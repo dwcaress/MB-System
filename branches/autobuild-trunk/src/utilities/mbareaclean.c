@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbareaclean.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2003-2011 by
+ *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -159,7 +159,7 @@ int getsoundingptr(int verbose, int soundingid,
 int flag_sounding(int verbose, int flag, int output_bad, int output_good,
 		  struct mbareaclean_sndg_struct *sndg, int *error);
 
-static char rcs_id[] = "$Id: mbareaclean.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mbareaclean.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 

@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c 1898 2011-06-13 19:49:07Z caress $
+ *    $Id: mbcopy.c 1934 2012-02-22 07:51:16Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -200,10 +200,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#ifdef WIN32
-#include <winsock2.h>
-#endif
-
 /* mbio include files */
 #include "mb_status.h"
 #include "mb_format.h"
@@ -267,7 +263,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 		void *ombio_ptr,
 		int *error);
 
-static char rcs_id[] = "$Id: mbcopy.c 1898 2011-06-13 19:49:07Z caress $";
+static char rcs_id[] = "$Id: mbcopy.c 1934 2012-02-22 07:51:16Z caress $";
 
 /*--------------------------------------------------------------------*/
 
@@ -3041,8 +3037,8 @@ int mbcopy_any_to_mbldeoih(int verbose,
 	if (ostore != NULL)
 		{		
 		/* set beam widths */
-		ostore->beam_xwidth = 100 * beamwidth_xtrack;
-		ostore->beam_lwidth = 100 * beamwidth_ltrack;
+		ostore->beam_xwidth = beamwidth_xtrack;
+		ostore->beam_lwidth = beamwidth_ltrack;
 		ostore->kind = kind;
 
 		/* insert data */
@@ -3065,7 +3061,6 @@ int mbcopy_any_to_mbldeoih(int verbose,
 				bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment, error);
-		  
 		}
 
 	/* print output debug statements */

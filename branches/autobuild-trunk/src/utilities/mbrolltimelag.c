@@ -7,9 +7,9 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
- *    $Id: mbrolltimelag.c 1908 2011-11-16 07:56:24Z caress $
+ *    $Id: mbrolltimelag.c 1964 2012-06-24 07:33:29Z caress $
  *
- *    Copyright (c) 2005-2011 by
+ *    Copyright (c) 2005-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -74,7 +74,7 @@
 
 #define	MBRTL_ALLOC_CHUNK	1000
 
-static char rcs_id[] = "$Id: mbrolltimelag.c 1908 2011-11-16 07:56:24Z caress $";
+static char rcs_id[] = "$Id: mbrolltimelag.c 1964 2012-06-24 07:33:29Z caress $";
 
 /*--------------------------------------------------------------------*/
 
@@ -83,7 +83,7 @@ int main (int argc, char **argv)
 	/* id variables */
 	char program_name[] = "MBrolltimelag";
 	char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
-	char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Ooutputname -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
+	char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Krollsource -Nnping -Ooutputname -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
 
 	/* parsing variables */
 	extern char *optarg;

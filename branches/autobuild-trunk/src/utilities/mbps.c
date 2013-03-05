@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbps.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -175,7 +175,7 @@ struct ping
 int rgb_black[] = {0, 0, 0};
 int rgb_white[] = {255, 255, 255};
 
-static char rcs_id[] = "$Id: mbps.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mbps.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 

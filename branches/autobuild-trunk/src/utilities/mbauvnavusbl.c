@@ -7,9 +7,9 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvnavusbl.c	11/21/2004
  *
- *    $Id: mbauvnavusbl.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbauvnavusbl.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2004-2011 by
+ *    Copyright (c) 2004-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -64,7 +64,7 @@
 /* local defines */
 #define	NCHARMAX	256
 
-static char rcs_id[] = "$Id: mbauvnavusbl.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mbauvnavusbl.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 

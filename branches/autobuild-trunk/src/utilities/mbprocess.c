@@ -3,12 +3,11 @@
 #  include <mbsystem_config.h>
 #endif
 
-
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c 1905 2011-09-13 23:52:36Z caress $
+ *    $Id: mbprocess.c 2015 2013-03-01 22:33:52Z caress $
  *
- *    Copyright (c) 2000-2011 by
+ *    Copyright (c) 2000-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,7 +18,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbprocess is a tool for processing swath sonar bathymetry data.  
+ * mbprocess is a tool for processing swath sonar bathymetry data.
  * This program performs a number of functions, including:
  *   - merging navigation
  *   - recalculating bathymetry from travel time and angle data
@@ -32,7 +31,7 @@
  * and the manual pages for mbprocess and mbset. The program
  * mbset is used to create and modify parameter files.
  * The data format and the input and output data files can be
- * specified using command line options. If no parameter file is 
+ * specified using command line options. If no parameter file is
  * specified (using the -P option) but an input file is specified
  * (with the -I option), then mbprocess will look for a parameter
  * file with the path inputfile.par, where inputfile is the input
@@ -253,10 +252,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef WIN32
-#include <winsock2.h>
-#endif
-
 /* mbio include files */
 #include "mb_format.h"
 #include "mb_status.h"
@@ -278,7 +273,7 @@ struct mbprocess_sscorr_struct
 	};
 
 /* define grid structure */
-struct mbprocess_grid_struct 
+struct mbprocess_grid_struct
 	{
 	mb_path	file;
         mb_path projectionname;
@@ -302,18 +297,18 @@ struct mbprocess_grid_struct
 /* function prototypes */
 int check_ss_for_bath(int verbose,
 	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int nss, double *ss, double *ssacrosstrack, 
+	int nss, double *ss, double *ssacrosstrack,
 	int *error);
 int get_corrtable(int verbose,
-	double time_d, int ncorrtable, int ncorrangle, 
-	struct mbprocess_sscorr_struct	*corrtable, 
-	struct mbprocess_sscorr_struct	*corrtableuse, 
+	double time_d, int ncorrtable, int ncorrangle,
+	struct mbprocess_sscorr_struct	*corrtable,
+	struct mbprocess_sscorr_struct	*corrtableuse,
 	int *error);
 int get_anglecorr(int verbose,
 	int nangle, double *angles, double *corrs,
 	double angle, double *corr, int *error);
 
-static char rcs_id[] = "$Id: mbprocess.c 1905 2011-09-13 23:52:36Z caress $";
+static char rcs_id[] = "$Id: mbprocess.c 2015 2013-03-01 22:33:52Z caress $";
 
 /*--------------------------------------------------------------------*/
 
@@ -370,6 +365,10 @@ and mbedit edit save files.\n";
 	int	pixels_ss;
 	void	*imbio_ptr = NULL;
 	void	*ombio_ptr = NULL;
+        int     nav_source;
+        int     heading_source;
+	int     vru_source;
+        int     svp_source;
 
 	/* mbio read and write values */
 	void	*store_ptr = NULL;
@@ -407,7 +406,7 @@ and mbedit edit save files.\n";
 	int	ocomment = 0;
 	int	oother = 0;
 	char	comment[MB_COMMENT_MAXLINE];
-	
+
 	/* sidescan recalculation */
 	int	pixel_size_set;
 	int	swath_width_set;
@@ -418,10 +417,10 @@ and mbedit edit save files.\n";
 	/* time, user, host variables */
 	time_t	right_now;
 	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
-	
+
 	/* parameter controls */
 	struct mb_process_struct process;
-	
+
 	/* processing variables */
 	int	checkuptodate = MB_YES;
 	int	testonly = MB_NO;
@@ -458,7 +457,7 @@ and mbedit edit save files.\n";
  	int	format = 0;
 	int	variable_beams;
 	int	traveltime;
-	int	beam_flagging; 
+	int	beam_flagging;
 	int	calculatespeedheading = MB_NO;
 	int	mbp_ifile_specified;
 	char	mbp_ifile[MBP_FILENAMESIZE];
@@ -503,6 +502,7 @@ and mbedit edit save files.\n";
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	double	del_time, dx, dy, dist;
+        double  headingcalc, speedcalc;
 	double	lever_x = 0.0;
 	double	lever_y = 0.0;
 	double	lever_heave = 0.0;
@@ -517,7 +517,7 @@ and mbedit edit save files.\n";
 	double	*velocity_sum = NULL;
 	void	*rt_svp;
 	double	ssv;
-	
+
 	/* swath file locking variables */
 	int	uselockfiles;
 	int	lock_status;
@@ -527,7 +527,7 @@ and mbedit edit save files.\n";
 	mb_path	lock_program;
 	mb_path lock_cpu;
 	mb_path lock_user;
-	char	lock_date[24];
+	mb_path	lock_date;
 
 	/* edit save file control variables */
 	struct mb_esf_struct esf;
@@ -535,7 +535,7 @@ and mbedit edit save files.\n";
 	int	neditduplicate;
 	int	neditnotused;
 	int	neditused;
-	
+
 	double	draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
 	double	roll_org, pitch_org, heave_org;
 	double	ttime, range;
@@ -553,7 +553,7 @@ and mbedit edit save files.\n";
 	int	ssv_prelimpass = MB_NO;
 	double	ssv_default;
 	double	ssv_start;
-	
+
 	/* sidescan correction */
 	double	altitude_default = 1000.0;
 	int	nsmooth = 5;
@@ -598,7 +598,7 @@ and mbedit edit save files.\n";
 	int	i, j, k, mm;
 	int	ix, jy, kgrid;
 	int	kgrid00, kgrid10,kgrid01,kgrid11;
-	
+
 	char	*ctime();
 	char	*getenv();
 
@@ -638,13 +638,13 @@ and mbedit edit save files.\n";
 	strcpy (mbp_ofile, "\0");
 	mbp_format_specified = MB_NO;
 	strip_comments = MB_NO;
-	
+
 	/* initialize grid */
 	memset(&grid, 0, sizeof (struct mbprocess_grid_struct));
-	
+
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -749,7 +749,7 @@ and mbedit edit save files.\n";
 	/* get format if required */
 	if (format == 0)
 		mb_get_format(verbose,read_file,NULL,&format,&error);
-  
+
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
 		read_datalist = MB_YES;
@@ -827,7 +827,7 @@ and mbedit edit save files.\n";
 	    {
 	    fprintf(stderr,"\nProgram <%s>\n",program_name);
 	    fprintf(stderr,"Version %s\n",rcs_id);
-	    fprintf(stderr,"MB-system Version %s\n",MB_VERSION);		
+	    fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
 	    fprintf(stderr,"\nProgram Operation:\n");
 	    fprintf(stderr,"  Input file:      %s\n",read_file);
 	    fprintf(stderr,"  Format:          %d\n",format);
@@ -840,14 +840,14 @@ and mbedit edit save files.\n";
 	    else
 		fprintf(stderr,"  Comments stripped from output.\n\n");
 	    }
-	    
+
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 	{
 	/* load parameters */
-	status = mb_pr_readpar(verbose, mbp_ifile, MB_NO, 
+	status = mb_pr_readpar(verbose, mbp_ifile, MB_NO,
 			&process, &error);
-			
+
 	/* reset output file and format if not reading from datalist */
 	if (read_datalist == MB_NO)
 	    {
@@ -860,13 +860,13 @@ and mbedit edit save files.\n";
 		process.mbp_format = mbp_format;
 		}
 	    }
-			
+
 	/* make output file path global if needed */
 	if (status == MB_SUCCESS
 	    && mbp_ofile_specified == MB_NO
 	    && process.mbp_ofile[0] != '/'
 	    && strrchr(process.mbp_ifile,'/') != NULL
-	    && (len = strrchr(process.mbp_ifile,'/') 
+	    && (len = strrchr(process.mbp_ifile,'/')
 			- process.mbp_ifile + 1) > 1)
 	    {
 	    strcpy(mbp_ofile,process.mbp_ofile);
@@ -891,7 +891,7 @@ and mbedit edit save files.\n";
 	    {
 	    pfilemodtime = file_status.st_mtime;
 	    }
-	    
+
 	/* skip if processing cannot be inferred */
 	if (status == MB_FAILURE)
 	    {
@@ -901,7 +901,7 @@ and mbedit edit save files.\n";
 	    	mbp_ifile);
 	    }
 
-	    
+
 	/* skip if input file can't be read */
 	else if (ifilemodtime == 0)
 	    {
@@ -910,7 +910,7 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"Data skipped - input file cannot be read: %s\n",
 	    	mbp_ifile);
 	    }
-	    
+
 	/* skip if parameter file can't be read */
 	else if (pfilemodtime == 0)
 	    {
@@ -995,7 +995,7 @@ and mbedit edit save files.\n";
 		    /* want to process, now try to set a lock of the file to be processed */
 		    if (uselockfiles == MB_YES)
 		    	{
-			lock_status = mb_pr_lockswathfile(verbose, process.mbp_ifile, 
+			lock_status = mb_pr_lockswathfile(verbose, process.mbp_ifile,
 						MBP_LOCK_PROCESS, program_name, &lock_error);
 			if (lock_status == MB_SUCCESS)
 			    {
@@ -1167,7 +1167,7 @@ and mbedit edit save files.\n";
 	    if (testonly == MB_YES)
 		proceedprocess = MB_NO;
 	    }
-		
+
 	/* now process the input file */
 	if (proceedprocess == MB_YES)
 	{
@@ -1208,7 +1208,7 @@ and mbedit edit save files.\n";
 	if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 	    {
 	    status = mb_format_flags(verbose,&process.mbp_format,
-			&variable_beams, &traveltime, &beam_flagging, 
+			&variable_beams, &traveltime, &beam_flagging,
 			&error);
 	    if (traveltime != MB_YES)
 		{
@@ -1282,7 +1282,7 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"  Navigation shift longitude:%f\n", process.mbp_nav_shiftlon);
 		    fprintf(stderr,"  Navigation shift latitude: %f\n", process.mbp_nav_shiftlat);
 		    }
-	    else 
+	    else
 		    fprintf(stderr,"  Navigation positions not shifted.\n");
 
 	    fprintf(stderr,"\nAdjusted Navigation Merging:\n");
@@ -1602,7 +1602,7 @@ and mbedit edit save files.\n";
 	    {
 	    /* count the data points in the svp file */
 	    nsvp = 0;
-	    if ((tfp = fopen(process.mbp_svpfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_svpfile, "r")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
 		    fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",process.mbp_svpfile);
@@ -1614,7 +1614,7 @@ and mbedit edit save files.\n";
 		    if (buffer[0] != '#')
 			nsvp++;
 	    fclose(tfp);
-	    
+
 	    /* allocate arrays for svp */
 	    if (nsvp > 1)
 		{
@@ -1624,7 +1624,7 @@ and mbedit edit save files.\n";
 		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&velocity,&error);
 		if (error == MB_ERROR_NO_ERROR)
 		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&velocity_sum,&error);
-	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -1633,9 +1633,9 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 		}
-	
+
 	    /* if no svp data then quit */
 	    else
 		{
@@ -1644,11 +1644,11 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}		    
-		
+		}
+
 	    /* read the data points in the svp file */
 	    nsvp = 0;
-	    if ((tfp = fopen(process.mbp_svpfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_svpfile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",process.mbp_svpfile);
@@ -1662,37 +1662,66 @@ and mbedit edit save files.\n";
 		    {
 		    /* read the depth & sound speed pair */
 		    mm = sscanf(buffer,"%lf %lf",&depth[nsvp],&velocity[nsvp]);
-		
-		    /* output some debug values */
-		    if (verbose >= 5 && mm == 2)
-			{
-			fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
-			fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-			    nsvp,depth[nsvp],nsvp,velocity[nsvp]);
-			}
-			
-		    /* update counter */
-		    if (mm == 2)
-			nsvp++;
-			
-		    /* check for nonzero initial depth & fix it if found */
-		    if (mm == 2 && nsvp == 1 && depth[0] != 0.0)
-		    	{
-			depth[1] = depth[0];
-			velocity[1] = velocity[0];
-			depth[0] = 0.0;
-			nsvp++;
-		
-			/* output some debug values */
-			if (verbose >= 5)
-			    {
-			    fprintf(stderr,"\ndbg5  Nonzero initial SVP depth fixed in program <%s>\n",program_name);
-			    fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-				0,depth[0],0,velocity[0]);
-			    fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-				1,depth[1],1,velocity[1]);
-			    }
-			}
+
+                    /* check for validity */
+                    if (mm == 2)
+                        {
+                        /* output some debug values */
+                        if (verbose >= 5)
+                            {
+                            fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
+                            fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
+                                nsvp,depth[nsvp],nsvp,velocity[nsvp]);
+                            }
+
+                        /* set initial depth to zero if needed */
+                        if (nsvp == 0)
+                            {
+                            if (depth[0] < 0.0)
+                                {
+                                /* output some info */
+                                fprintf(stderr,"Warning:\n\tProblem with svp value read in program <%s>\n",program_name);
+                                fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f reset so that first entry has zero depth\n",
+                                        nsvp,depth[0],nsvp,velocity[0]);
+
+                                depth[0] = 0.0;
+                                nsvp++;
+                                }
+                            else if (depth[0] > 0.0)
+                                {
+                                depth[1] = depth[0];
+                                depth[0] = 0.0;
+                                velocity[1] = velocity[0];
+                                nsvp += 2;
+
+                                /* output some info */
+                                 fprintf(stderr,"Warning:\n\tProblem with svp value read in program <%s>\n",program_name);
+                                fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f added so that first entry has zero depth\n",
+                                         nsvp,depth[0],nsvp,velocity[0]);
+                                fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f did not have zero depth\n",
+                                        nsvp,depth[1],nsvp,velocity[1]);
+                                }
+                            else
+                                {
+                                nsvp++;
+                                }
+                             }
+
+                        /* increment counter if all is ok */
+                        else if (depth[nsvp] > depth[nsvp-1])
+                            {
+                            nsvp++;
+                            }
+
+                        /* ignore sound speed value with duplicate or decreasing depth */
+                        else
+                            {
+                            /* output some info */
+                            fprintf(stderr,"Warning:\n\tProblem with svp value read in program <%s>\n",program_name);
+                            fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f ignored due to duplicate or decreasing depth\n",
+                                    nsvp,depth[nsvp],nsvp,velocity[nsvp]);
+                            }
+                        }
 		    }
 		}
 	    fclose(tfp);
@@ -1708,13 +1737,13 @@ and mbedit edit save files.\n";
 		    velocity[nsvp] = velocity[nsvp-1];
 		    nsvp++;
 		    }
-    
+
 	    /* get velocity sums */
 	    velocity_sum[0] = 0.5*(velocity[1] + velocity[0])
 		    *(depth[1] - depth[0]);
 	    for (i=1;i<nsvp-1;i++)
 		    {
-		    velocity_sum[i] = velocity_sum[i-1] 
+		    velocity_sum[i] = velocity_sum[i-1]
 			+ 0.5*(velocity[i+1] + velocity[i])
 			*(depth[i+1] - depth[i]);
 		    }
@@ -1731,11 +1760,11 @@ and mbedit edit save files.\n";
 	    if (process.mbp_nav_format == 8)
 		    nchar = 96;
 	    else
-		    nchar = 128;
+		    nchar = MBP_FILENAMESIZE-1;
 
 	    /* count the data points in the nav file */
 	    nnav = 0;
-	    if ((tfp = fopen(process.mbp_navfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_navfile, "r")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
 		    fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",process.mbp_navfile);
@@ -1746,7 +1775,7 @@ and mbedit edit save files.\n";
 	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
 		    nnav++;
 	    fclose(tfp);
-	    
+
 	    /* allocate arrays for nav */
 	    if (nnav > 1)
 		{
@@ -1762,7 +1791,7 @@ and mbedit edit save files.\n";
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nheave,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlonspl,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlatspl,&error);
-	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -1771,9 +1800,9 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 		}
-	
+
 	    /* if no nav data then quit */
 	    else
 		{
@@ -1782,11 +1811,11 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}		    
-		
+		}
+
 	    /* read the data points in the nav file */
 	    nnav = 0;
-	    if ((tfp = fopen(process.mbp_navfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_navfile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open navigation File <%s> for reading\n",process.mbp_navfile);
@@ -1906,10 +1935,10 @@ and mbedit edit save files.\n";
 			ioff += 4;
 			llon = atof(strncpy(dummy,buffer+ioff,8));
 			nlon[nnav] = mlon + llon/60.;
-			if (strncmp(EorW,"W",1) == 0) 
+			if (strncmp(EorW,"W",1) == 0)
 				nlon[nnav] = -nlon[nnav];
 			nlat[nnav] = mlat + llat/60.;
-			if (strncmp(NorS,"S",1) == 0) 
+			if (strncmp(NorS,"S",1) == 0)
 				nlat[nnav] = -nlat[nnav];
 			nav_ok = MB_YES;
 			}
@@ -1983,7 +2012,7 @@ and mbedit edit save files.\n";
 				    bufftmp = strchr(&bufftmp[1], ',');
 				    strncpy(NorS,bufftmp+1,1);
 				    nlat[nnav] = degree + dminute/60.;
-				    if (strncmp(NorS,"S",1) == 0) 
+				    if (strncmp(NorS,"S",1) == 0)
 					nlat[nnav] = -nlat[nnav];
 				    bufftmp = strchr(&bufftmp[1], ',');
 				    strncpy(dummy,"\0",128);
@@ -1994,7 +2023,7 @@ and mbedit edit save files.\n";
 				    strncpy(EorW,"\0",sizeof(EorW));
 				    strncpy(EorW,bufftmp+1,1);
 				    nlon[nnav] = degree + dminute/60.;
-				    if (strncmp(EorW,"W",1) == 0) 
+				    if (strncmp(EorW,"W",1) == 0)
 					nlon[nnav] = -nlon[nnav];
 				    mb_get_time(verbose,time_i,&time_d);
 				    ntime[nnav] = time_d;
@@ -2046,6 +2075,8 @@ and mbedit edit save files.\n";
 				&nroll[nnav],&npitch[nnav],&nheave[nnav]);
 			if (nget >= 9)
 				nav_ok = MB_YES;
+                        if (nnav > 0 && ntime[nnav] <= ntime[nnav-1])
+                                nav_ok = MB_NO;
 			if (nav_ok == MB_YES)
 			    {
 			    if (process.mbp_nav_heading == MBP_NAV_ON && nget < 10)
@@ -2063,7 +2094,7 @@ and mbedit edit save files.\n";
 				fprintf(stderr,"Draft data missing from nav file.\nMerging of draft data disabled.\n");
 				process.mbp_nav_draft = MBP_NAV_OFF;
 				}
-			    if (process.mbp_nav_draft == MBP_NAV_ON && nget < 15)
+			    if (process.mbp_nav_attitude == MBP_NAV_ON && nget < 15)
 				{
 				fprintf(stderr,"Roll, pitch, and heave data missing from nav file.\nMerging of roll, pitch, and heave data disabled.\n");
 				process.mbp_nav_attitude = MBP_NAV_OFF;
@@ -2089,14 +2120,14 @@ and mbedit edit save files.\n";
 			    }
 			}
 
-		/* deal with nav in r2rnav form: 
+		/* deal with nav in r2rnav form:
 			yyyy-mm-ddThh:mm:ss.sssZ decimalLongitude decimalLatitude quality nsat dilution height */
 		else if (process.mbp_nav_format == 10)
 			{
 			nget = sscanf(buffer,"%d-%d-%dT%d:%d:%lfZ %lf %lf %d %d %d %d",
 				&time_i[0],&time_i[1],&time_i[2],
 				&time_i[3],&time_i[4],&sec,
-				&nlon[nnav],&nlat[nnav], 
+				&nlon[nnav],&nlat[nnav],
 				&quality,&nsatellite,&dilution,&gpsheight);
 			if (nget != 12)
 				{
@@ -2153,7 +2184,7 @@ and mbedit edit save files.\n";
 				nnav++;
 			else if (ntime[nnav] > ntime[nnav-1])
 				nnav++;
-			else if (nnav > 0 && ntime[nnav] <= ntime[nnav-1] 
+			else if (nnav > 0 && ntime[nnav] <= ntime[nnav-1]
 				&& verbose >= 5)
 				{
 				fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
@@ -2169,7 +2200,7 @@ and mbedit edit save files.\n";
 		}
 	    fclose(tfp);
 
-		
+
 	    /* check for nav */
 	    if (nnav < 2)
 		    {
@@ -2178,44 +2209,23 @@ and mbedit edit save files.\n";
 			    program_name);
 		    exit(error);
 		    }
-		    
+
 	    /* apply time shift if needed */
 	    if (process.mbp_nav_timeshift != 0.0)
 		for (i=0;i<nnav;i++)
 		    ntime[i] += process.mbp_nav_timeshift;
-		    
-	    /* apply position shift if needed */
-    	    if (process.mbp_nav_shift == MBP_NAV_ON)
-		{
-		for (i=0;i<nnav;i++)
-		    {
-		    mb_coor_scale(verbose,nlat[i],&mtodeglon,&mtodeglat);
-		    headingx = sin(nheading[i] * DTR);
-		    headingy = cos(nheading[i] * DTR);
-		    nlon[i] -= (headingy * mtodeglon
-					* process.mbp_nav_offsetx
-			    	+ headingx * mtodeglon
-					* process.mbp_nav_offsety
-				- process.mbp_nav_shiftlon);
-		    nlat[i] -= (-headingx * mtodeglat
-					* process.mbp_nav_offsetx
-			    	+ headingy * mtodeglat
-					* process.mbp_nav_offsety
-				- process.mbp_nav_shiftlat);
-		    }
-		}
-    
+
 	    /* set up spline interpolation of nav points */
 	    splineflag = 1.0e30;
 	    mb_spline_init(verbose, ntime-1, nlon-1, nnav,
 			splineflag, splineflag, nlonspl-1, &error);
 	    mb_spline_init(verbose, ntime-1, nlat-1, nnav,
 			splineflag, splineflag, nlatspl-1, &error);
-    
+
 	    /* get start and finish times of nav */
 	    mb_get_date(verbose,ntime[0],stime_i);
 	    mb_get_date(verbose,ntime[nnav-1],ftime_i);
-    
+
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
@@ -2241,7 +2251,7 @@ and mbedit edit save files.\n";
 
 	    /* count the data points in the adjusted nav file */
 	    nanav = 0;
-	    if ((tfp = fopen(process.mbp_navadjfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_navadjfile, "r")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
 		    fprintf(stderr,"\nUnable to Open Adjusted Navigation File <%s> for reading\n",process.mbp_navadjfile);
@@ -2253,7 +2263,7 @@ and mbedit edit save files.\n";
 		    if (buffer[0] != '#')
 		    	nanav++;
 	    fclose(tfp);
-	    
+
 	    /* allocate arrays for adjusted nav */
 	    if (nanav > 1)
 		{
@@ -2265,7 +2275,7 @@ and mbedit edit save files.\n";
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nanav*sizeof(double),(void **)&nalonspl,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nanav*sizeof(double),(void **)&nalatspl,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nanav*sizeof(double),(void **)&nazspl,&error);
-	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -2274,9 +2284,9 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 		}
-	
+
 	    /* if no adjusted nav data then quit */
 	    else
 		{
@@ -2285,11 +2295,11 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}		    
-		
+		}
+
 	    /* read the data points in the nav file */
 	    nanav = 0;
-	    if ((tfp = fopen(process.mbp_navadjfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_navadjfile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open navigation File <%s> for reading\n",process.mbp_navadjfile);
@@ -2309,8 +2319,8 @@ and mbedit edit save files.\n";
 				&time_i[3],&time_i[4],&sec,
 				&natime[nanav],
 				&nalon[nanav],&nalat[nanav],
-				&heading, &speed, &draft, 
-				&roll, &pitch, &heave, 
+				&heading, &speed, &draft,
+				&roll, &pitch, &heave,
 				&naz[nanav]);
 			if (process.mbp_navadj_mode == MBP_NAVADJ_LL && nget >= 9)
 				nav_ok = MB_YES;
@@ -2351,7 +2361,7 @@ and mbedit edit save files.\n";
 				nanav++;
 			else if (natime[nanav] > natime[nanav-1])
 				nanav++;
-			else if (nanav > 0 && natime[nanav] <= natime[nanav-1] 
+			else if (nanav > 0 && natime[nanav] <= natime[nanav-1]
 				&& verbose >= 5)
 				{
 				fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
@@ -2366,7 +2376,7 @@ and mbedit edit save files.\n";
 		strncpy(buffer,"\0",sizeof(buffer));
 		}
 	    fclose(tfp);
-		
+
 	    /* check for adjusted nav */
 	    if (nanav < 2)
 		    {
@@ -2375,7 +2385,7 @@ and mbedit edit save files.\n";
 			    program_name);
 		    exit(error);
 		    }
-    
+
 	    /* set up spline interpolation of adjusted nav points */
 	    splineflag = 1.0e30;
 	    mb_spline_init(verbose, natime-1, nalon-1, nanav,
@@ -2384,11 +2394,11 @@ and mbedit edit save files.\n";
 			splineflag, splineflag, nalatspl-1, &error);
 	    mb_spline_init(verbose, natime-1, naz-1, nanav,
 			splineflag, splineflag, nazspl-1, &error);
-    
+
 	    /* get start and finish times of nav */
 	    mb_get_date(verbose,natime[0],stime_i);
 	    mb_get_date(verbose,natime[nanav-1],ftime_i);
-    
+
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
@@ -2414,7 +2424,7 @@ and mbedit edit save files.\n";
 
 	    /* count the data points in the attitude file */
 	    nattitude = 0;
-	    if ((tfp = fopen(process.mbp_attitudefile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_attitudefile, "r")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
 		    fprintf(stderr,"\nUnable to Open Attitude File <%s> for reading\n",process.mbp_attitudefile);
@@ -2425,7 +2435,7 @@ and mbedit edit save files.\n";
 	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
 		    nattitude++;
 	    fclose(tfp);
-	    
+
 	    /* allocate arrays for attitude */
 	    if (nattitude > 1)
 		{
@@ -2434,7 +2444,7 @@ and mbedit edit save files.\n";
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nattitude*sizeof(double),(void **)&attituderoll,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nattitude*sizeof(double),(void **)&attitudepitch,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nattitude*sizeof(double),(void **)&attitudeheave,&error);
- 	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -2443,9 +2453,9 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 		}
-	
+
 	    /* if no attitude data then quit */
 	    else
 		{
@@ -2454,11 +2464,11 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}		    
-		
+		}
+
 	    /* read the data points in the attitude file */
 	    nattitude = 0;
-	    if ((tfp = fopen(process.mbp_attitudefile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_attitudefile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open Attitude File <%s> for reading\n",process.mbp_attitudefile);
@@ -2469,7 +2479,7 @@ and mbedit edit save files.\n";
 	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
 		{
 		attitude_ok = MB_NO;
-		
+
 		/* ignore comments */
 		if (buffer[0] != '#')
 			{
@@ -2483,7 +2493,7 @@ and mbedit edit save files.\n";
 				if (nget == 4)
 					attitude_ok = MB_YES;
 				}
-	
+
 			/* deal with attitude in form: yr mon day hour min sec roll pitch heave */
 			else if (process.mbp_attitude_format == 2)
 				{
@@ -2500,7 +2510,7 @@ and mbedit edit save files.\n";
 				if (nget == 9)
 					attitude_ok = MB_YES;
 				}
-	
+
 			/* deal with attitude in form: yr jday hour min sec roll pitch heave */
 			else if (process.mbp_attitude_format == 3)
 				{
@@ -2519,7 +2529,7 @@ and mbedit edit save files.\n";
 				if (nget == 9)
 					attitude_ok = MB_YES;
 				}
-	
+
 			/* deal with attitude in form: yr jday daymin sec roll pitch heave */
 			else if (process.mbp_attitude_format == 4)
 				{
@@ -2538,7 +2548,7 @@ and mbedit edit save files.\n";
 					attitude_ok = MB_YES;
 				}
 			}
-	
+
 		/* output some debug values */
 		if (verbose >= 5 && attitude_ok == MB_YES)
 			{
@@ -2560,7 +2570,7 @@ and mbedit edit save files.\n";
 				nattitude++;
 			else if (attitudetime[nattitude] > attitudetime[nattitude-1])
 				nattitude++;
-			else if (nattitude > 0 && attitudetime[nattitude] <= attitudetime[nattitude-1] 
+			else if (nattitude > 0 && attitudetime[nattitude] <= attitudetime[nattitude-1]
 				&& verbose >= 5)
 				{
 				fprintf(stderr,"\ndbg5  Attitude time error in program <%s>\n",program_name);
@@ -2580,7 +2590,7 @@ and mbedit edit save files.\n";
 		}
 	    fclose(tfp);
 
-		
+
 	    /* check for attitude */
 	    if (nattitude < 2)
 		    {
@@ -2589,11 +2599,11 @@ and mbedit edit save files.\n";
 			    program_name);
 		    exit(error);
 		    }
-     
+
 	    /* get start and finish times of attitude */
 	    mb_get_date(verbose,attitudetime[0],stime_i);
 	    mb_get_date(verbose,attitudetime[nattitude-1],ftime_i);
-    
+
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
@@ -2619,7 +2629,7 @@ and mbedit edit save files.\n";
 
 	    /* count the data points in the sonardepth file */
 	    nsonardepth = 0;
-	    if ((tfp = fopen(process.mbp_sonardepthfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_sonardepthfile, "r")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
 		    fprintf(stderr,"\nUnable to Open Sonardepth File <%s> for reading\n",process.mbp_sonardepthfile);
@@ -2630,14 +2640,14 @@ and mbedit edit save files.\n";
 	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
 		    nsonardepth++;
 	    fclose(tfp);
-	    
+
 	    /* allocate arrays for sonardepth */
 	    if (nsonardepth > 1)
 		{
 		size = (nsonardepth+1)*sizeof(double);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nsonardepth*sizeof(double),(void **)&fsonardepthtime,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nsonardepth*sizeof(double),(void **)&fsonardepth,&error);
- 	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -2646,9 +2656,9 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 		}
-	
+
 	    /* if no sonardepth data then quit */
 	    else
 		{
@@ -2657,11 +2667,11 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}		    
-		
+		}
+
 	    /* read the data points in the sonardepth file */
 	    nsonardepth = 0;
-	    if ((tfp = fopen(process.mbp_sonardepthfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_sonardepthfile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open Sonardepth File <%s> for reading\n",process.mbp_sonardepthfile);
@@ -2672,7 +2682,7 @@ and mbedit edit save files.\n";
 	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
 		{
 		sonardepth_ok = MB_NO;
-		
+
 		/* ignore comments */
 		if (buffer[0] != '#')
 			{
@@ -2685,7 +2695,7 @@ and mbedit edit save files.\n";
 				if (nget == 2)
 					sonardepth_ok = MB_YES;
 				}
-	
+
 			/* deal with sonardepth in form: yr mon day hour min sec sonardepth */
 			else if (process.mbp_sonardepth_format == 2)
 				{
@@ -2700,7 +2710,7 @@ and mbedit edit save files.\n";
 				if (nget == 7)
 					sonardepth_ok = MB_YES;
 				}
-	
+
 			/* deal with sonardepth in form: yr jday hour min sec sonardepth */
 			else if (process.mbp_sonardepth_format == 3)
 				{
@@ -2717,7 +2727,7 @@ and mbedit edit save files.\n";
 				if (nget == 7)
 					sonardepth_ok = MB_YES;
 				}
-	
+
 			/* deal with sonardepth in form: yr jday daymin sec sonardepth */
 			else if (process.mbp_sonardepth_format == 4)
 				{
@@ -2734,7 +2744,7 @@ and mbedit edit save files.\n";
 					sonardepth_ok = MB_YES;
 				}
 			}
-	
+
 		/* output some debug values */
 		if (verbose >= 5 && sonardepth_ok == MB_YES)
 			{
@@ -2755,7 +2765,7 @@ and mbedit edit save files.\n";
 				nsonardepth++;
 			else if (fsonardepthtime[nsonardepth] > fsonardepthtime[nsonardepth-1])
 				nsonardepth++;
-			else if (nsonardepth > 0 && fsonardepthtime[nsonardepth] <= fsonardepthtime[nsonardepth-1] 
+			else if (nsonardepth > 0 && fsonardepthtime[nsonardepth] <= fsonardepthtime[nsonardepth-1]
 				&& verbose >= 5)
 				{
 				fprintf(stderr,"\ndbg5  sonardepth time error in program <%s>\n",program_name);
@@ -2771,7 +2781,7 @@ and mbedit edit save files.\n";
 		}
 	    fclose(tfp);
 
-		
+
 	    /* check for sonardepth */
 	    if (nsonardepth < 2)
 		    {
@@ -2780,11 +2790,11 @@ and mbedit edit save files.\n";
 			    program_name);
 		    exit(error);
 		    }
-     
+
 	    /* get start and finish times of sonardepth */
 	    mb_get_date(verbose,fsonardepthtime[0],stime_i);
 	    mb_get_date(verbose,fsonardepthtime[nsonardepth-1],ftime_i);
-    
+
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
@@ -2810,7 +2820,7 @@ and mbedit edit save files.\n";
 
 	    /* count the data points in the tide file */
 	    ntide = 0;
-	    if ((tfp = fopen(process.mbp_tidefile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_tidefile, "r")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
 		    fprintf(stderr,"\nUnable to Open Tide File <%s> for reading\n",process.mbp_tidefile);
@@ -2821,14 +2831,14 @@ and mbedit edit save files.\n";
 	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
 		    ntide++;
 	    fclose(tfp);
-	    
+
 	    /* allocate arrays for tide */
 	    if (ntide > 1)
 		{
 		size = (ntide+1)*sizeof(double);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&tidetime,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&tide,&error);
- 	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -2837,9 +2847,9 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 		}
-	
+
 	    /* if no tide data then quit */
 	    else
 		{
@@ -2848,11 +2858,11 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}		    
-		
+		}
+
 	    /* read the data points in the tide file */
 	    ntide = 0;
-	    if ((tfp = fopen(process.mbp_tidefile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_tidefile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open Tide File <%s> for reading\n",process.mbp_tidefile);
@@ -2863,7 +2873,7 @@ and mbedit edit save files.\n";
 	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
 		{
 		tide_ok = MB_NO;
-		
+
 		/* ignore comments */
 		if (buffer[0] != '#')
 			{
@@ -2876,7 +2886,7 @@ and mbedit edit save files.\n";
 				if (nget == 2)
 					tide_ok = MB_YES;
 				}
-	
+
 			/* deal with tide in form: yr mon day hour min sec tide */
 			else if (process.mbp_tide_format == 2)
 				{
@@ -2891,7 +2901,7 @@ and mbedit edit save files.\n";
 				if (nget == 7)
 					tide_ok = MB_YES;
 				}
-	
+
 			/* deal with tide in form: yr jday hour min sec tide */
 			else if (process.mbp_tide_format == 3)
 				{
@@ -2908,7 +2918,7 @@ and mbedit edit save files.\n";
 				if (nget == 6)
 					tide_ok = MB_YES;
 				}
-	
+
 			/* deal with tide in form: yr jday daymin sec tide */
 			else if (process.mbp_tide_format == 4)
 				{
@@ -2925,7 +2935,7 @@ and mbedit edit save files.\n";
 					tide_ok = MB_YES;
 				}
 			}
-	
+
 		/* output some debug values */
 		if (verbose >= 5 && tide_ok == MB_YES)
 			{
@@ -2946,7 +2956,7 @@ and mbedit edit save files.\n";
 				ntide++;
 			else if (tidetime[ntide] > tidetime[ntide-1])
 				ntide++;
-			else if (ntide > 0 && tidetime[ntide] <= tidetime[ntide-1] 
+			else if (ntide > 0 && tidetime[ntide] <= tidetime[ntide-1]
 				&& verbose >= 5)
 				{
 				fprintf(stderr,"\ndbg5  Tide time error in program <%s>\n",program_name);
@@ -2960,20 +2970,20 @@ and mbedit edit save files.\n";
 		}
 	    fclose(tfp);
 
-		
+
 	    /* check for tide */
-	    if (ntide < 2)
+	    if (ntide < 1)
 		    {
 		    fprintf(stderr,"\nNo tide read from file <%s>\n",process.mbp_tidefile);
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
 		    }
-     
+
 	    /* get start and finish times of tide */
 	    mb_get_date(verbose,tidetime[0],stime_i);
 	    mb_get_date(verbose,tidetime[ntide-1],ftime_i);
-    
+
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
@@ -2994,9 +3004,9 @@ and mbedit edit save files.\n";
 	/* get edits */
 	if (process.mbp_edit_mode == MBP_EDIT_ON)
 	    {
-	    status = mb_esf_open(verbose, process.mbp_editfile, 
+	    status = mb_esf_open(verbose, process.mbp_editfile,
 			    MB_YES, MB_NO, &esf, &error);
-	    if (status == MB_FAILURE) 
+	    if (status == MB_FAILURE)
 		{
 		fprintf(stderr,"\nUnable to resd from Edit Save File <%s>\n",process.mbp_editfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
@@ -3004,7 +3014,7 @@ and mbedit edit save files.\n";
 		exit(error);
 		}
 
-    
+
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
@@ -3024,7 +3034,7 @@ and mbedit edit save files.\n";
 
 	    /* count the data points in the static file */
 	    nstatic = 0;
-	    if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
 		    fprintf(stderr,"\nUnable to Open Static File <%s> for reading\n",process.mbp_staticfile);
@@ -3035,14 +3045,14 @@ and mbedit edit save files.\n";
 	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
 		    nstatic++;
 	    fclose(tfp);
-	    
+
 	    /* allocate arrays for static */
 	    if (nstatic > 0)
 		{
 		size = (nstatic+1)*sizeof(double);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nstatic*sizeof(int),(void **)&staticbeam,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nstatic*sizeof(double),(void **)&staticoffset,&error);
- 	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -3051,9 +3061,9 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 		}
-	
+
 	    /* if no static data then quit */
 	    else
 		{
@@ -3062,11 +3072,11 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}		    
-		
+		}
+
 	    /* read the data points in the static file */
 	    nstatic = 0;
-	    if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open Static File <%s> for reading\n",process.mbp_staticfile);
@@ -3087,7 +3097,7 @@ and mbedit edit save files.\n";
 				static_ok = MB_YES;
 				nstatic++;
 				}
-	
+
 			/* output some debug values */
 			if (verbose >= 5 && static_ok == MB_YES)
 				{
@@ -3104,7 +3114,7 @@ and mbedit edit save files.\n";
 		}
 	    fclose(tfp);
 
-		
+
 	    /* check for good static data */
 	    if (nstatic < 1)
 		    {
@@ -3113,7 +3123,7 @@ and mbedit edit save files.\n";
 			    program_name);
 		    exit(error);
 		    }
-    
+
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
@@ -3129,7 +3139,7 @@ and mbedit edit save files.\n";
 	    /* count the data points in the amplitude correction file */
 	    nampcorrtable = 0;
 	    nampcorrangle = 0;
-	    if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
 		    fprintf(stderr,"\nUnable to Open Amplitude Correction File <%s> for reading\n",process.mbp_ampcorrfile);
@@ -3145,7 +3155,7 @@ and mbedit edit save files.\n";
 		    sscanf(buffer,"# nangles:%d",&nampcorrangle);
 		}
 	    fclose(tfp);
-	    
+
 	    /* allocate arrays for amplitude correction tables */
 	    if (nampcorrtable > 0)
 		{
@@ -3167,7 +3177,7 @@ and mbedit edit save files.\n";
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrtableuse.angle),&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrtableuse.amplitude),&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrtableuse.sigma),&error);
-	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -3176,9 +3186,9 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 		}
-	
+
 	    /* if no amplitude correction file then quit */
 	    else
 		{
@@ -3187,11 +3197,11 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}		    
+		}
 
 	    /* read the data points in the amplitude correction file */
 	    nampcorrtable = 0;
-	    if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open Amplitude Correction File <%s> for reading\n",process.mbp_ampcorrfile);
@@ -3215,7 +3225,7 @@ and mbedit edit save files.\n";
 				&time_i[6], &(ampcorrtable[itable].time_d));
 		else if (buffer[0] != '#')
 			{
-			nget = sscanf(buffer, "%lf %lf %lf", 
+			nget = sscanf(buffer, "%lf %lf %lf",
 				&(ampcorrtable[itable].angle[ampcorrtable[itable].nangle]),
 				&(ampcorrtable[itable].amplitude[ampcorrtable[itable].nangle]),
 				&(ampcorrtable[itable].sigma[ampcorrtable[itable].nangle]));
@@ -3228,7 +3238,7 @@ and mbedit edit save files.\n";
 			}
 		}
 	    fclose(tfp);
-	    
+
 	    /* force amplitude correction tables to be symmetric if desired */
 	    if (process.mbp_ampcorr_symmetry == MBP_AMPCORR_SYMMETRIC)
 		    {
@@ -3242,20 +3252,20 @@ and mbedit edit save files.\n";
 					factor = 0.5;
 				    else
 				    	factor = 1.0;
-				    ampcorrtable[itable].amplitude[i] 
+				    ampcorrtable[itable].amplitude[i]
 					    = factor * (ampcorrtable[itable].amplitude[i]
 						    + ampcorrtable[itable].amplitude[j]);
-				    ampcorrtable[itable].sigma[i] 
+				    ampcorrtable[itable].sigma[i]
 					    = MAX(ampcorrtable[itable].sigma[i],
 						    ampcorrtable[itable].sigma[j]);
-				    ampcorrtable[itable].amplitude[j] 
+				    ampcorrtable[itable].amplitude[j]
 					    = ampcorrtable[itable].amplitude[i];
-				    ampcorrtable[itable].sigma[j] 
+				    ampcorrtable[itable].sigma[j]
 					    = ampcorrtable[itable].sigma[i];
 				    }
 			    }
 		    }
-		
+
 	    /* check for good amplitude correction data */
 	    if (nampcorrtable < 1)
 		    {
@@ -3264,7 +3274,7 @@ and mbedit edit save files.\n";
 			    program_name);
 		    exit(error);
 		    }
-    
+
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
@@ -3281,7 +3291,7 @@ and mbedit edit save files.\n";
 	    /* count the data points in the sidescan correction file */
 	    nsscorrtable = 0;
 	    nsscorrangle = 0;
-	    if ((tfp = fopen(process.mbp_sscorrfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_sscorrfile, "r")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
 		    fprintf(stderr,"\nUnable to Open Sidescan Correction File <%s> for reading\n",process.mbp_sscorrfile);
@@ -3297,7 +3307,7 @@ and mbedit edit save files.\n";
 		    sscanf(buffer,"# nangles:%d",&nsscorrangle);
 		}
 	    fclose(tfp);
-	    
+
 	    /* allocate arrays for sidescan correction tables */
 	    if (nsscorrtable > 0)
 		{
@@ -3319,7 +3329,7 @@ and mbedit edit save files.\n";
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nsscorrangle*sizeof(double),(void **)&(sscorrtableuse.angle),&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nsscorrangle*sizeof(double),(void **)&(sscorrtableuse.amplitude),&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nsscorrangle*sizeof(double),(void **)&(sscorrtableuse.sigma),&error);
-	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -3328,9 +3338,9 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 		}
-	
+
 	    /* if no sidescan correction file then quit */
 	    else
 		{
@@ -3339,11 +3349,11 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}		    
+		}
 
 	    /* read the data points in the sidescan correction file */
 	    nsscorrtable = 0;
-	    if ((tfp = fopen(process.mbp_sscorrfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_sscorrfile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open Sidescan Correction File <%s> for reading\n",process.mbp_sscorrfile);
@@ -3367,7 +3377,7 @@ and mbedit edit save files.\n";
 				&time_i[6], &(sscorrtable[itable].time_d));
 		else if (buffer[0] != '#')
 			{
-			nget = sscanf(buffer, "%lf %lf %lf", 
+			nget = sscanf(buffer, "%lf %lf %lf",
 				&(sscorrtable[itable].angle[sscorrtable[itable].nangle]),
 				&(sscorrtable[itable].amplitude[sscorrtable[itable].nangle]),
 				&(sscorrtable[itable].sigma[sscorrtable[itable].nangle]));
@@ -3380,7 +3390,7 @@ and mbedit edit save files.\n";
 			}
 		}
 	    fclose(tfp);
-	    
+
 	    /* force sidescan correction tables to be symmetric if desired */
 	    if (process.mbp_sscorr_symmetry == MBP_SSCORR_SYMMETRIC)
 		    {
@@ -3394,20 +3404,20 @@ and mbedit edit save files.\n";
 					factor = 0.5;
 				    else
 				    	factor = 1.0;
-				    sscorrtable[itable].amplitude[i] 
+				    sscorrtable[itable].amplitude[i]
 					    = factor * (sscorrtable[itable].amplitude[i]
 						    + sscorrtable[itable].amplitude[j]);
-				    sscorrtable[itable].amplitude[j] 
+				    sscorrtable[itable].amplitude[j]
 					    = sscorrtable[itable].amplitude[i];
-				    sscorrtable[itable].sigma[i] 
+				    sscorrtable[itable].sigma[i]
 					    = MAX(sscorrtable[itable].sigma[i],
 						    sscorrtable[itable].sigma[j]);
-				    sscorrtable[itable].sigma[j] 
+				    sscorrtable[itable].sigma[j]
 					    = sscorrtable[itable].sigma[i];
 				    }
 			    }
 		    }
-		
+
 	    /* check for good sidescan correction data */
 	    if (nsscorrtable < 1)
 		    {
@@ -3416,7 +3426,7 @@ and mbedit edit save files.\n";
 			    program_name);
 		    exit(error);
 		    }
-    
+
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
@@ -3428,11 +3438,11 @@ and mbedit edit save files.\n";
 	/*--------------------------------------------
 	  get topography grid
 	  --------------------------------------------*/
-	if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON 
-			&& (process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPO 
+	if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+			&& (process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPO
 				|| process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPOSLOPE))
-		|| (process.mbp_sscorr_mode == MBP_SSCORR_ON 
-			&& (process.mbp_sscorr_slope == MBP_SSCORR_USETOPO 
+		|| (process.mbp_sscorr_mode == MBP_SSCORR_ON
+			&& (process.mbp_sscorr_slope == MBP_SSCORR_USETOPO
 				|| process.mbp_sscorr_slope == MBP_SSCORR_USETOPOSLOPE)))
 		{
 		grid.data = NULL;
@@ -3441,7 +3451,7 @@ and mbedit edit save files.\n";
 					&grid.nxy, &grid.nx, &grid.ny, &grid.min, &grid.max,
 					&grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
 					&grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
-		if (status == MB_FAILURE) 
+		if (status == MB_FAILURE)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr,"\nUnable to read topography grid file: %s\n",
@@ -3545,31 +3555,31 @@ and mbedit edit save files.\n";
 		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&ttimes, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&angles, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&angles_forward, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&angles_null, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bheave, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&alongtrack_offset, &error);
 
 	/* if error initializing memory then quit */
@@ -3581,12 +3591,18 @@ and mbedit edit save files.\n";
 			program_name);
 		exit(error);
 		}
-	
+
+        /* get data kind sources for input format */
+        mb_format_source(verbose, &(process.mbp_format),
+		&nav_source, &heading_source,
+		&vru_source, &svp_source,
+		&error);
+
 	/*--------------------------------------------
 	  read the input file to get first ssv if necessary
 	  --------------------------------------------*/
 	/* read input file until a surface sound velocity value
-		is obtained, then close and reopen the file 
+		is obtained, then close and reopen the file
 		this provides the starting surface sound velocity
 		for recalculating the bathymetry */
 	if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE
@@ -3610,7 +3626,7 @@ and mbedit edit save files.\n";
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
-		
+
 		/* time gaps do not matter to mbprocess */
 		if (error == MB_ERROR_TIME_GAP)
 			{
@@ -3631,8 +3647,8 @@ and mbedit edit save files.\n";
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
 			}
-				
-		if (kind == MB_DATA_DATA 
+
+		if (kind == MB_DATA_DATA
 			&& error <= MB_ERROR_NO_ERROR)
 			{
 			/* extract travel times */
@@ -3642,13 +3658,13 @@ and mbedit edit save files.\n";
 				angles_forward,angles_null,
 				bheave,alongtrack_offset,
 				&draft,&ssv,&error);
-				
+
 			/* check surface sound velocity */
 			if (ssv > 0.0)
 				ssv_start = ssv;
 			}
 		}
-	
+
 	    /* close and reopen the input file */
 	    status = mb_close(verbose,&imbio_ptr,&error);
 	    if ((status = mb_read_init(
@@ -3682,31 +3698,31 @@ and mbedit edit save files.\n";
 		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						    sizeof(double), (void **)&bathalongtrack, &error);
 	    if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						    sizeof(double), (void **)&ss, &error);
 	    if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						    sizeof(double), (void **)&ssacrosstrack, &error);
 	    if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						    sizeof(double), (void **)&ssalongtrack, &error);
 	    if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						    sizeof(double), (void **)&ttimes, &error);
 	    if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						    sizeof(double), (void **)&angles, &error);
 	    if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						    sizeof(double), (void **)&angles_forward, &error);
 	    if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						    sizeof(double), (void **)&angles_null, &error);
 	    if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						    sizeof(double), (void **)&bheave, &error);
 	    if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						    sizeof(double), (void **)&alongtrack_offset, &error);
 
 	    /* if error initializing memory then quit */
@@ -3721,7 +3737,7 @@ and mbedit edit save files.\n";
 	    }
 	if (ssv_start <= 0.0)
 		ssv_start = ssv_default;
-	
+
 	/* reset error */
 	error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
@@ -3731,19 +3747,19 @@ and mbedit edit save files.\n";
 		|| process.mbp_ampcorr_mode == MBP_AMPCORR_ON)
 		{
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							sizeof(double), (void **)&depths, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							sizeof(double), (void **)&depthsmooth, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							sizeof(double), (void **)&depthacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							2 * sizeof(double), (void **)&slopes, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							2 * sizeof(double), (void **)&slopeacrosstrack, &error);
 		}
 
@@ -3892,7 +3908,7 @@ and mbedit edit save files.\n";
 			user,host,date);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-	
+
 		if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -3921,7 +3937,7 @@ and mbedit edit save files.\n";
 			    sprintf(comment,"  raytracing are not adjusted further).");
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
-		    }		    
+		    }
 		else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -3960,7 +3976,7 @@ and mbedit edit save files.\n";
 		sprintf(comment,"  Output file:        %s",process.mbp_ofile);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-	
+
 		if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 		    {
 		    if (process.mbp_angle_mode == MBP_ANGLES_OK)
@@ -4002,7 +4018,7 @@ and mbedit edit save files.\n";
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-	
+
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
 		    sprintf(comment,"  SVP file:               %s",process.mbp_svpfile);
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
@@ -4038,7 +4054,7 @@ and mbedit edit save files.\n";
 			sprintf(comment,"  Output bathymetry reference:   UNCORRECTED");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
-		    }		    
+		    }
 		if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF)
 		    {
 		    if (process.mbp_corrected == MB_YES)
@@ -4046,7 +4062,7 @@ and mbedit edit save files.\n";
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
 			sprintf(comment,"  Depths modified from uncorrected to corrected.");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-			}		    
+			}
 		    else
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -4054,7 +4070,7 @@ and mbedit edit save files.\n";
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		    }
-	
+
 		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -4065,7 +4081,7 @@ and mbedit edit save files.\n";
 		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  Roll bias:       %f degrees (starboard: -, port: +)", 
+		    sprintf(comment,"  Roll bias:       %f degrees (starboard: -, port: +)",
 			    process.mbp_rollbias);
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
@@ -4073,12 +4089,12 @@ and mbedit edit save files.\n";
 		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  Port roll bias:  %f degrees (starboard: -, port: +)", 
+		    sprintf(comment,"  Port roll bias:  %f degrees (starboard: -, port: +)",
 			    process.mbp_rollbias_port);
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  Starboard roll bias:  %f degrees (starboard: -, port: +)", 
+		    sprintf(comment,"  Starboard roll bias:  %f degrees (starboard: -, port: +)",
 			    process.mbp_rollbias_stbd);
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
@@ -4093,12 +4109,12 @@ and mbedit edit save files.\n";
 		else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  Pitch bias:      %f degrees (aft: -, forward: +)", 
+		    sprintf(comment,"  Pitch bias:      %f degrees (aft: -, forward: +)",
 			    process.mbp_pitchbias);
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    }
-	
+
 		if (process.mbp_draft_mode == MBP_DRAFT_SET)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -4255,12 +4271,12 @@ and mbedit edit save files.\n";
 			sprintf(comment,"  Merged navigation file:    %s", process.mbp_navfile);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	
+
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
 			sprintf(comment,"  Merged navigation format:  %d", process.mbp_nav_format);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	
+
 			if (process.mbp_nav_heading == MBP_NAV_ON)
 			    {
 			    strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -4356,7 +4372,7 @@ and mbedit edit save files.\n";
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 			    }
-	    	    else 
+	    	    else
 			    {
 			    sprintf(comment,"  Navigation positions not shifted.");
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
@@ -4642,8 +4658,8 @@ and mbedit edit save files.\n";
 		for (i=0;i<process.mbp_cut_num;i++)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment, "  Cut[%d]: %d %d %f %f", 
-				i, process.mbp_cut_kind[i], process.mbp_cut_mode[i], 
+			sprintf(comment, "  Cut[%d]: %d %d %f %f",
+				i, process.mbp_cut_kind[i], process.mbp_cut_mode[i],
 				process.mbp_cut_min[i], process.mbp_cut_max[i]);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			sprintf(comment, "  %f %f", process.mbp_cut_min[i], process.mbp_cut_max[i]);
@@ -4665,7 +4681,7 @@ and mbedit edit save files.\n";
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-	
+
 		if (process.mbp_kluge001 == MB_YES)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -4736,7 +4752,7 @@ and mbedit edit save files.\n";
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-	
+
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		sprintf(comment," ");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
@@ -4746,7 +4762,7 @@ and mbedit edit save files.\n";
 	/* set up the raytracing */
 	if (process.mbp_svp_mode != MBP_SVP_OFF)
 		status = mb_rt_init(verbose, nsvp, depth, velocity, &rt_svp, &error);
-	
+
 	/* set up the sidescan recalculation */
 	if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON)
 		{
@@ -4772,7 +4788,7 @@ and mbedit edit save files.\n";
 			}
 		pixel_int = process.mbp_ssrecalc_interpolate;
 		}
-	
+
 	/* initialize time_d_lastping */
 	time_d_lastping = 0.0;
 
@@ -4795,7 +4811,7 @@ and mbedit edit save files.\n";
 				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
-		
+
 		/* time gaps do not matter to mbprocess */
 		if (error == MB_ERROR_TIME_GAP)
 			{
@@ -4816,10 +4832,10 @@ and mbedit edit save files.\n";
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
 			}
-			
+
 		/* compare and save survey data timestamps */
 		if (process.mbp_kluge004 == MB_YES
-			&& error == MB_ERROR_NO_ERROR 
+			&& error == MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA)
 			{
 			if (time_d <= time_d_lastping)
@@ -4828,7 +4844,7 @@ and mbedit edit save files.\n";
 				status = MB_FAILURE;
 				}
 			}
-			
+
 		/* detect multiple pings with the same time stamps */
 		if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
 			{
@@ -4844,13 +4860,13 @@ and mbedit edit save files.\n";
 			}
 
 		/* increment counter */
-		if (error <= MB_ERROR_NO_ERROR 
+		if (error <= MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA)
 			idata++;
-		else if (error <= MB_ERROR_NO_ERROR 
+		else if (error <= MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_NAV)
 			inav++;
-		else if (error <= MB_ERROR_NO_ERROR 
+		else if (error <= MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_COMMENT)
 			icomment++;
 		else if (error <= MB_ERROR_NO_ERROR)
@@ -4879,7 +4895,7 @@ and mbedit edit save files.\n";
 			fprintf(stderr,"\nNonfatal MBIO Error:\n%s\n",message);
 			fprintf(stderr,"Input Record: %d\n",idata);
 			}
-		else if (verbose >= 1 && error != MB_ERROR_NO_ERROR 
+		else if (verbose >= 1 && error != MB_ERROR_NO_ERROR
 			&& error != MB_ERROR_EOF)
 			{
 			mb_error(verbose,error,&message);
@@ -4941,11 +4957,11 @@ and mbedit edit save files.\n";
                 		 mounted sonars)
         		       - this correction subtracts the heave
                 		 value from the sonar depth */
-			if (process.mbp_kluge002 == MB_YES 
+			if (process.mbp_kluge002 == MB_YES
 			    && kind == MB_DATA_DATA)
 			    draft -= heave;
 			}
-			
+
 		/* apply kluge005 - replaces survey record timestamps with
         		timestamps of corresponding merged navigation
         		records
@@ -4954,7 +4970,7 @@ and mbedit edit save files.\n";
                 	  then insert the corrected timestamps
                 	  into processed data */
 		if (process.mbp_kluge005 == MB_YES
-			&& error == MB_ERROR_NO_ERROR 
+			&& error == MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA
 			&& nnav > 0)
 			{
@@ -4963,7 +4979,130 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			time_d = ntime[idata-1];
 			mb_get_date(verbose,time_d,time_i);
 			}
-		    
+
+		/* interpolate the navigation if desired */
+		if (error == MB_ERROR_NO_ERROR
+			&& process.mbp_nav_mode == MBP_NAV_ON
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV))
+			{
+			/* interpolate navigation */
+			if (process.mbp_nav_algorithm == MBP_NAV_SPLINE
+			    && time_d >= ntime[0]
+			    && time_d <= ntime[nnav-1])
+			    {
+			    intstat = mb_spline_interp(verbose,
+					ntime-1, nlon-1, nlonspl-1,
+					nnav, time_d, &navlon, &itime,
+					&error);
+			    intstat = mb_spline_interp(verbose,
+					ntime-1, nlat-1, nlatspl-1,
+					nnav, time_d, &navlat, &itime,
+					&error);
+			    }
+			else
+			    {
+			    intstat = mb_linear_interp(verbose,
+					ntime-1, nlon-1,
+					nnav, time_d, &navlon, &itime,
+					&error);
+			    intstat = mb_linear_interp(verbose,
+					ntime-1, nlat-1,
+					nnav, time_d, &navlat, &itime,
+					&error);
+			    }
+
+			/* interpolate heading */
+			if (process.mbp_nav_heading == MBP_NAV_ON)
+			    {
+			    intstat = mb_linear_interp_degrees(verbose,
+					ntime-1, nheading-1,
+					nnav, time_d, &heading, &itime,
+					&error);
+			    }
+
+			/* interpolate speed */
+			if (process.mbp_nav_speed == MBP_NAV_ON)
+			    {
+			    intstat = mb_linear_interp(verbose,
+					ntime-1, nspeed-1,
+					nnav, time_d, &speed, &itime,
+					&error);
+			    }
+
+			/* interpolate draft */
+			if (process.mbp_nav_draft == MBP_NAV_ON)
+			    {
+			    intstat = mb_linear_interp(verbose,
+					ntime-1, ndraft-1,
+					nnav, time_d, &draft, &itime,
+					&error);
+			    }
+
+			/* interpolate attitude */
+			if (process.mbp_nav_attitude == MBP_NAV_ON)
+			    {
+			    intstat = mb_linear_interp(verbose,
+					ntime-1, nroll-1,
+					nnav, time_d, &roll, &itime,
+					&error);
+			    intstat = mb_linear_interp(verbose,
+					ntime-1, npitch-1,
+					nnav, time_d, &pitch, &itime,
+					&error);
+			    intstat = mb_linear_interp(verbose,
+					ntime-1, nheave-1,
+					nnav, time_d, &heave, &itime,
+					&error);
+			    }
+			}
+
+	/*--------------------------------------------
+	  handle attitude merging
+	  --------------------------------------------*/
+
+		/* interpolate the attitude if desired */
+		if (error == MB_ERROR_NO_ERROR
+			&& process.mbp_attitude_mode == MBP_ATTITUDE_ON
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV))
+			{
+			/* interpolate adjusted navigation */
+			intstat = mb_linear_interp(verbose,
+					attitudetime-1, attituderoll-1,
+					nattitude, time_d, &roll, &iatime,
+					&error);
+			intstat = mb_linear_interp(verbose,
+					attitudetime-1, attitudepitch-1,
+					nattitude, time_d, &pitch, &iatime,
+					&error);
+			intstat = mb_linear_interp(verbose,
+					attitudetime-1, attitudeheave-1,
+					nattitude, time_d, &heave, &iatime,
+					&error);
+			}
+
+	/*--------------------------------------------
+	  handle sonar depth merging
+	  --------------------------------------------*/
+
+		/* interpolate the sonardepth if desired */
+		if (error == MB_ERROR_NO_ERROR
+			&& process.mbp_sonardepth_mode == MBP_SONARDEPTH_ON
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV))
+			{
+			/* interpolate adjusted navigation */
+			intstat = mb_linear_interp(verbose,
+					fsonardepthtime-1, fsonardepth-1,
+					nsonardepth, time_d, &draft, &iatime,
+					&error);
+			}
+
+	/*--------------------------------------------
+	  handle position shifts
+	  --------------------------------------------*/
+
 		/* apply position shifts if needed */
     		if (process.mbp_nav_shift == MBP_NAV_ON)
 			{
@@ -4982,171 +5121,14 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 				    - process.mbp_nav_shiftlat);
 			}
 
-		/* interpolate the navigation if desired */
-		if (error == MB_ERROR_NO_ERROR
-			&& process.mbp_nav_mode == MBP_NAV_ON
-			&& (kind == MB_DATA_DATA
-			    || kind == MB_DATA_NAV))
-			{			
-			/* interpolate navigation */
-			if (process.mbp_nav_algorithm == MBP_NAV_SPLINE
-			    && time_d >= ntime[0] 
-			    && time_d <= ntime[nnav-1])
-			    {
-			    intstat = mb_spline_interp(verbose, 
-					ntime-1, nlon-1, nlonspl-1,
-					nnav, time_d, &navlon, &itime, 
-					&error);
-			    intstat = mb_spline_interp(verbose, 
-					ntime-1, nlat-1, nlatspl-1,
-					nnav, time_d, &navlat, &itime, 
-					&error);
-			    }
-			else
-			    {
-			    intstat = mb_linear_interp(verbose, 
-					ntime-1, nlon-1,
-					nnav, time_d, &navlon, &itime, 
-					&error);
-			    intstat = mb_linear_interp(verbose, 
-					ntime-1, nlat-1,
-					nnav, time_d, &navlat, &itime, 
-					&error);
-			    }
-			    
-			/* interpolate heading */
-			if (process.mbp_nav_heading == MBP_NAV_ON)
-			    {
-			    intstat = mb_linear_interp_degrees(verbose, 
-					ntime-1, nheading-1,
-					nnav, time_d, &heading, &itime, 
-					&error);
-			    }
-			    
-			/* interpolate speed */
-			if (process.mbp_nav_speed == MBP_NAV_ON)
-			    {
-			    intstat = mb_linear_interp(verbose, 
-					ntime-1, nspeed-1,
-					nnav, time_d, &speed, &itime, 
-					&error);
-			    }
-			    
-			/* interpolate draft */
-			if (process.mbp_nav_draft == MBP_NAV_ON)
-			    {
-			    intstat = mb_linear_interp(verbose, 
-					ntime-1, ndraft-1,
-					nnav, time_d, &draft, &itime, 
-					&error);
-			    }
-			    
-			/* interpolate attitude */
-			if (process.mbp_nav_attitude == MBP_NAV_ON)
-			    {
-			    intstat = mb_linear_interp(verbose, 
-					ntime-1, nroll-1,
-					nnav, time_d, &roll, &itime, 
-					&error);
-			    intstat = mb_linear_interp(verbose, 
-					ntime-1, npitch-1,
-					nnav, time_d, &pitch, &itime, 
-					&error);
-			    intstat = mb_linear_interp(verbose, 
-					ntime-1, nheave-1,
-					nnav, time_d, &heave, &itime, 
-					&error);
-			    }
-			}
-
-	/*--------------------------------------------
-	  handle adjusted navigation merging
-	  --------------------------------------------*/
-
-		/* interpolate the adjusted navigation if desired */
-		if (error == MB_ERROR_NO_ERROR
-			&& process.mbp_navadj_mode >= MBP_NAVADJ_LL
-			&& (kind == MB_DATA_DATA
-			    || kind == MB_DATA_NAV))
-			{			
-			/* interpolate adjusted navigation */
-			if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
-			    && time_d >= natime[0] 
-			    && time_d <= natime[nanav-1])
-			    {
-			    intstat = mb_spline_interp(verbose, 
-					natime-1, nalon-1, nalonspl-1,
-					nanav, time_d, &navlon, &iatime, 
-					&error);
-			    intstat = mb_spline_interp(verbose, 
-					ntime-1, nalat-1, nalatspl-1,
-					nanav, time_d, &navlat, &iatime, 
-					&error);
-			    }
-			else
-			    {
-			    intstat = mb_linear_interp(verbose, 
-					natime-1, nalon-1,
-					nanav, time_d, &navlon, &iatime, 
-					&error);
-			    intstat = mb_linear_interp(verbose, 
-					natime-1, nalat-1,
-					nanav, time_d, &navlat, &iatime, 
-					&error);
-			    }
-			}
-
-	/*--------------------------------------------
-	  handle attitude merging
-	  --------------------------------------------*/
-
-		/* interpolate the attitude if desired */
-		if (error == MB_ERROR_NO_ERROR
-			&& process.mbp_attitude_mode == MBP_ATTITUDE_ON
-			&& (kind == MB_DATA_DATA
-			    || kind == MB_DATA_NAV))
-			{			
-			/* interpolate adjusted navigation */
-			intstat = mb_linear_interp(verbose, 
-					attitudetime-1, attituderoll-1,
-					nattitude, time_d, &roll, &iatime, 
-					&error);
-			intstat = mb_linear_interp(verbose, 
-					attitudetime-1, attitudepitch-1,
-					nattitude, time_d, &pitch, &iatime, 
-					&error);
-			intstat = mb_linear_interp(verbose, 
-					attitudetime-1, attitudeheave-1,
-					nattitude, time_d, &heave, &iatime, 
-					&error);
-			}
-
-	/*--------------------------------------------
-	  handle sonar depth merging
-	  --------------------------------------------*/
-
-		/* interpolate the sonardepth if desired */
-		if (error == MB_ERROR_NO_ERROR
-			&& process.mbp_sonardepth_mode == MBP_SONARDEPTH_ON
-			&& (kind == MB_DATA_DATA
-			    || kind == MB_DATA_NAV))
-			{			
-			/* interpolate adjusted navigation */
-			intstat = mb_linear_interp(verbose, 
-					fsonardepthtime-1, fsonardepth-1,
-					nsonardepth, time_d, &draft, &iatime, 
-					&error);
-			}
-
 	/*--------------------------------------------
 	  handle draft correction
 	  --------------------------------------------*/
-    
 		/* add user specified draft correction if desired */
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_NAV))
-			{		
+			{
 			if (process.mbp_draft_mode == MBP_DRAFT_OFFSET)
 				draft = draft + process.mbp_draft_offset;
 			else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLY)
@@ -5158,9 +5140,46 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			}
 
 	/*--------------------------------------------
+	  handle adjusted navigation merging
+	  --------------------------------------------*/
+
+		/* interpolate the adjusted navigation if desired */
+		if (error == MB_ERROR_NO_ERROR
+			&& process.mbp_navadj_mode >= MBP_NAVADJ_LL
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV))
+			{
+			/* interpolate adjusted navigation */
+			if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
+			    && time_d >= natime[0]
+			    && time_d <= natime[nanav-1])
+			    {
+			    intstat = mb_spline_interp(verbose,
+					natime-1, nalon-1, nalonspl-1,
+					nanav, time_d, &navlon, &iatime,
+					&error);
+			    intstat = mb_spline_interp(verbose,
+					ntime-1, nalat-1, nalatspl-1,
+					nanav, time_d, &navlat, &iatime,
+					&error);
+			    }
+			else
+			    {
+			    intstat = mb_linear_interp(verbose,
+					natime-1, nalon-1,
+					nanav, time_d, &navlon, &iatime,
+					&error);
+			    intstat = mb_linear_interp(verbose,
+					natime-1, nalat-1,
+					nanav, time_d, &navlat, &iatime,
+					&error);
+			    }
+			}
+
+	/*--------------------------------------------
 	  apply z offset from navigation adjustment correction
 	  --------------------------------------------*/
-			    
+
 		/* apply z offset from navigation adjustment correction */
 		if (error == MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA
@@ -5169,19 +5188,19 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 		    {
 		    /* interpolate z offset */
 		    if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
-			&& time_d >= natime[0] 
+			&& time_d >= natime[0]
 			&& time_d <= natime[nanav-1])
 			{
-			intstat = mb_spline_interp(verbose, 
+			intstat = mb_spline_interp(verbose,
 				    natime-1, naz-1, nazspl-1,
-				    nanav, time_d, &zoffset, &iatime, 
+				    nanav, time_d, &zoffset, &iatime,
 				    &error);
 			}
 		    else
 			{
-			intstat = mb_linear_interp(verbose, 
+			intstat = mb_linear_interp(verbose,
 				    natime-1, naz-1,
-				    nanav, time_d, &zoffset, &iatime, 
+				    nanav, time_d, &zoffset, &iatime,
 				    &error);
 			}
 
@@ -5192,7 +5211,7 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 	/*--------------------------------------------
 	  handle lever arm correction
 	  --------------------------------------------*/
-			
+
 		/* do lever calculation to find heave implied by roll and pitch
 		   for a sonar displaced from the vru - this will be added to the
 		   bathymetry */
@@ -5207,9 +5226,9 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
 			    	beta += process.mbp_rollbias;
 			else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-			    	beta += 0.5 * (process.mbp_rollbias_port 
+			    	beta += 0.5 * (process.mbp_rollbias_port
 							+ process.mbp_rollbias_stbd);
-			mb_lever(verbose, 
+			mb_lever(verbose,
 			    	process.mbp_sonar_offsetx,
 			    	process.mbp_sonar_offsety,
 			    	process.mbp_sonar_offsetz,
@@ -5224,8 +5243,8 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 				&lever_x,
 				&lever_y,
 				&lever_heave,
-				&error);	
-/*fprintf(stderr, "alpha:%f beta:%f lever:%f\n", 
+				&error);
+/*fprintf(stderr, "alpha:%f beta:%f lever:%f\n",
 alpha, beta, lever_heave);*/
 			}
 
@@ -5245,7 +5264,7 @@ alpha, beta, lever_heave);*/
 		    }
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA
-			    || kind == MB_DATA_NAV)
+			    || kind == nav_source)
 			&& calculatespeedheading == MB_YES)
 			{
 			if (process.mbp_nav_mode == MBP_NAV_ON)
@@ -5278,22 +5297,38 @@ alpha, beta, lever_heave);*/
 			    dist = sqrt(dx*dx + dy*dy);
 			    if (del_time > 0.0)
 				{
-				speed = 3.6*dist/del_time;
+				speedcalc = 3.6*dist/del_time;
 				}
 			    else
-				speed = speed_old;
-			    if (dist > 0.0)
+				speedcalc = speed_old;
+			    if (dist > 0.0 && del_time > 0.0)
 				{
-				heading = RTD*atan2(dx/dist,dy/dist);
+				headingcalc = RTD*atan2(dx/dist,dy/dist);
+                                if (headingcalc < 0.0)
+                                    headingcalc += 360.0;
 				}
 			    else
-				heading = heading_old;
+				headingcalc = heading_old;
 			    }
+                        else
+                            {
+                            speedcalc = speed;
+                            headingcalc = heading;
+                            }
+                        if (process.mbp_heading_mode == MBP_HEADING_CALC
+                                || process.mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+                                {
+                                heading = headingcalc;
+                                }
+                        else
+                                {
+                                speed = speedcalc;
+                                }
 			time_d_old = time_d;
 			navlon_old = navlon;
 			navlat_old = navlat;
-			heading_old = heading;
-			speed_old = speed;
+			heading_old = headingcalc;
+			speed_old = speedcalc;
 			}
 
 		/* adjust heading if required */
@@ -5314,7 +5349,7 @@ alpha, beta, lever_heave);*/
 	  deal with bathymetry
 	  --------------------------------------------*/
 
-		/* if survey data encountered, 
+		/* if survey data encountered,
 			get the bathymetry */
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA))
@@ -5323,7 +5358,7 @@ alpha, beta, lever_heave);*/
 	/*--------------------------------------------
 	  get travel time values
 	  --------------------------------------------*/
-	  
+
 			/* extract travel times if they exist */
 			if (traveltime == MB_YES)
 			    {
@@ -5338,7 +5373,7 @@ alpha, beta, lever_heave);*/
 			/* estimate travel times if they don't exist */
 			else
 			    {
-			    draft_org = sonardepth;
+			    draft_org = sonardepth - heave;
 			    ssv = 1500.0;
 			    nbeams = nbath;
 			    for (i=0;i<nbath;i++)
@@ -5346,14 +5381,14 @@ alpha, beta, lever_heave);*/
 				if (beamflag[i] != MB_FLAG_NULL)
 				    {
 				    zz = bath[i] - sonardepth;
-				    rr = sqrt(zz * zz 
+				    rr = sqrt(zz * zz
 					+ bathacrosstrack[i] * bathacrosstrack[i]
 					+ bathalongtrack[i] * bathalongtrack[i]);
 				    ttimes[i] = rr / 750.0;
-				    mb_xyz_to_takeoff(verbose, 
-						bathacrosstrack[i], 
-						bathalongtrack[i], 
-						(bath[i] - sonardepth), 
+				    mb_xyz_to_takeoff(verbose,
+						bathacrosstrack[i],
+						bathalongtrack[i],
+						(bath[i] - sonardepth),
 						&angles[i],
 						&angles_forward[i],
 						&error);
@@ -5378,7 +5413,7 @@ alpha, beta, lever_heave);*/
 				ssv = ssv_start;
 			else
 				ssv_start = ssv;
-				
+
 			/* if heave adjustment specified do it */
 			if (process.mbp_heave_mode != MBP_HEAVE_OFF)
 			    {
@@ -5395,14 +5430,14 @@ alpha, beta, lever_heave);*/
 				    bheave[i] += process.mbp_heave;
 				}
 			    }
-				
+
 			/* if tt adjustment specified do it */
 			if (process.mbp_tt_mode == MBP_TT_MULTIPLY)
 			    {
 			    for (i=0;i<nbath;i++)
 				ttimes[i] *= process.mbp_tt_mult;
 			    }
-				
+
 			/* if ssv adjustment specified do it */
 			if (process.mbp_ssv_mode == MBP_SSV_SET)
 			    {
@@ -5418,7 +5453,7 @@ alpha, beta, lever_heave);*/
 	  --------------------------------------------*/
 
 			/* apply kluge006 - resets draft without changing bathymetry */
-			if (process.mbp_kluge006 == MB_YES 
+			if (process.mbp_kluge006 == MB_YES
 			    && kind == MB_DATA_DATA)
 			    {
 /*fprintf(stderr,"RESET Draft: %f %f %f\n",draft_org,draft,sonardepth);*/
@@ -5430,7 +5465,7 @@ alpha, beta, lever_heave);*/
 			if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 			    {
 /* fprintf(stderr,"\nPING: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f \n",
-time_i[0], time_i[1], time_i[2], 
+time_i[0], time_i[1], time_i[2],
 time_i[3], time_i[4], time_i[5], time_i[6],
 time_d); */
 			    /* loop over the beams */
@@ -5439,10 +5474,10 @@ time_d); */
 			      if (ttimes[i] > 0.0)
 				{
 				/* if needed, translate angles from takeoff
-					angle coordinates to roll-pitch 
+					angle coordinates to roll-pitch
 					coordinates, apply roll and pitch
 					corrections, and translate back */
-				if (process.mbp_rollbias_mode != MBP_ROLLBIAS_OFF 
+				if (process.mbp_rollbias_mode != MBP_ROLLBIAS_OFF
 					|| process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON
 					|| process.mbp_nav_attitude == MBP_NAV_ON
 					|| process.mbp_attitude_mode == MBP_ATTITUDE_ON
@@ -5450,8 +5485,8 @@ time_d); */
 					{
 					mb_takeoff_to_rollpitch(
 						verbose,
-						angles[i], angles_forward[i], 
-						&alpha, &beta, 
+						angles[i], angles_forward[i],
+						&alpha, &beta,
 						&error);
         			       /* apply kluge_003 - enables correction of beam angles in
         				SeaBeam 2112 data
@@ -5486,15 +5521,15 @@ time_d); */
 			    		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
 			    			beta += process.mbp_rollbias_port;
 					mb_rollpitch_to_takeoff(
-						verbose, 
-						alpha, beta, 
-						&angles[i], &angles_forward[i], 
-						&error); 
+						verbose,
+						alpha, beta,
+						&angles[i], &angles_forward[i],
+						&error);
 					}
-    
+
 				/* add heave and draft */
 				depth_offset_use = bheave[i] + draft + lever_heave;
-	
+
 				/* check depth_offset - use static shift if depth_offset negative */
 				if (depth_offset_use >= depth[0])
 				    {
@@ -5503,7 +5538,7 @@ time_d); */
 				else
 				    {
 				    static_shift = depth_offset_use - depth[0];
-				    
+
 				    if (verbose > 0)
 				    	{
 					fprintf(stderr, "\nWarning: Sonar depth is shallower than the top\n");
@@ -5516,8 +5551,8 @@ time_d); */
 					fprintf(stderr, "User specified draft:  %f\n", process.mbp_draft);
 					fprintf(stderr, "Depth offset used:     %f\n", depth_offset_use);
 					fprintf(stderr, "Data Record: %d\n",odata);
-					fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n", 
-						time_i[0], time_i[1], time_i[2], 
+					fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n",
+						time_i[0], time_i[1], time_i[2],
 						time_i[3], time_i[4], time_i[5], time_i[6]);
 	    				}
 				    }
@@ -5525,21 +5560,21 @@ time_d); */
 draft_org,draft,depth_offset_use,static_shift);*/
 
 				/* raytrace */
-				status = mb_rt(verbose, rt_svp, (depth_offset_use - static_shift), 
+				status = mb_rt(verbose, rt_svp, (depth_offset_use - static_shift),
 					angles[i], 0.5*ttimes[i],
-					process.mbp_angle_mode, ssv, angles_null[i], 
-					0, NULL, NULL, NULL, 
-					&xx, &zz, 
+					process.mbp_angle_mode, ssv, angles_null[i],
+					0, NULL, NULL, NULL,
+					&xx, &zz,
 					&ttime, &ray_stat, &error);
-					
+
 				/* apply static shift if any */
 				zz += static_shift;
-				
+
 /* fprintf(stderr,"PING:%4d %2d %2d %2d:%2d:%2d.%6d BEAM:%d depth_offset_use:%f draft:%f bheave:%f lever_heave:%f angle:%f tt:%f mode:%d ssv:%f null:%f xx:%f zz:%f tt:%f\n",
 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],i,
 depth_offset_use,draft,bheave[i],lever_heave,angles[i], 0.5*ttimes[i],process.mbp_angle_mode, ssv, angles_null[i],
 xx,zz,ttime); */
-/* fprintf(stderr, "%d %d : heave:%f draft:%f %f depth_offset:%f static:%f zz:%f\n", 
+/* fprintf(stderr, "%d %d : heave:%f draft:%f %f depth_offset:%f static:%f zz:%f\n",
 idata, i, bheave[i], draft, draft_org, depth_offset_use, static_shift, zz);*/
 /* fprintf(stderr,"COMPARE %d X:%f %f Y:%f %f Z:%f %f     %.3f %.3f %.3f\n",
 i,bathacrosstrack[i],xx*cos(DTR*angles_forward[i]),
@@ -5548,19 +5583,19 @@ bath[i],zz,
 bathacrosstrack[i]-xx*cos(DTR*angles_forward[i]),
 bathalongtrack[i]-xx*sin(DTR*angles_forward[i]),
 bath[i]-zz); */
- 
+
 				/* get alongtrack and acrosstrack distances
 					and depth */
 				bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
 				bathalongtrack[i] = xx*sin(DTR*angles_forward[i]) + alongtrack_offset[i];
 				bath[i] = zz;
-				
+
 				/* output some debug values */
 				if (verbose >= 5)
 				    fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %6.3f %8.2f %8.2f %8.2f\n",
-					idata, i, 0.5*ttimes[i], angles[i], angles_forward[i],  
+					idata, i, 0.5*ttimes[i], angles[i], angles_forward[i],
 					bathacrosstrack[i], bathalongtrack[i], bath[i]);
-    
+
 				/* output some debug messages */
 				if (verbose >= 5)
 				    {
@@ -5575,7 +5610,7 @@ bath[i]-zz); */
 				    fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
 				    }
 				}
-				
+
 			      /* else if no travel time no data */
 			      else
 				beamflag[i] = MB_FLAG_NULL;
@@ -5590,26 +5625,51 @@ bath[i]-zz); */
 			      {
 			      if (beamflag[i] != MB_FLAG_NULL)
 				{
+				/* output some debug messages */
+				if (verbose >= 5)
+				    {
+				    fprintf(stderr,"\ndbg5  Depth value to be calculated in program <%s>:\n",program_name);
+				    fprintf(stderr,"dbg5       kind:  %d\n",kind);
+				    fprintf(stderr,"dbg5       beam:  %d\n",i);
+				    fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
+				    fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
+				    fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
+				    }
+
 				/* add heave and draft */
 				depth_offset_use = bheave[i] + draft + lever_heave;
 				depth_offset_org = bheave[i] + draft_org;
 
 				/* strip off heave + draft */
 				bath[i] -= depth_offset_org;
-				
-				/* get range and angles in 
+
+				/* get range and angles in
 				    roll-pitch frame */
-				range = sqrt(bath[i] * bath[i] 
-					    + bathacrosstrack[i] 
+				range = sqrt(bath[i] * bath[i]
+					    + bathacrosstrack[i]
 						* bathacrosstrack[i]
-					    + bathalongtrack[i] 
+					    + bathalongtrack[i]
 						* bathalongtrack[i]);
-				alpha = asin(bathalongtrack[i] 
-					/ range);
-				beta = acos(bathacrosstrack[i] 
-					/ range / cos(alpha));
+                                if (fabs(range) < 0.001)
+                                        {
+                                        alpha = 0.0;
+                                        beta = 0.5 * M_PI;
+                                        }
+                                else
+                                        {
+                                        alpha = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
+                                        beta = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alpha)))));
+                                        }
+                                if (bath[i] < 0.0)
+                                        beta = 2.0 * M_PI - beta;
 
 				/* apply roll pitch corrections */
+                                if (process.mbp_nav_attitude == MBP_NAV_ON
+                                        || process.mbp_attitude_mode == MBP_ATTITUDE_ON)
+                                        {
+                                        beta += roll - roll_org;
+                                        alpha += pitch - pitch_org;
+                                        }
 				if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
 			    		alpha += DTR * process.mbp_pitchbias;
 			    	if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
@@ -5619,26 +5679,23 @@ bath[i]-zz); */
 			    		beta += DTR * process.mbp_rollbias_stbd;
 			    	else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
 			    		beta += DTR * process.mbp_rollbias_port;
-				
+
 				/* recalculate bathymetry */
-				bath[i] 
-				    = range * cos(alpha) * sin(beta);
-				bathalongtrack[i] 
-				    = range * sin(alpha);
-				bathacrosstrack[i] 
-				    = range * cos(alpha) * cos(beta);	
-					
-				/* add heave and draft back in */	    
+				bath[i] = range * cos(alpha) * sin(beta);
+				bathalongtrack[i] = range * sin(alpha);
+				bathacrosstrack[i] = range * cos(alpha) * cos(beta);
+
+				/* add heave and draft back in */
 				bath[i] += depth_offset_use;
-    
+
 				/* output some debug values */
 				if (verbose >= 5)
 				    fprintf(stderr,"dbg5       %3d %3d %8.2f %8.2f %8.2f\n",
-					idata, i, 
-					bathacrosstrack[i], 
-					bathalongtrack[i], 
+					idata, i,
+					bathacrosstrack[i],
+					bathalongtrack[i],
 					bath[i]);
-    
+
 				/* output some debug messages */
 				if (verbose >= 5)
 				    {
@@ -5659,7 +5716,7 @@ bath[i]-zz); */
 			    {
 			    /* get draft change */
 			    depth_offset_change = draft - draft_org + lever_heave;
-/*fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  depth offset:%f\n", 
+/* fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  depth_offset_change:%f\n",
 time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 
 			    /* loop over the beams */
@@ -5667,18 +5724,18 @@ time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 			      {
 			      if (beamflag[i] != MB_FLAG_NULL)
 				{
-				/* apply transducer depth change to depths */	    
+				/* apply transducer depth change to depths */
 				bath[i] += depth_offset_change;
-/*fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);*/
-    
+/* fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);*/
+
 				/* output some debug values */
 				if (verbose >= 5)
 				    fprintf(stderr,"dbg5       %3d %3d %8.2f %8.2f %8.2f\n",
-					idata, i, 
-					bathacrosstrack[i], 
-					bathalongtrack[i], 
+					idata, i,
+					bathacrosstrack[i],
+					bathalongtrack[i],
 					bath[i]);
-    
+
 				/* output some debug messages */
 				if (verbose >= 5)
 				    {
@@ -5691,15 +5748,15 @@ time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 				    }
 				}
 			      }
-/*fprintf(stderr, "time:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d draft:%f depth_offset_change:%f\n", 
-time_i[0], time_i[1], time_i[2], time_i[3], 
+/*fprintf(stderr, "time:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d draft:%f depth_offset_change:%f\n",
+time_i[0], time_i[1], time_i[2], time_i[3],
 time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    }
 
 	/*--------------------------------------------
 	  change water sound reference if needed
 	  --------------------------------------------*/
-			    
+
 			/* change bathymetry water sound reference if required */
 			if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF
 			    || (process.mbp_svp_mode == MBP_SVP_ON
@@ -5709,7 +5766,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				{
 				if (beamflag[i] != MB_FLAG_NULL)
 				    {
-				    /* calculate average water sound speed 
+				    /* calculate average water sound speed
 					for current depth value */
 				    depth_offset_use = bheave[i] + draft + lever_heave;
 				    zz = bath[i] - depth_offset_use;
@@ -5725,13 +5782,13 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					vsum = 0.0;
 				    if (k >= 0)
 					{
-					vsum += 0.5*(2*velocity[k] 
+					vsum += 0.5*(2*velocity[k]
 					    + (zz - depth[k])*(velocity[k+1] - velocity[k])
 					    /(depth[k+1] - depth[k]))*(zz - depth[k]);
 					vavg = vsum / zz;
 					}
 				    if (vavg <= 0.0) vavg = 1500.0;
-					
+
 				    /* if uncorrected value desired */
 				    if (process.mbp_corrected == MB_NO)
 					bath[i] = zz * 1500.0 / vavg + depth_offset_use;
@@ -5745,15 +5802,15 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 	/*--------------------------------------------
 	  apply tide correction
 	  --------------------------------------------*/
-			    
+
 			/* apply tide corrections */
 			if (process.mbp_tide_mode == MBP_TIDE_ON
-				&& ntide > 1)
+				&& ntide > 0)
 			    {
 			    /* interpolate tide */
-			    intstat = mb_linear_interp(verbose, 
+			    intstat = mb_linear_interp(verbose,
 					tidetime-1, tide-1,
-					ntide, time_d, &tideval, &itime, 
+					ntide, time_d, &tideval, &itime,
 					&error);
 
 			    /* apply tide to all valid beams */
@@ -5767,29 +5824,29 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 	/*--------------------------------------------
 	  apply per-beam static offsets
 	  --------------------------------------------*/
-			    
+
 			/* apply static corrections */
 			if (process.mbp_static_mode == MBP_STATIC_ON
-			    && nstatic > 0 
+			    && nstatic > 0
 			    && nstatic <= nbath)
 			    {
 			    for (i=0;i<nstatic;i++)
 				{
-				if (staticbeam[i] >= 0 
+				if (staticbeam[i] >= 0
 				    && staticbeam[i] < nbath)
 				    {
 				    if (beamflag[staticbeam[i]] != MB_FLAG_NULL)
 					bath[staticbeam[i]] -= staticoffset[i];
 				    }
 				}
-			    }			
+			    }
 
 			/* output some debug messages */
 			if (verbose >= 5)
 			    {
 			    fprintf(stderr,"\ndbg5  Depth values calculated in program <%s>:\n",program_name);
 			    fprintf(stderr,"dbg5       kind:  %d\n",kind);
-			    fprintf(stderr,"dbg5      beam    ttime      depth        xtrack    ltrack      flag\n");	
+			    fprintf(stderr,"dbg5      beam    ttime      depth        xtrack    ltrack      flag\n");
 			    for (i=0;i<nbath;i++)
 				fprintf(stderr,"dbg5       %2d   %f   %f   %f   %f   %d\n",
 				    i,ttimes[i],
@@ -5801,16 +5858,16 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 	/*--------------------------------------------
 	  apply beam edits
 	  --------------------------------------------*/
-			
+
 		/* apply the saved edits */
 		if (process.mbp_edit_mode == MBP_EDIT_ON
 		    && esf.nedit > 0
 		    && error == MB_ERROR_NO_ERROR
 		    && kind == MB_DATA_DATA)
-		    {			    
+		    {
 		    /* apply edits for this ping */
-		    status = mb_esf_apply(verbose, &esf, 
-		    		time_d, pingmultiplicity, nbath, 
+		    status = mb_esf_apply(verbose, &esf,
+		    		time_d, pingmultiplicity, nbath,
 				beamflag, &error);
 		    }
 
@@ -5838,14 +5895,14 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				}
 			    }
 
-			/* flag data according to beam 
+			/* flag data according to beam
 				acrosstrack distance */
 			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_BATH
 			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE)
 			    {
 			    for (i=0;i<nbath;i++)
 				{
-				if (mb_beam_ok(beamflag[i]) 
+				if (mb_beam_ok(beamflag[i])
 				    && bathacrosstrack[i] >= process.mbp_cut_min[icut]
 				    && bathacrosstrack[i] <= process.mbp_cut_max[icut])
 					beamflag[i]= MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -5883,14 +5940,14 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					speed,heading,draft,roll,pitch,heave,&error);
 			}
 
-		/* insert the altered bathymetry, recalculate the sidescan, 
+		/* insert the altered bathymetry, recalculate the sidescan,
 			and extract the results if desired */
 		if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON
 		    && error == MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA)
 			{
 			status = mb_insert(verbose,imbio_ptr,
-					store_ptr,kind, 
+					store_ptr,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					nbath,namp,nss,
@@ -5899,9 +5956,9 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					comment,&error);
 			status = mbsys_simrad2_makess(verbose,
 					imbio_ptr,store_ptr,
-					pixel_size_set,&pixel_size, 
-					swath_width_set,&swath_width, 
-					pixel_int, 
+					pixel_size_set,&pixel_size,
+					swath_width_set,&swath_width,
+					pixel_int,
 					&error);
 			status = mb_extract(verbose,imbio_ptr,store_ptr,&kind,
 					time_i,&time_d,&navlon,&navlat,
@@ -5938,14 +5995,14 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				}
 			    }
 
-			/* flag data according to beam 
+			/* flag data according to beam
 				acrosstrack distance */
 			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_AMP
 			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE)
 			    {
 			    for (i=0;i<namp;i++)
 				{
-				if (mb_beam_ok(beamflag[i]) 
+				if (mb_beam_ok(beamflag[i])
 				    && bathacrosstrack[i] >= process.mbp_cut_min[icut]
 				    && bathacrosstrack[i] <= process.mbp_cut_max[icut])
 					beamflag[i]= MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -5978,7 +6035,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				}
 			    }
 
-			/* flag data according to pixel 
+			/* flag data according to pixel
 				acrosstrack distance */
 			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_SS
 			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE)
@@ -6010,12 +6067,12 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 	/*--------------------------------------------
 	  apply grazing angle corrections to amplitude and sidescan
 	  --------------------------------------------*/
-	  
+
 	  	/* correct amplitude and sidescan using slopes from multibeam swath data */
-		if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON 
+		if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
 				&& (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE
 					|| process.mbp_ampcorr_slope == MBP_AMPCORR_USESLOPE))
-			|| (process.mbp_sscorr_mode == MBP_SSCORR_ON 
+			|| (process.mbp_sscorr_mode == MBP_SSCORR_ON
 				&& (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE
 					|| process.mbp_sscorr_slope == MBP_SSCORR_USESLOPE)))
 			{
@@ -6025,14 +6082,14 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				&& ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
 					&& nampcorrtable > 0
 					&& nampcorrangle > 0)
-					|| 
+					||
 					(process.mbp_sscorr_mode == MBP_SSCORR_ON
 					&& nsscorrtable > 0
 					&& nsscorrangle > 0)
 					))
 				{
-				mb_pr_set_bathyslope(verbose, 
-						nsmooth, 
+				mb_pr_set_bathyslope(verbose,
+						nsmooth,
 						nbath,
 						beamflag,
 						bath,
@@ -6056,30 +6113,30 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				{
 				/* calculate the correction table */
 				status = get_corrtable(verbose,
-					    time_d, 
-					    nampcorrtable, nampcorrangle, 
-					    ampcorrtable, &ampcorrtableuse, 
+					    time_d,
+					    nampcorrtable, nampcorrangle,
+					    ampcorrtable, &ampcorrtableuse,
 					    &error);
 
 				/* set the reference amplitudes */
-				status = get_anglecorr(verbose, 
-							ampcorrtableuse.nangle, 
-							ampcorrtableuse.angle, 
-							ampcorrtableuse.amplitude, 
-							(-process.mbp_ampcorr_angle), 
-							&reference_amp_port, 
+				status = get_anglecorr(verbose,
+							ampcorrtableuse.nangle,
+							ampcorrtableuse.angle,
+							ampcorrtableuse.amplitude,
+							(-process.mbp_ampcorr_angle),
+							&reference_amp_port,
 							&error);
-				status = get_anglecorr(verbose, 
-							ampcorrtableuse.nangle, 
-							ampcorrtableuse.angle, 
-							ampcorrtableuse.amplitude, 
-							process.mbp_ampcorr_angle, 
-							&reference_amp_stbd, 
+				status = get_anglecorr(verbose,
+							ampcorrtableuse.nangle,
+							ampcorrtableuse.angle,
+							ampcorrtableuse.amplitude,
+							process.mbp_ampcorr_angle,
+							&reference_amp_stbd,
 							&error);
 				reference_amp = 0.5 * (reference_amp_port
 								+ reference_amp_stbd);
 	/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
-	itable, ampcorrtableuse.time_d, 
+	itable, ampcorrtableuse.time_d,
 	ampcorrtableuse.nangle);
 	for (i=0;i<ampcorrtableuse.nangle;i++)
 	fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
@@ -6125,12 +6182,12 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 							angle = RTD * atan(bathacrosstrack[i] / altitude_use);
 							if (process.mbp_ampcorr_slope != MBP_AMPCORR_IGNORESLOPE)
 							   angle += RTD * atan(slope);
-							status = get_anglecorr(verbose, 
-									ampcorrtableuse.nangle, 
-									ampcorrtableuse.angle, 
-									ampcorrtableuse.amplitude, 
+							status = get_anglecorr(verbose,
+									ampcorrtableuse.nangle,
+									ampcorrtableuse.angle,
+									ampcorrtableuse.amplitude,
 									angle, &correction, &error);
-/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f", 
+/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f",
 j, i, slope, angle, correction, reference_amp, amp[i]);*/
 							if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
 				    				amp[i] = amp[i] - correction + reference_amp;
@@ -6151,31 +6208,31 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 				{
 				/* calculate the correction table */
 				status = get_corrtable(verbose,
-					    time_d, 
-					    nsscorrtable, nsscorrangle, 
-					    sscorrtable, &sscorrtableuse, 
+					    time_d,
+					    nsscorrtable, nsscorrangle,
+					    sscorrtable, &sscorrtableuse,
 					    &error);
 
 				/* set the reference amplitudes */
-				status = get_anglecorr(verbose, 
-							sscorrtableuse.nangle, 
-							sscorrtableuse.angle, 
-							sscorrtableuse.amplitude, 
-							(-process.mbp_sscorr_angle), 
-							&reference_amp_port, 
+				status = get_anglecorr(verbose,
+							sscorrtableuse.nangle,
+							sscorrtableuse.angle,
+							sscorrtableuse.amplitude,
+							(-process.mbp_sscorr_angle),
+							&reference_amp_port,
 							&error);
-				status = get_anglecorr(verbose, 
-							sscorrtableuse.nangle, 
-							sscorrtableuse.angle, 
-							sscorrtableuse.amplitude, 
-							process.mbp_sscorr_angle, 
-							&reference_amp_stbd, 
+				status = get_anglecorr(verbose,
+							sscorrtableuse.nangle,
+							sscorrtableuse.angle,
+							sscorrtableuse.amplitude,
+							process.mbp_sscorr_angle,
+							&reference_amp_stbd,
 							&error);
 				reference_amp = 0.5 * (reference_amp_port
 								+ reference_amp_stbd);
 
 	/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
-	itable, sscorrtableuse.time_d, 
+	itable, sscorrtableuse.time_d,
 	sscorrtableuse.nangle);
 	for (i=0;i<sscorrtableuse.nangle;i++)
 	fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
@@ -6227,12 +6284,12 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 							    angle += RTD * atan(slope);
 	/*fprintf(stderr,"slope:%f slopeangle:%f angle:%f\n",slope,RTD * atan(slope),angle);*/
 							    }
-							status = get_anglecorr(verbose, 
-									sscorrtableuse.nangle, 
-									sscorrtableuse.angle, 
-									sscorrtableuse.amplitude, 
+							status = get_anglecorr(verbose,
+									sscorrtableuse.nangle,
+									sscorrtableuse.angle,
+									sscorrtableuse.amplitude,
 									angle, &correction, &error);
-/*fprintf(stderr, "ping:%d pixel:%d altitude_use:%f slope:%f angle:%f corr:%f reference:%f ss: %f", 
+/*fprintf(stderr, "ping:%d pixel:%d altitude_use:%f slope:%f angle:%f corr:%f reference:%f ss: %f",
 	idata, i, altitude_use, slope, angle, correction, reference_amp, ss[i]);*/
 							if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
 				    				ss[i] = ss[i] - correction + reference_amp;
@@ -6246,10 +6303,10 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 			}
 
 	  	/* correct amplitude and sidescan using slopes from topography grid */
-		else if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON 
+		else if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
 				&& (process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPO
 					|| process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPOSLOPE))
-			|| (process.mbp_sscorr_mode == MBP_SSCORR_ON 
+			|| (process.mbp_sscorr_mode == MBP_SSCORR_ON
 				&& (process.mbp_sscorr_slope == MBP_SSCORR_USETOPO
 					|| process.mbp_sscorr_slope == MBP_SSCORR_USETOPOSLOPE)))
 			{
@@ -6264,33 +6321,33 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 				&& kind == MB_DATA_DATA
 				&& nampcorrtable > 0
 				&& nampcorrangle > 0)
-				{			
+				{
 				/* calculate the correction table */
 				status = get_corrtable(verbose,
-					    time_d, 
-					    nampcorrtable, nampcorrangle, 
-					    ampcorrtable, &ampcorrtableuse, 
+					    time_d,
+					    nampcorrtable, nampcorrangle,
+					    ampcorrtable, &ampcorrtableuse,
 					    &error);
 
 				/* set the reference amplitudes */
-				status = get_anglecorr(verbose, 
-							ampcorrtableuse.nangle, 
-							ampcorrtableuse.angle, 
-							ampcorrtableuse.amplitude, 
-							(-process.mbp_ampcorr_angle), 
-							&reference_amp_port, 
+				status = get_anglecorr(verbose,
+							ampcorrtableuse.nangle,
+							ampcorrtableuse.angle,
+							ampcorrtableuse.amplitude,
+							(-process.mbp_ampcorr_angle),
+							&reference_amp_port,
 							&error);
-				status = get_anglecorr(verbose, 
-							ampcorrtableuse.nangle, 
-							ampcorrtableuse.angle, 
-							ampcorrtableuse.amplitude, 
-							process.mbp_ampcorr_angle, 
-							&reference_amp_stbd, 
+				status = get_anglecorr(verbose,
+							ampcorrtableuse.nangle,
+							ampcorrtableuse.angle,
+							ampcorrtableuse.amplitude,
+							process.mbp_ampcorr_angle,
+							&reference_amp_stbd,
 							&error);
 				reference_amp = 0.5 * (reference_amp_port
 								+ reference_amp_stbd);
 	/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
-	itable, ampcorrtableuse.time_d, 
+	itable, ampcorrtableuse.time_d,
 	ampcorrtableuse.nangle);
 	for (i=0;i<ampcorrtableuse.nangle;i++)
 	fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
@@ -6375,14 +6432,14 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 							angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
 							slope = 0.0;
 							}
-							
+
 						/* apply correction */
-						status = get_anglecorr(verbose, 
-								ampcorrtableuse.nangle, 
-								ampcorrtableuse.angle, 
-								ampcorrtableuse.amplitude, 
+						status = get_anglecorr(verbose,
+								ampcorrtableuse.nangle,
+								ampcorrtableuse.angle,
+								ampcorrtableuse.amplitude,
 								angle, &correction, &error);
-/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f", 
+/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f",
 j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 						if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
 				    			amp[i] = amp[i] - correction + reference_amp;
@@ -6402,31 +6459,31 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 				{
 				/* calculate the correction table */
 				status = get_corrtable(verbose,
-					    time_d, 
-					    nsscorrtable, nsscorrangle, 
-					    sscorrtable, &sscorrtableuse, 
+					    time_d,
+					    nsscorrtable, nsscorrangle,
+					    sscorrtable, &sscorrtableuse,
 					    &error);
 
 				/* set the reference amplitudes */
-				status = get_anglecorr(verbose, 
-							sscorrtableuse.nangle, 
-							sscorrtableuse.angle, 
-							sscorrtableuse.amplitude, 
-							(-process.mbp_sscorr_angle), 
-							&reference_amp_port, 
+				status = get_anglecorr(verbose,
+							sscorrtableuse.nangle,
+							sscorrtableuse.angle,
+							sscorrtableuse.amplitude,
+							(-process.mbp_sscorr_angle),
+							&reference_amp_port,
 							&error);
-				status = get_anglecorr(verbose, 
-							sscorrtableuse.nangle, 
-							sscorrtableuse.angle, 
-							sscorrtableuse.amplitude, 
-							process.mbp_sscorr_angle, 
-							&reference_amp_stbd, 
+				status = get_anglecorr(verbose,
+							sscorrtableuse.nangle,
+							sscorrtableuse.angle,
+							sscorrtableuse.amplitude,
+							process.mbp_sscorr_angle,
+							&reference_amp_stbd,
 							&error);
 				reference_amp = 0.5 * (reference_amp_port
 								+ reference_amp_stbd);
 
 	/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
-	itable, sscorrtableuse.time_d, 
+	itable, sscorrtableuse.time_d,
 	sscorrtableuse.nangle);
 	for (i=0;i<sscorrtableuse.nangle;i++)
 	fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
@@ -6513,17 +6570,21 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 							angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
 							slope = 0.0;
 							}
-							
+
 						/* apply correction */
-						status = get_anglecorr(verbose, 
-								sscorrtableuse.nangle, 
-								sscorrtableuse.angle, 
-								sscorrtableuse.amplitude, 
+						status = get_anglecorr(verbose,
+								sscorrtableuse.nangle,
+								sscorrtableuse.angle,
+								sscorrtableuse.amplitude,
 								angle, &correction, &error);
 						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
-				    			ss[i] = ss[i] - correction + reference_amp;
+				    			{
+                                                        ss[i] = ss[i] - correction + reference_amp;
+                                                        }
 						else
-				    			ss[i] = ss[i] / correction * reference_amp;
+				    			{
+                                                        ss[i] = ss[i] / correction * reference_amp;
+                                                        }
 			    			}
 					}
 				}
@@ -6540,7 +6601,7 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 			{
 
 			status = mb_insert(verbose,imbio_ptr,
-					store_ptr,kind, 
+					store_ptr,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					nbath,namp,nss,
@@ -6555,7 +6616,7 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 
 		/* write some data */
 		if (error == MB_ERROR_NO_ERROR
-			|| (kind == MB_DATA_COMMENT 
+			|| (kind == MB_DATA_COMMENT
 				&& strip_comments == MB_NO))
 			{
 			status = mb_put_all(verbose,ombio_ptr,
@@ -6593,7 +6654,7 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 				}
 			}
 		}
-		
+
 	/* output beam flagging success info */
 	neditnull = 0;
 	neditduplicate = 0;
@@ -6645,12 +6706,12 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 	/* close the files */
 	status = mb_close(verbose,&imbio_ptr,&error);
 	status = mb_close(verbose,&ombio_ptr,&error);
-	
+
 	/* unlock the raw swath file */
 	if (uselockfiles == MB_YES)
-		lock_status = mb_pr_unlockswathfile(verbose, process.mbp_ifile, 
+		lock_status = mb_pr_unlockswathfile(verbose, process.mbp_ifile,
 						MBP_LOCK_PROCESS, program_name, &lock_error);
-	    
+
 	/* deallocate arrays for amplitude correction tables */
 	if (nampcorrtable > 0)
 		{
@@ -6665,7 +6726,7 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 			}
 		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&ampcorrtable,&error);
 		}
-	    
+
 	/* deallocate arrays for sidescan correction tables */
 	if (nsscorrtable > 0)
 		{
@@ -6680,7 +6741,7 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 			}
 		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&sscorrtable,&error);
 		}
-	    
+
 	/* deallocate topography grid */
 	if (grid.data != NULL)
 		{
@@ -6762,16 +6823,16 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 		fprintf(stderr,"%d output comment records\n",ocomment);
 		fprintf(stderr,"%d output other records\n",oother);
 		}
-		
+
 	/* generate inf file */
 	if (status == MB_SUCCESS)
 		{
-		status = mb_make_info(verbose, MB_YES, 
-					process.mbp_ofile, 
-					process.mbp_format, 
+		status = mb_make_info(verbose, MB_YES,
+					process.mbp_ofile,
+					process.mbp_format,
 					&error);
 		}
-		
+
 	} /* end processing file */
 
 	/* figure out whether and what to read next */
@@ -6806,7 +6867,7 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 /*--------------------------------------------------------------------*/
 int check_ss_for_bath(int verbose,
 	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int nss, double *ss, double *ssacrosstrack, 
+	int nss, double *ss, double *ssacrosstrack,
 	int *error)
 {
 	char	*function_name = "check_ss_for_bath";
@@ -6814,7 +6875,7 @@ int check_ss_for_bath(int verbose,
 	int	ifirst, ilast;
 	int	iss, ibath;
 	int	i;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -6827,10 +6888,10 @@ int check_ss_for_bath(int verbose,
 		fprintf(stderr,"dbg2       bathacrosstrack: %lu\n",(size_t)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, bath[i], bathacrosstrack[i]);
 		}
-		
+
 	/* find limits of good bathy */
 	ifirst = -1;
 	ilast = -1;
@@ -6844,7 +6905,7 @@ int check_ss_for_bath(int verbose,
 		ilast = i;
 		}
 	    }
-		
+
 	/* loop over sidescan looking for bathy on either side
 	   - zero sidescan if bathy lacking */
 	if (ifirst < ilast)
@@ -6863,7 +6924,7 @@ int check_ss_for_bath(int verbose,
 iss,ibath,bath[ibath],bath[ibath+1],
 bathacrosstrack[ibath],bathacrosstrack[ibath+1],
 ss[iss],ssacrosstrack[iss]);*/
-		
+
 		/* now zero sidescan if not surrounded by good bathy */
 		if (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath+1]))
 		    ss[iss] = 0.0;
@@ -6873,14 +6934,14 @@ ss[iss],ssacrosstrack[iss]);*/
 		    ss[iss] = 0.0;
 		}
 	    }
-	
+
 	/* else if no good bathy zero all sidescan */
 	else
 	    {
 	    for (iss=0;iss<nss;iss++)
 		{
 		ss[iss] = 0.0;
-		}		
+		}
 	    }
 
 	/* print output debug statements */
@@ -6899,9 +6960,9 @@ ss[iss],ssacrosstrack[iss]);*/
 }
 /*--------------------------------------------------------------------*/
 int get_corrtable(int verbose,
-	double time_d, int ncorrtable, int ncorrangle, 
-	struct mbprocess_sscorr_struct	*corrtable, 
-	struct mbprocess_sscorr_struct	*corrtableuse, 
+	double time_d, int ncorrtable, int ncorrangle,
+	struct mbprocess_sscorr_struct	*corrtable,
+	struct mbprocess_sscorr_struct	*corrtableuse,
 	int *error)
 {
 	char	*function_name = "get_corrtable";
@@ -6957,7 +7018,7 @@ int get_corrtable(int verbose,
 				itable = i;
 			}
 		factor = (time_d - corrtable[itable].time_d)
-				/ (corrtable[itable+1].time_d 
+				/ (corrtable[itable+1].time_d
 					- corrtable[itable].time_d);
 		corrtableuse->time_d = time_d;
 		corrtableuse->nangle = MIN(corrtable[itable].nangle,
@@ -6996,7 +7057,7 @@ int get_corrtable(int verbose,
 			}
 		    }
 		}
-	
+
 	/* now interpolate or extrapolate any zero values */
 	ifirst = ncorrangle;
 	ilast = -1;
@@ -7059,7 +7120,7 @@ int get_corrtable(int verbose,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       ncorrangle:      %d\n",ncorrangle);
 		for (i=0;i<ncorrangle;i++)
-		fprintf(stderr,"dbg2       correction[%d]: %f %f %f\n", 
+		fprintf(stderr,"dbg2       correction[%d]: %f %f %f\n",
 		    i, corrtableuse->angle[i], corrtableuse->amplitude[i], corrtableuse->sigma[i]);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -7107,7 +7168,7 @@ int get_anglecorr(int verbose,
 	/* interpolate the correction */
 	if (found == MB_YES)
 		{
-		*corr = corrs[iangle] 
+		*corr = corrs[iangle]
 			+ (corrs[iangle+1] - corrs[iangle])
 			*(angle - angles[iangle])
 			/(angles[iangle+1] - angles[iangle]);
@@ -7124,7 +7185,7 @@ int get_anglecorr(int verbose,
 		}
 	else
 		*corr = 0.0;
-		
+
 	/* use outermost value if angle outside nonzero range */
 	if (*corr == 0.0)
 		{
@@ -7166,4 +7227,3 @@ int get_anglecorr(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-

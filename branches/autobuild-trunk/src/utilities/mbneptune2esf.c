@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbneptune2esf.c	2004/11/11
- *    $Id: mbneptune2esf.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbneptune2esf.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2004-2011 by
+ *    Copyright (c) 2004-2012 by
  *    Gordon Keith
  *      CSIRO Marine Research
  *      Castray Esplanade
@@ -151,7 +151,7 @@ int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array
 int print_pings(FILE *output, struct neptune_ping_tree *node);
 int free_pings(int verbose, struct neptune_ping_tree **node, int *error);
 
-static char rcs_id[] = "$Id: mbneptune2esf.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mbneptune2esf.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 

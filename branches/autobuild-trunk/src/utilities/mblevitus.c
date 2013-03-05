@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mblevitus.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -130,10 +130,6 @@
 #include <string.h>
 #include <time.h>
 
-#ifdef WIN32
-#include <winsock2.h>
-#endif
-
 /* mbio include files */
 #include "mb_status.h"
 #include "mb_define.h"
@@ -143,7 +139,7 @@
 #define	NDEPTH_MAX	46
 #define	NLEVITUS_MAX	33
 
-static char rcs_id[] = "$Id: mblevitus.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mblevitus.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 

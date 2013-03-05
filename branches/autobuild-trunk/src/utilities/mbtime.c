@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbtime.c	6/5/2008
- *    $Id: mbtime.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbtime.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2008-2011 by
+ *    Copyright (c) 2008-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -50,7 +50,7 @@
 #define MBTIME_INPUT_EPOCH	0
 #define MBTIME_INPUT_CALENDAR	1
 
-static char rcs_id[] = "$Id: mbtime.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mbtime.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 

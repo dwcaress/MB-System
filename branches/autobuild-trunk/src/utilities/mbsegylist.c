@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegylist.c	5/29/2004
- *    $Id: mbsegylist.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbsegylist.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2004-2011 by
+ *    Copyright (c) 2004-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -92,7 +92,7 @@ int printsimplevalue(int verbose,
 	int ascii, int *invert, int *flipsign, int *error);
 int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 
-static char rcs_id[] = "$Id: mbsegylist.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mbsegylist.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 

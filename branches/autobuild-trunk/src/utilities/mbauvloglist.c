@@ -3,12 +3,11 @@
 #  include <mbsystem_config.h>
 #endif
 
-
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvloglist.c	8/14/2006
- *    $Id: mbauvloglist.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbauvloglist.c 2015 2013-03-01 22:33:52Z caress $
  *
- *    Copyright (c) 2006-2011 by
+ *    Copyright (c) 2006-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,9 +18,9 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBauvloglist prints the specified contents of an MBARI AUV mission log  
- * file to stdout. The form of the output is quite flexible; 
- * MBsegylist is tailored to produce ascii files in spreadsheet  
+ * MBauvloglist prints the specified contents of an MBARI AUV mission log
+ * file to stdout. The form of the output is quite flexible;
+ * MBsegylist is tailored to produce ascii files in spreadsheet
  * style with data columns separated by tabs.
  *
  * Author:	D. W. Caress
@@ -58,7 +57,7 @@
 #define	TYPE_INTEGER	2
 #define	TYPE_DOUBLE	3
 
-static char rcs_id[] = "$Id: mbauvloglist.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mbauvloglist.c 2015 2013-03-01 22:33:52Z caress $";
 
 /*--------------------------------------------------------------------*/
 
@@ -91,7 +90,7 @@ int main (int argc, char **argv)
 	/* auv log data */
 	FILE	*fp;
 	char	file[MB_PATH_MAXLINE];
-	struct	field	
+	struct	field
 		{
 		int	type;
 		int	size;
@@ -100,6 +99,7 @@ int main (int argc, char **argv)
 		char	format[MB_PATH_MAXLINE];
 		char	description[MB_PATH_MAXLINE];
 		char	units[MB_PATH_MAXLINE];
+		double	scale;
 		};
 	struct	printfield
 		{
@@ -115,7 +115,11 @@ int main (int argc, char **argv)
 	int	nrecord;
 	int	recordsize;
 	int	printheader = MB_NO;
-	
+	int	angles_in_degrees = MB_NO;
+
+	double	time_d;
+	int	time_i[7];
+	int	time_j[5];
 	char	buffer[MB_PATH_MAXLINE];
 	char	type[MB_PATH_MAXLINE];
 	char	printformat[MB_PATH_MAXLINE];
@@ -125,7 +129,7 @@ int main (int argc, char **argv)
 	int	ivalue;
 	int	index;
 	int	i, j;
-	
+
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
@@ -135,8 +139,8 @@ int main (int argc, char **argv)
 	printformat[0] = '\0';
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:I:i:L:l:O:o:PpVvWwHh")) != -1)
-	  switch (c) 
+	while ((c = getopt(argc, argv, "F:f:I:i:L:l:O:o:PpSsVvWwHh")) != -1)
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -181,6 +185,11 @@ int main (int argc, char **argv)
 		case 'P':
 		case 'p':
 			printheader = MB_YES;
+			flag++;
+			break;
+		case 'S':
+		case 's':
+			angles_in_degrees = MB_YES;
 			flag++;
 			break;
 		case '?':
@@ -237,6 +246,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
 		fprintf(stderr,"dbg2       printheader:    %d\n",printheader);
+		fprintf(stderr,"dbg2       angles_in_degrees:%d\n",angles_in_degrees);
 		fprintf(stderr,"dbg2       nprintfields:   %d\n",nprintfields);
 		for (i=0;i<nprintfields;i++)
 			fprintf(stderr,"dbg2         printfields[%d]:      %s %d %s\n",
@@ -252,31 +262,31 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
-		
+
 	/* open the input file */
-	if ((fp = fopen(file, "r")) == NULL) 
+	if ((fp = fopen(file, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to open log file <%s> for reading\n",file);
 		exit(status);
 		}
-		
+
 	nfields = 0;
 	recordsize = 0;
 	while ((result = fgets(buffer,MB_PATH_MAXLINE,fp)) == buffer
 		&& strncmp(buffer, "# begin",7) != 0)
 		{
-		nscan = sscanf(buffer, "# %s %s %s", 
-				type,  
-				fields[nfields].name,  
-				fields[nfields].format); 
+		nscan = sscanf(buffer, "# %s %s %s",
+				type,
+				fields[nfields].name,
+				fields[nfields].format);
 		if (nscan == 2)
 			{
 			if (printheader == MB_YES)
 				fprintf(stdout,"# csv %s\n",  fields[nfields].name);
 			}
-			
+
 		else if (nscan == 3)
 			{
 			if (printheader == MB_YES)
@@ -294,28 +304,40 @@ int main (int argc, char **argv)
 				{
 				fields[nfields].type = TYPE_DOUBLE;
 				fields[nfields].size = 8;
+				if (angles_in_degrees == MB_YES
+					&&(strcmp(fields[nfields].name, "mLatK") == 0
+						|| strcmp(fields[nfields].name, "mLonK") == 0
+						|| strcmp(fields[nfields].name, "mLonK") == 0
+						|| strcmp(fields[nfields].name, "mRollK") == 0
+						|| strcmp(fields[nfields].name, "mPitchK") == 0
+						|| strcmp(fields[nfields].name, "mHeadK") == 0))
+					fields[nfields].scale = RTD;
+				else
+					fields[nfields].scale = 1.0;
 				recordsize += 8;
 				}
 			else if (strcmp(type, "integer") == 0)
 				{
 				fields[nfields].type = TYPE_INTEGER;
 				fields[nfields].size = 4;
+				fields[nfields].scale = 1.0;
 				recordsize += 4;
 				}
 			else if (strcmp(type, "timeTag") == 0)
 				{
 				fields[nfields].type = TYPE_TIMETAG;
 				fields[nfields].size = 8;
+				fields[nfields].scale = 1.0;
 				recordsize += 8;
 				}
 			nfields++;
 			}
 		}
-		
+
 	/* end here if asked only to print header */
 	if (nprintfields == 0 && printheader == MB_YES)
 		exit(error);
-		
+
 	/* by default print everything */
 	if (nprintfields == 0)
 		{
@@ -328,30 +350,41 @@ int main (int argc, char **argv)
 			strcpy(printfields[i].format, fields[i].format);
 			}
 		}
-		
+
 	/* check the fields to be printed */
 	for (i=0;i<nprintfields;i++)
 		{
-		for (j=0;j<nfields;j++)
+		if (strcmp(printfields[i].name,"zero") == 0)
 			{
-			if (strcmp(printfields[i].name, fields[j].name) == 0)
-				printfields[i].index = j;
+			printfields[i].index = -1;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%d");
+				}
 			}
-		if (printfields[i].formatset == MB_NO)
+		else
 			{
-			strcpy(printfields[i].format, fields[printfields[i].index].format);
+			for (j=0;j<nfields;j++)
+				{
+				if (strcmp(printfields[i].name, fields[j].name) == 0)
+					printfields[i].index = j;
+				}
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, fields[printfields[i].index].format);
+				}
 			}
 		}
-		
+
 	/* if verbose print list of print field names */
 	if (verbose > 0)
 		{
 		for (i=0;i<nprintfields;i++)
 			{
-			if (i == 0) 
+			if (i == 0)
 				fprintf(stdout, "# ");
 			fprintf(stdout, "%s", printfields[i].name);
-			if (i < nprintfields-1) 
+			if (i < nprintfields-1)
 				fprintf(stdout, " | ");
 			else
 				fprintf(stdout, "\n");
@@ -365,20 +398,42 @@ int main (int argc, char **argv)
 		for (i=0;i<nprintfields;i++)
 			{
 			index = printfields[i].index;
-			if (fields[index].type == TYPE_DOUBLE)
+			if (index == -1)
 				{
-				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);	
+				dvalue = 0.0;
+				fprintf(stdout, printfields[i].format, dvalue);
+				}
+			else if (fields[index].type == TYPE_DOUBLE)
+				{
+				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
+				dvalue *= fields[index].scale;
 				fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (fields[index].type == TYPE_INTEGER)
 				{
-				mb_get_binary_int(MB_YES, &buffer[fields[index].index], &ivalue);	
+				mb_get_binary_int(MB_YES, &buffer[fields[index].index], &ivalue);
 				fprintf(stdout, printfields[i].format, ivalue);
 				}
 			else if (fields[index].type == TYPE_TIMETAG)
 				{
-				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);	
-				fprintf(stdout, printfields[i].format, dvalue);
+				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
+				if (strcmp(printfields[i].format, "time_i") == 0)
+					{
+					time_d = dvalue;
+					mb_get_date(verbose,time_d,time_i);
+					fprintf(stdout,"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d",
+						time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
+					}
+				else if (strcmp(printfields[i].format, "time_j") == 0)
+					{
+					time_d = dvalue;
+					mb_get_date(verbose,time_d,time_i);
+					mb_get_jtime(verbose,time_i,time_j);
+					fprintf(stdout,"%4.4d %3.3d %2.2d %2.2d %2.2d.%6.6d",
+						time_i[0],time_j[1],time_i[3],time_i[4],time_i[5],time_i[6]);
+					}
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			if (i < nprintfields - 1)
 				fprintf(stdout, "\t");

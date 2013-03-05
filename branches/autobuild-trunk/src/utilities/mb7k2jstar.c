@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb7k2jstar.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2005-2011 by
+ *    Copyright (c) 2005-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -96,7 +96,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mb7k2jstar.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mb7k2jstar.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 

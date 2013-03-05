@@ -2,13 +2,11 @@
 #ifdef HAVE_CONFIG_H
 #  include <mbsystem_config.h>
 #endif
-
-
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegypsd.c	2/19/2010
  *    $Id: mbsegypsd.c 1770 2009-10-19 17:16:39Z caress $
  *
- *    Copyright (c) 2009-2011 by
+ *    Copyright (c) 2009-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -58,6 +56,14 @@
 
 /* FFTW include files */
 #include "fftw3.h"
+
+/* local options */
+#define MBSEGYPSD_USESHOT               0
+#define MBSEGYPSD_USECMP                1
+#define MBSEGYPSD_WINDOW_OFF            0
+#define MBSEGYPSD_WINDOW_ON             1
+#define MBSEGYPSD_WINDOW_SEAFLOOR       2
+#define MBSEGYPSD_WINDOW_DEPTH          3
 
 /* NaN value */
 float	NaN;

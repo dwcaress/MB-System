@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	1/23/93
- *	$Id: mbdefaults.c 1905 2011-09-13 23:52:36Z caress $
+ *	$Id: mbdefaults.c 1965 2012-06-26 16:04:09Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,7 +19,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBDEFAULTS sets and retrieves the default MBIO control parameters 
+ * MBDEFAULTS sets and retrieves the default MBIO control parameters
  * stored in the file ~/.mbio_defaults.  Only the parameters specified
  * by command line arguments will be changed; if no ~/.mbio_defaults
  * file exists one will be created.
@@ -105,7 +105,7 @@
 #include "mb_status.h"
 #include "mb_define.h"
 
-static char rcs_id[]="$Id: mbdefaults.c 1905 2011-09-13 23:52:36Z caress $";
+static char rcs_id[]="$Id: mbdefaults.c 1965 2012-06-26 16:04:09Z caress $";
 
 /*--------------------------------------------------------------------*/
 
@@ -113,7 +113,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "MBDEFAULTS";
 	char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
-	char usage_message[] = "mbdefaults [-Dpsdisplay -Ffbtversion -Iimagedisplay -Llonflip\n\t-Ttimegap -Wproject -V -H]";
+	char usage_message[] = "mbdefaults [-Bfileiobuffer -Dpsdisplay -Ffbtversion -Iimagedisplay -Llonflip\n\t-Ttimegap -Wproject -V -H]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -130,6 +130,7 @@ int main (int argc, char **argv)
 	char	argstring[MB_PATH_MAXLINE];
 	int	fbtversion = 3;
 	int	uselockfiles = 1;
+	int	fileiobuffer = 0;
 	char	*HOME = "HOME";
 	char	*getenv();
 
@@ -156,10 +157,18 @@ int main (int argc, char **argv)
 	/* now get current uselockfiles value */
 	status = mb_uselockfiles(verbose,&uselockfiles);
 
+	/* now get current fileio buffering values */
+	status = mb_fileiobuffer(verbose,&fileiobuffer);
+
 	/* process argument list */
-	while ((c = getopt(argc, argv, "D:d:F:f:HhI:i:L:l:T:t:U:u:VvW:w:")) != -1)
-	  switch (c) 
+	while ((c = getopt(argc, argv, "B:b:D:d:F:f:HhI:i:L:l:T:t:U:u:VvW:w:")) != -1)
+	  switch (c)
 		{
+		case 'B':
+		case 'b':
+			sscanf (optarg,"%d",&fileiobuffer);
+			flag++;
+			break;
 		case 'D':
 		case 'd':
 			sscanf (optarg,"%s",psdisplay);
@@ -276,6 +285,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       mbproject:    %s\n",mbproject);
 		fprintf(stderr,"dbg2       fbtversion:   %d\n",fbtversion);
 		fprintf(stderr,"dbg2       uselockfiles: %d\n",uselockfiles);
+		fprintf(stderr,"dbg2       fileiobuffer: %d\n",fileiobuffer);
 		}
 
 	/* if help desired then print it and exit */
@@ -305,6 +315,7 @@ int main (int argc, char **argv)
 		fprintf(fp,"project:    %s\n",mbproject);
 		fprintf(fp,"fbtversion: %d\n",fbtversion);
 		fprintf(fp,"uselockfiles:%d\n",uselockfiles);
+		fprintf(fp,"fileiobuffer:%d\n",fileiobuffer);
 		fclose(fp);
 
 		printf("\nNew MBIO Default Control Parameters:\n");
@@ -320,6 +331,12 @@ int main (int argc, char **argv)
 		else
 			printf("fbtversion: %d\n",fbtversion);
 		printf("uselockfiles: %d\n",uselockfiles);
+		if (fileiobuffer == 0)
+			printf("fileiobuffer: %d (use standard fread() & fwrite() buffering)\n",fileiobuffer);
+		else if (fileiobuffer > 0)
+			printf("fileiobuffer: %d (use %d kB buffer for fread() & fwrite())\n",fileiobuffer,fileiobuffer);
+		else
+			printf("fileiobuffer: %d (use mmap for file i/o)\n",fileiobuffer);
 		}
 
 	/* else just list the current defaults */
@@ -338,6 +355,12 @@ int main (int argc, char **argv)
 		else
 			printf("fbtversion: %d\n",fbtversion);
 		printf("uselockfiles: %d\n",uselockfiles);
+		if (fileiobuffer == 0)
+			printf("fileiobuffer: %d (use standard fread() & fwrite() buffering)\n",fileiobuffer);
+		else if (fileiobuffer > 0)
+			printf("fileiobuffer: %d (use %d kB buffer for fread() & fwrite())\n",fileiobuffer,fileiobuffer);
+		else
+			printf("fileiobuffer: %d (use mmap for file i/o)\n",fileiobuffer);
 		}
 
 	/* print output debug statements */

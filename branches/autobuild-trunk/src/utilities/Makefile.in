@@ -36,20 +36,21 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-bin_PROGRAMS = mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
-	mb7kpreprocess$(EXEEXT) mbabsorption$(EXEEXT) \
-	mbareaclean$(EXEEXT) mbauvloglist$(EXEEXT) \
-	mbauvnavusbl$(EXEEXT) mbbackangle$(EXEEXT) mbclean$(EXEEXT) \
-	mbcopy$(EXEEXT) mbctdlist$(EXEEXT) mbdatalist$(EXEEXT) \
-	mbdefaults$(EXEEXT) mbdumpesf$(EXEEXT) mbextractsegy$(EXEEXT) \
-	mbfilter$(EXEEXT) mbformat$(EXEEXT) mbgetesf$(EXEEXT) \
-	mbgrid$(EXEEXT) mbhistogram$(EXEEXT) mbps$(EXEEXT) \
-	mbinfo$(EXEEXT) mblevitus$(EXEEXT) mblist$(EXEEXT) \
-	mbmosaic$(EXEEXT) mbnavlist$(EXEEXT) mbneptune2esf$(EXEEXT) \
-	mbprocess$(EXEEXT) mbrollbias$(EXEEXT) mbrolltimelag$(EXEEXT) \
-	mbroutetime$(EXEEXT) mbsegygrid$(EXEEXT) mbsegyinfo$(EXEEXT) \
-	mbsegylist$(EXEEXT) mbset$(EXEEXT) mbsm20002gsf$(EXEEXT) \
-	mbstripnan$(EXEEXT) mbsvplist$(EXEEXT) mbtime$(EXEEXT) \
+bin_PROGRAMS = mbformat$(EXEEXT) mbdefaults$(EXEEXT) \
+	mbdatalist$(EXEEXT) mbinfo$(EXEEXT) mbset$(EXEEXT) \
+	mbprocess$(EXEEXT) mbcopy$(EXEEXT) mblist$(EXEEXT) \
+	mbnavlist$(EXEEXT) mbsvplist$(EXEEXT) mbbackangle$(EXEEXT) \
+	mbclean$(EXEEXT) mbareaclean$(EXEEXT) mbhistogram$(EXEEXT) \
+	mbgrid$(EXEEXT) mbmosaic$(EXEEXT) mblevitus$(EXEEXT) \
+	mbrollbias$(EXEEXT) mbextractsegy$(EXEEXT) mbsegylist$(EXEEXT) \
+	mbsegyinfo$(EXEEXT) mbsegygrid$(EXEEXT) mbauvnavusbl$(EXEEXT) \
+	mbgetesf$(EXEEXT) mbneptune2esf$(EXEEXT) mbps$(EXEEXT) \
+	mbstripnan$(EXEEXT) mbrollbias$(EXEEXT) mb7k2jstar$(EXEEXT) \
+	mb7kpreprocess$(EXEEXT) mbrolltimelag$(EXEEXT) \
+	mbauvloglist$(EXEEXT) mb7k2ss$(EXEEXT) mbabsorption$(EXEEXT) \
+	mbdumpesf$(EXEEXT) mbtime$(EXEEXT) mbctdlist$(EXEEXT) \
+	mbfilter$(EXEEXT) mbroutetime$(EXEEXT) \
+	mbhysweeppreprocess$(EXEEXT) mbkongsbergpreprocess$(EXEEXT) \
 	$(am__EXEEXT_1)
 subdir = src/utilities
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
@@ -126,9 +127,15 @@ mbgrid_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_mbhistogram_OBJECTS = mbhistogram.$(OBJEXT)
 mbhistogram_OBJECTS = $(am_mbhistogram_OBJECTS)
 mbhistogram_DEPENDENCIES =
+am_mbhysweeppreprocess_OBJECTS = mbhysweeppreprocess.$(OBJEXT)
+mbhysweeppreprocess_OBJECTS = $(am_mbhysweeppreprocess_OBJECTS)
+mbhysweeppreprocess_DEPENDENCIES =
 am_mbinfo_OBJECTS = mbinfo.$(OBJEXT)
 mbinfo_OBJECTS = $(am_mbinfo_OBJECTS)
 mbinfo_DEPENDENCIES =
+am_mbkongsbergpreprocess_OBJECTS = mbkongsbergpreprocess.$(OBJEXT)
+mbkongsbergpreprocess_OBJECTS = $(am_mbkongsbergpreprocess_OBJECTS)
+mbkongsbergpreprocess_DEPENDENCIES =
 am_mblevitus_OBJECTS = mblevitus.$(OBJEXT)
 mblevitus_OBJECTS = $(am_mblevitus_OBJECTS)
 mblevitus_DEPENDENCIES =
@@ -179,9 +186,6 @@ mbsegypsd_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 am_mbset_OBJECTS = mbset.$(OBJEXT)
 mbset_OBJECTS = $(am_mbset_OBJECTS)
 mbset_DEPENDENCIES =
-am_mbsm20002gsf_OBJECTS = mbsm20002gsf.$(OBJEXT)
-mbsm20002gsf_OBJECTS = $(am_mbsm20002gsf_OBJECTS)
-mbsm20002gsf_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_mbstripnan_OBJECTS = mbstripnan.$(OBJEXT)
 mbstripnan_OBJECTS = $(am_mbstripnan_OBJECTS)
 mbstripnan_DEPENDENCIES =
@@ -212,14 +216,15 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbdatalist_SOURCES) $(mbdefaults_SOURCES) \
 	$(mbdumpesf_SOURCES) $(mbextractsegy_SOURCES) \
 	$(mbfilter_SOURCES) $(mbformat_SOURCES) $(mbgetesf_SOURCES) \
-	$(mbgrid_SOURCES) $(mbhistogram_SOURCES) $(mbinfo_SOURCES) \
-	$(mblevitus_SOURCES) $(mblist_SOURCES) $(mbmosaic_SOURCES) \
-	$(mbnavlist_SOURCES) $(mbneptune2esf_SOURCES) \
-	$(mbprocess_SOURCES) $(mbps_SOURCES) $(mbrollbias_SOURCES) \
-	$(mbrolltimelag_SOURCES) $(mbroutetime_SOURCES) \
-	$(mbsegygrid_SOURCES) $(mbsegyinfo_SOURCES) \
-	$(mbsegylist_SOURCES) $(mbsegypsd_SOURCES) $(mbset_SOURCES) \
-	$(mbsm20002gsf_SOURCES) $(mbstripnan_SOURCES) \
+	$(mbgrid_SOURCES) $(mbhistogram_SOURCES) \
+	$(mbhysweeppreprocess_SOURCES) $(mbinfo_SOURCES) \
+	$(mbkongsbergpreprocess_SOURCES) $(mblevitus_SOURCES) \
+	$(mblist_SOURCES) $(mbmosaic_SOURCES) $(mbnavlist_SOURCES) \
+	$(mbneptune2esf_SOURCES) $(mbprocess_SOURCES) $(mbps_SOURCES) \
+	$(mbrollbias_SOURCES) $(mbrolltimelag_SOURCES) \
+	$(mbroutetime_SOURCES) $(mbsegygrid_SOURCES) \
+	$(mbsegyinfo_SOURCES) $(mbsegylist_SOURCES) \
+	$(mbsegypsd_SOURCES) $(mbset_SOURCES) $(mbstripnan_SOURCES) \
 	$(mbsvplist_SOURCES) $(mbtime_SOURCES)
 DIST_SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mb7kpreprocess_SOURCES) $(mbabsorption_SOURCES) \
@@ -229,15 +234,16 @@ DIST_SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbdatalist_SOURCES) $(mbdefaults_SOURCES) \
 	$(mbdumpesf_SOURCES) $(mbextractsegy_SOURCES) \
 	$(mbfilter_SOURCES) $(mbformat_SOURCES) $(mbgetesf_SOURCES) \
-	$(mbgrid_SOURCES) $(mbhistogram_SOURCES) $(mbinfo_SOURCES) \
-	$(mblevitus_SOURCES) $(mblist_SOURCES) $(mbmosaic_SOURCES) \
-	$(mbnavlist_SOURCES) $(mbneptune2esf_SOURCES) \
-	$(mbprocess_SOURCES) $(mbps_SOURCES) $(mbrollbias_SOURCES) \
-	$(mbrolltimelag_SOURCES) $(mbroutetime_SOURCES) \
-	$(mbsegygrid_SOURCES) $(mbsegyinfo_SOURCES) \
-	$(mbsegylist_SOURCES) $(am__mbsegypsd_SOURCES_DIST) \
-	$(mbset_SOURCES) $(mbsm20002gsf_SOURCES) $(mbstripnan_SOURCES) \
-	$(mbsvplist_SOURCES) $(mbtime_SOURCES)
+	$(mbgrid_SOURCES) $(mbhistogram_SOURCES) \
+	$(mbhysweeppreprocess_SOURCES) $(mbinfo_SOURCES) \
+	$(mbkongsbergpreprocess_SOURCES) $(mblevitus_SOURCES) \
+	$(mblist_SOURCES) $(mbmosaic_SOURCES) $(mbnavlist_SOURCES) \
+	$(mbneptune2esf_SOURCES) $(mbprocess_SOURCES) $(mbps_SOURCES) \
+	$(mbrollbias_SOURCES) $(mbrolltimelag_SOURCES) \
+	$(mbroutetime_SOURCES) $(mbsegygrid_SOURCES) \
+	$(mbsegyinfo_SOURCES) $(mbsegylist_SOURCES) \
+	$(am__mbsegypsd_SOURCES_DIST) $(mbset_SOURCES) \
+	$(mbstripnan_SOURCES) $(mbsvplist_SOURCES) $(mbtime_SOURCES)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -414,117 +420,117 @@ top_srcdir = @top_srcdir@
 #Add mbprofilepsd to FFTW_PROG in future?
 include_HEADERS = levitus.h
 INCLUDES = -I.. -I../mbio -I../mbaux -I../surf -I../gsf @CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@
-AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}  
-mb7k2jstar_SOURCES = mb7k2jstar.c
-mb7k2jstar_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mb7k2ss_SOURCES = mb7k2ss.c
-mb7k2ss_LDADD = -L../mbaux \
+AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} 
+mbformat_SOURCES = mbformat.c
+mbformat_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbdefaults_SOURCES = mbdefaults.c
+mbdefaults_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbdatalist_SOURCES = mbdatalist.c
+mbdatalist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbinfo_SOURCES = mbinfo.c
+mbinfo_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbset_SOURCES = mbset.c
+mbset_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbprocess_SOURCES = mbprocess.c
+mbprocess_LDADD = -L../mbaux \
 	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
 
-mb7kpreprocess_SOURCES = mb7kpreprocess.c
-mb7kpreprocess_LDADD = -L../mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux 
-
-mbabsorption_SOURCES = mbabsorption.c
-mbabsorption_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbareaclean_SOURCES = mbareaclean.c
-mbareaclean_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbauvloglist_SOURCES = mbauvloglist.c
-mbauvloglist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbauvnavusbl_SOURCES = mbauvnavusbl.c
-mbauvnavusbl_LDADD = -L../mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
-
+mbcopy_SOURCES = mbcopy.c
+mbcopy_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mblist_SOURCES = mblist.c
+mblist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbnavlist_SOURCES = mbnavlist.c
+mbnavlist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbsvplist_SOURCES = mbsvplist.c
+mbsvplist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
 mbbackangle_SOURCES = mbbackangle.c
 mbbackangle_LDADD = -L../mbaux \
 	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
 
 mbclean_SOURCES = mbclean.c
 mbclean_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbcopy_SOURCES = mbcopy.c
-mbcopy_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbctdlist_SOURCES = mbctdlist.c
-mbctdlist_LDADD = -L../mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
-
-mbdatalist_SOURCES = mbdatalist.c
-mbdatalist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbdefaults_SOURCES = mbdefaults.c
-mbdefaults_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbdumpesf_SOURCES = mbdumpesf.c
-mbdumpesf_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbextractsegy_SOURCES = mbextractsegy.c
-mbextractsegy_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbfilter_SOURCES = mbfilter.c
-mbfilter_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbformat_SOURCES = mbformat.c
-mbformat_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbgetesf_SOURCES = mbgetesf.c
-mbgetesf_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbareaclean_SOURCES = mbareaclean.c
+mbareaclean_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbhistogram_SOURCES = mbhistogram.c
+mbhistogram_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
 mbgrid_SOURCES = mbgrid.c
 mbgrid_LDADD = -L../mbaux \
 	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
 
-mbhistogram_SOURCES = mbhistogram.c
-mbhistogram_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbinfo_SOURCES = mbinfo.c
-mbinfo_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mblevitus_SOURCES = mblevitus.c
-mblevitus_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mblist_SOURCES = mblist.c
-mblist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
 mbmosaic_SOURCES = mbmosaic.c
 mbmosaic_LDADD = -L../mbaux \
 	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
 
-mbnavlist_SOURCES = mbnavlist.c
-mbnavlist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbneptune2esf_SOURCES = mbneptune2esf.c
-mbneptune2esf_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbprocess_SOURCES = mbprocess.c
-mbprocess_LDADD = -L../mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
-
-mbps_SOURCES = mbps.c
-mbps_LDADD = -L../mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbps
-
+mblevitus_SOURCES = mblevitus.c
+mblevitus_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
 mbrollbias_SOURCES = mbrollbias.c
 mbrollbias_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbrolltimelag_SOURCES = mbrolltimelag.c
-mbrolltimelag_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbroutetime_SOURCES = mbroutetime.c
-mbroutetime_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbextractsegy_SOURCES = mbextractsegy.c
+mbextractsegy_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbsegylist_SOURCES = mbsegylist.c
+mbsegylist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbsegyinfo_SOURCES = mbsegyinfo.c
+mbsegyinfo_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
 mbsegygrid_SOURCES = mbsegygrid.c
 mbsegygrid_LDADD = -L../mbaux \
 	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
 
-mbsegyinfo_SOURCES = mbsegyinfo.c
-mbsegyinfo_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbsegylist_SOURCES = mbsegylist.c
-mbsegylist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbset_SOURCES = mbset.c
-mbset_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbsm20002gsf_SOURCES = mbsm20002gsf.c
-mbsm20002gsf_LDADD = -L../mbaux \
+mbauvnavusbl_SOURCES = mbauvnavusbl.c
+mbauvnavusbl_LDADD = -L../mbaux \
 	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+
+mbgetesf_SOURCES = mbgetesf.c
+mbgetesf_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbneptune2esf_SOURCES = mbneptune2esf.c
+mbneptune2esf_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbps_SOURCES = mbps.c
+mbps_LDADD = -L../mbaux \
+	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbps	
 
 mbstripnan_SOURCES = mbstripnan.c
 mbstripnan_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
-mbsvplist_SOURCES = mbsvplist.c
-mbsvplist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mb7k2jstar_SOURCES = mb7k2jstar.c
+mb7k2jstar_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mb7kpreprocess_SOURCES = mb7kpreprocess.c
+mb7kpreprocess_LDADD = -L../mbaux \
+	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux 
+
+mbrolltimelag_SOURCES = mbrolltimelag.c
+mbrolltimelag_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbauvloglist_SOURCES = mbauvloglist.c
+mbauvloglist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mb7k2ss_SOURCES = mb7k2ss.c
+mb7k2ss_LDADD = -L../mbaux \
+	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+
+mbabsorption_SOURCES = mbabsorption.c
+mbabsorption_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbdumpesf_SOURCES = mbdumpesf.c
+mbdumpesf_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
 mbtime_SOURCES = mbtime.c
 mbtime_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbctdlist_SOURCES = mbctdlist.c
+mbctdlist_LDADD = -L../mbaux \
+	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+
+mbfilter_SOURCES = mbfilter.c
+mbfilter_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbroutetime_SOURCES = mbroutetime.c
+mbroutetime_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbhysweeppreprocess_SOURCES = mbhysweeppreprocess.c
+mbhysweeppreprocess_LDADD = -L../mbaux -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
+mbkongsbergpreprocess_LDADD = -L../mbaux -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
 @BUILD_FFTW_TRUE@mbsegypsd_SOURCES = mbsegypsd.c
 @BUILD_FFTW_TRUE@mbsegypsd_CFLAGS = ${libfftw_CFLAGS} -L../mbaux
 @BUILD_FFTW_TRUE@mbsegypsd_LDADD = ${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi \
 @BUILD_FFTW_TRUE@	-lmbaux ${libfftw_LIBS}
 
 
-#mbprofilepsd_SOURCES = mbprofilepsd.c
-#mbprofilepsd_LDADD = -L../mbaux \
-#		     ${libgmt_LIBS} @FFTW_LIB_DIR@ -lmbio -lmbproj -lmbgsf -lmbmr1pr \
-#		     -lmbsapi -lmbaux @FFTW_LIB@
+# mbprofilepsd_SOURCES = mbprofilepsd.c
+# mbprofilepsd_CFLAGS = ${libfftw_CFLAGS} -L../mbaux
+# mbprofilepsd_LDADD = ${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi \
+#	-lmbaux ${libfftw_LIBS}
 BUILT_SOURCES = levitus.h
 CLEANFILES = levitus.h
 DISTCLEANFILES = levitus.h
@@ -666,9 +672,15 @@ mbgrid$(EXEEXT): $(mbgrid_OBJECTS) $(mbgrid_DEPENDENCIES)
 mbhistogram$(EXEEXT): $(mbhistogram_OBJECTS) $(mbhistogram_DEPENDENCIES) 
 	@rm -f mbhistogram$(EXEEXT)
 	$(LINK) $(mbhistogram_OBJECTS) $(mbhistogram_LDADD) $(LIBS)
+mbhysweeppreprocess$(EXEEXT): $(mbhysweeppreprocess_OBJECTS) $(mbhysweeppreprocess_DEPENDENCIES) 
+	@rm -f mbhysweeppreprocess$(EXEEXT)
+	$(LINK) $(mbhysweeppreprocess_OBJECTS) $(mbhysweeppreprocess_LDADD) $(LIBS)
 mbinfo$(EXEEXT): $(mbinfo_OBJECTS) $(mbinfo_DEPENDENCIES) 
 	@rm -f mbinfo$(EXEEXT)
 	$(LINK) $(mbinfo_OBJECTS) $(mbinfo_LDADD) $(LIBS)
+mbkongsbergpreprocess$(EXEEXT): $(mbkongsbergpreprocess_OBJECTS) $(mbkongsbergpreprocess_DEPENDENCIES) 
+	@rm -f mbkongsbergpreprocess$(EXEEXT)
+	$(LINK) $(mbkongsbergpreprocess_OBJECTS) $(mbkongsbergpreprocess_LDADD) $(LIBS)
 mblevitus$(EXEEXT): $(mblevitus_OBJECTS) $(mblevitus_DEPENDENCIES) 
 	@rm -f mblevitus$(EXEEXT)
 	$(LINK) $(mblevitus_OBJECTS) $(mblevitus_LDADD) $(LIBS)
@@ -714,9 +726,6 @@ mbsegypsd$(EXEEXT): $(mbsegypsd_OBJECTS) $(mbsegypsd_DEPENDENCIES)
 mbset$(EXEEXT): $(mbset_OBJECTS) $(mbset_DEPENDENCIES) 
 	@rm -f mbset$(EXEEXT)
 	$(LINK) $(mbset_OBJECTS) $(mbset_LDADD) $(LIBS)
-mbsm20002gsf$(EXEEXT): $(mbsm20002gsf_OBJECTS) $(mbsm20002gsf_DEPENDENCIES) 
-	@rm -f mbsm20002gsf$(EXEEXT)
-	$(LINK) $(mbsm20002gsf_OBJECTS) $(mbsm20002gsf_LDADD) $(LIBS)
 mbstripnan$(EXEEXT): $(mbstripnan_OBJECTS) $(mbstripnan_DEPENDENCIES) 
 	@rm -f mbstripnan$(EXEEXT)
 	$(LINK) $(mbstripnan_OBJECTS) $(mbstripnan_LDADD) $(LIBS)
@@ -753,7 +762,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgetesf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbhistogram.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbhysweeppreprocess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbinfo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbkongsbergpreprocess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mblevitus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mblist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbmosaic.Po@am__quote@
@@ -769,7 +780,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsegylist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsegypsd-mbsegypsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbset.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsm20002gsf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbstripnan.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsvplist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtime.Po@am__quote@
