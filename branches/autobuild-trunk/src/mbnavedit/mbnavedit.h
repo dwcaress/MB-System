@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h 1890 2011-05-03 19:25:11Z caress $
+ *    $Id: mbnavedit.h 1968 2012-07-02 12:14:02Z cferreira $
  *
- *    Copyright (c) 1995-2011 by
+ *    Copyright (c) 1995-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -168,7 +168,7 @@ EXTERNAL int	window_height;
 #define	MODEL_MODE_MEAN		1
 #define	MODEL_MODE_DR		2
 #define	MODEL_MODE_INVERT	3
-#define	NUM_FILES_MAX		100
+#define	NUM_FILES_MAX		1000
 
 /*--------------------------------------------------------------------*/
 

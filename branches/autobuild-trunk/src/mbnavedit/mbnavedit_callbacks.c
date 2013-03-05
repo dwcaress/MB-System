@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c 1890 2011-05-03 19:25:11Z caress $
+ *    $Id: mbnavedit_callbacks.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1995-2011 by
+ *    Copyright (c) 1995-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
