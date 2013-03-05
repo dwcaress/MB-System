@@ -595,7 +595,7 @@ dnl variables for shared data
 mbsystemdatadir="$datadir/$PACKAGE"
 AC_SUBST(mbsystemdatadir)
 
-AC_OUTPUT(Makefile src/Makefile src/gsf/Makefile src/surf/Makefile \
+AC_OUTPUT(Makefile src/Makefile src/gsf/Makefile src/html/Makefile src/surf/Makefile \
 	  src/mr1pr/Makefile src/proj/Makefile src/mbaux/Makefile \
 	  src/mbio/Makefile \
 	  src/utilities/Makefile src/gmt/Makefile \
