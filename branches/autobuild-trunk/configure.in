@@ -159,8 +159,8 @@ fi
     fi
  fi
  dnl Use ac_subst to set vars that would be set by pkg_check
- AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
- AC_SUBST([libgmt_CFLAGS], [$libgmt_CFLAGS])
+ AC_SUBST([libnetcdf_LIBS], [$libnetcdf_LIBS])
+ AC_SUBST([libnetcdf_CFLAGS], [$libnetcdf_CFLAGS])
 fi
 dnl done with CDF lib
 
@@ -229,7 +229,7 @@ fi
     else
 	echo "Looking for libgmt in $libgmt_CFLAGS ..."
 	save_LDFLAGS=$LDFLAGS
-	LDFLAGS="$LDFLAGS $libgmt_CFLAGS -lnetcdf -lm"
+	LDFLAGS="$LDFLAGS $libgmt_CFLAGS $libnetcdf_LIBS -lnetcdf -lm"
 	AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no], )
 	LDFLAGS="$save_LDFLAGS"
 	if test "$GMT_SETTING" = "no"; then
@@ -266,7 +266,7 @@ fi
 	save_CPPFLAGS=$CPPFLAGS
 	save_CFLAGS=$CFLAGS
 	CPPFLAGS="$CPPFLAGS $GMT_INC_DIR"
-	CFLAGS="$CFLAGS $GMT_INC_DIR"
+	CFLAGS="$CFLAGS $GMT_INC_DIR $CDF_INC_DIR"
 	AC_CHECK_HEADER(gmt.h, [GMT_SETTING=yes], [GMT_SETTING=no])
 	CPPFLAGS=$save_CPPFLAGS
 	CFLAGS=$save_CFLAGS

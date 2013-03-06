@@ -769,9 +769,9 @@ fftw_app
 libfftw_LIBS
 libfftw_CFLAGS
 GMT_INC_DIR
-CDF_INC_DIR
-libgmt_CFLAGS
 libgmt_LIBS
+libgmt_CFLAGS
+CDF_INC_DIR
 libnetcdf_LIBS
 libnetcdf_CFLAGS
 PKG_CONFIG_LIBDIR
@@ -12282,9 +12282,9 @@ fi
 	fi
     fi
  fi
-  libgmt_LIBS=$libgmt_LIBS
+  libnetcdf_LIBS=$libnetcdf_LIBS
 
- libgmt_CFLAGS=$libgmt_CFLAGS
+ libnetcdf_CFLAGS=$libnetcdf_CFLAGS
 
 fi
 
@@ -12478,7 +12478,7 @@ fi
     else
 	echo "Looking for libgmt in $libgmt_CFLAGS ..."
 	save_LDFLAGS=$LDFLAGS
-	LDFLAGS="$LDFLAGS $libgmt_CFLAGS -lnetcdf -lm"
+	LDFLAGS="$LDFLAGS $libgmt_CFLAGS $libnetcdf_LIBS -lnetcdf -lm"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GMT_begin in -lgmt" >&5
 $as_echo_n "checking for GMT_begin in -lgmt... " >&6; }
 if ${ac_cv_lib_gmt_GMT_begin+:} false; then :
@@ -12566,7 +12566,7 @@ fi
 	save_CPPFLAGS=$CPPFLAGS
 	save_CFLAGS=$CFLAGS
 	CPPFLAGS="$CPPFLAGS $GMT_INC_DIR"
-	CFLAGS="$CFLAGS $GMT_INC_DIR"
+	CFLAGS="$CFLAGS $GMT_INC_DIR $CDF_INC_DIR"
 	ac_fn_c_check_header_mongrel "$LINENO" "gmt.h" "ac_cv_header_gmt_h" "$ac_includes_default"
 if test "x$ac_cv_header_gmt_h" = xyes; then :
   GMT_SETTING=yes
