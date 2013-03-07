@@ -6,7 +6,7 @@ dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
-AC_INIT(mbsystem, 1.0.0)
+AC_INIT(mbsystem, 3.5.2017)
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 
@@ -105,7 +105,7 @@ AC_SUBST(OTPS_DIR)
 
 dnl Check for Levitus database
 GOT_LEVITUS=no
-echo "Checking for Levitus datbase"
+echo "Checking for Levitus database"
 dnl Tried AC_CHECK_FILE but did not work??
 dnl Use if test instead
 dnl TODO: add levitus-file option to configure to specify name
@@ -115,9 +115,9 @@ else
 	GOT_LEVITUS=no
 fi
 if test "$GOT_LEVITUS" = "yes" ; then
-	echo "Found Levitus datbase"
+	echo "Found Levitus database"
 else
-	echo "Did not find Levitus datbase"
+	echo "Did not find Levitus database"
 fi
 AM_CONDITIONAL([INSTALL_LEVITUS], [test "$GOT_LEVITUS" = yes])
 
@@ -225,7 +225,7 @@ fi
     echo "Using pre-installed libgmt."
  else
     if test "$GOT_GMT" = "no" ; then
-	AC_MSG_ERROR([Did not find libnetcdf, use --with-gmt-lib])
+	AC_MSG_ERROR([Did not find libgmt, use --with-gmt-lib])
     else
 	echo "Looking for libgmt in $libgmt_CFLAGS ..."
 	save_LDFLAGS=$LDFLAGS
