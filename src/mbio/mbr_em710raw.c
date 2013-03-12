@@ -999,13 +999,17 @@ ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i])
 
 			/* calculate beamflag */
 			detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];
-			if (((detection_mask & 128) == 128) && (((detection_mask & 32) == 32) || ((detection_mask & 24) == 24)))
+			if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0)
 				{
 				ping->png_beamflag[i] = MB_FLAG_NULL;
+/* fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
+i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
 				}
 			else if ((detection_mask & 128) == 128)
 				{
 				ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+/*fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
+i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
 				}
 			else if (ping->png_clean[i] != 0)
 				{
