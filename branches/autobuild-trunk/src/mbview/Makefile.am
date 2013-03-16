@@ -1,6 +1,6 @@
 bin_PROGRAMS = mbgrdviz mbeditviz
 
-INCLUDES = -I.. -I../mbio -I../mbaux @MOTIF_INC_DIR@ @GL_INC_DIR@
+AM_CPPFLAGS = -I.. -I../mbio -I../mbaux @MOTIF_INC_DIR@ @GL_INC_DIR@
 LIBS = @MOTIF_LIB_DIR@ @GL_LIB_DIR@
 
 include_HEADERS = mbview.h

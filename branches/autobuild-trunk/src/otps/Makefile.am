@@ -1,6 +1,6 @@
 bin_PROGRAMS = mbotps
 
-INCLUDES = -I.. -I../mbio -I../mbaux -I../surf -I../gsf @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_CPPFLAGS = -I.. -I../mbio -I../mbaux -I../surf -I../gsf @CDF_INC_DIR@ @GMT_INC_DIR@
 
 mbotps_SOURCES = mbotps.c
 mbotps_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L../mbio -L../gsf -L../proj -L../mr1pr -L../surf

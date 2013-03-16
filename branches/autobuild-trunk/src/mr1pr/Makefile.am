@@ -1,4 +1,4 @@
-INCLUDES = -I..
+AM_CPPFLAGS = -I..
 
 include_HEADERS = mr1pr.h mr1pr_defines.h
 

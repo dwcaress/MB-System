@@ -1,4 +1,4 @@
-INCLUDES = -I.. -I../gsf -I../proj -I../mr1pr -I../surf @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_CPPFLAGS = -I.. -I../gsf -I../proj -I../mr1pr -I../surf @CDF_INC_DIR@ @GMT_INC_DIR@
 
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L../gsf -L../surf -L../mr1pr -L../proj
 

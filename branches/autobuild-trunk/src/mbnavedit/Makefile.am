@@ -2,7 +2,7 @@ bin_PROGRAMS = mbnavedit
 
 include_HEADERS = 
 
-INCLUDES = -I.. -I../mbio -I../mbaux -I../surf -I../gsf @MOTIF_INC_DIR@
+AM_CPPFLAGS = -I.. -I../mbio -I../mbaux -I../surf -I../gsf @MOTIF_INC_DIR@
 
 LIBS = @MOTIF_LIB_DIR@
 

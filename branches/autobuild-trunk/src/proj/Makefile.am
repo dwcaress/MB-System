@@ -1,6 +1,6 @@
 bin_PROGRAMS = proj geod
 
-INCLUDES = -I..
+AM_CPPFLAGS = -I..
 
 include_HEADERS = proj_api.h 
 

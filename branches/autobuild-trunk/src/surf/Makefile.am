@@ -1,4 +1,4 @@
-INCLUDES = -I..
+AM_CPPFLAGS = -I..
 
 include_HEADERS = sapi.h
 

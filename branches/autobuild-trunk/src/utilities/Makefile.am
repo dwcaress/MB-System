@@ -53,7 +53,7 @@ bin_PROGRAMS = mbformat \
 
 include_HEADERS = levitus.h
 
-INCLUDES = -I.. -I../mbio -I../mbaux -I../surf -I../gsf @CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@
+AM_CPPFLAGS = -I.. -I../mbio -I../mbaux -I../surf -I../gsf @CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@
 LIBS = -L../mbio -L../gsf -L../proj -L../mr1pr -L../surf ${libnetcdf_LIBS} ${libgmt_LIBS}
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} 
 

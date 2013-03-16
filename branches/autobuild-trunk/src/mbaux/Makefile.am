@@ -1,4 +1,4 @@
-INCLUDES = -I.. -I../mbio @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_CPPFLAGS = -I.. -I../mbio @CDF_INC_DIR@ @GMT_INC_DIR@
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 
 if BUILD_MOTIF
