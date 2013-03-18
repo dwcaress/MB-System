@@ -59,7 +59,7 @@
  */
 #if defined(__cplusplus) || defined(__STDC__) || defined(__EXTENSIONS__)
 #include <stdlib.h>
-#ifndef VMS
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #endif
