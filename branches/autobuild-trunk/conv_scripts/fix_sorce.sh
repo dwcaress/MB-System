@@ -12,5 +12,12 @@ do
 		cat cnfg1.txt $file > tmp1.c
 		mv tmp1.c $file
 	fi
+	if grep "../../include/" $file >/dev/null; then
+		echo "Found old INC dir in $file"
+		sed 's/\"..\/..\/include\//\"/g' $file > tmp1.c
+		mv tmp1.c $file
+	else
+		echo "File is clean: $file"
+	fi
 
 done
