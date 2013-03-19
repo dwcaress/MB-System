@@ -1,9 +1,3 @@
-/* Added HAVE_CONFIG_H for autogen files */
-#ifdef HAVE_CONFIG_H
-#  include <mbsystem_config.h>
-#endif
-
-
 /*--------------------------------------------------------------------
  *    The MB-system:	mbkongsbergpreprocess.c	1/1/2012
  *    $Id: mbkongsbergpreprocess.c 1938 2012-02-22 20:58:08Z caress $
@@ -293,8 +287,6 @@ int main (int argc, char **argv)
 	int	type, source;
 	double	start_time_d, end_time_d;
 
-	double	ptime_d;
-	double	pheading;
 	double	heave_offset = 0.0;
 	double	heave_ping, heave_beam;
 	double	soundspeed;
@@ -1812,7 +1804,7 @@ int main (int argc, char **argv)
 				for (i=0;i<ping->png_nbeams;i++)
 					{
 					/* get attitude and heave at ping and receive time */
-					transmit_time_d = ptime_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
+					transmit_time_d = time_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
 					mb_hedint_interp(verbose, imbio_ptr, transmit_time_d,
 								&transmit_heading, &error);
 					mb_attint_interp(verbose, imbio_ptr, transmit_time_d,
@@ -1847,7 +1839,7 @@ int main (int argc, char **argv)
 
 					/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
 						the ping heading and the heading at sector transmit time */
-					phi -= transmit_heading - pheading;
+					phi -= transmit_heading - heading;
 					if (phi > 180.0) phi -= 360.0;
 					if (phi < -180.0) phi += 360.0;
 
@@ -1887,7 +1879,7 @@ int main (int argc, char **argv)
 				dt = 0.0;
 
 				/* get attitude and heave at ping and receive time */
-				transmit_time_d = ptime_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[inadir]];
+				transmit_time_d = time_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[inadir]];
 				mb_hedint_interp(verbose, imbio_ptr, transmit_time_d,
 							&transmit_heading, &error);
 				mb_attint_interp(verbose, imbio_ptr, transmit_time_d,
@@ -1940,7 +1932,7 @@ int main (int argc, char **argv)
 
 				/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
 					the ping heading and the heading at sector transmit time */
-				phi -= transmit_heading - pheading;
+				phi -= transmit_heading - heading;
 				if (phi > 180.0) phi -= 360.0;
 				if (phi < -180.0) phi += 360.0;
 
@@ -2036,11 +2028,36 @@ int main (int argc, char **argv)
 					{
 					/* only work on beams with good travel times */
 					detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];
-					if (ping->png_range[i] > 0.0
-						|| (((detection_mask & 128) == 128) && (((detection_mask & 32) == 32) || ((detection_mask & 24) == 24))))
+					if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0)
+						{
+						ping->png_beamflag[i] = MB_FLAG_NULL;
+						}
+					else if ((detection_mask & 128) == 128)
+						{
+						ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+						}
+					else if (ping->png_clean[i] != 0)
+						{
+						ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+						}
+					else
+						{
+						ping->png_beamflag[i] = MB_FLAG_NONE;
+						}
+
+					/* handle null beams */
+					if (ping->png_beamflag[i] == MB_FLAG_NULL)
+						{
+						ping->png_depression[i] = 0.0;
+						ping->png_azimuth[i] = 0.0;
+						ping->png_range[i] = 0.0;
+						}
+
+					/* handle non-null beams */
+					else
 						{
 						/* get attitude and heave at ping and receive time */
-						transmit_time_d = ptime_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
+						transmit_time_d = time_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
 						mb_hedint_interp(verbose, imbio_ptr, transmit_time_d,
 									&transmit_heading, &error);
 						mb_attint_interp(verbose, imbio_ptr, transmit_time_d,
@@ -2071,7 +2088,7 @@ int main (int argc, char **argv)
 
 						/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
 							the ping heading and the heading at sector transmit time */
-						phi -= transmit_heading - pheading;
+						phi -= transmit_heading - heading;
 						if (phi > 180.0) phi -= 360.0;
 						if (phi < -180.0) phi += 360.0;
 
@@ -2247,15 +2264,6 @@ int main (int argc, char **argv)
 						ping->png_depression[i] = theta_new;
 						ping->png_azimuth[i] = phi;
 						ping->png_range[i] += dt;
-						}
-
-					/* handle beams with zero travel times */
-					else
-						{
-						ping->png_beamflag[i] = MB_FLAG_NULL;
-						ping->png_depression[i] = 0.0;
-						ping->png_azimuth[i] = 0.0;
-						ping->png_range[i] = 0.0;
 						}
 					}
 

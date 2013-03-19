@@ -1,8 +1,3 @@
-/* Added HAVE_CONFIG_H for autogen files */
-#ifdef HAVE_CONFIG_H
-#  include <mbsystem_config.h>
-#endif
-
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
  *    $Id: mbfilter.c 2015 2013-03-01 22:33:52Z caress $

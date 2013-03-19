@@ -1,8 +1,3 @@
-/* Added HAVE_CONFIG_H for autogen files */
-#ifdef HAVE_CONFIG_H
-#  include <mbsystem_config.h>
-#endif
-
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2ss.c		8/15/2007
  *    $Id: mb7k2ss.c 2017 2013-03-03 05:09:42Z caress $

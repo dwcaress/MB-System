@@ -1,12 +1,6 @@
-/* Added HAVE_CONFIG_H for autogen files */
-#ifdef HAVE_CONFIG_H
-#  include <mbsystem_config.h>
-#endif
-
-
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em710raw.c	2/26/2008
- *	$Id: mbr_em710raw.c 2005 2013-01-01 02:20:24Z caress $
+ *	$Id: mbr_em710raw.c 2042 2013-03-12 20:06:32Z caress $
  *
  *    Copyright (c) 2008-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -224,7 +218,7 @@ int mbr_em710raw_wr_ss2(int verbose, void *mbio_ptr, int swap,
 int mbr_em710raw_wr_wc(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
 
-static char rcs_id[]="$Id: mbr_em710raw.c 2005 2013-01-01 02:20:24Z caress $";
+static char rcs_id[]="$Id: mbr_em710raw.c 2042 2013-03-12 20:06:32Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)
@@ -1005,13 +999,17 @@ ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i])
 
 			/* calculate beamflag */
 			detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];
-			if (((detection_mask & 128) == 128) && (((detection_mask & 32) == 32) || ((detection_mask & 24) == 24)))
+			if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0)
 				{
 				ping->png_beamflag[i] = MB_FLAG_NULL;
+/* fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
+i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
 				}
 			else if ((detection_mask & 128) == 128)
 				{
 				ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+/*fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
+i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
 				}
 			else if (ping->png_clean[i] != 0)
 				{

@@ -2,6 +2,7 @@
 #ifdef HAVE_CONFIG_H
 #  include <mbsystem_config.h>
 #endif
+
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_spline.c	10/11/00
  *    $Id: mb_spline.c 2015 2013-03-01 22:33:52Z caress $
