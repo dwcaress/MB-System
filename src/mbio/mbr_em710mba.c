@@ -4987,7 +4987,7 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		{
 		for (i=0;i<MBSYS_SIMRAD3_MAXPIXELS;i++)
 			{
-			ping->png_ss[i] = 0;
+			ping->png_ss[i] = EM3_INVALID_SS;
 			}
 		read_len = (size_t)(ping->png_pixels_ss * sizeof(short));
 		status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);

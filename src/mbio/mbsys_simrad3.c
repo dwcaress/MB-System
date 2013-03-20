@@ -1752,19 +1752,20 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		pixel_size = ping->png_pixel_size;
 		for (i=0;i<MBSYS_SIMRAD3_MAXPIXELS;i++)
 			{
-			if (ping->png_ss[i] != EM3_INVALID_AMP)
-				{
-				ss[i] = 0.01 * ping->png_ss[i];
-				ssacrosstrack[i] = pixel_size
-						* (i - MBSYS_SIMRAD3_MAXPIXELS / 2);
-				ssalongtrack[i] = 0.01 * ping->png_ssalongtrack[i];
-				}
-			else
+			if (ping->png_ss[i] == EM3_INVALID_SS
+				|| (ping->png_ss[i] == EM3_INVALID_AMP && ping->png_ssalongtrack[i] == 0))
 				{
 				ss[i] = MB_SIDESCAN_NULL;
 				ssacrosstrack[i] = pixel_size
 						* (i - MBSYS_SIMRAD3_MAXPIXELS / 2);
 				ssalongtrack[i] = 0.0;
+				}
+			else
+				{
+				ss[i] = 0.01 * ping->png_ss[i];
+				ssacrosstrack[i] = pixel_size
+						* (i - MBSYS_SIMRAD3_MAXPIXELS / 2);
+				ssalongtrack[i] = 0.01 * ping->png_ssalongtrack[i];
 				}
 			}
 
@@ -2152,7 +2153,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr,
 					}
 				else
 					{
-					ping->png_ss[i] = EM3_INVALID_AMP;
+					ping->png_ss[i] = EM3_INVALID_SS;
 					ping->png_ssalongtrack[i] = 0;
 					}
 				}
@@ -4081,7 +4082,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 			}
 		    else
 		    	{
-		    	ping->png_ss[i] = EM3_INVALID_AMP;
+		    	ping->png_ss[i] = EM3_INVALID_SS;
 		    	ping->png_ssalongtrack[i] = 0;
 			}
 		    }

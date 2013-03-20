@@ -1122,46 +1122,33 @@ else
 		}
 	}
 
-# get postscript viewer
+# use mbdefaults to get the current system default postscript viewer
+$ps_viewer = "ghostview";
+$lonflip = 0;
+@mbdefaults = `mbdefaults`;
+while (@mbdefaults)
+        {
+        $line = shift @mbdefaults;
+        if ($line =~ /ps viewer:\s+(\S+)/)
+                {
+                ($ps_viewer) = $line =~ /ps viewer:\s+(\S+)/;
+                 }
+        elsif ($line =~ /lonflip:\s+(\S+)/)
+                {
+                ($lonflip) = $line =~ /lonflip:\s+(\S+)/;
+                 }
+        }
+
 # check environment variable
 if ($ENV{"MB_PS_VIEWER"})
 	{
 	$ps_viewer = $ENV{"MB_PS_VIEWER"};
 	}
 
-# check for .mbio_defaults file
-$home = $ENV{"HOME"};
-$mbdef = "$home/.mbio_defaults";
-if (open(MBDEF,"<$mbdef"))
-	{
-	while (<MBDEF>)
-		{
-		if (!$ps_viewer && /ps viewer:\s+(\S+)/)
-			{
-			($ps_viewer) = /ps viewer:\s+(\S+)/;
-			}
-		if (!$lonflip && /lonflip:\s+(\S+)/)
-			{
-			($lonflip) = /lonflip:\s+(\S+)/;
-			}
-		}
-	}
-
-# just set $ps_viewer to ghostview
-if (!$ps_viewer)
-	{
-	$ps_viewer = "ghostview";
-	}
-# just set $lonflip to 0
-if (!$lonflip)
-	{
-	$lonflip = 0;
-	}
-
 # Look for mapproject
 $mapproject = `which mapproject`;
 if (! $mapproject) {
-    print "\n*** ERRORR ***\n";
+    print "\n*** ERROR ***\n";
     print "The GMT command 'mapproject' is not in your path.\n";
     print "Check your settings for the PATH environment variable.\n";
     print "in your .bash_profile, .cshrc, or other appropriate file for your shell.\n";

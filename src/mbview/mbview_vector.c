@@ -65,8 +65,6 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static char		value_string[MB_PATH_MAXLINE];
-
 static char rcs_id[]="$Id$";
 
 /*------------------------------------------------------------------------------*/
@@ -840,7 +838,6 @@ int mbview_drawvector(size_t instance, int rez)
 	/* local variables */
 	char	*function_name = "mbview_drawvector";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	GLUquadricObj *globj;

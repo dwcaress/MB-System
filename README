@@ -28,6 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.3.2051       March 20, 2013
   Version 5.3.2042       March 12, 2013
 * Version 5.3.2017       March 3, 2013
 * Version 5.3.2013       January 29, 2013
@@ -233,11 +234,40 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------
 
+-----> 5.3.2051 (March 20, 2013)
+
+Formats 58 and 59 (mbf): The calculation of "sidescan" from raw backscatter
+samples has been improved. The sidescan can now be successfully
+recalculated by mbprocess following application of bathymetry edits.
+
+Mbprocess: Recalculation of Konsberg multibeam sidescan now enabled for
+formats 58 (mbf_em710raw) and 59 (mbf_em710mba) with command
+mbset -PSSRECALCMODE:1.
+
+Mbedit: soundings originally flagged by the sonar now return to that
+state if they are unflagged and then reflagged interactively.
+
+Mbgrdviz: Disabled "goaway" buttons in dialogs to minimize crashes.
+
+Mbeditviz: Disabled "goaway" buttons in dialogs to minimize crashes.
+
+Mbm_grdplot: Updated macros to derive system defaults from mbdefaults.
+
+Mbm_grdtiff: Updated macros to derive system defaults from mbdefaults.
+
+Mbm_histplot: Updated macros to derive system defaults from mbdefaults.
+
+Mbm_grd3dplot: Updated macros to derive system defaults from mbdefaults.
+
+Mbm_vrefcheck: Updated macros to derive system defaults from mbdefaults.
+
+Mbm_plot: Updated macros to derive system defaults from mbdefaults.
+
 -----> 5.3.2042 (March 12, 2013)
 
 MBkongsbergpreprocess: Fixed calculation of transmit time for sector subpings.
 
-Format 58 (mbf_simrad3): Improved translation of bottom pick parameters to
+Format 58 (mbf_em710raw): Improved translation of bottom pick parameters to
 beam flags.
 
 MBgrdviz: Added export of routes to Hypack lnw format and to degrees + decimal

@@ -408,34 +408,22 @@ else
 		}
 	}
 
-# get postscript viewer
+# use mbdefaults to get the current system default image viewer
+$img_viewer = "xv";
+@mbdefaults = `mbdefaults`;
+while (@mbdefaults)
+        {
+        $line = shift @mbdefaults;
+        if ($line =~ /img viewer:\s+(\S+)/)
+                {
+                ($img_viewer) = $line =~ /img viewer:\s+(\S+)/;
+                 }
+        }
+
 # check environment variable
 if ($ENV{"MB_IMG_VIEWER"})
 	{
-	$tiff_viewer = $ENV{"MB_IMG_VIEWER"};
-	}
-
-# check for .mbio_defaults file
-if (!$tiff_viewer)
-	{
-	$home = $ENV{"HOME"};
-	$mbdef = "$home/.mbio_defaults";
-	if (open(MBDEF,"<$mbdef"))
-		{
-		while (<MBDEF>)
-			{
-			if (/img viewer:\s+(\S+)/)
-				{
-				($img_viewer) = /img viewer:\s+(\S+)/;
-				}
-			}
-		close MBDEF;
-		}
-	}
-# else just set it to xv
-if (!$img_viewer)
-	{
-	$img_viewer = "xv";
+	$img_viewer = $ENV{"MB_IMG_VIEWER"};
 	}
 
 # see if data file is a grd file or a list of grdfiles

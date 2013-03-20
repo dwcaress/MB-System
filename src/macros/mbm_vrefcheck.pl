@@ -163,32 +163,22 @@ print "Running psxy...\n";
 `psxy $resfile -JX$xaxis/9 -R$xmin/$xmax/-2/2 -B1g0.25:"Time From Beginning of File (hours)":/0.25g0.25:"Apparent Vertical Reference Noise (degrees)"::."Multibeam Data File - $file": -P > $psfile`;
 `rm -f $datfile $fltfile $resfile`;
 
-# get postscript viewer
+# use mbdefaults to get the current system default postscript viewer
+$ps_viewer = "ghostview";
+@mbdefaults = `mbdefaults`;
+while (@mbdefaults)
+        {
+        $line = shift @mbdefaults;
+        if ($line =~ /ps viewer:\s+(\S+)/)
+                {
+                ($ps_viewer) = $line =~ /ps viewer:\s+(\S+)/;
+                 }
+        }
+
 # check environment variable
 if ($ENV{"MB_PS_VIEWER"})
 	{
 	$ps_viewer = $ENV{"MB_PS_VIEWER"};
-	}
-# check for .mbio_defaults file
-if (!$ps_viewer)
-	{
-	$home = $ENV{"HOME"};
-	$mbdef = "$home/.mbio_defaults";
-	if (open(MBDEF,"<$mbdef"))
-		{
-		while (<MBDEF>)
-			{
-			if (/ps viewer:\s+(\S+)/)
-				{
-				($ps_viewer) = /ps viewer:\s+(\S+)/;
-				}
-			}
-		}
-	}
-# just set it to ghostview
-if (!$ps_viewer)
-	{
-	$ps_viewer = "ghostview";
 	}
 
 `$ps_viewer $psfile &`;
