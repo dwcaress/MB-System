@@ -150,11 +150,11 @@ int mbview_projectdata(size_t instance)
 		}
 if (mbv_verbose >= 2)
 fprintf(stderr,"mbview_projectdata: %ld\n", instance);
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* delete old projections if necessary */
 	if (view->primary_pj_init == MB_YES
 		&& view->primary_pjptr != NULL)
@@ -182,7 +182,7 @@ fprintf(stderr,"mbview_projectdata: %ld\n", instance);
 		data->display_projection_mode = MBV_PROJECTION_PROJECTED;
 
 	/* check for case where primary grid is already projected but displayed
-	   in that same projection 
+	   in that same projection
 	   - use same bounds info */
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED
 		&& data->display_projection_mode == MBV_PROJECTION_PROJECTED
@@ -192,7 +192,7 @@ fprintf(stderr,"mbview_projectdata: %ld\n", instance);
 		/* reset modes */
 		data->primary_grid_projection_mode = MBV_PROJECTION_ALREADYPROJECTED;
 		data->display_projection_mode = MBV_PROJECTION_ALREADYPROJECTED;
-		
+
 		/* get bounds */
 		view->xmin = data->primary_xmin;
 		view->xmax = data->primary_xmax;
@@ -205,21 +205,21 @@ fprintf(stderr,"mbview_projectdata: %ld\n", instance);
 		view->zorigin = data->exageration * 0.5 * (data->primary_min + data->primary_max);
 
 		/* set projection for getting lon lat */
-		proj_status = mb_proj_init(mbv_verbose, 
+		proj_status = mb_proj_init(mbv_verbose,
 					data->primary_grid_projection_id,
 					&(view->primary_pjptr),
 					&error);
 		if (proj_status == MB_SUCCESS)
 			{
 			view->primary_pj_init = MB_YES;
-			proj_status = mb_proj_init(mbv_verbose, 
+			proj_status = mb_proj_init(mbv_verbose,
 						data->display_projection_id,
 						&(view->display_pjptr),
 						&error);
 			if (proj_status == MB_SUCCESS)
 				view->display_pj_init = MB_YES;
 			}
-			
+
 		/* quit if projection fails */
 		if (proj_status != MB_SUCCESS)
 			{
@@ -232,21 +232,21 @@ fprintf(stderr,"mbview_projectdata: %ld\n", instance);
 			exit(error);
 			}
 		}
-	   
+
 	/* else set up projections as needed */
-	else 
+	else
 		{
 		/* first go from grid coordinates to lon lat */
 		if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
 			{
 			/* set projection */
-			proj_status = mb_proj_init(mbv_verbose, 
+			proj_status = mb_proj_init(mbv_verbose,
 						data->primary_grid_projection_id,
 						&(view->primary_pjptr),
 						&error);
 			if (proj_status == MB_SUCCESS)
 				view->primary_pj_init = MB_YES;
-			
+
 			/* quit if projection fails */
 			if (proj_status != MB_SUCCESS)
 				{
@@ -258,20 +258,20 @@ fprintf(stderr,"mbview_projectdata: %ld\n", instance);
 				mb_memory_clear(mbv_verbose, &error);
 				exit(error);
 				}
-				
+
 			/* get initial bounds */
 			proj_status = mb_proj_inverse(mbv_verbose,
 						view->primary_pjptr,
 						data->primary_xmin,
 						data->primary_ymin,
 						&xlonmin, &ylatmin,
-						&error);						
+						&error);
 			proj_status = mb_proj_inverse(mbv_verbose,
 						view->primary_pjptr,
 						data->primary_xmax,
 						data->primary_ymax,
 						&xlonmax, &ylatmax,
-						&error);						
+						&error);
 			}
 		else
 			{
@@ -281,18 +281,18 @@ fprintf(stderr,"mbview_projectdata: %ld\n", instance);
 			ylatmin = data->primary_ymin;
 			ylatmax = data->primary_ymax;
 			}
-			
+
 		/* now go from lon lat to display coordinates */
 		if (data->display_projection_mode == MBV_PROJECTION_PROJECTED)
 			{
 			/* set projection */
-			proj_status = mb_proj_init(mbv_verbose, 
+			proj_status = mb_proj_init(mbv_verbose,
 						data->display_projection_id,
 						&(view->display_pjptr),
 						&error);
 			if (proj_status == MB_SUCCESS)
 				view->display_pj_init = MB_YES;
-			
+
 			/* quit if projection fails */
 			if (proj_status != MB_SUCCESS)
 				{
@@ -304,20 +304,20 @@ fprintf(stderr,"mbview_projectdata: %ld\n", instance);
 				mb_memory_clear(mbv_verbose, &error);
 				exit(error);
 				}
-				
+
 			/* get bounds */
 			proj_status = mb_proj_forward(mbv_verbose,
 						view->display_pjptr,
 						xlonmin, ylatmin,
-						&view->xmin, 
+						&view->xmin,
 						&view->ymin,
-						&error);						
+						&error);
 			proj_status = mb_proj_forward(mbv_verbose,
 						view->display_pjptr,
 						xlonmax, ylatmax,
-						&view->xmax, 
+						&view->xmax,
 						&view->ymax,
-						&error);						
+						&error);
 
 			/* get origin */
 			view->xorigin = 0.5 * (view->xmin + view->xmax);
@@ -327,7 +327,7 @@ fprintf(stderr,"mbview_projectdata: %ld\n", instance);
 		else if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
 			{
 			/* set up geographic pseduo-projection */
-			mb_coor_scale(mbv_verbose, 
+			mb_coor_scale(mbv_verbose,
 	 			0.5*(ylatmin + ylatmax),
 	 			&(view->mtodeglon), &(view->mtodeglat));
 
@@ -379,21 +379,21 @@ fprintf(stderr,"mbview_projectdata: %ld\n", instance);
 				mbview_sphere_forward(instance,
 							0.5 * (xlonmin + xlonmax),
 							0.5 * (ylatmin + ylatmax),
-							&view->sphere_refx, 
-							&view->sphere_refy, 
+							&view->sphere_refx,
+							&view->sphere_refy,
 							&view->sphere_refz);
 
 				mbview_sphere_forward(instance,
-							xlonmin, 
+							xlonmin,
 							ylatmin,
-							&view->xmin, 
-							&view->ymin, 
+							&view->xmin,
+							&view->ymin,
 							&zdisplay);
 				mbview_sphere_forward(instance,
-							xlonmax, 
+							xlonmax,
 							ylatmax,
-							&view->xmax, 
-							&view->ymax, 
+							&view->xmax,
+							&view->ymax,
 							&zdisplay);
 				view->xmin -= view->sphere_refx;
 				view->xmax -= view->sphere_refx;
@@ -404,30 +404,30 @@ fprintf(stderr,"mbview_projectdata: %ld\n", instance);
 				mbview_sphere_forward(instance,
 							0.5 * (xlonmin + xlonmax),
 							0.5 * (ylatmin + ylatmax),
-							&view->xorigin, 
-							&view->yorigin, 
+							&view->xorigin,
+							&view->yorigin,
 							&view->zorigin);
-				
+
 				view->xorigin -= view->sphere_refx;
 				view->yorigin -= view->sphere_refy;
-				view->zorigin += 0.5 * (data->primary_min + data->primary_max) 
+				view->zorigin += 0.5 * (data->primary_min + data->primary_max)
 						- view->sphere_refz;
 				}
 			}
 		}
-		
+
 	/* get origin and scaling */
-	view->scale = MIN((1.75 * MBV_OPENGL_WIDTH 
+	view->scale = MIN((1.75 * MBV_OPENGL_WIDTH
 					/ (view->xmax - view->xmin)),
-				(1.75 * MBV_OPENGL_WIDTH  
+				(1.75 * MBV_OPENGL_WIDTH
 					/ view->aspect_ratio
 					/ (view->ymax - view->ymin)));
 	view->size2d = 1.0;
 
 /*fprintf(stderr,"Projections:\n");
-fprintf(stderr,"  Grid: mode:%d id:%s\n", 
+fprintf(stderr,"  Grid: mode:%d id:%s\n",
 data->primary_grid_projection_mode, data->primary_grid_projection_id);
-fprintf(stderr,"  Display: mode:%d id:%s\n", 
+fprintf(stderr,"  Display: mode:%d id:%s\n",
 data->display_projection_mode, data->display_projection_id);
 fprintf(stderr,"  Display min max: %f %f %f %f\n",
 view->xmin, view->xmax, view->ymin, view->ymax);
@@ -443,13 +443,13 @@ fprintf(stderr,"  Display scale: %f\n", view->scale);*/
 		k = i * data->primary_ny + j;
 		xgrid = data->primary_xmin + i * data->primary_dx;
 		ygrid = data->primary_ymin + j * data->primary_dy;
-		
+
 		/* reproject positions into display coordinates */
 		mbview_projectforward(instance, MB_NO,
 					xgrid, ygrid, data->primary_data[k],
 					&xlon, &ylat,
 					&xdisplay, &ydisplay, &zdisplay);
-					
+
 		/* insert into plotting arrays */
 		data->primary_x[k] = (float)xdisplay;
 		data->primary_y[k] = (float)ydisplay;
@@ -461,13 +461,13 @@ fprintf(stderr,"  Display scale: %f\n", view->scale);*/
 		&& data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
 		{
 		/* set projection for getting lon lat */
-		proj_status = mb_proj_init(mbv_verbose, 
+		proj_status = mb_proj_init(mbv_verbose,
 					data->secondary_grid_projection_id,
 					&(view->secondary_pjptr),
 					&error);
 		if (proj_status == MB_SUCCESS)
 			view->secondary_pj_init = MB_YES;
-			
+
 		/* quit if projection fails */
 		if (proj_status != MB_SUCCESS)
 			{
@@ -480,13 +480,13 @@ fprintf(stderr,"  Display scale: %f\n", view->scale);*/
 			exit(error);
 			}
 		}
-		
+
 	/* check for pending event */
-	if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
+	if (view->plot_done == MB_NO
+		&& view->plot_interrupt_allowed == MB_YES
 		&& i % MBV_EVENTCHECKCOARSENESS == 0)
 		do_mbview_xevents();
-		
+
 	/* dump out of loop if plotting already done at a higher recursion */
 	if (view->plot_done == MB_YES)
 		i = data->primary_nx;
@@ -501,8 +501,8 @@ fprintf(stderr,"  Display scale: %f\n", view->scale);*/
 			}
 
 		/* check for pending event */
-		if (view->plot_done == MB_NO 
-			&& view->plot_interrupt_allowed == MB_YES 
+		if (view->plot_done == MB_NO
+			&& view->plot_interrupt_allowed == MB_YES
 			&& i % MBV_EVENTCHECKCOARSENESS == 0)
 			do_mbview_xevents();
 
@@ -510,13 +510,13 @@ fprintf(stderr,"  Display scale: %f\n", view->scale);*/
 		if (view->plot_done == MB_YES)
 			i = data->primary_nx;
 		}
-		
+
 	/* clear zscale for grid */
 	mbview_zscaleclear(instance);
-		
+
 	/* project and scale data other than the grid */
 	mbview_zscale(instance);
-	
+
 	/* set projected flag only if plotting not done */
 	if (view->plot_done == MB_NO)
 		{
@@ -561,7 +561,7 @@ int mbview_derivative(size_t instance, int i, int j)
 		}
 if (mbv_verbose >= 2)
 fprintf(stderr,"mbview_derivative: %ld\n", instance);
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -609,12 +609,12 @@ fprintf(stderr,"mbview_derivative: %ld\n", instance);
 	/* calculate x derivative */
 	if (derivative_ok == MB_YES)
 		{
-		dx = (data->primary_x[k2] 
+		dx = (data->primary_x[k2]
 			- data->primary_x[k1]);
 		if (dx != 0.0)
-		data->primary_dzdx[k] 
-			= view->scale * 
-				(data->primary_data[k2] 
+		data->primary_dzdx[k]
+			= view->scale *
+				(data->primary_data[k2]
 					- data->primary_data[k1])
 				/ dx;
 		else
@@ -666,25 +666,25 @@ fprintf(stderr,"mbview_derivative: %ld\n", instance);
 	/* calculate y derivative */
 	if (derivative_ok == MB_YES)
 		{
-		dy = (data->primary_y[k2] 
+		dy = (data->primary_y[k2]
 			- data->primary_y[k1]);
 		if (dy != 0.0)
-		data->primary_dzdy[k] 
-			= view->scale * 
-				(data->primary_data[k2] 
+		data->primary_dzdy[k]
+			= view->scale *
+				(data->primary_data[k2]
 					- data->primary_data[k1])
-				/ (data->primary_y[k2] 
+				/ (data->primary_y[k2]
 					- data->primary_y[k1]);
 		else
 		data->primary_dzdy[k] = 0.0;
 		}
 	else
 		data->primary_dzdy[k] = 0.0;
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -721,11 +721,11 @@ int mbview_projectglobaldata(size_t instance)
 		}
 if (mbv_verbose >= 2)
 fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* can only project if projections are set up */
 	if (view->projected == MB_YES)
 		{
@@ -734,21 +734,21 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 			{
 			pointw = &(shared.shareddata.navpick.endpoints[0]);
 			status = mbview_projectfromlonlat(instance,
-					pointw->xlon, pointw->ylat, pointw->zdata, 
-					&(pointw->xgrid[instance]), 
+					pointw->xlon, pointw->ylat, pointw->zdata,
+					&(pointw->xgrid[instance]),
 					&(pointw->ygrid[instance]),
-					&(pointw->xdisplay[instance]), 
-					&(pointw->ydisplay[instance]), 
+					&(pointw->xdisplay[instance]),
+					&(pointw->ydisplay[instance]),
 					&(pointw->zdisplay[instance]));
 			for (i=0;i<4;i++)
 				{
 				pointw = &(shared.shareddata.navpick.xpoints[i]);
 				status = mbview_projectfromlonlat(instance,
-						pointw->xlon, pointw->ylat, pointw->zdata, 
-						&(pointw->xgrid[instance]), 
+						pointw->xlon, pointw->ylat, pointw->zdata,
+						&(pointw->xgrid[instance]),
 						&(pointw->ygrid[instance]),
-						&(pointw->xdisplay[instance]), 
-						&(pointw->ydisplay[instance]), 
+						&(pointw->xdisplay[instance]),
+						&(pointw->ydisplay[instance]),
 						&(pointw->zdisplay[instance]));
 				}
 			for(i=0;i<2;i++)
@@ -759,11 +759,11 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 						{
 						pointw = &(shared.shareddata.navpick.xsegments[i].lspoints[j]);
 						status = mbview_projectfromlonlat(instance,
-								pointw->xlon, pointw->ylat, pointw->zdata, 
-								&(pointw->xgrid[instance]), 
+								pointw->xlon, pointw->ylat, pointw->zdata,
+								&(pointw->xgrid[instance]),
 								&(pointw->ygrid[instance]),
-								&(pointw->xdisplay[instance]), 
-								&(pointw->ydisplay[instance]), 
+								&(pointw->xdisplay[instance]),
+								&(pointw->ydisplay[instance]),
 								&(pointw->zdisplay[instance]));
 						}
 					}
@@ -773,21 +773,21 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 			{
 			pointw = &(shared.shareddata.navpick.endpoints[1]);
 			status = mbview_projectfromlonlat(instance,
-					pointw->xlon, pointw->ylat, pointw->zdata, 
-					&(pointw->xgrid[instance]), 
+					pointw->xlon, pointw->ylat, pointw->zdata,
+					&(pointw->xgrid[instance]),
 					&(pointw->ygrid[instance]),
-					&(pointw->xdisplay[instance]), 
-					&(pointw->ydisplay[instance]), 
+					&(pointw->xdisplay[instance]),
+					&(pointw->ydisplay[instance]),
 					&(pointw->zdisplay[instance]));
 			for (i=4;i<8;i++)
 				{
 				pointw = &(shared.shareddata.navpick.xpoints[i]);
 				status = mbview_projectfromlonlat(instance,
-						pointw->xlon, pointw->ylat, pointw->zdata, 
-						&(pointw->xgrid[instance]), 
+						pointw->xlon, pointw->ylat, pointw->zdata,
+						&(pointw->xgrid[instance]),
 						&(pointw->ygrid[instance]),
-						&(pointw->xdisplay[instance]), 
-						&(pointw->ydisplay[instance]), 
+						&(pointw->xdisplay[instance]),
+						&(pointw->ydisplay[instance]),
 						&(pointw->zdisplay[instance]));
 				}
 			for(i=2;i<4;i++)
@@ -798,11 +798,11 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 						{
 						pointw = &(shared.shareddata.navpick.xsegments[i].lspoints[j]);
 						status = mbview_projectfromlonlat(instance,
-								pointw->xlon, pointw->ylat, pointw->zdata, 
-								&(pointw->xgrid[instance]), 
+								pointw->xlon, pointw->ylat, pointw->zdata,
+								&(pointw->xgrid[instance]),
 								&(pointw->ygrid[instance]),
-								&(pointw->xdisplay[instance]), 
-								&(pointw->ydisplay[instance]), 
+								&(pointw->xdisplay[instance]),
+								&(pointw->ydisplay[instance]),
 								&(pointw->zdisplay[instance]));
 						}
 					}
@@ -816,11 +816,11 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 				{
 				pointw = &(shared.shareddata.sites[i].point);
 				status = mbview_projectfromlonlat(instance,
-						pointw->xlon, pointw->ylat, pointw->zdata, 
-						&(pointw->xgrid[instance]), 
+						pointw->xlon, pointw->ylat, pointw->zdata,
+						&(pointw->xgrid[instance]),
 						&(pointw->ygrid[instance]),
-						&(pointw->xdisplay[instance]), 
-						&(pointw->ydisplay[instance]), 
+						&(pointw->xdisplay[instance]),
+						&(pointw->ydisplay[instance]),
 						&(pointw->zdisplay[instance]));
 				}
 			}
@@ -834,11 +834,11 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 				{
 				pointw = &(shared.shareddata.routes[i].points[j]);
 				status = mbview_projectfromlonlat(instance,
-						pointw->xlon, pointw->ylat, pointw->zdata, 
-						&(pointw->xgrid[instance]), 
+						pointw->xlon, pointw->ylat, pointw->zdata,
+						&(pointw->xgrid[instance]),
 						&(pointw->ygrid[instance]),
-						&(pointw->xdisplay[instance]), 
-						&(pointw->ydisplay[instance]), 
+						&(pointw->xdisplay[instance]),
+						&(pointw->ydisplay[instance]),
 						&(pointw->zdisplay[instance]));
 				}
 			    for (j=0;j<shared.shareddata.routes[i].npoints-1;j++)
@@ -847,11 +847,11 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 					{
 					pointw = &(shared.shareddata.routes[i].segments[j].lspoints[k]);
 					status = mbview_projectfromlonlat(instance,
-							pointw->xlon, pointw->ylat, pointw->zdata, 
-							&(pointw->xgrid[instance]), 
+							pointw->xlon, pointw->ylat, pointw->zdata,
+							&(pointw->xgrid[instance]),
 							&(pointw->ygrid[instance]),
-							&(pointw->xdisplay[instance]), 
-							&(pointw->ydisplay[instance]), 
+							&(pointw->xdisplay[instance]),
+							&(pointw->ydisplay[instance]),
 							&(pointw->zdisplay[instance]));
 					}
 				}
@@ -867,35 +867,35 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 				{
 				pointw = &(shared.shareddata.navs[i].navpts[j].point);
 				status = mbview_projectfromlonlat(instance,
-						pointw->xlon, pointw->ylat, pointw->zdata, 
-						&(pointw->xgrid[instance]), 
+						pointw->xlon, pointw->ylat, pointw->zdata,
+						&(pointw->xgrid[instance]),
 						&(pointw->ygrid[instance]),
-						&(pointw->xdisplay[instance]), 
-						&(pointw->ydisplay[instance]), 
+						&(pointw->xdisplay[instance]),
+						&(pointw->ydisplay[instance]),
 						&(pointw->zdisplay[instance]));
 				pointw = &(shared.shareddata.navs[i].navpts[j].pointport);
 				status = mbview_projectfromlonlat(instance,
-						pointw->xlon, pointw->ylat, pointw->zdata, 
-						&(pointw->xgrid[instance]), 
+						pointw->xlon, pointw->ylat, pointw->zdata,
+						&(pointw->xgrid[instance]),
 						&(pointw->ygrid[instance]),
-						&(pointw->xdisplay[instance]), 
-						&(pointw->ydisplay[instance]), 
+						&(pointw->xdisplay[instance]),
+						&(pointw->ydisplay[instance]),
 						&(pointw->zdisplay[instance]));
 				pointw = &(shared.shareddata.navs[i].navpts[j].pointcntr);
 				status = mbview_projectfromlonlat(instance,
-						pointw->xlon, pointw->ylat, pointw->zdata, 
-						&(pointw->xgrid[instance]), 
+						pointw->xlon, pointw->ylat, pointw->zdata,
+						&(pointw->xgrid[instance]),
 						&(pointw->ygrid[instance]),
-						&(pointw->xdisplay[instance]), 
-						&(pointw->ydisplay[instance]), 
+						&(pointw->xdisplay[instance]),
+						&(pointw->ydisplay[instance]),
 						&(pointw->zdisplay[instance]));
 				pointw = &(shared.shareddata.navs[i].navpts[j].pointstbd);
 				status = mbview_projectfromlonlat(instance,
-						pointw->xlon, pointw->ylat, pointw->zdata, 
-						&(pointw->xgrid[instance]), 
+						pointw->xlon, pointw->ylat, pointw->zdata,
+						&(pointw->xgrid[instance]),
 						&(pointw->ygrid[instance]),
-						&(pointw->xdisplay[instance]), 
-						&(pointw->ydisplay[instance]), 
+						&(pointw->xdisplay[instance]),
+						&(pointw->ydisplay[instance]),
 						&(pointw->zdisplay[instance]));
 				}
 			    for (j=0;j<shared.shareddata.navs[i].npoints-1;j++)
@@ -904,11 +904,11 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 					{
 					pointw = &(shared.shareddata.navs[i].segments[j].lspoints[k]);
 					status = mbview_projectfromlonlat(instance,
-							pointw->xlon, pointw->ylat, pointw->zdata, 
-							&(pointw->xgrid[instance]), 
+							pointw->xlon, pointw->ylat, pointw->zdata,
+							&(pointw->xgrid[instance]),
 							&(pointw->ygrid[instance]),
-							&(pointw->xdisplay[instance]), 
-							&(pointw->ydisplay[instance]), 
+							&(pointw->xdisplay[instance]),
+							&(pointw->ydisplay[instance]),
 							&(pointw->zdisplay[instance]));
 					}
 				}
@@ -924,11 +924,11 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 				{
 				pointw = &(shared.shareddata.vectors[i].vectorpts[j].point);
 				status = mbview_projectfromlonlat(instance,
-						pointw->xlon, pointw->ylat, pointw->zdata, 
-						&(pointw->xgrid[instance]), 
+						pointw->xlon, pointw->ylat, pointw->zdata,
+						&(pointw->xgrid[instance]),
 						&(pointw->ygrid[instance]),
-						&(pointw->xdisplay[instance]), 
-						&(pointw->ydisplay[instance]), 
+						&(pointw->xdisplay[instance]),
+						&(pointw->ydisplay[instance]),
 						&(pointw->zdisplay[instance]));
 				}
 			    for (j=0;j<shared.shareddata.navs[i].npoints-1;j++)
@@ -937,11 +937,11 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 					{
 					pointw = &(shared.shareddata.navs[i].segments[j].lspoints[k]);
 					status = mbview_projectfromlonlat(instance,
-							pointw->xlon, pointw->ylat, pointw->zdata, 
-							&(pointw->xgrid[instance]), 
+							pointw->xlon, pointw->ylat, pointw->zdata,
+							&(pointw->xgrid[instance]),
 							&(pointw->ygrid[instance]),
-							&(pointw->xdisplay[instance]), 
-							&(pointw->ydisplay[instance]), 
+							&(pointw->xdisplay[instance]),
+							&(pointw->ydisplay[instance]),
 							&(pointw->zdisplay[instance]));
 					}
 				}
@@ -990,8 +990,8 @@ int mbview_zscalegridpoint(size_t instance, int k)
 		fprintf(stderr,"dbg2       k:                %d\n",k);
 		}
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_zscalegridpoint: %d %d\n", i, j);
-		
+fprintf(stderr,"mbview_zscalegridpoint: %d\n", k);
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -1002,8 +1002,8 @@ fprintf(stderr,"mbview_zscalegridpoint: %d %d\n", i, j);
 		|| data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
 		{
 		/* scale z value alone */
-		data->primary_z[k] 
-			= (float)(view->scale 
+		data->primary_z[k]
+			= (float)(view->scale
 				* (data->exageration * data->primary_data[k] - view->zorigin));
 		}
 	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
@@ -1013,13 +1013,13 @@ fprintf(stderr,"mbview_zscalegridpoint: %d %d\n", i, j);
 		j = k % data->primary_ny;
 		xgrid = data->primary_xmin + i * data->primary_dx;
 		ygrid = data->primary_ymin + j * data->primary_dy;
-		
+
 		/* reproject positions into display coordinates */
 		mbview_projectforward(instance, MB_NO,
 					xgrid, ygrid, data->primary_data[k],
 					&xlon, &ylat,
 					&xdisplay, &ydisplay, &zdisplay);
-					
+
 		/* insert into plotting arrays */
 		data->primary_x[k] = (float)xdisplay;
 		data->primary_y[k] = (float)ydisplay;
@@ -1027,7 +1027,7 @@ fprintf(stderr,"mbview_zscalegridpoint: %d %d\n", i, j);
 		}
 
 	/* set zscale status bit */
-	data->primary_stat_z[k/8] 
+	data->primary_stat_z[k/8]
 		= data->primary_stat_z[k/8] | statmask[k%8];
 
 	/* print output debug statements */
@@ -1044,7 +1044,7 @@ fprintf(stderr,"mbview_zscalegridpoint: %d %d\n", i, j);
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, 
+int mbview_zscalepoint(size_t instance, int globalview, double offset_factor,
 			struct mbview_point_struct *point)
 {
 	/* local variables */
@@ -1067,7 +1067,7 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor,
 		}
 if (mbv_verbose >= 2)
 fprintf(stderr,"mbview_zscalepoint: %ld\n", instance);
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -1086,7 +1086,7 @@ fprintf(stderr,"mbview_zscalepoint: %ld\n", instance);
 					point->xgrid, point->ygrid, point->zdata,
 					&point->xlon, &point->ylat,
 					&point->xdisplay, &point->ydisplay, &point->zdisplay);
-					
+
 		if (globalview == MB_NO)
 			{
 			point->zdisplay += offset_factor;
@@ -1113,7 +1113,7 @@ fprintf(stderr,"mbview_zscalepoint: %ld\n", instance);
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, 
+int mbview_zscalepointw(size_t instance, int globalview, double offset_factor,
 			struct mbview_pointw_struct *pointw)
 {
 	/* local variables */
@@ -1136,7 +1136,7 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor,
 		}
 if (mbv_verbose >= 2)
 fprintf(stderr,"mbview_zscalepointw: %ld\n", instance);
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -1154,10 +1154,10 @@ fprintf(stderr,"mbview_zscalepointw: %ld\n", instance);
 		mbview_projectforward(instance, MB_NO,
 					pointw->xgrid[instance], pointw->ygrid[instance], pointw->zdata,
 					&(pointw->xlon), &(pointw->ylat),
-					&(pointw->xdisplay[instance]), 
-					&(pointw->ydisplay[instance]), 
+					&(pointw->xdisplay[instance]),
+					&(pointw->ydisplay[instance]),
 					&(pointw->zdisplay[instance]));
-					
+
 		if (globalview == MB_NO)
 			{
 			pointw->zdisplay[instance] += offset_factor;
@@ -1214,18 +1214,18 @@ fprintf(stderr,"mbview_updatepointw: %ld\n", instance);
 		if (i != instance && view->init != MBV_WINDOW_NULL)
 			{
 			data = &(view->data);
-			
+
 			/* get positions in grid coordinates */
 			status = mbview_projectll2xygrid(i,
-					pointw->xlon, pointw->ylat, 
-					&(pointw->xgrid[i]), 
+					pointw->xlon, pointw->ylat,
+					&(pointw->xgrid[i]),
 					&(pointw->ygrid[i]));
 
 			/* get positions in display coordinates */
 			status = mbview_projectll2display(i,
-					pointw->xlon, pointw->ylat, pointw->zdata, 
-					&(pointw->xdisplay[i]), 
-					&(pointw->ydisplay[i]), 
+					pointw->xlon, pointw->ylat, pointw->zdata,
+					&(pointw->xdisplay[i]),
+					&(pointw->ydisplay[i]),
 					&(pointw->zdisplay[i]));
 			}
 		}
@@ -1307,7 +1307,7 @@ int mbview_zscale(size_t instance)
 		}
 if (mbv_verbose >= 2)
 fprintf(stderr,"mbview_zscale: %ld\n", instance);
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -1365,7 +1365,7 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 				}
 			}
 		}
-		
+
 	/* handle area */
 	if (data->area_type == MBV_AREA_QUAD)
 		{
@@ -1389,7 +1389,7 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 				}
 			}
 		}
-		
+
 	/* handle region */
 	if (data->region_type == MBV_REGION_QUAD)
 		{
@@ -1402,7 +1402,7 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 				}
 			}
 		}
-	
+
 	/* handle navpicks */
 	if (shared.shareddata.navpick_type != MBV_PICK_NONE)
 		{
@@ -1417,7 +1417,7 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 				{
 				for (j=0;j<shared.shareddata.navpick.xsegments[i].nls;j++)
 					{
-					mbview_zscalepointw(instance, globalview, offset_factor, 
+					mbview_zscalepointw(instance, globalview, offset_factor,
 								&(shared.shareddata.navpick.xsegments[i].lspoints[j]));
 					}
 				}
@@ -1436,13 +1436,13 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 				{
 				for (j=0;j<shared.shareddata.navpick.xsegments[i].nls;j++)
 					{
-					mbview_zscalepointw(instance, globalview, offset_factor, 
+					mbview_zscalepointw(instance, globalview, offset_factor,
 								&(shared.shareddata.navpick.xsegments[i].lspoints[j]));
 					}
 				}
 			}
 		}
-		
+
 	/* handle sites */
 	if (shared.shareddata.nsite > 0)
 		{
@@ -1451,7 +1451,7 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 			mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.sites[i].point));
 			}
 		}
-		
+
 	/* handle routes */
 	if (shared.shareddata.nroute > 0)
 		{
@@ -1470,7 +1470,7 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 			}
 		    }
 		}
-		
+
 	/* handle nav */
 	if (shared.shareddata.nnav > 0)
 		{
@@ -1492,7 +1492,7 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 			}
 		    }
 		}
-		
+
 	/* handle vector */
 	if (shared.shareddata.nvector > 0)
 		{
@@ -1511,7 +1511,7 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 			}
 		    }
 		}
-	
+
 	/* set rez flags only if plotting not done */
 	if (view->plot_done == MB_NO)
 		{
@@ -1536,7 +1536,7 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 /*------------------------------------------------------------------------------*/
 int mbview_projectforward(size_t instance, int needlonlat,
 				double xgrid, double ygrid, double zdata,
-				double *xlon, double *ylat, 
+				double *xlon, double *ylat,
 				double *xdisplay, double *ydisplay, double *zdisplay)
 {
 	/* local variables */
@@ -1560,11 +1560,11 @@ int mbview_projectforward(size_t instance, int needlonlat,
 		fprintf(stderr,"dbg2       ygrid:            %f\n",ygrid);
 		fprintf(stderr,"dbg2       zdata:            %f\n",zdata);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-		
+
 	/* get positions into geographic coordinates if necessary */
 	if (needlonlat == MB_YES
 		|| data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED)
@@ -1637,7 +1637,7 @@ int mbview_projectinverse(size_t instance, int needlonlat,
 		fprintf(stderr,"dbg2       ydisplay:         %f\n",ydisplay);
 		fprintf(stderr,"dbg2       zdisplay:         %f\n",zdisplay);
 		}
-	
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -1707,7 +1707,7 @@ int mbview_projectfromlonlat(size_t instance,
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
 		fprintf(stderr,"dbg2       zdata:            %f\n",zdata);
 		}
-	
+
 	/* get positions into grid coordinates */
 	status = mbview_projectll2xygrid(instance,
 					xlon, ylat,
@@ -1762,7 +1762,7 @@ int mbview_projectgrid2ll(size_t instance,
 		fprintf(stderr,"dbg2       xgrid:            %f\n",xgrid);
 		fprintf(stderr,"dbg2       ygrid:            %f\n",ygrid);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -1820,7 +1820,7 @@ int mbview_projectll2xygrid(size_t instance,
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -1888,7 +1888,7 @@ int mbview_projectll2xyzgrid(size_t instance,
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
 		fprintf(stderr,"dbg2       zdata:            %lu\n",(size_t)zdata);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -1912,7 +1912,7 @@ int mbview_projectll2xyzgrid(size_t instance,
 		*xgrid = xlon;
 		*ygrid = ylat;
 		}
-		
+
 	/* now get zdata  from primary grid */
 	nfound = 0;
 	*zdata = 0.0;
@@ -1987,7 +1987,7 @@ int mbview_projectll2display(size_t instance,
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
 		fprintf(stderr,"dbg2       zdata:            %f\n",zdata);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -1997,8 +1997,8 @@ int mbview_projectll2display(size_t instance,
 		|| data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
 		{
 		mb_proj_forward(mbv_verbose, view->display_pjptr,
-				xlon, 
-				ylat, 
+				xlon,
+				ylat,
 				&xx,
 				&yy,
 				&error);
@@ -2077,7 +2077,7 @@ int mbview_projectdisplay2ll(size_t instance,
 		fprintf(stderr,"dbg2       ydisplay:         %f\n",ydisplay);
 		fprintf(stderr,"dbg2       zdisplay:         %f\n",zdisplay);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -2126,7 +2126,7 @@ int mbview_projectdisplay2ll(size_t instance,
 int mbview_projectdistance(size_t instance,
 				double xlon1, double ylat1, double zdata1,
 				double xlon2, double ylat2, double zdata2,
-				double *distancelateral, 
+				double *distancelateral,
 				double *distanceoverground,
 				double *slope)
 {
@@ -2157,7 +2157,7 @@ int mbview_projectdistance(size_t instance,
 		fprintf(stderr,"dbg2       ylat2:            %f\n",ylat2);
 		fprintf(stderr,"dbg2       zdata2:           %f\n",zdata2);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -2168,8 +2168,8 @@ int mbview_projectdistance(size_t instance,
 		{
 		/* point 1 */
 		mb_proj_forward(mbv_verbose, view->display_pjptr,
-				xlon1, 
-				ylat1, 
+				xlon1,
+				ylat1,
 				&xx1,
 				&yy1,
 				&error);
@@ -2177,8 +2177,8 @@ int mbview_projectdistance(size_t instance,
 
 		/* point 2 */
 		mb_proj_forward(mbv_verbose, view->display_pjptr,
-				xlon2, 
-				ylat2, 
+				xlon2,
+				ylat2,
 				&xx2,
 				&yy2,
 				&error);
@@ -2227,7 +2227,7 @@ int mbview_projectdistance(size_t instance,
 		mbview_sphere_forward(instance, xlon2, ylat2, &xx2, &yy2, &zz2);
 
 		/* lateral distance */
-		mbview_greatcircle_distbearing(instance, 
+		mbview_greatcircle_distbearing(instance,
 			xlon1, ylat1, xlon2, ylat2,
 			&bearing, distancelateral);
 
@@ -2290,11 +2290,11 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* The initial spherical coordinate system is defined as:
 			x = r * cos(longitude) * cos(latitude)
 			y = r * sin(longitude) * cos(latitude)
@@ -2305,14 +2305,14 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 			z = r * cos(colatitude)
 	   where:
 	   		colatitude = PI/2 - latitude
-	
+
 	   Euler's rotation theorem proves than any general rotation may be
 	   described by three successive rotations about the axes. One convention
 	   is to use first a rotation about the z-axis (angle phi), then a
 	   rotation about the x'-axis (angle theta), and finally a rotation
 	   about the z''-axis (angle psi).
-	    
-	   The euler rotation matrix becomes: 
+
+	   The euler rotation matrix becomes:
 	   		|	a11	a12	a13	|
 	   		|	a21	a22	a23	|
 	   		|	a31	a32	a33	|
@@ -2326,7 +2326,7 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 			a31 = sin(phi) * sin(theta)
 			a32 = -cos(phi) * sin(theta)
 			a33 = cos(theta)
-			
+
 	   We wish to rotate the coordinate system so that the reference position
 	   defined by xlon and ylat are located on the positive z-axis. The forward
 	   rotation is accomplished using:
@@ -2337,24 +2337,24 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 	   		phi = -PI
 			theta = ycolat = PI/2 - ylat
 			psi = xlon - PI/2
-			
+
 	  The relevant equations derived in part from:
 		http://mathworld.wolfram.com/EulerAngles.html
 	  which were viewed on January 19, 2004
 		*/
-	
+
 	/* create forward rotation matrix */
 	phi = DTR * xlon - 0.5 * M_PI;
 	theta = DTR * ylat - 0.5 * M_PI;
 	psi = M_PI;
 	mbview_sphere_matrix(phi, theta, psi, view->sphere_eulerforward);
-	
+
 	/* create reverse rotation matrix */
 	phi = -M_PI;
 	theta = 0.5 * M_PI - DTR * ylat;
 	psi = 0.5 * M_PI - DTR * xlon;
 	mbview_sphere_matrix(phi, theta, psi, view->sphere_eulerreverse);
-	
+
 	/* now get reference location in rotated coordinates */
 	view->sphere_reflon = xlon;
 	view->sphere_reflat = ylat;
@@ -2363,7 +2363,7 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 	view->sphere_refz = 0.0;
 	if (earthcentered == MB_NO)
 		{
-		mbview_sphere_forward(instance, xlon, ylat, 
+		mbview_sphere_forward(instance, xlon, ylat,
 				&view->sphere_refx,&view->sphere_refy, &view->sphere_refz);
 		}
 
@@ -2425,11 +2425,11 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat,
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* get position in initial cartesian coordinates */
 	sinlon = sin(DTR * xlon);
 	coslon = cos(DTR * xlon);
@@ -2438,7 +2438,7 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat,
 	posu[0] = MBV_SPHEROID_RADIUS * coslon * coslat;
 	posu[1] = MBV_SPHEROID_RADIUS * sinlon * coslat;
 	posu[2] = MBV_SPHEROID_RADIUS * sinlat;
-	
+
 	/* apply rotation to coordinates with the reference location
 		at the center of the view, on the positive z-axis. */
 	mbview_sphere_rotate(view->sphere_eulerforward,posu,posr);
@@ -2472,7 +2472,7 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, 
+int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz,
 			double *xlon, double *ylat)
 {
 	/* local variables */
@@ -2495,7 +2495,7 @@ int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz,
 		fprintf(stderr,"dbg2       yy:               %f\n",yy);
 		fprintf(stderr,"dbg2       zz:               %f\n",zz);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -2504,10 +2504,10 @@ int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz,
 	posr[0] = xx;
 	posr[1] = yy;
 	posr[2] = zz;
-	
+
 	/* unrotate position */
 	mbview_sphere_rotate(view->sphere_eulerreverse,posr,posu);
-	
+
 	/* get longitude and latitude */
 	*xlon = RTD * atan2(posu[1], posu[0]);
 	*ylat = 90.0 - RTD * (atan2(sqrt(posu[0] * posu[0] + posu[1] * posu[1]), posu[2]));
@@ -2553,7 +2553,7 @@ int mbview_sphere_matrix(double phi, double theta, double psi,double *eulermatri
 		fprintf(stderr,"dbg2       theta:            %f\n",theta);
 		fprintf(stderr,"dbg2       psi:              %f\n",psi);
 		}
-	
+
 	/* The initial spherical coordinate system is defined as:
 			x = r * cos(longitude) * cos(latitude)
 			y = r * sin(longitude) * cos(latitude)
@@ -2564,14 +2564,14 @@ int mbview_sphere_matrix(double phi, double theta, double psi,double *eulermatri
 			z = r * cos(colatitude)
 	   where:
 	   		colatitude = PI/2 - latitude
-	
+
 	   Euler's rotation theorem proves than any general rotation may be
 	   described by three successive rotations about the axes. One convention
 	   is to use first a rotation about the z-axis (angle phi), then a
 	   rotation about the x'-axis (angle theta), and finally a rotation
 	   about the z''-axis (angle psi).
-	    
-	   The euler rotation matrix becomes: 
+
+	   The euler rotation matrix becomes:
 	   		|	a11	a12	a13	|
 	   		|	a21	a22	a23	|
 	   		|	a31	a32	a33	|
@@ -2585,7 +2585,7 @@ int mbview_sphere_matrix(double phi, double theta, double psi,double *eulermatri
 			a31 = sin(phi) * sin(theta)
 			a32 = -cos(phi) * sin(theta)
 			a33 = cos(theta)
-			
+
 	   We wish to rotate the coordinate system so that the reference position
 	   defined by xlon and ylat are located on the positive z-axis. The forward
 	   rotation is accomplished using:
@@ -2596,12 +2596,12 @@ int mbview_sphere_matrix(double phi, double theta, double psi,double *eulermatri
 	   		phi = -PI
 			theta = ycolat = PI/2 - ylat
 			psi = xlon - PI/2
-			
+
 	  The relevant equations derived in part from:
 		http://mathworld.wolfram.com/EulerAngles.html
 	  which were viewed on January 19, 2004
 		*/
-	
+
 	/* create forward rotation matrix */
 	eulermatrix[0] = cos(phi) * cos(psi) - sin(phi) * cos(theta) * sin(psi);
 	eulermatrix[1] = sin(phi) * cos(psi) + cos(phi) * cos(theta) * sin(psi);
@@ -2681,7 +2681,7 @@ int mbview_sphere_rotate(double *eulermatrix,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_greatcircle_distbearing(size_t instance, 
+int mbview_greatcircle_distbearing(size_t instance,
 			double lon1, double lat1, double lon2,  double lat2,
 			double *bearing, double *distance)
 {
@@ -2707,11 +2707,11 @@ int mbview_greatcircle_distbearing(size_t instance,
 		fprintf(stderr,"dbg2       lon2:             %f\n",lon2);
 		fprintf(stderr,"dbg2       lat2:             %f\n",lat2);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* note: these equations derive in part from source code read at:
 		http://simgear.org/doxygen/polar3d_8hxx-source.html
 		on 17 February 2004 by D.W. Caress
@@ -2726,9 +2726,9 @@ int mbview_greatcircle_distbearing(size_t instance,
 	t2 = sin(0.5 * (rlat1 - rlat2));
 	dd = 2.0 * asin(sqrt(t2 * t2 + cos(rlat1) * cos(rlat2) * t1 * t1));
 	*distance = MBV_SPHEROID_RADIUS * dd;
-	
+
 	/* get great circle bearing */
-	
+
 	/* first check if at poles */
 	if (fabs(1.0 - sin(rlat1)) < 0.000001)
 		{
@@ -2737,18 +2737,18 @@ int mbview_greatcircle_distbearing(size_t instance,
 			{
 			*bearing = 180.0;
 			}
-			
+
 		/* at south pole therefore heading north */
 		else
 			{
 			*bearing = 0.0;
 			}
 		}
-		
+
 	/* handle position away from poles */
 	else
 		{
-		t3 = (sin(rlat2) - sin(rlat1) * cos(dd)) 
+		t3 = (sin(rlat2) - sin(rlat1) * cos(dd))
 				/ (sin(dd) * cos(rlat1));
 		rbearing = acos( MAX(MIN(t3, 1.0), -1.0));
 		if (t1 <= 0.0)
@@ -2780,7 +2780,7 @@ int mbview_greatcircle_distbearing(size_t instance,
 	return(status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_greatcircle_dist(size_t instance, 
+int mbview_greatcircle_dist(size_t instance,
 			double lon1, double lat1, double lon2,  double lat2,
 			double *distance)
 {
@@ -2806,11 +2806,11 @@ int mbview_greatcircle_dist(size_t instance,
 		fprintf(stderr,"dbg2       lon2:             %f\n",lon2);
 		fprintf(stderr,"dbg2       lat2:             %f\n",lat2);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* note: these equations derive in part from source code read at:
 		http://simgear.org/doxygen/polar3d_8hxx-source.html
 		on 17 February 2004 by D.W. Caress
@@ -2841,7 +2841,7 @@ int mbview_greatcircle_dist(size_t instance,
 	return(status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_greatcircle_endposition(size_t instance, 
+int mbview_greatcircle_endposition(size_t instance,
 			double lon1, double lat1, double bearing, double distance,
 			double *lon2, double *lat2)
 {
@@ -2866,16 +2866,16 @@ int mbview_greatcircle_endposition(size_t instance,
 		fprintf(stderr,"dbg2       bearing:          %f\n",bearing);
 		fprintf(stderr,"dbg2       distance:         %f\n",distance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* note: these equations derive in part from source code read at:
 		http://simgear.org/doxygen/polar3d_8hxx-source.html
 		on 17 February 2004 by D.W. Caress
 		The source code found at this location is licensed under the LGPL */
-		
+
 	/* scale angles to radians */
 	rd = distance / MBV_SPHEROID_RADIUS;
 	rbearing = DTR * (360.0 - bearing);
@@ -2893,7 +2893,7 @@ int mbview_greatcircle_endposition(size_t instance,
 		}
 	else
 		{
-		*lon2 = RTD * (fmod(rlon1 - asin( sin(rbearing) * sin(rd) / 
+		*lon2 = RTD * (fmod(rlon1 - asin( sin(rbearing) * sin(rd) /
                                    cos(rlat2) ) + M_PI, 2.0 * M_PI) - M_PI);
 		}
 
@@ -2931,10 +2931,10 @@ int mbview_colorclear(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 if (mbv_verbose >= 2)
 fprintf(stderr,"mbview_colorclear: %ld\n", instance);
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -2976,10 +2976,10 @@ int mbview_zscaleclear(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 if (mbv_verbose >= 2)
 fprintf(stderr,"mbview_zscaleclear: %ld\n", instance);
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -3021,7 +3021,7 @@ int mbview_setcolorparms(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -3048,7 +3048,7 @@ int mbview_setcolorparms(size_t instance)
 		view->min = data->secondary_colortable_min;
 		view->max = data->secondary_colortable_max;
 		}
-		
+
 	/* get illumination vector if necessary */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 	    view->shade_mode = data->primary_shade_mode;
@@ -3062,9 +3062,9 @@ int mbview_setcolorparms(size_t instance)
 	view->mag2 = 0.0;
 	if (view->shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
 		{
-        	view->illum_x = sin(DTR * data->illuminate_azimuth) 
+        	view->illum_x = sin(DTR * data->illuminate_azimuth)
 				* cos(DTR * data->illuminate_elevation);
-       	 	view->illum_y = cos(DTR * data->illuminate_azimuth) 
+       	 	view->illum_y = cos(DTR * data->illuminate_azimuth)
 				* cos(DTR * data->illuminate_elevation);
         	view->illum_z = sin(DTR * data->illuminate_elevation);
 		view->mag2 = data->illuminate_magnitude
@@ -3073,7 +3073,7 @@ int mbview_setcolorparms(size_t instance)
 data->illuminate_azimuth, data->illuminate_elevation, data->illuminate_magnitude);
 fprintf(stderr,"ILLUMLGT: %f %f %f %f\n",view->illum_x, view->illum_y, view->illum_z, view->mag2);*/
 		}
-		
+
 	/* get sign of overlay shading if necessary */
 	view->sign = 1.0;
 	if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY)
@@ -3083,7 +3083,7 @@ fprintf(stderr,"ILLUMLGT: %f %f %f %f\n",view->illum_x, view->illum_y, view->ill
 		else
 			view->sign = -1.0;
 		}
-	
+
 	/* get colortable */
 	if (view->colortable == MBV_COLORTABLE_HAXBY)
 		{
@@ -3188,15 +3188,15 @@ int mbview_make_histogram(
 		view->secondary_histogram_set = MB_YES;
 		}
 	dhist = (max - min) / (MBV_RAW_HISTOGRAM_DIM - 1);
-	
+
 	/* initialize histograms */
 	for (i=0;i<3*MBV_NUM_COLORS;i++)
 		histogram[i] = 0.0;
-	
+
 	/* initialize bins */
 	for (i=0;i<MBV_RAW_HISTOGRAM_DIM;i++)
 		binned_counts[i] = 0;
-	
+
 	/* loop over all values binning quantities */
 	bindimminusone = MBV_RAW_HISTOGRAM_DIM - 1;
 	nbinned = 0;
@@ -3227,9 +3227,9 @@ int mbview_make_histogram(
 			{
 			if (data->primary_data[i] != data->primary_nodatavalue)
 				{
-				slope = sqrt(data->primary_dzdx[i] 
+				slope = sqrt(data->primary_dzdx[i]
 							* data->primary_dzdx[i]
-						+ data->primary_dzdy[i] 
+						+ data->primary_dzdy[i]
 							* data->primary_dzdy[i]);
 				jbin = (slope - min) / dhist;
 				if (jbin >= 0 && jbin <= bindimminusone)
@@ -3260,7 +3260,7 @@ int mbview_make_histogram(
 				}
 			}
 		}
-		
+
 	/* construct histogram equalization for full data range */
 	histogram[0] = min;
 	histogram[MBV_NUM_COLORS-1] = max;
@@ -3276,7 +3276,7 @@ int mbview_make_histogram(
 			khist++;
 			}
 		}
-		
+
 	/* construct histogram equalization for data < 0.0 */
 	if (nbinnedneg > MBV_NUM_COLORS)
 		{
@@ -3296,7 +3296,7 @@ int mbview_make_histogram(
 				}
 			}
 		}
-		
+
 	/* construct histogram equalization for data >= 0.0 */
 	if (nbinnedpos > MBV_NUM_COLORS)
 		{
@@ -3339,7 +3339,7 @@ int mbview_make_histogram(
 	/* return */
 	return(status);
 }
-		
+
 /*------------------------------------------------------------------------------*/
 int mbview_colorpoint(
 	struct mbview_world_struct *view,
@@ -3366,7 +3366,7 @@ int mbview_colorpoint(
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
 		}
-		
+
 	/* get values for coloring */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 		{
@@ -3374,9 +3374,9 @@ int mbview_colorpoint(
 		}
 	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
 		{
-		value = sqrt(data->primary_dzdx[k] 
+		value = sqrt(data->primary_dzdx[k]
 					* data->primary_dzdx[k]
-				+ data->primary_dzdy[k] 
+				+ data->primary_dzdy[k]
 					* data->primary_dzdy[k]);
 		}
 	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
@@ -3388,12 +3388,12 @@ int mbview_colorpoint(
 		}
 
 	/* get color */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE 
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE
 		&& view->colortable != MBV_COLORTABLE_SEALEVEL)
 	    {
-	    mbview_getcolor(value, view->min, view->max, view->colortable_mode, 
-	    		(float) 0.0, (float) 0.0, (float) 1.0, 
-	    		(float) 1.0, (float) 0.0, (float) 0.0, 
+	    mbview_getcolor(value, view->min, view->max, view->colortable_mode,
+	    		(float) 0.0, (float) 0.0, (float) 1.0,
+	    		(float) 1.0, (float) 0.0, (float) 0.0,
 			view->colortable_red,
 			view->colortable_green,
 			view->colortable_blue,
@@ -3403,7 +3403,7 @@ int mbview_colorpoint(
 	    }
 	else if (view->colortable != MBV_COLORTABLE_SEALEVEL)
 	    {
-	    mbview_getcolor(value, view->min, view->max, view->colortable_mode, 
+	    mbview_getcolor(value, view->min, view->max, view->colortable_mode,
 			view->colortable_red[0],
 			view->colortable_green[0],
 			view->colortable_blue[0],
@@ -3423,7 +3423,7 @@ int mbview_colorpoint(
 		{
 		if (view->colortable_mode == MBV_COLORTABLE_NORMAL)
 		    {
-		    mbview_getcolor(value, 0.0, view->max, view->colortable_mode, 
+		    mbview_getcolor(value, 0.0, view->max, view->colortable_mode,
 			colortable_abovesealevel_red[0],
 			colortable_abovesealevel_green[0],
 			colortable_abovesealevel_blue[0],
@@ -3439,7 +3439,7 @@ int mbview_colorpoint(
 		    }
 		else
 		    {
-		    mbview_getcolor(value, -view->max / 11.0, view->max, view->colortable_mode, 
+		    mbview_getcolor(value, -view->max / 11.0, view->max, view->colortable_mode,
 			colortable_haxby_red[0],
 			colortable_haxby_green[0],
 			colortable_haxby_blue[0],
@@ -3458,7 +3458,7 @@ int mbview_colorpoint(
 		{
 		if (view->colortable_mode == MBV_COLORTABLE_REVERSED)
 		    {
-		    mbview_getcolor(value, view->min, 0.0, view->colortable_mode, 
+		    mbview_getcolor(value, view->min, 0.0, view->colortable_mode,
 			colortable_abovesealevel_red[0],
 			colortable_abovesealevel_green[0],
 			colortable_abovesealevel_blue[0],
@@ -3474,7 +3474,7 @@ int mbview_colorpoint(
 		    }
 		else
 		    {
-		    mbview_getcolor(value, view->min, -view->min / 11.0, view->colortable_mode, 
+		    mbview_getcolor(value, view->min, -view->min / 11.0, view->colortable_mode,
 			colortable_haxby_red[0],
 			colortable_haxby_green[0],
 			colortable_haxby_blue[0],
@@ -3496,14 +3496,14 @@ int mbview_colorpoint(
 	    {
 	    if (view->shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
 		{
-		dd = sqrt(view->mag2 * data->primary_dzdx[k] 
+		dd = sqrt(view->mag2 * data->primary_dzdx[k]
 				* data->primary_dzdx[k]
-			+ view->mag2 * data->primary_dzdy[k] 
+			+ view->mag2 * data->primary_dzdy[k]
 				* data->primary_dzdy[k]
 				+ 1.0);
-		intensity = data->illuminate_magnitude 
+		intensity = data->illuminate_magnitude
 			    * view->illum_x * data->primary_dzdx[k] / dd
-			+ data->illuminate_magnitude 
+			+ data->illuminate_magnitude
 			    * view->illum_y * data->primary_dzdy[k] / dd
 			+ view->illum_z / dd
 			- 0.5;
@@ -3520,9 +3520,9 @@ intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
 	    else if (view->shade_mode == MBV_SHADE_VIEW_SLOPE)
 		{
 		intensity = -data->slope_magnitude
-			* sqrt(data->primary_dzdx[k] 
+			* sqrt(data->primary_dzdx[k]
 					* data->primary_dzdx[k]
-				+ data->primary_dzdy[k] 
+				+ data->primary_dzdy[k]
 					* data->primary_dzdy[k]);
 		intensity = MAX(intensity, -1.0);
 		mbview_applyshade(intensity,
@@ -3538,7 +3538,7 @@ intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
 			mbview_getsecondaryvalue(view, data, i, j, &svalue);
 		if (svalue != data->secondary_nodatavalue)
 			{
-			intensity = view->sign * data->overlay_shade_magnitude 
+			intensity = view->sign * data->overlay_shade_magnitude
 				* (svalue - data->overlay_shade_center)
 				/ (data->secondary_max - data->secondary_min);
 			mbview_applyshade(intensity,
@@ -3550,7 +3550,7 @@ intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
 	    }
 
 	/* set color status bit */
-	data->primary_stat_color[k/8] 
+	data->primary_stat_color[k/8]
 		= data->primary_stat_color[k/8] | statmask[k%8];
 
 	/* print output debug statements */
@@ -3593,7 +3593,7 @@ int mbview_colorpoint_histogram(
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
 		}
-		
+
 	/* get values for coloring */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 		{
@@ -3601,9 +3601,9 @@ int mbview_colorpoint_histogram(
 		}
 	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
 		{
-		value = sqrt(data->primary_dzdx[k] 
+		value = sqrt(data->primary_dzdx[k]
 					* data->primary_dzdx[k]
-				+ data->primary_dzdy[k] 
+				+ data->primary_dzdy[k]
 					* data->primary_dzdy[k]);
 		}
 	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
@@ -3615,12 +3615,12 @@ int mbview_colorpoint_histogram(
 		}
 
 	/* get color */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE 
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE
 		&& view->colortable != MBV_COLORTABLE_SEALEVEL)
 	    {
-	    mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode, 
-	    		(float) 0.0, (float) 0.0, (float) 1.0, 
-	    		(float) 1.0, (float) 0.0, (float) 0.0, 
+	    mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode,
+	    		(float) 0.0, (float) 0.0, (float) 1.0,
+	    		(float) 1.0, (float) 0.0, (float) 0.0,
 			view->colortable_red,
 			view->colortable_green,
 			view->colortable_blue,
@@ -3631,7 +3631,7 @@ int mbview_colorpoint_histogram(
 	    }
 	else if (view->colortable != MBV_COLORTABLE_SEALEVEL)
 	    {
-	    mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode, 
+	    mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode,
 			view->colortable_red[0],
 			view->colortable_green[0],
 			view->colortable_blue[0],
@@ -3652,7 +3652,7 @@ int mbview_colorpoint_histogram(
 		{
 		if (view->colortable_mode == MBV_COLORTABLE_NORMAL)
 		    {
-		    mbview_getcolor_histogram(value, 0.0, view->max, view->colortable_mode, 
+		    mbview_getcolor_histogram(value, 0.0, view->max, view->colortable_mode,
 			colortable_abovesealevel_red[0],
 			colortable_abovesealevel_green[0],
 			colortable_abovesealevel_blue[0],
@@ -3669,7 +3669,7 @@ int mbview_colorpoint_histogram(
 		    }
 		else
 		    {
-		    mbview_getcolor_histogram(value, -view->max / 11.0, view->max, view->colortable_mode, 
+		    mbview_getcolor_histogram(value, -view->max / 11.0, view->max, view->colortable_mode,
 			colortable_haxby_red[0],
 			colortable_haxby_green[0],
 			colortable_haxby_blue[0],
@@ -3689,7 +3689,7 @@ int mbview_colorpoint_histogram(
 		{
 		if (view->colortable_mode == MBV_COLORTABLE_REVERSED)
 		    {
-		    mbview_getcolor_histogram(value, view->min, 0.0, view->colortable_mode, 
+		    mbview_getcolor_histogram(value, view->min, 0.0, view->colortable_mode,
 			colortable_abovesealevel_red[0],
 			colortable_abovesealevel_green[0],
 			colortable_abovesealevel_blue[0],
@@ -3706,7 +3706,7 @@ int mbview_colorpoint_histogram(
 		    }
 		else
 		    {
-		    mbview_getcolor_histogram(value, view->min, -view->min / 11.0, view->colortable_mode, 
+		    mbview_getcolor_histogram(value, view->min, -view->min / 11.0, view->colortable_mode,
 			colortable_haxby_red[0],
 			colortable_haxby_green[0],
 			colortable_haxby_blue[0],
@@ -3729,14 +3729,14 @@ int mbview_colorpoint_histogram(
 	    {
 	    if (view->shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
 		{
-		dd = sqrt(view->mag2 * data->primary_dzdx[k] 
+		dd = sqrt(view->mag2 * data->primary_dzdx[k]
 				* data->primary_dzdx[k]
-			+ view->mag2 * data->primary_dzdy[k] 
+			+ view->mag2 * data->primary_dzdy[k]
 				* data->primary_dzdy[k]
 				+ 1.0);
-		intensity = data->illuminate_magnitude 
+		intensity = data->illuminate_magnitude
 			    * view->illum_x * data->primary_dzdx[k] / dd
-			+ data->illuminate_magnitude 
+			+ data->illuminate_magnitude
 			    * view->illum_y * data->primary_dzdy[k] / dd
 			+ view->illum_z / dd
 			- 0.5;
@@ -3753,9 +3753,9 @@ intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
 	    else if (view->shade_mode == MBV_SHADE_VIEW_SLOPE)
 		{
 		intensity = -data->slope_magnitude
-			* sqrt(data->primary_dzdx[k] 
+			* sqrt(data->primary_dzdx[k]
 					* data->primary_dzdx[k]
-				+ data->primary_dzdy[k] 
+				+ data->primary_dzdy[k]
 					* data->primary_dzdy[k]);
 		intensity = MAX(intensity, -1.0);
 		mbview_applyshade(intensity,
@@ -3771,7 +3771,7 @@ intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
 			mbview_getsecondaryvalue(view, data, i, j, &svalue);
 		if (svalue != data->secondary_nodatavalue)
 			{
-			intensity = view->sign * data->overlay_shade_magnitude 
+			intensity = view->sign * data->overlay_shade_magnitude
 				* (svalue - data->overlay_shade_center)
 				/ (data->secondary_max - data->secondary_min);
 			mbview_applyshade(intensity,
@@ -3783,7 +3783,7 @@ intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
 	    }
 
 	/* set color status bit */
-	data->primary_stat_color[k/8] 
+	data->primary_stat_color[k/8]
 		= data->primary_stat_color[k/8] | statmask[k%8];
 
 	/* print output debug statements */
@@ -3801,7 +3801,7 @@ intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
 
 /*------------------------------------------------------------------------------*/
 int mbview_getcolor(double value, double min, double max,
-			int colortablemode, 
+			int colortablemode,
 			float below_red,
 			float below_green,
 			float below_blue,
@@ -3844,7 +3844,7 @@ int mbview_getcolor(double value, double min, double max,
 		for (i=0;i<MBV_NUM_COLORS;i++)
 			fprintf(stderr,"dbg2       colortable_blue[%d]:  %f\n",i,colortable_blue[i]);
 		}
-		
+
 	/* get color */
 	if (colortablemode == MBV_COLORTABLE_NORMAL)
 		factor = (max - value) / (max - min);
@@ -3895,7 +3895,7 @@ int mbview_getcolor(double value, double min, double max,
 
 /*------------------------------------------------------------------------------*/
 int mbview_getcolor_histogram(double value, double min, double max,
-			int colortablemode, 
+			int colortablemode,
 			float below_red,
 			float below_green,
 			float below_blue,
@@ -3939,7 +3939,7 @@ int mbview_getcolor_histogram(double value, double min, double max,
 				colortable_red[i], colortable_green[i], colortable_blue[i], histogram[i]);
 			}
 		}
-		
+
 	/* get color */
 	if (colortablemode == MBV_COLORTABLE_NORMAL)
 		factor = (max - value) / (max - min);
@@ -3971,7 +3971,7 @@ int mbview_getcolor_histogram(double value, double min, double max,
 				found = MB_YES;
 				}
 			}
-			
+
 		/* get color */
 		if (colortablemode == MBV_COLORTABLE_NORMAL)
 			{
@@ -4013,7 +4013,7 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b)
 	/* note - this correction algorithm is taken from the GMT Technical
 	   Reference and Cookbook by Wessel and Smith - you can find it in
 	   Appendix I: Color Space - The final frontier */
-	   
+
 	/* local variables */
 	char	*function_name = "mbview_applyshade";
 	int	status = MB_SUCCESS;
@@ -4032,7 +4032,7 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       intensity:           %f\n",intensity);
 		}
-	
+
 	/* change the initial rgb into hsv space */
 	vmax = MAX (MAX (*r, *g), *b);
 	vmin = MIN (MIN (*r, *g), *b);
@@ -4056,36 +4056,36 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b)
 		else
 			h = 4.0 + gmod - rmod;
 		h *= 60.0;
-		if (h < 0.0) 
+		if (h < 0.0)
 			h += 360.0;
 		}
 
 	/* apply the shade to the color */
-	if (intensity > 0) 
+	if (intensity > 0)
 		{
-		if (s != 0.0) 
-			s = (1.0 - intensity) * s 
+		if (s != 0.0)
+			s = (1.0 - intensity) * s
 				+ intensity * 0.1;
-		v = (1.0 - intensity) * v 
+		v = (1.0 - intensity) * v
 			+ intensity;
 		}
-	else 
+	else
 		{
-		if (s != 0.0) 
-			s = (1.0 + intensity) * s 
+		if (s != 0.0)
+			s = (1.0 + intensity) * s
 				- intensity;
-		v = (1.0 + intensity) * v 
+		v = (1.0 + intensity) * v
 			- intensity * 0.3;
 		}
-	if (v < 0.0) 
+	if (v < 0.0)
 		v = 0.0;
-	if (s < 0.0) 
+	if (s < 0.0)
 		s = 0.0;
-	if (v > 1.0) 
+	if (v > 1.0)
 		v = 1.0;
-	if (s > 1.0) 
+	if (s > 1.0)
 		s = 1.0;
-	
+
 	/* change the corrected hsv values back into rgb */
 	if (s == 0.0)
 		{
@@ -4095,43 +4095,43 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b)
 		}
 	else
 		{
-		while (h >= 360.0) 
+		while (h >= 360.0)
 			h -= 360.0;
 		h /= 60.0;
 		f = h - ((int)h);
 		p = v * (1.0 - s);
 		q = v * (1.0 - (s * f));
 		t = v * (1.0 - (s * (1.0 - f)));
-		switch (((int)h)) 
+		switch (((int)h))
 			{
 			case 0:
-				*r = v;	
-				*g = t;	
+				*r = v;
+				*g = t;
 				*b = p;
 				break;
 			case 1:
-				*r = q;	
-				*g = v;	
+				*r = q;
+				*g = v;
 				*b = p;
 				break;
 			case 2:
-				*r = p;	
-				*g = v;	
+				*r = p;
+				*g = v;
 				*b = t;
 				break;
 			case 3:
-				*r = p;	
-				*g = q;	
+				*r = p;
+				*g = q;
 				*b = v;
 				break;
 			case 4:
-				*r = t;	
-				*g = p;	
+				*r = t;
+				*g = p;
 				*b = v;
 				break;
 			case 5:
-				*r = v;	
-				*g = p;	
+				*r = v;
+				*g = p;
 				*b = q;
 				break;
 			}
@@ -4157,7 +4157,7 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b)
 /*------------------------------------------------------------------------------*/
 int mbview_getsecondaryvalue(struct mbview_world_struct *view,
 				struct mbview_struct *data,
-				int i, int j, 
+				int i, int j,
 				double *secondary_value)
 {
 	/* local variables */
@@ -4182,11 +4182,11 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view,
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		}
-	
+
 	/* get position in primary grid */
 	xgrid = data->primary_xmin + i * data->primary_dx;
 	ygrid = data->primary_ymin + j * data->primary_dy;
-		
+
 	/* get lon and lat of desired position */
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED
 		|| data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
@@ -4216,7 +4216,7 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view,
 	/* get rounded location in secondary grid */
 	ii = (xsgrid - data->secondary_xmin) / data->secondary_dx;
 	jj = (ysgrid - data->secondary_ymin) / data->secondary_dy;
-	
+
 	/* answer only defined within grid bounds */
 	if (ii < 0 || ii >= data->secondary_nx
 		|| jj < 0 || jj > data->secondary_ny)
@@ -4274,7 +4274,7 @@ int mbview_contour(size_t instance, int rez)
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -4283,14 +4283,14 @@ int mbview_contour(size_t instance, int rez)
 	if (rez == MBV_REZ_FULL)
 	    	stride = 1;
 	else if (rez == MBV_REZ_HIGH)
-	    	stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
+	    	stride = MAX((int)ceil(((double)data->primary_nx)
+				/ ((double)data->hirez_dimension)),
+			(int)ceil(((double)data->primary_ny)
 				/ ((double)data->hirez_dimension)));
 	else
-	    	stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
+	    	stride = MAX((int)ceil(((double)data->primary_nx)
+				/ ((double)data->lorez_dimension)),
+			(int)ceil(((double)data->primary_ny)
 				/ ((double)data->lorez_dimension)));
 
 	/* start openGL list */
@@ -4309,7 +4309,7 @@ int mbview_contour(size_t instance, int rez)
 	glColor3f(0.0, 0.0, 0.0);
 	glLineWidth(1.0);
 	glBegin(GL_LINES);
-	
+
 if (mbv_verbose >= 2)
 fprintf(stderr,"mbview_contour: instance:%ld rez:%d stride:%d contour interval:%f\n",
 instance, rez, stride, data->contour_interval);
@@ -4339,7 +4339,7 @@ instance, rez, stride, data->contour_interval);
 		vertex[1] = (i + stride) * data->primary_ny + j;
 	        vertex[2] = i * data->primary_ny + j + stride;
 		vertex[3] = (i + stride) * data->primary_ny + j + stride;
-		
+
 		/* check if either triangle can be contoured */
 		triangleA = MB_NO;
 		triangleB = MB_NO;
@@ -4351,7 +4351,7 @@ instance, rez, stride, data->contour_interval);
 			&& data->primary_data[vertex[3]] != data->primary_nodatavalue
 			&& data->primary_data[vertex[2]] != data->primary_nodatavalue)
 			triangleB = MB_YES;
-			
+
 		/* if at least one triangle is valid, contour it */
 		if (triangleA == MB_YES || triangleB == MB_YES)
 			{
@@ -4362,7 +4362,7 @@ instance, rez, stride, data->contour_interval);
 			for (kk=0;kk<4;kk++)
 				{
 				k = vertex[kk];
-				if (data->primary_data[k] != data->primary_nodatavalue) 
+				if (data->primary_data[k] != data->primary_nodatavalue)
 					{
 					if (!(data->primary_stat_z[k/8] & statmask[k%8]))
 						mbview_zscalegridpoint(instance,k);
@@ -4384,14 +4384,14 @@ instance, rez, stride, data->contour_interval);
 			level_min = (int)ceil(datamin / data->contour_interval);
 			level_max = (int)floor(datamax / data->contour_interval);
 			nlevel = level_max - level_min + 1;
-				
+
 			/* now if contours are needed loop over the contour levels */
 			if (nlevel > 0)
 				{
 				for (l=level_min;l<=level_max;l++)
 					{
 					level_value = l * data->contour_interval;
-					
+
 					/* deal with triangle A - vertexes 0, 1, and 2 */
 					if (triangleA == MB_YES)
 					{
@@ -4479,7 +4479,7 @@ instance, rez, stride, data->contour_interval);
 						glVertex3f(xx[1], yy[1], zz[1]);
 						}
 					}
-					
+
 					/* deal with triangle B - vertexes 1, 3, and 2 */
 					if (triangleB == MB_YES)
 					{
@@ -4567,24 +4567,24 @@ instance, rez, stride, data->contour_interval);
 						glVertex3f(xx[1], yy[1], zz[1]);
 						}
 					}
-					
+
 					}
 				}
 			}
-		
+
 		}
-		
+
 	/* check for pending event */
-	if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
+	if (view->plot_done == MB_NO
+		&& view->plot_interrupt_allowed == MB_YES
 		&& i % MBV_EVENTCHECKCOARSENESS == 0)
 		do_mbview_xevents();
-		
+
 	/* dump out of loop if plotting already done at a higher recursion */
 	if (view->plot_done == MB_YES)
 		i = data->primary_nx;
 	}
-	
+
 	/* end openGL list */
 	glEnd();
 	glEndList();
@@ -4619,7 +4619,7 @@ instance, rez, stride, data->contour_interval);
 	return(status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_getzdata(size_t instance, 
+int mbview_getzdata(size_t instance,
 			double xgrid, double ygrid,
 			int *found, double *zdata)
 {
@@ -4645,7 +4645,7 @@ int mbview_getzdata(size_t instance,
 		fprintf(stderr,"dbg2       xgrid:            %f\n",xgrid);
 		fprintf(stderr,"dbg2       ygrid:            %f\n",ygrid);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -4653,7 +4653,7 @@ int mbview_getzdata(size_t instance,
 	/* get location in grid */
 	i = (int)((xgrid - data->primary_xmin) / data->primary_dx);
 	j = (int)((ygrid - data->primary_ymin) / data->primary_dy);
-	
+
 	/* fail if outside grid */
 	if (i < 0 || i >= data->primary_nx - 1
 		|| j < 0 || j >= data->primary_ny - 1)
@@ -4661,7 +4661,7 @@ int mbview_getzdata(size_t instance,
 		*found = MB_NO;
 		*zdata = 0.0;
 		}
-		
+
 	/* check all four points and average the good ones */
 	else
 		{
@@ -4702,7 +4702,7 @@ int mbview_getzdata(size_t instance,
 			*found = MB_NO;
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{

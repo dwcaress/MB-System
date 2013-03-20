@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	install_makefiles	5/20/94
 #    $Id$
 #
-#    Copyright (c) 1993-2009 by 
+#    Copyright (c) 1993-2009 by
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -28,8 +28,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   MB-System installation.  Before running this script, the
 #   installer should edit the variable declarations below (where
 #   indicated) so that these values are appropriate for the system
-#   on which MB-System is being installed.  At execution the script 
-#   will read template makefiles in the MB-System source directories 
+#   on which MB-System is being installed.  At execution the script
+#   will read template makefiles in the MB-System source directories
 #   and create makefiles with the correct attributes.
 #   This enables users to install MB-System without having to edit
 #   the makefiles.  Instead of editing the makefiles directly, the
@@ -51,23 +51,23 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	NETCDFINCDIR	Location of NetCDF include file netcdf.h
 #	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
 #	GMTINCDIR	Location of GMT include files gmt.h, grd.h, and pslib.h
-#	LEVITUS		Path of Levitus global water properties data file. This is usually 
+#	LEVITUS		Path of Levitus global water properties data file. This is usually
 #                               $MBSYSTEM_HOME/share/annual.
-#	PROJECTIONS	Path of PROJ4 projections database. This is usually 
+#	PROJECTIONS	Path of PROJ4 projections database. This is usually
 #                               $MBSYSTEM_HOME/share/Projections.dat.
 #   REQUIRED for spectrogram tool mbsegypsd..
 #	FFTWLIBDIR	Location of FFTW library libfftw.a
-#	FFTWINCDIR	Location of FFTW include file fftw.h 
-#			If these parameters are not both set, mbsegypsd will 
+#	FFTWINCDIR	Location of FFTW include file fftw.h
+#			If these parameters are not both set, mbsegypsd will
 #			not be built.
 #   REQUIRED for openGL tools mbgrdviz and mbeditviz:
 #       OPENGLLIBS	OpenGL libraries required for new graphical tools,
-#.                              including mbgrdviz and mbeditviz. If this  
+#.                              including mbgrdviz and mbeditviz. If this
 #                               parameter is not set, mbgrdviz and mbeditviz
 #                               will not be built
 #   REQUIRED for tidal prediction program mbotps:
 #       OTPSDIR		Location of OTPSnc package, including executable
-#.                              predict_tide and batch files used by  
+#.                              predict_tide and batch files used by
 #                               predict_tide. If this is not specified
 #				correction mbotps will build but not run
 #				correctly
@@ -92,10 +92,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #				- assumes use of Apple's X11
 #				- assumes netCDF, GMT, and OpenMotif installe
 #					using fink
-#       irixusrlocal - install manually on SGI IRIX 
+#       irixusrlocal - install manually on SGI IRIX
 #				- assumes installation in /usr/local/mbsystem
 #				- assumes netCDF and GMT installs in /usr/local
-#	
+#
 #--------------------------------------------------------------------
 # EDIT THE PARAMETERS HERE IF NO APPROPRIATE PRESET CONFIGURATION IS DEFINED
 # Set the configuration parameters manually:
@@ -110,7 +110,6 @@ $NETCDFLIBDIR = "/sw/lib";
 $NETCDFINCDIR = "/sw/include";
 $GMTLIBDIR = "/usr/local/gmt/lib";
 $GMTINCDIR = "/usr/local/gmt/include";
-$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 $PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
 #
 # Required parameters for spectrogram program mbsegypsd
@@ -139,13 +138,13 @@ $OTPSDIR = "/usr/local/OTPSnc";
 #$CC = "cc";
 #
 # Optional parameters for use of independent GSF library installation
-#   - GSF library included with MB-System will be used 
+#   - GSF library included with MB-System will be used
 #     if these are commented out
 #$GSFLIB = "/usr/local/gsf/lib/libgsf.a";
 #$GSFINCDIR = "/usr/local/gsf/include/";
 #
 # Optional parameters for use of independent PROJ4 library installation
-#   - PROJ4 library included with MB-System will be used 
+#   - PROJ4 library included with MB-System will be used
 #     if these are commented out
 #$PROJLIB = "/usr/local/proj/lib/libproj.a";
 #$PROJINCDIR = "/usr/local/proj/include/";
@@ -345,7 +344,7 @@ $command_line = "@ARGV";
 &MBGetopts('P:p:');
 $preset = 	($opt_P || $opt_p);
 
-	
+
 #--------------------------------------------------------------------
 # USE PARAMETERS SET ABOVE IF NO APPROPRIATE PRESET CONFIGURATION IS DEFINED
 #--------------------------------------------------------------------
@@ -356,7 +355,7 @@ if (!$preset)
 #--------------------------------------------------------------------
 # ELSE RESET PARAMETERS USING SPECIFIED PRESET CONFIGURATION
 #--------------------------------------------------------------------
-# 
+#
 # Preset configuration for MacOs X when building through fink
 elsif ($preset eq "macosxfink")
 	{
@@ -380,7 +379,7 @@ elsif ($preset eq "macosxfink")
 	$CFLAGS = "-O3 -funroll-loops -fexpensive-optimizations -I/usr/X11R6/include -Wall -Wimplicit -pedantic -W -Wstrict-prototypes -Wredundant-decls  -Wimplicit-int -Wimplicit-function-declaration -Wnested-externs";
 	$LFLAGS = "-Wl -lm -bind_at_load";
 	}
-# 
+#
 # Preset configuration for MacOs X 10.6 (Snow Leopard) when building in /usr/local
 #       assumes that GMT, netCDF, and OpenMotif are installed using fink in 32 bit mode
 elsif ($preset eq "macosxusrlocal")
@@ -405,7 +404,7 @@ elsif ($preset eq "macosxusrlocal")
 	$CFLAGS = "-m32 -g -I/usr/X11R6/include";
 	$LFLAGS = "-m32 -Wl -lm";
 	}
-# 
+#
 # Preset configuration for MacOs X 10.5 (Leopard) when building in /usr/local
 #       assumes that GMT, netCDF, and OpenMotif are installed using fink
 elsif ($preset eq "macosx10.5usrlocal")
@@ -430,7 +429,7 @@ elsif ($preset eq "macosx10.5usrlocal")
 	$CFLAGS = "-g -I/usr/X11R6/include";
 	$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
 	}
-# 
+#
 # Preset configuration for Cygwin on Windows when building in /usr/local
 #       assumes that GMT and netCDF are also installed in /usr/local
 elsif ($preset eq "CYGWIN")
@@ -454,7 +453,7 @@ elsif ($preset eq "CYGWIN")
 	$CFLAGS = "-g -fdata-sections -I/usr/X11R6/include";
 	$LFLAGS = "-lrpc -lrpclib -lm -Wl,--enable-runtime-pseudo-reloc";
 	}
-# 
+#
 # Preset configuration for SGI Irix when building in /usr/local
 #       assumes that GMT and netCDF are installed in /usr/local
 elsif ($preset eq "irixusrlocal")
@@ -478,7 +477,7 @@ elsif ($preset eq "irixusrlocal")
 	$CFLAGS = "-O2";
 	$LFLAGS = "-lm -lsun";
 	}
-	
+
 # Quit because preset not recognized:
 else
 	{
@@ -492,7 +491,7 @@ else
 #--------------------------------------------------------------------
 #
 # Example for installing on Apple Macintosh Computers
-# running MacOS X version 10.2 to 10.4. Here I am using the 
+# running MacOS X version 10.2 to 10.4. Here I am using the
 # Apple X11 distribution and the OpenMotif (www.openmotif.org)
 # port provided by Fink (www.fink.org). GMT and netCDF have
 # also been installed using fink (note: current versions of
@@ -517,7 +516,7 @@ else
 #	$LFLAGS = "-Wl -lm -bind_at_load";
 #
 # Example for installing on Apple Macintosh Computers
-# running MacOS X version 10.5 ("Leopard"). Here I am using the 
+# running MacOS X version 10.5 ("Leopard"). Here I am using the
 # Apple X11 distribution and the OpenMotif (www.openmotif.org)
 # port provided by Fink (www.fink.org). GMT and netCDF have
 # also been installed using fink (note: current versions of
@@ -744,14 +743,14 @@ if ($BYTESWAPTESTSTRING eq "0x78 0x56 0x34 0x12")
 	$BYTESWAPPED = "YES";
 	$CFLAGS = "$CFLAGS -DBYTESWAPPED";
 	}
-	
+
 # add __APPLE__ flag to CFLAGS to allow GSF code to build under OSX
 if ($OS eq "DARWIN" || $OS eq "CYGWIN")
 	{
 	$CFLAGS = "$CFLAGS -D__APPLE__";
 	}
 
-# set archiver 
+# set archiver
 if ($OS eq "LYNX")
 	{
 	$ARCHIVE = "libr rcv";
@@ -849,7 +848,7 @@ print "Levitus Data Location:     $LEVITUS\n";
 print "Projections Data Location: $PROJECTIONS\n";
 
 # make sure that that the following directories exist:
-#      mbsystem/bin mbsystem/lib mbsystem/include 
+#      mbsystem/bin mbsystem/lib mbsystem/include
 if (! -d "bin")
 	{
 	`mkdir bin`;
@@ -1039,8 +1038,8 @@ while (@files)
 		elsif (index($_,"cd mbnavadjust",0) >= 0 && $GRAPHICAL ne "YES")
 			{
 			}
-		elsif (index($_,"cd mbview",0) >= 0 
-					&& ($GRAPHICAL ne "YES" 
+		elsif (index($_,"cd mbview",0) >= 0
+					&& ($GRAPHICAL ne "YES"
 						|| !$OPENGLLIBS
 						|| ! -e "src/mbview"))
 			{
@@ -1069,7 +1068,7 @@ exit 0;
 # the same arg.
 #
 # Usage:
-#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
 #			    # -c does not take arg. Sets opt_* as a
 #                           # side effect.
 
@@ -1100,7 +1099,7 @@ sub MBGetopts {
 		    $rest = shift(@ARGV);
 		}
 		if (eval "\$opt_$first") {
-		    eval "\$opt_$first = \$opt_$first 
+		    eval "\$opt_$first = \$opt_$first
 				. \":\" . \$rest;";
 		}
 		else {

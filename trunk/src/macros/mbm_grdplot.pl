@@ -1033,33 +1033,22 @@ else
 		}
 	}
 
-# get postscript viewer
+# use mbdefaults to get the current system default postscript viewer
+$ps_viewer = "ghostview";
+@mbdefaults = `mbdefaults`;
+while (@mbdefaults)
+        {
+        $line = shift @mbdefaults;
+        if ($line =~ /ps viewer:\s+(\S+)/)
+                {
+                ($ps_viewer) = $line =~ /ps viewer:\s+(\S+)/;
+                 }
+        }
+
 # check environment variable
 if ($ENV{"MB_PS_VIEWER"})
 	{
 	$ps_viewer = $ENV{"MB_PS_VIEWER"};
-	}
-# check for .mbio_defaults file
-if (!$ps_viewer)
-	{
-	$home = $ENV{"HOME"};
-	$mbdef = "$home/.mbio_defaults";
-	if (open(MBDEF,"<$mbdef"))
-		{
-		while (<MBDEF>)
-			{
-			if (/ps viewer:\s+(\S+)/)
-				{
-				($ps_viewer) = /ps viewer:\s+(\S+)/;
-				}
-			}
-		close MBDEF;
-		}
-	}
-# else just set it to ghostview
-if (!$ps_viewer)
-	{
-	$ps_viewer = "ghostview";
 	}
 
 # see if data file is a grd file or a list of grdfiles

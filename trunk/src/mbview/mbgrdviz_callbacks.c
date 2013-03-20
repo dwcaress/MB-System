@@ -660,13 +660,13 @@ do_mbgrdviz_sensitivity()
     	/* set file opening menu items only if an mbview instance is active */
 	mbview_active = MB_NO;
 	mbview_allactive = MB_YES;
-	instance = -1;
+	instance = MBV_NO_WINDOW;
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
 		{
 		if (mbview_id[i] == MB_YES)
 			{
 			mbview_active = MB_YES;
-			if (instance < 0)
+			if (instance == MBV_NO_WINDOW)
 				instance = i;
 			}
 		else
@@ -1450,7 +1450,7 @@ int do_mbgrdviz_dismiss_notify(size_t instance)
 		}
 
 	/* set mbview window <id> to inactive */
-	if (instance >= 0 && instance < MBV_MAX_WINDOWS
+	if (instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS
 		&& mbview_id[instance] == MB_YES)
 		{
 		mbview_id[instance] = MB_NO;
@@ -2151,7 +2151,7 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 		{
 
 		/* read in the grd file */
@@ -2271,7 +2271,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 
 	    /* count the sites in the input file */
@@ -2439,7 +2439,7 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 
 	    /* get the number of sites to be written to the outpuf file */
@@ -2578,7 +2578,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 	    /* initialize route values */
 	    routecolor = MBV_COLOR_BLUE;
@@ -2764,7 +2764,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 
 	    /* get the number of routes to be written to the outpuf file */
@@ -2992,7 +2992,7 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 
 	    /* get the number of routes to be written to the outpuf file */
@@ -3147,7 +3147,7 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 
 	    /* get the number of routes to be written to the outpuf file */
@@ -3307,7 +3307,7 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 
 	    /* get the number of routes to be written to the outpuf file */
@@ -3475,7 +3475,7 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr)
 	int	routecolor;
 	int	routesize;
 	mb_path	routename;
-	char	message[MB_PATH_MAXLINE];
+	char	*error_message;
 	char	projection_id[MB_PATH_MAXLINE];
 	void	*pjptr = NULL;
 	int	proj_status;
@@ -3494,7 +3494,7 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 
 	    /* get the number of routes to be written to the outpuf file */
@@ -3586,18 +3586,27 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr)
 		    /* if the is the first route define the projection */
 		    if (pjptr == NULL && npointtotal > 0)
 			{
-			reference_lon = routelon[0];
+			reference_lon = 0.0;
+			reference_lat = 0.0;
+			for (j=0;j<npointtotal;j++)
+			    {
+			    reference_lon += routelon[j];
+			    reference_lat += routelat[j];
+			    }
+			reference_lon = reference_lon / npointtotal;
+			reference_lat = reference_lat / npointtotal;
 			if (reference_lon < 180.0)
 				reference_lon += 360.0;
 			if (reference_lon >= 180.0)
 				reference_lon -= 360.0;
 			utm_zone = (int)(((reference_lon + 183.0)
 				/ 6.0) + 0.5);
-			reference_lat = routelat[0];
 			if (reference_lat >= 0.0)
 				sprintf(projection_id, "UTM%2.2dN", utm_zone);
 			else
 				sprintf(projection_id, "UTM%2.2dS", utm_zone);
+			fprintf(stderr,"Reference longitude: %.9f latitude:%.9f\nOutput lnw file in projection:%s\n",
+				reference_lon,reference_lat,projection_id);
 
 			/* initialize appropriate UTM projection */
 			proj_status = mb_proj_init(verbose, projection_id, &(pjptr), &error);
@@ -3605,9 +3614,9 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr)
 			/* quit if projection fails */
 			if (proj_status != MB_SUCCESS)
 				{
-				mb_error(verbose,error,&message);
+				mb_error(verbose,error,&error_message);
 				fprintf(stderr,"\nMBIO Error initializing projection:\n%s\n",
-					message);
+					error_message);
 				fprintf(stderr,"\nProgram terminated in <%s>\n",
 					function_name);
 				mb_memory_clear(verbose, &error);
@@ -3703,7 +3712,7 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 	    /* initialize vector values */
 	    vectorcolor = MBV_COLOR_BLUE;
@@ -3910,7 +3919,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
 	char	*unknown = "Unknown";
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 
 	    /* get the number of profiles to be written to the outpuf file */
@@ -4078,7 +4087,7 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr)
 		}
 
 	/* read data for valid instance */
-	if (instance >= 0)
+	if (instance != MBV_NO_WINDOW)
 	    {
 	    done = MB_NO;
 	    while (done == MB_NO)
@@ -5123,10 +5132,10 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 		}
 
 	/* get new instance number */
-	if (instance_source >= 0 && instance_source < MBV_MAX_WINDOWS)
+	if (instance_source != MBV_NO_WINDOW && instance_source < MBV_MAX_WINDOWS)
 		{
 		status = mbview_init(verbose, &instance, &error);
-		if (instance < 0)
+		if (instance == MBV_NO_WINDOW)
 			{
 			fprintf(stderr, "Unable to create mbview - %d mbview windows already created\n",
 			MBV_MAX_WINDOWS);

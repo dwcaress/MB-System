@@ -256,6 +256,7 @@
 #include "../../include/mb_swap.h"
 #include "../../include/mbsys_atlas.h"
 #include "../../include/mbsys_simrad2.h"
+#include "../../include/mbsys_simrad3.h"
 
 /* define sidescan correction table structure */
 struct mbprocess_sscorr_struct
@@ -1216,7 +1217,8 @@ and mbedit edit save files.\n";
 
 	/* check for right format if recalculating sidescan is on */
 	if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON
-	    && process.mbp_format != MBF_EM300MBA)
+	    && process.mbp_format != MBF_EM300MBA
+            && process.mbp_format != MBF_EM710MBA)
 	    {
 	    fprintf(stderr,"\nProgram <%s> only recalculates sidescan for format %d\n",program_name,MBF_EM300MBA);
 	    fprintf(stderr,"Format %d is specified. Sidescan recalculation disabled\n",process.mbp_format);
@@ -5949,7 +5951,15 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
+                        if (process.mbp_format == MBF_EM300MBA)
 			status = mbsys_simrad2_makess(verbose,
+					imbio_ptr,store_ptr,
+					pixel_size_set,&pixel_size,
+					swath_width_set,&swath_width,
+					pixel_int,
+					&error);
+                        else if (process.mbp_format == MBF_EM710MBA)
+			status = mbsys_simrad3_makess(verbose,
 					imbio_ptr,store_ptr,
 					pixel_size_set,&pixel_size,
 					swath_width_set,&swath_width,

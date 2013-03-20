@@ -3564,6 +3564,7 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
 
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
@@ -3749,6 +3750,7 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
 
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
@@ -3909,6 +3911,7 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
 
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,

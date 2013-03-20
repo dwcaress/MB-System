@@ -342,6 +342,7 @@
 
 /* invalid value flags */
 #define	EM3_INVALID_AMP			0x7F
+#define	EM3_INVALID_SS			0x7FFF
 #define	EM3_INVALID_CHAR		0xFF
 #define	EM3_INVALID_SHORT		0xFFFF
 #define EM3_INVALID_U_INT		0xFFFFFFFF
