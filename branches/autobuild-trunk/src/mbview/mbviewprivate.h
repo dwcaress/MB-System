@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h 1934 2012-02-22 07:51:16Z caress $
+ *    $Id: mbviewprivate.h 2051 2013-03-20 05:18:24Z caress $
  *
  *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -145,13 +145,13 @@ struct mbview_shared_struct
     int			init_sitelist;
     int			init_routelist;
     int			init_navlist;
-    	
+
     /* global lon lat print style */
     int	lonlatstyle;
-    
+
     /* pointer to structure holding global data */
     struct mbview_shareddata_struct shareddata;
-    
+
     /* widgets and other Xwindows stuff of interest */
     Widget		topLevelShell_sitelist;
     Widget		mainWindow_sitelist;
@@ -163,17 +163,17 @@ struct mbview_shared_struct
     Widget		mainWindow_navlist;
     MB3DNavListData	mb3d_navlist;
     };
- 
+
 
 /* structure to hold instances of mbview windows */
 struct mbview_world_struct
     {
     /* flag if this instance is initialized */
     int			init;
-    
+
     /* pointer to structure holding data to be rendered */
     struct mbview_struct data;
-    
+
     /* widgets and other Xwindows stuff of interest */
     Widget		topLevelShell;
     Widget		mainWindow;
@@ -196,7 +196,7 @@ struct mbview_world_struct
     int			prglx_init;
     GLXContext		prglx_context;
     float 		praspect_ratio;
-        
+
     /* cursors */
     Cursor TargetBlackCursor;
     Cursor TargetGreenCursor;
@@ -208,8 +208,8 @@ struct mbview_world_struct
     Cursor BoatBlackCursor;
     Cursor BoatRedCursor;
     Cursor WatchBlackCursor;
-    Cursor WatchRedCursor;    
-    
+    Cursor WatchRedCursor;
+
     /* projections */
     int primary_pj_init;
     void *primary_pjptr;
@@ -226,7 +226,7 @@ struct mbview_world_struct
     double sphere_refz;
     double sphere_eulerforward[9];
     double sphere_eulerreverse[9];
-    
+
     /* drawing variables */
     Dimension gl_width;
     Dimension gl_height;
@@ -245,7 +245,7 @@ struct mbview_world_struct
     int contourlorez;
     int contourhirez;
     int contourfullrez;
-    
+
     /* color and shade variables */
     double min;
     double max;
@@ -283,7 +283,7 @@ struct mbview_world_struct
     /* relevant mbio defaults */
     int lonflip;
     double timegap;
-    
+
     float offset2d_x;
     float offset2d_y;
     float offset2d_x_save;
@@ -353,71 +353,71 @@ EXTERNAL char	*mbsystem_library_name;
 
 /* library colortables */
 float	colortable_haxby_red[MBV_NUM_COLORS] =
-                { 0.950, 1.000, 1.000, 1.000, 0.941, 0.804, 
+                { 0.950, 1.000, 1.000, 1.000, 0.941, 0.804,
                   0.541, 0.416, 0.196, 0.157, 0.145 };
 float	colortable_haxby_green[MBV_NUM_COLORS] =
-                { 0.950, 0.729, 0.631, 0.741, 0.925, 1.000, 
+                { 0.950, 0.729, 0.631, 0.741, 0.925, 1.000,
                   0.925, 0.922, 0.745, 0.498, 0.224 };
 float	colortable_haxby_blue[MBV_NUM_COLORS] =
-                { 0.950, 0.522, 0.267, 0.341, 0.475, 0.635, 
+                { 0.950, 0.522, 0.267, 0.341, 0.475, 0.635,
                   0.682, 1.000, 1.000, 0.984, 0.686 };
 float	colortable_bright_red[MBV_NUM_COLORS] =
-                { 1.000, 1.000, 1.000, 1.000, 0.500, 0.000, 
+                { 1.000, 1.000, 1.000, 1.000, 0.500, 0.000,
                   0.000, 0.000, 0.000, 0.500, 1.000 };
 float	colortable_bright_green[MBV_NUM_COLORS] =
-                { 0.000, 0.250, 0.500, 1.000, 1.000, 1.000, 
+                { 0.000, 0.250, 0.500, 1.000, 1.000, 1.000,
                   1.000, 0.500, 0.000, 0.000, 0.000 };
 float	colortable_bright_blue[MBV_NUM_COLORS] =
-                { 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 
+                { 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
                   1.000, 1.000, 1.000, 1.000, 1.000 };
 float	colortable_muted_red[MBV_NUM_COLORS] =
-                { 0.784, 0.761, 0.702, 0.553, 0.353, 0.000, 
+                { 0.784, 0.761, 0.702, 0.553, 0.353, 0.000,
                   0.000, 0.000, 0.000, 0.353, 0.553 };
 float	colortable_muted_green[MBV_NUM_COLORS] =
-                { 0.000, 0.192, 0.353, 0.553, 0.702, 0.784, 
+                { 0.000, 0.192, 0.353, 0.553, 0.702, 0.784,
                   0.553, 0.353, 0.000, 0.000, 0.000 };
 float	colortable_muted_blue[MBV_NUM_COLORS] =
-                { 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 
+                { 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
                   0.553, 0.702, 0.784, 0.702, 0.553 };
 float	colortable_gray_red[MBV_NUM_COLORS] =
-                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
+                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500,
                   0.600, 0.700, 0.800, 0.900, 1.000 };
 float	colortable_gray_green[MBV_NUM_COLORS] =
-                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
+                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500,
                   0.600, 0.700, 0.800, 0.900, 1.000 };
 float	colortable_gray_blue[MBV_NUM_COLORS] =
-                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
+                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500,
                   0.600, 0.700, 0.800, 0.900, 1.000 };
 float	colortable_flat_red[MBV_NUM_COLORS] =
-                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
+                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500,
                   0.500, 0.500, 0.500, 0.500, 0.500 };
 float	colortable_flat_green[MBV_NUM_COLORS] =
-                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
+                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500,
                   0.500, 0.500, 0.500, 0.500, 0.500 };
 float	colortable_flat_blue[MBV_NUM_COLORS] =
-                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
+                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500,
                   0.500, 0.500, 0.500, 0.500, 0.500 };
 float	colortable_abovesealevel_red[MBV_NUM_COLORS+1] =
-                { 0.980, 0.960, 0.941, 0.921, 0.902, 0.882, 
+                { 0.980, 0.960, 0.941, 0.921, 0.902, 0.882,
 		  0.862, 0.843, 0.823, 0.804, 0.784};
 float	colortable_abovesealevel_green[MBV_NUM_COLORS+1] =
-                { 0.980, 0.940, 0.901, 0.862, 0.823, 0.784, 
+                { 0.980, 0.940, 0.901, 0.862, 0.823, 0.784,
 		  0.744, 0.705, 0.666, 0.627, 0.588};
 float	colortable_abovesealevel_blue[MBV_NUM_COLORS+1] =
-                { 0.471, 0.440, 0.408, 0.376, 0.345, 0.314, 
+                { 0.471, 0.440, 0.408, 0.376, 0.345, 0.314,
 		  0.282, 0.250, 0.219, 0.188, 0.157};
 
 float	colortable_object_red[MBV_NUM_COLORS] =
-                { 0.000, 1.000, 1.000, 1.000, 0.000, 0.000, 
+                { 0.000, 1.000, 1.000, 1.000, 0.000, 0.000,
                   0.000, 1.000, 0.000, 0.000, 0.000 };
 float	colortable_object_green[MBV_NUM_COLORS] =
-                { 0.000, 1.000, 0.000, 1.000, 1.000, 1.000, 
+                { 0.000, 1.000, 0.000, 1.000, 1.000, 1.000,
                   0.000, 0.000, 0.000, 0.000, 0.000 };
 float	colortable_object_blue[MBV_NUM_COLORS] =
-                { 0.000, 1.000, 0.000, 0.000, 0.000, 1.000, 
+                { 0.000, 1.000, 0.000, 0.000, 0.000, 1.000,
                   1.000, 1.000, 0.000, 0.000, 0.000 };
-		  
-char	*mbview_colorname[MBV_NUM_COLORS] = 
+
+char	*mbview_colorname[MBV_NUM_COLORS] =
 		{ "Black",
 		  "White",
 		  "Red",
@@ -426,7 +426,7 @@ char	*mbview_colorname[MBV_NUM_COLORS] =
 		  "Blue-Green",
 		  "Blue",
 		  "Purple" };
-		  
+
 /* status mask arrays */
 char	statmask[8] = { MBV_STATMASK0,
 			MBV_STATMASK1,
@@ -463,11 +463,11 @@ extern float	colortable_object_red[MBV_NUM_COLORS+1];
 extern float	colortable_object_green[MBV_NUM_COLORS+1];
 extern float	colortable_object_blue[MBV_NUM_COLORS+1];
 extern char	*mbview_colorname[MBV_NUM_COLORS];
-		  
+
 /* status mask arrays */
 extern char	statmask[8];
 #endif
-	
+
 /*--------------------------------------------------------------------*/
 
 /* mbview_callbacks.c function prototypes */
@@ -726,16 +726,16 @@ int mbview_projectdata(size_t instance);
 int mbview_derivative(size_t instance, int i, int j);
 int mbview_projectglobaldata(size_t instance);
 int mbview_zscalegridpoint(size_t instance, int k);
-int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, 
+int mbview_zscalepoint(size_t instance, int globalview, double offset_factor,
 			struct mbview_point_struct *point);
-int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, 
+int mbview_zscalepointw(size_t instance, int globalview, double offset_factor,
 			struct mbview_pointw_struct *pointw);
 int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw);
 int mbview_updatesegmentw(size_t instance, struct mbview_linesegmentw_struct *segmentw);
 int mbview_zscale(size_t instance);
 int mbview_projectforward(size_t instance, int needlonlat,
 				double xgrid, double ygrid, double zdata,
-				double *xlon, double *ylat, 
+				double *xlon, double *ylat,
 				double *xdisplay, double *ydisplay, double *zdisplay);
 int mbview_projectinverse(size_t instance, int needlonlat,
 				double xdisplay, double ydisplay,double zdisplay,
@@ -763,24 +763,24 @@ int mbview_projectdisplay2ll(size_t instance,
 int mbview_projectdistance(size_t instance,
 				double xlon1, double ylat1, double zdata1,
 				double xlon2, double ylat2, double zdata2,
-				double *distancelateral, 
+				double *distancelateral,
 				double *distanceoverground,
 				double *slope);
 int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double ylat);
 int mbview_sphere_forward(size_t instance, double xlon, double ylat,
 			double *xx, double *yy, double *zz);
-int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, 
+int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz,
 			double *xlon, double *ylat);
 int mbview_sphere_matrix(double phi, double theta, double psi,double *eulermatrix);
 int mbview_sphere_rotate(double *eulermatrix,
 			double *v, double *vr);
-int mbview_greatcircle_distbearing(size_t instance, 
+int mbview_greatcircle_distbearing(size_t instance,
 			double lon1, double lat1, double lon2,  double lat2,
 			double *bearing, double *distance);
-int mbview_greatcircle_dist(size_t instance, 
+int mbview_greatcircle_dist(size_t instance,
 			double lon1, double lat1, double lon2,  double lat2,
 			double *distance);
-int mbview_greatcircle_endposition(size_t instance, 
+int mbview_greatcircle_endposition(size_t instance,
 			double lon1, double lat1, double bearing, double distance,
 			double *lon2, double *lat2);
 int mbview_colorclear(size_t instance);
@@ -800,7 +800,7 @@ int mbview_colorpoint_histogram(
 	float *histogram,
 	int i, int j, int k);
 int mbview_getcolor(double value, double min, double max,
-			int colortablemode, 
+			int colortablemode,
 			float below_red,
 			float below_green,
 			float below_blue,
@@ -812,7 +812,7 @@ int mbview_getcolor(double value, double min, double max,
 			float *colortable_blue,
 			float *red, float *green, float *blue);
 int mbview_getcolor_histogram(double value, double min, double max,
-			int colortablemode, 
+			int colortablemode,
 			float below_red,
 			float below_green,
 			float below_blue,
@@ -827,10 +827,10 @@ int mbview_getcolor_histogram(double value, double min, double max,
 int mbview_applyshade(double intensity, float *r, float *g, float *b);
 int mbview_getsecondaryvalue(struct mbview_world_struct *view,
 				struct mbview_struct *data,
-				int i, int j, 
+				int i, int j,
 				double *secondary_value);
 int mbview_contour(size_t instance, int rez);
-int mbview_getzdata(size_t instance, 
+int mbview_getzdata(size_t instance,
 			double xgrid, double ygrid,
 			int *found, double *zdata);
 
@@ -846,12 +846,12 @@ int mbview_plothigh(size_t instance);
 int mbview_plotfull(size_t instance);
 int mbview_plot(size_t instance, int rez);
 int mbview_findpoint(size_t instance, int xpixel, int ypixel,
-			int *found, 
+			int *found,
 			double *xgrid, double *ygrid,
 			double *xlon, double *ylat, double *zdata,
 			double *xdisplay, double *ydisplay, double *zdisplay);
 int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel,
-			int ijbounds[4], int *found, 
+			int ijbounds[4], int *found,
 			double *xgrid, double *ygrid,
 			double *xlon, double *ylat, double *zdata,
 			double *xdisplay, double *ydisplay, double *zdisplay);
@@ -885,7 +885,7 @@ int mbview_getnavpointcount(int verbose, size_t instance,
 			int	*npoint,
 			int	*nintpoint,
 			int *error);
-int mbview_allocnavarrays(int verbose, 
+int mbview_allocnavarrays(int verbose,
 			int	npointtotal,
 			double	**time_d,
 			double	**navlon,
@@ -968,16 +968,16 @@ int mbview_getrouteselected(int verbose, size_t instance,
 			int	*selected,
 			int *error);
 int mbview_getrouteinfo(int verbose, size_t instance,
-			int working_route, 
-			int *nroutewaypoint, 
-			int *nroutpoint, 
-			char *routename, 
-			int *routecolor, 
-			int *routesize, 
-			double *routedistancelateral, 
-			double *routedistancetopo, 
+			int working_route,
+			int *nroutewaypoint,
+			int *nroutpoint,
+			char *routename,
+			int *routecolor,
+			int *routesize,
+			double *routedistancelateral,
+			double *routedistancetopo,
 			int *error);
-int mbview_allocroutearrays(int verbose, 
+int mbview_allocroutearrays(int verbose,
 			int	npointtotal,
 			double	**routelon,
 			double	**routelat,
@@ -1047,7 +1047,7 @@ int mbview_updateroutelist();
 int mbview_getsitecount(int verbose, size_t instance,
 			int	*nsite,
 			int *error);
-int mbview_allocsitearrays(int verbose, 
+int mbview_allocsitearrays(int verbose,
 			int	nsite,
 			double	**sitelon,
 			double	**sitelat,
@@ -1097,14 +1097,14 @@ int mbview_updatesitelist();
 int mbview_getprofilecount(int verbose, size_t instance,
 			int *npoints,
 			int *error);
-int mbview_allocprofilepoints(int verbose, 
+int mbview_allocprofilepoints(int verbose,
 			int	npoints,
 			struct mbview_profilepoint_struct **points,
 			int 	*error);
-int mbview_freeprofilepoints(int verbose, 
+int mbview_freeprofilepoints(int verbose,
 			double	**points,
 			int *error);
-int mbview_allocprofilearrays(int verbose, 
+int mbview_allocprofilearrays(int verbose,
 			int	npoints,
 			double	**distance,
 			double	**zdata,
@@ -1115,7 +1115,7 @@ int mbview_allocprofilearrays(int verbose,
 			double	**bearing,
 			double	**slope,
 			int 	*error);
-int mbview_freeprofilearrays(int verbose, 
+int mbview_freeprofilearrays(int verbose,
 			double	**distance,
 			double	**zdata,
 			int	**boundary,
@@ -1144,7 +1144,7 @@ int mbview_reset_prglx(size_t instance);
 int mbview_destroy_prglx(size_t instance);
 int mbview_plotprofile(size_t instance);
 int mbview_profile_text(size_t instance);
-	
+
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
 
 /*--------------------------------------------------------------------*/

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.pl 1989 2012-10-04 21:36:53Z caress $
+#    $Id: mbm_grdplot.pl 2051 2013-03-20 05:18:24Z caress $
 #
 #    Copyright (c) 1993-2012 by
 #    D. W. Caress (caress@mbari.org)
@@ -69,7 +69,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.pl 1989 2012-10-04 21:36:53Z caress $
+#   $Id: mbm_grdplot.pl 2051 2013-03-20 05:18:24Z caress $
 #
 # Revisions:
 #   $Log: mbm_grdplot.perl,v $
@@ -436,7 +436,7 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_grdplot.pl 1989 2012-10-04 21:36:53Z caress $\n";
+	print "\nVersion: $Id: mbm_grdplot.pl 2051 2013-03-20 05:18:24Z caress $\n";
 	print "\nMacro to generate a shellscript of GMT commands which, \n";
 	print "when executed, will generate a Postscript plot of gridded \n";
 	print "data.  Several styles of plots can be generated, including \n";
@@ -1033,33 +1033,22 @@ else
 		}
 	}
 
-# get postscript viewer
+# use mbdefaults to get the current system default postscript viewer
+$ps_viewer = "ghostview";
+@mbdefaults = `mbdefaults`;
+while (@mbdefaults)
+        {
+        $line = shift @mbdefaults;
+        if ($line =~ /ps viewer:\s+(\S+)/)
+                {
+                ($ps_viewer) = $line =~ /ps viewer:\s+(\S+)/;
+                 }
+        }
+
 # check environment variable
 if ($ENV{"MB_PS_VIEWER"})
 	{
 	$ps_viewer = $ENV{"MB_PS_VIEWER"};
-	}
-# check for .mbio_defaults file
-if (!$ps_viewer)
-	{
-	$home = $ENV{"HOME"};
-	$mbdef = "$home/.mbio_defaults";
-	if (open(MBDEF,"<$mbdef"))
-		{
-		while (<MBDEF>)
-			{
-			if (/ps viewer:\s+(\S+)/)
-				{
-				($ps_viewer) = /ps viewer:\s+(\S+)/;
-				}
-			}
-		close MBDEF;
-		}
-	}
-# else just set it to ghostview
-if (!$ps_viewer)
-	{
-	$ps_viewer = "ghostview";
 	}
 
 # see if data file is a grd file or a list of grdfiles

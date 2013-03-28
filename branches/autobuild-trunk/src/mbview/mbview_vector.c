@@ -6,7 +6,7 @@
 
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_vector.c	1/11/2012
- *    $Id: mbview_vector.c 1945 2012-05-02 19:11:42Z caress $
+ *    $Id: mbview_vector.c 2051 2013-03-20 05:18:24Z caress $
  *
  *    Copyright (c) 2012 by
  *    David W. Caress (caress@mbari.org)
@@ -71,9 +71,7 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static char		value_string[MB_PATH_MAXLINE];
-
-static char rcs_id[]="$Id: mbview_vector.c 1945 2012-05-02 19:11:42Z caress $";
+static char rcs_id[]="$Id: mbview_vector.c 2051 2013-03-20 05:18:24Z caress $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getvectorcount(int verbose, size_t instance,
@@ -846,7 +844,6 @@ int mbview_drawvector(size_t instance, int rez)
 	/* local variables */
 	char	*function_name = "mbview_drawvector";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	GLUquadricObj *globj;

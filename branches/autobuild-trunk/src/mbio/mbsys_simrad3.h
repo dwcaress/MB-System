@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
- *	$Id: mbsys_simrad3.h 2005 2013-01-01 02:20:24Z caress $
+ *	$Id: mbsys_simrad3.h 2051 2013-03-20 05:18:24Z caress $
  *
  *    Copyright (c) 2008-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -342,6 +342,7 @@
 
 /* invalid value flags */
 #define	EM3_INVALID_AMP			0x7F
+#define	EM3_INVALID_SS			0x7FFF
 #define	EM3_INVALID_CHAR		0xFF
 #define	EM3_INVALID_SHORT		0xFFFF
 #define EM3_INVALID_U_INT		0xFFFFFFFF

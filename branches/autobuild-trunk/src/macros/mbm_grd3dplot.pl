@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.pl 1961 2012-06-08 18:11:41Z caress $
+#    $Id: mbm_grd3dplot.pl 2051 2013-03-20 05:18:24Z caress $
 #
 #    Copyright (c) 1993-2012 by
 #    D. W. Caress (caress@mbari.org)
@@ -63,7 +63,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.pl 1961 2012-06-08 18:11:41Z caress $
+#   $Id: mbm_grd3dplot.pl 2051 2013-03-20 05:18:24Z caress $
 #
 # Revisions:
 #   $Log: mbm_grd3dplot.perl,v $
@@ -371,7 +371,7 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_grd3dplot.pl 1961 2012-06-08 18:11:41Z caress $\n";
+	print "\nVersion: $Id: mbm_grd3dplot.pl 2051 2013-03-20 05:18:24Z caress $\n";
 	print "\nMacro to generate a shellscript of GMT commands which, when \n";
 	print "executed, will generate a 3D perspective Postscript plot of  \n";
 	print "gridded data.  Several styles of plots can be generated, \n";
@@ -797,33 +797,22 @@ else
 		}
 	}
 
-# get postscript viewer
+# use mbdefaults to get the current system default postscript viewer
+$ps_viewer = "ghostview";
+@mbdefaults = `mbdefaults`;
+while (@mbdefaults)
+        {
+        $line = shift @mbdefaults;
+        if ($line =~ /ps viewer:\s+(\S+)/)
+                {
+                ($ps_viewer) = $line =~ /ps viewer:\s+(\S+)/;
+                 }
+        }
+
 # check environment variable
 if ($ENV{"MB_PS_VIEWER"})
 	{
 	$ps_viewer = $ENV{"MB_PS_VIEWER"};
-	}
-# check for .mbio_defaults file
-if (!$ps_viewer)
-	{
-	$home = $ENV{"HOME"};
-	$mbdef = "$home/.mbio_defaults";
-	if (open(MBDEF,"<$mbdef"))
-		{
-		while (<MBDEF>)
-			{
-			if (/ps viewer:\s+(\S+)/)
-				{
-				($ps_viewer) = /ps viewer:\s+(\S+)/;
-				}
-			}
-		close MBDEF;
-		}
-	}
-# else just set it to ghostview
-if (!$ps_viewer)
-	{
-	$ps_viewer = "ghostview";
 	}
 
 # get limits of data file using grdinfo

@@ -3,10 +3,9 @@
 #  include <mbsystem_config.h>
 #endif
 
-
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em710mba.c	2/26/2008
- *	$Id: mbr_em710mba.c 2005 2013-01-01 02:20:24Z caress $
+ *	$Id: mbr_em710mba.c 2051 2013-03-20 05:18:24Z caress $
  *
  *    Copyright (c) 2008-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -194,7 +193,7 @@ int mbr_em710mba_wr_ss2(int verbose, void *mbio_ptr, int swap,
 int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
 
-static char rcs_id[]="$Id: mbr_em710mba.c 2005 2013-01-01 02:20:24Z caress $";
+static char rcs_id[]="$Id: mbr_em710mba.c 2051 2013-03-20 05:18:24Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em710mba(int verbose, void *mbio_ptr, int *error)
@@ -4993,7 +4992,7 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		{
 		for (i=0;i<MBSYS_SIMRAD3_MAXPIXELS;i++)
 			{
-			ping->png_ss[i] = 0;
+			ping->png_ss[i] = EM3_INVALID_SS;
 			}
 		read_len = (size_t)(ping->png_pixels_ss * sizeof(short));
 		status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);

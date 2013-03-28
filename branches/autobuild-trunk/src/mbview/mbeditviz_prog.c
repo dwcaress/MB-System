@@ -2,9 +2,11 @@
 #ifdef HAVE_CONFIG_H
 #  include <mbsystem_config.h>
 #endif
+
+
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c 2015 2013-03-01 22:33:52Z caress $
+ *    $Id: mbeditviz_prog.c 2051 2013-03-20 05:18:24Z caress $
  *
  *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -87,7 +89,7 @@
 #include "mbeditviz.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c 2015 2013-03-01 22:33:52Z caress $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c 2051 2013-03-20 05:18:24Z caress $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
@@ -3568,6 +3570,7 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
 
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
@@ -3753,6 +3756,7 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
 
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
@@ -3913,6 +3917,7 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
 
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,

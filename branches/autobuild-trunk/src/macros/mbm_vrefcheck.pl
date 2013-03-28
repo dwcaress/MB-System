@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_vrefcheck.perl	6/18/93
-#    $Id: mbm_vrefcheck.pl 1961 2012-06-08 18:11:41Z caress $
+#    $Id: mbm_vrefcheck.pl 2051 2013-03-20 05:18:24Z caress $
 #
 #    Copyright (c) 1993-2012 by
 #    D. W. Caress (caress@mbari.org)
@@ -34,7 +34,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_vrefcheck.pl 1961 2012-06-08 18:11:41Z caress $
+#   $Id: mbm_vrefcheck.pl 2051 2013-03-20 05:18:24Z caress $
 #
 # Revisions:
 #   $Log: mbm_vrefcheck.perl,v $
@@ -163,32 +163,22 @@ print "Running psxy...\n";
 `psxy $resfile -JX$xaxis/9 -R$xmin/$xmax/-2/2 -B1g0.25:"Time From Beginning of File (hours)":/0.25g0.25:"Apparent Vertical Reference Noise (degrees)"::."Multibeam Data File - $file": -P > $psfile`;
 `rm -f $datfile $fltfile $resfile`;
 
-# get postscript viewer
+# use mbdefaults to get the current system default postscript viewer
+$ps_viewer = "ghostview";
+@mbdefaults = `mbdefaults`;
+while (@mbdefaults)
+        {
+        $line = shift @mbdefaults;
+        if ($line =~ /ps viewer:\s+(\S+)/)
+                {
+                ($ps_viewer) = $line =~ /ps viewer:\s+(\S+)/;
+                 }
+        }
+
 # check environment variable
 if ($ENV{"MB_PS_VIEWER"})
 	{
 	$ps_viewer = $ENV{"MB_PS_VIEWER"};
-	}
-# check for .mbio_defaults file
-if (!$ps_viewer)
-	{
-	$home = $ENV{"HOME"};
-	$mbdef = "$home/.mbio_defaults";
-	if (open(MBDEF,"<$mbdef"))
-		{
-		while (<MBDEF>)
-			{
-			if (/ps viewer:\s+(\S+)/)
-				{
-				($ps_viewer) = /ps viewer:\s+(\S+)/;
-				}
-			}
-		}
-	}
-# just set it to ghostview
-if (!$ps_viewer)
-	{
-	$ps_viewer = "ghostview";
 	}
 
 `$ps_viewer $psfile &`;

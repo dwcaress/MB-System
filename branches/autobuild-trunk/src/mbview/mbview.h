@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h 1934 2012-02-22 07:51:16Z caress $
+ *    $Id: mbview.h 2051 2013-03-20 05:18:24Z caress $
  *
  *    Copyright (c); 2002-2012 by
  *    David W. Caress (caress@mbari.org);
@@ -304,7 +304,7 @@ struct mbview_contoursegment_struct {
 	float	z;
 	float	level;
 	};
-	
+
 struct mbview_point_struct {
 	double	xgrid;
 	double	ygrid;
@@ -315,7 +315,7 @@ struct mbview_point_struct {
 	double	ydisplay;
 	double	zdisplay;
 	};
-	
+
 struct mbview_pointw_struct {
 	double	xgrid[MBV_MAX_WINDOWS];
 	double	ygrid[MBV_MAX_WINDOWS];
@@ -326,7 +326,7 @@ struct mbview_pointw_struct {
 	double	ydisplay[MBV_MAX_WINDOWS];
 	double	zdisplay[MBV_MAX_WINDOWS];
 	};
-	
+
 struct mbview_navpoint_struct {
 	int	draped;
 	int	selected;
@@ -341,7 +341,7 @@ struct mbview_navpoint_struct {
 	int	shot;
 	int	cdp;
 	};
-	
+
 struct mbview_navpointw_struct {
 	int	draped;
 	int	selected;
@@ -356,7 +356,7 @@ struct mbview_navpointw_struct {
 	int	shot;
 	int	cdp;
 	};
-	
+
 struct mbview_vectorpointw_struct {
 	int	draped;
 	int	selected;
@@ -427,7 +427,7 @@ struct mbview_area_struct {
 	struct mbview_point_struct cornerpoints[4];
 	struct mbview_linesegment_struct segments[4];
 	};
-	
+
 struct mbview_site_struct {
 	struct mbview_pointw_struct point;
 	int	color;
@@ -500,14 +500,14 @@ struct mbview_shareddata_struct {
 	/* nav pick */
 	int	navpick_type;
 	struct mbview_pickw_struct navpick;
-	
+
 	/* site data */
 	int	site_mode;
 	int	nsite;
 	int	nsite_alloc;
 	int	site_selected;
 	struct mbview_site_struct *sites;
-	
+
 	/* route data */
 	int	route_mode;
 	int	nroute;
@@ -515,7 +515,7 @@ struct mbview_shareddata_struct {
 	int	route_selected;
 	int	route_point_selected;
 	struct mbview_route_struct *routes;
-	
+
 	/* nav data */
 	int	nav_mode;
 	int	nnav;
@@ -523,7 +523,7 @@ struct mbview_shareddata_struct {
 	int	nav_selected[2];
 	int	nav_point_selected[2];
 	struct mbview_nav_struct *navs;
-	
+
 	/* vector data */
 	int	vector_mode;
 	int	nvector;
@@ -534,7 +534,7 @@ struct mbview_shareddata_struct {
 	};
 
 struct mbview_struct {
-	
+
 	/* function pointers */
 	int (*mbview_dismiss_notify)(size_t id);
 	void (*mbview_pickonepoint_notify)(size_t id);
@@ -546,7 +546,7 @@ struct mbview_struct {
 	void (*mbview_picknav_notify)(size_t id);
 	void (*mbview_pickvector_notify)(size_t id);
 	void (*mbview_sensitivity_notify)();
-	
+
 	/* active flag */
 	int	active;
 
@@ -572,12 +572,12 @@ struct mbview_struct {
 	int	grid_mode;
 	int	grid_shade_mode;
 	int	grid_contour_mode;
-	
+
 	/* histogram equalization controls */
 	int	primary_histogram;
 	int	primaryslope_histogram;
 	int	secondary_histogram;
-	
+
 	/* colortable controls */
 	int	primary_colortable;
 	int	primary_colortable_mode;
@@ -602,7 +602,7 @@ struct mbview_struct {
 	double	viewelevation3d;
 	double	viewazimuth3d;
 	int	viewbounds[4];
-	
+
 	/* shading controls */
 	double	illuminate_magnitude;
 	double	illuminate_elevation;
@@ -611,15 +611,15 @@ struct mbview_struct {
 	double	overlay_shade_magnitude;
 	double	overlay_shade_center;
 	int	overlay_shade_mode;
-	
+
 	/* contour controls */
 	double	contour_interval;
-	
+
 	/* profile controls */
 	double	profile_exageration;
 	int	profile_widthfactor;
 	double	profile_slopethreshold;
-	
+
 	/* projection controls */
 	int	primary_grid_projection_mode;
 	mb_path	primary_grid_projection_id;
@@ -627,7 +627,7 @@ struct mbview_struct {
 	mb_path	secondary_grid_projection_id;
 	int	display_projection_mode;
 	mb_path	display_projection_id;
-	
+
 	/* grid data */
 	float	primary_nodatavalue;
 	int	primary_nxy;
@@ -666,27 +666,27 @@ struct mbview_struct {
 	double	secondary_dx;
 	double	secondary_dy;
 	float	*secondary_data;
-	
+
 	/* pick info flag */
 	int	pickinfo_mode;
-	
+
 	/* point and line pick */
 	int	pick_type;
 	struct mbview_pick_struct pick;
-	
+
 	/* area data */
 	int	area_type;
 	int	area_pickendpoint;
 	struct mbview_area_struct area;
-	
+
 	/* region data */
 	int	region_type;
 	int	region_pickcorner;
 	struct mbview_region_struct region;
-	
+
 	/* profile data */
 	struct mbview_profile_struct profile;
-	
+
 	/* global data view modes */
 	int	site_view_mode;
 	int	route_view_mode;
@@ -694,7 +694,7 @@ struct mbview_struct {
 	int	navdrape_view_mode;
 	int	vector_view_mode;
 	int	profile_view_mode;
-	
+
 	};
 
 /*--------------------------------------------------------------------*/
@@ -705,6 +705,7 @@ struct mb3dsoundings_sounding_struct {
 	int	iping;
 	int	ibeam;
 	char	beamflag;
+        char	beamflagorg;
 	double	x;
 	double	y;
 	double	z;
@@ -715,7 +716,7 @@ struct mb3dsoundings_sounding_struct {
 	int	winy;
 };
 
-struct mb3dsoundings_struct {	
+struct mb3dsoundings_struct {
 	/* location and scale parameters */
 	double	xorigin;
 	double	yorigin;
@@ -731,7 +732,7 @@ struct mb3dsoundings_struct {
 	double	cosbearing;
 	double	scale;
 	double	zscale;
-	
+
 	/* sounding data */
 	int	num_soundings;
 	int	num_soundings_unflagged;
@@ -900,7 +901,7 @@ int mbview_setsecondaryname(int verbose, size_t instance,
 int mbview_projectdata(size_t instance);
 int mbview_projectforward(size_t instance, int needlonlat,
 				double xgrid, double ygrid, double zdata,
-				double *xlon, double *ylat, 
+				double *xlon, double *ylat,
 				double *xdisplay, double *ydisplay, double *zdisplay);
 int mbview_projectinverse(size_t instance, int needlonlat,
 				double xdisplay, double ydisplay,double zdisplay,
@@ -928,13 +929,13 @@ int mbview_projectdisplay2ll(size_t instance,
 int mbview_projectdistance(size_t instance,
 				double xlon1, double ylat1, double zdata1,
 				double xlon2, double ylat2, double zdata2,
-				double *distancelateral, 
+				double *distancelateral,
 				double *distanceoverground,
 				double *slope);
-int mbview_getzdata(size_t instance, 
+int mbview_getzdata(size_t instance,
 			double xgrid, double ygrid,
 			int *found, double *zdata);
-int mbview_getzdata(size_t instance, 
+int mbview_getzdata(size_t instance,
 			double xgrid, double ygrid,
 			int *found, double *zdata);
 
@@ -962,7 +963,7 @@ int mbview_getnavpointcount(int verbose, size_t instance,
 			int	*npoint,
 			int	*nintpoint,
 			int *error);
-int mbview_allocnavarrays(int verbose, 
+int mbview_allocnavarrays(int verbose,
 			int	npointtotal,
 			double	**time_d,
 			double	**navlon,
@@ -1033,7 +1034,7 @@ int mbview_getvectorpointcount(int verbose, size_t instance,
 			int	*npoint,
 			int	*nintpoint,
 			int *error);
-int mbview_allocvectorarrays(int verbose, 
+int mbview_allocvectorarrays(int verbose,
 			int	npointtotal,
 			double	**veclon,
 			double	**veclat,
@@ -1079,16 +1080,16 @@ int mbview_getrouteselected(int verbose, size_t instance,
 			int	*selected,
 			int *error);
 int mbview_getrouteinfo(int verbose, size_t instance,
-			int working_route, 
-			int *nroutewaypoint, 
-			int *nroutpoint, 
-			char *routename, 
-			int *routecolor, 
-			int *routesize, 
-			double *routedistancelateral, 
-			double *routedistancetopo, 
+			int working_route,
+			int *nroutewaypoint,
+			int *nroutpoint,
+			char *routename,
+			int *routecolor,
+			int *routesize,
+			double *routedistancelateral,
+			double *routedistancetopo,
 			int *error);
-int mbview_allocroutearrays(int verbose, 
+int mbview_allocroutearrays(int verbose,
 			int	npointtotal,
 			double	**routelon,
 			double	**routelat,
@@ -1150,7 +1151,7 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 int mbview_getsitecount(int verbose, size_t instance,
 			int	*nsite,
 			int *error);
-int mbview_allocsitearrays(int verbose, 
+int mbview_allocsitearrays(int verbose,
 			int	nsite,
 			double	**sitelon,
 			double	**sitelat,
@@ -1194,14 +1195,14 @@ int mbview_enableeditsites(int verbose, size_t instance,
 int mbview_getprofilecount(int verbose, size_t instance,
 			int *npoints,
 			int *error);
-int mbview_allocprofilepoints(int verbose, 
+int mbview_allocprofilepoints(int verbose,
 			int	npoints,
 			struct mbview_profilepoint_struct **points,
 			int 	*error);
-int mbview_freeprofilepoints(int verbose, 
+int mbview_freeprofilepoints(int verbose,
 			double	**points,
 			int *error);
-int mbview_allocprofilearrays(int verbose, 
+int mbview_allocprofilearrays(int verbose,
 			int	npoints,
 			double	**distance,
 			double	**zdata,
@@ -1212,7 +1213,7 @@ int mbview_allocprofilearrays(int verbose,
 			double	**bearing,
 			double	**slope,
 			int 	*error);
-int mbview_freeprofilearrays(int verbose, 
+int mbview_freeprofilearrays(int verbose,
 			double	**distance,
 			double	**zdata,
 			int	**boundary,
