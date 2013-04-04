@@ -1386,7 +1386,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XmStringFree((XmString)tmp0);
     }
 
-    XtAddCallback(class_in->mbview_pushButton_shadeparms, XmNactivateCallback, do_mbview_shadeparmspopdown, (XtPointer)0);
+    XtAddCallback(class_in->mbview_pushButton_shadeparms, XmNactivateCallback, do_mbview_shadeparmspopup, (XtPointer)0);
 
     ac = 0;
     {

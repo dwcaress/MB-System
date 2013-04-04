@@ -28,6 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.3.2053       April 4, 2013
   Version 5.3.2051       March 20, 2013
   Version 5.3.2042       March 12, 2013
 * Version 5.3.2017       March 3, 2013
@@ -233,6 +234,26 @@ that may follow from correct or incorrect use of these programs.
 ------------------------------------
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------
+
+-----> 5.3.2053 (April 4, 2013)
+
+Mb7k2ss: Fixed line breakouts so that the first line is output separate from
+the second.
+
+Formats 162, 163, 168, 169 (text xyz variants): Fixed i/o modules to handle files
+with leading white space before the first column.
+
+Mbset: Added -N option to turn off merging of navigation from MBnavadjust and
+also remove the *.na0 files.
+
+Mbgrid, mbmosaic, mbm_grid: Fixed documentation descriptions of the options
+controlling the spline interpolation, particularly the tension.
+
+Mbm_grdtiff: Fixed the image display program called in the tiff-creating
+script created by mbm_grdtiff.
+
+Mbdatalist: Recast the output format for the -S option. One now gets a single
+line of output for each file unless the -V option is also specified.
 
 -----> 5.3.2051 (March 20, 2013)
 

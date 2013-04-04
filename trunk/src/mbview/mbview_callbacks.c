@@ -7648,7 +7648,7 @@ do_mbview_shadeparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
-if (mbv_verbose >= 2)
+if (mbv_verbose >= 0)
 fprintf(stderr,"do_mbview_shadeparmspopup: instance:%ld\n", instance);
 
 	/* get view */

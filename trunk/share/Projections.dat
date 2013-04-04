@@ -17372,11 +17372,20 @@ no_defs <>
 	x_0=-3046491.73 y_0=0.00
 	no_defs<>
 #
-# Oblique Mercator for Alarcon Rise Survey
-<CampecheEscarpmentObliqueMercator>
+# Oblique Mercator for Campeche Escarpment Survey
+<CampecheEscarpmentObliqueMercator1>
 	proj=omerc ellps=WGS84
 	lon_1=-92.748065 lat_1=21.784402
 	lon_2=-87.502298 lat_2=25.124851
 	units=m no_rot
 	x_0=-3812301.52 y_0=0.00
+	no_defs<>
+#
+# Second Oblique Mercator for Campeche Escarpment Survey
+<CampecheEscarpmentObliqueMercator2>
+	proj=omerc ellps=WGS84
+	lon_1=-92.664712 lat_1=21.674536
+	lon_2=-87.420688 lat_2=25.011832
+	units=m no_rot
+	x_0=-3798982.97 y_0=0.00
 	no_defs<>

@@ -127,7 +127,7 @@ int main (int argc, char **argv)
 	int	nproblemfiles = 0;
 	int	remove_locks = MB_NO;
 	int	make_datalistp = MB_NO;
-	
+
 	int	prstatus = MB_PR_FILE_UP_TO_DATE;
 	int	lock_status;
 	int	lock_error;
@@ -138,7 +138,7 @@ int main (int argc, char **argv)
 	mb_path lock_user;
 	char	lock_date[25];
 	mb_path	lockfile;
-	
+
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
 	FILE	*output;
@@ -153,7 +153,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhCcF:f:I:i:NnOoPpQqR:r:SsUuYyZz")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'C':
 		case 'c':
@@ -306,7 +306,7 @@ int main (int argc, char **argv)
 	if (make_datalistp)
 		{
    		/* figure out data format and fileroot if possible */
-		status = mb_get_format(verbose, read_file, 
+		status = mb_get_format(verbose, read_file,
 					fileroot, &format, &error);
 		sprintf(file, "%sp.mb-1", fileroot);
 
@@ -321,7 +321,7 @@ int main (int argc, char **argv)
 		fclose(fp);
 		if (verbose > 0)
 		    fprintf(output, "Convenience datalist file %s created...\n", file);
-		
+
 		/* exit unless building ancilliary files has also been requested */
 		if (make_inf == MB_NO)
 			exit(error);
@@ -335,10 +335,10 @@ int main (int argc, char **argv)
 	if (format > 0)
 		{
 		nfile++;
-		
+
 		if (make_inf == MB_YES)
 		    {
-		    status = mb_make_info(verbose, force_update, 
+		    status = mb_make_info(verbose, force_update,
 						read_file, format, &error);
 		    }
 		else if (problem_report == MB_YES)
@@ -348,14 +348,14 @@ int main (int argc, char **argv)
 			nproblemfiles++;
 		    nparproblemtot += nparproblem;
 		    ndataproblemtot += ndataproblem;
-			
+
 		    }
 		else
 		    {
 		    /* check for mbinfo file if bounds checking enabled */
 		    if (look_bounds == MB_YES)
 			{
-			status = mb_check_info(verbose, read_file, lonflip, bounds, 
+			status = mb_check_info(verbose, read_file, lonflip, bounds,
 				    &file_in_bounds, &error);
 			if (status == MB_FAILURE)
 			    {
@@ -364,45 +364,70 @@ int main (int argc, char **argv)
 			    error = MB_ERROR_NO_ERROR;
 			    }
 			}
-			
+
 		    /* ouput file if no bounds checking or in bounds */
 		    if (look_bounds == MB_NO || file_in_bounds == MB_YES)
 			{
-			fprintf(output, "%s %d %f\n", read_file, format, file_weight);
-			
+			if (verbose > 0)
+				fprintf(output, "%s %d %f\n", read_file, format, file_weight);
+			else
+				fprintf(output, "%s %d %f", read_file, format, file_weight);
+
 			/* check status if desired */
 			if (status_report == MB_YES)
 			    {
 			    status = mb_pr_checkstatus(verbose, read_file, &prstatus, &error);
-			    if (prstatus == MB_PR_FILE_UP_TO_DATE)
-				fprintf(output, "\tStatus: up to date\n");
-			    else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
-				fprintf(output, "\tStatus: out of date - needs processing\n");
-			    else if (prstatus == MB_PR_FILE_NOT_EXIST)
-				fprintf(output, "\tStatus: file does not exist\n");
-			    else if (prstatus == MB_PR_NO_PARAMETER_FILE)
-				fprintf(output, "\tStatus: no parameter file - processing undefined\n");
+			    if (verbose > 0)
+				{
+				if (prstatus == MB_PR_FILE_UP_TO_DATE)
+				    fprintf(output, "\tStatus: up to date\n");
+				else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
+				    fprintf(output, "\tStatus: out of date - needs processing\n");
+				else if (prstatus == MB_PR_FILE_NOT_EXIST)
+				    fprintf(output, "\tStatus: file does not exist\n");
+				else if (prstatus == MB_PR_NO_PARAMETER_FILE)
+				    fprintf(output, "\tStatus: no parameter file - processing undefined\n");
+				}
+			    else
+				{
+				if (prstatus == MB_PR_FILE_UP_TO_DATE)
+				    fprintf(output, "\t<Up-to-date>");
+				else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
+				    fprintf(output, "\t<Needs-processing>");
+				else if (prstatus == MB_PR_FILE_NOT_EXIST)
+				    fprintf(output, "\t<Does-not-exist>");
+				else if (prstatus == MB_PR_NO_PARAMETER_FILE)
+				    fprintf(output, "\t<No-parameter-file>");
+				}
 			    }
-			
+
 			/* check locks if desired */
 			if (status_report == MB_YES || remove_locks == MB_YES)
 			    {
 			    lock_status = mb_pr_lockinfo(verbose, read_file, &locked,
-							    &lock_purpose, lock_program, lock_user, 
+							    &lock_purpose, lock_program, lock_user,
 							    lock_cpu, lock_date, &lock_error);
 			    if (locked == MB_YES && status_report == MB_YES)
-				fprintf(output,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", 
+				{
+				if (verbose > 0)
+					fprintf(output,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n",
 						lock_program, lock_user, lock_cpu, lock_date);
+				else
+					fprintf(output,"\t<Locked>");
+				}
 			    if (locked == MB_YES && remove_locks == MB_YES)
 			        {
 				sprintf(lockfile, "%s.lck", file);
 				sprintf(command, "/bin/rm -f %s", lockfile);
 				}
 			    }
+
+			if (verbose == 0)
+				fprintf(output, "\n");
 			}
 		    }
 		}
-		
+
 	/* else parse datalist */
 	else
 		{
@@ -441,7 +466,7 @@ int main (int argc, char **argv)
 			    /* check for mbinfo file if bounds checking enabled */
 			    if (look_bounds == MB_YES)
 				{
-				status = mb_check_info(verbose, file, lonflip, bounds, 
+				status = mb_check_info(verbose, file, lonflip, bounds,
 					    &file_in_bounds, &error);
 				if (status == MB_FAILURE)
 				    {
@@ -450,7 +475,7 @@ int main (int argc, char **argv)
 				    error = MB_ERROR_NO_ERROR;
 				    }
 				}
-				
+
 			    /* copy file if no bounds checking or in bounds */
 			    if (look_bounds == MB_NO || file_in_bounds == MB_YES)
 				{
@@ -463,7 +488,7 @@ int main (int argc, char **argv)
 					filename = file;
 				if (nfile == 1)
 					system("rm datalist.mb-1");
-			    	sprintf(command, "echo %s %d %f >> datalist.mb-1", 
+			    	sprintf(command, "echo %s %d %f >> datalist.mb-1",
 					filename, format, file_weight);
 				system(command);
 			    	}
@@ -473,7 +498,7 @@ int main (int argc, char **argv)
 			    /* check for mbinfo file if bounds checking enabled */
 			    if (look_bounds == MB_YES)
 				{
-				status = mb_check_info(verbose, file, lonflip, bounds, 
+				status = mb_check_info(verbose, file, lonflip, bounds,
 					    &file_in_bounds, &error);
 				if (status == MB_FAILURE)
 				    {
@@ -482,51 +507,78 @@ int main (int argc, char **argv)
 				    error = MB_ERROR_NO_ERROR;
 				    }
 				}
-			
+
 			    /* ouput file if no bounds checking or in bounds */
 			    if (look_bounds == MB_NO || file_in_bounds == MB_YES)
-				fprintf(output, "%s %d %f\n", file, format, file_weight);
-
-			    /* check status if desired */
-			    if (status_report == MB_YES)
 				{
-				status = mb_pr_checkstatus(verbose, file, &prstatus, &error);
-				if (prstatus == MB_PR_FILE_UP_TO_DATE)
-				    fprintf(output, "\tstatus: up to date\n");
-				else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
-				    fprintf(output, "\tstatus: out of date - needs processing\n");
-				else if (prstatus == MB_PR_FILE_NOT_EXIST)
-				    fprintf(output, "\tstatus: file does not exist\n");
-				else if (prstatus == MB_PR_NO_PARAMETER_FILE)
-				    fprintf(output, "\tstatus: no parameter file - processing undefined\n");
-				}
+				if (verbose > 0)
+					fprintf(output, "%s %d %f\n", file, format, file_weight);
+				else
+					fprintf(output, "%s %d %f", file, format, file_weight);
 
-			    /* check locks if desired */
-			    if (status_report == MB_YES || remove_locks == MB_YES)
-				{
-				lock_status = mb_pr_lockinfo(verbose, file, &locked,
-								&lock_purpose, lock_program, lock_user, 
-								lock_cpu, lock_date, &lock_error);
-				if (locked == MB_YES && status_report == MB_YES)
-				    fprintf(output,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", 
-						    lock_program, lock_user, lock_cpu, lock_date);
-				if (locked == MB_YES && remove_locks == MB_YES)
-			            {
-				    sprintf(lockfile, "%s.lck", file);
-				    fprintf(output, "\tRemoving lock file %s\n", lockfile);
-				    sprintf(command, "/bin/rm -f %s", lockfile);
-				    system(command);
+				/* check status if desired */
+				if (status_report == MB_YES)
+				    {
+				    status = mb_pr_checkstatus(verbose, file, &prstatus, &error);
+				    if (verbose > 0)
+					{
+					if (prstatus == MB_PR_FILE_UP_TO_DATE)
+					    fprintf(output, "\tStatus: up to date\n");
+					else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
+					    fprintf(output, "\tStatus: out of date - needs processing\n");
+					else if (prstatus == MB_PR_FILE_NOT_EXIST)
+					    fprintf(output, "\tStatus: file does not exist\n");
+					else if (prstatus == MB_PR_NO_PARAMETER_FILE)
+					    fprintf(output, "\tStatus: no parameter file - processing undefined\n");
+					}
+				    else
+					{
+					if (prstatus == MB_PR_FILE_UP_TO_DATE)
+					    fprintf(output, "\t<Up-to-date>");
+					else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
+					    fprintf(output, "\t<Needs-processing>");
+					else if (prstatus == MB_PR_FILE_NOT_EXIST)
+					    fprintf(output, "\t<Does-not-exist>");
+					else if (prstatus == MB_PR_NO_PARAMETER_FILE)
+					    fprintf(output, "\t<No-parameter-file>");
+					}
 				    }
+
+				/* check locks if desired */
+				if (status_report == MB_YES || remove_locks == MB_YES)
+				    {
+				    lock_status = mb_pr_lockinfo(verbose, file, &locked,
+								    &lock_purpose, lock_program, lock_user,
+								    lock_cpu, lock_date, &lock_error);
+				    if (locked == MB_YES && status_report == MB_YES)
+					    {
+					    if (verbose > 0)
+						    fprintf(output,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n",
+							    lock_program, lock_user, lock_cpu, lock_date);
+					    else
+						    fprintf(output,"\t<Locked>");
+					    }
+				    if (locked == MB_YES && remove_locks == MB_YES)
+					{
+					sprintf(lockfile, "%s.lck", file);
+					fprintf(output, "\tRemoving lock file %s\n", lockfile);
+					sprintf(command, "/bin/rm -f %s", lockfile);
+					system(command);
+					}
+				    }
+
+				if (verbose == 0)
+					fprintf(output, "\n");
 				}
 			    }
-			    
+
 			}
 		mb_datalist_close(verbose,&datalist,&error);
 		}
 
 	/* set program status */
 	status = MB_SUCCESS;
-	
+
 	/* output counts */
 	if (verbose > 0)
 	    {

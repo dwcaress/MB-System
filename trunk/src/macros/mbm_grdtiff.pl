@@ -1499,7 +1499,7 @@ print "\nInstructions:\n";
 print "  Execute <$cmdfile> to generate TIFF image <$tiffile>.\n";
 if (!$no_view_ps)
 	{
-	print "  Executing <$cmdfile> also invokes $ps_viewer ";
+	print "  Executing <$cmdfile> also invokes $img_viewer ";
 	print "to view the plot on the screen.\n";
 	}
 if ($verbose)

@@ -712,7 +712,7 @@ int main (int argc, char **argv)
 		mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * rangethreshold;
 		oktowrite = 0;
-		linechange = MB_YES;
+		linechange = MB_NO;
 
 		/* output status */
 		if (verbose > 0)
@@ -807,7 +807,7 @@ int main (int argc, char **argv)
 		mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * rangethreshold;
 		oktowrite = 0;
-		linechange = MB_YES;
+		linechange = MB_NO;
 
 		/* output status */
 		if (verbose > 0)
