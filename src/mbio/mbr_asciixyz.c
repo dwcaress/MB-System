@@ -1045,8 +1045,10 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* handle the data */
 	if (status == MB_SUCCESS
-	    && (line[0] < '+'
-		|| line[0] > '9'))
+	    && (line[0] < '0' || line[0] > '9')
+	    && line[0] != ' '
+	    && line[0] != '+'
+	    && line[0] != '-')
 	    {
 	    store->kind = MB_DATA_COMMENT;
             strncpy(store->comment,&line[1],MBSYS_SINGLEBEAM_MAXLINE);

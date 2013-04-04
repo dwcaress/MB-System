@@ -785,8 +785,6 @@ int main (int argc, char **argv)
 			sscanf (optarg,"%s", topogridfile);
 			usetopogrid = MB_YES;
 			flag++;
-fprintf(stderr,"dbg2      usetopogrid:          %d\n",usetopogrid);
-fprintf(stderr,"dbg2      topogridfile:         %s\n",topogridfile);
 			break;
 		case 'U':
 		case 'u':

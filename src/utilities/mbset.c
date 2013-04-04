@@ -172,11 +172,10 @@ which performs a number of functions, including:\n\
 The parameters controlling mbprocess are included in an ascii\n\
 parameter file. The parameter file syntax is documented by\n\
 the manual pages for mbprocess and mbset. \n\n";
-	char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -V -H]";
+	char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -N -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -200,10 +199,14 @@ the manual pages for mbprocess and mbset. \n\n";
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_NO;
 	double	file_weight;
-	int	lookforfiles = 0;
+	int	lookforfiles = MB_NO;
+	int	removembnavadjust = MB_NO;
+	struct stat file_status;
+	int	fstat;
  	int	format = 0;
 	char	mbp_ifile[MBP_FILENAMESIZE];
 	int	mbp_format;
+	int	write_parameter_file = MB_NO;
 	int	nscan;
 	int	i;
 
@@ -212,7 +215,7 @@ the manual pages for mbprocess and mbset. \n\n";
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhEeF:f:I:i:LlP:p:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhEeF:f:I:i:LlNnP:p:")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -241,6 +244,11 @@ the manual pages for mbprocess and mbset. \n\n";
 		case 'L':
 		case 'l':
 			lookforfiles++;
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			removembnavadjust++;
 			flag++;
 			break;
 		case 'P':
@@ -343,6 +351,7 @@ the manual pages for mbprocess and mbset. \n\n";
 	status = mb_pr_readpar(verbose, mbp_ifile, lookforfiles,
 			&process, &error);
 	process.mbp_ifile_specified = MB_YES;
+	write_parameter_file = MB_NO;
 
 	if (process.mbp_format_specified == MB_NO)
 		{
@@ -354,6 +363,36 @@ the manual pages for mbprocess and mbset. \n\n";
 		process.mbp_ofile_specified = MB_YES;
 		mb_pr_default_output(verbose, &process, &error);
 		}
+
+	/* apply request to remove all reference to mbnavadjust
+		- this includes deleting any adjusted navigation
+		file referenced by the process.mbp_navadjfile */
+	if (removembnavadjust == MB_YES)
+		{
+		/* delete the navadjust file if it exists */
+		if (strlen(process.mbp_navadjfile) > 0
+			&& (fstat = stat(process.mbp_navadjfile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			{
+			remove(process.mbp_navadjfile);
+			fprintf(stderr,"Removed navigation adjustment file %s for %s\n",
+				process.mbp_navadjfile, mbp_ifile);
+			}
+
+		/* set NAVADJFILE and NAVADJMODE to nothing and off */
+		if (strlen(process.mbp_navadjfile) > 0 || process.mbp_navadj_mode != MBP_NAV_OFF)
+			{
+			fprintf(stderr,"Turned off navigation adjustment for %s\n", mbp_ifile);
+			write_parameter_file = MB_YES;
+			}
+
+		process.mbp_navadjfile[0] = '\0';
+		process.mbp_navadj_mode = MBP_NAV_OFF;
+		}
+
+	/* if any parameters are being set, write a parameter file */
+	if (pargc > 0)
+		write_parameter_file = MB_YES;
 
 	/* process parameter list */
 	for (i=0;i<pargc;i++)
@@ -1140,6 +1179,56 @@ the manual pages for mbprocess and mbset. \n\n";
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, &error);
 
+	/* if any of the important modes has been turned on, write the parameter file */
+	if (process.mbp_nav_mode != MBP_NAV_OFF
+		|| process.mbp_navadj_mode != MBP_NAV_OFF
+		|| process.mbp_attitude_mode != 0
+		|| process.mbp_sonardepth_mode != 0
+		|| process.mbp_cut_num != 0
+		|| process.mbp_edit_mode != MBP_EDIT_OFF
+		|| process.mbp_bathrecalc_mode != MBP_BATHRECALC_OFF
+		|| process.mbp_draft_mode != MBP_DRAFT_OFF
+		|| process.mbp_heave_mode != MBP_HEAVE_OFF
+		|| process.mbp_lever_mode != MBP_LEVER_OFF
+		|| process.mbp_rollbias_mode != MBP_ROLLBIAS_OFF
+		|| process.mbp_pitchbias_mode != MBP_PITCHBIAS_OFF
+		|| process.mbp_heading_mode != MBP_HEADING_OFF
+		|| process.mbp_tide_mode != MBP_TIDE_OFF
+		|| process.mbp_ampcorr_mode != MBP_AMPCORR_OFF
+		|| process.mbp_sscorr_mode != MBP_SSCORR_OFF
+		|| process.mbp_ssrecalc_mode != MBP_SSRECALC_OFF
+		|| process.mbp_meta_vessel[0] != '\0'
+		|| process.mbp_meta_institution[0] != '\0'
+		|| process.mbp_meta_platform[0] != '\0'
+		|| process.mbp_meta_sonar[0] != '\0'
+		|| process.mbp_meta_sonarversion[0] != '\0'
+		|| process.mbp_meta_cruiseid[0] != '\0'
+		|| process.mbp_meta_cruisename[0] != '\0'
+		|| process.mbp_meta_pi[0] != '\0'
+		|| process.mbp_meta_piinstitution[0] != '\0'
+		|| process.mbp_meta_client[0] != '\0'
+		|| process.mbp_meta_svcorrected != MBP_CORRECTION_UNKNOWN
+		|| process.mbp_meta_tidecorrected != MBP_CORRECTION_UNKNOWN
+		|| process.mbp_meta_batheditmanual != MBP_CORRECTION_UNKNOWN
+		|| process.mbp_meta_batheditauto != MBP_CORRECTION_UNKNOWN
+		|| process.mbp_meta_rollbias != MBP_METANOVALUE + 1.
+		|| process.mbp_meta_pitchbias != MBP_METANOVALUE + 1.
+		|| process.mbp_meta_headingbias != MBP_METANOVALUE + 1.
+		|| process.mbp_meta_draft != MBP_METANOVALUE + 1.
+		|| process.mbp_kluge001 != MB_NO
+		|| process.mbp_kluge002 != MB_NO
+		|| process.mbp_kluge003 != MB_NO
+		|| process.mbp_kluge004 != MB_NO
+		|| process.mbp_kluge005 != MB_NO
+		|| process.mbp_kluge006 != MB_NO
+		|| process.mbp_kluge007 != MB_NO
+		|| process.mbp_kluge008 != MB_NO
+		|| process.mbp_kluge009 != MB_NO
+		|| process.mbp_kluge010 != MB_NO)
+		{
+		write_parameter_file = MB_YES;
+		}
+
 	/* print starting debug statements */
 	if (verbose >= 2)
 	    {
@@ -1484,7 +1573,8 @@ the manual pages for mbprocess and mbset. \n\n";
 	    }
 
 	/* write parameters */
-	status = mb_pr_writepar(verbose, mbp_ifile,
+	if (write_parameter_file == MB_YES)
+		status = mb_pr_writepar(verbose, mbp_ifile,
 			&process, &error);
 
 	/* output results */

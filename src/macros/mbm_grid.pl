@@ -40,10 +40,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #             -Rwest/east/south/north -V
 #
 # Additional Options:
-#            [-Adatatype -Bborder -Cclip -Dxdim/ydim -Edx/dy/units
+#            [-Adatatype -Bborder -Cclip[/mode[/tension]] -Dxdim/ydim -Edx/dy/units
 #            -Fpriority_range -Ggridkind -H -Llonflip -Jprojection
 #            -M -N -Ppings
-#            -Sspeed -Ttension -U{azimuth/factor | time}
+#            -Sspeed -U{azimuth/factor | time}
 #            -V -Wscale -Xextend
 #            -Ypriority_file -Zbathdef]
 #
@@ -127,7 +127,7 @@ $root =    		($opt_O || $opt_o);
 $pings = 		($opt_P || $opt_p);
 $bounds = 		($opt_R || $opt_r);
 $speed = 		($opt_S || $opt_s);
-$tension = 		($opt_T || $opt_t);
+$topofile = 		($opt_T || $opt_t);
 $azimuthfactortime = 	($opt_U || $opt_u);
 $verbose = 		($opt_V || $opt_v);
 $scale = 		($opt_W || $opt_w);
@@ -156,9 +156,9 @@ if ($help)
         print "this macro. \n";
         print "\nBasic Usage:\n\tmbm_grid {-Ifilelist | -Fformat -IFile} -Oroot -V  \n";
         print "\nAdditional Options:\n\t-Rwest/east/south/north \n";
-        print "         [-Adatatype -Bborder -Cclip -Dxdim/ydim -Edx/dy/units \n";
-        print "         -fpriority_range -Ggridkind -H -Llonflip -M -N -Ppings  \n";
-        print "         -Sspeed -Ttension -U{azimuth/factor | time}  \n";
+        print "         [-Adatatype -Bborder -Cclip[/mode[/tension]] -Dxdim/ydim \n";
+        print "         -Edx/dy/units -fpriority_range -Ggridkind -H -Llonflip \n";
+        print "         -M -N -Ppings -Sspeed -Ttension -U{azimuth/factor | time}  \n";
         print "         -V -Wscale -Xextend  \n";
         print "         -Ypriority_file -Zbathdef]  \n";
 	exit 0;
@@ -574,9 +574,9 @@ if ($speed)
 	{
 	printf FCMD "\t-S$speed \\\n";
 	}
-if ($tension)
+if ($topofile && $datatype > 2)
 	{
-	printf FCMD "\t-T$tension \\\n";
+	printf FCMD "\t-T$topofile \\\n";
 	}
 if ($azimuthfactortime)
 	{
@@ -706,9 +706,9 @@ if ($verbose)
 		{
 		print "  Speed Limit:  $speed\n";
 		}
-	if ($tension)
+	if ($topofile && $datatype > 2)
 		{
-		print "  Spline Tension: $tension\n";
+		print "  Topo file:    $topofile\n";
 		}
 	if ($azimuthfactortime)
 		{
