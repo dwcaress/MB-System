@@ -1,6 +1,12 @@
+/* Added HAVE_CONFIG_H for autogen files */
+#ifdef HAVE_CONFIG_H
+#  include <mbsystem_config.h>
+#endif
+
+
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2ss.c		8/15/2007
- *    $Id: mb7k2ss.c 2017 2013-03-03 05:09:42Z caress $
+ *    $Id: mb7k2ss.c 2053 2013-04-04 20:55:29Z caress $
  *
  *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -96,7 +102,7 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 					double *table_altitude, double *table_range,
 					int *error);
 
-static char rcs_id[] = "$Id: mb7k2ss.c 2017 2013-03-03 05:09:42Z caress $";
+static char rcs_id[] = "$Id: mb7k2ss.c 2053 2013-04-04 20:55:29Z caress $";
 char program_name[] = "mb7k2ss";
 
 /*--------------------------------------------------------------------*/
@@ -712,7 +718,7 @@ int main (int argc, char **argv)
 		mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * rangethreshold;
 		oktowrite = 0;
-		linechange = MB_YES;
+		linechange = MB_NO;
 
 		/* output status */
 		if (verbose > 0)
@@ -807,7 +813,7 @@ int main (int argc, char **argv)
 		mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * rangethreshold;
 		oktowrite = 0;
-		linechange = MB_YES;
+		linechange = MB_NO;
 
 		/* output status */
 		if (verbose > 0)

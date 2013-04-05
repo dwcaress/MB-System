@@ -1,6 +1,11 @@
+/* Added HAVE_CONFIG_H for autogen files */
+#ifdef HAVE_CONFIG_H
+#  include <mbsystem_config.h>
+#endif
+
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_asciixyz.c	5/8/2002
- *	$Id: mbr_asciixyz.c 2015 2013-03-01 22:33:52Z caress $
+ *	$Id: mbr_asciixyz.c 2053 2013-04-04 20:55:29Z caress $
  *
  *    Copyright (c) 2002-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -113,7 +118,7 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_asciixyz.c 2015 2013-03-01 22:33:52Z caress $";
+static char rcs_id[]="$Id: mbr_asciixyz.c 2053 2013-04-04 20:55:29Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error)
@@ -1045,8 +1050,10 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* handle the data */
 	if (status == MB_SUCCESS
-	    && (line[0] < '+'
-		|| line[0] > '9'))
+	    && (line[0] < '0' || line[0] > '9')
+	    && line[0] != ' '
+	    && line[0] != '+'
+	    && line[0] != '-')
 	    {
 	    store->kind = MB_DATA_COMMENT;
             strncpy(store->comment,&line[1],MBSYS_SINGLEBEAM_MAXLINE);

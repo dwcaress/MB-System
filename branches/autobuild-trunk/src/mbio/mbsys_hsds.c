@@ -1,3 +1,9 @@
+/* Added HAVE_CONFIG_H for autogen files */
+#ifdef HAVE_CONFIG_H
+#  include <mbsystem_config.h>
+#endif
+
+
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.c	3/2/93
  *	$Id: mbsys_hsds.c 2015 2013-03-01 22:33:52Z caress $

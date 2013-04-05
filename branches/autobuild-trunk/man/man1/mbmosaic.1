@@ -1,4 +1,4 @@
-.TH mbmosaic 1 "15 October 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic 1 "24 March 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data
 from swath mapping sonar data files.
@@ -9,14 +9,14 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP
 [\fB-A\fIdatatype[F]\fP
-\fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP
+\fB-B\fIborder\fP  -C\fIclip\fP[\fI/mode\fP[\fI/tension\fP]] \fB-D\fIxdim/ydim\fP
 \fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range[/weight]\fP
 \fB-G\fIgridkind\fP  \fB-J\fIprojection\fP
 \fB-H -L\fIlonflip\fP \fB-M -N -P\fIpings\fP
 \fB-R\fIwest/east/south/north\fP \fB-R\fIfactor\fP
-\fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fIazimuth/factor\fP
+\fB-S\fIspeed\fP \fB-T\fItopofile\fP \fB-U\fIazimuth/factor\fP
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP
-\fB-Y\fIpriority_source\fP \fB-Z\fIbath_default\fP]
+\fB-Y\fIpriority_source\fP \fB-Z\fIaltitude\fP]
 
 .SH DESCRIPTION
 \fBmbmosaic\fP is a utility used to mosaic amplitude or sidescan
@@ -244,13 +244,26 @@ wherever no data exist, provided \fIborder\fP > 0.0.
 Default: \fIborder\fP = 0.0
 .TP
 .B \-C
-\fIclip\fP
+ \fIclip\fP[\fI/mode\fP[\fI/tension\fP]]
 .br
-Sets the clipping dimension for the spline interpolation. If \fIclip\fP=0
-no spline interpolation will be done.  If \fIclip\fP>0 then the spline
-interpolation will fill data gaps to a distance of \fIclip\fP times
-the grid spacing.
-Default: \fIclip\fP = 0.
+Controls the use of spline interpolation to fill grid cells not
+filled by swath data. The \fIclip\fP value sets the distance from
+swath data (in grid cells) that the spline interpolation may be
+applied. If \fIclip\fP=0 no spline interpolation will be done.
+If \fImode\fP=1 (the default), then the interpolation will fill
+data gaps up to two times \fIclip\fP grid cells in size. If \fImode\fP=2
+then the spline interpolation will fill all undefined cells within
+a distance of \fIclip\fP cells from data. If \fImode\fP = 3 or \fIclip\fP is
+set to a value greater than both dimensions of the output grid, then
+all grid cells not set by swath data will be filled by interpolation.
+The optional \fItension\fP value controls the thin plate spline interpolation.
+A \fItension\fP of 0 gives a minimum curvature surface with free edges;
+this is a pure Laplacian solution. A nonzero \fItension\fP tends to
+suppress spurious oscillations and flatten the interpolation toward the
+edges; a \fItension\fP of infinity yields a pure thin plate spline solution.
+The \fItension\fP must be zero or greater.
+Default: \fIclip\fP = 0, \fImode\fP = 1, and \fItension\fP = 0.0
+(minimum curvature solution).
 .TP
 .B \-D
 \fIxdim/ydim\fP
@@ -541,16 +554,14 @@ the input data; pings associated with a smaller ship speed will not be
 output. Default: \fIspeed\fP = 0.
 .TP
 .B \-T
-\fItension\fP
+\fItopofile\fP
 .br
-Sets the \fItension\fP value used in the thin plate spline interpolation.
-A \fItension\fP of 0 gives a minimum curvature surface with free edges;
-this is a pure Laplacian solution. A nonzero \fItension\fP tends to
-suppress spurious oscillations and flatten
-the interpolation toward the edges; a \fItension\fP of infinity
-yields a pure spline solution. The \fItension\fP must be zero or
-greater.
-Default: \fItension\fP = 1.0e10 (pure spline solution).
+Specifies a topography grid file that is used in calculating the sonar altitude
+associated with each data sample, which is in turn used to calculate the
+grazing angle. If the \fB-Y\fP option is used, then the grazing angle maps
+into a prioritization value for each data sample. The topography grid should
+cover the entire region being mosaiced, and should not have data gaps in regions
+of interest.
 .TP
 .B \-U
 \fIazimuth/factor\fP
@@ -610,11 +621,14 @@ Default: \fIextend\fP = 0.0
 \fIpriority_source\fP
 .br
 Enables priortization of data points based on their apparent
-grazing angle (this angle is arctan(x/z) where x is acrosstrack distance
-and z is sonar altitude, so
-that the center of the swath has an apparent grazing angle of
+grazing angle This angle is arctan(x/z) where x is acrosstrack distance
+and z is sonar altitude relative to the data point.
+The center of the swath has an apparent grazing angle of
 zero, the port swath edge has a large negative angle, and the
-starboard swath edge has a large positive angle). A number of predefined
+starboard swath edge has a large positive angle. The sonar altitude
+relative to the data can be set uniformly (\fB-Z\fP option), derived from
+bathymetry contained in the swath data (default when available), or calculated from
+a gridded model of seafloor topography (\fB-T\fP option). A number of predefined
 priority tables are available and can be accessed by setting \fIpriority_source\fP
 to a number from 1 to 8. These priority tables include:
 
@@ -706,9 +720,9 @@ than the maximum will be zero. See the examples below for a
 further explanation of the use of \fIpriority_source\fP.
 .TP
 .B \-Z
-\fIbath_default\fP
+\fIaltitude\fP
 .br
-Sets the default depth used for calculating grazing angles for
+Sets the default altitude used for calculating grazing angles for
 amplitude or sidescan values where depths are not available.
 Default: \fIscale\fP = 1000.0
 .SH EXAMPLES
@@ -769,7 +783,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
 
  Program mbmosaic
- Version $Id: mbmosaic.1 1994 2012-10-27 07:49:28Z caress $
+ Version $Id: mbmosaic.1 2053 2013-04-04 20:55:29Z caress $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

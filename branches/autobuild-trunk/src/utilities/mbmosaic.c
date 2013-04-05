@@ -6,7 +6,7 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c 2004 2012-12-13 00:49:35Z caress $
+ *    $Id: mbmosaic.c 2053 2013-04-04 20:55:29Z caress $
  *
  *    Copyright (c) 1997-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -392,7 +392,7 @@ int mbmosaic_get_footprint(
 		int	*error);
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c 2004 2012-12-13 00:49:35Z caress $";
+static char rcs_id[] = "$Id: mbmosaic.c 2053 2013-04-04 20:55:29Z caress $";
 char program_name[] = "mbmosaic";
 char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -791,8 +791,6 @@ int main (int argc, char **argv)
 			sscanf (optarg,"%s", topogridfile);
 			usetopogrid = MB_YES;
 			flag++;
-fprintf(stderr,"dbg2      usetopogrid:          %d\n",usetopogrid);
-fprintf(stderr,"dbg2      topogridfile:         %s\n",topogridfile);
 			break;
 		case 'U':
 		case 'u':

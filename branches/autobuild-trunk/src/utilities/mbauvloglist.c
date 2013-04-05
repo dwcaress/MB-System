@@ -1,3 +1,9 @@
+/* Added HAVE_CONFIG_H for autogen files */
+#ifdef HAVE_CONFIG_H
+#  include <mbsystem_config.h>
+#endif
+
+
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvloglist.c	8/14/2006
  *    $Id: mbauvloglist.c 2015 2013-03-01 22:33:52Z caress $

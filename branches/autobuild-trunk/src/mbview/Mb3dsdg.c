@@ -155,6 +155,7 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNy, 275); ac++;
         XtSetArg(args[ac], XmNwidth, 987); ac++;
         XtSetArg(args[ac], XmNheight, 584); ac++;
+        XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
         class_in->Mb3dsdg = XmCreateForm(parent,
             (char *)name,
             args,

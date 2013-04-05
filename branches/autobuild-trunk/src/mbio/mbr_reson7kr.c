@@ -1,3 +1,9 @@
+/* Added HAVE_CONFIG_H for autogen files */
+#ifdef HAVE_CONFIG_H
+#  include <mbsystem_config.h>
+#endif
+
+
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
  *	$Id: mbr_reson7kr.c 2015 2013-03-01 22:33:52Z caress $

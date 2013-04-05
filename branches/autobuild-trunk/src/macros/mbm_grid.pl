@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.pl 1961 2012-06-08 18:11:41Z caress $
+#    $Id: mbm_grid.pl 2053 2013-04-04 20:55:29Z caress $
 #
 #    Copyright (c) 1999-2012 by
 #    D. W. Caress (caress@mbari.org)
@@ -40,10 +40,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #             -Rwest/east/south/north -V
 #
 # Additional Options:
-#            [-Adatatype -Bborder -Cclip -Dxdim/ydim -Edx/dy/units
+#            [-Adatatype -Bborder -Cclip[/mode[/tension]] -Dxdim/ydim -Edx/dy/units
 #            -Fpriority_range -Ggridkind -H -Llonflip -Jprojection
 #            -M -N -Ppings
-#            -Sspeed -Ttension -U{azimuth/factor | time}
+#            -Sspeed -U{azimuth/factor | time}
 #            -V -Wscale -Xextend
 #            -Ypriority_file -Zbathdef]
 #
@@ -54,7 +54,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.pl 1961 2012-06-08 18:11:41Z caress $
+#   $Id: mbm_grid.pl 2053 2013-04-04 20:55:29Z caress $
 #
 # Revisions:
 #   $Log: mbm_grid.perl,v $
@@ -127,7 +127,7 @@ $root =    		($opt_O || $opt_o);
 $pings = 		($opt_P || $opt_p);
 $bounds = 		($opt_R || $opt_r);
 $speed = 		($opt_S || $opt_s);
-$tension = 		($opt_T || $opt_t);
+$topofile = 		($opt_T || $opt_t);
 $azimuthfactortime = 	($opt_U || $opt_u);
 $verbose = 		($opt_V || $opt_v);
 $scale = 		($opt_W || $opt_w);
@@ -139,7 +139,7 @@ $bathdef = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_grid.pl 1961 2012-06-08 18:11:41Z caress $\n";
+	print "\nVersion: $Id: mbm_grid.pl 2053 2013-04-04 20:55:29Z caress $\n";
         print "Macro to generate a shellscript of MB-System commands \n";
         print "which, when executed, will generate a grid or mosaic of the \n";
         print "specified swath sonar data. The grid or mosaic may be of \n";
@@ -156,9 +156,9 @@ if ($help)
         print "this macro. \n";
         print "\nBasic Usage:\n\tmbm_grid {-Ifilelist | -Fformat -IFile} -Oroot -V  \n";
         print "\nAdditional Options:\n\t-Rwest/east/south/north \n";
-        print "         [-Adatatype -Bborder -Cclip -Dxdim/ydim -Edx/dy/units \n";
-        print "         -fpriority_range -Ggridkind -H -Llonflip -M -N -Ppings  \n";
-        print "         -Sspeed -Ttension -U{azimuth/factor | time}  \n";
+        print "         [-Adatatype -Bborder -Cclip[/mode[/tension]] -Dxdim/ydim \n";
+        print "         -Edx/dy/units -fpriority_range -Ggridkind -H -Llonflip \n";
+        print "         -M -N -Ppings -Sspeed -Ttension -U{azimuth/factor | time}  \n";
         print "         -V -Wscale -Xextend  \n";
         print "         -Ypriority_file -Zbathdef]  \n";
 	exit 0;
@@ -574,9 +574,9 @@ if ($speed)
 	{
 	printf FCMD "\t-S$speed \\\n";
 	}
-if ($tension)
+if ($topofile && $datatype > 2)
 	{
-	printf FCMD "\t-T$tension \\\n";
+	printf FCMD "\t-T$topofile \\\n";
 	}
 if ($azimuthfactortime)
 	{
@@ -706,9 +706,9 @@ if ($verbose)
 		{
 		print "  Speed Limit:  $speed\n";
 		}
-	if ($tension)
+	if ($topofile && $datatype > 2)
 		{
-		print "  Spline Tension: $tension\n";
+		print "  Topo file:    $topofile\n";
 		}
 	if ($azimuthfactortime)
 		{

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdtiff.perl	11/3/1999
-#    $Id: mbm_grdtiff.pl 2051 2013-03-20 05:18:24Z caress $
+#    $Id: mbm_grdtiff.pl 2053 2013-04-04 20:55:29Z caress $
 #
 #    Copyright (c) 1999-2012 by
 #    D. W. Caress (caress@mbari.org)
@@ -49,7 +49,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdtiff.pl 2051 2013-03-20 05:18:24Z caress $
+#   $Id: mbm_grdtiff.pl 2053 2013-04-04 20:55:29Z caress $
 #
 # Revisions:
 #   $Log: mbm_grdtiff.perl,v $
@@ -180,7 +180,7 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_grdtiff.pl 2051 2013-03-20 05:18:24Z caress $\n";
+	print "\nVersion: $Id: mbm_grdtiff.pl 2053 2013-04-04 20:55:29Z caress $\n";
         print "\nMacro to generate a shellscript which, when executed, will \n";
         print "generate a geographically located TIFF image of gridded \n";
         print "data. The primary purpose of this macro is to allow the simple, \n";
@@ -1499,7 +1499,7 @@ print "\nInstructions:\n";
 print "  Execute <$cmdfile> to generate TIFF image <$tiffile>.\n";
 if (!$no_view_ps)
 	{
-	print "  Executing <$cmdfile> also invokes $ps_viewer ";
+	print "  Executing <$cmdfile> also invokes $img_viewer ";
 	print "to view the plot on the screen.\n";
 	}
 if ($verbose)

@@ -9,12 +9,12 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP
 [\fB-A\fIdatatype\fP
-\fB-B\fIborder\fP -C\fIclip\fP[\fI/mode\fP] \fB-D\fIxdim/ydim\fP
+\fB-B\fIborder\fP -C\fIclip\fP[\fI/mode\fP[\fI/tension\fP]] \fB-D\fIxdim/ydim\fP
 \fB-E\fIdx/dy/units[!]\fP \fB-F\fImode\fP
 \fB-G\fIgridkind\fP \fB-J\fIprojection\fP \fB-K\fIbackground\fP
 \fB-L\fIlonflip\fP \fB-M -N -P\fIpings\fP \fB-Q\fP
 \fB-R\fIwest/east/south/north\fP \fB-R\fIfactor\fP
-\fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fItime\fP
+\fB-S\fIspeed\fP \fB-U\fItime\fP
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
 
 .SH DESCRIPTION
@@ -267,7 +267,7 @@ wherever no data exist, provided \fIborder\fP > 0.0.
 Default: \fIborder\fP = 0.0
 .TP
 .B \-C
-\fIclip[/mode]\fP
+ \fIclip\fP[\fI/mode\fP[\fI/tension\fP]]
 .br
 Controls the use of spline interpolation to fill grid cells not
 filled by swath data. The \fIclip\fP value sets the distance from
@@ -279,7 +279,14 @@ then the spline interpolation will fill all undefined cells within
 a distance of \fIclip\fP cells from data. If \fImode\fP = 3 or \fIclip\fP is
 set to a value greater than both dimensions of the output grid, then
 all grid cells not set by swath data will be filled by interpolation.
-Default: \fIclip\fP = 0 and \fImode\fP = 1.
+The optional \fItension\fP value controls the thin plate spline interpolation.
+A \fItension\fP of 0 gives a minimum curvature surface with free edges;
+this is a pure Laplacian solution. A nonzero \fItension\fP tends to
+suppress spurious oscillations and flatten the interpolation toward the
+edges; a \fItension\fP of infinity yields a pure thin plate spline solution.
+The \fItension\fP must be zero or greater.
+Default: \fIclip\fP = 0, \fImode\fP = 1, and \fItension\fP = 0.0
+(minimum curvature solution).
 .TP
 .B \-D
 \fIxdim/ydim\fP
@@ -589,19 +596,6 @@ Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 output. Default: \fIspeed\fP = 0.
 .TP
-.B \-T
-\fItension\fP
-.br
-Sets the \fItension\fP value used in the thin plate spline interpolation.
-
-A \fItension\fP of 0 gives a minimum curvature surface with free edges;
-this is a pure Laplacian solution. A nonzero \fItension\fP tends to
-suppress spurious oscillations and flatten
-the interpolation toward the edges; a \fItension\fP of infinity
-yields a pure thin plate spline solution. The \fItension\fP must be zero or
-greater.
-Default: \fItension\fP = 0.0 (minimum curvature solution).
-.TP
 .B \-U
 \fItime\fP
 .br
@@ -664,7 +658,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
 
  Program MBGRID
- Version $Id: mbgrid.1 1994 2012-10-27 07:49:28Z caress $
+ Version $Id: mbgrid.1 2053 2013-04-04 20:55:29Z caress $
  MB-system Version 4.5
 
  MBGRID Parameters:

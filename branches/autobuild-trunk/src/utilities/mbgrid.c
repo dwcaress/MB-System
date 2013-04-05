@@ -6,7 +6,7 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c 2010 2013-01-14 18:53:21Z caress $
+ *    $Id: mbgrid.c 2053 2013-04-04 20:55:29Z caress $
  *
  *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -506,12 +506,12 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b,
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c 2010 2013-01-14 18:53:21Z caress $";
+static char rcs_id[] = "$Id: mbgrid.c 2053 2013-04-04 20:55:29Z caress $";
 char program_name[] = "mbgrid";
 char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 char usage_message[] = "mbgrid -Ifilelist -Oroot \
 [-Rwest/east/south/north -Rfactor -Adatatype\n\
-          -Bborder -Cclip/mode/tension -Dxdim/ydim -Edx/dy/units[!] -F\n\
+          -Bborder -Cclip[/mode[/tension]] -Dxdim/ydim -Edx/dy/units[!] -F\n\
           -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings -Sspeed\n\
           -Utime -V -Wscale -Xextend]";
 /*--------------------------------------------------------------------*/

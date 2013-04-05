@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h 2051 2013-03-20 05:18:24Z caress $
+ *    $Id: mb_status.h 2053 2013-04-04 20:55:29Z caress $
  *
  *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
@@ -29,9 +29,9 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.3.2051"
-#define	MB_BUILD_DATE	"20 March 2013"
-#define	MB_SVN		"$Id: mb_status.h 2051 2013-03-20 05:18:24Z caress $"
+#define	MB_VERSION	"5.3.2053"
+#define	MB_BUILD_DATE	"4 April 2013"
+#define	MB_SVN		"$Id: mb_status.h 2053 2013-04-04 20:55:29Z caress $"
 
 /* MBIO function boolean convention */
 #define	MB_YES	        1

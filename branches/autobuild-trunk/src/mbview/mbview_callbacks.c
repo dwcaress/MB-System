@@ -6,7 +6,7 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c 2051 2013-03-20 05:18:24Z caress $
+ *    $Id: mbview_callbacks.c 2053 2013-04-04 20:55:29Z caress $
  *
  *    Copyright (c) 2002-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -168,7 +168,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c 2051 2013-03-20 05:18:24Z caress $";
+static char rcs_id[]="$Id: mbview_callbacks.c 2053 2013-04-04 20:55:29Z caress $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -7654,7 +7654,7 @@ do_mbview_shadeparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
-if (mbv_verbose >= 2)
+if (mbv_verbose >= 0)
 fprintf(stderr,"do_mbview_shadeparmspopup: instance:%ld\n", instance);
 
 	/* get view */

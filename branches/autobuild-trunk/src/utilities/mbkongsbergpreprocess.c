@@ -1,3 +1,9 @@
+/* Added HAVE_CONFIG_H for autogen files */
+#ifdef HAVE_CONFIG_H
+#  include <mbsystem_config.h>
+#endif
+
+
 /*--------------------------------------------------------------------
  *    The MB-system:	mbkongsbergpreprocess.c	1/1/2012
  *    $Id: mbkongsbergpreprocess.c 1938 2012-02-22 20:58:08Z caress $
