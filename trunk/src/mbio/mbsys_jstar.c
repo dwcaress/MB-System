@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_jstar.c	10/4/94
  *	$Id$
  *
- *    Copyright (c) 2005-2012 by
+ *    Copyright (c) 2005-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -394,14 +394,14 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*nss = 0;
 
 		/* get nadir depth */
-		if (ssport->depth > 0)
+		if (sbp->depth > 0)
 			{
-			bath[0] = 0.001 * ssport->depth;
+			bath[0] = 0.001 * sbp->depth;
 			beamflag[0] = MB_FLAG_NONE;
 			}
-		else if (ssport->depth < 0)
+		else if (sbp->depth < 0)
 			{
-			bath[0] = -0.001 * ssport->depth;
+			bath[0] = -0.001 * sbp->depth;
 			beamflag[0] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
 			}
 		else
@@ -1615,7 +1615,6 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ssport;
 	struct mbsys_jstar_channel_struct *ssstbd;
-	int	kind;
 	int	time_j[5];
 
 	/* print input debug statements */
@@ -1652,7 +1651,7 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	store = (struct mbsys_jstar_struct *) store_ptr;
 
 	/* insert subbottom data into structure */
-	if (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 		{
 		/* get channel */
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
@@ -2082,6 +2081,9 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 	/* get data kind */
 	*kind = store->kind;
 
+	/* get segy traceheader */
+	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segyheader_ptr;
+
 	/* extract data from structure */
 	if (*kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 		{
@@ -2311,6 +2313,9 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data kind */
 	store->kind = kind;
+
+	/* get segy traceheader */
+	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segyheader_ptr;
 
 	/* insert data to structure */
 	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)

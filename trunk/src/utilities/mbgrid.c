@@ -416,11 +416,12 @@
 #include "gmt.h"
 
 /* gridding algorithms */
-#define	MBGRID_WEIGHTED_MEAN	1
-#define	MBGRID_MEDIAN_FILTER	2
-#define	MBGRID_MINIMUM_FILTER	3
-#define	MBGRID_MAXIMUM_FILTER	4
-#define	MBGRID_WEIGHTED_FOOTPRINT   5
+#define	MBGRID_WEIGHTED_MEAN                1
+#define	MBGRID_MEDIAN_FILTER                2
+#define	MBGRID_MINIMUM_FILTER               3
+#define	MBGRID_MAXIMUM_FILTER               4
+#define	MBGRID_WEIGHTED_FOOTPRINT_SLOPE     5
+#define	MBGRID_WEIGHTED_FOOTPRINT           6
 
 /* grid format definitions */
 #define	MBGRID_ASCII	1
@@ -1066,9 +1067,8 @@ int main (int argc, char **argv)
 		}
 
 	/* footprint option only for bathymetry */
-	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT
-		&& (datatype != MBGRID_DATA_TOPOGRAPHY
-		    && datatype != MBGRID_DATA_BATHYMETRY))
+	if ((grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE || grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
+		&& (datatype != MBGRID_DATA_TOPOGRAPHY && datatype != MBGRID_DATA_BATHYMETRY))
 		{
 		grid_mode = MBGRID_WEIGHTED_MEAN;
 		}
@@ -1543,6 +1543,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			fprintf(outfp,"Minimum Filter\n");
 		else if (grid_mode == MBGRID_MAXIMUM_FILTER)
 			fprintf(outfp,"Maximum Filter\n");
+		else if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE)
+			fprintf(outfp,"Footprint-Slope Weighted Mean\n");
 		else if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
 			fprintf(outfp,"Footprint Weighted Mean\n");
 		else
@@ -1609,7 +1611,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		if (grid_mode == MBGRID_WEIGHTED_MEAN)
 			fprintf(outfp,"Gaussian filter 1/e length: %f grid intervals\n",
 				scale);
-		if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
+		if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE
+                        || grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
 			fprintf(outfp,"Footprint 1/e distance: %f times footprint\n",
 				scale);
 		if (check_time == MB_YES && first_in_stays == MB_NO)
@@ -1944,8 +1947,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			dfile);
 		}
 
-	/***** do footprint gridding *****/
-	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
+	/***** do weighted footprint slope gridding *****/
+	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE)
 	{
 	/* set up parameters for first cut low resolution slope grid */
 	for (i=0;i<4;i++)
@@ -2320,7 +2323,6 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		if (cnt[kgrid] == 0)
 			{
 			gridsmall[kgrid] = sgrid[kint];
-			nbinspline++;
 /*fprintf(stderr,"YES i:%d j:%d kgrid:%d kint:%d sgrid:%f gridsmall:%f\n",
 i,j,kgrid,kint,sgrid[kint],gridsmall[kgrid]);*/
 			}
@@ -2880,7 +2882,472 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 			}
 
-	/***** end of footprint gridding *****/
+	/***** end of weighted footprint slope gridding *****/
+	}
+
+	/***** do weighted footprint gridding *****/
+	else if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
+	{
+
+	/* allocate memory for additional arrays */
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&norm,&error);
+
+	/* initialize arrays */
+	for (i=0;i<gxdim;i++)
+		for (j=0;j<gydim;j++)
+			{
+			kgrid = i * gydim + j;
+			grid[kgrid] = 0.0;
+			norm[kgrid] = 0.0;
+			sigma[kgrid] = 0.0;
+			firsttime[kgrid] = 0.0;
+			num[kgrid] = 0;
+			cnt[kgrid] = 0;
+			}
+
+	/* read in data */
+	fprintf(outfp,"\nDoing second pass to generate final grid...\n");
+	ndata = 0;
+	if ((status = mb_datalist_open(verbose,&datalist,
+					filelist,look_processed,&error)) != MB_SUCCESS)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(outfp,"\nUnable to open data list file: %s\n",
+			filelist);
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
+			program_name);
+		mb_memory_clear(verbose, &error);
+		exit(error);
+		}
+	while ((status = mb_datalist_read2(verbose,datalist,
+			&pstatus,path,ppath,&format,&file_weight,&error))
+			== MB_SUCCESS)
+		{
+		ndatafile = 0;
+
+		/* if format > 0 then input is swath sonar file */
+		if (format > 0 && path[0] != '#')
+		{
+		/* apply pstatus */
+		if (pstatus == MB_PROCESSED_USE)
+			strcpy(file, ppath);
+		else
+			strcpy(file, path);
+
+		/* check for mbinfo file - get file bounds if possible */
+		rformat = format;
+		strcpy(rfile,file);
+		status = mb_check_info(verbose, rfile, lonflip, bounds,
+				&file_in_bounds, &error);
+		if (status == MB_FAILURE)
+			{
+			file_in_bounds = MB_YES;
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
+		/* initialize the swath sonar file */
+		if (file_in_bounds == MB_YES)
+		    {
+		    /* check for "fast bathymetry" or "fbt" file */
+		    if (datatype == MBGRID_DATA_TOPOGRAPHY
+			    || datatype == MBGRID_DATA_BATHYMETRY)
+			{
+			mb_get_fbt(verbose, rfile, &rformat, &error);
+			}
+
+		    /* call mb_read_init() */
+		    if ((status = mb_read_init(
+			verbose,rfile,rformat,pings,lonflip,bounds,
+			btime_i,etime_i,speedmin,timegap,
+			&mbio_ptr,&btime_d,&etime_d,
+			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",rfile);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+
+		    /* get mb_io_ptr */
+		    mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+		    /* allocate memory for reading data arrays */
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(char), (void **)&beamflag, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bath, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							    sizeof(double), (void **)&amp, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlat, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							    sizeof(double), (void **)&ss, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							    sizeof(double), (void **)&sslon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							    sizeof(double), (void **)&sslat, &error);
+
+		    /* if error initializing memory then quit */
+		    if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
+				message);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+
+		    /* loop over reading */
+		    while (error <= MB_ERROR_NO_ERROR)
+			{
+			status = mb_read(verbose,mbio_ptr,&kind,
+				&rpings,time_i,&time_d,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
+				&beams_bath,&beams_amp,&pixels_ss,
+				beamflag,bath,amp,bathlon,bathlat,
+				ss,sslon,sslat,
+				comment,&error);
+
+			/* time gaps are not a problem here */
+			if (error == MB_ERROR_TIME_GAP)
+				{
+				error = MB_ERROR_NO_ERROR;
+				status = MB_SUCCESS;
+				}
+
+			/* print debug statements */
+			if (verbose >= 2)
+				{
+				fprintf(outfp,"\ndbg2  Ping read in program <%s>\n",program_name);
+				fprintf(outfp,"dbg2       kind:           %d\n",kind);
+				fprintf(outfp,"dbg2       beams_bath:     %d\n",beams_bath);
+				fprintf(outfp,"dbg2       beams_amp:      %d\n",beams_amp);
+				fprintf(outfp,"dbg2       pixels_ss:      %d\n",pixels_ss);
+				fprintf(outfp,"dbg2       error:          %d\n",error);
+				fprintf(outfp,"dbg2       status:         %d\n",status);
+				}
+
+			if ((datatype == MBGRID_DATA_BATHYMETRY
+				|| datatype == MBGRID_DATA_TOPOGRAPHY)
+				&& error == MB_ERROR_NO_ERROR)
+			  {
+
+			  /* reproject beam positions if necessary */
+			  if (use_projection == MB_YES)
+			    {
+			    mb_proj_forward(verbose, pjptr,
+					    navlon, navlat,
+					    &navlon, &navlat,
+					    &error);
+			    for (ib=0;ib<beams_bath;ib++)
+			      if (mb_beam_ok(beamflag[ib]))
+				mb_proj_forward(verbose, pjptr,
+						bathlon[ib], bathlat[ib],
+						&bathlon[ib], &bathlat[ib],
+						&error);
+			    }
+
+			  /* deal with data */
+			  for (ib=0;ib<beams_bath;ib++)
+			    if (mb_beam_ok(beamflag[ib]))
+			      {
+			      /* get position in grid */
+			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
+/*fprintf(outfp, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n",
+ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
+
+			      /* check if within allowed time */
+			      if (check_time == MB_YES)
+			        {
+				/* if in region of interest
+				   check if time is ok */
+				if (ix >= 0 && ix < gxdim
+				  && iy >= 0 && iy < gydim)
+				  {
+			          kgrid = ix*gydim + iy;
+				  if (firsttime[kgrid] <= 0.0)
+				    {
+				    firsttime[kgrid] = time_d;
+				    time_ok = MB_YES;
+				    }
+				  else if (fabs(time_d - firsttime[kgrid])
+				    > timediff)
+				    {
+				    if (first_in_stays == MB_YES)
+					time_ok = MB_NO;
+				    else
+					{
+					time_ok = MB_YES;
+					firsttime[kgrid] = time_d;
+					ndata = ndata - cnt[kgrid];
+					ndatafile = ndatafile - cnt[kgrid];
+					norm[kgrid] = 0.0;
+					grid[kgrid] = 0.0;
+					sigma[kgrid] = 0.0;
+					num[kgrid] = 0;
+					cnt[kgrid] = 0;
+					}
+				    }
+			          else
+				    time_ok = MB_YES;
+				  }
+				else
+				  time_ok = MB_YES;
+				}
+			      else
+				time_ok = MB_YES;
+
+			      /* process if in region of interest */
+			      if (ix >= -xtradim
+				&& ix < gxdim + xtradim
+				&& iy >= -xtradim
+				&& iy < gydim + xtradim
+				&& time_ok == MB_YES)
+			        {
+				/* calculate footprint - this is a kluge assuming
+				   sonar at surface - also assumes lon lat grid
+				   - to be generalized in later version
+				   DWC 11/16/99 */
+				/* calculate footprint - now uses sonar altitude
+				   - still assumes lon lat grid
+				   - to be generalized in later version
+				   DWC 1/29/2001 */
+				/* now handles projected grids
+				   DWC 3/5/2003 */
+			  	if (use_projection == MB_YES)
+			  	  {
+				  foot_dx = (bathlon[ib] - navlon);
+				  foot_dy = (bathlat[ib] - navlat);
+				  }
+			  	else
+			  	  {
+				  foot_dx = (bathlon[ib] - navlon) / mtodeglon;
+				  foot_dy = (bathlat[ib] - navlat) / mtodeglat;
+				  }
+				foot_lateral = sqrt(foot_dx * foot_dx + foot_dy * foot_dy);
+				if (foot_lateral > 0.0)
+				    {
+				    foot_dxn = foot_dx / foot_lateral;
+				    foot_dyn = foot_dy / foot_lateral;
+				    }
+				else
+				    {
+				    foot_dxn = 1.0;
+				    foot_dyn = 0.0;
+				    }
+				foot_range = sqrt(foot_lateral * foot_lateral + altitude * altitude);
+				if (foot_range > 0.0)
+				    {
+				    foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
+				    foot_dtheta = 0.5 * scale * mb_io_ptr->beamwidth_xtrack;
+				    foot_dphi = 0.5 * scale * mb_io_ptr->beamwidth_ltrack;
+				    if (foot_dtheta <= 0.0)
+					foot_dtheta = 1.0;
+				    if (foot_dphi <= 0.0)
+					foot_dphi = 1.0;
+				    foot_hwidth =(bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta))
+							- foot_lateral;
+				    foot_hlength = foot_range * tan(DTR * foot_dphi);
+/* fprintf(outfp, "bath:%f sonardepth:%f dx:%f dy:%f lateral:%f range:%f theta:%f dtheta:%f dphi:%f fhwidth:%f fhlength:%f\n",
+bath[ib],sonardepth,foot_dx, foot_dy, foot_lateral, foot_range, foot_theta,foot_dtheta,foot_dphi,foot_hwidth,foot_hlength);*/
+
+				    /* get range of bins around footprint to examine */
+			  	    if (use_projection == MB_YES)
+			  	      {
+				      foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
+				      foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
+				      foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
+				      foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / dy);
+				      }
+			  	    else
+			  	      {
+				      foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
+				      foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
+				      foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
+				      foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
+				      }
+				    foot_dix = 2 * MAX(foot_wix, foot_lix);
+				    foot_diy = 2 * MAX(foot_wiy, foot_liy);
+/*fprintf(outfp, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
+fprintf(outfp, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d foot_diy:%d\n",
+foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
+			            ix1 = MAX(ix - foot_dix, 0);
+			            ix2 = MIN(ix + foot_dix, gxdim - 1);
+			            iy1 = MAX(iy - foot_diy, 0);
+			            iy2 = MIN(iy + foot_diy, gydim - 1);
+/*fprintf(outfp, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
+
+				    /* loop over neighborhood of bins */
+			            for (ii=ix1;ii<=ix2;ii++)
+			             for (jj=iy1;jj<=iy2;jj++)
+				       {
+				       /* find center of bin in lon lat degrees from sounding center */
+				       kgrid = ii * gydim + jj;
+				       xx = (wbnd[0] + ii*dx + 0.5*dx - bathlon[ib]);
+				       yy = (wbnd[2] + jj*dy + 0.5*dy - bathlat[ib]);
+
+				       /* get depth or topo value at this point */
+				       sbath = topofactor * bath[ib];
+/*fprintf(stderr,"ib:%d ii:%d jj:%d bath:%f %f   diff:%f   xx:%f yy:%f\n",
+ib,ii,jj,topofactor * bath[ib],sbath,topofactor * bath[ib]-sbath,xx,yy);*/
+
+				       /* get center and corners of bin in meters from sounding center */
+			  	      if (use_projection == MB_YES)
+			  		{
+					 xx0 = xx;
+					 yy0 = yy;
+					 bdx = 0.5 * dx;
+					 bdy = 0.5 * dy;
+					 }
+			  	      else
+			  		{
+					 xx0 = xx / mtodeglon;
+					 yy0 = yy / mtodeglat;
+					 bdx = 0.5 * dx/ mtodeglon;
+					 bdy = 0.5 * dy/ mtodeglat;
+					 }
+				       xx1 = xx0 - bdx;
+				       xx2 = xx0 + bdx;
+				       yy1 = yy0 - bdy;
+				       yy2 = yy0 + bdy;
+/*fprintf(outfp, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy, xx, yy);
+fprintf(outfp, "p0: %f %f   p1: %f %f   p2: %f %f\n",
+xx0, yy0, xx1, yy1, xx2, yy2);*/
+
+				       /* rotate center and corners of bin to footprint coordinates */
+				       prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
+				       pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
+				       prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
+				       pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
+				       prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
+				       pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
+				       prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
+				       pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
+				       prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
+				       pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
+
+				       /* get weight integrated over bin */
+				       mbgrid_weight(verbose, foot_hwidth, foot_hlength,
+						    prx[0], pry[0], bdx, bdy,
+						    &prx[1], &pry[1],
+						    &weight, &use_weight, &error);
+
+				       if (use_weight != MBGRID_USE_NO && weight > 0.000001)
+					    {
+					    weight *= file_weight;
+					    norm[kgrid] = norm[kgrid] + weight;
+					    grid[kgrid] = grid[kgrid] + weight * sbath;
+					    sigma[kgrid] = sigma[kgrid] + weight * sbath * sbath;
+					    if (use_weight == MBGRID_USE_YES)
+						{
+						num[kgrid]++;
+						if (ii == ix && jj == iy)
+							cnt[kgrid]++;
+						}
+					    }
+				       }
+				    ndata++;
+				    ndatafile++;
+				    }
+
+				/* else for xyz data without footprint */
+				else if (ix >= 0 && ix < gxdim
+					  && iy >= 0 && iy < gydim)
+				    {
+			            kgrid = ix*gydim + iy;
+				    norm[kgrid] = norm[kgrid] + file_weight;
+				    grid[kgrid] = grid[kgrid]
+					    + file_weight*topofactor*bath[ib];
+				    sigma[kgrid] = sigma[kgrid]
+					    + file_weight*topofactor*topofactor
+					    *bath[ib]*bath[ib];
+				    num[kgrid]++;
+				    cnt[kgrid]++;
+				    ndata++;
+				    ndatafile++;
+				    }
+				}
+			      }
+			  }
+			}
+		    status = mb_close(verbose,&mbio_ptr,&error);
+		    status = MB_SUCCESS;
+		    error = MB_ERROR_NO_ERROR;
+		    }
+		if (verbose >= 2)
+			fprintf(outfp,"\n");
+		if (verbose > 0 || file_in_bounds == MB_YES)
+			fprintf(outfp,"%d data points processed in %s\n",
+				ndatafile,rfile);
+
+		/* add to datalist if data actually contributed */
+		if (ndatafile > 0 && dfp != NULL)
+			{
+			if (pstatus == MB_PROCESSED_USE)
+				fprintf(dfp, "P:");
+			else
+				fprintf(dfp, "R:");
+			fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+			fflush(dfp);
+			}
+		} /* end if (format > 0) */
+
+		}
+	if (datalist != NULL)
+		mb_datalist_close(verbose,&datalist,&error);
+	if (verbose > 0)
+		fprintf(outfp,"\n%d total data points processed\n",ndata);
+
+	/* now loop over all points in the output grid */
+	if (verbose >= 1)
+		fprintf(outfp,"\nMaking raw grid...\n");
+	nbinset = 0;
+	nbinzero = 0;
+	nbinspline = 0;
+	nbinbackground = 0;
+	for (i=0;i<gxdim;i++)
+		for (j=0;j<gydim;j++)
+			{
+			kgrid = i * gydim + j;
+			if (num[kgrid] > 0)
+				{
+				grid[kgrid] = grid[kgrid]/norm[kgrid];
+				factor = sigma[kgrid]/norm[kgrid]
+					- grid[kgrid]*grid[kgrid];
+				sigma[kgrid] = sqrt(fabs(factor));
+				nbinset++;
+				}
+			else
+				{
+				grid[kgrid] = clipvalue;
+				sigma[kgrid] = 0.0;
+				}
+			/* fprintf(outfp,"%d %d %d  %f %f %f   %d %d %f %f\n",
+			i,j,kgrid,
+			grid[kgrid], wbnd[0] + i*dx, wbnd[2] + j*dy,
+			num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
+			}
+
+	/***** end of weighted footprint gridding *****/
 	}
 
 	/***** do weighted mean or min/max gridding *****/

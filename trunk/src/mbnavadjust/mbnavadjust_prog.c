@@ -2441,7 +2441,8 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile)
 	int	iform;
 	int	nread, first;
 	int	output_open = MB_NO;
-	int	good_beams, new_segment;
+	int	good_beams;
+	int	new_segment;
 	double	headingx, headingy, mtodeglon, mtodeglat;
 	double	lon, lat;
 	double	navlon_old, navlat_old;
@@ -2530,6 +2531,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile)
 	project.inversion = MBNA_INVERSION_NONE;
 	new_pings = 0;
 	new_crossings = 0;
+	good_beams = 0;
 
 	/* allocate mbna_file array if needed */
 	if (project.num_files_alloc <= project.num_files)
@@ -3511,7 +3513,6 @@ int mbnavadjust_findcrossings()
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2                       ifile: %d\n",ifile);
 		}
 
 	/* turn on message */
@@ -6198,7 +6199,6 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 	double	distance;
 	double	altitude;
 	double	sonardepth;
-	double	draft;
 	double	roll;
 	double	pitch;
 	double	heave;
@@ -6410,7 +6410,7 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 				    pingraw->navlon = navlon;
 				    pingraw->navlat = navlat;
 				    pingraw->heading = heading;
-				    pingraw->draft = draft;
+				    pingraw->draft = sonardepth;
 				    pingraw->beams_bath = beams_bath;
 /* fprintf(stderr,"\nPING %d : %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
 swathraw->npings,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]); */
@@ -8868,7 +8868,7 @@ mbnavadjust_autosetsvsvertical()
 	int	nprocess;
 	int	ntie, nfixed, ncols;
 	double	misfit_initial, perturbationsize, perturbationsizeold;
-	double	perturbationchange, convergencecriterea, misfit_ties;
+	double	perturbationchange, convergencecriterea;
 	double	offset_z_m, block_offset_avg_z;
 	double	*x, *xx;
 	int	done, iter, nc1, nc2, navg, use, reset_tie;
@@ -9101,8 +9101,8 @@ i,j,nc1,nc2,offsetx,offsety,offset_z_m); */
 			 convergencecriterea = fabs(perturbationchange) / misfit_initial;
 			 if (convergencecriterea < MBNA_CONVERGENCE || iter > MBNA_INTERATION_MAX)
 		    	     done = MB_YES;
-fprintf(stderr,"BLOCK INVERT: iter:%d ntie:%d misfit_initial:%f misfit_ties:%f perturbationsize:%g perturbationchange:%g convergencecriterea:%g done:%d\n",
-iter,ntie,misfit_initial,misfit_ties,perturbationsize,perturbationchange,convergencecriterea,done);
+fprintf(stderr,"BLOCK INVERT: iter:%d ntie:%d misfit_initial:%f perturbationsize:%g perturbationchange:%g convergencecriterea:%g done:%d\n",
+iter,ntie,misfit_initial,perturbationsize,perturbationchange,convergencecriterea,done);
 
 			 if (done == MB_NO)
 		             {
@@ -9437,7 +9437,7 @@ mbnavadjust_invertnav()
 	int	nseq, nseqlast;
 	int	nchange;
 	int	ndx, ndx2;
-	int	icrossing, ifile, jtie;
+	int	icrossing, jtie;
 	int	isection, isnav, inav;
 	int	nc1, nc2, nc3;
 	int	i, j, k;
@@ -11279,7 +11279,6 @@ icrossing,j,tie->offset_z_m,nc2,x[3*nc2+2],nc1,x[3*nc1+2],offsetz,nc2,xx[3*nc2+2
 		    nseq = 0;
 		    ndx = 0;
 		    ndx2 = 0;
-		    file = &project.files[ifile];
 		    for (i=0;i<project.num_files;i++)
 			{
 			file = &project.files[i];
@@ -13014,7 +13013,7 @@ mbnavadjust_modelplot_middlepick(int x, int y)
 					    {
 					    rangemin = range;
 					    pick_crossing = i;
-					    pick_tie = j;
+					    pick_tie = MBNA_SELECT_NONE;
 					    pick_file = crossing->file_id_1;
 					    pick_section = crossing->section_1;
 					    pick_snav = section->num_snav/2;
@@ -13026,7 +13025,7 @@ mbnavadjust_modelplot_middlepick(int x, int y)
 					    {
 					    rangemin = range;
 					    pick_crossing = i;
-					    pick_tie = j;
+					    pick_tie = MBNA_SELECT_NONE;
 					    pick_file = crossing->file_id_1;
 					    pick_section = crossing->section_1;
 					    pick_snav = section->num_snav/2;
@@ -13038,7 +13037,7 @@ mbnavadjust_modelplot_middlepick(int x, int y)
 					    {
 					    rangemin = range;
 					    pick_crossing = i;
-					    pick_tie = j;
+					    pick_tie = MBNA_SELECT_NONE;
 					    pick_file = crossing->file_id_1;
 					    pick_section = crossing->section_1;
 					    pick_snav = section->num_snav/2;
@@ -13057,7 +13056,7 @@ mbnavadjust_modelplot_middlepick(int x, int y)
 					    {
 					    rangemin = range;
 					    pick_crossing = i;
-					    pick_tie = j;
+					    pick_tie = MBNA_SELECT_NONE;
 					    pick_file = crossing->file_id_2;
 					    pick_section = crossing->section_2;
 					    pick_snav = section->num_snav/2;
@@ -13069,7 +13068,7 @@ mbnavadjust_modelplot_middlepick(int x, int y)
 					    {
 					    rangemin = range;
 					    pick_crossing = i;
-					    pick_tie = j;
+					    pick_tie = MBNA_SELECT_NONE;
 					    pick_file = crossing->file_id_2;
 					    pick_section = crossing->section_2;
 					    pick_snav = section->num_snav/2;
@@ -13081,7 +13080,7 @@ mbnavadjust_modelplot_middlepick(int x, int y)
 					    {
 					    rangemin = range;
 					    pick_crossing = i;
-					    pick_tie = j;
+					    pick_tie = MBNA_SELECT_NONE;
 					    pick_file = crossing->file_id_2;
 					    pick_section = crossing->section_2;
 					    pick_snav = section->num_snav/2;

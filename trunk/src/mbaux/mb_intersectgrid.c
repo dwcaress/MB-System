@@ -57,7 +57,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       topogridfile:              %s\n", topogridfile);
 		fprintf(stderr,"dbg2       lonflip:                   %d\n", *lonflip);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)topogrid);
+		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)(*topogrid_ptr));
 		}
 
 	/* allocate memory for topogrid structure */

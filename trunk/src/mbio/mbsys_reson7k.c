@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
  *	$Id$
  *
- *    Copyright (c) 2004-2012 by
+ *    Copyright (c) 2004-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1011,7 +1011,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	v2detection->detection_algorithm = 0;
 	v2detection->flags = 0;
 	for (i=0;i<64;i++)
-		v2detection->reserved[64] = 0;
+		v2detection->reserved[i] = 0;
 	for (i=0;i<MBSYS_RESON7K_MAX_BEAMS;i++)
 		{
 		v2detection->range[i] = 0.0;
@@ -7097,6 +7097,9 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	attitude = (s7kr_attitude *) &store->attitude;
 	reference = (s7kr_reference *) &store->reference;
 	navigation = &(store->navigation);
+	fsdwsb = &(store->fsdwsb);
+	fsdwsslo = &(store->fsdwsslo);
+	fsdwsshi = &(store->fsdwsshi);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -8886,7 +8889,7 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 	s7kr_bluefin *bluefin;
 	s7k_bluefin_environmental *environmental;
 	s7kr_ctd *ctd;
-	int	status;
+	int	status = MB_SUCCESS;
 	int	time_j[5];
 	int	time_i[7];
 	int	i;
@@ -9027,7 +9030,7 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 	s7k_header *header;
 	s7kr_bluefin *bluefin;
 	s7k_bluefin_environmental *environmental;
-	int	status;
+	int	status = MB_SUCCESS;
 	int	i;
 
 	/* print input debug statements */

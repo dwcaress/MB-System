@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
  *	$Id$
  *
- *    Copyright (c) 2001-2012 by
+ *    Copyright (c) 2001-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -161,7 +161,7 @@ int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_surf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_surf_dimensions";
@@ -826,7 +826,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			angles_forward[0] = 0.0;
 			angles_null[0] = 0.0;
 			heave[0] = -0.5 * (store->SoundingData.heaveWhileTransmitting
-					+ store->MultiBeamReceiveParams[i].heaveWhileReceiving);
+					+ store->MultiBeamReceiveParams[0].heaveWhileReceiving);
 			alongtrack_offset[0] = 0.0;
 
 			/* set status */

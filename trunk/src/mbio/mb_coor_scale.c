@@ -2,7 +2,7 @@
  *    The MB-system:	mb_coor_scale.c	1/21/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,7 +20,7 @@
  *
  * Author:	D. W. Caress
  * Date:	January 21, 1993
- * 
+ *
  * $Log: mb_coor_scale.c,v $
  * Revision 5.4  2008/09/27 03:27:10  caress
  * Working towards release 5.1.1beta24
@@ -102,7 +102,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-/* ellipsoid coefficients from World Geodetic System Ellipsoid of 1972 
+/* ellipsoid coefficients from World Geodetic System Ellipsoid of 1972
  * - see Bowditch (H.O. 9 -- American Practical Navigator). */
 #define C1 111412.84
 #define C2 -93.5
@@ -115,7 +115,7 @@
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mb_coor_scale(int verbose, double latitude, 
+int mb_coor_scale(int verbose, double latitude,
 			double *mtodeglon, double *mtodeglat)
 {
 	char	*function_name = "mb_coor_scale";
@@ -136,9 +136,9 @@ int mb_coor_scale(int verbose, double latitude,
 	if (fabs(latitude) <= 90.0)
 		{
 		radlat = DTR*latitude;
-		*mtodeglon = 1./fabs(C1*cos(radlat) + C2*cos(3*radlat) 
+		*mtodeglon = 1./fabs(C1*cos(radlat) + C2*cos(3*radlat)
 				+ C3*cos(5*radlat));
-		*mtodeglat = 1./fabs(C4 + C5*cos(2*radlat) 
+		*mtodeglat = 1./fabs(C4 + C5*cos(2*radlat)
 				+ C6*cos(4*radlat) + C7*cos(6*radlat));
 		status = MB_SUCCESS;
 		}
@@ -168,7 +168,7 @@ int mb_coor_scale(int verbose, double latitude,
 int mb_apply_lonflip(int verbose, int lonflip, double *longitude)
 {
 	char	*function_name = "mb_apply_lonflip";
-	int	status;
+	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -184,21 +184,21 @@ int mb_apply_lonflip(int verbose, int lonflip, double *longitude)
 	/* apply lonflip */
 	if (lonflip < 0)
 		{
-		if (*longitude > 0.) 
+		if (*longitude > 0.)
 			*longitude = *longitude - 360.;
 		else if (*longitude < -360.)
 			*longitude = *longitude + 360.;
 		}
 	else if (lonflip == 0)
 		{
-		if (*longitude > 180.) 
+		if (*longitude > 180.)
 			*longitude = *longitude - 360.;
 		else if (*longitude < -180.)
 			*longitude = *longitude + 360.;
 		}
 	else
 		{
-		if (*longitude > 360.) 
+		if (*longitude > 360.)
 			*longitude = *longitude - 360.;
 		else if (*longitude < 0.)
 			*longitude = *longitude + 360.;

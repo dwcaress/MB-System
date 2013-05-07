@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
 #	$Id$
 #
-#     Copyright (c) 1993-2009 by
+#     Copyright (c) 1993-2013 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -225,7 +225,7 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbsys_netcdf.h $(INCDIR)/mbsys_navnetcdf.h \
 	$(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h \
 	$(INCDIR)/mbsys_image83p.h $(INCDIR)/mbsys_hysweep.h \
-	$(INCDIR)/mbsys_benthos.h \
+	$(INCDIR)/mbsys_benthos.h $(INCDIR)/mbsys_swathplus.h \
 	$(INCDIR)/mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiocen.h \
 	$(INCDIR)/mbf_sbsiolsi.h $(INCDIR)/mbf_sburicen.h \
 	$(INCDIR)/mbf_sbifremr.h $(INCDIR)/mbf_hsatlraw.h \
@@ -282,7 +282,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_netcdf.o mbsys_navnetcdf.o  \
 		mbsys_reson7k.o mbsys_jstar.o \
 		mbsys_image83p.o mbsys_hysweep.o \
-		mbsys_benthos.o \
+		mbsys_benthos.o mbsys_swathplus.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -317,7 +317,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_edgjstar.o mbr_segysegy.o \
 		mbr_image83p.o mbr_imagemba.o \
 		mbr_hir2rnav.o mbr_hysweep1.o \
-		mbr_xtfb1624.o
+		mbr_xtfb1624.o \
+                mbr_swplssxi.o mbr_swplssxp.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -348,7 +349,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_netcdf.o mbsys_navnetcdf.o \
 		mbsys_reson7k.o mbsys_jstar.o \
 		mbsys_image83p.o mbsys_hysweep.o \
-		mbsys_benthos.o \
+		mbsys_benthos.o mbsys_swathplus.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -383,7 +384,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_edgjstar.o mbr_segysegy.o \
 		mbr_image83p.o mbr_imagemba.o \
 		mbr_hir2rnav.o mbr_hysweep1.o \
-		mbr_xtfb1624.o
+		mbr_xtfb1624.o \
+                mbr_swplssxi.o mbr_swplssxp.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -516,6 +518,8 @@ mbsys_hysweep.o:	mbsys_hysweep.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(I
 	$(CC) -c $(CFLAGS) mbsys_hysweep.c
 mbsys_benthos.o:	mbsys_benthos.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_benthos.h
 	$(CC) -c $(CFLAGS) mbsys_benthos.c
+mbsys_swathplus.o:	mbsys_swathplus.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_swathplus.h
+	$(CC) -c $(CFLAGS) mbsys_swathplus.c
 mbr_sbsiomrg.o:	mbr_sbsiomrg.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiomrg.h
 	$(CC) -c $(CFLAGS) mbr_sbsiomrg.c
 mbr_sbsiocen.o: mbr_sbsiocen.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiocen.h
@@ -648,6 +652,10 @@ mbr_hysweep1.o: mbr_hysweep1.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_hysweep1.c
 mbr_xtfb1624.o: mbr_xtfb1624.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_benthos.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_xtfb1624.c
+mbr_swplssxi.o: mbr_swplssxi.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_swathplus.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_swplssxi.c
+mbr_swplssxp.o: mbr_swplssxp.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_swathplus.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_swplssxp.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_format.h:	mb_format.h
@@ -773,6 +781,9 @@ $(INCDIR)/mbsys_hysweep.h:	mbsys_hysweep.h
 $(INCDIR)/mbsys_benthos.h:	mbsys_benthos.h
 	cp mbsys_benthos.h $(INCDIR)/mbsys_benthos.h
 	chmod 664 $(INCDIR)/mbsys_benthos.h
+$(INCDIR)/mbsys_swathplus.h:	mbsys_swathplus.h
+	cp mbsys_swathplus.h $(INCDIR)/mbsys_swathplus.h
+	chmod 664 $(INCDIR)/mbsys_swathplus.h
 $(INCDIR)/mbf_sbsiomrg.h:	mbf_sbsiomrg.h
 	cp mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiomrg.h
 	chmod 664 $(INCDIR)/mbf_sbsiomrg.h
