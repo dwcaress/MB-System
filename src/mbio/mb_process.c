@@ -5948,7 +5948,7 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 	if ((fstat = stat(lockfile, &file_status)) == -1)
 		{
 		/* proceed only if we create the lockfile */
-	    	if ((fp = fopen(lockfile, "w")) != NULL)
+	    	if ((fp = fopen(lockfile, "wx")) != NULL)
 			{
 			right_now = time((time_t *)0);
 			strncpy(date,ctime(&right_now),24);

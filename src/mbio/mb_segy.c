@@ -2,7 +2,7 @@
  *    The MB-system:	mb_segy.c	5/25/2004
  *    $Id$
  *
- *    Copyright (c) 2004-2012 by
+ *    Copyright (c) 2004-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -470,6 +470,9 @@ int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_segyio_struct *mb_segyio_ptr;
 
+	/* get pointer to segyio structure */
+	mb_segyio_ptr = (struct mb_segyio_struct *) *mbsegyio_ptr;
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -479,9 +482,6 @@ int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error)
 		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
 		fprintf(stderr,"dbg2       fp:          %lu\n",(size_t)mb_segyio_ptr->fp);
 		}
-
-	/* get pointer to segyio structure */
-	mb_segyio_ptr = (struct mb_segyio_struct *) *mbsegyio_ptr;
 
 	/* deallocate memory */
 	if (mb_segyio_ptr->bufferalloc > 0)
@@ -800,7 +800,10 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2       emute_mils:    %d\n",traceheader->emute_mils);
 		fprintf(stderr,"dbg2       nsamps:        %d\n",traceheader->nsamps);
 		fprintf(stderr,"dbg2       si_micros:     %d\n",traceheader->si_micros);
-		fprintf(stderr,"dbg2       other_1[19]:   %d\n",traceheader->other_1[19]);
+		for (i=0;i<19;i++)
+			{
+			fprintf(stderr,"dbg2       other_1[%d]:   %d\n",i,traceheader->other_1[i]);
+			}
 		fprintf(stderr,"dbg2       year:          %d\n",traceheader->year);
 		fprintf(stderr,"dbg2       day_of_yr:     %d\n",traceheader->day_of_yr);
 		fprintf(stderr,"dbg2       hour:          %d\n",traceheader->hour);
@@ -808,7 +811,10 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2       sec:           %d\n",traceheader->sec);
 		fprintf(stderr,"dbg2       mils:          %d\n",traceheader->mils);
 		fprintf(stderr,"dbg2       tr_weight:     %d\n",traceheader->tr_weight);
-		fprintf(stderr,"dbg2       other_2[5]:    %d\n",traceheader->other_2[5]);
+		for (i=0;i<5;i++)
+			{
+			fprintf(stderr,"dbg2       other_2[%d]:    %d\n",i,traceheader->other_2[i]);
+			}
 		fprintf(stderr,"dbg2       delay:         %f\n",traceheader->delay);
 		fprintf(stderr,"dbg2       smute_sec:     %f\n",traceheader->smute_sec);
 		fprintf(stderr,"dbg2       emute_sec:     %f\n",traceheader->emute_sec);
@@ -908,7 +914,10 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2       emute_mils:    %d\n",traceheader->emute_mils);
 		fprintf(stderr,"dbg2       nsamps:        %d\n",traceheader->nsamps);
 		fprintf(stderr,"dbg2       si_micros:     %d\n",traceheader->si_micros);
-		fprintf(stderr,"dbg2       other_1[19]:   %d\n",traceheader->other_1[19]);
+		for (i=0;i<19;i++)
+			{
+			fprintf(stderr,"dbg2       other_1[%d]:   %d\n",i,traceheader->other_1[i]);
+			}
 		fprintf(stderr,"dbg2       year:          %d\n",traceheader->year);
 		fprintf(stderr,"dbg2       day_of_yr:     %d\n",traceheader->day_of_yr);
 		fprintf(stderr,"dbg2       hour:          %d\n",traceheader->hour);
@@ -916,7 +925,10 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2       sec:           %d\n",traceheader->sec);
 		fprintf(stderr,"dbg2       mils:          %d\n",traceheader->mils);
 		fprintf(stderr,"dbg2       tr_weight:     %d\n",traceheader->tr_weight);
-		fprintf(stderr,"dbg2       other_2[5]:    %d\n",traceheader->other_2[5]);
+		for (i=0;i<5;i++)
+			{
+			fprintf(stderr,"dbg2       other_2[%d]:   %d\n",i,traceheader->other_2[i]);
+			}
 		fprintf(stderr,"dbg2       delay:         %f\n",traceheader->delay);
 		fprintf(stderr,"dbg2       smute_sec:     %f\n",traceheader->smute_sec);
 		fprintf(stderr,"dbg2       emute_sec:     %f\n",traceheader->emute_sec);

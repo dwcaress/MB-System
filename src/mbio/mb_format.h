@@ -2,7 +2,7 @@
  *    The MB-system:	mb_format.h	1/19/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -284,9 +284,10 @@
 #define	MB_SYS_IMAGE83P		31
 #define	MB_SYS_HYSWEEP		32
 #define	MB_SYS_BENTHOS		33
+#define	MB_SYS_SWATHPLUS	34
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	71
+#define	MB_FORMATS	73
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -522,6 +523,12 @@
                                         variable pixels, dual frequency sidescan and subbottom,
                                         xtf variant, single files,
                                         low frequency sidescan returned as survey data, Benthos. */
+#define MBF_SWPLSSXI	221	/* SEA intermediate format for SWATHplus interferometric sonar,
+                                        variable beams, bathymetry, amplitude,
+                                        binary, single files, SEA. */
+#define MBF_SWPLSSXP	222	/* SEA processed format for SWATHplus interferometric sonar,
+                                        variable beams, bathymetry, amplitude,
+                                        binary, single files, SEA. */
 
 /* format registration function prototypes */
 int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error);
@@ -597,6 +604,8 @@ int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hir2rnav(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error);
 int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error);
+int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error);
+int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error);
 int mbr_info_sbsiomrg(int verbose,
 			int *system,
 			int *beams_bath_max,
@@ -2058,6 +2067,46 @@ int mbr_info_hysweep1(int verbose,
 			double *beamwidth_ltrack,
 			int *error);
 int mbr_info_xtfb1624(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
+int mbr_info_swplssxi(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
+int mbr_info_swplssxp(int verbose,
 			int *system,
 			int *beams_bath_max,
 			int *beams_amp_max,

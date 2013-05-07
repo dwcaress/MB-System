@@ -1,4 +1,4 @@
-.TH mbgrid 1 "15 October 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid 1 "4 May 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data
 from swath sonar data files.
@@ -90,11 +90,11 @@ page), \fBmbgrid\fP can also read data from ASCII text files in
 longitude, latitude, value triples. This allows one to incorporate
 conventional echosounder bathymetry data into the gridding.
 
-If the default weighted average gridding scheme is being used,
+If the \fB-F\fP\fI1\fP option is used, the gridding is performed using
+a weighted average gridding scheme. In this algorithm,
 each data point's contribution to a Gaussian weighted
 average for each nearby grid cell is calculated as the point is read
-and added to
-the grid cell sums.  The weighting function is given by:
+and added to the grid cell sums.  The weighting function is given by:
  	W(r) = Aexp(-r**2/a**2)
 .br
 where r is the distance from the center of the grid point to the data point,
@@ -113,13 +113,18 @@ parially lies within the beam footprint; these weighting values
 represent the fraction of the beam contained within the cell. Each
 footprint is tilted according to the local slope; the slope is estimated
 from a low resolution, first pass grid created by simple mean filtering
-the soundings. The slope grid is generated using a cell size twice that
+of the soundings. The slope grid is generated using a cell size twice that
 of the final grid. This approach allows one to sensibly grid data using
 a resolution greater than that of the raw data. Thus, if one has data
 with a large depth variation, one can generate a grid with a cell spacing
 appropriate for the high resolution, shallow data and still get
 sensible results in deep regions where the grid cells may be
 much smaller than the beam footprints.
+
+If the \fB-F\fP\fI6\fP option is used, the gridding is performed using
+a variant of the weighted beam footprint slope algorithm described above
+that omits the use of the local slope, and thus requires only a single pass
+through the data.
 
 If the \fB-F\fP\fI2\fP option is used, the gridding is performed with a
 median filter scheme instead of a Gaussian weighted average. In this

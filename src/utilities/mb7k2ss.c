@@ -1386,6 +1386,9 @@ activewaypoint, range, rangelast, navlon, routelon[activewaypoint], navlat, rout
 			/* check survey data position against waypoints */
 			if (linechange == MB_YES)
 				{
+				/* increment line number */
+				linenumber++;
+
 				/* set output file name */
 				if (extract_type == MB7K2SS_SSLOW)
 					sprintf(output_file, "%s_%4.4d_sslo.mb71", lineroot, linenumber);
@@ -1402,9 +1405,6 @@ activewaypoint, range, rangelast, navlon, routelon[activewaypoint], navlat, rout
 				rangelast = 1000 * rangethreshold;
 				oktowrite = 0;
 				linechange = MB_NO;
-
-				/* increment line number */
-				linenumber++;
 				}
 			else
 				rangelast = range;

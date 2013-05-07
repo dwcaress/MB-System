@@ -2,7 +2,7 @@
  *    The MB-system:	mb_access.c	11/1/00
  *    $Id$
 
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -2204,6 +2204,10 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
 	int	i;
 
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segytraceheader_ptr;
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -2284,10 +2288,6 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
 		    fprintf(stderr,"dbg2       sample:%d  data:%f\n", i, segydata[i]);
 		}
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segytraceheader_ptr;
 
 	/* call the appropriate mbsys_ insertion routine */
 	if (mb_io_ptr->mb_io_insert_segy != NULL)

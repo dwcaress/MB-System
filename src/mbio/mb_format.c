@@ -2,7 +2,7 @@
  *    The MB-system:	mb_format.c	2/18/94
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -643,6 +643,14 @@ int mb_format_register(int verbose,
 	else if (*format == MBF_XTFB1624)
 		{
 		status = mbr_register_xtfb1624(verbose, mbio_ptr, error);
+		}
+	else if (*format == MBF_SWPLSSXI)
+		{
+		status = mbr_register_swplssxi(verbose, mbio_ptr, error);
+		}
+	else if (*format == MBF_SWPLSSXP)
+		{
+		status = mbr_register_swplssxp(verbose, mbio_ptr, error);
 		}
 	else
 		{
@@ -1555,6 +1563,28 @@ int mb_format_info(int verbose,
 	else if (*format == MBF_XTFB1624)
 		{
 		status = mbr_info_xtfb1624(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error);
+		}
+	else if (*format == MBF_SWPLSSXI)
+		{
+		status = mbr_info_swplssxi(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error);
+		}
+	else if (*format == MBF_SWPLSSXP)
+		{
+		status = mbr_info_swplssxp(verbose, system,
 			beams_bath_max, beams_amp_max, pixels_ss_max,
 			format_name, system_name, format_description,
 			numfile, filetype,
@@ -3398,6 +3428,56 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
 		*format = MBF_HYSWEEP1;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for a SEA SWATHplus *.sxi file format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".sxi")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".SXI")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_SWPLSSXI;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for a SEA SWATHplus *.sxp file format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".sxp")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".SXP")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_SWPLSSXP;
 		found = MB_YES;
 		}
 	    }

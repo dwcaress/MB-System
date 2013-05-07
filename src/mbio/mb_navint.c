@@ -2,7 +2,7 @@
  *    The MB-system:	mb_time.c	10/30/2000
  *    $Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -81,7 +81,7 @@
 /*  #define MB_NAVINT_DEBUG 1
     #define MB_ATTINT_DEBUG 1
     #define MB_HEDINT_DEBUG 1
-    #define MB_DEPINT_DEBUG 1 
+    #define MB_DEPINT_DEBUG 1
     #define MB_ALTINT_DEBUG 1 */
 
 static char rcs_id[]="$Id$";
@@ -123,24 +123,24 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 						mb_io_ptr->fix_lon[i],
 						mb_io_ptr->fix_lat[i]);
 		}
-	
+
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->nfix == 0
 		|| (time_d > mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]))
-		{	
+		{
 		/* if list if full make room for another nav fix */
 		if (mb_io_ptr->nfix >= MB_ASYNCH_SAVE_MAX)
 			{
 			mb_io_ptr->nfix = MB_ASYNCH_SAVE_MAX - 1;
 			for (i=0;i<mb_io_ptr->nfix;i++)
 				{
-				mb_io_ptr->fix_time_d[i] 
+				mb_io_ptr->fix_time_d[i]
 					= mb_io_ptr->fix_time_d[i+1];
 				mb_io_ptr->fix_lon[i] = mb_io_ptr->fix_lon[i+1];
 				mb_io_ptr->fix_lat[i] = mb_io_ptr->fix_lat[i+1];
 				}
 			}
-			
+
 		/* add new fix to list */
 		mb_io_ptr->fix_time_d[mb_io_ptr->nfix] = time_d;
 		mb_io_ptr->fix_lon[mb_io_ptr->nfix] = lon;
@@ -193,9 +193,9 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_interp interpolates or extrapolates a
 		nav fix from the internal list. */
-int mb_navint_interp(int verbose, void *mbio_ptr, 
-		double time_d, double heading, double rawspeed, 
-		double *lon, double *lat, double *speed, 
+int mb_navint_interp(int verbose, void *mbio_ptr,
+		double time_d, double heading, double rawspeed,
+		double *lon, double *lat, double *speed,
 		int *error)
 {
 	char	*function_name = "mb_navint_interp";
@@ -206,7 +206,6 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 	double	factor, headingx, headingy;
 	double  speed_mps;
 	int	ifix;
-	int	nshift;
 	int	i;
 
 	/* print input debug statements */
@@ -236,7 +235,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 						mb_io_ptr->fix_lon[i],
 						mb_io_ptr->fix_lat[i]);
 		}
-	
+
 	/* get degrees to meters conversion if fix available */
 	if (mb_io_ptr->nfix > 0)
 		{
@@ -244,35 +243,35 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 			mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
 			&mtodeglon,&mtodeglat);
 		}
-	
+
 	/* use raw speed if available */
 	if (rawspeed > 0.0)
 	  *speed = rawspeed; /* km/hr */
-		
+
 	/* else get speed averaged over all available fixes */
 	else if (mb_io_ptr->nfix > 1)
 		{
-		dx = (mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
+		dx = (mb_io_ptr->fix_lon[mb_io_ptr->nfix-1]
 			- mb_io_ptr->fix_lon[0])/mtodeglon;
-		dy = (mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
+		dy = (mb_io_ptr->fix_lat[mb_io_ptr->nfix-1]
 			- mb_io_ptr->fix_lat[0])/mtodeglat;
-		dt = mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1] 
+		dt = mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
 			- mb_io_ptr->fix_time_d[0];
 		*speed = 3.6 * sqrt(dx*dx + dy*dy)/dt; /* km/hr */
 		}
-		
+
 	/* else speed unknown */
 	else
 		*speed = 0.0;
 
 	/* get speed in m/s */
 	speed_mps = *speed / 3.6;
-	
+
 	/* interpolate if possible */
 	if (mb_io_ptr->nfix > 1
-		&& (mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1] 
+		&& (mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
 			>= time_d)
-		&& (mb_io_ptr->fix_time_d[0] 
+		&& (mb_io_ptr->fix_time_d[0]
 			<= time_d))
 		{
 		/* get interpolated position */
@@ -281,65 +280,63 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 		while (time_d > mb_io_ptr->fix_time_d[ifix])
 			{
 			ifix++;
-			nshift++;
 			}
 		while (time_d < mb_io_ptr->fix_time_d[ifix-1])
 			{
 			ifix--;
-			nshift++;
 			}
 
 		factor = (time_d - mb_io_ptr->fix_time_d[ifix-1])
 			/(mb_io_ptr->fix_time_d[ifix] - mb_io_ptr->fix_time_d[ifix-1]);
-		*lon = mb_io_ptr->fix_lon[ifix-1] 
+		*lon = mb_io_ptr->fix_lon[ifix-1]
 			+ factor*(mb_io_ptr->fix_lon[ifix] - mb_io_ptr->fix_lon[ifix-1]);
-		*lat = mb_io_ptr->fix_lat[ifix-1] 
+		*lat = mb_io_ptr->fix_lat[ifix-1]
 			+ factor*(mb_io_ptr->fix_lat[ifix] - mb_io_ptr->fix_lat[ifix-1]);
 		status = MB_SUCCESS;
 #ifdef MB_NAVINT_DEBUG
-	fprintf(stderr, "mb_navint_interp: Nav  %f %f interpolated at fix %d of %d with factor:%f\n", 
+	fprintf(stderr, "mb_navint_interp: Nav  %f %f interpolated at fix %d of %d with factor:%f\n",
 		*lon, *lat, ifix, mb_io_ptr->nfix, factor);
 #endif
 		}
-		
+
 	/* extrapolate from last fix - note zero speed
 	    results in just using the last fix */
 	else if (mb_io_ptr->nfix > 1
-		&& (mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1] 
+		&& (mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
 			< time_d))
-		{		
+		{
 		/* extrapolated position using average speed */
 		dd = (time_d - mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
 			* speed_mps; /* meters */
 		headingx = sin(DTR * heading);
 		headingy = cos(DTR * heading);
-		*lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
+		*lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1]
 			+ headingx * mtodeglon * dd;
-		*lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
+		*lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1]
 			+ headingy * mtodeglat * dd;
 		status = MB_SUCCESS;
 #ifdef MB_NAVINT_DEBUG
-	fprintf(stderr, "mb_navint_interp: Nav %f %f extrapolated from last fix of %d with distance:%f and speed:%f\n", 
+	fprintf(stderr, "mb_navint_interp: Nav %f %f extrapolated from last fix of %d with distance:%f and speed:%f\n",
 		*lon, *lat, mb_io_ptr->nfix, dd, speed_mps);
 #endif
 		}
-		
+
 	/* extrapolate from first fix - note zero speed
 	    results in just using the first fix */
 	else if (mb_io_ptr->nfix >= 1)
-		{		
+		{
 		/* extrapolated position using average speed */
 		dd = (time_d - mb_io_ptr->fix_time_d[0])
 			* speed_mps; /* meters */
 		headingx = sin(DTR * heading);
 		headingy = cos(DTR * heading);
-		*lon = mb_io_ptr->fix_lon[0] 
+		*lon = mb_io_ptr->fix_lon[0]
 			+ headingx * mtodeglon * dd;
-		*lat = mb_io_ptr->fix_lat[0] 
+		*lat = mb_io_ptr->fix_lat[0]
 			+ headingy * mtodeglat * dd;
 		status = MB_SUCCESS;
 #ifdef MB_NAVINT_DEBUG
-	fprintf(stderr, "mb_navint_interp: Nav %f %f extrapolated from first fix of %d with distance %f and speed:%f\n", 
+	fprintf(stderr, "mb_navint_interp: Nav %f %f extrapolated from first fix of %d with distance %f and speed:%f\n",
 		*lon, *lat, mb_io_ptr->nfix, dd, speed_mps);
 #endif
 		}
@@ -377,8 +374,8 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 /*--------------------------------------------------------------------*/
 /* 	function mb_attint_add adds a attitude fix to the internal
 		list used for interpolation/extrapolation. */
-int mb_attint_add(int verbose, void *mbio_ptr, 
-			double time_d, double heave, 
+int mb_attint_add(int verbose, void *mbio_ptr,
+			double time_d, double heave,
 			double roll, double pitch, int *error)
 {
 	char	*function_name = "mb_attint_add";
@@ -403,25 +400,25 @@ int mb_attint_add(int verbose, void *mbio_ptr,
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->nattitude == 0
 		|| (time_d > mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude-1]))
-		{	
+		{
 		/* if list if full make room for another attitude fix */
 		if (mb_io_ptr->nattitude >= MB_ASYNCH_SAVE_MAX)
 			{
 			mb_io_ptr->nattitude = MB_ASYNCH_SAVE_MAX - 1;
 			for (i=0;i<mb_io_ptr->nattitude;i++)
 				{
-				mb_io_ptr->attitude_time_d[i] 
+				mb_io_ptr->attitude_time_d[i]
 					= mb_io_ptr->attitude_time_d[i+1];
 				mb_io_ptr->attitude_heave[i] = mb_io_ptr->attitude_heave[i+1];
 				mb_io_ptr->attitude_roll[i] = mb_io_ptr->attitude_roll[i+1];
 				mb_io_ptr->attitude_pitch[i] = mb_io_ptr->attitude_pitch[i+1];
 				}
 			}
-			
+
 		/* add new fix to list */
 		mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude] = time_d;
 		mb_io_ptr->attitude_heave[mb_io_ptr->nattitude] = heave;
@@ -429,7 +426,7 @@ int mb_attint_add(int verbose, void *mbio_ptr,
 		mb_io_ptr->attitude_pitch[mb_io_ptr->nattitude] = pitch;
 		mb_io_ptr->nattitude++;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_add:    Attitude fix %d time_d:%f roll:%f pitch:%f heave:%f added\n", 
+	fprintf(stderr, "mb_attint_add:    Attitude fix %d time_d:%f roll:%f pitch:%f heave:%f added\n",
 				mb_io_ptr->nattitude, time_d, roll, pitch, heave);
 #endif
 
@@ -472,8 +469,8 @@ int mb_attint_add(int verbose, void *mbio_ptr,
 /*--------------------------------------------------------------------*/
 /* 	function mb_attint_nadd adds multiple attitude fixes to the internal
 		list used for interpolation/extrapolation. */
-int mb_attint_nadd(int verbose, void *mbio_ptr, 
-			int nsamples, double *time_d, double *heave, 
+int mb_attint_nadd(int verbose, void *mbio_ptr,
+			int nsamples, double *time_d, double *heave,
 			double *roll, double *pitch, int *error)
 {
 	char	*function_name = "mb_attint_nadd";
@@ -508,7 +505,7 @@ int mb_attint_nadd(int verbose, void *mbio_ptr,
 		shift = mb_io_ptr->nattitude + nsamples - MB_ASYNCH_SAVE_MAX;
 		for (i=0;i<mb_io_ptr->nattitude-shift;i++)
 			{
-			mb_io_ptr->attitude_time_d[i] 
+			mb_io_ptr->attitude_time_d[i]
 				= mb_io_ptr->attitude_time_d[i+shift];
 			mb_io_ptr->attitude_heave[i] = mb_io_ptr->attitude_heave[i+shift];
 			mb_io_ptr->attitude_roll[i] = mb_io_ptr->attitude_roll[i+shift];
@@ -516,7 +513,7 @@ int mb_attint_nadd(int verbose, void *mbio_ptr,
 			}
 		mb_io_ptr->nattitude = mb_io_ptr->nattitude - shift;
 		}
-	
+
 	/* add fixes */
 	for (i=0;i<nsamples;i++)
 		{
@@ -526,7 +523,7 @@ int mb_attint_nadd(int verbose, void *mbio_ptr,
 		mb_io_ptr->attitude_roll[mb_io_ptr->nattitude] = roll[i];
 		mb_io_ptr->attitude_pitch[mb_io_ptr->nattitude] = pitch[i];
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_add:    Attitude fix %d of %d: time:%f roll:%f pitch:%f heave:%f added\n", 
+	fprintf(stderr, "mb_attint_add:    Attitude fix %d of %d: time:%f roll:%f pitch:%f heave:%f added\n",
 				i, mb_io_ptr->nattitude, time_d[i], roll[i], pitch[i], heave[i]);
 #endif
 		mb_io_ptr->nattitude++;
@@ -570,9 +567,9 @@ int mb_attint_nadd(int verbose, void *mbio_ptr,
 /*--------------------------------------------------------------------*/
 /* 	function mb_attint_interp interpolates or extrapolates a
 		attitude fix from the internal list. */
-int mb_attint_interp(int verbose, void *mbio_ptr, 
-		double time_d, double *heave, 
-		double *roll, double *pitch, 
+int mb_attint_interp(int verbose, void *mbio_ptr,
+		double time_d, double *heave,
+		double *roll, double *pitch,
 		int *error)
 {
 	char	*function_name = "mb_attint_interp";
@@ -595,62 +592,62 @@ int mb_attint_interp(int verbose, void *mbio_ptr,
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* interpolate if possible */
 	if (mb_io_ptr->nattitude > 1
-		&& (mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude-1] 
+		&& (mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude-1]
 			>= time_d)
-		&& (mb_io_ptr->attitude_time_d[0] 
+		&& (mb_io_ptr->attitude_time_d[0]
 			<= time_d))
 		{
-		/* get interpolated position */		    
+		/* get interpolated position */
 		ifix = (mb_io_ptr->nattitude - 1) * (time_d - mb_io_ptr->attitude_time_d[0])
 			/(mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude - 1] - mb_io_ptr->attitude_time_d[0]);
 		while (time_d > mb_io_ptr->attitude_time_d[ifix])
 			ifix++;
 		while (time_d < mb_io_ptr->attitude_time_d[ifix-1])
 			ifix--;
-			
+
 		factor = (time_d - mb_io_ptr->attitude_time_d[ifix-1])
 			/(mb_io_ptr->attitude_time_d[ifix] - mb_io_ptr->attitude_time_d[ifix-1]);
-		*heave = mb_io_ptr->attitude_heave[ifix-1] 
+		*heave = mb_io_ptr->attitude_heave[ifix-1]
 			+ factor*(mb_io_ptr->attitude_heave[ifix] - mb_io_ptr->attitude_heave[ifix-1]);
-		*roll = mb_io_ptr->attitude_roll[ifix-1] 
+		*roll = mb_io_ptr->attitude_roll[ifix-1]
 			+ factor*(mb_io_ptr->attitude_roll[ifix] - mb_io_ptr->attitude_roll[ifix-1]);
-		*pitch = mb_io_ptr->attitude_pitch[ifix-1] 
+		*pitch = mb_io_ptr->attitude_pitch[ifix-1]
 			+ factor*(mb_io_ptr->attitude_pitch[ifix] - mb_io_ptr->attitude_pitch[ifix-1]);
 		status = MB_SUCCESS;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_interp: Attitude time_d:%f roll:%f pitch:%f heave:%f interpolated at fix %d of %d with factor:%f\n", 
+	fprintf(stderr, "mb_attint_interp: Attitude time_d:%f roll:%f pitch:%f heave:%f interpolated at fix %d of %d with factor:%f\n",
 		time_d, *roll, *pitch, *heave, ifix, mb_io_ptr->nattitude, factor);
 #endif
 		}
-		
+
 	/* extrapolate from last fix */
 	else if (mb_io_ptr->nattitude > 1
-		&& (mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude-1] 
+		&& (mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude-1]
 			< time_d))
-		{		
+		{
 		/* extrapolated position using average speed */
 		*heave = mb_io_ptr->attitude_heave[mb_io_ptr->nattitude-1];
 		*roll = mb_io_ptr->attitude_roll[mb_io_ptr->nattitude-1];
 		*pitch = mb_io_ptr->attitude_pitch[mb_io_ptr->nattitude-1];
 		status = MB_SUCCESS;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_interp: Attitude time_d:%f roll:%f pitch:%f heave:%f extrapolated from last fix of %d\n", 
+	fprintf(stderr, "mb_attint_interp: Attitude time_d:%f roll:%f pitch:%f heave:%f extrapolated from last fix of %d\n",
 		time_d, *roll, *pitch, *heave, mb_io_ptr->nattitude);
 #endif
 		}
-		
+
 	/* extrapolate from first fix */
 	else if (mb_io_ptr->nattitude >= 1)
-		{		
+		{
 		*heave = mb_io_ptr->attitude_heave[0];
 		*roll = mb_io_ptr->attitude_roll[0];
 		*pitch = mb_io_ptr->attitude_pitch[0];
 		status = MB_SUCCESS;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_interp: Attitude time_d:%f roll:%f pitch:%f heave:%f extrapolated from first fix of %d\n", 
+	fprintf(stderr, "mb_attint_interp: Attitude time_d:%f roll:%f pitch:%f heave:%f extrapolated from first fix of %d\n",
 		time_d, *roll, *pitch, *heave, mb_io_ptr->nattitude);
 #endif
 		}
@@ -710,23 +707,23 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->nheading == 0
 		|| (time_d > mb_io_ptr->heading_time_d[mb_io_ptr->nheading-1]))
-		{	
+		{
 		/* if list if full make room for another heading fix */
 		if (mb_io_ptr->nheading >= MB_ASYNCH_SAVE_MAX)
 			{
 			mb_io_ptr->nheading = MB_ASYNCH_SAVE_MAX - 1;
 			for (i=0;i<mb_io_ptr->nheading;i++)
 				{
-				mb_io_ptr->heading_time_d[i] 
+				mb_io_ptr->heading_time_d[i]
 					= mb_io_ptr->heading_time_d[i+1];
 				mb_io_ptr->heading_heading[i] = mb_io_ptr->heading_heading[i+1];
 				}
 			}
-			
+
 		/* add new fix to list */
 		mb_io_ptr->heading_time_d[mb_io_ptr->nheading] = time_d;
 		mb_io_ptr->heading_heading[mb_io_ptr->nheading] = heading;
@@ -770,7 +767,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 /*--------------------------------------------------------------------*/
 /* 	function mb_hedint_nadd adds multiple heading fixes to the internal
 		list used for interpolation/extrapolation. */
-int mb_hedint_nadd(int verbose, void *mbio_ptr, 
+int mb_hedint_nadd(int verbose, void *mbio_ptr,
 			int nsamples, double *time_d, double *heading, int *error)
 {
 	char	*function_name = "mb_hedint_nadd";
@@ -805,13 +802,13 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr,
 		shift = mb_io_ptr->nheading + nsamples - MB_ASYNCH_SAVE_MAX;
 		for (i=0;i<mb_io_ptr->nheading-shift;i++)
 			{
-			mb_io_ptr->heading_time_d[i] 
+			mb_io_ptr->heading_time_d[i]
 				= mb_io_ptr->heading_time_d[i+shift];
 			mb_io_ptr->heading_heading[i] = mb_io_ptr->heading_heading[i+shift];
 			}
 		mb_io_ptr->nheading = mb_io_ptr->nheading - shift;
 		}
-	
+
 	/* add fixes */
 	for (i=0;i<nsamples;i++)
 		{
@@ -819,7 +816,7 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr,
 		mb_io_ptr->heading_time_d[mb_io_ptr->nheading] = time_d[i];
 		mb_io_ptr->heading_heading[mb_io_ptr->nheading] = heading[i];
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_nadd:    Heading fix %d of %d: %f added\n", 
+	fprintf(stderr, "mb_hedint_nadd:    Heading fix %d of %d: %f added\n",
 				i, mb_io_ptr->nheading, heading[i]);
 #endif
 		mb_io_ptr->nheading++;
@@ -859,8 +856,8 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr,
 /*--------------------------------------------------------------------*/
 /* 	function mb_hedint_interp interpolates or extrapolates a
 		heading fix from the internal list. */
-int mb_hedint_interp(int verbose, void *mbio_ptr, 
-		double time_d, double *heading, 
+int mb_hedint_interp(int verbose, void *mbio_ptr,
+		double time_d, double *heading,
 		int *error)
 {
 	char	*function_name = "mb_hedint_interp";
@@ -884,12 +881,12 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* interpolate if possible */
 	if (mb_io_ptr->nheading > 1
-		&& (mb_io_ptr->heading_time_d[mb_io_ptr->nheading-1] 
+		&& (mb_io_ptr->heading_time_d[mb_io_ptr->nheading-1]
 			>= time_d)
-		&& (mb_io_ptr->heading_time_d[0] 
+		&& (mb_io_ptr->heading_time_d[0]
 			<= time_d))
 		{
 		/* get interpolated heading */
@@ -915,32 +912,32 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 			*heading -= 360.0;
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Heading %f interpolated at value %d of %d with factor:%f\n", 
+	fprintf(stderr, "mb_hedint_interp: Heading %f interpolated at value %d of %d with factor:%f\n",
 		*heading, ifix, mb_io_ptr->nheading, factor);
 #endif
 		}
-		
+
 	/* extrapolate from last fix */
 	else if (mb_io_ptr->nheading > 1
-		&& (mb_io_ptr->heading_time_d[mb_io_ptr->nheading-1] 
+		&& (mb_io_ptr->heading_time_d[mb_io_ptr->nheading-1]
 			< time_d))
-		{		
+		{
 		/* extrapolated heading using average speed */
 		*heading = mb_io_ptr->heading_heading[mb_io_ptr->nheading-1];
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Heading %f taken from last value of %d\n", 
+	fprintf(stderr, "mb_hedint_interp: Heading %f taken from last value of %d\n",
 		*heading, mb_io_ptr->nheading);
 #endif
 		}
-		
+
 	/* extrapolate from first fix */
 	else if (mb_io_ptr->nheading >= 1)
-		{		
+		{
 		*heading = mb_io_ptr->heading_heading[0];
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Heading %f taken from first value of %d\n", 
+	fprintf(stderr, "mb_hedint_interp: Heading %f taken from first value of %d\n",
 		*heading, mb_io_ptr->nheading);
 #endif
 		}
@@ -996,23 +993,23 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->nsonardepth == 0
 		|| (time_d > mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth-1]))
-		{	
+		{
 		/* if list if full make room for another sonardepth fix */
 		if (mb_io_ptr->nsonardepth >= MB_ASYNCH_SAVE_MAX)
 			{
 			mb_io_ptr->nsonardepth = MB_ASYNCH_SAVE_MAX - 1;
 			for (i=0;i<mb_io_ptr->nsonardepth;i++)
 				{
-				mb_io_ptr->sonardepth_time_d[i] 
+				mb_io_ptr->sonardepth_time_d[i]
 					= mb_io_ptr->sonardepth_time_d[i+1];
 				mb_io_ptr->sonardepth_sonardepth[i] = mb_io_ptr->sonardepth_sonardepth[i+1];
 				}
 			}
-			
+
 		/* add new fix to list */
 		mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth] = time_d;
 		mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth] = sonardepth;
@@ -1056,8 +1053,8 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 /*--------------------------------------------------------------------*/
 /* 	function mb_depint_interp interpolates or extrapolates a
 		sonar depth fix from the internal list. */
-int mb_depint_interp(int verbose, void *mbio_ptr, 
-		double time_d, double *sonardepth, 
+int mb_depint_interp(int verbose, void *mbio_ptr,
+		double time_d, double *sonardepth,
 		int *error)
 {
 	char	*function_name = "mb_depint_interp";
@@ -1080,12 +1077,12 @@ int mb_depint_interp(int verbose, void *mbio_ptr,
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* interpolate if possible */
 	if (mb_io_ptr->nsonardepth > 1
-		&& (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth-1] 
+		&& (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth-1]
 			>= time_d)
-		&& (mb_io_ptr->sonardepth_time_d[0] 
+		&& (mb_io_ptr->sonardepth_time_d[0]
 			<= time_d))
 		{
 		/* get interpolated position */
@@ -1098,36 +1095,36 @@ int mb_depint_interp(int verbose, void *mbio_ptr,
 
 		factor = (time_d - mb_io_ptr->sonardepth_time_d[ifix-1])
 			/(mb_io_ptr->sonardepth_time_d[ifix] - mb_io_ptr->sonardepth_time_d[ifix-1]);
-		*sonardepth = mb_io_ptr->sonardepth_sonardepth[ifix-1] 
+		*sonardepth = mb_io_ptr->sonardepth_sonardepth[ifix-1]
 			+ factor*(mb_io_ptr->sonardepth_sonardepth[ifix] - mb_io_ptr->sonardepth_sonardepth[ifix-1]);
 		status = MB_SUCCESS;
 #ifdef MB_DEPINT_DEBUG
-	fprintf(stderr, "mb_depint_interp: sonardepth %f interpolated at fix %d of %d with factor:%f\n", 
+	fprintf(stderr, "mb_depint_interp: sonardepth %f interpolated at fix %d of %d with factor:%f\n",
 		*sonardepth, ifix, mb_io_ptr->nsonardepth, factor);
 #endif
 		}
-		
+
 	/* extrapolate from last value */
 	else if (mb_io_ptr->nsonardepth > 1
-		&& (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth-1] 
+		&& (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth-1]
 			< time_d))
-		{		
+		{
 		/* extrapolated depth using last value */
 		*sonardepth = mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth-1];
 		status = MB_SUCCESS;
 #ifdef MB_DEPINT_DEBUG
-	fprintf(stderr, "mb_depint_interp: sonardepth %f extrapolated from last fix of %d\n", 
+	fprintf(stderr, "mb_depint_interp: sonardepth %f extrapolated from last fix of %d\n",
 		*sonardepth, mb_io_ptr->nsonardepth);
 #endif
 		}
-		
+
 	/* extrapolate from first fix */
 	else if (mb_io_ptr->nsonardepth >= 1)
-		{		
+		{
 		*sonardepth = mb_io_ptr->sonardepth_sonardepth[0];
 		status = MB_SUCCESS;
 #ifdef MB_DEPINT_DEBUG
-	fprintf(stderr, "mb_depint_interp: sonardepth %f extrapolated from first fix of %d\n", 
+	fprintf(stderr, "mb_depint_interp: sonardepth %f extrapolated from first fix of %d\n",
 		*sonardepth, mb_io_ptr->nsonardepth);
 #endif
 		}
@@ -1183,23 +1180,23 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->naltitude == 0
 		|| (time_d > mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude-1]))
-		{	
+		{
 		/* if list if full make room for another altitude fix */
 		if (mb_io_ptr->naltitude >= MB_ASYNCH_SAVE_MAX)
 			{
 			mb_io_ptr->naltitude = MB_ASYNCH_SAVE_MAX - 1;
 			for (i=0;i<mb_io_ptr->naltitude;i++)
 				{
-				mb_io_ptr->altitude_time_d[i] 
+				mb_io_ptr->altitude_time_d[i]
 					= mb_io_ptr->altitude_time_d[i+1];
 				mb_io_ptr->altitude_altitude[i] = mb_io_ptr->altitude_altitude[i+1];
 				}
 			}
-			
+
 		/* add new fix to list */
 		mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude] = time_d;
 		mb_io_ptr->altitude_altitude[mb_io_ptr->naltitude] = altitude;
@@ -1243,8 +1240,8 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 /*--------------------------------------------------------------------*/
 /* 	function mb_altint_interp interpolates or extrapolates a
 		altitude fix from the internal list. */
-int mb_altint_interp(int verbose, void *mbio_ptr, 
-		double time_d, double *altitude, 
+int mb_altint_interp(int verbose, void *mbio_ptr,
+		double time_d, double *altitude,
 		int *error)
 {
 	char	*function_name = "mb_altint_interp";
@@ -1267,12 +1264,12 @@ int mb_altint_interp(int verbose, void *mbio_ptr,
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* interpolate if possible */
 	if (mb_io_ptr->naltitude > 1
-		&& (mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude-1] 
+		&& (mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude-1]
 			>= time_d)
-		&& (mb_io_ptr->altitude_time_d[0] 
+		&& (mb_io_ptr->altitude_time_d[0]
 			<= time_d))
 		{
 		/* get interpolated position */
@@ -1285,36 +1282,36 @@ int mb_altint_interp(int verbose, void *mbio_ptr,
 
 		factor = (time_d - mb_io_ptr->altitude_time_d[ifix-1])
 			/(mb_io_ptr->altitude_time_d[ifix] - mb_io_ptr->altitude_time_d[ifix-1]);
-		*altitude = mb_io_ptr->altitude_altitude[ifix-1] 
+		*altitude = mb_io_ptr->altitude_altitude[ifix-1]
 			+ factor*(mb_io_ptr->altitude_altitude[ifix] - mb_io_ptr->altitude_altitude[ifix-1]);
 		status = MB_SUCCESS;
 #ifdef MB_ALTINT_DEBUG
-	fprintf(stderr, "mb_altint_interp: altitude %f interpolated at fix %d of %d with factor:%f\n", 
+	fprintf(stderr, "mb_altint_interp: altitude %f interpolated at fix %d of %d with factor:%f\n",
 		*altitude, ifix, mb_io_ptr->naltitude, factor);
 #endif
 		}
-		
+
 	/* extrapolate from last fix */
 	else if (mb_io_ptr->naltitude > 1
-		&& (mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude-1] 
+		&& (mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude-1]
 			< time_d))
-		{		
+		{
 		/* extrapolated position using average speed */
 		*altitude = mb_io_ptr->altitude_altitude[mb_io_ptr->naltitude-1];
 		status = MB_SUCCESS;
 #ifdef MB_ALTINT_DEBUG
-	fprintf(stderr, "mb_altint_interp: altitude %f extrapolated from last fix of %d\n", 
+	fprintf(stderr, "mb_altint_interp: altitude %f extrapolated from last fix of %d\n",
 		*altitude, mb_io_ptr->naltitude);
 #endif
 		}
-		
+
 	/* extrapolate from first fix */
 	else if (mb_io_ptr->naltitude >= 1)
-		{		
+		{
 		*altitude = mb_io_ptr->altitude_altitude[0];
 		status = MB_SUCCESS;
 #ifdef MB_ALTINT_DEBUG
-	fprintf(stderr, "mb_altint_interp: altitude %f extrapolated from first fix of %d\n", 
+	fprintf(stderr, "mb_altint_interp: altitude %f extrapolated from first fix of %d\n",
 		*altitude, mb_io_ptr->naltitude);
 #endif
 		}

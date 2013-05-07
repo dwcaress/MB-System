@@ -2738,7 +2738,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	*device_number_MB_HCP;
 	int	*device_number_MB_GYR;
 	int	*device_number_MB_DFT;
-	double	x,y;
 	int	i, j;
 
 	/* print input debug statements */
