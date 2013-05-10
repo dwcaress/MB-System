@@ -84,8 +84,8 @@ am_libmbview_la_OBJECTS = libmbview_la-MB3DView.lo \
 	libmbview_la-mbview_secondary.lo libmbview_la-mbview_pick.lo \
 	libmbview_la-mbview_profile.lo libmbview_la-mbview_site.lo \
 	libmbview_la-mbview_route.lo libmbview_la-mbview_nav.lo \
-	libmbview_la-mbview_vector.lo libmbview_la-mb_glwdrawa.lo \
-	libmbview_la-Mb3dsdg.lo \
+	libmbview_la-mbview_vector.lo libmbview_la-mbview_bxutils.lo \
+	libmbview_la-mb_glwdrawa.lo  libmbview_la-Mb3dsdg.lo \
 	libmbview_la-mb3dsoundings_callbacks.lo \
 	libmbview_la-MBpedit.lo libmbview_la-mbpingedit_callbacks.lo
 libmbview_la_OBJECTS = $(am_libmbview_la_OBJECTS)
@@ -94,7 +94,6 @@ libmbview_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(CFLAGS) $(libmbview_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(bin_PROGRAMS)
 am_mbeditviz_OBJECTS = mbeditviz-mbeditviz_main.$(OBJEXT) \
-	mbeditviz-mbeditviz_bxutils.$(OBJEXT) \
 	mbeditviz-mbeditviz_callbacks.$(OBJEXT) \
 	mbeditviz-mbeditviz_prog.$(OBJEXT) \
 	mbeditviz-mbeditviz_creation.$(OBJEXT)
@@ -104,7 +103,7 @@ mbeditviz_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(mbeditviz_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_mbgrdviz_OBJECTS = mbgrdviz_main.$(OBJEXT) \
-	mbgrdviz_bxutils.$(OBJEXT) mbgrdviz_callbacks.$(OBJEXT) \
+	mbgrdviz_callbacks.$(OBJEXT) \
 	mbgrdviz_creation.$(OBJEXT)
 mbgrdviz_OBJECTS = $(am_mbgrdviz_OBJECTS)
 mbgrdviz_DEPENDENCIES = libmbview.la
@@ -269,26 +268,26 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I.. -I../mbio -I../mbaux @MOTIF_INC_DIR@ @GL_INC_DIR@
 include_HEADERS = mbview.h
-mbgrdviz_SOURCES = mbgrdviz_main.c mbgrdviz_bxutils.c mbgrdviz_callbacks.c  mbgrdviz_creation.c
+mbgrdviz_SOURCES = mbgrdviz_main.c mbgrdviz_callbacks.c  mbgrdviz_creation.c
 mbgrdviz_LDADD = -L../mbio -L../proj -L../mr1pr -L../surf -L../mbaux -lmbio -lmbproj -lmbxgr \
 	@MOTIF_LIB@ @GL_LIB@ libmbview.la
 
-mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_bxutils.c mbeditviz_callbacks.c mbeditviz_prog.c mbeditviz_creation.c
+mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_callbacks.c mbeditviz_prog.c mbeditviz_creation.c
 mbeditviz_LDADD = -L../mbio -L../proj -L../mr1pr -L../surf -L../mbaux -lmbio -lmbproj -lmbaux -lmbxgr \
 	@MOTIF_LIB@ @GL_LIB@ libmbview.la
 
 mbeditviz_CFLAGS = -DMBEDITVIZ_DECLARE_GLOBALS
 lib_LTLIBRARIES = libmbview.la
 libmbview_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libmbview_la_CFLAGS = -DMBVIEW_LIBRARY
+libmbview_la_CFLAGS = -DMBVIEW_LIBRARY -L../mbio
 libmbview_la_SOURCES = \
 	MB3DView.c MB3DSiteList.c MB3DRouteList.c MB3DNavList.c \
 	mbview_callbacks.c mbview_process.c mbview_plot.c mbview_primary.c \
 	mbview_secondary.c mbview_pick.c mbview_profile.c mbview_site.c \
-	mbview_route.c mbview_nav.c mbview_vector.c mb_glwdrawa.c Mb3dsdg.c \
+	mbview_route.c mbview_nav.c mbview_vector.c mbview_bxutils.c mb_glwdrawa.c Mb3dsdg.c \
 	mb3dsoundings_callbacks.c MBpedit.c mbpingedit_callbacks.c
 
-libmbview_la_LIBADD = @MOTIF_LIB_DIR@ @GL_LIB_DIR@ @MOTIF_LIB@ @GL_LIB@
+libmbview_la_LIBADD = @MOTIF_LIB_DIR@ @GL_LIB_DIR@ @MOTIF_LIB@ @GL_LIB@ -lmbio
 all: all-am
 
 .SUFFIXES:
@@ -354,7 +353,7 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-libmbview.la: $(libmbview_la_OBJECTS) $(libmbview_la_DEPENDENCIES) 
+libmbview.la: $(libmbview_la_OBJECTS) $(libmbview_la_DEPENDENCIES)
 	$(libmbview_la_LINK) -rpath $(libdir) $(libmbview_la_OBJECTS) $(libmbview_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
@@ -399,10 +398,10 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-mbeditviz$(EXEEXT): $(mbeditviz_OBJECTS) $(mbeditviz_DEPENDENCIES) 
+mbeditviz$(EXEEXT): $(mbeditviz_OBJECTS) $(mbeditviz_DEPENDENCIES)
 	@rm -f mbeditviz$(EXEEXT)
 	$(mbeditviz_LINK) $(mbeditviz_OBJECTS) $(mbeditviz_LDADD) $(LIBS)
-mbgrdviz$(EXEEXT): $(mbgrdviz_OBJECTS) $(mbgrdviz_DEPENDENCIES) 
+mbgrdviz$(EXEEXT): $(mbgrdviz_OBJECTS) $(mbgrdviz_DEPENDENCIES)
 	@rm -f mbgrdviz$(EXEEXT)
 	$(LINK) $(mbgrdviz_OBJECTS) $(mbgrdviz_LDADD) $(LIBS)
 
@@ -432,12 +431,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbview_la-mbview_secondary.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbview_la-mbview_site.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbview_la-mbview_vector.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbeditviz-mbeditviz_bxutils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbview_la-mbview_bxutils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbeditviz-mbeditviz_callbacks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbeditviz-mbeditviz_creation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbeditviz-mbeditviz_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbeditviz-mbeditviz_prog.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrdviz_bxutils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrdviz_callbacks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrdviz_creation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrdviz_main.Po@am__quote@
@@ -568,6 +566,13 @@ libmbview_la-mbview_vector.lo: mbview_vector.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbview_la_CFLAGS) $(CFLAGS) -c -o libmbview_la-mbview_vector.lo `test -f 'mbview_vector.c' || echo '$(srcdir)/'`mbview_vector.c
 
+libmbview_la-mbview_bxutils.lo: mbview_bxutils.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbview_la_CFLAGS) $(CFLAGS) -MT libmbview_la-mbview_bxutils.lo -MD -MP -MF $(DEPDIR)/libmbview_la-mbview_bxutils.Tpo -c -o libmbview_la-mbview_bxutils.lo `test -f 'mbview_bxutils.c' || echo '$(srcdir)/'`mbview_bxutils.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libmbview_la-mbview_bxutils.Tpo $(DEPDIR)/libmbview_la-mbview_bxutils.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbview_bxutils.c' object='libmbview_la-mbview_bxutils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbview_la_CFLAGS) $(CFLAGS) -c -o libmbview_la-mbview_bxutils.lo `test -f 'mbview_bxutils.c' || echo '$(srcdir)/'`mbview_bxutils.c
+
 libmbview_la-mb_glwdrawa.lo: mb_glwdrawa.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbview_la_CFLAGS) $(CFLAGS) -MT libmbview_la-mb_glwdrawa.lo -MD -MP -MF $(DEPDIR)/libmbview_la-mb_glwdrawa.Tpo -c -o libmbview_la-mb_glwdrawa.lo `test -f 'mb_glwdrawa.c' || echo '$(srcdir)/'`mb_glwdrawa.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libmbview_la-mb_glwdrawa.Tpo $(DEPDIR)/libmbview_la-mb_glwdrawa.Plo
@@ -616,20 +621,6 @@ mbeditviz-mbeditviz_main.obj: mbeditviz_main.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbeditviz_main.c' object='mbeditviz-mbeditviz_main.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbeditviz_CFLAGS) $(CFLAGS) -c -o mbeditviz-mbeditviz_main.obj `if test -f 'mbeditviz_main.c'; then $(CYGPATH_W) 'mbeditviz_main.c'; else $(CYGPATH_W) '$(srcdir)/mbeditviz_main.c'; fi`
-
-mbeditviz-mbeditviz_bxutils.o: mbeditviz_bxutils.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbeditviz_CFLAGS) $(CFLAGS) -MT mbeditviz-mbeditviz_bxutils.o -MD -MP -MF $(DEPDIR)/mbeditviz-mbeditviz_bxutils.Tpo -c -o mbeditviz-mbeditviz_bxutils.o `test -f 'mbeditviz_bxutils.c' || echo '$(srcdir)/'`mbeditviz_bxutils.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mbeditviz-mbeditviz_bxutils.Tpo $(DEPDIR)/mbeditviz-mbeditviz_bxutils.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbeditviz_bxutils.c' object='mbeditviz-mbeditviz_bxutils.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbeditviz_CFLAGS) $(CFLAGS) -c -o mbeditviz-mbeditviz_bxutils.o `test -f 'mbeditviz_bxutils.c' || echo '$(srcdir)/'`mbeditviz_bxutils.c
-
-mbeditviz-mbeditviz_bxutils.obj: mbeditviz_bxutils.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbeditviz_CFLAGS) $(CFLAGS) -MT mbeditviz-mbeditviz_bxutils.obj -MD -MP -MF $(DEPDIR)/mbeditviz-mbeditviz_bxutils.Tpo -c -o mbeditviz-mbeditviz_bxutils.obj `if test -f 'mbeditviz_bxutils.c'; then $(CYGPATH_W) 'mbeditviz_bxutils.c'; else $(CYGPATH_W) '$(srcdir)/mbeditviz_bxutils.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mbeditviz-mbeditviz_bxutils.Tpo $(DEPDIR)/mbeditviz-mbeditviz_bxutils.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbeditviz_bxutils.c' object='mbeditviz-mbeditviz_bxutils.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbeditviz_CFLAGS) $(CFLAGS) -c -o mbeditviz-mbeditviz_bxutils.obj `if test -f 'mbeditviz_bxutils.c'; then $(CYGPATH_W) 'mbeditviz_bxutils.c'; else $(CYGPATH_W) '$(srcdir)/mbeditviz_bxutils.c'; fi`
 
 mbeditviz-mbeditviz_callbacks.o: mbeditviz_callbacks.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbeditviz_CFLAGS) $(CFLAGS) -MT mbeditviz-mbeditviz_callbacks.o -MD -MP -MF $(DEPDIR)/mbeditviz-mbeditviz_callbacks.Tpo -c -o mbeditviz-mbeditviz_callbacks.o `test -f 'mbeditviz_callbacks.c' || echo '$(srcdir)/'`mbeditviz_callbacks.c
