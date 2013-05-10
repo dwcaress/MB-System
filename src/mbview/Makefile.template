@@ -81,8 +81,8 @@ MOTIFLIBS = -L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11
 # Locations of OpenGL libraries:
 OPENGLLIBS = -lGLU -lGL
 #
-# Compilers 
-CC = cc 
+# Compilers
+CC = cc
 #
 # Compile and load flags:
 CFLAGS = -g -I/usr/include/X11R6 -DDARWIN -DGMT3_3
@@ -116,6 +116,7 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 		mbview_route.o\
 		mbview_nav.o \
 		mbview_vector.o \
+                mbview_bxutils.o \
 		mb_glwdrawa.o \
 		Mb3dsdg.o \
 		mb3dsoundings_callbacks.o \
@@ -137,6 +138,7 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 		mbview_route.o\
 		mbview_nav.o \
 		mbview_vector.o \
+                mbview_bxutils.o \
 		mb_glwdrawa.o \
 		Mb3dsdg.o \
 		mb3dsoundings_callbacks.o \
@@ -146,7 +148,6 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 
 ### link the executables
 $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
-		mbgrdviz_bxutils.o \
 		mbgrdviz_callbacks.o \
 		mbgrdviz_creation.o \
 		$(LIBDIR)/libmbview.a \
@@ -160,7 +161,6 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		$(GSFLIB) \
 		$(GMTLIBDIR)/libpsl.a
 	$(CC) $(CFLAGS) mbgrdviz_main.o \
-		mbgrdviz_bxutils.o \
 		mbgrdviz_callbacks.o \
 		mbgrdviz_creation.o \
 		$(LIBDIR)/libmbview.a \
@@ -175,7 +175,6 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		$(GMTLIBDIR)/libpsl.a \
 		$(OPENGLLIBS) $(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbgrdviz
 $(BINDIR)/mbeditviz: mbeditviz_main.o \
-		mbeditviz_bxutils.o \
 		mbeditviz_callbacks.o \
 		mbeditviz_prog.o \
 		mbeditviz_creation.o \
@@ -191,7 +190,6 @@ $(BINDIR)/mbeditviz: mbeditviz_main.o \
 		$(GMTLIBDIR)/libgmt.a \
 		$(GMTLIBDIR)/libpsl.a
 	$(CC) $(CFLAGS) mbeditviz_main.o \
-		mbeditviz_bxutils.o \
 		mbeditviz_callbacks.o \
 		mbeditviz_prog.o \
 		mbeditviz_creation.o \
@@ -238,11 +236,11 @@ mbview_nav.o: mbview_nav.c mbview.h mbviewprivate.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_nav.c
 mbview_vector.o: mbview_vector.c mbview.h mbviewprivate.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_vector.c
+mbview_bxutils.o: mbview_bxutils.c
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_bxutils.c
 mb_glwdrawa.o: mb_glwdrawa.c mb_glwdrawa.h mb_glwdrawap.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mb_glwdrawa.c
-mbgrdviz_bxutils.o: mbgrdviz_bxutils.c
-	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbgrdviz_bxutils.c
-mbgrdviz_creation.o: mbgrdviz_creation.c mbgrdviz_creation.h 
+mbgrdviz_creation.o: mbgrdviz_creation.c mbgrdviz_creation.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbgrdviz_creation.c
 mbgrdviz_main.o: mbgrdviz_main.c mbview.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbgrdviz_main.c
@@ -250,15 +248,13 @@ mbgrdviz_callbacks.o: mbgrdviz_callbacks.c mbview.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbgrdviz_callbacks.c
 Mb3dsdg.o: Mb3dsdg.c Mb3dsdg.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c Mb3dsdg.c
-mb3dsoundings_callbacks.o: mb3dsoundings_callbacks.c Mb3dsdg.h mb3dsoundingsprivate.h 
+mb3dsoundings_callbacks.o: mb3dsoundings_callbacks.c Mb3dsdg.h mb3dsoundingsprivate.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mb3dsoundings_callbacks.c
 MBpedit.o: MBpedit.c MBpedit.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c MBpedit.c
-mbpingedit_callbacks.o: mbpingedit_callbacks.c Mb3dsdg.h mbpingeditprivate.h 
+mbpingedit_callbacks.o: mbpingedit_callbacks.c Mb3dsdg.h mbpingeditprivate.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbpingedit_callbacks.c
-mbeditviz_bxutils.o: mbeditviz_bxutils.c
-	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_bxutils.c
-mbeditviz_creation.o: mbeditviz_creation.c mbeditviz_creation.h 
+mbeditviz_creation.o: mbeditviz_creation.c mbeditviz_creation.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_creation.c
 mbeditviz_main.o: mbeditviz_main.c mbeditviz.h $(INCDIR)/mbview.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_main.c
@@ -274,6 +270,5 @@ $(INCDIR)/mbview.h:	mbview.h
 
 ### copy the man page to the man page directory
 
-clean: 
+clean:
 	rm -f *.o
-
