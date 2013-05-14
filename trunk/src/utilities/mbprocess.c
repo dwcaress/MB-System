@@ -537,6 +537,7 @@ and mbedit edit save files.\n";
 	double	ttime, range;
 	double	xx, zz, rr, vsum, vavg;
 	double	alpha, beta;
+        double  alphar, betar;
 	int	ray_stat;
 	double	*ttimes = NULL;
 	double	*angles = NULL;
@@ -5649,38 +5650,38 @@ bath[i]-zz); */
 						* bathalongtrack[i]);
                                 if (fabs(range) < 0.001)
                                         {
-                                        alpha = 0.0;
-                                        beta = 0.5 * M_PI;
+                                        alphar = 0.0;
+                                        betar = 0.5 * M_PI;
                                         }
                                 else
                                         {
-                                        alpha = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
-                                        beta = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alpha)))));
+                                        alphar = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
+                                        betar = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alpha)))));
                                         }
                                 if (bath[i] < 0.0)
-                                        beta = 2.0 * M_PI - beta;
+                                        betar = 2.0 * M_PI - beta;
 
 				/* apply roll pitch corrections */
                                 if (process.mbp_nav_attitude == MBP_NAV_ON
                                         || process.mbp_attitude_mode == MBP_ATTITUDE_ON)
                                         {
-                                        beta += roll - roll_org;
-                                        alpha += pitch - pitch_org;
+                                        betar += DTR * (roll - roll_org);
+                                        alphar += DTR * (pitch - pitch_org);
                                         }
 				if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-			    		alpha += DTR * process.mbp_pitchbias;
+			    		alphar += DTR * process.mbp_pitchbias;
 			    	if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-			    		beta += DTR * process.mbp_rollbias;
+			    		betar += DTR * process.mbp_rollbias;
 			    	else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE
-					&& beta <= M_PI * 0.5)
-			    		beta += DTR * process.mbp_rollbias_stbd;
+					&& betar <= M_PI * 0.5)
+			    		betar += DTR * process.mbp_rollbias_stbd;
 			    	else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-			    		beta += DTR * process.mbp_rollbias_port;
+			    		betar += DTR * process.mbp_rollbias_port;
 
 				/* recalculate bathymetry */
-				bath[i] = range * cos(alpha) * sin(beta);
-				bathalongtrack[i] = range * sin(alpha);
-				bathacrosstrack[i] = range * cos(alpha) * cos(beta);
+				bath[i] = range * cos(alphar) * sin(betar);
+				bathalongtrack[i] = range * sin(alphar);
+				bathacrosstrack[i] = range * cos(alphar) * cos(betar);
 
 				/* add heave and draft back in */
 				bath[i] += depth_offset_use;

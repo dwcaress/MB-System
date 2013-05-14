@@ -107,8 +107,8 @@ static char rcs_id[] = "$Id$";
 int main (int argc, char **argv)
 {
 	char program_name[] = "mbsvplist";
-	char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file.  The -D\noption causes duplicate SVPs to be output.";
-	char usage_message[] = "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -P -V -Z]";
+	char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file. The -D\noption causes duplicate SVPs to be output.\nThe -T option will output a CSV table of svp#, time, longitude, latitude and number of points for SVPs.";
+	char usage_message[] = "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -P -T -V -Z]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -150,6 +150,8 @@ int main (int argc, char **argv)
 	double	time_d;
 	double	navlon;
 	double	navlat;
+	double	last_navlon;
+	double	last_navlat;
 	double	speed;
 	double	heading;
 	double	distance;
@@ -175,6 +177,7 @@ int main (int argc, char **argv)
 	int	svp_printmode;
 	int	svp_force_zero;
 	int	svp_file_output;
+	int output_as_table = MB_NO;
 
 	/* SVP values */
 	int	svp_match_found = MB_NO;
@@ -199,6 +202,7 @@ int main (int argc, char **argv)
 	int	svp_depthzero_reset;
 	double	svp_depthzero;
 	int	output_counts = MB_NO;
+	int	out_cnt = 0;
 
 	/* ttimes values */
 	int	ssv_output = MB_NO;
@@ -238,7 +242,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "CcDdF:f:I:i:M:m:OoPpSsZzVvHh")) != -1)
+	while ((c = getopt(argc, argv, "CcDdF:f:I:i:M:m:OoPpSsTtZzVvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -289,6 +293,11 @@ int main (int argc, char **argv)
 			ssv_output = MB_YES;
 			svp_file_output = MB_NO;
 			svp_setprocess = MB_NO;
+			break;
+		case 'T':
+		case 't':
+			output_as_table = MB_YES;
+			ssv_output = MB_NO;
 			break;
 		case 'Z':
 		case 'z':
@@ -499,6 +508,11 @@ int main (int argc, char **argv)
 	while (error <= MB_ERROR_NO_ERROR)
 		{
 		/* read a data record */
+		if(output_as_table == MB_YES) /* save previous navigation information */
+			{
+			last_navlon=navlon;
+			last_navlat=navlat;
+			}
 		status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
 			time_i,&time_d,&navlon,&navlat,
 			&speed,&heading,
@@ -517,7 +531,6 @@ int main (int argc, char **argv)
 			fprintf(stderr,"dbg2       error:          %d\n",error);
 			fprintf(stderr,"dbg2       status:         %d\n",status);
 			}
-
 		/* if svp then extract data */
 		if (error <= MB_ERROR_NO_ERROR
 			&& kind == svp_source
@@ -614,7 +627,6 @@ int main (int argc, char **argv)
 				svp_save_count++;
 				svp_unique++;
 				}
-
 			/* output svp as desired */
 			if (svp_loaded == MB_YES && ssv_output == MB_NO && output_counts == MB_NO &&
 			    ((svp_printmode == MBSVPLIST_PRINTMODE_CHANGE
@@ -636,7 +648,21 @@ int main (int argc, char **argv)
 					svp_fp = stdout;
 
 				/* print out the svp */
-				if (svp_fp != NULL)
+				if (output_as_table == MB_YES) /* output csv table to stdout */
+					{
+					if(out_cnt++ == 0) /* output header records */
+						{
+							printf("#mbsvplist CSV table output\n#navigation information is approximate\n#SVP_cnt,date_time,longitude,latitude,num_data_points\n");
+						}
+					printf( "%d,%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d,%.6f,%.6f,%d\n",out_cnt,
+							svp_time_i[0], svp_time_i[1],
+						    svp_time_i[2], svp_time_i[3],
+						    svp_time_i[4], svp_time_i[5],
+						    svp_time_i[6],
+						    last_navlon,last_navlat,
+						    svp.n);
+					}
+				else if (svp_fp != NULL)
 					{
 					/* output info */
 					if (verbose >= 1)
