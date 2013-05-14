@@ -6,7 +6,7 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsvplist\fP [\fB-C -D \fB-F\fIformat \fB-H \fB-I\fIfile \fB-M\fImode\fP \fB-O -P -S -V -Z\fP]
+\fBmbsvplist\fP [\fB-C -D \fB-F\fIformat \fB-H \fB-I\fIfile \fB-M\fImode\fP \fB-O -P -S -T -V -Z\fP]
 
 .SH DESCRIPTION
 This program, \fBmbsvplist\fP, lists all water
@@ -24,6 +24,8 @@ SVP count within the file. Some files contain SVPs at
 regular intervals, typically with the same SVP duplicated
 many times. By default, \fBmbsvplist\fP ignores duplicate
 SVPs. The \fB-D\fP option causes duplicate SVPs to be output.
+The \fB-T\fP option causes \fBmbsvplist\fP to output the sound velocity values
+as CSV tables rather than white space delimited columns.
 The \fB-P\fP option
 implies \fB-O\fP, and also causes the parameter file to be modified
 so that the first SVP output for each file becomes the
@@ -124,6 +126,11 @@ used for beamforming by the sonar (often called surface sound velocity, or SSV)
 instead of SVP profiles. Each SSV value will be paired with the
 corresponding sonar depth, and in general one depth-SSV pair will be output
 for each survey ping.
+.TP
+.B \-T
+.br
+This option causes \fBmbsvplist\fP to output the sound velocity profiles as
+csv tables.
 .TP
 .B \-V
 Normally, \fBmbsvplist\fP works "silently" without outputting
