@@ -107,8 +107,8 @@ static char rcs_id[] = "$Id$";
 int main (int argc, char **argv)
 {
 	char program_name[] = "mbsvplist";
-	char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file. The -D\noption causes duplicate SVPs to be output.\nThe -T option will output a CSV table of svp#, time, longitude, latitude and number of points for SVPs.";
-	char usage_message[] = "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -P -T -V -Z]";
+	char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file. The -D\noption causes duplicate SVPs to be output.\nThe -T option will output a CSV table of svp#, time, longitude, latitude and number of points for SVPs.\nWhen the -Nmin_num_pairs option is used, only svps that have at least min_num_pairs svp values will be output.(This is particularly useful for .xse data where the svp is entered as a single values svp.)";
+	char usage_message[] = "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -Nmin_num_pairs -P -T -V -Z]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -203,6 +203,7 @@ int main (int argc, char **argv)
 	double	svp_depthzero;
 	int	output_counts = MB_NO;
 	int	out_cnt = 0;
+	int	min_num_pairs = 0;
 
 	/* ttimes values */
 	int	ssv_output = MB_NO;
@@ -242,7 +243,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "CcDdF:f:I:i:M:m:OoPpSsTtZzVvHh")) != -1)
+	while ((c = getopt(argc, argv, "CcDdF:f:I:i:M:m:N:n:OoPpSsTtZzVvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -276,6 +277,10 @@ int main (int argc, char **argv)
 		case 'm':
 			sscanf (optarg,"%d", &svp_printmode);
 			flag++;
+			break;
+		case 'N':
+		case 'n':
+			sscanf (optarg,"%d", &min_num_pairs);
 			break;
 		case 'O':
 		case 'o':
@@ -606,7 +611,8 @@ int main (int argc, char **argv)
 
 			/* if the svp is unique so far, save it in memory */
 			if (svp_loaded == MB_YES
-				&& svp_match_found == MB_NO)
+				&& svp_match_found == MB_NO
+				&& svp.n >= min_num_pairs)
 				{
 				/* allocate memory as needed */
 				if (svp_save_count >= svp_save_alloc)
@@ -633,7 +639,8 @@ int main (int argc, char **argv)
 					&& (svp_written == 0 || svp_repeat == MB_NO))
 			    || (svp_printmode == MBSVPLIST_PRINTMODE_UNIQUE
 					&& (svp_match_found == MB_NO))
-			    || (svp_printmode == MBSVPLIST_PRINTMODE_ALL)))
+			    || (svp_printmode == MBSVPLIST_PRINTMODE_ALL))
+			    && svp.n >= min_num_pairs)
 				{
 				/* set the output */
 				if (svp_file_output == MB_YES)

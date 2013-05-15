@@ -1,4 +1,4 @@
-.TH mbsvplist 1 "15 December 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mbsvplist 1 "14 May 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsvplist\fP - List water sound velocity profiles in swath sonar data files.
 
@@ -26,6 +26,10 @@ many times. By default, \fBmbsvplist\fP ignores duplicate
 SVPs. The \fB-D\fP option causes duplicate SVPs to be output.
 The \fB-T\fP option causes \fBmbsvplist\fP to output the sound velocity values
 as CSV tables rather than white space delimited columns.
+When the \fB-N\fP\fImin_num_pairs\fP option is used, only svps that have at
+least \fImin_num_pairs\fP svp values will be output. This option is particularly
+useful for data in which the svp has been entered as a single values svp
+(particularly XSE format, or \fBMBIO\fP format 94 multibeam data).
 The \fB-P\fP option
 implies \fB-O\fP, and also causes the parameter file to be modified
 so that the first SVP output for each file becomes the

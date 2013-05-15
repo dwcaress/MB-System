@@ -235,6 +235,11 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------
 
+-----> 5.3.2060 (May 14, 2013)
+
+Mbsvplist: Added -N option to limit the number of SVP profiles that can be
+output. (contributed by Suzanne O'Hara)
+
 -----> 5.3.2059 (May 14, 2013)
 
 Mbprocess: Fixed bug in mbprocess in which angle rotation calculations mixed
