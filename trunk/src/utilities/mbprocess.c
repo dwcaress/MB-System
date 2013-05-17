@@ -5656,10 +5656,10 @@ bath[i]-zz); */
                                 else
                                         {
                                         alphar = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
-                                        betar = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alpha)))));
+                                        betar = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alphar)))));
                                         }
                                 if (bath[i] < 0.0)
-                                        betar = 2.0 * M_PI - beta;
+                                        betar = 2.0 * M_PI - betar;
 
 				/* apply roll pitch corrections */
                                 if (process.mbp_nav_attitude == MBP_NAV_ON

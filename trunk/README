@@ -235,6 +235,10 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------
 
+-----> 5.3.2062 (May 17, 2013)
+
+Mbprocess: Fixed a couple more mistakes on lines 5659 and 5662 in mbprocess.c.
+
 -----> 5.3.2061 (May 16, 2013)
 
 Perl macros: Renamed all perl source files in mbsystem/src/macros by removing
