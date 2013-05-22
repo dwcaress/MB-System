@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_callbacks.c	10/7/2002
  *    $Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -145,8 +145,8 @@
 #include "mb_glwdrawa.h"
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* Set flag to define mbview global variables in this code block */
 #define MBVIEWGLOBAL
@@ -9915,4 +9915,3 @@ view->colordonecount,data->primary_nxy);*/
 }
 
 /*------------------------------------------------------------------------------*/
-

@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_cbat8101.c	8/8/94
  *	$Id$
  *
- *    Copyright (c) 1998-2012 by
+ *    Copyright (c) 1998-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_cbat8101.c contains the functions for reading and writing
- * multibeam data in the CBAT8101 format.  
+ * multibeam data in the CBAT8101 format.
  * These functions include:
  *   mbr_alm_cbat8101	- allocate read/write memory
  *   mbr_dem_cbat8101	- deallocate read/write memory
@@ -82,38 +82,38 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_reson.h"
-#include "../../include/mbf_cbat8101.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_reson.h"
+#include "mbf_cbat8101.h"
 
 /* include for byte swapping on little-endian machines */
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 
 /* essential function prototypes */
-int mbr_register_cbat8101(int verbose, void *mbio_ptr, 
+int mbr_register_cbat8101(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_cbat8101(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_cbat8101(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_cbat8101(int verbose, void *mbio_ptr, int *error);
@@ -123,19 +123,19 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error);
-int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error);
-int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error);
-int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error);
-int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error);
-int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error);
-int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error);
-int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error);
 int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
 int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error);
@@ -168,54 +168,54 @@ int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_cbat8101(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_cbat8101(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_cbat8101;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_cbat8101; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_reson_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_reson_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_cbat8101; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_cbat8101; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_reson_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_reson_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_reson_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_reson_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_reson_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_reson_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_reson_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_reson_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_reson_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_reson_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_reson_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_cbat8101;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_reson_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_reson_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_cbat8101;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_cbat8101;
+	mb_io_ptr->mb_io_dimensions = &mbsys_reson_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_reson_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_reson_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_reson_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_reson_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_reson_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_reson_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_reson_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_reson_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_reson_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_reson_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -263,25 +263,25 @@ int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_cbat8101(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_cbat8101(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_cbat8101";
@@ -322,7 +322,7 @@ int mbr_info_cbat8101(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -470,24 +470,24 @@ int mbr_zero_cbat8101(int verbose, void *data_ptr, int *error)
 		data->roll_offset = 0;	/* roll offset (degrees) */
 		data->pitch_offset = 0;	/* pitch offset (degrees) */
 		data->heading_offset = 0;	/* heading offset (degrees) */
-		data->time_delay = 0;		/* positioning system 
+		data->time_delay = 0;		/* positioning system
 							delay (sec) */
 		data->transducer_depth = 0;	/* tranducer depth (meters) */
 		data->transducer_height = 0;	/* reference height (meters) */
-		data->transducer_x = 0;	/* reference athwartships 
+		data->transducer_x = 0;	/* reference athwartships
 							offset (meters) */
 		data->transducer_y = 0;	/* reference  fore-aft
 							offset (meters) */
-		data->antenna_x = 0;		/* antenna athwartships 
+		data->antenna_x = 0;		/* antenna athwartships
 							offset (meters) */
-		data->antenna_y = 0;		/* antenna fore-aft 
+		data->antenna_y = 0;		/* antenna fore-aft
 							offset (meters) */
 		data->antenna_z = 0;		/* antenna height (meters) */
 		data->motion_sensor_x = 0;	/* motion sensor athwartships
 							offset (meters) */
 		data->motion_sensor_y = 0;	/* motion sensor fore-aft
 							offset (meters) */
-		data->motion_sensor_z = 0;	/* motion sensor height 
+		data->motion_sensor_z = 0;	/* motion sensor height
 							offset (meters) */
 		data->spare = 0;
 		data->line_number = 0;
@@ -617,9 +617,9 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = data->kind;
-	
+
 	/* add nav records to list for interpolation */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_NAV)
 		{
 		mb_fix_y2k(verbose, data->pos_year,&time_i[0]);
@@ -637,9 +637,9 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_DATA
-		&& data->longitude == 0 
+		&& data->longitude == 0
 		&& data->latitude == 0
 		&& mb_io_ptr->nfix >= 1)
 		{
@@ -653,7 +653,7 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			+ 100*data->thousandth_sec;
 		mb_get_time(verbose,time_i, &time_d);
 		heading = 0.01 * data->heading;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0,
 				    &lon, &lat, &speed, error);
 		data->longitude = (int) (lon / 0.00000009);
 		data->latitude = (int) (lat / 0.00000009);
@@ -692,7 +692,7 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->spare = data->spare;
 		store->line_number = data->line_number;
 		store->start_or_stop = data->start_or_stop;
-		store->transducer_serial_number 
+		store->transducer_serial_number
 			= data->transducer_serial_number;
 		for (i=0;i<MBSYS_RESON_COMMENT_LENGTH;i++)
 			store->comment[i] = data->comment[i];
@@ -843,7 +843,7 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->spare = store->spare;
 		data->line_number = store->line_number;
 		data->start_or_stop = store->start_or_stop;
-		data->transducer_serial_number 
+		data->transducer_serial_number
 			= store->transducer_serial_number;
 		for (i=0;i<MBF_CBAT8101_COMMENT_LENGTH;i++)
 			data->comment[i] = store->comment[i];
@@ -910,9 +910,9 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<data->beams_bath;i++)
 			{
 			data->bath[i] = store->bath[i];
-			data->bath_acrosstrack[i] 
+			data->bath_acrosstrack[i]
 			    = store->bath_acrosstrack[i];
-			data->bath_alongtrack[i] 
+			data->bath_alongtrack[i]
 			    = store->bath_alongtrack[i];
 			data->tt[i] = store->tt[i];
 			data->angle[i] = store->angle[i];
@@ -1141,7 +1141,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"done:%d\n",done);
 		fprintf(stderr,"type:%x\n",*type);*/
 		}
-		
+
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mbfp);
 
@@ -1216,7 +1216,7 @@ int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_parameter";
@@ -1385,7 +1385,7 @@ int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_nav";
@@ -1511,7 +1511,7 @@ int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_svp";
@@ -1623,7 +1623,7 @@ int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_svp";
@@ -1735,7 +1735,7 @@ int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_bath";
@@ -1829,19 +1829,19 @@ int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap,
 			for (i=0;i<data->beams_bath;i++)
 				{
 				beamarray = line + 32 + 12*i;
-				short_ptr = (short *) beamarray; 
+				short_ptr = (short *) beamarray;
 				data->bath[i] = *short_ptr;
-				short_ptr = ((short *) beamarray) + 1; 
+				short_ptr = ((short *) beamarray) + 1;
 				data->bath_acrosstrack[i] = *short_ptr;
-				short_ptr = ((short *) beamarray) + 2; 
+				short_ptr = ((short *) beamarray) + 2;
 				data->bath_alongtrack[i] = *short_ptr;
-				short_ptr = ((short *) beamarray) + 3; 
+				short_ptr = ((short *) beamarray) + 3;
 				data->tt[i] = *short_ptr;
-				short_ptr = ((short *) beamarray) + 4; 
+				short_ptr = ((short *) beamarray) + 4;
 				data->angle[i] = *short_ptr;
-				char_ptr = (unsigned char *) (beamarray + 10); 
+				char_ptr = (unsigned char *) (beamarray + 10);
 				data->quality[i] = (short) *char_ptr;
-				char_ptr = (unsigned char *) (beamarray + 11); 
+				char_ptr = (unsigned char *) (beamarray + 11);
 				data->amp[i] = (short) *char_ptr;
 				}
 			}
@@ -1850,22 +1850,22 @@ int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap,
 			for (i=0;i<data->beams_bath;i++)
 				{
 				beamarray = line + 32 + 12*i;
-				short_ptr = (short *) beamarray; 
-				data->bath[i] = 
+				short_ptr = (short *) beamarray;
+				data->bath[i] =
 					(short) mb_swap_short(*short_ptr);
-				short_ptr = ((short *) beamarray) + 1; 
-				data->bath_acrosstrack[i] = 
+				short_ptr = ((short *) beamarray) + 1;
+				data->bath_acrosstrack[i] =
 					(short) mb_swap_short(*short_ptr);
-				short_ptr = ((short *) beamarray) + 2; 
-				data->bath_alongtrack[i] = 
+				short_ptr = ((short *) beamarray) + 2;
+				data->bath_alongtrack[i] =
 					(short) mb_swap_short(*short_ptr);
-				short_ptr = ((short *) beamarray) + 3; 
+				short_ptr = ((short *) beamarray) + 3;
 				data->tt[i] = (short) mb_swap_short(*short_ptr);
-				short_ptr = ((short *) beamarray) + 4; 
+				short_ptr = ((short *) beamarray) + 4;
 				data->angle[i] = (short) mb_swap_short(*short_ptr);
-				char_ptr = (unsigned char *) (beamarray + 10); 
+				char_ptr = (unsigned char *) (beamarray + 10);
 				data->quality[i] = (short) *char_ptr;
-				char_ptr = (unsigned char *) (beamarray + 11); 
+				char_ptr = (unsigned char *) (beamarray + 11);
 				data->amp[i] = (short) *char_ptr;
 				}
 			}
@@ -1918,7 +1918,7 @@ int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_heading";
@@ -2001,7 +2001,7 @@ int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, 
+int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_attitude";
@@ -2234,7 +2234,7 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 		line[RESON_COMMENT_SIZE+2] = '\0';
 
 		/* write out data */
-		status = fwrite(line,1,RESON_COMMENT_SIZE+3,mbfp); 
+		status = fwrite(line,1,RESON_COMMENT_SIZE+3,mbfp);
 		if (status != RESON_COMMENT_SIZE+3)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2715,9 +2715,9 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 				}
 			else
 				{
-				*short_ptr = (short) 
+				*short_ptr = (short)
 					mb_swap_short((short)data->svp_depth[i]);
-				*short_ptr2 = (short) 
+				*short_ptr2 = (short)
 					mb_swap_short((short)data->svp_vel[i]);
 				}
 			}
@@ -2895,19 +2895,19 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 			for (i=0;i<MBF_CBAT8101_MAXBEAMS;i++)
 				{
 				beamarray = line + 32 + 12*i;
-				short_ptr = (short *) beamarray; 
+				short_ptr = (short *) beamarray;
 				*short_ptr = (short) data->bath[i];
-				short_ptr = ((short *) beamarray) + 1; 
+				short_ptr = ((short *) beamarray) + 1;
 				*short_ptr = (short) data->bath_acrosstrack[i];
-				short_ptr = ((short *) beamarray) + 2; 
+				short_ptr = ((short *) beamarray) + 2;
 				*short_ptr = (short) data->bath_alongtrack[i];
-				short_ptr = ((short *) beamarray) + 3; 
+				short_ptr = ((short *) beamarray) + 3;
 				*short_ptr = (short) data->tt[i];
-				short_ptr = ((short *) beamarray) + 4; 
+				short_ptr = ((short *) beamarray) + 4;
 				*short_ptr = (short) data->angle[i];
-				char_ptr = (unsigned char *) (beamarray + 10); 
+				char_ptr = (unsigned char *) (beamarray + 10);
 				*char_ptr = (char) data->quality[i];
-				char_ptr = (unsigned char *) (beamarray + 11); 
+				char_ptr = (unsigned char *) (beamarray + 11);
 				*char_ptr = (unsigned char) data->amp[i];
 				}
 			}
@@ -2916,24 +2916,24 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 			for (i=0;i<MBF_CBAT8101_MAXBEAMS;i++)
 				{
 				beamarray = line + 32 + 12*i;
-				short_ptr = (short *) beamarray; 
-				*short_ptr = (short) 
+				short_ptr = (short *) beamarray;
+				*short_ptr = (short)
 					mb_swap_short((short)data->bath[i]);
-				short_ptr = ((short *) beamarray) + 1; 
-				*short_ptr = (short) 
+				short_ptr = ((short *) beamarray) + 1;
+				*short_ptr = (short)
 					mb_swap_short((short)data->bath_acrosstrack[i]);
-				short_ptr = ((short *) beamarray) + 2; 
-				*short_ptr = (short) 
+				short_ptr = ((short *) beamarray) + 2;
+				*short_ptr = (short)
 					mb_swap_short((short)data->bath_alongtrack[i]);
-				short_ptr = ((short *) beamarray) + 3; 
-				*short_ptr = (short) 
+				short_ptr = ((short *) beamarray) + 3;
+				*short_ptr = (short)
 					mb_swap_short((short)data->tt[i]);
-				short_ptr = ((short *) beamarray) + 4; 
-				*short_ptr = (short) 
+				short_ptr = ((short *) beamarray) + 4;
+				*short_ptr = (short)
 					mb_swap_short((short)data->angle[i]);
-				char_ptr = (unsigned char *) (beamarray + 10); 
+				char_ptr = (unsigned char *) (beamarray + 10);
 				*char_ptr = (char) data->quality[i];
-				char_ptr = (unsigned char *) (beamarray + 11); 
+				char_ptr = (unsigned char *) (beamarray + 11);
 				*char_ptr = (unsigned char) data->amp[i];
 				}
 			}

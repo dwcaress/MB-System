@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hdcs.h	3/16/99
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -56,8 +56,8 @@
 /*
  * Notes on the MBSYS_HDCS data structure:
  *   1. The OMG-HDCS format is a collection of similar data
- *      formats used by the seafloor mapping software 
- *      developed by Dr. John Hughes Clarke (Ocean Mapping 
+ *      formats used by the seafloor mapping software
+ *      developed by Dr. John Hughes Clarke (Ocean Mapping
  *      Group of the University of New Brunswick). A variety
  *      of sonars are supported in OMG-HDCS.
  *   2. OMG-HDCS files all begin with a summary header that
@@ -75,12 +75,12 @@
  *      amplitude files. The sidescan files have the suffix
  *      ".ss_data" added to the end of the primary file's name.
  *   5. Comment records are encoded in MBIO by setting the first
- *      eight bytes of the data record header (profile) to '#' 
+ *      eight bytes of the data record header (profile) to '#'
  *      values. The profile part of the comment record will have
  *      the same size as expected for data from the tool type
  *      listed in the summary. However, the data section for
  *      comment records will always be 256 bytes long regardless
- *      of the tool type. This mechanism is supported only by 
+ *      of the tool type. This mechanism is supported only by
  *      MB-System.
  *
  */
@@ -193,7 +193,7 @@ static char *mbsys_hdcs_tool_names[MBSYS_HDCS_NUM_TOOLS] = {
 
 
 /* define beam record structure */
-struct mbsys_hdcs_beam_struct 
+struct mbsys_hdcs_beam_struct
 	{
         int	status;           /* status is either OK (0) or bad (other) */
         mb_u_char scaling_factor; /* V4 */
@@ -205,16 +205,16 @@ struct mbsys_hdcs_beam_struct
         int	processedDepth;    /* Depth (mm)                            */
 	int	timeOffset;
         int	depthAccuracy;    /* Depth accuracy (mm)                   */
-	mb_u_char reflectivity;  
-	char	Q_factor;  /* phase or amplitude detection */ 
-	char	beam_no;  
+	mb_u_char reflectivity;
+	char	Q_factor;  /* phase or amplitude detection */
+	char	beam_no;
 	char	freq;   /* 12.7, 13.0, 13.3, 95.0, Smii, GLORIA */
 
-	char	calibratedBackscatter; /* effects of power/TVG and atten. 
+	char	calibratedBackscatter; /* effects of power/TVG and atten.
 					    removed*/
-	char	mindB;		
+	char	mindB;
 	char	maxdB;
-	mb_u_char	pseudoAngleIndependentBackscatter;		
+	mb_u_char	pseudoAngleIndependentBackscatter;
 					/* corrected for mean angular dependence
 					    for geological visualisation */
 	int	range;   /* other option on EM 12 */
@@ -233,14 +233,14 @@ struct mbsys_hdcs_beam_struct
 	signed short Rc_steer;
 	mb_u_char TxSector;
 	unsigned int timestampOffset; /* really is a 64 bit integer, trying to compress */
-					/* would'nt even need if didn't have to relate wavefile 
+					/* would'nt even need if didn't have to relate wavefile
 			 		by this number */
-	unsigned short no_RAMAN; 
-	unsigned short no_IR; 
-	unsigned short no_GAPD; 
+	unsigned short no_RAMAN;
+	unsigned short no_IR;
+	unsigned short no_GAPD;
 	unsigned short no_PMT;
-	mb_u_char prim_depth_conf; 
-	mb_u_char seco_depth_conf; 
+	mb_u_char prim_depth_conf;
+	mb_u_char seco_depth_conf;
 	signed short scan_azimuth; 	/* 100ths of degree */
 	unsigned short nadir_angle; 	/* 100ths of degree */
 					/* always dynamically compressed for v4 using scaling factor */
@@ -257,7 +257,7 @@ struct mbsys_hdcs_beam_struct
 	unsigned int snippet_last_sample;
 	float intensity;
 	};
-	
+
 /* specific FOR ATLAS SAPI data */
 struct mbsys_omghdcs_profile_subparams_struct
 {
@@ -319,7 +319,7 @@ struct mbsys_hdcs_struct
         int    minProcDepth;	/* Minimum depth (mm)                    */
         int    maxProcDepth;	/* Maximum depth (mm)                    */
         int    status_sum;	/* status not actually used at all ....  */
-        
+
         /* V4 */
 	int totalProfileBytes;
 	int Profile_BitsDefining[20];
@@ -327,9 +327,9 @@ struct mbsys_hdcs_struct
 	int Beam_BitsDefining[20];
 	/* End V4 Summary */
 
-        int    status_pro;	/* status is either OK (0) 
+        int    status_pro;	/* status is either OK (0)
 					or no nav (1)
-					or unwanted for gridding (2) 
+					or unwanted for gridding (2)
 					or comment record (999) (MB-System only) */
         int    numDepths_pro;	/* Number of depths in profile        */
         int    numSamples;	/* Number of sidescan samples in parallel file        */
@@ -342,7 +342,7 @@ struct mbsys_hdcs_struct
         int    vesselRoll;	/* Vessel roll (100 nRadians)         */
         int    tide;		/* Tide (mm)                          */
         int    vesselVelocity;	/* Vessel Velocity (mm/s)
-					note - transducer pitch is 
+					note - transducer pitch is
 					generally tucked into the vel field     */
 	char    power;
 	char    TVG;
@@ -351,10 +351,10 @@ struct mbsys_hdcs_struct
         int	soundVelocity; 	/* mm/s */
 	int	lengthImageDataField;
         int	pingNo;
-	char	mode;  
-	char	Q_factor;  
+	char	mode;
+	char	Q_factor;
 	char	pulseLength;   /* centisecs*/
-	mb_u_char unassigned;  
+	mb_u_char unassigned;
 	unsigned short td_sound_speed;
 	unsigned short samp_rate;
 	mb_u_char z_res_cm;
@@ -373,7 +373,7 @@ struct mbsys_hdcs_struct
 	mb_u_char beam_spacing;
 	mb_u_char coverage_sector;
 	mb_u_char yaw_stab_mode;
-	
+
 	/* V4 */
 	struct mbsys_omghdcs_profile_subparams_struct params[2];
 
@@ -424,7 +424,7 @@ struct mbsys_hdcs_struct
   	unsigned char bs_sample_descriptor;
   	unsigned int snippet_sample_descriptor;
   	/* End V4 Profile */
-	
+
 	struct mbsys_hdcs_beam_struct *beams;
 	mb_s_char	*ss_raw;
 	int	pixel_size;	/* processed sidescan pixel size in mm */
@@ -432,63 +432,62 @@ struct mbsys_hdcs_struct
 	short	ss_proc[MBSYS_HDCS_MAX_PIXELS];
 				/* the processed sidescan ordered port to starboard */
 	int	ssalongtrack[MBSYS_HDCS_MAX_PIXELS];
-				/* the processed sidescan alongtrack distances 
+				/* the processed sidescan alongtrack distances
 					in mm */
 	char	comment[MBSYS_HDCS_MAX_COMMENT];
 	};
-	
+
 /* system specific function prototypes */
-int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_hdcs_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hdcs_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_hdcs_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hdcs_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_hdcs_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_hdcs_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_hdcs_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_hdcs_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			double transducer_depth, double altitude, 
+			double transducer_depth, double altitude,
 			int *error);
 int mbsys_hdcs_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_hdcs_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_hdcs_copy(int verbose, void *mbio_ptr, 
+int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

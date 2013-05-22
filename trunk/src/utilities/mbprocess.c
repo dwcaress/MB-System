@@ -2,7 +2,7 @@
  *    The MB-system:	mbprocess.c	3/31/93
  *    $Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -248,15 +248,15 @@
 #include <sys/stat.h>
 
 /* mbio include files */
-#include "../../include/mb_format.h"
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_aux.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_swap.h"
-#include "../../include/mbsys_atlas.h"
-#include "../../include/mbsys_simrad2.h"
-#include "../../include/mbsys_simrad3.h"
+#include "mb_format.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_aux.h"
+#include "mb_process.h"
+#include "mb_swap.h"
+#include "mbsys_atlas.h"
+#include "mbsys_simrad2.h"
+#include "mbsys_simrad3.h"
 
 /* define sidescan correction table structure */
 struct mbprocess_sscorr_struct

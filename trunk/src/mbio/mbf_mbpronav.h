@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_mbpronav.h	5/20/99
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_mbpronav.h defines the data structures used by MBIO functions
- * to store navigation data read from the MBF_MBPRONAV format.  
+ * to store navigation data read from the MBF_MBPRONAV format.
  *
  * Author:	D. W. Caress
  * Date:	May 20, 1999
@@ -50,16 +50,16 @@
  *      of each file. The comment records begin with the character '#'.
  *   3. Navigation files in the this format may be generated using
  *      mblist with the -OtMXYHS option.
- *   
+ *
  */
- 
+
 #define	MBF_MBPRONAV_MAXLINE	256
 
 struct mbf_mbpronav_struct
 	{
 	/* type of data record */
 	int	kind;
-	
+
 	/* time stamp */
 	double	time_d;
 	int	time_i[7];
@@ -73,13 +73,13 @@ struct mbf_mbpronav_struct
 	double  roll;
 	double  pitch;
 	double  heave;
-	
+
 	/* swathbounds */
 	double	portlon;
 	double	portlat;
 	double	stbdlon;
 	double	stbdlat;
- 
+
 	/* comment */
 	char	comment[MBF_MBPRONAV_MAXLINE];
-	};	
+	};

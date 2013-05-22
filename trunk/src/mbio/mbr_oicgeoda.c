@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_oicgeoda.c	2/16/99
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_oicgeoda.c contains the functions for reading and writing
- * multibeam data in the MBF_OICGEODA format.  
+ * multibeam data in the MBF_OICGEODA format.
  * These functions include:
  *   mbr_alm_oicgeoda	- allocate read/write memory
  *   mbr_dem_oicgeoda	- deallocate read/write memory
@@ -80,40 +80,40 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbf_oicgeoda.h"
-#include "../../include/mbsys_oic.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbf_oicgeoda.h"
+#include "mbsys_oic.h"
 
 /* include for byte swapping on little-endian machines */
 #ifdef BYTESWAPPED
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 #endif
 
 /* essential function prototypes */
-int mbr_register_oicgeoda(int verbose, void *mbio_ptr, 
+int mbr_register_oicgeoda(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_oicgeoda(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_oicgeoda(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error);
@@ -142,54 +142,54 @@ int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_oicgeoda(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_oicgeoda(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_oicgeoda;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_oicgeoda; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_oic_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_oic_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_oicgeoda; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_oicgeoda; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_oic_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_oic_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_oic_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_oic_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_oic_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_oic_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = &mbsys_oic_insert_altitude; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_oic_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_oic_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_oic_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_oicgeoda;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_oic_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_oic_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_oicgeoda;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_oicgeoda;
+	mb_io_ptr->mb_io_dimensions = &mbsys_oic_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_oic_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_oic_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_oic_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_oic_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_oic_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = &mbsys_oic_insert_altitude;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_oic_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_oic_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_oic_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -237,25 +237,25 @@ int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_oicgeoda(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_oicgeoda(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_oicgeoda";
@@ -296,7 +296,7 @@ int mbr_info_oicgeoda(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -514,7 +514,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	header = &(dataplus->header);
 	data = &(dataplus->data);
 	comment = dataplus->client;
-	
+
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
@@ -522,9 +522,9 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if ((read_size = fread(buffer,1,4,mb_io_ptr->mbfp)) != 4)
 	    {
 	    status = MB_FAILURE;
-	    *error = MB_ERROR_EOF;		    
+	    *error = MB_ERROR_EOF;
 	    }
-	    
+
 	/* read another byted at a time until header found */
 	while (status == MB_SUCCESS
 	    && (buffer[0] != 'G'
@@ -536,10 +536,10 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(&buffer[3],1,1,mb_io_ptr->mbfp)) != 1)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
-	    
+
 	/* now read the rest of the header */
 	if (status == MB_SUCCESS)
 	    {
@@ -549,10 +549,10 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		!= MBF_OICGEODA_HEADER_SIZE-4)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
-	    
+
 	/* now parse the header */
 	if (status == MB_SUCCESS)
 	    {
@@ -562,13 +562,13 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    index += 4;
  	    mb_get_binary_int(MB_NO,&buffer[index],&header->data_size);
 	    index += 4;
-	    header->client_size = buffer[index]; 
+	    header->client_size = buffer[index];
 	    index += 1;
-	    header->fish_status = buffer[index]; 
+	    header->fish_status = buffer[index];
 	    index += 1;
-	    header->nav_used = buffer[index]; 
+	    header->nav_used = buffer[index];
 	    index += 1;
-	    header->nav_type = buffer[index]; 
+	    header->nav_type = buffer[index];
 	    index += 1;
  	    mb_get_binary_int(MB_NO,&buffer[index],&header->utm_zone);
 	    index += 4;
@@ -629,13 +629,13 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	    for (i=0;i<MBF_OICGEODA_MAX_CHANNELS;i++)
 		{
-		header->channel[i].type = buffer[index]; 
+		header->channel[i].type = buffer[index];
 		index += 1;
-		header->channel[i].side = buffer[index]; 
+		header->channel[i].side = buffer[index];
 		index += 1;
-		header->channel[i].size = buffer[index]; 
+		header->channel[i].size = buffer[index];
 		index += 1;
-		header->channel[i].empty = buffer[index]; 
+		header->channel[i].empty = buffer[index];
 		index += 1;
  		mb_get_binary_int(MB_NO,&buffer[index],&header->channel[i].frequency);
 		index += 4;
@@ -643,7 +643,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		index += 4;
 		}
 	    }
-	
+
 	/* read client specific data */
 	if (status == MB_SUCCESS && header->client_size > 0)
 	    {
@@ -657,7 +657,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    else
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
 
@@ -683,7 +683,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* set kind and error in mb_io_ptr */
 	mb_io_ptr->new_kind = dataplus->kind;
 	mb_io_ptr->new_error = *error;
-	    
+
 	/* loop over each data channel and read data */
 	if (status == MB_SUCCESS && header->num_chan > 0)
 	    {
@@ -700,9 +700,9 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    data_size = sizeof(float) * header->channel[i].num_samples;
 		else if (header->channel[i].size == OIC_SIZE_3FLOAT)
 		    data_size = 3 * sizeof(float) * header->channel[i].num_samples;
-		
+
 		/* allocate data if needed */
-		if (data_size > data->rawsize[i] 
+		if (data_size > data->rawsize[i]
 		    || data->raw[i] == NULL)
 		    {
 		    if (data->raw[i] != NULL)
@@ -710,7 +710,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_mallocd(verbose,__FILE__,__LINE__, data_size, (void **)&(data->raw[i]),error);
 		    data->rawsize[i] = data_size;
 		    }
-		    
+
 		/* read the data */
 		if (status == MB_SUCCESS)
 		    {
@@ -718,7 +718,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			!= data_size)
 			{
 			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;		    
+			*error = MB_ERROR_EOF;
 			}
 		    }
 
@@ -762,9 +762,9 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 #endif
 		}
 	    }
-		
+
 	/* figure out number of beams and pixels in data */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && dataplus->kind == MB_DATA_DATA)
 	    {
 	    header->beams_bath = 0;
@@ -784,24 +784,24 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			&& header->ss_chan_port == -1)
 			{
 			header->ss_chan_port = ichan;
-			header->fish_altitude_samples 
-				= 2.0 * header->fish_altitude 
+			header->fish_altitude_samples
+				= 2.0 * header->fish_altitude
 					* header->channel[ichan].num_samples
 					/ header->sound_velocity
 					/ header->fish_ping_period;
-			header->pixels_ss += header->channel[ichan].num_samples 
+			header->pixels_ss += header->channel[ichan].num_samples
 			    - MIN(header->fish_altitude_samples - 1, 0);
 			}
 		    else if (header->channel[ichan].side == OIC_STARBOARD
 			&& header->ss_chan_stbd == -1)
 			{
 			header->ss_chan_stbd = ichan;
-			header->fish_altitude_samples 
-				= 2.0 * header->fish_altitude 
+			header->fish_altitude_samples
+				= 2.0 * header->fish_altitude
 					* header->channel[ichan].num_samples
 					/ header->sound_velocity
 					/ header->fish_ping_period;
-			header->pixels_ss += header->channel[ichan].num_samples 
+			header->pixels_ss += header->channel[ichan].num_samples
 			    - MIN(header->fish_altitude_samples - 1, 0);
 			}
 		    }
@@ -932,17 +932,17 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		fprintf(stderr,"dbg5       offset[%1d]:      %d\n",
 			     i, header->channel[i].offset);
-		fprintf(stderr,"dbg5       type[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       type[%1d]:        %d\n",
 			     i, header->channel[i].type);
-		fprintf(stderr,"dbg5       side[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       side[%1d]:        %d\n",
 			     i, header->channel[i].side);
-		fprintf(stderr,"dbg5       size[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       size[%1d]:        %d\n",
 			     i, header->channel[i].size);
-		fprintf(stderr,"dbg5       empty[%1d]:       %d\n", 
+		fprintf(stderr,"dbg5       empty[%1d]:       %d\n",
 			     i, header->channel[i].empty);
-		fprintf(stderr,"dbg5       frequency[%1d]:   %d\n", 
+		fprintf(stderr,"dbg5       frequency[%1d]:   %d\n",
 			     i, header->channel[i].frequency);
-		fprintf(stderr,"dbg5       num_samples[%1d]: %d\n", 
+		fprintf(stderr,"dbg5       num_samples[%1d]: %d\n",
 			     i, header->channel[i].num_samples);
 		}
 	    for (i=0;i<header->num_chan;i++)
@@ -1007,7 +1007,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    float_ptr = (float *) data->raw[i];
 		    for (j=0;j<header->channel[i].num_samples;j++)
 			{
-			fprintf(stderr, "dbg5      %5d  %10f %10f %10f\n", 
+			fprintf(stderr, "dbg5      %5d  %10f %10f %10f\n",
 				j, float_ptr[3*j], float_ptr[3*j+1], float_ptr[3*j+2]);
 			}
 		    }
@@ -1019,7 +1019,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    }
 
 	/* construct bathymetry and sidescan from raw data */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && dataplus->kind == MB_DATA_DATA)
 	    {
 	    /* allocate arrays if needed */
@@ -1037,15 +1037,15 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->tt), error);
 		if (data->angle != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->angle), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float),
 				    (void **)&(data->bath), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float),
 				    (void **)&(data->bathacrosstrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float),
 				    (void **)&(data->bathalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float),
 				    (void **)&(data->tt), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float),
 				    (void **)&(data->angle), error);
 		}
 	    if (header->beams_amp > data->beams_amp_alloc
@@ -1054,7 +1054,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->beams_amp_alloc = header->beams_amp;
 		if (data->amp != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->amp), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_amp * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_amp * sizeof(float),
 				    (void **)&(data->amp), error);
 		}
 	    if (header->pixels_ss > data->pixels_ss_alloc
@@ -1067,14 +1067,14 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->ssacrosstrack), error);
 		if (data->ssalongtrack != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->ssalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float),
 				    (void **)&(data->ss), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float),
 				    (void **)&(data->ssacrosstrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float),
 				    (void **)&(data->ssalongtrack), error);
 		}
-		
+
 	    /* initialize bathymetry and sidescan */
 	    for (j=0;j<header->beams_bath;j++)
 		{
@@ -1097,10 +1097,10 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	    /* get center bathymetry */
 	    if (header->bath_chan_port >= 0
-		&& header->channel[header->bath_chan_port].type 
+		&& header->channel[header->bath_chan_port].type
 		    == OIC_TYPE_ANGLE
 		&& header->bath_chan_stbd >= 0
-		&& header->channel[header->bath_chan_stbd].type 
+		&& header->channel[header->bath_chan_stbd].type
 		    == OIC_TYPE_ANGLE)
 		{
 		j = header->beams_bath / 2;
@@ -1111,9 +1111,9 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    alpha,beta,&theta,&phi,error);
 		xx = rr * sin(DTR * theta);
 		zz = rr * cos(DTR * theta);
-		data->bathacrosstrack[j] 
+		data->bathacrosstrack[j]
 			= xx * cos(DTR * phi);
-		data->bathalongtrack[j] 
+		data->bathalongtrack[j]
 			= xx * sin(DTR * phi);
 		data->bath[j] = zz + header->fish_depth;
 		data->tt[j] = 2.0 * rr / header->sound_velocity;
@@ -1130,7 +1130,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    }
 		else
 		    {
-		    dx = header->fish_range 
+		    dx = header->fish_range
 			    / header->channel[ichan].num_samples;
 		    j = header->beams_bath / 2;
 		    }
@@ -1148,7 +1148,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			j--;
 			beta = -float_ptr[3 * i + 1] + header->fish_roll;
-			rr = 0.5 * header->sound_velocity 
+			rr = 0.5 * header->sound_velocity
 				* float_ptr[3 * i];
 			data->amp[j] = float_ptr[3 * i + 2];
 			}
@@ -1177,9 +1177,9 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				    alpha,beta,&theta,&phi,error);
 			xx = rr * sin(DTR * theta);
 			zz = rr * cos(DTR * theta);
-			data->bathacrosstrack[j] 
+			data->bathacrosstrack[j]
 				= xx * cos(DTR * phi);
-			data->bathalongtrack[j] 
+			data->bathalongtrack[j]
 				= xx * sin(DTR * phi);
 			data->bath[j] = zz + header->fish_depth;
 			data->tt[j] = 2.0 * rr / header->sound_velocity;
@@ -1206,7 +1206,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    }
 		else
 		    {
-		    dx = header->fish_range 
+		    dx = header->fish_range
 			    / header->channel[ichan].num_samples;
 		    j = header->beams_bath / 2;
 		    }
@@ -1224,7 +1224,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			j++;
 			beta = float_ptr[3 * i + 1] + header->fish_roll;
-			rr = 0.5 * header->sound_velocity 
+			rr = 0.5 * header->sound_velocity
 				* float_ptr[3 * i];
 			data->amp[j] = float_ptr[3 * i + 2];
 			}
@@ -1253,9 +1253,9 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				    alpha,beta,&theta,&phi,error);
 			xx = rr * sin(DTR * theta);
 			zz = rr * cos(DTR * theta);
-			data->bathacrosstrack[j] 
+			data->bathacrosstrack[j]
 				= xx * cos(DTR * phi);
-			data->bathalongtrack[j] 
+			data->bathalongtrack[j]
 				= xx * sin(DTR * phi);
 			data->bath[j] = zz + header->fish_depth;
 			data->tt[j] = 2.0 * rr / header->sound_velocity;
@@ -1299,10 +1299,10 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->ss[j] = int_ptr[i];
 		    else if (header->channel[ichan].size == OIC_SIZE_FLOAT)
 			data->ss[j] = float_ptr[i];
-		    beta = 180.0 - asin(((double)header->fish_altitude_samples) 
+		    beta = 180.0 - asin(((double)header->fish_altitude_samples)
 				/ ((double)i)) / DTR;
 		    alpha = header->fish_pitch;
-		    rr = 0.5 * header->sound_velocity 
+		    rr = 0.5 * header->sound_velocity
 			    * sample_interval * i;
 		    status = mb_rollpitch_to_takeoff(verbose,
 				alpha,beta,&theta,&phi,error);
@@ -1330,8 +1330,8 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=header->fish_altitude_samples+1;
 		    i<header->channel[ichan].num_samples;i++)
 		    {
-		    j = header->pixels_ss 
-			    - header->channel[ichan].num_samples 
+		    j = header->pixels_ss
+			    - header->channel[ichan].num_samples
 			    + i - header->fish_altitude_samples - 1;
 		    if (header->channel[ichan].size == OIC_SIZE_CHAR)
 			data->ss[j] = char_ptr[i];
@@ -1341,10 +1341,10 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->ss[j] = int_ptr[i];
 		    else if (header->channel[ichan].size == OIC_SIZE_FLOAT)
 			data->ss[j] = float_ptr[i];
-		    beta = asin(((double)header->fish_altitude_samples) 
+		    beta = asin(((double)header->fish_altitude_samples)
 				/ ((double)i)) / DTR;
 		    alpha = header->fish_pitch;
-		    rr = 0.5 * header->sound_velocity 
+		    rr = 0.5 * header->sound_velocity
 			    * sample_interval * i;
 		    status = mb_rollpitch_to_takeoff(verbose,
 				alpha,beta,&theta,&phi,error);
@@ -1365,25 +1365,25 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    fprintf(stderr,"dbg5       beam   bath  xtrack ltrack   tt   angle\n");
 	    for (i=0;i<header->beams_bath;i++)
 		{
-		fprintf(stderr,"dbg5       %4d %10f %10f %10f %10f %10f\n", 
-			i, data->bath[i], data->bathacrosstrack[i], 
-			data->bathalongtrack[i], 
+		fprintf(stderr,"dbg5       %4d %10f %10f %10f %10f %10f\n",
+			i, data->bath[i], data->bathacrosstrack[i],
+			data->bathalongtrack[i],
 			data->tt[i], data->angle[i]);
 		}
 	    fprintf(stderr,"dbg5       beams_amp:       %d\n",header->beams_amp);
 	    fprintf(stderr,"dbg5       beam   amp  xtrack ltrack\n");
 	    for (i=0;i<header->beams_amp;i++)
 		{
-		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n", 
-			i, data->amp[i], data->bathacrosstrack[i], 
+		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n",
+			i, data->amp[i], data->bathacrosstrack[i],
 			data->bathalongtrack[i]);
 		}
 	    fprintf(stderr,"dbg5       pixels_ss:       %d\n",header->pixels_ss);
 	    fprintf(stderr,"dbg5       beam   ss  xtrack ltrack\n");
 	    for (i=0;i<header->beams_amp;i++)
 		{
-		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n", 
-			i, data->ss[i], data->ssacrosstrack[i], 
+		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n",
+			i, data->ss[i], data->ssacrosstrack[i],
 			data->ssalongtrack[i]);
 		}
 	    }
@@ -1444,7 +1444,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    store->pixels_ss = header->pixels_ss;
 	    store->ss_chan_port = header->ss_chan_port;
 	    store->ss_chan_stbd = header->ss_chan_stbd;
-	    
+
 	    /* raw data */
 	    for (i=0;i<store->num_chan;i++)
 		{
@@ -1456,9 +1456,9 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->channel[i].empty = header->channel[i].empty;
 		store->channel[i].frequency = header->channel[i].frequency;
 		store->channel[i].num_samples = header->channel[i].num_samples;
-		
+
 		/* allocate data if needed */
-		if (data->rawsize[i] > store->rawsize[i] 
+		if (data->rawsize[i] > store->rawsize[i]
 		    || store->raw[i] == NULL)
 		    {
 		    if (store->raw[i] != NULL)
@@ -1466,13 +1466,13 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    store->rawsize[i] = data->rawsize[i];
 		    status = mb_mallocd(verbose,__FILE__,__LINE__,store->rawsize[i], (void **)&(store->raw[i]),error);
 		    }
-		    
+
 		/* copy the data */
 		if (status == MB_SUCCESS)
 		    {
 		    for (j=0;j<store->rawsize[i];j++)
 			{
-			store->raw[i][j] = data->raw[i][j];	    
+			store->raw[i][j] = data->raw[i][j];
 			}
 		    }
 		}
@@ -1499,17 +1499,17 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->tt), error);
 		if (store->angle != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->angle), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(char), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(char),
 				    (void **)&(store->beamflag),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->bath),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->bathacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->bathalongtrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->tt),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->angle),error);
 		}
 	    if (header->beams_amp > store->beams_amp_alloc
@@ -1518,7 +1518,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->beams_amp_alloc = header->beams_amp;
 		if (store->amp != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->amp), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_amp_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_amp_alloc * sizeof(float),
 				    (void **)&(store->amp),error);
 		}
 	    if (header->pixels_ss > store->pixels_ss_alloc
@@ -1533,11 +1533,11 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->ssacrosstrack), error);
 		if (store->ssalongtrack != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->ssalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float),
 				    (void **)&(store->ss),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float),
 				    (void **)&(store->ssacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float),
 				    (void **)&(store->ssalongtrack),error);
 		}
 	    for (i=0;i<store->beams_bath;i++)
@@ -1562,7 +1562,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->ssacrosstrack[i] = data->ssacrosstrack[i];
 		store->ssalongtrack[i] = data->ssalongtrack[i];
 		}
-		    
+
 	    /* client */
 	    for (i=0;i<header->client_size;i++)
 		store->client[i] = dataplus->client[i];
@@ -1679,7 +1679,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    header->pixels_ss = store->pixels_ss;
 	    header->ss_chan_port = store->ss_chan_port;
 	    header->ss_chan_stbd = store->ss_chan_stbd;
-	    
+
 	    /* raw data */
 	    for (i=0;i<header->num_chan;i++)
 		{
@@ -1691,9 +1691,9 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		header->channel[i].empty = store->channel[i].empty;
 		header->channel[i].frequency = store->channel[i].frequency;
 		header->channel[i].num_samples = store->channel[i].num_samples;
-		
+
 		/* allocate data if needed */
-		if (store->rawsize[i] > data->rawsize[i] 
+		if (store->rawsize[i] > data->rawsize[i]
 		    || data->raw[i] == NULL)
 		    {
 		    if (data->raw[i] != NULL)
@@ -1701,13 +1701,13 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    data->rawsize[i] = store->rawsize[i];
 		    status = mb_mallocd(verbose,__FILE__,__LINE__, data->rawsize[i], (void **)&(data->raw[i]),error);
 		    }
-		    
+
 		/* copy the data */
 		if (status == MB_SUCCESS)
 		    {
 		    for (j=0;j<data->rawsize[i];j++)
 			{
-			data->raw[i][j] = store->raw[i][j];		    
+			data->raw[i][j] = store->raw[i][j];
 			}
 		    }
 		}
@@ -1731,15 +1731,15 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->tt), error);
 		if (data->angle != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->angle), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float),
 				    (void **)&(data->bath),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float),
 				    (void **)&(data->bathacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float),
 				    (void **)&(data->bathalongtrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float),
 				    (void **)&(data->tt),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float),
 				    (void **)&(data->angle),error);
 		}
 	    if (header->beams_amp > data->beams_amp_alloc
@@ -1748,7 +1748,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->beams_amp_alloc = header->beams_amp;
 		if (data->amp != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->amp), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_amp_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_amp_alloc * sizeof(float),
 				    (void **)&(data->amp),error);
 		}
 	    if (header->pixels_ss > data->pixels_ss_alloc
@@ -1763,11 +1763,11 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->ssacrosstrack), error);
 		if (data->ssalongtrack != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->ssalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float),
 				    (void **)&(data->ss),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float),
 				    (void **)&(data->ssacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float),
 				    (void **)&(data->ssalongtrack),error);
 		}
 	    for (i=0;i<header->beams_bath;i++)
@@ -1788,7 +1788,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->ssacrosstrack[i] = store->ssacrosstrack[i];
 		data->ssalongtrack[i] = store->ssalongtrack[i];
 		}
-		    
+
 	    /* client */
 	    for (i=0;i<header->client_size;i++)
 		dataplus->client[i] = store->client[i];
@@ -1842,17 +1842,17 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		fprintf(stderr,"dbg5       offset[%1d]:      %d\n",
 			     i, header->channel[i].offset);
-		fprintf(stderr,"dbg5       type[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       type[%1d]:        %d\n",
 			     i, header->channel[i].type);
-		fprintf(stderr,"dbg5       side[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       side[%1d]:        %d\n",
 			     i, header->channel[i].side);
-		fprintf(stderr,"dbg5       size[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       size[%1d]:        %d\n",
 			     i, header->channel[i].size);
-		fprintf(stderr,"dbg5       empty[%1d]:       %d\n", 
+		fprintf(stderr,"dbg5       empty[%1d]:       %d\n",
 			     i, header->channel[i].empty);
-		fprintf(stderr,"dbg5       frequency[%1d]:   %d\n", 
+		fprintf(stderr,"dbg5       frequency[%1d]:   %d\n",
 			     i, header->channel[i].frequency);
-		fprintf(stderr,"dbg5       num_samples[%1d]: %d\n", 
+		fprintf(stderr,"dbg5       num_samples[%1d]: %d\n",
 			     i, header->channel[i].num_samples);
 		}
 	    fprintf(stderr,"dbg5       status:     %d\n",status);
@@ -1924,7 +1924,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    float_ptr = (float *) data->raw[i];
 		    for (j=0;j<header->channel[i].num_samples;j++)
 			{
-			fprintf(stderr, "dbg5      %5d  %10f %10f %10f\n", 
+			fprintf(stderr, "dbg5      %5d  %10f %10f %10f\n",
 				j, float_ptr[3*j], float_ptr[3*j+1], float_ptr[3*j+2]);
 			}
 		    }
@@ -1932,18 +1932,18 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    fprintf(stderr, "dbg5       size:      unknown\n");
 		}
 	    }
-	    
+
 	/* now reverse parse the header */
 	if (status == MB_SUCCESS)
 	    {
 	    index = 0;
-	    buffer[index] = 'G'; 
+	    buffer[index] = 'G';
 	    index += 1;
-	    buffer[index] = 'E'; 
+	    buffer[index] = 'E';
 	    index += 1;
-	    buffer[index] = 'O'; 
+	    buffer[index] = 'O';
 	    index += 1;
-	    buffer[index] = header->type; 
+	    buffer[index] = header->type;
 	    index += 1;
  	    mb_put_binary_int(MB_NO,header->proc_status,&buffer[index]);
 	    index += 4;
@@ -2025,7 +2025,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* write next header to file */
 	if ((write_size = fwrite(buffer,1,MBF_OICGEODA_HEADER_SIZE,
-			mb_io_ptr->mbfp)) == MBF_OICGEODA_HEADER_SIZE) 
+			mb_io_ptr->mbfp)) == MBF_OICGEODA_HEADER_SIZE)
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
@@ -2035,7 +2035,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
 		}
-	
+
 	/* write client specific data */
 	if (status == MB_SUCCESS && header->client_size > 0)
 	    {
@@ -2044,10 +2044,10 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		!= (int)(header->client_size))
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;		    
+		*error = MB_ERROR_WRITE_FAIL;
 		}
 	    }
-	    
+
 	/* loop over each data channel and write data */
 	if (status == MB_SUCCESS && header->num_chan > 0)
 	    {
@@ -2103,7 +2103,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		    }
 #endif
-		    
+
 		/* write the data */
 		if (status == MB_SUCCESS)
 		    {
@@ -2111,7 +2111,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			!= data_size)
 			{
 			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;		    
+			*error = MB_ERROR_WRITE_FAIL;
 			}
 		    }
 		}

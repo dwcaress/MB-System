@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsunknwn.c	10/13/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2012 by
+ *    Copyright (c) 2008-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_hsunknwn.c contains the functions for reading and writing
- * multibeam data in the HSUNKNWN format.  
+ * multibeam data in the HSUNKNWN format.
  * These functions include:
  *   mbr_alm_hsunknwn	- allocate read/write memory
  *   mbr_dem_hsunknwn	- deallocate read/write memory
@@ -39,24 +39,24 @@
  * Because the number of beams is 59, I suppose that the sonar
  * was likely an Atlas Hydrosweep DS, and treat the data as
  * such.
- * 
- * Table AP5-4 Format of MBES Files (2000-2005) 
  *
- * Line No, Item                                             Format Column 
- * 1    1   Blank                                            4X      1:4 
- *      2   Date (Year/Month/Day: YYYYMMDD)                  I8      4:12 
- *      3   Blank                                            1X      13:13 
- *      4   Time (Hour/Minute/Second: HHMMSS)                I6      14:19 
- *      5   Longitude of Center (Degree)                     F12.7   20:31 
- *      6   Latitude of Center (Degree)                      F12.7   32:43 
- *      7   Dummy Data                                       2F8.1   44:59 
- *      8   Azimuth (Heading: Degree)                        F9.3    60:68 
- *      9   Water Depth of Center (m)                        F9.3    69:78 
- * 2        Water Depth (X= -29 - 0 - +29)                   59F7.1  1:411 
- * 3        Horizontal Distance (X= -29 - 0 - +29)           59F7.1  1:411 
- * 4        Acoustic Reflection Intensity (X= -29 - 0 - +29) 59F7.1  1:411 
- * 5        Dummy Data                                       59F7.1  1:411 
- * 6        Dummy Data                                       59F7.1  1:411 
+ * Table AP5-4 Format of MBES Files (2000-2005)
+ *
+ * Line No, Item                                             Format Column
+ * 1    1   Blank                                            4X      1:4
+ *      2   Date (Year/Month/Day: YYYYMMDD)                  I8      4:12
+ *      3   Blank                                            1X      13:13
+ *      4   Time (Hour/Minute/Second: HHMMSS)                I6      14:19
+ *      5   Longitude of Center (Degree)                     F12.7   20:31
+ *      6   Latitude of Center (Degree)                      F12.7   32:43
+ *      7   Dummy Data                                       2F8.1   44:59
+ *      8   Azimuth (Heading: Degree)                        F9.3    60:68
+ *      9   Water Depth of Center (m)                        F9.3    69:78
+ * 2        Water Depth (X= -29 - 0 - +29)                   59F7.1  1:411
+ * 3        Horizontal Distance (X= -29 - 0 - +29)           59F7.1  1:411
+ * 4        Acoustic Reflection Intensity (X= -29 - 0 - +29) 59F7.1  1:411
+ * 5        Dummy Data                                       59F7.1  1:411
+ * 6        Dummy Data                                       59F7.1  1:411
  * Repeat Line 1 to 6
  *
  * Note: the data we saw has the first four characters of the first line
@@ -70,37 +70,37 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_hsds.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_hsds.h"
 
 #define LINE1SIZE 87
 #define LINE2SIZE 415
 
 /* essential function prototypes */
-int mbr_register_hsunknwn(int verbose, void *mbio_ptr, 
+int mbr_register_hsunknwn(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_hsunknwn(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_hsunknwn(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_hsunknwn(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_hsunknwn(int verbose, void *mbio_ptr, int *error);
@@ -129,54 +129,54 @@ int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsunknwn(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_hsunknwn(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_hsunknwn;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_hsunknwn; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_hsds_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_hsds_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_hsunknwn; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_hsunknwn; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_hsds_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_hsds_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_hsds_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_hsds_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_hsds_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_hsds_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_hsds_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_hsds_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_hsds_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_hsunknwn;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_hsds_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_hsds_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_hsunknwn;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_hsunknwn;
+	mb_io_ptr->mb_io_dimensions = &mbsys_hsds_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_hsds_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_hsds_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_hsds_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_hsds_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_hsds_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_hsds_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_hsds_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_hsds_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -224,25 +224,25 @@ int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_hsunknwn(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_hsunknwn(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_hsunknwn";
@@ -283,7 +283,7 @@ int mbr_info_hsunknwn(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -425,7 +425,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
-		
+
 		/* if comment just read the next line */
 		if (strncmp(line, "COMM", 4) == 0)
 			{
@@ -443,9 +443,9 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				store->comment[strlen(store->comment)-1] = 0;
 				}
 			}
-			
+
 		else
-			{		
+			{
 			store->kind = MB_DATA_DATA;
 
 			mb_get_int(    &(store->year),         line+ 4,  4);
@@ -694,7 +694,7 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		status = fprintf(mb_io_ptr->mbfp,"COMM                                                                                 \r\n");
 		if (status > 0)
 			status = fprintf(mb_io_ptr->mbfp,"%s\r\n",store->comment);
-		if (status > 0) 
+		if (status > 0)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -705,7 +705,7 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			*error = MB_ERROR_WRITE_FAIL;
 			}
 		}
-		
+
 	/* write data record to file */
 	else if (store->kind == MB_DATA_DATA)
 		{
@@ -745,7 +745,7 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		fprintf(mb_io_ptr->mbfp,"\r\n");
 		}
-		
+
 	else
 		{
 		status = MB_SUCCESS;

@@ -98,9 +98,9 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_io.h"
+#include "mb_define.h"
 
 /* ellipsoid coefficients from World Geodetic System Ellipsoid of 1972
  * - see Bowditch (H.O. 9 -- American Practical Navigator). */

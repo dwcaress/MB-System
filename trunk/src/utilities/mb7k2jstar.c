@@ -2,7 +2,7 @@
  *    The MB-system:	mb7k2jstar.c	5/19/2005
  *    $Id$
  *
- *    Copyright (c) 2005-2012 by
+ *    Copyright (c) 2005-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -63,12 +63,12 @@
 #include <string.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
-#include "../../include/mbsys_reson7k.h"
-#include "../../include/mbsys_jstar.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_io.h"
+#include "mbsys_reson7k.h"
+#include "mbsys_jstar.h"
 
 /* local defines */
 #define	MB7K2JSTAR_SSLOW	1
@@ -177,10 +177,10 @@ int main (int argc, char **argv)
 	double	draft;
 	double	ssv;
 	double	ssv_use = 1500.0;
-	
+
 	char	comment[MB_COMMENT_MAXLINE];
 	int	icomment = 0;
-	
+
 	/* jstar data */
 	s7k_fsdwchannel	*s7kchannel;		/* Channel header and data */
 	s7k_fsdwssheader *s7kssheader;		/* Edgetech sidescan header */
@@ -189,22 +189,22 @@ int main (int argc, char **argv)
 	int	obeams_bath;
 	int	obeams_amp;
 	int	opixels_ss;
-	
+
 	/* extract modes */
 	int	extract_sbp = MB_NO;
 	int	extract_sslow = MB_NO;
 	int	extract_sshigh = MB_NO;
 	int	print_comments = MB_NO;
-	
+
 	/* bottompick mode */
 	int	bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
 	double	bottompickthreshold = 0.4;
-	
+
 	/* sidescan gain mode */
 	int	gainmode = MB7K2JSTAR_SSGAIN_OFF;
 	double	gainfactor = 1.0;
 	int	ssflip = MB_NO;
-	
+
 	/* route and auto-line data */
 	char	route_file[MB_PATH_MAXLINE];
 	int	route_file_set = MB_NO;
@@ -227,7 +227,7 @@ int main (int argc, char **argv)
 	int	activewaypoint = 0;
 	int	startline = 1;
 	int	linenumber;
-	
+
 	/* counting variables */
 	int	nreaddata = 0;
 	int	nreadheader = 0;
@@ -249,7 +249,7 @@ int main (int argc, char **argv)
 	int	nwritesbptot = 0;
 	int	nwritesslotot = 0;
 	int	nwritesshitot = 0;
-	
+
 	int	mode;
 	int	format_status, format_guess;
 	int	format_output = MBF_EDGJSTAR;
@@ -277,11 +277,11 @@ int main (int argc, char **argv)
 	char	*result;
 	int	nget;
 	int	point_ok;
-	
+
 	int	read_data;
 	int	found;
 	int	i, j, n;
-	
+
 	startline = 1;
 	strcpy(lineroot, "jstar");
 
@@ -294,7 +294,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:XxVvHh")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -491,17 +491,17 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
-		
+
 	/* set output types if needed */
-	if (extract_sbp == MB_NO 
-		&& extract_sslow == MB_NO 
+	if (extract_sbp == MB_NO
+		&& extract_sslow == MB_NO
 		&& extract_sshigh == MB_NO)
 		{
 		extract_sbp = MB_YES;
 		extract_sslow = MB_YES;
 		extract_sshigh = MB_YES;
 		}
-	
+
 	/* output output types */
 	fprintf(stdout, "\nData records to extract:\n");
 	if (extract_sbp == MB_YES)
@@ -512,22 +512,22 @@ int main (int argc, char **argv)
 		fprintf(stdout, "     High Sidescan\n");
 	if (ssflip == MB_YES)
 		fprintf(stdout, "     Sidescan port and starboard exchanged\n");
-		
+
 	/* set starting line number and output file if route read */
 	if (route_file_set == MB_YES)
 		{
 		linenumber = startline;
 		sprintf(output_file, "%s_%4.4d.mb132", lineroot, linenumber);
 		}
-	
+
 	/* new output file obviously needed */
 	new_output_file = MB_YES;
 
 	/* if specified read route file */
 	if (route_file_set == MB_YES)
-		{	    
+		{
 		/* open the input file */
-		if ((fp = fopen(route_file, "r")) == NULL) 
+		if ((fp = fopen(route_file, "r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;
@@ -561,7 +561,7 @@ int main (int argc, char **argv)
 					point_ok = MB_YES;
 				else
 					point_ok = MB_NO;
-			    
+
 				/* if good data check for need to allocate more space */
 				if (point_ok == MB_YES
 					&& nroutepoint + 1 > nroutepointalloc)
@@ -601,7 +601,7 @@ int main (int argc, char **argv)
 		/* close the file */
 		fclose(fp);
 		fp = NULL;
-		
+
 		/* set starting values */
 		activewaypoint = 1;
 		mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
@@ -652,7 +652,7 @@ int main (int argc, char **argv)
 	    strcpy(file, read_file);
 	    read_data = MB_YES;
 	    }
-	
+
 	/* loop over all files to be read */
 	while (read_data == MB_YES && format == MBF_RESON7KR)
 	{
@@ -704,13 +704,13 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -741,7 +741,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-		
+
 	/* set up output file name if needed */
 	if (error == MB_ERROR_NO_ERROR)
 		{
@@ -750,11 +750,11 @@ int main (int argc, char **argv)
 			/* set flag to open new output file */
 			new_output_file = MB_YES;
 			}
-			
+
 		else if (output_file_set == MB_NO && route_file_set == MB_NO)
 			{
 			new_output_file = MB_YES;
-			format_status = mb_get_format(verbose, file, output_file, 
+			format_status = mb_get_format(verbose, file, output_file,
 		    				&format_guess, &error);
 			if (format_status != MB_SUCCESS || format_guess != format)
 				{
@@ -801,7 +801,7 @@ int main (int argc, char **argv)
 		{
 		/* reset error */
 		error = MB_ERROR_NO_ERROR;
-		
+
 		/* read next data record */
 		status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
 				    time_i,&time_d,&navlon,&navlat,
@@ -832,12 +832,12 @@ istore->time_i[0],istore->time_i[1],istore->time_i[2],istore->time_i[3],istore->
 			if (heading != 0.0)
 				lastheading = heading;
 			}
-		    
+
 		/* check survey data position against waypoints */
 /* fprintf(stderr,"status:%d error:%d kind:%d route_file_set:%d nroutepoint:%d navlon:%f navlat:%f\n",
 status,error,kind,route_file_set,nroutepoint,navlon,navlat); */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA
-			&& route_file_set == MB_YES && nroutepoint > 1 
+			&& route_file_set == MB_YES && nroutepoint > 1
 			&& navlon != 0.0 && navlat != 0.0)
 			{
 			dx = (navlon - routelon[activewaypoint]) / mtodeglon;
@@ -845,8 +845,8 @@ status,error,kind,route_file_set,nroutepoint,navlon,navlat); */
 			range = sqrt(dx * dx + dy * dy);
 /* fprintf(stderr,"activewaypoint:%d range:%f lon:%f %f lat:%f %f dx:%f dy:%f\n",
 activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[activewaypoint], dx, dy);*/
-			if (range < rangethreshold 
-				&& (activewaypoint == 0 || range > rangelast) 
+			if (range < rangethreshold
+				&& (activewaypoint == 0 || range > rangelast)
 				&& activewaypoint < nroutepoint - 1)
 				{
 /* fprintf(stderr,"New output by range to routepoint: %f\n",range); */
@@ -855,7 +855,7 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 				    {
 				    /* increment line number */
 				    linenumber++;
-				    
+
 				    /* set output file name */
 				    sprintf(output_file, "%s_%4.4d", lineroot, linenumber);
 				    if (extract_sbp == MB_YES && extract_sslow == MB_YES && extract_sshigh == MB_YES)
@@ -878,7 +878,7 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 					    strcat(output_file,".jsf");
 					    format_output = MBF_EDGJSTAR;
 					    }
-				    
+
 				    /* set to open new output file */
 				    new_output_file = MB_YES;
 				    }
@@ -892,8 +892,8 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 			else
 				rangelast = range;
 			}
-				
-		if (kind == MB_DATA_DATA 
+
+		if (kind == MB_DATA_DATA
 			&& error <= MB_ERROR_NO_ERROR)
 			{
 			/* extract travel times */
@@ -903,11 +903,11 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 				angles_forward,angles_null,
 				bheave,alongtrack_offset,
 				&draft,&ssv,&error);
-				
+
 			/* check surface sound velocity */
 			if (ssv > 0.0)
 				ssv_use = ssv;
-				
+
 			/* get bottom arrival time, if possible */
 			ttime_min = 0.0;
 			found = MB_NO;
@@ -930,14 +930,14 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 				}
 /*fprintf(stderr,"found:%d beam_min:%d ttime_min_use:%f\n", found, beam_min, ttime_min_use);*/
 			}
-		    
+
 		/* nonfatal errors do not matter */
 		if (error < MB_ERROR_NO_ERROR)
 			{
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
-			
+
 		/* if needed open new output file */
 		if (status == MB_SUCCESS
 			&& new_output_file == MB_YES
@@ -945,7 +945,7 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 				|| (extract_sslow == MB_YES && kind == MB_DATA_SIDESCAN2)
 				|| (extract_sshigh == MB_YES && kind == MB_DATA_SIDESCAN3)))
 			{
-				
+
 			/* close any old output file unless a single file has been specified */
 			if (ombio_ptr != NULL)
 				{
@@ -955,12 +955,12 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 				/* generate inf file */
 				if (status == MB_SUCCESS)
 					{
-					status = mb_make_info(verbose, MB_YES, 
-								current_output_file, 
-								format_output, 
+					status = mb_make_info(verbose, MB_YES,
+								current_output_file,
+								format_output,
 								&error);
 					}
-					
+
 				/* output counts */
 				fprintf(stdout, "\nData records written to: %s\n", current_output_file);
 				fprintf(stdout, "     Subbottom:     %d\n", nwritesbp);
@@ -970,7 +970,7 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 				nwritesslotot += nwritesslo;
 				nwritesshitot += nwritesshi;
 				}
-				
+
 			/* open the new file */
 			nwritesbp = 0;
 			nwritesslo = 0;
@@ -986,7 +986,7 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 					program_name);
 				exit(error);
 				}
-				
+
 			/* save current_output_file */
 			strcpy(current_output_file, output_file);
 
@@ -994,7 +994,7 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 			omb_io_ptr = (struct mb_io_struct *) ombio_ptr;
 			ostore_ptr = omb_io_ptr->store_data;
 			ostore = (struct mbsys_jstar_struct *) ostore_ptr;
-			
+
 			/* reset new_output_file */
 			new_output_file = MB_NO;
 			}
@@ -1025,22 +1025,22 @@ imb_io_ptr->fix_lon[i],
 imb_io_ptr->fix_lat[i]);*/
 			mb_get_jtime(verbose, istore->time_i, time_j);
 			speed = 0.0;
-			mb_hedint_interp(verbose, imbio_ptr, time_d,  
+			mb_hedint_interp(verbose, imbio_ptr, time_d,
 					&heading, &error);
-			mb_navint_interp(verbose, imbio_ptr, time_d, heading, speed, 
+			mb_navint_interp(verbose, imbio_ptr, time_d, heading, speed,
 					&navlon, &navlat, &speed, &error);
-			mb_depint_interp(verbose, imbio_ptr, time_d,  
+			mb_depint_interp(verbose, imbio_ptr, time_d,
 					&sonardepth, &error);
-			mb_altint_interp(verbose, imbio_ptr, time_d,  
+			mb_altint_interp(verbose, imbio_ptr, time_d,
 					&altitude, &error);
-			mb_attint_interp(verbose, imbio_ptr, time_d,  
+			mb_attint_interp(verbose, imbio_ptr, time_d,
 					&heave, &roll, &pitch, &error);
 			}
-			
-		/* if following a route check that the vehicle has come on line 
+
+		/* if following a route check that the vehicle has come on line
 		    	(within MBES_ONLINE_THRESHOLD degrees)
 		    	before writing any data */
-		if (checkroutebearing == MB_YES 
+		if (checkroutebearing == MB_YES
 		    	&& nroutepoint > 1 && activewaypoint > 0)
 		    	{
 			headingdiff = fabs(routeheading[activewaypoint-1] - heading);
@@ -1050,53 +1050,53 @@ imb_io_ptr->fix_lat[i]);*/
 				oktowrite++;
 			else
 				oktowrite = 0;
-/* fprintf(stderr,"heading: %f %f %f oktowrite:%d\n", 
+/* fprintf(stderr,"heading: %f %f %f oktowrite:%d\n",
 routeheading[activewaypoint-1],heading,headingdiff,oktowrite);*/
 			}
 		else
 		    	oktowrite = MBES_ONLINE_COUNT;
 /* if (status == MB_SUCCESS)
-fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
-activewaypoint,linenumber,range, navlon, 
+fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n",
+activewaypoint,linenumber,range, navlon,
 routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
-			
+
 	   	/* handle multibeam data */
-		if (status == MB_SUCCESS && kind == MB_DATA_DATA) 
+		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 /*fprintf(stderr,"MB_DATA_DATA: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreaddata++;
 			}
-			
+
 	   	/* handle file header data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_HEADER) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_HEADER)
 			{
 /*fprintf(stderr,"MB_DATA_HEADER: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadheader++;
 			}
-			
+
 	   	/* handle bluefin ctd data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SSV) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_SSV)
 			{
 /*fprintf(stderr,"MB_DATA_SSV: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadssv++;
 			}
-			
+
 	   	/* handle bluefin nav data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_NAV2) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_NAV2)
 			{
 /*fprintf(stderr,"MB_DATA_NAV1: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadnav1++;
 			}
-			
+
 	   	/* handle subbottom data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 			{
 /*fprintf(stderr,"MB_DATA_SUBBOTTOM_SUBBOTTOM: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadsbp++;
-			
+
 			/* output data if desired */
 			if (extract_sbp == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT)
-				{		
+				{
 				/* set overall parameters */
 				ostore->kind = kind;
 				ostore->subsystem = 0;
@@ -1189,7 +1189,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				/* User defined area from 180-239                                       */
 				/* -------------------------------------------------------------------- */
 				channel->heaveCompensation = s7ksegyheader->heaveCompensation;		/* 180-181 : Heave compensation offset (samples) */
-				channel->trigSource = s7ksegyheader->trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */    
+				channel->trigSource = s7ksegyheader->trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */
 				channel->markNumber = s7ksegyheader->markNumber;			/* 184-185 : Mark Number (0 = no mark) */
 				channel->NMEAHour = s7ksegyheader->NMEAHour;				/* 186-187 : Hour */
 				channel->NMEAMinutes = s7ksegyheader->NMEAMinutes;			/* 188-189 : Minutes */
@@ -1199,8 +1199,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->NMEADay = s7ksegyheader->NMEADay;				/* 196-197 : Day */
 				channel->NMEAYear = s7ksegyheader->NMEAYear;				/* 198-199 : Year */
 				channel->millisecondsToday = 0.001 * istore->time_i[6]			/* 200-203 : Millieconds today */
-							+ 1000 * (istore->time_i[5] 
-								+ 60.0 * (istore->time_i[4] 
+							+ 1000 * (istore->time_i[5]
+								+ 60.0 * (istore->time_i[4]
 									+ 60.0 * istore->time_i[3]));
 				channel->ADCMax = s7ksegyheader->ADCMax;				/* 204-205 : Maximum absolute value for ADC samples for this packet */
 				channel->calConst = s7ksegyheader->calConst;				/* 206-207 : System constant in tenths of a dB */
@@ -1255,7 +1255,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						channelmax = 0.0;
 						for (i=0;i<channel->samples;i++)
 							{
-							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i]
 								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
 							channelmax = MAX(value, channelmax);
 							}
@@ -1263,7 +1263,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						threshold = bottompickthreshold * channelmax;
 						for (i=0;i<channel->samples && channelpick == 0;i++)
 							{
-							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i]
 								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
 							if (value >= threshold)
 								channelpick = i;
@@ -1286,7 +1286,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 								channelpick = i;
 							}
 						}
-						
+
 					/* set sonar altitude */
 					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
@@ -1310,26 +1310,26 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
 				channel->heading = (short) (100.0 * heading);
-				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
+				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075;
 				channel->sonardepth = 1000 * sonardepth;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (32768 * roll / 180.0); 
-				channel->pitch = (short) (32768 * pitch / 180.0); 
+				channel->roll = (short) (32768 * roll / 180.0);
+				channel->pitch = (short) (32768 * pitch / 180.0);
 				channel->heaveCompensation = heave /
-						channel->sampleInterval / 0.00000075; 
+						channel->sampleInterval / 0.00000075;
 
 				/* write the record */
 				mb_write_ping(verbose, ombio_ptr, ostore_ptr, &error);
 				nwritesbp++;
 				}
 			}
-			
+
 	   	/* handle low frequency sidescan data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2)
 			{
 /*fprintf(stderr,"MB_DATA_SIDESCAN2: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadsslo++;
-			
+
 			/* output data if desired */
 			if (extract_sslow == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT)
 				{
@@ -1432,7 +1432,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				/* User defined area from 180-239                                       */
 				/* -------------------------------------------------------------------- */
 				channel->heaveCompensation = 0;						/* 180-181 : Heave compensation offset (samples) */
-				channel->trigSource = s7kssheader->trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */    
+				channel->trigSource = s7kssheader->trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */
 				channel->markNumber = s7kssheader->markNumber;				/* 184-185 : Mark Number (0 = no mark) */
 				channel->NMEAHour = 0;							/* 186-187 : Hour */
 				channel->NMEAMinutes = 0;						/* 188-189 : Minutes */
@@ -1442,8 +1442,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->NMEADay = 0;							/* 196-197 : Day */
 				channel->NMEAYear = 0;							/* 198-199 : Year */
 				channel->millisecondsToday = 0.001 * istore->time_i[6]			/* 200-203 : Millieconds today */
-							+ 1000 * (istore->time_i[5] 
-								+ 60.0 * (istore->time_i[4] 
+							+ 1000 * (istore->time_i[5]
+								+ 60.0 * (istore->time_i[4]
 									+ 60.0 * istore->time_i[3]));
 				channel->ADCMax = s7kssheader->ADCMax;					/* 204-205 : Maximum absolute value for ADC samples for this packet */
 				channel->calConst = 0;							/* 206-207 : System constant in tenths of a dB */
@@ -1537,7 +1537,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						channelmax = 0.0;
 						for (i=0;i<channel->samples;i++)
 							{
-							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i]
 								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
 							channelmax = MAX(value, channelmax);
 							}
@@ -1545,7 +1545,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						threshold = bottompickthreshold * channelmax;
 						for (i=0;i<channel->samples && channelpick == 0;i++)
 							{
-							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i]
 								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
 							if (value >= threshold)
 								channelpick = i;
@@ -1568,7 +1568,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 								channelpick = i;
 							}
 						}
-						
+
 					/* set sonar altitude */
 					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
@@ -1582,7 +1582,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					{
 					channel->sonaraltitude = 1000 * altitude;
 					}
-					
+
 				/* apply gain if specified */
 				if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR)
 					{
@@ -1611,13 +1611,13 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
 				channel->heading = (short) (100.0 * heading);
-				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
+				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
 				channel->sonardepth = 1000 * sonardepth;
-				channel->roll = (short) (32768 * roll / 180.0); 
-				channel->pitch = (short) (32768 * pitch / 180.0); 
+				channel->roll = (short) (32768 * roll / 180.0);
+				channel->pitch = (short) (32768 * pitch / 180.0);
 				channel->heaveCompensation = heave /
-						channel->sampleInterval / 0.00000075; 
+						channel->sampleInterval / 0.00000075;
 
 				/*----------------------------------------------------------------*/
 				/* copy low frequency starboard sidescan to jstar storage */
@@ -1714,7 +1714,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				/* User defined area from 180-239                                       */
 				/* -------------------------------------------------------------------- */
 				channel->heaveCompensation = 0;						/* 180-181 : Heave compensation offset (samples) */
-				channel->trigSource = s7kssheader->trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */    
+				channel->trigSource = s7kssheader->trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */
 				channel->markNumber = s7kssheader->markNumber;				/* 184-185 : Mark Number (0 = no mark) */
 				channel->NMEAHour = 0;							/* 186-187 : Hour */
 				channel->NMEAMinutes = 0;						/* 188-189 : Minutes */
@@ -1724,8 +1724,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->NMEADay = 0;							/* 196-197 : Day */
 				channel->NMEAYear = 0;							/* 198-199 : Year */
 				channel->millisecondsToday = 0.001 * istore->time_i[6]			/* 200-203 : Millieconds today */
-							+ 1000 * (istore->time_i[5] 
-								+ 60.0 * (istore->time_i[4] 
+							+ 1000 * (istore->time_i[5]
+								+ 60.0 * (istore->time_i[4]
 									+ 60.0 * istore->time_i[3]));
 				channel->ADCMax = s7kssheader->ADCMax;					/* 204-205 : Maximum absolute value for ADC samples for this packet */
 				channel->calConst = 0;							/* 206-207 : System constant in tenths of a dB */
@@ -1819,7 +1819,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						channelmax = 0.0;
 						for (i=0;i<channel->samples;i++)
 							{
-							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i]
 								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
 							channelmax = MAX(value, channelmax);
 							}
@@ -1827,7 +1827,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						threshold = bottompickthreshold * channelmax;
 						for (i=0;i<channel->samples && channelpick == 0;i++)
 							{
-							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i]
 								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
 							if (value >= threshold)
 								channelpick = i;
@@ -1850,7 +1850,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 								channelpick = i;
 							}
 						}
-						
+
 					/* set sonar altitude */
 					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
@@ -1864,7 +1864,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					{
 					channel->sonaraltitude = 1000 * altitude;
 					}
-					
+
 				/* apply gain if specified */
 				if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR)
 					{
@@ -1889,26 +1889,26 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
 				channel->heading = (short) (100.0 * heading);
-				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
+				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075;
 				channel->sonardepth = 1000 * sonardepth;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (32768 * roll / 180.0); 
-				channel->pitch = (short) (32768 * pitch / 180.0); 
+				channel->roll = (short) (32768 * roll / 180.0);
+				channel->pitch = (short) (32768 * pitch / 180.0);
 				channel->heaveCompensation = heave /
-						channel->sampleInterval / 0.00000075; 
+						channel->sampleInterval / 0.00000075;
 
 				/* write the record */
 				nwritesslo++;
 				mb_write_ping(verbose, ombio_ptr, ostore_ptr, &error);
 				}
 			}
-			
+
 	   	/* handle high frequency sidescan data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN3) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN3)
 			{
 /*fprintf(stderr,"MB_DATA_SIDESCAN3: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadsshi++;
-			
+
 			/* output data if desired */
 			if (extract_sshigh == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT)
 				{
@@ -2008,7 +2008,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				/* User defined area from 180-239                                       */
 				/* -------------------------------------------------------------------- */
 				channel->heaveCompensation = 0;						/* 180-181 : Heave compensation offset (samples) */
-				channel->trigSource = s7kssheader->trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */    
+				channel->trigSource = s7kssheader->trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */
 				channel->markNumber = s7kssheader->markNumber;				/* 184-185 : Mark Number (0 = no mark) */
 				channel->NMEAHour = 0;							/* 186-187 : Hour */
 				channel->NMEAMinutes = 0;						/* 188-189 : Minutes */
@@ -2018,8 +2018,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->NMEADay = 0;							/* 196-197 : Day */
 				channel->NMEAYear = 0;							/* 198-199 : Year */
 				channel->millisecondsToday = 0.001 * istore->time_i[6]			/* 200-203 : Millieconds today */
-							+ 1000 * (istore->time_i[5] 
-								+ 60.0 * (istore->time_i[4] 
+							+ 1000 * (istore->time_i[5]
+								+ 60.0 * (istore->time_i[4]
 									+ 60.0 * istore->time_i[3]));
 				channel->ADCMax = s7kssheader->ADCMax;					/* 204-205 : Maximum absolute value for ADC samples for this packet */
 				channel->calConst = 0;							/* 206-207 : System constant in tenths of a dB */
@@ -2113,7 +2113,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						channelmax = 0.0;
 						for (i=0;i<channel->samples;i++)
 							{
-							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i]
 								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
 							channelmax = MAX(value, channelmax);
 							}
@@ -2121,7 +2121,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						threshold = bottompickthreshold * channelmax;
 						for (i=0;i<channel->samples && channelpick == 0;i++)
 							{
-							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i]
 								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
 							if (value >= threshold)
 								channelpick = i;
@@ -2144,7 +2144,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 								channelpick = i;
 							}
 						}
-						
+
 					/* set sonar altitude */
 					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
@@ -2168,13 +2168,13 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
 				channel->heading = (short) (100.0 * heading);
-				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
+				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075;
 				channel->sonardepth = 1000 * sonardepth;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (32768 * roll / 180.0); 
-				channel->pitch = (short) (32768 * pitch / 180.0); 
+				channel->roll = (short) (32768 * roll / 180.0);
+				channel->pitch = (short) (32768 * pitch / 180.0);
 				channel->heaveCompensation = heave /
-						channel->sampleInterval / 0.00000075; 
+						channel->sampleInterval / 0.00000075;
 
 				/*----------------------------------------------------------------*/
 				/* copy high frequency starboard sidescan to jstar storage */
@@ -2268,7 +2268,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				/* User defined area from 180-239                                       */
 				/* -------------------------------------------------------------------- */
 				channel->heaveCompensation = 0;						/* 180-181 : Heave compensation offset (samples) */
-				channel->trigSource = s7kssheader->trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */    
+				channel->trigSource = s7kssheader->trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */
 				channel->markNumber = s7kssheader->markNumber;				/* 184-185 : Mark Number (0 = no mark) */
 				channel->NMEAHour = 0;							/* 186-187 : Hour */
 				channel->NMEAMinutes = 0;						/* 188-189 : Minutes */
@@ -2278,8 +2278,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->NMEADay = 0;							/* 196-197 : Day */
 				channel->NMEAYear = 0;							/* 198-199 : Year */
 				channel->millisecondsToday = 0.001 * istore->time_i[6]			/* 200-203 : Millieconds today */
-							+ 1000 * (istore->time_i[5] 
-								+ 60.0 * (istore->time_i[4] 
+							+ 1000 * (istore->time_i[5]
+								+ 60.0 * (istore->time_i[4]
 									+ 60.0 * istore->time_i[3]));
 				channel->ADCMax = s7kssheader->ADCMax;					/* 204-205 : Maximum absolute value for ADC samples for this packet */
 				channel->calConst = 0;							/* 206-207 : System constant in tenths of a dB */
@@ -2373,7 +2373,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						channelmax = 0.0;
 						for (i=0;i<channel->samples;i++)
 							{
-							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i]
 								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
 							channelmax = MAX(value, channelmax);
 							}
@@ -2381,7 +2381,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						threshold = bottompickthreshold * channelmax;
 						for (i=0;i<channel->samples && channelpick == 0;i++)
 							{
-							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i]
 								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
 							if (value >= threshold)
 								channelpick = i;
@@ -2404,7 +2404,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 								channelpick = i;
 							}
 						}
-						
+
 					/* set sonar altitude */
 					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
@@ -2428,26 +2428,26 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
 				channel->heading = (short) (100.0 * heading);
-				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
+				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075;
 				channel->sonardepth = 1000 * sonardepth;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (32768 * roll / 180.0); 
-				channel->pitch = (short) (32768 * pitch / 180.0); 
+				channel->roll = (short) (32768 * roll / 180.0);
+				channel->pitch = (short) (32768 * pitch / 180.0);
 				channel->heaveCompensation = heave /
-						channel->sampleInterval / 0.00000075; 
+						channel->sampleInterval / 0.00000075;
 
 				/* write the record */
 				nwritesshi++;
 				mb_write_ping(verbose, ombio_ptr, ostore_ptr, &error);
 				}
 			}
-			
+
 	   	/* handle unknown data */
-		else  if (status == MB_SUCCESS) 
+		else  if (status == MB_SUCCESS)
 			{
 /*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
 			}
-			
+
 	   	/* handle read error */
 		else
 			{
@@ -2478,7 +2478,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 
 	/* close the swath file */
 	status = mb_close(verbose,&imbio_ptr,&error);
-	
+
 	/* output counts */
 	fprintf(stdout, "\nData records read from: %s\n", file);
 	fprintf(stdout, "     Survey:        %d\n", nreaddata);
@@ -2521,17 +2521,17 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		{
 		/* close the swath file */
 		status = mb_close(verbose,&ombio_ptr,&error);
-		
+
 		/* generate inf file */
 		if (status == MB_SUCCESS)
 			{
-			status = mb_make_info(verbose, MB_YES, 
-						output_file, 
-						format_output, 
+			status = mb_make_info(verbose, MB_YES,
+						output_file,
+						format_output,
 						&error);
 			}
 		}
-	
+
 	/* output counts */
 	fprintf(stdout, "\nTotal data records read from: %s\n", file);
 	fprintf(stdout, "     Survey:        %d\n", nreaddatatot);
@@ -2545,10 +2545,10 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 	fprintf(stdout, "     Subbottom:     %d\n", nwritesbptot);
 	fprintf(stdout, "     Low Sidescan:  %d\n", nwritesslotot);
 	fprintf(stdout, "     High Sidescan: %d\n", nwritesshitot);
-		
+
 	/* deallocate route arrays */
 	if (route_file_set == MB_YES)
-		{	    
+		{
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&routelon, &error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&routelat, &error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&routeheading, &error);

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_intersectgrid.c	10/20/2012
  *    $Id:  $
  *
- *    Copyright (c) 2012-2012 by
+ *    Copyright (c) 2012-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -34,9 +34,9 @@
 #include <time.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_aux.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_aux.h"
 
 static char rcs_id[] = "$Id: mb_intersectgrid.c 1917 2012-01-10 19:25:33Z caress $";
 

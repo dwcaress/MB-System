@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_sbsiomrg.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_sbsiomrg.h defines the data structure used by MBIO functions
- * to store multibeam data read from the  MBF_SBSIOMRG format (MBIO id 11).  
+ * to store multibeam data read from the  MBF_SBSIOMRG format (MBIO id 11).
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
@@ -72,14 +72,14 @@
  *      Institution of Oceanography; most data files in this format
  *      consist of Sea Beam data collected on the R/V Thomas Washington.
  *   2. The data consist of 100 byte records with 50 2-byte signed
- *      integer words.  
+ *      integer words.
  *   3. The 16 depth values are stored uncentered (the depth values
  *      are centered in most formats).
  *   4. Comments can be embedded in the data as 100 byte ascii strings,
  *	where the first two characters must always be "##" so that
- *      the year value is greater than 7000.  
+ *      the year value is greater than 7000.
  *   5. Data files created in the early 1980's on an IBM 1800 may have
- *      padding records consisting entirely of zeros; these may be 
+ *      padding records consisting entirely of zeros; these may be
  *      recognized by the year being 0 and should be ignored.
  *   6. Information on this format was obtained from the Geological
  *      Data Center at the Scripps Institution of Oceanography
@@ -88,10 +88,10 @@
  * mbf_sbsiomrg_data_struct structure holds data (kind = 1) or an
  * ascii comment record (kind = 2).
  *
- * The mbf_sbsiomrg_data_struct structure is a direct representation 
+ * The mbf_sbsiomrg_data_struct structure is a direct representation
  * of the binary data structure used in the MBF_SBSIOMRG format.
  */
- 
+
  /* size of data records */
 #define MBF_SBSIOMRG_RECORD_SIZE	100
 
@@ -112,7 +112,7 @@ struct mbf_sbsiomrg_data_struct
 	short	spare1[3];	/* unused */
 	unsigned short	sbtim;	/* Sea Beam computer clock time in 10ths of
 					seconds from start of hour (0-3600) */
-	unsigned short	sbhdg;	/* Sea Beam gyro heading 
+	unsigned short	sbhdg;	/* Sea Beam gyro heading
 					0 = 0 degrees
 					1 = 0.0055 degrees
 					16384 = 90 degrees

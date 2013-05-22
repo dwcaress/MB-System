@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -117,16 +117,16 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_elac.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_elac.h"
 
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_elac_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_elac_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_elac_alloc";
@@ -282,7 +282,7 @@ int mbsys_elac_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elac_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_elac_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_elac_deall";
@@ -316,7 +316,7 @@ int mbsys_elac_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elac_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_elac_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_elac_dimensions";
@@ -378,12 +378,12 @@ int mbsys_elac_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -426,7 +426,7 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[3] = store->profile[0].hour;
 		time_i[4] = store->profile[0].minute;
 		time_i[5] = store->profile[0].second;
-		time_i[6] = 10000*store->profile[0].hundredth_sec 
+		time_i[6] = 10000*store->profile[0].hundredth_sec
 			+ 100*store->profile[0].thousandth_sec;
 		mb_get_time(verbose,time_i,time_d);
 
@@ -439,7 +439,7 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed = 0.0;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 6.0;
 		mb_io_ptr->beamwidth_xtrack = 3.0;
@@ -458,22 +458,22 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			ibeam = (store->profile_num - 1 - i)
 					+ store->profile_num*(7 - j);
 			if (store->profile[i].quality[j] == 1)
-			    beamflag[ibeam] 
+			    beamflag[ibeam]
 				= MB_FLAG_NONE;
 			else if (store->profile[i].quality[j] < 8)
-			    beamflag[ibeam] 
+			    beamflag[ibeam]
 				= MB_FLAG_SONAR + MB_FLAG_FLAG;
 			else if (store->profile[i].quality[j] == 8)
-			    beamflag[ibeam] 
+			    beamflag[ibeam]
 				= MB_FLAG_NULL;
 			else if (store->profile[i].quality[j] == 10)
-			    beamflag[ibeam] 
+			    beamflag[ibeam]
 				= MB_FLAG_MANUAL + MB_FLAG_FLAG;
 			else if (store->profile[i].quality[j] == 20)
-			    beamflag[ibeam] 
+			    beamflag[ibeam]
 				= MB_FLAG_FILTER + MB_FLAG_FLAG;
 			else
-			    beamflag[ibeam] 
+			    beamflag[ibeam]
 				= MB_FLAG_NULL;
 			bath[ibeam] = depthscale*store->profile[i].bath[j];
 			bathacrosstrack[ibeam] = dacrscale
@@ -559,13 +559,13 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -581,7 +581,7 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -609,12 +609,12 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -656,13 +656,13 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
@@ -693,8 +693,8 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->profile[0].minute = time_i[4];
 		store->profile[0].second = time_i[5];
 		store->profile[0].hundredth_sec = time_i[6]/10000;
-		store->profile[0].thousandth_sec 
-			= (time_i[6] 
+		store->profile[0].thousandth_sec
+			= (time_i[6]
 			- 10000*store->profile[0].hundredth_sec)/100;
 
 		/*get navigation */
@@ -727,13 +727,13 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				    else if (store->profile[i].quality[j] == 1)
 					store->profile[i].quality[j] = 7;
 				    }
-				else 
+				else
 				    store->profile[i].quality[j] = 1;
-				store->profile[i].bath[j] 
+				store->profile[i].bath[j]
 					= bath[ibeam]/depthscale;
-				store->profile[i].bath_acrosstrack[j] 
+				store->profile[i].bath_acrosstrack[j]
 					= bathacrosstrack[ibeam]/dacrscale;
-				store->profile[i].bath_alongtrack[j] 
+				store->profile[i].bath_alongtrack[j]
 					= bathalongtrack[ibeam]/daloscale;
 				store->profile[i].amp[j] = amp[ibeam]/reflscale;
 				}
@@ -763,9 +763,9 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_elac_ttimes";
@@ -834,15 +834,15 @@ int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				angles[ibeam] = -angles[ibeam];
 				angles_forward[ibeam] = 0.0;
-				angles_null[ibeam] = 30.0 
-					+ angscale 
+				angles_null[ibeam] = 30.0
+					+ angscale
 					* store->transducer_port_error;
 				}
 			else
 				{
 				angles_forward[ibeam] = 180.0;
-				angles_null[ibeam] = 30.0 
-					+ angscale 
+				angles_null[ibeam] = 30.0
+					+ angscale
 					* store->transducer_starboard_error;
 				}
 			heave[ibeam] = 0.001 * store->profile[i].heave;
@@ -1000,7 +1000,7 @@ int mbsys_elac_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_elac_extract_altitude";
@@ -1037,7 +1037,7 @@ int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get draft */
-		*transducer_depth = 0.005 
+		*transducer_depth = 0.005
 				    * (store->transducer_starboard_depth
 					+ store->transducer_port_depth);
 		depthscale = 0.01;
@@ -1052,15 +1052,15 @@ int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		      for (j=0;j<8;j++)
 			{
 			if (store->profile[i].quality[j] == 1
-			    && fabs(dacrscale 
-				    * store->profile[i].bath_acrosstrack[j]) 
+			    && fabs(dacrscale
+				    * store->profile[i].bath_acrosstrack[j])
 				< xtrack_min)
 			    {
-			    xtrack_min = fabs(dacrscale 
+			    xtrack_min = fabs(dacrscale
 				* store->profile[i].bath_acrosstrack[j]);
 			    bath_best = depthscale * store->profile[i].bath[j];
 			    }
-			}		
+			}
 		    }
 		if (bath_best <= 0.0)
 		    {
@@ -1069,15 +1069,15 @@ int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		      for (j=0;j<8;j++)
 			{
 			if (store->profile[i].quality[j] < 8
-			    && fabs(dacrscale 
-				    * store->profile[i].bath_acrosstrack[j]) 
+			    && fabs(dacrscale
+				    * store->profile[i].bath_acrosstrack[j])
 				< xtrack_min)
 			    {
-			    xtrack_min = fabs(dacrscale 
+			    xtrack_min = fabs(dacrscale
 				* store->profile[i].bath_acrosstrack[j]);
 			    bath_best = depthscale * store->profile[i].bath[j];
 			    }
-			}		
+			}
 		    }
 		*altitude = bath_best - *transducer_depth;
 
@@ -1125,8 +1125,8 @@ int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_elac_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_elac_extract_nav";
@@ -1164,7 +1164,7 @@ int mbsys_elac_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[3] = store->profile[0].hour;
 		time_i[4] = store->profile[0].minute;
 		time_i[5] = store->profile[0].second;
-		time_i[6] = 10000*store->profile[0].hundredth_sec 
+		time_i[6] = 10000*store->profile[0].hundredth_sec
 			+ 100*store->profile[0].thousandth_sec;
 		mb_get_time(verbose,time_i,time_d);
 
@@ -1258,7 +1258,7 @@ int mbsys_elac_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1292,7 +1292,7 @@ int mbsys_elac_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_elac_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1345,8 +1345,8 @@ int mbsys_elac_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->profile[0].minute = time_i[4];
 		store->profile[0].second = time_i[5];
 		store->profile[0].hundredth_sec = time_i[6]/10000;
-		store->profile[0].thousandth_sec 
-			= (time_i[6] 
+		store->profile[0].thousandth_sec
+			= (time_i[6]
 			- 10000*store->profile[0].hundredth_sec)/100;
 
 		/*get navigation */
@@ -1416,7 +1416,7 @@ int mbsys_elac_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		*nsvp = store->svp_num;
-		
+
 		/* get profile */
 		for (i=0;i<*nsvp;i++)
 			{
@@ -1498,7 +1498,7 @@ int mbsys_elac_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		store->svp_num = MIN(nsvp, MBSYS_ELAC_MAXSVP);
-		
+
 		/* get profile */
 		for (i=0;i<store->svp_num;i++)
 			{
@@ -1521,7 +1521,7 @@ int mbsys_elac_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elac_copy(int verbose, void *mbio_ptr, 
+int mbsys_elac_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {

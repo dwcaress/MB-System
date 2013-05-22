@@ -2,7 +2,7 @@
  *    The MB-system:	mbtime.c	6/5/2008
  *    $Id$
  *
- *    Copyright (c) 2008-2012 by
+ *    Copyright (c) 2008-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBTIME converts time values between epoch seconds (seconds since 
+ * MBTIME converts time values between epoch seconds (seconds since
  * 1970/01/01 00:00:00.000000) and calendar time (e.g. 2008/006/05/17/24/32/0).
  * The input time is set using the command line arguments -Mtime_d for
  * epoch seconds and -Tyear/month/day/hour/minute/second/microsecond for
@@ -38,8 +38,8 @@
 #include <string.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 #define MBTIME_INPUT_EPOCH	0
 #define MBTIME_INPUT_CALENDAR	1
@@ -72,7 +72,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhM:m:T:t:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -153,8 +153,8 @@ int main (int argc, char **argv)
 	if (mode == MBTIME_INPUT_EPOCH)
 		{
 		mb_get_date(verbose, time_d, time_i);
-		fprintf(stdout, "%4.4d/%2.2d/%2.2d/%2.2d/%2.2d/%2.2d.%6.6d\n", 
-			time_i[0], time_i[1], time_i[2], 
+		fprintf(stdout, "%4.4d/%2.2d/%2.2d/%2.2d/%2.2d/%2.2d.%6.6d\n",
+			time_i[0], time_i[1], time_i[2],
 			time_i[3], time_i[4], time_i[5], time_i[6]);
 		}
 

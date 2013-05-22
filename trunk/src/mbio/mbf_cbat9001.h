@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_cbat9001.h	8/21/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_cbat9001.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_CBAT9001 format (MBIO id 81).  
+ * to store multibeam data read from the MBF_CBAT9001 format (MBIO id 81).
  *
  * Author:	D. W. Caress
  * Date:	August 21, 1994
@@ -57,7 +57,7 @@
  */
 /*
  * Notes on the MBF_CBAT9001 data format:
- *   1. Reson SeaBat products are high frequency, 
+ *   1. Reson SeaBat products are high frequency,
  *      shallow water multibeam sonars.
  *      Reson SeaBat 9001 systems output both bathymetry
  *      and amplitude information for 60 beams.
@@ -67,10 +67,10 @@
  *      by a combination of amplitude and phase bottom
  *      detection.
  *   2. Reson multibeam systems output raw range and amplitude
- *      data in a binary format. The data acquisition systems 
- *      associated with the sonars calculate bathymetry using 
+ *      data in a binary format. The data acquisition systems
+ *      associated with the sonars calculate bathymetry using
  *      a water sound velocity, roll, pitch, and heave data.
- *   3. Generally, Reson data acquisition systems record 
+ *   3. Generally, Reson data acquisition systems record
  *      navigation asynchronously in the data stream, without
  *      providing speed information. This means that the
  *      navigation must be interpolated on the fly as the
@@ -88,13 +88,13 @@
  *           Reson 8101 data.
  *        MBF_HYPC8101 - the ASCII format used by the HYPACK system
  *           of Coastal Oceanographics in conjunction with
- *           Reson 8101 data. This format is supported as read-only 
+ *           Reson 8101 data. This format is supported as read-only
  *           by MB-System.
  *        MBF_GSFGENMB - the generic sensor format of SAIC which
  *           supports data from a large number of sonars, including
  *           Reson sonars. MB-System handles GSF separately from
  *           other formats.
- *   6. For the UNB-style formats MBF_CBAT9001 and MBF_CBAT8101, 
+ *   6. For the UNB-style formats MBF_CBAT9001 and MBF_CBAT8101,
  *      each data telegram is preceded by a two byte start code and
  *      followed by a three byte end code consisting of 0x03
  *      followed by two bytes representing the checksum for
@@ -216,14 +216,14 @@ struct mbf_cbat9001_struct
 	int	gain3;		/* unused */
 	int	beams_bath;
 	short bath[MBSYS_RESON_MAXBEAMS];
-				/* depths:  0.01 meters */	
+				/* depths:  0.01 meters */
 	short int bath_acrosstrack[MBSYS_RESON_MAXBEAMS];
 				/* acrosstrack distances: 0.01 meters */
 	short int bath_alongtrack[MBSYS_RESON_MAXBEAMS];
 				/* alongtrack distances: 0.01 meters */
 	short int tt[MBSYS_RESON_MAXBEAMS];
 				/* travel times:         0.05 msec */
-	short int angle[MBSYS_RESON_MAXBEAMS];		
+	short int angle[MBSYS_RESON_MAXBEAMS];
 				/* 0.005 degrees */
 	short int quality[MBSYS_RESON_MAXBEAMS];
 				/* 0 (bad) to 3 (good) */
@@ -231,4 +231,3 @@ struct mbf_cbat9001_struct
 				/* ??? */
 
 	};
-

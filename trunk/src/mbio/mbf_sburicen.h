@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_sburicen.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_sburicen.h defines the data structure used by MBIO functions
- * to store multibeam data read from the  MBF_SBURICEN format (MBIO id 14).  
+ * to store multibeam data read from the  MBF_SBURICEN format (MBIO id 14).
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
@@ -76,7 +76,7 @@
  *      center beam is in word 10 of the depth and distance arrays.
  *   4. Comments can be embedded in the data as 100 byte ascii strings,
  *	where the first two characters must always be "cc" so that the
- *      first depth value is 25443.  
+ *      first depth value is 25443.
  *   5. Information on this format was obtained from the Geological
  *      Data Center at the Scripps Institution of Oceanography
  *
@@ -84,7 +84,7 @@
  * mbf_sburicen_data_struct structure holds data (kind = 1) or an
  * ascii comment record (kind = 2).
  *
- * The mbf_sburicen_data_struct structure is a direct representation  
+ * The mbf_sburicen_data_struct structure is a direct representation
  * of the binary data structure used in the MBF_SBURICEN format.
  */
 
@@ -97,7 +97,7 @@ struct mbf_sburicen_data_struct
 	short	axis;		/* navigation error ellipse major axis angle */
 	short	major;		/* navigation error ellipse major axis */
 	short	minor;		/* navigation error ellipse minor axis */
-	unsigned short	sbhdg;	/* Sea Beam gyro heading 
+	unsigned short	sbhdg;	/* Sea Beam gyro heading
 					0 = 0 degrees
 					1 = 0.0055 degrees
 					16384 = 90 degrees

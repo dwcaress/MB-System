@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_cbat8101.h	8/21/94
  *	$Id$
  *
- *    Copyright (c) 1998-2012 by
+ *    Copyright (c) 1998-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_cbat8101.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_CBAT8101 format (MBIO id 82).  
+ * to store multibeam data read from the MBF_CBAT8101 format (MBIO id 82).
  *
  * Author:	D. W. Caress
  * Date:	December 10, 1998
@@ -39,7 +39,7 @@
  */
 /*
  * Notes on the MBF_CBAT8101 data format:
- *   1. Reson SeaBat products are high frequency, 
+ *   1. Reson SeaBat products are high frequency,
  *      shallow water multibeam sonars.
  *      Reson SeaBat 8101 systems output both bathymetry
  *      and amplitude information for 60 beams.
@@ -49,10 +49,10 @@
  *      by a combination of amplitude and phase bottom
  *      detection.
  *   2. Reson multibeam systems output raw range and amplitude
- *      data in a binary format. The data acquisition systems 
- *      associated with the sonars calculate bathymetry using 
+ *      data in a binary format. The data acquisition systems
+ *      associated with the sonars calculate bathymetry using
  *      a water sound velocity, roll, pitch, and heave data.
- *   3. Generally, Reson data acquisition systems record 
+ *   3. Generally, Reson data acquisition systems record
  *      navigation asynchronously in the data stream, without
  *      providing speed information. This means that the
  *      navigation must be interpolated on the fly as the
@@ -70,13 +70,13 @@
  *           Reson 8101 data.
  *        MBF_HYPC8101 - the ASCII format used by the HYPACK system
  *           of Coastal Oceanographics in conjunction with
- *           Reson 8101 data. This format is supported as read-only 
+ *           Reson 8101 data. This format is supported as read-only
  *           by MB-System.
  *        MBF_GSFGENMB - the generic sensor format of SAIC which
  *           supports data from a large number of sonars, including
  *           Reson sonars. MB-System handles GSF separately from
  *           other formats.
- *   6. For the UNB-style formats MBF_CBAT8101 and MBF_CBAT8101, 
+ *   6. For the UNB-style formats MBF_CBAT8101 and MBF_CBAT8101,
  *      each data telegram is preceded by a two byte start code and
  *      followed by a three byte end code consisting of 0x03
  *      followed by two bytes representing the checksum for
@@ -95,28 +95,28 @@
  *            *** Defined only for MB-System
  *   7. For the ASCII HYPACK format, the following information
  *      is take verbatim from Coastal Oceanographics documentation:
- * 
- *        Coastal Oceanographics, Inc. 
+ *
+ *        Coastal Oceanographics, Inc.
  *        Technical Note: Hypack Raw Data Format
- *        
- *        Data collected by the Hypack Survey program is recorded 
+ *
+ *        Data collected by the Hypack Survey program is recorded
  *        in Raw format, one file per survey line. Raw files are
- *        recorded as text, allowing them to be loaded into any 
- *        text editor that reads large files (Windows Notepad, Write 
+ *        recorded as text, allowing them to be loaded into any
+ *        text editor that reads large files (Windows Notepad, Write
  *        and Wordpad for example).
- *        
- *        When inspecting raw files, one of the first things noticed 
+ *
+ *        When inspecting raw files, one of the first things noticed
  *        is that the format is not tabular. That is, there is not a record for
- *        each sounding containing depth, position, tide corrections, 
+ *        each sounding containing depth, position, tide corrections,
  *        etc. Instead, there are separate records for each device
- *        measurement and the correlation between measurements is 
+ *        measurement and the correlation between measurements is
  *        through time tags.
- *        
- *        Every raw file contains two section; a header, which is 
+ *
+ *        Every raw file contains two section; a header, which is
  *        written when data logging starts, and a data section, which is
- *        written as data is collected. Each record starts with a 
+ *        written as data is collected. Each record starts with a
  *        three character tag. The tags are:
- *        
+ *
  *        Header
  *        ------
  *        DEV - Device Information
@@ -132,7 +132,7 @@
  *        PRI - Primary Navigation Device
  *        PTS - Planned Line Waypoint
  *        TND - Survey Time and Date
- *        
+ *
  *        Data
  *        ----
  *        FIX - Fix (Event) Mark
@@ -144,11 +144,11 @@
  *        POS - Position
  *        ROX - Roxann data
  *        SB2 - Multibeam data
- *        
+ *
  *        --------------
  *        Header Section
  *        --------------
- *        
+ *
  *        DEV - Device Information
  *        ------------------------
  *        DEV dn dc "Device Name"
@@ -171,53 +171,53 @@
  *        13 8192 Device accepts output from Hypack
  *        14 16384 xxx
  *        15 32768 Device has extended capabilities
- *        
+ *
  *        Example:
  *        DEV 0 100 "GPS"
- *        
+ *
  *        INF - General Information
  *        -------------------------
  *        INF "surveyor" "boat" "project" "area" tc dc sv
  *        tc: initial tide correction
  *        dc: initial draft correction
  *        sv: sound velocity
- *        
+ *
  *        Example:
  *        INF "steve" "LCH 19" "mcmillen" "617.6 to 618.2" -0.7 0 1500.0
- *        
+ *
  *        EOH - End of Header
  *        -------------------
  *        This tag simply indicates end of header and has no data.
- *        
+ *
  *        EOL - End of Planned Line
  *        -------------------------
  *        This tag simply indicates end of planned line information no data.
- *        
+ *
  *        LBP - Planned Line Begin Point.
  *        -------------------------------
  *        LBP x y
  *        x: x grid position
  *        y: y grid position
- *        
+ *
  *        Example:
  *        LBP 5567222.42 3771640.72
- *        
+ *
  *        LIN - Planned Line Data follows
  *        -------------------------------
  *        LIN nw
  *        nw: Number of waypoints
- *        
+ *
  *        Example:
  *        LIN 5
- *        
+ *
  *        LNN - Planned Line Name
  *        -----------------------
  *        LNN text
  *        text: line name or number
- *        
+ *
  *        Example:
  *        LNN 14
- *        
+ *
  *        OFF - Device Offsets
  *        --------------------
  *        OFF dn n1 n2 n3 n4 n5 n6 n7
@@ -229,10 +229,10 @@
  *        n5: roll rotation angle. Port side up is positive.
  *        n6: pitch rotation angle. Bow up is positive.
  *        n7: device latency in seconds.
- *        
+ *
  *        Example:
  *        OFF 0 0 0 13.35 0 0 0 0.86
- *        
+ *
  *        PRD - Private Device Data
  *        -------------------------
  *        PRD - Multiple transducer offset
@@ -241,40 +241,40 @@
  *        n1: transducer starboard offset
  *        n2: transducer forward offset
  *        n3: transducer depth offset (draft)
- *        
+ *
  *        Example:
  *        PRD 1 OFF -25.60 0.00 0.40
- *        
+ *
  *        PRD - Odom Echoscan II Multibeam Identifier
  *        -------------------------------------------
  *        PRD dn ECHOSCN2 n1 n2
  *        dn: device number
  *        n1: Not used
  *        n2: Beam width
- *        
+ *
  *        Example:
  *        PRD 1 ECHOSCN2 -43.5 3.0
- *        
+ *
  *        PRD - Reson Seabat 9001 Multibeam Identifier
  *        --------------------------------------------
  *        PRD dn SEABAT n1 n2
  *        dn: device number
  *        n1: Not used
  *        n2: Beam width
- *        
+ *
  *        Example:
  *        PRD 1 SEABAT -44.2 1.5
- *        
+ *
  *        PRD - Reson Seabat 9003 Multibeam Identifier
  *        --------------------------------------------
  *        PRD dn SEA9003 n1 n2
  *        dn: device number
  *        n1: Not used
  *        n2: Beam width
- *        
+ *
  *        Example:
  *        PRD 1 SEA9003 -60.0 3.0
- *        
+ *
  *        PRD - Reson Seabat 8101 Multibeam Identifier
  *        --------------------------------------------
  *        PRD dn SEA8101 n1 n2 n3
@@ -282,48 +282,48 @@
  *        n1: Beam 1 angle
  *        n2: Angle increment
  *        n3: Number of beams
- *        
+ *
  *        Example:
  *        PRD 1 SEA8101 -75.00 1.50 101
- *        
+ *
  *        PRI - Primary Navigation Device
  *        -------------------------------
  *        PRI dn
  *        dn: device number
- *        
+ *
  *        Example:
  *        PRI 0
- *        
+ *
  *        PTS - Planned Line Waypoint
  *        ---------------------------
  *        PTS x y
  *        x: waypoint easting
  *        y: waypoint northing
- *        
+ *
  *        Example:
  *        PTS 5569134.63 3774182.61
- *        
+ *
  *        TND - Survey Time and Date
  *        --------------------------
  *        TND t d
  *        t: time string
  *        d: date string
- *        
+ *
  *        Example:
  *        TND 15:54:33 08/28/95
- *        
+ *
  *        --------------------------
  *        Data Section
  *        --------------------------
- *        
+ *
  *        FIX - Fix (Event) Mark
  *        ----------------------
  *        FIX n
  *        n: event number
- *        
+ *
  *        Example:
  *        FIX 152
- *        
+ *
  *        HCP - Heave Compensation
  *        ------------------------
  *        HCP dn t h r p
@@ -332,20 +332,20 @@
  *        h: heave in meters
  *        r: roll in degrees (+ port side up)
  *        p: pitch in degrees (+ bow up)
- *        
+ *
  *        Example:
  *        HCP 2 57273.81 0 3.61 0
- *        
+ *
  *        EC1 - Echo Sounding (single frequency)
  *        --------------------------------------
  *        EC1 dn t rd
  *        dn: device number
  *        t: time tag (seconds past midnight)
  *        rd: raw depth
- *        
+ *
  *        Example:
  *        EC1 0 48077.365 3.20
- *        
+ *
  *        EC2 - Echo Sounding (dual frequency)
  *        ------------------------------------
  *        EC2 dn t rd1 rd2
@@ -353,10 +353,10 @@
  *        t: time tag (seconds past midnight)
  *        rd1: raw depth 1
  *        rd2: raw depth 2
- *        
+ *
  *        Example:
  *        EC2 0 48077.365 3.20 3.15
- *        
+ *
  *        ECM - Echo Soundings (multiple transducer system)
  *        -------------------------------------------------
  *        ECM dn t n rd1 rd2 ... rdn
@@ -367,20 +367,20 @@
  *        rd2: raw depth 2
  *        ...
  *        rdn: raw depth, transducer n
- *        
+ *
  *        Example:
  *        ECM 1 57274.82 9 11 10.8 10.7 11.4 11.8 13 15.1 15.5 15.6
- *        
+ *
  *        GYR - Gyro Data (Heading)
  *        -------------------------
  *        GYR dn t h
  *        dn: device number
  *        t: time tag (seconds past midnight)
  *        h: ship heading angle
- *        
+ *
  *        Example:
  *        GYR 0 57274.04 193
- *        
+ *
  *        POS - Position
  *        --------------
  *        POS dn t x y
@@ -388,10 +388,10 @@
  *        t: time tag (seconds past midnight)
  *        x: easting
  *        y: northing
- *        
+ *
  *        Example:
  *        POS 0 57274.04 5569070.02 3774080.46
- *        
+ *
  *        ROX - Roxann data
  *        -----------------
  *        ROX dn t n e1 e2
@@ -400,10 +400,10 @@
  *        n: number of values to follow (always 2)
  *        e1: roxann e1 measurement
  *        e2: roxann e2 measurement
- *        
+ *
  *        Example:
  *        ROX 2 48077.474 2 0.03 0.13
- *        
+ *
  *        SB2 - Multibeam data
  *        --------------------
  *        SB2 dn t n sv r1 r2 r3 ... rn q1 q2 ... qn
@@ -413,16 +413,16 @@
  *        sv: sound velocity from device.
  *        r1-n: ranges in device units.
  *        q1-n: quality codes (0 to 3 range, 0=bad). Packed 4 per number.
- *        
+ *
  *        Example (Echoscan II):
  *        SB2 1 48077.474 39 1500.00 19.50 19.31 ...
- *        
+ *
  *        Example (Seabat 9001):
  *        SB2 1 48077.474 76 1500.00 19.50 19.31 ...
- *        
+ *
  *        Example (Seabat 9003):
  *        SB2 1 48077.474 51 1500.00 19.50 19.31 ...
- *        
+ *
  *        Example (Seabat 8101 using 101 beams):
  *        SB2 1 48077.474 51 1500.00 19.50 19.31 ...
  *
@@ -530,14 +530,14 @@ struct mbf_cbat8101_struct
 	int	gain3;		/* unused */
 	int	beams_bath;
 	short bath[MBSYS_RESON_MAXBEAMS];
-				/* depths:  0.01 meters */	
+				/* depths:  0.01 meters */
 	short int bath_acrosstrack[MBSYS_RESON_MAXBEAMS];
 				/* acrosstrack distances: 0.01 meters */
 	short int bath_alongtrack[MBSYS_RESON_MAXBEAMS];
 				/* alongtrack distances: 0.01 meters */
 	short int tt[MBSYS_RESON_MAXBEAMS];
 				/* travel times:         0.05 msec */
-	short int angle[MBSYS_RESON_MAXBEAMS];		
+	short int angle[MBSYS_RESON_MAXBEAMS];
 				/* 0.005 degrees */
 	short int quality[MBSYS_RESON_MAXBEAMS];
 				/* 0 (bad) to 3 (good) */
@@ -545,4 +545,3 @@ struct mbf_cbat8101_struct
 				/* ??? */
 
 	};
-

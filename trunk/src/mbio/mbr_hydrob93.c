@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hydrob93.c	9/19/2002
  *	$Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -57,37 +57,37 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_singlebeam.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_singlebeam.h"
 
 /* local defines */
 #define MBF_HYDROB93_RECORD_LENGTH 14
 
 /* essential function prototypes */
-int mbr_register_hydrob93(int verbose, void *mbio_ptr, 
+int mbr_register_hydrob93(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_hydrob93(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_hydrob93(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_hydrob93(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error);
@@ -116,54 +116,54 @@ int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hydrob93(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_hydrob93(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_hydrob93;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_hydrob93; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_singlebeam_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_singlebeam_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_hydrob93; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_hydrob93; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_singlebeam_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_singlebeam_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_singlebeam_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_singlebeam_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_singlebeam_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_singlebeam_extract_altitude; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_hydrob93;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_singlebeam_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_singlebeam_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_hydrob93;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_hydrob93;
+	mb_io_ptr->mb_io_dimensions = &mbsys_singlebeam_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_singlebeam_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_singlebeam_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_singlebeam_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_singlebeam_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_singlebeam_extract_altitude;
 	mb_io_ptr->mb_io_insert_altitude = NULL;
-	mb_io_ptr->mb_io_extract_svp = NULL; 
+	mb_io_ptr->mb_io_extract_svp = NULL;
 	mb_io_ptr->mb_io_insert_svp = NULL;
-	mb_io_ptr->mb_io_ttimes = &mbsys_singlebeam_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_singlebeam_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_singlebeam_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_ttimes = &mbsys_singlebeam_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_singlebeam_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_singlebeam_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -211,25 +211,25 @@ int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_hydrob93(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_hydrob93(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_hydrob93";
@@ -270,7 +270,7 @@ int mbr_info_hydrob93(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -328,7 +328,7 @@ int mbr_alm_hydrob93(int verbose, void *mbio_ptr, int *error)
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* set number of header records read to zero */
 	mb_io_ptr->save1 = 0;
 
@@ -414,7 +414,7 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* read next record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 	if ((status = fread(line,1,MBF_HYDROB93_RECORD_LENGTH,
-			mb_io_ptr->mbfp)) == MBF_HYDROB93_RECORD_LENGTH) 
+			mb_io_ptr->mbfp)) == MBF_HYDROB93_RECORD_LENGTH)
 		{
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
@@ -431,10 +431,10 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if (status == MB_SUCCESS)
 	    {
 	    /* parse data */
-	    mb_get_binary_int(MB_YES, &line[0], (int *) &ilatitude); 
-	    mb_get_binary_int(MB_YES, &line[4], (int *) &ilongitude); 
-	    mb_get_binary_int(MB_YES, &line[8], (int *) &idepth); 
-	    mb_get_binary_short(MB_YES, &line[12], (short *) &itype); 
+	    mb_get_binary_int(MB_YES, &line[0], (int *) &ilatitude);
+	    mb_get_binary_int(MB_YES, &line[4], (int *) &ilongitude);
+	    mb_get_binary_int(MB_YES, &line[8], (int *) &idepth);
+	    mb_get_binary_short(MB_YES, &line[12], (short *) &itype);
 	    store->longitude = (ilongitude) * 0.000001;
 	    store->latitude = (ilatitude) * 0.000001;
 	    store->bath = (idepth) * 0.1;
@@ -451,7 +451,7 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    store->roll = 0.0;
 	    store->pitch = 0.0;
 	    store->heave = 0.0;
-	    
+
 	    /* set kind */
 	    if (itype == 711 || itype == 10711)
 	    	store->kind = MB_DATA_DATA;
@@ -486,13 +486,13 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"dbg4       status:       %d\n",status);
 			}
 	    	}
-	    	
+
 	    else
-	    	{	    	
+	    	{
 	    	status = MB_FAILURE;
 	   	*error = MB_ERROR_UNINTELLIGIBLE;
 	    	}
-		
+
 	    }
 
 	/* set error and kind in mb_io_ptr */
@@ -556,7 +556,7 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    fprintf(stderr,"dbg4       error:        %d\n",*error);
 		    fprintf(stderr,"dbg4       status:       %d\n",status);
 		    }
-		    
+
 	    /* put data into buffer */
 	    ilongitude = (int)(1000000 * store->longitude);
 	    ilatitude = (int)(1000000 * store->longitude);
@@ -567,14 +567,14 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    	itype = 0;
 	    else
 	    	itype = 10711;
-	    mb_put_binary_int(MB_YES, (int) ilatitude, (void *) &line[0]); 
-	    mb_put_binary_int(MB_YES, (int) ilongitude, (void *) &line[4]); 
-	    mb_put_binary_int(MB_YES, (int) idepth, (void *) &line[8]); 
-	    mb_put_binary_short(MB_YES, (short) itype, (void *) &line[12]); 
+	    mb_put_binary_int(MB_YES, (int) ilatitude, (void *) &line[0]);
+	    mb_put_binary_int(MB_YES, (int) ilongitude, (void *) &line[4]);
+	    mb_put_binary_int(MB_YES, (int) idepth, (void *) &line[8]);
+	    mb_put_binary_short(MB_YES, (short) itype, (void *) &line[12]);
 	    }
 
 	if ((status = fwrite(line,1,MBF_HYDROB93_RECORD_LENGTH,
-		mb_io_ptr->mbfp)) == MBF_HYDROB93_RECORD_LENGTH) 
+		mb_io_ptr->mbfp)) == MBF_HYDROB93_RECORD_LENGTH)
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;

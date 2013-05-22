@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hs10jams.c	12/4/00
  *	$Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -65,11 +65,11 @@
  *      consists of 800 byte binary records in which only the
  *      lower 4 bits of each byte are used.
  *   4. The actual data files provided to WHOI seem to be simple
- *      717 byte ASCII records with time, lat, lon, heading, 
- *      center beam depth, 45 depths, 45 acrosstrack distances, 
- *      45 beam amplitudes, and a <CR><LF> terminator. Format 
+ *      717 byte ASCII records with time, lat, lon, heading,
+ *      center beam depth, 45 depths, 45 acrosstrack distances,
+ *      45 beam amplitudes, and a <CR><LF> terminator. Format
  *      171 supports the actual data we received.
- *   5. The data received use 5 characters each for depth, 
+ *   5. The data received use 5 characters each for depth,
  *      acrosstrack, and amplitude values. Null beams have
  *      depth values of 29999 and acrosstrack values of 99999.
  *      MB-System supports beam flagging by setting flagged
@@ -82,25 +82,25 @@
  *      where the first two bytes of the record are "##".
  *      Comment records are variable length.
  *   8. The raw data format specification is as follows:
- * 
+ *
  *      ----------------------------------------------------------
  *      HS-10 MNBES Data Format - JAMSTEC
- *      
+ *
  *      800 bytes/record, 10 records/block
- *      
+ *
  *      Note: 4 bits from LSB is effective in each byte.
  *           zB. 30 30 35 39 ---> 0 0 5 9 (HEX) = 89 (DEC)
  *               30 30 32 3D ---> 0 0 2 D (HEX) = 45 (DEC)
  *      The HS-10 processor calculates the water depth by use of
- *      average sound velocity and by correcting the difference 
- *      between the true angle of the sound path (obtained by the 
- *      true sound velocity profile) and the nominal angle of each 
- *      beam (every 2 degrees). The horizontal distance of the n-th 
+ *      average sound velocity and by correcting the difference
+ *      between the true angle of the sound path (obtained by the
+ *      true sound velocity profile) and the nominal angle of each
+ *      beam (every 2 degrees). The horizontal distance of the n-th
  *      beam is
  *              Distance(n) = Depth(n) * tan[T(n)],
- *      where T(n) is the nominal angle of the n-th beam: 
+ *      where T(n) is the nominal angle of the n-th beam:
  *              ( T(n) = 2 * (n-23) degrees, n=1,45 ).
- *      
+ *
  *      No.  Bytes  Data
  *       1.    4    Year
  *       2.    4    Month
@@ -162,9 +162,9 @@
  *      49.    4    Sonar mode [0]
  *      50.         not used
  *      ----------------------------------------------------------
- * 
+ *
  */
- 
+
 #define	MBF_HS10JAMS_MAXLINE	800
 #define	MBF_HS10JAMS_LENGTH	717
 
@@ -174,34 +174,34 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_hs10.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_hs10.h"
 
 /* essential function prototypes */
-int mbr_register_hs10jams(int verbose, void *mbio_ptr, 
+int mbr_register_hs10jams(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_hs10jams(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_hs10jams(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_hs10jams(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_hs10jams(int verbose, void *mbio_ptr, int *error);
@@ -230,54 +230,54 @@ int mbr_register_hs10jams(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hs10jams(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_hs10jams(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_hs10jams;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_hs10jams; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_hs10_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_hs10_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_hs10jams; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_hs10jams; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_hs10_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_hs10_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_hs10_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_hs10_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_hs10_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_hs10_extract_altitude; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_hs10jams;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_hs10_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_hs10_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_hs10jams;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_hs10jams;
+	mb_io_ptr->mb_io_dimensions = &mbsys_hs10_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_hs10_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_hs10_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_hs10_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_hs10_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_hs10_extract_altitude;
 	mb_io_ptr->mb_io_insert_altitude = NULL;
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_hs10_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_hs10_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_hs10_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_hs10_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_hs10_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_hs10_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -325,25 +325,25 @@ int mbr_register_hs10jams(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_hs10jams(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_hs10jams(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_hs10jams";
@@ -384,7 +384,7 @@ int mbr_info_hs10jams(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -521,8 +521,8 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next record */
-	if ((line_ptr = fgets(line, MBF_HS10JAMS_MAXLINE, 
-			mb_io_ptr->mbfp)) != NULL) 
+	if ((line_ptr = fgets(line, MBF_HS10JAMS_MAXLINE,
+			mb_io_ptr->mbfp)) != NULL)
 		{
 		mb_io_ptr->file_bytes += strlen(line);
 		if (strlen(line) >= MBF_HS10JAMS_LENGTH-2
@@ -554,11 +554,11 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			for (i=0;i<MBSYS_HS10_COMMENT;i++)
 				store->comment[i] = '\0';
 			store->kind = MB_DATA_COMMENT;
-			strncpy(store->comment, &line[2], 
-				MIN(MBSYS_HS10_COMMENT, 
+			strncpy(store->comment, &line[2],
+				MIN(MBSYS_HS10_COMMENT,
 				    strlen(&line[2]) - 2));
 			}
-		
+
 		/* deal with survey ping */
 		else
 			{
@@ -581,19 +581,19 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_get_int(&store->lonmin, &line[shift], 5); shift += 5;
 			mb_get_int(&store->heading, &line[shift], 4); shift += 4;
 			mb_get_int(&store->center_depth, &line[shift], 5); shift += 5;
-			
+
 			/* get depth */
 			for (i=0;i<MBSYS_HS10_BEAMS;i++)
 				 {
 				 mb_get_int(&store->depth[i], &line[shift], 5); shift += 5;
 				 }
-			
+
 			/* get acrosstrack */
 			for (i=0;i<MBSYS_HS10_BEAMS;i++)
 				 {
 				 mb_get_int(&store->acrosstrack[i], &line[shift], 5); shift += 5;
 				 }
-			
+
 			/* get amplitude */
 			for (i=0;i<MBSYS_HS10_BEAMS;i++)
 				 {
@@ -607,8 +607,8 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr->new_kind = store->kind;
 
 	/* print debug statements */
-	if (verbose >= 5 
-		&& status == MB_SUCCESS 
+	if (verbose >= 5
+		&& status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
@@ -631,8 +631,8 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"dbg5       %2d %5d %5d %5d\n",
 				i,store->depth[i],store->acrosstrack[i],store->amplitude[i]);
 		}
-	else if (verbose >= 5 
-		&& status == MB_SUCCESS 
+	else if (verbose >= 5
+		&& status == MB_SUCCESS
 		&& store->kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"\ndbg5  Comment read in MBIO function <%s>\n",function_name);
@@ -681,7 +681,7 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	store = (struct mbsys_hs10_struct *) store_ptr;
 
 	/* write out debug info */
-	if (verbose >= 5 
+	if (verbose >= 5
 		&& store->kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"\ndbg5  Values to write in MBIO function <%s>\n",function_name);
@@ -701,7 +701,7 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"dbg5       %2d %5d %5d %5d\n",
 				i,store->depth[i],store->acrosstrack[i],store->amplitude[i]);
 		}
-	else if (verbose >= 5 
+	else if (verbose >= 5
 		&& store->kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"\ndbg5  Comment to write in MBIO function <%s>\n",function_name);
@@ -723,21 +723,21 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	else
 		{
 		/* deal with survey ping */
-		sprintf(line, 
-		    "%2d%2d%2d%2d%2d%3d%c%3d%5d%c%3d%5d%4d%5d", 
-		    store->year, 
-		    store->month, 
-		    store->day, 
-		    store->hour, 
-		    store->minute, 
-		    store->tenth_second, 
-		    store->NorS, 
-		    store->latdeg, 
-		    store->latmin, 
-		    store->EorW, 
-		    store->londeg, 
-		    store->lonmin, 
-		    store->heading, 
+		sprintf(line,
+		    "%2d%2d%2d%2d%2d%3d%c%3d%5d%c%3d%5d%4d%5d",
+		    store->year,
+		    store->month,
+		    store->day,
+		    store->hour,
+		    store->minute,
+		    store->tenth_second,
+		    store->NorS,
+		    store->latdeg,
+		    store->latmin,
+		    store->EorW,
+		    store->londeg,
+		    store->lonmin,
+		    store->heading,
 		    store->center_depth);
 		shift = 40;
 		for (i=0;i<MBSYS_HS10_BEAMS;i++)

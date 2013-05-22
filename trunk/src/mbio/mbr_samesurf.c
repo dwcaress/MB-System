@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_samesurf.c	6/13/2002
  *	$Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -61,12 +61,12 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/sapi.h"
-#include "../../include/mbsys_surf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "../surf/sapi.h"
+#include "mbsys_surf.h"
 
 /* essential function prototypes */
 int mbr_register_samesurf(int verbose, void *mbio_ptr,
@@ -146,7 +146,7 @@ int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_surf_deall;
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_samesurf;
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_samesurf;
-	mb_io_ptr->mb_io_dimensions = &mbsys_surf_dimensions; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_surf_dimensions;
 	mb_io_ptr->mb_io_extract = &mbsys_surf_extract;
 	mb_io_ptr->mb_io_insert = &mbsys_surf_insert;
 	mb_io_ptr->mb_io_extract_nav = &mbsys_surf_extract_nav;
@@ -228,7 +228,7 @@ int mbr_info_samesurf(int verbose,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
-			int *svp_source, 
+			int *svp_source,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
 			int *error)

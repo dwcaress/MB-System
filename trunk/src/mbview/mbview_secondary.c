@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_secondary.c	9/25/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2012 by
+ *    Copyright (c) 2003-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -92,8 +92,8 @@
 #include "mb_glwdrawa.h"
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* mbview include */
 #include "mbview.h"
@@ -161,7 +161,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance,
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* set values */
         data->secondary_grid_projection_mode = secondary_grid_projection_mode;
         strcpy(data->secondary_grid_projection_id, secondary_grid_projection_id);
@@ -177,9 +177,9 @@ int mbview_setsecondarygrid(int verbose, size_t instance,
         data->secondary_ymax = secondary_ymax;
         data->secondary_dx = secondary_dx;
         data->secondary_dy = secondary_dy;
-	
+
 	/* allocate required arrays */
-    	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->secondary_nxy, 
+    	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->secondary_nxy,
     				(void **)&data->secondary_data, error);
 	if (status != MB_SUCCESS)
 	    {
@@ -188,10 +188,10 @@ int mbview_setsecondarygrid(int verbose, size_t instance,
 		    function_name);
 	    exit(*error);
 	    }
-	
+
 	/* copy grid */
 	memcpy(data->secondary_data, secondary_data, data->secondary_nxy * sizeof(float));
-	
+
 	/* check if secondary grid has same bounds and dimensions as primary grid so
 		that overlay calculations are trivial */
 	if (data->secondary_nx == data->primary_nx
@@ -209,7 +209,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance,
 		&& data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
 		{
 		/* set projection for getting lon lat */
-		proj_status = mb_proj_init(mbv_verbose, 
+		proj_status = mb_proj_init(mbv_verbose,
 					data->secondary_grid_projection_id,
 					&(view->secondary_pjptr),
 					error);
@@ -217,7 +217,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance,
 			view->secondary_pj_init = MB_YES;
 /*fprintf(stderr,"SECONDARY GRID PROJECTION:%d %ld %s\n",
 view->secondary_pj_init,(size_t)view->secondary_pjptr,data->secondary_grid_projection_id);*/
-			
+
 		/* quit if projection fails */
 		if (proj_status != MB_SUCCESS)
 			{
@@ -230,10 +230,10 @@ view->secondary_pj_init,(size_t)view->secondary_pjptr,data->secondary_grid_proje
 			exit(*error);
 			}
 		}
-		
+
 	/* reset histogram flag */
 	view->secondary_histogram_set = MB_NO;
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -282,7 +282,7 @@ int mbview_updatesecondarygrid(int verbose, size_t instance,
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* set value */
 	if (secondary_nx == data->secondary_nx
 		&& secondary_ny == data->secondary_ny)
@@ -295,7 +295,7 @@ int mbview_updatesecondarygrid(int verbose, size_t instance,
 				{
 				data->secondary_min = data->secondary_data[k];
 				data->secondary_max = data->secondary_data[k];
-				first = MB_NO;	
+				first = MB_NO;
 				}
 			else if (secondary_data[k] != data->secondary_nodatavalue)
 				{
@@ -304,7 +304,7 @@ int mbview_updatesecondarygrid(int verbose, size_t instance,
 				}
 			}
 		}
-		
+
 	/* reset plotting and colors */
 	view->lastdrawrez = MBV_REZ_NONE;
 	mbview_setcolorparms(instance);
@@ -312,7 +312,7 @@ int mbview_updatesecondarygrid(int verbose, size_t instance,
 
 	/* reset histogram flag */
 	view->secondary_histogram_set = MB_NO;
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -361,7 +361,7 @@ int mbview_updatesecondarygridcell(int verbose, size_t instance,
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* set value */
 	if (secondary_ix >= 0 && secondary_ix < data->secondary_nx
 		&& secondary_jy >= 0 && secondary_jy < data->secondary_ny)
@@ -370,7 +370,7 @@ int mbview_updatesecondarygridcell(int verbose, size_t instance,
 		k = secondary_ix * data->secondary_ny + secondary_jy;
 		data->secondary_data[k] = value;
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -426,7 +426,7 @@ int mbview_setsecondarycolortable(int verbose, size_t instance,
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* set values */
         data->secondary_colortable = secondary_colortable;
         data->secondary_colortable_mode = secondary_colortable_mode;
@@ -440,42 +440,42 @@ int mbview_setsecondarycolortable(int verbose, size_t instance,
 	if (XtIsManaged(view->mb3dview.mbview_textField_overlaymin))
 		{
 		sprintf(value_text,"%g", data->secondary_colortable_min);
-		XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymin, 
+		XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymin,
 				value_text);
 		sprintf(value_text,"%g", data->secondary_colortable_max);
-		XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymax, 
+		XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymax,
 				value_text);
 		if (data->secondary_colortable_mode == MBV_COLORTABLE_NORMAL)
 			{
-	    		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_ctoh, 
+	    		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_ctoh,
 				TRUE, TRUE);
 			}
 		else
 			{
-	    		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_htoc, 
+	    		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_htoc,
 				TRUE, TRUE);
 			}
 		}
 	if (XtIsManaged(view->mb3dview.mbview_textField_overlay_amp))
 		{
 		sprintf(value_text,"%g", data->overlay_shade_magnitude);
-		XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp, 
+		XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp,
 				value_text);
 		sprintf(value_text,"%g", data->overlay_shade_center);
-		XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_center, 
+		XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_center,
 				value_text);
 		if (data->overlay_shade_mode == MBV_COLORTABLE_NORMAL)
 			{
-	    		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh, 
+	    		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh,
 				TRUE, TRUE);
 			}
 		else
 			{
-	    		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_htoc, 
+	    		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_htoc,
 				TRUE, TRUE);
 			}
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -523,12 +523,12 @@ int mbview_setsecondaryname(int verbose, size_t instance,
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* set secondary grid labels */
  	if (XtIsManaged(view->mb3dview.mbview_toggleButton_data_secondary))
 		{
 		ac = 0;
-        	tmp0 = (XmString) BX_CONVERT(view->mb3dview.mbview_toggleButton_data_secondary, (char *)name, 
+        	tmp0 = (XmString) BX_CONVERT(view->mb3dview.mbview_toggleButton_data_secondary, (char *)name,
                 	XmRXmString, 0, &argok);
         	XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
 		XtSetValues(view->mb3dview.mbview_toggleButton_data_secondary, args, ac);
@@ -536,13 +536,13 @@ int mbview_setsecondaryname(int verbose, size_t instance,
 
 		ac = 0;
 		sprintf(value_text, "Shading by %s", name);
-        	tmp0 = (XmString) BX_CONVERT(view->mb3dview.mbview_toggleButton_overlay_secondary, (char *)value_text, 
+        	tmp0 = (XmString) BX_CONVERT(view->mb3dview.mbview_toggleButton_overlay_secondary, (char *)value_text,
                 	XmRXmString, 0, &argok);
         	XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_secondary, args, ac);
         	XmStringFree((XmString)tmp0);
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -559,4 +559,3 @@ int mbview_setsecondaryname(int verbose, size_t instance,
 }
 
 /*------------------------------------------------------------------------------*/
-

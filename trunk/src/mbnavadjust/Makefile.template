@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  6/23/95
 #	$Id$
 #
-#     Copyright (c) 2000-2011 by 
+#     Copyright (c) 2000-2013 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,37 +16,6 @@
 # Date:		September 7, 2000
 #
 # $Log: Makefile.template,v $
-# Revision 5.8  2009/03/13 07:05:58  caress
-# Release 5.1.2beta02
-#
-# Revision 5.7  2006/11/10 22:36:05  caress
-# Working towards release 5.1.0
-#
-# Revision 5.6  2006/06/16 19:30:58  caress
-# Check in after the Santa Monica Basin Mapping AUV Expedition.
-#
-# Revision 5.5  2006/03/06 21:38:15  caress
-# Changed libproj and libgsf to libmbproj and libmbgsf.
-#
-# Revision 5.4  2003/07/27 20:49:38  caress
-# Release 5.0.0
-#
-# Revision 5.3  2003/03/10 20:01:31  caress
-# Added mr1pr library.
-#
-# Revision 5.2  2002/07/20 20:45:56  caress
-# Release 5.0.beta20
-#
-# Revision 5.1  2001/06/30 17:40:46  caress
-# Release 5.0.beta02
-#
-# Revision 5.0  2001/03/22  21:08:55  caress
-# Trying to make release 5.0.beta0
-#
-# Revision 1.1  2000/09/30  07:21:32  caress
-# Initial revision
-#
-#
 #
 
 ### sets locations of vital objects
@@ -60,7 +29,7 @@ INCDIR = ../../include
 MOTIFINCDIR = /usr/include/Xm
 MOTIFLIBS = -lXm -lXt -lX11
 #
-# Compilers 
+# Compilers
 CC = cc
 #
 # Compile and load flags:
@@ -110,20 +79,18 @@ $(BINDIR)/mbnavadjust: mbnavadjust.o \
 
 ### compile the source files
 mbnavadjust.o: mbnavadjust.c mbnavadjust_creation.h mbnavadjust.h \
-	mbnavadjust_extrawidgets.h
-	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbnavadjust.c
+	mbnavadjust_extrawidgets.h ../mbaux/mb_aux.h
+	$(CC) $(CFLAGS) -I../mbio -I../mbaux -I$(MOTIFINCDIR) -c mbnavadjust.c
 mbnavadjust_creation.o: mbnavadjust_creation.c mbnavadjust_creation.h
-	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbnavadjust_creation.c
+	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbnavadjust_creation.c
 mbnavadjust_callbacks.o: mbnavadjust_callbacks.c mbnavadjust.h mbnavadjust_creation.h \
-	mbnavadjust_extrawidgets.h $(INCDIR)/mb_xgraphics.h
-	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbnavadjust_callbacks.c
+	mbnavadjust_extrawidgets.h ../mbaux/mb_xgraphics.h
+	$(CC) $(CFLAGS) -I../mbio -I../mbaux -I$(MOTIFINCDIR) -c mbnavadjust_callbacks.c
 mbnavadjust_util.o: mbnavadjust_util.c mbnavadjust_creation.h
-	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbnavadjust_util.c
-mbnavadjust_prog.o: mbnavadjust_prog.c mbnavadjust.h  $(INCDIR)/mb_format.h \
-		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h $(INCDIR)/mb_xgraphics.h
-	$(CC) $(CFLAGS) -I$(INCDIR) -c mbnavadjust_prog.c
+	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbnavadjust_util.c
+mbnavadjust_prog.o: mbnavadjust_prog.c mbnavadjust.h  ../mbio/mb_format.h \
+		../mbio/mb_io.h ../mbio/mb_status.h ../mbio/mb_define.h ../mbaux/mb_aux.h ../mbaux/mb_xgraphics.h
+	$(CC) $(CFLAGS) -I../mbio -I../mbaux -c mbnavadjust_prog.c
 
-clean: 
+clean:
 	rm -f core *.o
-
-

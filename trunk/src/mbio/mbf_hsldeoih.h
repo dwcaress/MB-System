@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hsldeoih.h	3/11/93
  *	$Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_hsldeoih.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_HSLDEOIH format (MBIO id 24).  
+ * to store multibeam data read from the MBF_HSLDEOIH format (MBIO id 24).
  *
  * Author:	D. W. Caress
  * Date:	March 11, 1993
@@ -77,10 +77,10 @@
  *        ERGNPOSI:  navigation source
  *        ERGNMESS:  across-track "survey" bathymetry
  *        ERGNEICH:  along-track "calibration" bathymetry
- *        ERGNLSZT:  travel times associated with 
+ *        ERGNLSZT:  travel times associated with
  *                   ERGNMESS or ERGNEICH records
  *        ERGNCTDS:  water sound velocity profile
- *        ERGNAMPL:  amplitudes associated with 
+ *        ERGNAMPL:  amplitudes associated with
  *                   ERGNMESS or ERGNEICH records
  *        LDEOCOMM:  comment records (an L-DEO extension)
  *   4. A single ping usually results in the following series of
@@ -94,10 +94,10 @@
  *   5. The kind value in the mbf_hsldeoih_struct indicates whether the
  *      mbf_hsldeoih_data_struct structure holds data from a ping or
  *      data from some other record:
- *        kind = 1 : data from a survey ping 
+ *        kind = 1 : data from a survey ping
  *                   (ERGNMESS + ERGNSLZT + ERGNAMPL)
  *        kind = 2 : comment (LDEOCOMM)
- *        kind = 4 : data from a calibrate ping 
+ *        kind = 4 : data from a calibrate ping
  *                   (ERGNEICH + ERGNSLZT + ERGNAMPL)
  *        kind = 5 : mean and keel velocity (ERGNHYDI)
  *        kind = 6 : water velocity profile (ERGNCTDS)
@@ -113,20 +113,20 @@
  *      the kind of data contained in the record.  The length of the
  *      record will depend on the kind.  The data structures associated
  *      with the different data records are defined below.
- *   10. This format is envisioned as the L-DEO in-house archive format 
+ *   10. This format is envisioned as the L-DEO in-house archive format
  *      for processed Hydrosweep DS data.
  *   11. The kind values have changed. In older versions the definitions
  *      where:
- *        kind = 1 : data from a survey ping 
+ *        kind = 1 : data from a survey ping
  *                   (ERGNMESS + ERGNSLZT + ERGNAMPL)
  *        kind = 2 : comment (LDEOCOMM)
- *        kind = 3 : data from a calibrate ping 
+ *        kind = 3 : data from a calibrate ping
  *                   (ERGNEICH + ERGNSLZT + ERGNAMPL)
  *        kind = 4 : mean and keel velocity (ERGNHYDI)
  *        kind = 5 : water velocity profile (ERGNCTDS)
  *        kind = 6 : standby navigation (ERGNPARA)
  *        kind = 7 : navigation source (ERGNPOSI)
- *      The code checks for and fixes older data files on read, 
+ *      The code checks for and fixes older data files on read,
  *      using the record size values to check for bad kind values.
  */
 
@@ -157,9 +157,9 @@
 #define MBF_HSLDEOIH_OLDKIND_NAV_SOURCE		7
 
 /* array matching gain values to appropriate beam */
-static int which_gain[MBSYS_HSDS_BEAMS] = 
+static int which_gain[MBSYS_HSDS_BEAMS] =
 			{ 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-			  4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 
+			  4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6,
 			  7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
 			 10,10,10,10,11,11,11,11,12,12,12,12,
 			 13,13,13,13,14,14,14,14,15 };

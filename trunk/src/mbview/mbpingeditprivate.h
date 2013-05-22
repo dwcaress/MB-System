@@ -2,7 +2,7 @@
  *    The MB-system:	mb3dsoundingsprivate.h	11/19/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2012 by
+ *    Copyright (c) 2007-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -59,7 +59,7 @@
 #define MBP_LEFT_WIDTH		40
 #define MBP_LEFT_HEIGHT		40
 #define	MBP_NUM_COLORS   11
- 
+
 #define MBP_OPENGL_WIDTH 3.0
 #define MBP_OPENGL_ZMIN2D -5.0
 #define MBP_OPENGL_ZMAX2D 1000.0
@@ -94,7 +94,7 @@ struct mbpingedit_world_struct
     {
     /* flag if this instance is initialized */
     int			init;
-    
+
     /* function pointers */
     void (*mbpingedit_dismiss_notify)();
     void (*mbpingedit_edit_notify)(int ifile, int iping, int ibeam, char beamflag, int flush);
@@ -102,7 +102,7 @@ struct mbpingedit_world_struct
 
     /* pointer to structure holding data to be rendered */
     struct mbpingedit_struct *soundingdata;
-    
+
     /* widgets and other Xwindows stuff of interest */
     Widget		topLevelShell;
     Widget		mainWindow;
@@ -114,11 +114,11 @@ struct mbpingedit_world_struct
     int			glx_init;
     GLXContext		glx_context;
     int			message_on;
-    
+
     /* mode parameters */
     int			mouse_mode;
     int			edit_mode;
-        
+
     /* cursors */
     Cursor TargetBlackCursor;
     Cursor TargetGreenCursor;
@@ -134,8 +134,8 @@ struct mbpingedit_world_struct
     Cursor BoatBlackCursor;
     Cursor BoatRedCursor;
     Cursor WatchBlackCursor;
-    Cursor WatchRedCursor;    
-    
+    Cursor WatchRedCursor;
+
     /* drawing variables */
     float elevation;
     float azimuth;
@@ -169,7 +169,7 @@ struct mbpingedit_world_struct
     int button_move_y;
     int button_up_x;
     int button_up_y;
-    
+
     /* edit grab parameters */
     int grab_start_defined;
     int grab_end_defined;
@@ -177,13 +177,13 @@ struct mbpingedit_world_struct
     int	grab_start_y;
     int	grab_end_x;
     int	grab_end_y;
-	
+
     /* patch test parameters */
     int	irollbias;
     int	ipitchbias;
     int	iheadingbias;
     int	itimelag;
-    
+
     /* view parameters */
     int	view_boundingbox;
     int	view_flagged;
@@ -216,7 +216,7 @@ EXTERNAL struct mbpingedit_world_struct mbpingedit;
 #ifdef MBPINGEDITGLOBAL
 
 /* library colortables */
-char	*mbpingedit_colorname[MBP_NUM_COLORS] = 
+char	*mbpingedit_colorname[MBP_NUM_COLORS] =
 		{ "Black",
 		  "White",
 		  "Red",

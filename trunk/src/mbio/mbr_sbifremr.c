@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_sbifremr.c	3/29/96
  *	$Id$
  *
- *    Copyright (c) 1996-2012 by
+ *    Copyright (c) 1996-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_sbifremr.c contains the functions for reading and writing
- * multibeam data in the SBIFREMR format.  
+ * multibeam data in the SBIFREMR format.
  * These functions include:
  *   mbr_alm_sbifremr	- allocate read/write memory
  *   mbr_dem_sbifremr	- deallocate read/write memory
@@ -97,38 +97,38 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_sb.h"
-#include "../../include/mbf_sbifremr.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_sb.h"
+#include "mbf_sbifremr.h"
 
 /* angle spacing for SeaBeam Classic */
 #define	ANGLE_SPACING 3.75
 
 /* essential function prototypes */
-int mbr_register_sbifremr(int verbose, void *mbio_ptr, 
+int mbr_register_sbifremr(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_sbifremr(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_sbifremr(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_sbifremr(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_sbifremr(int verbose, void *mbio_ptr, int *error);
@@ -159,54 +159,54 @@ int mbr_register_sbifremr(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_sbifremr(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_sbifremr(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_sbifremr;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_sbifremr; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_sb_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_sb_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_sbifremr; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_sbifremr; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_sb_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_sb_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_sb_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_sb_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_sb_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_sb_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_sb_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_sb_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_sbifremr;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_sb_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_sb_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_sbifremr;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_sbifremr;
+	mb_io_ptr->mb_io_dimensions = &mbsys_sb_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_sb_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_sb_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_sb_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_sb_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_sb_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_sb_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_sb_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -254,25 +254,25 @@ int mbr_register_sbifremr(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_sbifremr(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_sbifremr(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_sbifremr";
@@ -313,7 +313,7 @@ int mbr_info_sbifremr(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -697,7 +697,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error)
 			*error = MB_ERROR_EOF;
 			done = MB_YES;
 			}
-		
+
 		/* deal with comment */
 		else if (nchars > 2 && line[0] == '#' && line[1] == '#')
 			{
@@ -706,7 +706,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error)
 			done = MB_YES;
 			first = MB_YES;
 			}
-			
+
 		/* deal with good line */
 		else if (nchars > 96)
 			{
@@ -722,7 +722,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error)
 				line_save = MB_YES;
 				first = MB_YES;
 				}
-			
+
 			/* else convert and store the data */
 			else if (beam_num > -1 && beam_num < 19)
 				{
@@ -744,15 +744,15 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error)
 
 				/* convert data */
 				data->kind = MB_DATA_DATA;
-				data->lon[beam_num] = 
+				data->lon[beam_num] =
 					lon_deg + lon_min / 60.0;
 				if (EorW == 'W')
-					data->lon[beam_num] 
+					data->lon[beam_num]
 						= -1.0 * data->lon[beam_num];
-				data->lat[beam_num] = 
+				data->lat[beam_num] =
 					lat_deg + lat_min / 60.0;
 				if (NorS == 'S')
-					data->lat[beam_num] 
+					data->lat[beam_num]
 						= -1.0 * data->lat[beam_num];
 				data->deph[beam_num] = -depth;
 				first = MB_NO;
@@ -760,7 +760,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error)
 				}
 			}
 		}
-		
+
 	/* if success convert the data */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
 		{
@@ -777,18 +777,18 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error)
 		data->day = time_j[1];
 		data->min = time_j[2];
 		data->sec = time_j[3];
-		
+
 		/* do nav */
 		data->lon2u = (short int) 60.0 * data->lon[center];
-		data->lon2b = (short int) (600000.0 
+		data->lon2b = (short int) (600000.0
 			* (data->lon[center] - data->lon2u / 60.0));
 		data->lat2u = (short int) 60.0 * (90.0 + data->lat[center]);
 		data->lat2b = (short int) (600000.0
 			* (data->lat[center] + 90.0 - data->lat2u/60.0));
-			
+
 		/* get coordinate scaling */
 		mb_coor_scale(verbose,data->lat[center],&mtodeglon,&mtodeglat);
-		
+
 		/* find port-most and starboard-most beams */
 		beam_port = MBF_SBIFREMR_NUM_BEAMS;
 		beam_starboard = -1;
@@ -824,12 +824,12 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error)
 			}
 		else
 			heading = heading_save;
-		
-			
+
+
 		/* do heading */
 		heading_save = heading;
 		data->sbhdg = (short int) (heading * 182.044444);
-		
+
 		/* if needed try to get center beam lon and lat */
 		if (data->deph[center] == 0)
 			{
@@ -849,23 +849,23 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error)
 					{
 					depth = fabs((double)data->deph[i]);
 					angle = DTR * fabs(MBF_SBIFREMR_ANGLE_SPACING * (i - center));
-					distance = depth * tan(angle); 
-					data->lon[center] += 
-					    data->lon[i] 
-					    - mtodeglon * headingy 
+					distance = depth * tan(angle);
+					data->lon[center] +=
+					    data->lon[i]
+					    - mtodeglon * headingy
 					    * distance;
-					data->lat[center] += 
-					    data->lat[i] 
-					    + mtodeglat * headingx 
+					data->lat[center] +=
+					    data->lat[i]
+					    + mtodeglat * headingx
 					    * distance;
 					count++;
 					}
 				}
 			if (count > 0)
 				{
-				data->lon[center] = 
+				data->lon[center] =
 					data->lon[center] / count;
-				data->lat[center] = 
+				data->lat[center] =
 					data->lat[center] / count;
 				}
 			else
@@ -876,21 +876,21 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error)
 */
 /* end code commented out */
 			}
-		
+
 		/* do acrosstrack distances */
 		if (status == MB_SUCCESS)
 			{
 			for (i=0;i<MBF_SBIFREMR_NUM_BEAMS;i++)
 			    if (data->deph[i] != 0)
 			    {
-			    dx = (data->lon[i] - data->lon[center]) 
+			    dx = (data->lon[i] - data->lon[center])
 				    / mtodeglon;
-			    dy = (data->lat[i] - data->lat[center]) 
+			    dy = (data->lat[i] - data->lat[center])
 				    / mtodeglat;
 			    distance = sqrt(dx * dx + dy * dy);
 			    if (i > center)
 				distance = -distance;
-			    data->dist[i] = distance; 
+			    data->dist[i] = distance;
 			    }
 			}
 		}
@@ -969,7 +969,7 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error)
 		{
 		/* increment ping counter */
 		ping_num_save++;
-		
+
 		/* get time */
 		time_j[0] = data->year;
 		time_j[1] = data->day;
@@ -984,7 +984,7 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error)
 		minute = time_i[4];
 		second = time_i[5];
 		tsecond = 0;
-		
+
 		/* get lon lat */
 		lon = data->lon2u/60. + data->lon2b/600000.;
 		lat = data->lat2u/60. + data->lat2b/600000. - 90.;
@@ -992,14 +992,14 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error)
 			lon = lon - 360.0;
 		else if (lon < -180.0)
 			lon = lon + 360.0;
-		
+
 		/* get coordinate scaling */
 		heading = 0.0054932 * data->sbhdg;
 		data->sbhdg = (short int) (heading * 182.044444);
 		mb_coor_scale(verbose,lat,&mtodeglon,&mtodeglat);
 		headingx = sin(heading * DTR);
 		headingy = cos(heading * DTR);
-		
+
 		/* write beams */
 		for (i=0;i<MBF_SBIFREMR_NUM_BEAMS;i++)
 		    {
@@ -1007,13 +1007,13 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error)
 			{
 			/* increment sounding counter */
 			sounding_num_save++;
-			
+
 			/* get lon lat for beam */
 			data->lon[i] = lon + headingy * mtodeglon
 					* data->dist[i];
 			data->lat[i] = lat - headingx * mtodeglat
 					*data->dist[i];
-			
+
 			/* get printing values */
 			beam_num = 19 - i;
 			if (data->lon[i] > 180.0)
@@ -1038,17 +1038,17 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error)
 				NorS = 'N';
 			lat_deg = (int) data->lat[i];
 			lat_min = (data->lat[i] - lat_deg) * 60.0;
-			
+
 			/* print out beam */
-			fprintf(mbfp, "%c%2.2d%8.4f %c%3.3d%8.4f", 
-				NorS, lat_deg, lat_min, 
+			fprintf(mbfp, "%c%2.2d%8.4f %c%3.3d%8.4f",
+				NorS, lat_deg, lat_min,
 				EorW, lon_deg, lon_min);
 			depth = -data->deph[i];
-			fprintf(mbfp,"%11.3f ****************", 
+			fprintf(mbfp,"%11.3f ****************",
 				depth);
-			fprintf(mbfp, "%7d%4d%7d    0 ", 
+			fprintf(mbfp, "%7d%4d%7d    0 ",
 				ping_num_save, beam_num, sounding_num_save);
-			fprintf(mbfp, "%2d/%2d/%2d %2dh%2dm%2ds00\n", 
+			fprintf(mbfp, "%2d/%2d/%2d %2dh%2dm%2ds00\n",
 				day, month, year, hour, minute, second);
 			}
 		    }

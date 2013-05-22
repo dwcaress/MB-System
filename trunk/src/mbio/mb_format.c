@@ -262,16 +262,16 @@
 #include <sys/stat.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_swap.h"
-#include "../../include/mb_format.h"
-#include "../../include/mbsys_simrad.h"
-#include "../../include/mbsys_simrad2.h"
-#include "../../include/mbsys_simrad3.h"
-#include "../../include/mbsys_jstar.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_process.h"
+#include "mb_io.h"
+#include "mb_swap.h"
+#include "mb_format.h"
+#include "mbsys_simrad.h"
+#include "mbsys_simrad2.h"
+#include "mbsys_simrad3.h"
+#include "mbsys_jstar.h"
 
 /* Alias table for old (pre-version 4.0) format id's */
 static int format_alias_table[] =

@@ -2,7 +2,7 @@
  *    The MB-system:	mbmosaic.c	2/10/97
  *    $Id$
  *
- *    Copyright (c) 1997-2012 by
+ *    Copyright (c) 1997-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -177,12 +177,12 @@
 #include <time.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_info.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_aux.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_info.h"
+#include "mb_process.h"
+#include "mb_aux.h"
 
 /* GMT include files */
 #include "gmt.h"

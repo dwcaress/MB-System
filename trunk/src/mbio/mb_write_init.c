@@ -2,7 +2,7 @@
  *    The MB-system:	mb_write_init.c	1/25/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -214,13 +214,13 @@
 #endif
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_segy.h"
-#include "../../include/sapi.h"
-#include "gsf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mb_segy.h"
+#include "../surf/sapi.h"
+#include "../gsf/gsf.h"
 #include "netcdf.h"
 
 static char rcs_id[]="$Id$";

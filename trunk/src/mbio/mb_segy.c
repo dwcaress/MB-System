@@ -56,10 +56,10 @@
 #include <math.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_segy.h"
-#include "../../include/mb_swap.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_segy.h"
+#include "mb_swap.h"
 
 static char rcs_id[]="$Id$";
 

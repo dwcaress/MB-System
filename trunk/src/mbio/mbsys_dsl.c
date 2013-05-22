@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_dsl.c	3.00	8/5/96
  *	$Id$
  *
- *    Copyright (c) 1996-2012 by
+ *    Copyright (c) 1996-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -91,16 +91,16 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_dsl.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_dsl.h"
 
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_dsl_alloc";
@@ -207,7 +207,7 @@ int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 }
 
 /*--------------------------------------------------------------------*/
-int mbsys_dsl_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_dsl_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_dsl_deall";
@@ -241,7 +241,7 @@ int mbsys_dsl_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_dsl_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_dsl_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_dsl_dimensions";
@@ -303,12 +303,12 @@ int mbsys_dsl_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -365,7 +365,7 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed = 0.0;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 2.0;
 		mb_io_ptr->beamwidth_xtrack = 0.2;
@@ -384,7 +384,7 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			    }
 			else if (store->bat_port[i] < 0.0)
 			    {
-			    beamflag[j] = 
+			    beamflag[j] =
 				MB_FLAG_MANUAL + MB_FLAG_FLAG;
 			    bath[j] = -store->bat_port[i];
 			    }
@@ -402,7 +402,7 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			    }
 			else if (store->bat_stbd[i] < 0.0)
 			    {
-			    beamflag[j] = 
+			    beamflag[j] =
 				MB_FLAG_MANUAL + MB_FLAG_FLAG;
 			    bath[j] = -store->bat_stbd[i];
 			    }
@@ -508,13 +508,13 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -530,7 +530,7 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -562,12 +562,12 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -607,17 +607,17 @@ int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -639,7 +639,7 @@ int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
-		{		
+		{
 		/* get time */
 		store->tv_sec = (int) time_d;
 		store->tv_usec = 1000000 * (time_d - (double) store->tv_sec);
@@ -694,9 +694,9 @@ int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_dsl_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_dsl_ttimes";
@@ -891,7 +891,7 @@ int mbsys_dsl_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_dsl_extract_altitude";
@@ -944,7 +944,7 @@ int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			xtrack_min = dx * (i + 0.5);
 			bath_best = store->bat_stbd[i];
 			}
-		    }		
+		    }
 		if (bath_best <= 0.0)
 		    {
 		    xtrack_min = 99999999.9;
@@ -962,7 +962,7 @@ int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    xtrack_min = dx * (i + 0.5);
 			    bath_best = fabs(store->bat_stbd[i]);
 			    }
-			}		
+			}
 		    }
 		*altitude = bath_best - *transducer_depth;
 
@@ -1010,8 +1010,8 @@ int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_dsl_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_dsl_extract_nav";
@@ -1144,7 +1144,7 @@ int mbsys_dsl_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1178,7 +1178,7 @@ int mbsys_dsl_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_dsl_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1256,7 +1256,7 @@ int mbsys_dsl_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_dsl_copy(int verbose, void *mbio_ptr, 
+int mbsys_dsl_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {

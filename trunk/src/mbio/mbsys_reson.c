@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_reson.c contains the functions for handling the data structure
- * used by MBIO functions to store data from Reson SEABAT multibeam 
+ * used by MBIO functions to store data from Reson SEABAT multibeam
  * sonar systems, including the 9001, 9002, and 8101 sonars.
  * The data formats which are commonly used to store Reson SeaBat
  * data in files include
@@ -121,16 +121,16 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_reson.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_reson.h"
 
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_reson_alloc";
@@ -179,18 +179,18 @@ int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->transducer_depth = 0;	/* tranducer depth (meters) */
 	store->transducer_height = 0;	/* reference height (meters) */
 	store->transducer_x = 0;	/* reference fore-aft offset (meters) */
-	store->transducer_y = 0;	/* reference athwartships 
+	store->transducer_y = 0;	/* reference athwartships
 						offset (meters) */
-	store->antenna_x = 0;		/* antenna athwartships 
+	store->antenna_x = 0;		/* antenna athwartships
 						offset (meters) */
-	store->antenna_y = 0;		/* antenna athwartships 
+	store->antenna_y = 0;		/* antenna athwartships
 						offset (meters) */
 	store->antenna_z = 0;		/* antenna height (meters) */
-	store->motion_sensor_x = 0;	/* motion sensor 
+	store->motion_sensor_x = 0;	/* motion sensor
 						athwartships offset (meters) */
-	store->motion_sensor_y = 0;	/* motion sensor 
+	store->motion_sensor_y = 0;	/* motion sensor
 						athwartships offset (meters) */
-	store->motion_sensor_z = 0;	/* motion sensor 
+	store->motion_sensor_z = 0;	/* motion sensor
 						height offset (meters) */
 	store->spare = 0;
 	store->line_number = 0;
@@ -282,7 +282,7 @@ int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_reson_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_reson_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_reson_deall";
@@ -316,7 +316,7 @@ int mbsys_reson_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_reson_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_reson_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_reson_dimensions";
@@ -378,12 +378,12 @@ int mbsys_reson_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -425,7 +425,7 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[3] = store->hour;
 		time_i[4] = store->minute;
 		time_i[5] = store->second;
-		time_i[6] = 10000*store->hundredth_sec 
+		time_i[6] = 10000*store->hundredth_sec
 			+ 100*store->thousandth_sec;
 		mb_get_time(verbose,time_i,time_d);
 
@@ -438,7 +438,7 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed = 0.0;
-		
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 1.5;
 		mb_io_ptr->beamwidth_xtrack = 1.5;
@@ -466,13 +466,13 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			    }
 			else
 			    {
-			    beamflag[i] 
+			    beamflag[i]
 				= MB_FLAG_MANUAL + MB_FLAG_FLAG;
 			    bath[i] = depthscale*store->bath[i];
 			    }
-			bathacrosstrack[i] 
+			bathacrosstrack[i]
 				= dacrscale*store->bath_acrosstrack[i];
-			bathalongtrack[i] 
+			bathalongtrack[i]
 				= daloscale*store->bath_alongtrack[i];
 			}
 		for (i=0;i<*namp;i++)
@@ -541,7 +541,7 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[3] = store->pos_hour;
 		time_i[4] = store->pos_minute;
 		time_i[5] = store->pos_second;
-		time_i[6] = 10000*store->pos_hundredth_sec 
+		time_i[6] = 10000*store->pos_hundredth_sec
 			+ 100*store->pos_thousandth_sec;
 		mb_get_time(verbose,time_i,time_d);
 
@@ -626,13 +626,13 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -648,7 +648,7 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -674,12 +674,12 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -720,13 +720,13 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
@@ -757,7 +757,7 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->minute = time_i[4];
 		store->second = time_i[5];
 		store->hundredth_sec = time_i[6]/10000;
-		store->thousandth_sec = 
+		store->thousandth_sec =
 			(time_i[6] - 10000*store->hundredth_sec)/100;
 
 		/*get navigation */
@@ -775,7 +775,7 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		reflscale  = 1.0;
 		for (i=0;i<nbath;i++)
 			{
-			if (beamflag[i] 
+			if (beamflag[i]
 			    == MB_FLAG_NULL)
 			    {
 			    store->bath[i] = bath[i]/depthscale;
@@ -793,7 +793,7 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    }
 			store->bath_acrosstrack[i]
 				= bathacrosstrack[i]/dacrscale;
-			store->bath_alongtrack[i] 
+			store->bath_alongtrack[i]
 				= bathalongtrack[i]/daloscale;
 			}
 		for (i=0;i<namp;i++)
@@ -813,7 +813,7 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_minute = time_i[4];
 		store->pos_second = time_i[5];
 		store->pos_hundredth_sec = time_i[6]/10000;
-		store->pos_thousandth_sec = 
+		store->pos_thousandth_sec =
 			(time_i[6] - 10000*store->pos_hundredth_sec)/100;
 
 		/*get navigation */
@@ -846,9 +846,9 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_reson_ttimes";
@@ -897,20 +897,20 @@ int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		heave_use = 0.001 * store->heave;
 		*draft = 0.001 * store->transducer_depth;
 		*ssv = 0.1 * store->sound_vel;
-		
+
 		/* get first starboard angle */
 		icenter = 0;
 		anglemin = 32000;
 		for (i=0;i<*nbeams;i++)
 			{
-			if (store->angle[i] != 0 
+			if (store->angle[i] != 0
 			    && store->angle[i] < anglemin)
 			    {
 			    anglemin = store->angle[i];
 			    icenter = i;
 			    }
 			}
-		if (icenter > 0 
+		if (icenter > 0
 		    && icenter < *nbeams - 1)
 		    {
 		    if (store->angle[icenter+1] < store->angle[icenter-1])
@@ -929,8 +929,8 @@ int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			    angle = 90.0 - angscale * store->angle[i];
 			pitch = angscale * store->pitch;
 			mb_rollpitch_to_takeoff(
-				verbose, pitch, angle, 
-				&angles[i], 
+				verbose, pitch, angle,
+				&angles[i],
 				&angles_forward[i], error);
 			angles_null[i] = angles[i];
 			heave[i] = heave_use;
@@ -1083,7 +1083,7 @@ int mbsys_reson_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_reson_extract_altitude";
@@ -1124,21 +1124,21 @@ int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		dacrscale  = 0.01;
 		if (store->bath[store->beams_bath/2] != 0
 		    && store->quality[store->beams_bath/2] >= 3)
-		    bath_best = depthscale 
+		    bath_best = depthscale
 				* store->bath[store->beams_bath/2];
 		else
 		    {
 		    xtrack_min = 99999999.9;
 		    for (i=0;i<store->beams_bath;i++)
 			{
-			if (store->bath[i] != 0 
+			if (store->bath[i] != 0
 			    && store->quality[i] >= 3
 			    && fabs(store->bath_acrosstrack[i]) < xtrack_min)
 			    {
 			    xtrack_min = fabs(dacrscale * store->bath_acrosstrack[i]);
 			    bath_best = depthscale * store->bath[i];
 			    }
-			}		
+			}
 		    }
 		if (bath_best == 0.0)
 		    {
@@ -1152,7 +1152,7 @@ int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    xtrack_min = fabs(dacrscale * store->bath_acrosstrack[i]);
 			    bath_best = depthscale * store->bath[i];
 			    }
-			}		
+			}
 		    }
 		*transducer_depth = 0.001 * store->transducer_depth
 				    + 0.001 * store->heave;
@@ -1202,8 +1202,8 @@ int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_reson_extract_nav";
@@ -1241,7 +1241,7 @@ int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[3] = store->hour;
 		time_i[4] = store->minute;
 		time_i[5] = store->second;
-		time_i[6] = 10000*store->hundredth_sec 
+		time_i[6] = 10000*store->hundredth_sec
 			+ 100*store->thousandth_sec;
 		mb_get_time(verbose,time_i,time_d);
 
@@ -1321,7 +1321,7 @@ int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[3] = store->pos_hour;
 		time_i[4] = store->pos_minute;
 		time_i[5] = store->pos_second;
-		time_i[6] = 10000*store->pos_hundredth_sec 
+		time_i[6] = 10000*store->pos_hundredth_sec
 			+ 100*store->pos_thousandth_sec;
 		mb_get_time(verbose,time_i,time_d);
 
@@ -1408,7 +1408,7 @@ int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1442,7 +1442,7 @@ int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1495,7 +1495,7 @@ int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->minute = time_i[4];
 		store->second = time_i[5];
 		store->hundredth_sec = time_i[6]/10000;
-		store->thousandth_sec = 
+		store->thousandth_sec =
 			(time_i[6] - 10000*store->hundredth_sec)/100;
 
 		/*get navigation */
@@ -1525,7 +1525,7 @@ int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_minute = time_i[4];
 		store->pos_second = time_i[5];
 		store->pos_hundredth_sec = time_i[6]/10000;
-		store->pos_thousandth_sec = 
+		store->pos_thousandth_sec =
 			(time_i[6] - 10000*store->pos_hundredth_sec)/100;
 
 		/*get navigation */
@@ -1594,7 +1594,7 @@ int mbsys_reson_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		*nsvp = store->svp_num;
-		
+
 		/* get profile */
 		for (i=0;i<*nsvp;i++)
 			{
@@ -1676,7 +1676,7 @@ int mbsys_reson_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		store->svp_num = MIN(nsvp, MBSYS_RESON_MAXSVP);
-		
+
 		/* get profile */
 		for (i=0;i<store->svp_num;i++)
 			{
@@ -1699,7 +1699,7 @@ int mbsys_reson_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_reson_copy(int verbose, void *mbio_ptr, 
+int mbsys_reson_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {

@@ -2,7 +2,7 @@
  *    The MB-system:	mbroutetime.c	5/4/2009
  *    $Id$
  *
- *    Copyright (c) 2009-2012 by
+ *    Copyright (c) 2009-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -36,9 +36,9 @@
 #include <string.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
 
 /* defines */
 #define MBES_ALLOC_NUM			128
@@ -116,7 +116,7 @@ int main (int argc, char **argv)
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
-	
+
 	/* route and auto-line data */
 	char	route_file[MB_PATH_MAXLINE];
 	int	rawroutefile = MB_NO;
@@ -131,12 +131,12 @@ int main (int argc, char **argv)
 	double	*routelat = NULL;
 	double	*routeheading = NULL;
 	int	*routewaypoint = NULL;
-	double	*routetime_d = NULL;	
+	double	*routetime_d = NULL;
 	double	range;
 	double	rangethreshold = 25.0;
 	double	rangelast;
 	int	activewaypoint = 0;
-	
+
 	double	mtodeglon, mtodeglat;
 	double	lastlon;
 	double	lastlat;
@@ -160,7 +160,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "F:f:I:i:O:o:R:r:U:u:VvHh")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -266,7 +266,7 @@ int main (int argc, char **argv)
 		}
 
 	/* read route file */
-	if ((fp = fopen(route_file, "r")) == NULL) 
+	if ((fp = fopen(route_file, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
@@ -356,11 +356,11 @@ int main (int argc, char **argv)
 		fprintf(stderr,"Read %d waypoints from route file: %s\n",
 			nroutepoint, route_file);
 		}
-		
+
 	/* get format if required */
 	if (format == 0)
 		mb_get_format(verbose,read_file,NULL,&format,&error);
-		
+
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
 		read_datalist = MB_YES;
@@ -391,7 +391,7 @@ int main (int argc, char **argv)
 	    strcpy(file, read_file);
 	    read_data = MB_YES;
 	    }
-	
+
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 		{
@@ -430,13 +430,13 @@ int main (int argc, char **argv)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							sizeof(double), (void **)&bathalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&ssacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&ssalongtrack, &error);
 
 		/* if error initializing memory then quit */
@@ -491,15 +491,15 @@ int main (int argc, char **argv)
 					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
 					if (verbose > 0)
-						fprintf(stderr,"> activewaypoint:%d time_d:%f range:%f   lon: %f %f   lat: %f %f\n", 
-							activewaypoint, time_d, range, navlon, 
+						fprintf(stderr,"> activewaypoint:%d time_d:%f range:%f   lon: %f %f   lat: %f %f\n",
+							activewaypoint, time_d, range, navlon,
 							routelon[activewaypoint], navlat, routelat[activewaypoint]);
-							
-					if (range < rangethreshold 
-						&& (activewaypoint == 0 || range > rangelast) 
+
+					if (range < rangethreshold
+						&& (activewaypoint == 0 || range > rangelast)
 						&& activewaypoint < nroutepoint)
 						{
-						fprintf(stderr,"Waypoint %d of %d found with range %f m\n", 
+						fprintf(stderr,"Waypoint %d of %d found with range %f m\n",
 								activewaypoint, nroutepoint, range);
 						routetime_d[activewaypoint] = time_d;
 						activewaypoint++;
@@ -548,11 +548,11 @@ int main (int argc, char **argv)
 		}
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
-		
+
 	/* if the last route point was not reached, add one last waypoint */
 	if (nroutepointfound < nroutepoint)
 		{
-		fprintf(stderr,"Waypoint %d of %d set at end of data with range %f m to next specified waypoint\n", 
+		fprintf(stderr,"Waypoint %d of %d set at end of data with range %f m to next specified waypoint\n",
 				activewaypoint, nroutepoint, range);
 		routelon[nroutepointfound] = lastlon;
 		routelat[nroutepointfound] = lastlat;
@@ -561,13 +561,13 @@ int main (int argc, char **argv)
 		routewaypoint[nroutepointfound] = MBES_ROUTE_WAYPOINT_ENDLINE;
 		nroutepointfound++;
 		}
-		
+
 	/* output time list for the route */
 	if (output_file_set == MB_NO)
 		{
 		sprintf(output_file, "%s_wpttime_d.txt", read_file);
 		}
-	if ((fp = fopen(output_file, "w")) == NULL) 
+	if ((fp = fopen(output_file, "w")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
@@ -581,7 +581,7 @@ int main (int argc, char **argv)
 			fprintf(stderr,"%3d %3d %11.6f %10.6f %10.6f %.6f\n", i, routewaypoint[i], routelon[i], routelat[i], routeheading[i], routetime_d[i]);
 		}
 	fclose(fp);
-		
+
 	/* deallocate route arrays */
 	status = mb_freed(verbose,__FILE__,__LINE__, (void **)&routelon, &error);
 	status = mb_freed(verbose,__FILE__,__LINE__, (void **)&routelat, &error);

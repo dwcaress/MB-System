@@ -2,7 +2,7 @@
  *    The MB-system:	mb_time.c	1/21/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -111,8 +111,8 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* time conversion constants and variables */
 #define SECINYEAR 31536000.0
@@ -151,14 +151,14 @@ int mb_get_time(int verbose, int time_i[7], double *time_d)
 
 	/* get time */
 	yearday = yday[time_i[1]-1];
-	if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0) 
-		|| time_i[0]%400==0) 
-		&& (time_i[1] > 2)) 
+	if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0)
+		|| time_i[0]%400==0)
+		&& (time_i[1] > 2))
 		yearday++;
 	leapday = (time_i[0] - 1969)/4;
-	*time_d = (time_i[0] - 1970)*SECINYEAR 
-		+ (yearday - 1 + leapday + time_i[2])*SECINDAY 
-		+ time_i[3]*SECINHOUR + time_i[4]*SECINMINUTE 
+	*time_d = (time_i[0] - 1970)*SECINYEAR
+		+ (yearday - 1 + leapday + time_i[2])*SECINDAY
+		+ time_i[3]*SECINHOUR + time_i[4]*SECINMINUTE
 		+ time_i[5] + 0.000001*time_i[6];
 
 	/* assume success */
@@ -204,11 +204,11 @@ int mb_get_date(int verbose, double time_d, int time_i[7])
 	/* get the date */
 	daytotal = (int) (time_d/SECINDAY);
 	time_i[3] = (int) ((time_d - daytotal*SECINDAY)/SECINHOUR);
-	time_i[4] = (int) ((time_d - daytotal*SECINDAY 
+	time_i[4] = (int) ((time_d - daytotal*SECINDAY
 			- time_i[3]*SECINHOUR)/SECINMINUTE);
-	time_i[5] = (int) (time_d - daytotal*SECINDAY 
+	time_i[5] = (int) (time_d - daytotal*SECINDAY
 			- time_i[3]*SECINHOUR - time_i[4]*SECINMINUTE);
-	time_i[6] = (int) 1000000*(time_d - daytotal*SECINDAY 
+	time_i[6] = (int) 1000000*(time_d - daytotal*SECINDAY
 			- time_i[3]*SECINHOUR - time_i[4]*SECINMINUTE
 			- time_i[5]);
 	time_i[0] = (int) (time_d/SECINYEAR) + 1970;
@@ -222,11 +222,11 @@ int mb_get_date(int verbose, double time_d, int time_i[7])
 		}
 	leapday = 0;
 	if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0)
-		|| time_i[0]%400 == 0) 
-		&& yearday > yday[2]) 
+		|| time_i[0]%400 == 0)
+		&& yearday > yday[2])
 		leapday = 1;
 	for (i=0;i<12;i++)
-		if (yearday > (yday[i] + leapday)) 
+		if (yearday > (yday[i] + leapday))
 			time_i[1] = i + 1;
 	time_i[2] = yearday - yday[time_i[1]-1] - leapday;
 
@@ -277,7 +277,7 @@ int mb_get_date_string(int verbose, double time_d, char *string)
 	/* get the date */
 	mb_get_date(verbose, time_d, time_i);
 	sprintf(string, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d",
-		time_i[0], time_i[1], time_i[2], time_i[3], 
+		time_i[0], time_i[1], time_i[2], time_i[3],
 		time_i[4], time_i[5], time_i[6]);
 
 	/* assume success */
@@ -298,7 +298,7 @@ int mb_get_date_string(int verbose, double time_d, char *string)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-/* 	function mb_get_jtime returns the day of year calculated 
+/* 	function mb_get_jtime returns the day of year calculated
  *	from (yy/mm/dd/hr/mi/sc). */
 int mb_get_jtime(int verbose, int time_i[7], int time_j[5])
 {
@@ -324,9 +324,9 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5])
 	/* get time with day of year */
 	time_j[0] = time_i[0];
 	time_j[1] = yday[time_i[1]-1] + time_i[2];
-	if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0) 
-		|| time_i[0] % 400 == 0) 
-		&& (time_i[1] > 2)) 
+	if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0)
+		|| time_i[0] % 400 == 0)
+		&& (time_i[1] > 2))
 		time_j[1]++;
 	time_j[2] = time_i[3]*IMININHOUR + time_i[4];
 	time_j[3] = time_i[5];
@@ -385,17 +385,17 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7])
 	time_i[4] = time_j[2] - time_i[3]*IMININHOUR;
 	time_i[5] = time_j[3];
 	time_i[6] = time_j[4];
-	if (((time_j[0] % 4 == 0 && time_j[0] % 100 != 0) 
-		|| time_j[0] % 400 == 0) 
-		&& time_j[1] > yday[2]) 
+	if (((time_j[0] % 4 == 0 && time_j[0] % 100 != 0)
+		|| time_j[0] % 400 == 0)
+		&& time_j[1] > yday[2])
 		leapday = 1;
 	else
 		leapday = 0;
 	time_i[1] = 0;
 	for (i=0;i<12;i++)
-		if (time_j[1] > (yday[i] + leapday)) 
+		if (time_j[1] > (yday[i] + leapday))
 			time_i[1] = i + 1;
-	if(leapday==1 && time_j[1] == yday[2]+1) 
+	if(leapday==1 && time_j[1] == yday[2]+1)
 		leapday=0;
 	time_i[2] = time_j[1] - yday[time_i[1]-1] - leapday;
 

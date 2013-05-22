@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_sbsiocen.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_sbsiocen.h defines the data structure used by MBIO functions
- * to store multibeam data read from the  MBF_SBSIOCEN format (MBIO id 12).  
+ * to store multibeam data read from the  MBF_SBSIOCEN format (MBIO id 12).
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
@@ -68,13 +68,13 @@
  *      data.  This format was created and used by the Scripps
  *      Institution of Oceanography; most data files in this format
  *      consist of Sea Beam data collected on the R/V Thomas Washington.
- *   2. The data consist of 112 byte records including a 4-character 
+ *   2. The data consist of 112 byte records including a 4-character
  *      string, 2-byte integers, and 4-byte integers.
  *   3. The 16 depth values are stored centered in 19 value arrays.  The
  *      center beam is in word 10 of the depth and distance arrays.
  *   4. Comments can be embedded in the data as 112 byte ascii strings,
  *	where the first two characters must always be "##" to set
- *      the comment flag.  
+ *      the comment flag.
  *   5. Information on this format was obtained from the Geological
  *      Data Center at the Scripps Institution of Oceanography
  *
@@ -82,7 +82,7 @@
  * mbf_sbsiocen_data_struct structure holds data (kind = 1) or an
  * ascii comment record (kind = 2).
  *
- * The mbf_sbsiocen_data_struct structure is a direct representation of 
+ * The mbf_sbsiocen_data_struct structure is a direct representation of
  * the binary data structure used in the MBF_SBSIOCEN format.
  */
 
@@ -102,7 +102,7 @@ struct mbf_sbsiocen_data_struct
 	short	lon2b;		/* fraction of minute times 10000 */
 	unsigned short	sbtim;	/* Sea Beam computer clock time in 10ths of
 					seconds from start of hour (0-3600) */
-	unsigned short	sbhdg;	/* Sea Beam gyro heading 
+	unsigned short	sbhdg;	/* Sea Beam gyro heading
 					0 = 0 degrees
 					1 = 0.0055 degrees
 					16384 = 90 degrees

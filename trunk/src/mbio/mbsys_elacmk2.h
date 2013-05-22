@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_elacmk2.h	6/10/97
  *	$Id$
  *
- *    Copyright (c) 1997-2012 by
+ *    Copyright (c) 1997-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -15,7 +15,7 @@
 /*
  * mbsys_elacmk2.h defines the data structures used by MBIO functions
  * to store data from Elac BottomChart Mark II multibeam sonar systems.
- * The data formats which are commonly used to store Elac 
+ * The data formats which are commonly used to store Elac
  * data in files include
  *      MBF_ELMK2UNB : MBIO ID 92
  *
@@ -80,7 +80,7 @@
  *         0x0253: Sound velocity profile                2016 data bytes
  *         0x0258: Mark II general bathymetry wrapper      24 data bytes
  *                 Mark II general bathymetry beam         28 data bytes
- *   6. Elac systems record navigation fixes using the position 
+ *   6. Elac systems record navigation fixes using the position
  *      telegram; navigation is not included in the per ping data.
  *      Since speed is not recorded, it is impossible to extrapolate
  *      position from the last navigation fix when processing the
@@ -239,65 +239,64 @@ struct mbsys_elacmk2_struct
 	int	beams_bath;		/* number of beams stored */
 	struct mbsys_elacmk2_beam_struct beams[MBSYS_ELACMK2_MAXBEAMS];
 	};
-	
+
 /* system specific function prototypes */
-int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_elacmk2_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_elacmk2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_elacmk2_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_elacmk2_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_elacmk2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_elacmk2_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
 int mbsys_elacmk2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, 
-			int *nsvp, 
+			int *kind,
+			int *nsvp,
 			double *depth, double *velocity,
 			int *error);
 int mbsys_elacmk2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp, 
+			int nsvp,
 			double *depth, double *velocity,
 			int *error);
-int mbsys_elacmk2_copy(int verbose, void *mbio_ptr, 
+int mbsys_elacmk2_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

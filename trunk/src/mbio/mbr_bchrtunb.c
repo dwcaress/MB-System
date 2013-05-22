@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_bchrtunb.c contains the functions for reading and writing
- * multibeam data in the BCHRTUNB format.  
+ * multibeam data in the BCHRTUNB format.
  * These functions include:
  *   mbr_alm_bchrtunb	- allocate read/write memory
  *   mbr_dem_bchrtunb	- deallocate read/write memory
@@ -110,38 +110,38 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_elac.h"
-#include "../../include/mbf_bchrtunb.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_elac.h"
+#include "mbf_bchrtunb.h"
 
 /* include for byte swapping */
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 
 /* essential function prototypes */
-int mbr_register_bchrtunb(int verbose, void *mbio_ptr, 
+int mbr_register_bchrtunb(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_bchrtunb(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_bchrtunb(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_bchrtunb(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_bchrtunb(int verbose, void *mbio_ptr, int *error);
@@ -149,35 +149,35 @@ int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error);
 int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, 
+int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error);
 
 static char rcs_id[]="$Id$";
@@ -202,54 +202,54 @@ int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_bchrtunb(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_bchrtunb(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_bchrtunb;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_bchrtunb; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_elac_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_elac_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_bchrtunb; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_bchrtunb; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_elac_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_elac_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_elac_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_elac_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_elac_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_elac_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_elac_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_elac_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_elac_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_elac_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_elac_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_bchrtunb;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_elac_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_elac_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_bchrtunb;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_bchrtunb;
+	mb_io_ptr->mb_io_dimensions = &mbsys_elac_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_elac_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_elac_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_elac_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_elac_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_elac_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_elac_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_elac_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_elac_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_elac_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_elac_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -297,25 +297,25 @@ int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_bchrtunb(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_bchrtunb(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_bchrtunb";
@@ -356,7 +356,7 @@ int mbr_info_bchrtunb(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -505,7 +505,7 @@ int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error)
 		data->roll_offset = 0;	/* roll offset (degrees) */
 		data->pitch_offset = 0;	/* pitch offset (degrees) */
 		data->heading_offset = 0;	/* heading offset (degrees) */
-		data->time_delay = 0;		/* positioning system 
+		data->time_delay = 0;		/* positioning system
 							delay (sec) */
 		data->transducer_port_height = 0;
 		data->transducer_starboard_height = 0;
@@ -658,9 +658,9 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = data->kind;
-	
+
 	/* add nav records to list for interpolation */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_NAV)
 		{
 		mb_fix_y2k(verbose, data->pos_year,&time_i[0]);
@@ -678,9 +678,9 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_DATA
-		&& data->profile[0].longitude == 0 
+		&& data->profile[0].longitude == 0
 		&& data->profile[0].latitude == 0
 		&& mb_io_ptr->nfix >= 1)
 		{
@@ -694,7 +694,7 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			+ 100*data->profile[0].thousandth_sec;
 		mb_get_time(verbose,time_i, &time_d);
 		heading = 0.01 * data->profile[0].heading;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0,
 				    &lon, &lat, &speed, error);
 		data->profile[0].longitude = (int) (lon / 0.00000009);
 		data->profile[0].latitude = (int) (lat / 0.00000009);
@@ -721,17 +721,17 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->heading_offset = data->heading_offset;
 		store->time_delay = data->time_delay;
 		store->transducer_port_height = data->transducer_port_height;
-		store->transducer_starboard_height 
+		store->transducer_starboard_height
 			= data->transducer_starboard_height;
 		store->transducer_port_depth = data->transducer_port_depth;
-		store->transducer_starboard_depth 
+		store->transducer_starboard_depth
 			= data->transducer_starboard_depth;
 		store->transducer_port_x = data->transducer_port_x;
 		store->transducer_starboard_x = data->transducer_starboard_x;
 		store->transducer_port_y = data->transducer_port_y;
 		store->transducer_starboard_y = data->transducer_starboard_y;
 		store->transducer_port_error = data->transducer_port_error;
-		store->transducer_starboard_error 
+		store->transducer_starboard_error
 			= data->transducer_starboard_error;
 		store->antenna_height = data->antenna_height;
 		store->antenna_x = data->antenna_x;
@@ -742,7 +742,7 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->heave_offset = data->heave_offset;
 		store->line_number = data->line_number;
 		store->start_or_stop = data->start_or_stop;
-		store->transducer_serial_number 
+		store->transducer_serial_number
 			= data->transducer_serial_number;
 		for (i=0;i<MBF_BCHRTUNB_COMMENT_LENGTH;i++)
 			store->comment[i] = data->comment[i];
@@ -801,9 +801,9 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->profile[i].hour = data->profile[i].hour;
 			store->profile[i].minute = data->profile[i].minute;
 			store->profile[i].second = data->profile[i].second;
-			store->profile[i].hundredth_sec 
+			store->profile[i].hundredth_sec
 				= data->profile[i].hundredth_sec;
-			store->profile[i].thousandth_sec 
+			store->profile[i].thousandth_sec
 				= data->profile[i].thousandth_sec;
 			store->profile[i].longitude = data->profile[i].longitude;
 			store->profile[i].latitude = data->profile[i].latitude;
@@ -813,19 +813,19 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->profile[i].heave = data->profile[i].heave;
 			for (j=0;j<8;j++)
 				{
-				store->profile[i].bath[j] 
+				store->profile[i].bath[j]
 					= data->profile[i].bath[j];
-				store->profile[i].bath_acrosstrack[j] 
+				store->profile[i].bath_acrosstrack[j]
 					= 2 * data->profile[i].bath_acrosstrack[j];
-				store->profile[i].bath_alongtrack[j] 
+				store->profile[i].bath_alongtrack[j]
 					= data->profile[i].bath_alongtrack[j];
-				store->profile[i].tt[j] 
+				store->profile[i].tt[j]
 					= data->profile[i].tt[j];
-				store->profile[i].angle[j] 
+				store->profile[i].angle[j]
 					= data->profile[i].angle[j];
-				store->profile[i].quality[j] 
+				store->profile[i].quality[j]
 					= data->profile[i].quality[j];
-				store->profile[i].amp[j] 
+				store->profile[i].amp[j]
 					= data->profile[i].amp[j];
 				}
 			}
@@ -894,17 +894,17 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->heading_offset = store->heading_offset;
 		data->time_delay = store->time_delay;
 		data->transducer_port_height = store->transducer_port_height;
-		data->transducer_starboard_height 
+		data->transducer_starboard_height
 			= store->transducer_starboard_height;
 		data->transducer_port_depth = store->transducer_port_depth;
-		data->transducer_starboard_depth 
+		data->transducer_starboard_depth
 			= store->transducer_starboard_depth;
 		data->transducer_port_x = store->transducer_port_x;
 		data->transducer_starboard_x = store->transducer_starboard_x;
 		data->transducer_port_y = store->transducer_port_y;
 		data->transducer_starboard_y = store->transducer_starboard_y;
 		data->transducer_port_error = store->transducer_port_error;
-		data->transducer_starboard_error 
+		data->transducer_starboard_error
 			= store->transducer_starboard_error;
 		data->antenna_height = store->antenna_height;
 		data->antenna_x = store->antenna_x;
@@ -915,7 +915,7 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->heave_offset = store->heave_offset;
 		data->line_number = store->line_number;
 		data->start_or_stop = store->start_or_stop;
-		data->transducer_serial_number 
+		data->transducer_serial_number
 			= store->transducer_serial_number;
 		for (i=0;i<MBF_BCHRTUNB_COMMENT_LENGTH;i++)
 			data->comment[i] = store->comment[i];
@@ -974,9 +974,9 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->profile[i].hour = store->profile[i].hour;
 			data->profile[i].minute = store->profile[i].minute;
 			data->profile[i].second = store->profile[i].second;
-			data->profile[i].hundredth_sec 
+			data->profile[i].hundredth_sec
 				= store->profile[i].hundredth_sec;
-			data->profile[i].thousandth_sec 
+			data->profile[i].thousandth_sec
 				= store->profile[i].thousandth_sec;
 			data->profile[i].longitude = store->profile[i].longitude;
 			data->profile[i].latitude = store->profile[i].latitude;
@@ -986,20 +986,20 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->profile[i].heave = store->profile[i].heave;
 			for (j=0;j<8;j++)
 				{
-				data->profile[i].bath[j] 
+				data->profile[i].bath[j]
 					= store->profile[i].bath[j];
-				data->profile[i].bath_acrosstrack[j] 
-					= store->profile[i].bath_acrosstrack[j] 
+				data->profile[i].bath_acrosstrack[j]
+					= store->profile[i].bath_acrosstrack[j]
 					    / 2;
-				data->profile[i].bath_alongtrack[j] 
+				data->profile[i].bath_alongtrack[j]
 					= store->profile[i].bath_alongtrack[j];
-				data->profile[i].tt[j] 
+				data->profile[i].tt[j]
 					= store->profile[i].tt[j];
-				data->profile[i].angle[j] 
+				data->profile[i].angle[j]
 					= store->profile[i].angle[j];
-				data->profile[i].quality[j] 
+				data->profile[i].quality[j]
 					= store->profile[i].quality[j];
-				data->profile[i].amp[j] 
+				data->profile[i].amp[j]
 					= store->profile[i].amp[j];
 				}
 			}
@@ -1164,7 +1164,7 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error)
 			done = MB_YES;
 
 		}
-		
+
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mbfp);
 
@@ -1182,7 +1182,7 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrtunb_rd_comment";
@@ -1238,7 +1238,7 @@ int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrtunb_rd_parameter";
@@ -1338,34 +1338,34 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp,
 		short_ptr = (short int *) &line[14];
 		data->time_delay = (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[16];
-		data->transducer_port_height 
+		data->transducer_port_height
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[18];
-		data->transducer_starboard_height 
+		data->transducer_starboard_height
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[20];
-		data->transducer_port_depth 
+		data->transducer_port_depth
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[22];
-		data->transducer_starboard_depth 
+		data->transducer_starboard_depth
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[24];
-		data->transducer_port_x 
+		data->transducer_port_x
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[26];
-		data->transducer_starboard_x 
+		data->transducer_starboard_x
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[28];
-		data->transducer_port_y 
+		data->transducer_port_y
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[30];
-		data->transducer_starboard_y 
+		data->transducer_starboard_y
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[32];
-		data->transducer_port_error 
+		data->transducer_port_error
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[34];
-		data->transducer_starboard_error 
+		data->transducer_starboard_error
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[36];
 		data->antenna_height = (short int) mb_swap_short(*short_ptr);
@@ -1386,7 +1386,7 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp,
 		short_ptr = (short int *) &line[52];
 		data->start_or_stop = (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[54];
-		data->transducer_serial_number 
+		data->transducer_serial_number
 			= (short int) mb_swap_short(*short_ptr);
 #endif
 		}
@@ -1454,7 +1454,7 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrtunb_rd_pos";
@@ -1536,10 +1536,10 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp,
 		data->other_quality = (int) mb_swap_short(*short_ptr);
 #endif
 		}
-		
+
 	/* KLUGE for 1996 UNB TRAINING COURSE - FLIP LONGITUDE */
-	if (data->pos_year == 96 
-	    && data->pos_month >= 6 
+	if (data->pos_year == 96
+	    && data->pos_month >= 6
 	    && data->pos_month <= 8)
 		data->pos_longitude = -data->pos_longitude;
 
@@ -1582,7 +1582,7 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrtunb_rd_svp";
@@ -1687,7 +1687,7 @@ int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrtunb_rd_bath56";
@@ -1771,10 +1771,10 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp,
 				short_ptr = (short *) &beam[0];
 				data->profile[i].bath[j] = (short int) *short_ptr;
 				short_ptr = (short *) &beam[2];
-				data->profile[i].bath_acrosstrack[j] 
+				data->profile[i].bath_acrosstrack[j]
 					= (short int) *short_ptr;
 				short_ptr = (short *) &beam[4];
-				data->profile[i].bath_alongtrack[j] 
+				data->profile[i].bath_alongtrack[j]
 					= (short int) *short_ptr;
 				short_ptr = (short *) &beam[6];
 				data->profile[i].tt[j] = (short int) *short_ptr;
@@ -1785,40 +1785,40 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp,
 				}
 #else
 			int_ptr = (int *) &profile[8];
-			data->profile[i].latitude 
+			data->profile[i].latitude
 				= (int) mb_swap_int(*int_ptr);
 			int_ptr = (int *) &profile[12];
-			data->profile[i].longitude 
+			data->profile[i].longitude
 				= (int) mb_swap_int(*int_ptr);
 			short_ptr = (short int *) &profile[16];
-			data->profile[i].roll 
+			data->profile[i].roll
 				= (int) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[18];
-			data->profile[i].pitch 
+			data->profile[i].pitch
 				= (int) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[20];
-			data->profile[i].heading 
+			data->profile[i].heading
 				= (int)(unsigned short) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[22];
-			data->profile[i].heave 
+			data->profile[i].heave
 				= (int) mb_swap_short(*short_ptr);
 			for (j=0;j<8;j++)
 				{
 				beam = &profile[24 + 12*j];
 				short_ptr = (short *) &beam[0];
-				data->profile[i].bath[j] 
+				data->profile[i].bath[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[2];
-				data->profile[i].bath_acrosstrack[j] 
+				data->profile[i].bath_acrosstrack[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[4];
-				data->profile[i].bath_alongtrack[j] 
+				data->profile[i].bath_alongtrack[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[6];
-				data->profile[i].tt[j] 
+				data->profile[i].tt[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[8];
-				data->profile[i].angle[j] 
+				data->profile[i].angle[j]
 					= (short int) mb_swap_short(*short_ptr);
 				data->profile[i].quality[j] = (short int) beam[10];
 				data->profile[i].amp[j] = (short int) beam[11];
@@ -1910,7 +1910,7 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrtunb_rd_bath40";
@@ -1994,10 +1994,10 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp,
 				short_ptr = (short *) &beam[0];
 				data->profile[i].bath[j] = (short int) *short_ptr;
 				short_ptr = (short *) &beam[2];
-				data->profile[i].bath_acrosstrack[j] 
+				data->profile[i].bath_acrosstrack[j]
 					= (short int) *short_ptr;
 				short_ptr = (short *) &beam[4];
-				data->profile[i].bath_alongtrack[j] 
+				data->profile[i].bath_alongtrack[j]
 					= (short int) *short_ptr;
 				short_ptr = (short *) &beam[6];
 				data->profile[i].tt[j] = (short int) *short_ptr;
@@ -2008,40 +2008,40 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp,
 				}
 #else
 			int_ptr = (int *) &profile[8];
-			data->profile[i].latitude 
+			data->profile[i].latitude
 				= (int) mb_swap_int(*int_ptr);
 			int_ptr = (int *) &profile[12];
-			data->profile[i].longitude 
+			data->profile[i].longitude
 				= (int) mb_swap_int(*int_ptr);
 			short_ptr = (short int *) &profile[16];
-			data->profile[i].roll 
+			data->profile[i].roll
 				= (int) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[18];
-			data->profile[i].pitch 
+			data->profile[i].pitch
 				= (int) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[20];
-			data->profile[i].heading 
+			data->profile[i].heading
 				= (int)(unsigned short) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[22];
-			data->profile[i].heave 
+			data->profile[i].heave
 				= (int) mb_swap_short(*short_ptr);
 			for (j=0;j<8;j++)
 				{
 				beam = &profile[24 + 12*j];
 				short_ptr = (short *) &beam[0];
-				data->profile[i].bath[j] 
+				data->profile[i].bath[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[2];
-				data->profile[i].bath_acrosstrack[j] 
+				data->profile[i].bath_acrosstrack[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[4];
-				data->profile[i].bath_alongtrack[j] 
+				data->profile[i].bath_alongtrack[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[6];
-				data->profile[i].tt[j] 
+				data->profile[i].tt[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[8];
-				data->profile[i].angle[j] 
+				data->profile[i].angle[j]
 					= (short int) mb_swap_short(*short_ptr);
 				data->profile[i].quality[j] = (short int) beam[10];
 				data->profile[i].amp[j] = (short int) beam[11];
@@ -2133,7 +2133,7 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, 
+int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrtunb_rd_bath32";
@@ -2217,10 +2217,10 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp,
 				short_ptr = (short *) &beam[0];
 				data->profile[i].bath[j] = (short int) *short_ptr;
 				short_ptr = (short *) &beam[2];
-				data->profile[i].bath_acrosstrack[j] 
+				data->profile[i].bath_acrosstrack[j]
 					= (short int) *short_ptr;
 				short_ptr = (short *) &beam[4];
-				data->profile[i].bath_alongtrack[j] 
+				data->profile[i].bath_alongtrack[j]
 					= (short int) *short_ptr;
 				short_ptr = (short *) &beam[6];
 				data->profile[i].tt[j] = (short int) *short_ptr;
@@ -2231,40 +2231,40 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp,
 				}
 #else
 			int_ptr = (int *) &profile[8];
-			data->profile[i].latitude 
+			data->profile[i].latitude
 				= (int) mb_swap_int(*int_ptr);
 			int_ptr = (int *) &profile[12];
-			data->profile[i].longitude 
+			data->profile[i].longitude
 				= (int) mb_swap_int(*int_ptr);
 			short_ptr = (short int *) &profile[16];
-			data->profile[i].roll 
+			data->profile[i].roll
 				= (int) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[18];
-			data->profile[i].pitch 
+			data->profile[i].pitch
 				= (int) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[20];
-			data->profile[i].heading 
+			data->profile[i].heading
 				= (int)(unsigned short) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[22];
-			data->profile[i].heave 
+			data->profile[i].heave
 				= (int) mb_swap_short(*short_ptr);
 			for (j=0;j<8;j++)
 				{
 				beam = &profile[24 + 12*j];
 				short_ptr = (short *) &beam[0];
-				data->profile[i].bath[j] 
+				data->profile[i].bath[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[2];
-				data->profile[i].bath_acrosstrack[j] 
+				data->profile[i].bath_acrosstrack[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[4];
-				data->profile[i].bath_alongtrack[j] 
+				data->profile[i].bath_alongtrack[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[6];
-				data->profile[i].tt[j] 
+				data->profile[i].tt[j]
 					= (short int) mb_swap_short(*short_ptr);
 				short_ptr = (short *) &beam[8];
-				data->profile[i].angle[j] 
+				data->profile[i].angle[j]
 					= (short int) mb_swap_short(*short_ptr);
 				data->profile[i].quality[j] = (short int) beam[10];
 				data->profile[i].amp[j] = (short int) beam[11];
@@ -2356,7 +2356,7 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr,  
+int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 
@@ -2435,7 +2435,7 @@ int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp,  
+int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 
@@ -2521,7 +2521,7 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp,  
+int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 
@@ -2676,30 +2676,30 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp,
 		short_ptr = (short int *) &line[14];
 		*short_ptr = (short int) mb_swap_short(data->time_delay);
 		short_ptr = (short int *) &line[16];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_port_height);
 		short_ptr = (short int *) &line[18];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_starboard_height);
 		short_ptr = (short int *) &line[20];
 		*short_ptr = (short int) mb_swap_short(data->transducer_port_depth);
 		short_ptr = (short int *) &line[22];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_starboard_depth);
 		short_ptr = (short int *) &line[24];
 		*short_ptr = (short int) mb_swap_short(data->transducer_port_x);
 		short_ptr = (short int *) &line[26];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_starboard_x);
 		short_ptr = (short int *) &line[28];
 		*short_ptr = (short int) mb_swap_short(data->transducer_port_y);
 		short_ptr = (short int *) &line[30];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_starboard_y);
 		short_ptr = (short int *) &line[32];
 		*short_ptr = (short int) mb_swap_short(data->transducer_port_error);
 		short_ptr = (short int *) &line[34];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_starboard_error);
 		short_ptr = (short int *) &line[36];
 		*short_ptr = (short int) mb_swap_short(data->antenna_height);
@@ -2720,7 +2720,7 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp,
 		short_ptr = (short int *) &line[52];
 		*short_ptr = (short int) mb_swap_short(data->start_or_stop);
 		short_ptr = (short int *) &line[54];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_serial_number);
 #endif
 		line[ELAC_PARAMETER_SIZE] = 0x03;
@@ -2755,7 +2755,7 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp,  
+int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 
@@ -2899,7 +2899,7 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp,  
+int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 
@@ -2988,9 +2988,9 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp,
 			*short_ptr = (short int) data->svp_depth[i];
 			*short_ptr2 = (short int) data->svp_vel[i];
 #else
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int)data->svp_depth[i]);
-			*short_ptr2 = (short int) 
+			*short_ptr2 = (short int)
 				mb_swap_short((short int)data->svp_vel[i]);
 #endif
 			}
@@ -3033,7 +3033,7 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp,  
+int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrtunb_wr_bath56";
@@ -3151,10 +3151,10 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp,
 		*short_ptr = (short int) data->sound_vel;
 #else
 		short_ptr = (short int *) &line[0];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short((short int) data->ping_num);
 		short_ptr = (short int *) &line[2];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short((short int) data->sound_vel);
 #endif
 		line[4] = (char) data->mode;
@@ -3191,10 +3191,10 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp,
 				short_ptr = (short *) &beam[0];
 				*short_ptr = (short int) data->profile[i].bath[j];
 				short_ptr = (short *) &beam[2];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					data->profile[i].bath_acrosstrack[j];
 				short_ptr = (short *) &beam[4];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					data->profile[i].bath_alongtrack[j];
 				short_ptr = (short *) &beam[6];
 				*short_ptr = (short int) data->profile[i].tt[j];
@@ -3205,40 +3205,40 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp,
 				}
 #else
 			int_ptr = (int *) &profile[8];
-			*int_ptr 
+			*int_ptr
 				= (int) mb_swap_int(data->profile[i].latitude);
 			int_ptr = (int *) &profile[12];
-			*int_ptr 
+			*int_ptr
 				= (int) mb_swap_int(data->profile[i].longitude);
 			short_ptr = (short int *) &profile[16];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int) data->profile[i].roll);
 			short_ptr = (short int *) &profile[18];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int) data->profile[i].pitch);
 			short_ptr = (short int *) &profile[20];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int)(unsigned short) data->profile[i].heading);
 			short_ptr = (short int *) &profile[22];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int) data->profile[i].heave);
 			for (j=0;j<8;j++)
 				{
 				beam = &profile[24 + 12*j];
 				short_ptr = (short *) &beam[0];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					mb_swap_short(data->profile[i].bath[j]);
 				short_ptr = (short *) &beam[2];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 				mb_swap_short(data->profile[i].bath_acrosstrack[j]);
 				short_ptr = (short *) &beam[4];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 				mb_swap_short(data->profile[i].bath_alongtrack[j]);
 				short_ptr = (short *) &beam[6];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					mb_swap_short(data->profile[i].tt[j]);
 				short_ptr = (short *) &beam[8];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					mb_swap_short(data->profile[i].angle[j]);
 				beam[10] = (char) data->profile[i].quality[j];
 				beam[11] = (char) data->profile[i].amp[j];
@@ -3277,7 +3277,7 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp,  
+int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 
@@ -3396,10 +3396,10 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp,
 		*short_ptr = (short int) data->sound_vel;
 #else
 		short_ptr = (short int *) &line[0];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short((short int) data->ping_num);
 		short_ptr = (short int *) &line[2];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short((short int) data->sound_vel);
 #endif
 		line[4] = (char) data->mode;
@@ -3436,10 +3436,10 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp,
 				short_ptr = (short *) &beam[0];
 				*short_ptr = (short int) data->profile[i].bath[j];
 				short_ptr = (short *) &beam[2];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					data->profile[i].bath_acrosstrack[j];
 				short_ptr = (short *) &beam[4];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					data->profile[i].bath_alongtrack[j];
 				short_ptr = (short *) &beam[6];
 				*short_ptr = (short int) data->profile[i].tt[j];
@@ -3450,40 +3450,40 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp,
 				}
 #else
 			int_ptr = (int *) &profile[8];
-			*int_ptr 
+			*int_ptr
 				= (int) mb_swap_int(data->profile[i].latitude);
 			int_ptr = (int *) &profile[12];
-			*int_ptr 
+			*int_ptr
 				= (int) mb_swap_int(data->profile[i].longitude);
 			short_ptr = (short int *) &profile[16];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int) data->profile[i].roll);
 			short_ptr = (short int *) &profile[18];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int) data->profile[i].pitch);
 			short_ptr = (short int *) &profile[20];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int)(unsigned short) data->profile[i].heading);
 			short_ptr = (short int *) &profile[22];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int) data->profile[i].heave);
 			for (j=0;j<8;j++)
 				{
 				beam = &profile[24 + 12*j];
 				short_ptr = (short *) &beam[0];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					mb_swap_short(data->profile[i].bath[j]);
 				short_ptr = (short *) &beam[2];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 				mb_swap_short(data->profile[i].bath_acrosstrack[j]);
 				short_ptr = (short *) &beam[4];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 				mb_swap_short(data->profile[i].bath_alongtrack[j]);
 				short_ptr = (short *) &beam[6];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					mb_swap_short(data->profile[i].tt[j]);
 				short_ptr = (short *) &beam[8];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					mb_swap_short(data->profile[i].angle[j]);
 				beam[10] = (char) data->profile[i].quality[j];
 				beam[11] = (char) data->profile[i].amp[j];
@@ -3522,7 +3522,7 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp,  
+int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp,
 		struct mbf_bchrtunb_struct *data, int *error)
 {
 
@@ -3641,10 +3641,10 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp,
 		*short_ptr = (short int) data->sound_vel;
 #else
 		short_ptr = (short int *) &line[0];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short((short int) data->ping_num);
 		short_ptr = (short int *) &line[2];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short((short int) data->sound_vel);
 #endif
 		line[4] = (char) data->mode;
@@ -3681,10 +3681,10 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp,
 				short_ptr = (short *) &beam[0];
 				*short_ptr = (short int) data->profile[i].bath[j];
 				short_ptr = (short *) &beam[2];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					data->profile[i].bath_acrosstrack[j];
 				short_ptr = (short *) &beam[4];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					data->profile[i].bath_alongtrack[j];
 				short_ptr = (short *) &beam[6];
 				*short_ptr = (short int) data->profile[i].tt[j];
@@ -3695,40 +3695,40 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp,
 				}
 #else
 			int_ptr = (int *) &profile[8];
-			*int_ptr 
+			*int_ptr
 				= (int) mb_swap_int(data->profile[i].latitude);
 			int_ptr = (int *) &profile[12];
-			*int_ptr 
+			*int_ptr
 				= (int) mb_swap_int(data->profile[i].longitude);
 			short_ptr = (short int *) &profile[16];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int) data->profile[i].roll);
 			short_ptr = (short int *) &profile[18];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int) data->profile[i].pitch);
 			short_ptr = (short int *) &profile[20];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int)(unsigned short) data->profile[i].heading);
 			short_ptr = (short int *) &profile[22];
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int) data->profile[i].heave);
 			for (j=0;j<8;j++)
 				{
 				beam = &profile[24 + 12*j];
 				short_ptr = (short *) &beam[0];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					mb_swap_short(data->profile[i].bath[j]);
 				short_ptr = (short *) &beam[2];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 				mb_swap_short(data->profile[i].bath_acrosstrack[j]);
 				short_ptr = (short *) &beam[4];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 				mb_swap_short(data->profile[i].bath_alongtrack[j]);
 				short_ptr = (short *) &beam[6];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					mb_swap_short(data->profile[i].tt[j]);
 				short_ptr = (short *) &beam[8];
-				*short_ptr = (short int) 
+				*short_ptr = (short int)
 					mb_swap_short(data->profile[i].angle[j]);
 				beam[10] = (char) data->profile[i].quality[j];
 				beam[11] = (char) data->profile[i].amp[j];
