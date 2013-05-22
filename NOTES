@@ -1,5 +1,49 @@
+-------------------------------------------------------------------------------
+MB-SYSTEM INSTALLATION NOTES FILE:
+-------------------------------------------------------------------------------
+Version: $Id$
+-------------------------------------------------------------------------------
+
+This file contains installation notes for the MB-System open source software
+package for the processing and display of swath sonar data. This file is located
+at the top of the MB-System source code distribution directory structure.
+
+-------------------------------------------------------------------------------
+THE MB-SYSTEM SOURCE CODE DISTRIBUTION:
+-------------------------------------------------------------------------------
+MB-System is distributed as a compressed tar archive named according to the
+release version. For example, release 5.3.2055 was distributed in a file named:
+    mbsystem-5.4.2077.tar.gz
+
+The tar utility is used to extract the distribution:
+    % tar xvzf mbsystem-5.3.2055.tar.gz
+
+yielding a directory named "mbsystem-5.4.2077". Listing the contents reveals:
+    % cd mbsystem-5.4.2077
+    % ls -s
+	total 2920
+	  8 AUTHORS		  8 NEWS		 40 configure.in
+	 16 COPYING		 16 NOTES		 48 depcomp
+	224 ChangeLog		 56 README		 32 install-sh
+	 72 GPL			 88 config.guess	 64 install_makefiles
+	 32 INSTALL		 72 config.sub*		576 libtool*
+	 48 Makefile.in		944 configure		560 ltmain.sh
+	  8 Makefile.template	  8 configure.cmd*	  0 src/
+
+-------------------------------------------------------------------------------
+MB-SYSTEM BUILD SYSTEMS:
+-------------------------------------------------------------------------------
+MB-System source distributions come with two build systems. Both create a
+set of recursive makefiles so that the make utility can be used to compile and
+install the package. The primary build system uses a configure script that has
+been created using the GNU autotools package. Users customize the makefiles for
+the local system by using arguments to configure. The older approach uses a
+perl script called install_makefiles that must first be edited to reflect the
+local system. The install_makefiles script is maintained for backward
+compatibility, but we expect most users to use the configure script.
+
 --------------------------------------------------------------
- nstall Notes for MB-System with configure
+BUILDING AND INSTALLING MB-SYSTEM WITH CONFIGURE
 -------------------------------------------------------------
 
 1. Simple method
@@ -19,7 +63,7 @@ Common Options
 --with-motif-lib location of Motif libs (optional)
 --with-motif-include location of Motif headers (optional)
 --with-opengl-lib location of OpenGL libs (optional)
---with-opengl-include location of OpenGL headers (optional) 
+--with-opengl-include location of OpenGL headers (optional)
 
 If FFTW3, Motif, or OpenGL cannot be found MB-System will be built with without this support.
 
@@ -55,4 +99,97 @@ autoreconf --force --install --symlink --warnings=all
 #####################################
 
 
+
+
+-------------------------------------------------------------------------------
+HOW TO INSTALL MB-SYSTEM:
+-------------------------------------------------------------------------------
+
+The MB-System source code is extracted by first uncompressing the tar file and then running tar:
+     % tar xvzf MB-System.tar.gz
+
+This will create a directory structure called mbsystem. In order to configure your installation,
+you must edit the shellscript mbsystem/install_makefiles. This is perl script will read template
+makefiles in the MB-System source directories and create makefiles with the correct attributes.
+This enables users to install MB-System without having to edit the makefiles. Instead of editing
+the makefiles directly, the installer should edit this script so that the locations of important
+libraries and include files are accurate and so that the compile and link flags are correct.
+
+The important parameters to be set in install_makefiles are:
+
+     Required parameters:
+     $MBSYSTEM_HOME - absolute path to the MB-System installation location
+     $OS - Operating system (e.g. DARWIN, LINUX).
+     $CFLAGS - Compile flags for C source files.
+     $LFLAGS - Load flags for all object files.
+     $NETCDFLIBDIR - Location of NetCDF library.
+     $NETCDFINCDIR - Location of NetCDF header files.
+     $GMTLIBDIR - Location of GMT libraries.
+     $GMTINCDIR - Location of GMT header files.
+
+     Required parameters for spectrogram program mbsegypsd
+	- mbsegypsd will not be built if these are commented out
+     $FFTWLIBDIR - Location of the FFTW3 library.
+     $FFTWINCDIR - Location of FFTW3 header files.
+
+     Required parameters for graphical tools
+	- graphical tools will not be built if these
+	  are commented out
+     $MOTIFINCDIR - Location of the Motif header files.
+     $MOTIFLIBS - Location of the Motif libraries.
+
+     Required parameter for visualization tools
+	- visualization tools will not be built if this
+	  is commented out
+     $OPENGLLIBS - Link flags for the OpenGL libraries: "-lGLU -lGL";
+
+     Required parameter for mblevitus program
+     $LEVITUS - Location of the Levitus library (usually "$MBSYSTEM_HOME/share/LevitusAnnual82.dat").
+
+     Required parameter for mbotps program
+     $OTPSDIR - Location of the OTPSnc installation (usually "/usr/local/OTPSnc").
+
+     Optional name of C compiler (if other than "cc").
+     $CC - Usually "cc", but could be "gcc".
+
+     Optional parameters for use of independent GSF library installation
+	- GSF library included with MB-System will be used
+	  if these are commented out
+     $GSFLIB - Location of GSF library.
+     $GSFINCDIR - Location of GSF header files.
+
+     Optional parameters for use of independent PROJ4 library installation
+	- PROJ4 library included with MB-System will be used
+	  if these are commented out
+     $PROJLIB - Location of PROJ4 library.
+     $PROJINCDIR - Location of PROJ4 header files.
+
+Examples of appropriate values for several different installations (e.g. Sun, SGI, PC) are included
+in the comments in install_makefiles. To execute install_makefiles, do the following:
+
+     % cd mbsystem
+     % install_makefiles
+
+Because install_makefiles is a perl script, the executable perl must be available in the installer's
+path. Once install_makefiles has been correctly configured and run, give the command "make all"
+to generate the executable programs:
+
+     % make all
+
+The make command will descend recursively down through the directory structure, compiling
+source files, linking object files, and copying executables and manual pages to the appropriate
+directories. The executables will be placed in mbsystem/bin, the libraries in mbsystem/lib, and
+the manual pages in mbsystem/man/man1.
+
+Naturally, in order for users to use the MB-System utilities, the directory containing the
+executables must be included in their path (usually this is done by editing the .cshrc file in the
+user's home directory). The executable perl must also be available in the user's path for most of
+the macros to work.
+
+Most users will also wish to specify which program they generally use to view Postscript plots on
+their screen. This parameter can be set either with the mbdefaults program or using the
+MB_PS_VIEWER environment variable - the former is recommended (see the mbdefaults manual
+page for details). On Sun workstations pageview is a popular Postscript viewer; on Silicon
+Graphics machines xpsview is commonly used. A popular generic alternative to these platform
+specific programs is ghostview.
 
