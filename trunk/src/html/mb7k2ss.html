@@ -1,0 +1,452 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mb7k2ss</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mb7k2ss</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  4 October 2012 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mb7k2ss</B> - extracts sidescan sonar
+data from Reson 7k format data, bins and lays the sidescan
+onto the seafloor, and outputs files in the MBF_MBLDEOIH
+formst (MBIO format id 71).
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mb7k2ss</B> [<B>-A</B><I>type</I>
+<B>-B</B><I>bottompickmode/bottompickthreshold</I> <B>-C</B> <B>-D</B><I>interpbins</I>
+<B>-F</B><I>format</I> <B>-I</B><I>file</I> <B>-L</B><I>startline/lineroot</I>
+<B>-M -O</B><I>outfile</I> <B>-Q</B><I>routetimefile</I> <B>-R</B><I>routefile</I>
+<B>-T</B><I>topogridfile</I> <B>-U</B><I>rangethreshold</I> <B>-X -H -V</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mb7k2ss</B> is a utility that extracts Edgetech sidescan data from
+Reson 7k format (MBIO format 88) data and outputs in the MBF_MBLDEOIH
+format (MBIO format 71). Edgetech sonar systems may include dual
+frequency sidescans and a subbottom profiler. Users may use the <B>-A</B>
+option to specify whether low frequency or high frequency sidescan data
+are extracted. By default, low frequency sidescan is extracted.
+<B>MB7k2ss</B> can operate on a single input file or on a datalist
+referencing many input files.
+<P>
+The raw sidescan consists of port and starboard channels, each with
+thousands of samples ordered uniformly in time from the sonar ping.
+<B>MB7k2ss</B> outputs a lower resolution single sidescan swath laid
+out onto the seafloor and ordered in pixels with uniform spacing in
+acrosstrack distance. Typically the output swath will have 4001
+sidescan pixels, each representing an average of several raw samples.
+To achieve this result, the program calculates the location
+of each raw sample, and bins the samples into the output swath.
+By default, the program uses the sonar altitude and a flat bottom
+assumption to calculate the sample positions. If a topography grid
+covering the survey area is input using the <B>-T</B> option, then
+the sample positions will be calculated using that topography and
+the resulting sidescan will be properly located on the seafloor
+(that is, if the topography is accurate...).
+<P>
+The method used to determine the sonar altitude is controlled using the
+<B>-B</B> option. By default, the program will use the altitude value
+recorded in the vehicle navigation records. Users may also specify use
+of nadir bathymetry from co-recorded multibeam bathymetry, or the
+altitude can be picked from the first arrival observed in the sidescan
+data itself.
+<P>
+The extracted sidescan data file(s) can be organized three ways.By
+default there will be a separate output file for every input file.
+If the <B>-O</B> option is used to specify a single output file, then
+all of the specified sidescan data will be output to that file. If
+the <B>-Q</B> or <B>-R</B> option is used to specify a survey route file
+that includes the waypoints covered while collecting the data file(s)
+referenced by <B>-I</B><I>file</I>, then the output sidescan data will
+be broken up by the sequential lines defined by the waypoints. The
+<B>-R</B> option requires a route file of the form exported by <B>MBgrdviz</B>.
+The <B>-Q</B> option requires a route file that includes the time
+at which each waypoint is reached in the data; this can be generated
+from a regular route file using <B>mbroutetime</B>. In either of these
+cases each output file will be named using the  line root name
+specified by <B>-L</B><I>startline/lineroot</I> with a sequential line
+number starting from <I>startline</I>. All output files will have a
+&quot;.mb71&quot; suffix.
+<P>
+The program <B>mbextractsegy</B> is available to extract subbottom profiler
+data from Reson 7k data.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>mode</I>
+<BR>
+
+This option sets the types of data to be extracted and output.
+If <B>-A</B><I>1</I> is given, then any low frequency sidescan
+in the input will be extracted to the output. If <B>-A</B><I>2</I>
+is given, then any high frequency sidescan records are extracted.
+Default: Low frequency sidescan records are extracted.
+<DT><B>-B</B>
+
+<DD>
+<I>bottompickmode/bottompickthreshold</I>
+<BR>
+
+This option sets the source of the sonar first arrival time used for
+laying out sidescan on the seafloor. If <I>bottompickmode</I> = 1,
+then <B>mb7k2ss</B> will use the altitude value associated with
+platform navigation. If <I>bottompickmode</I> = 2, then <B>mb7k2ss</B>
+will extract the first arrival time from multibeam bathymetry in the
+7k data stream. If <I>bottompickmode</I> = 3, then <B>mb7k2ss</B>
+will pick the first arrival time in the sidescan sonar data by looking
+for the first sample with an amplitude &gt; <I>bottompickthreshold</I> times the
+maximum amplitude in the trace. The altitude used will be the average of
+the first arrival times calculated for the port and starboard channels.
+Default: fIbottompickmode = 1.
+<DT><B>-C</B>
+
+<DD>
+<BR>
+
+This option causes  <B>mb7k2ss</B> to print out any comment records
+encountered in the input Reson 7k data.
+<DT><B>-D</B>
+
+<DD>
+<I>interpbins</I>
+<BR>
+
+Causes interpolation over gaps in the output sidescan resulting from draping
+the sidescan on topography. The <I>interpbins</I> values sets the maximum
+gap size over which interpolation will be applied.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format used if the input is read from stdin
+or from a file. If <I>format</I> &lt; 0, then the input file specified
+with the <B>-I</B> option will actually contain a list of input swath sonar
+data files. This program only reads Reson 7k format data files (<B>MBIO</B>
+format 88).
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Sets the input file path. If <I>format</I> &gt; 0 (set with the
+<B>-f</B> option or <B>mbdefaults</B>) then the swath sonar data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;88<BR>
+<BR>
+
+This program only reads Reson 7k format data files (<B>MBIO</B>
+format 88).
+<DT><B>-L</B>
+
+<DD>
+<I>startline/lineroot</I>
+<BR>
+
+This option sets the starting line number and the output filename root
+used when <B>-R</B> is specified so that data are output according
+to planned survey lines. Default: <I>startline</I> = 1; <I>lineroot</I> = &quot;jstar&quot;.
+<DT><B>-M</B>
+
+<DD>
+<BR>
+
+This option causes <B>mb7k2ss</B> to omit data during turns when
+extracting into line files according to a specified set of waypoints
+(<B>-R</B> option). The traces will not be output until the heading is
+within 15 degrees of the next survey line's bearing.
+<DT><B>-O</B>
+
+<DD>
+<BR>
+
+This option sets the output MBF_LDEOIH (<B>MBIO</B> format 71) format file path.
+If <B>-O</B> is not invoked, the output filename (or filenames if a datalist
+is being processed) will be the input swath filename with the &quot;.s7k&quot; or &quot;.mb88&quot;
+suffix replaced by a &quot;.mb71) suffix. The record types to be extracted are set
+using the <B>-A</B> option.
+<DT><B>-Q</B>
+
+<DD>
+<I>routetimefile</I>
+<BR>
+
+This option specifies a file containing the times that the survey reached
+the intended waypoints. This text file consists of lines of the form:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>count&nbsp;waypoint&nbsp;longitude&nbsp;latitude&nbsp;heading&nbsp;time_d<BR>
+<BR>
+
+where count is just an integer counter starting at 0, waypoint is the waypoint
+number starting at 0, longitude and latitude are the waypoint position in
+decimal degrees, heading is the heading in decimal degrees, and time_d is
+the unix or epoch time (time since 00:00:00 January 1, 1970) in decimal
+seconds that the survey reached this waypoint. This file can be generated from
+an <B>mbgrdviz</B> route file and survey data using the program <B>mbroutetime</B>.
+If <I>routetimefile</I> is specified, <B>mb7k2ss</B>
+will output data in files corresponding to the planned survey lines.
+The output file names will be based on <I>lineroot</I> and will include
+the line number starting with <I>starline</I>, both of which are specified
+using the <B>-L</B> options.  If none of <B>-O</B>, <B>-Q</B>, or <B>-R</B> are
+invoked, the output filename (or files if a datalist is being processed) will
+be the input swath filename with an &quot;.mb71&quot; suffix appended.
+<DT><B>-R</B>
+
+<DD>
+<I>routefile</I>
+<BR>
+
+This option specifies an <B>mbgrdviz</B> route file containing the intended
+waypoints of the survey. If <I>routefile</I> is specified, <B>mb7k2ss</B>
+will output sidescan data in files corresponding to the planned survey lines.
+The output file names will be based on <I>lineroot</I> and will include
+the line number starting with <I>starline</I>, both of which are specified
+using the <B>-L</B> options.  If none of <B>-O</B>, <B>-Q</B>, or <B>-R</B> are
+invoked, the output filename (or files if a datalist is being processed) will
+be the input swath filename with an &quot;.mb71&quot; suffix appended.
+<DT><B>-T</B>
+
+<DD>
+<I>topogridfile</I>
+<BR>
+
+This option specifies a GMT grid file containing a topography model of the
+survey area. When available, <B>mb7k2ss</B>, uses the topography to calculate
+the position of each raw sidescan sample on the seafloor prior to binning
+the sample into the swath data. This method is considerable improvement over the
+flat bottom assumption used when topography is unavailable. The grid file
+must contain topography (positive up) rather than bathymetry (positive down).
+<DT><B>-U</B>
+
+<DD>
+<I>rangethreshold</I>
+<BR>
+
+If the <B>-R</B> option is specified, <B>mb7k2ss</B> breaks up the
+output into files corresponding to survey lines specified in a route file.
+This option sets the threshold distance in meters used to determine when
+a waypoint along the route has been reached; the program considers the
+next waypoint reached when the range to the waypoint becomes smaller
+than <I>rangethreshold</I> and then ceases to decrease.
+Default: <I>rangethreshold</I> = 50 m.
+<DT><B>-V</B>
+
+<DD>
+This option increases the verbosity of <B>mb7k2ss</B>, causing it
+to print out messages regarding its progress to stdout.
+<DT><B>-W</B>
+
+<DD>
+<I>swathwidth</I>
+This option sets the output sidescan swath width in meters. By default
+<B>mb7k2ss</B> calculates the swath width to use all of the samples available
+in the original data.
+<DT><B>-X</B>
+
+<DD>
+This option switches port and starboard sidescan channels.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that we have collected two Reson 7k datafiles incorporating
+multibeam sonar data, sidescan data, and subbottom profiler data, and
+that the filenames are:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20070809_173212.s7k
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20070809_175133.s7k
+After running <B>mb7kpreprocess</B> on these files to fix issues and
+prepare the data for processing, we will have two additional files named:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20070809_173212.mb88
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20070809_175133.mb88
+After editing the bathymetry in the &quot;.mb88&quot; files with <B>mbedit</B>,
+and running <B>mbprocess</B> to apply the edits, we will have two processed
+files that are, among other uses, suitable for sidescan extraction:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20070809_173212p.mb88
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20070809_175133p.mb88
+If we have two datalist files, one called datalist.mb-1 referencing the &quot;.mb88&quot;
+files with the following contents:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20070809_173212p.mb88&nbsp;88
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20070809_175133p.mb88&nbsp;88
+and another called datalistp.mb-1 referencing the first datalist with a
+$PROCESSED tag:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$PROCESSED
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datalist.mb-1&nbsp;-1
+then we can extract the Edgetech sidescan from the processed files using:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mb7k2ss&nbsp;-v&nbsp;-A1&nbsp;-B2&nbsp;-I&nbsp;datalistp.mb-1&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-M&nbsp;-X&nbsp;-R&nbsp;MAUV_Axial_1v4.rte&nbsp;-L1/Axial07SS&nbsp;\<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-T&nbsp;AxialCalderaMBARIAllTopo.grd<BR>
+Here the <B>-R</B> option specifies an <B>MBgrdviz</B> route file that was
+followed in collecting the data. By using this option, the output sidescan
+files will be broken into lines defined by the route waypoints, and the
+output filenames will be sequentially numbered. The <B>-T</B> option specifies a
+topography grid that is used by <B>mb7k2ss</B> to lay out the sidescan on
+the seafloor. The output appears as follows:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;mb7k2ss
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mb7k2ss.1&nbsp;1989&nbsp;2012-10-04&nbsp;21:36:53Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.1.1beta5<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;to&nbsp;extract:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sidescan&nbsp;port&nbsp;and&nbsp;starboard&nbsp;exchanged<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Imported&nbsp;45&nbsp;waypoints&nbsp;from&nbsp;route&nbsp;file:&nbsp;MAUV_Axial_1v4.rte<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Grid&nbsp;read:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Dimensions:&nbsp;2072&nbsp;3558<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Geographic&nbsp;Coordinate&nbsp;System&nbsp;Name:&nbsp;Geographic&nbsp;WGS84<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Geographic&nbsp;Coordinate&nbsp;System&nbsp;ID:&nbsp;&nbsp;&nbsp;4326<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Longitude:&nbsp;&nbsp;229.926767&nbsp;230.060367&nbsp;&nbsp;0.000065<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Latitude:&nbsp;&nbsp;&nbsp;45.866667&nbsp;46.026700&nbsp;&nbsp;0.000045<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Internal&nbsp;Grid&nbsp;Projection&nbsp;Mode:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Internal&nbsp;Grid&nbsp;Projection&nbsp;ID:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;epsg4326<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;Read:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;grid_projection_mode:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;grid_projection_id:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;epsg4326<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;nodatavalue:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-10000000.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;nx:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2072<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;ny:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3558<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;min:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-2302.588135<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;max:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-1382.877319<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;xmin:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;229.926767<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;xmax:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;230.060367<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;ymin:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;45.866667<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;ymax:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;46.026700<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;dx:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000065<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;dy:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000045<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;data:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;71467008<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;read&nbsp;from:&nbsp;20070809_173212p.mb88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2330<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;Header:&nbsp;&nbsp;&nbsp;2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;CTD:&nbsp;&nbsp;&nbsp;1152<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;Nav:&nbsp;&nbsp;&nbsp;942<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;2328<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;inf&nbsp;file&nbsp;for&nbsp;Axial07SS_0001_sslo.mb71<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;fnv&nbsp;file&nbsp;for&nbsp;Axial07SS_0001_sslo.mb71<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;written&nbsp;to:&nbsp;Axial07SS_0001_sslo.mb71<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;2759<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;inf&nbsp;file&nbsp;for&nbsp;Axial07SS_0002_sslo.mb71<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;fnv&nbsp;file&nbsp;for&nbsp;Axial07SS_0002_sslo.mb71<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;written&nbsp;to:&nbsp;Axial07SS_0002_sslo.mb71<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;369<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;read&nbsp;from:&nbsp;20070809_175133p.mb88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2367<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;Header:&nbsp;&nbsp;&nbsp;2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;CTD:&nbsp;&nbsp;&nbsp;1158<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;Nav:&nbsp;&nbsp;&nbsp;942<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;2367<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;inf&nbsp;file&nbsp;for&nbsp;Axial07SS_0003_sslo.mb71<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;fnv&nbsp;file&nbsp;for&nbsp;Axial07SS_0003_sslo.mb71<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Total&nbsp;data&nbsp;records&nbsp;read:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4697<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;Header:&nbsp;&nbsp;&nbsp;4<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;CTD:&nbsp;&nbsp;&nbsp;2310<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;Nav:&nbsp;&nbsp;&nbsp;1884<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;4695<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Total&nbsp;data&nbsp;records&nbsp;written:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;4160<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbformat.html">mbformat</A></B>(l), <B><A HREF="mbinfo.html">mbinfo</A></B>(l), <B><A HREF="mb7kpreprocess.html">mb7kpreprocess</A></B>(l),
+<B><A HREF="mb7k2jstar.html">mb7k2jstar</A></B>(l), <B><A HREF="mbextractsegy.html">mbextractsegy</A></B>(l), <B><A HREF="mbbackangle.html">mbbackangle</A></B>(l), <B><A HREF="mbprocess.html">mbprocess</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+No doubt.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 4 October 2012</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

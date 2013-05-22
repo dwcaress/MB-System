@@ -1,0 +1,276 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbabsorption</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mblevitus</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbabsorption</B> - calculates the absorption of sound in sea water in dB/km
+as a function of frequency, temperature, salinity, sound speed, and depth.
+<P>
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbabsorption</B> [<B>-C</B><I>soundspeed</I> <B>-D</B><I>depth</I> 
+<B>-F</B><I>frequency</I> <B>-P</B><I>ph</I> <B>-S</B><I>salinity</I> <B>-T</B><I>temperature</I> <B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbabsorption</B> - calculates the absorption of sound in sea water in dB/km
+<BR>&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;frequency&nbsp;(kHz),&nbsp;temperature&nbsp;(degrees&nbsp;C),&nbsp;salinity&nbsp;(per&nbsp;mil),&nbsp;
+depth (m), pH, and water sound speed (m/sec). 
+<P>
+<BR>&nbsp;We&nbsp;use&nbsp;the&nbsp;Francois&nbsp;and&nbsp;Garrison&nbsp;equations&nbsp;from:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Francois,&nbsp;R.E.,&nbsp;Garrison,&nbsp;G.R.,&nbsp;&quot;Sound&nbsp;absorption&nbsp;based
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;on&nbsp;ocean&nbsp;measurements:&nbsp;Part&nbsp;I:&nbsp;Pure&nbsp;water&nbsp;and&nbsp;magnesium
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sulfate&nbsp;contributions&quot;,&nbsp;J.&nbsp;Acoust.&nbsp;Soc.&nbsp;Am.,&nbsp;72(3),&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;896-907,&nbsp;1982.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Francois,&nbsp;R.E.,&nbsp;Garrison,&nbsp;G.R.,&nbsp;&quot;Sound&nbsp;absorption&nbsp;based
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;on&nbsp;ocean&nbsp;measurements:&nbsp;Part&nbsp;II:&nbsp;Boric&nbsp;acid&nbsp;contribution
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;equation&nbsp;for&nbsp;total&nbsp;absorption&quot;,&nbsp;J.&nbsp;Acoust.&nbsp;Soc.&nbsp;Am.,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;72(6),&nbsp;1879-1890,&nbsp;1982.
+<P>
+Francois and Garrison [1982] model the sound absorption in
+sea water as resulting from contributions from pure water,
+magnesium sulfate, and boric acid. The boric acid contribution
+is significant below 10 kHz. The equations are:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>absorption&nbsp;=&nbsp;Boric&nbsp;Acid&nbsp;Contribution<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>+&nbsp;MbSO4&nbsp;Contribution<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>+&nbsp;Pure&nbsp;Water&nbsp;Contribution<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<BR>
+
+Boric Acid Contribution:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>AlphaB&nbsp;=&nbsp;Ab&nbsp;*&nbsp;Pb&nbsp;*&nbsp;Fb&nbsp;*&nbsp;f**2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-------------------<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f**2&nbsp;+&nbsp;Fb**2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Ab&nbsp;=&nbsp;8.86&nbsp;/&nbsp;c&nbsp;*&nbsp;10**(0.78&nbsp;*&nbsp;pH&nbsp;-&nbsp;5)&nbsp;(dB/km/kHz)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Pb&nbsp;=&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Fb&nbsp;=&nbsp;2.8&nbsp;*&nbsp;(S&nbsp;/&nbsp;35)**0.5&nbsp;*&nbsp;10**(4&nbsp;-&nbsp;1245&nbsp;/&nbsp;Tk)&nbsp;(kHz)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<BR>
+
+MgSO4 Contribution:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>AlphaM&nbsp;=&nbsp;Am&nbsp;*&nbsp;Pm&nbsp;*&nbsp;Fm&nbsp;*&nbsp;f**2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-------------------<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f**2&nbsp;+&nbsp;Fm**2<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Am&nbsp;=&nbsp;21.44&nbsp;*&nbsp;S&nbsp;*&nbsp;(1&nbsp;+&nbsp;0.025&nbsp;*&nbsp;T)&nbsp;/&nbsp;c&nbsp;(dB/km/kHZ)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Pm&nbsp;=&nbsp;1&nbsp;-&nbsp;0.000137&nbsp;*&nbsp;D&nbsp;+&nbsp;0.0000000062&nbsp;*&nbsp;D**2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Fm&nbsp;=&nbsp;(8.17&nbsp;*&nbsp;10**(8&nbsp;-&nbsp;1990&nbsp;/&nbsp;Tk))&nbsp;/&nbsp;(1&nbsp;+&nbsp;0.0018&nbsp;*&nbsp;(S&nbsp;-&nbsp;35))&nbsp;&nbsp;(kHz)<BR>
+<BR>&nbsp;
+<BR>
+
+Pure Water Contribution:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>AlphaW&nbsp;=&nbsp;Aw&nbsp;*&nbsp;Pw&nbsp;*&nbsp;f**2<BR>
+<BR>&nbsp;&nbsp;
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>For&nbsp;T&nbsp;&lt;=&nbsp;20&nbsp;deg&nbsp;C<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Aw&nbsp;=&nbsp;0.0004397&nbsp;-&nbsp;0.0000259&nbsp;*&nbsp;T<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;0.000000911&nbsp;*&nbsp;T**2&nbsp;-&nbsp;0.000000015&nbsp;*&nbsp;T**3&nbsp;(dB/km/kHz)&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>For&nbsp;T&nbsp;&gt;&nbsp;20&nbsp;deg&nbsp;C<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Aw&nbsp;=&nbsp;0.0003964&nbsp;-&nbsp;0.00001146&nbsp;*&nbsp;T<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;0.000000145&nbsp;*&nbsp;T**2&nbsp;-&nbsp;0.00000000049&nbsp;*&nbsp;T**3&nbsp;(dB/km/kHz)&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Pw&nbsp;=&nbsp;1&nbsp;-&nbsp;0.0000383&nbsp;*&nbsp;D&nbsp;+&nbsp;0.00000000049&nbsp;*&nbsp;D**2&nbsp;<BR>
+<BR>&nbsp;
+<BR>
+
+Parameters:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>f&nbsp;=&nbsp;sound&nbsp;frequency&nbsp;(kHz)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>c&nbsp;=&nbsp;speed&nbsp;of&nbsp;sound&nbsp;(m/s)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>T&nbsp;=&nbsp;temperature&nbsp;(deg&nbsp;C)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Tk&nbsp;=&nbsp;temperature&nbsp;(deg&nbsp;K)&nbsp;=&nbsp;T&nbsp;+&nbsp;273&nbsp;(deg&nbsp;K)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>S&nbsp;=&nbsp;salinity&nbsp;(per&nbsp;mil)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>D&nbsp;=&nbsp;depth&nbsp;(m)<BR>
+<P>
+<BR>
+
+If the speed of sound is not specified by the user, it will be
+calculated from temperature, salinity, and depth using:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>c&nbsp;=~&nbsp;1412&nbsp;+&nbsp;3.21&nbsp;*&nbsp;T&nbsp;+&nbsp;1.19&nbsp;*&nbsp;S&nbsp;+&nbsp;0.0167&nbsp;*&nbsp;D<BR>
+<P>
+<BR>
+
+Normally, <B>mbabsorption</B> simply prints the resulting absorption
+value to stdout. If the <B>-V</B> option is specified, the output will
+include a listing of the parameters used in calculating the absorption.
+<BR>&nbsp;
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-C</B>
+
+<DD>
+<I>soundspeed</I>
+<BR>
+
+Specifies the water sound speed in m/sec. If the option is
+not used, the water sound speed will be calculated from the
+temperature, salinity, and depth. 
+<DT><B>-D</B>
+
+<DD>
+<I>depth</I>
+<BR>
+
+Sets the depth in meters at which the sound absorption should be calculated.
+Default: <I>depth</I> = 0.0 m (i.e. the sea surface).
+<DT><B>-F</B>
+
+<DD>
+<I>frequency</I>
+<BR>
+
+Sets the sound frequency in kHz at which the sound absorption should be calculated.
+Default: <I>frequency</I> = 200 kHz.
+<DT><B>-P</B>
+
+<DD>
+<I>ph</I>
+<BR>
+
+Sets the pH value at which the sound absorption should be calculated.
+Default: <I>ph</I> = 8.
+<DT><B>-S</B>
+
+<DD>
+<I>salinity</I>
+<BR>
+
+Sets the salinity in per mil at which the sound absorption should be calculated.
+Default: <I>salinity</I> = 35 per mil.
+<DT><B>-T</B>
+
+<DD>
+<I>temperature</I>
+<BR>
+
+Sets the temperature in degrees C at which the sound absorption should be calculated.
+Default: <I>temperature</I> = 10.0 degrees C.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbabsorption</B> outputs only a single absorption value 
+to the stdout stream.  If the
+<B>-V</B> flag is given, then <B>mbabsorption</B> works in a &quot;verbose&quot; mode and
+also outputs the parameters used to calculate the absorption.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that one wishes to obtain the water sound absorption for
+a 200 kHz multibeam sonar operating at a depth of 1000 meters (on
+an AUV, for instance) in water with a salinity of 35 per mil, a pH
+of 8, and a temperature of 4 degrees C. The following will suffice:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbabsorption&nbsp;-D1000&nbsp;-F200&nbsp;-P8&nbsp;-S35&nbsp;-T4<BR>
+<BR>
+
+The output will be:
+<BR>&nbsp;37.692561
+<BR>&nbsp;
+<BR>
+
+In order to obtain a more readable result, use the <B>-V</B> option:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbabsorption&nbsp;-D1000&nbsp;-F200&nbsp;-P8&nbsp;-S35&nbsp;-T4&nbsp;-V<BR>
+<BR>
+
+The output will be:
+<BR>
+
+<BR>&nbsp;Program&nbsp;MBabsorption
+<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbabsorption.1&nbsp;1783&nbsp;2009-10-26&nbsp;23:33:35Z&nbsp;caress&nbsp;$
+<BR>&nbsp;MB-system&nbsp;Version&nbsp;5.1.1beta15
+<BR>&nbsp;
+<BR>&nbsp;Input&nbsp;Parameters:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Frequency:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;200.000000&nbsp;kHz
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Temperature:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.000000&nbsp;deg&nbsp;C
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Salinity:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;35.000000&nbsp;per&nbsp;mil
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1000.000000&nbsp;m
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pH:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.000000
+<BR>&nbsp;Result:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sound&nbsp;absorption:&nbsp;37.692561&nbsp;dB/km
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+None known.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 26 October 2009</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

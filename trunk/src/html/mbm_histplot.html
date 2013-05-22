@@ -1,0 +1,403 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_histplot</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_histplot</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_histplot</B> - Create an executable shellscript which will generate
+a GMT histogram plot of a dataset.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_histplot</B> <B>-I</B><I>file</I>
+[<B>-G</B><I>fill</I> <B>-H</B>
+<B>-O</B><I>root</I> <B>-P</B><I>pagesize</I>
+<B>-U</B><I>orientation</I> <B>-V</B>
+<B>-W</B><I>pen</I> ]
+<P>
+Additional Options:
+<BR>
+
+[<B>-B</B><I>tickinfo</I> 
+<B>-J</B><I>projection</I>[<I>/scale | width</I>]
+<B>-L</B><I>title</I>[<I>:xlabel:ylabel</I>] <B>-M</B><I>misc</I>
+<B>-Q</B> <B>-R</B><I>w/e/s/n</I> <B>-X</B> <B>-Z</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_histplot</B> is a macro to generate a shellscript of
+GMT commands which, when executed, will generate a Postscript
+histogram plot of a set of data values.
+The plot will be scaled to fit on the specified page size
+or, if the scale is user defined, the page size will be
+chosen in accordance with the plot size. The primary purpose
+of this macro is to allow the simple, semi-automated
+production of nice looking plots with a few command line
+arguments. For users seeking more control over the plot
+appearance, a number of additional optional arguments are
+provided. Truly ambitious users may edit the plot shellscript
+to take advantage of GMT capabilites not supported by this
+macro.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>
+
+Suzanne H. O'Hara (<A HREF="mailto:sohara@ldeo.columbia.edu">sohara@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-B</B>
+
+<DD>
+<I>tickinfo</I>
+<BR>
+
+Sets map boundary tickmark intervals. See the <B>psbasemap</B>
+manual page for details. By default the program chooses
+basemap annotations based on the map boundaries.
+<DT><B>-C</B>
+
+<DD>
+<I>cellwidth</I>
+<BR>
+
+Sets the width of the cells into which the data are binned to form
+the histogram. The default is use a cell width that is 1/10 the
+data range.
+<DT><B>-G</B>
+
+<DD>
+<I>fill</I>
+<BR>
+
+Select filling of the histogram.
+Set the shade (0-255) or color
+(r/g/b) [Default is a light gray]. To reset no fill,
+use <I>fill</I> = &quot;N&quot;.
+You may optionally specify
+<B>-Gp</B><I>icon_size/pattern</I>, where
+<I>pattern</I> gives the number of the
+image pattern (1-32) OR the name of a
+icon-format file.  <I>icon_size</I> sets
+the unit size in inch.
+To invert black and white pixels, use
+<B>-GP</B> instead of <B>-Gp</B>.  See
+<B>GMTs</B> Cookbook &amp; Technical Reference
+Appendix E for information on individual patterns.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>[filepars:]xy_file</I>
+<BR>
+
+<P>
+Specifies the file containing the data to be plotted in a
+histogram. A single column of data is expected.
+<DT><B>-J</B>
+
+<DD>
+<I>projection</I>[<I>/width/height</I>]
+<BR>
+
+Sets the plot scale. The projection is linear (<B>-J</B><I>X), and
+the user can optionally specify the width and height.
+<DT></I><B>-L</B>
+
+<DD>
+<I>title[:xlabel[:ylabel]]</I>
+<BR>
+
+Sets the title and the labels for the x and y axes of
+the plot. Note that a colon (:) rather than a slash (/) is
+used to separate the labels. Colons cannot be used in the
+labels themselves. If this option is not used, then a default title
+and colorscale label are provided. If the title is supplied
+alone, no x or y-axis labels will be provided.
+<DT><B>-O</B>
+
+<DD>
+<I>root</I>
+<BR>
+
+Sets the root used to construct the filename of the output shellscript
+(<I>root</I>.cmd) and names of files created when the shellscript is
+run.  Normally the
+name of the input grid file or grid file list is
+used as the <I>root</I>.
+<DT><B>-P</B>
+
+<DD>
+<I>pagesize</I>
+<BR>
+
+This option sets the size of the page the plot will be centered
+on. If the user does not set the plot scale, the plot will be
+sized as large as will fit on the designated page. If the user
+sets the plot scale such that the plot will not fit on the
+designated page, a larger page will be used.
+The supported page sizes are:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;American&nbsp;ANSI&nbsp;sizes:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.5&nbsp;x&nbsp;11.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;215.9&nbsp;x&nbsp;&nbsp;279.4&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B&nbsp;&nbsp;&nbsp;&nbsp;11.0&nbsp;x&nbsp;17.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;279.4&nbsp;x&nbsp;&nbsp;431.8&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C&nbsp;&nbsp;&nbsp;&nbsp;17.0&nbsp;x&nbsp;22.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;431.8&nbsp;x&nbsp;&nbsp;558.8&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;22.0&nbsp;x&nbsp;34.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;558.8&nbsp;x&nbsp;&nbsp;863.6&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E&nbsp;&nbsp;&nbsp;&nbsp;34.0&nbsp;x&nbsp;44.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;863.6&nbsp;x&nbsp;1117.6&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;F&nbsp;&nbsp;&nbsp;&nbsp;28.0&nbsp;x&nbsp;40.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;711.2&nbsp;x&nbsp;1016.0&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E1&nbsp;&nbsp;&nbsp;44.0&nbsp;x&nbsp;68.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(1117.6&nbsp;x&nbsp;1727.2&nbsp;mm)
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric&nbsp;ISO&nbsp;A&nbsp;sizes:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A0&nbsp;&nbsp;&nbsp;841.0&nbsp;x&nbsp;1189.0&nbsp;mm&nbsp;&nbsp;(33.11&nbsp;x&nbsp;46.81&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A1&nbsp;&nbsp;&nbsp;594.0&nbsp;x&nbsp;&nbsp;841.0&nbsp;mm&nbsp;&nbsp;(23.39&nbsp;x&nbsp;33.11&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A2&nbsp;&nbsp;&nbsp;420.0&nbsp;x&nbsp;&nbsp;594.0&nbsp;mm&nbsp;&nbsp;(16.54&nbsp;x&nbsp;23.39&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A3&nbsp;&nbsp;&nbsp;297.0&nbsp;x&nbsp;&nbsp;420.0&nbsp;mm&nbsp;&nbsp;(11.69&nbsp;x&nbsp;16.54&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A4&nbsp;&nbsp;&nbsp;210.0&nbsp;x&nbsp;&nbsp;297.0&nbsp;mm&nbsp;&nbsp;(&nbsp;8.27&nbsp;x&nbsp;11.69&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A5&nbsp;&nbsp;&nbsp;148.0&nbsp;x&nbsp;&nbsp;210.0&nbsp;mm&nbsp;&nbsp;(&nbsp;5.83&nbsp;x&nbsp;&nbsp;8.27&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A6&nbsp;&nbsp;&nbsp;105.0&nbsp;x&nbsp;&nbsp;148.0&nbsp;mm&nbsp;&nbsp;(&nbsp;4.13&nbsp;x&nbsp;&nbsp;5.83&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A7&nbsp;&nbsp;&nbsp;&nbsp;74.0&nbsp;x&nbsp;&nbsp;105.0&nbsp;mm&nbsp;&nbsp;(&nbsp;2.91&nbsp;x&nbsp;&nbsp;4.13&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A8&nbsp;&nbsp;&nbsp;&nbsp;52.0&nbsp;x&nbsp;&nbsp;&nbsp;74.0&nbsp;mm&nbsp;&nbsp;(&nbsp;2.05&nbsp;x&nbsp;&nbsp;2.91&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A9&nbsp;&nbsp;&nbsp;&nbsp;37.0&nbsp;x&nbsp;&nbsp;&nbsp;52.0&nbsp;mm&nbsp;&nbsp;(&nbsp;1.46&nbsp;x&nbsp;&nbsp;2.05&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A10&nbsp;&nbsp;&nbsp;26.0&nbsp;x&nbsp;&nbsp;&nbsp;37.0&nbsp;mm&nbsp;&nbsp;(&nbsp;1.02&nbsp;x&nbsp;&nbsp;1.46&nbsp;in.)
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric&nbsp;ISO&nbsp;B&nbsp;sizes:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B0&nbsp;&nbsp;&nbsp;1000.0x&nbsp;1414.0&nbsp;mm&nbsp;&nbsp;(39.37&nbsp;x&nbsp;55.67&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B1&nbsp;&nbsp;&nbsp;707.0&nbsp;x&nbsp;1000.0&nbsp;mm&nbsp;&nbsp;(27.83&nbsp;x&nbsp;39.37&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B2&nbsp;&nbsp;&nbsp;500.0&nbsp;x&nbsp;&nbsp;707.0&nbsp;mm&nbsp;&nbsp;(19.68&nbsp;x&nbsp;27.83&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B3&nbsp;&nbsp;&nbsp;353.0&nbsp;x&nbsp;&nbsp;500.0&nbsp;mm&nbsp;&nbsp;(13.90&nbsp;x&nbsp;19.68&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B4&nbsp;&nbsp;&nbsp;250.0&nbsp;x&nbsp;&nbsp;353.0&nbsp;mm&nbsp;&nbsp;(&nbsp;9.84&nbsp;x&nbsp;13.90&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B5&nbsp;&nbsp;&nbsp;176.0&nbsp;x&nbsp;&nbsp;250.0&nbsp;mm&nbsp;&nbsp;(&nbsp;6.93&nbsp;x&nbsp;&nbsp;9.84&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B6&nbsp;&nbsp;&nbsp;125.0&nbsp;x&nbsp;&nbsp;176.0&nbsp;mm&nbsp;&nbsp;(&nbsp;4.92&nbsp;x&nbsp;&nbsp;6.93&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B7&nbsp;&nbsp;&nbsp;&nbsp;88.0&nbsp;x&nbsp;&nbsp;125.0&nbsp;mm&nbsp;&nbsp;(&nbsp;3.46&nbsp;x&nbsp;&nbsp;4.92&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B8&nbsp;&nbsp;&nbsp;&nbsp;62.0&nbsp;x&nbsp;&nbsp;&nbsp;88.0&nbsp;mm&nbsp;&nbsp;(&nbsp;2.44&nbsp;x&nbsp;&nbsp;3.46&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B9&nbsp;&nbsp;&nbsp;&nbsp;44.0&nbsp;x&nbsp;&nbsp;&nbsp;62.0&nbsp;mm&nbsp;&nbsp;(&nbsp;1.73&nbsp;x&nbsp;&nbsp;2.44&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B10&nbsp;&nbsp;&nbsp;31.0&nbsp;x&nbsp;&nbsp;&nbsp;44.0&nbsp;mm&nbsp;&nbsp;(&nbsp;1.22&nbsp;x&nbsp;&nbsp;1.73&nbsp;in.)
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric&nbsp;ISO&nbsp;C&nbsp;sizes:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C0&nbsp;&nbsp;&nbsp;914.4&nbsp;x&nbsp;1300.5&nbsp;mm&nbsp;&nbsp;(36.00&nbsp;x&nbsp;51.20&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C1&nbsp;&nbsp;&nbsp;650.2&nbsp;x&nbsp;&nbsp;914.4&nbsp;mm&nbsp;&nbsp;(25.60&nbsp;x&nbsp;36.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C2&nbsp;&nbsp;&nbsp;457.2&nbsp;x&nbsp;&nbsp;650.2&nbsp;mm&nbsp;&nbsp;(18.00&nbsp;x&nbsp;25.60&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C3&nbsp;&nbsp;&nbsp;325.1&nbsp;x&nbsp;&nbsp;457.2&nbsp;mm&nbsp;&nbsp;(12.80&nbsp;x&nbsp;18.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C4&nbsp;&nbsp;&nbsp;228.6&nbsp;x&nbsp;&nbsp;325.1&nbsp;mm&nbsp;&nbsp;(&nbsp;9.00&nbsp;x&nbsp;12.80&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C5&nbsp;&nbsp;&nbsp;162.6&nbsp;x&nbsp;&nbsp;228.6&nbsp;mm&nbsp;&nbsp;(&nbsp;6.40&nbsp;x&nbsp;&nbsp;9.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C6&nbsp;&nbsp;&nbsp;114.3&nbsp;x&nbsp;&nbsp;162.6&nbsp;mm&nbsp;&nbsp;(&nbsp;4.50&nbsp;x&nbsp;&nbsp;6.40&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C7&nbsp;&nbsp;&nbsp;&nbsp;81.3&nbsp;x&nbsp;&nbsp;114.3&nbsp;mm&nbsp;&nbsp;(&nbsp;3.20&nbsp;x&nbsp;&nbsp;4.50&nbsp;in.)
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  MB-System large format sizes:<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m1&nbsp;&nbsp;1371.6&nbsp;x&nbsp;1828.8&nbsp;mm&nbsp;&nbsp;(54.00&nbsp;x&nbsp;72.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m2&nbsp;&nbsp;1371.6&nbsp;x&nbsp;2133.6&nbsp;mm&nbsp;&nbsp;(54.00&nbsp;x&nbsp;84.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m3&nbsp;&nbsp;1371.6&nbsp;x&nbsp;2438.4&nbsp;mm&nbsp;&nbsp;(54.00&nbsp;x&nbsp;96.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m4&nbsp;&nbsp;1524.0&nbsp;x&nbsp;1828.8&nbsp;mm&nbsp;&nbsp;(60.00&nbsp;x&nbsp;72.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m5&nbsp;&nbsp;1524.0&nbsp;x&nbsp;2133.6&nbsp;mm&nbsp;&nbsp;(60.00&nbsp;x&nbsp;84.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m6&nbsp;&nbsp;1524.0&nbsp;x&nbsp;2438.4&nbsp;mm&nbsp;&nbsp;(60.00&nbsp;x&nbsp;96.00&nbsp;in.)
+<P>
+The default page size is A.
+<DT><B>-Q</B>
+
+<DD>
+Normally, the output plot generation shellscript
+includes lines which execute
+a program to display the Postscript image on the screen.
+This option causes those lines to be commented out so
+that executing the shellscript produces a Postscript plot
+but does not attempt to display it on the screen.
+The program
+to be used to display the Postscript is set
+using <B>mbdefaults</B>;
+the default value can be overridden by setting the environment
+variable $MB_PS_VIEWER.
+<DT><B>-R</B>
+
+<DD>
+<I>west/east/south/north</I>
+<BR>
+
+<I>west, east, south,</I> and <I>north</I> specify the Region of interest. [Default is
+the range of the data and the histogram distribution].
+<DT><B>-U</B>
+
+<DD>
+<I>orientation</I>
+<BR>
+
+Normally the orientation of the plot (portrait or landscape)
+is selected automatically so as to maximize the plot scale.
+The <B>-U</B> option allows the user to set the plot orientation. If
+<I>orientation</I> = 1, a portrait plot will be produced; if
+<I>orientation</I> = 2, a landscape plot will be produced.
+<DT><B>-V</B>
+
+<DD>
+Causes <B>mbm_histplot</B> to operate in &quot;verbose&quot; mode
+so that it outputs
+more information than usual.
+<DT><B>-W</B>
+
+<DD>
+<I>pen</I>
+<BR>
+
+Set pen attributes for plotting. See chapter 4.12 in the
+GMT Technical reference for a discussion of GMT pen values.
+[Defaults: width = 1, color = 0/0/0,
+texture = solid].
+<DT><B>-X</B>
+
+<DD>
+Normally, <B>mbm_histplot</B> creates an executable shellscript and
+then exits.  This option will cause the shellscript to be executed
+in the background before <B>mbm_histplot</B> exits.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose we have a single column ascii file of time lag estimates called
+timelag.dat. In order to generate a 6 inch wide and 4 inches high
+simple histogram plot of these data, use:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_histplot -Itimelag.dat -Otimelaghist -JX6/4 -V<BR>
+to generate a GMT plot shellscript called timelaghist.cmd.
+<P>
+As an example, the contents of the plotting shellscript
+&quot;timelaghist.cmd&quot; are:
+<P>
+#! /bin/csh -f
+#
+# Shellscript to create Postscript plot of data in grd file
+# Created by macro mbm_histplot
+#
+# This shellscript created by following command line:
+# mbm_histplot -Itimelag.dat -Otimelaghist -JX6/4 -V
+#
+# Define shell variables used in this script:
+set PS_FILE         = timelaghist.ps
+set CPT_FILE        =
+set MAP_PROJECTION  = X
+set MAP_SCALE       = 6/4
+set MAP_REGION      = -0.57/0.12/0/50
+set X_OFFSET        = 2.5
+set Y_OFFSET        = 2.375
+#
+# Save existing GMT defaults
+echo Saving GMT defaults...
+gmtdefaults -L &gt;! gmtdefaults$$
+#
+# Set new GMT defaults
+echo Setting new GMT defaults...
+gmtset MEASURE_UNIT inch
+gmtset PAPER_MEDIA archA+
+gmtset ANOT_FONT Helvetica
+gmtset LABEL_FONT Helvetica
+gmtset HEADER_FONT Helvetica
+gmtset ANOT_FONT_SIZE 8
+gmtset LABEL_FONT_SIZE 8
+gmtset HEADER_FONT_SIZE 10
+gmtset FRAME_WIDTH 0.075
+gmtset TICK_LENGTH 0.075
+gmtset PAGE_ORIENTATION LANDSCAPE
+gmtset COLOR_BACKGROUND 0/0/0
+gmtset COLOR_FOREGROUND 255/255/255
+gmtset COLOR_NAN 255/255/255
+gmtset DEGREE_FORMAT 3
+#
+# Make histogram
+echo Running pshistogram...
+pshistogram timelag.dat <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-J$MAP_PROJECTION$MAP_SCALE <TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R$MAP_REGION <TT>&nbsp;&nbsp;</TT>-B0.05:&quot; &quot;:/5:&quot;Frequency %&quot;::.&quot;Frequency Histogram of timelag.dat&quot;: -W0.069 -Z1 -L1p -Ggray -X$X_OFFSET -Y$Y_OFFSET -V &gt;! $PS_FILE<BR>
+#
+# Delete surplus files
+echo Deleting surplus files...
+/bin/rm -f $CPT_FILE
+#
+# Reset GMT default fonts
+echo Resetting GMT fonts...
+/bin/mv gmtdefaults$$ .gmtdefaults
+#
+# Run gv
+echo Running gv in background...
+gv --orientation=landscape --media=BBox $PS_FILE &amp;
+#
+# All done!
+echo All done!
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbdefaults.html">mbdefaults</A></B>(l),
+<B><A HREF="mbm_grdplot.html">mbm_grdplot</A></B>(l), <B><A HREF="mbm_grd3dplot.html">mbm_grd3dplot</A></B>(l),
+<B><A HREF="mbm_plot.html">mbm_plot</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Please let us know.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 26 October 2009</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

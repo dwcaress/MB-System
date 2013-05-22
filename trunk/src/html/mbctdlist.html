@@ -1,0 +1,281 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbctdlist</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbctdlist</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  2 May 2012 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbctdlist</B> - List CTD data in swath sonar data files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbctdlist</B> [<B>-A</B> <B>-D</B><I>decimate</I> <B>-F</B><I>format</I>
+<B>-G</B><I>delimeter</I> <B>-H</B> <B>-I</B><I>file </I>
+<B>-O</B><I>output_format</I> <B>-V</B> <B>-Z</B><I>segment</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MBctdlist</B> prints the specified contents of CTD records
+in a swath sonar data file to stdout. CTD stands for conductivity,
+temperature, and depth (pressure). Some seafoor mapping sonar platforms
+(e.g. ROVs or AUVs) carry CTDs. The CTD data may be included in the
+sonar data stream to enable calculation of water sound speed for use
+in sonar settings and/or data processing. In addition to the raw
+conductivity (S/m), temperature (degree C), and pressure (dBar) data,
+salinity (ppu), depth (m), and water sound speed (m/s) are typically
+available by calculation.<B>MBctdlist</B> can also output navigation
+and time stamp values. By default, <B>mbctdlist</B>  produces ASCII files in
+spreadsheet style, with data columns separated by tabs. Alternatively,
+other column delimiters can be used (<B>-G</B> option), or
+the output can be binary, with each field represented
+as a double precision float (<B>-A</B> option). The
+option <B>-O</B><I>output_format</I> is
+used to control the data types that are sent to stdout. The output stream can
+be decimated using the <B>-D</B> option. The output of
+<B>mbctdlist</B> can be piped to plotting and data analysis programs.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>
+
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<BR>
+
+Causes the output to be binary (native double precision floating
+point) rather than ASCII. Some
+output options cannot be represented as single binary floats (e.g.
+time strings and longitude or latitude broken into degrees
+and minutes. These values are output as multiple fields as
+appropriate.
+Default: ASCII output with fields separated by tabs.
+<DT><B>-D</B>
+
+<DD>
+<I>decimate</I>
+<BR>
+
+Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1),
+every available data record is output. If <I>decimate</I>&gt;1, then only
+every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate</I>=1.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the format for the input swath sonar data using
+<B>MBIO</B> integer format identifiers.
+This program uses the <B>MBIO</B> library and will read any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
+<DT><B>-G</B>
+
+<DD>
+<I>delimiter</I>
+<BR>
+
+Sets the character(s) used to separate output fields when ascii
+columns are output. Default: tabs are used as delimiters.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>file</I>
+<BR>
+
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-F</B> option) then the swath sonar data contained in <I>file</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>file</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>file</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile.mb88&nbsp;88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile.mb88&nbsp;88<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will read any swath sonar
+format supported by <B>MBIO</B>. However, only files in formats supporting
+CTD data will contain relevant data and produce an output.
+A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page.
+Default: <I>file</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values returned.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <I>lonflip</I> = 0.
+<DT><B>-O</B>
+
+<DD>
+<I>output_format</I>
+<BR>
+
+Determines the form of the output. <I>Output_format</I> is a string composed
+of one or more of the following characters:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>C</B>&nbsp;&nbsp;for&nbsp;conductivity&nbsp;(S/m)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>^C</B>&nbsp;for&nbsp;sonar&nbsp;altitude&nbsp;(meters)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>c</B>&nbsp;&nbsp;for&nbsp;temperature&nbsp;(degree&nbsp;C)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>^c</B>&nbsp;for&nbsp;sonar&nbsp;depth&nbsp;(meters)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>H</B>&nbsp;&nbsp;for&nbsp;heading&nbsp;(degrees)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>h</B>&nbsp;&nbsp;for&nbsp;course&nbsp;made&nbsp;good&nbsp;(degrees)<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>J</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;jd&nbsp;hh&nbsp;mm&nbsp;ss.ssssss)<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;jd&nbsp;is&nbsp;the&nbsp;julian&nbsp;day&nbsp;of&nbsp;the&nbsp;year
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>j</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;jd&nbsp;dm&nbsp;ss.ssssss)<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;jd&nbsp;is&nbsp;the&nbsp;julian&nbsp;day&nbsp;of&nbsp;the&nbsp;year
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;dm&nbsp;is&nbsp;the&nbsp;minute&nbsp;of&nbsp;the&nbsp;day
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>L</B>&nbsp;&nbsp;for&nbsp;cumulative&nbsp;along-track&nbsp;distance&nbsp;(km)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>l</B>&nbsp;&nbsp;for&nbsp;cumulative&nbsp;along-track&nbsp;distance&nbsp;(m)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>M</B>&nbsp;&nbsp;for&nbsp;unix&nbsp;time&nbsp;in&nbsp;decimal&nbsp;seconds&nbsp;since&nbsp;1/1/70&nbsp;00:00:00<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>m</B>&nbsp;&nbsp;for&nbsp;time&nbsp;in&nbsp;decimal&nbsp;seconds&nbsp;since&nbsp;first&nbsp;record<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>P</B>&nbsp;&nbsp;for&nbsp;potential&nbsp;temperature&nbsp;(degree)<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>S</B>&nbsp;&nbsp;for&nbsp;salinity&nbsp;(ppu)<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>^S</B>&nbsp;for&nbsp;speed&nbsp;(km/hr)<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>s</B>&nbsp;&nbsp;for&nbsp;water&nbsp;sound&nbsp;speed&nbsp;(m/s)<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>^s</B>&nbsp;for&nbsp;speed&nbsp;made&nbsp;good&nbsp;(km/hr)<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>T</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy/mm/dd/hh/mm/ss)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>t</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;mm&nbsp;dd&nbsp;hh&nbsp;mm&nbsp;ss)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>U</B>&nbsp;&nbsp;for&nbsp;unix&nbsp;time&nbsp;in&nbsp;integer&nbsp;seconds&nbsp;since&nbsp;1/1/70&nbsp;00:00:00<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>u</B>&nbsp;&nbsp;for&nbsp;time&nbsp;in&nbsp;integer&nbsp;seconds&nbsp;since&nbsp;first&nbsp;record<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>V</B>&nbsp;&nbsp;for&nbsp;ping&nbsp;interval&nbsp;(decimal&nbsp;seconds)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>X</B>&nbsp;&nbsp;for&nbsp;longitude&nbsp;(decimal&nbsp;degrees)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>x</B>&nbsp;&nbsp;for&nbsp;longitude&nbsp;(degrees&nbsp;+&nbsp;decimal&nbsp;minutes&nbsp;+&nbsp;E/W)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>Y</B>&nbsp;&nbsp;for&nbsp;latitude&nbsp;(decimal&nbsp;degrees)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>y</B>&nbsp;&nbsp;for&nbsp;latitude&nbsp;(degrees&nbsp;+&nbsp;decimal&nbsp;minutes&nbsp;+&nbsp;N/S)<BR>
+<P>
+Default <I>output_format</I> = <B>TXYCc^cSs</B> (Time, lon, lat, conductivity,
+temperature, depth, salinity, sound speed).
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbctdlist</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbctdlist</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used and all error status messages.
+<DT><B>-Z</B>
+
+<DD>
+<I>segment</I>
+<BR>
+
+Causes the ascii output of different input swath files
+(e.g. when a datalist is specified with the <B>-I</B> option)
+to be separated by lines with <I>segment</I>. If <I>segment</I>
+is a single character, then the output is a multiple segment
+file of the sort accepted by the <B>GMT</B> program <B>psxy</B>.
+This option only works with ascii output, and is thus disabled
+when the <B>-A</B> option is specified. The most common usage
+is <B>-Z</B>I&gt;.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to obtain a ctd list from a Reson 7125 data file
+in the 7k format (MBIO id 88) called 20080904_231809p.mb88. To
+obtain a listing with time in unix second forms followed
+by longitude, latitude, and salinity, the following will suffice:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbctdlist&nbsp;-i&nbsp;20080904_231809p.mb88&nbsp;-OMXYS&nbsp;|&nbsp;more<BR>
+<P>
+The output will be as follows:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1220570288.486000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-129.066699&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;47.997246&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;34.305<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1220570288.685999&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-129.066702&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;47.997245&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;34.304<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1220570288.885999&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-129.066706&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;47.997244&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;34.305<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1220570289.086000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-129.066710&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;47.997243&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;34.305<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1220570289.286000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-129.066713&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;47.997242&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;34.304<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.....<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbinfo.html">mbinfo</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+<B>mbctdlist</B> initially only works with data in the MBF_RESON7KR format (MBIO format id 88)
+supporting Reson 7k series multibeam sonars.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 2 May 2012</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
