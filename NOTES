@@ -1,0 +1,58 @@
+--------------------------------------------------------------
+ nstall Notes for MB-System with configure
+-------------------------------------------------------------
+
+1. Simple method
+./configure
+make
+make install
+
+Common Options
+./configure --help for full list of options
+--prefix=install location for mbsystem (/usr/local/mbsystem)
+--with-netcdf-lib location of NetCDF libs
+--with-netcdf-include location of NetCDF headers
+--with-gmt-lib location of GMT libs
+--with-gmt-include location of GMT headers
+--with-fftw-lib location of FFTW3 libs (optional)
+--with-fftw-include location of FFTW3 headers (optional)
+--with-motif-lib location of Motif libs (optional)
+--with-motif-include location of Motif headers (optional)
+--with-opengl-lib location of OpenGL libs (optional)
+--with-opengl-include location of OpenGL headers (optional) 
+
+If FFTW3, Motif, or OpenGL cannot be found MB-System will be built with without this support.
+
+Can also supply custom compile flags such as the following...
+
+CFLAGS="-g -W" ./configure --prefix=/usr/local/mbsystem --disable-static
+
+will override system default CFLAGS with "-g and -W" and install mbsystem in /usr/local/mbsystem and will disable building the static libraries (just shared).
+
+
+######################################
+To modify build system...
+Edit configure.in and Makefile.am (in each folder)
+and then run the following
+#####################################
+
+#Build libtool files for AM_PROG_LIBTOOL
+libtoolize --force --copy
+aclocal
+#Build custom header for configure
+autoheader
+automake --add-missing --include-deps
+autoconf
+
+####################################
+Updated March 16, 2013
+
+To update configure files use the following:
+autoupdate
+and
+autoreconf --force --install --symlink --warnings=all
+
+#####################################
+
+
+
