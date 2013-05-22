@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbwedge_prog.c	6/9/2010
- *    $Id: $
+ *    $Id$
  *
  *    Copyright (c) 2010 by
  *    David W. Caress (caress@mbari.org)
@@ -76,7 +76,7 @@ struct mbwedge_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbwedge_prog.c 1862 2010-06-07 00:26:46Z caress $";
+static char rcs_id[] = "$Id$";
 static char program_name[] = "MBwedge";
 static char help_message[] =  
 "MBwedge is an interactive sonar display tool for use with the\n\

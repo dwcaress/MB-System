@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.h	10/14/2009
- *    $Id: mbedit.h 1862 2010-06-07 00:26:46Z caress $
+ *    $Id$
  *
  *    Copyright (c) 2009-2010 by
  *    David W. Caress (caress@mbari.org)
