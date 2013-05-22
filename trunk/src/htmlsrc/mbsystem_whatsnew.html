@@ -1,0 +1,361 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>What's New in MB-System</TITLE>
+  <meta http-equiv="Content-Type" content="text/html">
+  <meta name="Title" content="MB-System: Mapping the Seafloor">
+  <meta name="Author" content="David Caress, Dale Chayes">
+  <meta name="Description" content="open source software for processing bathymetry and backscatter data from multibeam and sidescan sonar">
+  <meta name="Keywords" content="seafloor,mapping,multibeam,sonar,bathymetry,sidescan,swath processing,open,source,software">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+
+<H1 ALIGN=CENTER>What's New in MB-System Version 5.3</H1>
+
+<P>The version 5.3.x releases of MB-System includes a number of changes and
+improvements relative to the earlier version 5 releases. Two of these changes, a new &quot;fast bathymetry&quot; or fbt file format, and the implementation of file locking, will generate files that older versions of MB-System cannot read. Consequently, we recommend that any MB-System users that work together on common datasets upgrade simultaneously to release 5.3.1887 or higher. The particulars follow: </P>
+
+<UL>
+  <LI>Changes to the "fbt" or "fast bathymetry" files in the MB-System processing environment.</LI>
+  
+  <UL>
+  <LI>We updated the definition of swath format MBF_LDEOIH (format 71),
+which is used for the "fast bathymetry" or *.fbt files in MB-System
+processing environments. </LI>
+  <LI>The previous form of *.fbt files had a
+    serious limitation in that bathymetry from multibeams operated
+    near the seafloor in deep water did not represent the full
+    numerical resolution of those data. </LI>
+  <LI>The updated format allows for
+    depth and distance resolution to 0.001 m even in the deep ocean.    </LI>
+  <LI>Old *.fbt files are read transparently, but newly written files
+    will not be readable by older versions of MB-System.. </LI>
+  </UL>
+</UL>
+
+<UL>
+  <LI>File locking by data editing tools MBedit, MBeditvia, MBnavedit, MBclean, and the processing program MBprocess.</LI>
+  
+  <UL>
+  <LI>A file locking mechanism has been implemented to allow multiple users to work on the same projects without interfering. The intent is for this mechansim to work on heterogeneous networks, which means that the data can be on non-Posix filesystems mounted on multiple computers running different operating systems.</LI>
+    
+  <LI>The file locking is implemented in a crude fashion involving the creation and deletion of &quot;lock files&quot;. These are text files with a &quot;.lck&quot; suffix that are created in parallel with the associated &quot;raw&quot; swath files. If a lock file exists, the swath file has been locked by a program and cannot be opened for editing or processing by any other program. When a program completes its work on or with a swath file, it removes the lock by deleting the file.</LI>
+    
+  <LI>The lock files include text indicating the program that generated the lock, the time the lock was created, the purpose (e.g. bathymetry editing), which user generated the lock, and what machine that user was logged into.</LI>
+    
+  <LI>File locking is implemented for MBedit, MBeditviz, MBnavedit, and MBprocess.</LI>
+  <LI>An example of the contents of a lock file is:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# File /Volumes/MappingAUVOps2011/20110525m1/20110525_202216.mb88 <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Locked by user &lt;caress&gt; on cpu &lt;diebold.shore.mbari.org&gt; at &lt;Fri May 27 09:45:42 2011&gt;<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Locking Program: MBedit<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Locking User: caress<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Locking CPU: diebold.shore.mbari.org<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Locking Time: Fri May 27 09:45:42 2011<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Locking Purpose ID: 2<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Locking Purpose Description: Edit Bathymetry<BR>
+  </LI>
+  <LI>The primary negative consequence of file locking is the potential creation of orphaned lock files if a locking program crashes or is interrupted. The mbdatalist tool can now be used to detect lock files (-S option) in any of the files references through a datalist, or to remove any lock files (-Y option).</LI>
+  </UL>
+</UL>
+
+<UL>
+  <LI>MBedit and MBnavedit can now operate on datalists.</LI>
+  
+  <UL>
+  <LI>Previously, these two editing tools opened one file at a time, specified from a file opening dialog accessed by clicking the &lt;File&gt; button.</LI>
+  <LI>Now, &lt;File&gt; is a pull down menu with two options: &lt;Open&gt; and &lt;File Selection List&gt;. The first brings up the same file opening dialog as before. The second brings up a list dialog showing all of the files available for editing.</LI>
+  <LI>If a user opens a single file for editing, that file will be added to an internal list of files available for editing, and then loaded.</LI>
+  <LI>If a user opens a datalist, then all of the files referenced through the recursive datalist structure will be added to the internal list of files available for editing, and the first file will be loaded.</LI>
+  <LI>The user can, by selecting the &lt;File-&gt;File Selection List&gt; menu item, display the internal list of available files. Selecting a file in this list will cause that file to be loaded for editing. If another file was already loaded, it will be closed out gracefully before the new file is loaded.</LI>
+  <LI>The list of available files also indicates which files have been previously edited (so that &quot;.esf&quot; or &quot;.nve&quot; files exist) and which are currently locked by other programs and users.</LI>
+  </UL>
+</UL>
+
+<UL>
+  <LI>Pseudo-Parallel Processing With MBprocess</LI>
+  
+  <UL>
+  <LI>Updating the processing of one or more surveys with MBprocess can be time consuming because each swath file must be processed in turn.</LI>
+  <LI>Since the processing of each file depends only on the parameter and ancilliary files parallel to that file, the use of MBprocess is inherently parallelizable.</LI>
+  <LI>The file locking mechanism described above allows users to simultaneously run multiple instances of MBprocess on the same datalist structure.</LI>
+  <LI>Each MBprocess instance will parse through the datalist structure and attempt to process each swath file in turn.</LI>
+  <LI>Swath files will be skipped if they are up-to-date, or if they are locked.</LI>
+  <LI>The MBprocess instances can be on different computers, as long as the same filesystems are mounted.</LI>
+  <LI>The benefit of this pseudo-parallel processing tends to be limited by the network throughput. For instance, at MBARI the swath data are served on CIFS or Samba filesystems over Gigabet ethernet. We find that processing runs go faster with up to six MBprocess instances running on up to three different computers, but that adding more  than six processes causes the entire run to take longer.    </LI>
+  </UL>
+</UL>
+
+<UL>
+  <li>New data formats:
+    <ul>
+      <li>HYSWEEP HSX multibeam data format (format id 201)</li>
+    </ul>
+  </li>
+</UL>
+<H1 ALIGN=CENTER>What Was New in MB-System Versions 5.1 and 5.2</H1>
+
+<P>The version 5.1.x and 5.2.z releases of MB-System included a number of changes and
+improvements relative to the version 4 releases. The most significant changes
+included: </P>
+
+<UL>
+  <LI>A new approach to managing data processing.</LI>
+  
+  <UL>
+  <LI>Many tools - one output file. In previous versions of MB-System, each
+    processing program read an input swath data file and produced an output
+    swath data file. This &quot;serial&quot; processing scheme generally produced
+    a large number of intermediate data files. MB-System version 5.0 features
+    the integration of the editing and analysis tools with a single program,
+    mbprocess, that outputs processed data files. The new &quot;parallel&quot;
+    processing scheme covers bathymetry data processing, but does not yet incorporate
+    the sidescan processing capabilities. All of the old tools and capabilities
+    are still part of the distribution.</LI>
+    
+  <LI>Recursive datalists. The lists of data files used by gridding and plotting
+    programs can now be recursive, making it simpler to manage data from many
+    different surveys.</LI>
+    
+  <LI>Automatic format identification. MB-System programs will now attempt
+    to automatically identify the swath data format based on the filename suffix.</LI>
+    
+  <LI>Extended inf files. Users can generate inf files by directing the output
+    of mbinfo to a file named by adding an &quot;.inf&quot; suffix to the swath
+    data file name. Several programs can parse inf files, if they exist, to
+    quickly obtain data locations or ranges. This feature speeds operations
+    such as gridding, mosaicing, and automated plotting.<BR>
+  <BR>
+  </LI>
+  </UL>
+  
+  <LI>New command line tools.</LI>
+  
+  <UL>
+  <LI>MBprocess. This new tool performs a variety of processing tasks and
+    produces a single output processed swath data file. The program mbprocess
+    can apply bathymetry edits from mbedit and mbclean, navigation edits from
+    mbnavedit, sound velocity profile changes from mbvelocitytool, and a variety
+    of other corrections.</LI>
+    
+  <LI>MBset. This new tool allows users to create and modify the parameter
+    files used to control the operation of mbprocess.</LI>
+    
+  <LI>MBdatalist. This new tool allows users to list the files referenced by
+    a recursive datalist structure. It can also be used to create the ancillary ".inf",
+  ".fbt", and ".fnv" files for all of the data files referenced in a recursive datalist
+    structure. </LI>
+    
+  <LI>MBsvplist. This new tool lists water sound velocity profiles embedded
+    in swath data files, creating secondary files that 
+    can be read into MBvelocitytool.</LI>
+    
+  <LI>MBareaclean. This new tool identifies and flags artifacts in swath sonar
+    bathymetry data within a specified area of interest. The
+    area is divided into a grid with square cells or bins, and the
+    data are grouped according to these bins. Once all
+    of  data  are read, statistical tests are applied 
+    to the soundings within each bin.</LI>
+  <LI>MBotps. This new tool uses the Oregon State Tidal Prediction Software (OTPSnc) package to calculate open ocean tidal models for bathymetry correction.</LI>
+    
+  <LI>MBextractsegy. This new tool extracts subbottom profiler data
+    from swath files to SEGY format files.</LI>
+    
+  <LI>MBsegyinfo. This new tool extracts SEGY data file information and statistics.
+    
+  <LI>MBsegylist. This new tool produces arbitrary ascii tables from SEGY data files.
+    
+  <LI>MBsegygrid. This new tool grids seismic and subbottom data from SEGY data files.
+  <LI>MBsegypsd. This new tool calculates sonograms from SEGY data files.<BR>
+    <BR>
+  </UL>
+  
+  <LI>Improved bathymetry and navigation editors.</LI>
+  
+  <UL>
+  <LI>MBedit and MBnavedit now swallow data files whole rather than reading
+    in limited size buffers.</LI>
+    
+  <LI>MBedit now outputs beam edit events rather than an entire swath file.
+    The edits are applied by MBprocess.</LI>
+    
+  <LI>MBnavedit now outputs the edited navigation rather than an entire swath
+    file. The edited navigation is merged using MBprocess.</LI>
+    
+  <LI>Both editors show the position of the currently displayed data within
+    the entire data file.</LI>
+  <LI>MBnavedit has two navigation modeling modes relevant to swath data
+    collected using poorly navigated ROVs and towfishes. One mode applies a
+    dead reckoning model with interactively set drifts, and the other involves
+    inverting for an optimally smooth navigation by penalizing speed and acceleration.<BR>
+  </LI>
+  <LI>MBnavadjust. This new tool allows users to adjust poorly navigated
+    surveys by matching features in overlapping swathes. It is particularly
+    useful for processing surveys conducted from submerged platforms.</LI>
+  </UL>
+</UL>
+<UL>
+  <li>New Visualization Based Tools
+  </li>
+  <ul>
+    <li>MBgrdviz is a  GMT grid 2D/3D visualization utility. MBgrdviz also allows the display of sonar navigation, sites, and routes, and interactive survey planning.</li>
+  </ul>
+  <UL>
+    <LI>MBeditviz is an interactive 3D visualization bathymetry editor and patch test tool.</LI>
+  </UL>
+</UL>
+<UL>
+  <li>Support for Projected Coordinate Systems
+  </li>
+  <ul>
+    <li>MB-System now incorporates the  source  code  for  the
+      PROJ.4  Cartographic  Projections  library,  providing
+      support for (apparently) all  commonly  used  geodetic
+      coordinate  systems.   PROJ.4  was developed by Gerald
+      Evenden (then of the USGS), and was obtained from  the
+      www.remotesensing.org website.</li>
+  </ul>
+  <UL>
+    
+    <LI>A  large  number of commonly used projected coordinate
+      systems (e.g. UTM)  are  defined  in  a  file  
+      (mbsystem/share/projections.dat) distributed with MB-System.
+      These include all of the standard UTM  zones,  all  of
+      the  standard state plate coordinate systems, and most
+      of the European Petroleum Survey Group (EPSG)  coordinate 
+    systems (also including UTM).</LI>
+    
+    <LI>MB-System  can now handle swath data that is navigated
+      in a supported projected coordinate system. In particular, 
+      data files that are navigated with UTM eastings
+      and northings instead of longitude  and  latitude  can
+    now be plotted and processed with MB-System.</LI>
+    
+    <LI>The  programs mbgrid and mbmosaic can now output grids
+      and mosaics in any of the projected coordinate systems
+    specified in mbsystem/share/projections.dat.</LI>
+    
+    <LI>The   TIFF   images  generated  with  mbm_grdtiff  and
+      mbgrdtiff now fully conform to  the  GeoTIFF  standard,
+      providing that the source grids or mosaics were generated 
+      using mbgrid or  mbmosaic  in  either  Geographic
+      coordinates, UTM coordinates, or any of the EPSG coordinate 
+      systems specified in the projections.dat  file.
+      This  means,  for instance, that GeoTIFF images generated 
+      with mbgrdtiff  will  be  properly  georeferenced
+      when  they  are imported into ESRI ArcGIS or other GIS
+      packages.<BR>
+      <BR>
+    </LI>
+  </UL>
+  
+  <LI>Restructuring the code.</LI>
+  
+  <UL>
+    <LI>All of the C code now conforms to the ANSI C standard.</LI>
+    
+    <LI>The underlying input/output library (MBIO) has been substantially rewritten.
+      The structure has been streamlined, simplifying both future development
+    and support of the existing code. The MBIO API has been greatly modified.</LI>
+  </UL>
+</UL>
+<UL>
+  <LI>Handling of old Simrad multibeam data.</LI>
+  
+  <UL>
+  <LI>Vendor format data from the old Simrad multibeams (pre-1997 sonars)
+    are now supported by a single format id (51) rather than a separate format
+    id for each sonar model. The old format id's are automatically aliased
+    to 51, so existing shellscripts will continue to work.</LI>
+    
+  <LI>MB-System no longer supports beam flagging in format 51 data. The
+    use of mbedit and mbclean on format 51 data will cause the flagged
+    beams to be irrevocably nulled. Previous versions of MB-System used
+    the highest bit in the depth values to represent beam flags because
+    no Simrad data seemed to use that bit. We have not obtained data 
+    with depth values using the full bit-range, conflicting with the
+    old beam flagging scheme. We recommend that old Simrad data be translated
+    to the extended processing format (57) which contains proper beam
+    flags and supports all processing functions. Format 57 is also used for processing data from
+    the current Simrad multibeam sonars.
+    
+  <LI>Sidescan data from old Simrad multibeams (pre-1997 sonars) are now
+    handled in the same manner as data from the newer sonars (e.g. EM3000,
+    EM3000, EM120). The raw samples in the vendor data format are binned, averaged,
+    and interpolated into a 1024 pixel sidescan swath. This binned sidescan
+    is not saved in the vendor format, so (as above) it is recommended that the data be
+    translated to an extended format (57) that stores both bathymetry beam flags
+    and processed sidescan. </LI>
+  </UL>
+</UL>
+
+<UL>
+<LI>Streamlining of MB-System Default Parameters.</LI>
+
+<UL>
+<LI>Prior to version 5.0, the MB-System defaults
+set by mbdefaults included the format id, a control for
+ping averaging, longitude and latitude bounds for windowing
+by area, and begin and end times for windowing in time. These
+values are no longer set in the .mbio_defaults file or controlled
+by mbdefaults. As noted above, the format id is automatically
+identified from the filename when possible. When filenames do not
+match one of the recognized structures, users must specify the
+format using the relevant programs -Fformat option.
+The controls for ping averaging and windowing in time and space
+are rarely used, and must now be explicitly set in command
+line arguments.</LI>
+</UL>
+</UL>
+
+<UL>
+<LI>New Data Formats</LI>
+
+<UL>
+<LI>Furuno HS10 multibeam bathymetry is supported as format 171.</LI>
+
+<LI>SeaBeam 2120 multibeam data in the L3 Communications XSE format are
+supported as format 94 (already used to support Elac Bottomchart MkII XSE
+data).</LI>
+
+<LI>Raw STN Atlas multibeam data generated by the upgraded Hydrosweep DS2
+multibeam on the R/V Ewing are supported by read-only format 182.
+Processing is supported using the augmented read-write format 183.</LI>
+
+<LI>The IFREMER netCDF multibeam archiving data format is supported
+as format 75. Similarly, the IFREMER netCDF navigation 
+archiving data format is supported
+as format 167.</LI>
+
+<LI>The STN Atlas processing data format SURF is supported as format 181. At
+present, SURF is supported as a read-only format. This allows plotting and gridding
+of the SURF data, but not processing. Writing or translating the SURF data to
+allow processing will be supported in a later version.
+</LI>
+
+<LI>The Hawaii Mapping Research Group's  MR1 format is supported as
+format 64. This format is used to disseminate data from both the
+HMRG interferometric sonars (e.g. MR1) and the WHOI DSL 120 deep-towed
+inteferometric sonar. This format has been supported by including
+the code for the HMRG library libmr1pr in the MB-System library. Thanks
+to Roger Davis and HMRG for making the code available under the GPL.</LI>
+
+<LI>The Reson 7k format produced by the 7000 series Reson SeaBat multibeams
+and the Reson 6046 datalogger is now supported as format 88. This format
+can incoporate sidescan sonar and subbottom profiler data as well as the
+multibeam data.</LI>
+<LI>Third generation Simrad multibeams (EM122, EM302, EM710) are supported by formats 58 and 59.</LI>
+<LI>Imagenex and Odom DeltaT multibeams are supported by formats 191 and 192.</LI>
+</UL>
+</UL>
+
+<CENTER><P><BR>
+Last Updated: $Id$ </P></CENTER>
+
+<P>
+<HR WIDTH="67%"></P>
+
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A> </P>
+
+</BODY>
+</HTML>

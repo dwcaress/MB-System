@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <title>MB-System Future Development</title>
+  <meta content="text/html" http-equiv="Content-Type">
+  <meta content="MB-System: Mapping the Seafloor" name="Title">
+  <meta content="David Caress, Dale Chayes" name="Author">
+  <meta
+ content="open source software for processing bathymetry and backscatter data from multibeam and sidescan sonar"
+ name="Description">
+  <meta
+ content="seafloor,mapping,multibeam,sonar,bathymetry,sidescan,swath processing,open,source,software"
+ name="Keywords">
+</head>
+<body alink="#cc9900" vlink="#997040" link="#336699" bgcolor="#ffffff"
+ text="#000000">
+<center>
+<h1>Plans for Future MB-System Development</h1>
+</center>
+Listed below are some notions for the future development of MB-System.
+We include these here not as a promise of what we will do, but rather
+to
+encourage discussion with MB-System users regarding what we might do.
+Comments
+and suggestions are welcome: <a href="mailto:%20mbsystem@mbari.org">email
+us</a> at the MB-System <a 
+ href="http://listserver.mbari.org/sympa/arc/mbsystem">Discussion
+List</a>!
+<ul>
+  <li>MB-System architecture changes we would like to achieve:
+    <ul>
+      <li>Move installation method from install_makefiles script to a configure script using autoconf or something similar. This will probably result in significant changes to the structure of the source code package.</li>
+    </ul>
+  </li>
+</ul>
+<ul>
+  <li>
+    Data formats we would like to support:</li>
+  <ul>
+    <li>
+      Atlas SURF format (Fansweep and Odom sonars) - Atlas released
+      the
+      source code for an API&nbsp;to read and write SURF data under the GNU
+      GPL some years ago. However, the SURF format is supported read-only, which means
+      that SURF format data may be plotted, gridded, and mosaiced, but not
+      reprocessed. We will fuly support the SURF format when  we find
+      time. A large amount of German and Australian government mapping data
+    are in the SURF format.</li>
+    <li>
+      Caris HDCS format (the result of processing swath bathymetry data with
+      the Caris HIPS software package) - this is another propritary format. A
+      large amount of multibeam data collected by and for NOAA's hydrographic
+      groups are in this format. These data will not be available to the
+      general
+      public until the format is known or the data is translated to an open
+    format.</li>
+    <li>
+      Triton-Elics XTF format (produced by the Triton Isis datalogging
+      systems). This is an open, but poorly documented, widely used mapping data collection format.
+    Supporting XTF is unlikely to become a priority for the core MB-System team, but some MB-System users have expressed interest in developing the capability. We shall see...</li>
+    <li>Conversion to GSF. We should enable mbcopy to translate a wide
+      variety of data formats into GSF. Some work on this is planned for 2009.<br>
+    </li>
+  </ul>
+</ul>
+<ul>
+  <li>Capabilities we would like to add to MB-System:</li>
+  <ul>
+    <li>
+Improved mblevitus. We need an updated tool to deliver water sound
+speed
+models based on more complete and recent databases than the 1982
+Levitus
+database used now.</li>
+    <li>
+Graphical project management tool. With the release of version 5.0,
+MB-System
+now has most of the low-level elements in place to enable efficient
+processing
+project management. Now we need to make a tool that uses the underlying
+structure provided by mbprocess and the related programs.</li>
+    <li>
+Improved sidescan processing. We currently use amplitude-vs-grazing
+angle correction tables derived by averaging the raw data. We would
+likely do better to model the correction functions as piecewise
+analytic functions. We also need an interactive
+tool for developing sidescan correction parameters.</li>
+    <li>
+Extended grid format including sums and weights so that grids can be
+updated
+when that is more efficient than recreating from scratch.</li>
+    <li>
+Realtime survey visualization tool. We would like a flexible tool for viewing
+swath data during surveys
+with interactively controlled scales and map styles.</li>
+  </ul>
+</ul>
+<center>
+<p><br>
+Last Updated: $Id$</p>
+</center>
+<p>
+</p>
+<hr width="67%">
+<p><a href="mbsystem_home.html"><img align="bottom" width="158"
+ height="55" border="0" src="mbsystem_logo_small.gif"></a><a
+ href="mbsystem_home.html">Back
+to MB-System Home Page...</a>
+</p>
+</body>
+</html>
