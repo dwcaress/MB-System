@@ -1,12 +1,51 @@
-AUTHORS
---------------------------------------------------
+-------------------------------------------------------------------------------
+MB-SYSTEM AUTHORS FILE:
+-------------------------------------------------------------------------------
+Version: $Id$
+-------------------------------------------------------------------------------
 
-The primary developers are David W. Caress of the Monterey Bay Aquarium 
-Research Institute and Dale N. Chayes of the Lamont-Doherty Earth 
-Observatory (L-DEO) of Columbia University. 
+This file lists the primary and contributing authors of the MB-System open
+source software package for the processing and display of swath sonar data.
+This file is located at the top of the MB-System source code distribution
+directory structure.
 
-Val Schmidt, an engineer at L-DEO, joined the MB-System team during 2002. 
-Val, now a graduate student at the Center for Coastal and Ocean Mapping at 
-the University of New Hampshire, has worked to develop polished 
-MB-System documentation, particularly the MB-System Cookbook.
+-------------------------------------------------------------------------------
+MB-SYSTEM PRIMARY AUTHORS:
+-------------------------------------------------------------------------------
 
+David W. Caress (caress@mbari.org)
+Monterey Bay Aquarium Research Institute
+7700 Sandholdt Road
+Moss Landing, CA 95039
+
+Dale N. Chayes (dale@ldeo.columbia.edu)
+Lamont-Doherty Earth Observatory of Columbia University
+Rte 9W
+Palisades, NY 10964
+
+-------------------------------------------------------------------------------
+MB-SYSTEM CONTRIBUTING AUTHORS:
+-------------------------------------------------------------------------------
+
+Bob Covill, Tekmap Consulting, Nova Scotia, Canada
+Christian Ferreira, MARUM, University of Bremen, Germany
+Gordon Keith, CSIRO Marine and Atmospheric Research, Australia
+Suzanne O'Hara, Lamont-Doherty Earth Observatory of Columbia University
+Val Schmidt, University of New Hampshire JHC/CCOM
+
+------------------------------------------------------------------------
+OTHER MB-SYSTEM CONTRIBUTORS:
+------------------------------------------------------------------------
+
+In addition to those listed above, a number of people have made contributions to
+the source code for MB-System.  These include:
+    Mike McCann (MBARI)
+    Daniel Scheirer (United States Geological Survey)
+    Paul Cohen (formerly of SeaBeam Instruments and Fidelity Investments)
+    Steve Dzurenko (foremerly of SeaBeam Instruments and University of Texas)
+    Peter Lemmond (Woods Hole Oceanographic Institution)
+    David Brock (formerly with Antarctic Support Associates)
+    Alberto Malinverno (Lamont-Doherty Earth Observatory)
+    Russ Alexander (formerly with UCSB)
+
+------------------------------------------------------------------------
