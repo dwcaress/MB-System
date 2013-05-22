@@ -1,0 +1,322 @@
+.TH mbhysweeppreprocess 1 "21 August 2012" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbhysweeppreprocess\fP - performs preprocessing of multibeam data
+in the Hysweep HSX format (\fBMBIO\fP format 201).
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbhysweeppreprocess\fP
+[\fB-A\fP\fIoffsettype/x/y/z/t\fP \fB-B\fP\fIrollbias/pitchbias/headingbias\fP
+\fB-D\fP\fIsonardepthfile\fP \fB-I\fP\fIdatalist\fP
+\fB-J\fP\fIprojection\fP  \fB-L\fP
+\fB-M\fP\fInavformat\fP \fB-N\fP\fInavfile\fP
+\fB-T\fP\fItimelag\fP
+\fB-H\fP \fB-V\fP]
+
+.SH DESCRIPTION
+\fBmbhysweeppreprocess\fP reads a Hysweep HSX (format 201) file, interpolates the
+asynchronous navigation and attitude onto the multibeam data,
+and writes a new HSX file with that information correctly embedded
+in the multibeam data. The user must specify a projection for the easting-northing
+navigation used in HSX files. This program can also fix various problems
+with multibeam data, and allows for lever arm correction of offsets between the
+sonar, the motion sensor, and the positioning sensor (provided the navigation
+and attitude data included in the HSX file are uncorrected for sensor offsets)..
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH OPTIONS
+.TP
+.B \-A
+\fItype/offsetx/offsety/offsetz/offsett\fP
+.br
+This option sets the spatial and time offset for a sensor relative to a reference
+point on the survey platform (by convention usually close to the center of mass and rotation).
+If \fItype\fP = 1, the offsets pertain to the survey sonar. If \fItype\fP = 2, the offsets
+pertain to the source of the attitude data, usually an MRU or INS. If \fItype\fP = 3, the
+offsets pertain to the source of the position or navigation data. The time offsets are
+referenced against the sonar data, thus the sonar time offset will usually be zero. If any
+of these offsets are defined, then \fBmbhysweeppreprocess\fP will use lever arm calculations
+to determine the x, y, and z offsets associated with the platform attitude for each ping, and
+add those to the sonar navigation and depth values.
+.TP
+.B \-B
+\fIrollbias/pitchbias/headingbias\fP
+.br
+This option sets roll, pitch, and heading bias values to be applied before merging the attitude
+and heading data with the sonar data while calculating bathymetry.
+.TP
+.B \-D
+\fIsonardepthfile\fP
+.br
+This option causes \fBmbhysweeppreprocess\fP to read a sonar depth time series from the specified
+file and use that data in place of any sonar depth (DFT) records present in the HSX file. The
+sonar depth data must be in an ascii format of the form:
+ 	yyyy:mm:dd:hh:mm:ss.sss zzzz.zzz
+.br
+where yyyy=year, mm=month, dd=day, hh=hour, mm=minute, ss.sss = seconds, and zzzz.zzz = sonar depth in meters.
+.TP
+.B \-F
+\fIformat\fP
+.br
+Sets the format of the input file specified with the \fB-I\fP option. This is normally omitted unless
+the input filename does not conform to the \fBMB-System\fP file naming conventions. For this
+program, the only relevant options are \fIformat\fP = 201 for an HSX format file, or
+\fIformat\fP= -1 for a datalist referencing multiple format 201 files.
+.TP
+.B \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-I
+\fIinfile\fP
+.br
+Sets the input file path. If \fIformat\fP > 0 (set with the
+\fB-f\fP option or \fBmbdefaults\fP) then the swath sonar data contained in \fIinfile\fP
+is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the \fIinfile\fP file, each
+data file should be followed by a data format identifier, e.g.:
+ 	datafile1 201
+ 	datafile2 201
+.br
+This program only reads Hysweep HSX format data files (\fBMBIO\fP
+format 201).
+.TP
+.B \-J
+\fIprojection\fP
+.br
+The Hypack and Hysweep software packages operate with navigation in a user-defined
+projected coordinate system. Resultantly, HSX format files contain positions in a
+projected coordinate system rather than longitude and latitude in geographic
+coordinates. Generally, the HSX files do not contain any description of the projection
+used to obtain the eastings and northings in those files. This option allows a
+user to specifiy the projection used to translate the eastings and northings back
+into longitude and latitude. If this option is not specified, \fBMB-System\fP will
+assume the data are associated with UTM zone 1 north. The projection identifier must
+conform to the same usage as with projections specified for \fBmbgrid\fP.
+For  instance, to fully specify a particular northern UTM zone, set projection = UTMXXN
+where XX gives the UTM zone (defined from 01 to 60). As an example, a northern UTM
+zone 12 projection can be specified using -JUTM12N.  Southern UTM zones are specified as
+UTMXXS. The European Petroleum Survey Group (EPSG) has defined a large number of PCS's
+used worldwide and assigned number id's to each; one can also specify the northern
+UTM zone 12 projection using its EPSG designation, or -Jepsg32612. The complete list
+of projected coordinate systems supported by \fBMB-System\fP is given in the \fBmbgrid\fP
+manual page.
+.TP
+.B \-L
+.br
+This option causes the program to list the timetags of bathymetry,
+navigation, attitude, and other data records.
+.TP
+.B \-M
+\fInavformat\fP
+.br
+Sets the input navigation file format used by the file specified with the
+\fB-N\fP option.
+ At present, the only option for the navigation file format is \fInavformat\fP=1:
+ 	yyyy:mm:dd:hh:mm:ss.sss sssss.sss eeeeeeee.eee nnnnnnnn.nnn zzzz.zzz aaa.aaa hhh.hhh
+.br
+where yyyy=year, mm=month, dd=day, hh=hour, mm=minute, ss.sss = seconds, sssss.sss = seconds
+from the start of the year, eeeeeeee.eee = easting in meters, nnnnnnnnn.nnn = northing in
+meters, zzzz.zzz = sonar depth in meters, and hhh.hhh = heading in degrees.
+Default: \fInavformat\fP=1.
+.TP
+.B \-N
+\fInavfile\fP
+.br
+The program will read navigation from the file \fInavfile\fP
+and merge those data with the multibeam data in the HSX file.
+If a timelag model is specified using
+\fB-T\fP\fItimelag\fP, the time lag will be applied to the navigation and
+attitude data before merging with the sonar data. The navigation and attitude
+data from \fInavfile\fP will also be embedded in asynchronous data records
+in the output format 201 data. Any pre-existing navigation data records will
+remain unchanged in the data stream. However, the HSX file header will be altered
+to show the newly merged data as "enabled" and the original, asynchronous data
+as not enabled.
+.TP
+.B \-T
+\fItimelag\fP
+.br
+This option specifies a \fItimelag\fP value in seconds to be applied
+to the navigation and attitude data prior to it being merged with the
+bathymetry. If \fItimelag\fP is a valid path to a file containing time
+stamp and time lag pairs, then these data will be read and the time lag
+applied to particular records will be interpolated by time.
+.TP
+.B \-V
+This option increases the verbosity of \fBmbhysweeppreprocess\fP with
+respect to informational output to the shell.
+
+.SH EXAMPLES
+Suppose that one has logged a set of five HSX files incorporating
+multibeam sonar data, navigation, attitude, heading, and altitude data,
+but not sonar depth data, all from an ROV platform. Further suppose
+that a datalist file named datalist_hsx.mb-1 references those
+files, and that a separate text file named  ROVnav.txt includes
+an improved vehicle navigation, including the sonar depth. Finally,
+suppose that the existing sensor offsets are known, but have not
+been applied to any of the existing data
+.br
+In order to merge the better navigation and sonar depth before
+starting MB-System processing, do something like:
+.br
+ 	mbhysweeppreprocess -I datalist_hsx.mb-1 \
+ 			-A1/0.42/2.005/-1.34/0.0 \
+ 			-A2/0.46/0.22/0.55/0.0 \
+ 			-A3/0.46/0.22/0.55/0.0 \
+ 			-JUTM01N -NROVnav.txt
+.br
+The program will output something like the following:
+ 	Data available for merging:
+ 	     Navigation (northing easting sonardepth altitude heading): 120959
+ 	     Sonar depth (sonardepth):                                  0
+ 	     Time lag:                                                  0
+
+ 	Offsets to be applied:
+         	       X (m)   Y (m)   Z (m)   T (sec)
+ 	     Roll bias:       0.000
+ 	     Pitch bias:      0.000
+ 	     Heading bias:    0.000
+ 	     Sonar:    0.420    2.005   -1.340    0.000
+ 	     MRU:      0.420    2.005   -1.340    0.000
+ 	     Nav:      0.420    2.005   -1.340    0.000
+
+ 	Data records read from: 000_2004.HSX
+ 	     Positions (POS):                   2651
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     19486
+ 	     Attitude (HCP):                    15752
+ 	     Echosounder (altitude) (EC1):      2651
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               24438
+ 	     Other:                             64978
+
+ 	Data records read from: 000_2048.HSX
+ 	     Positions (POS):                   2967
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     21942
+ 	     Attitude (HCP):                    17771
+ 	     Echosounder (altitude) (EC1):      2967
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               25363
+ 	     Other:                             71010
+
+ 	Data records read from: 000_2138.HSX
+ 	     Positions (POS):                   2573
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     18936
+ 	     Attitude (HCP):                    15307
+ 	     Echosounder (altitude) (EC1):      2573
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               23398
+ 	     Other:                             62787
+
+ 	Data records read from: 000_2221.HSX
+ 	     Positions (POS):                   2824
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     20863
+ 	     Attitude (HCP):                    16907
+ 	     Echosounder (altitude) (EC1):      2824
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               23993
+ 	     Other:                             67411
+
+ 	Data records read from: 000_2308.HSX
+ 	     Positions (POS):                   2657
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     19571
+ 	     Attitude (HCP):                    15818
+ 	     Echosounder (altitude) (EC1):      2657
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               24009
+ 	     Other:                             64712
+
+ 	Total data records read from: datalist_hsx.mb-1
+ 	     Positions (POS):                   13672
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     100798
+ 	     Attitude (HCP):                    81555
+ 	     Echosounder (altitude) (EC1):      13672
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               121201
+ 	     Other:                             330898
+
+ 	Data records written to: 000_2004.mb201
+ 	     Positions (POS):                   2651
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     19486
+ 	     Attitude (HCP):                    15752
+ 	     Echosounder (altitude) (EC1):      2651
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               24438
+ 	     Other:                             0
+
+ 	Data records written to: 000_2048.mb201
+ 	     Positions (POS):                   2967
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     21942
+ 	     Attitude (HCP):                    17771
+ 	     Echosounder (altitude) (EC1):      2967
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               25363
+ 	     Other:                             0
+
+ 	Data records written to: 000_2138.mb201
+ 	     Positions (POS):                   2573
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     18936
+ 	     Attitude (HCP):                    15307
+ 	     Echosounder (altitude) (EC1):      2573
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               23398
+ 	     Other:                             0
+
+ 	Data records written to: 000_2221.mb201
+ 	     Positions (POS):                   2824
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     20863
+ 	     Attitude (HCP):                    16907
+ 	     Echosounder (altitude) (EC1):      2824
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               23993
+ 	     Other:                             0
+
+ 	Data records written to: 000_2308.mb201
+ 	     Positions (POS):                   2657
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     19571
+ 	     Attitude (HCP):                    15818
+ 	     Echosounder (altitude) (EC1):      2657
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               24009
+ 	     Other:                             0
+
+ 	Total data records written from: datalist_hsx.mb-1
+ 	     Positions (POS):                   13672
+ 	     Positions ignored (POS):           0
+ 	     Heading (GYR):                     100798
+ 	     Attitude (HCP):                    81555
+ 	     Echosounder (altitude) (EC1):      13672
+ 	     Dynamic draft (DFT):               0
+ 	     Raw multibeam (RMB):               121201
+ 	     Other:                             0
+
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbformat\fP(l), \fBmbinfo\fP(l)
+
+.SH BUGS
+At this point, the HSX i/o module and preprocessor are only tested with a single
+survey of R2Sonic data.

@@ -1,0 +1,340 @@
+.TH mbauvloglist 1 "11 January 2011" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbauvloglist\fP - Lists table data from an MBARI AUV mission log file.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbauvloglist\fP \fB-I\fP\fIfile\fP [\fB-L\fP\fIlonflip\fP
+\fB-O\fP\fIlist\fP \fB-P -S\fP \fB-V -H\fP ]
+
+.SH DESCRIPTION
+MBauvloglist reads an MBARI AUV mission log file and lists specified
+fields in tab-delimited text output. MBARI AUV mission logs  are binary
+files with an ascii header describing the units, name, and binary size 
+of each value in a single record. An example of a log file header is:
+
+# binary fastcatlog
+.br
+# timeTag time %8.8e ,time ,UNKNOWN 
+.br
+# double conductivity %8.8e ,Calculated conductivity ,Siemens/meter 
+.br
+# double temperature %8.8e ,Calculated temperature ,Celsius 
+.br
+# double pressure %8.8e ,Calculated pressure ,Decibars 
+.br
+# double calculated_salinity %8.8e ,Calculated salinity ,Volts 
+.br
+# double cond_frequency %8.8e ,Raw Conductivity frequency ,Hertz 
+.br
+# double temp_counts %8.8e ,Raw Pressure A/D counts ,Unitless 
+.br
+# double pressure_counts %8.8e ,pressure_counts ,Unitless 
+.br
+# double pressure_temp_comp_voltage_reading %8.8e ,Raw pressure temp compensation voltage reading ,Volts 
+.br
+# double calculated_sound_velocity %8.8e ,Calculated sound velocity ,M/s 
+.br
+# begin
+
+Users can extract arbitrary text lists of values in the AUV log files by using the \fB-O\fP
+option repeatedly to specify fields by name (e.g. calculated_sound_velocity)
+in the order desired. The print formatting statements (e.g. %8.8e) included in the log
+header is used by default. However, users can use the \fB-F\fP option to specify
+optional formatting for fields specified in following \fB-O\fP commands.
+
+To find out the values contained in any particular log file, use the \fB-P\fP option alone
+to print out a list of the contents. Then run \fBmbauvloglist\fP again using the \fB-O\fP option
+to specify each of the desired values in the desired order of columns. The \fB-F\fP option 
+can be used to set the printing format. Otherwise, the default format specified in the
+log header will be used.
+
+As of August 2009, the contents of the MBARI Mapping AUV missions logs are:
+
+DropWeight.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ short WDTimer %d ,Count Down Timer ,Seconds 
+ short BWTimer %d ,Burn Wire Timer ,Seconds 
+ short WDClear %d ,Watch Dog Clear ,Unitless 
+ short AcommsDN %d ,Acoustic Comms Drop Now ,Unitless 
+ short WDStatus %d ,Watch Dog Status ,Unknown 
+ short DWout %d ,Drop Weight Active ,Unitless 
+ short GulperProxIn %d ,Gulper Proximity Sensor ,Unitless 
+ 
+adam6017.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ double chan0 %8.8e ,chan0 ,UNKNOWN 
+ double chan1 %8.8e ,chan1 ,UNKNOWN 
+ double chan2 %8.8e ,chan2 ,UNKNOWN 
+ double chan3 %8.8e ,chan3 ,UNKNOWN 
+ double chan4 %8.8e ,chan4 ,UNKNOWN 
+ double chan5 %8.8e ,chan5 ,UNKNOWN 
+ double chan6 %8.8e ,chan6 ,UNKNOWN 
+ double chan7 %8.8e ,chan7 ,UNKNOWN 
+ 
+ats.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ double AtsDelta %8.8e ,Last ms drift bt Reson and Auv clocks: drift = delta0 - (tReson-tAuv) ,seconds 
+ double AtsDrift %8.8e ,AtsDrift ,seconds 
+ 
+dvl.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ double dvlBotVelx %8.8e ,dvlBotVelx ,UNKNOWN 
+ double dvlBotVely %8.8e ,dvlBotVely ,UNKNOWN 
+ double dvlBotVelz %8.8e ,dvlBotVelz ,UNKNOWN 
+ double dvlBotVele %8.8e ,dvlBotVele ,UNKNOWN 
+ short dvlBotVelStat %d ,dvlBotVelStat ,UNKNOWN 
+ double dvlWatVelx %8.8e ,dvlWatVelx ,UNKNOWN 
+ double dvlWatVely %8.8e ,dvlWatVely ,UNKNOWN 
+ double dvlWatVelz %8.8e ,dvlWatVelz ,UNKNOWN 
+ double dvlWatVele %8.8e ,dvlWatVele ,UNKNOWN 
+ short dvlWatVelStat %d ,dvlWatVelStat ,UNKNOWN 
+ double dvlTemp %8.8e ,dvlTemp ,UNKNOWN 
+ double dvlPitch %8.8e ,dvlPitch ,UNKNOWN 
+ double dvlRoll %8.8e ,dvlRoll ,UNKNOWN 
+ double dvlHeading %8.8e ,dvlHeading ,UNKNOWN 
+ double dvlBeam1 %4.6f ,dvlBeam1 ,UNKNOWN 
+ double dvlBeam2 %4.6f ,dvlBeam2 ,UNKNOWN 
+ double dvlBeam3 %4.6f ,dvlBeam3 ,UNKNOWN 
+ double dvlBeam4 %8.8e ,dvlBeam4 ,UNKNOWN 
+ double dvlRange %8.8e ,dvlRange ,UNKNOWN 
+ double dvlToping %20.4f ,dvlToping ,UNKNOWN 
+ double dvlSpdSnd %12.4f ,dvlSpdSnd ,UNKNOWN 
+ 
+dynamicControl.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ double myTime %.2f ,myTime ,UNKNOWN 
+ double xTrackError %8.8e ,xTrackError ,UNKNOWN 
+ double cPsi %8.8e ,cPsi ,UNKNOWN 
+ double cDeltaR %8.8e ,cDeltaR ,UNKNOWN 
+ double tPsi %8.8e ,tPsi ,UNKNOWN 
+ double psiProp %8.8e ,psiProp ,UNKNOWN 
+ double psiInt %8.8e ,psiInt ,UNKNOWN 
+ double psiRate %8.8e ,psiRate ,UNKNOWN 
+ double xteIntegral %8.8e ,xteIntegral ,UNKNOWN 
+ double kxte %8.8e ,kxte ,UNKNOWN 
+ double dPsi %8.8e ,dPsi ,UNKNOWN 
+ double speedCmd %8.8e ,speedCmd ,UNKNOWN 
+ double omegaCmd %8.8e ,omegaCmd ,UNKNOWN 
+ double cDepth %8.8e ,cDepth ,UNKNOWN 
+ double tDepth %8.8e ,tDepth ,UNKNOWN 
+ double DepthError %8.8e ,DepthError ,UNKNOWN 
+ double dIntegral %8.8e ,dIntegral ,UNKNOWN 
+ double mDepthRateTerm %8.8e ,mDepthRateTerm ,UNKNOWN 
+ double cTheta %8.8e ,cTheta ,UNKNOWN 
+ double pitchProp %8.8e ,pitchProp ,UNKNOWN 
+ double pitchInt %8.8e ,pitchInt ,UNKNOWN 
+ double pitchRate %8.8e ,pitchRate ,UNKNOWN 
+ double pitchIntInp %8.8e ,pitchIntInp ,UNKNOWN 
+ double cDeltaEBL %8.8e ,cDeltaEBL ,UNKNOWN 
+ double cDeltaE %8.8e ,cDeltaE ,UNKNOWN 
+ double targetNorthing %13.2f ,targetNorthing ,UNKNOWN 
+ double targetEasting %13.2f ,targetEasting ,UNKNOWN 
+ double newBearing %8.8e ,newBearing ,UNKNOWN 
+ double newNorthing %13.2f ,newNorthing ,UNKNOWN 
+ double newEasting %13.2f ,newEasting ,UNKNOWN 
+ short first %d ,first ,UNKNOWN 
+ 
+fastcatlog.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ double conductivity %8.8e ,Calculated conductivity ,Siemens/meter 
+ double temperature %8.8e ,Calculated temperature ,Celsius 
+ double pressure %8.8e ,Calculated pressure ,Decibars 
+ double calculated_salinity %8.8e ,Calculated salinity ,Volts 
+ double cond_frequency %8.8e ,Raw Conductivity frequency ,Hertz 
+ double temp_counts %8.8e ,Raw Pressure A/D counts ,Unitless 
+ double pressure_counts %8.8e ,pressure_counts ,Unitless 
+ double pressure_temp_comp_voltage_reading %8.8e ,Raw pressure temp compensation voltage reading ,Volts 
+ double calculated_sound_velocity %8.8e ,Calculated sound velocity ,M/s 
+ 
+gps.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ integer hours %d ,Hours ,Hours 
+ integer minutes %d ,Minutes ,Minutes 
+ integer seconds %d ,Seconds ,Seconds 
+ integer centiSeconds %d ,CentiSeconds ,CentiSeconds 
+ angle latitude %8.8e ,Vehicle latitude ,Degrees 
+ angle longitude %8.8e ,Vehicle longitude ,Degrees 
+ short quality %d ,GPS quality code ,Unitless 
+ short numberOfSatellites %d ,Number of satellites visible ,Unitless 
+ double hdop %8.8e ,Horizontal dilution of precision ,Unitless 
+ double antennaHeight %8.8e ,Altitude of GPS antenna above mean sea level ,meters 
+ double geoHeight %8.8e ,Geoidal separation ,meters 
+ short dgpsDataAge %d ,Age of differential GPS correction ,seconds 
+ short dgpsRSID %d ,Differential reference station ID ,Unitless 
+ 
+kearfott.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ integer mCyclesK %d ,mCyclesK ,UNKNOWN 
+ integer mModeK %d ,mModeK ,UNKNOWN 
+ integer mMonK %d ,mMonK ,UNKNOWN 
+ double mLatK %3.8f ,mLatK ,UNKNOWN 
+ double mLonK %3.8f ,mLonK ,UNKNOWN 
+ double mNorthK %13.2f ,mNorthK ,UNKNOWN 
+ double mEastK %13.2f ,mEastK ,UNKNOWN 
+ double mDepthK %8.8e ,mDepthK ,UNKNOWN 
+ double mRollK %8.8e ,mRollK ,UNKNOWN 
+ double mPitchK %8.8e ,mPitchK ,UNKNOWN 
+ double mHeadK %8.8e ,mHeadK ,UNKNOWN 
+ double mVbodyxK %8.8e ,mVbodyxK ,UNKNOWN 
+ double mVbodyyK %8.8e ,mVbodyyK ,UNKNOWN 
+ double mVbodyzK %8.8e ,mVbodyzK ,UNKNOWN 
+ double mAccelxK %8.8e ,mAccelxK ,UNKNOWN 
+ double mAccelyK %8.8e ,mAccelyK ,UNKNOWN 
+ double mAccelzK %8.8e ,mAccelzK ,UNKNOWN 
+ double mPrateK %8.8e ,mPrateK ,UNKNOWN 
+ double mQrateK %8.8e ,mQrateK ,UNKNOWN 
+ double mRrateK %8.8e ,mRrateK ,UNKNOWN 
+ double utcTime %8.8e ,utcTime ,UNKNOWN 
+ 
+m3dmgx1.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ angle mRollCB %8.8e ,Roll ,Degrees 
+ angle mOmega_xCB %8.8e ,Roll rate ,Degrees/second 
+ angle mPitchCB %8.8e ,Pitch ,Degrees 
+ angle mOmega_yCB %8.8e ,Pitch rate ,Degrees/second 
+ angle mYawCB %8.8e ,Yaw ,Degrees 
+ angle mOmega_zCB %8.8e ,Yaw rate ,Degrees/second 
+ double mAccel_xCB %8.8e ,Acceleration along vehicle x-axis ,G 
+ double mAccel_yCB %8.8e ,Acceleration along vehicle y-axis ,G 
+ double mAccel_zCB %8.8e ,Acceleration along vehicle z-axis ,G 
+ double mMag_xCB %8.8e ,Magnetic field along vehicle x-axis ,Gauss 
+ double mMag_yCB %8.8e ,Magnetic field along vehicle y-axis ,Gauss 
+ double mMag_zCB %8.8e ,Magnetic field along vehicle z-axis ,Gauss 
+ double mTempCB %8.8e ,Crossbow internal temperature ,Celsius 
+ 
+navigation.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ double mPos_x %13.2f ,Vehicle Northing (WGS 84 Zone 10S) ,Meters 
+ double mPos_y %13.2f ,Vehicle Easting (WGS 84 Zone 10S) ,Meters 
+ double mDepth %8.8e ,Vehicle Depth ,Meters 
+ double mGpsNorth %13.2f ,Northing (WGS 84 Zone 10S) based upon GPS fix ,Meters 
+ double mGpsEast %13.2f ,Easting (WGS 84 Zone 10S) based upon GPS fix ,Meters 
+ integer mGpsValid %d ,GPS fix Status code ,Unitless 
+ double mPhi %8.8e ,Vehicle roll ,Degrees 
+ double mTheta %8.8e ,Vehicle pitch ,Degrees 
+ double mPsi %8.8e ,Vehicle yaw ,Degrees 
+ double mOmega_x %8.8e ,Vehicle roll rate ,Degrees/second 
+ double mOmega_y %8.8e ,Vehicle pitch rate ,Degrees/second 
+ double mOmega_z %8.8e ,Vehicle yaw rate ,Degrees/second 
+ double mPsaRange %8.8e ,Altimeter range ,Meters 
+ double mAltitude %8.8e ,Vehicle altitude above bottom ,Meters 
+ double mDvlAltitude %8.8e ,mDvlAltitude ,UNKNOWN 
+ double mWaterSpeed %8.8e ,Current speed based upon DVL data ,Meters/second 
+ integer mDvlValid %d ,Dvl valid flag in Navigation ,UNKNOWN 
+ integer mDvlNewData %d ,Navigation thinks the Dvl has new data ,UNKNOWN 
+ double mDeltaT %8.8e ,Time between Dvl updates ,Seconds 
+ double nfix %13.2f ,Northing (WGS 84 Zone 10S) based upon baseline fix ,Meters 
+ double efix %13.2f ,Easting (WGS 84 Zone 10S) based upon baseline fix ,Meters 
+ double filter_north %13.2f ,Kalman filter northing (WGS 84 Zone 10S) ,Meters 
+ double filter_east %13.2f ,Kalman filter easting (WGS 84 Zone 10S) ,Meters 
+ double filter_depth %8.8e ,Kalman filter depth ,Meters 
+ double north_current %8.8e ,Northward flowing current estimate ,Meters/second 
+ double east_current %8.8e ,Eastward flowing current estimate ,Meters/second 
+ double speed_bias %8.8e ,Speed bias based upon long baseline fixes ,Meters/second 
+ double heading_bias %8.8e ,Heading bias based upon long baseline fixes ,Degrees 
+ double latitude %5.8f ,latitude ,UNKNOWN 
+ double longitude %5.8f ,longitude ,UNKNOWN 
+ 
+parosci.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ double depth %8.3lf ,Depth ,Meters 
+ double temp %8.8e ,Pressure Sensor Internal Temp ,Celsius 
+ double pressure %8.8lf ,Pressure ,Bars 
+ double temp_period %8.8lf ,Temperature Period ,Microseconds 
+ double pres_period %8.8lf ,Pressure Period ,Microseconds 
+ 
+tailCone.log Contents:
+ timeTag time %8.8e ,time ,UNKNOWN 
+ integer status %d ,status ,UNKNOWN 
+ integer elevatorCurrent %d ,elevatorCurrent ,UNKNOWN 
+ integer rudderCurrent %d ,rudderCurrent ,UNKNOWN 
+ float propCurrent1 %f ,propCurrent1 ,UNKNOWN 
+ integer propCurrent2 %d ,propCurrent2 ,UNKNOWN 
+ integer propRpm %d ,propRpm ,UNKNOWN 
+ float elevatorAngle %f ,elevatorAngle ,UNKNOWN 
+ float rudderAngle %f ,rudderAngle ,UNKNOWN 
+ integer propPwm %d ,propPwm ,UNKNOWN 
+ integer propTemp %d ,propTemp ,UNKNOWN 
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH OPTIONS
+.TP
+.B \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-F
+\fIprintformat\fP
+.br
+Sets the printing format (in fprintf() style) of the next value specified using
+the \fB-O\fP option.By default, \fBmbauvloglist\fP uses the print format specified
+in the log file header.
+format 
+.TP
+.B \-I
+\fIifile\fP
+.br
+Sets the input MBARI AUV mission log  filename. 
+.TP
+.B \-L
+\fIlonflip\fP
+.br
+Sets the range of the longitude values output.
+If \fIlonflip\fP=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If \fIlonflip\fP=0 
+then the longitude values will be in
+the range from -180 to 180 degrees. If \fIlonflip\fP=1 
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: \fBmbauvloglist\fP uses the user default \fIlonflip\fP set using
+\fBmbdefaults\fP.
+.TP
+.B \-O
+\fIvaluename\fP
+.br
+Causes \fBmbauvloglist\fP to output the specified value. This option can be 
+given multiple times, and the values will be output in the order specified.
+.TP
+.B \-P
+.br
+Prints out the log file header.
+.TP
+.B \-S
+.br
+Scales angular values to be in degrees instead of radians.
+.TP
+.B \-V
+The \fB-V\fP option causes the program to be verbose.
+.SH EXAMPLE
+To extract a list of pressure and water sound speed from the CTD log of an
+AUV mission, use:
+ 	mbauvloglist -I mvc_logs/2006.224.00/fastcatlog.log \\ 
+ 		-F%f -O pressure -O calculated_sound_velocity 
+.br
+This simple list is ordered as the data were collected, following the ups
+and downs of the AUV mission. In order to construct a model of the water
+sound speed as a function of depth, one can sort the output of \fBmbauvloglist\fP
+(using the program \fBsort\fP) to be ordered with increasing pressure (depth), 
+and then resampled into uniform increments of pressure using the \fBGMT\fP
+program \fBsample1d\fP.
+ 	mbauvloglist -I mvc_logs/2006.224.00/fastcatlog.log \\ 
+ 		-F%f -O pressure -O calculated_sound_velocity \\ 
+ 		| sort -n -u > auv_ssv.txt
+ 	sample1d auv_ssv.txt -Fl -H1 -S0.0 -I10.0 > auv_ssv_bin.txt
+
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBsample1d\fP, \fBsort\fP.
+
+.SH BUGS
+Indubitably.
