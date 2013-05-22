@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hsmdaraw.h	8/11/95
  *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdaraw.h,v 5.2 2003/04/17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1995-2012 by
+ *    Copyright (c) 1995-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_hsmdaraw.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_HSMDARAW format (MBIO id 101).  
+ * to store multibeam data read from the MBF_HSMDARAW format (MBIO id 101).
  *
  * Author:	Dale Chayes
  *      	David W. Caress
@@ -56,35 +56,35 @@
  *
  * Revision 4.2  95/08/16  07:07:41  07:07:41  dale (Dale Chayes)
  * This one works to some extent.
- * 
+ *
  * Revision 4.1  95/08/14  20:54:33  20:54:33  dale (Dale Chayes)
  * Its partially working. HSMD is partially working.
- * 
+ *
  * Revision 4.0  95/08/11  13:59:40  13:59:40  dale (Dale Chayes)
  * First attempt, not ready for use.
  * Copied from (and slightly modified) mbf_hsatlraw.h
- * 
+ *
  *
  *
  * Notes on the MBSYS_HSMD data structure:
  *   1. The Atlas Hydrosweep MD generates several types of data files
  *      including:
- *           "*.P"    Profile data files that contain bathy data 
+ *           "*.P"    Profile data files that contain bathy data
  *           "*.W"    Wreck data files with info about obstructions
  *           "*.R"    Raw data files. At present, this is the only
  *                    data file format that is supported by MB. These
  *                    files are written in XDR format. Code to assist
  *                    in parsing these files was provided by STN Atlas.
  *
- *   2. The MD systems output 40 beams of bathymetry on one side and 
+ *   2. The MD systems output 40 beams of bathymetry on one side and
  *      160 beams of amplitude measurements, along with a moras of other
  *      information.  MD systems ping to one side (making 40 beams & 160
  *      sidescan measurements), wait for all the returns and then ping
  *      to the other side. The "Raw.beamside" variable indicates which side
  *      the current ping is pointed.
- * 
+ *
  *   3. The records all include navigation and time stamp information.
- *      There is a Header block in front of every data record. The 
+ *      There is a Header block in front of every data record. The
  *      record types are:
  *        - Raw Event (RAW in the case statement) which contains the
  *          travel time and amplitude data along with other interesting
@@ -92,7 +92,7 @@
  *        - Navigation (NAV -------"------------) which contains one
  *          input record from the NAV system.
  *        - MD Event
- *        - Beam angle data (ANG) which contains the pointing angles 
+ *        - Beam angle data (ANG) which contains the pointing angles
  *          of the beams. The MD system is supposed to be able to operate
  *          in a beam hopping mode where the beam angles shift from ping
  *          to ping, but this is not yet enabled. The Raw.noho variable
@@ -100,12 +100,12 @@
  *        - Sound Velocity (SVP) can contain a sound speed profile.
  *        - Raw Event (REV) which seems to happen at the beginging of
  *          each data file.
- *        
+ *
  *   4. A single ping usually insonifies one side of the track and results
- *      in RAW data record. Sequential RAW records occur for alternating 
+ *      in RAW data record. Sequential RAW records occur for alternating
  *      sides. NAV records appear to happen at the rate at which they are
  *      supplied by either of the possible Navigation inputs. In early legs
- *      (1994) on the Alliance, two different nav systems were inserting 
+ *      (1994) on the Alliance, two different nav systems were inserting
  *      records, one flagged with an "I" for Integrated Nav and the other
  *      using a "G" to signify GPS. Some time early in 1995, the onboard
  *      nav system was changed and now there appears to be only one type
@@ -124,19 +124,19 @@
 /* HSMD defines */
 
 /* maximum number of depth/sound speed data pairs allowed */
-#define MBF_HSMDARAW_MAXVEL		20	
+#define MBF_HSMDARAW_MAXVEL		20
 
 /* maximum number of nonzero beams per ping */
-#define MBF_HSMDARAW_BEAMS_PING		40 
+#define MBF_HSMDARAW_BEAMS_PING		40
 
 /* Stores both sides of swath, either starboard or port is nonzero in a ping. */
-#define MBF_HSMDARAW_BEAMS		79 
+#define MBF_HSMDARAW_BEAMS		79
 
 /* maximum number of sidescan pixels in a single ping */
-#define MBF_HSMDARAW_PIXELS_PING		160 
+#define MBF_HSMDARAW_PIXELS_PING		160
 
 /* Stores both sides of swath, either starboard or port is nonzero in a ping. */
-#define MBF_HSMDARAW_PIXELS		319 
+#define MBF_HSMDARAW_PIXELS		319
 
 /* length of a comment string */
 #define MBF_HSMDARAW_COMMENT (128)
@@ -157,7 +157,7 @@
 #define MBF_HSMDARAW_BAT        8 /* LDEO bathymetry + raw data */
 
 char *mbf_hsmdaraw_labels[] = {
-  "NONE", 
+  "NONE",
   "RAW",			/* a Raw data record */
   "NAV",			/* Navigation data */
   "MDE",			/* Poke of the "Event button?" */
@@ -167,7 +167,7 @@ char *mbf_hsmdaraw_labels[] = {
   "COM"				/* an LDEO comment */
 };
 
-#define HEADER_ADJUST 12        /* magic offset to subract from scslng to 
+#define HEADER_ADJUST 12        /* magic offset to subract from scslng to
                                  * account for the header record
                                  */
 
@@ -180,11 +180,11 @@ char *mbf_hsmdaraw_labels[] = {
 #define REV    6                /* Raw EVent */
 #define COM    7		/* LDEO comment */
 
-/* This structure is an amalgamation of the individual strucutres used in 
+/* This structure is an amalgamation of the individual strucutres used in
  * the Atlas example code and propageted into scan_md. MB requires (works
  * better with) a single structure. */
 
-struct  mbf_hsmdaraw_struct {		
+struct  mbf_hsmdaraw_struct {
 	int	kind;
 
 	/* ------------------------------- Header data */
@@ -227,8 +227,8 @@ struct  mbf_hsmdaraw_struct {
 	int	spfb[MBF_HSMDARAW_BEAMS_PING];	/* unscaled travel times */
 	double	depth[MBF_HSMDARAW_BEAMS_PING];		/* cross track depths */
 	double	distance[MBF_HSMDARAW_BEAMS_PING];	/* cross track distances */
-	double	ss_range;				/* distance to outermost 
-								sidescan 
+	double	ss_range;				/* distance to outermost
+								sidescan
 								sample (meters) */
 	mb_u_char	ss[MBF_HSMDARAW_PIXELS_PING];	/* sidescan pixels */
 	double	heading_tx;		/* Heading at transmit */

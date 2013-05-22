@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_bchrtunb.h	8/21/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_bchrtunb.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_BCHRTUNB format (MBIO id 91).  
+ * to store multibeam data read from the MBF_BCHRTUNB format (MBIO id 91).
  *
  * Author:	D. W. Caress
  * Date:	August 21, 1994
@@ -78,7 +78,7 @@
  *         0x0254: BottomChart 56 beam bathymetry         848 data bytes
  *         0x0255: BottomChart 40 beam bathymetry         608 data bytes
  *         0x0256: BottomChart 32 beam bathymetry         488 data bytes
- *   6. Elac systems record navigation fixes using the position 
+ *   6. Elac systems record navigation fixes using the position
  *      telegram; navigation is not always included in the per ping data.
  *      Since speed is not recorded, it is impossible to extrapolate
  *      position from the last navigation fix when processing the
@@ -108,14 +108,14 @@ struct mbf_bchrtunb_profile_struct
 	int	pitch;			/* 0.005 degrees */
 	int	heading;		/* PI/180 degrees */
 	int	heave;			/* 0.001 meters */
-	short bath[8];		/* depths:  0.01 meters */	
+	short bath[8];		/* depths:  0.01 meters */
 	short int bath_acrosstrack[8];
 				/* acrosstrack distances: 0.01 meters */
 	short int bath_alongtrack[8];
 				/* alongtrack distances: 0.01 meters */
 	short int tt[8];	/* travel times:         0.05 msec */
 	short int angle[8];	/* 0.005 degrees */
-	short int quality[8];	/* 1 (good) to 8 (bad) 
+	short int quality[8];	/* 1 (good) to 8 (bad)
 				    extension:	10: flag by manual edit
 						20: flag by filter edit */
 	short int amp[8];	/* ??? */

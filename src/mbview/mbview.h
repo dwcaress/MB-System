@@ -2,7 +2,7 @@
  *    The MB-system:	mbview.h	10/9/2002
  *    $Id$
  *
- *    Copyright (c); 2002-2012 by
+ *    Copyright (c); 2002-2013 by
  *    David W. Caress (caress@mbari.org);
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -100,11 +100,11 @@
 /*--------------------------------------------------------------------*/
 
 #ifndef MB_STATUS_DEF
-#include "../../include/mb_status.h"
+#include "mb_status.h"
 #endif
 
 #ifndef MB_DEFINE_DEF
-#include "../../include/mb_define.h"
+#include "mb_define.h"
 #endif
 
 /* maximum number of mbview windows */

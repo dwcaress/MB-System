@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_elmk2unb.c	6/6/97
  *	$Id$
  *
- *    Copyright (c) 1997-2012 by
+ *    Copyright (c) 1997-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_elmk2unb.c contains the functions for reading and writing
- * multibeam data in the ELMK2UNB format.  
+ * multibeam data in the ELMK2UNB format.
  * These functions include:
  *   mbr_alm_elmk2unb	- allocate read/write memory
  *   mbr_dem_elmk2unb	- deallocate read/write memory
@@ -97,38 +97,38 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_elacmk2.h"
-#include "../../include/mbf_elmk2unb.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_elacmk2.h"
+#include "mbf_elmk2unb.h"
 
 /* include for byte swapping */
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 
 /* essential function prototypes */
-int mbr_register_elmk2unb(int verbose, void *mbio_ptr, 
+int mbr_register_elmk2unb(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_elmk2unb(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_elmk2unb(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_elmk2unb(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_elmk2unb(int verbose, void *mbio_ptr, int *error);
@@ -175,54 +175,54 @@ int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_elmk2unb(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_elmk2unb(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_elmk2unb;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_elmk2unb; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_elacmk2_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_elacmk2_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_elmk2unb; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_elmk2unb; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_elacmk2_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_elacmk2_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_elacmk2_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_elacmk2_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_elacmk2_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_elacmk2_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_elacmk2_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_elacmk2_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_elacmk2_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_elacmk2_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_elacmk2_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_elmk2unb;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_elacmk2_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_elacmk2_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_elmk2unb;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_elmk2unb;
+	mb_io_ptr->mb_io_dimensions = &mbsys_elacmk2_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_elacmk2_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_elacmk2_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_elacmk2_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_elacmk2_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_elacmk2_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_elacmk2_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_elacmk2_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_elacmk2_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_elacmk2_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_elacmk2_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -270,25 +270,25 @@ int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_elmk2unb(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_elmk2unb(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_elmk2unb";
@@ -329,7 +329,7 @@ int mbr_info_elmk2unb(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -477,7 +477,7 @@ int mbr_zero_elmk2unb(int verbose, void *data_ptr, int *error)
 		data->roll_offset = 0;	/* roll offset (degrees) */
 		data->pitch_offset = 0;	/* pitch offset (degrees) */
 		data->heading_offset = 0;	/* heading offset (degrees) */
-		data->time_delay = 0;		/* positioning system 
+		data->time_delay = 0;		/* positioning system
 							delay (sec) */
 		data->transducer_port_height = 0;
 		data->transducer_starboard_height = 0;
@@ -628,9 +628,9 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = data->kind;
-	
+
 	/* add nav records to list for interpolation */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_NAV)
 		{
 		mb_fix_y2k(verbose, data->pos_year,&time_i[0]);
@@ -648,7 +648,7 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_DATA
 		&& mb_io_ptr->nfix >= 1)
 		{
@@ -662,7 +662,7 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			+ 100*data->thousandth_sec;
 		mb_get_time(verbose,time_i, &time_d);
 		heading = 0.01 * data->heading;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0,
 				    &lon, &lat, &speed, error);
 		data->longitude = (int) (lon / 0.00000009);
 		data->latitude = (int) (lat / 0.00000009);
@@ -691,17 +691,17 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    store->heading_offset = data->heading_offset;
 		    store->time_delay = data->time_delay;
 		    store->transducer_port_height = data->transducer_port_height;
-		    store->transducer_starboard_height 
+		    store->transducer_starboard_height
 			    = data->transducer_starboard_height;
 		    store->transducer_port_depth = data->transducer_port_depth;
-		    store->transducer_starboard_depth 
+		    store->transducer_starboard_depth
 			    = data->transducer_starboard_depth;
 		    store->transducer_port_x = data->transducer_port_x;
 		    store->transducer_starboard_x = data->transducer_starboard_x;
 		    store->transducer_port_y = data->transducer_port_y;
 		    store->transducer_starboard_y = data->transducer_starboard_y;
 		    store->transducer_port_error = data->transducer_port_error;
-		    store->transducer_starboard_error 
+		    store->transducer_starboard_error
 			    = data->transducer_starboard_error;
 		    store->antenna_height = data->antenna_height;
 		    store->antenna_x = data->antenna_x;
@@ -711,10 +711,10 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    store->vru_y = data->vru_y;
 		    store->line_number = data->line_number;
 		    store->start_or_stop = data->start_or_stop;
-		    store->transducer_serial_number 
+		    store->transducer_serial_number
 			    = data->transducer_serial_number;
 		    }
-		    
+
 		/* comment */
 		if (store->kind == MB_DATA_COMMENT)
 		    {
@@ -724,7 +724,7 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* position (position telegrams) */
 		if (store->kind == MB_DATA_NAV)
-		    {		
+		    {
 		    store->pos_year = data->pos_year;
 		    store->pos_month = data->pos_month;
 		    store->pos_day = data->pos_day;
@@ -748,7 +748,7 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* sound velocity profile */
 		if (store->kind == MB_DATA_VELOCITY_PROFILE)
-		    {		
+		    {
 		    store->svp_year = data->svp_year;
 		    store->svp_month = data->svp_month;
 		    store->svp_day = data->svp_day;
@@ -767,16 +767,16 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* depth telegram */
 		if (store->kind == MB_DATA_DATA)
-		    {		
+		    {
 		    store->year = data->year;
 		    store->month = data->month;
 		    store->day = data->day;
 		    store->hour = data->hour;
 		    store->minute = data->minute;
 		    store->second = data->second;
-		    store->hundredth_sec 
+		    store->hundredth_sec
 			    = data->hundredth_sec;
-		    store->thousandth_sec 
+		    store->thousandth_sec
 			    = data->thousandth_sec;
 		    store->longitude = lon;
 		    store->latitude = lat;
@@ -871,17 +871,17 @@ int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->heading_offset = store->heading_offset;
 		data->time_delay = store->time_delay;
 		data->transducer_port_height = store->transducer_port_height;
-		data->transducer_starboard_height 
+		data->transducer_starboard_height
 			= store->transducer_starboard_height;
 		data->transducer_port_depth = store->transducer_port_depth;
-		data->transducer_starboard_depth 
+		data->transducer_starboard_depth
 			= store->transducer_starboard_depth;
 		data->transducer_port_x = store->transducer_port_x;
 		data->transducer_starboard_x = store->transducer_starboard_x;
 		data->transducer_port_y = store->transducer_port_y;
 		data->transducer_starboard_y = store->transducer_starboard_y;
 		data->transducer_port_error = store->transducer_port_error;
-		data->transducer_starboard_error 
+		data->transducer_starboard_error
 			= store->transducer_starboard_error;
 		data->antenna_height = store->antenna_height;
 		data->antenna_x = store->antenna_x;
@@ -891,7 +891,7 @@ int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->vru_y = store->vru_y;
 		data->line_number = store->line_number;
 		data->start_or_stop = store->start_or_stop;
-		data->transducer_serial_number 
+		data->transducer_serial_number
 			= store->transducer_serial_number;
 		for (i=0;i<MBF_ELMK2UNB_COMMENT_LENGTH;i++)
 			data->comment[i] = store->comment[i];
@@ -940,9 +940,9 @@ int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->hour = store->hour;
 		data->minute = store->minute;
 		data->second = store->second;
-		data->hundredth_sec 
+		data->hundredth_sec
 			= store->hundredth_sec;
-		data->thousandth_sec 
+		data->thousandth_sec
 			= store->thousandth_sec;
 		data->ping_num = store->ping_num;
 		data->sound_vel = store->sound_vel;
@@ -1127,7 +1127,7 @@ int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_comment(int verbose, FILE *mbfp, 
+int mbr_elmk2unb_rd_comment(int verbose, FILE *mbfp,
 		struct mbf_elmk2unb_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_comment";
@@ -1183,7 +1183,7 @@ int mbr_elmk2unb_rd_comment(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp, 
+int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp,
 		struct mbf_elmk2unb_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_parameter";
@@ -1281,34 +1281,34 @@ int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp,
 		short_ptr = (short int *) &line[14];
 		data->time_delay = (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[16];
-		data->transducer_port_height 
+		data->transducer_port_height
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[18];
-		data->transducer_starboard_height 
+		data->transducer_starboard_height
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[20];
-		data->transducer_port_depth 
+		data->transducer_port_depth
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[22];
-		data->transducer_starboard_depth 
+		data->transducer_starboard_depth
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[24];
-		data->transducer_port_x 
+		data->transducer_port_x
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[26];
-		data->transducer_starboard_x 
+		data->transducer_starboard_x
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[28];
-		data->transducer_port_y 
+		data->transducer_port_y
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[30];
-		data->transducer_starboard_y 
+		data->transducer_starboard_y
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[32];
-		data->transducer_port_error 
+		data->transducer_port_error
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[34];
-		data->transducer_starboard_error 
+		data->transducer_starboard_error
 			= (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[36];
 		data->antenna_height = (short int) mb_swap_short(*short_ptr);
@@ -1327,7 +1327,7 @@ int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp,
 		short_ptr = (short int *) &line[50];
 		data->start_or_stop = (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[52];
-		data->transducer_serial_number 
+		data->transducer_serial_number
 			= (short int) mb_swap_short(*short_ptr);
 #endif
 		}
@@ -1394,7 +1394,7 @@ int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_pos(int verbose, FILE *mbfp, 
+int mbr_elmk2unb_rd_pos(int verbose, FILE *mbfp,
 		struct mbf_elmk2unb_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_pos";
@@ -1476,10 +1476,10 @@ int mbr_elmk2unb_rd_pos(int verbose, FILE *mbfp,
 		data->other_quality = (int) mb_swap_short(*short_ptr);
 #endif
 		}
-		
+
 	/* KLUGE for 1996 UNB TRAINING COURSE - FLIP LONGITUDE */
-	if (data->pos_year == 96 
-	    && data->pos_month >= 6 
+	if (data->pos_year == 96
+	    && data->pos_month >= 6
 	    && data->pos_month <= 8)
 		data->pos_longitude = -data->pos_longitude;
 
@@ -1522,7 +1522,7 @@ int mbr_elmk2unb_rd_pos(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp, 
+int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp,
 		struct mbf_elmk2unb_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_svp";
@@ -1627,7 +1627,7 @@ int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, 
+int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp,
 		struct mbf_elmk2unb_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_bathgen";
@@ -1662,7 +1662,7 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 		{
 		data->kind = MB_DATA_DATA;
-		
+
 		data->day =            (int) line[0];
 		data->month =          (int) line[1];
 		data->year =           (int) line[2];
@@ -1744,7 +1744,7 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg5       beams_bath:       %d\n",
 			data->beams_bath);
 		}
-		
+
 	/* now read each of the beams */
 	if (status == MB_SUCCESS)
 		{
@@ -1773,26 +1773,26 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp,
 			data->beams[i].tt = (unsigned int) *int_ptr;
 #else
 			int_ptr = (int *) &line[0];
-			data->beams[i].bath = (unsigned int) 
+			data->beams[i].bath = (unsigned int)
 					mb_swap_int(*int_ptr);
 			int_ptr = (int *) &line[4];
-			data->beams[i].bath_acrosstrack = (int) 
+			data->beams[i].bath_acrosstrack = (int)
 					mb_swap_int(*int_ptr);
 			int_ptr = (int *) &line[8];
-			data->beams[i].bath_alongtrack = (int) 
+			data->beams[i].bath_alongtrack = (int)
 					mb_swap_int(*int_ptr);
 			int_ptr = (int *) &line[12];
-			data->beams[i].tt = (unsigned int) 
+			data->beams[i].tt = (unsigned int)
 					mb_swap_int(*int_ptr);
 #endif
 			data->beams[i].quality = line[16];
 			if (data->beams[i].quality <= 0)
 			    data->beams[i].quality = 8;
-			data->beams[i].amplitude 
+			data->beams[i].amplitude
 				= (int) ((mb_s_char) line[17] + 128);
 #ifndef BYTESWAPPED
 			short_ptr = (short *) &line[18];
-			data->beams[i].time_offset = (unsigned short) 
+			data->beams[i].time_offset = (unsigned short)
 				*short_ptr;
 			short_ptr = (short *) &line[20];
 			data->beams[i].heave = (short) *short_ptr;
@@ -1804,21 +1804,21 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp,
 			data->beams[i].angle = (short) *short_ptr;
 #else
 			short_ptr = (short *) &line[18];
-			data->beams[i].time_offset = (unsigned short) 
+			data->beams[i].time_offset = (unsigned short)
 				mb_swap_short(*short_ptr);
 			short_ptr = (short *) &line[20];
-			data->beams[i].heave = (short) 
+			data->beams[i].heave = (short)
 				mb_swap_short(*short_ptr);
 			short_ptr = (short *) &line[22];
-			data->beams[i].roll = (short) 
+			data->beams[i].roll = (short)
 				mb_swap_short(*short_ptr);
 			short_ptr = (short *) &line[24];
-			data->beams[i].pitch = (short) 
+			data->beams[i].pitch = (short)
 				mb_swap_short(*short_ptr);
 			short_ptr = (short *) &line[26];
-			data->beams[i].angle = (short) 
+			data->beams[i].angle = (short)
 				mb_swap_short(*short_ptr);
-#endif		
+#endif
 			}
 
 		    /* print debug statements */
@@ -2192,30 +2192,30 @@ int mbr_elmk2unb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *erro
 		short_ptr = (short int *) &line[14];
 		*short_ptr = (short int) mb_swap_short(data->time_delay);
 		short_ptr = (short int *) &line[16];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_port_height);
 		short_ptr = (short int *) &line[18];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_starboard_height);
 		short_ptr = (short int *) &line[20];
 		*short_ptr = (short int) mb_swap_short(data->transducer_port_depth);
 		short_ptr = (short int *) &line[22];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_starboard_depth);
 		short_ptr = (short int *) &line[24];
 		*short_ptr = (short int) mb_swap_short(data->transducer_port_x);
 		short_ptr = (short int *) &line[26];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_starboard_x);
 		short_ptr = (short int *) &line[28];
 		*short_ptr = (short int) mb_swap_short(data->transducer_port_y);
 		short_ptr = (short int *) &line[30];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_starboard_y);
 		short_ptr = (short int *) &line[32];
 		*short_ptr = (short int) mb_swap_short(data->transducer_port_error);
 		short_ptr = (short int *) &line[34];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_starboard_error);
 		short_ptr = (short int *) &line[36];
 		*short_ptr = (short int) mb_swap_short(data->antenna_height);
@@ -2234,7 +2234,7 @@ int mbr_elmk2unb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *erro
 		short_ptr = (short int *) &line[50];
 		*short_ptr = (short int) mb_swap_short(data->start_or_stop);
 		short_ptr = (short int *) &line[52];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short(data->transducer_serial_number);
 #endif
 		line[ELACMK2_PARAMETER_SIZE] = 0x03;
@@ -2506,9 +2506,9 @@ int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error)
 			*short_ptr = (short int) data->svp_depth[i];
 			*short_ptr2 = (short int) data->svp_vel[i];
 #else
-			*short_ptr = (short int) 
+			*short_ptr = (short int)
 				mb_swap_short((short int)data->svp_depth[i]);
-			*short_ptr2 = (short int) 
+			*short_ptr2 = (short int)
 				mb_swap_short((short int)data->svp_vel[i]);
 #endif
 			}
@@ -2678,16 +2678,16 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		*short_ptr =  (unsigned short) data->pulse_length;
 #else
 		short_ptr = (short int *) &line[8];
-		*short_ptr =  (unsigned short) 
+		*short_ptr =  (unsigned short)
 			mb_swap_short( (unsigned short) data->ping_num);
 		short_ptr = (short int *) &line[10];
-		*short_ptr =  (unsigned short) 
+		*short_ptr =  (unsigned short)
 			mb_swap_short( (unsigned short) data->sound_vel);
 		short_ptr = (short int *) &line[12];
-		*short_ptr =  (unsigned short) 
+		*short_ptr =  (unsigned short)
 			mb_swap_short( (unsigned short) data->heading);
 		short_ptr = (short int *) &line[14];
-		*short_ptr =  (unsigned short) 
+		*short_ptr =  (unsigned short)
 			mb_swap_short( (unsigned short) data->pulse_length);
 #endif
 		line[16] = (char) data->mode;
@@ -2701,10 +2701,10 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		*short_ptr = (short int) data->beams_bath;
 #else
 		short_ptr = (short int *) &line[20];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short((short int) data->reserved);
 		short_ptr = (short int *) &line[22];
-		*short_ptr = (short int) 
+		*short_ptr = (short int)
 			mb_swap_short((short int) data->beams_bath);
 #endif
 
@@ -2738,16 +2738,16 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		    *int_ptr = (unsigned int) data->beams[i].tt;
 #else
 		    int_ptr = (int *) &line[0];
-		    *int_ptr = (unsigned int) 
+		    *int_ptr = (unsigned int)
 				    mb_swap_int(data->beams[i].bath);
 		    int_ptr = (int *) &line[4];
-		     *int_ptr = (int) 
+		     *int_ptr = (int)
 				    mb_swap_int(data->beams[i].bath_acrosstrack);
 		    int_ptr = (int *) &line[8];
-		     *int_ptr = (int) 
+		     *int_ptr = (int)
 				    mb_swap_int(data->beams[i].bath_alongtrack);
 		    int_ptr = (int *) &line[12];
-		     *int_ptr = (unsigned int) 
+		     *int_ptr = (unsigned int)
 				    mb_swap_int(data->beams[i].tt);
 #endif
 		    line[16] = data->beams[i].quality;
@@ -2755,7 +2755,7 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 			    ((mb_s_char) (data->beams[i].amplitude - 128));
 #ifndef BYTESWAPPED
 		    short_ptr = (short *) &line[18];
-		    *short_ptr = (unsigned short) 
+		    *short_ptr = (unsigned short)
 			    data->beams[i].time_offset;
 		    short_ptr = (short *) &line[20];
 		    *short_ptr = (short) data->beams[i].heave;
@@ -2767,21 +2767,21 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		    *short_ptr = (short) data->beams[i].angle;
 #else
 		    short_ptr = (short *) &line[18];
-		    *short_ptr = (unsigned short) 
+		    *short_ptr = (unsigned short)
 			    mb_swap_short(data->beams[i].time_offset);
 		    short_ptr = (short *) &line[20];
-		    *short_ptr = (short) 
+		    *short_ptr = (short)
 			    mb_swap_short(data->beams[i].heave);
 		    short_ptr = (short *) &line[22];
-		    *short_ptr = (short) 
+		    *short_ptr = (short)
 			    mb_swap_short(data->beams[i].roll);
 		    short_ptr = (short *) &line[24];
-		    *short_ptr = (short) 
+		    *short_ptr = (short)
 			    mb_swap_short(data->beams[i].pitch);
 		    short_ptr = (short *) &line[26];
-		    *short_ptr = (short) 
+		    *short_ptr = (short)
 			    mb_swap_short(data->beams[i].angle);
-#endif		
+#endif
 
 		    /* write out data */
 		    status = fwrite(line,1,ELACMK2_BATHGEN_BEAM_SIZE,mbfp);
@@ -2804,7 +2804,7 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		line[0] = 0x03;
 		line[1] = '\0';
 		line[2] = '\0';
-    
+
 		/* write out data */
 		status = fwrite(line,1,3,mbfp);
 		if (status != 3)

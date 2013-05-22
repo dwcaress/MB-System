@@ -2,7 +2,7 @@
  *    The MB-system:	mb_buffer.c	2/25/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,25 +14,25 @@
  *--------------------------------------------------------------------*/
 /*
  * mb_buffer.c contains the functions for buffered i/o of multibeam
- * data.   
+ * data.
  * These functions include:
  *   mb_buffer_init	- initialize buffer structure
  *   mb_buffer_close	- close buffer structure
  *   mb_buffer_load	- load data from file into buffer
  *   mb_buffer_dump	- dump data from buffer into file
  *   mb_buffer_clear	- clear data from buffer
- *   mb_buffer_get_next_data	- extract navigation and bathymetry/backscatter 
+ *   mb_buffer_get_next_data	- extract navigation and bathymetry/backscatter
  *   				from next suitable record in buffer
- *   mb_buffer_get_next_nav	- extract navigation and vru 
+ *   mb_buffer_get_next_nav	- extract navigation and vru
  *   				from next suitable record in buffer
- *   mb_buffer_extract	- extract navigation and bathymetry/backscatter 
+ *   mb_buffer_extract	- extract navigation and bathymetry/backscatter
  *   				from specified record in buffer
- *   mb_buffer_insert	- insert altered navigation and 
- *   				bathymetry/backscatter data into 
+ *   mb_buffer_insert	- insert altered navigation and
+ *   				bathymetry/backscatter data into
  *   				record in buffer
- *   mb_buffer_extract_nav - extract navigation and vru 
+ *   mb_buffer_extract_nav - extract navigation and vru
  *   				from specified record in buffer
- *   mb_buffer_insert_nav - insert altered navigation into 
+ *   mb_buffer_insert_nav - insert altered navigation into
  *   				record in buffer
  *
  * Author:	D. W. Caress
@@ -180,10 +180,10 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
 
 static char rcs_id[]="$Id$";
 
@@ -337,7 +337,7 @@ int mb_buffer_load(int verbose, void *buff_ptr,void *mbio_ptr,
 		/* read the next data record */
 		status = mb_read_ping(verbose,mbio_ptr,store_ptr,
 					&kind,error);
-			
+
 		/* log errors */
 		if (*error < MB_ERROR_NO_ERROR)
 			mb_notice_log_error(verbose, mbio_ptr, *error);
@@ -553,9 +553,9 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 				fprintf(stderr,"dbg4       new kind:    %d\n",buff->buffer_kind[i]);
 				}
 
-			buff->buffer[i] = 
+			buff->buffer[i] =
 				buff->buffer[*ndump + i];
-			buff->buffer_kind[i] = 
+			buff->buffer_kind[i] =
 				buff->buffer_kind[*ndump + i];
 			buff->buffer[*ndump + i] = NULL;
 			buff->buffer_kind[*ndump + i] = 0;
@@ -703,9 +703,9 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 				fprintf(stderr,"dbg4       new kind:    %d\n",buff->buffer_kind[i]);
 				}
 
-			buff->buffer[i] = 
+			buff->buffer[i] =
 				buff->buffer[*ndump + i];
-			buff->buffer_kind[i] = 
+			buff->buffer_kind[i] =
 				buff->buffer_kind[*ndump + i];
 			buff->buffer[*ndump + i] = NULL;
 			buff->buffer_kind[*ndump + i] = 0;
@@ -760,7 +760,7 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr,
 		int start, int *id,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
+		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
@@ -799,7 +799,7 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr,
 	found = MB_NO;
 	for (i=start;i<buff->nbuffer;i++)
 		{
-		if (found == MB_NO 
+		if (found == MB_NO
 			&& buff->buffer_kind[i] == MB_DATA_DATA)
 			{
 			*id = i;
@@ -884,8 +884,8 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr,
 int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		int start, int *id,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
-		double *speed, double *heading, double *draft, 
+		double *navlon, double *navlat,
+		double *speed, double *heading, double *draft,
 		double *roll, double *pitch, double *heave,
 		int *error)
 {
@@ -914,12 +914,12 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* look for next data of the appropriate type */
 	found = MB_NO;
 	for (i=start;i<buff->nbuffer;i++)
 		{
-		if (found == MB_NO 
+		if (found == MB_NO
 			&& buff->buffer_kind[i] == mb_io_ptr->nav_source)
 			{
 			*id = i;
@@ -938,7 +938,7 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		status = mb_buffer_extract_nav(verbose,
 			buff_ptr,mbio_ptr,*id,&kind,
 			time_i,time_d,navlon,navlat,
-			speed,heading,draft, 
+			speed,heading,draft,
 			roll,pitch,heave,error);
 
 	/* print output debug statements */
@@ -980,15 +980,15 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr,
-		int id, int *kind, 
+		int id, int *kind,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
+		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, 
+		char *comment,
 		int *error)
 {
 	char	*function_name = "mb_buffer_extract";
@@ -1050,13 +1050,13 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1072,7 +1072,7 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg4       nbath:         %d\n",*nbath);
@@ -1113,9 +1113,9 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr,
-		int id, int *kind, 
+		int id, int *kind,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
+		double *navlon, double *navlat,
 		double *speed, double *heading, double *draft,
 		double *roll, double *pitch, double *heave,
 		int *error)
@@ -1164,7 +1164,7 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 			store_ptr,kind,
 			time_i,time_d,navlon,navlat,
 			speed,heading,draft,
-			roll,pitch,heave, 
+			roll,pitch,heave,
 			error);
 		}
 
@@ -1176,7 +1176,7 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1209,13 +1209,13 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 /*--------------------------------------------------------------------*/
 int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr,
 		int id, int time_i[7], double time_d,
-		double navlon, double navlat, 
+		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
 		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, 
+		char *comment,
 		int *error)
 {
 	char	*function_name = "mb_buffer_insert";
@@ -1292,7 +1292,7 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr,
 		}
 
 	status = mb_insert(verbose,mbio_ptr,store_ptr,
-		buff->buffer_kind[id], 
+		buff->buffer_kind[id],
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
 		beamflag,bath,amp,
@@ -1317,7 +1317,7 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr,
 /*--------------------------------------------------------------------*/
 int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		int id, int time_i[7], double time_d,
-		double navlon, double navlat, 
+		double navlon, double navlat,
 		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
@@ -1376,7 +1376,7 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		mbio_ptr,store_ptr,
 		time_i,time_d,navlon,navlat,
 		speed,heading,draft,
-		roll,pitch,heave, 
+		roll,pitch,heave,
 		error);
 
 	/* print output debug statements */
@@ -1395,7 +1395,7 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr,
-			int id, int *kind, 
+			int id, int *kind,
 			int *error)
 {
 	char	*function_name = "mb_buffer_get_kind";
@@ -1448,7 +1448,7 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr,
-			int id, void **store_ptr, 
+			int id, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mb_buffer_get_ptr";

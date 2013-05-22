@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_xtfr8101.h	8/24/01
  *	$Id$
  *
- *    Copyright (c) 2001-2012 by
+ *    Copyright (c) 2001-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_xtfr8101.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_XTFR8101 format (MBIO id 83).  
+ * to store multibeam data read from the MBF_XTFR8101 format (MBIO id 83).
  *
  * Author:	D. W. Caress
  * Date:	August 24, 2001
@@ -35,7 +35,7 @@
  */
 /*
  * Notes on the MBF_XTFR8101 data format:
- *   1. Reson SeaBat products are high frequency, 
+ *   1. Reson SeaBat products are high frequency,
  *
  */
 
@@ -103,21 +103,21 @@ struct mbf_xtfr8101_xtffileheader
 							11 = Sonatech_DDS
 							12 = Echoscan
 							13 = Elac Bottomchart 1180
-							14 = Klein 5000	
-							15 = Reson SeaBat 8101	
-							16 = Imagenex model 858	
-							17 = USN SILOS with 3-channel analog	
-							18 = Sonatech super high res sidescan sonar	
-							19 = Delph AU32 Analog input (2 channel)	
+							14 = Klein 5000
+							15 = Reson SeaBat 8101
+							16 = Imagenex model 858
+							17 = USN SILOS with 3-channel analog
+							18 = Sonatech super high res sidescan sonar
+							19 = Delph AU32 Analog input (2 channel)
 							20 = Generic sonar using the memory-mapped
-								file interface	
-							21 = Simrad SM2000	
-							22 = Standard multibedia audio	
+								file interface
+							21 = Simrad SM2000
+							22 = Standard multibedia audio
 							23 = Edgetech ACI card for 260 sonar throug PC31 card
-							24 = Edgetech black box	
-							25 = Fugro deeptow	
-							26 = C&C Edgetech chirp conversion program	
-							27 = DTI SAS synthetic aperture processor (mmap file)	
+							24 = Edgetech black box
+							25 = Fugro deeptow
+							26 = C&C Edgetech chirp conversion program
+							27 = DTI SAS synthetic aperture processor (mmap file)
 							*/
 	char		NoteString[64];
 	char		ThisFileName[64];
@@ -147,7 +147,7 @@ struct mbf_xtfr8101_xtffileheader
 	float		MRUOffsetPitch; 	/* Multibeam MRU pitch offset (degrees) */
 	float		MRUOffsetRoll;		/* Multibeam MRU roll offset (degrees) */
 	struct mbf_xtfr8101_xtfchaninfo chaninfo[6];
-	
+
 	};
 
 struct mbf_xtfpacketheader
@@ -159,7 +159,7 @@ struct mbf_xtfpacketheader
 	unsigned short	Reserved1[2];
 	unsigned int	NumBytesThisRecord;	/* total byte count including this header */
 	};
-	
+
 struct mbf_xtfattitudeheader
 	{
 	struct mbf_xtfpacketheader packetheader;
@@ -172,7 +172,7 @@ struct mbf_xtfattitudeheader
 	float		Heading;
 	char		Reserved3[10];
 	};
-	
+
 struct mbf_xtfbathheader
 	{
 	struct mbf_xtfpacketheader packetheader;
@@ -449,7 +449,7 @@ struct 	RESON8100_RT
 						/* for dual head system, most significant bit (bit 7) */
 						/* indicates which sonar head to associate with packet */
 						/* 	head 1 - bit 7 set to 0 */
-						/* 	head 2 -	bit 7 set to 1 	 */	
+						/* 	head 2 -	bit 7 set to 1 	 */
 	unsigned short 	latency;          		/* time from ping to output (milliseconds) */
 	unsigned int	Seconds;	/* seconds since 00:00:00, 1 January 1970 */
 	unsigned int	Millisecs;	/* milliseconds, LSB = 1 ms */
@@ -594,13 +594,13 @@ struct mbf_xtfr8101_struct
 
 	/* type of sonar */
 	int	sonar;			/* Type of Reson sonar */
-	
+
 	/* xtf file header */
 	struct mbf_xtfr8101_xtffileheader fileheader;
 
 	/* xtf attitude record */
 	struct mbf_xtfattitudeheader attitudeheader;
-	
+
 	/* xtf Reson multibeam bathymetry record */
 	struct mbf_xtfbathheader bathheader;
 	struct RESON8100_RIT reson8100rit;
@@ -613,4 +613,3 @@ struct mbf_xtfr8101_struct
 	/* comment */
 	char comment[MBF_XTFR8101_COMMENT_LENGTH];
 	};
-

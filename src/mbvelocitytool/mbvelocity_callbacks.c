@@ -2,7 +2,7 @@
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,13 +13,13 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBVELOCITYTOOL is an interactive water velocity profile editor 
- * used to examine multiple water velocity profiles and to create 
- * new water velocity profiles which can be used for the processing 
- * of swath sonar data.  In general, this tool is used to examine 
- * water velocity profiles obtained from XBTs, CTDs, or databases, 
- * and to construct new profiles consistent with these various 
- * sources of information.  
+ * MBVELOCITYTOOL is an interactive water velocity profile editor
+ * used to examine multiple water velocity profiles and to create
+ * new water velocity profiles which can be used for the processing
+ * of swath sonar data.  In general, this tool is used to examine
+ * water velocity profiles obtained from XBTs, CTDs, or databases,
+ * and to construct new profiles consistent with these various
+ * sources of information.
  *
  * Author:	D. W. Caress
  * Date:	April 8, 1993
@@ -112,9 +112,9 @@
 
 /* mbedit widget includes */
 #include "mbvelocity_creation.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_status.h"
-#include "../../include/mb_xgraphics.h"
+#include "mb_define.h"
+#include "mb_status.h"
+#include "mb_xgraphics.h"
 #include "mbvelocity.h"
 
 /*
@@ -348,7 +348,7 @@ GRAU( XtPointer, call)
         count++;
         if ( count == CHUNK )
         {
-            valueList = 
+            valueList =
 		(String *)XtRealloc((char *)valueList,
 				    (count + CHUNK) * sizeof(String));
         }
@@ -358,7 +358,7 @@ GRAU( XtPointer, call)
     for ( i = 0; i < count; i++ )
     {
 	/*
-	 * First, extract the widget name and generate a string to 
+	 * First, extract the widget name and generate a string to
 	 * pass to BxWidgetIdsFromNames().
 	 */
 	cptr = strrchr(valueList[i], '.');
@@ -404,7 +404,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 	    XtFree((char *)(valueList[i]));
 	    return;
 	}
-	
+
 	/*
 	 * Next, get the resource name to set.
 	 */
@@ -426,7 +426,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
         {
             rsc++;
         }
-	
+
         ptr = rsc + strlen(rsc) - 1;
         while( ptr && *ptr )
         {
@@ -444,7 +444,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
         {
             *ptr = '\0';
         }
-	
+
 	/*
 	 * Lastly, get the string value to which to set the resource.
 	 */
@@ -462,7 +462,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 	    XtFree((char *)(valueList[i]));
 	    return;
 	}
-	
+
         ptr = start + strlen(start) - 1;
         while( ptr && *ptr )
         {
@@ -480,7 +480,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
         {
             *ptr = '\0';
         }
-	
+
 	/*
 	 * Now convert the widget name to a Widget ID
 	 */
@@ -490,7 +490,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 	    XtFree((char *)(valueList[i]));
 	    continue;
         }
-	
+
 	/*
 	 * If the widget name conversion succeeded, we now need to get the
 	 * resource list for the widget so that we can do a resource conversion
@@ -513,46 +513,46 @@ void
 do_mbvelocity_init(int argc, char **argv)
 {
     int	    i;
-    
+
     /* make sure expose plots are off */
     expose_plot_ok = False;
-    
+
     /* get additional widgets */
-    fileSelectionList = (Widget) 
-	XmFileSelectionBoxGetChild(fileSelectionBox, 
+    fileSelectionList = (Widget)
+	XmFileSelectionBoxGetChild(fileSelectionBox,
 				    XmDIALOG_LIST);
-    fileSelectionText = (Widget) 
-	XmFileSelectionBoxGetChild(fileSelectionBox, 
+    fileSelectionText = (Widget)
+	XmFileSelectionBoxGetChild(fileSelectionBox,
 				    XmDIALOG_TEXT);
-    XtAddCallback(fileSelectionList, 
-	    XmNbrowseSelectionCallback, 
+    XtAddCallback(fileSelectionList,
+	    XmNbrowseSelectionCallback,
 	    do_fileselection_list, NULL);
-	    
+
     XtUnmanageChild(
 	    (Widget) XmFileSelectionBoxGetChild(
-				    fileSelectionBox, 
+				    fileSelectionBox,
 				    XmDIALOG_HELP_BUTTON));
 
     /* Setup the entire screen. */
     display = XtDisplay(drawingArea);
     colormap = DefaultColormap(display,XDefaultScreen(display));
-    
+
     /* Setup just the "canvas" part of the screen. */
     can_xid = XtWindow(drawingArea);
-    
+
     /* Setup the "graphics Context" for just the "canvas" */
     xgcv.background = WhitePixelOfScreen(DefaultScreenOfDisplay(display));
     xgcv.foreground = BlackPixelOfScreen(DefaultScreenOfDisplay(display));
     xgcv.line_width = 2;
-    gc = XCreateGC(display,can_xid,GCBackground | GCForeground 
+    gc = XCreateGC(display,can_xid,GCBackground | GCForeground
 	     | GCLineWidth, &xgcv);
-    
+
     /* Setup the font for just the "canvas" screen. */
     fontStruct = XLoadQueryFont(display, xgfont);
     XSetFont(display,gc,fontStruct->fid);
-    
+
     XSelectInput(display, can_xid, EV_MASK );
-    
+
     /* Load the colors that will be used in this program. */
     status = XLookupColor(display,colormap, "white",&db_color,&colors[0]);
     if ((status = XAllocColor(display,colormap,&colors[0])) == 0)
@@ -579,18 +579,18 @@ do_mbvelocity_init(int argc, char **argv)
 	    {
 	    mpixel_values[i] = colors[i].pixel;
 	    }
-    
+
     /* Setup initial cursor. This will be changed when changing "MODE". */
     myCursor = XCreateFontCursor(display, XC_target);
     XAllocNamedColor(display,colormap,"red",&closest[0],&exact[0]);
     XAllocNamedColor(display,colormap,"coral",&closest[1],&exact[1]);
     XRecolorCursor(display,myCursor,&closest[0],&closest[1]);
     XDefineCursor(display,can_xid,myCursor);
-    
+
     /* initialize graphics */
     xg_init(display, can_xid, borders, xgfont, &can_xgid);
-    
-    status = mbvt_set_graphics(can_xgid, borders, 
+
+    status = mbvt_set_graphics(can_xgid, borders,
 		    NCOLORS, mpixel_values);
 
     /* initialize some labels */
@@ -600,13 +600,13 @@ do_mbvelocity_init(int argc, char **argv)
     set_label_string(label_status_edit, message_str);
     strcpy(message_str, "No swath sonar data loaded...");
     set_label_string(label_status_mb, message_str);
-    
+
     /* initialize mbvelocitytool proper */
     status = mbvt_init(argc,argv);
-    
+
     /* set the controls */
     do_set_controls();
-    
+
     /* finally allow expose plots */
     expose_plot_ok = True;
 }
@@ -618,9 +618,9 @@ void do_set_controls()
 	/* get some values from mbvelocitytool */
 	mbvt_get_values(&edit_gui,&ndisplay_gui,&maxdepth_gui,
 		&velrange_gui,&velcenter_gui,&resrange_gui,&anglemode_gui,&format_gui);
-			
+
 	/* set about version label */
-	sprintf(message_str, ":::t\"MB-System Release %s\":t\"%s\"", 
+	sprintf(message_str, ":::t\"MB-System Release %s\":t\"%s\"",
 		MB_VERSION, MB_BUILD_DATE);
 	set_label_multiline_string(label_about_version, message_str);
 
@@ -631,76 +631,76 @@ void do_set_controls()
 	else
 	    sprintf(message_str, "Loaded %d display SVPs", ndisplay_gui);
 	set_label_string(label_status_display, message_str);
-			
+
 	/* set pushbuttons */
 	if (edit_gui == 1)
 	    {
-	    XtVaSetValues(pushButton_save_svp, 
+	    XtVaSetValues(pushButton_save_svp,
 			XmNsensitive, True,
 			NULL);
-	    XtVaSetValues(pushButton_save_svpfile, 
+	    XtVaSetValues(pushButton_save_svpfile,
 			XmNsensitive, True,
 			NULL);
 	    }
 	else
 	    {
-	    XtVaSetValues(pushButton_save_svp, 
+	    XtVaSetValues(pushButton_save_svp,
 			XmNsensitive, False,
 			NULL);
-	    XtVaSetValues(pushButton_save_svpfile, 
+	    XtVaSetValues(pushButton_save_svpfile,
 			XmNsensitive, False,
 			NULL);
 	    }
 	if (nload > 0)
 	    {
-	    XtVaSetValues(pushButton_process, 
+	    XtVaSetValues(pushButton_process,
 			XmNsensitive, True,
 			NULL);
-	    XtVaSetValues(pushButton_save_residuals, 
+	    XtVaSetValues(pushButton_save_residuals,
 			XmNsensitive, True,
 			NULL);
 	    }
 	else
 	    {
-	    XtVaSetValues(pushButton_process, 
+	    XtVaSetValues(pushButton_process,
 			XmNsensitive, False,
 			NULL);
-	    XtVaSetValues(pushButton_save_residuals, 
+	    XtVaSetValues(pushButton_save_residuals,
 			XmNsensitive, False,
 			NULL);
 	    }
 
 	/* set values of maximum depth slider */
-	XtVaSetValues(slider_maxdepth, 
-			XmNvalue, (int)maxdepth_gui, 
+	XtVaSetValues(slider_maxdepth,
+			XmNvalue, (int)maxdepth_gui,
 			NULL);
 
 	/* set values of velocity range slider */
-	XtVaSetValues(slider_velrange, 
-			XmNvalue, (int)velrange_gui, 
+	XtVaSetValues(slider_velrange,
+			XmNvalue, (int)velrange_gui,
 			NULL);
 
 	/* set values of velocity center slider */
-	XtVaSetValues(slider_velcenter, 
-			XmNvalue, (int)velcenter_gui, 
-			XmNminimum, (int)1300, 
-			XmNmaximum, (int)1700, 
+	XtVaSetValues(slider_velcenter,
+			XmNvalue, (int)velcenter_gui,
+			XmNminimum, (int)1300,
+			XmNmaximum, (int)1700,
 			NULL);
 
 	/* set values of residual range slider */
-	XtVaSetValues(slider_residual_range, 
-			XmNvalue, ((int) (10 * resrange_gui)), 
+	XtVaSetValues(slider_residual_range,
+			XmNvalue, ((int) (10 * resrange_gui)),
 			NULL);
 
 	/* set values of angle mode radiobox */
 	if (anglemode_gui == 0)
-	    XmToggleButtonSetState(toggleButton_mode_ok, 
+	    XmToggleButtonSetState(toggleButton_mode_ok,
 			TRUE, TRUE);
 	else if (anglemode_gui == 1)
-	    XmToggleButtonSetState(toggleButton_mode_snell, 
+	    XmToggleButtonSetState(toggleButton_mode_snell,
 			TRUE, TRUE);
 	else if (anglemode_gui == 2)
-	    XmToggleButtonSetState(toggleButton_mode_null, 
+	    XmToggleButtonSetState(toggleButton_mode_null,
 			TRUE, TRUE);
 
 	/* set value of format text item */
@@ -715,7 +715,7 @@ do_velrange( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs;
     acs=(XmScaleCallbackStruct*)call_data;
-    
+
     velrange_gui = (double) acs->value;
 
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
@@ -734,7 +734,7 @@ do_velcenter( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs;
     acs=(XmScaleCallbackStruct*)call_data;
-    
+
     velcenter_gui = (double) acs->value;
 
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
@@ -755,7 +755,7 @@ do_process_mb( Widget w, XtPointer client_data, XtPointer call_data)
     acs=(XmAnyCallbackStruct*)call_data;
 
     fprintf(stderr, "\nAbout to process data\n");
-	    
+
     /* turn off expose plots */
     expose_plot_ok = False;
 
@@ -763,7 +763,7 @@ do_process_mb( Widget w, XtPointer client_data, XtPointer call_data)
     status = mbvt_process_multibeam();
     if (status != 1)
 	    XBell(display,100);
-	    
+
     /* turn on expose plots */
     expose_plot_ok = True;
 
@@ -771,7 +771,7 @@ do_process_mb( Widget w, XtPointer client_data, XtPointer call_data)
     do_set_controls();
 
     mbvt_plot();
-	
+
 }
 
 /*--------------------------------------------------------------------*/
@@ -783,7 +783,7 @@ do_maxdepth( Widget w, XtPointer client_data, XtPointer call_data)
     acs=(XmScaleCallbackStruct*)call_data;
 
     maxdepth_gui = (double) acs->value;
-    
+
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
 	    velrange_gui,velcenter_gui,resrange_gui,anglemode_gui);
 
@@ -800,7 +800,7 @@ do_anglemode( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     if (XmToggleButtonGetState(toggleButton_mode_ok))
 	anglemode_gui = 0;
     else if (XmToggleButtonGetState(toggleButton_mode_snell))
@@ -829,7 +829,7 @@ do_quit( Widget w, XtPointer client_data, XtPointer call_data)
     mbvt_quit();
 
     fprintf(stderr,"\nExiting mbvelocity!\n");
-    
+
     exit(0);
 
 }
@@ -853,13 +853,13 @@ do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 	    {
 	    /* look for MB suffix convention */
 	    form = format_gui;
-	    if ((status = mbvt_get_format(selection_text, 
+	    if ((status = mbvt_get_format(selection_text,
 			    &form)) == MB_SUCCESS)
 		{
 		format_gui = form;
 		sprintf(message_str,"%d",format_gui);
 		XmTextFieldSetString(
-		    textField_mbformat, 
+		    textField_mbformat,
 		    message_str);
 		}
 	    }
@@ -881,7 +881,7 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 
     /* read the input file name */
     if(!XmStringGetLtoR(acs->value,
-	    XmSTRING_DEFAULT_CHARSET, 
+	    XmSTRING_DEFAULT_CHARSET,
 	    &input_file_ptr))
 	    {
 	    selected = 0;
@@ -905,7 +905,7 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 	    if (status == 1)
 	      {
 	      sprintf(message_str, "Loaded display SVP from: %s", input_file);
-	      set_label_string(label_status_display, 
+	      set_label_string(label_status_display,
 			message_str);
 	      }
 	    }
@@ -919,7 +919,7 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 	      {
 	      edit_gui = 1;
 	       sprintf(message_str, "Loaded editable SVP from: %s", input_file);
-	       set_label_string(label_status_edit, 
+	       set_label_string(label_status_edit,
 			message_str);
 	      }
 	    }
@@ -933,12 +933,12 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 	    if (status == 1)
 	      {
 	       sprintf(message_str, "Saved editable SVP to: %s", input_file);
-	       set_label_string(label_status_edit, 
+	       set_label_string(label_status_edit,
 			message_str);
 	      }
 	    }
        else if (open_type == MBVT_IO_OPEN_MB)
-	    {	    
+	    {
 	    /* turn off expose plots */
 	    expose_plot_ok = False;
 
@@ -952,18 +952,18 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 	    /* reset status message */
 	    if (status == 1)
 	      {
-	      sprintf(message_str, "Read %d pings from swath file: %s", 
+	      sprintf(message_str, "Read %d pings from swath file: %s",
 			    nload, input_file);
-	      set_label_string(label_status_mb, 
+	      set_label_string(label_status_mb,
 			message_str);
 	      }
 	    if (status == 1 && edit_gui != 1)
 	      {
 	       sprintf(message_str, "Loaded default editable SVP");
-	       set_label_string(label_status_edit, 
+	       set_label_string(label_status_edit,
 			message_str);
 	      }
-	    
+
 	    /* turn on expose plots */
 	    expose_plot_ok = True;
 	    }
@@ -990,7 +990,7 @@ do_open_commandline(char *wfile, char *sfile, char *file, int format)
 
        /* get selected filename id and file format id */
        if (strlen(file) > 0)
-	    {	    
+	    {
 	    /* turn off expose plots */
 	    expose_plot_ok = False;
 
@@ -1004,15 +1004,15 @@ do_open_commandline(char *wfile, char *sfile, char *file, int format)
 	    /* reset status message */
 	    if (status == 1)
 	      {
-	      sprintf(message_str, "Read %d pings from swath file: %s", 
+	      sprintf(message_str, "Read %d pings from swath file: %s",
 			    nload, input_file);
-	      set_label_string(label_status_mb, 
+	      set_label_string(label_status_mb,
 			message_str);
 	      }
 	    if (status == 1 && edit_gui != 1)
 	      {
 	       sprintf(message_str, "Loaded default editable SVP");
-	       set_label_string(label_status_edit, 
+	       set_label_string(label_status_edit,
 			message_str);
 	      }
 	    }
@@ -1026,7 +1026,7 @@ do_open_commandline(char *wfile, char *sfile, char *file, int format)
 	    if (status == 1)
 	      {
 	       sprintf(message_str, "Loaded editable SVP from: %s", wfile);
-	       set_label_string(label_status_edit, 
+	       set_label_string(label_status_edit,
 			message_str);
 	      }
 	    }
@@ -1039,11 +1039,11 @@ do_open_commandline(char *wfile, char *sfile, char *file, int format)
 	    if (status == 1)
 	      {
 	      sprintf(message_str, "Loaded display SVP from: %s", wfile);
-	      set_label_string(label_status_display, 
+	      set_label_string(label_status_display,
 			message_str);
 	      }
 	    }
-	    
+
 	/* turn on expose plots */
 	expose_plot_ok = True;
 
@@ -1063,7 +1063,7 @@ do_new_profile( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmListCallbackStruct *acs;
     acs=(XmListCallbackStruct*)call_data;
-    
+
     /* get new edit velocity profile */
     mbvt_new_edit_profile();
 
@@ -1085,7 +1085,7 @@ do_residual_range( Widget w, XtPointer client_data, XtPointer call_data)
     acs=(XmScaleCallbackStruct*)call_data;
 
     resrange_gui = ((double)acs->value / 10.0);
-    
+
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
 	    velrange_gui,velcenter_gui,resrange_gui,anglemode_gui);
 
@@ -1112,7 +1112,7 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
     int	    doit;
     int	    ring_bell;
     int	    status;
-    
+
     /* If there is input in the drawing area */
     if (acs->reason == XmCR_INPUT)
     {
@@ -1124,7 +1124,7 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
 	  {
 	    x_loc = event->xbutton.x;
 	    y_loc = event->xbutton.y;
-    
+
 	    status = mbvt_action_select_node(
 			    x_loc,y_loc);
 
@@ -1134,7 +1134,7 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    {
 		    status = mbvt_action_drag_node(
 			    x_loc,y_loc);
-		    if (status == 0 && ring_bell == False) 
+		    if (status == 0 && ring_bell == False)
 			    {
 			    ring_bell = True;
 			    XBell(display,100);
@@ -1150,7 +1150,7 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    /* If the button is still pressed then read the location */
 		    /* of the pointer and run the action mouse function again */
 		    if (mask_return == 256 )
-			doit = True; 
+			doit = True;
 		    else
 			doit = False;
 		    }
@@ -1167,7 +1167,7 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
 	  {
 	    x_loc = event->xbutton.x;
 	    y_loc = event->xbutton.y;
-    
+
 	    status = mbvt_action_add_node(
 			    x_loc,y_loc);
 	    if (status != 1)
@@ -1183,7 +1183,7 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
 	  {
 	    x_loc = event->xbutton.x;
 	    y_loc = event->xbutton.y;
-    
+
 	    status = mbvt_action_delete_node(
 			    x_loc,y_loc);
 	    if (status != 1)
@@ -1202,7 +1202,7 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
 	  if(event->xbutton.button == 1)
 	  {
 		    status = mbvt_action_mouse_up(x_loc, y_loc);
-		    
+
 		    if (status == 0) XBell(display,100);
 
 	  }; /* end of button 1 button release */
@@ -1337,24 +1337,24 @@ do_wait_until_viewed(XtAppContext app)
     Window  topwindow;
     XWindowAttributes	xwa;
     XEvent  event;
-    
+
     /* set app_context */
     app_context = app;
-    
+
     /* find the top level shell */
-    for (topshell = drawingArea; 
+    for (topshell = drawingArea;
 	    !XtIsTopLevelShell(topshell);
 	    topshell = XtParent(topshell))
 	;
-	
+
     /* keep processing events until it is viewed */
     if (XtIsRealized(topshell))
 	{
 	topwindow = XtWindow(topshell);
-	
+
 	/* wait for the window to be mapped */
 	while (XGetWindowAttributes(
-			XtDisplay(drawingArea), 
+			XtDisplay(drawingArea),
 			topwindow, &xwa)
 		&& xwa.map_state != IsViewable)
 	    {
@@ -1362,9 +1362,9 @@ do_wait_until_viewed(XtAppContext app)
 	    XtDispatchEvent(&event);
 	    }
 	}
-	
+
     XmUpdateDisplay(topshell);
-	
+
     return(1);
 }
 
@@ -1377,16 +1377,16 @@ do_message_on(char *message)
     Window  diawindow, topwindow;
     XWindowAttributes	xwa;
     XEvent  event;
-    
+
     set_label_string(label_message, message);
     XtManageChild(bulletinBoard_message);
-    
+
     /* force the label to be visible */
-    for (diashell = label_message; 
-	    !XtIsShell(diashell); 
+    for (diashell = label_message;
+	    !XtIsShell(diashell);
 	    diashell = XtParent(diashell))
 	;
-    for (topshell = diashell; 
+    for (topshell = diashell;
 	    !XtIsTopLevelShell(topshell);
 	    topshell = XtParent(topshell))
 	;
@@ -1394,7 +1394,7 @@ do_message_on(char *message)
 	{
 	diawindow = XtWindow(diashell);
 	topwindow = XtWindow(topshell);
-	
+
 	/* wait for the dialog to be mapped */
 	while (XGetWindowAttributes(display, diawindow, &xwa)
 		&& xwa.map_state != IsViewable)
@@ -1402,14 +1402,14 @@ do_message_on(char *message)
 	    if (XGetWindowAttributes(display, topwindow, &xwa)
 		    && xwa.map_state != IsViewable)
 		break;
-		
+
 	    XtAppNextEvent(app_context, &event);
 	    XtDispatchEvent(&event);
 	    }
 	}
-	
+
     XmUpdateDisplay(topshell);
-	
+
     return(1);
 }
 
@@ -1421,7 +1421,7 @@ do_message_off()
     XtUnmanageChild(bulletinBoard_message);
     XSync(XtDisplay(bulletinBoard_message), 0);
     XmUpdateDisplay(bulletinBoard_message);
-	
+
     return(1);
 }
 
@@ -1435,7 +1435,7 @@ do_error_dialog(char *s1, char *s2, char *s3)
     set_label_string(label_error_three, s3);
     XtManageChild(bulletinBoard_error);
     XBell(display,100);
-	
+
     return(1);
 }
 
@@ -1446,13 +1446,13 @@ do_error_dialog(char *s1, char *s2, char *s3)
 void set_label_string(Widget w, String str)
 {
     XmString xstr;
-    
+
     xstr = XmStringCreateLocalized( str );
-    if ( xstr != NULL ) 
-	XtVaSetValues(w, 
-	    XmNlabelString, xstr, 
+    if ( xstr != NULL )
+	XtVaSetValues(w,
+	    XmNlabelString, xstr,
 	    NULL);
-    else 
+    else
 	XtWarning("Failed to update labelString");
 
     XmStringFree( xstr );
@@ -1483,7 +1483,7 @@ void set_label_multiline_string(Widget w, String str)
 void get_text_string(Widget w, String str)
 {
     char	*str_tmp;
-    
+
     str_tmp = (char *) XmTextGetString(w);
     strcpy(str, str_tmp);
     XtFree(str_tmp);

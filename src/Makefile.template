@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template	5/24/94
 #	$Id$
 #
-#     Copyright (c) 1993-2011 by
+#     Copyright (c) 1993-2013 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -14,75 +14,8 @@
 # Makefile template for MB-system in the src directory
 # Author:	D. W. Caress
 # Date:		January 21, 1993
-# 
+#
 # $Log: Makefile.template,v $
-# Revision 5.5  2009/03/13 07:05:58  caress
-# Release 5.1.2beta02
-#
-# Revision 5.4  2008/12/31 08:47:38  caress
-# Updates towards release 5.1.1
-#
-# Revision 5.3  2007/05/28 17:00:45  caress
-# Removed glw directory - that code is now in mbview
-#
-# Revision 5.2  2007/05/23 16:40:48  caress
-# Added library for Motif OpenGL widget because this library is no longer uniformly available in Xfree86 distributions.
-#
-# Revision 5.1  2003/12/05 07:56:24  caress
-# The script now recognizes mbview when OpenGL libraries are specified.
-#
-# Revision 5.0  2003/08/07 22:36:16  caress
-# Updated copyright date.
-#
-# Revision 4.13  2003/03/10 07:38:51  caress
-# Added mr1pr library
-#
-# Revision 4.12  2002/07/25 19:04:01  caress
-# Release 5.0.beta21
-#
-# Revision 4.11  2000/09/30 07:18:57  caress
-# Snapshot for Dale.
-#
-# Revision 4.10  2000/09/30  05:08:04  caress
-# Snapshot for Dale.
-#
-# Revision 4.9  1999/12/11  04:36:44  caress
-# Moved xgraphics.c to src/xgraphics
-#
-# Revision 4.8  1998/10/05  22:13:31  caress
-# MB-System version 4.6beta
-#
-# Revision 4.7  1997/09/18  13:27:32  caress
-# Removed references to realtime code.
-#
-# Revision 4.6  1997/09/12  18:41:06  caress
-# Added mbrt directory.
-#
-# Revision 4.5  1997/04/21  16:53:02  caress
-# MB-System 4.5 Beta Release.
-#
-# Revision 4.4  1995/09/26  14:37:31  caress
-# Now make clean works for mbvelocitytool.
-# .,
-#
-# Revision 4.4  1995/09/26  14:37:31  caress
-# Now make clean works for mbvelocitytool.
-# .,
-#
-# Revision 4.3  1995/08/07  17:26:55  caress
-# Added mbnavedit.
-#
-# Revision 4.2  1994/11/29  01:39:40  caress
-# Added "-" to make clean calls so rm failures
-# are ignored on SGI's.
-#
-# Revision 4.1  1994/10/21  11:29:42  caress
-# Release V4.0
-#
-# Revision 4.0  1994/05/24  18:33:40  caress
-# First cut.
-#
-#
 #
 
 all:
@@ -101,6 +34,10 @@ all:
 	cd mbvelocitytool; make all
 	cd mbview; make all
 	cd otps; make all
+	cd man; make all
+	cd html; make all
+	cd ps; make all
+	cd share; make all
 
 clean:
 	- cd gsf; make clean
@@ -118,4 +55,7 @@ clean:
 	- cd mbvelocitytool; make clean
 	- cd mbview; make clean
 	- cd otps; make clean
-
+	- cd man; make clean
+	- cd html; make clean
+	- cd ps; make clean
+	- cd share; make clean

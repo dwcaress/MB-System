@@ -2,7 +2,7 @@
  *    The MB-system:	mblevitus.c	4/15/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,20 +13,20 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBLEVITUS generates an average water velocity profile for a 
- * specified location from the Levitus temperature and salinity 
+ * MBLEVITUS generates an average water velocity profile for a
+ * specified location from the Levitus temperature and salinity
  * database.
- * 
+ *
  * The calculation of water sound velocity from salinity and
  * temperature observations proceeds in two steps. The first
  * step is to calculate the pressure as a function of depth
  * and latitude. We use equations from a 1989 book by Coates:
- * * 
+ * *
  * The second step is to calculate the water sound velocity.
- * We use the DelGrosso equation because of the results presented in 
- *    Dusha, Brian D. Worcester, Peter F., Cornuelle, Bruce D., 
- *      Howe, Bruce. M. "On equations for the speed of sound 
- *      in seawater", J. Acoust. Soc. Am., Vol 93, No 1, 
+ * We use the DelGrosso equation because of the results presented in
+ *    Dusha, Brian D. Worcester, Peter F., Cornuelle, Bruce D.,
+ *      Howe, Bruce. M. "On equations for the speed of sound
+ *      in seawater", J. Acoust. Soc. Am., Vol 93, No 1,
  *      January 1993, pp 255-275.
  *
  * Author:	D. W. Caress
@@ -125,8 +125,8 @@
 #include <time.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* global defines */
 #define	NO_DATA	-1000000000.0
@@ -171,7 +171,7 @@ int main (int argc, char **argv)
 	float	salinity[NLEVITUS_MAX][180];
 	float	velocity[NDEPTH_MAX];
 	static float	depth[NDEPTH_MAX] = {
-		    0.,   10.,   20.,   30.,   50., 
+		    0.,   10.,   20.,   30.,   50.,
 		   75.,  100.,  125.,  150.,  200.,
 		  250.,  300.,  400.,  500.,  600.,
 		  700.,  800.,  900., 1000., 1100.,
@@ -201,7 +201,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhR:r:O:o:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -317,7 +317,7 @@ int main (int argc, char **argv)
 	record_size = sizeof(float) * NLEVITUS_MAX * 180;
 	location = ilon*record_size;
 	status = fseek(ifp,location,0);
-	if ((status = fread(&temperature[0][0],1,record_size,ifp)) 
+	if ((status = fread(&temperature[0][0],1,record_size,ifp))
 		== record_size)
 		{
 		status = MB_SUCCESS;
@@ -332,7 +332,7 @@ int main (int argc, char **argv)
 	/* read the salinity */
 	location = location + 360*record_size;
 	status = fseek(ifp,location,0);
-	if ((status = fread(&salinity[0][0],1,record_size,ifp)) 
+	if ((status = fread(&salinity[0][0],1,record_size,ifp))
 		== record_size)
 		{
 		status = MB_SUCCESS;
@@ -373,58 +373,58 @@ int main (int argc, char **argv)
 		/* set counter */
 		nvelocity_tot++;
 
-		/* get pressure for a given depth 
+		/* get pressure for a given depth
 			as a function of latitude */
 		pressure = 1.0052405 * depth[i]
 			* (1.0 + 0.00528 * sin (DTR * latitude)
 			    * sin(DTR * latitude))
 			+ 0.00000236 * depth[i] * depth[i];
 
-		/* calculate water sound speed using 
+		/* calculate water sound speed using
 			DelGrosso equations */
 		/* convert decibar to kg/cm**2 */
-		pressure = pressure * 0.1019716; 
+		pressure = pressure * 0.1019716;
 		c0 = 1402.392;
-		dltact  = temperature[last_good][ilat] 
-			    * ( 5.01109398873 
-			    + temperature[last_good][ilat] 
-			    * (-0.0550946843172 
-			    + temperature[last_good][ilat] 
+		dltact  = temperature[last_good][ilat]
+			    * ( 5.01109398873
+			    + temperature[last_good][ilat]
+			    * (-0.0550946843172
+			    + temperature[last_good][ilat]
 			    * 0.000221535969240));
 		dltacs = salinity[last_good][ilat]
-			    * (1.32952290781 
-			    + salinity[last_good][ilat] 
+			    * (1.32952290781
+			    + salinity[last_good][ilat]
 			    * 0.000128955756844);
-      
-		dltacp = pressure 
-			    * (0.156059257041E0 
-				+ pressure 
+
+		dltacp = pressure
+			    * (0.156059257041E0
+				+ pressure
 				* (0.000024499868841
-				    + pressure 
+				    + pressure
 				    * -0.00000000883392332513));
-		dcstp =  temperature[last_good][ilat] 
+		dcstp =  temperature[last_good][ilat]
 			    * (-0.0127562783426
-				    * salinity[last_good][ilat]      
-				+ pressure 
+				    * salinity[last_good][ilat]
+				+ pressure
 				* ( 0.00635191613389
-				    + pressure 
+				    + pressure
 				    * (0.265484716608E-7
 					* temperature[last_good][ilat]
-					- 0.00000159349479045       
+					- 0.00000159349479045
 					+ 0.522116437235E-9 * pressure)
 				    -0.000000438031096213
-				    * temperature[last_good][ilat] 
-				    * temperature[last_good][ilat] )) 
-			    + salinity[last_good][ilat] 
-			    * (-0.161674495909E-8 
+				    * temperature[last_good][ilat]
+				    * temperature[last_good][ilat] ))
+			    + salinity[last_good][ilat]
+			    * (-0.161674495909E-8
 				* salinity[last_good][ilat]
-				* pressure * pressure 
-				+ temperature[last_good][ilat] 
+				* pressure * pressure
+				+ temperature[last_good][ilat]
 				* (0.0000968403156410
 				    * temperature[last_good][ilat]
-				    + pressure 
+				    + pressure
 				    * ( 0.00000485639620015
-					* salinity[last_good][ilat]      
+					* salinity[last_good][ilat]
 					-0.000340597039004)));
 		velocity[i] = c0 + dltact + dltacs + dltacp + dcstp;
 		}

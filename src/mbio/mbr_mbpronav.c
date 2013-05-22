@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_mbpronav.c	5/20/99
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -82,12 +82,12 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_singlebeam.h"
-#include "../../include/mbf_mbpronav.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_singlebeam.h"
+#include "mbf_mbpronav.h"
 
 /* essential function prototypes */
 int mbr_register_mbpronav(int verbose, void *mbio_ptr,

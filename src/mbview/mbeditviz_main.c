@@ -4,7 +4,7 @@
  *    The MB-system:	mbeditviz_main.c		4/27/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2012 by
+ *    Copyright (c) 2007-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -79,8 +79,8 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 #include <stdlib.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* mbview include file */
 #include "mbview.h"

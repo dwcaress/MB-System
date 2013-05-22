@@ -2,7 +2,7 @@
  *    The MB-system:	mb_fileio.c	5/23/2012
  *    $Id:  $
  *
- *    Copyright (c) 2012-2012 by
+ *    Copyright (c) 2012-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -35,9 +35,9 @@
 #include <stdio.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_io.h"
+#include "mb_define.h"
 
 static char rcs_id[]="$Id: $";
 

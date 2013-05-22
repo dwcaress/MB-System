@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_plot.c	9/26/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2012 by
+ *    Copyright (c) 2003-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -102,8 +102,8 @@
 #include "mb_glwdrawa.h"
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* mbview include */
 #include "mbview.h"
@@ -136,11 +136,11 @@ int mbview_reset_glx(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-		
+
 	/* delete old glx_context if it exists */
 	if (view->glx_init == MB_YES)
 		{
@@ -155,12 +155,12 @@ __FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view
 #endif
 		glXDestroyContext(view->dpy, view->glx_context);
 		view->glx_init = MB_NO;
-	
+
 #ifdef MBV_GET_GLX_ERRORS
 mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 		}
-	
+
 	/* set up a new opengl context */
 	ac = 0;
 	XtSetArg(args[ac], mbGLwNvisualInfo, &(view->vi));
@@ -184,7 +184,7 @@ __FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view
 	view->contourlorez = MB_NO;
 	view->contourhirez = MB_NO;
 	view->contourfullrez = MB_NO;
-	
+
 #ifdef MBV_GET_GLX_ERRORS
 mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
@@ -211,7 +211,7 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 	return(status);
 }
 
-		
+
 /*------------------------------------------------------------------------------*/
 int mbview_drawdata(size_t instance, int rez)
 {
@@ -240,29 +240,29 @@ int mbview_drawdata(size_t instance, int rez)
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* get size of grid in view */
 	nxrange = data->viewbounds[1] - data->viewbounds[0] + 1;
 	nyrange = data->viewbounds[3] - data->viewbounds[2] + 1;
-	
+
 	/* set stride for looping over data */
 	if (rez == MBV_REZ_FULL)
 	    stride = 1;
 	else if (rez == MBV_REZ_HIGH)
-	    stride = MAX((int)ceil(((double)nxrange) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)nyrange) 
+	    stride = MAX((int)ceil(((double)nxrange)
+				/ ((double)data->hirez_dimension)),
+			(int)ceil(((double)nyrange)
 				/ ((double)data->hirez_dimension)));
 	else
-	    stride = MAX((int)ceil(((double)nxrange) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)nyrange) 
+	    stride = MAX((int)ceil(((double)nxrange)
+				/ ((double)data->lorez_dimension)),
+			(int)ceil(((double)nyrange)
 				/ ((double)data->lorez_dimension)));
-	
+
 	/* enable depth test for 3D plots */
 	if (data->display_mode == MBV_DISPLAY_3D
 		|| data->display_projection_mode == MBV_PROJECTION_SPHEROID)
@@ -270,10 +270,10 @@ int mbview_drawdata(size_t instance, int rez)
 #ifdef MBV_GET_GLX_ERRORS
 mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
-		
+
 	/* set color parameters */
 	mbview_setcolorparms(instance);
-	
+
 	/* calculate histogram equalization if needed */
 	make_histogram = MB_NO;
 	use_histogram = MB_NO;
@@ -316,7 +316,7 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		&& data->secondary_histogram == MB_YES
 		&& view->secondary_histogram_set == MB_NO)
 		mbview_make_histogram(view, data, MBV_DATA_SECONDARY);
-	
+
 /*fprintf(stderr,"mbview_drawdata: %d %d stride:%d\n", instance,rez,stride);*/
 
 	/* draw the triangle outlines */
@@ -365,7 +365,7 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		}
 	}
 	*/
-	
+
 	/* draw the triangles */
 	/*glBegin(GL_TRIANGLES);
 	for (i=0;i<data->primary_nx-stride;i+=stride)
@@ -423,21 +423,21 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 				data->primary_z[m]);
 			}
 		} */
-		
+
 	/* check for pending event */
-	
-	/*if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
+
+	/*if (view->plot_done == MB_NO
+		&& view->plot_interrupt_allowed == MB_YES
 		&& i % MBV_EVENTCHECKCOARSENESS == 0)
 		do_mbview_xevents();*/
-		
+
 	/* dump out of loop if plotting already done at a higher recursion */
-	
+
 	/*if (view->plot_done == MB_YES)
 		i = data->primary_nx;
 	}
 	glEnd();*/
-		
+
 	/* draw the data as triangle strips */
 	for (i=data->viewbounds[0];i<data->viewbounds[1]-stride;i+=stride)
 	{
@@ -487,7 +487,7 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 			glVertex3f(data->primary_x[kk],
 				data->primary_y[kk],
 				data->primary_z[kk]);
-/*fprintf(stderr,"Drawing triangles: origin: %f %f %f  pt:%f %f %f\n", 
+/*fprintf(stderr,"Drawing triangles: origin: %f %f %f  pt:%f %f %f\n",
 view->xorigin,view->yorigin,view->zorigin,
 data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
 			}
@@ -552,15 +552,15 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		on = MB_NO;
 		flip = MB_NO;
 		}
-		
+
 	/* check for pending event */
-	if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
+	if (view->plot_done == MB_NO
+		&& view->plot_interrupt_allowed == MB_YES
 		&& i % MBV_EVENTCHECKCOARSENESS == 0)
 		{
 		do_mbview_xevents();
 		}
-		
+
 	/* dump out of loop if plotting already done at a higher recursion */
 	if (view->plot_done == MB_YES)
 		i = data->primary_nx;
@@ -579,38 +579,38 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		else if (rez == MBV_REZ_LOW && view->contourlorez == MB_YES)
 	    		glCallList((GLuint)(3*instance+1));
 		}
-	
+
 #ifdef MBV_GET_GLX_ERRORS
 mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
-		
+
 	/* draw current pick */
 	mbview_drawpick(instance);
-		
+
 	/* draw current area */
 	mbview_drawarea(instance);
-		
+
 	/* draw current region */
 	mbview_drawregion(instance);
 
 	/* draw current navpick */
-	mbview_drawnavpick(instance);		
+	mbview_drawnavpick(instance);
 
 	/* draw sites */
 	mbview_drawsite(instance, rez);
-		
+
 	/* draw routes */
 	mbview_drawroute(instance, rez);
-		
+
 	/* draw nav */
 	mbview_drawnav(instance, rez);
-		
+
 	/* draw vectors */
 	mbview_drawvector(instance, rez);
 
 	/* make sure depth test is off */
 	glDisable(GL_DEPTH_TEST);
-		
+
 	/* set lastdrawrez flag */
 	view->lastdrawrez = rez;
 
@@ -644,7 +644,7 @@ int mbview_plotlowall(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* replot all active instances except for instance
 	  	which should already be replotted */
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
@@ -682,7 +682,7 @@ int mbview_plotlowhighall(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* replot all active instances except for instance
 	  	which should already be replotted */
 	mbview_plotlowall(instance);
@@ -719,7 +719,7 @@ int mbview_plothighall(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* replot all active instances except for instance
 	  	which should already be replotted */
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
@@ -760,20 +760,20 @@ int mbview_plotlow(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only plot if mbview active for this instance */
 	if (data->active == MB_YES)
 	    {
 	    /* set plot_done to MB_NO and increment the plot recursion level */
 	    view->plot_done = MB_NO;
 	    view->plot_recursion++;
-	    
+
 	    status = mbview_plot(instance, MBV_REZ_LOW);
-    
+
 	    /* the plot_done flag will still be MB_NO if this
 	       is the highest recursion level to be reached - finish the plot
 	       only in this case */
@@ -784,10 +784,10 @@ int mbview_plotlow(size_t instance)
 if (mbv_verbose >= 2)
 fprintf(stderr, "Plot finished! instance:%ld recursion:%d\n", instance, view->plot_recursion);
 		    }
-		    
+
 	    /* decrement the plot recursion level */
 	    view->plot_recursion--;
-			    
+
 	    if (view->message_on == MB_YES && view->plot_recursion == 0)
 		    do_mbview_status("Done.", instance);
 if (mbv_verbose >= 2)
@@ -826,11 +826,11 @@ int mbview_plotlowhigh(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only plot if mbview active for this instance */
 	if (data->active == MB_YES)
 	    {
@@ -838,11 +838,11 @@ int mbview_plotlowhigh(size_t instance)
 	    /* set plot_done to MB_NO and increment the plot recursion level */
 	    view->plot_done = MB_NO;
 	    view->plot_recursion++;
-	    
+
 	    status = mbview_plot(instance, MBV_REZ_LOW);
-	    
+
 	    status = mbview_plot(instance, MBV_REZ_HIGH);
-    
+
 	    /* the plot_done flag will still be MB_NO if this
 	       is the highest recursion level to be reached - finish the plot
 	       only in this case */
@@ -853,16 +853,16 @@ int mbview_plotlowhigh(size_t instance)
 if (mbv_verbose >= 2)
 fprintf(stderr, "Plot finished! instance:%ld recursion:%d\n", instance, view->plot_recursion);
 		    }
-		    
+
 	    /* decrement the plot recursion level */
 	    view->plot_recursion--;
-			    
+
 	    if (view->message_on == MB_YES && view->plot_recursion == 0)
 		    do_mbview_status("Done.", instance);
 if (mbv_verbose >= 2)
 fprintf(stderr,"Done with mbview_plotlowhigh %ld  recursion:%d\n\n",instance,view->plot_recursion);
 	    }
-	    
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -894,11 +894,11 @@ int mbview_plothigh(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only plot if mbview active for this instance */
 	if (data->active == MB_YES)
 	    {
@@ -906,9 +906,9 @@ int mbview_plothigh(size_t instance)
 	    /* set plot_done to MB_NO and increment the plot recursion level */
 	    view->plot_done = MB_NO;
 	    view->plot_recursion++;
-	    
+
 	    status = mbview_plot(instance, MBV_REZ_HIGH);
-    
+
 	    /* the plot_done flag will still be MB_NO if this
 	       is the highest recursion level to be reached - finish the plot
 	       only in this case */
@@ -919,10 +919,10 @@ int mbview_plothigh(size_t instance)
 if (mbv_verbose >= 2)
 fprintf(stderr, "Plot finished! instance:%ld recursion:%d\n", instance, view->plot_recursion);
 		    }
-		    
+
 	    /* decrement the plot recursion level */
 	    view->plot_recursion--;
-			    
+
 	    if (view->message_on == MB_YES && view->plot_recursion == 0)
 		    do_mbview_status("Done.", instance);
 if (mbv_verbose >= 2)
@@ -960,11 +960,11 @@ int mbview_plotfull(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only plot if mbview active for this instance */
 	if (data->active == MB_YES)
 	    {
@@ -972,9 +972,9 @@ int mbview_plotfull(size_t instance)
 	    /* set plot_done to MB_NO and increment the plot recursion level */
 	    view->plot_done = MB_NO;
 	    view->plot_recursion++;
-	    
+
 	    status = mbview_plot(instance, MBV_REZ_FULL);
-    
+
 	    /* the plot_done flag will still be MB_NO if this
 	       is the highest recursion level to be reached - finish the plot
 	       only in this case */
@@ -985,16 +985,16 @@ int mbview_plotfull(size_t instance)
 if (mbv_verbose >= 2)
 fprintf(stderr, "Plot finished! instance:%ld recursion:%d\n", instance, view->plot_recursion);
 		    }
-		    
+
 	    /* decrement the plot recursion level */
 	    view->plot_recursion--;
-			    
+
 	    if (view->message_on == MB_YES && view->plot_recursion == 0)
 		    do_mbview_status("Done.", instance);
 if (mbv_verbose >= 2)
 fprintf(stderr,"Done with mbview_plotfull %ld  recursion:%d\n\n",instance,view->plot_recursion);
 	    }
-	    
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1028,15 +1028,15 @@ int mbview_plot(size_t instance, int rez)
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only plot if this view is still active */
 	if (view->glx_init == MB_YES)
 		{
-	
+
 		/* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
 fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
@@ -1100,7 +1100,7 @@ fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
 			mbview_viewbounds(instance);
 			view->viewboundscount = 0;
 
-			/* regenerate 3D drape of pick marks if either 3D display 
+			/* regenerate 3D drape of pick marks if either 3D display
 				or the pick move is final */
 			if (data->pick_type != MBV_PICK_NONE
 				&& data->display_mode == MBV_DISPLAY_3D)
@@ -1121,16 +1121,16 @@ fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
 			view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
 			if (data->display_mode == MBV_DISPLAY_2D)
 				{
-				glOrtho(view->left, 
-					view->right, 
-					view->bottom, 
-					view->top, 
+				glOrtho(view->left,
+					view->right,
+					view->bottom,
+					view->top,
 					MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
 				}
 			else
 				{
-				gluPerspective(40.0, 
-					view->aspect_ratio, 
+				gluPerspective(40.0,
+					view->aspect_ratio,
 					0.01 * MBV_OPENGL_WIDTH,
 					1000 * MBV_OPENGL_WIDTH);
 				}
@@ -1140,23 +1140,23 @@ fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
 			glLoadIdentity();
 			if (data->display_mode == MBV_DISPLAY_2D)
 				{
-				glTranslated (view->offset2d_x, 
-						view->offset2d_y, 
+				glTranslated (view->offset2d_x,
+						view->offset2d_y,
 						MBV_OPENGL_ZMIN2D);
 				}
 			else if (data->display_mode == MBV_DISPLAY_3D)
 				{
-				viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
+				viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH
 						/ view->aspect_ratio;
-				glTranslated (0.0, 0.0, 
+				glTranslated (0.0, 0.0,
 						-viewdistance + view->viewoffset3d_z);
-				glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
-				glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
-				glTranslated (view->offset3d_x, 
-						view->offset3d_y, 
+				glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0);
+				glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0);
+				glTranslated (view->offset3d_x,
+						view->offset3d_y,
 						-viewdistance + view->offset3d_z);
-				glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
-				glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
+				glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0);
+				glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0);
 				}
 
 			/* set background color */
@@ -1223,7 +1223,7 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 
 /*------------------------------------------------------------------------------*/
 int mbview_findpoint(size_t instance, int xpixel, int ypixel,
-			int *found, 
+			int *found,
 			double *xgrid, double *ygrid,
 			double *xlon, double *ylat, double *zdata,
 			double *xdisplay, double *ydisplay, double *zdisplay)
@@ -1253,11 +1253,11 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel,
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only plot if this view is still active */
 	if (view->glx_init == MB_YES)
 		{
@@ -1270,8 +1270,8 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel,
 		ijbounds[2] = 0;
 		ijbounds[3] = data->primary_ny;
 		rez = MBV_REZ_LOW;
-		mbview_findpointrez(instance, rez, xpixel, ypixel, 
-				ijbounds, found, 
+		mbview_findpointrez(instance, rez, xpixel, ypixel,
+				ijbounds, found,
 				xgrid, ygrid,
 				xlon, ylat, zdata,
 				xdisplay, ydisplay, zdisplay);
@@ -1293,9 +1293,9 @@ rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
 
 		/* now check high rez */
 		rez = MBV_REZ_HIGH;
-		mbview_findpointrez(instance, rez, xpixel, ypixel, 
-				ijbounds, found, 
-				xgrid, ygrid, 
+		mbview_findpointrez(instance, rez, xpixel, ypixel,
+				ijbounds, found,
+				xgrid, ygrid,
 				xlon, ylat, zdata,
 				xdisplay, ydisplay, zdisplay);
 		if (*found == MB_NO && foundsave == MB_YES)
@@ -1328,17 +1328,17 @@ rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
 			zdisplaysave = *zdisplay;
 
 			/* choose resolution */
-			if ((ijbounds[1] - ijbounds[0]) 
+			if ((ijbounds[1] - ijbounds[0])
 					> data->hirez_dimension
-				|| (ijbounds[3] - ijbounds[2]) 
+				|| (ijbounds[3] - ijbounds[2])
 					> data->hirez_dimension)
 				rez = MBV_REZ_HIGH;
 			else
 				rez = MBV_REZ_FULL;
 
 			/* try again */
-			mbview_findpointrez(instance, rez, xpixel, ypixel, 
-				ijbounds, found, 
+			mbview_findpointrez(instance, rez, xpixel, ypixel,
+				ijbounds, found,
 				xgrid, ygrid,
 				xlon, ylat, zdata,
 				xdisplay, ydisplay, zdisplay);
@@ -1348,10 +1348,10 @@ rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
 		if (*found == MB_NO && data->display_mode == MBV_DISPLAY_2D)
 			{
 			*xdisplay = view->left - view->offset2d_x
-				+ 2.0 * MBV_OPENGL_WIDTH / view->size2d 
+				+ 2.0 * MBV_OPENGL_WIDTH / view->size2d
 				* ((double)xpixel) / ((double)data->width);
 			*ydisplay = view->bottom - view->offset2d_y
-				+ 2.0 * MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d 
+				+ 2.0 * MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d
 				* ((double)ypixel) / ((double)data->height);
 			*zdisplay = 0.0;
 			mbview_projectdisplay2ll(instance,
@@ -1377,7 +1377,7 @@ rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
 			*zdisplay = zdisplaysave;
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1399,7 +1399,7 @@ rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
 
 /*------------------------------------------------------------------------------*/
 int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel,
-			int ijbounds[4], int *found, 
+			int ijbounds[4], int *found,
 			double *xgrid, double *ygrid,
 			double *xlon, double *ylat, double *zdata,
 			double *xdisplay, double *ydisplay, double *zdisplay)
@@ -1435,28 +1435,28 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel,
 		fprintf(stderr,"dbg2       ijbounds[2]:     %d\n",ijbounds[2]);
 		fprintf(stderr,"dbg2       ijbounds[3]:     %d\n",ijbounds[3]);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only plot if this view is still active */
 	if (view->glx_init == MB_YES)
 		{
-	
+
 		/* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
 fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
 __FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
 #endif
 	glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
-/*fprintf(stderr,"\nmbview_findpointrez: instance:%ld point:%d %d  bounds:%d %d %d %d\n", 
+/*fprintf(stderr,"\nmbview_findpointrez: instance:%ld point:%d %d  bounds:%d %d %d %d\n",
 instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
-	
+
 #ifdef MBV_GET_GLX_ERRORS
 mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
-	
+
 		/* apply projection if needed */
 		if (view->projected == MB_NO)
 			{
@@ -1473,16 +1473,16 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
 		if (data->display_mode == MBV_DISPLAY_2D)
 			{
-			glOrtho(view->left, 
-				view->right, 
-				view->bottom, 
-				view->top, 
+			glOrtho(view->left,
+				view->right,
+				view->bottom,
+				view->top,
 				MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
 			}
 		else
 			{
-			gluPerspective(40.0, 
-				view->aspect_ratio, 
+			gluPerspective(40.0,
+				view->aspect_ratio,
 				0.01 * MBV_OPENGL_WIDTH,
 				1000 * MBV_OPENGL_WIDTH);
 			}
@@ -1492,23 +1492,23 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		glLoadIdentity();
 		if (data->display_mode == MBV_DISPLAY_2D)
 			{
-			glTranslated (view->offset2d_x, 
-					view->offset2d_y, 
+			glTranslated (view->offset2d_x,
+					view->offset2d_y,
 					MBV_OPENGL_ZMIN2D);
 			}
 		else if (data->display_mode == MBV_DISPLAY_3D)
 			{
-			viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
+			viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH
 					/ view->aspect_ratio;
-			glTranslated (0.0, 0.0, 
+			glTranslated (0.0, 0.0,
 					-viewdistance + view->viewoffset3d_z);
-			glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
-			glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
-			glTranslated (view->offset3d_x, 
-					view->offset3d_y, 
+			glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0);
+			glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0);
+			glTranslated (view->offset3d_x,
+					view->offset3d_y,
 					-viewdistance + view->offset3d_z);
-			glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
-			glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
+			glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0);
+			glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0);
 			}
 
 		/* set background color */
@@ -1533,14 +1533,14 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		if (rez == MBV_REZ_FULL)
 		    stride = 1;
 		else if (rez == MBV_REZ_HIGH)
-		    stride = MAX((int)ceil(((double)data->primary_nx) 
-					/ ((double)data->hirez_dimension)), 
-				(int)ceil(((double)data->primary_ny) 
+		    stride = MAX((int)ceil(((double)data->primary_nx)
+					/ ((double)data->hirez_dimension)),
+				(int)ceil(((double)data->primary_ny)
 					/ ((double)data->hirez_dimension)));
 		else
-		    stride = MAX((int)ceil(((double)data->primary_nx) 
-					/ ((double)data->lorez_dimension)), 
-				(int)ceil(((double)data->primary_ny) 
+		    stride = MAX((int)ceil(((double)data->primary_nx)
+					/ ((double)data->lorez_dimension)),
+				(int)ceil(((double)data->primary_ny)
 					/ ((double)data->lorez_dimension)));
 
 		/* get number of grid cells used in picking */
@@ -1549,7 +1549,7 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		npicky = (nj / stride);
 		jpickstride = stride * (int)floor((npicky / MBV_PICK_DIVISION) + 1);
 
-/*fprintf(stderr,"mbview_findpointrez: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n", 
+/*fprintf(stderr,"mbview_findpointrez: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n",
 stride, npickx, npicky, ipickstride, jpickstride);*/
 
 		/* draw the triangles */
@@ -1563,7 +1563,7 @@ stride, npickx, npicky, ipickstride, jpickstride);*/
 			m = i * data->primary_ny + j + stride;
 			n = (i + stride) * data->primary_ny + j + stride;
 
-			rgb[0] = (float)floor(((double)((i - imin) / ipickstride))) 
+			rgb[0] = (float)floor(((double)((i - imin) / ipickstride)))
 					/ (MBV_PICK_DIVISION + 1.0);
 			rgb[1] = (float)floor(((double)((j - jmin) / jpickstride)))
 					/ (MBV_PICK_DIVISION + 1.0);
@@ -1635,39 +1635,39 @@ i,j, rgb[0], rgb[1], rgb[2]);*/
 		glReadBuffer(GL_FRONT);
 
 		/* calculate pick location */
-		if (rgba[0] != 1.0 
-			&& rgba[1] != 1.0 
+		if (rgba[0] != 1.0
+			&& rgba[1] != 1.0
 			&& (rgba[2] > 0.2 && rgba[2] < 0.8))
 			{
 			*found = MB_YES;
 
-			i = imin + ipickstride 
+			i = imin + ipickstride
 					* ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
-			j = jmin + jpickstride 
+			j = jmin + jpickstride
 					* ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
 			k = i * data->primary_ny + j;
 			l = (i + stride) * data->primary_ny + j;
 			m = i * data->primary_ny + j + stride;
 			n = (i + stride) * data->primary_ny + j + stride;
-			if (rint((MBV_PICK_DIVISION + 1.0) * rgba[2]) 
+			if (rint((MBV_PICK_DIVISION + 1.0) * rgba[2])
 				== (MBV_PICK_DIVISION + 1.0) / 4.0)
 				{
-				*xgrid = data->primary_xmin 
+				*xgrid = data->primary_xmin
 						+ (3 * i + stride) * data->primary_dx / 3.0;
-				*ygrid = data->primary_ymin 
+				*ygrid = data->primary_ymin
 						+ (3 * j + stride) * data->primary_dy / 3.0;
-				*zdata = (data->primary_data[k] 
-						+ data->primary_data[l] 
+				*zdata = (data->primary_data[k]
+						+ data->primary_data[l]
 						+ data->primary_data[m]) / 3.0;
 				}
 			else
 				{
-				*xgrid = data->primary_xmin 
+				*xgrid = data->primary_xmin
 						+ (3 * i + 2 * stride) * data->primary_dx / 3.0;
-				*ygrid = data->primary_ymin 
+				*ygrid = data->primary_ymin
 						+ (3 * j + 2 * stride) * data->primary_dy / 3.0;
-				*zdata = (data->primary_data[l] 
-						+ data->primary_data[n] 
+				*zdata = (data->primary_data[l]
+						+ data->primary_data[n]
 						+ data->primary_data[m]) / 3.0;
 				}
 /*fprintf(stderr,"pickrez:%d %d   rgb: %f %f %f %f   i:%d j:%d\n",
@@ -1679,7 +1679,7 @@ xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3], i, j);*/
 						xlon, ylat,
 						xdisplay, ydisplay,zdisplay);
 
-/*fprintf(stderr," pickrez: grid: %f %f %f     lonlat: %f %f display: %f %f %f\n", 
+/*fprintf(stderr," pickrez: grid: %f %f %f     lonlat: %f %f display: %f %f %f\n",
 *xgrid, *ygrid, *zdata, *xlon, *ylat, *xdisplay, *ydisplay, *zdisplay);*/
 
 
@@ -1704,12 +1704,12 @@ xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3], i, j);*/
 /*fprintf(stderr,"pickrez bad pick!!:%d %d   rgba: %f %f %f %f\n",
 xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
 			}
-	
+
 #ifdef MBV_GET_GLX_ERRORS
 mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1765,26 +1765,26 @@ int mbview_viewbounds(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only plot if this view is still active */
 	if (view->glx_init == MB_YES)
 		{
-	
+
 	/* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
 fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
 __FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
-	
+
 #ifdef MBV_GET_GLX_ERRORS
 mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
-	
+
 		/* apply projection if needed */
 		if (view->projected == MB_NO)
 			{
@@ -1797,7 +1797,7 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 			{
 /*fprintf(stderr,"2D GL bounds: %f %f %f %f\n",
 view->left, view->right, view->bottom, view->top);
-fprintf(stderr,"2D GL offsets: %f %f\n", 
+fprintf(stderr,"2D GL offsets: %f %f\n",
 view->offset2d_x, view->offset2d_y);
 fprintf(stderr,"2D primary grid corners: \n");
 i = 0; j = 0; k = i * data->primary_ny + j;
@@ -1814,9 +1814,9 @@ fprintf(stderr,"UR:%f %f\n",
 data->primary_x[k],data->primary_y[k]);*/
 
 			/* set stride for looping over data using rule for low rez plotting */
-			stride = MAX((int)ceil(((double)data->primary_nx) 
-						/ ((double)data->lorez_dimension)), 
-					(int)ceil(((double)data->primary_ny) 
+			stride = MAX((int)ceil(((double)data->primary_nx)
+						/ ((double)data->lorez_dimension)),
+					(int)ceil(((double)data->primary_ny)
 						/ ((double)data->lorez_dimension)));
 
 			/* get 2D view bounds */
@@ -1896,7 +1896,7 @@ data->primary_x[k],data->primary_y[k]);*/
 
 		/* 3D case requires plotting */
 		else
-			{	
+			{
 			/* set projection to 2D or 3D */
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
@@ -1906,16 +1906,16 @@ data->primary_x[k],data->primary_y[k]);*/
 			view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
 			if (data->display_mode == MBV_DISPLAY_2D)
 				{
-				glOrtho(view->left, 
-					view->right, 
-					view->bottom, 
-					view->top, 
+				glOrtho(view->left,
+					view->right,
+					view->bottom,
+					view->top,
 					MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
 				}
 			else
 				{
-				gluPerspective(40.0, 
-					view->aspect_ratio, 
+				gluPerspective(40.0,
+					view->aspect_ratio,
 					0.01 * MBV_OPENGL_WIDTH,
 					1000 * MBV_OPENGL_WIDTH);
 				}
@@ -1925,23 +1925,23 @@ data->primary_x[k],data->primary_y[k]);*/
 			glLoadIdentity();
 			if (data->display_mode == MBV_DISPLAY_2D)
 				{
-				glTranslated (view->offset2d_x, 
-						view->offset2d_y, 
+				glTranslated (view->offset2d_x,
+						view->offset2d_y,
 						MBV_OPENGL_ZMIN2D);
 				}
 			else if (data->display_mode == MBV_DISPLAY_3D)
 				{
-				viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
+				viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH
 						/ view->aspect_ratio;
-				glTranslated (0.0, 0.0, 
+				glTranslated (0.0, 0.0,
 						-viewdistance + view->viewoffset3d_z);
-				glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
-				glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
-				glTranslated (view->offset3d_x, 
-						view->offset3d_y, 
+				glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0);
+				glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0);
+				glTranslated (view->offset3d_x,
+						view->offset3d_y,
 						-viewdistance + view->offset3d_z);
-				glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
-				glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
+				glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0);
+				glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0);
 				}
 
 			/* set background color */
@@ -1955,9 +1955,9 @@ data->primary_x[k],data->primary_y[k]);*/
 				glEnable(GL_DEPTH_TEST);
 
 			/* set stride for looping over data using rule for low rez plotting */
-			stride = MAX((int)ceil(((double)data->primary_nx) 
-						/ ((double)data->lorez_dimension)), 
-					(int)ceil(((double)data->primary_ny) 
+			stride = MAX((int)ceil(((double)data->primary_nx)
+						/ ((double)data->lorez_dimension)),
+					(int)ceil(((double)data->primary_ny)
 						/ ((double)data->lorez_dimension)));
 
 			/* get number of grid cells used in picking */
@@ -1966,7 +1966,7 @@ data->primary_x[k],data->primary_y[k]);*/
 			npicky = (data->primary_ny / stride);
 			jpickstride = stride * (int)floor((npicky / MBV_PICK_DIVISION) + 1);
 
-/*fprintf(stderr,"mbview_viewbounds: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n", 
+/*fprintf(stderr,"mbview_viewbounds: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n",
 stride, npickx, npicky, ipickstride, jpickstride);*/
 
 			/* draw the triangles */
@@ -1980,7 +1980,7 @@ stride, npickx, npicky, ipickstride, jpickstride);*/
 					m = i * data->primary_ny + j + stride;
 					n = (i + stride) * data->primary_ny + j + stride;
 
-					rgb[0] = (float)floor(((double)(i / ipickstride))) 
+					rgb[0] = (float)floor(((double)(i / ipickstride)))
 							/ (MBV_PICK_DIVISION + 1.0);
 					rgb[1] = (float)floor(((double)(j / jpickstride)))
 							/ (MBV_PICK_DIVISION + 1.0);
@@ -2186,11 +2186,11 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg)
 		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
 		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only plot if this view is still active */
 	if (view->glx_init == MB_YES)
 		{
@@ -2231,7 +2231,7 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg)
 			{
 			fprintf(stderr,"dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n",
 				i, seg->lspoints[i].xgrid, seg->lspoints[i].ygrid,  seg->lspoints[i].zdata,
-				 seg->lspoints[i].xlon, seg->lspoints[i].ylat, 
+				 seg->lspoints[i].xlon, seg->lspoints[i].ylat,
 				 seg->lspoints[i].xdisplay, seg->lspoints[i].ydisplay,
 				 seg->lspoints[i].zdisplay);
 			}
@@ -2259,7 +2259,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	double	segbearing, dsegbearing, segdist, dsegdist;
 	int	done;
 	int	i, j, icnt;
-	
+
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2281,14 +2281,14 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
 		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* reset done flag */
 	done = MB_NO;
-	
+
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID
 		&& view->sphere_refx == 0.0
@@ -2303,27 +2303,27 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		global = MB_NO;
 		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET;
 		}
-		
-	/* get half characteristic distance between grid points 
+
+	/* get half characteristic distance between grid points
 		from center of primary grid */
 	i = data->primary_nx / 2;
 	j = data->primary_ny / 2;
-	mbview_projectgrid2ll(instance, 
-				(double)(data->primary_xmin + i * data->primary_dx), 
-				(double)(data->primary_ymin + j * data->primary_dy), 
+	mbview_projectgrid2ll(instance,
+				(double)(data->primary_xmin + i * data->primary_dx),
+				(double)(data->primary_ymin + j * data->primary_dy),
 				&xlon1, &ylat1);
 	mbview_projectgrid2ll(instance,
- 				(double)(data->primary_xmin + (i + 1) * data->primary_dx), 
-				(double)(data->primary_ymin + (j + 1) * data->primary_dy), 
+ 				(double)(data->primary_xmin + (i + 1) * data->primary_dx),
+				(double)(data->primary_ymin + (j + 1) * data->primary_dy),
 				&xlon2, &ylat2);
-	mbview_greatcircle_distbearing(instance, 
-			xlon1, ylat1, xlon2, ylat2, 
+	mbview_greatcircle_distbearing(instance,
+			xlon1, ylat1, xlon2, ylat2,
 			&dsegbearing, &dsegdist);
-	
+
 	/* get number of preliminary points along the segment */
-	mbview_greatcircle_distbearing(instance, 
-			seg->endpoints[0].xlon, seg->endpoints[0].ylat, 
-			seg->endpoints[1].xlon, seg->endpoints[1].ylat, 
+	mbview_greatcircle_distbearing(instance,
+			seg->endpoints[0].xlon, seg->endpoints[0].ylat,
+			seg->endpoints[1].xlon, seg->endpoints[1].ylat,
 			&segbearing, &segdist);
 	nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
 
@@ -2334,7 +2334,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		seg->nls = 0;
 		seg->nls_alloc = 0;
 		}
-	
+
 	/* get the points along the great circle arc */
 	else
 		{
@@ -2353,7 +2353,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 			seg->nls = 0;
 			}
 		}
-		
+
 	/* now calculate points along great circle arc */
 	if (seg->nls_alloc > 1 && done == MB_NO)
 		{
@@ -2369,18 +2369,18 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		for (i=1;i<nsegpoint-1;i++)
 			{
 			mbview_greatcircle_endposition(instance,
-							seg->lspoints[0].xlon, 
-							seg->lspoints[0].ylat, 
-							segbearing, 
+							seg->lspoints[0].xlon,
+							seg->lspoints[0].ylat,
+							segbearing,
 							(double)(i * dsegdist),
-							&(seg->lspoints[seg->nls].xlon), 
-							&(seg->lspoints[seg->nls].ylat)), 
+							&(seg->lspoints[seg->nls].xlon),
+							&(seg->lspoints[seg->nls].ylat)),
 			status = mbview_projectll2xyzgrid(instance,
-							seg->lspoints[seg->nls].xlon, 
-							seg->lspoints[seg->nls].ylat, 
-							&(seg->lspoints[seg->nls].xgrid), 
-							&(seg->lspoints[seg->nls].ygrid), 
-							&(seg->lspoints[seg->nls].zdata)); 
+							seg->lspoints[seg->nls].xlon,
+							seg->lspoints[seg->nls].ylat,
+							&(seg->lspoints[seg->nls].xgrid),
+							&(seg->lspoints[seg->nls].ygrid),
+							&(seg->lspoints[seg->nls].zdata));
 			if (status == MB_SUCCESS)
 				{
 				seg->nls++;
@@ -2393,13 +2393,13 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		seg->lspoints[seg->nls].zdata = seg->endpoints[1].zdata;
 		seg->lspoints[seg->nls].xlon = seg->endpoints[1].xlon;
 		seg->lspoints[seg->nls].ylat = seg->endpoints[1].ylat;
-		seg->nls++;			
+		seg->nls++;
 
 		/* now calculate rest of point values */
 		for (icnt=0;icnt<seg->nls;icnt++)
 			{
 			mbview_projectll2display(instance,
-				seg->lspoints[icnt].xlon, 
+				seg->lspoints[icnt].xlon,
 				seg->lspoints[icnt].ylat,
 				seg->lspoints[icnt].zdata,
 				&(seg->lspoints[icnt].xdisplay),
@@ -2411,14 +2411,14 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 				}
 			else if (global == MB_YES)
 				{
-				seg->lspoints[icnt].xdisplay 
-					+= seg->lspoints[icnt].xdisplay 
+				seg->lspoints[icnt].xdisplay
+					+= seg->lspoints[icnt].xdisplay
 						* offset_factor;
-				seg->lspoints[icnt].ydisplay 
-					+= seg->lspoints[icnt].ydisplay 
+				seg->lspoints[icnt].ydisplay
+					+= seg->lspoints[icnt].ydisplay
 						* offset_factor;
-				seg->lspoints[icnt].zdisplay 
-					+= seg->lspoints[icnt].zdisplay 
+				seg->lspoints[icnt].zdisplay
+					+= seg->lspoints[icnt].zdisplay
 						* offset_factor;
 				}
 			else
@@ -2427,7 +2427,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 				}
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -2451,7 +2451,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 			{
 			fprintf(stderr,"dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n",
 				i, seg->lspoints[i].xgrid, seg->lspoints[i].ygrid,  seg->lspoints[i].zdata,
-				 seg->lspoints[i].xlon, seg->lspoints[i].ylat, 
+				 seg->lspoints[i].xlon, seg->lspoints[i].ylat,
 				 seg->lspoints[i].xdisplay, seg->lspoints[i].ydisplay,
 				 seg->lspoints[i].zdisplay);
 			}
@@ -2496,14 +2496,14 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid);
 		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* reset done flag */
 	done = MB_NO;
-	
+
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID
 		&& view->sphere_refx == 0.0
@@ -2518,7 +2518,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 		global = MB_NO;
 		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET;
 		}
-	
+
 	/* figure out how many points to calculate along the segment */
 	istart = (int)((seg->endpoints[0].xgrid - data->primary_xmin)
 			/ data->primary_dx);
@@ -2528,14 +2528,14 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 			/ data->primary_dy);
 	jend = (int)((seg->endpoints[1].ygrid - data->primary_ymin)
 			/ data->primary_dy);
-			
+
 	/* no need to fill in if the segment doesn't cross grid boundaries */
 	if (istart == iend && jstart == jend)
 		{
 		done = MB_YES;
 		seg->nls = 0;
 		}
-		
+
 	/* else allocate space for the array of points */
 	else
 		{
@@ -2577,21 +2577,21 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 				}
 			}
 		}
-		
+
 	/* if points needed and space allocated do it */
 	if (done == MB_NO && ni + nj > 0)
-		{		
+		{
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid = seg->endpoints[0].xgrid;
 		seg->lspoints[seg->nls].ygrid = seg->endpoints[0].ygrid;
 		seg->lspoints[seg->nls].zdata = seg->endpoints[0].zdata;
 		seg->nls++;
-		
+
 		/* get line equation */
-		if (ni > 0 && seg->endpoints[1].xgrid != seg->endpoints[0].xgrid) 
+		if (ni > 0 && seg->endpoints[1].xgrid != seg->endpoints[0].xgrid)
 			{
-			mm = (seg->endpoints[1].ygrid - seg->endpoints[0].ygrid) 
+			mm = (seg->endpoints[1].ygrid - seg->endpoints[0].ygrid)
 				/ (seg->endpoints[1].xgrid - seg->endpoints[0].xgrid);
 			bb = seg->endpoints[0].ygrid - mm * seg->endpoints[0].xgrid;
 			}
@@ -2614,12 +2614,12 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 				{
 				/* interpolate zdata */
 				zdata = data->primary_data[k]
-					+ (ygrid - data->primary_ymin 
+					+ (ygrid - data->primary_ymin
 							- j * data->primary_dy)
 						/ data->primary_dy
-						* (data->primary_data[l] 
+						* (data->primary_data[l]
 							- data->primary_data[k]);
-						
+
 				/* add point to list */
 				seg->lspoints[seg->nls].xgrid = xgrid;
 				seg->lspoints[seg->nls].ygrid = ygrid;
@@ -2633,11 +2633,11 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 		seg->lspoints[seg->nls].ygrid = seg->endpoints[1].ygrid;
 		seg->lspoints[seg->nls].zdata = seg->endpoints[1].zdata;
 		seg->nls++;
-		
+
 		/* get line equation */
-		if (nj > 0 && seg->endpoints[1].ygrid != seg->endpoints[0].ygrid) 
+		if (nj > 0 && seg->endpoints[1].ygrid != seg->endpoints[0].ygrid)
 			{
-			mm = (seg->endpoints[1].xgrid - seg->endpoints[0].xgrid) 
+			mm = (seg->endpoints[1].xgrid - seg->endpoints[0].xgrid)
 				/ (seg->endpoints[1].ygrid - seg->endpoints[0].ygrid);
 			bb = seg->endpoints[0].xgrid - mm * seg->endpoints[0].ygrid;
 			}
@@ -2660,12 +2660,12 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 				{
 				/* interpolate zdata */
 				zdata = data->primary_data[k]
-					+ (xgrid - data->primary_xmin 
+					+ (xgrid - data->primary_xmin
 							- i * data->primary_dx)
 						/ data->primary_dx
-						* (data->primary_data[l] 
+						* (data->primary_data[l]
 							- data->primary_data[k]);
-				
+
 				/* insert point into list */
 				found = MB_NO;
 				done = MB_NO;
@@ -2736,12 +2736,12 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 					}
 				}
 			}
-			
+
 		/* now calculate rest of point values */
 		for (icnt=0;icnt<seg->nls;icnt++)
 			{
 			mbview_projectforward(instance, MB_YES,
-				seg->lspoints[icnt].xgrid, 
+				seg->lspoints[icnt].xgrid,
 				seg->lspoints[icnt].ygrid,
 				seg->lspoints[icnt].zdata,
 				&(seg->lspoints[icnt].xlon),
@@ -2755,14 +2755,14 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 				}
 			else if (global == MB_YES)
 				{
-				seg->lspoints[icnt].xdisplay 
-					+= seg->lspoints[icnt].xdisplay 
+				seg->lspoints[icnt].xdisplay
+					+= seg->lspoints[icnt].xdisplay
 						* offset_factor;
-				seg->lspoints[icnt].ydisplay 
-					+= seg->lspoints[icnt].ydisplay 
+				seg->lspoints[icnt].ydisplay
+					+= seg->lspoints[icnt].ydisplay
 						* offset_factor;
-				seg->lspoints[icnt].zdisplay 
-					+= seg->lspoints[icnt].zdisplay 
+				seg->lspoints[icnt].zdisplay
+					+= seg->lspoints[icnt].zdisplay
 						* offset_factor;
 				}
 			else
@@ -2771,7 +2771,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 				}
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -2786,7 +2786,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 			{
 			fprintf(stderr,"dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n",
 				i, seg->lspoints[i].xgrid, seg->lspoints[i].ygrid,  seg->lspoints[i].zdata,
-				 seg->lspoints[i].xlon, seg->lspoints[i].ylat, 
+				 seg->lspoints[i].xlon, seg->lspoints[i].ylat,
 				 seg->lspoints[i].xdisplay, seg->lspoints[i].ydisplay,
 				 seg->lspoints[i].zdisplay);
 			}
@@ -2827,7 +2827,7 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
 		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -2837,13 +2837,13 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 		{
 		status = mbview_drapesegmentw_gc(instance, seg);
 		}
-		
+
 	/* else project on straight lines in grid projection */
 	else
 		{
 		status = mbview_drapesegmentw_grid(instance, seg);
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -2866,12 +2866,12 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 		for (i=0;i<seg->nls;i++)
 			{
 			fprintf(stderr,"dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n",
-				i, seg->lspoints[i].xgrid[instance], 
-				seg->lspoints[i].ygrid[instance],  
+				i, seg->lspoints[i].xgrid[instance],
+				seg->lspoints[i].ygrid[instance],
 				seg->lspoints[i].zdata,
-				seg->lspoints[i].xlon, 
-				seg->lspoints[i].ylat, 
-				seg->lspoints[i].xdisplay[instance], 
+				seg->lspoints[i].xlon,
+				seg->lspoints[i].ylat,
+				seg->lspoints[i].xdisplay[instance],
 				seg->lspoints[i].ydisplay[instance],
 				seg->lspoints[i].zdisplay[instance]);
 			}
@@ -2899,7 +2899,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	double	segbearing, dsegbearing, segdist, dsegdist;
 	int	done;
 	int	i, j, icnt;
-	
+
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2921,14 +2921,14 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
 		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* reset done flag */
 	done = MB_NO;
-	
+
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID
 		&& view->sphere_refx == 0.0
@@ -2943,27 +2943,27 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		global = MB_NO;
 		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET;
 		}
-		
-	/* get half characteristic distance between grid points 
+
+	/* get half characteristic distance between grid points
 		from center of primary grid */
 	i = data->primary_nx / 2;
 	j = data->primary_ny / 2;
-	mbview_projectgrid2ll(instance, 
-				(double)(data->primary_xmin + i * data->primary_dx), 
-				(double)(data->primary_ymin + j * data->primary_dy), 
+	mbview_projectgrid2ll(instance,
+				(double)(data->primary_xmin + i * data->primary_dx),
+				(double)(data->primary_ymin + j * data->primary_dy),
 				&xlon1, &ylat1);
 	mbview_projectgrid2ll(instance,
- 				(double)(data->primary_xmin + (i + 1) * data->primary_dx), 
-				(double)(data->primary_ymin + (j + 1) * data->primary_dy), 
+ 				(double)(data->primary_xmin + (i + 1) * data->primary_dx),
+				(double)(data->primary_ymin + (j + 1) * data->primary_dy),
 				&xlon2, &ylat2);
-	mbview_greatcircle_distbearing(instance, 
-			xlon1, ylat1, xlon2, ylat2, 
+	mbview_greatcircle_distbearing(instance,
+			xlon1, ylat1, xlon2, ylat2,
 			&dsegbearing, &dsegdist);
-	
+
 	/* get number of preliminary points along the segment */
-	mbview_greatcircle_distbearing(instance, 
-			seg->endpoints[0].xlon, seg->endpoints[0].ylat, 
-			seg->endpoints[1].xlon, seg->endpoints[1].ylat, 
+	mbview_greatcircle_distbearing(instance,
+			seg->endpoints[0].xlon, seg->endpoints[0].ylat,
+			seg->endpoints[1].xlon, seg->endpoints[1].ylat,
 			&segbearing, &segdist);
 	nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
 
@@ -2974,7 +2974,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		seg->nls = 0;
 		seg->nls_alloc = 0;
 		}
-	
+
 	/* get the points along the great circle arc */
 	else
 		{
@@ -2993,7 +2993,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 			seg->nls = 0;
 			}
 		}
-		
+
 	/* now calculate points along great circle arc */
 	if (seg->nls_alloc > 1 && done == MB_NO)
 		{
@@ -3009,18 +3009,18 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		for (i=1;i<nsegpoint-1;i++)
 			{
 			mbview_greatcircle_endposition(instance,
-							seg->lspoints[0].xlon, 
-							seg->lspoints[0].ylat, 
-							segbearing, 
+							seg->lspoints[0].xlon,
+							seg->lspoints[0].ylat,
+							segbearing,
 							(double)(i * dsegdist),
-							&(seg->lspoints[seg->nls].xlon), 
-							&(seg->lspoints[seg->nls].ylat)), 
+							&(seg->lspoints[seg->nls].xlon),
+							&(seg->lspoints[seg->nls].ylat)),
 			status = mbview_projectll2xyzgrid(instance,
-							seg->lspoints[seg->nls].xlon, 
-							seg->lspoints[seg->nls].ylat, 
-							&(seg->lspoints[seg->nls].xgrid[instance]), 
-							&(seg->lspoints[seg->nls].ygrid[instance]), 
-							&(seg->lspoints[seg->nls].zdata)); 
+							seg->lspoints[seg->nls].xlon,
+							seg->lspoints[seg->nls].ylat,
+							&(seg->lspoints[seg->nls].xgrid[instance]),
+							&(seg->lspoints[seg->nls].ygrid[instance]),
+							&(seg->lspoints[seg->nls].zdata));
 			if (status == MB_SUCCESS)
 				{
 				seg->nls++;
@@ -3033,13 +3033,13 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		seg->lspoints[seg->nls].zdata = seg->endpoints[1].zdata;
 		seg->lspoints[seg->nls].xlon = seg->endpoints[1].xlon;
 		seg->lspoints[seg->nls].ylat = seg->endpoints[1].ylat;
-		seg->nls++;			
+		seg->nls++;
 
 		/* now calculate rest of point values */
 		for (icnt=0;icnt<seg->nls;icnt++)
 			{
 			mbview_projectll2display(instance,
-				seg->lspoints[icnt].xlon, 
+				seg->lspoints[icnt].xlon,
 				seg->lspoints[icnt].ylat,
 				seg->lspoints[icnt].zdata,
 				&(seg->lspoints[icnt].xdisplay[instance]),
@@ -3051,14 +3051,14 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 				}
 			else if (global == MB_YES)
 				{
-				seg->lspoints[icnt].xdisplay[instance] 
-					+= seg->lspoints[icnt].xdisplay[instance] 
+				seg->lspoints[icnt].xdisplay[instance]
+					+= seg->lspoints[icnt].xdisplay[instance]
 						* offset_factor;
-				seg->lspoints[icnt].ydisplay[instance] 
-					+= seg->lspoints[icnt].ydisplay[instance] 
+				seg->lspoints[icnt].ydisplay[instance]
+					+= seg->lspoints[icnt].ydisplay[instance]
 						* offset_factor;
-				seg->lspoints[icnt].zdisplay[instance] 
-					+= seg->lspoints[icnt].zdisplay[instance] 
+				seg->lspoints[icnt].zdisplay[instance]
+					+= seg->lspoints[icnt].zdisplay[instance]
 						* offset_factor;
 				}
 			else
@@ -3067,7 +3067,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 				}
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -3090,12 +3090,12 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		for (i=0;i<seg->nls;i++)
 			{
 			fprintf(stderr,"dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n",
-				i, seg->lspoints[i].xgrid[instance], 
-				seg->lspoints[i].ygrid[instance],  
+				i, seg->lspoints[i].xgrid[instance],
+				seg->lspoints[i].ygrid[instance],
 				seg->lspoints[i].zdata,
-				seg->lspoints[i].xlon, 
-				seg->lspoints[i].ylat, 
-				seg->lspoints[i].xdisplay[instance], 
+				seg->lspoints[i].xlon,
+				seg->lspoints[i].ylat,
+				seg->lspoints[i].xdisplay[instance],
 				seg->lspoints[i].ydisplay[instance],
 				seg->lspoints[i].zdisplay[instance]);
 			}
@@ -3124,7 +3124,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	int	global;
 	double	offset_factor;
 	int	i, j, k, l, ii, icnt, jcnt;
-	
+
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -3141,14 +3141,14 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid[instance]);
 		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid[instance]);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* reset done flag */
 	done = MB_NO;
-	
+
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID
 		&& view->sphere_refx == 0.0
@@ -3163,7 +3163,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		global = MB_NO;
 		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET;
 		}
-	
+
 	/* figure out how many points to calculate along the segment */
 	xgridstart = seg->endpoints[0].xgrid[instance];
 	xgridend = seg->endpoints[1].xgrid[instance];
@@ -3188,14 +3188,14 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 /* fprintf(stderr,"mbview_drapesegmentw_grid: xgridstart:%f xgridend:%f ygridstart:%f ygridend:%f\n",
 xgridstart,xgridend,ygridstart,ygridend);
 fprintf(stderr,"mbview_drapesegmentw_grid: istart:%d iend:%d jstart:%d jend:%d\n",istart,iend,jstart,jend);*/
-			
+
 	/* no need to fill in if the segment doesn't cross grid boundaries */
 	if (istart == iend && jstart == jend)
 		{
 		done = MB_YES;
 		seg->nls = 0;
 		}
-		
+
 	/* else allocate space for the array of points */
 	else
 		{
@@ -3239,21 +3239,21 @@ fprintf(stderr,"mbview_drapesegmentw_grid: istart:%d iend:%d jstart:%d jend:%d\n
 		}
 /*fprintf(stderr,"mbview_drapesegmentw_grid: ni:%d nj:%d iadd:%d istart:%d iend:%d jadd:%d jstart:%d jend:%d\n",
 ni,nj,iadd,istart,iend,jadd,jstart,jend);*/
-		
+
 	/* if points needed and space allocated do it */
 	if (done == MB_NO && ni + nj > 0)
-		{		
+		{
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[0].xgrid[instance];
 		seg->lspoints[seg->nls].ygrid[instance] = seg->endpoints[0].ygrid[instance];
 		seg->lspoints[seg->nls].zdata = seg->endpoints[0].zdata;
 		seg->nls++;
-		
+
 		/* get line equation */
-		if (ni > 0 && seg->endpoints[1].xgrid[instance] != seg->endpoints[0].xgrid[instance]) 
+		if (ni > 0 && seg->endpoints[1].xgrid[instance] != seg->endpoints[0].xgrid[instance])
 			{
-			mm = (seg->endpoints[1].ygrid[instance] - seg->endpoints[0].ygrid[instance]) 
+			mm = (seg->endpoints[1].ygrid[instance] - seg->endpoints[0].ygrid[instance])
 				/ (seg->endpoints[1].xgrid[instance] - seg->endpoints[0].xgrid[instance]);
 			bb = seg->endpoints[0].ygrid[instance] - mm * seg->endpoints[0].xgrid[instance];
 			}
@@ -3275,12 +3275,12 @@ ni,nj,iadd,istart,iend,jadd,jstart,jend);*/
 				{
 				/* interpolate zdata */
 				zdata = data->primary_data[k]
-					+ (ygrid - data->primary_ymin 
+					+ (ygrid - data->primary_ymin
 							- j * data->primary_dy)
 						/ data->primary_dy
-						* (data->primary_data[l] 
+						* (data->primary_data[l]
 							- data->primary_data[k]);
-						
+
 				/* add point to list */
 				seg->lspoints[seg->nls].xgrid[instance] = xgrid;
 				seg->lspoints[seg->nls].ygrid[instance] = ygrid;
@@ -3296,11 +3296,11 @@ seg->nls,icnt,i,j,k,l,xgrid,ygrid,zdata);*/
 		seg->lspoints[seg->nls].ygrid[instance] = seg->endpoints[1].ygrid[instance];
 		seg->lspoints[seg->nls].zdata = seg->endpoints[1].zdata;
 		seg->nls++;
-		
+
 		/* get line equation */
-		if (nj > 0 && seg->endpoints[1].ygrid[instance] != seg->endpoints[0].ygrid[instance]) 
+		if (nj > 0 && seg->endpoints[1].ygrid[instance] != seg->endpoints[0].ygrid[instance])
 			{
-			mm = (seg->endpoints[1].xgrid[instance] - seg->endpoints[0].xgrid[instance]) 
+			mm = (seg->endpoints[1].xgrid[instance] - seg->endpoints[0].xgrid[instance])
 				/ (seg->endpoints[1].ygrid[instance] - seg->endpoints[0].ygrid[instance]);
 			bb = seg->endpoints[0].xgrid[instance] - mm * seg->endpoints[0].ygrid[instance];
 			}
@@ -3323,12 +3323,12 @@ seg->nls,icnt,i,j,k,l,xgrid,ygrid,zdata);*/
 				{
 				/* interpolate zdata */
 				zdata = data->primary_data[k]
-					+ (xgrid - data->primary_xmin 
+					+ (xgrid - data->primary_xmin
 							- i * data->primary_dx)
 						/ data->primary_dx
-						* (data->primary_data[l] 
+						* (data->primary_data[l]
 							- data->primary_data[k]);
-				
+
 				/* insert point into list */
 				found = MB_NO;
 				done = MB_NO;
@@ -3411,12 +3411,12 @@ seg->nls,jcnt,insert,jadd,i,j,k,l,xgrid,ygrid,zdata);*/
 					insert = seg->nls - 1;
 				}
 			}
-			
+
 		/* now calculate rest of point values */
 		for (icnt=0;icnt<seg->nls;icnt++)
 			{
 			mbview_projectforward(instance, MB_YES,
-				seg->lspoints[icnt].xgrid[instance], 
+				seg->lspoints[icnt].xgrid[instance],
 				seg->lspoints[icnt].ygrid[instance],
 				seg->lspoints[icnt].zdata,
 				&(seg->lspoints[icnt].xlon),
@@ -3430,14 +3430,14 @@ seg->nls,jcnt,insert,jadd,i,j,k,l,xgrid,ygrid,zdata);*/
 				}
 			else if (global == MB_YES)
 				{
-				seg->lspoints[icnt].xdisplay[instance] 
-					+= seg->lspoints[icnt].xdisplay[instance] 
+				seg->lspoints[icnt].xdisplay[instance]
+					+= seg->lspoints[icnt].xdisplay[instance]
 						* offset_factor;
-				seg->lspoints[icnt].ydisplay[instance] 
-					+= seg->lspoints[icnt].ydisplay[instance] 
+				seg->lspoints[icnt].ydisplay[instance]
+					+= seg->lspoints[icnt].ydisplay[instance]
 						* offset_factor;
-				seg->lspoints[icnt].zdisplay[instance] 
-					+= seg->lspoints[icnt].zdisplay[instance] 
+				seg->lspoints[icnt].zdisplay[instance]
+					+= seg->lspoints[icnt].zdisplay[instance]
 						* offset_factor;
 				}
 			else
@@ -3446,7 +3446,7 @@ seg->nls,jcnt,insert,jadd,i,j,k,l,xgrid,ygrid,zdata);*/
 				}
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -3460,12 +3460,12 @@ seg->nls,jcnt,insert,jadd,i,j,k,l,xgrid,ygrid,zdata);*/
 		for (i=0;i<seg->nls;i++)
 			{
 			fprintf(stderr,"dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n",
-				i, seg->lspoints[i].xgrid[instance], 
-				seg->lspoints[i].ygrid[instance],  
-				seg->lspoints[i].zdata, 
-				seg->lspoints[i].xlon, 
-				seg->lspoints[i].ylat, 
-				seg->lspoints[i].xdisplay[instance], 
+				i, seg->lspoints[i].xgrid[instance],
+				seg->lspoints[i].ygrid[instance],
+				seg->lspoints[i].zdata,
+				seg->lspoints[i].xlon,
+				seg->lspoints[i].ylat,
+				seg->lspoints[i].xdisplay[instance],
 				seg->lspoints[i].ydisplay[instance],
 				seg->lspoints[i].zdisplay[instance]);
 			}
@@ -3498,14 +3498,14 @@ int mbview_glerrorcheck(size_t instance, char *sourcefile, int line, char *sourc
 		fprintf(stderr,"dbg2       line:             %d\n",line);
 		fprintf(stderr,"dbg2       sourcefunction:   %s\n",sourcefunction);
 		}
-	
+
 	/* check for OpenGL error if MBV_GET_GLX_ERRORS set */
 	gl_error = (GLenum)glGetError();
 	gl_error_msg = (GLubyte *)gluErrorString(gl_error);
 	if (gl_error != GL_NO_ERROR)
-		fprintf(stderr,"GLerror: Instance:%lu %s:%d Function %s: OpenGL error: %s\n", 
+		fprintf(stderr,"GLerror: Instance:%lu %s:%d Function %s: OpenGL error: %s\n",
 			instance, sourcefile, line, sourcefunction, gl_error_msg);
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{

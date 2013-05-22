@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_sbsiolsi.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_sbsiolsi.h defines the data structure used by MBIO functions
- * to store multibeam data read from the  MBF_SBSIOLSI format (MBIO id 13).  
+ * to store multibeam data read from the  MBF_SBSIOLSI format (MBIO id 13).
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
@@ -70,13 +70,13 @@
  *      consist of Sea Beam data collected on the R/V Thomas Washington.
  *   2. This data format is no longer in use and is supported only to
  *      provide a means of dealing with a few old data tapes.
- *   3. The data consist of 100 byte records consisting entirely of 
+ *   3. The data consist of 100 byte records consisting entirely of
  *      2-byte integers.
  *   4. The 16 depth values are stored centered in 19 value arrays.  The
  *      center beam is in word 10 of the depth and distance arrays.
  *   5. Comments can be embedded in the data as 100 byte ascii strings,
  *	where the first two characters must always be "cc" so that the
- *      first depth value is 25443.  
+ *      first depth value is 25443.
  *   6. Information on this format was obtained by deciphering some
  *      old data tapes; there could be more to know about this format,
  *      but its probably not worth worrying about.
@@ -85,7 +85,7 @@
  * mbf_sbsiolsi_data_struct structure holds data (kind = 1) or an
  * ascii comment record (kind = 2).
  *
- * The mbf_sbsiolsi_data_struct structure is a direct representation  
+ * The mbf_sbsiolsi_data_struct structure is a direct representation
  * of the binary data structure used in the MBF_SBSIOLSI format.
  */
 
@@ -98,7 +98,7 @@ struct mbf_sbsiolsi_data_struct
 	short	axis;		/* navigation error ellipse major axis angle */
 	short	major;		/* navigation error ellipse major axis */
 	short	minor;		/* navigation error ellipse minor axis */
-	unsigned short	sbhdg;	/* Sea Beam gyro heading 
+	unsigned short	sbhdg;	/* Sea Beam gyro heading
 					0 = 0 degrees
 					1 = 0.0055 degrees
 					16384 = 90 degrees

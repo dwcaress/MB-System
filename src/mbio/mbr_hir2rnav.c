@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hir2rnav.c	5/20/99
  *	$Id: mbr_hir2rnav.c 1829 2010-02-05 02:53:39Z caress $
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -35,34 +35,34 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_singlebeam.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_singlebeam.h"
 
 /* essential function prototypes */
-int mbr_register_hir2rnav(int verbose, void *mbio_ptr, 
+int mbr_register_hir2rnav(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_hir2rnav(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_hir2rnav(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_hir2rnav(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_hir2rnav(int verbose, void *mbio_ptr, int *error);
@@ -93,54 +93,54 @@ int mbr_register_hir2rnav(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hir2rnav(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_hir2rnav(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_hir2rnav;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_hir2rnav; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_singlebeam_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_singlebeam_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_hir2rnav; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_hir2rnav; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_singlebeam_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_singlebeam_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_singlebeam_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_singlebeam_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_singlebeam_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_singlebeam_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_singlebeam_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_singlebeam_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_singlebeam_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_hir2rnav;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_singlebeam_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_singlebeam_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_hir2rnav;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_hir2rnav;
+	mb_io_ptr->mb_io_dimensions = &mbsys_singlebeam_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_singlebeam_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_singlebeam_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_singlebeam_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_singlebeam_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_singlebeam_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_singlebeam_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_singlebeam_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_singlebeam_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -188,25 +188,25 @@ int mbr_register_hir2rnav(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_hir2rnav(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_hir2rnav(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_hir2rnav";
@@ -247,7 +247,7 @@ int mbr_info_hir2rnav(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -301,7 +301,7 @@ int mbr_alm_hir2rnav(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
 	status = mbsys_singlebeam_alloc(verbose, mbio_ptr, &(mb_io_ptr->store_data), error);
-	
+
 	/* set number of records read or written to zero */
 	mb_io_ptr->save1 = 0;
 
@@ -381,17 +381,17 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* get pointers to mbio descriptor and data structure */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store = (struct mbsys_singlebeam_struct *) store_ptr;
-	
+
 	/* get pointer to read counter */
 	read_count = (int *) &mb_io_ptr->save1;
-	    
+
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next record */
-	if ((line_ptr = fgets(line, MB_PATH_MAXLINE, 
-			mb_io_ptr->mbfp)) != NULL) 
+	if ((line_ptr = fgets(line, MB_PATH_MAXLINE,
+			mb_io_ptr->mbfp)) != NULL)
 		{
 		/* set status */
 		mb_io_ptr->file_bytes += strlen(line);
@@ -423,14 +423,14 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    nget = sscanf(line,"%d-%d-%dT%d:%d:%lfZ %lf %lf %d %d %lf %d",
 		    &store->time_i[0],&store->time_i[1],&store->time_i[2],
 		    &store->time_i[3],&store->time_i[4],&sec,
-		    &store->longitude,&store->latitude, 
+		    &store->longitude,&store->latitude,
 		    &store->gps_quality,&store->gps_nsat,
 		    &store->gps_dilution,&store->gps_height);
 /* fprintf(stderr,"\nLINE:%s\tnget:%d %d/%d/%d %d:%d:%f  lon:%f lat:%f  gps:%d %d %f %d\n",
 line,nget,
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],sec,
-store->longitude,store->latitude, 
+store->longitude,store->latitude,
 store->gps_quality,store->gps_nsat,
 store->gps_dilution,store->gps_height);*/
 	    if (nget != 12)
@@ -456,9 +456,9 @@ store->gps_dilution,store->gps_height);*/
 	    	{
 	    	status = MB_FAILURE;
 	   	*error = MB_ERROR_UNINTELLIGIBLE;
-		}		
+		}
 	    }
-	    
+
 	/* print output debug statements */
 	if (status == MB_SUCCESS && verbose >= 4)
 	    {
@@ -533,10 +533,10 @@ int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* get pointer to mbio descriptor and data structure*/
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store = (struct mbsys_singlebeam_struct *) store_ptr;
-	
+
 	/* get pointer to write counter */
 	write_count = (int *) &mb_io_ptr->save1;
-	    
+
 	/* print output debug statements */
 	if (store != NULL && verbose >= 4)
 	    {
@@ -591,7 +591,7 @@ int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    sprintf(line,"%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%3.3dZ\t%11.6f\t%10.6f\t%d\t%d\t%.1f\t%d\n",
 				    store->time_i[0],store->time_i[1],store->time_i[2],
 				    store->time_i[3],store->time_i[4],store->time_i[5],1000*store->time_i[6],
-				    store->longitude,store->latitude, 
+				    store->longitude,store->latitude,
 				    store->gps_quality,store->gps_nsat,
 				    store->gps_dilution,store->gps_height);
 		    else

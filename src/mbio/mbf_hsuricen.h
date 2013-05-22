@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hsuricen.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_hsuricen.h defines the data structure used by MBIO functions
- * to store multibeam data read from the  MBF_HSURICEN format (MBIO id 23).  
+ * to store multibeam data read from the  MBF_HSURICEN format (MBIO id 23).
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
@@ -75,14 +75,14 @@
  *      center beam is in word 30 of the depth and distance arrays.
  *   4. Comments can be embedded in the data as 100 byte ascii strings,
  *	where the first two characters must always be "cc" so that the
- *      sec value is 25443.  
+ *      sec value is 25443.
  *   5. This format was deciphered from examples of data.
  *
  * The kind value in the mbf_hsuricen_struct indicates whether the
  * mbf_hsuricen_data_struct structure holds data (kind = 1) or an
  * ascii comment record (kind = 2).
  *
- * The mbf_hsuricen_data_struct structure is a direct representation 
+ * The mbf_hsuricen_data_struct structure is a direct representation
  * of the binary data structure used in the MBF_HSURICEN format.
  */
 
@@ -100,12 +100,12 @@ struct mbf_hsuricen_data_struct
 	short	pitch;		/* pitch in degrees x 10 */
 	short	scale;		/* scale factor x 100 */
 	mb_u_char	speed_ref;	/* 'B' or 'W' */
-	mb_u_char	quality;	
+	mb_u_char	quality;
 	short	deph[59];	/* scaled depths in meters
 					portmost to stbdmost */
 	short	dist[59];	/* scaled cross track distances,
 					port ranges are negative */
-	};	
+	};
 
 struct mbf_hsuricen_struct
 	{

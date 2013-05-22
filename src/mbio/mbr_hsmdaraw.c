@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsmdaraw.c	2/11/93
  *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 5.8 2005/11/05 00:48:04 caress Exp $
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_hsmdaraw.c contains the functions for reading and writing
- * multibeam data in the HSMDARAW format.  
+ * multibeam data in the HSMDARAW format.
  * These functions include:
  *   mbr_alm_hsmdaraw	- allocate read/write memory
  *   mbr_dem_hsmdaraw	- deallocate read/write memory
@@ -100,24 +100,24 @@
  * Revision 4.3  95/08/16  15:53:04  15:53:04  dale (Dale Chayes)
  * Works to a limited extent.
  * Does not handle writing type 101 data files yet.
- * 
+ *
  * Revision 4.2  95/08/14  20:55:17  20:55:17  dale (Dale Chayes)
  * HSMD is partially working, at least internally.
  * Still need to fix:
  *  - time for each ping
  *  - position for each ping
- * 
+ *
  * Revision 4.1  95/08/13  08:05:35  08:05:35  dale (Dale Chayes)
  * First attempt to compile. Still has a bunch of no longer appropriate
- * variables and does not yet have all the right stuff for HSMD, but 
+ * variables and does not yet have all the right stuff for HSMD, but
  * less than 100 errors before the compiler quits.
- * 
+ *
  * Revision 4.0  95/08/11  14:09:12  14:09:12  dale (Dale Chayes)
  * First cut, copied from mbr_hsatlraw.c
  * reformated for emacs
  * converted hsds structures and defines to hsmd
  * Code not functionaly modified yet.
- * 
+ *
  *
  */
 
@@ -129,35 +129,35 @@
 #include <rpc/xdr.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_hsmd.h"
-#include "../../include/mbf_hsmdaraw.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_hsmd.h"
+#include "mbf_hsmdaraw.h"
 
 /* essential function prototypes */
-int mbr_register_hsmdaraw(int verbose, void *mbio_ptr, 
+int mbr_register_hsmdaraw(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_hsmdaraw(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_hsmdaraw(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_hsmdaraw(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_hsmdaraw(int verbose, void *mbio_ptr, int *error);
@@ -191,54 +191,54 @@ int mbr_register_hsmdaraw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsmdaraw(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_hsmdaraw(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_hsmdaraw;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_hsmdaraw; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_hsmd_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_hsmd_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_hsmdaraw; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_hsmdaraw; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_hsmd_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_hsmd_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_hsmd_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_hsmd_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_hsmd_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_hsmd_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_hsmd_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_hsmd_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_hsmd_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_hsmdaraw;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_hsmd_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_hsmd_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_hsmdaraw;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_hsmdaraw;
+	mb_io_ptr->mb_io_dimensions = &mbsys_hsmd_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_hsmd_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_hsmd_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_hsmd_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_hsmd_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_hsmd_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_hsmd_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_hsmd_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_hsmd_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -286,25 +286,25 @@ int mbr_register_hsmdaraw(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_hsmdaraw(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_hsmdaraw(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_hsmdaraw";
@@ -345,7 +345,7 @@ int mbr_info_hsmdaraw(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -398,10 +398,10 @@ int mbr_alm_hsmdaraw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
-  
+
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-  
+
 	/* set initial status */
 	status = MB_SUCCESS;
 
@@ -417,7 +417,7 @@ int mbr_alm_hsmdaraw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	data = (struct mbf_hsmdaraw_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
-	
+
 	/* initialize saved values */
 	FirstReftime = &mb_io_ptr->saved1;	/* time from the first header */
 	Header_count = &mb_io_ptr->save1; /* number of header records encounterd */
@@ -631,12 +631,12 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	data = (struct mbf_hsmdaraw_struct *) mb_io_ptr->raw_data;
 	store = (struct mbsys_hsmd_struct *) store_ptr;
-  
+
 	/* read next (record of) data from file */
 	status = mbr_hsmdaraw_rd_data(verbose,mbio_ptr,error);
 
 	/* print debug statements */
-	if (verbose >= 5) 
+	if (verbose >= 5)
 		{
 		fprintf(stderr,"dbg5: In function name:\t%s\n", function_name);
 		fprintf(stderr,"dbg5:\t Returned from  mbr_hsmdaraw_rd_data()\n");
@@ -648,9 +648,9 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = data->kind;
-	
+
 	/* add nav records to list for interpolation */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_NAV)
 		{
 		time_i[0] = data->year;
@@ -667,7 +667,7 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_DATA
 		&& mb_io_ptr->nfix >= 1)
 		{
@@ -680,7 +680,7 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		time_i[6] = 1000 * data->millisecond;
 		mb_get_time(verbose, time_i, &time_d);
 		heading = data->heading_tx;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0,
 				    &lon, &lat, &speed, error);
 		data->lon = lon;
 		data->lat = lat;
@@ -936,9 +936,9 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 	int     i;
 	int     time_i[7];
 	double	scale;
-	double	PingTime;	/* Synthesised time of this ping 
-				 		PingTime = Base_time 
-				 		+ (current.datuhr 
+	double	PingTime;	/* Synthesised time of this ping
+				 		PingTime = Base_time
+				 		+ (current.datuhr
 						- FirstReftime) */
 
 	double *FirstReftime;	/* time from the first header */
@@ -984,7 +984,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 	/* read the first four bytes */
 	for (i=0;i<4;i++)
 		status = xdr_char(xdrs, &data->scsid[i]);
-		
+
 	/* loop until the beginning of a record is found */
 	while (status == MB_SUCCESS
 		&& strncmp(data->scsid, "DXT", 3) != 0)
@@ -994,8 +994,8 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 		    || data->scsid[3] == 'D')
 		    {
 		    for (i=0;i<3;i++)
-			    data->scsid[i] = data->scsid[i+1];		    
-		    status = xdr_char(xdrs, &data->scsid[3]);		
+			    data->scsid[i] = data->scsid[i+1];
+		    status = xdr_char(xdrs, &data->scsid[3]);
 		    }
 		else
 		    {
@@ -1013,10 +1013,10 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 			{
 			for (i=1;i<4;i++)
 			    status = xdr_char(xdrs, &data->scsid[i]);
-			}	
+			}
 		    }
 		}
-		
+
 	/* now read the rest of the record */
 	if (status == MB_SUCCESS)
 		for (i=0;i<4;i++)
@@ -1039,7 +1039,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 		&& data->transid != MBF_HSMDARAW_COM)
 		{
 		(*Header_count)++;
-		if (*Header_count == 1)	
+		if (*Header_count == 1)
 			*FirstReftime = data->reftime;
 		}
 
@@ -1053,7 +1053,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 	if (verbose >= 2 && status == MB_SUCCESS)
 		{
 		fprintf(stderr,"\ndbg2: ========================== \n");
-		fprintf(stderr,"dbg2: HED (0) # %d\t%.3lf\t%.3lf \n", 
+		fprintf(stderr,"dbg2: HED (0) # %d\t%.3lf\t%.3lf \n",
 				*Header_count,data->reftime, data->reftime-*FirstReftime);
 		}
 	if (verbose >= 5 && status == MB_SUCCESS)
@@ -1075,17 +1075,17 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 				data->reftime);
 		}
 
-     	/* done reading the header part of this data record 
+     	/* done reading the header part of this data record
 		- now read the rest*/
 
 	/* read the appropriate data records */
-	if (status == MB_SUCCESS ) 
-		{ 
+	if (status == MB_SUCCESS )
+		{
 		switch(data->transid)
 	  		{
 	  		case (MBF_HSMDARAW_RAW):	/* 1, Raw data record */
 	    			{
-				data->kind = MB_DATA_DATA; 
+				data->kind = MB_DATA_DATA;
 
 	      			(*Raw_count)++;	/* the number of this kind of record */
 
@@ -1121,7 +1121,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					}
 
 				/* Calculate bathymetry.
-					The travel times are scaled to 
+					The travel times are scaled to
 					seconds, then adjusted for the mean sound
 					speed, then do the simple geometry to
 					calculate depth and cross-track. */
@@ -1132,18 +1132,18 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 				if (status == MB_SUCCESS)
 				for (i=0; i<MBF_HSMDARAW_BEAMS_PING; i++ )
 		    			{
-	 				data->depth[i] = 
-						(fabs(scale * data->spfb[i]) 
+	 				data->depth[i] =
+						(fabs(scale * data->spfb[i])
 						* 0.5 * data->cmean)
 	    					* cos(data->angle[i] * DTR);
-	 				data->distance[i] = 
-	    					data->depth[i] 
+	 				data->distance[i] =
+	    					data->depth[i]
 						* tan(data->angle[i] * DTR );
 	  				if (data->spfb[i] < 0)
-	   					data->depth[i] = 
+	   					data->depth[i] =
 							-data->depth[i];
 					if (data->Port == -1)
-						data->distance[i] = 
+						data->distance[i] =
 							-data->distance[i];
 					}
 
@@ -1166,20 +1166,20 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					for (i=0;i<5;i++)
 						status = xdr_double(xdrs, &data->roll_rx[i]);
 				if (status == MB_SUCCESS)
-					status = xdr_double(xdrs, &data->pitch_tx); 
+					status = xdr_double(xdrs, &data->pitch_tx);
 				if (status == MB_SUCCESS)
 					for (i=0;i<5;i++)
 						status = xdr_double(xdrs, &data->pitch_rx[i]);
 
 				/* Establish the time of day for this
-				 * ping. "Raw" (travel time) data records 
+				 * ping. "Raw" (travel time) data records
 				 * do not contain time of day, only the
-				 * internal Reference time. The interrupt 
-				 * records contain a unix epoch time used 
+				 * internal Reference time. The interrupt
+				 * records contain a unix epoch time used
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = data->datuhr + (data->reftime 
+					PingTime = data->datuhr + (data->reftime
 						- *FirstReftime);
 					status = mb_get_date(verbose,PingTime,time_i);
 
@@ -1208,8 +1208,8 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					fprintf(stderr,"\ndbg2: \t->Lon:   \t%.4lf\n",data->lon);
 					}
 				if (verbose >= 2 && status == MB_SUCCESS)
-					fprintf(stderr,"\ndbg2: RAW (1) \t%3d\t%4d %2d %2d %2d:%2d:%2d.%3d\n", 
-						data->Port, data->year, data->month, data->day, 
+					fprintf(stderr,"\ndbg2: RAW (1) \t%3d\t%4d %2d %2d %2d:%2d:%2d.%3d\n",
+						data->Port, data->year, data->month, data->day,
 						data->hour, data->minute, data->second, data->millisecond);
 				if (verbose >= 2 && status == MB_SUCCESS)
 					{
@@ -1223,22 +1223,22 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					for (i=0;i<MBF_HSMDARAW_BEAMS_PING;i=i+4)
 		    				{
 						fprintf(stderr,"\t(%02d) %10d (%02d) %10d (%02d) %10d (%02d) %10d\n",
-			      				i,data->spfb[i], 
-							i+1,data->spfb[i+1], 
-							i+2, data->spfb[i+2], 
+			      				i,data->spfb[i],
+							i+1,data->spfb[i+1],
+							i+2, data->spfb[i+2],
 							i+3, data->spfb[i+3]);
 		   				}
 					fprintf(stderr,"\tss_range\t%lf\n", data->ss_range);
-					fprintf(stderr,"\tampl\n");	       
+					fprintf(stderr,"\tampl\n");
 					for (i=0;i<MBF_HSMDARAW_PIXELS_PING;i=i+4)
 		    				{
 						fprintf(stderr,"\t%d\t%d\t%d\t%d\n",
-							data->ss[i], 
-							data->ss[i+1], 
+							data->ss[i],
+							data->ss[i+1],
 							data->ss[i+2],
 			      				data->ss[i+3]);
 		    				}
-		  
+
 					fprintf(stderr,"\theading_tx\t%8.3lf\n", data->heading_tx);
 					fprintf(stderr,"\theading_rx:\t");
 					fprintf(stderr,"%8.3lf %8.3lf %8.3lf %8.3lf %8.3lf\n",
@@ -1247,7 +1247,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 						data->heading_rx[2],
 						data->heading_rx[3],
 						data->heading_rx[4]);
-		  
+
 					fprintf(stderr,"\troll_tx\t%8.3lf\n", data->roll_tx);
 					fprintf(stderr,"\troll_rx:\t");
 					fprintf(stderr,"%8.3lf %8.3lf %8.3lf %8.3lf %8.3lf\n",
@@ -1256,7 +1256,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 						data->roll_rx[2],
 						data->roll_rx[3],
 						data->roll_rx[4]);
-		  
+
 					fprintf(stderr,"\tpitch_tx\t%8.3lf\n", data->pitch_tx);
 					fprintf(stderr,"\tpitch_rx:\t");
 					fprintf(stderr,"%8.3lf %8.3lf %8.3lf %8.3lf %8.3lf\n",
@@ -1276,10 +1276,10 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 	      				*error = MB_ERROR_EOF;
 	     			break;
 	    			}
-	      
+
 	  		case (MBF_HSMDARAW_BAT):	/* 8, LDEO bath data record */
 	    			{
-				data->kind = MB_DATA_DATA; 
+				data->kind = MB_DATA_DATA;
 
 	      			(*Raw_count)++;	/* the number of this kind of record */
 
@@ -1331,16 +1331,16 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					for (i=0;i<5;i++)
 						status = xdr_double(xdrs, &data->roll_rx[i]);
 				if (status == MB_SUCCESS)
-					status = xdr_double(xdrs, &data->pitch_tx); 
+					status = xdr_double(xdrs, &data->pitch_tx);
 				if (status == MB_SUCCESS)
 					for (i=0;i<5;i++)
 						status = xdr_double(xdrs, &data->pitch_rx[i]);
 
 				/* Establish the time of day for this
-				 * ping. "Raw" (travel time) data records 
+				 * ping. "Raw" (travel time) data records
 				 * do not contain time of day, only the
-				 * internal Reference time. The interrupt 
-				 * records contain a unix epoch time used 
+				 * internal Reference time. The interrupt
+				 * records contain a unix epoch time used
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
@@ -1371,8 +1371,8 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					fprintf(stderr,"\ndbg2: \t->Lon:   \t%.4lf\n",data->lon);
 					}
 				if (verbose >= 2 && status == MB_SUCCESS)
-					fprintf(stderr,"\ndbg2: RAW (1) \t%3d\t%4d %2d %2d %2d:%2d:%2d.%3d\n", 
-						data->Port, data->year, data->month, data->day, 
+					fprintf(stderr,"\ndbg2: RAW (1) \t%3d\t%4d %2d %2d %2d:%2d:%2d.%3d\n",
+						data->Port, data->year, data->month, data->day,
 						data->hour, data->minute, data->second, data->millisecond);
 				if (verbose >= 2 && status == MB_SUCCESS)
 					{
@@ -1386,22 +1386,22 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					for (i=0;i<MBF_HSMDARAW_BEAMS_PING;i=i+4)
 		    				{
 						fprintf(stderr,"\t(%02d) %10d (%02d) %10d (%02d) %10d (%02d) %10d\n",
-			      				i,data->spfb[i], 
-							i+1,data->spfb[i+1], 
-							i+2, data->spfb[i+2], 
+			      				i,data->spfb[i],
+							i+1,data->spfb[i+1],
+							i+2, data->spfb[i+2],
 							i+3, data->spfb[i+3]);
 		   				}
 					fprintf(stderr,"\tss_range\t%lf\n", data->ss_range);
-					fprintf(stderr,"\tampl\n");	       
+					fprintf(stderr,"\tampl\n");
 					for (i=0;i<MBF_HSMDARAW_PIXELS_PING;i=i+4)
 		    				{
 						fprintf(stderr,"\t%d\t%d\t%d\t%d\n",
-							data->ss[i], 
-							data->ss[i+1], 
+							data->ss[i],
+							data->ss[i+1],
 							data->ss[i+2],
 			      				data->ss[i+3]);
 		    				}
-		  
+
 					fprintf(stderr,"\theading_tx\t%8.3lf\n", data->heading_tx);
 					fprintf(stderr,"\theading_rx:\t");
 					fprintf(stderr,"%8.3lf %8.3lf %8.3lf %8.3lf %8.3lf\n",
@@ -1410,7 +1410,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 						data->heading_rx[2],
 						data->heading_rx[3],
 						data->heading_rx[4]);
-		  
+
 					fprintf(stderr,"\troll_tx\t%8.3lf\n", data->roll_tx);
 					fprintf(stderr,"\troll_rx:\t");
 					fprintf(stderr,"%8.3lf %8.3lf %8.3lf %8.3lf %8.3lf\n",
@@ -1419,7 +1419,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 						data->roll_rx[2],
 						data->roll_rx[3],
 						data->roll_rx[4]);
-		  
+
 					fprintf(stderr,"\tpitch_tx\t%8.3lf\n", data->pitch_tx);
 					fprintf(stderr,"\tpitch_rx:\t");
 					fprintf(stderr,"%8.3lf %8.3lf %8.3lf %8.3lf %8.3lf\n",
@@ -1428,7 +1428,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 						data->pitch_rx[2],
 						data->pitch_rx[3],
 						data->pitch_rx[4]);
-		  
+
 					}
 
 				/* check status */
@@ -1440,7 +1440,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 	      				*error = MB_ERROR_EOF;
 	     			break;
 	    			}
-	      
+
 	  		case (MBF_HSMDARAW_NAV): /* 2, Navigation data record */
 	    			{
 				(*Nav_count)++;
@@ -1482,15 +1482,15 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					status = xdr_char(xdrs, &data->pos_sens[1]);
 
 				/* Establish the time of day for this
-				 * nav record. Nav data records 
+				 * nav record. Nav data records
 				 * do contain time of day, but the values
 				 * seem unreliable. Thus, we use the
-				 * internal Reference time. The interrupt 
-				 * records contain a unix epoch time used 
+				 * internal Reference time. The interrupt
+				 * records contain a unix epoch time used
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = data->datuhr + (data->reftime 
+					PingTime = data->datuhr + (data->reftime
 						- *FirstReftime);
 					status = mb_get_date(verbose,PingTime,time_i);
 
@@ -1506,8 +1506,8 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 
 	      			/* output some debug messages */
 				if (verbose >= 2 && status == MB_SUCCESS)
-					fprintf(stderr,"\ndbg2: NAV (2) # %3d\t%4d %2d %2d %2d:%2d:%2d.%3d\n", 
-						*Nav_count, data->year, data->month, data->day, 
+					fprintf(stderr,"\ndbg2: NAV (2) # %3d\t%4d %2d %2d %2d:%2d:%2d.%3d\n",
+						*Nav_count, data->year, data->month, data->day,
 						data->hour, data->minute, data->second, data->millisecond);
 				if (verbose >= 2 && status == MB_SUCCESS)
 					{
@@ -1520,7 +1520,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					fprintf(stderr,"dbg2: \t->minute: \t%2d\n",data->minute);
 					fprintf(stderr,"dbg2: \t->second: \t%2d\n",data->second);
 					fprintf(stderr,"dbg2: \t->millisec::\t%.3f\n",data->secf);
-		  		    
+
 					fprintf(stderr,"dbg2: \t->lat:    \t%lf\n",data->lat);
 					fprintf(stderr,"dbg2: \t->lon:    \t%lf\n",data->lon);
 					fprintf(stderr,"dbg2: \t->pos_sens:\t%s\n", data->pos_sens);
@@ -1552,24 +1552,24 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 			case (MBF_HSMDARAW_MDE):		/* 3, MD Event */
 	    			{
 				(*MDevent_count)++;
-				data->kind = MB_DATA_EVENT; 
-	      
+				data->kind = MB_DATA_EVENT;
+
 				if (status == MB_SUCCESS)
 					status = xdr_int(xdrs, &data->evid);
-	      
+
 				if (status == MB_SUCCESS)
 					for (i=0;i<84;i++)
 						status = xdr_char(xdrs, &data->evtext[i]);
 
 				/* Establish the time of day for this
-				 * record. Event data records 
+				 * record. Event data records
 				 * do not contain time of day, only the
-				 * internal Reference time. The interrupt 
-				 * records contain a unix epoch time used 
+				 * internal Reference time. The interrupt
+				 * records contain a unix epoch time used
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = data->datuhr + (data->reftime 
+					PingTime = data->datuhr + (data->reftime
 						- *FirstReftime);
 					status = mb_get_date(verbose,
 						    PingTime,time_i);
@@ -1608,10 +1608,10 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 	    			{
 				(*Angle_count)++;
 				data->kind = MB_DATA_ANGLE;
-	      
+
 				if (status == MB_SUCCESS)
 					status = xdr_int(xdrs, &data->noho);
-	      
+
 				if (status == MB_SUCCESS && status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDARAW_BEAMS_PING;i++)
 						{
@@ -1620,14 +1620,14 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 						}
 
 				/* Establish the time of day for this
-				 * record. Angle data records 
+				 * record. Angle data records
 				 * do not contain time of day, only the
-				 * internal Reference time. The interrupt 
-				 * records contain a unix epoch time used 
+				 * internal Reference time. The interrupt
+				 * records contain a unix epoch time used
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = data->datuhr + (data->reftime 
+					PingTime = data->datuhr + (data->reftime
 						- *FirstReftime);
 					status = mb_get_date(verbose,
 						    PingTime,time_i);
@@ -1654,9 +1654,9 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 		  			for (i=0;i<MBF_HSMDARAW_BEAMS_PING;i=i+4)
 		   				{
 		      				fprintf(stderr,"\t%02d: %8.3lf\t%02d: %8.3lf\t%02d: %8.3lf\t%02d: %8.3lf\n",
-						i,data->angle[i], 
-						i+1,data->angle[i+1], 
-						i+2, data->angle[i+2], 
+						i,data->angle[i],
+						i+1,data->angle[i+1],
+						i+2, data->angle[i+2],
 						i+3, data->angle[i+3]);
 		    				}
 					}
@@ -1668,12 +1668,12 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 	      				*error = MB_ERROR_EOF;
 	     			break;
 	    			}
-	    
+
 			case (MBF_HSMDARAW_SVP): /* 5, Sound Velocity Profile */
 	    			{
 				(*Svp_count)++;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
-				
+
 				data->num_vel = 20;
 				for (i=0;i<data->num_vel;i++)
 					{
@@ -1682,14 +1682,14 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					}
 
 				/* Establish the time of day for this
-				 * record. SVP data records 
+				 * record. SVP data records
 				 * do not contain time of day, only the
-				 * internal Reference time. The interrupt 
-				 * records contain a unix epoch time used 
+				 * internal Reference time. The interrupt
+				 * records contain a unix epoch time used
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = data->datuhr + (data->reftime 
+					PingTime = data->datuhr + (data->reftime
 						- *FirstReftime);
 					status = mb_get_date(verbose,
 						    PingTime,time_i);
@@ -1717,12 +1717,12 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 	      				*error = MB_ERROR_EOF;
 	     			break;
 	    			}
-	    
-	    
+
+
 			case (MBF_HSMDARAW_REV):	/* 6, An Interrupt event? */
 	    			{
 				(*Rev_count)++;
-	      
+
 				if (status == MB_SUCCESS)
 					status = xdr_double(xdrs, &data->datuhr);
 				if (status == MB_SUCCESS)
@@ -1733,12 +1733,12 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 						status = xdr_char(xdrs, &data->mktext[i]);
 
 				/* Establish the time of day for this
-				 * record. Interrupt data records 
+				 * record. Interrupt data records
 				 * contain a unix time which is used
 				 * to get time of day. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = data->datuhr + (data->reftime 
+					PingTime = data->datuhr + (data->reftime
 						- *FirstReftime);
 					status = mb_get_date(verbose,
 						    PingTime,time_i);
@@ -1766,10 +1766,10 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					fprintf(stderr,"\t->mksysint:\t%s\n",data->mksysint);
 					fprintf(stderr,"\t->mktext:  \t%s\n",data->mktext);
 					}
-	      
+
 				/* Check to see if this Raw Event is
 				 * indicating the start or end of the file. */
-				if (status == MB_SUCCESS 
+				if (status == MB_SUCCESS
 					&& strncmp(data->mksysint, "STOP",4) == 0)
 					{
 					data->kind = MB_DATA_STOP;
@@ -1789,12 +1789,12 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 
 			case (MBF_HSMDARAW_COM):	/* 7, Comment */
 	    			{
-				data->kind = MB_DATA_COMMENT; 
+				data->kind = MB_DATA_COMMENT;
 
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDARAW_COMMENT;i++)
 						status = xdr_char(xdrs, &data->comment[i]);
-		
+
 				/* Check status. */
 				if (status == MB_SUCCESS)
 		  			*error = MB_ERROR_NO_ERROR;
@@ -1804,11 +1804,11 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 	    			}
 
 	  		default:
-	    			{			
+	    			{
 				/* Should never get here, so fail! */
 				status = MB_FAILURE;
 	      			*error = MB_ERROR_UNINTELLIGIBLE;
-	      
+
 				if (verbose >=2)
 					{
 					fprintf(stderr,"dbg2: data->transid=%d not parsed\n",
@@ -1816,9 +1816,9 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error)
 					}
 				break;
 	    			}
-	  		} 
+	  		}
       		}
-	
+
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
@@ -1889,16 +1889,16 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		status = xdr_double(xdrs, &data->reftime);
 
 	/* write the appropriate data record */
-	if (status == MB_SUCCESS ) 
-		{ 
+	if (status == MB_SUCCESS )
+		{
 		switch(data->transid)
 	  		{
 	  		case (MBF_HSMDARAW_RAW):	/* 1, Raw data record */
 	    			{
 				/* make sure transid is correct */
 				data->transid = MBF_HSMDARAW_RAW;
-	      
-				/* First make sure bathymetry edits are 
+
+				/* First make sure bathymetry edits are
 					carried over into travel times */
 				for (i=0; i<MBF_HSMDARAW_BEAMS_PING; i++ )
 		    			{
@@ -1925,8 +1925,8 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 					fprintf(stderr,"\ndbg2: \t->Lon:   \t%.4lf\n",data->lon);
 					}
 				if (verbose >= 2 && status == MB_SUCCESS)
-					fprintf(stderr,"\ndbg2: RAW (1) \t%3d\t%4d %2d %2d %2d:%2d:%2d.%3d\n", 
-						data->Port, data->year, data->month, data->day, 
+					fprintf(stderr,"\ndbg2: RAW (1) \t%3d\t%4d %2d %2d %2d:%2d:%2d.%3d\n",
+						data->Port, data->year, data->month, data->day,
 						data->hour, data->minute, data->second, data->millisecond);
 				if (verbose >= 2 && status == MB_SUCCESS)
 					{
@@ -1940,22 +1940,22 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 					for (i=0;i<MBF_HSMDARAW_BEAMS_PING;i=i+4)
 		    				{
 						fprintf(stderr,"\t(%02d) %10d (%02d) %10d (%02d) %10d (%02d) %10d\n",
-			      				i,data->spfb[i], 
-							i+1,data->spfb[i+1], 
-							i+2, data->spfb[i+2], 
+			      				i,data->spfb[i],
+							i+1,data->spfb[i+1],
+							i+2, data->spfb[i+2],
 							i+3, data->spfb[i+3]);
 		   				}
 					fprintf(stderr,"\tss_range\t%lf\n", data->ss_range);
-					fprintf(stderr,"\tampl\n");	       
+					fprintf(stderr,"\tampl\n");
 					for (i=0;i<MBF_HSMDARAW_PIXELS_PING;i=i+4)
 		    				{
 						fprintf(stderr,"\t%d\t%d\t%d\t%d\n",
-							data->ss[i], 
-							data->ss[i+1], 
+							data->ss[i],
+							data->ss[i+1],
 							data->ss[i+2],
 			      				data->ss[i+3]);
 		    				}
-		  
+
 					fprintf(stderr,"\theading_tx\t%8.3lf\n", data->heading_tx);
 					fprintf(stderr,"\theading_rx:\t");
 					fprintf(stderr,"%8.3lf %8.3lf %8.3lf %8.3lf %8.3lf\n",
@@ -1964,7 +1964,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 						data->heading_rx[2],
 						data->heading_rx[3],
 						data->heading_rx[4]);
-		  
+
 					fprintf(stderr,"\troll_tx\t%8.3lf\n", data->roll_tx);
 					fprintf(stderr,"\troll_rx:\t");
 					fprintf(stderr,"%8.3lf %8.3lf %8.3lf %8.3lf %8.3lf\n",
@@ -1973,7 +1973,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 						data->roll_rx[2],
 						data->roll_rx[3],
 						data->roll_rx[4]);
-		  
+
 					fprintf(stderr,"\tpitch_tx\t%8.3lf\n", data->pitch_tx);
 					fprintf(stderr,"\tpitch_rx:\t");
 					fprintf(stderr,"%8.3lf %8.3lf %8.3lf %8.3lf %8.3lf\n",
@@ -1982,7 +1982,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 						data->pitch_rx[2],
 						data->pitch_rx[3],
 						data->pitch_rx[4]);
-		  
+
 					}
 
 				/* set water velocity and travel time data */
@@ -2019,7 +2019,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 					for (i=0;i<5;i++)
 						status = xdr_double(xdrs, &data->roll_rx[i]);
 				if (status == MB_SUCCESS)
-					status = xdr_double(xdrs, &data->pitch_tx); 
+					status = xdr_double(xdrs, &data->pitch_tx);
 				if (status == MB_SUCCESS)
 					for (i=0;i<5;i++)
 						status = xdr_double(xdrs, &data->pitch_rx[i]);
@@ -2031,7 +2031,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	      				*error = MB_ERROR_WRITE_FAIL;
 	     			break;
 	    			}
-	      
+
 	  		case (MBF_HSMDARAW_NAV): /* 2, Navigation data record */
 	    			{
 				/* set nav data */
@@ -2101,10 +2101,10 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	      				*error = MB_ERROR_WRITE_FAIL;
 	     			break;
 	    			}
-	    
+
 			case (MBF_HSMDARAW_SVP): /* 5, Sound Velocity Profile */
 	    			{
-				
+
 				data->num_vel = 20;
 				for (i=0;i<data->num_vel;i++)
 					{
@@ -2130,7 +2130,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 				if (status == MB_SUCCESS)
 					for (i=0;i<84;i++)
 						status = xdr_char(xdrs, &data->mktext[i]);
-	      
+
 				/* Check status. */
 				if (status == MB_SUCCESS)
 		  			*error = MB_ERROR_NO_ERROR;
@@ -2144,7 +2144,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDARAW_COMMENT;i++)
 						status = xdr_char(xdrs, &data->comment[i]);
-		
+
 				/* Check status. */
 				if (status == MB_SUCCESS)
 		  			*error = MB_ERROR_NO_ERROR;
@@ -2154,13 +2154,13 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	    			}
 
 	  		default:
-	    			{			
+	    			{
 				/* Should never get here, so fail! */
 				status = MB_FAILURE;
 	      			*error = MB_ERROR_UNINTELLIGIBLE;
 				break;
 	    			}
-	  		} 
+	  		}
       		}
 
 	/* print output debug statements */
@@ -2177,5 +2177,3 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-
-

@@ -2,7 +2,7 @@
  *    The MB-system:	mbeditviz.h		4/27/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2012 by
+ *    Copyright (c) 2007-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -45,11 +45,11 @@
 #define	MB_EDITVIZ_DEF		1
 
 #ifndef MB_STATUS_DEF
-#include "../../include/mb_status.h"
+#include "mb_status.h"
 #endif
 
 #ifndef MB_DEFINE_DEF
-#include "../../include/mb_define.h"
+#include "mb_define.h"
 #endif
 
 #ifndef MB_PROCESS_DEF
@@ -188,7 +188,7 @@ struct mbev_grid_struct
 	float	*wgt;
 	float	*val;
 	float	*sgm;
-	};		
+	};
 
 /*--------------------------------------------------------------------*/
 
@@ -282,22 +282,22 @@ int mbeditviz_get_format(char *file, int *form);
 int mbeditviz_open_data(char *path, int format);
 int mbeditviz_import_file(char *path, int format);
 int mbeditviz_load_file(int ifile);
-int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, 
-				double rollbias, double pitchbias, double headingbias, double timelag,  
+int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping,
+				double rollbias, double pitchbias, double headingbias, double timelag,
 				double *heading, double *sonardepth,
 				double *rolldelta, double *pitchdelta);
 int mbeditviz_beam_position(double navlon, double navlat, double headingx, double headingy,
 				double mtodeglon, double mtodeglat,
-				double bath, double acrosstrack, double alongtrack, 
-				double sonardepth, 
-				double rollbias, double pitchbias, 
+				double bath, double acrosstrack, double alongtrack,
+				double sonardepth,
+				double rollbias, double pitchbias,
 				double *bathcorr, double *lon, double *lat);
 int mbeditviz_unload_file(int ifile);
 int mbeditviz_delete_file(int ifile);
 double mbeditviz_erf(double x);
-int mbeditviz_bin_weight(double foot_a, double foot_b, double scale, 
-		    double pcx, double pcy, double dx, double dy, 
-		    double *px, double *py, 
+int mbeditviz_bin_weight(double foot_a, double foot_b, double scale,
+		    double pcx, double pcy, double dx, double dy,
+		    double *px, double *py,
 		    double *weight, int *use);
 int mbeditviz_get_grid_bounds();
 int mbeditviz_setup_grid();

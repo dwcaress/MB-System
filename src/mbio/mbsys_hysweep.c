@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hysweep.c	3.00	12/23/2011
  *	$Id$
  *
- *    Copyright (c) 2011-2012 by
+ *    Copyright (c) 2011-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -32,11 +32,11 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_hysweep.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_hysweep.h"
 
 /* turn on debug statements here */
 /* #define MSYS_HYSWEEP_DEBUG 1 */

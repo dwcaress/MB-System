@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsuricen.c	2/2/93
  *	$Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_hsuricen.c contains the functions for reading and writing
- * multibeam data in the HSURICEN format.  
+ * multibeam data in the HSURICEN format.
  * These functions include:
  *   mbr_alm_hsuricen	- allocate read/write memory
  *   mbr_dem_hsuricen	- deallocate read/write memory
@@ -118,40 +118,40 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_hsds.h"
-#include "../../include/mbf_hsuricen.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_hsds.h"
+#include "mbf_hsuricen.h"
 
 /* include for byte swapping on little-endian machines */
 #ifdef BYTESWAPPED
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 #endif
 
 /* essential function prototypes */
-int mbr_register_hsuricen(int verbose, void *mbio_ptr, 
+int mbr_register_hsuricen(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_hsuricen(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_hsuricen(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_hsuricen(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_hsuricen(int verbose, void *mbio_ptr, int *error);
@@ -180,54 +180,54 @@ int mbr_register_hsuricen(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsuricen(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_hsuricen(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_hsuricen;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_hsuricen; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_hsds_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_hsds_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_hsuricen; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_hsuricen; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_hsds_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_hsds_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_hsds_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_hsds_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_hsds_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_hsds_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_hsds_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_hsds_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_hsds_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_hsuricen;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_hsds_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_hsds_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_hsuricen;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_hsuricen;
+	mb_io_ptr->mb_io_dimensions = &mbsys_hsds_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_hsds_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_hsds_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_hsds_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_hsds_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_hsds_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_hsds_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_hsds_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_hsds_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -275,25 +275,25 @@ int mbr_register_hsuricen(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_hsuricen(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_hsuricen(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_hsuricen";
@@ -334,7 +334,7 @@ int mbr_info_hsuricen(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -386,7 +386,7 @@ int mbr_alm_hsuricen(int verbose, void *mbio_ptr, int *error)
 
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_hsuricen_struct);
-	mb_io_ptr->data_structure_size = 
+	mb_io_ptr->data_structure_size =
 		sizeof(struct mbf_hsuricen_data_struct);
 	status = mb_malloc(verbose,mb_io_ptr->structure_size,
 				&mb_io_ptr->raw_data,error);
@@ -483,7 +483,7 @@ int mbr_rt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* read next record from file */
 	if ((status = fread(data,1,mb_io_ptr->data_structure_size,
-			mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) 
+			mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size)
 		{
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
@@ -570,7 +570,7 @@ int mbr_rt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* position (all records ) */
 		store->lon = 0.0000001*data->lon;
 		store->lat = 0.0000001*data->lat;
-		if (store->lon > 180.) 
+		if (store->lon > 180.)
 			store->lon = store->lon - 360.;
 		else if (store->lon < -180.)
 			store->lon = store->lon + 360.;
@@ -583,7 +583,7 @@ int mbr_rt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->pitch = 0.1*data->pitch;
 		store->track = 0;
 		store->depth_scale = 0.01*data->scale;
-		store->depth_center 
+		store->depth_center
 			= store->depth_scale * data->deph[MBSYS_HSDS_BEAMS/2];
 		store->spare = 1;
 		id = MBSYS_HSDS_BEAMS - 1;
@@ -729,7 +729,7 @@ int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5       status:         %d\n",status);
 		}
 
-	/* first set some plausible amounts for some of the 
+	/* first set some plausible amounts for some of the
 		variables in the HSURICEN record */
 	data->course = 0;
 	data->pitch = 0;
@@ -831,8 +831,8 @@ int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		|| dataplus->kind == MB_DATA_COMMENT)
 		{
 		if ((status = fwrite(data,1,mb_io_ptr->data_structure_size,
-				mb_io_ptr->mbfp)) 
-				== mb_io_ptr->data_structure_size) 
+				mb_io_ptr->mbfp))
+				== mb_io_ptr->data_structure_size)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;

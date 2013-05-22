@@ -2,7 +2,7 @@
  *    The MB-system:	mb_error.c	2/2/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -96,9 +96,9 @@
 
 /* mbio include files */
 #define DEFINE_MB_MESSAGES 1
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_io.h"
 
 static char rcs_id[]="$Id$";
 

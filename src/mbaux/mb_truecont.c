@@ -2,7 +2,7 @@
  *    The MB-system:	mb_truecont.c	4/21/94
  *    $Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,9 +28,9 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_aux.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_aux.h"
 
 /* global defines */
 #define IMOVE 	3

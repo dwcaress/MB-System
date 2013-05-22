@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_em12ifrm.h	12/5/00
  *	$Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_em12ifrm.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_EM12IFRM format (MBIO id 58).  
+ * to store multibeam data read from the MBF_EM12IFRM format (MBIO id 58).
  *
  * Author:	D. W. Caress
  * Date:	December 5, 2000
@@ -41,22 +41,22 @@
  * Notes on the MBF_EM12IFRM data format:
  *   1. IFREMER uses their own software to process swath data.
  *      Currently (2004) the software is called CARAIBES, but
- *      during the 1990's they used an earlier package called 
- *      TRISMUS to process multibeam data. This format was used 
+ *      during the 1990's they used an earlier package called
+ *      TRISMUS to process multibeam data. This format was used
  *      and generated as part of TRISMUS processing of EM12S and
- *      EM12D multibeam data. TRISMUS recast the data as parallel 
- *      files for bathymetry (.SO suffix), imagery (.IM suffix), 
- *      and asynchronous navigation (.NA suffix). We recommend 
- *      that users translate the TRISMUS data to the current 
+ *      EM12D multibeam data. TRISMUS recast the data as parallel
+ *      files for bathymetry (.SO suffix), imagery (.IM suffix),
+ *      and asynchronous navigation (.NA suffix). We recommend
+ *      that users translate the TRISMUS data to the current
  *      mbsystem format for processing Simrad multibeam data
  *      (EM300MBA - format 57) before processing.
  *   2. This format is supported read-only in MB-System.
  *   3. The systems of interest:
- *         EM-12S:   Deep water 12kHz multibeam sonar with up to 
- *                   81 beams of bathymetry and up to 523 sidescan 
+ *         EM-12S:   Deep water 12kHz multibeam sonar with up to
+ *                   81 beams of bathymetry and up to 523 sidescan
  *                   samples per bathymetry beam.
- *         EM-12D:   Deep water 12kHz multibeam sonar with up to 
- *                   81 beams of bathymetry and up to 523 sidescan 
+ *         EM-12D:   Deep water 12kHz multibeam sonar with up to
+ *                   81 beams of bathymetry and up to 523 sidescan
  *                   samples per bathymetry beam. This is a dual
  *                   system which produces alternating port and
  *                   starboard pings to provide a 150 degree swath.
@@ -64,22 +64,22 @@
  *      beginning with "$CASTM". The sources of these strings
  *      include "NACOU", "NAGP1",  and "NAGP2".
  *      MB-System uses only the "NACOU" strings.
- *   5. Each bathymetry record is 1032 bytes long and begins 
- *      with a 35 character string containing the identifier 
+ *   5. Each bathymetry record is 1032 bytes long and begins
+ *      with a 35 character string containing the identifier
  *      and time stamp. The first six characters are one of
  *      the following:
  *           "$12SOC": EM12S ping
  *           "$12SOB": EM12D port ping
  *           "$12SOT": EM12S starboard ping
  *           "$COMM:": Comment (MB-System only)
- *   6. The imagery records are of variable length and begin 
- *      with a 35 character string containing the identifier 
+ *   6. The imagery records are of variable length and begin
+ *      with a 35 character string containing the identifier
  *      and time stamp. The first six characters are one of
  *      the following:
  *           "$12IMC": EM12S ping
  *           "$12IMB": EM12D port ping
  *           "$12IMT": EM12S starboard ping
- *      As with the Simrad vendor formats, multiple sidescan 
+ *      As with the Simrad vendor formats, multiple sidescan
  *      datagrams are recorded for each ping.
  *
  */
@@ -111,19 +111,19 @@ struct mbf_em12ifrm_struct
 	double	pitch_offset;	/* pitch offset (degrees) */
 	double	heading_offset;	/* heading offset (degrees) */
 	double	em100_td;	/* EM-100 tranducer depth (meters) */
-	double	em100_tx;	/* EM-100 tranducer fore-aft 
+	double	em100_tx;	/* EM-100 tranducer fore-aft
 					offset (meters) */
-	double	em100_ty;	/* EM-100 tranducer athwartships 
+	double	em100_ty;	/* EM-100 tranducer athwartships
 					offset (meters) */
 	double	em12_td;	/* EM-12 tranducer depth (meters) */
-	double	em12_tx;	/* EM-12 tranducer fore-aft 
+	double	em12_tx;	/* EM-12 tranducer fore-aft
 					offset (meters) */
-	double	em12_ty;	/* EM-12 tranducer athwartships 
+	double	em12_ty;	/* EM-12 tranducer athwartships
 					offset (meters) */
 	double	em1000_td;	/* EM-1000 tranducer depth (meters) */
-	double	em1000_tx;	/* EM-1000 tranducer fore-aft 
+	double	em1000_tx;	/* EM-1000 tranducer fore-aft
 					offset (meters) */
-	double	em1000_ty;	/* EM-1000 tranducer athwartships 
+	double	em1000_ty;	/* EM-1000 tranducer athwartships
 					offset (meters) */
 	char	spare_parameter[128];
 	int	survey_line;
@@ -179,7 +179,7 @@ struct mbf_em12ifrm_struct
 	int	beams_bath;	/* EM-1000:  60
 				   EM12S:    81
 				   EM12D:    81 */
-	int	bath_mode;	/* EM-1000: 1=deep; 2=medium; 3=shallow 
+	int	bath_mode;	/* EM-1000: 1=deep; 2=medium; 3=shallow
 				   EM-12S:  1=shallow equiangle spacing
 				            2=deep equiangle spacing
 				            3=shallow equidistant spacing
@@ -195,11 +195,11 @@ struct mbf_em12ifrm_struct
 				            7=deep 114 degree equidistant
 				            8=deep 98 degree equidistant */
 	int	bath_res;	/* EM-12 only: 1=high res; 2=low res */
-	int	bath_quality;	/* number of good beams, 
+	int	bath_quality;	/* number of good beams,
 					negative if ping rejected */
 	int	keel_depth;	/* depth of most vertical beam:
-					EM-1000:        0.02 meters 
-					EM-12 high res: 0.10 meters 
+					EM-1000:        0.02 meters
+					EM-12 high res: 0.10 meters
 					EM-12 low res:  0.20 meters */
 	int	heading;	/* 0.1 degrees */
 	int	roll;		/* 0.01 degrees */
@@ -207,30 +207,30 @@ struct mbf_em12ifrm_struct
 	int	xducer_pitch;	/* 0.01 degrees */
 	int	ping_heave;	/* 0.01 meters */
 	int	sound_vel;	/* 0.1 meters/sec */
-	short int bath[MBF_EM12IFRM_MAXBEAMS];	
+	short int bath[MBF_EM12IFRM_MAXBEAMS];
 				/* depths:
-					EM-1000:        0.02 meters 
-					EM-12 high res: 0.10 meters 
+					EM-1000:        0.02 meters
+					EM-12 high res: 0.10 meters
 					EM-12 low res:  0.20 meters */
 	short int bath_acrosstrack[MBF_EM12IFRM_MAXBEAMS];
 				/* acrosstrack distances:
-					EM-1000:         0.1 meters 
-					EM-12 high res:  0.2 meters 
+					EM-1000:         0.1 meters
+					EM-12 high res:  0.2 meters
 					EM-12 low res:   0.5 meters */
 	short int bath_alongtrack[MBF_EM12IFRM_MAXBEAMS];
 				/* alongtrack distances:
-					EM-1000:         0.1 meters 
-					EM-12 high res:  0.2 meters 
+					EM-1000:         0.1 meters
+					EM-12 high res:  0.2 meters
 					EM-12 low res:   0.5 meters */
 	short int tt[MBF_EM12IFRM_MAXBEAMS];	/* meters */
 				/* travel times:
-					EM-1000:         0.05 msec 
-					EM-12 high res:  0.20 msec 
+					EM-1000:         0.05 msec
+					EM-12 high res:  0.20 msec
 					EM-12 low res:   0.80 msec */
 	mb_s_char	amp[MBF_EM12IFRM_MAXBEAMS];	    /* 0.5 dB */
 	mb_u_char	quality[MBF_EM12IFRM_MAXBEAMS];	    /* meters */
 	mb_s_char	heave[MBF_EM12IFRM_MAXBEAMS];	    /* 0.1 meters */
-	
+
 	/* sidescan */
 	int	pixels_ssraw;	/* total number of samples for this ping */
 	int	ss_mode;	/* 1 = EM-12 shallow:   0.6 m/sample
@@ -238,17 +238,17 @@ struct mbf_em12ifrm_struct
 				   3 = EM-1000 deep:    0.3 m/sample
 				   4 = EM-1000 medium:  0.3 m/sample
 				   5 = EM-1000 shallow: 0.15 m/sample */
-	short int beam_frequency[MBF_EM12IFRM_MAXBEAMS]; 
+	short int beam_frequency[MBF_EM12IFRM_MAXBEAMS];
 				/*	0 = 12.67 kHz
 					1 = 13.00 kHz
 					2 = 13.33 kHz
 					3 = 95.00 kHz */
-	short int beam_samples[MBF_EM12IFRM_MAXBEAMS];	
+	short int beam_samples[MBF_EM12IFRM_MAXBEAMS];
 				/* number of sidescan samples derived from
 					each beam */
 	short int beam_center_sample[MBF_EM12IFRM_MAXBEAMS];
 				/* center beam sample number among samples
-					from one beam */	
+					from one beam */
 	short int beam_start_sample[MBF_EM12IFRM_MAXBEAMS];
 				/* start beam sample number among samples
 					from entire ping */
@@ -259,8 +259,7 @@ struct mbf_em12ifrm_struct
 	short	ss[MBF_EM12IFRM_MAXPIXELS];
 				/* the processed sidescan ordered port to starboard */
 	short	ssalongtrack[MBF_EM12IFRM_MAXPIXELS];
-				/* the processed sidescan alongtrack distances 
+				/* the processed sidescan alongtrack distances
 					in distance resolution units */
 
 };
-

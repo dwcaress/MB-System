@@ -2,7 +2,7 @@
  *    The MB-system:	mb_put_comment.c	7/15/97
  *    $Id$
  *
- *    Copyright (c) 1997-2012 by
+ *    Copyright (c) 1997-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -60,10 +60,10 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
 
 /*--------------------------------------------------------------------*/
 int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error)
@@ -100,7 +100,7 @@ int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error)
 	time_d = 0.0;
 	navlon = 0.0;
 	status = mb_insert(verbose,mbio_ptr,mb_io_ptr->store_data,
-			MB_DATA_COMMENT, 
+			MB_DATA_COMMENT,
 			time_i,time_d,navlon,navlat,speed,heading,
 			0,0,0,
 			NULL,NULL,NULL,

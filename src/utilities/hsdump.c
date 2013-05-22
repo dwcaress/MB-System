@@ -2,7 +2,7 @@
  *    The MB-system:	hsdump.c	6/16/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * HSDUMP lists the information contained in data records on
- * Hydrosweep DS data files, including survey, calibrate, water 
+ * Hydrosweep DS data files, including survey, calibrate, water
  * velocity and comment records. The default input stream is stdin.
  *
  * Author:	D. W. Caress
@@ -111,10 +111,10 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_hsds.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mbsys_hsds.h"
 
 static char rcs_id[] = "$Id$";
 
@@ -240,7 +240,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhF:f:I:i:O:o:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -452,7 +452,7 @@ int main (int argc, char **argv)
 			mb_error(verbose,error,&message);
 			fprintf(output,"\nNonfatal MBIO Error:\n%s\n",message);
 			}
-		else if (verbose >= 1 && error > MB_ERROR_NO_ERROR 
+		else if (verbose >= 1 && error > MB_ERROR_NO_ERROR
 			&& error != MB_ERROR_EOF)
 			{
 			mb_error(verbose,error,&message);
@@ -578,7 +578,7 @@ int main (int argc, char **argv)
 			}
 
 		/* deal with calibrate data record */
-		if (kind == MB_DATA_CALIBRATE 
+		if (kind == MB_DATA_CALIBRATE
 			&& mb_data_calibrate_list == MB_YES)
 			{
 			mb_data_calibrate_count++;
@@ -688,7 +688,7 @@ int main (int argc, char **argv)
 			}
 
 		/* deal with mean velocity data record */
-		if (kind == MB_DATA_MEAN_VELOCITY 
+		if (kind == MB_DATA_MEAN_VELOCITY
 			&& mb_data_mean_velocity_list == MB_YES)
 			{
 			mb_data_mean_velocity_count++;
@@ -776,14 +776,14 @@ int main (int argc, char **argv)
 	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathacrosstrack,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathalongtrack,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssacrosstrack,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathacrosstrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathalongtrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssacrosstrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssalongtrack,&error);
 
 	/* check memory */
 	if (verbose >= 4)

@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_atlas.h	6/22/01
  *	$Id$
  *
- *    Copyright (c) 2001-2012 by
+ *    Copyright (c) 2001-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,10 +13,10 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_atlas.h defines the MBIO data structures for handling data from 
+ * mbsys_atlas.h defines the MBIO data structures for handling data from
  * STN Atlas Marine Electronics multibeam sonars.
  * The relevant sonars include Hydrosweep DS2 and Fansweep sonars.
- * The older  Hydrosweep DS and MD sonars produce data in different 
+ * The older  Hydrosweep DS and MD sonars produce data in different
  * formats (e.g. 21-24 and 101-102).
  * The data formats associated with (newer) STN Atlas sonars
  * include:
@@ -60,7 +60,7 @@
  * Notes on the MBSYS_ATLAS data structure:
  *
  * 1) STN Atlas Marine Electronics (aka SAM) sonars write raw data in real-time
- *    as binary XDR encoded data. Files are stored on disk by the HYDROMAP 
+ *    as binary XDR encoded data. Files are stored on disk by the HYDROMAP
  *    Online workstation. The workstation on the Ewing is an HP Vectra
  *    running SuSe Linux (2.2 kernel.)
  *
@@ -80,17 +80,17 @@
  *
  * lot file:    26 (center beam) and lots of zeros
  *
- * For starters (June, 2001) we are assuming fixed beam spacing w/ a 90 or 
+ * For starters (June, 2001) we are assuming fixed beam spacing w/ a 90 or
  * 120 degree swath so all of the swath mapping data we need is in the  ".fsw"
- * data file. 
+ * data file.
  *
  * 4) Data record type ids:
  *    MB-System critical records are:
  *
- *      Sounding data     10   T0, nav, attitude, 
- *      Depths            11   travel time+amp/beam 
+ *      Sounding data     10   T0, nav, attitude,
+ *      Depths            11   travel time+amp/beam
  *      Sidescan          12   Multiple packets of sidescan data
- *      Tracking windows  19   
+ *      Tracking windows  19
  *      Amplitude         28   TX and RX data necessary for calculating true amp
  *
  *    Other potentially interesting things:
@@ -98,7 +98,7 @@
  *
  * 5) Time values are in Unix seconds (seconds since 1/1/1970 00:00:00
  */
- 
+
 /* include mb_define.h */
 #ifndef MB_DEFINE_DEF
 #include "mb_define.h"
@@ -116,9 +116,9 @@
 #define	MBSYS_ATLAS_MAXBEAMTELEGRAM	200
 #define	MBSYS_ATLAS_MAXPIXELTELEGRAM	1024
 #define	MBSYS_ATLAS_MAXWINDOWS		100
-#define	MBSYS_ATLAS_HSDS2_PFB_NUM	59 
-#define	MBSYS_ATLAS_HSDS2_RX_PAR		20 
-#define	MBSYS_ATLAS_HSDS2_TX_PAR		10 
+#define	MBSYS_ATLAS_HSDS2_PFB_NUM	59
+#define	MBSYS_ATLAS_HSDS2_RX_PAR		20
+#define	MBSYS_ATLAS_HSDS2_TX_PAR		10
 #define	MBSYS_ATLAS_COMMENT_LENGTH	256
 #define	MBSYS_ATLAS_HSDS2_MAXBEAMS	140
 
@@ -138,13 +138,13 @@
 struct mbsys_atlas_struct
 	{
 	int		kind;
-	
+
 	/* navigation telegram */
 	double		sys_pos_lat;		/* latitude (radians) */
 	double		sys_pos_lon;		/* longitude (radians) */
 	char		sys_pos_sensor[8];	/* position sensor name */
 	double		sys_pos_time_d;		/* position fix time (s) */
-	
+
 	/* start telegram */
 	unsigned int	start_ping_no;		/* ping number */
 	double		start_transmit_time_d;	/* ping timestamp */
@@ -239,7 +239,7 @@ struct mbsys_atlas_struct
 	double		start_cmean;		/* mean water sound speed (m/s) */
 	double		start_depth_min;	/* minimum depth from GUI (m) */
 	double		start_depth_max;	/* maximum depth from GUI (m) */
-	
+
 	/* travel times telegrams */
 	unsigned int	tt_ping_no;		/* ping number */
 	double		tt_transmit_time_d;	/* ping timestamp */
@@ -275,7 +275,7 @@ struct mbsys_atlas_struct
 								/*		0 = unvalid	    */
 								/*		1 = valid	    */
 								/*	    bits 3-7 unused	    */
-								
+
 	/* processed bathymetry */
 	double		pr_navlon;					/* longitude (degrees) */
 	double		pr_navlat;					/* latitude (degrees) */
@@ -284,7 +284,7 @@ struct mbsys_atlas_struct
 	double		pr_bathacrosstrack[MBSYS_ATLAS_MAXBEAMS];	/* acrosstrack distance (m) */
 	double		pr_bathalongtrack[MBSYS_ATLAS_MAXBEAMS];		/* alongtrack distance (m) */
 	char		pr_beamflag[MBSYS_ATLAS_MAXBEAMS];		/* beam edit/status flags */
-	
+
 	/* sidescan telegrams */
 	unsigned int	ss_ping_no;		/* ping number */
 	double		ss_transmit_time_d;	/* ping timestamp */
@@ -306,8 +306,8 @@ struct mbsys_atlas_struct
 								    /* MD => 5,5,5,5,5,5,5,5	    */
 	float		tr_start[MBSYS_ATLAS_MAXWINDOWS];	    /* start time (s) - two way	    */
 	float		tr_stop[MBSYS_ATLAS_MAXWINDOWS];		    /* stop time (s) - two way	    */
-	
-	/* backscatter telegram */	
+
+	/* backscatter telegram */
 	double		bs_transmit_time_d;	/* ping timestamp */
 	int		bs_ping_no;		/* ping number */
 	unsigned short	bs_nrActualGainSets;	/* 10 to 20 gain sets */
@@ -326,16 +326,16 @@ struct mbsys_atlas_struct
 	float		bs_m_tau[MBSYS_ATLAS_HSDS2_PFB_NUM];	    /* echo duration (s) */
 	char		bs_eff_ampli[MBSYS_ATLAS_HSDS2_PFB_NUM];	    /* effective amplitude */
 	char		bs_nis[MBSYS_ATLAS_HSDS2_PFB_NUM];	    /* noise isotropic */
-	
+
 	/* comment */
 	char		comment[MBSYS_ATLAS_COMMENT_LENGTH];
 	};
-	
+
 
 /*
- * These two arrays represent the angle from the vertical for each of the 
+ * These two arrays represent the angle from the vertical for each of the
  * two modes of operation of the HS-DS2 on the Ewing in June, 2001.
- * 
+ *
  * The values were extracted from a sample "raw" angle data file.
  *
  */
@@ -345,7 +345,7 @@ extern double ds2_ang_90d_59b[];
 extern double ds2_ang_120d_140b[];
 extern double ds2_ang_90d_140b[];
 #else
-double ds2_ang_120d_59b[] = 
+double ds2_ang_120d_59b[] =
 	{
 	-1.040042,
 	-1.004178,
@@ -407,8 +407,8 @@ double ds2_ang_120d_59b[] =
 	1.004178,
 	1.040042
 	};
-	
-double ds2_ang_90d_59b[] = 
+
+double ds2_ang_90d_59b[] =
 	{
 	-0.779988,
 	-0.753092,
@@ -470,8 +470,8 @@ double ds2_ang_90d_59b[] =
 	0.753092,
 	0.779988
 	};
-	
-double ds2_ang_120d_140b[] = 
+
+double ds2_ang_120d_140b[] =
 	{
 	-1.040042,
 	-1.025077,
@@ -615,7 +615,7 @@ double ds2_ang_120d_140b[] =
 	1.040042
 	};
 
-double ds2_ang_90d_140b[] = 
+double ds2_ang_90d_140b[] =
 	{
 	-0.77998,
 	-0.76876,
@@ -760,7 +760,7 @@ double ds2_ang_90d_140b[] =
 	};
 
 /*-----------------------------------------------------------------------------*/
-/* Hydrosweep DS2 Transmit Instant Correction Tables 
+/* Hydrosweep DS2 Transmit Instant Correction Tables
  *
  * Mode: Medium Depth 1 ( 100 -  450 m), additive corr. values for runtimes [msec]
  *       Opmode[6] = 1
@@ -908,7 +908,7 @@ double DS2_TimeCorrMedium1[] = {
 		0.000};
 
 /*
- * 
+ *
  * Mode: Medium Depth 2 ( 400 - 1000 m), additive corr. values for runtimes [msec]
  *       Opmode[6] = 1
  */
@@ -1055,7 +1055,7 @@ double DS2_TimeCorrMedium2[] = {
 		0.000};
 
 /*
- * 
+ *
  * Mode: Deep Sea 3 ( 800 - 3700 m), additive corr. values for runtimes [msec]
  *       Opmode[6] = 2
  */
@@ -1202,7 +1202,7 @@ double DS2_TimeCorrDeep3[] = {
 		0.000};
 
 /*
- * 
+ *
  * Mode: Deep Sea 4 (3300 - max. m), additive corr. values for runtimes [msec]
  *       Opmode[6] = 2
  */
@@ -1349,59 +1349,58 @@ double DS2_TimeCorrDeep4[] = {
 		0.000};
 
 #endif
-	
+
 /* system specific function prototypes */
-int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_atlas_copy(int verbose, void *mbio_ptr, 
+int mbsys_atlas_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, 
+int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr,
 			void *store_ptr,
 			int *error);
-

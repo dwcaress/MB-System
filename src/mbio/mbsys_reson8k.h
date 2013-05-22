@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_reson.h	8/20/94
  *	$Id$
  *
- *    Copyright (c) 2001-2012 by
+ *    Copyright (c) 2001-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_reson.h defines the data structures used by MBIO functions
- * to store data from Reson SeaBat 8101 and other 8K series 
+ * to store data from Reson SeaBat 8101 and other 8K series
  * multibeam sonar systems.
  * The data formats which are commonly used to store Reson 8K
  * data in files include
@@ -207,76 +207,75 @@ struct mbsys_reson8k_struct
 	double	pixel_size;
 	char 	beamflag[MBSYS_RESON8K_MAXBEAMS]; 		/* beamflags */
 	double 	bath[MBSYS_RESON8K_MAXBEAMS];			/* bathymetry (m) */
-	double 	amp[MBSYS_RESON8K_MAXBEAMS];			/* bathymetry (m) */	
+	double 	amp[MBSYS_RESON8K_MAXBEAMS];			/* bathymetry (m) */
 	double 	bath_acrosstrack[MBSYS_RESON8K_MAXBEAMS];	/* acrosstrack distance (m) */
 	double 	bath_alongtrack[MBSYS_RESON8K_MAXBEAMS];	/* alongtrack distance (m) */
 	double	ss[MBSYS_RESON8K_MAXPIXELS];			/* sidescan */
 	double 	ss_acrosstrack[MBSYS_RESON8K_MAXPIXELS];	/* acrosstrack distance (m) */
 	double 	ss_alongtrack[MBSYS_RESON8K_MAXPIXELS];		/* alongtrack distance (m) */
 	};
-	
+
 /* system specific function prototypes */
-int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_reson8k_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_reson8k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_reson8k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_reson8k_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_reson8k_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_reson8k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_reson8k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
 int mbsys_reson8k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, 
-			int *nsvp, 
+			int *kind,
+			int *nsvp,
 			double *depth, double *velocity,
 			int *error);
 int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp, 
+			int nsvp,
 			double *depth, double *velocity,
 			int *error);
-int mbsys_reson8k_copy(int verbose, void *mbio_ptr, 
+int mbsys_reson8k_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
 int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr,
-			int pixel_size_set, double *pixel_size, 
-			int swath_width_set, double *swath_width, 
+			int pixel_size_set, double *pixel_size,
+			int swath_width_set, double *swath_width,
 			int *error);
-

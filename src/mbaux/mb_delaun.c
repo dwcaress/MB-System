@@ -2,7 +2,7 @@
  *    The MB-system:	mb_delaun.c	4/19/94
  *    $Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -43,20 +43,20 @@
  *			of the triangles
  *   iv3[2*npts+1]:	array of indices of points forming the third vertex
  *			of the triangles
- *   ct1[2*npts+1]:	triangle connection array, value ct1[i] indicates which 
+ *   ct1[2*npts+1]:	triangle connection array, value ct1[i] indicates which
  *			triangle connects to side 1 of triangle i, value
  *			of -1 indicates no connecting triangle
- *   ct2[2*npts+1]:	triangle connection array, value ct2[i] indicates which 
+ *   ct2[2*npts+1]:	triangle connection array, value ct2[i] indicates which
  *			triangle connects to side 2 of triangle i
  *			of -1 indicates no connecting triangle
- *   ct3[2*npts+1]:	triangle connection array, value ct3[i] indicates which 
+ *   ct3[2*npts+1]:	triangle connection array, value ct3[i] indicates which
  *			triangle connects to side 3 of triangle i
  *			of -1 indicates no connecting triangle
- *   cs1[2*npts+1]:	triangle connection array, value cs1[i] indicates which 
+ *   cs1[2*npts+1]:	triangle connection array, value cs1[i] indicates which
  *			side of triangle ct1[i] connects to side 1 of triangle i
- *   cs2[2*npts+1]:	triangle connection array, value cs2[i] indicates which 
+ *   cs2[2*npts+1]:	triangle connection array, value cs2[i] indicates which
  *			side of triangle ct2[i] connects to side 2 of triangle i
- *   cs3[2*npts+1]:	triangle connection array, value cs3[i] indicates which 
+ *   cs3[2*npts+1]:	triangle connection array, value cs3[i] indicates which
  *			side of triangle ct3[i] connects to side 3 of triangle i
  *   error:		error value, MBIO convention
  *
@@ -70,26 +70,26 @@
  *   v3[2*npts+1]:	the value v3[i] stores the square of the radius
  *			of the circumcircle of triangle i
  *   istack[2*npts+1]:	This is a stack onto which is pushed the the
- *			indexes of all the triangles that need to be 
+ *			indexes of all the triangles that need to be
  *			replaced as a result of the addition of a new
- *			point. During the construction of the new 3-tuples 
- *			the index of the 3-tuple to be replaced is 
- *			popped from the stack. Since the addition of each 
- *			new point adds 2 more triangles to the total, 
- *			istack is popped 2 more times than it is pushed 
- *			for each additional point. Hence istack is 
- *			initialized prior to the main part of the routine 
- *			so that it correctly returns the indexes of the 
+ *			point. During the construction of the new 3-tuples
+ *			the index of the 3-tuple to be replaced is
+ *			popped from the stack. Since the addition of each
+ *			new point adds 2 more triangles to the total,
+ *			istack is popped 2 more times than it is pushed
+ *			for each additional point. Hence istack is
+ *			initialized prior to the main part of the routine
+ *			so that it correctly returns the indexes of the
  *			new triangles.
- *    kv1[6*npts+1]:	For each new point, each existing triangle is 
- *    kv2[6*npts+1]:	tested in turn and replaced if the new point 
+ *    kv1[6*npts+1]:	For each new point, each existing triangle is
+ *    kv2[6*npts+1]:	tested in turn and replaced if the new point
  *			lies within its circumcircle. Each side of the
  *			triangle is pushed onto the arrays kv1 and kv2 to
- *			potentially form a triangle with the new point. 
+ *			potentially form a triangle with the new point.
  *			HOWEVER, if the side is already on the kv stack it
- *			is removed from the stack.  This means that if the 
- *			side is common to two triangles that are to be 
- *			replaced, i.e an interior side, then it is not 
+ *			is removed from the stack.  This means that if the
+ *			side is common to two triangles that are to be
+ *			replaced, i.e an interior side, then it is not
  *			used as the basis for forming the new triangles.
  *
  * Author:	D. W. Caress
@@ -141,8 +141,8 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* some defines */
 #define	LARGE	1.0e10
@@ -154,27 +154,27 @@ static char rcs_id[] = "$Id$";
 	input set of points, where the triangles are as close to equiangular
 	as possible. */
 int mb_delaun(
-	int	verbose, 
-	int	npts, 
-	double	*p1, 
-	double	*p2, 
-	int	*ed, 
-	int	*ntri, 
-	int	*iv1, 
-	int	*iv2, 
-	int	*iv3, 
-	int	*ct1, 
-	int	*ct2, 
-	int	*ct3, 
-	int	*cs1, 
-	int	*cs2, 
-	int	*cs3, 
-	double	*v1, 
-	double	*v2, 
-	double	*v3, 
-	int	*istack, 
-	int	*kv1, 
-	int	*kv2, 
+	int	verbose,
+	int	npts,
+	double	*p1,
+	double	*p2,
+	int	*ed,
+	int	*ntri,
+	int	*iv1,
+	int	*iv2,
+	int	*iv3,
+	int	*ct1,
+	int	*ct2,
+	int	*ct3,
+	int	*cs1,
+	int	*cs2,
+	int	*cs3,
+	double	*v1,
+	double	*v2,
+	double	*v3,
+	int	*istack,
+	int	*kv1,
+	int	*kv2,
 	int	*error)
 {
 	char	*function_name = "mb_delaun";
@@ -293,16 +293,16 @@ fprintf(stderr,"jt:%d  %d %d %d\n",jt,iv1[jt],iv2[jt],iv3[jt]);*/
 	  for (jt=0;jt<isp;jt++)
 	    {
 	    i1 = iv3[jt];
-	    /* calculate the distance of the 
+	    /* calculate the distance of the
 		point from the jt circumcenter */
 	    rsq = (p1[nuc] - p1[i1])*(p1[nuc] + p1[i1] - 2*v1[jt])
 		+ (p2[nuc] - p2[i1])*(p2[nuc] + p2[i1] - 2*v2[jt]);
 
-	    /* If the point lies within circumcircle of triangle 
-		(3-tuple) jt then delete this triangle. Save the 
-		edges provided that they are not part of another 
+	    /* If the point lies within circumcircle of triangle
+		(3-tuple) jt then delete this triangle. Save the
+		edges provided that they are not part of another
 		triangle for which the point lies within the circumcircle
-		Thus "interior" edges are eliminated prior to 
+		Thus "interior" edges are eliminated prior to
 		construction of the new triangles (3 tuples). */
 /*if (rsq <= 0.0 && !(rsq < 0.0))
 {
@@ -334,8 +334,8 @@ fprintf(stderr,"jt:%d iv3:%d %f %f\n",jt,iv3[jt],p1[iv3[jt]],p2[iv3[jt]]);
 		if (l2 == 3) ivs2 = iv3;
 		addside = MB_YES;
 
-		/* Check if the side is already stored in kv. If it 
-			is then Side common to more than one of the 
+		/* Check if the side is already stored in kv. If it
+			is then Side common to more than one of the
 			current triangles. So remove it from list. */
 		j = 0;
 		while ((j < km) && addside)
@@ -394,11 +394,11 @@ fprintf(stderr,"jt:%d iv3:%d %f %f\n",jt,iv3[jt],p1[iv3[jt]],p2[iv3[jt]]);
 	      v2[kt] = 0.5*(p2[i2] + p2[nuc] - s*(p1[i2] - p1[nuc]));
 	      }
 
-	    /* The three points are degenerate and lie on a line. 
-		The "true" circumcenter is at infinity and the radius 
-		is also infinite. All points on the plane lie within 
-		the circumcircle. Thus simulate this by using 
-		circumcenter and circumcircle of the enclosing 
+	    /* The three points are degenerate and lie on a line.
+		The "true" circumcenter is at infinity and the radius
+		is also infinite. All points on the plane lie within
+		the circumcircle. Thus simulate this by using
+		circumcenter and circumcircle of the enclosing
 		equilateral triangle */
 	    else
 	      {

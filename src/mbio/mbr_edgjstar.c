@@ -53,12 +53,12 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_swap.h"
-#include "../../include/mbsys_jstar.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mb_swap.h"
+#include "mbsys_jstar.h"
 
 /* essential function prototypes */
 int mbr_register_edgjstar(int verbose, void *mbio_ptr,

@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavedit.h	6/24/95
  *    $Id$
  *
- *    Copyright (c) 1995-2012 by
+ *    Copyright (c) 1995-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -324,4 +324,3 @@ int mbnavedit_plot_draft_value(int iplot, int iping);
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
 
 /*--------------------------------------------------------------------*/
-

@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
  *    $Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -106,11 +106,11 @@
 
 #define MBNAVADJUST_DECLARE_GLOBALS
 #include "mbnavadjust_extrawidgets.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_status.h"
-#include "../../include/mb_aux.h"
+#include "mb_define.h"
+#include "mb_status.h"
+#include "mb_aux.h"
 #include "mbnavadjust.h"
-#include "../../include/mb_xgraphics.h"
+#include "mb_xgraphics.h"
 
 #include "mbnavadjust_creation.h"
 

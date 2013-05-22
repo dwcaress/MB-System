@@ -36,12 +36,12 @@
 #include <sys/stat.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_aux.h"
-#include "../../include/mbsys_simrad3.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_io.h"
+#include "mb_aux.h"
+#include "mbsys_simrad3.h"
 
 #define MBKONSBERGPREPROCESS_ALLOC_CHUNK 1000
 #define MBKONSBERGPREPROCESS_PROCESS		1

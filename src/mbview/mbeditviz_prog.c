@@ -2,7 +2,7 @@
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2012 by
+ *    Copyright (c) 2007-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -67,11 +67,11 @@
 #include <sys/stat.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_aux.h"
-#include "../../include/mbsys_singlebeam.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_aux.h"
+#include "mbsys_singlebeam.h"
 
 /* GMT include files */
 #include "gmt.h"

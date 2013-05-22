@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_mbnetcdf.c	1/25/02
  *	$Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -83,12 +83,12 @@
 #include <netcdf.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_process.h"
-#include "../../include/mbsys_netcdf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mb_process.h"
+#include "mbsys_netcdf.h"
 
 /* essential function prototypes */
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr,

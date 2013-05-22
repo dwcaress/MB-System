@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_mbarrov2.h	10/3/2006
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_mbarrov2.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_MBARROV2 format (MBIO id 170).  
+ * to store multibeam data read from the MBF_MBARROV2 format (MBIO id 170).
  *
  * Author:	D. W. Caress
  * Date:	October 3, 2006
@@ -31,20 +31,20 @@
  *   2. The MB-System implementation includes the support of
  *      an arbitrary number of comment records at the beginning
  *      of each file. The comment records begin with the character '#'.
- *   
+ *
  */
- 
+
 #define	MBF_MBARROV2_MAXLINE	1024
 
 struct mbf_mbarrov2_struct
 	{
 	/* type of data record */
 	int	kind;
-	
+
 	/* RovName */
 	char	rovname[8];
 	int	divenumber;
-	
+
 	/* time stamp */
 	double	time_d;
 	int	time_i[7];
@@ -61,10 +61,10 @@ struct mbf_mbarrov2_struct
 	double	ship_longitude;	/* degrees */
 	double	ship_latitude;	/* degrees */
 	double	ship_heading;	/* degrees */
-	
+
 	/* flags */
 	int	qc_flag;
- 
+
 	/* comment */
 	char	comment[MBF_MBARROV2_MAXLINE];
-	};	
+	};

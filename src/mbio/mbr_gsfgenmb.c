@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
  *	$Id$
  *
- *    Copyright (c) 1998-2012 by
+ *    Copyright (c) 1998-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -84,12 +84,12 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbf_gsfgenmb.h"
-#include "../../include/mbsys_gsf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbf_gsfgenmb.h"
+#include "mbsys_gsf.h"
 
 /* GSF error value */
 extern int gsfError;

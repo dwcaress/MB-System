@@ -2,7 +2,7 @@
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
  *    $Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -36,10 +36,10 @@
 #include <math.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_format.h"
-#include "../../include/mbsys_singlebeam.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mbsys_singlebeam.h"
 
 /* GMT include files */
 #include "gmt.h"

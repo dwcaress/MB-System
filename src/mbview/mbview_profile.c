@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_profile.c	3/8/2006
  *    $Id$
  *
- *    Copyright (c) 2006-2012 by
+ *    Copyright (c) 2006-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -61,8 +61,8 @@
 #include "mb_glwdrawa.h"
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* mbview include */
 #include "mbview.h"
@@ -115,7 +115,7 @@ int mbview_getprofilecount(int verbose, size_t instance,
 
 	/* get number of profiles */
 	*npoints = data->profile.npoints;
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -133,7 +133,7 @@ int mbview_getprofilecount(int verbose, size_t instance,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_allocprofilepoints(int verbose, 
+int mbview_allocprofilepoints(int verbose,
 			int	npoints,
 			struct mbview_profilepoint_struct **points,
 			int 	*error)
@@ -157,7 +157,7 @@ int mbview_allocprofilepoints(int verbose,
 		}
 
 	/* allocate the arrays using mb_realloc */
-	status = mb_reallocd(verbose, __FILE__, __LINE__, 
+	status = mb_reallocd(verbose, __FILE__, __LINE__,
 				npoints * sizeof(struct mbview_profilepoint_struct),
 				(void **)points,error);
 
@@ -179,7 +179,7 @@ int mbview_allocprofilepoints(int verbose,
 
 
 /*------------------------------------------------------------------------------*/
-int mbview_freeprofilepoints(int verbose, 
+int mbview_freeprofilepoints(int verbose,
 			double	**points,
 			int *error)
 
@@ -221,7 +221,7 @@ int mbview_freeprofilepoints(int verbose,
 
 
 /*------------------------------------------------------------------------------*/
-int mbview_allocprofilearrays(int verbose, 
+int mbview_allocprofilearrays(int verbose,
 			int	npoints,
 			double	**distance,
 			double	**zdata,
@@ -293,7 +293,7 @@ int mbview_allocprofilearrays(int verbose,
 
 
 /*------------------------------------------------------------------------------*/
-int mbview_freeprofilearrays(int verbose, 
+int mbview_freeprofilearrays(int verbose,
 			double	**distance,
 			double	**zdata,
 			int	**boundary,
@@ -401,19 +401,19 @@ int mbview_getprofile(int verbose, size_t instance,
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* check that the array pointers are not NULL */
-	if (distance == NULL || zdata == NULL || boundary == NULL 
-		|| xlon == NULL || ylat == NULL || distovertopo == NULL 
+	if (distance == NULL || zdata == NULL || boundary == NULL
+		|| xlon == NULL || ylat == NULL || distovertopo == NULL
 		|| slope == NULL || bearing == NULL)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_DATA_NOT_INSERTED;
 		}
-	
+
 	/* otherwise go get the profile data */
 	else
-		{	
+		{
 		/* loop over the profiles */
 		strcpy(source_name, data->profile.source_name);
 		*length = data->profile.length;
@@ -432,7 +432,7 @@ int mbview_getprofile(int verbose, size_t instance,
 			slope[i] = data->profile.points[i].slope;
 			}
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -446,9 +446,9 @@ int mbview_getprofile(int verbose, size_t instance,
 		fprintf(stderr,"dbg2       npoints:                    %d\n", *npoints);
 		for (i=0;i<*npoints;i++)
 			{
-			fprintf(stderr,"dbg2       %d distance:%f zdata:%f boundary:%d xlon:%f ylat:%f distovertopo:%f bearing:%f slope:%f\n", 
-					i, distance[i], zdata[i], boundary[i], 
-				        xlon[i], ylat[i], distovertopo[i], 
+			fprintf(stderr,"dbg2       %d distance:%f zdata:%f boundary:%d xlon:%f ylat:%f distovertopo:%f bearing:%f slope:%f\n",
+					i, distance[i], zdata[i], boundary[i],
+				        xlon[i], ylat[i], distovertopo[i],
 				        bearing[i], slope[i]);
 			}
 		fprintf(stderr,"dbg2       error:                     %d\n",*error);
@@ -469,7 +469,7 @@ int mbview_reset_prglx(size_t instance)
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	Dimension	scrolledWindow_width;
-	Dimension	scrolledWindow_height;	
+	Dimension	scrolledWindow_height;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -481,11 +481,11 @@ int mbview_reset_prglx(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n", instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-		
+
 	/* If profile view enabled update opengl plotting widget */
 	if (data->profile_view_mode == MBV_VIEW_ON)
 		{
@@ -497,12 +497,12 @@ int mbview_reset_prglx(size_t instance)
 			}
 
 		/* get and set sizes of the drawingArea */
-		XtVaGetValues(view->mb3dview.mbview_scrolledWindow_profile, 
-			XmNwidth, &scrolledWindow_width, 
-			XmNheight, &scrolledWindow_height, 
+		XtVaGetValues(view->mb3dview.mbview_scrolledWindow_profile,
+			XmNwidth, &scrolledWindow_width,
+			XmNheight, &scrolledWindow_height,
 			NULL);
 		data->prheight = scrolledWindow_height - 35;
-		data->prwidth = data->profile_widthfactor 
+		data->prwidth = data->profile_widthfactor
 					* (scrolledWindow_width -20);
 
 		/* set drawing area size */
@@ -533,7 +533,7 @@ fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
 __FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
 #endif
 		glXMakeCurrent(view->dpy,XtWindow(view->prglwmda),view->prglx_context);
-	
+
 #ifdef MBV_GET_GLX_ERRORS
 mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
@@ -579,11 +579,11 @@ int mbview_destroy_prglx(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n", instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-		
+
 	/* If profile view enabled update opengl plotting widget */
 	if (data->profile_view_mode == MBV_VIEW_ON)
 		{
@@ -613,7 +613,7 @@ int mbview_destroy_prglx(size_t instance)
 	return(status);
 }
 
-		
+
 
 /*------------------------------------------------------------------------------*/
 int mbview_plotprofile(size_t instance)
@@ -641,11 +641,11 @@ int mbview_plotprofile(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n", instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* If there is a profile plot it */
 	if (data->profile_view_mode == MBV_VIEW_ON)
 		{
@@ -669,13 +669,13 @@ fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
 __FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
 #endif
 		glXMakeCurrent(view->dpy,XtWindow(view->prglwmda),view->prglx_context);
-	
+
 #ifdef MBV_GET_GLX_ERRORS
 mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(left, right, bottom, top, 
+		glOrtho(left, right, bottom, top,
 				MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
 
 		/* set up translations */
@@ -692,19 +692,19 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		glBegin(GL_QUADS);
 		for (i=0;i<data->profile.npoints-1;i++)
 			{
-			if (data->profile.points[i].boundary == MB_NO 
+			if (data->profile.points[i].boundary == MB_NO
 				|| data->profile.points[i+1].boundary == MB_NO)
 				{
 				if (data->profile.points[i].slope < data->profile_slopethreshold)
 					{
-					glColor3f(colortable_object_red[MBV_COLOR_BLACK], 
-						colortable_object_green[MBV_COLOR_BLACK], 
+					glColor3f(colortable_object_red[MBV_COLOR_BLACK],
+						colortable_object_green[MBV_COLOR_BLACK],
 						colortable_object_blue[MBV_COLOR_BLACK]);
 					}
 				else
 					{
-					glColor3f(colortable_object_red[MBV_COLOR_RED], 
-						colortable_object_green[MBV_COLOR_RED], 
+					glColor3f(colortable_object_red[MBV_COLOR_RED],
+						colortable_object_green[MBV_COLOR_RED],
 						colortable_object_blue[MBV_COLOR_RED]);
 					}
 				x = scale * data->profile.points[i].distance;
@@ -740,8 +740,8 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		glEnd();
 
 		/* draw boundaries */
-		glColor3f(colortable_object_red[MBV_COLOR_GREEN], 
-			colortable_object_green[MBV_COLOR_GREEN], 
+		glColor3f(colortable_object_red[MBV_COLOR_GREEN],
+			colortable_object_green[MBV_COLOR_GREEN],
 			colortable_object_blue[MBV_COLOR_GREEN]);
 		glLineWidth(2.0);
 		glBegin(GL_LINES);
@@ -758,12 +758,12 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 
 		/* draw box */
 		if (clip == MB_NO)
-			glColor3f(colortable_object_red[MBV_COLOR_BLACK], 
-				colortable_object_green[MBV_COLOR_BLACK], 
+			glColor3f(colortable_object_red[MBV_COLOR_BLACK],
+				colortable_object_green[MBV_COLOR_BLACK],
 				colortable_object_blue[MBV_COLOR_BLACK]);
 		else
-			glColor3f(colortable_object_red[MBV_COLOR_RED], 
-				colortable_object_green[MBV_COLOR_RED], 
+			glColor3f(colortable_object_red[MBV_COLOR_RED],
+				colortable_object_green[MBV_COLOR_RED],
 				colortable_object_blue[MBV_COLOR_RED]);
 		glLineWidth(2.0);
 		glBegin(GL_LINE_LOOP);
@@ -783,13 +783,13 @@ mbview_glerrorcheck(instance, 2, function_name);
 #endif
 
 		/* swap opengl buffers */
-		glXSwapBuffers (XtDisplay(view->prglwmda), 
+		glXSwapBuffers (XtDisplay(view->prglwmda),
 				XtWindow(view->prglwmda));
 #ifdef MBV_GETERRORS
 mbview_glerrorcheck(instance, 3, function_name);
 #endif
 
-		
+
 		/* update info label */
 		mbview_profile_text(instance);
 		}
@@ -829,7 +829,7 @@ int mbview_profile_text(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n", instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -838,7 +838,7 @@ int mbview_profile_text(size_t instance)
 	if (data->profile.npoints > 0 && data->profile.source != MBV_PROFILE_NONE)
 		{
 		sprintf(value_text,
-		":::t\"Profile Source: %s\":t\" Length: %.2f m\":t\" Vertical Range: \":t\" %.2f to %.2f m\"", 
+		":::t\"Profile Source: %s\":t\" Length: %.2f m\":t\" Vertical Range: \":t\" %.2f to %.2f m\"",
 			data->profile.source_name,
 			data->profile.points[data->profile.npoints-1].distance,
 			data->profile.zmin,data->profile.zmax);
@@ -848,7 +848,7 @@ int mbview_profile_text(size_t instance)
 		sprintf(value_text, ":::t\"Profile Source: None\":t\"No Profile\"");
 		}
 	set_mbview_label_multiline_string(view->mb3dview.mbview_profile_label_info, value_text);
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{

@@ -2,7 +2,7 @@
  *    The MB-system:	mb3dsoundingsprivate.h	9/24/2003
  *    $Id$
  *
- *    Copyright (c) 2007-2012 by
+ *    Copyright (c) 2007-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -65,7 +65,7 @@
 #define MBS_LEFT_WIDTH		40
 #define MBS_LEFT_HEIGHT		40
 #define	MBS_NUM_COLORS   11
- 
+
 #define MBS_OPENGL_WIDTH 3.0
 #define MBS_OPENGL_ZMIN2D -5.0
 #define MBS_OPENGL_ZMAX2D 1000.0
@@ -100,7 +100,7 @@ struct mb3dsoundings_world_struct
     {
     /* flag if this instance is initialized */
     int			init;
-    
+
     /* function pointers */
     void (*mb3dsoundings_dismiss_notify)();
     void (*mb3dsoundings_edit_notify)(int ifile, int iping, int ibeam, char beamflag, int flush);
@@ -110,7 +110,7 @@ struct mb3dsoundings_world_struct
 
     /* pointer to structure holding data to be rendered */
     struct mb3dsoundings_struct *soundingdata;
-    
+
     /* widgets and other Xwindows stuff of interest */
     Widget		topLevelShell;
     Widget		mainWindow;
@@ -122,13 +122,13 @@ struct mb3dsoundings_world_struct
     int			glx_init;
     GLXContext		glx_context;
     int			message_on;
-    
+
     /* mode parameters */
     int			mouse_mode;
     int			edit_mode;
     int			keyreverse_mode;
     int			mousereverse_mode;
-        
+
     /* cursors */
     Cursor TargetBlackCursor;
     Cursor TargetGreenCursor;
@@ -144,8 +144,8 @@ struct mb3dsoundings_world_struct
     Cursor BoatBlackCursor;
     Cursor BoatRedCursor;
     Cursor WatchBlackCursor;
-    Cursor WatchRedCursor;    
-    
+    Cursor WatchRedCursor;
+
     /* drawing variables */
     float elevation;
     float azimuth;
@@ -179,7 +179,7 @@ struct mb3dsoundings_world_struct
     int button_move_y;
     int button_up_x;
     int button_up_y;
-    
+
     /* edit grab parameters */
     int grab_start_defined;
     int grab_end_defined;
@@ -187,19 +187,19 @@ struct mb3dsoundings_world_struct
     int	grab_start_y;
     int	grab_end_x;
     int	grab_end_y;
-	
+
     /* patch test parameters */
     int	irollbias;
     int	ipitchbias;
     int	iheadingbias;
     int	itimelag;
-    
+
     /* view parameters */
     int	view_boundingbox;
     int	view_flagged;
     int	view_profiles;
     int	view_scalewithflagged;
-    
+
     /* last sounding edited */
     int	last_sounding_defined;
     int	last_sounding_edited;
@@ -236,7 +236,7 @@ EXTERNAL int key_d_down = 0;
 #ifdef MB3DSOUNDINGSGLOBAL
 
 /* library colortables */
-char	*mb3dsoundings_colorname[MBS_NUM_COLORS] = 
+char	*mb3dsoundings_colorname[MBS_NUM_COLORS] =
 		{ "Black",
 		  "White",
 		  "Red",
@@ -252,7 +252,7 @@ char	*mb3dsoundings_colorname[MBS_NUM_COLORS] =
 /* library colortables */
 extern char	*mb3dsoundings_colorname[MBS_NUM_COLORS];
 #endif
-	
+
 /*--------------------------------------------------------------------*/
 
 int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *error);

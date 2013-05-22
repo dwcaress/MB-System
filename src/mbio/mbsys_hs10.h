@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hs10.h	12/4/00
  *	$Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -55,11 +55,11 @@
  *      consists of 800 byte binary records in which only the
  *      lower 4 bits of each byte are used.
  *   4. The actual data files provided to WHOI seem to be simple
- *      717 byte ASCII records with time, lat, lon, heading, 
- *      center beam depth, 45 depths, 45 acrosstrack distances, 
- *      45 beam amplitudes, and a <CR><LF> terminator. Format 
+ *      717 byte ASCII records with time, lat, lon, heading,
+ *      center beam depth, 45 depths, 45 acrosstrack distances,
+ *      45 beam amplitudes, and a <CR><LF> terminator. Format
  *      171 supports the actual data we received.
- *   5. The data received use 5 characters each for depth, 
+ *   5. The data received use 5 characters each for depth,
  *      acrosstrack, and amplitude values. Null beams have
  *      depth values of 29999 and acrosstrack values of 99999.
  *      MB-System supports beam flagging by setting flagged
@@ -72,25 +72,25 @@
  *      where the first two bytes of the record are "##".
  *      Comment records are variable length.
  *   8. The raw data format specification is as follows:
- * 
+ *
  *      ----------------------------------------------------------
  *      HS-10 MNBES Data Format - JAMSTEC
- *      
+ *
  *      800 bytes/record, 10 records/block
- *      
+ *
  *      Note: 4 bits from LSB is effective in each byte.
  *           zB. 30 30 35 39 ---> 0 0 5 9 (HEX) = 89 (DEC)
  *               30 30 32 3D ---> 0 0 2 D (HEX) = 45 (DEC)
  *      The HS-10 processor calculates the water depth by use of
- *      average sound velocity and by correcting the difference 
- *      between the true angle of the sound path (obtained by the 
- *      true sound velocity profile) and the nominal angle of each 
- *      beam (every 2 degrees). The horizontal distance of the n-th 
+ *      average sound velocity and by correcting the difference
+ *      between the true angle of the sound path (obtained by the
+ *      true sound velocity profile) and the nominal angle of each
+ *      beam (every 2 degrees). The horizontal distance of the n-th
  *      beam is
  *              Distance(n) = Depth(n) * tan[T(n)],
- *      where T(n) is the nominal angle of the n-th beam: 
+ *      where T(n) is the nominal angle of the n-th beam:
  *              ( T(n) = 2 * (n-23) degrees, n=1,45 ).
- *      
+ *
  *      No.  Bytes  Data
  *       1.    4    Year
  *       2.    4    Month
@@ -152,7 +152,7 @@
  *      49.    4    Sonar mode [0]
  *      50.         not used
  *      ----------------------------------------------------------
- * 
+ *
  */
 
 /* number of beams for Furuno HS-10 */
@@ -189,60 +189,59 @@ struct mbsys_hs10_struct
 	int	depth[MBSYS_HS10_BEAMS];
 	int	acrosstrack[MBSYS_HS10_BEAMS];
 	int	amplitude[MBSYS_HS10_BEAMS];
-	
+
 	/* comment */
 	char	comment[MBSYS_HS10_COMMENT];
-	};	
-	
+	};
+
 /* system specific function prototypes */
-int mbsys_hs10_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hs10_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_hs10_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hs10_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_hs10_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hs10_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_hs10_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hs10_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_hs10_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hs10_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_hs10_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_hs10_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_hs10_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_hs10_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_hs10_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_hs10_copy(int verbose, void *mbio_ptr, 
+int mbsys_hs10_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

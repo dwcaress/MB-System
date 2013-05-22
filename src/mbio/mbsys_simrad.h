@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_simrad.h	8/5/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,9 +13,9 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_simrad.h defines the MBIO data structures for handling data from 
- * old (pre-1997) Simrad multibeam sonars (e.g. EM950, EM1000, EM12S, 
- * EM12D). The data formats associated with Simrad multibeams 
+ * mbsys_simrad.h defines the MBIO data structures for handling data from
+ * old (pre-1997) Simrad multibeam sonars (e.g. EM950, EM1000, EM12S,
+ * EM12D). The data formats associated with Simrad multibeams
  * (both old and new) include:
  *    MBSYS_SIMRAD formats (code in mbsys_simrad.c and mbsys_simrad.h):
  *      MBF_EMOLDRAW : MBIO ID 51 - Vendor EM1000, EM12S, EM12D, EM121
@@ -24,7 +24,7 @@
  *      MBF_EM12DARW : MBIO ID 54 - NERC EM12S
  *                   : MBIO ID 55 - aliased to 51
  *    MBSYS_SIMRAD2 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
- *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120 
+ *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120
  *      MBF_EM300MBA : MBIO ID 57 - MBARI EM3000, EM300, EM120
  *
  *
@@ -165,9 +165,9 @@
  *         0x02CD: EM-12S or EM-1000 sidescan + phase    1465 data bytes
  *   6. The EM-12D system records separate starboard and port datagrams
  *      for each ping.
- *   7. Multiple sidescan datagrams are recorded for each ping because 
+ *   7. Multiple sidescan datagrams are recorded for each ping because
  *      there is too much information to fit in a single datagram.
- *   8. Simrad systems record navigation fixes using the position 
+ *   8. Simrad systems record navigation fixes using the position
  *      datagram; no navigation is included in the per ping data.  Thus,
  *      it is necessary to extrapolate the navigation for each ping
  *      at read time from the last navigation fix.  The frequency of
@@ -242,7 +242,7 @@
 #define	EM_SS_NONE		0
 #define	EM_SS_AMPONLY		1
 #define	EM_SS_AMPPHASE		2
-	
+
 /* The following angle tables were provided by
     Dr. John Hughes Clarke of the University of
     New Brunswick. Dr. Clarke obtained these tables
@@ -997,25 +997,25 @@ double angles_EM12DS_ISO_ANG_SHALLOW[81] = {
 		-75.0000
 };
 double angles_EM12DP_SHALLOW[81] = {
-		75.00000, 74.81250, 74.62500, 74.43750, 
+		75.00000, 74.81250, 74.62500, 74.43750,
 		74.25000, 74.06250, 73.81250, 73.62500,
 		73.37500, 73.18750, 72.93750, 72.68750,
 		72.43750, 72.18750, 71.93750, 71.68750,
-		71.43750, 71.12500, 70.87500, 70.56250, 
+		71.43750, 71.12500, 70.87500, 70.56250,
 		70.25000, 69.93750, 69.62500, 69.31250,
-		68.93750, 68.62500, 68.25000, 67.87500, 
+		68.93750, 68.62500, 68.25000, 67.87500,
 		67.43750, 67.06250, 66.62500, 66.18750,
-		65.75000, 65.31250, 64.81250, 64.31250, 
+		65.75000, 65.31250, 64.81250, 64.31250,
 		63.81250, 63.25000, 62.68750, 62.12500,
-		61.50000, 60.87500, 60.25000, 59.56250, 
+		61.50000, 60.87500, 60.25000, 59.56250,
 		58.81250, 58.12500, 57.31250, 56.50000,
-		55.68750, 54.81250, 53.87500, 52.93750, 
+		55.68750, 54.81250, 53.87500, 52.93750,
 		51.87500, 50.87500, 49.75000, 48.56250,
-		47.37500, 46.12500, 44.75000, 43.37500, 
+		47.37500, 46.12500, 44.75000, 43.37500,
 		41.93750, 40.37500, 38.75000, 37.06250,
-		35.31250, 33.50000, 31.56250, 29.56250, 
+		35.31250, 33.50000, 31.56250, 29.56250,
 		27.43750, 25.31250, 23.06250, 20.68750,
-		18.31250, 15.81250, 13.31250, 10.68750, 
+		18.31250, 15.81250, 13.31250, 10.68750,
 		08.06250, 05.37500, 02.68750, 00.00000,
 		-02.6875
 };
@@ -1184,15 +1184,15 @@ double angles_EM12S_SHALLOW[81] = {
 };
 double angles_EM121_GUESS[121] = {
 		 60.0, 59.0, 58.0, 57.0, 56.0, 55.0, 54.0, 53.0, 52.0, 51.0,
-		 50.0, 49.0, 48.0, 47.0, 46.0, 45.0, 44.0, 43.0, 42.0, 41.0, 
-		 40.0, 39.0, 38.0, 37.0, 36.0, 35.0, 34.0, 33.0, 32.0, 31.0, 
-		 30.0, 29.0, 28.0, 27.0, 26.0, 25.0, 24.0, 23.0, 22.0, 21.0, 
-		 20.0, 19.0, 18.0, 17.0, 16.0, 15.0, 14.0, 13.0, 12.0, 11.0, 
+		 50.0, 49.0, 48.0, 47.0, 46.0, 45.0, 44.0, 43.0, 42.0, 41.0,
+		 40.0, 39.0, 38.0, 37.0, 36.0, 35.0, 34.0, 33.0, 32.0, 31.0,
+		 30.0, 29.0, 28.0, 27.0, 26.0, 25.0, 24.0, 23.0, 22.0, 21.0,
+		 20.0, 19.0, 18.0, 17.0, 16.0, 15.0, 14.0, 13.0, 12.0, 11.0,
 		 10.0,  9.0,  8.0,  7.0,  6.0,  5.0,  4.0,  3.0,  2.0,  1.0,
 		  0.0,
-     		 -1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0, -8.0, -9.0,-10.0, 
+     		 -1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0, -8.0, -9.0,-10.0,
 		-11.0,-12.0,-13.0,-14.0,-15.0,-16.0,-17.0,-18.0,-19.0,-20.0,
-		-21.0,-22.0,-23.0,-24.0,-25.0,-26.0,-27.0,-28.0,-29.0,-30.0, 
+		-21.0,-22.0,-23.0,-24.0,-25.0,-26.0,-27.0,-28.0,-29.0,-30.0,
 		-31.0,-32.0,-33.0,-34.0,-35.0,-36.0,-37.0,-38.0,-39.0,-40.0,
 		-41.0,-42.0,-43.0,-44.0,-45.0,-46.0,-47.0,-48.0,-49.0,-50.0,
      		-51.0,-52.0,-53.0,-54.0,-55.0,-56.0,-57.0,-58.0,-59.0,-60.0
@@ -1209,14 +1209,14 @@ struct mbsys_simrad_survey_struct
 	/* interpolated nav */
 	double	longitude;
 	double	latitude;
-	
+
 	/* bathymetry */
 	int	ping_number;
 	int	beams_bath;	/* EM-1000:  60
 				   EM12S:    81
-				   EM121:   121 
+				   EM121:   121
 				   EM12D:   81 */
-	int	bath_mode;	/* EM-1000: 1=deep; 2=medium; 3=shallow 
+	int	bath_mode;	/* EM-1000: 1=deep; 2=medium; 3=shallow
 				   EM-12S:  1=shallow equiangle spacing
 				            2=deep equiangle spacing
 				            3=shallow equidistant spacing
@@ -1232,7 +1232,7 @@ struct mbsys_simrad_survey_struct
 				            7=deep 114 degree equidistant
 				            8=deep 98 degree equidistant */
 	int	bath_res;	/* EM-12 only: 1=high res; 2=low res */
-	int	bath_quality;	/* number of good beams, 
+	int	bath_quality;	/* number of good beams,
 					negative if ping rejected */
 	int	bath_num;	/* number of beams, EM-121 only, 61 or 121 */
 	int	pulse_length;	/* pulse length in ms, EM-121 only */
@@ -1245,8 +1245,8 @@ struct mbsys_simrad_survey_struct
 	int	depth_res;	/* depth resolution, 0.01 m, EM-121 only */
 	int	range_res;	/* range resolution, 0.1 ms, EM-121 only */
 	int	keel_depth;	/* depth of most vertical beam:
-					EM-1000:        0.02 meters 
-					EM-12 high res: 0.10 meters 
+					EM-1000:        0.02 meters
+					EM-12 high res: 0.10 meters
 					EM-12 low res:  0.20 meters
 					EM-121          depth_res meters */
 	int	heading;	/* heading:
@@ -1258,35 +1258,35 @@ struct mbsys_simrad_survey_struct
 	int	xducer_pitch;	/* 0.01 degrees */
 	int	ping_heave;	/* 0.01 meters */
 	int	sound_vel;	/* 0.1 meters/sec */
-	unsigned short int bath[MBSYS_SIMRAD_MAXBEAMS];	
+	unsigned short int bath[MBSYS_SIMRAD_MAXBEAMS];
 				/* depths:
-					EM-1000:        0.02 meters 
-					EM-12 high res: 0.10 meters 
+					EM-1000:        0.02 meters
+					EM-12 high res: 0.10 meters
 					EM-12 low res:  0.20 meters
 					EM-121:         depth_res meters */
 	short int bath_acrosstrack[MBSYS_SIMRAD_MAXBEAMS];
 				/* acrosstrack distances:
-					EM-1000:         0.1 meters 
-					EM-12 high res:  0.2 meters 
+					EM-1000:         0.1 meters
+					EM-12 high res:  0.2 meters
 					EM-12 low res:   0.5 meters
 					EM-121:          across_res meters */
 	short int bath_alongtrack[MBSYS_SIMRAD_MAXBEAMS];
 				/* alongtrack distances:
-					EM-1000:         0.1 meters 
-					EM-12 high res:  0.2 meters 
+					EM-1000:         0.1 meters
+					EM-12 high res:  0.2 meters
 					EM-12 low res:   0.5 meters
 					EM-121:          along_res meters */
 	short int tt[MBSYS_SIMRAD_MAXBEAMS];	/* meters */
 				/* travel times:
-					EM-1000:         0.05 msec 
-					EM-12 high res:  0.20 msec 
+					EM-1000:         0.05 msec
+					EM-12 high res:  0.20 msec
 					EM-12 low res:   0.80 msec
 					EM-121:          0.1 * range_res msec */
 	mb_s_char	amp[MBSYS_SIMRAD_MAXBEAMS];	/* 0.5 dB */
 	mb_u_char	quality[MBSYS_SIMRAD_MAXBEAMS];	/* meters */
 	mb_s_char	heave[MBSYS_SIMRAD_MAXBEAMS];	/* 0.1 meters */
 	mb_s_char	beamflag[MBSYS_SIMRAD_MAXBEAMS];	/* MB-System beamflags */
-	
+
 	/* sidescan */
 	int	ss_status;
 	int	pixels_ssraw;	/* total number of samples for this ping */
@@ -1295,12 +1295,12 @@ struct mbsys_simrad_survey_struct
 				   3 = EM-1000 deep:    0.3 m/sample
 				   4 = EM-1000 medium:  0.3 m/sample
 				   5 = EM-1000 shallow: 0.15 m/sample */
-	short int beam_frequency[MBSYS_SIMRAD_MAXBEAMS]; 
+	short int beam_frequency[MBSYS_SIMRAD_MAXBEAMS];
 				/*	0 = 12.67 kHz
 					1 = 13.00 kHz
 					2 = 13.33 kHz
 					3 = 95.00 kHz */
-	short int beam_samples[MBSYS_SIMRAD_MAXBEAMS];	
+	short int beam_samples[MBSYS_SIMRAD_MAXBEAMS];
 				/* number of sidescan samples derived from
 					each beam */
 	short int beam_center_sample[MBSYS_SIMRAD_MAXBEAMS];
@@ -1317,7 +1317,7 @@ struct mbsys_simrad_survey_struct
 	short	ss[MBSYS_SIMRAD_MAXPIXELS];
 				/* the processed sidescan ordered port to starboard */
 	short	ssalongtrack[MBSYS_SIMRAD_MAXPIXELS];
-				/* the processed sidescan alongtrack distances 
+				/* the processed sidescan alongtrack distances
 					in distance resolution units */
 	};
 
@@ -1344,19 +1344,19 @@ struct mbsys_simrad_struct
 	double	pitch_offset;	/* pitch offset (degrees) */
 	double	heading_offset;	/* heading offset (degrees) */
 	double	em100_td;	/* EM-100 tranducer depth (meters) */
-	double	em100_tx;	/* EM-100 tranducer fore-aft 
+	double	em100_tx;	/* EM-100 tranducer fore-aft
 					offset (meters) */
-	double	em100_ty;	/* EM-100 tranducer athwartships 
+	double	em100_ty;	/* EM-100 tranducer athwartships
 					offset (meters) */
 	double	em12_td;	/* EM-12 tranducer depth (meters) */
-	double	em12_tx;	/* EM-12 tranducer fore-aft 
+	double	em12_tx;	/* EM-12 tranducer fore-aft
 					offset (meters) */
-	double	em12_ty;	/* EM-12 tranducer athwartships 
+	double	em12_ty;	/* EM-12 tranducer athwartships
 					offset (meters) */
 	double	em1000_td;	/* EM-1000 tranducer depth (meters) */
-	double	em1000_tx;	/* EM-1000 tranducer fore-aft 
+	double	em1000_tx;	/* EM-1000 tranducer fore-aft
 					offset (meters) */
-	double	em1000_ty;	/* EM-1000 tranducer athwartships 
+	double	em1000_ty;	/* EM-1000 tranducer athwartships
 					offset (meters) */
 	char	spare_parameter[128];
 	int	survey_line;
@@ -1401,44 +1401,44 @@ struct mbsys_simrad_struct
 	int	minute;
 	int	second;
 	int	centisecond;
-	
+
 	/* pointer to survey data structure */
 	struct mbsys_simrad_survey_struct *ping;
 	};
-	
+
 /* system specific function prototypes */
-int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_simrad_survey_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad_survey_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error);
-int mbsys_simrad_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_simrad_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_simrad_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_simrad_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
@@ -1447,38 +1447,37 @@ int mbsys_simrad_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
 			int *pulses, int *error);
 int mbsys_simrad_gains(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transmit_gain, double *pulse_length, 
+			int *kind, double *transmit_gain, double *pulse_length,
 			double *receive_gain, int *error);
 int mbsys_simrad_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_simrad_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_simrad_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
 int mbsys_simrad_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, 
-			int *nsvp, 
+			int *kind,
+			int *nsvp,
 			double *depth, double *velocity,
 			int *error);
 int mbsys_simrad_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp, 
+			int nsvp,
 			double *depth, double *velocity,
 			int *error);
-int mbsys_simrad_copy(int verbose, void *mbio_ptr, 
+int mbsys_simrad_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
 int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr,
-		int pixel_size_set, double *pixel_size, 
-		int swath_width_set, double *swath_width, 
-		int pixel_int, 
+		int pixel_size_set, double *pixel_size,
+		int swath_width_set, double *swath_width,
+		int pixel_int,
 		int *error);
-

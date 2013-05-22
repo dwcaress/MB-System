@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_mr1bldeo.c	10/24/95
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_mr1bldeo.c contains the functions for reading and writing
- * multibeam data in the MR1BLDEO format.  
+ * multibeam data in the MR1BLDEO format.
  * These functions include:
  *   mbr_alm_mr1bldeo	- allocate read/write memory
  *   mbr_dem_mr1bldeo	- deallocate read/write memory
@@ -96,34 +96,34 @@
 #include <rpc/xdr.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_mr1b.h"
-#include "../../include/mbf_mr1bldeo.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_mr1b.h"
+#include "mbf_mr1bldeo.h"
 
 /* essential function prototypes */
 int mbr_register_mr1bldeo(int verbose, void *mbio_ptr, int *error);
-int mbr_info_mr1bldeo(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_mr1bldeo(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_mr1bldeo(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_mr1bldeo(int verbose, void *mbio_ptr, int *error);
@@ -131,13 +131,13 @@ int mbr_zero_mr1bldeo(int verbose, struct mbf_mr1bldeo_struct *data, int *error)
 int mbr_rt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_mr1bldeo_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_mr1bldeo_rd_hdr(int verbose, XDR *xdrs, 
+int mbr_mr1bldeo_rd_hdr(int verbose, XDR *xdrs,
 		struct mbf_mr1bldeo_struct *data, char **hdr_comment,
 		int *error);
-int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs, 
+int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs,
 		struct mbf_mr1bldeo_struct *data, int *error);
 int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct *data, int *error);
-int mbr_mr1bldeo_wr_hdr(int verbose, XDR *xdrs, 
+int mbr_mr1bldeo_wr_hdr(int verbose, XDR *xdrs,
 		struct mbf_mr1bldeo_struct *data, char **hdr_comment, int *error);
 int mbr_mr1bldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *data, int *error);
 
@@ -163,54 +163,54 @@ int mbr_register_mr1bldeo(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mr1bldeo(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_mr1bldeo(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_mr1bldeo;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_mr1bldeo; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_mr1b_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_mr1b_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_mr1bldeo; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_mr1bldeo; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_mr1b_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_mr1b_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_mr1b_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_mr1b_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_mr1b_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_mr1b_extract_altitude; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_mr1bldeo;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_mr1b_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_mr1b_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_mr1bldeo;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_mr1bldeo;
+	mb_io_ptr->mb_io_dimensions = &mbsys_mr1b_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_mr1b_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_mr1b_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_mr1b_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_mr1b_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_mr1b_extract_altitude;
 	mb_io_ptr->mb_io_insert_altitude = NULL;
-	mb_io_ptr->mb_io_extract_svp = NULL; 
+	mb_io_ptr->mb_io_extract_svp = NULL;
 	mb_io_ptr->mb_io_insert_svp = NULL;
-	mb_io_ptr->mb_io_ttimes = &mbsys_mr1b_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_mr1b_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_mr1b_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_ttimes = &mbsys_mr1b_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_mr1b_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_mr1b_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -258,25 +258,25 @@ int mbr_register_mr1bldeo(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_mr1bldeo(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_mr1bldeo(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_mr1bldeo";
@@ -316,7 +316,7 @@ int mbr_info_mr1bldeo(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -626,7 +626,7 @@ int mbr_rt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* bathymetry */
 		for (i=0;i<store->port_btycount;i++)
 			{
-			store->bath_acrosstrack_port[i] 
+			store->bath_acrosstrack_port[i]
 				= data->bath_acrosstrack_port[i];
 			store->bath_port[i] = data->bath_port[i];
 			store->tt_port[i] = data->tt_port[i];
@@ -634,7 +634,7 @@ int mbr_rt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		for (i=0;i<store->stbd_btycount;i++)
 			{
-			store->bath_acrosstrack_stbd[i] 
+			store->bath_acrosstrack_stbd[i]
 				= data->bath_acrosstrack_stbd[i];
 			store->bath_stbd[i] = data->bath_stbd[i];
 			store->tt_stbd[i] = data->tt_stbd[i];
@@ -747,7 +747,7 @@ int mbr_wt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* bathymetry */
 		for (i=0;i<data->port_btycount;i++)
 			{
-			data->bath_acrosstrack_port[i] 
+			data->bath_acrosstrack_port[i]
 				= store->bath_acrosstrack_port[i];
 			data->bath_port[i] = store->bath_port[i];
 			data->tt_port[i] = store->tt_port[i];
@@ -755,7 +755,7 @@ int mbr_wt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		for (i=0;i<data->stbd_btycount;i++)
 			{
-			data->bath_acrosstrack_stbd[i] 
+			data->bath_acrosstrack_stbd[i]
 				= store->bath_acrosstrack_stbd[i];
 			data->bath_stbd[i] = store->bath_stbd[i];
 			data->tt_stbd[i] = store->tt_stbd[i];
@@ -834,7 +834,7 @@ int mbr_mr1bldeo_rd_data(int verbose, void *mbio_ptr, int *error)
 			if (mb_io_ptr->hdr_comment == NULL)
 				mb_io_ptr->hdr_comment_size = 0;
 			else
-				mb_io_ptr->hdr_comment_size 
+				mb_io_ptr->hdr_comment_size
 					= strlen(mb_io_ptr->hdr_comment);
 			mb_io_ptr->hdr_comment_loc = 0;
 			if (mb_io_ptr->hdr_comment_size > 80)
@@ -851,11 +851,11 @@ int mbr_mr1bldeo_rd_data(int verbose, void *mbio_ptr, int *error)
 		extract comment and return */
 	else if (mb_io_ptr->hdr_comment_size > mb_io_ptr->hdr_comment_loc)
 		{
-		if (mb_io_ptr->hdr_comment_size - mb_io_ptr->hdr_comment_loc 
+		if (mb_io_ptr->hdr_comment_size - mb_io_ptr->hdr_comment_loc
 			> 80)
 			read_size = 80;
 		else
-			read_size = mb_io_ptr->hdr_comment_size 
+			read_size = mb_io_ptr->hdr_comment_size
 				- mb_io_ptr->hdr_comment_loc;
 		strncpy(data->comment,
 			&mb_io_ptr->hdr_comment[mb_io_ptr->hdr_comment_loc],
@@ -888,7 +888,7 @@ int mbr_mr1bldeo_rd_data(int verbose, void *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1bldeo_rd_hdr(int verbose, XDR *xdrs, 
+int mbr_mr1bldeo_rd_hdr(int verbose, XDR *xdrs,
 		struct mbf_mr1bldeo_struct *data, char **hdr_comment,
 		int *error)
 {
@@ -915,7 +915,7 @@ int mbr_mr1bldeo_rd_hdr(int verbose, XDR *xdrs,
 
 	/* read magic number */
 	status = xdr_int(xdrs, &data->mf_magic);
-		
+
 	/* read ping count */
 	if (status == MB_SUCCESS)
 		status = xdr_int(xdrs, &data->mf_count);
@@ -965,7 +965,7 @@ int mbr_mr1bldeo_rd_hdr(int verbose, XDR *xdrs,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs, 
+int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs,
 		struct mbf_mr1bldeo_struct *data, int *error)
 {
 	char	*function_name = "mbr_mr1bldeo_rd_ping";
@@ -1017,8 +1017,8 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs,
 	status = xdr_int(xdrs, &data->stbd_btycount);
 	status = xdr_float(xdrs, &data->stbd_ssoffset);
 	status = xdr_int(xdrs, &data->stbd_sscount);
-	
-	/* read bathymetry and sidescan data 
+
+	/* read bathymetry and sidescan data
 		- handle more data than allowed by MBIO by
 		  throwing away the excess */
 
@@ -1027,10 +1027,10 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs,
 		{
 		if (verbose > 0)
 			{
-			fprintf(stderr, "Port bathymetry count exceeds MBIO maximum: %d %d\n", 
+			fprintf(stderr, "Port bathymetry count exceeds MBIO maximum: %d %d\n",
 				data->port_btycount, MBF_MR1BLDEO_BEAMS_SIDE);
 			}
-		dummy_count = data->port_btycount 
+		dummy_count = data->port_btycount
 			- MBF_MR1BLDEO_BEAMS_SIDE;
 		data->port_btycount = MBF_MR1BLDEO_BEAMS_SIDE;
 		}
@@ -1056,10 +1056,10 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs,
 		{
 		if (verbose > 0)
 			{
-			fprintf(stderr, "Port sidescan count exceeds MBIO maximum: %d %d\n", 
+			fprintf(stderr, "Port sidescan count exceeds MBIO maximum: %d %d\n",
 				data->port_sscount, MBF_MR1BLDEO_PIXELS_SIDE);
 			}
-		dummy_count = data->port_sscount 
+		dummy_count = data->port_sscount
 			- MBF_MR1BLDEO_PIXELS_SIDE;
 		data->port_sscount = MBF_MR1BLDEO_PIXELS_SIDE;
 		}
@@ -1080,10 +1080,10 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs,
 		/* output debug messages */
 		if (verbose > 0)
 			{
-			fprintf(stderr, "Starboard bathymetry count exceeds MBIO maximum: %d %d\n", 
+			fprintf(stderr, "Starboard bathymetry count exceeds MBIO maximum: %d %d\n",
 				data->stbd_btycount, MBF_MR1BLDEO_BEAMS_SIDE);
 			}
-		dummy_count = data->stbd_btycount 
+		dummy_count = data->stbd_btycount
 			- MBF_MR1BLDEO_BEAMS_SIDE;
 		data->stbd_btycount = MBF_MR1BLDEO_BEAMS_SIDE;
 		}
@@ -1110,10 +1110,10 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs,
 		/* output debug messages */
 		if (verbose > 0)
 			{
-			fprintf(stderr, "Starboard sidescan count exceeds MBIO maximum: %d %d\n", 
+			fprintf(stderr, "Starboard sidescan count exceeds MBIO maximum: %d %d\n",
 				data->stbd_sscount, MBF_MR1BLDEO_PIXELS_SIDE);
 			}
-		dummy_count = data->stbd_sscount 
+		dummy_count = data->stbd_sscount
 			- MBF_MR1BLDEO_PIXELS_SIDE;
 		data->stbd_sscount = MBF_MR1BLDEO_PIXELS_SIDE;
 		}
@@ -1197,7 +1197,7 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs,
 		for (i=0;i<data->port_btycount;i++)
 		  {
 		  fprintf(stderr,"dbg5       %3d     %12.4g %12.4g %12.4g %12.4g\n",
-			i,data->bath_port[i],data->bath_acrosstrack_port[i], 
+			i,data->bath_port[i],data->bath_acrosstrack_port[i],
 			data->tt_port[i],data->angle_port[i]);
 		  }
 		fprintf(stderr,"\n");
@@ -1285,7 +1285,7 @@ int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct
 		}
 
 	/* if data and file header not written */
-	else if (mb_io_ptr->fileheader == MB_NO 
+	else if (mb_io_ptr->fileheader == MB_NO
 		&& data->kind != MB_DATA_COMMENT)
 		{
 		/* write file header */
@@ -1298,7 +1298,7 @@ int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct
 		}
 
 	/* if data and file header written */
-	else if (mb_io_ptr->fileheader == MB_YES 
+	else if (mb_io_ptr->fileheader == MB_YES
 		&& data->kind == MB_DATA_DATA)
 		{
 		/* write data */
@@ -1306,7 +1306,7 @@ int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct
 		}
 
 	/* if not data and file header written */
-	else if (mb_io_ptr->fileheader == MB_YES 
+	else if (mb_io_ptr->fileheader == MB_YES
 		&& data->kind != MB_DATA_DATA)
 		{
 		status = MB_FAILURE;
@@ -1334,7 +1334,7 @@ int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1bldeo_wr_hdr(int verbose, XDR *xdrs, 
+int mbr_mr1bldeo_wr_hdr(int verbose, XDR *xdrs,
 		struct mbf_mr1bldeo_struct *data, char **hdr_comment, int *error)
 {
 	char	*function_name = "mbr_mr1bldeo_wr_hdr";
@@ -1369,7 +1369,7 @@ int mbr_mr1bldeo_wr_hdr(int verbose, XDR *xdrs,
 
 	/* write magic number */
 	status = xdr_int(xdrs, &data->mf_magic);
-		
+
 	/* write ping count */
 	if (status == MB_SUCCESS)
 		{
@@ -1488,7 +1488,7 @@ int mbr_mr1bldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *dat
 		for (i=0;i<data->port_btycount;i++)
 		  {
 		  fprintf(stderr,"dbg5       %3d     %12.4g %12.4g %12.4g %12.4g\n",
-			i,data->bath_port[i],data->bath_acrosstrack_port[i], 
+			i,data->bath_port[i],data->bath_acrosstrack_port[i],
 			data->tt_port[i],data->angle_port[i]);
 		  }
 		fprintf(stderr,"\n");

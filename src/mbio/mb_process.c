@@ -2,7 +2,7 @@
  *    The MB-system:	mb_process.c	9/11/00
  *    $Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -168,11 +168,11 @@
 #include <sys/stat.h>
 
 /* mbio include files */
-#include "../../include/mb_io.h"
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_process.h"
+#include "mb_io.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_process.h"
 
 static char rcs_id[]="$Id$";
 

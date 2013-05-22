@@ -2,7 +2,7 @@
  *    The MB-system:	mbformat.c	1/22/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -109,9 +109,9 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_format.h"
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_format.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* local defines */
 #define MBFORMAT_LIST_LONG	0
@@ -163,7 +163,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "F:f:HhI:i:LlKkVvWw")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'F':
 		case 'f':
@@ -237,7 +237,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
-		
+
 	/* print out the info */
 	if (file_specified == MB_YES)
 		{
@@ -340,19 +340,19 @@ int main (int argc, char **argv)
 			if ((status = mb_format_description(verbose,&format,format_description,&error)) == MB_SUCCESS
 				&& format == i)
 				{
-				format_informal_ptr = (char *) 
+				format_informal_ptr = (char *)
 				    strstr(format_description, "Informal Description:");
-				format_attributes_ptr = (char *) 
+				format_attributes_ptr = (char *)
 				    strstr(format_description, "Attributes:");
-				strncpy(format_name, format_description, 
-					strlen(format_description) 
+				strncpy(format_name, format_description,
+					strlen(format_description)
 					    - strlen(format_informal_ptr));
-				format_name[strlen(format_description) 
+				format_name[strlen(format_description)
 					    - strlen(format_informal_ptr) - 1] = '\0';
-				strncpy(format_informal, format_informal_ptr, 
-					strlen(format_informal_ptr) 
+				strncpy(format_informal, format_informal_ptr,
+					strlen(format_informal_ptr)
 					    - strlen(format_attributes_ptr));
-				format_informal[strlen(format_informal_ptr) 
+				format_informal[strlen(format_informal_ptr)
 					    - strlen(format_attributes_ptr) - 1] = '\0';
 				strcpy(format_attributes, format_attributes_ptr);
 				format_attributes[strlen(format_attributes_ptr)-1] = '\0';

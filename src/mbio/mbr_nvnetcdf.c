@@ -60,11 +60,11 @@
 #include <netcdf.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_navnetcdf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_navnetcdf.h"
 
 /* essential function prototypes */
 int mbr_register_nvnetcdf(int verbose, void *mbio_ptr,

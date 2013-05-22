@@ -2,7 +2,7 @@
  *    The MB-system:	mbcopy.c	2/4/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -17,7 +17,7 @@
  * swath sonar data file with the specified conversions.  Options include
  * windowing in time and space and ping averaging.  The input and
  * output data formats may differ, though not all possible combinations
- * make sense.  The default input and output streams are stdin 
+ * make sense.  The default input and output streams are stdin
  * and stdout.
  *
  * Author:	D. W. Caress
@@ -195,18 +195,18 @@
 #include <unistd.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
-#include "../../include/mbsys_xse.h"
-#include "../../include/mbsys_elacmk2.h"
-#include "../../include/mbsys_simrad.h"
-#include "../../include/mbsys_simrad2.h"
-#include "../../include/mbsys_ldeoih.h"
-#include "../../include/mbsys_gsf.h"
-#include "../../include/mbsys_hsds.h"
-#include "../../include/mbsys_reson8k.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_io.h"
+#include "mbsys_xse.h"
+#include "mbsys_elacmk2.h"
+#include "mbsys_simrad.h"
+#include "mbsys_simrad2.h"
+#include "mbsys_ldeoih.h"
+#include "mbsys_gsf.h"
+#include "mbsys_hsds.h"
+#include "mbsys_reson8k.h"
 
 /* defines for special copying routines */
 #define	MBCOPY_PARTIAL			0
@@ -220,40 +220,40 @@
 /* function prototypes */
 int setup_transfer_rules(int verbose, int ibeams, int obeams,
 		int *istart, int *iend, int *offset, int *error);
-int mbcopy_elacmk2_to_xse(int verbose, 
-		struct mbsys_elacmk2_struct *istore, 
-		struct mbsys_xse_struct *ostore, 
+int mbcopy_elacmk2_to_xse(int verbose,
+		struct mbsys_elacmk2_struct *istore,
+		struct mbsys_xse_struct *ostore,
 		int *error);
-int mbcopy_xse_to_elacmk2(int verbose, 
-		struct mbsys_xse_struct *istore, 
-		struct mbsys_elacmk2_struct *ostore, 
+int mbcopy_xse_to_elacmk2(int verbose,
+		struct mbsys_xse_struct *istore,
+		struct mbsys_elacmk2_struct *ostore,
 		int *error);
-int mbcopy_simrad_to_simrad2(int verbose, 
-		struct mbsys_simrad_struct *istore, 
-		struct mbsys_simrad2_struct *ostore, 
+int mbcopy_simrad_to_simrad2(int verbose,
+		struct mbsys_simrad_struct *istore,
+		struct mbsys_simrad2_struct *ostore,
 		int *error);
-int mbcopy_simrad_time_convert(int verbose, 
-		int year, int month, 
-		int day, int hour, 
-		int minute, int second, 
-		int centisecond, 
-		int *date, int *msec, 
+int mbcopy_simrad_time_convert(int verbose,
+		int year, int month,
+		int day, int hour,
+		int minute, int second,
+		int centisecond,
+		int *date, int *msec,
 		int *error);
-int mbcopy_any_to_mbldeoih(int verbose, 
-		int kind, int *time_i, double time_d, 
-		double navlon, double navlat, double speed, double heading, 
-		double draft, double altitude, 
-		double roll, double pitch, double heave, 
-		double	beamwidth_xtrack, double beamwidth_ltrack, 
+int mbcopy_any_to_mbldeoih(int verbose,
+		int kind, int *time_i, double time_d,
+		double navlon, double navlat, double speed, double heading,
+		double draft, double altitude,
+		double roll, double pitch, double heave,
+		double	beamwidth_xtrack, double beamwidth_ltrack,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, 
-		void *ombio_ptr, void *ostore_ptr, 
+		char *comment,
+		void *ombio_ptr, void *ostore_ptr,
 		int *error);
-int mbcopy_reson8k_to_gsf(int verbose, 
-		void *imbio_ptr, 
+int mbcopy_reson8k_to_gsf(int verbose,
+		void *imbio_ptr,
 		void *ombio_ptr,
 		int *error);
 
@@ -392,7 +392,7 @@ int main (int argc, char **argv)
 	int	copymode = MBCOPY_PARTIAL;
 	int	use_sleep = MB_NO;
 	int	inbounds = MB_YES;
-	
+
 	/* sleep variable */
 	double	sleep_factor = 1.0;
 	double	time_d_last;
@@ -426,13 +426,13 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "B:b:C:c:DdE:e:F:f:HhI:i:L:l:M:m:NnO:o:P:p:Q:q:R:r:S:s:T:t:Vv")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'B':
 		case 'b':
 			sscanf (optarg,"%d/%d/%d/%d/%d/%lf",
 				&btime_i[0],&btime_i[1],&btime_i[2],
-				&btime_i[3],&btime_i[4],&seconds);				
+				&btime_i[3],&btime_i[4],&seconds);
 			btime_i[5] = (int)floor(seconds);
 			btime_i[6] = 1000000 * (seconds - btime_i[5]);
 			flag++;
@@ -615,11 +615,11 @@ int main (int argc, char **argv)
 
 	if (merge == MB_YES && mformat <=0)
 		mb_get_format(verbose,mfile,NULL,&mformat,&error);
-		
 
-	/* obtain format array locations - format ids will 
+
+	/* obtain format array locations - format ids will
 		be aliased to current ids if old format ids given */
-	if ((status = mb_format(verbose,&iformat,&error)) 
+	if ((status = mb_format(verbose,&iformat,&error))
 		!= MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
@@ -628,7 +628,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	if ((status = mb_format(verbose,&oformat,&error)) 
+	if ((status = mb_format(verbose,&oformat,&error))
 		!= MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
@@ -637,7 +637,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	if (merge == MB_YES && (status = mb_format(verbose,&mformat,&error)) 
+	if (merge == MB_YES && (status = mb_format(verbose,&mformat,&error))
 		!= MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
@@ -661,7 +661,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	imb_io_ptr = (struct mb_io_struct *) imbio_ptr; 
+	imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
 
 	/* initialize reading the merge swath sonar file */
 	if (merge == MB_YES && (status = mb_read_init(
@@ -677,7 +677,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	mmb_io_ptr = (struct mb_io_struct *) mmbio_ptr; 
+	mmb_io_ptr = (struct mb_io_struct *) mmbio_ptr;
 
 	/* initialize writing the output swath sonar file */
 	if ((status = mb_write_init(
@@ -692,7 +692,7 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 	omb_io_ptr = (struct mb_io_struct *) ombio_ptr;
-	
+
 	/* bathonly mode works only if output format is mbldeoih */
 	if (bathonly == MB_YES && oformat != MBF_MBLDEOIH)
 		{
@@ -703,43 +703,43 @@ int main (int argc, char **argv)
 		    fprintf(stderr,"Program %s is ignoring the -D argument\n",program_name);
 		    }
 		}
-		
+
 	/* if bathonly mode for mbldeoih format, assume we are making an fbt file
 		- set the format to use - this allows user to set use of old format
-		in .mbio_defaults file - purpose is to keep compatibility with 
+		in .mbio_defaults file - purpose is to keep compatibility with
 		Fledermaus */
 	if (bathonly == MB_YES && oformat == MBF_MBLDEOIH)
 		{
 		omb_io_ptr->save1 = fbtversion;
 		}
-		
+
 	/* determine if full or partial copies will be made */
-	if (pings == 1 
-		&& imb_io_ptr->system != MB_SYS_NONE 
+	if (pings == 1
+		&& imb_io_ptr->system != MB_SYS_NONE
 		&& imb_io_ptr->system == omb_io_ptr->system)
 		copymode = MBCOPY_FULL;
-	else if (pings == 1 
-		&& imb_io_ptr->system == MB_SYS_ELACMK2 
+	else if (pings == 1
+		&& imb_io_ptr->system == MB_SYS_ELACMK2
 		&& omb_io_ptr->system == MB_SYS_XSE)
 		copymode = MBCOPY_ELACMK2_TO_XSE;
-	else if (pings == 1 
-		&& imb_io_ptr->system == MB_SYS_XSE 
+	else if (pings == 1
+		&& imb_io_ptr->system == MB_SYS_XSE
 		&& omb_io_ptr->system == MB_SYS_ELACMK2)
 		copymode = MBCOPY_XSE_TO_ELACMK2;
-	else if (pings == 1 
-		&& imb_io_ptr->system == MB_SYS_SIMRAD 
+	else if (pings == 1
+		&& imb_io_ptr->system == MB_SYS_SIMRAD
 		&& omb_io_ptr->format == MBF_EM300MBA)
 		copymode = MBCOPY_SIMRAD_TO_SIMRAD2;
-	else if (pings == 1 
+	else if (pings == 1
 		&& omb_io_ptr->format == MBF_MBLDEOIH)
 		copymode = MBCOPY_ANY_TO_MBLDEOIH;
-	else if (pings == 1 
-		&& imb_io_ptr->format == MBF_XTFR8101 
+	else if (pings == 1
+		&& imb_io_ptr->format == MBF_XTFR8101
 		&& omb_io_ptr->format ==  MBF_GSFGENMB )
-		copymode = MBCOPY_RESON8K_TO_GSF;		
+		copymode = MBCOPY_RESON8K_TO_GSF;
 	else
 		copymode = MBCOPY_PARTIAL;
-		
+
 	/* quit if an unsupported copy to GSF is requested */
 	if (omb_io_ptr->format == MBF_GSFGENMB && copymode == MBCOPY_PARTIAL)
 		{
@@ -782,13 +782,13 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&ibathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&iss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&issacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&issalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -806,13 +806,13 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&obathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&oss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ossacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ossalongtrack, &error);
 
 	if (MB_YES == merge) {
@@ -832,13 +832,13 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&mbathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&mss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&mssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&mssalongtrack, &error);
 	}
 
@@ -873,7 +873,7 @@ int main (int argc, char **argv)
 	if (insertcomments == MB_YES)
 		{
 		/* open file */
-		if ((fp = fopen(commentfile, "r")) == NULL) 
+		if ((fp = fopen(commentfile, "r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr,"\nUnable to Open Comment File <%s> for reading\n",commentfile);
@@ -1025,7 +1025,7 @@ int main (int argc, char **argv)
 	/* read and write */
 	while (error <= MB_ERROR_NO_ERROR)
 		{
-		
+
 		/* read some data */
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
@@ -1057,20 +1057,20 @@ int main (int argc, char **argv)
 			}
 
 		/* increment counter */
-		if (error <= MB_ERROR_NO_ERROR 
+		if (error <= MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA)
 			idata = idata + pings;
-		else if (error <= MB_ERROR_NO_ERROR 
+		else if (error <= MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_COMMENT)
 			icomment++;
-			
+
 		/* time gaps do not matter to mbcopy */
 		if (error == MB_ERROR_TIME_GAP)
 			{
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
 			}
-			
+
 		/* check for survey data in or out of bounds */
 		if (kind == MB_DATA_DATA)
 			{
@@ -1092,7 +1092,7 @@ int main (int argc, char **argv)
 				 	|| time_d - .001 > mtime_d))
 			    {
 			      /* find merge record */
-			      
+
 			      mstatus = mb_get(verbose,mmbio_ptr,&mkind,&mpings,
 					       mtime_i,&mtime_d,
 					       &mnavlon,&mnavlat,
@@ -1103,9 +1103,9 @@ int main (int argc, char **argv)
 					       mbathacrosstrack,mbathalongtrack,
 					       mss,mssacrosstrack,mssalongtrack,
 					       mcomment,&merror);
-			      
+
 			    }
-			  
+
 			  if (time_d + .001 < mtime_d ||
 			      merror > 0)
 			    {
@@ -1171,7 +1171,7 @@ int main (int argc, char **argv)
 			fprintf(stderr,"\nNonfatal MBIO Error:\n%s\n",message);
 			fprintf(stderr,"Number of good records so far: %d\n",idata);
 			}
-		else if (verbose >= 1 && error != MB_ERROR_NO_ERROR 
+		else if (verbose >= 1 && error != MB_ERROR_NO_ERROR
 			&& error != MB_ERROR_EOF)
 			{
 			mb_error(verbose,error,&message);
@@ -1180,7 +1180,7 @@ int main (int argc, char **argv)
 				time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5],time_i[6]);
 			}
-		
+
 		/* do sleep if required */
 		if (use_sleep == MB_YES
 			&& kind == MB_DATA_DATA
@@ -1194,7 +1194,7 @@ int main (int argc, char **argv)
 			&& error <= MB_ERROR_NO_ERROR
 			&& idata > 1)
 			{
-			sleep_time = (unsigned int) 
+			sleep_time = (unsigned int)
 				(sleep_factor * (time_d - time_d_last));
 			sleep(sleep_time);
 			time_d_last = time_d;
@@ -1282,7 +1282,7 @@ int main (int argc, char **argv)
 				ossalongtrack[j] = 0.0;
 				}
 			}
-			
+
 		/* handle special full translation cases */
 		if (copymode == MBCOPY_FULL
 			&& error == MB_ERROR_NO_ERROR)
@@ -1293,21 +1293,21 @@ int main (int argc, char **argv)
 			&& error == MB_ERROR_NO_ERROR)
 			{
 			ostore_ptr = omb_io_ptr->store_data;
-			status = mbcopy_elacmk2_to_xse(verbose, 
+			status = mbcopy_elacmk2_to_xse(verbose,
 				    istore_ptr, ostore_ptr, &error);
 			}
 		else if (copymode == MBCOPY_XSE_TO_ELACMK2
 			&& error == MB_ERROR_NO_ERROR)
 			{
 			ostore_ptr = omb_io_ptr->store_data;
-			status = mbcopy_xse_to_elacmk2(verbose, 
+			status = mbcopy_xse_to_elacmk2(verbose,
 				    istore_ptr, ostore_ptr, &error);
 			}
 		else if (copymode == MBCOPY_SIMRAD_TO_SIMRAD2
 			&& error == MB_ERROR_NO_ERROR)
 			{
 			ostore_ptr = omb_io_ptr->store_data;
-			status = mbcopy_simrad_to_simrad2(verbose, 
+			status = mbcopy_simrad_to_simrad2(verbose,
 				    istore_ptr, ostore_ptr, &error);
 			}
 		else if (copymode == MBCOPY_RESON8K_TO_GSF
@@ -1315,17 +1315,17 @@ int main (int argc, char **argv)
 			{
 
 			ostore_ptr = omb_io_ptr->store_data;
-			status = mbcopy_reson8k_to_gsf(verbose, 
+			status = mbcopy_reson8k_to_gsf(verbose,
 				    imbio_ptr, ombio_ptr, &error);
 			}
 		else if (copymode == MBCOPY_ANY_TO_MBLDEOIH
 			&& error == MB_ERROR_NO_ERROR)
 			{
 			if (kind == MB_DATA_DATA)
-				mb_extract_nav(verbose, imbio_ptr, istore_ptr, 
-					&kind, time_i, &time_d, 
-					&navlon, &navlat, &speed, &heading, &draft, 
-					&roll, &pitch, &heave, 
+				mb_extract_nav(verbose, imbio_ptr, istore_ptr,
+					&kind, time_i, &time_d,
+					&navlon, &navlat, &speed, &heading, &draft,
+					&roll, &pitch, &heave,
 					&error);
 			ostore_ptr = omb_io_ptr->store_data;
 			if (kind == MB_DATA_DATA
@@ -1337,40 +1337,40 @@ int main (int argc, char **argv)
 				    namp = 0;
 				    nss = 0;
 				    }
-				    
+
 				/* copy the data to mbldeoih */
 				if (merge == MB_YES)
 					{
-					status = mbcopy_any_to_mbldeoih(verbose, 
-						kind, time_i, time_d, 
-						navlon, navlat, speed, heading, 
-						draft, altitude, roll, pitch, heave, 
-						imb_io_ptr->beamwidth_xtrack, 
-						imb_io_ptr->beamwidth_ltrack, 
+					status = mbcopy_any_to_mbldeoih(verbose,
+						kind, time_i, time_d,
+						navlon, navlat, speed, heading,
+						draft, altitude, roll, pitch, heave,
+						imb_io_ptr->beamwidth_xtrack,
+						imb_io_ptr->beamwidth_ltrack,
 						nbath,namp,nss,
 						mbeamflag,mbath,iamp,mbathacrosstrack,
 						mbathalongtrack,
 						iss,issacrosstrack,issalongtrack,
-						comment, 
+						comment,
 						ombio_ptr, ostore_ptr, &error);
 					}
 				else
 					{
-					  status = mbcopy_any_to_mbldeoih(verbose, 
-						kind, time_i, time_d, 
-						navlon, navlat, speed, heading, 
-						draft, altitude, roll, pitch, heave, 
-						imb_io_ptr->beamwidth_xtrack, 
-						imb_io_ptr->beamwidth_ltrack, 
+					  status = mbcopy_any_to_mbldeoih(verbose,
+						kind, time_i, time_d,
+						navlon, navlat, speed, heading,
+						draft, altitude, roll, pitch, heave,
+						imb_io_ptr->beamwidth_xtrack,
+						imb_io_ptr->beamwidth_ltrack,
 						nbath,namp,nss,
 						ibeamflag,ibath,iamp,ibathacrosstrack,
 						ibathalongtrack,
 						iss,issacrosstrack,issalongtrack,
-						comment, 
+						comment,
 						ombio_ptr, ostore_ptr, &error);
 					}
 				}
-			else 
+			else
 				error = MB_ERROR_OTHER;
 			}
 		else if (copymode == MBCOPY_PARTIAL
@@ -1380,20 +1380,20 @@ int main (int argc, char **argv)
 			ostore_ptr = omb_io_ptr->store_data;
 			if (pings == 1 && kind == MB_DATA_DATA)
 				{
-				mb_extract_nav(verbose, imbio_ptr, istore_ptr, 
-						&kind, time_i, &time_d, 
-						&navlon, &navlat, &speed, &heading, &draft, 
-						&roll, &pitch, &heave, 
+				mb_extract_nav(verbose, imbio_ptr, istore_ptr,
+						&kind, time_i, &time_d,
+						&navlon, &navlat, &speed, &heading, &draft,
+						&roll, &pitch, &heave,
 						&error);
-				mb_insert_nav(verbose, ombio_ptr, ostore_ptr, 
-						time_i, time_d, 
-						navlon, navlat, speed, heading, draft, 
-						roll, pitch, heave, 
+				mb_insert_nav(verbose, ombio_ptr, ostore_ptr,
+						time_i, time_d,
+						navlon, navlat, speed, heading, draft,
+						roll, pitch, heave,
 						&error);
 				}
 			status = mb_insert(verbose, ombio_ptr, ostore_ptr,
-						kind, time_i, time_d, 
-						navlon, navlat, speed, heading, 
+						kind, time_i, time_d,
+						navlon, navlat, speed, heading,
 						obeams_bath,obeams_amp,opixels_ss,
 						obeamflag,obath,oamp,obathacrosstrack,
 						obathalongtrack,
@@ -1416,8 +1416,8 @@ int main (int argc, char **argv)
 		    case MBCOPY_XSE_TO_ELACMK2:
 		    case MBCOPY_RESON8K_TO_GSF:
 		      status = mb_insert(verbose, ombio_ptr, ostore_ptr,
-						kind, time_i, time_d, 
-						navlon, navlat, speed, heading, 
+						kind, time_i, time_d,
+						navlon, navlat, speed, heading,
 						mbeams_bath,ibeams_amp,ipixels_ss,
 						mbeamflag,mbath,iamp,mbathacrosstrack,
 						mbathalongtrack,
@@ -1428,7 +1428,7 @@ int main (int argc, char **argv)
 		  }
 
 		/* write some data */
-		if ((error == MB_ERROR_NO_ERROR 
+		if ((error == MB_ERROR_NO_ERROR
 				&& kind != MB_DATA_COMMENT
 				&& inbounds == MB_YES)
 			|| (kind == MB_DATA_COMMENT && stripcomments == MB_NO))
@@ -1549,9 +1549,9 @@ int setup_transfer_rules(int verbose, int ibeams, int obeams,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbcopy_elacmk2_to_xse(int verbose, 
-	struct mbsys_elacmk2_struct *istore, 
-	struct mbsys_xse_struct *ostore, 
+int mbcopy_elacmk2_to_xse(int verbose,
+	struct mbsys_elacmk2_struct *istore,
+	struct mbsys_xse_struct *ostore,
 	int *error)
 {
 	char	*function_name = "mbcopy_elacmk2_to_xse";
@@ -1572,12 +1572,12 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		}
 
 	/* copy the data  */
-	if (istore != NULL && ostore != NULL 
+	if (istore != NULL && ostore != NULL
 		&& (void *) istore != (void *) ostore)
 		{
 		/* type of data record */
 		ostore->kind = istore->kind;  /* Survey, nav, Comment */
-		
+
 		/* parameter (ship frames) */
 		ostore->par_source = 0;		/* sensor id */
 		mb_fix_y2k(verbose, istore->par_year, &time_i[0]);
@@ -1586,7 +1586,7 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		time_i[3] = istore->par_hour;
 		time_i[4] = istore->par_minute;
 		time_i[5] = istore->par_second;
-		time_i[6] = 10000*istore->par_hundredth_sec 
+		time_i[6] = 10000*istore->par_hundredth_sec
 			+ 100*istore->par_thousandth_sec;
 		mb_get_time(verbose,time_i,&time_d);
 		ostore->par_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;		/* sec since 1/1/1901 00:00 */
@@ -1609,7 +1609,7 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		ostore->par_hrp_x = 0.01 * istore->vru_x;		/* motion sensor x position, meters */
 		ostore->par_hrp_y = 0.01 * istore->vru_y;		/* motion sensor y position, meters */
 		ostore->par_hrp_z = 0.01 * istore->vru_height;		/* motion sensor z position, meters */
-	
+
 		/* svp (sound velocity frames) */
 		ostore->svp_source = 0;		/* sensor id */
 		mb_fix_y2k(verbose, istore->svp_year, &time_i[0]);
@@ -1618,7 +1618,7 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		time_i[3] = istore->svp_hour;
 		time_i[4] = istore->svp_minute;
 		time_i[5] = istore->svp_second;
-		time_i[6] = 10000*istore->svp_hundredth_sec 
+		time_i[6] = 10000*istore->svp_hundredth_sec
 			+ 100*istore->svp_thousandth_sec;
 		mb_get_time(verbose,time_i,&time_d);
 		ostore->svp_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;		/* sec since 1/1/1901 00:00 */
@@ -1635,7 +1635,7 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		    ostore->svp_temperature[i] = 0.0;	/* degree celcius */
 		    ostore->svp_pressure[i] = 0.0;	/* bar */
 		    }
-	
+
 		/* position (navigation frames) */
 		ostore->nav_source = 0;		/* sensor id */
 		mb_fix_y2k(verbose, istore->pos_year, &time_i[0]);
@@ -1644,7 +1644,7 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		time_i[3] = istore->pos_hour;
 		time_i[4] = istore->pos_minute;
 		time_i[5] = istore->pos_second;
-		time_i[6] = 10000*istore->pos_hundredth_sec 
+		time_i[6] = 10000*istore->pos_hundredth_sec
 			+ 100*istore->pos_thousandth_sec;
 		mb_get_time(verbose,time_i,&time_d);
 		ostore->nav_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;		/* sec since 1/1/1901 00:00 */
@@ -1654,17 +1654,17 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		ostore->nav_description_len = 0;
 		for (i=0;i<MBSYS_XSE_DESCRIPTION_LENGTH;i++)
 		    ostore->nav_description[i] = 0;
-		ostore->nav_x = DTR * 0.00000009 * istore->pos_longitude;			/* eastings (m) or 
+		ostore->nav_x = DTR * 0.00000009 * istore->pos_longitude;			/* eastings (m) or
 						    longitude (radians) */
-		ostore->nav_y = DTR * 0.00000009 * istore->pos_latitude;			/* northings (m) or 
+		ostore->nav_y = DTR * 0.00000009 * istore->pos_latitude;			/* northings (m) or
 						    latitude (radians) */
-		ostore->nav_z = 0.0;			/* height (m) or 
+		ostore->nav_z = 0.0;			/* height (m) or
 						    ellipsoidal height (m) */
 		ostore->nav_speed_ground = 0.0;	/* m/s */
 		ostore->nav_course_ground = DTR * 0.01 * istore->heading;	/* radians */
 		ostore->nav_speed_water = 0.0;	/* m/s */
 		ostore->nav_course_water = 0.0;	/* radians */
-		
+
 		/* survey depth (multibeam frames) */
 		if (ostore->kind == MB_DATA_DATA)
 		    {
@@ -1719,7 +1719,7 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		time_i[3] = istore->hour;
 		time_i[4] = istore->minute;
 		time_i[5] = istore->second;
-		time_i[6] = 10000*istore->hundredth_sec 
+		time_i[6] = 10000*istore->hundredth_sec
 			+ 100*istore->thousandth_sec;
 		mb_get_time(verbose,time_i,&time_d);
 		ostore->mul_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;		/* sec since 1/1/1901 00:00 */
@@ -1750,9 +1750,9 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		    ostore->beams[i].pitch = DTR * 0.005 * istore->beams[j].pitch;
 		    ostore->beams[i].beam = i + 1;
 		    ostore->beams[i].quality = istore->beams[j].quality;
-		    ostore->beams[i].amplitude = istore->beams[j].amplitude;		    
+		    ostore->beams[i].amplitude = istore->beams[j].amplitude;
 		    }
-		
+
 		/* survey sidescan (sidescan frames) */
 		ostore->sid_frame = MB_NO;		/* boolean flag - sidescan frame read */
 		ostore->sid_group_avt = MB_NO;		/* boolean flag - amp vs time group read */
@@ -1816,19 +1816,19 @@ int mbcopy_elacmk2_to_xse(int verbose,
 			ostore->sid_cmp_real[i] = 0; /* real sidescan signal */
 		for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
 			ostore->sid_cmp_imaginary[i] = 0; /* imaginary sidescan signal */
-		ostore->sid_wgt_factorleft = 0;		/* weighting factor for block floating 
-						point expansion  -- 
+		ostore->sid_wgt_factorleft = 0;		/* weighting factor for block floating
+						point expansion  --
 						defined as 2^(-N) volts for lsb */
 		ostore->sid_wgt_samplesleft = 0;	/* number of left samples */
-		ostore->sid_wgt_factorright = 0;		/* weighting factor for block floating 
-						point expansion  -- 
+		ostore->sid_wgt_factorright = 0;		/* weighting factor for block floating
+						point expansion  --
 						defined as 2^(-N) volts for lsb */
 		ostore->sid_wgt_samplesright = 0;	/* number of right samples */
-	
+
 		/* comment */
 		for (i=0;i<MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH);i++)
 			ostore->comment[i] = istore->comment[i];
-	
+
 		/* unsupported frame */
 		ostore->rawsize = 0;
 		for (i=0;i<MBSYS_XSE_BUFFER_SIZE;i++)
@@ -1850,9 +1850,9 @@ int mbcopy_elacmk2_to_xse(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbcopy_xse_to_elacmk2(int verbose, 
-		struct mbsys_xse_struct *istore, 
-		struct mbsys_elacmk2_struct *ostore, 
+int mbcopy_xse_to_elacmk2(int verbose,
+		struct mbsys_xse_struct *istore,
+		struct mbsys_elacmk2_struct *ostore,
 		int *error)
 {
 	char	*function_name = "mbcopy_xse_to_elacmk2";
@@ -1874,15 +1874,15 @@ int mbcopy_xse_to_elacmk2(int verbose,
 		}
 
 	/* copy the data  */
-	if (istore != NULL && ostore != NULL 
+	if (istore != NULL && ostore != NULL
 		&& (void *) istore != (void *) ostore)
 		{
 		/* type of data record */
 		ostore->kind = istore->kind;
 		ostore->sonar = MBSYS_ELACMK2_UNKNOWN;
-	
+
 		/* parameter telegram */
-		time_d = istore->par_sec 
+		time_d = istore->par_sec
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * istore->par_usec;
 		mb_get_date(verbose,time_d,time_i);
@@ -1893,8 +1893,8 @@ int mbcopy_xse_to_elacmk2(int verbose,
 		ostore->par_minute = time_i[4];
 		ostore->par_second = time_i[5];
 		ostore->par_hundredth_sec = time_i[6]/10000;
-		ostore->par_thousandth_sec 
-			= (time_i[6] 
+		ostore->par_thousandth_sec
+			= (time_i[6]
 			- 10000 * ostore->par_hundredth_sec)/100;
 		ostore->roll_offset = RTD * 100 * istore->par_roll_bias;		/* roll offset (degrees) */
 		ostore->pitch_offset = RTD * 100 * istore->par_pitch_bias;	/* pitch offset (degrees) */
@@ -1921,9 +1921,9 @@ int mbcopy_xse_to_elacmk2(int verbose,
 		ostore->transducer_serial_number = 0;
 		for (i=0;i<MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH);i++)
 			ostore->comment[i] = istore->comment[i];
-	
+
 		/* position (position telegrams) */
-		time_d = istore->nav_sec 
+		time_d = istore->nav_sec
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * istore->nav_usec;
 		mb_get_date(verbose,time_d,time_i);
@@ -1934,8 +1934,8 @@ int mbcopy_xse_to_elacmk2(int verbose,
 		ostore->pos_minute = time_i[4];
 		ostore->pos_second = time_i[5];
 		ostore->pos_hundredth_sec = time_i[6]/10000;
-		ostore->pos_thousandth_sec 
-			= (time_i[6] 
+		ostore->pos_thousandth_sec
+			= (time_i[6]
 			- 10000 * ostore->pos_hundredth_sec)/100;
 		ostore->pos_latitude = RTD * istore->nav_y / 0.00000009;
 		ostore->pos_longitude = RTD * istore->nav_x / 0.00000009;
@@ -1948,9 +1948,9 @@ int mbcopy_xse_to_elacmk2(int verbose,
 		ostore->pos_spare = 0;
 		ostore->semi_major_axis = 0;
 		ostore->other_quality = 0;
-	
+
 		/* sound velocity profile */
-		time_d = istore->svp_sec 
+		time_d = istore->svp_sec
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * istore->svp_usec;
 		mb_get_date(verbose,time_d,time_i);
@@ -1961,8 +1961,8 @@ int mbcopy_xse_to_elacmk2(int verbose,
 		ostore->svp_minute = time_i[4];
 		ostore->svp_second = time_i[5];
 		ostore->svp_hundredth_sec = time_i[6]/10000;
-		ostore->svp_thousandth_sec 
-			= (time_i[6] 
+		ostore->svp_thousandth_sec
+			= (time_i[6]
 			- 10000 * ostore->svp_hundredth_sec)/100;
 		ostore->svp_num = istore->svp_nsvp;
 		for (i=0;i<500;i++)
@@ -1970,9 +1970,9 @@ int mbcopy_xse_to_elacmk2(int verbose,
 			ostore->svp_depth[i] = 10 * istore->svp_depth[i]; /* 0.1 meters */
 			ostore->svp_vel[i] = 10 * istore->svp_velocity[i];	/* 0.1 meters/sec */
 			}
-	
+
 		/* depth telegram */
-		time_d = istore->mul_sec 
+		time_d = istore->mul_sec
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * istore->mul_usec;
 		mb_get_date(verbose,time_d,time_i);
@@ -1983,8 +1983,8 @@ int mbcopy_xse_to_elacmk2(int verbose,
 		ostore->minute = time_i[4];
 		ostore->second = time_i[5];
 		ostore->hundredth_sec = time_i[6]/10000;
-		ostore->thousandth_sec 
-			= (time_i[6] 
+		ostore->thousandth_sec
+			= (time_i[6]
 			- 10000 * ostore->hundredth_sec)/100;
 		ostore->longitude = RTD * istore->mul_lon;
 		ostore->latitude = RTD * istore->mul_lat;
@@ -2045,9 +2045,9 @@ int mbcopy_xse_to_elacmk2(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbcopy_simrad_to_simrad2(int verbose, 
-		struct mbsys_simrad_struct *istore, 
-		struct mbsys_simrad2_struct *ostore, 
+int mbcopy_simrad_to_simrad2(int verbose,
+		struct mbsys_simrad_struct *istore,
+		struct mbsys_simrad2_struct *ostore,
 		int *error)
 {
 	char	*function_name = "mbcopy_simrad_to_simrad2";
@@ -2074,7 +2074,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		}
 
 	/* copy the data  */
-	if (istore != NULL && ostore != NULL 
+	if (istore != NULL && ostore != NULL
 		&& (void *) istore != (void *) ostore)
 		{
 		/* type of data record */
@@ -2102,25 +2102,25 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		    ostore->sonar = MBSYS_SIMRAD2_EM121;
 
 		/* time stamp */
-		mbcopy_simrad_time_convert(verbose, 
-		    istore->year, istore->month, 
-		    istore->day, istore->hour, 
-		    istore->minute, istore->second, 
-		    istore->centisecond, 
-		    &ostore->date, &ostore->msec, 
+		mbcopy_simrad_time_convert(verbose,
+		    istore->year, istore->month,
+		    istore->day, istore->hour,
+		    istore->minute, istore->second,
+		    istore->centisecond,
+		    &ostore->date, &ostore->msec,
 		    error);
-	
+
 		/* installation parameter values */
 		ostore->par_date = 0;	/* installation parameter date = year*10000 + month*100 + day
 					    Feb 26, 1995 = 19950226 */
 		ostore->par_msec = 0;	/* installation parameter time since midnight in msec
 					    08:12:51.234 = 29570234 */
-		mbcopy_simrad_time_convert(verbose, 
-		    istore->par_year, istore->par_month, 
-		    istore->par_day, istore->par_hour, 
-		    istore->par_minute, istore->par_second, 
-		    istore->par_centisecond, 
-		    &ostore->par_date, &ostore->par_msec, 
+		mbcopy_simrad_time_convert(verbose,
+		    istore->par_year, istore->par_month,
+		    istore->par_day, istore->par_hour,
+		    istore->par_minute, istore->par_second,
+		    istore->par_centisecond,
+		    &ostore->par_date, &ostore->par_msec,
 		    error);
 		ostore->par_line_num = istore->survey_line; /* survey line number */
 		ostore->par_serial_1 = 0;/* system 1 serial number */
@@ -2173,7 +2173,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		ostore->par_dsh[1] = 'N';	/* depth sensor heave (IN or NI) */
 		ostore->par_aps = 0;	/* active position system number */
 		ostore->par_p1m = 0;	/* position system 1 motion compensation (boolean) */
-		ostore->par_p1t = 0;	/* position system 1 time stamp used 
+		ostore->par_p1t = 0;	/* position system 1 time stamp used
 					    (0=system time, 1=position input time) */
 		ostore->par_p1z = 0.0;	/* position system 1 vertical location (m) */
 		ostore->par_p1x = 0.0;	/* position system 1 along location (m) */
@@ -2184,7 +2184,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		    ostore->par_p1g[i] = '\0';	/* position system 1 geodetic datum */
 		    }
 		ostore->par_p2m = 0;	/* position system 2 motion compensation (boolean) */
-		ostore->par_p2t = 0;	/* position system 2 time stamp used 
+		ostore->par_p2t = 0;	/* position system 2 time stamp used
 					    (0=system time, 1=position input time) */
 		ostore->par_p2z = 0.0;	/* position system 2 vertical location (m) */
 		ostore->par_p2x = 0.0;	/* position system 2 along location (m) */
@@ -2195,7 +2195,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		    ostore->par_p2g[i] = '\0';	/* position system 2 geodetic datum */
 		    }
 		ostore->par_p3m = 0;	/* position system 3 motion compensation (boolean) */
-		ostore->par_p3t = 0;	/* position system 3 time stamp used 
+		ostore->par_p3t = 0;	/* position system 3 time stamp used
 					    (0=system time, 1=position input time) */
 		ostore->par_p3z = 0.0;	/* position system 3 vertical location (m) */
 		ostore->par_p3x = 0.0;	/* position system 3 along location (m) */
@@ -2226,7 +2226,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		    ostore->par_pll[i] = '\0';	/* survey line identifier (planned line number) */
 		    ostore->par_com[i] = '\0';	/* comment */
 		    }
-	
+
 		/* runtime parameter values */
 		ostore->run_date = 0;		/* runtime parameter date = year*10000 + month*100 + day
 					    Feb 26, 1995 = 19950226 */
@@ -2246,7 +2246,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 						00 : off
 						01 : weak
 						10 : medium
-						11 : strong 
+						11 : strong
 					    bit 2 is set if the slope filter is on
 					    bit 3 is set if the sidelobe filter is on
 					    bit 4 is set if the range windows are expanded
@@ -2255,7 +2255,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		ostore->run_min_depth = 0;	/* minimum depth (m) */
 		ostore->run_max_depth = 0;	/* maximum depth (m) */
 		ostore->run_absorption = 0;	/* absorption coefficient (0.01 dB/km) */
-	
+
 		ostore->run_tran_pulse = 0;	/* transmit pulse length (usec) */
 		if (istore->sonar == MBSYS_SIMRAD_EM12S
 		    || istore->sonar == MBSYS_SIMRAD_EM12D)
@@ -2298,19 +2298,19 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		    {
 		    ostore->run_spare[i] = '\0';
 		    }
-	
+
 		/* sound velocity profile */
 		ostore->svp_use_date = 0;	/* date at start of use
 					    date = year*10000 + month*100 + day
 					    Feb 26, 1995 = 19950226 */
 		ostore->svp_use_msec = 0;	/* time at start of use since midnight in msec
 					    08:12:51.234 = 29570234 */
-		mbcopy_simrad_time_convert(verbose, 
-		    istore->svp_year, istore->svp_month, 
-		    istore->svp_day, istore->svp_hour, 
-		    istore->svp_minute, istore->svp_second, 
-		    istore->svp_centisecond, 
-		    &ostore->svp_use_date, &ostore->svp_use_msec, 
+		mbcopy_simrad_time_convert(verbose,
+		    istore->svp_year, istore->svp_month,
+		    istore->svp_day, istore->svp_hour,
+		    istore->svp_minute, istore->svp_second,
+		    istore->svp_centisecond,
+		    &ostore->svp_use_date, &ostore->svp_use_msec,
 		    error);
 		ostore->svp_count = 0;		/* sequential counter or input identifier */
 		ostore->svp_serial = 0;		/* system 1 serial number */
@@ -2326,28 +2326,28 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		    ostore->svp_depth[i] = istore->svp_depth[i];	/* depth of svp entries (according to svp_depth_res) */
 		    ostore->svp_vel[i] = istore->svp_vel[i];	/* sound speed of svp entries (0.1 m/sec) */
 		    }
-		    
+
 		/* position */
 		ostore->pos_date = 0;		/* position date = year*10000 + month*100 + day
 					    Feb 26, 1995 = 19950226 */
 		ostore->pos_msec = 0;		/* position time since midnight in msec
 					    08:12:51.234 = 29570234 */
-		mbcopy_simrad_time_convert(verbose, 
-		    istore->pos_year, istore->pos_month, 
-		    istore->pos_day, istore->pos_hour, 
-		    istore->pos_minute, istore->pos_second, 
-		    istore->pos_centisecond, 
-		    &ostore->pos_date, &ostore->pos_msec, 
+		mbcopy_simrad_time_convert(verbose,
+		    istore->pos_year, istore->pos_month,
+		    istore->pos_day, istore->pos_hour,
+		    istore->pos_minute, istore->pos_second,
+		    istore->pos_centisecond,
+		    &ostore->pos_date, &ostore->pos_msec,
 		    error);
 		ostore->pos_count = 0;		/* sequential counter */
 		ostore->pos_serial = 0;		/* system 1 serial number */
 		ostore->pos_latitude = 20000000 * istore->pos_latitude;
 					/* latitude in decimal degrees * 20000000
-					    (negative in southern hemisphere) 
+					    (negative in southern hemisphere)
 					    if valid, invalid = 0x7FFFFFFF */
 		ostore->pos_longitude = 10000000 * istore->pos_longitude;
 					/* longitude in decimal degrees * 10000000
-					    (negative in western hemisphere) 
+					    (negative in western hemisphere)
 					    if valid, invalid = 0x7FFFFFFF */
 		ostore->pos_quality = 0;	/* measure of position fix quality (cm) */
 		ostore->pos_speed = (int)(istore->speed / 0.036);
@@ -2371,7 +2371,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		    ostore->pos_input[i] = 0;	/* position input datagram as received, minus
 					    header and tail (such as NMEA 0183 $ and CRLF) */
 		    }
-		    
+
 		/* height */
 		ostore->hgt_date = 0;		/* height date = year*10000 + month*100 + day
 					    Feb 26, 1995 = 19950226 */
@@ -2384,7 +2384,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 					    zero the height is derived from the GGK datagram
 					    and is the height of the water level re the
 					    vertical datum */
-		
+
 		/* tide */
 		ostore->tid_date = 0;		/* tide date = year*10000 + month*100 + day
 					    Feb 26, 1995 = 19950226 */
@@ -2396,8 +2396,8 @@ int mbcopy_simrad_to_simrad2(int verbose,
 					    Feb 26, 1995 = 19950226 */
 		ostore->tid_origin_msec = 0;	/* tide input time since midnight in msec
 					    08:12:51.234 = 29570234 */
-		ostore->tid_tide = 0;		/* tide offset (0.01 m) */	
-		
+		ostore->tid_tide = 0;		/* tide offset (0.01 m) */
+
 		/* clock */
 		ostore->clk_date = 0;		/* system date = year*10000 + month*100 + day
 					    Feb 26, 1995 = 19950226 */
@@ -2411,14 +2411,14 @@ int mbcopy_simrad_to_simrad2(int verbose,
 					    08:12:51.234 = 29570234 */
 		ostore->clk_1_pps_use = 0;	/* if 1 then the internal clock is synchronized
 					    to an external 1 PPS signal, if 0 then not */
-	
+
 		/* allocate memory for data structure if needed */
 		if (istore->kind == MB_DATA_DATA
 			&& ostore->ping == NULL)
 			status = mb_mallocd(verbose, __FILE__, __LINE__,
 				sizeof(struct mbsys_simrad2_ping_struct),
 				(void **)&(ostore->ping),error);
-				
+
 		if (istore->kind == MB_DATA_DATA
 			&& istore->ping != NULL
 			&& ostore->ping != NULL)
@@ -2448,39 +2448,39 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			    }
 
 			/* initialize everything */
-			oping->png_date = ostore->date;	
+			oping->png_date = ostore->date;
 					/* date = year*10000 + month*100 + day
 					    Feb 26, 1995 = 19950226 */
-			oping->png_msec = ostore->msec;	
+			oping->png_msec = ostore->msec;
 					/* time since midnight in msec
 					    08:12:51.234 = 29570234 */
-			oping->png_count = iping->ping_number;	
+			oping->png_count = iping->ping_number;
 					/* sequential counter or input identifier */
-			oping->png_serial = iping->swath_id;	
+			oping->png_serial = iping->swath_id;
 					/* system 1 or system 2 serial number */
 			oping->png_latitude = 20000000 * iping->latitude;
 					/* latitude in decimal degrees * 20000000
-					    (negative in southern hemisphere) 
+					    (negative in southern hemisphere)
 					    if valid, invalid = 0x7FFFFFFF */
 			oping->png_longitude = 10000000 * iping->longitude;
 					/* longitude in decimal degrees * 10000000
-					    (negative in western hemisphere) 
+					    (negative in western hemisphere)
 					    if valid, invalid = 0x7FFFFFFF */
 			oping->png_speed = 0xFFFF;
 					/* speed over ground (cm/sec) if valid,
 					    invalid = 0xFFFF */
 			if (ostore->sonar == MBSYS_SIMRAD2_EM121)
-			    oping->png_heading = iping->heading; /* heading (0.01 deg) */	
+			    oping->png_heading = iping->heading; /* heading (0.01 deg) */
 			else
 			    oping->png_heading = 10 * iping->heading; /* heading (0.01 deg) */
-			oping->png_ssv = iping->sound_vel;	
+			oping->png_ssv = iping->sound_vel;
 					/* sound speed at transducer (0.1 m/sec) */
 			oping->png_xducer_depth = iping->ping_heave + (int) (100 * ostore->par_s1z);
 			bath_offset = 0.01 * oping->png_xducer_depth;
-					/* transmit transducer depth (0.01 m) 
+					/* transmit transducer depth (0.01 m)
 					    - The transmit transducer depth plus the
 						depth offset multiplier times 65536 cm
-						should be added to the beam depths to 
+						should be added to the beam depths to
 						derive the depths re the water line.
 						The depth offset multiplier will usually
 						be zero, except when the EM3000 sonar
@@ -2488,64 +2488,64 @@ int mbcopy_simrad_to_simrad2(int verbose,
 						depth greater than about 650 m. Note that
 						the offset multiplier will be negative
 						(-1) if the actual heave is large enough
-						to bring the transmit transducer above 
+						to bring the transmit transducer above
 						the water line. This may represent a valid
-						situation,  but may also be due to an 
-						erroneously set installation depth of 
+						situation,  but may also be due to an
+						erroneously set installation depth of
 						the either transducer or the water line. */
 			if (oping->png_xducer_depth > 0)
-			    oping->png_offset_multiplier = 0;	
-					/* transmit transducer depth offset multiplier */ 
+			    oping->png_offset_multiplier = 0;
+					/* transmit transducer depth offset multiplier */
 			else
 			    {
-			    oping->png_offset_multiplier = -1;	
-			    oping->png_xducer_depth = oping->png_xducer_depth + 65536;   
-					/* transmit transducer depth offset multiplier */ 
+			    oping->png_offset_multiplier = -1;
+			    oping->png_xducer_depth = oping->png_xducer_depth + 65536;
+					/* transmit transducer depth offset multiplier */
 			    }
-					   
+
 			/* beam data */
 			oping->png_nbeams_max = iping->beams_bath;
 					/* maximum number of beams possible */
-			oping->png_nbeams = iping->beams_bath;	
+			oping->png_nbeams = iping->beams_bath;
 					/* number of valid beams */
 			if ((ostore->sonar == MBSYS_SIMRAD2_EM12S
 				|| ostore->sonar == MBSYS_SIMRAD2_EM12D)
 			    && iping->bath_res == 1)
 			    {
-			    oping->png_depth_res = 10;	
+			    oping->png_depth_res = 10;
 					/* depth resolution (0.1 m) */
-			    oping->png_distance_res = 20;	
+			    oping->png_distance_res = 20;
 					/* x and y resolution (0.2 m) */
-			    oping->png_sample_rate = 5000;	
+			    oping->png_sample_rate = 5000;
 					/* sampling rate (Hz) */
 			    }
 			else if ((ostore->sonar == MBSYS_SIMRAD2_EM12S
 				|| ostore->sonar == MBSYS_SIMRAD2_EM12D)
 			    && iping->bath_res == 2)
 			    {
-			    oping->png_depth_res = 20;	
+			    oping->png_depth_res = 20;
 					/* depth resolution (0.2 m) */
-			    oping->png_distance_res = 50;	
+			    oping->png_distance_res = 50;
 					/* x and y resolution (0.5 m) */
-			    oping->png_sample_rate = 1250;	
+			    oping->png_sample_rate = 1250;
 					/* sampling rate (Hz) */
 			    }
 			else if (ostore->sonar == MBSYS_SIMRAD2_EM1000)
 			    {
-			    oping->png_depth_res = 2;	
+			    oping->png_depth_res = 2;
 					/* depth resolution (0.02 m) */
-			    oping->png_distance_res = 10;	
+			    oping->png_distance_res = 10;
 					/* x and y resolution (0.1 m) */
-			    oping->png_sample_rate = 20000;	
+			    oping->png_sample_rate = 20000;
 					/* sampling rate (Hz) */
 			    }
 			else if (ostore->sonar == MBSYS_SIMRAD2_EM121)
 			    {
-			    oping->png_depth_res = iping->depth_res;	
+			    oping->png_depth_res = iping->depth_res;
 					/* depth resolution (0.01 m) */
-			    oping->png_distance_res = iping->across_res;	
+			    oping->png_distance_res = iping->across_res;
 					/* x and y resolution (0.01 m) */
-			    oping->png_sample_rate = (int)(1.0 / (0.0001 * iping->range_res));	
+			    oping->png_sample_rate = (int)(1.0 / (0.0001 * iping->range_res));
 					/* sampling rate (Hz) */
 			    }
 
@@ -2632,7 +2632,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 				else if (iping->bath_mode == 5)
 				    angles_simrad = angles_EM12S_105;
 				else if (iping->bath_mode == 6)
-				    angles_simrad = angles_EM12S_90;			
+				    angles_simrad = angles_EM12S_90;
 				}
 			else if (istore->sonar == MBSYS_SIMRAD_EM12D
 				&& iping->swath_id == EM_SWATH_PORT)
@@ -2648,11 +2648,11 @@ int mbcopy_simrad_to_simrad2(int verbose,
 				else if (iping->bath_mode == 5)
 				    angles_simrad = angles_EM12DP_140;
 				else if (iping->bath_mode == 6)
-				    angles_simrad = angles_EM12DP_128;			
+				    angles_simrad = angles_EM12DP_128;
 				else if (iping->bath_mode == 7)
-				    angles_simrad = angles_EM12DP_114;			
+				    angles_simrad = angles_EM12DP_114;
 				else if (iping->bath_mode == 8)
-				    angles_simrad = angles_EM12DP_98;			
+				    angles_simrad = angles_EM12DP_98;
 				}
 			else if (istore->sonar == MBSYS_SIMRAD_EM12D
 				&& iping->swath_id == EM_SWATH_STARBOARD)
@@ -2668,13 +2668,13 @@ int mbcopy_simrad_to_simrad2(int verbose,
 				else if (iping->bath_mode == 5)
 				    angles_simrad = angles_EM12DS_140;
 				else if (iping->bath_mode == 6)
-				    angles_simrad = angles_EM12DS_128;			
+				    angles_simrad = angles_EM12DS_128;
 				else if (iping->bath_mode == 7)
-				    angles_simrad = angles_EM12DS_114;			
+				    angles_simrad = angles_EM12DS_114;
 				else if (iping->bath_mode == 8)
-				    angles_simrad = angles_EM12DS_98;			
+				    angles_simrad = angles_EM12DS_98;
 				}
-				
+
 			/* if interleaved get center beam */
 			if (interleave == MB_YES)
 				{
@@ -2692,11 +2692,11 @@ int mbcopy_simrad_to_simrad2(int verbose,
 				else
 				    istep = 0;
 				}
-				
+
 			/* set beam values */
 			for (i=0;i<oping->png_nbeams;i++)
 			    {
-			    oping->png_depth[i] = (int)((unsigned short)iping->bath[i]);	
+			    oping->png_depth[i] = (int)((unsigned short)iping->bath[i]);
 					/* depths in depth resolution units */
 			    if (oping->png_depth[i] != 0)
 				oping->png_depth[i] -= (int)(bath_offset / (0.01 * oping->png_depth_res));
@@ -2724,7 +2724,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 				{
 				beta = 90.0 + angles_simrad[i];
 				}
-			    mb_rollpitch_to_takeoff(verbose, 
+			    mb_rollpitch_to_takeoff(verbose,
 				    alpha, beta, &theta, &phi, error);
 			    oping->png_depression[i] = (int) (100 * (90.0 - theta));
 					/* Beam depression angles
@@ -2736,31 +2736,31 @@ int mbcopy_simrad_to_simrad2(int verbose,
 						in 0.01 degree. These values used to rotate sounding
 						position relative to the sonar after raytracing. */
 			    oping->png_range[i] = iping->tt[i];
-					/* Ranges as one way 
-						travel times in time units defined as half 
+					/* Ranges as one way
+						travel times in time units defined as half
 						the inverse sampling rate. */
-			    oping->png_quality[i] = iping->quality[i];	
+			    oping->png_quality[i] = iping->quality[i];
 					/* 0-254 */
-			    oping->png_window[i] = 0;		
+			    oping->png_window[i] = 0;
 					/* samples/4 */
-			    oping->png_amp[i] = iping->amp[i];		
+			    oping->png_amp[i] = iping->amp[i];
 					/* 0.5 dB */
-			    oping->png_beam_num[i] = i + 1;	
-					/* beam 128 is first beam on 
+			    oping->png_beam_num[i] = i + 1;
+					/* beam 128 is first beam on
 					    second head of EM3000D */
 			    if (iping->bath[i] > 0)
 				oping->png_beamflag[i] = MB_FLAG_NONE;
 			    else
 				oping->png_beamflag[i] = MB_FLAG_NULL;
 			    }
-					   
+
 			/* raw travel time and angle data */
 			oping->png_raw1_read = MB_NO;	/* flag indicating actual reading of rawbeam1 record */
 			oping->png_raw2_read = MB_NO;	/* flag indicating actual reading of rawbeam2 record */
 			oping->png_raw_nbeams = 0;	/* number of raw travel times and angles
 				    - nonzero only if raw beam record read */
 					/* number of valid beams */
-	
+
 			/* get raw pixel size to be stored in oping->png_max_range */
 			if (iping->pixels_ssraw > 0)
 			    oping->png_ss_read = MB_YES;	/* flag indicating actual reading of sidescan record */
@@ -2795,50 +2795,50 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			    else
 				oping->png_max_range = 15;
 			    }
-		
+
 			/* sidescan */
-			oping->png_r_zero = 0;	
+			oping->png_r_zero = 0;
 					/* range to normal incidence used in TVG
 					    (R0 predicted) in samples */
 			oping->png_r_zero_corr = 0;
 					/* range to normal incidence used to correct
 					    sample amplitudes in number of samples */
-			oping->png_tvg_start = 0;	
-					/* start sample of TVG ramp if not enough 
+			oping->png_tvg_start = 0;
+					/* start sample of TVG ramp if not enough
 					    dynamic range (0 otherwise) */
 			oping->png_tvg_stop = 0;	\
-					/* stop sample of TVG ramp if not enough 
+					/* stop sample of TVG ramp if not enough
 					    dynamic range (0 otherwise) */
-			oping->png_bsn = 0;	
+			oping->png_bsn = 0;
 					/* normal incidence backscatter (BSN) in dB */
-			oping->png_bso = 0;	
+			oping->png_bso = 0;
 					/* oblique incidence backscatter (BSO) in dB */
 			if (ostore->sonar == MBSYS_SIMRAD2_EM121)
-			    oping->png_tx = 10 * iping->beam_width;	
+			    oping->png_tx = 10 * iping->beam_width;
 			else if (ostore->sonar == MBSYS_SIMRAD2_EM12S
 				    || ostore->sonar == MBSYS_SIMRAD2_EM12D)
-			    oping->png_tx = 17;	
+			    oping->png_tx = 17;
 			else if (ostore->sonar == MBSYS_SIMRAD2_EM1000)
-			    oping->png_tx = 33;	
+			    oping->png_tx = 33;
 					/* Tx beamwidth in 0.1 degree */
-			oping->png_tvg_crossover = 0;	
+			oping->png_tvg_crossover = 0;
 					/* TVG law crossover angle in degrees */
-			oping->png_nbeams_ss = oping->png_nbeams;	
+			oping->png_nbeams_ss = oping->png_nbeams;
 					/* number of beams with sidescan */
 			oping->png_npixels = iping->pixels_ssraw;
 			for (i=0;i<oping->png_nbeams_ss;i++)
 			    {
-			    oping->png_beam_index[i] = i;	
+			    oping->png_beam_index[i] = i;
 					/* beam index number */
-			    oping->png_sort_direction[i] = 0;	
+			    oping->png_sort_direction[i] = 0;
 					/* sorting direction - first sample in beam has lowest
 					    range if 1, highest if -1. */
-			    oping->png_beam_samples[i] = iping->beam_samples[i];	
+			    oping->png_beam_samples[i] = iping->beam_samples[i];
 					/* number of sidescan samples derived from
 						each beam */
-			    oping->png_start_sample[i] = iping->beam_start_sample[i];	
+			    oping->png_start_sample[i] = iping->beam_start_sample[i];
 					/* start sample number */
-			    oping->png_center_sample[i] = iping->beam_center_sample[i];	
+			    oping->png_center_sample[i] = iping->beam_center_sample[i];
 					/* center sample number */
 			    }
 			for (i=0;i<oping->png_npixels;i++)
@@ -2855,7 +2855,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			    	oping->png_ss[i] = iping->ss[i];
 					/* the processed sidescan ordered port to starboard */
 			    	oping->png_ssalongtrack[i] = iping->ssalongtrack[i];
-					/* the processed sidescan alongtrack distances 
+					/* the processed sidescan alongtrack distances
 						in distance resolution units */
 				}
 			    else
@@ -2863,7 +2863,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			    	oping->png_ss[i] = EM2_INVALID_AMP;
 					/* the processed sidescan ordered port to starboard */
 			    	oping->png_ssalongtrack[i] = EM2_INVALID_AMP;
-					/* the processed sidescan alongtrack distances 
+					/* the processed sidescan alongtrack distances
 						in distance resolution units */
 				}
 			    }
@@ -2885,12 +2885,12 @@ int mbcopy_simrad_to_simrad2(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbcopy_simrad_time_convert(int verbose, 
-		    int year, int month, 
-		    int day, int hour, 
-		    int minute, int second, 
-		    int centisecond, 
-		    int *date, int *msec, 
+int mbcopy_simrad_time_convert(int verbose,
+		    int year, int month,
+		    int day, int hour,
+		    int minute, int second,
+		    int centisecond,
+		    int *date, int *msec,
 		    int *error)
 {
 	char	*function_name = "mbcopy_simrad_time_convert";
@@ -2912,7 +2912,7 @@ int mbcopy_simrad_time_convert(int verbose,
 		fprintf(stderr,"dbg2       second:     %d\n",second);
 		fprintf(stderr,"dbg2       centisecond:%d\n",centisecond);
 		}
-		
+
 	/* get time */
 	mb_fix_y2k(verbose, year, &time_i[0]);
 	time_i[1] = month;
@@ -2946,18 +2946,18 @@ int mbcopy_simrad_time_convert(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbcopy_any_to_mbldeoih(int verbose, 
-		int kind, int *time_i, double time_d, 
-		double navlon, double navlat, double speed, double heading, 
-		double draft, double altitude, 
-		double roll, double pitch, double heave, 
-		double	beamwidth_xtrack, double beamwidth_ltrack, 
+int mbcopy_any_to_mbldeoih(int verbose,
+		int kind, int *time_i, double time_d,
+		double navlon, double navlat, double speed, double heading,
+		double draft, double altitude,
+		double roll, double pitch, double heave,
+		double	beamwidth_xtrack, double beamwidth_ltrack,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, 
-		void *ombio_ptr, void *ostore_ptr, 
+		char *comment,
+		void *ombio_ptr, void *ostore_ptr,
 		int *error)
 {
 	char	*function_name = "mbcopy_any_to_mbldeoih";
@@ -3005,18 +3005,18 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
 			nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -3029,7 +3029,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 
 	/* copy the data  */
 	if (ostore != NULL)
-		{		
+		{
 		/* set beam widths */
 		ostore->beam_xwidth = beamwidth_xtrack;
 		ostore->beam_lwidth = beamwidth_ltrack;
@@ -3038,18 +3038,18 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		/* insert data */
 		if (kind == MB_DATA_DATA)
 		        {
-			mb_insert_nav(verbose, ombio_ptr, (void *)ostore, 
-					time_i, time_d, 
-					navlon, navlat, speed, heading, draft, 
-					roll, pitch, heave, 
+			mb_insert_nav(verbose, ombio_ptr, (void *)ostore,
+					time_i, time_d,
+					navlon, navlat, speed, heading, draft,
+					roll, pitch, heave,
 					error);
-			mb_insert_altitude(verbose, ombio_ptr, (void *)ostore, 
-					draft, altitude, 
+			mb_insert_altitude(verbose, ombio_ptr, (void *)ostore,
+					draft, altitude,
 					error);
 			}
 		status = mb_insert(verbose, ombio_ptr, (void *)ostore,
-				kind, time_i, time_d, 
-				navlon, navlat, speed, heading, 
+				kind, time_i, time_d,
+				navlon, navlat, speed, heading,
 				nbath,namp,nss,
 				beamflag,bath,amp,bathacrosstrack,
 				bathalongtrack,
@@ -3072,8 +3072,8 @@ int mbcopy_any_to_mbldeoih(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbcopy_reson8k_to_gsf(int verbose, 
-		void *imbio_ptr, 
+int mbcopy_reson8k_to_gsf(int verbose,
+		void *imbio_ptr,
 		void *ombio_ptr,
 		int *error)
 {
@@ -3082,7 +3082,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 	struct mb_io_struct *imb_io_ptr;
 	struct mb_io_struct *omb_io_ptr;
 	struct mbsys_reson8k_struct *istore;
-	struct mbsys_gsf_struct *ostore;			
+	struct mbsys_gsf_struct *ostore;
 	gsfDataID	    *dataID; 		/* pointers withinin gsf data */
 	gsfRecords	    *records;
 	gsfSwathBathyPing   *mb_ping;
@@ -3099,13 +3099,13 @@ int mbcopy_reson8k_to_gsf(int verbose,
 
 	imb_io_ptr  = (struct mb_io_struct *) imbio_ptr;
 	omb_io_ptr = (struct mb_io_struct *) ombio_ptr;
-	
+
 	/* get reson data structure pointer */
 	istore = imb_io_ptr->store_data;
-	
+
 	/* get gsf data structure pointer */
 	ostore = omb_io_ptr->store_data;
-		
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -3119,7 +3119,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 		fprintf(stderr,"dbg2       ostore:     %lu\n",(size_t)ostore);
 		fprintf(stderr,"dbg2       kind:       %lu\n",(size_t)istore->kind);
 		}
-	
+
 	/* copy the data  */
 	if (istore != NULL && ostore != NULL)
 		{
@@ -3133,42 +3133,42 @@ int mbcopy_reson8k_to_gsf(int verbose,
 
 		/* insert data in structure */
 		if (istore->kind == MB_DATA_DATA)
-			{		
+			{
 			/* on the first ping set the processing parameters up  */
-			if (omb_io_ptr->ping_count == 0) 
+			if (omb_io_ptr->ping_count == 0)
 				{
 				/* ostore->kind = MB_DATA_PROCESSING_PARAMETERS;
 				dataID->recordID = GSF_RECORD_PROCESSING_PARAMETERS; */
 				memset((void *)&params, 0, sizeof(gsfMBParams));
 
-				params.roll_compensated = GSF_COMPENSATED; 
+				params.roll_compensated = GSF_COMPENSATED;
 				params.pitch_compensated = GSF_COMPENSATED;
 				params.heave_compensated = GSF_COMPENSATED;
-				params.tide_compensated = 0; 
+				params.tide_compensated = 0;
 				params.ray_tracing = 0      ;
-				params.depth_calculation =GSF_DEPTHS_RE_1500_MS; 
-				params.to_apply.draft[0] = 0;	    
-				params.to_apply.roll_bias[0] = 0;;	    
-				params.to_apply.pitch_bias[0] = 0;;	    
+				params.depth_calculation =GSF_DEPTHS_RE_1500_MS;
+				params.to_apply.draft[0] = 0;
+				params.to_apply.roll_bias[0] = 0;;
+				params.to_apply.pitch_bias[0] = 0;;
 				params.to_apply.gyro_bias[0] = 0;;
-				/* note it appears the x and y axis are switched between 
+				/* note it appears the x and y axis are switched between
 					reson and gsf reference systems	*/
-				params.to_apply.position_x_offset = istore->NavOffsetY;  	    
-				params.to_apply.position_y_offset = istore->NavOffsetX;  	    
-				params.to_apply.position_z_offset = istore->NavOffsetZ;  	    
+				params.to_apply.position_x_offset = istore->NavOffsetY;
+				params.to_apply.position_y_offset = istore->NavOffsetX;
+				params.to_apply.position_z_offset = istore->NavOffsetZ;
 				params.to_apply.transducer_x_offset[0] = istore->MBOffsetY;
 				params.to_apply.transducer_y_offset[0] = istore->MBOffsetX;
 				params.to_apply.transducer_z_offset[0] = istore->MBOffsetZ;
-				params.to_apply.mru_roll_bias = istore->MRUOffsetRoll;			    
-				params.to_apply.mru_pitch_bias = istore->MRUOffsetPitch; 		    
-				params.to_apply.mru_heading_bias = 0;		    
-				params.to_apply.mru_x_offset = istore->MRUOffsetY;			    
-				params.to_apply.mru_y_offset = istore->MRUOffsetX;			    
-				params.to_apply.mru_z_offset = istore->MRUOffsetZ;			    
-				params.to_apply.center_of_rotation_x_offset = 0;	    
-				params.to_apply.center_of_rotation_y_offset = 0;	    
+				params.to_apply.mru_roll_bias = istore->MRUOffsetRoll;
+				params.to_apply.mru_pitch_bias = istore->MRUOffsetPitch;
+				params.to_apply.mru_heading_bias = 0;
+				params.to_apply.mru_x_offset = istore->MRUOffsetY;
+				params.to_apply.mru_y_offset = istore->MRUOffsetX;
+				params.to_apply.mru_z_offset = istore->MRUOffsetZ;
+				params.to_apply.center_of_rotation_x_offset = 0;
+				params.to_apply.center_of_rotation_y_offset = 0;
 				params.to_apply.center_of_rotation_z_offset = 0;
-				ret = gsfPutMBParams(&params, records, omb_io_ptr->gsfid, 1); 
+				ret = gsfPutMBParams(&params, records, omb_io_ptr->gsfid, 1);
 				}
 
 			/* set data id */
@@ -3177,9 +3177,9 @@ int mbcopy_reson8k_to_gsf(int verbose,
 
 			/* get time */
 			mb_ping->ping_time.tv_sec = (int) istore->png_time_d;
-			mb_ping->ping_time.tv_nsec 
-				= (int) (1000000000 
-				    * (istore->png_time_d 
+			mb_ping->ping_time.tv_nsec
+				= (int) (1000000000
+				    * (istore->png_time_d
 					    - mb_ping->ping_time.tv_sec));
 
 			/* get navigation, applying inverse projection if defined */
@@ -3198,14 +3198,14 @@ int mbcopy_reson8k_to_gsf(int verbose,
 
 			/* get speed */
 			mb_ping->speed = istore->png_speed/ 1.852;
-			
+
 			/* set sonar depth */
 			mb_ping->depth_corrector = istore->MBOffsetZ;
 
                 	/* do roll pitch heave */
 			mb_ping->roll =  istore->png_roll;
 			mb_ping->pitch = istore->png_pitch;
-			mb_ping->heave = istore->png_heave;		
+			mb_ping->heave = istore->png_heave;
 
 			/* get numbers of beams */
 			mb_ping->number_beams = istore->beams_bath;
@@ -3213,32 +3213,32 @@ int mbcopy_reson8k_to_gsf(int verbose,
 			/* allocate memory in arrays if required */
 			if (istore->beams_bath > 0)
 			      {
-			      mb_ping->beam_flags 
-				  = (unsigned char *) 
+			      mb_ping->beam_flags
+				  = (unsigned char *)
 				      realloc(mb_ping->beam_flags,
 						  istore->beams_bath * sizeof(char));
-			      mb_ping->depth 
-				  = (double *) 
+			      mb_ping->depth
+				  = (double *)
 				      realloc(mb_ping->depth,
 						  istore->beams_bath * sizeof(double));
-			      mb_ping->across_track 
-				  = (double *) 
+			      mb_ping->across_track
+				  = (double *)
 				      realloc(mb_ping->across_track,
 						  istore->beams_bath * sizeof(double));
-			      mb_ping->along_track 
-				  = (double *) 
+			      mb_ping->along_track
+				  = (double *)
 				      realloc(mb_ping->along_track,
 						  istore->beams_bath * sizeof(double));
-			      mb_ping->travel_time 
-				  = (double *) 
+			      mb_ping->travel_time
+				  = (double *)
 				      realloc(mb_ping->travel_time,
 						  istore->beams_bath * sizeof(double));
-			      mb_ping->beam_angle 
-				  = (double *) 
+			      mb_ping->beam_angle
+				  = (double *)
 				      realloc(mb_ping->beam_angle,
 						  istore->beams_bath * sizeof(double));
 			      mb_ping->beam_angle_forward
-				  = (double *) 
+				  = (double *)
 				      realloc(mb_ping->beam_angle_forward,
 						  istore->beams_bath * sizeof(double));
 
@@ -3247,7 +3247,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 				  || mb_ping->across_track == NULL
 				  || mb_ping->along_track == NULL
 				  || mb_ping->travel_time == NULL
-				  || mb_ping->beam_angle_forward == NULL 
+				  || mb_ping->beam_angle_forward == NULL
 				  || mb_ping->beam_angle == NULL )
 				  {
 				  status = MB_FAILURE;
@@ -3256,8 +3256,8 @@ int mbcopy_reson8k_to_gsf(int verbose,
 			      }
 			  if (istore->beams_amp > 0)
 			      {
-			      mb_ping->mr_amplitude 
-				  = (double *) 
+			      mb_ping->mr_amplitude
+				  = (double *)
 				      realloc(mb_ping->mr_amplitude,
 						  istore->beams_amp * sizeof(double));
 			      if (mb_ping->mr_amplitude == NULL)
@@ -3281,7 +3281,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 
 			  /* read depth and beam location values into storage arrays */
 			  icenter = istore->beams_bath / 2;
-			  angscale = ((double)istore->beam_width_num) 
+			  angscale = ((double)istore->beam_width_num)
 					/ ((double)istore->beam_width_denom);
 			  for (i=0;i<istore->beams_bath;i++)
 				  {
@@ -3293,11 +3293,11 @@ int mbcopy_reson8k_to_gsf(int verbose,
 				      mb_ping->along_track[i] = istore->bath_alongtrack[i];
 				      mb_ping->travel_time[i] = 0.25 * (double)istore->range[i]/(double)istore->sample_rate;
 				      alpha = istore->png_pitch;
-				      beta = 90.0 + (icenter - i) * angscale + istore->png_roll; 
+				      beta = 90.0 + (icenter - i) * angscale + istore->png_roll;
 				      mb_rollpitch_to_takeoff(
-					      verbose, 
-					      alpha, beta, 
-					      &theta, &phi, 
+					      verbose,
+					      alpha, beta,
+					      &theta, &phi,
 					      error);
 				      mb_ping->beam_angle[i] = theta;
 				      if (phi < 0.0)
@@ -3323,36 +3323,36 @@ int mbcopy_reson8k_to_gsf(int verbose,
 				  }
 
 			  /* set scale factor for bathymetry */
-			  mbsys_gsf_getscale(verbose, istore->bath, istore->beamflag, istore->beams_bath, 
-					16, MB_NO, 
-					&mb_ping->scaleFactors.scaleTable[0].multiplier, 
+			  mbsys_gsf_getscale(verbose, istore->bath, istore->beamflag, istore->beams_bath,
+					16, MB_NO,
+					&mb_ping->scaleFactors.scaleTable[0].multiplier,
 					&mb_ping->scaleFactors.scaleTable[0].offset,
 					error);
-			  mbsys_gsf_getscale(verbose, istore->bath_acrosstrack, istore->beamflag, istore->beams_bath, 
-					16, MB_YES, 
-					&mb_ping->scaleFactors.scaleTable[1].multiplier, 
+			  mbsys_gsf_getscale(verbose, istore->bath_acrosstrack, istore->beamflag, istore->beams_bath,
+					16, MB_YES,
+					&mb_ping->scaleFactors.scaleTable[1].multiplier,
 					&mb_ping->scaleFactors.scaleTable[1].offset,
 					error);
-			  mbsys_gsf_getscale(verbose, istore->bath_alongtrack, istore->beamflag, istore->beams_bath, 
-					16, MB_YES, 
-					&mb_ping->scaleFactors.scaleTable[2].multiplier, 
+			  mbsys_gsf_getscale(verbose, istore->bath_alongtrack, istore->beamflag, istore->beams_bath,
+					16, MB_YES,
+					&mb_ping->scaleFactors.scaleTable[2].multiplier,
 					&mb_ping->scaleFactors.scaleTable[2].offset,
 					error);
 
-			  /* set travel time scale assume two full byte for a 
+			  /* set travel time scale assume two full byte for a
 			  	two way 120 m travel path */
 			  mb_ping->scaleFactors.scaleTable[3].multiplier = 65535/0.160;
 			  mb_ping->scaleFactors.scaleTable[3].offset = 0;
 
 			  /* assume angle degrees are stored in hundreds of a degree */
-			  mb_ping->scaleFactors.scaleTable[4].multiplier  = 100.; 
+			  mb_ping->scaleFactors.scaleTable[4].multiplier  = 100.;
 			  mb_ping->scaleFactors.scaleTable[4].offset = 0;
-			  mb_ping->scaleFactors.scaleTable[17].multiplier = 50.; 
+			  mb_ping->scaleFactors.scaleTable[17].multiplier = 50.;
 			  mb_ping->scaleFactors.scaleTable[17].offset = 0;
 
-			  mb_ping->scaleFactors.numArraySubrecords = 6;	
+			  mb_ping->scaleFactors.numArraySubrecords = 6;
 
-			  /* choose gain factor -it's a guess based on dataset 
+			  /* choose gain factor -it's a guess based on dataset
 			  	regression analysis!! rcc */
 			  gain_correction = 2.2*(istore->gain & 63) + 6*istore->power;
 
@@ -3366,13 +3366,13 @@ int mbcopy_reson8k_to_gsf(int verbose,
 				  	}
 
 				/* set scale factor for mc_amplitude */
-				mbsys_gsf_getscale(verbose, mb_ping->mc_amplitude, istore->beamflag, istore->beams_amp, 
+				mbsys_gsf_getscale(verbose, mb_ping->mc_amplitude, istore->beamflag, istore->beams_amp,
 						8, MB_YES, &multiplier, &offset, error);
 		    		mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY-1].multiplier
 						= multiplier;
 				mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY-1].offset
 						= offset;
-				mb_ping->scaleFactors.numArraySubrecords ++ ;			
+				mb_ping->scaleFactors.numArraySubrecords ++ ;
 			  	}
 			  else if (mb_ping->mr_amplitude != NULL)
 			  	{
@@ -3382,48 +3382,48 @@ int mbcopy_reson8k_to_gsf(int verbose,
 					}
 
 			       /* Set scale factor for mr _amplitude */
-				mbsys_gsf_getscale(verbose, mb_ping->mr_amplitude, istore->beamflag, istore->beams_amp, 
+				mbsys_gsf_getscale(verbose, mb_ping->mr_amplitude, istore->beamflag, istore->beams_amp,
 						8, MB_NO, &multiplier, &offset, error);
 		    		mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY-1].multiplier
 						= multiplier;
 				mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY-1].offset
-						= offset;	
-				mb_ping->scaleFactors.numArraySubrecords  ++ ;		
+						= offset;
+				mb_ping->scaleFactors.numArraySubrecords  ++ ;
 			  	}
 
-			/* generate imagery from sidescan trace 
+			/* generate imagery from sidescan trace
 				code here would have to be modified for snippets
 
 	        		mb_ping->brb_inten = (gsfBRBIntensity *) realloc(mb_ping->brb_inten,sizeof(gsfBRBIntensity));
 
 				gsfBRBIntensity *brb;
-				brb = mb_ping->brb_inten;					  
+				brb = mb_ping->brb_inten;
 				brb->bits_per_sample = (unsigned char) 16;
 				brb->applied_corrections = 0;
 				gsfTimeSeriesIntensity *brb_ts;
 				*brb_ts = brb->time_series;
-				*brb_ts = (gsfTimeSeriesIntensity*)realloc(*brb_ts,istore->beams_bath*sizeof(gsfTimeSeriesIntensity));	
-				*/	 
+				*brb_ts = (gsfTimeSeriesIntensity*)realloc(*brb_ts,istore->beams_bath*sizeof(gsfTimeSeriesIntensity));
+				*/
 
 			/* now fill in the reson 8100 specific fields */
 			mb_ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC;
 			mb_ping->sensor_data.gsfReson8100Specific.latency = istore->latency ;
-			mb_ping->sensor_data.gsfReson8100Specific.ping_number = istore->ping_number ; 
-			mb_ping->sensor_data.gsfReson8100Specific.sonar_id = istore->sonar_id ;   
-			mb_ping->sensor_data.gsfReson8100Specific.sonar_model = istore->sonar_model ; 
-			mb_ping->sensor_data.gsfReson8100Specific.frequency = istore->frequency ;   
+			mb_ping->sensor_data.gsfReson8100Specific.ping_number = istore->ping_number ;
+			mb_ping->sensor_data.gsfReson8100Specific.sonar_id = istore->sonar_id ;
+			mb_ping->sensor_data.gsfReson8100Specific.sonar_model = istore->sonar_model ;
+			mb_ping->sensor_data.gsfReson8100Specific.frequency = istore->frequency ;
 			mb_ping->sensor_data.gsfReson8100Specific.surface_velocity = istore->velocity ;
-			mb_ping->sensor_data.gsfReson8100Specific.sample_rate = istore->sample_rate ; 
-			mb_ping->sensor_data.gsfReson8100Specific.ping_rate = istore->ping_rate ;   
+			mb_ping->sensor_data.gsfReson8100Specific.sample_rate = istore->sample_rate ;
+			mb_ping->sensor_data.gsfReson8100Specific.ping_rate = istore->ping_rate ;
 			mb_ping->sensor_data.gsfReson8100Specific.mode = GSF_8100_AMPLITUDE ;
-			mb_ping->sensor_data.gsfReson8100Specific.range = istore->range_set ;         
-			mb_ping->sensor_data.gsfReson8100Specific.power = istore->power ;         
-			mb_ping->sensor_data.gsfReson8100Specific.gain = istore->gain ;	       
-			mb_ping->sensor_data.gsfReson8100Specific.pulse_width = istore->pulse_width ;   
-			mb_ping->sensor_data.gsfReson8100Specific.tvg_spreading = istore->tvg_spread ; 
+			mb_ping->sensor_data.gsfReson8100Specific.range = istore->range_set ;
+			mb_ping->sensor_data.gsfReson8100Specific.power = istore->power ;
+			mb_ping->sensor_data.gsfReson8100Specific.gain = istore->gain ;
+			mb_ping->sensor_data.gsfReson8100Specific.pulse_width = istore->pulse_width ;
+			mb_ping->sensor_data.gsfReson8100Specific.tvg_spreading = istore->tvg_spread ;
 			mb_ping->sensor_data.gsfReson8100Specific.tvg_absorption = istore->tvg_absorp ;
-			mb_ping->sensor_data.gsfReson8100Specific.fore_aft_bw = istore->projector_beam_width/10.;   
-			mb_ping->sensor_data.gsfReson8100Specific.athwart_bw = (double)istore->beam_width_num/(double)istore->beam_width_denom;    
+			mb_ping->sensor_data.gsfReson8100Specific.fore_aft_bw = istore->projector_beam_width/10.;
+			mb_ping->sensor_data.gsfReson8100Specific.athwart_bw = (double)istore->beam_width_num/(double)istore->beam_width_denom;
 			mb_ping->sensor_data.gsfReson8100Specific.projector_type = istore->projector_type ;
 			mb_ping->sensor_data.gsfReson8100Specific.projector_angle = istore->projector_angle ;
 			mb_ping->sensor_data.gsfReson8100Specific.range_filt_min = istore->min_range ;
@@ -3431,8 +3431,8 @@ int mbcopy_reson8k_to_gsf(int verbose,
 			mb_ping->sensor_data.gsfReson8100Specific.depth_filt_min = istore->min_depth ;
 			mb_ping->sensor_data.gsfReson8100Specific.depth_filt_max = istore-> max_depth;
 			mb_ping->sensor_data.gsfReson8100Specific.filters_active = istore->filters_active ;
-			mb_ping->sensor_data.gsfReson8100Specific.temperature = istore->temperature ;   
-			mb_ping->sensor_data.gsfReson8100Specific.beam_spacing = (double)istore->beam_width_num/(double)istore->beam_width_denom;  
+			mb_ping->sensor_data.gsfReson8100Specific.temperature = istore->temperature ;
+			mb_ping->sensor_data.gsfReson8100Specific.beam_spacing = (double)istore->beam_width_num/(double)istore->beam_width_denom;
 			}
 
 		/* insert comment in structure */
@@ -3441,11 +3441,11 @@ int mbcopy_reson8k_to_gsf(int verbose,
 			dataID->recordID = GSF_RECORD_COMMENT;
 			if (records->comment.comment_length < strlen(istore->comment) + 1)
 			    {
-			    if ((records->comment.comment 
-					= (char *) 
+			    if ((records->comment.comment
+					= (char *)
 					    realloc(records->comment.comment,
 						strlen(istore->comment)+1))
-						    == NULL) 
+						    == NULL)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_MEMORY_FAIL;
@@ -3457,9 +3457,9 @@ int mbcopy_reson8k_to_gsf(int verbose,
 			    strcpy(records->comment.comment, istore->comment);
 			    records->comment.comment_length = strlen(istore->comment)+1;
 			    records->comment.comment_time.tv_sec = (int) istore->png_time_d;
-			    records->comment.comment_time.tv_nsec 
-				    = (int) (1000000000 
-					* (istore->png_time_d 
+			    records->comment.comment_time.tv_nsec
+				    = (int) (1000000000
+					* (istore->png_time_d
 						- records->comment.comment_time.tv_sec));
 			    }
 			}

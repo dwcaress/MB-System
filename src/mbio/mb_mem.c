@@ -2,7 +2,7 @@
  *    The MB-system:	mb_mem.c	3/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -124,9 +124,9 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_io.h"
 
 /* memory allocation list variables */
 #define	MB_MEMORY_ALLOC_STEP	100
@@ -150,7 +150,7 @@ int mb_mem_debug_on(int verbose, int *error)
 	char	*function_name = "mb_mem_debug_on";
 	int	status = MB_SUCCESS;
 	int	i;
-	
+
 	/* turn debug output on */
 	mb_mem_debug = MB_YES;
 
@@ -195,7 +195,7 @@ int mb_mem_debug_off(int verbose, int *error)
 	char	*function_name = "mb_mem_debug_off";
 	int	status = MB_SUCCESS;
 	int	i;
-	
+
 	/* turn debug output off */
 	mb_mem_debug = MB_NO;
 
@@ -298,7 +298,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 			mb_alloc_overflow = MB_YES;
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %d in function %s\n",*ptr, function_name);
-#endif		
+#endif
 			}
 		}
 
@@ -329,7 +329,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_mallocd(int verbose, char *sourcefile, int sourceline, 
+int mb_mallocd(int verbose, char *sourcefile, int sourceline,
 		size_t size, void **ptr, int *error)
 {
 	char	*function_name = "mb_mallocd";
@@ -397,7 +397,7 @@ int mb_mallocd(int verbose, char *sourcefile, int sourceline,
 			mb_alloc_overflow = MB_YES;
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %d in function %s\n",*ptr, function_name);
-#endif		
+#endif
 			}
 		}
 
@@ -452,7 +452,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 	for (i=0;i<n_mb_alloc;i++)
 		if (mb_alloc_ptr[i] == *ptr)
 			iptr = i;
-			
+
 	/* if pointer is non-NULL use realloc */
 	if (*ptr != NULL)
 	    *ptr = (char *) realloc(*ptr, size);
@@ -460,7 +460,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 	/* if pointer is NULL use malloc */
 	else if (size > 0)
 	    *ptr = (char *) malloc(size);
-	    
+
 	/* check for success */
 	if (size > 0 && *ptr == NULL)
 	    {
@@ -483,7 +483,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 		mb_alloc_ptr[iptr] = *ptr;
 		mb_alloc_size[iptr] = size;
 		}
-		    
+
 	    /* else remove it from list */
 	    else
 		{
@@ -495,7 +495,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 		n_mb_alloc--;
 		}
 	    }
-    
+
 	/* else add to list if possible if size > 0 */
 	else if (status == MB_SUCCESS
 	    && size > 0)
@@ -511,7 +511,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 		mb_alloc_overflow = MB_YES;
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %d in function %s\n",*ptr, function_name);
-#endif		
+#endif
 		}
 	    }
 
@@ -555,7 +555,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_reallocd(int verbose, char *sourcefile, int sourceline, 
+int mb_reallocd(int verbose, char *sourcefile, int sourceline,
 		size_t size, void **ptr, int *error)
 {
 	char	*function_name = "mb_reallocd";
@@ -582,7 +582,7 @@ int mb_reallocd(int verbose, char *sourcefile, int sourceline,
 	for (i=0;i<n_mb_alloc;i++)
 		if (mb_alloc_ptr[i] == *ptr)
 			iptr = i;
-			
+
 	/* if pointer is non-NULL use realloc */
 	if (*ptr != NULL)
 	    *ptr = (char *) realloc(*ptr, size);
@@ -590,7 +590,7 @@ int mb_reallocd(int verbose, char *sourcefile, int sourceline,
 	/* if pointer is NULL use malloc */
 	else if (size > 0)
 	    *ptr = (char *) malloc(size);
-	    
+
 	/* check for success */
 	if (size > 0 && *ptr == NULL)
 	    {
@@ -615,7 +615,7 @@ int mb_reallocd(int verbose, char *sourcefile, int sourceline,
 		strncpy(mb_alloc_sourcefile[iptr],sourcefile,MB_NAME_LENGTH-1);
 		mb_alloc_sourceline[iptr] = sourceline;
 		}
-		    
+
 	    /* else remove it from list */
 	    else
 		{
@@ -629,7 +629,7 @@ int mb_reallocd(int verbose, char *sourcefile, int sourceline,
 		n_mb_alloc--;
 		}
 	    }
-    
+
 	/* else add to list if possible if size > 0 */
 	else if (status == MB_SUCCESS
 	    && size > 0)
@@ -647,7 +647,7 @@ int mb_reallocd(int verbose, char *sourcefile, int sourceline,
 		mb_alloc_overflow = MB_YES;
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %d in function %s\n",*ptr, function_name);
-#endif		
+#endif
 		}
 	    }
 
@@ -743,7 +743,7 @@ int mb_free(int verbose, void **ptr, int *error)
 		{
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr,"NOTICE: mbm_mem overflow pointer freed %d in function %s\n",*ptr, function_name);
-#endif		
+#endif
 		/* free the memory */
 		free(*ptr);
 		*ptr = NULL;
@@ -842,7 +842,7 @@ int mb_freed(int verbose, char *sourcefile, int sourceline, void **ptr, int *err
 		{
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr,"NOTICE: mbm_mem overflow pointer freed %d in function %s\n",*ptr, function_name);
-#endif		
+#endif
 		/* free the memory */
 		free(*ptr);
 		*ptr = NULL;
@@ -901,7 +901,7 @@ int mb_memory_clear(int verbose, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
-		
+
 	/* loop over all allocated memory */
 	for (i=0;i<n_mb_alloc;i++)
 		{
@@ -923,7 +923,7 @@ int mb_memory_clear(int verbose, int *error)
 		mb_alloc_sourceline[i] = 0;
 		}
 	n_mb_alloc = 0;
-	
+
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
@@ -943,7 +943,7 @@ int mb_memory_clear(int verbose, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_memory_status(int verbose, int *nalloc, int *nallocmax, 
+int mb_memory_status(int verbose, int *nalloc, int *nallocmax,
 			int *overflow, size_t *allocsize, int *error)
 {
 	char	*function_name = "mb_memory_status";
@@ -1040,7 +1040,7 @@ int mb_memory_list(int verbose, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_register_array(int verbose, void *mbio_ptr, 
+int mb_register_array(int verbose, void *mbio_ptr,
 		int type, size_t size, void **handle, int *error)
 {
 	static char rcs_id[]="$Id$";
@@ -1065,7 +1065,7 @@ int mb_register_array(int verbose, void *mbio_ptr,
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* allocate larger array for register if necessary */
 	if (mb_io_ptr->n_regarray >= mb_io_ptr->n_regarray_alloc)
 		{
@@ -1093,7 +1093,7 @@ int mb_register_array(int verbose, void *mbio_ptr,
 			mb_io_ptr->regarray_size[i] = 0;
 			}
 		}
-		
+
 	/* register the array */
 	if (status == MB_SUCCESS)
 		{
@@ -1106,7 +1106,7 @@ int mb_register_array(int verbose, void *mbio_ptr,
 			nalloc = mb_io_ptr->pixels_ss_max;
 		else
 			nalloc = 0;
-			
+
 		/* allocate the array - always allocate at least one dimension so the pointer is non-null */
 		if (nalloc <= 0)
 			nalloc = 1;
@@ -1120,8 +1120,8 @@ int mb_register_array(int verbose, void *mbio_ptr,
 			mb_io_ptr->regarray_type[mb_io_ptr->n_regarray] = type;
 			mb_io_ptr->regarray_size[mb_io_ptr->n_regarray] = size;
 			mb_io_ptr->n_regarray++;
-/*fprintf(stderr,"Array registered: handle:%lx ptr:%lx  stored handle:%lx ptr:%lx type:%d size:%d\n", 
-(size_t)handle, (size_t)*handle,  
+/*fprintf(stderr,"Array registered: handle:%lx ptr:%lx  stored handle:%lx ptr:%lx type:%d size:%d\n",
+(size_t)handle, (size_t)*handle,
 (size_t)mb_io_ptr->regarray_handle[mb_io_ptr->n_regarray-1],
 (size_t)mb_io_ptr->regarray_ptr[mb_io_ptr->n_regarray-1],
 mb_io_ptr->regarray_type[mb_io_ptr->n_regarray-1],
@@ -1145,7 +1145,7 @@ mb_io_ptr->regarray_size[mb_io_ptr->n_regarray-1]);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_update_arrays(int verbose, void *mbio_ptr, 
+int mb_update_arrays(int verbose, void *mbio_ptr,
 		int nbath, int namp, int nss, int *error)
 {
 	static char rcs_id[]="$Id$";
@@ -1174,7 +1174,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr,
 nbath,mb_io_ptr->beams_bath_alloc,
 namp,mb_io_ptr->beams_amp_alloc,
 nss,mb_io_ptr->pixels_ss_alloc);*/
-	
+
 	/* reallocate larger arrays if necessary */
 	if (nbath > mb_io_ptr->beams_bath_alloc)
 		{
@@ -1191,7 +1191,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 			if (nbath % 1024 > 0)
 				mb_io_ptr->beams_bath_alloc += 1024;
 			}
-			
+
 		/* allocate mb_io_ptr arrays */
 		if (status == MB_SUCCESS)
 			status = mb_realloc(verbose,mb_io_ptr->beams_bath_alloc*sizeof(char),
@@ -1233,7 +1233,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 			}
 		mb_io_ptr->beams_bath_max = nbath;
-			
+
 		/* allocate registered arrays */
 		for (i=0;i<mb_io_ptr->n_regarray;i++)
 			{
@@ -1243,13 +1243,13 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 				{
 				mb_io_ptr->regarray_oldptr[i] = mb_io_ptr->regarray_ptr[i];
 				handle = (void **)(mb_io_ptr->regarray_handle[i]);
-				status = mb_realloc(verbose, 
+				status = mb_realloc(verbose,
 						mb_io_ptr->beams_bath_alloc * mb_io_ptr->regarray_size[i],
 						handle, error);
 				mb_io_ptr->regarray_ptr[i] = *handle;
 				}
 			}
-			
+
 		/* set reallocation flag */
 		mb_io_ptr->bath_arrays_reallocated = MB_YES;
 		}
@@ -1268,7 +1268,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 			if (namp % 1024 > 0)
 				mb_io_ptr->beams_amp_alloc += 1024;
 			}
-			
+
 		if (status == MB_SUCCESS)
 			status = mb_realloc(verbose,mb_io_ptr->beams_amp_alloc*sizeof(double),
 					(void **)&mb_io_ptr->amp,error);
@@ -1285,7 +1285,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 			mb_io_ptr->new_amp[i] = 0.0;
 			}
 		mb_io_ptr->beams_amp_max = namp;
-			
+
 		/* allocate registered arrays */
 		for (i=0;i<mb_io_ptr->n_regarray;i++)
 			{
@@ -1295,13 +1295,13 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 				{
 				mb_io_ptr->regarray_oldptr[i] = mb_io_ptr->regarray_ptr[i];
 				handle = (void **)(mb_io_ptr->regarray_handle[i]);
-				status = mb_realloc(verbose, 
+				status = mb_realloc(verbose,
 						mb_io_ptr->beams_amp_alloc * mb_io_ptr->regarray_size[i],
 						handle, error);
 				mb_io_ptr->regarray_ptr[i] = *handle;
 				}
 			}
-			
+
 		/* set reallocation flag */
 		mb_io_ptr->amp_arrays_reallocated = MB_YES;
 		}
@@ -1320,7 +1320,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 			if (namp % 1024 > 0)
 				mb_io_ptr->pixels_ss_alloc += 1024;
 			}
-			
+
 		if (status == MB_SUCCESS)
 			status = mb_realloc(verbose,mb_io_ptr->pixels_ss_alloc*sizeof(double),
 					(void **)&mb_io_ptr->ss,error);
@@ -1353,7 +1353,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 			mb_io_ptr->new_ss_alongtrack[i] = 0.0;
 			}
 		mb_io_ptr->pixels_ss_max = nss;
-			
+
 		/* allocate registered arrays */
 		for (i=0;i<mb_io_ptr->n_regarray;i++)
 			{
@@ -1363,13 +1363,13 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 				{
 				mb_io_ptr->regarray_oldptr[i] = mb_io_ptr->regarray_ptr[i];
 				handle = (void **)(mb_io_ptr->regarray_handle[i]);
-				status = mb_realloc(verbose, 
+				status = mb_realloc(verbose,
 						mb_io_ptr->pixels_ss_alloc * mb_io_ptr->regarray_size[i],
 						handle, error);
 				mb_io_ptr->regarray_ptr[i] = *handle;
 				}
 			}
-			
+
 		/* set reallocation flag */
 		mb_io_ptr->ss_arrays_reallocated = MB_YES;
 		}
@@ -1386,7 +1386,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 				status = mb_free(verbose, (void **)(mb_io_ptr->regarray_handle[i]), error);
 				}
 			}
-		
+
 		/* free the standard arrays */
 		status = mb_free(verbose,(void **)&mb_io_ptr->beamflag,error);
 		status = mb_free(verbose,(void **)&mb_io_ptr->bath,error);
@@ -1407,7 +1407,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 		status = mb_free(verbose,(void **)&mb_io_ptr->new_ss,error);
 		status = mb_free(verbose,(void **)&mb_io_ptr->new_ss_acrosstrack,error);
 		status = mb_free(verbose,(void **)&mb_io_ptr->new_ss_alongtrack,error);
-		
+
 		/* free the mb_io structure */
 		status = mb_free(verbose,(void **)&mb_io_ptr,error);
 		mb_io_ptr->beams_bath_alloc = 0;
@@ -1432,7 +1432,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_update_arrayptr(int verbose, void *mbio_ptr, 
+int mb_update_arrayptr(int verbose, void *mbio_ptr,
 		void **handle, int *error)
 {
 	static char rcs_id[]="$Id$";
@@ -1583,7 +1583,7 @@ int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error)
 /*fprintf(stderr,"deallocate %d registered arrays\n",mb_io_ptr->n_regarray);*/
 	for (i=0;i<mb_io_ptr->n_regarray;i++)
 		{
-/*fprintf(stderr,"i:%d registered array: stored handle:%x ptr:%x\n", 
+/*fprintf(stderr,"i:%d registered array: stored handle:%x ptr:%x\n",
 i,mb_io_ptr->regarray_handle[mb_io_ptr->n_regarray-1],
 mb_io_ptr->regarray_ptr[mb_io_ptr->n_regarray-1]);*/
 		if (status == MB_SUCCESS)
