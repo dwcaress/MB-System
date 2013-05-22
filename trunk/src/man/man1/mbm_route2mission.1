@@ -1,0 +1,419 @@
+.TH mbm_route2mission 1 "6 November 2011" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbm_route2mission\fP - Macro to convert an \fBmbgrdviz\fP route file into an
+MBARI AUV mission script.
+
+.SH VERSION
+Version 5.0\fP
+
+.SH SYNOPSIS
+\fBmbm_route2mission\fP \fB-I\fP\fIroutefile\fP
+[\fB-A\fP\fIaltitudemin/altitudeabort[/altitudedesired[/altitudedesired2[/altitudedesired3]]]\fP
+\fB-B\fP\fIbehavior\fP \fB-C\fP\fImissiontime\fP
+\fB-D\fP\fIdepthconstant[/depthconstant2]\fP
+\fB-F\fP\fIforwarddistance\fP \fB-G\fP\fIgpsmode\fP
+\fB-J\fP\fIdepthprofilefile\fP \fB-L\fP\fIapproachdepth\fP
+\fB-M\fP\fI[sensorlist]\fP \fB-N\fP[\fIspiraldescentaltitude\fP] \fB-O\fP\fImissionfile\fP
+\fB-P\fP\fI[startlon/startlat | startdistance]\fP
+\fB-R\fP\fItransmitpower/receivegain[/rangeminfraction[/pulsewidth]]\fP
+\fB-S\fP\fIspeed\fP \fB-T\fP\fIstarttime\fP
+\fB-W\fP\fIwaypointspacing\fP \fB-V\fP \fB-H\fP]
+
+.SH DESCRIPTION
+\fBmbm_route2mission\fP - Macro to convert an \fBmbgrdviz\fP route file into an
+MBARI AUV mission script.
+
+MBARI Autonomous Underwater Vehicles, or AUVs, are controlled using a layered
+behavior system that is specified using a mission script. This macro generates
+an MBARI AUV mission script from an \fBMB-System\fP route file such as those
+generated interactively using \fBMBgrdviz\fP. The output MBARI AUV mission script
+is named using a ".cfg" suffix. A Winfrog waypoint file (ending in ".pts") is also
+output which mirrors the waypoints in the input route file.
+
+The output AUV mission script includes safety behaviors that operate throughout
+a mission (e.g. missionTimer sets a mission timeout duration, and depthEnvelope
+sets depth and altitude limits). The script also includes the sequential behaviors
+required to take a vehicle from the start of a mission at the surface, obtaining
+the initial position from GPS, descent to depth, flying to the starting waypoint,
+running the desired survey lines with a desired depth or altitude profile,
+ascent to the surface, and reacquiring positioning from GPS. For seafloor mapping
+surveys, sonar settings and data logging are also controlled through the
+mission script.
+
+The input route file specifies a survey mission as a set of sequential waypoints,
+and also includes the depth profile between those waypoints. Waypoints may be
+ordinary, the start of a survey line, or the end of a survey line (the start and
+end line waypoints are generated using the survey route planning feature of
+\fBMBgrdviz\fP). The spacing  of the depth profile points between the waypoints
+derives from the bathymetric grid used to generate the route.
+
+The output mission specifies a larger number of waypoints than the input route file.
+The mission waypoints are generated every \fIwaypointspacing\fP meters (specified
+with the \fB-W\fP option), and the AUV is commanded to fly at particular depths (or
+depth profiles) between each waypoint. By default, the AUV will be flown using a control
+behavior called WaypointDepth in which the commanded vehicle depth follows a linearly
+interpolated profile between the depth at the starting waypoint and the depth
+at the ending waypoint. The simpler alternative waypoint behavior specifies a
+single vehicle depth while flying to the next mission; as it begins each segment
+the vehicle will ascend or descend sharply to the desired depth and then fly
+level until the next waypoint is reached.
+
+The \fB-A\fP option allows the user to set the basic vehicle
+altitude control. The vehicle's vertical position will be simulatneously controlled
+in terms of both altitude above the bottom and depth below the sea surface. The commanded
+depth between each waypoint is calculated by \fBmbm_route2mission\fP (using the bathymetry
+profiles in the input route file) to produce a vehicle altitude that is \fIaltitudedesired\fP
+meters above the shallowest depth looking \fIforwarddistance\fP meters ahead. The
+forward looking feature allows the vehicle to be commanded to ascend prior to reaching
+large scarps. As the mission commences, the AUV attempts to fly at the commanded depth
+unless that would result in an altitude less than \fIaltitudemin\fP meters. In that
+circumstance, the vehicle flies in an altitude-following mode. Thus, for consistent
+bottom-following, a common approach is to set \fIaltitudemin\fP to the desired
+altitude and to set \fIaltitudedesired\fP to a value slightly smaller than \fIaltitudemin\fP.
+This strategy allows the look-ahead feature to bring the vehicle safely over steep rises
+while otherwise maintaining a constant altitude.
+
+The \fB-G\fP option allows the user to specify that the vehicle ascend to the surface
+and reset positioning  with GPS at the beginning and/or end of survey lines.
+
+The \fB-N\fP option allows the user to specify that the vehicle first move to the
+initial survey waypoint, and then follow a spiral descent to the desired survey depth.
+The \fB-L\fP\fIapproachdepth\fP option sets the vehicle depth as it approaches the
+first waypoint before the spiral descent. The optional \fIspiraldescentaltitude\fP
+parameter sets the altitude at which the spiral descent is terminated; if \fB-N\fP
+is given alone then \fIaltitudedesired\fP from the \fB-A\fP option is used.
+These options are used for deepwater missions
+in which the vehicle navigation is updated by acoustic modem during the free
+inertial descents.
+
+The mission script must also allow sufficient time for the vehicle to transit from its
+starting point to the first waypoint in the survey mission. The \fB-T\fP and \fB-P\fP
+options allow the user specify the AUV starting position, the distance to the first
+waypoint, or the time required to reach the first waypoint.
+
+The MBARI Mapping AUV is equipped with a 200 kHz multibeam sonar, a 2-16 kHz chirp subbottom
+profiler, a 110 kHz chirp sidescan, and a 410 kHz chirp sidescan. The \fB-M\fP option is
+used to enable these mapping sonars in the AUV mission script. If the route file contains
+waypoints identified as line start and line end points, the subbottom profiler (if enabled) will be
+turned on and off at these points. The waypoint type value can be set interactively within
+\fBmbgrdviz\fP.
+
+The MBARI Benthic Imaging AUV is equipped with dual strobes and a downward pointed camera.
+The \fB-MC\fP option is used to enable control of the camera in the AUV mission script. If the route file contains
+waypoints identified as line start and line end points, the camera (if enabled) will be
+turned on and off at these points. The waypoint type value can be set interactively within
+\fBmbgrdviz\fP.
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH OPTIONS
+.TP
+.B \-A
+\fIaltitudemin/altitudeabort[/altitudedesired[/altitudedesired2[/altitudedesired3]]]\fP
+.br
+Sets the AUV altitude control paramters. The missions generated by this
+script directly command the AUV's depth. However, the commanded depth
+will be overridden by the minimum altitude, or \fIaltitudemin\fP value;
+the vehicle will adjust it's depth so that it does not fly any closer
+to the bottom than \fIaltitudemin\fP meters. If the vehicle reaches an
+altitude equal to or less than \fIaltitudeabort\fP meters, then the
+mission will be aborted. The user may specify a desired altitude
+(\fIaltitudedesired\fP) that is different than \fIaltitudemin\fP, so that
+the commanded depths do not directly correspond to the minimum altitude.
+The user can also specify second or third desired altitude
+values \fIaltitudedesired2\fP \fIaltitudedesired2\fP
+that are used between waypoints of type START2 and END2, or START3
+and END3, respectively, as defined in
+\fBMBgrdviz\fP routes.
+.TP
+.B \-B
+\fIbehavior\fP
+.br
+Sets the AUV behavior used to fly the mission. If \fIbehavior\fP = 0, then
+the AUV uses the WayPoint behavior in which a single vehicle depth is specified
+for the approach to each waypoint. If \fIbehavior\fP = 1, then the AUV uses
+the WayPointDepth behavior in which each mission segment has both a starting
+and an ending depth specified, and the vehicle is commanded to fly a depth
+profile that is a linear ramp between the two depths. Default: \fIbehavior\fP = 1;
+.TP
+.B \-C
+\fImissiontime\fP
+.br
+Sets the maximum time allowed for the AUV mission. If the \fImissiontime\fP is
+exceeded, the AUV will transition to it's internal abort plan.
+Default: mission abort time calculated from mission parameters.
+.TP
+.B \-D
+\fIdepthconstant[/depthconstant2]\fP
+.br
+Sets constant depth values that will be used between waypoints of
+typ START4 and END4 for \fIdepthconstant\fP and START5 and END5 for
+\fIdepthconstant2\fP. These are the waypoint types defined in
+\fBMBgrdviz\fP routes. While these waypoint types are active, the
+AUV is commanded to the specified constant depth value.
+.TP
+.B \-F
+\fIforwarddistance\fP
+.br
+The program looks \fIforwarddistance\fP m ahead for the shallowest bottom
+depth along the survey route, and then commands the vehicle to
+fly at least \fIaltitudemin\fP above that depth.
+.TP
+.B \-G
+\fIgpsmode\fP
+.br
+Sets the frequency with which the AUV will surface between survey lines to
+get GPS fixes. By default, the vehicle only get GPS fixes at the surface at
+the beginning and end of the mission, and not surface during the mission.
+If \fIgpsmode\fP = 1, then the vehicle will ascend for gps fixes at
+the start of each survey line. If \fIgpsmode\fP = 2, then the vehicle will
+ascend for gps fixes at the end of each survey line. If \fIgpsmode\fP = 3,
+then the vehicle will  ascend for gps fixes at the start and end of each survey line
+.TP
+.B \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-I
+\fIroutefile\fP
+.br
+Sets the filename of the input \fBmbgrdviz\fP route file.
+A route file specifies a desired survey route as a set of
+lines between waypoints. In addition to the waypoints, the file
+also includes the depth profiles along those lines.
+.TP
+.B \-J
+\fIdepthprofilefile\fP
+.br
+Sets the filename of an input desired depth profile file. This is the depth
+profile that the vehicle should follow when flying the mission (as opposed to
+following the bottom at a particular altitude).
+.TP
+.B \-L
+\fIapproachdepth\fP
+.br
+Sets the vehicle depth during the approach to the first waypoint when a
+spiral descent to depth at the first waypoint is specified  using the \fB-N\fP option.
+.TP
+.B \-M
+\fI[sensorlist]\fP
+This option enables control of the Mapping AUV's mapping sonars and other possible
+sensors. By default, the AUV mission is generated without turning on the mapping sonars.
+If \fB-M\fP is given alone, the multibeam, subbottom profiler, and both low and high
+frequency sidescan sonars will be enabled. The \fIsonarlist\fP parameter can
+optionally specify which sonars are enabled in addition to the multibeam (the
+multibeam serves as the ping timing master for all sonars, and thus must be
+enabled if any mapping sonars are enabled). The \fIsonarlist\fP value is
+made up of one or more of the following characters:
+ 		M	multibeam sonar
+ 		S	subbottom profiler (and multibeam)
+ 		L	low frequency sidescan (and multibeam)
+ 		H	high frequency sidescan (and multibeam)
+ 		B	multibeam beam (water column) data
+ 		C	benthic imaging camera and strobes
+.br
+Thus, \fB-M\fP\fISL\fP will cause the multibeam, the subbottom profiler, and
+the low frequency sidescan to be enabled while leaving the high frequency
+sidescan off.
+.TP
+.B \-N
+\fIspiraldescentaltitude\fP
+Sets the mission to include a shallow transit to the first waypoint followed by a
+spiral descent to depth to start the survey. The descent is terminated at the
+altitude \fIspiraldescentaltitude\fP if specified here. Otherwise, the descent is
+terminated at the altitude \fIaltitudedesired\fP from the \fB-A\fP option.
+.TP
+.B \-O
+\fImissionfile\fP
+.br
+Sets the filename of the output MBARI AUV mission script.
+.TP
+.B \-P
+\fIlon/lat\fP
+.br
+This sets the expected starting position (\fIlon\fP longitude
+and \fIlat\fP latitude) of the Mapping AUV so that the
+expected time to run to the first waypoint can be estimated. If neither
+the \fB-P\fP or \fB-T\fP options are specified, a distance of 500 meters
+to the first waypoint is assumed.
+.TP
+.B \-R
+\fItransmitpower/receivegain[/rangeminfraction[/pulsewidth]]\fP
+.br
+This sets the key multibeam sonar parameters. Here \fItransmitpower\fP is
+the transmit power of the multibeam in dB, with a range of 0-220 dB. The
+multibeam receive gain has a range of 0-83 dB. The \fIrangeminfraction\fP variable
+sets the minimum range at which the multibeam will make bottom picks; this
+prevents the multibeam from picking on nearfield arrivals usually reflecting
+interference from other sonars. If the sonar is operating with an altitude of
+50 m and \fIrangeminfraction\fP = 0.2, then the range gating minimum range will be
+0.2 * 50 m = 10 m. The \fIpulsewidth\fP variable sets the multibeam sonar
+transmit pulse width in microseconds. Default: \fItransmitpower\fP = 220, \fIreceivegain\fP = 220,
+\fIrangeminfraction\fP = 0.2, \fIpulsewidth\fP = 60.
+.TP
+.B \-S
+\fIspeed\fP
+.br
+This sets the commanded AUV speed in meters/second. Default: \fIspeed\fP = 1.5 m/s.
+.TP
+.B \-T
+\fIstarttime\fP
+.br
+This sets the expected time required for the AUV to reach the first waypoint
+in the survey mission. If neither
+the \fB-P\fP or \fB-T\fP options are specified, a distance of 500 meters
+to the first waypoint is assumed.
+.TP
+.B \-W
+\fIwaypointspacing\fP
+.br
+Sets the spacing in meters of the waypoints output to the mission script.
+.TP
+.B \-V
+The \fB-V\fP option causes \fBmbm_route2mission\fP to print out status messages.
+
+.SH EXAMPLES
+Suppose you are going to run the MBARI Mapping AUV on the Coaxial Segment of the
+Juan de Fuca Ridge. You have created a route file called Coaxial2009_1v3.rte using
+\fBmbgrdviz\fP. In order to create an MBARI AUV mission script for mission beginning
+with a spiral descent to an altitude of 50 m, followed by a survey run at a 75 m altitude,
+the following will suffice:
+ 	mbm_route2mission -I Coaxial2009_1v3.rte \
+ 		-A75/30/75 -B1 \
+ 		-G0 -MSL -N50 -R220/83/0.3 \
+ 		-O Coaxial2009_1v3.cfg \
+ 		-S1.5 -L30 -W100 -V
+.br
+The resulting mission script has the following header:
+
+     # This MBARI Mapping AUV mission file has been generated
+     # by the MB-System program mbm_route2mission run by
+     # user <caress> on cpu <shepard> at <Thu Jul 30 11:36:47 PDT 2009>
+     #
+     # Mission Summary:
+     #     Route File:               Coaxial2009_1v3.rte
+     #     Mission File:             Coaxial2009_1v3.cfg
+     #     Distance:                 79501.503455 (m)
+     #     Estimated Time:           57203 (s)  15.890 (hr)
+     #     Abort Time:               60067 (s)
+     #     Max battery life:         64800 (s)
+     #     Safety margin:            1800 (s)
+     #     Ascend time:              2932 (s)
+     #     Way Points:               44
+     #     Route Points:             550
+     #     Survey behavior:          WaypointDepth
+     #     Descent style:            Spiral descent
+     #     Mapping sonar control enabled:
+     #                               Multibeam enabled
+     #                                 Multibeam receive gain:           83
+     #                                 Multibeam transmit gain:          220
+     #                                 Multibeam minimum range fraction: 0.3
+     #                               Subbottom enabled
+     #                               Low sidescan enabled
+     #                               High sidescan disabled
+     #
+     # Mission Parameters:
+     #     Vehicle Speed:            1.500000 (m/s) 2.915769 (knots)
+     #     Desired Vehicle Altitude: 75 (m)
+     #     Minimum Vehicle Altitude: 75 (m)
+     #     Abort Vehicle Altitude:   30 (m)
+     #     Maximum Vehicle Depth:    2525.307922 (m)
+     #     Abort Vehicle Depth:      2562.807922 (m)
+     #     Descent Vehicle Depth:    3 (m)
+     #     Spiral descent depth:     2324.917643 m
+     #     Spiral descent altitude:  50 m
+     #     Forward Looking Distance:  (m)
+     #     Waypoint Spacing:         100 (m)
+     #     GPS Duration:             600 (s)
+     #     Descend Rate:             0.417 (m/s)
+     #     Ascend Rate:              1 (m/s)
+     #     Initial descend Duration: 300 (s)
+     #     Setpoint Duration:        30 (s)
+     #
+     # The primary waypoints from the route file are:
+     #   <number> <longitude (deg)> <latitude (deg)> <topography (m)> <distance (m)> <type>
+     #   0 -129.588618 46.504590 -2384.917643 0.000000 3
+     #   1 -129.583151 46.507559 -2412.977865 533.709482 3
+     #   2 -129.569223 46.503420 -2548.389974 1697.143568 1
+     #   3 -129.566359 46.501080 -2494.963053 2037.557099 3
+     #   4 -129.548611 46.529852 -2539.510864 5512.537193 4
+     #   5 -129.551250 46.530628 -2562.807922 5732.537193 3
+     #   6 -129.568962 46.501924 -2531.034424 9199.497998 4
+     #   7 -129.571600 46.502699 -2519.138489 9419.497998 3
+     #   8 -129.553889 46.531404 -2547.114624 12886.458803 4
+     #   9 -129.556529 46.532180 -2514.533569 13106.458803 3
+     #   10 -129.574238 46.503475 -2470.815735 16573.419607 4
+     #   11 -129.576876 46.504250 -2444.596313 16793.419607 3
+     #   12 -129.559168 46.532956 -2521.781921 20260.380412 4
+     #   13 -129.561807 46.533732 -2537.382141 20480.380412 3
+     #   14 -129.579514 46.505026 -2429.459961 23947.341216 4
+     #   15 -129.582152 46.505801 -2412.764343 24167.341217 3
+     #   16 -129.564447 46.534508 -2545.397705 27634.302021 4
+     #   17 -129.567086 46.535284 -2534.068665 27854.302021 3
+     #   18 -129.584791 46.506576 -2398.283020 31321.262826 4
+     #   19 -129.587429 46.507352 -2390.671509 31541.262826 3
+     #   20 -129.569726 46.536059 -2489.889282 35008.223630 4
+     #   21 -129.572365 46.536835 -2465.280823 35228.223630 3
+     #   22 -129.590068 46.508127 -2389.067017 38695.184435 4
+     #   23 -129.592706 46.508902 -2409.290771 38915.184435 3
+     #   24 -129.575005 46.537610 -2466.533142 42382.145240 4
+     #   25 -129.577645 46.538386 -2491.371094 42602.145240 3
+     #   26 -129.595345 46.509677 -2397.609253 46069.106044 4
+     #   27 -129.597984 46.510452 -2413.315918 46289.106044 3
+     #   28 -129.580285 46.539161 -2499.048889 49756.066849 4
+     #   29 -129.582925 46.539937 -2523.030640 49976.066849 3
+     #   30 -129.600622 46.511227 -2443.481018 53443.027653 4
+     #   31 -129.603261 46.512002 -2419.008240 53663.027653 3
+     #   32 -129.585565 46.540712 -2518.522400 57129.988458 4
+     #   33 -129.588205 46.541487 -2498.521301 57349.988458 3
+     #   34 -129.605900 46.512777 -2450.386536 60816.949263 4
+     #   35 -129.608539 46.513552 -2473.623230 61036.949263 3
+     #   36 -129.590845 46.542262 -2487.422180 64503.910067 4
+     #   37 -129.593485 46.543038 -2491.040466 64723.910067 3
+     #   38 -129.611178 46.514327 -2472.610657 68190.870872 3
+     #   39 -129.606711 46.517999 -2485.114583 68723.704236 3
+     #   40 -129.557338 46.509809 -2488.398743 72619.152031 3
+     #   41 -129.550415 46.521262 -2545.285828 73998.189601 3
+     #   42 -129.600724 46.536447 -2470.920736 78209.372536 3
+     #   43 -129.606972 46.525648 -2443.988281 79501.503455 4
+     #
+     # A total of 550 mission points have been defined.
+     #
+     # Define Mission parameters:
+     #define MISSION_SPEED      1.500000
+     #define MISSION_DISTANCE   79501.503455
+     #define MISSION_TIME       57203
+     #define MISSION_TIMEOUT    60067
+     #define DEPTH_MAX          2525.307922
+     #define DEPTH_ABORT        2562.807922
+     #define ALTITUDE_DESIRED   75.000000
+     #define ALTITUDE_MIN       75.000000
+     #define ALTITUDE_ABORT     30.000000
+     #define GPS_DURATION       600
+     #define DESCENT_DEPTH      3.000000
+     #define SPIRAL_DESCENT_DEPTH      2324.917643
+     #define SPIRAL_DESCENT_ALTITUDE   50.000000
+     #define DESCEND_DURATION   300
+     #define SETPOINT_DURATION  30
+     #define GPSMINHITS         10
+     #define ASCENDRUDDER       3.000000
+     #define ASCENDPITCH        45.000000
+     #define ASCENDENDDEPTH     2.000000
+     #define DESCENDRUDDER      3.000000
+     #define DESCENDPITCH       -30.000000
+     #define MAXCROSSTRACKERROR 30
+     #define RESON_DURATION     6
+     #q
+
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbgrdviz\fP(l)
+
+.SH BUGS
+Perhaps.
