@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbformat</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbformat</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbformat</B> -  List information about swath sonar data formats
+supported by the <B>MBIO</B> library.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS<B>mbformat</B> [<B> -F</B><I>format</I> <B>-I</B><I>file</I> <B>-L -K -V -H</B>]</H2>
+
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbformat</B> is a utility which identifies the swath sonar data formats
+associated with <B>mbio</B> format id's.  If no format id or input filename
+is specified, <B>mbformat</B> lists all of the currently supported formats 
+along with short descriptions. If a format id is specified using the 
+<B>-F</B> option, then <B>mbformat</B> prints a short description of that 
+format. If a filename is specified using the <B>-I</B> option, then 
+<B>mbformat</B> attempts to identify a valid format id for that file using 
+swath data filename prefix and suffix conventions embedded in <B>MB-System</B>. 
+The program also determines the filename &quot;root&quot;, which is the filename minus 
+whatever format-specific prefix or suffix has been recognized. In no prefix
+or suffix is recognized, then the root is simply the entire filename.
+<P>
+Normally, <B>mbformat</B>
+prints out a brief description of each identified format. If the <B>-L</B>
+option is used, <B>mbformat</B> simply prints out the valid format id number,
+or 0 if a file or format has been specified but no valid id can be identified.
+If the <B>-K</B> option is used, <B>mbformat</B> will print out the filename
+&quot;root&quot; followed by the format id number.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the format id to be listed.  If no format is given, all of the 
+currently supported formats will be listed. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>file</I>
+<BR>
+
+Sets the filename to be tested against known filename prefix and
+suffix conventions in order to identify the format id.
+<DT><B>-K</B>
+
+<DD>
+Causes the fileroot and the format id to be output. The fileroot
+is the filename with any format specific suffix removed.
+<DT><B>-L</B>
+
+<DD>
+Causes the format descriptions to be omitted 
+so that only the <B>MBIO</B> format id numbers are listed.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbformat</B> only prints out format descriptions.  If the
+<B>-V</B> flag is given, then <B>mbformat</B> works in a &quot;verbose&quot; mode and
+also outputs the program version being used.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to identify the swath sonar data format associated
+with a format id of 11.  The following will suffice:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbformat&nbsp;-F11<BR>
+<BR>
+
+and the result will be this output:
+<BR>&nbsp;&nbsp;MBIO&nbsp;data&nbsp;format&nbsp;id:&nbsp;11
+<BR>&nbsp;&nbsp;Format&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MBF_SBSIOMRG
+<BR>&nbsp;&nbsp;Informal&nbsp;Description:&nbsp;SIO&nbsp;merge&nbsp;Sea&nbsp;Beam
+<BR>&nbsp;&nbsp;Attributes:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sea&nbsp;Beam,&nbsp;bathymetry,&nbsp;16&nbsp;beams,&nbsp;binary,&nbsp;uncentered,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SIO.
+<P>
+Suppose one wishes to list all of the currently supported data formats.
+The following will suffice:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbformat<BR>
+<P>
+Suppose one wants to find out what format is associated with a raw
+SeaBeam 2112 file named sb199811231045.rec:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbformat&nbsp;-I&nbsp;sb199811231045.rec<BR>
+<BR>
+
+This results in the output:
+<BR>&nbsp;&nbsp;MBIO&nbsp;data&nbsp;format&nbsp;id:&nbsp;41
+<BR>&nbsp;&nbsp;Format&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MBF_SB2100RW
+<BR>&nbsp;&nbsp;Informal&nbsp;Description:&nbsp;SeaBeam&nbsp;2100&nbsp;series&nbsp;vender&nbsp;format
+<BR>&nbsp;&nbsp;Attributes:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SeaBeam&nbsp;2100,&nbsp;bathymetry,&nbsp;amplitude&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;sidescan,&nbsp;151&nbsp;beams&nbsp;and&nbsp;2000&nbsp;pixels,&nbsp;ascii&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;binary&nbsp;sidescan,&nbsp;SeaBeam&nbsp;Instruments.
+<P>
+Using the -K option:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbformat&nbsp;-K&nbsp;-I&nbsp;sb199811231045.rec<BR>
+<BR>
+
+will produce the following output:
+<BR>
+
+<BR>&nbsp;&nbsp;sb199811231045&nbsp;41
+<BR>
+
+where the format id has been identified as 41 because of the &quot;.rec&quot;
+file suffix and the fileroot has been identified as &quot;sb199811231045&quot;
+by removing the suffix. Use of the -L option:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbformat&nbsp;-L&nbsp;-I&nbsp;sb199811231045.rec<BR>
+<BR>
+
+will produce output with just format id:
+<BR>
+
+<BR>&nbsp;&nbsp;41
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbio.html">mbio</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+No known bugs.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS<B>mbformat</B> [<B> -F</B><I>format</I> <B>-I</B><I>file</I> <B>-L -K -V -H</B>]</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 26 October 2009</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

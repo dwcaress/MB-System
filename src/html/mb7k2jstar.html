@@ -1,0 +1,386 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mb7k2jstar</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mb7k2jstar</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  15 October 2012 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mb7k2jstar</B> - extracts subbottom profiler and/or sidescan sonar
+data from Reson 7k format data files into Edgetech Jstar format data files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mb7k2jstar</B> [<B>-I</B><I>file </I><B>-A</B><I>type</I>
+<B>-B</B><I>bottompickmode/bottompickthreshold</I> <B>-C</B>
+<B>-F</B><I>format</I> <B>-L</B><I>startline/lineroot</I>
+<B>-M -O</B><I>outfile</I> <B>-R</B><I>routefile</I> <B>-X -H -V</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MB7k2jstar</B> is a utility that extracts Edgetech subbottom
+profiler and sidescan data from Reson 7k format (MBIO format 88) data and
+outputs in the Edgetech Jstar format (MBIO formats 132 and 133).
+By default, <B>mb7k2jstar</B> extracts all channels of
+sonar data from the Reson 7k file to the Edgetech Jstar file.
+Edgetech sonar systems may include dual frequency sidescans and a
+subbottom profiler. Users may use the <B>-A</B> option to specify
+which channels are extracted. <B>MB7k2jstar</B> operates on single
+input files or on datalists. By default there will be a separate
+output file for every input file, but if the <B>-O</B> option
+is used to specify an output file, data from all input files will
+be directed to that single output file.
+<P>
+The extracted Jstar data file(s) can be organized three ways. If the <B>-O</B>
+option is used to specify a single Jstar output file, then all of the
+Jstar data will be output to that single file. If the <B>-R</B> option is
+used to specify a survey route file that includes the waypoints covered
+while collecting the data file(s) referenced by <B>-I</B><I>file</I>, then
+the output Jstar data will be broken up by the sequential lines defined by
+the waypoints. In this case each output Jstar file will be named using the
+line root name specified by <B>-L</B><I>startline/lineroot</I> with a sequential line
+number starting from <I>startline</I>. If neither the <B>-O</B> or <B>-L</B>
+options are used, each input swath file will have a corresponding Jstar output
+file.
+<P>
+When the user specifies that all Edgetech sidescan and subbottom
+data be extracted but does not specify the output file name, the
+output files will have the &quot;*.jsf&quot; suffix recognized by Edgetech
+software. If the <B>-A</B><I>1</I> option is used to specify that only
+low frequency sidescan be extracted, the output files will have
+an &quot;*.mb132&quot; suffix. If the <B>-A</B><I>1</I> option is used to specify that only
+high frequency sidescan be extracted, the output files will have
+an &quot;*.mb133&quot; suffix.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>mode</I>
+<BR>
+
+This option sets the types of data to be extracted and output.
+If <B>-A</B><I>1</I> is given, then any low frequency sidescan
+in the input will be extracted to the output. If <B>-A</B><I>2</I>
+is given, then any high frequency sidescan records are extracted.
+The <B>-A</B><I>3</I> option causes subbottom profiler records to
+be extracted. Default: All Edgetech sidescan and subbottom
+profiler records are extracted.
+<DT><B>-B</B>
+
+<DD>
+<I>bottompickmode/bottompickthreshold</I>
+<BR>
+
+This option sets the source of the sonar first arrival time embedded into
+the Jstar format trace headers. This value can be used for
+laying out sidescan on the seafloor. If <I>bottompickmode</I> = 1,
+then <B>mb7k2jstar</B> will use the altitude value associated with
+platform navigation. If <I>bottompickmode</I> = 2, then <B>mb7k2jstar</B>
+will extract the first arrival time from multibeam bathymetry in the
+7k data stream. If <I>bottompickmode</I> = 3, then <B>mb7k2jstar</B>
+will pick the first arrival time in the sidescan sonar data by looking
+for the first sample with an amplitude &gt; <I>bottompickthreshold</I> times the
+maximum amplitude in the trace.
+Default: <I>bottompickmode</I> = 1.
+<DT><B>-C</B>
+
+<DD>
+<BR>
+
+This option causes  <B>mb7k2jstar</B> to print out any comment records
+encountered in the input Reson 7k data.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format used if the input is read from stdin
+or from a file. If <I>format</I> &lt; 0, then the input file specified
+with the <B>-I</B> option will actually contain a list of input swath sonar
+data files. This program only reads Reson 7k format data files (<B>MBIO</B>
+format 88).
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Sets the input file path. If <I>format</I> &gt; 0 (set with the
+<B>-f</B> option or <B>mbdefaults</B>) then the swath sonar data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;88<BR>
+<BR>
+
+This program only reads Reson 7k format data files (<B>MBIO</B>
+format 88).
+<DT><B>-L</B>
+
+<DD>
+<I>startline/lineroot</I>
+<BR>
+
+This option sets the starting line number and the output filename root
+used when <B>-R</B> is specified so that data are output according
+to planned survey lines. Default: <I>startline</I> = 1; <I>lineroot</I> = &quot;jstar&quot;.
+<DT><B>-M</B>
+
+<DD>
+<BR>
+
+This option causes <B>mb7k2jstar</B> to omit data during turns when
+extracting into line files according to a specified set of waypoints
+(<B>-R</B> option). The traces will not be output until the heading is
+within 15 degrees of the next survey line's bearing.
+<DT><B>-O</B>
+
+<DD>
+<BR>
+
+This option sets the output Edgetech Jstar (<B>MBIO</B> format 132/133) format file path.
+If <B>-O</B> is not invoked,
+the output jstar filename (or files if a datalist is being processed) will
+be the input swath filename with the &quot;.s7k&quot; or &quot;.mb88&quot; suffix replaced by a new suffix.
+An &quot;.jsf&quot; suffix is used when all Edgetech record types are extracted
+to the output, &quot;.mb132&quot; is used when the low frequency sidescan records are extracted,
+and &quot;.mb133&quot; is used when the high frequency sidescan records are extracted. The record
+types to be extracted are set using the <B>-A</B> option.
+<DT><B>-R</B>
+
+<DD>
+<I>routefile</I>
+<BR>
+
+This option specifies an <B>mbgrdviz</B> route file containing the intended
+waypoints of the survey. If <I>routefile</I> is specified, <B>mb7k2jstar</B>
+will output Jstar data in files corresponding to the planned survey lines.
+The output Jstar file names will be based on <I>lineroot</I> and will include
+the line number starting with <I>starline</I>, both of which are specified
+using the <B>-L</B> options.  If neither <B>-O</B> nore <B>-R</B> are invoked,
+the output Jstar filename (or files if a datalist is being processed) will
+be the input swath filename with an appropriate suffix appended (&quot;.jsf&quot; for
+mixed Jstar files, &quot;.mb132&quot; for low frequency sidescan only files, and &quot;.mb133&quot;
+for high frequency sidescan only files).
+<DT><B>-V</B>
+
+<DD>
+This option increases the verbosity of <B>mb7k2jstar</B>, causing it
+to print out messages regarding its progress to stdout.
+<DT><B>-X</B>
+
+<DD>
+This option switches port and starboard sidescan channels.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that one has collected a Reson 7k datafile incorporating
+multibeam sonar data, sidescan data, and subbottom profiler data, and
+that the filename is:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20050418_150155.s7k<BR>
+<BR>
+
+<P>
+In order to extract all of the Edgetech sonar data into a Jstar file, one can use
+<B>mb7k2jstar</B> with no special arguments:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mb7k2jstar&nbsp;-I&nbsp;20040722_152111.s7k<BR>
+<BR>
+
+which yields the following output:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;read&nbsp;from:&nbsp;20050418_150155.s7k<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;Header:&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;CTD:&nbsp;&nbsp;&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;Nav:&nbsp;&nbsp;&nbsp;760<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;written&nbsp;to:&nbsp;20050418_150155.jsf<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;989<BR>
+<P>
+One may also extract just the low frequency sidescan by using the <B>-A</B><I>1</I> option:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mb7k2jstar&nbsp;-I&nbsp;20040722_152111.s7k&nbsp;-A1<BR>
+<BR>
+
+which yields the following output:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;read&nbsp;from:&nbsp;20050418_150155.s7k<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;Header:&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;CTD:&nbsp;&nbsp;&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;Nav:&nbsp;&nbsp;&nbsp;760<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;written&nbsp;to:&nbsp;20050418_150155.mb132<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<P>
+One may also extract just the high frequency sidescan by using the <B>-A</B><I>2</I> option:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mb7k2jstar&nbsp;-I&nbsp;20040722_152111.s7k&nbsp;-A2<BR>
+<BR>
+
+which yields the following output:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;read&nbsp;from:&nbsp;20050418_150155.s7k<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;Header:&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;CTD:&nbsp;&nbsp;&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;Nav:&nbsp;&nbsp;&nbsp;760<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;written&nbsp;to:&nbsp;20050418_150155.mb132<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2527&nbsp;records&nbsp;output&nbsp;to&nbsp;segy&nbsp;file&nbsp;20040722_154429.s7k.segy<BR>
+<BR>
+
+<P>
+Users may process multiple Reson 7k files by inputting a datalist, or list of
+swath data files. All of the extracted data records can be output to a single
+file by specifying the output file with the <B>-O</B> option. For example, if
+one has a datalist file called datalistp.mb-1 that references three Reson 7k files:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20050418_150155p.mb88&nbsp;88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20050418_151812p.mb88&nbsp;88<BR>
+<BR>
+
+and one wants all the low frequency sidescan data collated into a single
+Jstar data file called 20050418_sslow.mb132, then use the following command:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mb7k2jstar&nbsp;-A1&nbsp;-I&nbsp;datalistp.mb-1&nbsp;-O&nbsp;20050418_sslow.mb132<BR>
+<BR>
+
+which yields the following output:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;to&nbsp;extract:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;read&nbsp;from:&nbsp;20050418_150155p.mb88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;Header:&nbsp;&nbsp;&nbsp;2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;CTD:&nbsp;&nbsp;&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;Nav:&nbsp;&nbsp;&nbsp;760<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;989<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;written&nbsp;to:&nbsp;20050418_sslow.mb132<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;990<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;read&nbsp;from:&nbsp;20050418_151812p.mb88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;741<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;Header:&nbsp;&nbsp;&nbsp;2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;CTD:&nbsp;&nbsp;&nbsp;741<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;Nav:&nbsp;&nbsp;&nbsp;563<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;741<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;742<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;741<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;records&nbsp;written&nbsp;to:&nbsp;20050418_sslow.mb132<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;742<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Total&nbsp;data&nbsp;records&nbsp;read&nbsp;from:&nbsp;20050418_151812p.mb88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1731<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;Header:&nbsp;&nbsp;&nbsp;4<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;CTD:&nbsp;&nbsp;&nbsp;1730<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bluefin&nbsp;Nav:&nbsp;&nbsp;&nbsp;1323<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1730<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;1732<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;1730<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Total&nbsp;data&nbsp;records&nbsp;written&nbsp;to:&nbsp;20050418_sslow.mb132<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;Sidescan:&nbsp;&nbsp;1732<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;Sidescan:&nbsp;0<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbformat.html">mbformat</A></B>(1), <B><A HREF="mbinfo.html">mbinfo</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+No doubt.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 15 October 2012</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
