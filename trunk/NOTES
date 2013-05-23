@@ -12,13 +12,21 @@ at the top of the MB-System source code distribution directory structure.
 THE MB-SYSTEM SOURCE CODE DISTRIBUTION:
 -------------------------------------------------------------------------------
 MB-System is distributed as a compressed tar archive named according to the
-release version. For example, release 5.3.2055 was distributed in a file named:
+release version. For example, release 5.4.2077 was distributed in a file named:
     mbsystem-5.4.2077.tar.gz
+Here the major release is 5, the minor release is 4, and the third number is the
+corresponding revision number for the source code archive (which is managed
+using the Subversion package).
+
+The source code archive can be accessed directly at:
+    http://svn.ilab.ldeo.columbia.edu
 
 The tar utility is used to extract the distribution:
-    % tar xvzf mbsystem-5.3.2055.tar.gz
+    % tar xvzf mbsystem-5.4.2077.tar.gz
+yielding a directory named "mbsystem-5.4.2077".
 
-yielding a directory named "mbsystem-5.4.2077". Listing the contents reveals:
+Listing the contents of the top directory and then the src directory below
+reveals:
     % cd mbsystem-5.4.2077
     % ls -s
 	total 2920
@@ -29,6 +37,24 @@ yielding a directory named "mbsystem-5.4.2077". Listing the contents reveals:
 	 32 INSTALL		 72 config.sub*		576 libtool*
 	 48 Makefile.in		944 configure		560 ltmain.sh
 	  8 Makefile.template	  8 configure.cmd*	  0 src/
+    % ls -s src
+	total 80
+	48 Makefile.in			 8 mbsystem_config.h
+	 8 Makefile.template		 8 mbsystem_config.h.in
+	 0 gmt/				 0 mbvelocitytool/
+	 0 gsf/				 0 mbview/
+	 0 html/			 0 mr1pr/
+	 0 macros/			 0 otps/
+	 0 man/				 0 proj/
+	 0 mbaux/			 0 ps/
+	 0 mbedit/			 0 share/
+	 0 mbio/			 8 stamp-h1
+	 0 mbnavadjust/			 0 surf/
+	 0 mbnavedit/			 0 utilities/
+The src/html, src/man, and src/ps directories contain documentation in web page,
+man page, and postscript formats respectively. The other directories under src
+contain either C source files that are compiled into programs or Perl script
+source files.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM BUILD SYSTEMS:
@@ -42,78 +68,95 @@ perl script called install_makefiles that must first be edited to reflect the
 local system. The install_makefiles script is maintained for backward
 compatibility, but we expect most users to use the configure script.
 
---------------------------------------------------------------
+-------------------------------------------------------------------------------
 BUILDING AND INSTALLING MB-SYSTEM WITH CONFIGURE
--------------------------------------------------------------
-
-1. Simple method
-./configure
-make
-make install
-
-Common Options
-./configure --help for full list of options
---prefix=install location for mbsystem (/usr/local/mbsystem)
---with-netcdf-lib location of NetCDF libs
---with-netcdf-include location of NetCDF headers
---with-gmt-lib location of GMT libs
---with-gmt-include location of GMT headers
---with-fftw-lib location of FFTW3 libs (optional)
---with-fftw-include location of FFTW3 headers (optional)
---with-motif-lib location of Motif libs (optional)
---with-motif-include location of Motif headers (optional)
---with-opengl-lib location of OpenGL libs (optional)
---with-opengl-include location of OpenGL headers (optional)
-
-If FFTW3, Motif, or OpenGL cannot be found MB-System will be built with without this support.
-
-Can also supply custom compile flags such as the following...
-
-CFLAGS="-g -W" ./configure --prefix=/usr/local/mbsystem --disable-static
-
-will override system default CFLAGS with "-g and -W" and install mbsystem in /usr/local/mbsystem and will disable building the static libraries (just shared).
-
-
-######################################
-To modify build system...
-Edit configure.in and Makefile.am (in each folder)
-and then run the following
-#####################################
-
-#Build libtool files for AM_PROG_LIBTOOL
-libtoolize --force --copy
-aclocal
-#Build custom header for configure
-autoheader
-automake --add-missing --include-deps
-autoconf
-
-####################################
-Updated March 16, 2013
-
-To update configure files use the following:
-autoupdate
-and
-autoreconf --force --install --symlink --warnings=all
-
-#####################################
-
-
-
-
--------------------------------------------------------------------------------
-HOW TO INSTALL MB-SYSTEM:
 -------------------------------------------------------------------------------
 
-The MB-System source code is extracted by first uncompressing the tar file and then running tar:
-     % tar xvzf MB-System.tar.gz
+The basis steps for building MB-System using the configure script are:
 
-This will create a directory structure called mbsystem. In order to configure your installation,
-you must edit the shellscript mbsystem/install_makefiles. This is perl script will read template
-makefiles in the MB-System source directories and create makefiles with the correct attributes.
-This enables users to install MB-System without having to edit the makefiles. Instead of editing
-the makefiles directly, the installer should edit this script so that the locations of important
-libraries and include files are accurate and so that the compile and link flags are correct.
+    1. Move to the top of the MB-System distribution directory:
+        % cd mbsystem-5.4.2077
+
+    2. Run the configure script to generate the Makefile files throughout the
+    distribution directory structure. The command line options for configure
+    are discussed below.
+        % [...pre-options...]./configure [...options...]
+
+    3. Run the make utility to build the software within the source distribution.
+        % make
+
+    4. Run the make utility with the install option to install the software
+    within the target location that was specified while running configure.
+        % make
+        % make install
+
+The configure script is intended to discern the enviroment, locate prerequisite
+packages, and construct the makefiles with a minimum of user intervention. In
+practice, users generally need to set at least some options when using the
+configure script in order to successfully build, install, and run MB-System.
+If NetCDF and GMT installations cannot be located, MB-System cannot be built. If
+FFTW3, Motif, or OpenGL cannot be found MB-System will be built, but without
+the applications that depend on these packages.
+
+The available configure options are:
+    --help                         list all options
+    --prefix=path                  install location for mbsystem
+                                   (e.g. /usr/local/mbsystem)
+    --with-netcdf-lib=path         location of NetCDF libs
+    --with-netcdf-include=path     location of NetCDF headers
+    --with-gmt-lib=path            location of GMT libs
+    --with-gmt-include=path        location of GMT headers
+    --with-fftw-lib=path           location of FFTW3 libs (optional)
+    --with-fftw-include=path       location of FFTW3 headers (optional)
+    --with-motif-lib=path          location of Motif libs (optional)
+    --with-motif-include=path      location of Motif headers (optional)
+    --with-opengl-lib=path         location of OpenGL libs (optional)
+    --with-opengl-include=path     location of OpenGL headers (optional)
+    --disable-static               disable building static libraries
+                                   (i.e. build only shared libraries)
+
+Users can also define custom compiler flags on the command line to be used by
+configure. For example, the command:
+        % CFLAGS="-g -W" ./configure --disable-static --prefix=/usr/local/mbsystem
+will override the system default CFLAGS with "-g and -W", build the package in
+the distribution directory without static libraries (shared libraries only), and
+install the package in /usr/local/mbsystem. The destination directories will be:
+        /usr/local/mbsystem/bin                      executable binaries and scripts
+        /usr/local/mbsystem/lib                      libraries
+        /usr/local/mbsystem/include                  header files
+        /usr/local/mbsystem/share/mbsystem           projection and levitus data
+        /usr/local/mbsystem/share/doc/mbsystem/html  web page documentation
+        /usr/local/mbsystem/share/doc/mbsystem/ps    postscript documentation
+        /usr/local/mbsystem/man                      man page documentation
+
+If one is installing on a Mac in which some or all of the prerequisite packages
+have been installed with Fink or MacPorts, then the locations of those
+prerequisite packages must be explicitly defined. Fink installs packages in
+/sw, and MacPorts installs into /opt. An example for installing in a Fink-centric
+system is:
+        % CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN" \
+        ./configure \
+        --prefix=/Users/caress/sandbox/mbsystem \
+        --with-netcdf-include=/sw/include \
+        --with-netcdf-lib=/sw/lib \
+        --with-gmt-include=/sw/include \
+        --with-gmt-lib=/sw/lib \
+        --with-fftw-include=/sw/include \
+        --with-fftw-lib=/sw/lib \
+        --with-motif-include=/sw/include \
+        --with-motif-lib=/sw/lib
+
+-------------------------------------------------------------------------------
+BUILDING AND INSTALLING MB-SYSTEM WITH INSTALL_MAKEFILES:
+-------------------------------------------------------------------------------
+
+The original, and now alternate, method for generating the makefiles is to use
+a script named install_makefiles that is also present at the top of the
+MB-System distribution. In contrast to configure, which can be controlled by
+command line options, install_makefiles must be customized to the local
+environment by manual editing before this perl script is executed.
+In order to configure your installation. In particular, the user must explicitly
+set the library locations, header file locations, compile flags, and link flags.
 
 The important parameters to be set in install_makefiles are:
 
@@ -164,32 +207,61 @@ The important parameters to be set in install_makefiles are:
      $PROJLIB - Location of PROJ4 library.
      $PROJINCDIR - Location of PROJ4 header files.
 
-Examples of appropriate values for several different installations (e.g. Sun, SGI, PC) are included
-in the comments in install_makefiles. To execute install_makefiles, do the following:
+An example of the parameters for installing a distribution in /usr/local on a
+current (MacOs X 10.8) Fink-centric Mac is:
+     $MBSYSTEM_HOME = "/usr/local/mbsystem-5.4.2077";
+     $OS = "DARWIN";
+     $CFLAGS = "-I/usr/X11R6/include ";
+     $LFLAGS = "-lm -L/sw/lib -lgdal";
+     $NETCDFLIBDIR = "/sw/lib";
+     $NETCDFINCDIR = "/sw/include";
+     $GMTLIBDIR = "/sw/lib";
+     $GMTINCDIR = "/usr/include";
+     $PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+     $FFTWLIBDIR = "/sw/lib";
+     $FFTWINCDIR = "/sw/include";
+     $MOTIFINCDIR = "/sw/include";
+     $MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+     $OPENGLLIBS = "-lGLU -lGL";
+     $LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+     $OTPSDIR = "/usr/local/OTPSnc";
 
-     % cd mbsystem
-     % install_makefiles
+To execute install_makefiles, do the following:
 
-Because install_makefiles is a perl script, the executable perl must be available in the installer's
-path. Once install_makefiles has been correctly configured and run, give the command "make all"
-to generate the executable programs:
+     % cd mbsystem-5.4.2077
+     % ./install_makefiles
+
+Because install_makefiles is a perl script, the executable perl must be
+available in the installer's path. Once install_makefiles has been correctly
+configured and run, give the command "make all" to generate the executable
+programs:
 
      % make all
 
-The make command will descend recursively down through the directory structure, compiling
-source files, linking object files, and copying executables and manual pages to the appropriate
-directories. The executables will be placed in mbsystem/bin, the libraries in mbsystem/lib, and
-the manual pages in mbsystem/man/man1.
+The make command will descend recursively down through the directory structure,
+compiling source files, linking object files, and copying executables and manual
+pages to the appropriate directories.
+The destination directories will be:
+        /usr/local/mbsystem-5.4.2077/bin                      executable binaries and scripts
+        /usr/local/mbsystem-5.4.2077/lib                      libraries
+        /usr/local/mbsystem-5.4.2077/include                  header files
+        /usr/local/mbsystem-5.4.2077/share/mbsystem           projection and levitus data
+        /usr/local/mbsystem-5.4.2077/share/doc/mbsystem/html  web page documentation
+        /usr/local/mbsystem-5.4.2077/share/doc/mbsystem/ps    postscript documentation
+        /usr/local/mbsystem-5.4.2077/man                      man page documentation
 
-Naturally, in order for users to use the MB-System utilities, the directory containing the
-executables must be included in their path (usually this is done by editing the .cshrc file in the
-user's home directory). The executable perl must also be available in the user's path for most of
-the macros to work.
+-------------------------------------------------------------------------------
+SETTING THE USER ENVIRONMENT:
+-------------------------------------------------------------------------------
 
-Most users will also wish to specify which program they generally use to view Postscript plots on
-their screen. This parameter can be set either with the mbdefaults program or using the
-MB_PS_VIEWER environment variable - the former is recommended (see the mbdefaults manual
-page for details). On Sun workstations pageview is a popular Postscript viewer; on Silicon
-Graphics machines xpsview is commonly used. A popular generic alternative to these platform
-specific programs is ghostview.
+Naturally, in order for users to use the MB-System utilities, the directory
+containing the executables must be included in their path. The executable perl
+must also be available in the user's path for most of the macros to work. This
+is generally achieved by editing the environment files in a user's home
+directory. For csh users, the relevant files are .cshrc and .login; for sh or
+bash users, the relevant files are .bashrc and .bash_profile.
 
+Most users will also wish to specify which program they generally use to view
+Postscript plots on their screen. This parameter can be set with the mbdefaults
+program. The recommended Postscript viewer is a program called gv.
+-------------------------------------------------------------------------------
