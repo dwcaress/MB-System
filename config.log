@@ -30,8 +30,8 @@ Kernel configured for up to 8 processors.
 Processor type: i486 (Intel 80486)
 Processors active: 0 1 2 3 4 5 6 7
 Primary memory available: 16.00 gigabytes
-Default processor set: 142 tasks, 606 threads, 8 processors
-Load average: 0.72, Mach factor: 7.27
+Default processor set: 147 tasks, 633 threads, 8 processors
+Load average: 0.80, Mach factor: 7.19
 /bin/machine           = unknown
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
@@ -61,218 +61,218 @@ PATH: /opt/X11/bin
 ## Core tests. ##
 ## ----------- ##
 
-configure:2382: checking build system type
-configure:2396: result: x86_64-apple-darwin12.3.0
-configure:2416: checking host system type
-configure:2429: result: x86_64-apple-darwin12.3.0
-configure:2466: checking for a BSD-compatible install
-configure:2534: result: /sw/bin/ginstall -c
-configure:2545: checking whether build environment is sane
-configure:2595: result: yes
-configure:2736: checking for a thread-safe mkdir -p
-configure:2775: result: /sw/bin/gmkdir -p
-configure:2788: checking for gawk
-configure:2818: result: no
-configure:2788: checking for mawk
-configure:2818: result: no
-configure:2788: checking for nawk
-configure:2818: result: no
-configure:2788: checking for awk
-configure:2804: found /usr/bin/awk
-configure:2815: result: awk
-configure:2826: checking whether make sets $(MAKE)
-configure:2848: result: yes
-configure:2929: checking whether to enable maintainer-specific portions of Makefiles
-configure:2938: result: no
-configure:3002: checking for gcc
-configure:3018: found /usr/bin/gcc
-configure:3029: result: gcc
-configure:3258: checking for C compiler version
-configure:3267: gcc --version >&5
+configure:2380: checking build system type
+configure:2394: result: x86_64-apple-darwin12.3.0
+configure:2414: checking host system type
+configure:2427: result: x86_64-apple-darwin12.3.0
+configure:2464: checking for a BSD-compatible install
+configure:2532: result: /sw/bin/ginstall -c
+configure:2543: checking whether build environment is sane
+configure:2593: result: yes
+configure:2734: checking for a thread-safe mkdir -p
+configure:2773: result: /sw/bin/gmkdir -p
+configure:2786: checking for gawk
+configure:2816: result: no
+configure:2786: checking for mawk
+configure:2816: result: no
+configure:2786: checking for nawk
+configure:2816: result: no
+configure:2786: checking for awk
+configure:2802: found /usr/bin/awk
+configure:2813: result: awk
+configure:2824: checking whether make sets $(MAKE)
+configure:2846: result: yes
+configure:2927: checking whether to enable maintainer-specific portions of Makefiles
+configure:2936: result: no
+configure:3000: checking for gcc
+configure:3016: found /usr/bin/gcc
+configure:3027: result: gcc
+configure:3256: checking for C compiler version
+configure:3265: gcc --version >&5
 i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 (Based on Apple Inc. build 5658) (LLVM build 2336.11.00)
 Copyright (C) 2007 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-configure:3278: $? = 0
-configure:3267: gcc -v >&5
+configure:3276: $? = 0
+configure:3265: gcc -v >&5
 Using built-in specs.
 Target: i686-apple-darwin11
 Configured with: /private/var/tmp/llvmgcc42/llvmgcc42-2336.11~67/src/configure --disable-checking --enable-werror --prefix=/Applications/Xcode.app/Contents/Developer/usr/llvm-gcc-4.2 --mandir=/share/man --enable-languages=c,objc,c++,obj-c++ --program-prefix=llvm- --program-transform-name=/^[cg][^.-]*$/s/$/-4.2/ --with-slibdir=/usr/lib --build=i686-apple-darwin11 --enable-llvm=/private/var/tmp/llvmgcc42/llvmgcc42-2336.11~67/dst-llvmCore/Developer/usr/local --program-prefix=i686-apple-darwin11- --host=x86_64-apple-darwin11 --target=i686-apple-darwin11 --with-gxx-include-dir=/usr/include/c++/4.2.1
 Thread model: posix
 gcc version 4.2.1 (Based on Apple Inc. build 5658) (LLVM build 2336.11.00)
-configure:3278: $? = 0
-configure:3267: gcc -V >&5
+configure:3276: $? = 0
+configure:3265: gcc -V >&5
 llvm-gcc-4.2: argument to `-V' is missing
-configure:3278: $? = 1
-configure:3267: gcc -qversion >&5
+configure:3276: $? = 1
+configure:3265: gcc -qversion >&5
 i686-apple-darwin11-llvm-gcc-4.2: no input files
-configure:3278: $? = 1
-configure:3298: checking whether the C compiler works
-configure:3320: gcc -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   conftest.c  >&5
-configure:3324: $? = 0
-configure:3372: result: yes
-configure:3375: checking for C compiler default output file name
-configure:3377: result: a.out
-configure:3383: checking for suffix of executables
-configure:3390: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   conftest.c  >&5
-configure:3394: $? = 0
-configure:3416: result: 
-configure:3438: checking whether we are cross compiling
-configure:3446: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   conftest.c  >&5
-configure:3450: $? = 0
-configure:3457: ./conftest
-configure:3461: $? = 0
-configure:3476: result: no
-configure:3481: checking for suffix of object files
-configure:3503: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:3507: $? = 0
-configure:3528: result: o
-configure:3532: checking whether we are using the GNU C compiler
-configure:3551: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:3551: $? = 0
-configure:3560: result: yes
-configure:3569: checking whether gcc accepts -g
-configure:3589: gcc -c -g  conftest.c >&5
-configure:3589: $? = 0
-configure:3630: result: yes
-configure:3647: checking for gcc option to accept ISO C89
-configure:3710: gcc  -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:3710: $? = 0
-configure:3723: result: none needed
-configure:3754: checking for style of include used by make
-configure:3782: result: GNU
-configure:3808: checking dependency style of gcc
-configure:3919: result: gcc3
-configure:3935: checking whether gcc and cc understand -c and -o together
-configure:3966: gcc -c conftest.c -o conftest2.o >&5
-configure:3970: $? = 0
-configure:3976: gcc -c conftest.c -o conftest2.o >&5
-configure:3980: $? = 0
-configure:3991: cc -c conftest.c >&5
-configure:3995: $? = 0
-configure:4003: cc -c conftest.c -o conftest2.o >&5
-configure:4007: $? = 0
-configure:4013: cc -c conftest.c -o conftest2.o >&5
-configure:4017: $? = 0
-configure:4035: result: yes
-configure:4070: checking dependency style of gcc
-configure:4179: result: gcc3
-configure:4194: checking whether ln -s works
-configure:4198: result: yes
-configure:4205: checking whether make sets $(MAKE)
-configure:4227: result: yes
-configure:4282: checking how to print strings
-configure:4309: result: printf
-configure:4330: checking for a sed that does not truncate output
-configure:4394: result: /usr/bin/sed
-configure:4412: checking for grep that handles long lines and -e
-configure:4470: result: /usr/bin/grep
-configure:4475: checking for egrep
-configure:4537: result: /usr/bin/grep -E
-configure:4542: checking for fgrep
-configure:4604: result: /usr/bin/grep -F
-configure:4639: checking for ld used by gcc
-configure:4706: result: /usr/llvm-gcc-4.2/libexec/gcc/i686-apple-darwin11/4.2.1/ld
-configure:4713: checking if the linker (/usr/llvm-gcc-4.2/libexec/gcc/i686-apple-darwin11/4.2.1/ld) is GNU ld
-configure:4728: result: no
-configure:4740: checking for BSD- or MS-compatible name lister (nm)
-configure:4789: result: /usr/bin/nm
-configure:4919: checking the name lister (/usr/bin/nm) interface
-configure:4926: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:4929: /usr/bin/nm "conftest.o"
-configure:4932: output
+configure:3276: $? = 1
+configure:3296: checking whether the C compiler works
+configure:3318: gcc -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   conftest.c  >&5
+configure:3322: $? = 0
+configure:3370: result: yes
+configure:3373: checking for C compiler default output file name
+configure:3375: result: a.out
+configure:3381: checking for suffix of executables
+configure:3388: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   conftest.c  >&5
+configure:3392: $? = 0
+configure:3414: result: 
+configure:3436: checking whether we are cross compiling
+configure:3444: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   conftest.c  >&5
+configure:3448: $? = 0
+configure:3455: ./conftest
+configure:3459: $? = 0
+configure:3474: result: no
+configure:3479: checking for suffix of object files
+configure:3501: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:3505: $? = 0
+configure:3526: result: o
+configure:3530: checking whether we are using the GNU C compiler
+configure:3549: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:3549: $? = 0
+configure:3558: result: yes
+configure:3567: checking whether gcc accepts -g
+configure:3587: gcc -c -g  conftest.c >&5
+configure:3587: $? = 0
+configure:3628: result: yes
+configure:3645: checking for gcc option to accept ISO C89
+configure:3708: gcc  -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:3708: $? = 0
+configure:3721: result: none needed
+configure:3752: checking for style of include used by make
+configure:3780: result: GNU
+configure:3806: checking dependency style of gcc
+configure:3917: result: gcc3
+configure:3933: checking whether gcc and cc understand -c and -o together
+configure:3964: gcc -c conftest.c -o conftest2.o >&5
+configure:3968: $? = 0
+configure:3974: gcc -c conftest.c -o conftest2.o >&5
+configure:3978: $? = 0
+configure:3989: cc -c conftest.c >&5
+configure:3993: $? = 0
+configure:4001: cc -c conftest.c -o conftest2.o >&5
+configure:4005: $? = 0
+configure:4011: cc -c conftest.c -o conftest2.o >&5
+configure:4015: $? = 0
+configure:4033: result: yes
+configure:4068: checking dependency style of gcc
+configure:4177: result: gcc3
+configure:4192: checking whether ln -s works
+configure:4196: result: yes
+configure:4203: checking whether make sets $(MAKE)
+configure:4225: result: yes
+configure:4280: checking how to print strings
+configure:4307: result: printf
+configure:4328: checking for a sed that does not truncate output
+configure:4392: result: /usr/bin/sed
+configure:4410: checking for grep that handles long lines and -e
+configure:4468: result: /usr/bin/grep
+configure:4473: checking for egrep
+configure:4535: result: /usr/bin/grep -E
+configure:4540: checking for fgrep
+configure:4602: result: /usr/bin/grep -F
+configure:4637: checking for ld used by gcc
+configure:4704: result: /usr/llvm-gcc-4.2/libexec/gcc/i686-apple-darwin11/4.2.1/ld
+configure:4711: checking if the linker (/usr/llvm-gcc-4.2/libexec/gcc/i686-apple-darwin11/4.2.1/ld) is GNU ld
+configure:4726: result: no
+configure:4738: checking for BSD- or MS-compatible name lister (nm)
+configure:4787: result: /usr/bin/nm
+configure:4917: checking the name lister (/usr/bin/nm) interface
+configure:4924: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:4927: /usr/bin/nm "conftest.o"
+configure:4930: output
 0000000000000000 S _some_variable
-configure:4939: result: BSD nm
-configure:4943: checking the maximum length of command line arguments
-configure:5073: result: 196608
-configure:5090: checking whether the shell understands some XSI constructs
-configure:5100: result: yes
-configure:5104: checking whether the shell understands "+="
-configure:5110: result: yes
-configure:5145: checking how to convert x86_64-apple-darwin12.3.0 file names to x86_64-apple-darwin12.3.0 format
-configure:5185: result: func_convert_file_noop
-configure:5192: checking how to convert x86_64-apple-darwin12.3.0 file names to toolchain format
-configure:5212: result: func_convert_file_noop
-configure:5219: checking for /usr/llvm-gcc-4.2/libexec/gcc/i686-apple-darwin11/4.2.1/ld option to reload object files
-configure:5226: result: -r
-configure:5300: checking for objdump
-configure:5330: result: no
-configure:5359: checking how to recognize dependent libraries
-configure:5561: result: pass_all
-configure:5646: checking for dlltool
-configure:5676: result: no
-configure:5706: checking how to associate runtime and link libraries
-configure:5733: result: printf %s\n
-configure:5794: checking for ar
-configure:5810: found /usr/bin/ar
-configure:5821: result: ar
-configure:5858: checking for archiver @FILE support
-configure:5875: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:5875: $? = 0
-configure:5878: ar cru libconftest.a @conftest.lst >&5
+configure:4937: result: BSD nm
+configure:4941: checking the maximum length of command line arguments
+configure:5071: result: 196608
+configure:5088: checking whether the shell understands some XSI constructs
+configure:5098: result: yes
+configure:5102: checking whether the shell understands "+="
+configure:5108: result: yes
+configure:5143: checking how to convert x86_64-apple-darwin12.3.0 file names to x86_64-apple-darwin12.3.0 format
+configure:5183: result: func_convert_file_noop
+configure:5190: checking how to convert x86_64-apple-darwin12.3.0 file names to toolchain format
+configure:5210: result: func_convert_file_noop
+configure:5217: checking for /usr/llvm-gcc-4.2/libexec/gcc/i686-apple-darwin11/4.2.1/ld option to reload object files
+configure:5224: result: -r
+configure:5298: checking for objdump
+configure:5328: result: no
+configure:5357: checking how to recognize dependent libraries
+configure:5559: result: pass_all
+configure:5644: checking for dlltool
+configure:5674: result: no
+configure:5704: checking how to associate runtime and link libraries
+configure:5731: result: printf %s\n
+configure:5792: checking for ar
+configure:5808: found /usr/bin/ar
+configure:5819: result: ar
+configure:5856: checking for archiver @FILE support
+configure:5873: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:5873: $? = 0
+configure:5876: ar cru libconftest.a @conftest.lst >&5
 ar: @conftest.lst: No such file or directory
-configure:5881: $? = 1
-configure:5901: result: no
-configure:5959: checking for strip
-configure:5975: found /usr/bin/strip
-configure:5986: result: strip
-configure:6058: checking for ranlib
-configure:6074: found /usr/bin/ranlib
-configure:6085: result: ranlib
-configure:6187: checking command to parse /usr/bin/nm output from gcc object
-configure:6307: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:6310: $? = 0
-configure:6314: /usr/bin/nm conftest.o \| sed -n -e 's/^.*[ ]\([BCDEGRST][BCDEGRST]*\)[ ][ ]*\([_A-Za-z][_A-Za-z0-9]*\)$/\1 \2 \2/p' | sed '/ __gnu_lto/d' \> conftest.nm
-configure:6317: $? = 0
+configure:5879: $? = 1
+configure:5899: result: no
+configure:5957: checking for strip
+configure:5973: found /usr/bin/strip
+configure:5984: result: strip
+configure:6056: checking for ranlib
+configure:6072: found /usr/bin/ranlib
+configure:6083: result: ranlib
+configure:6185: checking command to parse /usr/bin/nm output from gcc object
+configure:6305: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:6308: $? = 0
+configure:6312: /usr/bin/nm conftest.o \| sed -n -e 's/^.*[ ]\([BCDEGRST][BCDEGRST]*\)[ ][ ]*\([_A-Za-z][_A-Za-z0-9]*\)$/\1 \2 \2/p' | sed '/ __gnu_lto/d' \> conftest.nm
+configure:6315: $? = 0
 cannot find nm_test_var in conftest.nm
-configure:6307: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:6310: $? = 0
-configure:6314: /usr/bin/nm conftest.o \| sed -n -e 's/^.*[ ]\([BCDEGRST][BCDEGRST]*\)[ ][ ]*_\([_A-Za-z][_A-Za-z0-9]*\)$/\1 _\2 \2/p' | sed '/ __gnu_lto/d' \> conftest.nm
-configure:6317: $? = 0
-configure:6383: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   conftest.c conftstm.o >&5
-configure:6386: $? = 0
-configure:6424: result: ok
-configure:6461: checking for sysroot
-configure:6491: result: no
-configure:6747: checking for mt
-configure:6777: result: no
-configure:6797: checking if : is a manifest tool
-configure:6803: : '-?'
-configure:6811: result: no
-configure:6867: checking for dsymutil
-configure:6883: found /usr/bin/dsymutil
-configure:6894: result: dsymutil
-configure:6959: checking for nmedit
-configure:6975: found /usr/bin/nmedit
-configure:6986: result: nmedit
-configure:7051: checking for lipo
-configure:7067: found /usr/bin/lipo
-configure:7078: result: lipo
-configure:7143: checking for otool
-configure:7159: found /usr/bin/otool
-configure:7170: result: otool
-configure:7235: checking for otool64
-configure:7265: result: no
-configure:7310: checking for -single_module linker flag
-gcc -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  -o libconftest.dylib -dynamiclib -Wl,-single_module conftest.c
-configure:7343: result: yes
-configure:7346: checking for -exported_symbols_list linker flag
-configure:7366: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   -Wl,-exported_symbols_list,conftest.sym conftest.c  >&5
-configure:7366: $? = 0
-configure:7376: result: yes
-configure:7379: checking for -force_load linker flag
-gcc -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -c -o conftest.o conftest.c
+configure:6305: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:6308: $? = 0
+configure:6312: /usr/bin/nm conftest.o \| sed -n -e 's/^.*[ ]\([BCDEGRST][BCDEGRST]*\)[ ][ ]*_\([_A-Za-z][_A-Za-z0-9]*\)$/\1 _\2 \2/p' | sed '/ __gnu_lto/d' \> conftest.nm
+configure:6315: $? = 0
+configure:6381: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   conftest.c conftstm.o >&5
+configure:6384: $? = 0
+configure:6422: result: ok
+configure:6459: checking for sysroot
+configure:6489: result: no
+configure:6745: checking for mt
+configure:6775: result: no
+configure:6795: checking if : is a manifest tool
+configure:6801: : '-?'
+configure:6809: result: no
+configure:6865: checking for dsymutil
+configure:6881: found /usr/bin/dsymutil
+configure:6892: result: dsymutil
+configure:6957: checking for nmedit
+configure:6973: found /usr/bin/nmedit
+configure:6984: result: nmedit
+configure:7049: checking for lipo
+configure:7065: found /usr/bin/lipo
+configure:7076: result: lipo
+configure:7141: checking for otool
+configure:7157: found /usr/bin/otool
+configure:7168: result: otool
+configure:7233: checking for otool64
+configure:7263: result: no
+configure:7308: checking for -single_module linker flag
+gcc -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  -o libconftest.dylib -dynamiclib -Wl,-single_module conftest.c
+configure:7341: result: yes
+configure:7344: checking for -exported_symbols_list linker flag
+configure:7364: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   -Wl,-exported_symbols_list,conftest.sym conftest.c  >&5
+configure:7364: $? = 0
+configure:7374: result: yes
+configure:7377: checking for -force_load linker flag
+gcc -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED -c -o conftest.o conftest.c
 ar cru libconftest.a conftest.o
 ranlib libconftest.a
-gcc -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  -o conftest conftest.c -Wl,-force_load,./libconftest.a
-configure:7411: result: yes
-configure:7453: checking how to run the C preprocessor
-configure:7484: gcc -E  conftest.c
-configure:7484: $? = 0
-configure:7498: gcc -E  conftest.c
+gcc -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  -o conftest conftest.c -Wl,-force_load,./libconftest.a
+configure:7409: result: yes
+configure:7451: checking how to run the C preprocessor
+configure:7482: gcc -E  conftest.c
+configure:7482: $? = 0
+configure:7496: gcc -E  conftest.c
 conftest.c:11:28: error: ac_nonexistent.h: No such file or directory
-configure:7498: $? = 1
+configure:7496: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -285,12 +285,12 @@ configure: failed program was:
 | #define VERSION "3.5.2017"
 | /* end confdefs.h.  */
 | #include <ac_nonexistent.h>
-configure:7523: result: gcc -E
-configure:7543: gcc -E  conftest.c
-configure:7543: $? = 0
-configure:7557: gcc -E  conftest.c
+configure:7521: result: gcc -E
+configure:7541: gcc -E  conftest.c
+configure:7541: $? = 0
+configure:7555: gcc -E  conftest.c
 conftest.c:11:28: error: ac_nonexistent.h: No such file or directory
-configure:7557: $? = 1
+configure:7555: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -303,101 +303,101 @@ configure: failed program was:
 | #define VERSION "3.5.2017"
 | /* end confdefs.h.  */
 | #include <ac_nonexistent.h>
-configure:7586: checking for ANSI C header files
-configure:7606: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7606: $? = 0
-configure:7679: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   conftest.c  >&5
-configure:7679: $? = 0
-configure:7679: ./conftest
-configure:7679: $? = 0
-configure:7690: result: yes
-configure:7703: checking for sys/types.h
-configure:7703: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7703: $? = 0
-configure:7703: result: yes
-configure:7703: checking for sys/stat.h
-configure:7703: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7703: $? = 0
-configure:7703: result: yes
-configure:7703: checking for stdlib.h
-configure:7703: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7703: $? = 0
-configure:7703: result: yes
-configure:7703: checking for string.h
-configure:7703: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7703: $? = 0
-configure:7703: result: yes
-configure:7703: checking for memory.h
-configure:7703: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7703: $? = 0
-configure:7703: result: yes
-configure:7703: checking for strings.h
-configure:7703: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7703: $? = 0
-configure:7703: result: yes
-configure:7703: checking for inttypes.h
-configure:7703: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7703: $? = 0
-configure:7703: result: yes
-configure:7703: checking for stdint.h
-configure:7703: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7703: $? = 0
-configure:7703: result: yes
-configure:7703: checking for unistd.h
-configure:7703: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7703: $? = 0
-configure:7703: result: yes
-configure:7717: checking for dlfcn.h
-configure:7717: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:7717: $? = 0
-configure:7717: result: yes
-configure:7923: checking for objdir
-configure:7938: result: .libs
-configure:8209: checking if gcc supports -fno-rtti -fno-exceptions
-configure:8227: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  -fno-rtti -fno-exceptions conftest.c >&5
+configure:7584: checking for ANSI C header files
+configure:7604: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7604: $? = 0
+configure:7677: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   conftest.c  >&5
+configure:7677: $? = 0
+configure:7677: ./conftest
+configure:7677: $? = 0
+configure:7688: result: yes
+configure:7701: checking for sys/types.h
+configure:7701: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7701: $? = 0
+configure:7701: result: yes
+configure:7701: checking for sys/stat.h
+configure:7701: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7701: $? = 0
+configure:7701: result: yes
+configure:7701: checking for stdlib.h
+configure:7701: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7701: $? = 0
+configure:7701: result: yes
+configure:7701: checking for string.h
+configure:7701: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7701: $? = 0
+configure:7701: result: yes
+configure:7701: checking for memory.h
+configure:7701: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7701: $? = 0
+configure:7701: result: yes
+configure:7701: checking for strings.h
+configure:7701: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7701: $? = 0
+configure:7701: result: yes
+configure:7701: checking for inttypes.h
+configure:7701: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7701: $? = 0
+configure:7701: result: yes
+configure:7701: checking for stdint.h
+configure:7701: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7701: $? = 0
+configure:7701: result: yes
+configure:7701: checking for unistd.h
+configure:7701: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7701: $? = 0
+configure:7701: result: yes
+configure:7715: checking for dlfcn.h
+configure:7715: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:7715: $? = 0
+configure:7715: result: yes
+configure:7921: checking for objdir
+configure:7936: result: .libs
+configure:8207: checking if gcc supports -fno-rtti -fno-exceptions
+configure:8225: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  -fno-rtti -fno-exceptions conftest.c >&5
 cc1: warning: command line option "-fno-rtti" is valid for C++/ObjC++ but not for C
-configure:8231: $? = 0
-configure:8244: result: no
-configure:8571: checking for gcc option to produce PIC
-configure:8578: result: -fno-common -DPIC
-configure:8586: checking if gcc PIC flag -fno-common -DPIC works
-configure:8604: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  -fno-common -DPIC -DPIC conftest.c >&5
-configure:8608: $? = 0
-configure:8621: result: yes
-configure:8650: checking if gcc static flag -static works
-configure:8678: result: no
-configure:8693: checking if gcc supports -c -o file.o
-configure:8714: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  -o out/conftest2.o conftest.c >&5
-configure:8718: $? = 0
-configure:8740: result: yes
-configure:8748: checking if gcc supports -c -o file.o
-configure:8795: result: yes
-configure:8828: checking whether the gcc linker (/usr/llvm-gcc-4.2/libexec/gcc/i686-apple-darwin11/4.2.1/ld) supports shared libraries
-configure:9981: result: yes
-configure:10221: checking dynamic linker characteristics
-configure:10954: result: darwin12.3.0 dyld
-configure:11061: checking how to hardcode library paths into programs
-configure:11086: result: immediate
-configure:11626: checking whether stripping libraries is possible
-configure:11640: result: yes
-configure:11666: checking if libtool supports shared libraries
-configure:11668: result: yes
-configure:11671: checking whether to build shared libraries
-configure:11692: result: yes
-configure:11695: checking whether to build static libraries
-configure:11699: result: yes
-configure:11740: checking whether byte ordering is bigendian
-configure:11755: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:11755: $? = 0
-configure:11800: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:11800: $? = 0
-configure:11818: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
+configure:8229: $? = 0
+configure:8242: result: no
+configure:8569: checking for gcc option to produce PIC
+configure:8576: result: -fno-common -DPIC
+configure:8584: checking if gcc PIC flag -fno-common -DPIC works
+configure:8602: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  -fno-common -DPIC -DPIC conftest.c >&5
+configure:8606: $? = 0
+configure:8619: result: yes
+configure:8648: checking if gcc static flag -static works
+configure:8676: result: no
+configure:8691: checking if gcc supports -c -o file.o
+configure:8712: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  -o out/conftest2.o conftest.c >&5
+configure:8716: $? = 0
+configure:8738: result: yes
+configure:8746: checking if gcc supports -c -o file.o
+configure:8793: result: yes
+configure:8826: checking whether the gcc linker (/usr/llvm-gcc-4.2/libexec/gcc/i686-apple-darwin11/4.2.1/ld) supports shared libraries
+configure:9979: result: yes
+configure:10219: checking dynamic linker characteristics
+configure:10952: result: darwin12.3.0 dyld
+configure:11059: checking how to hardcode library paths into programs
+configure:11084: result: immediate
+configure:11624: checking whether stripping libraries is possible
+configure:11638: result: yes
+configure:11664: checking if libtool supports shared libraries
+configure:11666: result: yes
+configure:11669: checking whether to build shared libraries
+configure:11690: result: yes
+configure:11693: checking whether to build static libraries
+configure:11697: result: yes
+configure:11738: checking whether byte ordering is bigendian
+configure:11753: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:11753: $? = 0
+configure:11798: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:11798: $? = 0
+configure:11816: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
 conftest.c: In function 'main':
 conftest.c:30: error: 'not' undeclared (first use in this function)
 conftest.c:30: error: (Each undeclared identifier is reported only once
 conftest.c:30: error: for each function it appears in.)
 conftest.c:30: error: expected ';' before 'big'
-configure:11818: $? = 1
+configure:11816: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -434,21 +434,21 @@ configure: failed program was:
 |   ;
 |   return 0;
 | }
-configure:11946: result: no
-configure:11971: checking for ANSI C header files
-configure:12075: result: yes
-configure:12084: checking for exp in -lm
-configure:12109: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   conftest.c -lm   >&5
+configure:11944: result: no
+configure:11969: checking for ANSI C header files
+configure:12073: result: yes
+configure:12082: checking for exp in -lm
+configure:12107: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   conftest.c -lm   >&5
 conftest.c:32: warning: conflicting types for built-in function 'exp'
-configure:12109: $? = 0
-configure:12118: result: yes
-configure:12130: checking for int8_t
-configure:12130: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:12130: $? = 0
-configure:12130: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
+configure:12107: $? = 0
+configure:12116: result: yes
+configure:12128: checking for int8_t
+configure:12128: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:12128: $? = 0
+configure:12128: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
 conftest.c: In function 'main':
 conftest.c:64: error: size of array 'test_array' is negative
-configure:12130: $? = 1
+configure:12128: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -520,11 +520,11 @@ configure: failed program was:
 |   ;
 |   return 0;
 | }
-configure:12130: result: yes
-configure:12142: checking malloc.h usability
-configure:12142: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
+configure:12128: result: yes
+configure:12140: checking malloc.h usability
+configure:12140: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
 conftest.c:59:20: error: malloc.h: No such file or directory
-configure:12142: $? = 1
+configure:12140: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -585,11 +585,11 @@ configure: failed program was:
 | # include <unistd.h>
 | #endif
 | #include <malloc.h>
-configure:12142: result: no
-configure:12142: checking malloc.h presence
-configure:12142: gcc -E  conftest.c
+configure:12140: result: no
+configure:12140: checking malloc.h presence
+configure:12140: gcc -E  conftest.c
 conftest.c:26:20: error: malloc.h: No such file or directory
-configure:12142: $? = 1
+configure:12140: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -617,34 +617,34 @@ configure: failed program was:
 | #define HAVE_LIBM 1
 | /* end confdefs.h.  */
 | #include <malloc.h>
-configure:12142: result: no
-configure:12142: checking for malloc.h
-configure:12142: result: no
-configure:12170: checking rpc/rpc.h usability
-configure:12170: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:12170: $? = 0
-configure:12170: result: yes
-configure:12170: checking rpc/rpc.h presence
-configure:12170: gcc -E  conftest.c
-configure:12170: $? = 0
-configure:12170: result: yes
-configure:12170: checking for rpc/rpc.h
-configure:12170: result: yes
-configure:12182: checking rpc/types.h usability
-configure:12182: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:12182: $? = 0
-configure:12182: result: yes
-configure:12182: checking rpc/types.h presence
-configure:12182: gcc -E  conftest.c
-configure:12182: $? = 0
-configure:12182: result: yes
-configure:12182: checking for rpc/types.h
-configure:12182: result: yes
-configure:12195: checking for main in -lws2_32
-configure:12214: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   conftest.c -lws2_32  -lm  >&5
+configure:12140: result: no
+configure:12140: checking for malloc.h
+configure:12140: result: no
+configure:12168: checking rpc/rpc.h usability
+configure:12168: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:12168: $? = 0
+configure:12168: result: yes
+configure:12168: checking rpc/rpc.h presence
+configure:12168: gcc -E  conftest.c
+configure:12168: $? = 0
+configure:12168: result: yes
+configure:12168: checking for rpc/rpc.h
+configure:12168: result: yes
+configure:12180: checking rpc/types.h usability
+configure:12180: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:12180: $? = 0
+configure:12180: result: yes
+configure:12180: checking rpc/types.h presence
+configure:12180: gcc -E  conftest.c
+configure:12180: $? = 0
+configure:12180: result: yes
+configure:12180: checking for rpc/types.h
+configure:12180: result: yes
+configure:12193: checking for main in -lws2_32
+configure:12212: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   conftest.c -lws2_32  -lm  >&5
 ld: library not found for -lws2_32
 collect2: ld returned 1 exit status
-configure:12214: $? = 1
+configure:12212: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -682,105 +682,105 @@ configure: failed program was:
 |   ;
 |   return 0;
 | }
-configure:12223: result: no
-configure:12235: checking for xdrmem_create
-configure:12235: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   conftest.c -lm  >&5
-configure:12235: $? = 0
-configure:12235: result: yes
-configure:12542: checking for pkg-config
-configure:12560: found /sw/bin/pkg-config
-configure:12572: result: /sw/bin/pkg-config
-configure:12597: checking pkg-config is at least version 0.9.0
-configure:12600: result: yes
-configure:12610: checking for libnetcdf
-configure:12617: $PKG_CONFIG --exists --print-errors "netcdf"
-configure:12620: $? = 0
-configure:12633: $PKG_CONFIG --exists --print-errors "netcdf"
-configure:12636: $? = 0
-configure:12673: result: yes
-configure:12831: checking netcdf.h usability
-configure:12831: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -I/sw/include  -I/sw/include conftest.c >&5
-configure:12831: $? = 0
-configure:12831: result: yes
-configure:12831: checking netcdf.h presence
-configure:12831: gcc -E  -I/sw/include conftest.c
-configure:12831: $? = 0
-configure:12831: result: yes
-configure:12831: checking for netcdf.h
-configure:12831: result: yes
-configure:12856: checking for libgmt
-configure:12863: $PKG_CONFIG --exists --print-errors "gmt"
+configure:12221: result: no
+configure:12233: checking for xdrmem_create
+configure:12233: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   conftest.c -lm  >&5
+configure:12233: $? = 0
+configure:12233: result: yes
+configure:12514: checking for pkg-config
+configure:12532: found /sw/bin/pkg-config
+configure:12544: result: /sw/bin/pkg-config
+configure:12569: checking pkg-config is at least version 0.9.0
+configure:12572: result: yes
+configure:12582: checking for libnetcdf
+configure:12589: $PKG_CONFIG --exists --print-errors "netcdf"
+configure:12592: $? = 0
+configure:12605: $PKG_CONFIG --exists --print-errors "netcdf"
+configure:12608: $? = 0
+configure:12645: result: yes
+configure:12803: checking netcdf.h usability
+configure:12803: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED -I/sw/include  -I/sw/include conftest.c >&5
+configure:12803: $? = 0
+configure:12803: result: yes
+configure:12803: checking netcdf.h presence
+configure:12803: gcc -E  -I/sw/include conftest.c
+configure:12803: $? = 0
+configure:12803: result: yes
+configure:12803: checking for netcdf.h
+configure:12803: result: yes
+configure:12828: checking for libgmt
+configure:12835: $PKG_CONFIG --exists --print-errors "gmt"
 Package gmt was not found in the pkg-config search path.
 Perhaps you should add the directory containing `gmt.pc'
 to the PKG_CONFIG_PATH environment variable
 No package 'gmt' found
-configure:12866: $? = 1
-configure:12879: $PKG_CONFIG --exists --print-errors "gmt"
+configure:12838: $? = 1
+configure:12851: $PKG_CONFIG --exists --print-errors "gmt"
 Package gmt was not found in the pkg-config search path.
 Perhaps you should add the directory containing `gmt.pc'
 to the PKG_CONFIG_PATH environment variable
 No package 'gmt' found
-configure:12882: $? = 1
-configure:12895: result: no
+configure:12854: $? = 1
+configure:12867: result: no
 No package 'gmt' found
-configure:12990: checking for GMT_begin in -lgmt
-configure:13015: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   -L/sw/lib -L/sw/lib -lnetcdf -lnetcdf -lm conftest.c -lgmt  -lm  >&5
-configure:13015: $? = 0
-configure:13024: result: yes
-configure:13078: checking gmt.h usability
-configure:13078: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -I/sw/include -I/sw/include  -I/sw/include conftest.c >&5
+configure:12962: checking for GMT_begin in -lgmt
+configure:12987: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   -L/sw/lib -L/sw/lib -lnetcdf -lnetcdf -lm conftest.c -lgmt  -lm  >&5
+configure:12987: $? = 0
+configure:12996: result: yes
+configure:13050: checking gmt.h usability
+configure:13050: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED -I/sw/include -I/sw/include  -I/sw/include conftest.c >&5
 In file included from /sw/include/gmt.h:636,
                  from conftest.c:61:
 /sw/include/gmt_version.h:5:1: warning: "PACKAGE_VERSION" redefined
 conftest.c:4:1: warning: this is the location of the previous definition
-configure:13078: $? = 0
-configure:13078: result: yes
-configure:13078: checking gmt.h presence
-configure:13078: gcc -E  -I/sw/include conftest.c
+configure:13050: $? = 0
+configure:13050: result: yes
+configure:13050: checking gmt.h presence
+configure:13050: gcc -E  -I/sw/include conftest.c
 In file included from /sw/include/gmt.h:636,
                  from conftest.c:28:
 /sw/include/gmt_version.h:5:1: warning: "PACKAGE_VERSION" redefined
 conftest.c:4:1: warning: this is the location of the previous definition
-configure:13078: $? = 0
-configure:13078: result: yes
-configure:13078: checking for gmt.h
-configure:13078: result: yes
-configure:13102: checking for libfftw
-configure:13109: $PKG_CONFIG --exists --print-errors "fftw3"
-configure:13112: $? = 0
-configure:13125: $PKG_CONFIG --exists --print-errors "fftw3"
-configure:13128: $? = 0
-configure:13165: result: yes
-configure:13334: checking fftw3.h usability
-configure:13334: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -I/sw/include  -I/sw/include conftest.c >&5
-configure:13334: $? = 0
-configure:13334: result: yes
-configure:13334: checking fftw3.h presence
-configure:13334: gcc -E  -I/sw/include conftest.c
-configure:13334: $? = 0
-configure:13334: result: yes
-configure:13334: checking for fftw3.h
-configure:13334: result: yes
-configure:13529: checking for XmCreatePushButton in -lXm
-configure:13554: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  -L/sw/lib  conftest.c -lXm  -L/sw/lib -L/sw/lib  >&5
-configure:13554: $? = 0
-configure:13563: result: yes
-configure:13572: checking for XtAppMainLoop in -lXt
-configure:13597: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  -L/sw/lib  conftest.c -lXt  -L/sw/lib -L/sw/lib  >&5
-configure:13597: $? = 0
-configure:13606: result: yes
-configure:13615: checking for XSendEvent in -lX11
-configure:13640: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  -L/sw/lib  conftest.c -lX11  -L/sw/lib -L/sw/lib  >&5
-configure:13640: $? = 0
-configure:13649: result: yes
-configure:13712: checking X11/Intrinsic.h usability
-configure:13712: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -I/sw/include  -I/sw/include conftest.c >&5
-configure:13712: $? = 0
-configure:13712: result: yes
-configure:13712: checking X11/Intrinsic.h presence
-configure:13712: gcc -E  -I/sw/include conftest.c
+configure:13050: $? = 0
+configure:13050: result: yes
+configure:13050: checking for gmt.h
+configure:13050: result: yes
+configure:13074: checking for libfftw
+configure:13081: $PKG_CONFIG --exists --print-errors "fftw3"
+configure:13084: $? = 0
+configure:13097: $PKG_CONFIG --exists --print-errors "fftw3"
+configure:13100: $? = 0
+configure:13137: result: yes
+configure:13306: checking fftw3.h usability
+configure:13306: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED -I/sw/include  -I/sw/include conftest.c >&5
+configure:13306: $? = 0
+configure:13306: result: yes
+configure:13306: checking fftw3.h presence
+configure:13306: gcc -E  -I/sw/include conftest.c
+configure:13306: $? = 0
+configure:13306: result: yes
+configure:13306: checking for fftw3.h
+configure:13306: result: yes
+configure:13501: checking for XmCreatePushButton in -lXm
+configure:13526: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  -L/sw/lib  conftest.c -lXm  -L/sw/lib -L/sw/lib  >&5
+configure:13526: $? = 0
+configure:13535: result: yes
+configure:13544: checking for XtAppMainLoop in -lXt
+configure:13569: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  -L/sw/lib  conftest.c -lXt  -L/sw/lib -L/sw/lib  >&5
+configure:13569: $? = 0
+configure:13578: result: yes
+configure:13587: checking for XSendEvent in -lX11
+configure:13612: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  -L/sw/lib  conftest.c -lX11  -L/sw/lib -L/sw/lib  >&5
+configure:13612: $? = 0
+configure:13621: result: yes
+configure:13684: checking X11/Intrinsic.h usability
+configure:13684: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED -I/sw/include  -I/sw/include conftest.c >&5
+configure:13684: $? = 0
+configure:13684: result: yes
+configure:13684: checking X11/Intrinsic.h presence
+configure:13684: gcc -E  -I/sw/include conftest.c
 conftest.c:28:27: error: X11/Intrinsic.h: No such file or directory
-configure:13712: $? = 1
+configure:13684: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -810,27 +810,27 @@ configure: failed program was:
 | #define HAVE_RPC_TYPES_H 1
 | /* end confdefs.h.  */
 | #include <X11/Intrinsic.h>
-configure:13712: result: no
-configure:13712: WARNING: X11/Intrinsic.h: accepted by the compiler, rejected by the preprocessor!
-configure:13712: WARNING: X11/Intrinsic.h: proceeding with the compiler's result
-configure:13712: checking for X11/Intrinsic.h
-configure:13712: result: yes
-configure:13766: checking for main in -lGL
-configure:13785: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   conftest.c -lGL  -lm  >&5
-configure:13785: $? = 0
-configure:13794: result: yes
-configure:13803: checking for main in -lGLU
-configure:13822: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN   conftest.c -lGLU -lGL -lm  >&5
-configure:13822: $? = 0
-configure:13831: result: yes
-configure:13964: checking GL/gl.h usability
-configure:13964: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:13964: $? = 0
-configure:13964: result: yes
-configure:13964: checking GL/gl.h presence
-configure:13964: gcc -E  conftest.c
+configure:13684: result: no
+configure:13684: WARNING: X11/Intrinsic.h: accepted by the compiler, rejected by the preprocessor!
+configure:13684: WARNING: X11/Intrinsic.h: proceeding with the compiler's result
+configure:13684: checking for X11/Intrinsic.h
+configure:13684: result: yes
+configure:13738: checking for main in -lGL
+configure:13757: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   conftest.c -lGL  -lm  >&5
+configure:13757: $? = 0
+configure:13766: result: yes
+configure:13775: checking for main in -lGLU
+configure:13794: gcc -o conftest -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED   conftest.c -lGLU -lGL -lm  >&5
+configure:13794: $? = 0
+configure:13803: result: yes
+configure:13936: checking GL/gl.h usability
+configure:13936: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:13936: $? = 0
+configure:13936: result: yes
+configure:13936: checking GL/gl.h presence
+configure:13936: gcc -E  conftest.c
 conftest.c:29:19: error: GL/gl.h: No such file or directory
-configure:13964: $? = 1
+configure:13936: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -861,19 +861,19 @@ configure: failed program was:
 | #define GOT_MOTIF 1
 | /* end confdefs.h.  */
 | #include <GL/gl.h>
-configure:13964: result: no
-configure:13964: WARNING: GL/gl.h: accepted by the compiler, rejected by the preprocessor!
-configure:13964: WARNING: GL/gl.h: proceeding with the compiler's result
-configure:13964: checking for GL/gl.h
-configure:13964: result: yes
-configure:13964: checking GL/glu.h usability
-configure:13964: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:13964: $? = 0
-configure:13964: result: yes
-configure:13964: checking GL/glu.h presence
-configure:13964: gcc -E  conftest.c
+configure:13936: result: no
+configure:13936: WARNING: GL/gl.h: accepted by the compiler, rejected by the preprocessor!
+configure:13936: WARNING: GL/gl.h: proceeding with the compiler's result
+configure:13936: checking for GL/gl.h
+configure:13936: result: yes
+configure:13936: checking GL/glu.h usability
+configure:13936: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:13936: $? = 0
+configure:13936: result: yes
+configure:13936: checking GL/glu.h presence
+configure:13936: gcc -E  conftest.c
 conftest.c:30:20: error: GL/glu.h: No such file or directory
-configure:13964: $? = 1
+configure:13936: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -905,19 +905,19 @@ configure: failed program was:
 | #define HAVE_GL_GL_H 1
 | /* end confdefs.h.  */
 | #include <GL/glu.h>
-configure:13964: result: no
-configure:13964: WARNING: GL/glu.h: accepted by the compiler, rejected by the preprocessor!
-configure:13964: WARNING: GL/glu.h: proceeding with the compiler's result
-configure:13964: checking for GL/glu.h
-configure:13964: result: yes
-configure:13964: checking GL/glx.h usability
-configure:13964: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN  conftest.c >&5
-configure:13964: $? = 0
-configure:13964: result: yes
-configure:13964: checking GL/glx.h presence
-configure:13964: gcc -E  conftest.c
+configure:13936: result: no
+configure:13936: WARNING: GL/glu.h: accepted by the compiler, rejected by the preprocessor!
+configure:13936: WARNING: GL/glu.h: proceeding with the compiler's result
+configure:13936: checking for GL/glu.h
+configure:13936: result: yes
+configure:13936: checking GL/glx.h usability
+configure:13936: gcc -c -I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED  conftest.c >&5
+configure:13936: $? = 0
+configure:13936: result: yes
+configure:13936: checking GL/glx.h presence
+configure:13936: gcc -E  conftest.c
 conftest.c:31:20: error: GL/glx.h: No such file or directory
-configure:13964: $? = 1
+configure:13936: $? = 1
 configure: failed program was:
 | /* confdefs.h */
 | #define PACKAGE_NAME "mbsystem"
@@ -950,12 +950,12 @@ configure: failed program was:
 | #define HAVE_GL_GLU_H 1
 | /* end confdefs.h.  */
 | #include <GL/glx.h>
-configure:13964: result: no
-configure:13964: WARNING: GL/glx.h: accepted by the compiler, rejected by the preprocessor!
-configure:13964: WARNING: GL/glx.h: proceeding with the compiler's result
-configure:13964: checking for GL/glx.h
-configure:13964: result: yes
-configure:14111: creating ./config.status
+configure:13936: result: no
+configure:13936: WARNING: GL/glx.h: accepted by the compiler, rejected by the preprocessor!
+configure:13936: WARNING: GL/glx.h: proceeding with the compiler's result
+configure:13936: checking for GL/glx.h
+configure:13936: result: yes
+configure:14079: creating ./config.status
 
 ## ---------------------- ##
 ## Running config.status. ##
@@ -972,33 +972,33 @@ generated by GNU Autoconf 2.69.  Invocation command line was
 
 on deitz
 
-config.status:1144: creating Makefile
-config.status:1144: creating src/Makefile
-config.status:1144: creating src/mbio/Makefile
-config.status:1144: creating src/gsf/Makefile
-config.status:1144: creating src/surf/Makefile
-config.status:1144: creating src/mr1pr/Makefile
-config.status:1144: creating src/proj/Makefile
-config.status:1144: creating src/mbaux/Makefile
-config.status:1144: creating src/utilities/Makefile
-config.status:1144: creating src/gmt/Makefile
-config.status:1144: creating src/macros/Makefile
-config.status:1144: creating src/mbedit/Makefile
-config.status:1144: creating src/mbnavedit/Makefile
-config.status:1144: creating src/mbvelocitytool/Makefile
-config.status:1144: creating src/mbnavadjust/Makefile
-config.status:1144: creating src/otps/Makefile
-config.status:1144: creating src/mbview/Makefile
-config.status:1144: creating src/man/Makefile
-config.status:1144: creating src/man/man1/Makefile
-config.status:1144: creating src/man/man3/Makefile
-config.status:1144: creating src/html/Makefile
-config.status:1144: creating src/ps/Makefile
-config.status:1144: creating src/share/Makefile
-config.status:1144: creating src/mbsystem_config.h
-config.status:1325: src/mbsystem_config.h is unchanged
-config.status:1373: executing depfiles commands
-config.status:1373: executing libtool commands
+config.status:1142: creating Makefile
+config.status:1142: creating src/Makefile
+config.status:1142: creating src/mbio/Makefile
+config.status:1142: creating src/gsf/Makefile
+config.status:1142: creating src/surf/Makefile
+config.status:1142: creating src/mr1pr/Makefile
+config.status:1142: creating src/proj/Makefile
+config.status:1142: creating src/mbaux/Makefile
+config.status:1142: creating src/utilities/Makefile
+config.status:1142: creating src/gmt/Makefile
+config.status:1142: creating src/macros/Makefile
+config.status:1142: creating src/mbedit/Makefile
+config.status:1142: creating src/mbnavedit/Makefile
+config.status:1142: creating src/mbvelocitytool/Makefile
+config.status:1142: creating src/mbnavadjust/Makefile
+config.status:1142: creating src/otps/Makefile
+config.status:1142: creating src/mbview/Makefile
+config.status:1142: creating src/man/Makefile
+config.status:1142: creating src/man/man1/Makefile
+config.status:1142: creating src/man/man3/Makefile
+config.status:1142: creating src/html/Makefile
+config.status:1142: creating src/ps/Makefile
+config.status:1142: creating src/share/Makefile
+config.status:1142: creating src/mbsystem_config.h
+config.status:1323: src/mbsystem_config.h is unchanged
+config.status:1371: executing depfiles commands
+config.status:1371: executing libtool commands
 
 ## ---------------- ##
 ## Cache variables. ##
@@ -1015,7 +1015,7 @@ ac_cv_env_CCAS_value=
 ac_cv_env_CC_set=
 ac_cv_env_CC_value=
 ac_cv_env_CFLAGS_set=set
-ac_cv_env_CFLAGS_value='-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN'
+ac_cv_env_CFLAGS_value='-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED'
 ac_cv_env_CPPFLAGS_set=
 ac_cv_env_CPPFLAGS_value=
 ac_cv_env_CPP_set=
@@ -1158,10 +1158,10 @@ BUILD_MOTIF_TRUE=''
 CC='gcc'
 CCAS='gcc'
 CCASDEPMODE='depmode=gcc3'
-CCASFLAGS='-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN'
+CCASFLAGS='-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED'
 CCDEPMODE='depmode=gcc3'
 CDF_INC_DIR='-I/sw/include'
-CFLAGS='-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN'
+CFLAGS='-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED'
 CPP='gcc -E'
 CPPFLAGS=''
 CYGPATH_W='echo'
@@ -1183,8 +1183,6 @@ GL_LIB_DIR=''
 GMT_INC_DIR='-I/sw/include'
 GREP='/usr/bin/grep'
 INSTALL_DATA='${INSTALL} -m 644'
-INSTALL_LEVITUS_FALSE=''
-INSTALL_LEVITUS_TRUE='#'
 INSTALL_PROGRAM='${INSTALL}'
 INSTALL_SCRIPT='${INSTALL}'
 INSTALL_STRIP_PROGRAM='$(install_sh) -c -s'

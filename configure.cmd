@@ -37,7 +37,7 @@ autoreconf --force --install --symlink --warnings=all
 #------------------------------------------------------------------------------
 
 # Build in place:
-CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN" \
+CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
     --with-netcdf-include=/sw/include \
@@ -52,7 +52,7 @@ CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN" \
 #------------------------------------------------------------------------------
 
 # Build in /usr/local:
-CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN" \
+CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED" \
 sudo ./configure \
     --prefix=/usr/local \
     --with-netcdf-include=/sw/include \
@@ -67,7 +67,7 @@ sudo ./configure \
 #------------------------------------------------------------------------------
 
 # Build in ~/buildtest
-CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN" \
+CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED" \
 ./configure \
     --prefix=/Users/caress/buildtest \
     --with-netcdf-include=/sw/include \
