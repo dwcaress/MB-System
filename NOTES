@@ -12,8 +12,8 @@ at the top of the MB-System source code distribution directory structure.
 THE MB-SYSTEM SOURCE CODE DISTRIBUTION:
 -------------------------------------------------------------------------------
 MB-System is distributed as a compressed tar archive named according to the
-release version. For example, release 5.4.2077 was distributed in a file named:
-    mbsystem-5.4.2077.tar.gz
+release version. For example, release 5.4.2081 was distributed in a file named:
+    mbsystem-5.4.2081.tar.gz
 Here the major release is 5, the minor release is 4, and the third number is the
 corresponding revision number for the source code archive (which is managed
 using the Subversion package).
@@ -22,12 +22,12 @@ The source code archive can be accessed directly at:
     http://svn.ilab.ldeo.columbia.edu
 
 The tar utility is used to extract the distribution:
-    % tar xvzf mbsystem-5.4.2077.tar.gz
-yielding a directory named "mbsystem-5.4.2077".
+    % tar xvzf mbsystem-5.4.2081.tar.gz
+yielding a directory named "mbsystem-5.4.2081".
 
 Listing the contents of the top directory and then the src directory below
 reveals:
-    % cd mbsystem-5.4.2077
+    % cd mbsystem-5.4.2081
     % ls -s
 	total 2920
 	  8 AUTHORS		  8 NEWS		 40 configure.in
@@ -75,7 +75,7 @@ BUILDING AND INSTALLING MB-SYSTEM WITH CONFIGURE
 The basis steps for building MB-System using the configure script are:
 
     1. Move to the top of the MB-System distribution directory:
-        % cd mbsystem-5.4.2077
+        % cd mbsystem-5.4.2081
 
     2. Run the configure script to generate the Makefile files throughout the
     distribution directory structure. The command line options for configure
@@ -209,7 +209,7 @@ The important parameters to be set in install_makefiles are:
 
 An example of the parameters for installing a distribution in /usr/local on a
 current (MacOs X 10.8) Fink-centric Mac is:
-     $MBSYSTEM_HOME = "/usr/local/mbsystem-5.4.2077";
+     $MBSYSTEM_HOME = "/usr/local/mbsystem-5.4.2081";
      $OS = "DARWIN";
      $CFLAGS = "-I/usr/X11R6/include ";
      $LFLAGS = "-lm -L/sw/lib -lgdal";
@@ -228,7 +228,7 @@ current (MacOs X 10.8) Fink-centric Mac is:
 
 To execute install_makefiles, do the following:
 
-     % cd mbsystem-5.4.2077
+     % cd mbsystem-5.4.2081
      % ./install_makefiles
 
 Because install_makefiles is a perl script, the executable perl must be
@@ -242,13 +242,13 @@ The make command will descend recursively down through the directory structure,
 compiling source files, linking object files, and copying executables and manual
 pages to the appropriate directories.
 The destination directories will be:
-        /usr/local/mbsystem-5.4.2077/bin                      executable binaries and scripts
-        /usr/local/mbsystem-5.4.2077/lib                      libraries
-        /usr/local/mbsystem-5.4.2077/include                  header files
-        /usr/local/mbsystem-5.4.2077/share/mbsystem           projection and levitus data
-        /usr/local/mbsystem-5.4.2077/share/doc/mbsystem/html  web page documentation
-        /usr/local/mbsystem-5.4.2077/share/doc/mbsystem/ps    postscript documentation
-        /usr/local/mbsystem-5.4.2077/man                      man page documentation
+        /usr/local/mbsystem-5.4.2081/bin                      executable binaries and scripts
+        /usr/local/mbsystem-5.4.2081/lib                      libraries
+        /usr/local/mbsystem-5.4.2081/include                  header files
+        /usr/local/mbsystem-5.4.2081/share/mbsystem           projection and levitus data
+        /usr/local/mbsystem-5.4.2081/share/doc/mbsystem/html  web page documentation
+        /usr/local/mbsystem-5.4.2081/share/doc/mbsystem/ps    postscript documentation
+        /usr/local/mbsystem-5.4.2081/man                      man page documentation
 
 -------------------------------------------------------------------------------
 SETTING THE USER ENVIRONMENT:
