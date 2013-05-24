@@ -101,24 +101,6 @@ dnl check for command line option and reset
 AC_ARG_WITH(otps_dir, [  --with-otps_dir=DIR        Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
 AC_SUBST(OTPS_DIR)
 
-dnl Check for Levitus database
-GOT_LEVITUS=no
-echo "Checking for Levitus database"
-dnl Tried AC_CHECK_FILE but did not work??
-dnl Use if test instead
-dnl TODO: add levitus-file option to configure to specify name
-if test -f "$srcdir/share/LevitusAnnual82.dat" ; then
-	GOT_LEVITUS=yes
-else
-	GOT_LEVITUS=no
-fi
-if test "$GOT_LEVITUS" = "yes" ; then
-	echo "Found Levitus database"
-else
-	echo "Did not find Levitus database"
-fi
-AM_CONDITIONAL([INSTALL_LEVITUS], [test "$GOT_LEVITUS" = yes])
-
 dnl Check for NetCDF lib
 echo "Check for NetCDF"
 GOT_CDF=no
@@ -643,14 +625,4 @@ if test "$GOT_GL" = "yes" ; then
 else
 	echo "OpenGL Support: Disabled"
 fi
-if test "$GOT_LEVITUS" = "yes" ; then
-	echo "Installing Levitus database in ${prefix}/share/mbsystem"
-else
-	echo ""
-	echo "Did not find Levitus database in ./share/"
-	echo "Levitus programs will still be built"
-	echo "Consider installing Levitus in ${prefix}/share/mbsystem to use support programs"
-	echo ""
-fi
-
 echo "Using $OTPS_DIR for OSU Tidal Prediction Software"

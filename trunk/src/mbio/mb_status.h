@@ -29,7 +29,7 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.4.2080"
+#define	MB_VERSION	"5.4.2081"
 #define	MB_BUILD_DATE	"23 May 2013"
 #define	MB_SVN		"$Id$"
 
