@@ -139,6 +139,14 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2082 (May 24, 2013)
+
+Configure.cmd: Added -DBYTESWAPPED to the recommended pre-options for the
+configure script on Macs.
+
+MBF_EM710RAW (format 58) and MBF_EM710MBA (format 59): Added EM2045 to the
+list of supported Kongsberg multibeam sonars (also known as the EM2040D).
+
 -----> 5.4.2081 (May 23, 2013)
 
 Build System: Have implemented an autotools-based build system with a

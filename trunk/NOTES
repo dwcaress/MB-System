@@ -117,10 +117,12 @@ The available configure options are:
 
 Users can also define custom compiler flags on the command line to be used by
 configure. For example, the command:
-        % CFLAGS="-g -W" ./configure --disable-static --prefix=/usr/local/mbsystem
-will override the system default CFLAGS with "-g and -W", build the package in
-the distribution directory without static libraries (shared libraries only), and
-install the package in /usr/local/mbsystem. The destination directories will be:
+        % CFLAGS="-g -W -DBYTESWAPPED" ./configure --disable-static \
+          --prefix=/usr/local/mbsystem
+will override the system default CFLAGS with "-g, -W, and -DBYTESWAPPED", build
+the package in the distribution directory without static libraries (shared
+libraries only), and install the package in /usr/local/mbsystem. The destination
+directories will be:
         /usr/local/mbsystem/bin                      executable binaries and scripts
         /usr/local/mbsystem/lib                      libraries
         /usr/local/mbsystem/include                  header files
@@ -134,7 +136,7 @@ have been installed with Fink or MacPorts, then the locations of those
 prerequisite packages must be explicitly defined. Fink installs packages in
 /sw, and MacPorts installs into /opt. An example for installing in a Fink-centric
 system is:
-        % CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN" \
+        % CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED" \
         ./configure \
         --prefix=/Users/caress/sandbox/mbsystem \
         --with-netcdf-include=/sw/include \
