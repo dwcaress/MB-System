@@ -35,6 +35,11 @@
 /*****************************************************************************
  *       INCLUDE FILES
  *****************************************************************************/
+/* Added HAVE_CONFIG_H for autogen files */
+#ifdef HAVE_CONFIG_H
+#  include <mbsystem_config.h>
+#endif
+
 
 #include <Xm/Xm.h>
 #include <Xm/RowColumn.h>
@@ -47,7 +52,7 @@
  */
 #if defined(__cplusplus) || defined(__STDC__) || defined(__EXTENSIONS__)
 #include <stdlib.h>
-#if !defined(VMS) && !defined(DARWIN)
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #endif

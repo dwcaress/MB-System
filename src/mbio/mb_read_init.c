@@ -203,41 +203,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-/* XDR i/o include file */
-#ifdef IRIX
-#include <rpc/rpc.h>
-#endif
-#ifdef IRIX64
-#include <rpc/rpc.h>
-#endif
-#ifdef SOLARIS
-#include <rpc/rpc.h>
-#endif
-#ifdef LINUX
-#include <rpc/rpc.h>
-#endif
-#ifdef LYNX
-#include <rpc/rpc.h>
-#endif
-#ifdef SUN
-#include <rpc/xdr.h>
-#endif
-#ifdef HPUX
-#include <rpc/rpc.h>
-#endif
-#ifdef DARWIN
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-#ifdef CYGWIN
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-#ifdef OTHER
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-
 /* mbio include files */
 #include "mb_status.h"
 #include "mb_format.h"
