@@ -161,6 +161,23 @@
  *
  *
  */
+#ifdef HAVE_CONFIG_H
+#  include <mbsystem_config.h>
+#endif
+
+/* include for mb_s_char types */
+#if HAVE_STDINT_H
+# include <stdint.h>
+#endif
+
+/* For XDR/RPC */
+#ifdef HAVE_RPC_RPC_H
+# include <rpc/rpc.h>
+#endif
+#ifdef HAVE_RPC_TYPES_H
+# include <rpc/types.h>
+# include <rpc/xdr.h>
+#endif
 
 /* include this code only once */
 #ifndef MB_DEFINE_DEF
@@ -214,34 +231,11 @@
 
 /* type definitions of signed and unsigned char */
 typedef unsigned char	mb_u_char;
-#ifdef IRIX
-typedef signed char	mb_s_char;
-#endif
-#ifdef IRIX64
-typedef signed char	mb_s_char;
-#endif
-#ifdef SOLARIS
-typedef signed char	mb_s_char;
-#endif
-#ifdef LINUX
-typedef signed char	mb_s_char;
-#endif
-#ifdef LYNX
-typedef signed char	mb_s_char;
-#endif
-#ifdef SUN
-typedef char	mb_s_char;
-#endif
-#ifdef HPUX
-typedef signed char	mb_s_char;
-#endif
-#ifdef DARWIN
-typedef char	mb_s_char;
-#endif
-#ifdef CYGWIN
-typedef char	mb_s_char;
-#endif
-#ifdef OTHER
+
+/* From stdint.h if available */
+#if defined INT8_MAX || defined int8_t
+typedef int8_t mb_s_char;
+#else
 typedef signed char	mb_s_char;
 #endif
 
