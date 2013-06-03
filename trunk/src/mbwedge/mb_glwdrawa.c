@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_glwdrawa.c	5/22/2007
- *    $Id: mb_glwdrawa.c 1770 2009-10-19 17:16:39Z caress $
+ *    $Id$
  *
  *    Altered from original code for MB-System by
  *    David W. Caress (caress@mbari.org)
