@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles 1788 2009-11-09 16:51:01Z caress $
+#    $Id$
 #
 #    Copyright (c) 1993-2013 by
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -154,7 +154,7 @@ $OTPSDIR = "/usr/local/OTPSnc";
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles 1788 2009-11-09 16:51:01Z caress $
+#   $Id$
 #
 # Revisions:
 #   $Log: install_makefiles,v $
