@@ -114,30 +114,29 @@ am_libmbio_la_OBJECTS = mb_format.lo mb_error.lo mb_swap.lo \
 	mbsys_reson8k.lo mbsys_netcdf.lo mbsys_navnetcdf.lo \
 	mbsys_reson7k.lo mbsys_jstar.lo mbsys_image83p.lo \
 	mbsys_hysweep.lo mbsys_benthos.lo mbsys_swathplus.lo \
-	mbr_sbsiomrg.lo \
-	mbr_sbsiocen.lo mbr_sbsiolsi.lo mbr_sburicen.lo \
-	mbr_sburivax.lo mbr_sbifremr.lo mbr_hsatlraw.lo \
-	mbr_hsldedmb.lo mbr_hsuricen.lo mbr_hsurivax.lo \
-	mbr_hsldeoih.lo mbr_hsunknwn.lo mbr_sb2100rw.lo \
-	mbr_sb2100bi.lo mbr_emoldraw.lo mbr_em12darw.lo \
-	mbr_em12ifrm.lo mbr_em300raw.lo mbr_em300mba.lo \
-	mbr_em710raw.lo mbr_em710mba.lo mbr_mr1prhig.lo \
-	mbr_mr1aldeo.lo mbr_mr1bldeo.lo mbr_mr1prvr2.lo \
-	mbr_mbldeoih.lo mbr_cbat9001.lo mbr_cbat8101.lo \
-	mbr_hypc8101.lo mbr_bchrtunb.lo mbr_elmk2unb.lo \
-	mbr_bchrxunb.lo mbr_l3xseraw.lo mbr_sbsioswb.lo \
-	mbr_sb2000sb.lo mbr_sb2000ss.lo mbr_hsmdaraw.lo \
-	mbr_hsmdldih.lo mbr_dsl120pf.lo mbr_dsl120sf.lo \
-	mbr_gsfgenmb.lo mbr_mstiffss.lo mbr_oicgeoda.lo \
-	mbr_oicmbari.lo mbr_omghdcsj.lo mbr_mgd77dat.lo \
-	mbr_asciixyz.lo mbr_hydrob93.lo mbr_mbarirov.lo \
-	mbr_mbarrov2.lo mbr_mbpronav.lo mbr_hs10jams.lo \
-	mbr_hsds2raw.lo mbr_hsds2lam.lo mbr_xtfr8101.lo \
-	mbr_mbnetcdf.lo mbr_nvnetcdf.lo mbr_samesurf.lo \
-	mbr_reson7kr.lo mbr_edgjstar.lo mbr_segysegy.lo \
-	mbr_image83p.lo mbr_imagemba.lo mbr_hir2rnav.lo \
-	mbr_hysweep1.lo mbr_xtfb1624.lo mbr_swplssxi.lo \
-	mbr_swplssxp.lo
+	mbr_sbsiomrg.lo mbr_sbsiocen.lo mbr_sbsiolsi.lo \
+	mbr_sburicen.lo mbr_sburivax.lo mbr_sbifremr.lo \
+	mbr_hsatlraw.lo mbr_hsldedmb.lo mbr_hsuricen.lo \
+	mbr_hsurivax.lo mbr_hsldeoih.lo mbr_hsunknwn.lo \
+	mbr_sb2100rw.lo mbr_sb2100bi.lo mbr_emoldraw.lo \
+	mbr_em12darw.lo mbr_em12ifrm.lo mbr_em300raw.lo \
+	mbr_em300mba.lo mbr_em710raw.lo mbr_em710mba.lo \
+	mbr_mr1prhig.lo mbr_mr1aldeo.lo mbr_mr1bldeo.lo \
+	mbr_mr1prvr2.lo mbr_mbldeoih.lo mbr_cbat9001.lo \
+	mbr_cbat8101.lo mbr_hypc8101.lo mbr_bchrtunb.lo \
+	mbr_elmk2unb.lo mbr_bchrxunb.lo mbr_l3xseraw.lo \
+	mbr_sbsioswb.lo mbr_sb2000sb.lo mbr_sb2000ss.lo \
+	mbr_hsmdaraw.lo mbr_hsmdldih.lo mbr_dsl120pf.lo \
+	mbr_dsl120sf.lo mbr_gsfgenmb.lo mbr_mstiffss.lo \
+	mbr_oicgeoda.lo mbr_oicmbari.lo mbr_omghdcsj.lo \
+	mbr_mgd77dat.lo mbr_asciixyz.lo mbr_hydrob93.lo \
+	mbr_mbarirov.lo mbr_mbarrov2.lo mbr_mbpronav.lo \
+	mbr_hs10jams.lo mbr_hsds2raw.lo mbr_hsds2lam.lo \
+	mbr_xtfr8101.lo mbr_mbnetcdf.lo mbr_nvnetcdf.lo \
+	mbr_samesurf.lo mbr_reson7kr.lo mbr_edgjstar.lo \
+	mbr_segysegy.lo mbr_image83p.lo mbr_imagemba.lo \
+	mbr_hir2rnav.lo mbr_hysweep1.lo mbr_xtfb1624.lo \
+	mbr_swplssxi.lo mbr_swplssxp.lo
 nodist_libmbio_la_OBJECTS =
 libmbio_la_OBJECTS = $(am_libmbio_la_OBJECTS) \
 	$(nodist_libmbio_la_OBJECTS)
@@ -308,8 +307,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I.. -I../gsf -I../proj -I../mr1pr -I../surf @CDF_INC_DIR@ @GMT_INC_DIR@
-AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L../gsf -L../surf -L../mr1pr -L../proj
+AM_CPPFLAGS = -I@top_srcdir@/src -I@top_srcdir@/src/gsf -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L@top_srcdir@/src/gsf -L@top_srcdir@/src/surf -L@top_srcdir@/src/mr1pr -L@top_srcdir@/src/proj
 include_HEADERS = mb_format.h mb_status.h \
         mb_io.h mb_swap.h \
         mb_define.h mb_process.h \
@@ -384,7 +383,7 @@ libmbio_la_SOURCES = \
                 mbsys_netcdf.c mbsys_navnetcdf.c \
                 mbsys_reson7k.c mbsys_jstar.c \
                 mbsys_image83p.c mbsys_hysweep.c \
-                mbsys_benthos.c mbsys_swathplus.c \
+                mbsys_benthos.c mbsys_swathplus.c\
                 mbr_sbsiomrg.c mbr_sbsiocen.c \
                 mbr_sbsiolsi.c mbr_sburicen.c \
                 mbr_sburivax.c mbr_sbifremr.c \
@@ -496,7 +495,7 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-libmbio.la: $(libmbio_la_OBJECTS) $(libmbio_la_DEPENDENCIES) $(EXTRA_libmbio_la_DEPENDENCIES)
+libmbio.la: $(libmbio_la_OBJECTS) $(libmbio_la_DEPENDENCIES) $(EXTRA_libmbio_la_DEPENDENCIES) 
 	$(libmbio_la_LINK) -rpath $(libdir) $(libmbio_la_OBJECTS) $(libmbio_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
@@ -606,7 +605,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_xtfr8101.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_atlas.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_benthos.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_swathplus.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_dsl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_elac.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_elacmk2.Plo@am__quote@

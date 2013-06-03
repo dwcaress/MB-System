@@ -71,9 +71,9 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
 	install-html-recursive install-info-recursive \
-	install-pdf-recursive install-ps-recursive install-share-recursive install-recursive \
+	install-pdf-recursive install-ps-recursive install-recursive \
 	installcheck-recursive installdirs-recursive pdf-recursive \
-	ps-recursive share-recursive uninstall-recursive
+	ps-recursive uninstall-recursive
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -115,8 +115,9 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = gsf surf mr1pr proj mbio mbaux utilities gmt otps macros \
-	mbedit mbnavedit mbvelocitytool mbnavadjust mbview man html ps share
+DIST_SUBDIRS = gsf surf mr1pr proj mbio mbaux utilities gmt otps \
+	macros mbedit mbnavedit mbvelocitytool mbnavadjust mbview man \
+	html ps share
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -254,8 +255,6 @@ host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
 htmldir = @htmldir@
-psdir = @psdir@
-sharedir = @sharedir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -277,7 +276,6 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
-sharedir = @sharedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -332,7 +330,7 @@ mbsystem_config.h: stamp-h1
 stamp-h1: $(srcdir)/mbsystem_config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status src/mbsystem_config.h
-$(srcdir)/mbsystem_config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
+$(srcdir)/mbsystem_config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
 	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 	rm -f stamp-h1
 	touch $@
@@ -641,10 +639,6 @@ install-ps: install-ps-recursive
 
 install-ps-am:
 
-install-share: install-share-recursive
-
-install-share-am:
-
 installcheck-am:
 
 maintainer-clean: maintainer-clean-recursive
@@ -663,10 +657,6 @@ ps: ps-recursive
 
 ps-am:
 
-share: share-recursive
-
-share-am:
-
 uninstall-am: uninstall-includeHEADERS
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) all \
@@ -676,18 +666,15 @@ uninstall-am: uninstall-includeHEADERS
 	all all-am check check-am clean clean-generic clean-libtool \
 	ctags ctags-recursive distclean distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am ps ps-am share share-am \
-	info info-am install install-am \
+	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
-	install-ps install-ps-am install-share install-share-am \
 	install-includeHEADERS install-info install-info-am \
-	install-man install-pdf install-pdf-am \
-	install-strip installcheck installcheck-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
 	installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am share share-am \
-	tags tags-recursive \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
 	uninstall uninstall-am uninstall-includeHEADERS
 
 

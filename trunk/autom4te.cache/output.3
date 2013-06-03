@@ -658,8 +658,6 @@ libnetcdf_CFLAGS
 PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
-INSTALL_LEVITUS_FALSE
-INSTALL_LEVITUS_TRUE
 OTPS_DIR
 XDR_LIB
 LIBTOOL_DEPS
@@ -12462,27 +12460,6 @@ fi
 
 
 
-GOT_LEVITUS=no
-echo "Checking for Levitus database"
-if test -f "$srcdir/share/LevitusAnnual82.dat" ; then
-	GOT_LEVITUS=yes
-else
-	GOT_LEVITUS=no
-fi
-if test "$GOT_LEVITUS" = "yes" ; then
-	echo "Found Levitus database"
-else
-	echo "Did not find Levitus database"
-fi
- if test "$GOT_LEVITUS" = yes; then
-  INSTALL_LEVITUS_TRUE=
-  INSTALL_LEVITUS_FALSE='#'
-else
-  INSTALL_LEVITUS_TRUE='#'
-  INSTALL_LEVITUS_FALSE=
-fi
-
-
 echo "Check for NetCDF"
 GOT_CDF=no
 CDF_SETTING=no
@@ -14036,7 +14013,7 @@ fi
 mbsystemdatadir="$datadir/$PACKAGE"
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/gsf/Makefile src/surf/Makefile src/mr1pr/Makefile src/proj/Makefile src/mbaux/Makefile src/utilities/Makefile src/gmt/Makefile src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile src/mbvelocitytool/Makefile src/mbnavadjust/Makefile src/otps/Makefile src/mbview/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile share/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/gsf/Makefile src/surf/Makefile src/mr1pr/Makefile src/proj/Makefile src/mbaux/Makefile src/utilities/Makefile src/gmt/Makefile src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile src/mbvelocitytool/Makefile src/mbnavadjust/Makefile src/otps/Makefile src/mbview/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile src/ps/Makefile src/share/Makefile"
 
 
 
@@ -14085,10 +14062,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCCAS_TRUE}" && test -z "${am__fastdepCCAS_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCCAS\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${INSTALL_LEVITUS_TRUE}" && test -z "${INSTALL_LEVITUS_FALSE}"; then
-  as_fn_error $? "conditional \"INSTALL_LEVITUS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_FFTW_TRUE}" && test -z "${BUILD_FFTW_FALSE}"; then
@@ -14996,7 +14969,8 @@ do
     "src/man/man1/Makefile") CONFIG_FILES="$CONFIG_FILES src/man/man1/Makefile" ;;
     "src/man/man3/Makefile") CONFIG_FILES="$CONFIG_FILES src/man/man3/Makefile" ;;
     "src/html/Makefile") CONFIG_FILES="$CONFIG_FILES src/html/Makefile" ;;
-    "share/Makefile") CONFIG_FILES="$CONFIG_FILES share/Makefile" ;;
+    "src/ps/Makefile") CONFIG_FILES="$CONFIG_FILES src/ps/Makefile" ;;
+    "src/share/Makefile") CONFIG_FILES="$CONFIG_FILES src/share/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -16394,14 +16368,4 @@ if test "$GOT_GL" = "yes" ; then
 else
 	echo "OpenGL Support: Disabled"
 fi
-if test "$GOT_LEVITUS" = "yes" ; then
-	echo "Installing Levitus database in ${prefix}/share/mbsystem"
-else
-	echo ""
-	echo "Did not find Levitus database in ./share/"
-	echo "Levitus programs will still be built"
-	echo "Consider installing Levitus in ${prefix}/share/mbsystem to use support programs"
-	echo ""
-fi
-
 echo "Using $OTPS_DIR for OSU Tidal Prediction Software"

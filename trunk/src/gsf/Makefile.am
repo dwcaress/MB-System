@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I..
+AM_CPPFLAGS = -I@top_srcdir@/src
 
 include_HEADERS = gsf.h
 

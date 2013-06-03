@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I..
+AM_CPPFLAGS = -I@top_srcdir@/src
 
 include_HEADERS = mr1pr.h mr1pr_defines.h
 

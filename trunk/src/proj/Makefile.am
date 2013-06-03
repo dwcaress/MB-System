@@ -1,8 +1,8 @@
 bin_PROGRAMS = proj geod
 
-AM_CPPFLAGS = -I..
+AM_CPPFLAGS = -I@top_srcdir@/src
 
-include_HEADERS = proj_api.h 
+include_HEADERS = proj_api.h
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c geodesic.h
@@ -164,4 +164,3 @@ proj_mdist.c \
 proj_rouss.c \
 rtodms.c \
 vector1.c
-
