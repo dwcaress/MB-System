@@ -18,7 +18,7 @@ autoconf
 
 # To update configure files use the following:
 autoupdate
-autoreconf --force --install --symlink --warnings=all
+autoreconf --force --install --warnings=all
 
 #------------------------------------------------------------------------------
 # More notes from Bob Covill
