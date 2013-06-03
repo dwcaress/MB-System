@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbwedge_callbacks.c	4/8/93
- *    $Id: mbwedge_callbacks.c  $
+ *    $Id$
  *
  *    Copyright (c) 1993-2010 by
  *    David W. Caress (caress@mbari.org)
