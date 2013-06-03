@@ -1,6 +1,6 @@
-AM_CPPFLAGS = -I.. -I../gsf -I../proj -I../mr1pr -I../surf @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_CPPFLAGS = -I@top_srcdir@/src -I@top_srcdir@/src/gsf -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@
 
-AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L../gsf -L../surf -L../mr1pr -L../proj
+AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L@top_srcdir@/src/gsf -L@top_srcdir@/src/surf -L@top_srcdir@/src/mr1pr -L@top_srcdir@/src/proj
 
 
 include_HEADERS = mb_format.h mb_status.h \

@@ -213,7 +213,6 @@ host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
 htmldir = @htmldir@
-psdir = @psdir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -228,6 +227,7 @@ libnetcdf_LIBS = @libnetcdf_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
+mbsystemdatadir = @mbsystemdatadir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
@@ -469,9 +469,9 @@ dvi: dvi-am
 
 dvi-am:
 
-ps: ps-am
+html: html-am
 
-ps-am:
+html-am:
 
 info: info-am
 
@@ -485,9 +485,9 @@ install-dvi-am:
 
 install-exec-am:
 
-install-ps: install-ps-am
+install-html: install-html-am
 
-install-ps-am:
+install-html-am:
 
 install-info: install-info-am
 
@@ -527,10 +527,10 @@ uninstall-am: uninstall-dist_psDATA
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
-	dvi-am ps ps-am info info-am install install-am \
+	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dist_psDATA install-dvi \
-	install-dvi-am install-exec install-exec-am install-ps \
-	install-ps-am install-info install-info-am install-man \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
