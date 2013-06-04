@@ -1,22 +1,22 @@
 .TH mbmosaic 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbmosaic\fP - Mosaic amplitude or sidescan data
+\fBmbmosaic\fP \- Mosaic amplitude or sidescan data
 from swath mapping sonar data files.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP
-[\fB-A\fIdatatype[F]\fP
-\fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP
-\fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range[/weight]\fP
-\fB-G\fIgridkind\fP  \fB-J\fIprojection\fP
-\fB-H -L\fIlonflip\fP \fB-M -N -P\fIpings\fP
-\fB-R\fIwest/east/south/north\fP \fB-R\fIfactor\fP
-\fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fIazimuth/factor\fP
-\fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP
-\fB-Y\fIpriority_source\fP \fB-Z\fIbath_default\fP]
+\fBmbmosaic\fP \fB\-I\fIfilelist\fP \fB\-O\fIroot\fP
+[\fB\-A\fIdatatype[F]\fP
+\fB\-B\fIborder\fP \-C\fIclip\fP \fB\-D\fIxdim/ydim\fP
+\fB\-E\fIdx/dy/units[!]\fP \fB\-F\fIpriority_range[/weight]\fP
+\fB\-G\fIgridkind\fP  \fB\-J\fIprojection\fP
+\fB\-H \-L\fIlonflip\fP \fB\-M \-N \-P\fIpings\fP
+\fB\-R\fIwest/east/south/north\fP \fB\-R\fIfactor\fP
+\fB\-S\fIspeed\fP \fB\-T\fItension\fP \fB\-U\fIazimuth/factor\fP
+\fB\-V\fP \-W\fIscale\fP \fB\-X\fIextend\fP
+\fB\-Y\fIpriority_source\fP \fB\-Z\fIbath_default\fP]
 
 .SH DESCRIPTION
 \fBmbmosaic\fP is a utility used to mosaic amplitude or sidescan
@@ -35,10 +35,10 @@ or which are dominantly from a particular look azimuth
 preferred look azimuth of 90 degrees).
 
 The user must specify a file containing a list of the data files to
-be used and their data formats (\fB-I\fP), and a character string
-to be used as the root of the output filenames (\fB-O\fP). The user
-may specify the bounds of the region to be gridded (\fB-R\fP), and
-either the dimensions (\fB-D\fP) or node spacing \fB-E\fP of the grid,
+be used and their data formats (\fB\-I\fP), and a character string
+to be used as the root of the output filenames (\fB\-O\fP). The user
+may specify the bounds of the region to be gridded (\fB\-R\fP), and
+either the dimensions (\fB\-D\fP) or node spacing \fB\-E\fP of the grid,
 If the bounds and grid dimensions (or spacing) are not specified, the
 program will select the region encompassing all of the data in the
 input files and a grid spacing equivalent to 0.02 times the maximum
@@ -47,24 +47,24 @@ specified, the program will select the region encompassing all of the
 data in the input files and a grid spacing equivalent to 0.02 times the maximum
 sonar altitude. The automatically calculated grid bounds will exactly
 correspond to the smallest rectangular region including the data unless
-the user specifies a larger region using \fB-R\fP\fIfactor\fP. The value
+the user specifies a larger region using \fB\-R\fP\fIfactor\fP. The value
 \fIfactor\fP must be greater than one; if \fIfactor\fP = 1.1 then the
 grid bounds will be expanded to the east and west by an amount 0.05 times
 the data bounds east-west extend and to the north and south by an amount
 0.05 times the data bounds north-south extent.
 The input data type (beam amplitude or sidescan) is specified using
-the \fB-A\fP option. Depending on the input datalist, the amplitude or
+the \fB\-A\fP option. Depending on the input datalist, the amplitude or
 sidescan data may be raw or corrected for variations in amplitude with
 grazing angle (see \fBmbbackangle\fP and \fBmbprocess\fP), and may be
 unfiltered or have been filtered using \fBmbfilter\fP.
 The user can also specify the range of allowable sample priorities used in
-the mosaicing (\fB-F\fP), the preferred look azimuth (\fB-U\fP), the
+the mosaicing (\fB\-F\fP), the preferred look azimuth (\fB\-U\fP), the
 maximum distance from data points that the spline interpolation is
-used (\fB-C\fP), the format of the output files, and other parameters.
+used (\fB\-C\fP), the format of the output files, and other parameters.
 
 By default, \fBmbmosaic\fP generates mosiacs in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
-the WGS84 horizontal datum. The \fB-J\fP option can be used to specify
+the WGS84 horizontal datum. The \fB\-J\fP option can be used to specify
 an alternate, projected coordinate system (PCS). When a PCS is used,
 position will be defined in eastings and northings (meters) relative
 to the origin of the particular PCS. Universal Transverse Mercator
@@ -90,7 +90,7 @@ programs \fBmbgrid\fP, \fBmbswath\fP, and \fBmbcontour\fP
 also use ".inf" files in the same fashion.
 
 Usually, the internal working grid has the same boundaries as the
-output grid. However, the \fB-X\fP option
+output grid. However, the \fB\-X\fP option
 allows the size of the internal grid to be increased so that data outside
 the grid can be used to guide the spline interpolation of data gaps which
 happen to lie at the the edge of the grid.  This is particularly important
@@ -101,7 +101,7 @@ pings which lie within the data input bounds, and accepts all data
 values with locations within the working grid.
 
 The sample priorities are set according to either or both of two
-criterea. The first criterea is set by using the \fB-Y\fP option
+criterea. The first criterea is set by using the \fB\-Y\fP option
 to specify a file containing a list of data priorities
 as a function of apparent grazing angle (this angle is the
 arctan(x/z) where x is acrosstrack distance and z is depth, so
@@ -110,14 +110,14 @@ zero, the port swath edge has a large negative angle, and the
 starboard swath edge has a large positive angle). The highest
 priority assigned should be one, and the lowest zero.
 
-The second criteria is set by using the \fB-U\fP option to specify
+The second criteria is set by using the \fB\-U\fP option to specify
 a preferred look azimuth (data on the port side of the swath have
-a look azimuth equal to the heading - 90 degrees, and data on the
+a look azimuth equal to the heading \- 90 degrees, and data on the
 starboard side have a look azimuth equal to the heading + 90 degrees).
-The second parameter in the \fB-U\fP option is a factor (f) which
+The second parameter in the \fB\-U\fP option is a factor (f) which
 modulates how rapidly the priority degrades away from the preferred
 look azimuth. The priority (p) is assigned as follows:
-        p = cos( f * (Ap - Al))
+        p = cos( f * (Ap \- Al))
 .br
 where Ap is the preferred look azimuth and A is the actual
 look azimuth. If f = 1.0, the priority will be 1.0
@@ -139,7 +139,7 @@ priorities together.
 The default behavior is to set each bin to the value of the highest
 priority sample found in that bin. If more than one sample has
 the same highest priority, the first such sample is used.
-If the \fB-F\fP option is used to set a range of acceptable
+If the \fB\-F\fP option is used to set a range of acceptable
 priorities, then the mosaicing is done using a Gaussian weighted
 mean algorithm. The samples used are those with priorities larger
 than the highest priority found minus the range value.
@@ -152,37 +152,37 @@ where r is the distance from the center of the bin to the data point,
 a is the distance at which the weighting function falls to 1/e of its
 maximum value, and A is a normalizing factor set so that the sum of all
 the weights adds to a value of 1.  Normally, the distance a is set to be
-half the average grid point spacing, but this can be varied using the \fB-W\fP
+half the average grid point spacing, but this can be varied using the \fB\-W\fP
 option.
 
-If the weight parameter is used on the \fB-F\fP option then
+If the weight parameter is used on the \fB\-F\fP option then
 for weight = 0 [default] the above weight is used,
 for weight = 1 the above weight is multiplied by the sample priority,
 and for weight = 2 the above weight is multiplied by the square of the sample priority.
-Using \fB-F1/1\fP causes the priorities to be treated as weights rather than priorities.
+Using \fB\-F1/1\fP causes the priorities to be treated as weights rather than priorities.
 
-If the \fB-C\fP option is used to set clipping to a value > 0, then a
+If the \fB\-C\fP option is used to set clipping to a value > 0, then a
 2D thin plate spline algorithm is applied to the successfully calculated
 grid values to fill in, or interpolate, gaps in the data.  New values
 are assigned only at grid points within a specified distance from
 the nearest data points (this distance is specified in terms of
-grid point spacing using the \fB-C\fP command).  Thus, small gaps
+grid point spacing using the \fB\-C\fP command).  Thus, small gaps
 in the data can be filled, or the whole grid can be filled in with
 a smooth interpolation.
 
 The output grid will by default contain values of 99999.9 at cells
-containing no data; if the \fB-N\fP option is used then the flagging
+containing no data; if the \fB\-N\fP option is used then the flagging
 value used is NaN, or not-a-number.
 
 The names of the output files are based on the root character string
-specified using the \fB-O\fP option. A number of grid formats are
+specified using the \fB\-O\fP option. A number of grid formats are
 supported, including all of the grid formats supported by \fBGMT\fP.
-See the \fB-G\fP option below for a list of the available formats.
+See the \fB\-G\fP option below for a list of the available formats.
 If the grid is output in any of the \fBGMT\fP grid formats,
 then its filename is "root.grd", and a shellscript
 which will allow the contents of the grid to be viewed using \fBGMT\fP programs
 is also output with the filename "root.grd.cmd".  If the
-\fB-G\fP\fI1\fP option is used to specify an ascii format grid, then the
+\fB\-G\fP\fI1\fP option is used to specify an ascii format grid, then the
 output grid filename will be "root.asc", but no plotting shellscript
 will be created.
 
@@ -190,17 +190,17 @@ A datalist file containing references to all of the swath files actually
 contibuting to the grid is also created. This file is named by adding
 a ".mb-1" suffix to the root string.
 
-The \fB-M\fP option causes \fBmbmosaic\fP to output two additional
+The \fB\-M\fP option causes \fBmbmosaic\fP to output two additional
 grids, the first ("root_num.grd") being the number of high priority
 data points used within each bin, and the second ("root_sd.grd")
 being the standard deviation of the data points used within each bin.
-The \fB-M\fP option can only be used if Gaussian weighted mean
-mosaicing is enabled with the \fB-F\fP option.
+The \fB\-M\fP option can only be used if Gaussian weighted mean
+mosaicing is enabled with the \fB\-F\fP option.
 Plotting shellscripts
 called "root_num.grd.cmd" and "root_sd.grd.cmd" are also output
 if the grids are in a \fBGMT\fP grid format.
 
-The \fB-J\fP option can be used to specify grids in UTM eastings
+The \fB\-J\fP option can be used to specify grids in UTM eastings
 and northings (meters) rather than in geographic coordinates
 (longitude and latitude degrees).
 
@@ -256,7 +256,7 @@ Default: \fIclip\fP = 0.
 \fIxdim/ydim\fP
 .br
 Sets the dimensions of the output grid.  This option is superceded
-if the user specifies the grid spacing with the \fB-E\fP option.
+if the user specifies the grid spacing with the \fB\-E\fP option.
 Default:  \fIxdim\fP = \fIydim\fP = 101.
 .TP
 .B \-E
@@ -273,15 +273,15 @@ equal to the longitude cell spacing (after conversion to
 degrees, if necessary).
 By default, the grid spacing is calculated from
 the grid bounds and the grid dimensions. When the user
-uses the \fB-E\fP option to set the cell spacings, the
+uses the \fB\-E\fP option to set the cell spacings, the
 grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
 grid cell spacings are usually required to keep
 the grid bounds as specified. Appending an ! to the end of
-the \fB-E\fP arguments forces \fBmbmosaic\fP to use the
+the \fB\-E\fP arguments forces \fBmbmosaic\fP to use the
 exact grid cell spacing values specified by adjusting the
 grid bounds.
-Default: If neither the \fB-E\fP or \fB-D\fP options are specified,
+Default: If neither the \fB\-E\fP or \fB\-D\fP options are specified,
 the program sets the grid cell spacing to be 0.02 times the maximum
 sonar altitude in the input files.
 .TP
@@ -357,20 +357,20 @@ prior to being output. The \fInan\fP value sets the value used for
 .br
 Note that the following arguments are equivalent because they
 all produce a standard \fBGMT\fP netCDF 4-byte float grid:
- 	\fB-G\fP\fI3\fP
- 	\fB-G\fP\fI100\fP
- 	\fB-G\fP\fI=0\fP
+ 	\fB\-G\fP\fI3\fP
+ 	\fB\-G\fP\fI100\fP
+ 	\fB\-G\fP\fI=0\fP
 .br
 Should the user wish to produce a grid in native binary floats,
 then the following two arguments will work:
- 	\fB-G\fP\fI101\fP
- 	\fB-G\fP\fI=1\fP
+ 	\fB\-G\fP\fI101\fP
+ 	\fB\-G\fP\fI=1\fP
 .br
 Should the user wish to produce a grid in native short int format
 with a scaling factor of 10, an offset of 32000, and a NaN value
 of 32767, then the following arguments will suffice:
 .br
- 	\fB-G\fP\fI=2/10/32000/32767\fP
+ 	\fB\-G\fP\fI=2/10/32000/32767\fP
 
 If \fIgridkind\fP = 3 or \fIgridkind\fP >= 100,
 \fBmbgrid\fP also outputs shellscripts
@@ -382,8 +382,8 @@ If \fIgridkind\fP = 4, the output grids will be in the Arc/Info ASCII
 grid format.  Arc/Info ASCII grids use "square" bins,
 meaning that the longitude and latitude grid cell spacings must
 be identical. Thus, whenever the \fIgridkind\fP = 4 option is
-used, the \fB-E\fP option must also be used in a way which
-ensures equal grid cell spacings (see the \fB-E\fP documentation
+used, the \fB\-E\fP option must also be used in a way which
+ensures equal grid cell spacings (see the \fB\-E\fP documentation
 above).
 Default: \fIgridkind\fP = 100.
 .TP
@@ -411,7 +411,7 @@ Default: \fIdatalist\fP = datalist.mb-1
 By default, \fBmbgrid\fP generates grids in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
 the WGS84 geographic coordinate system.
-The \fB-J\fP option can be used to specify
+The \fB\-J\fP option can be used to specify
 an alternate, projected coordinate system (PCS). When a PCS is used,
 position will be defined in eastings and northings (meters) relative
 to the origin of the particular PCS. Universal Transverse Mercator
@@ -420,31 +420,31 @@ is the most commonly used PCS in the oceanographic community, but
 The underlying projection functions derive from the \fBPROJ.4\fP library
 written by Gerald Evenden, then of the U.S. Geological Survey.
 
-The \fIprojection\fP argument for the \fB-J\fP option can be either
+The \fIprojection\fP argument for the \fB\-J\fP option can be either
 a PCS identifier from the projection definition list provided at the
-end of this manual page, or simply \fB-J\fP\fIU\fP to specify using
+end of this manual page, or simply \fB\-J\fP\fIU\fP to specify using
 UTM in whatever zone is appropriate for the grid bounds specified
-with the \fB-R\fP option.
+with the \fB\-R\fP option.
 
 For instance, to fully specify a particular northern UTM
 zone, set \fIprojection\fP = UTMXXN where XX gives
 the UTM zone (defined from 01 to 60). As an example, a northern UTM
-zone 12 projection can be specified using \fB-J\fP\fIUTM12N\fP.
+zone 12 projection can be specified using \fB\-J\fP\fIUTM12N\fP.
 Southern UTM zones are specified as UTMXXS. The European Petroleum
 Survey Group (EPSG) has defined a large number of PCS's used worldwide
 and assigned number id's to each; one can also specify the northern
 UTM zone 12 projection using its EPSG designation,
-or \fB-J\fP\fIepsg32612\fP.
+or \fB\-J\fP\fIepsg32612\fP.
 When the projected coordinate system is fully specified
-by the \fB-J\fP option, then the grid bounds may be specified using
-\fB-R\fP in either longitude and latitude or in eastings and northings.
+by the \fB\-J\fP option, then the grid bounds may be specified using
+\fB\-R\fP in either longitude and latitude or in eastings and northings.
 
 Alternatively, one may indicate a UTM projection without specifying the
-zone by using \fB-J\fP\fIU\fP. In this case, the
+zone by using \fB\-J\fP\fIU\fP. In this case, the
 UTM zone will be inferred from the midpoint of the
 specified longitude and latitude bounds, and then the
 longitude and latitude bounds given with the
-\fB-fR\fP option are translated to UTM eastings and northings.
+\fB\-fR\fP option are translated to UTM eastings and northings.
 
 All grids and mosaics produced by \fBMB-System\fP
 programs contain identifiers that are recognized
@@ -463,10 +463,10 @@ into GIS software.
 \fIlonflip\fP
 .br
 Sets the range of the longitude values returned.
-If \fIlonflip\fP=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If \fIlonflip\fP=0
+If \fIlonflip\fP=\-1 then the longitude values will be in
+the range from \-360 to 0 degrees. If \fIlonflip\fP=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If \fIlonflip\fP=1
+the range from \-180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
@@ -490,9 +490,9 @@ Sets the character string to be used as the root of the
 output filenames. For example, if the grid is output as a \fBGMT\fP
 version 2 GRD format (netCDF) file (the default),
 then its filename is "root.grd". If the
-\fB-G\fP\fI1\fP option is used to specify an ascii format grid, then the
+\fB\-G\fP\fI1\fP option is used to specify an ascii format grid, then the
 output grid filename will be "root.asc". If the
-\fB-G\fP\fI2\fP option is used to specify a version 1 GRD
+\fB\-G\fP\fI2\fP option is used to specify a version 1 GRD
 format (binary) grid, then the
 output grid filename will be "root.grd1". If the output grid is
 in the \fBGMT\fP version 2 GRD format, a shellscript
@@ -514,21 +514,21 @@ beam spacing. Default: \fIpings\fP = 1.
 \fIfactor\fP
 .br
 The first form sets the longitude and latitude bounds of the output grid.
-By default (if the \fB-R\fP\fIwest/east/south/north\fP
+By default (if the \fB\-R\fP\fIwest/east/south/north\fP
 option is not specified) the program will set
 the grid bounds to be the area encompassing all of the data in the
-input files. The second form (\fB-R\fP\fIfactor\fP) expands the automatically
+input files. The second form (\fB\-R\fP\fIfactor\fP) expands the automatically
 calculated bounds by the multiplicative \fIfactor\fP.The value
 \fIfactor\fP must be greater than one; if \fIfactor\fP = 1.1 then the
 grid bounds will be expanded to the east and west by an amount 0.05 times
 the data bounds east-west extend and to the north and south by an amount
 0.05 times the data bounds north-south extent.
-If the user uses the \fB-E\fP option to set the grid spacing, then the dimensions
+If the user uses the \fB\-E\fP option to set the grid spacing, then the dimensions
 will be calculated from the grid bounds and spacing. In these
 circumstances rounding errors will usually require that the eastern
 and northern bounds be adjusted to fit exactly with the
 grid dimensions and spacing.
-Default: If the \fB-R\fP\fIwest/east/south/north\fP
+Default: If the \fB\-R\fP\fIwest/east/south/north\fP
 option is not specified, the program will set
 the grid bounds to be the area encompassing all of the data in the
 input files.
@@ -557,14 +557,14 @@ Default: \fItension\fP = 1.0e10 (pure spline solution).
 .br
 Enables prioritizing data points according to their look azimuth
 (data on the port side of the swath have
-a look azimuth equal to the heading - 90 degrees, and data on the
+a look azimuth equal to the heading \- 90 degrees, and data on the
 starboard side have a look azimuth equal to the heading + 90 degrees).
 Here \fIazimuth\fP is the preferred look azimuth, and \fIfactor\fP
 modulates how rapidly the priority degrades away from the preferred
 look azimuth. The priority (p) for a data point is assigned as follows:
-        p = cos(f * (Ap - Al))
+        p = cos(f * (Ap \- Al))
 .br
-when -90 < (f * (Ap - Al)) < 90 and
+when \-90 < (f * (Ap \- Al)) < 90 and
         p = 0
 .br
 otherwise, where f = \fIfactor\fP, Ap = \fIazimuth\fP, and Al is the
@@ -583,7 +583,7 @@ will have a zero priority).
 .B \-V
 Normally, \fBmbmosaic\fP prints out information regarding its
 controlling parameters during execution; the
-\fB-V\fP option causes the program to also print out statements
+\fB\-V\fP option causes the program to also print out statements
 indicating its progress.
 .TP
 .B \-W
@@ -622,8 +622,8 @@ to a number from 1 to 8. These priority tables include:
 \fIpriority_source\fP = 1:
 .br
       Angle (deg)  Priority
-      ---------------------
- 	  -60          1.0
+      \---------------------
+ 	  \-60          1.0
  	    0          0.0
  	   60          1.0
 
@@ -631,8 +631,8 @@ to a number from 1 to 8. These priority tables include:
 \fIpriority_source\fP = 2:
 .br
       Angle (deg)  Priority
-      ---------------------
- 	  -67          1.0
+      \---------------------
+ 	  \-67          1.0
  	    0          0.0
  	   67          1.0
 
@@ -640,8 +640,8 @@ to a number from 1 to 8. These priority tables include:
 \fIpriority_source\fP = 3:
 .br
       Angle (deg)  Priority
-      ---------------------
- 	  -75          1.0
+      \---------------------
+ 	  \-75          1.0
  	    0          0.0
  	   75          1.0
 
@@ -649,8 +649,8 @@ to a number from 1 to 8. These priority tables include:
 \fIpriority_source\fP = 4:
 .br
       Angle (deg)  Priority
-      ---------------------
- 	  -85          1.0
+      \---------------------
+ 	  \-85          1.0
  	    0          0.0
  	   85          1.0
 
@@ -658,8 +658,8 @@ to a number from 1 to 8. These priority tables include:
 \fIpriority_source\fP = 5:
 .br
       Angle (deg)  Priority
-      ---------------------
- 	  -60          0.0
+      \---------------------
+ 	  \-60          0.0
  	    0          1.0
  	   60          0.0
 
@@ -667,8 +667,8 @@ to a number from 1 to 8. These priority tables include:
 \fIpriority_source\fP = 6:
 .br
       Angle (deg)  Priority
-      ---------------------
- 	  -67          0.0
+      \---------------------
+ 	  \-67          0.0
  	    0          1.0
  	   67          0.0
 
@@ -676,8 +676,8 @@ to a number from 1 to 8. These priority tables include:
 \fIpriority_source\fP = 7:
 .br
       Angle (deg)  Priority
-      ---------------------
- 	  -75          0.0
+      \---------------------
+ 	  \-75          0.0
  	    0          1.0
  	   75          0.0
 
@@ -685,8 +685,8 @@ to a number from 1 to 8. These priority tables include:
 \fIpriority_source\fP = 8:
 .br
       Angle (deg)  Priority
-      ---------------------
- 	  -85          0.0
+      \---------------------
+ 	  \-85          0.0
  	    0          1.0
  	   85          0.0
 
@@ -752,15 +752,15 @@ angles of 45 degrees. No data with angle magnitudes greater
 than 60 degrees will be used.
 
 Then, run \fBmbmosaic\fP as follows:
- 	mbmosaic -Idatalist \\
+ 	mbmosaic \-Idatalist \\
  		-R114.1333/114.7833/-32.1166/-31.55 \\
- 		-A4 -E100/100/meters -N \\
- 		-Yangle_priority.dat -F0.10 -C10 \\
- 		-Operth_ss -V
+ 		-A4 \-E100/100/meters \-N \\
+ 		-Yangle_priority.dat \-F0.10 \-C10 \\
+ 		-Operth_ss \-V
 
-The \fB-E\fP option specifies grid spacings of 100 meters in
+The \fB\-E\fP option specifies grid spacings of 100 meters in
 both the longitude and latitude; the dimensions of the output
-grid are calculated according by \fBmbmosaic\fP. The \fB-F\fP
+grid are calculated according by \fBmbmosaic\fP. The \fB\-F\fP
 option enables Gaussian weighted mean mosaicing and the priority
 range of 0.10 means that for each bin, all data with priorities
 within 0.1 of the highest priority will be used.
@@ -780,18 +780,18 @@ The output looks like:
  Grid dimensions: 616 629
  Grid bounds:
    Longitude:  114.1333  114.7833
-   Latitude:   -32.1166  -31.5500
+   Latitude:   \-32.1166  \-31.5500
  Working grid dimensions: 616 629
  Working Grid bounds:
    Longitude:  114.1333  114.7833
-   Latitude:   -32.1166  -31.5500
+   Latitude:   \-32.1166  \-31.5500
  Longitude interval: 0.001057 degrees or 100.051035 m
  Latitude interval:  0.000902 degrees or 100.042679 m
  Specified Longitude interval: 100.000000 meters
  Specified Latitude interval:  100.000000 meters
  Input data bounds:
    Longitude:  113.4833  115.4333
-   Latitude:   -32.6832  -30.9834
+   Latitude:   \-32.6832  \-30.9834
  Mosaicing algorithm:
    Average of highest weighted pixels
    Pixel weighting range: 0.100000
@@ -834,7 +834,7 @@ The output looks like:
  Bins set using interpolation:    58051
  Bins not set:                    242999
  Maximum number of data in a bin: 121
- Minimum value:   -6573.12   Maximum value:   97704.64
+ Minimum value:   \-6573.12   Maximum value:   97704.64
  Minimum sigma:    4.50125   Maximum sigma: 42979.49567
 
  Outputting results...
@@ -843,7 +843,7 @@ The output looks like:
  Running grdhisteq...
 
  Program Status:
- --------------
+ \--------------
 
    Plot Style:
      Color Fill
@@ -865,7 +865,7 @@ The output looks like:
      Page size:                a
      Page width:               8.5
      Page height:              11
-     Projection:               -Jm10
+     Projection:               \-Jm10
      Axes annotation:          10m/10m
      Orientation:              portrait
      Number of colors:         11
@@ -874,11 +874,11 @@ The output looks like:
 
    Grid Data Attributes:
      Longitude min max:         114.1330   114.7830
-     Latitude min max:          -32.1166   -31.5500
-     Data min max:                 -6573   9.77e+04
+     Latitude min max:          \-32.1166   \-31.5500
+     Data min max:                 \-6573   9.77e+04
 
    Primary Grid Plotting Controls:
-     Color start datum:        -12500.000000
+     Color start datum:        \-12500.000000
      Color end datum:          112500.000000
      Histogram stretch applied to color palette
 
@@ -897,7 +897,7 @@ The output looks like:
      COLOR_FOREGROUND          255/255/255
      COLOR_NAN                 255/255/255
 
- --------------
+ \--------------
 
  Plot generation shellscript <perth_ss.grd.cmd> created.
 
@@ -907,31 +907,31 @@ The output looks like:
    Executing <perth_ss.grd.cmd> also invokes
         xpsview to view the plot on the screen.
 
- --------------
+ \--------------
 
 
  Done.
 
 The names of the output files are based on the root character string
-specified using the \fB-O\fP option.  Since the grid is output as a netCDF
+specified using the \fB\-O\fP option.  Since the grid is output as a netCDF
 GRD format file, its filename is "perth_ss.grd"; a shellscript
 which will allow the contents of the grid to viewed using \fBGMT\fP programs
 is also output with the filename "perth_ss.grd.cmd".
 
 Suppose that one wants to produce a mosaic composed only of data
-with a more or less eastward look azimuth. Then add the \fB-U\fP
+with a more or less eastward look azimuth. Then add the \fB\-U\fP
 option with a preferred azimuth of 90 degrees. A look azimuth
 factor of 2.0 will cause \fBmbmosaic\fP to reject any data with
 look azimuths outside a range of 45 to 135 degrees.
 The following will suffice:
- 	mbmosaic -Idatalist \\
+ 	mbmosaic \-Idatalist \\
  		-R114.1333/114.7833/-32.1166/-31.55 \\
- 		-A4 -E100/100/meters -N \\
- 		-Yangle_priority.dat -F0.10 -C10 \\
- 		-Operth_ss -U90/2.0 -V
+ 		-A4 \-E100/100/meters \-N \\
+ 		-Yangle_priority.dat \-F0.10 \-C10 \\
+ 		-Operth_ss \-U90/2.0 \-V
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbgrid\fP(l), \fBmbm_grid\fP(l), \fBmbm_grd2arc\fP(l)
+\fBmbsystem\fP(1), \fBmbgrid\fP(1), \fBmbm_grid\fP(1), \fBmbm_grd2arc\fP(1)
 
 .SH BUGS
 The options for this program have grown a bit complicated.
@@ -949,13 +949,13 @@ incorporated unchanged into the MB-System package.
 
 The first item on each line is the PCS identifier inside brackets, such
 as <UTM10N> or <epsg32749>. To specify using one of these PCS's, use
-the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
+the \fB\-J\fP option, e.g. \fB\-J\fP\fIUTM10N\fP or \fB\-J\fP\fIepsg32749\fP.
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  Standard Universal Transverse Mercator (UTM)
      and Universal Polar Stereographic (UPS)
      projected coordinate systems for MB-System
- ---------------------------------------------------------
+ \---------------------------------------------------------
 
  <UTM01N> : WGS 84 / UTM zone 1N
  <UTM02N> : WGS 84 / UTM zone 2N
@@ -1080,15 +1080,15 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <UPSN> : WGS 84 / UPS North
  <UPSS> : WGS 84 / UPS South
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  Listing of State Plane North American Datum Zones
- ---------------------------------------------------------
+ \---------------------------------------------------------
    MB-System projection ids are the zone number
    prefixed by either "nad27sp" or "nad83sp"
- ----------------------------------------------
+ \----------------------------------------------
                                 NGS zone number
  State and zone                  1927     1983
- ----------------------------------------------
+ \----------------------------------------------
  Alabama east ..................  101      101
  Alabama west ..................  102      102
  Alaska zone no. 1 ............. 5001     5001
@@ -1226,12 +1226,12 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  Wyoming east central .......... 4902     4902
  Wyoming west .................. 4904     4904
  Wyoming west central .......... 4903     4903
- ----------------------------------------------
+ \----------------------------------------------
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  State Plane Coordinate Systems
  North American Datum 1927
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <nad27sp101> : alabama east> : nad27sp
  <nad27sp102> : alabama west> : nad27sp
  <nad27sp5010> : alaska zone no. 10> : nad27sp
@@ -1251,8 +1251,8 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad27sp501> : colorado north> : nad27sp
  <nad27sp502> : colorado central> : nad27sp
  <nad27sp503> : colorado south> : nad27sp
- <nad27sp600> : connecticut ---> : nad27sp
- <nad27sp700> : delaware ---> : nad27sp
+ <nad27sp600> : connecticut \---> : nad27sp
+ <nad27sp700> : delaware \---> : nad27sp
  <nad27sp901> : florida east> : nad27sp
  <nad27sp902> : florida west> : nad27sp
  <nad27sp903> : florida north> : nad27sp
@@ -1281,7 +1281,7 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad27sp1703> : louisiana offshore> : nad27sp
  <nad27sp1801> : maine east> : nad27sp
  <nad27sp1802> : maine west> : nad27sp
- <nad27sp1900> : maryland ---> : nad27sp
+ <nad27sp1900> : maryland \---> : nad27sp
  <nad27sp2001> : massachusetts mainland> : nad27sp
  <nad27sp2002> : massachusetts island> : nad27sp
  <nad27sp2101> : michigan east> : nad27sp
@@ -1306,8 +1306,8 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad27sp2701> : nevada east> : nad27sp
  <nad27sp2702> : nevada central> : nad27sp
  <nad27sp2703> : nevada west> : nad27sp
- <nad27sp2800> : new hampshire ---> : nad27sp
- <nad27sp2900> : new jersey ---> : nad27sp
+ <nad27sp2800> : new hampshire \---> : nad27sp
+ <nad27sp2900> : new jersey \---> : nad27sp
  <nad27sp3001> : new mexico east> : nad27sp
  <nad27sp3002> : new mexico central> : nad27sp
  <nad27sp3003> : new mexico west> : nad27sp
@@ -1315,7 +1315,7 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad27sp3102> : new york central> : nad27sp
  <nad27sp3103> : new york west> : nad27sp
  <nad27sp3104> : new york long island> : nad27sp
- <nad27sp3200> : north carolina ---> : nad27sp
+ <nad27sp3200> : north carolina \---> : nad27sp
  <nad27sp3301> : north dakota north> : nad27sp
  <nad27sp3302> : north dakota south> : nad27sp
  <nad27sp3401> : ohio north> : nad27sp
@@ -1326,12 +1326,12 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad27sp3602> : oregon south> : nad27sp
  <nad27sp3701> : pennsylvania north> : nad27sp
  <nad27sp3702> : pennsylvania south> : nad27sp
- <nad27sp3800> : rhode island ---> : nad27sp
+ <nad27sp3800> : rhode island \---> : nad27sp
  <nad27sp3901> : south carolina north> : nad27sp
  <nad27sp3902> : south carolina south> : nad27sp
  <nad27sp4001> : south dakota north> : nad27sp
  <nad27sp4002> : south dakota south> : nad27sp
- <nad27sp4100> : tennessee ---> : nad27sp
+ <nad27sp4100> : tennessee \---> : nad27sp
  <nad27sp4201> : texas north> : nad27sp
  <nad27sp4202> : texas north central> : nad27sp
  <nad27sp4203> : texas central> : nad27sp
@@ -1340,7 +1340,7 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad27sp4301> : utah north> : nad27sp
  <nad27sp4302> : utah central> : nad27sp
  <nad27sp4303> : utah south> : nad27sp
- <nad27sp4400> : vermont ---> : nad27sp
+ <nad27sp4400> : vermont \---> : nad27sp
  <nad27sp4501> : virginia north> : nad27sp
  <nad27sp4502> : virginia south> : nad27sp
  <nad27sp4601> : washington north> : nad27sp
@@ -1367,10 +1367,10 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad27sp5202> : virgin islands st. croix> : nad27sp
  <nad27sp5400> : guam island> : nad27sp
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  State Plane Coordinate Systems
  North American Datum 1983
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <nad83sp101> : alabama east> : nad83
  <nad83sp102> : alabama west> : nad83
  <nad83sp5010> : alaska zone no. 10> : nad83
@@ -1388,8 +1388,8 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad83sp501> : colorado north> : nad83
  <nad83sp502> : colorado central> : nad83
  <nad83sp503> : colorado south> : nad83
- <nad83sp600> : connecticut ---> : nad83
- <nad83sp700> : delaware ---> : nad83
+ <nad83sp600> : connecticut \---> : nad83
+ <nad83sp700> : delaware \---> : nad83
  <nad83sp901> : florida east> : nad83
  <nad83sp902> : florida west> : nad83
  <nad83sp903> : florida north> : nad83
@@ -1418,7 +1418,7 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad83sp1703> : louisiana offshore> : nad83
  <nad83sp1801> : maine east> : nad83
  <nad83sp1802> : maine west> : nad83
- <nad83sp1900> : maryland ---> : nad83
+ <nad83sp1900> : maryland \---> : nad83
  <nad83sp2001> : massachusetts mainland> : nad83
  <nad83sp2002> : massachusetts island> : nad83
  <nad83sp2111> : michigan north> : nad83
@@ -1437,8 +1437,8 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad83sp2701> : nevada east> : nad83
  <nad83sp2702> : nevada central> : nad83
  <nad83sp2703> : nevada west> : nad83
- <nad83sp2800> : new hampshire ---> : nad83
- <nad83sp2900> : new jersey ---> : nad83
+ <nad83sp2800> : new hampshire \---> : nad83
+ <nad83sp2900> : new jersey \---> : nad83
  <nad83sp3001> : new mexico east> : nad83
  <nad83sp3002> : new mexico central> : nad83
  <nad83sp3003> : new mexico west> : nad83
@@ -1446,7 +1446,7 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad83sp3102> : new york central> : nad83
  <nad83sp3103> : new york west> : nad83
  <nad83sp3104> : new york long island> : nad83
- <nad83sp3200> : north carolina ---> : nad83
+ <nad83sp3200> : north carolina \---> : nad83
  <nad83sp3301> : north dakota north> : nad83
  <nad83sp3302> : north dakota south> : nad83
  <nad83sp3401> : ohio north> : nad83
@@ -1457,11 +1457,11 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad83sp3602> : oregon south> : nad83
  <nad83sp3701> : pennsylvania north> : nad83
  <nad83sp3702> : pennsylvania south> : nad83
- <nad83sp3800> : rhode island ---> : nad83
+ <nad83sp3800> : rhode island \---> : nad83
  <nad83sp3900> : south carolina> : nad83
  <nad83sp4001> : south dakota north> : nad83
  <nad83sp4002> : south dakota south> : nad83
- <nad83sp4100> : tennessee ---> : nad83
+ <nad83sp4100> : tennessee \---> : nad83
  <nad83sp4201> : texas north> : nad83
  <nad83sp4202> : texas north central> : nad83
  <nad83sp4203> : texas central> : nad83
@@ -1470,7 +1470,7 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad83sp4301> : utah north> : nad83
  <nad83sp4302> : utah central> : nad83
  <nad83sp4303> : utah south> : nad83
- <nad83sp4400> : vermont ---> : nad83
+ <nad83sp4400> : vermont \---> : nad83
  <nad83sp4501> : virginia north> : nad83
  <nad83sp4502> : virginia south> : nad83
  <nad83sp4601> : washington north> : nad83
@@ -1495,17 +1495,17 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <nad83sp5009> : alaska zone no. 9> : nad83
  <nad83sp5200> : puerto rico and virgin islands> : nad83
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  Great Lakes Grids using Clarke 1866 ellipsoid
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <erie-etal> : Lake Erie, Ontario and St. Lawrence River.
  <huron> : Lake Huron
  <michigan> : Lake Michigan
  <superior> : Lake Superior, Lake of the Woods
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  EPSG projection definitions
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <epsg4001> : Unknown datum based upon the Airy 1830 ellipsoid
  <epsg4002> : Unknown datum based upon the Airy Modified 1849 ellipsoid
  <epsg4003> : Unknown datum based upon the Australian National Spheroid
@@ -5026,16 +5026,16 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <epsg32761> : WGS 84 / UPS South
  <epsg32766> : WGS 84 / TM 36 SE
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  Additional EPSG-like projection definitions
- ---------------------------------------------------------
+ \---------------------------------------------------------
  OGC-defined extended codes  (41000--41999) see http://www.digitalearth.gov/wmt/auto.html
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <epsg41001> : WGS84 / Simple Mercator
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  CubeWerx-defined extended codes  (42100--42199)
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <epsg42101> : WGS 84 / LCC Canada
  <epsg42102> : NAD83 / BC Albers (this has been superceeded but is kept for compatibility)
  <epsg42103> : WGS 84 / LCC USA
@@ -5043,24 +5043,24 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <epsg42105> : WGS84 / Merc NorthAm
  <epsg42106> : WGS84 / Lambert Azim Mozambique
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  CubeWerx-customer definitions  (42300--42399)
- ---------------------------------------------------------
- <epsg42301> : NAD27 / Polar Stereographic / CM=-98
+ \---------------------------------------------------------
+ <epsg42301> : NAD27 / Polar Stereographic / CM=\-98
  <epsg42302>JapanOrtho.09 09
  <epsg42303> : NAD83 / Albers NorthAm
  <epsg42304> : NAD83 / NRCan LCC Canada
  <epsg42305> : France_II
  <epsg42306> : NAD83/QC_LCC
- <epsg42307> : NAD83 / Texas Central - feet
+ <epsg42307> : NAD83 / Texas Central \- feet
  <epsg42308> : NAD27 / California Albers
  <epsg42309> : NAD 83 / LCC Canada AVHRR-2
  <epsg42310> : WGS84+GRS80 / Mercator
  <epsg42311> : NAD83 / LCC Statcan
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  ESRI projection definitions
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <esri2000> : Anguilla 1957 / British West Indies Grid
  <esri2001> : Antigua 1943 / British West Indies Grid
  <esri2002> : Dominica 1945 / British West Indies Grid
@@ -8016,14 +8016,14 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <esri104304> : GCS Voirol 1875 Degree
  <esri104305> : GCS Voirol Unifie 1960 Degree
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  Google mercator
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <900913> Chris' funny epsgish code for the google mercator
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  IGNF (French Mapping Agency) projection definitions
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <ANAA92> : MOP92 (Anaa) Tuamotu
  <APAT86> : MOP86 (Apataki, Rapa, Hao) Tuamotu
  <ATI> : Ancienne Triangulation des Ingenieurs
@@ -8039,10 +8039,10 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <IGN63> : IGN 1963 (Hiva Oa, Tahuata, Mohotani)
  <IGN72> : IGN 1972 Grande-Terre / Ile des Pins
  <KAUE70> : MHPF70 (Kauehi) Tuamotu
- <KERG62CAR> : Kerguelen - K0
- <LIFOU56> : Lifou - Iles Loyaute (IGN56)
+ <KERG62CAR> : Kerguelen \- K0
+ <LIFOU56> : Lifou \- Iles Loyaute (IGN56)
  <LUREF> : Nouvelle Triangulation du Grand Duche du Luxembourg
- <MARE53> : Mare - Iles Loyaute (IGN53)
+ <MARE53> : Mare \- Iles Loyaute (IGN53)
  <MARQUI72> : IGN 1972 (Eiao, Hiva Oa, Mohotani) Marquises
  <MART38> : Martinique Fort-Desaix
  <MAYO50> : Mayotte Combani
@@ -8053,8 +8053,8 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <NTF> : Nouvelle Triangulation Francaise
  <NUKU72> : IGN 1972 Nuku Hiva
  <NUKU94> : SAT94 (Nukutavake) Tuamotu
- <OUVEA72CAR> : Ouvea - Iles Loyaute (MHNC 1972 - OUVEA)
- <PETRELS72> : Petrels - IGN 1972
+ <OUVEA72CAR> : Ouvea \- Iles Loyaute (MHNC 1972 \- OUVEA)
+ <PETRELS72> : Petrels \- IGN 1972
  <RAIA53> : IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine
  <REUN47> : Reunion 1947
  <RGF93> : Reseau geodesique francais 1993
@@ -8068,11 +8068,11 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <SAT84> : SAT84 (Rurutu) Iles Australes
  <SHOM84> : SHOM 1984 Martinique Montagne Du Vauclin
  <STPM50> : St Pierre et Miquelon 1950
- <TAHAA> : Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est)
+ <TAHAA> : Raiatea \- Tahaa 51-54 (Tahaa, Base Terme Est)
  <TAHI51> : Tahiti-Terme Nord 1951
  <TAHI79> : IGN79 (Tahiti) Iles de la Societe
  <TANNA> : Tanna Bloc Sud
- <TERA50> : Pointe Geologie - Perroud 1950
+ <TERA50> : Pointe Geologie \- Perroud 1950
  <TUBU69> : MHPF 1969 (Tubuai) Iles Australes
  <WALL78> : Wallis-Uvea 1978 (MOP78)
  <WGS72> : World Geodetic System 1972
@@ -8091,10 +8091,10 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <IGN63GEO> : IGN 1963 (Hiva Oa, Tahuata, Mohotani)
  <IGN72GEO> : IGN 1972 Grande-Terre / Ile des Pins
  <KAUE70GEO> : MHPF70 (Kauehi) Tuamotu
- <KERG62GEO> : Kerguelen - K0
- <LIFOU56GEO> : Lifou - Iles Loyaute (IGN56)
+ <KERG62GEO> : Kerguelen \- K0
+ <LIFOU56GEO> : Lifou \- Iles Loyaute (IGN56)
  <LUXGEO> : Nouvelle Triangulation du Grand Duche du Luxembourg
- <MARE53GEO> : Mare - Iles Loyaute (IGN53)
+ <MARE53GEO> : Mare \- Iles Loyaute (IGN53)
  <MARQUI72GEO> : IGN 1972 (Eiao, Hiva Oa, Mohotani) Marquises
  <MART38GEO> : Martinique Fort-Desaix
  <MAYO50GEO> : Mayotte Combani
@@ -8106,7 +8106,7 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <NTFP> : Nouvelle Triangulation Francaise Paris grades
  <NUKU72GEO> : IGN 1972 Nuku Hiva
  <NUKU94GEO> : SAT94 (Nukutavake) Tuamotu
- <OUVEA72GEO> : Ouvea - Iles Loyaute (MHNC 1972 - OUVEA)
+ <OUVEA72GEO> : Ouvea \- Iles Loyaute (MHNC 1972 \- OUVEA)
  <RAIA53GEO> : IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine
  <REUN47GEO> : Reunion 1947
  <RGF93G> : Reseau geodesique francais 1993
@@ -8119,43 +8119,43 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <SAT84GEO> : SAT84 (Rurutu) Iles Australes
  <SHOM84GEO> : SHOM 1984 Martinique Montagne Du Vauclin
  <STPM50GEO> : St Pierre et Miquelon 1950
- <TAHAAGEO> : Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est)
+ <TAHAAGEO> : Raiatea \- Tahaa 51-54 (Tahaa, Base Terme Est)
  <TAHI51GEO> : Tahiti-Terme Nord 1951
  <TAHI79GEO> : IGN79 (Tahiti) Iles de la Societe
  <TANNAGEO> : Tanna Bloc Sud
- <TERA50GEO> : Pointe Geologie - Perroud 1950
+ <TERA50GEO> : Pointe Geologie \- Perroud 1950
  <TUBU69GEO> : MHPF 1969 (Tubuai) Iles Australes
- <WALL78GEO> : Wallis - Uvea 1978 (MOP78)
+ <WALL78GEO> : Wallis \- Uvea 1978 (MOP78)
  <WGS72G> : WGS72
  <WGS84G> : World Geodetic System 1984
  <WGS84RRAFGEO> : Reseau de reference des Antilles francaises (1988-1991)
  <XGEO> : Systeme CIO-BIH
- <ANAA92UTM6S> : MOP92 (Anaa) Tuamotu - UTM fuseau 6 Sud
- <APAT86UTM6S> : MOP86 (Apataki, Rapa, Hao) Tuamotu - UTM fuseau 6 Sud
- <APAT86UTM7S> : MOP86 (Apataki, Rapa, Hao) Tuamotu - UTM fuseau 7 Sud
- <CAD97UTM38S> : Cadastre 1997 - UTM fuseau 38 Sud
+ <ANAA92UTM6S> : MOP92 (Anaa) Tuamotu \- UTM fuseau 6 Sud
+ <APAT86UTM6S> : MOP86 (Apataki, Rapa, Hao) Tuamotu \- UTM fuseau 6 Sud
+ <APAT86UTM7S> : MOP86 (Apataki, Rapa, Hao) Tuamotu \- UTM fuseau 7 Sud
+ <CAD97UTM38S> : Cadastre 1997 \- UTM fuseau 38 Sud
  <CROZ63UTM39S> : Crozet 1963
  <CSG67UTM21> : Guyane CSG67 UTM fuseau 21
  <CSG67UTM22> : Guyane CSG67 UTM fuseau 22
- <EFATE57UT59S> : EFATE-IGN 1957 - UTM fuseau 59 Sud
- <FANGA84UTM7S> : Fangataufa 1984 - UTM fuseau 7 Sud
- <GEOPORTALANF> : Geoportail - Antilles francaises
- <GEOPORTALCRZ> : Geoportail - Crozet
- <GEOPORTALFXX> : Geoportail - France metropolitaine
- <GEOPORTALGUF> : Geoportail - Guyane
- <GEOPORTALKER> : Geoportail - Kerguelen
- <GEOPORTALMYT> : Geoportail - Mayotte
- <GEOPORTALNCL> : Geoportail - Nouvelle-Caledonie
- <GEOPORTALPYF> : Geoportail - Polynesie francaise
- <GEOPORTALREU> : Geoportail - Reunion et dependances
- <GEOPORTALSPM> : Geoportail - Saint-Pierre et Miquelon
- <GEOPORTALWLF> : Geoportail - Wallis et Futuna
+ <EFATE57UT59S> : EFATE-IGN 1957 \- UTM fuseau 59 Sud
+ <FANGA84UTM7S> : Fangataufa 1984 \- UTM fuseau 7 Sud
+ <GEOPORTALANF> : Geoportail \- Antilles francaises
+ <GEOPORTALCRZ> : Geoportail \- Crozet
+ <GEOPORTALFXX> : Geoportail \- France metropolitaine
+ <GEOPORTALGUF> : Geoportail \- Guyane
+ <GEOPORTALKER> : Geoportail \- Kerguelen
+ <GEOPORTALMYT> : Geoportail \- Mayotte
+ <GEOPORTALNCL> : Geoportail \- Nouvelle-Caledonie
+ <GEOPORTALPYF> : Geoportail \- Polynesie francaise
+ <GEOPORTALREU> : Geoportail \- Reunion et dependances
+ <GEOPORTALSPM> : Geoportail \- Saint-Pierre et Miquelon
+ <GEOPORTALWLF> : Geoportail \- Wallis et Futuna
  <GUAD48UTM20> : Guadeloupe Ste Anne
  <GUADFM49U20> : Guadeloupe Fort Marigot
- <IGN63UTM7S> : IGN 1963 - Hiva Oa, Tahuata, Mohotani - UTM fuseau 7 Sud
- <IGN72LAM> : IGN 1972 - Lambert Nouvelle Caledonie
- <IGN72UTM58S> : IGN 1972 - UTM fuseau 58 Sud
- <KAUE70UTM6S> : MHPF70 (Kauehi) Tuamotu - UTM fuseau 6 Sud
+ <IGN63UTM7S> : IGN 1963 \- Hiva Oa, Tahuata, Mohotani \- UTM fuseau 7 Sud
+ <IGN72LAM> : IGN 1972 \- Lambert Nouvelle Caledonie
+ <IGN72UTM58S> : IGN 1972 \- UTM fuseau 58 Sud
+ <KAUE70UTM6S> : MHPF70 (Kauehi) Tuamotu \- UTM fuseau 6 Sud
  <KERG62UTM42S> : Kerguelen 1962
  <LAMB1> : Lambert I
  <LAMB1C> : Lambert I Carto
@@ -8169,17 +8169,17 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <LAMBE> : Lambert II etendu
  <LAMBGC> : Lambert grand champ
  <LUXGAUSSK> : Luxembourg 1929
- <MARE53UTM58S> : Mare - Iles Loyaute - UTM fuseau 58 Sud
+ <MARE53UTM58S> : Mare \- Iles Loyaute \- UTM fuseau 58 Sud
  <MART38UTM20> : Martinique Fort-Desaix
  <MAYO50UTM38S> : Mayotte Combani
- <MHPF67UTM8S> : MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles) - UTM 8 S
- <MILLER> : Geoportail - Monde
- <MOOREA87U6S> : Moorea 1987 - UTM fuseau 6 Sud
- <MOP90UTM6S> : MOP90 (Tetiaroa) Iles de la Societe - UTM fuseau 6 Sud
- <NUKU72U7S> : IGN 1972 Nuku Hiva - UTM fuseau 7 Sud
- <NUKU94UTM7S> : IGN 1994 Nuku Hiva - UTM fuseau 7 Sud
- <OUVEA72U58S> : Ouvea - Iles Loyaute - UTM fuseau 58 Sud
- <RAIA53UTM5S> : IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine - UTM fuseau 5
+ <MHPF67UTM8S> : MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles) \- UTM 8 S
+ <MILLER> : Geoportail \- Monde
+ <MOOREA87U6S> : Moorea 1987 \- UTM fuseau 6 Sud
+ <MOP90UTM6S> : MOP90 (Tetiaroa) Iles de la Societe \- UTM fuseau 6 Sud
+ <NUKU72U7S> : IGN 1972 Nuku Hiva \- UTM fuseau 7 Sud
+ <NUKU94UTM7S> : IGN 1994 Nuku Hiva \- UTM fuseau 7 Sud
+ <OUVEA72U58S> : Ouvea \- Iles Loyaute \- UTM fuseau 58 Sud
+ <RAIA53UTM5S> : IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine \- UTM fuseau 5
  <REUN47GAUSSL> : Reunion Gauss Laborde
  <RGF93CC42> : Projection conique conforme Zone 1
  <RGF93CC43> : Projection conique conforme Zone 2
@@ -8191,25 +8191,25 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <RGF93CC49> : Projection conique conforme Zone 8
  <RGF93CC50> : Projection conique conforme Zone 9
  <RGM04UTM38S> : UTM fuseau 38 Sud (Reseau Geodesique de Mayotte 2004)
- <RGNCLAM> : Reseau Geodesique de Nouvelle-Caledonie - Lambert Nouvelle Caledonie
- <RGNCUTM57S> : Reseau Geodesique de Nouvelle-Caledonie - UTM fuseau 57 Sud
- <RGNCUTM58S> : Reseau Geodesique de Nouvelle-Caledonie - UTM fuseau 58 Sud
- <RGNCUTM59S> : Reseau Geodesique de Nouvelle-Caledonie - UTM fuseau 59 Sud
- <RGPFUTM5S> : RGPF - UTM fuseau 5 Sud
- <RGPFUTM6S> : RGPF - UTM fuseau 6 Sud
- <RGPFUTM7S> : RGPF - UTM fuseau 7 Sud
+ <RGNCLAM> : Reseau Geodesique de Nouvelle-Caledonie \- Lambert Nouvelle Caledonie
+ <RGNCUTM57S> : Reseau Geodesique de Nouvelle-Caledonie \- UTM fuseau 57 Sud
+ <RGNCUTM58S> : Reseau Geodesique de Nouvelle-Caledonie \- UTM fuseau 58 Sud
+ <RGNCUTM59S> : Reseau Geodesique de Nouvelle-Caledonie \- UTM fuseau 59 Sud
+ <RGPFUTM5S> : RGPF \- UTM fuseau 5 Sud
+ <RGPFUTM6S> : RGPF \- UTM fuseau 6 Sud
+ <RGPFUTM7S> : RGPF \- UTM fuseau 7 Sud
  <RGR92UTM40S> : RGR92 UTM fuseau 40 Sud
  <RGSPM06U21> : Saint-Pierre-et-Miquelon (2006) UTM Fuseau 21 Nord
- <SAT84UTM5S> : SAT84 (Rurutu) Iles Australes - UTM fuseau 5 Sud
+ <SAT84UTM5S> : SAT84 (Rurutu) Iles Australes \- UTM fuseau 5 Sud
  <STEREOSX> : Stereographique polaire Sud
  <STPM50UTM21> : St Pierre et Miquelon 1950
  <TAHAAUTM05S> : Tahaa 1951
  <TAHI51UTM06S> : Tahiti-Terme Nord UTM fuseau 6 Sud
  <TAHI79UTM6S> : Tahiti 1979
- <TANNAUTM59S> : Tanna Bloc Sud - UTM fuseau 59 Sud
+ <TANNAUTM59S> : Tanna Bloc Sud \- UTM fuseau 59 Sud
  <TERA50SPTA> : Terre Adelie Stereo polaire Terre Adelie
  <TERA50STEREO> : Terre Adelie 1950
- <TUBU69UTM6S> : Tubuai - Iles Australes - UTM fuseau 6 Sud
+ <TUBU69UTM6S> : Tubuai \- Iles Australes \- UTM fuseau 6 Sud
  <UTM01SW72> : World Geodetic System 1972 UTM fuseau 01 Sud
  <UTM01SW84> : World Geodetic System 1984 UTM fuseau 01 Sud
  <UTM01W84> : World Geodetic System 1984 UTM fuseau 01
@@ -8345,15 +8345,15 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <UTM60W84> : World Geodetic System 1984 UTM fuseau 60
  <WALL78UTM1S> : Wallis-Uvea 1978 (MOP78) UTM 1 SUD
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  Various Non-U.S. Coordinate Systems,
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <CH1903> : Swiss Coordinate System
  <madagascar> : Laborde grid for Madagascar
- <new_zealand> : New Zealand Map Grid (NZMG) - Projection unique to N.Z. so all factors fixed
- ---------------------------------------------------------
+ <new_zealand> : New Zealand Map Grid (NZMG) \- Projection unique to N.Z. so all factors fixed
+ \---------------------------------------------------------
  Secondary grids DMA TM8358.1, p. 4.3
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <bwi> : British West Indies
  <costa-n> : Costa Rica Norte
  <costa-s> : Costa Rica Sud
@@ -8378,9 +8378,9 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <palestine> : Palestine
  <panama> : Panama
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  other grids in DMA TM8358.1
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <bng> : British National Grid
  <malay> : West Malaysian RSO Grid
  <india-I> : India Zone I
@@ -8400,9 +8400,9 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <s-maroc> : Sud Maroc Grid
  <s-tunis> : Sud Tunisie Grid
 
- ---------------------------------------------------------
+ \---------------------------------------------------------
  Gauss Krueger Grids for Germany
- ---------------------------------------------------------
+ \---------------------------------------------------------
  <gk2-d> : Gauss Krueger Grid for Germany
  <gk3-d> : Gauss Krueger Grid for Germany
  <gk4-d> : Gauss Krueger Grid for Germany

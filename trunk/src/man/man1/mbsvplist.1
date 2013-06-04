@@ -1,12 +1,12 @@
-.TH mbsvplist 1 "15 December 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mbsvplist 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbsvplist\fP - List water sound velocity profiles in swath sonar data files.
+\fBmbsvplist\fP \- List water sound velocity profiles in swath sonar data files.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsvplist\fP [\fB-C -D \fB-F\fIformat \fB-H \fB-I\fIfile \fB-M\fImode\fP \fB-O -P -S -V -Z\fP]
+\fBmbsvplist\fP [\fB\-C \-D \fB\-F\fIformat \fB\-H \fB\-I\fIfile \fB\-M\fImode\fP \fB\-O \-P \-S \-V \-Z\fP]
 
 .SH DESCRIPTION
 This program, \fBmbsvplist\fP, lists all water
@@ -23,14 +23,14 @@ where FILE is the swath data filename and XXX is the
 SVP count within the file. Some files contain SVPs at
 regular intervals, typically with the same SVP duplicated
 many times. By default, \fBmbsvplist\fP ignores duplicate
-SVPs. The \fB-D\fP option causes duplicate SVPs to be output.
-The \fB-P\fP option
-implies \fB-O\fP, and also causes the parameter file to be modified
+SVPs. The \fB\-D\fP option causes duplicate SVPs to be output.
+The \fB\-P\fP option
+implies \fB\-O\fP, and also causes the parameter file to be modified
 so that the first SVP output for each file becomes the
 SVP used for recalculating bathymetry for that swath file.
-The \fB-C\fP option causes \fBmbsvplist\fP to output the number
+The \fB\-C\fP option causes \fBmbsvplist\fP to output the number
 of unique SVPs in a file to the shell (standard out).
-The \fB-S\fP option causes \fBmbsvplist\fP to output the sound velocity values
+The \fB\-S\fP option causes \fBmbsvplist\fP to output the sound velocity values
 used for beamforming by the sonar (often called surface sound velocity, or SSV)
 instead of SVP profiles. Each SSV value will be paired with the
 corresponding sonar depth, and there will generally be one SSV value output
@@ -54,7 +54,7 @@ Causes \fBmbsvplist\fP to output the number of unique SVPs in each file to the s
 .TP
 .B \-D
 .br
-Causes \fBmbsvplist\fP to output duplicate SVPs. This is equivalent to \fB-M\fP\fI2\fP.
+Causes \fBmbsvplist\fP to output duplicate SVPs. This is equivalent to \fB\-M\fP\fI2\fP.
 .TP
 .B \-F
 \fIformat\fP
@@ -62,7 +62,7 @@ Causes \fBmbsvplist\fP to output duplicate SVPs. This is equivalent to \fB-M\fP\
 Sets the format for the input swath sonar data using
 \fBMBIO\fP integer format identifiers.
 If \fIformat\fP < 0, then the input
-file specified with the \fB-I\fP
+file specified with the \fB\-I\fP
 option will actually contain
 a list of input swath sonar data files.
 This program uses the \fBMBIO\fP library and will read any swath sonar
@@ -78,7 +78,7 @@ of its operation and then exit immediately.
 \fIfile\fP
 .br
 Sets the input filename. If \fIformat\fP > 0 (set with the
-\fB-F\fP option) then the swath sonar data contained in \fIfile\fP
+\fB\-F\fP option) then the swath sonar data contained in \fIfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read
@@ -100,7 +100,7 @@ Sets the SVP output mode. If \fImode\fP=0 (the default), then the first SVP of
 each file will be output, plus any SVP that is different from the previous SVP.
 If \fImode\fP=1, then only the first instance of each unique SVP will be output, even
 through multiple files referenced through a datalist structure. If \fImode\fP=2,
-then all SVPs will be output even if they are duplicates (equivalent to the \fB-D\fP option).
+then all SVPs will be output even if they are duplicates (equivalent to the \fB\-D\fP option).
 .TP
 .B \-O
 .br
@@ -112,7 +112,7 @@ SVP count within the file.
 .TP
 .B \-P
 .br
-This option implies the output option \fB-O\fP. Additionally,
+This option implies the output option \fB\-O\fP. Additionally,
 this option sets the first SVP output for each swathfile to be used for
 recalculating the bathymetry in that swathfile by \fBmbprocess\fP
 by modifying the associated parameter file.
@@ -128,7 +128,7 @@ for each survey ping.
 .B \-V
 Normally, \fBmbsvplist\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBmblist\fP works in a "verbose" mode and
+\fB\-V\fP flag is given, then \fBmblist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
 .B \-Z
@@ -136,7 +136,7 @@ Normally, \fBmbsvplist\fP faithfully outputs the SVP data just
 as it is stored in the swath files. Rarely, sonars may store SVP
 data with a nonzero depth for the first sound speed value, a
 circumstance that causes problems with bathymetry recalculation
-using \fBmbprocess\fP. The \fB-Z\fP option causes \fBmbsvplist\fP
+using \fBmbprocess\fP. The \fB\-Z\fP option causes \fBmbsvplist\fP
 to replace the first depth value with zero before outputting the
 SVP.
 
@@ -145,7 +145,7 @@ Suppose one wishes to obtain an SVP list from a Simrad EM300 data file
 in the MBARI format (MBIO id 57) called mbari_1998_107_msn.mb57. To
 obtain a listing to stdout, the following will suffice:
 
- 	mbsvplist -F57 -I mbari_1998_526_msn.mb57 -V
+ 	mbsvplist \-F57 \-I mbari_1998_526_msn.mb57 \-V
 
 The output will be as follows:
 
@@ -188,7 +188,7 @@ Total 4 SVP records read
 Total 1 SVP records written
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbprocess\fP(l)
+\fBmbsystem\fP(1), \fBmbprocess\fP(1)
 
 .SH BUGS
 Probably.

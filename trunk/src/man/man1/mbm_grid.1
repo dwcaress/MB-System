@@ -1,6 +1,6 @@
-.TH mbm_grid 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grid 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbm_grid\fP - Create an executable shellscript which will generate
+\fBmbm_grid\fP \- Create an executable shellscript which will generate
 a grid (bathymetry or topography) or mosaic (amplitude or sidescan)
 of swath sonar swath data.
 
@@ -8,27 +8,27 @@ of swath sonar swath data.
 Version 5.0
 
 .SH SYNOPSIS
-mbm_grid \fB-I\fP\fIfile\fP
-\fB-F\fP\fIformat\fP \fB-O\fP\fIroot\fP
-\fB-R\fP\fIwest/east/south/north\fP
-[\fB-A\fP\fIdatatype\fP \fB-B\fP\fIborder\fP \fB-C\fP\fIclip\fP
-\fB-D\fP\fIxdim/ydim\fP \fB-E\fP\fIdx/dy/units\fP
-{\fB-f\fP\fIpriority_range\fP | \fB-f\fP\fImode\fP}
-\fB-G\fP\fIgridkind\fP \fB-H\fP
-\fB-J\fP\fIprojection\fP \fB-K\fIbackground\fP
-\fB-L\fP\fIlonflip\fP \fB-M\fP \fB-N\fP \fB-P\fP\fIpings\fP
-\fB-S\fP\fIspeed\fP \fB-T\fP\fItension\fP
-\fB-U\fP\fI{azimuth/factor | time}\fP
-\fB-V\fP \fB-W\fP\fIscale\fP \fB-X\fP\fIextend\fP
-\fB-Y\fP\fIpriority_file\fP \fB-Z\fP\fIbathdef\fP]
+mbm_grid \fB\-I\fP\fIfile\fP
+\fB\-F\fP\fIformat\fP \fB\-O\fP\fIroot\fP
+\fB\-R\fP\fIwest/east/south/north\fP
+[\fB\-A\fP\fIdatatype\fP \fB\-B\fP\fIborder\fP \fB\-C\fP\fIclip\fP
+\fB\-D\fP\fIxdim/ydim\fP \fB\-E\fP\fIdx/dy/units\fP
+{\fB\-f\fP\fIpriority_range\fP | \fB\-f\fP\fImode\fP}
+\fB\-G\fP\fIgridkind\fP \fB\-H\fP
+\fB\-J\fP\fIprojection\fP \fB\-K\fIbackground\fP
+\fB\-L\fP\fIlonflip\fP \fB\-M\fP \fB\-N\fP \fB\-P\fP\fIpings\fP
+\fB\-S\fP\fIspeed\fP \fB\-T\fP\fItension\fP
+\fB\-U\fP\fI{azimuth/factor | time}\fP
+\fB\-V\fP \fB\-W\fP\fIscale\fP \fB\-X\fP\fIextend\fP
+\fB\-Y\fP\fIpriority_file\fP \fB\-Z\fP\fIbathdef\fP]
 
 .SH DESCRIPTION
 \fBmbm_grid\fP is a macro to generate a shellscript of MB-System commands
 which, when executed, will generate a grid or mosaic of the
 specified swath sonar data. The grid or mosaic may be of
-bathymetry (positive down, \fB-A\fP\fI1\fP),
-topography (positive up, \fB-A\fP\fI2\fP),
-amplitude (\fB-A\fP\fI3\fP), or sidescan data (\fB-A\fP\fI4\fP).
+bathymetry (positive down, \fB\-A\fP\fI1\fP),
+topography (positive up, \fB\-A\fP\fI2\fP),
+amplitude (\fB\-A\fP\fI3\fP), or sidescan data (\fB\-A\fP\fI4\fP).
 The primary purpose of this
 macro is to allow the simple, semi-automated production of
 grids and mosaics with a few command line arguments. The macro
@@ -41,7 +41,7 @@ complete explanations of how these programs work.
 
 By default, \fBmbgrid\fP and \fBmbmosaic\fP generate grids in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
-the WGS84 horizontal datum. The \fB-J\fP option can be used to specify 
+the WGS84 horizontal datum. The \fB\-J\fP option can be used to specify
 an alternate, projected coordinate system (PCS). When a PCS is used,
 position will be defined in eastings and northings (meters) relative
 to the origin of the particular PCS. Universal Transverse Mercator
@@ -86,7 +86,7 @@ Default: \fIborder\fP = 0.0
 \fIclip\fP
 .br
 Sets the clipping dimension for the spline interpolation. If \fIclip\fP=0
-no spline interpolation will be done.  If \fIclip\fP>0 
+no spline interpolation will be done.  If \fIclip\fP>0
 .TP
 .B \-K
 \fIbackground\fP
@@ -105,7 +105,7 @@ Default: \fIclip\fP = 0.
 .br
 Sets the dimensions of the output grid.
 This option is superceded
-if the user specifies the grid spacing with the \fB-E\fP option.
+if the user specifies the grid spacing with the \fB\-E\fP option.
 Default:  \fIxdim\fP = \fIydim\fP = 101.
 .TP
 .B \-E
@@ -117,7 +117,7 @@ and \fIdy\fP values are assumed to be in meters. Valid values
 for \fIunits\fP include "km", "meters", and "degrees".
 By default, the grid spacing is calculated from
 the grid bounds and the grid dimensions. When the user
-uses the \fB-E\fP option to set the grid spacing, the
+uses the \fB\-E\fP option to set the grid spacing, the
 grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
 grid cell spacing values are usually required to keep
@@ -128,18 +128,18 @@ the grid bounds as specified.
 .br
 Sets the data format for the input data.
 If \fIformat\fP < 0, then the input file specified
-with the \fB-I\fP option will actually contain a list of input swath sonar
+with the \fB\-I\fP option will actually contain a list of input swath sonar
 data files. This program uses the \fBMBIO\fP library
 and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = -1.
+is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = \-1.
 .TP
 .B \-f
 \fImode\fP
 .br
 Sets the gridding algorithm to be used by \fBmbgrid\fP for bathymetry
-(\fB-A\fP\fI1\fP) or topography c data.
+(\fB\-A\fP\fI1\fP) or topography c data.
  	\fImode\fP = 1:         Gaussian Weighted Mean
  	\fImode\fP = 2:         Median Filter
  	\fImode\fP = 3:         Minimum Filter
@@ -150,7 +150,7 @@ The default is \fImode\fP = 1 (Gaussian Weighted Mean).
 \fIpriority_range\fP
 .br
 Turns on Gaussian weighted mean mosaicing in \fBmbmosaic\fP
-for amplitude (\fB-A\fP\fI3\fP) or sidescan (\fB-A\fP\fI4\fP) data. The
+for amplitude (\fB\-A\fP\fI3\fP) or sidescan (\fB\-A\fP\fI4\fP) data. The
 \fIpriority_range\fP value determines which data points are
 used in the mosaicing. The minimum priority threshold for
 each bin is the highest priority value found among the
@@ -182,7 +182,7 @@ of its operation and then exit immediately.
 \fIfilename\fP
 .br
 Sets the input filename. If \fIformat\fP > 0 (set with the
-\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP
+\fB\-f\fP option) then the swath sonar data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0 (the default),
 then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
@@ -202,49 +202,49 @@ is given in the \fBMBIO\fP manual page.
 \fIprojection\fP
 By default, \fBmbgrid\fP and \fBmbmosaic\fP generate grids in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
-the WGS84 geographic coordinate system. 
-The \fB-J\fP option can be used to specify 
+the WGS84 geographic coordinate system.
+The \fB\-J\fP option can be used to specify
 an alternate, projected coordinate system (PCS). When a PCS is used,
 position will be defined in eastings and northings (meters) relative
 to the origin of the particular PCS. Universal Transverse Mercator
 is the most commonly used PCS in the oceanographic community, but
-\fBmbgrid\fP supports a large number of other PCS's as well. 
+\fBmbgrid\fP supports a large number of other PCS's as well.
 The underlying projection functions derive from the \fBPROJ.4\fP library
 written by Gerald Evenden, then of the U.S. Geological Survey.
 
-The \fIprojection\fP argument for the \fB-J\fP option can be either
-a PCS identifier from the projection definition list provided at the 
-end of this manual page, or simply \fB-J\fP\fIU\fP to specify using
+The \fIprojection\fP argument for the \fB\-J\fP option can be either
+a PCS identifier from the projection definition list provided at the
+end of this manual page, or simply \fB\-J\fP\fIU\fP to specify using
 UTM in whatever zone is appropriate for the grid bounds specified
-with the \fB-R\fP option.
+with the \fB\-R\fP option.
 
-For instance, to fully specify a particular northern UTM 
+For instance, to fully specify a particular northern UTM
 zone, set \fIprojection\fP = UTMXXN where XX gives
 the UTM zone (defined from 01 to 60). As an example, a northern UTM
-zone 12 projection can be specified using \fB-J\fP\fIUTM12N\fP.
+zone 12 projection can be specified using \fB\-J\fP\fIUTM12N\fP.
 Southern UTM zones are specified as UTMXXS. The European Petroleum
 Survey Group (EPSG) has defined a large number of PCS's used worldwide
 and assigned number id's to each; one can also specify the northern
-UTM zone 12 projection using its EPSG designation, 
-or \fB-J\fP\fIepsg32612\fP.
+UTM zone 12 projection using its EPSG designation,
+or \fB\-J\fP\fIepsg32612\fP.
 When the projected coordinate system is fully specified
-by the \fB-J\fP option, then the grid bounds may be specified using
-\fB-R\fP in either longitude and latitude or in eastings and northings.
+by the \fB\-J\fP option, then the grid bounds may be specified using
+\fB\-R\fP in either longitude and latitude or in eastings and northings.
 
 Alternatively, one may indicate a UTM projection without specifying the
-zone by using \fB-J\fP\fIU\fP. In this case, the 
-UTM zone will be inferred from the midpoint of the 
-specified longitude and latitude bounds, and then the 
-longitude and latitude bounds given with the 
-\fB-fR\fP option are translated to UTM eastings and northings.
+zone by using \fB\-J\fP\fIU\fP. In this case, the
+UTM zone will be inferred from the midpoint of the
+specified longitude and latitude bounds, and then the
+longitude and latitude bounds given with the
+\fB\-fR\fP option are translated to UTM eastings and northings.
 
-All grids and mosaics produced by \fBMB-System\fP 
+All grids and mosaics produced by \fBMB-System\fP
 programs contain identifiers that are recognized
-by the plotting macros \fBmbm_grdplot\fP, 
+by the plotting macros \fBmbm_grdplot\fP,
 \fBmbm_grd3dplot\fP, and \fBmbm_grdtiff\fP.
-These plotting macros automatically use a 
+These plotting macros automatically use a
 linear map projection whenever they
-encounter grids and mosaics that are already 
+encounter grids and mosaics that are already
 in a projected coordinate system. Also, the program \fBmbgrdtiff\fP
 automatically inserts the appropriate projection information into
 the GeoTIFF images it generates. As a result, images generated by
@@ -254,28 +254,28 @@ into GIS software.
 .B \-K
 \fIbackground\fP
 .br
-The \fB-K\fP\fIbackground\fP option is used to underlay a bathymetry or topography
+The \fB\-K\fP\fIbackground\fP option is used to underlay a bathymetry or topography
 grid with a global or regional topography model. The background data
 model is accessed from a database using the \fBGMT\fP program grdraster.
 The \fIbackground\fP value is an identifier number used to specify which
 dataset to extract using \fBgrdraster\fP. These identifiers are user
-defined and vary with installations. When the \fB-K\fP\fIbackground\fP
+defined and vary with installations. When the \fB\-K\fP\fIbackground\fP
 option is invoked, \fBgrdraster\fP is used to extract all of the longitude,
 latitude, and topography values within the specified database that lie
 within the desired grid. These values are interpolated onto the desired
 grid locations using the thin plate spline algorithm, and then mapped onto
 the grid wherever the values are undefined by either swath data or the
-spline interpolation invoked with the \fB-C\fP option.
+spline interpolation invoked with the \fB\-C\fP option.
 
 .TP
 .B \-L
 \fIlonflip\fP
 .br
 Sets the range of the longitude values returned.
-If \fIlonflip\fP=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If \fIlonflip\fP=0
+If \fIlonflip\fP=\-1 then the longitude values will be in
+the range from \-360 to 0 degrees. If \fIlonflip\fP=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If \fIlonflip\fP=1
+the range from \-180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
@@ -299,9 +299,9 @@ Sets the character string to be used as the root of the
 output filenames. For example, if the grid is output as a GMT
 version 2 GRD format (netCDF) file (the default),
 then its filename is "root.grd". If the
-\fB-G\fP\fI1\fP option is used to specify an ascii format grid, then the
+\fB\-G\fP\fI1\fP option is used to specify an ascii format grid, then the
 output grid filename will be "root.asc". If the
-\fB-G\fP\fI2\fP option is used to specify a version 1 GRD
+\fB\-G\fP\fI2\fP option is used to specify a version 1 GRD
 format (binary) grid, then the
 output grid filename will be "root.grd1". If the output grid is
 in the GMT version 2 GRD format, a shellscript
@@ -325,7 +325,7 @@ in feet.
 \fIwest/east/south/north\fP
 .br
 Sets the longitude and latitude bounds of the output grid. If the user
-uses the \fB-E\fP option to set the grid spacing, then the dimensions
+uses the \fB\-E\fP option to set the grid spacing, then the dimensions
 will be calculated from the grid bounds and spacing. In these
 circumstances rounding errors will usually require that the eastern
 and northern bounds be adjusted to fit exactly with the
@@ -368,14 +368,14 @@ will be saved and used instead of the first data.
 .br
 Enables prioritizing data points according to their look azimuth
 (data on the port side of the swath have
-a look azimuth equal to the heading - 90 degrees, and data on the
+a look azimuth equal to the heading \- 90 degrees, and data on the
 starboard side have a look azimuth equal to the heading + 90 degrees).
 Here \fIazimuth\fP is the preferred look azimuth, and \fIfactor\fP
 modulates how rapidly the priority degrades away from the preferred
 look azimuth. The priority (p) for a data point is assigned as follows:
-        p = cos(f * (Ap - Al))
+        p = cos(f * (Ap \- Al))
 .br
-when -90 < (f * (Ap - Al)) < 90 and
+when \-90 < (f * (Ap \- Al)) < 90 and
         p = 0
 .br
 otherwise, where f = \fIfactor\fP, Ap = \fIazimuth\fP, and Al is the
@@ -392,7 +392,7 @@ look azimuths 180 degrees away from \fIazimuth\fP
 will have a zero priority).
 .TP
 .B \-V
-The \fB-V\fP option causes \fBmbm_grid\fP to print out statements
+The \fB\-V\fP option causes \fBmbm_grid\fP to print out statements
 indicating its progress.
 .TP
 .B \-W
@@ -454,14 +454,14 @@ The following four commands generate gridding shellscripts
 for bathymetry, topography, amplitude, and sidescan,
 respectively:
 
- 	mbm_grid -F24 -I example_hs.mb24 \\
-		-A1 -V -Obath
- 	mbm_grid -F24 -I example_hs.mb24 \\
- 		-A2 -V -Otopo
- 	mbm_grid -F24 -I example_hs.mb24 \\
- 		-A3 -V -Oamp
- 	mbm_grid -F24 -I example_hs.mb24 \\
- 		-A4 -V -Oss
+ 	mbm_grid \-F24 \-I example_hs.mb24 \\
+		-A1 \-V \-Obath
+ 	mbm_grid \-F24 \-I example_hs.mb24 \\
+ 		-A2 \-V \-Otopo
+ 	mbm_grid \-F24 \-I example_hs.mb24 \\
+ 		-A3 \-V \-Oamp
+ 	mbm_grid \-F24 \-I example_hs.mb24 \\
+ 		-A4 \-V \-Oss
 
 When the following shellscripts are executed, each will
 generate a both a grid (or mosaic) file and an additional
@@ -482,16 +482,16 @@ plots of the gridded data.
 As an example, the contents of the gridding shellscript
 "bath_mbgrid.cmd" are:
 
- #! /bin/csh -f
+ #! /bin/csh \-f
  #
  # Shellscript to grid or mosaic swath sonar data
  # Created by macro mbm_grid
  #
  # This shellscript created by following command line:
- # mbm_grid -F24 -I example_hs.mb24 -A1 -V -Obath
+ # mbm_grid \-F24 \-I example_hs.mb24 \-A1 \-V \-Obath
  #
  # Define shell variables used in this script:
- set REGION       = -49.316085/-49.096415/12.06972/12.18588
+ set REGION       = \-49.316085/-49.096415/12.06972/12.18588
  set INPUT_FILE   = example_hs.mb24
  set INPUT_FORMAT = 24
  set ROOT         = bath
@@ -502,23 +502,21 @@ As an example, the contents of the gridding shellscript
  #
  # Run mbgrid
  echo Running mbgrid...
- mbgrid -Idatalist$$ \\
+ mbgrid \-Idatalist$$ \\
  	-R$REGION \\
   	-O$ROOT \\
- 	-A1 -N \\
+ 	-A1 \-N \\
   	-E363.3/363.3/meters \\
  #
  # All done!
  echo All done!
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbgrid\fP(l),
-\fBmbmosaic\fP(l), \fBmbinfo\fP(l),
-\fBmbm_grdplot\fP(l)
+\fBmbsystem\fP(1), \fBmbgrid\fP(1),
+\fBmbmosaic\fP(1), \fBmbinfo\fP(1),
+\fBmbm_grdplot\fP(1)
 
 .SH BUGS
 This macro is new and hasn't been tested in serious
-usage yet - let us know what to fix, add, or
+usage yet \- let us know what to fix, add, or
 change!.
-
-

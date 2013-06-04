@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
 %%Creator: groff version 1.19.2
-%%CreationDate: Mon Jun  3 18:26:28 2013
+%%CreationDate: Tue Jun  4 01:14:32 2013
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%DocumentSuppliedResources: procset grops 1.19 2
@@ -228,21 +228,21 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 138.73(mbstripNaN\(1\) MB-System)72 48 R 138.73
 (5.0 mbstripNaN\(1\))2.5 F/F1 10.95/Times-Bold@0 SF -.219(NA)72 84 S(ME)
-.219 E/F2 10/Times-Bold@0 SF(mbstripNaN)108 96 Q F0 2.5<2d8c>2.5 G
+.219 E/F2 10/Times-Bold@0 SF(mbstripNaN)108 96 Q F0 2.5<ad8c>2.5 G
 (lter to remo)-2.5 E .3 -.15(ve N)-.15 H(aN nodes).15 E F1(VERSION)72
 124.8 Q F0 -1.11(Ve)108 136.8 S(rsion 5.0)1.11 E F1(SYNOPSIS)72 165.6 Q
 F2(mbstripNaN)108 177.6 Q F1(DESCRIPTION)72 206.4 Q F2(mbstripNaN)108
 218.4 Q F0 1.492(is a utility for remo)3.992 F 1.491
 (ving NaN nodes that are produced by the GMT utilities)-.15 F F2
-(grd2xyz)3.991 E F0(and)3.991 E F2(blockmean)108 230.4 Q F0 .136
-(with the -bo option.)2.635 F .136(The standard output of)5.136 F F2
-(mbstripNaN)2.636 E F0 .136(may be fed into the standard input of)2.636
-F F2(surface)108 242.4 Q F0 .01(with the -bi option.)2.51 F .01
-(This is used by the)5.01 F F2(mbm_grd2geo)2.509 E(vrml)-.1 E F0 .009
-(utility in order to spline \214ll areas of no)2.509 F .695
-(data so that irre)108 254.4 R .695(gular bath)-.15 F .695
-(ymetry may be ef)-.05 F(fecti)-.25 E -.15(ve)-.25 G .696
-(ly visualized using GeoVRML which has no concept of).15 F(NaN.)108
+(grd2xyz)3.991 E F0(and)3.991 E F2(blockmean)108 230.4 Q F0
+(with the \255bo option.)2.5 E(The standard output of)5 E F2(mbstripNaN)
+2.5 E F0(may be fed into the standard input of)2.5 E F2(surface)108
+242.4 Q F0 .576(with the \255bi option.)3.077 F .576
+(This is used by the)5.576 F F2(mbm_grd2geo)3.076 E(vrml)-.1 E F0 .576
+(utility in order to spline \214ll areas of)3.076 F .584
+(no data so that irre)108 254.4 R .584(gular bath)-.15 F .584
+(ymetry may be ef)-.05 F(fecti)-.25 E -.15(ve)-.25 G .584
+(ly visualized using GeoVRML which has no concept).15 F(of NaN.)108
 266.4 Q(Note that)108 290.4 Q F2(mbstripNaN)2.5 E F0 -.1(wo)2.5 G
 (rks with a double precision data stream.).1 E(The code is simple.)108
 314.4 Q(Here it is:)5 E(#include <stdio.h>)113 338.4 Q
@@ -260,14 +260,15 @@ G(cutes:).15 E(#)113 595.2 Q 2.5(#C)113 607.2 S(on)-2.5 E -.15(ve)-.4 G
 (rt grid to xyz format for \214lling in blank).15 E 2.5(#a)113 619.2 S
 (reas, preprocess w/blockmean, use surf)-2.5 E(ace to)-.1 E 2.5(#e)113
 631.2 S(xtrapolate to no data areas)-2.65 E(#)113 643.2 Q
-(grd2xyz -bo Samp_Ore)113 655.2 Q(gonMar)-.15 E
+(grd2xyz \255bo Samp_Ore)113 655.2 Q(gonMar)-.15 E
 (ginI_bath.grd | blockmean \\)-.18 E
-(-bi -bo -V -I0.00336363636363635/0.00134545454545457 \\)118 667.2 Q
-(-R-125.2/-124.867/45/45.1332 | mbstripNaN | surf)118 679.2 Q(ace \\)-.1
-E(-bi -I0.00336363636363635/0.00134545454545457 \\)118 691.2 Q
-(-S0.333312 -T0.35 -GTmp_Ore)118 703.2 Q(gonMar)-.15 E
-(ginI_bath.grd -V \\)-.18 E(-R-125.2/-124.867/45/45.1332)118 715.2 Q
-(MB-System 5.0)72 768 Q(26 October 2009)137.055 E(1)195.395 E 0 Cg EP
+(\255bi \255bo \255V \255I0.00336363636363635/0.00134545454545457 \\)118
+667.2 Q(\255R-125.2/-124.867/45/45.1332 | mbstripNaN | surf)118 679.2 Q
+(ace \\)-.1 E(\255bi \255I0.00336363636363635/0.00134545454545457 \\)118
+691.2 Q(\255S0.333312 \255T0.35 \255GTmp_Ore)118 703.2 Q(gonMar)-.15 E
+(ginI_bath.grd \255V \\)-.18 E(\255R-125.2/-124.867/45/45.1332)118 715.2
+Q(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0
+Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
@@ -278,7 +279,8 @@ BP
 (\(1\),)A F2(surface)2.5 E F0(\(1\),)A F2(mbm_grd2geo)2.5 E(vrml)-.1 E
 F0(\(1\))A F1 -.11(BU)72 148.8 S(GS).11 E F0(Ho)108 160.8 Q 2.5(wm)-.25
 G(an)-2.5 E 2.5(yb)-.15 G(ugs can there be in an 8 line program?)-2.7 E
-(MB-System 5.0)72 768 Q(26 October 2009)137.055 E(2)195.395 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(2)204.835 E 0
+Cg EP
 %%Trailer
 end
 %%EOF

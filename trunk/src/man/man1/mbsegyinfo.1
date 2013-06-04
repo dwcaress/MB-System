@@ -1,12 +1,12 @@
 .TH mbsegyinfo 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbsegyinfo\fP - Output some basic statistics of segy format seismic data files.
+\fBmbsegyinfo\fP \- Output some basic statistics of segy format seismic data files.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsegyinfo\fP [\fB-I\fIfilename\fP \fB-L\fIlonflip\fP \fB-O\fP \fB-H -V\fP]
+\fBmbsegyinfo\fP [\fB\-I\fIfilename\fP \fB\-L\fIlonflip\fP \fB\-O\fP \fB\-H \-V\fP]
 
 .SH DESCRIPTION
 \fBMBsegyinfo\fP is a utility for reading a segy format seismic data file
@@ -21,7 +21,7 @@ files, that may be parsed by other \fBMB-System\fP programs
 and macros. To create an ".sinf" file, simply direct the
 output of \fBmbsegyinfo\fP to a file named by adding the
 suffix ".sinf" to the input swath data filename. The
-\fB-O\fP option accomplishes this same task
+\fB\-O\fP option accomplishes this same task
 automatically.
 
 .SH AUTHORSHIP
@@ -48,10 +48,10 @@ Sets the input segy seismic data filename. Default: \fIinfile\fP = "stdin".
 \fIlonflip\fP
 .br
 Sets the range of the longitude values returned.
-If \fIlonflip\fP=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If \fIlonflip\fP=0
+If \fIlonflip\fP=\-1 then the longitude values will be in
+the range from \-360 to 0 degrees. If \fIlonflip\fP=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If \fIlonflip\fP=1
+the range from \-180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fBmbsegyinfo selects the bext longitude range based
@@ -66,14 +66,14 @@ using the original data file path with an ".sinf" suffix appended.
 .B \-V
 Normally, \fBmbsegyinfo\fP only prints out the statistics obtained
 by reading all of the data.  If the
-\fB-V\fP flag is given, then \fBmbsegyinfo\fP works in a "verbose" mode and
+\fB\-V\fP flag is given, then \fBmbsegyinfo\fP works in a "verbose" mode and
 outputs the program version being used and all read error status messages.
 
 .SH EXAMPLES
 Suppose one wishes to know something about the contents of
 a segy subbottom profiler data file named 20040722_152111.s7k.segy.
 The following will suffice:
- 	mbsegyinfo -I 20040722_152111.s7k.segy
+ 	mbsegyinfo \-I 20040722_152111.s7k.segy
 .br
 and returns the following output:
  	SEGY Data File:      20040722_152111.s7k.segy
@@ -96,28 +96,28 @@ and returns the following output:
  	    RP trace:                        1        1        1
             Delay (sec):              0.000000 0.000000 0.000000
  	    Range (m):                0.000000 0.000000 0.000000
- 	    Receiver Elevation (m):   -224.030000 -2.860000 -221.170000
- 	    Source Elevation (m):     -224.030000 -2.860000 -221.170000
- 	    Source Depth (m):         2.860000 224.030000 -221.170000
- 	    Receiver Water Depth (m): 51.510000 487.670000 -436.160000
- 	    Source Water Depth (m):   51.510000 487.670000 -436.160000
+ 	    Receiver Elevation (m):   \-224.030000 \-2.860000 \-221.170000
+ 	    Source Elevation (m):     \-224.030000 \-2.860000 \-221.170000
+ 	    Source Depth (m):         2.860000 224.030000 \-221.170000
+ 	    Receiver Water Depth (m): 51.510000 487.670000 \-436.160000
+ 	    Source Water Depth (m):   51.510000 487.670000 \-436.160000
 
  	Navigation Totals:
 
  	  Start of Data:
  	    Time:  07 22 2004 15:20:37.029000  JD204
- 	    Lon: -121.8573     Lat:   36.7755
+ 	    Lon: \-121.8573     Lat:   36.7755
 
  	  End of Data:
  	    Time:  07 22 2004 15:44:15.438000  JD204
- 	    Lon: -121.8572     Lat:   36.7952
+ 	    Lon: \-121.8572     Lat:   36.7952
 
  	Limits:
- 	  Minimum Longitude:    -121.8574   Maximum Longitude:    -121.8572
+ 	  Minimum Longitude:    \-121.8574   Maximum Longitude:    \-121.8572
  	  Minimum Latitude:       36.7755   Maximum Latitude:       36.7952
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbextractsegy\fP(l), \fBmbsegylist\fP(l), \fBmbsegygrid\fP(l),
+\fBmbsystem\fP(1), \fBmbextractsegy\fP(1), \fBmbsegylist\fP(1), \fBmbsegygrid\fP(1),
 \fBSIOSEIS\fP(http://sioseis.ucsd.edu/ )
 
 .SH BUGS

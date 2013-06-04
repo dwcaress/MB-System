@@ -1,20 +1,20 @@
-.TH mbformat 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbformat 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbformat\fP -  List information about swath sonar data formats
+\fBmbformat\fP \-  List information about swath sonar data formats
 supported by the \fBMBIO\fP library.
 
 .SH VERSION
 Version 5.0
 
-.SH SYNOPSIS\fBmbformat\fP [\fB -F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-L -K -V -H\fP]
+.SH SYNOPSIS\fBmbformat\fP [\fB \-F\fP\fIformat\fP \fB\-I\fP\fIfile\fP \fB\-L \-K \-V \-H\fP]
 
 .SH DESCRIPTION
 \fBmbformat\fP is a utility which identifies the swath sonar data formats
 associated with \fBmbio\fP format id's.  If no format id or input filename
 is specified, \fBmbformat\fP lists all of the currently supported formats 
 along with short descriptions. If a format id is specified using the 
-\fB-F\fP option, then \fBmbformat\fP prints a short description of that 
-format. If a filename is specified using the \fB-I\fP option, then 
+\fB\-F\fP option, then \fBmbformat\fP prints a short description of that 
+format. If a filename is specified using the \fB\-I\fP option, then 
 \fBmbformat\fP attempts to identify a valid format id for that file using 
 swath data filename prefix and suffix conventions embedded in \fBMB-System\fP. 
 The program also determines the filename "root", which is the filename minus 
@@ -22,10 +22,10 @@ whatever format-specific prefix or suffix has been recognized. In no prefix
 or suffix is recognized, then the root is simply the entire filename.
 
 Normally, \fBmbformat\fP
-prints out a brief description of each identified format. If the \fB-L\fP
+prints out a brief description of each identified format. If the \fB\-L\fP
 option is used, \fBmbformat\fP simply prints out the valid format id number,
 or 0 if a file or format has been specified but no valid id can be identified.
-If the \fB-K\fP option is used, \fBmbformat\fP will print out the filename
+If the \fB\-K\fP option is used, \fBmbformat\fP will print out the filename
 "root" followed by the format id number.
 
 .SH AUTHORSHIP
@@ -67,14 +67,14 @@ so that only the \fBMBIO\fP format id numbers are listed.
 .TP
 .B \-V
 Normally, \fBmbformat\fP only prints out format descriptions.  If the
-\fB-V\fP flag is given, then \fBmbformat\fP works in a "verbose" mode and
+\fB\-V\fP flag is given, then \fBmbformat\fP works in a "verbose" mode and
 also outputs the program version being used.
 
 .SH EXAMPLES
 Suppose one wishes to identify the swath sonar data format associated
 with a format id of 11.  The following will suffice:
 .br
- 	mbformat -F11
+ 	mbformat \-F11
 .br
 and the result will be this output:
   MBIO data format id: 11
@@ -91,7 +91,7 @@ The following will suffice:
 Suppose one wants to find out what format is associated with a raw
 SeaBeam 2112 file named sb199811231045.rec:
 .br
- 	mbformat -I sb199811231045.rec
+ 	mbformat \-I sb199811231045.rec
 .br
 This results in the output:
   MBIO data format id: 41
@@ -101,9 +101,9 @@ This results in the output:
                         and sidescan, 151 beams and 2000 pixels, ascii 
                         with binary sidescan, SeaBeam Instruments.
 
-Using the -K option:
+Using the \-K option:
 .br
- 	mbformat -K -I sb199811231045.rec
+ 	mbformat \-K \-I sb199811231045.rec
 .br
 will produce the following output:
 .br
@@ -111,16 +111,16 @@ will produce the following output:
 .br
 where the format id has been identified as 41 because of the ".rec"
 file suffix and the fileroot has been identified as "sb199811231045"
-by removing the suffix. Use of the -L option:
+by removing the suffix. Use of the \-L option:
 .br
- 	mbformat -L -I sb199811231045.rec
+ 	mbformat \-L \-I sb199811231045.rec
 .br
 will produce output with just format id:
 .br
   41
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbio\fP(l)
+\fBmbsystem\fP(1), \fBmbio\fP(1)
 
 .SH BUGS
 No known bugs.

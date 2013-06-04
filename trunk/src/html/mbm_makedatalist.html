@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_makedatalist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -33,15 +33,15 @@ Version 5.0
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>Mbm_makedatalist</B> is a macro to generate an MB-System 
-datalist file referencing all identifiable swath files in 
-the specified target directory. 
+<B>Mbm_makedatalist</B> is a macro to generate an MB-System
+datalist file referencing all identifiable swath files in
+the specified target directory.
 <P>
-The output datalist will be placed in the current working 
-directory. The output datalist is named datalist.mb-1 
+The output datalist will be placed in the current working
+directory. The output datalist is named datalist.mb-1
 by default, but can be specified with the <B>-O</B> option.
 If no target directory is specified with the <B>-I</B>
-option, then the current working directory is used. In order 
+option, then the current working directory is used. In order
 for swath files to be recognized and included in the datalist,
 they must conform to the MB-System swath file naming convention
 (see the <B>mbsystem</B> manual page for details).
@@ -75,14 +75,14 @@ of its operation and then exit immediately.
 <I>directory</I>
 <BR>
 
-Sets the path of the target directory. 
+Sets the path of the target directory.
 <DT><B>-O</B>
 
 <DD>
 <I>datalist</I>
 <BR>
 
-Sets the name of the output datalist file. Default: datalist.mb-1 
+Sets the name of the output datalist file. Default: datalist.mb-1
 <DT><B>-V</B>
 
 <DD>
@@ -92,7 +92,7 @@ The <B>-V</B> option causes <B>mbm_makedatalist</B> to print out status messages
 <A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
-Suppose we have a set of swath files in a directory and we 
+Suppose we have a set of swath files in a directory and we
 want to construct a datalist referring to those files. A simple
 directory listing shows four files:
 <BR>
@@ -125,16 +125,14 @@ where the file junk.txt has been ignored.
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbdatalist.html">mbdatalist</A></B>(l), <B><A HREF="mbinfo.html">mbinfo</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbdatalist.html">mbdatalist</A></B>(1), <B><A HREF="mbinfo.html">mbinfo</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
 This macro doesn't yet recognize when one swath file derives from
-another (e.g. line1p.mb57 can be inferred to be a processed 
+another (e.g. line1p.mb57 can be inferred to be a processed
 version of line1.mb57).
-<P>
-<P>
 <P>
 
 <HR>
@@ -154,7 +152,7 @@ version of line1.mb57).
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

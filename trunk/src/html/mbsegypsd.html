@@ -11,13 +11,13 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbsegypsd</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  24 December 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbsegypsd</B> - Calculates the power spectral densisty function (PSD) of each trace in a 
+<B>mbsegypsd</B> - Calculates the power spectral densisty function (PSD) of each trace in a
 segy file, outputting the PSD estimates as a GMT grid file with trace number along
 the x axis and frequency along the y axis.
 <P>
@@ -29,7 +29,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbsegypsd</B> <B>-I</B><I>file</I> <B>-O</B><I>root 
+<B>mbsegypsd</B> <B>-I</B><I>file</I> <B>-O</B><I>root
 [</I><B>-A</B><I>shotscale</I> <B>-D</B><I>decimatex</I> <B>-R</B>
 <B>-S</B><I>mode[/start/end[/schan/echan]]</I> <B>-T</B><I>sweep[/delay]</I>
 <B>-W</B><I>mode/start/end</I> <B>-H</B> <B>-V</B>]&quot;;
@@ -37,13 +37,13 @@ Version 5.0
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbsegypsd</B> calculates the power spectral densisty function (PSD) of each 
-trace in a segy file, outputting the PSD estimates as a grid with 
+<B>mbsegypsd</B> calculates the power spectral densisty function (PSD) of each
+trace in a segy file, outputting the PSD estimates as a grid with
 trace number along the x axis and frequency along the y axis.
-The output files are <B>GMT</B> netCDF format grid files. 
+The output files are <B>GMT</B> netCDF format grid files.
 <P>
 The x-dimension of the grid is determined by the number of traces specified
-by the <B>-S</B> option and any decimation specified with option <B>-D</B>. 
+by the <B>-S</B> option and any decimation specified with option <B>-D</B>.
 If the <B>-S</B> option is not specified, then all of the traces in the segy file
 will be processed. If the time sweep and delay (if any) are not specified using
 the <B>-T</B> option, then the sweep and delay will be set so that all trace samples
@@ -57,7 +57,7 @@ have a sample interval of (1/26000 = 0.00003846 seconds). In this case, the
 PSD will be calculated for frequencies ranging from 0 Hz to 13000 Hz (13 kHz).
 <P>
 For each trace, the PSD will be calculated by ensemble averaging, which means that
-the trace will be broken up into a number of segments of length <I>nfft</I> (specified 
+the trace will be broken up into a number of segments of length <I>nfft</I> (specified
 with the <B>-N</B> option, default = 1024), a fast-Fourier-transform (FFT) will be
 calculated for each segment, and the PSD estimate will be the average of
 the FFT magnitudes over all segments. Before the FFT is calculated, each segment
@@ -103,7 +103,7 @@ The <I>shotscale</I> value represents the shot spacing in meters.
 <I>decimatex</I>
 <BR>
 
-Sets the decimation of traces (<I>decimatex</I>) used in generating the output grid. 
+Sets the decimation of traces (<I>decimatex</I>) used in generating the output grid.
 <DT><B>-H</B>
 
 <DD>
@@ -137,11 +137,11 @@ Sets the filename root for the output GMT netCDF format grid.
 
 This option sets the range of traces that are gridded, and thus determines
 the x-dimension of the output grid (also impacted by any decimation
-specified with <B>-D</B>). If <I>mode</I> = 0, then <I>start</I> and <I>end</I> 
+specified with <B>-D</B>). If <I>mode</I> = 0, then <I>start</I> and <I>end</I>
 refer to shot numbers. This typically is useful for subbottom data or seismic
-data in shot gather form. If <I>mode</I> = 1, then <I>start</I> and <I>end</I> 
+data in shot gather form. If <I>mode</I> = 1, then <I>start</I> and <I>end</I>
 refer to CMP (or RP or CDP) numbers. This typically is useful for seismic
-reflection data in stacked or CMP gather forms. If the data are multichannel 
+reflection data in stacked or CMP gather forms. If the data are multichannel
 seismic reflection or seismic refraction in either shot or CMP gathers, the
 start and end of the channels selected for gridding is set using the optional <I>schan</I>
 and <I>echan</I>, respectively. The x-dimension of the output grid is determined by
@@ -152,13 +152,13 @@ and <I>echan</I>, respectively. The x-dimension of the output grid is determined
 <I>sweep[/delay]</I>
 <BR>
 
-The <I>sweep</I> value sets the time range of seismic data to be processed in seconds. 
+The <I>sweep</I> value sets the time range of seismic data to be processed in seconds.
 The optional <I>delay</I> value sets the sweep start time, again in seconds.
 <DT><B>-V</B>
 
 <DD>
 Normally, <B>mbsegypsd</B> prints out information regarding its
-controlling parameters during execution; the 
+controlling parameters during execution; the
 <B>-V</B> option causes the program to also print out statements
 indicating its progress.
 <DT><B>-W</B>
@@ -170,10 +170,10 @@ indicating its progress.
 This option can be used to limit the data being processed to a particular time
 window in various ways. This option does not impact the definition of the overall
 grid bounds, but does restrict the data processed to samples within particular times
-of interest. If <I>mode</I> = 1, then <I>start</I> and <I>end</I> are simply start and end 
+of interest. If <I>mode</I> = 1, then <I>start</I> and <I>end</I> are simply start and end
 times of good data in seconds. If <I>mode</I> = 2, then <I>start</I> and <I>end</I> are relative to
 the time of the bottom return. In this case <I>start</I> is often negative so that the
-grid shows data above the seafloor, and then down into the subsurface. Finally, if <I>mode</I> = 3, 
+grid shows data above the seafloor, and then down into the subsurface. Finally, if <I>mode</I> = 3,
 then <I>start</I> and <I>end</I> are relative to the time corresponding to the sonar
 depth.
 <P>
@@ -199,7 +199,7 @@ calculations. The shell output of the program is:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbsegypsd<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbsegypsd.1&nbsp;1938&nbsp;2012-02-22&nbsp;20:58:08Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.1.2beta12<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MBsegypsd&nbsp;Parameters:<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;segy&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20090922_1833_V3422_S7_CH025ms.segy<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;fileroot:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;testpsd<BR>
@@ -228,7 +228,7 @@ calculations. The shell output of the program is:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NaN&nbsp;values&nbsp;used&nbsp;to&nbsp;flag&nbsp;regions&nbsp;with&nbsp;no&nbsp;data<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shotscale:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.000000<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequencyscale:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.000000<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:0&nbsp;position:0&nbsp;shot:0&nbsp;channel:1&nbsp;2009/265&nbsp;18:32:59.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-102498.789062&nbsp;-187.008667<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:25&nbsp;position:25&nbsp;shot:25&nbsp;channel:1&nbsp;2009/265&nbsp;18:34:14.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-201902.890625&nbsp;9166.462891<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:50&nbsp;position:50&nbsp;shot:50&nbsp;channel:1&nbsp;2009/265&nbsp;18:35:29.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-203695.765625&nbsp;28316.906250<BR>
@@ -242,7 +242,7 @@ calculations. The shell output of the program is:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:1600&nbsp;position:1600&nbsp;shot:1600&nbsp;channel:1&nbsp;2009/265&nbsp;19:52:59.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-190216.031250&nbsp;-14304.720703<BR>
 <BR>&nbsp;.br
 <BR>&nbsp;.br
-The output PSD grid file is named testpsd.grd. A shellscript named 
+The output PSD grid file is named testpsd.grd. A shellscript named
 testpsd.grd.cmd is also created that, when executed, will generate a plot of the
 sonogram. <B>MBsegypsd</B> also outputs an ascii file containing the average PSD for the
 entire segy file in the form of frequency PSD pairs. In this case, the average PSD file
@@ -279,15 +279,13 @@ a plot of the average PSD.
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbm_grdplot.html">mbm_grdplot</A></B>(l), <B><A HREF="mbmosaic.html">mbmosaic</A></B>(l), <B><A HREF="mbm_grid.html">mbm_grid</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbm_grdplot.html">mbm_grdplot</A></B>(1), <B><A HREF="mbmosaic.html">mbmosaic</A></B>(1), <B><A HREF="mbm_grid.html">mbm_grid</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
 Probably...
 The plots could be better...
-<P>
-<P>
 <P>
 
 <HR>
@@ -307,7 +305,7 @@ The plots could be better...
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 24 December 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

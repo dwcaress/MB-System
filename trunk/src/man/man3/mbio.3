@@ -1,7 +1,7 @@
 .TH mbio 3 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 
 .SH NAME
-\fBmbio\fP - Format independent input/output library for swath mapping sonar data.
+\fBmbio\fP \- Format independent input/output library for swath mapping sonar data.
 
 .SH VERSION
 Version 5.0
@@ -763,23 +763,23 @@ All \fBMBIO\fP functions also pass an error value argument which gives
 somewhat more information about problems than the status value.  The
 full suite of possible error values and the associated error messages are:
   	error = 0:	"No error",
-  	error = -1:	"Time gap in data",
-  	error = -2:	"Data outside specified location
+  	error = \-1:	"Time gap in data",
+  	error = \-2:	"Data outside specified location
  			bounds",
-  	error = -3:	"Data outside specified time interval",
-  	error = -4:	"Ship speed too small",
-  	error = -5:	"Comment record",
-  	error = -6:	"Neither a data record nor a comment
+  	error = \-3:	"Data outside specified time interval",
+  	error = \-4:	"Ship speed too small",
+  	error = \-5:	"Comment record",
+  	error = \-6:	"Neither a data record nor a comment
  			record",
-  	error = -7:	"Unintelligible data record",
-  	error = -8:	"Ignore this data",
-  	error = -9:	"No data requested for buffer load",
-  	error = -10:	"Data buffer is full",
-  	error = -11:	"No data was loaded into the buffer",
-  	error = -12:	"Data buffer is empty",
-  	error = -13:	"No data was dumped from the buffer"
-  	error = -14:	"No more survey data records in buffer"
-  	error = -15:	"Data inconsistencies prevented
+  	error = \-7:	"Unintelligible data record",
+  	error = \-8:	"Ignore this data",
+  	error = \-9:	"No data requested for buffer load",
+  	error = \-10:	"Data buffer is full",
+  	error = \-11:	"No data was loaded into the buffer",
+  	error = \-12:	"Data buffer is empty",
+  	error = \-13:	"No data was dumped from the buffer"
+  	error = \-14:	"No more survey data records in buffer"
+  	error = \-15:	"Data inconsistencies prevented
  			inserting data into storage structure"
   	error = 1:	"Unable to allocate memory,
  			initialization failed",
@@ -800,7 +800,7 @@ full suite of possible error values and the associated error messages are:
   	error = 12:	"Invalid control parameter specified
  			by user",
   	error = 13:	"Invalid buffer id",
-  	error = 14:	"Invalid system id - this should
+  	error = 14:	"Invalid system id \- this should
  			not happen!"
   	error = 15:	"This data file is not in the specified format!"
 .br
@@ -879,8 +879,8 @@ across-track distance between beams.
 
 The \fIlonflip\fP paramenter determines the range in which longitude values
 are returned:
- 	\fIlonflip\fP = -1 : -360 to   0
- 	\fIlonflip\fP =  0 : -180 to 180
+ 	\fIlonflip\fP = \-1 : \-360 to   0
+ 	\fIlonflip\fP =  0 : \-180 to 180
  	\fIlonflip\fP =  1 :    0 to 360
 
 The \fIbounds\fP array sets the area within which data are desired.
@@ -982,7 +982,7 @@ is called.
 A status value indicating success or failure is returned; an error value
 argument passes more detailed information about initialization failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_write_init\fP(
  		int \fIverbose\fP,
@@ -1041,7 +1041,7 @@ is called.
 A status value indicating success or failure is returned; an error value
 argument passes more detailed information about initialization failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_register_array\fP(
  		int \fIverbose\fP,
@@ -1067,7 +1067,7 @@ has \fIsize\fP = 8). The array is associated with the \fBMBIO\fP
 descriptor \fImbio_ptr\fP, and is freed when \fImb_close\fP is
 called for this particular \fImbio_ptr\fP.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_close\fP(
  		int \fIverbose\fP,
@@ -1083,7 +1083,7 @@ returned; an error value argument passes more detailed information
 about failures.
 .SH LEVEL 1 FUNCTIONS
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_read\fP(
  		int \fIverbose\fP,
@@ -1172,7 +1172,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 read failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_get\fP(
  		int \fIverbose\fP,
@@ -1318,7 +1318,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 read failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_write_ping\fP(
  		int \fIverbose\fP,
@@ -1343,7 +1343,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 write failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_get_store\fP(
  		int \fIverbose\fP,
@@ -1370,7 +1370,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_get_all\fP(
  		int \fIverbose\fP,
@@ -1485,7 +1485,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 read failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_put_all\fP(
  		int \fIverbose\fP,
@@ -1602,7 +1602,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 write failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_put_comment\fP(
  		int \fIverbose\fP,
@@ -1628,7 +1628,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 write failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_extract\fP(
  		int \fIverbose\fP,
@@ -1715,7 +1715,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 extract failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_insert\fP(
  		int \fIverbose\fP,
@@ -1803,7 +1803,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 insert failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_extract_nav\fP(
  		int \fIverbose\fP,
@@ -1862,7 +1862,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 extract failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_insert_nav\fP(
  		int \fIverbose\fP,
@@ -1919,7 +1919,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 insert failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_extract_altitude\fP(
  		int \fIverbose\fP,
@@ -1960,7 +1960,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 data extraction failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_insert_altitude\fP(
  		int \fIverbose\fP,
@@ -1993,7 +1993,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 insert failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_extract_svp\fP(
  		int \fIverbose\fP,
@@ -2033,7 +2033,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 data extraction failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_insert_svp\fP(
  		int \fIverbose\fP,
@@ -2069,7 +2069,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 data insertion failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_ttimes\fP(
  		int \fIverbose\fP,
@@ -2140,7 +2140,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 data extraction failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_detects\fP(
  		int \fIverbose\fP,
@@ -2178,7 +2178,7 @@ only a subset of the supported sonars. If the corresponding low
 level routine is undefined, \fI*error\fP will be set to
 MB_ERROR_BAD_SYSTEM (14).
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_gains\fP(
  		int \fIverbose\fP,
@@ -2215,7 +2215,7 @@ only a subset of the supported sonars. If the corresponding low
 level routine is undefined, \fI*error\fP will be set to
 MB_ERROR_BAD_SYSTEM (14).
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_extract_rawss\fP(
  		int \fIverbose\fP,
@@ -2236,7 +2236,7 @@ sidescan varies greatly among sonars, the processing one might apply to
 the data will depend on the sonar source. The definition of
 \fBmb_extract_rawss\fP may well change when we actually implement it.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_insert_rawss\fP(
  		int \fIverbose\fP,
@@ -2256,7 +2256,7 @@ sidescan varies greatly among sonars, the processing one might apply to
 the data will depend on the sonar source. The definition of
 \fBmb_insert_rawss\fP may well change when we actually implement it.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_copyrecord\fP(
  		int \fIverbose\fP,
@@ -2298,7 +2298,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 buffer initialization failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_close\fP(
  		int \fIverbose\fP,
@@ -2318,7 +2318,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 buffer deallocation failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_load\fP(
  		int \fIverbose\fP,
@@ -2355,7 +2355,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 buffer deallocation failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_dump\fP(
  		int \fIverbose\fP,
@@ -2397,7 +2397,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 buffer deallocation failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_clear\fP(
  		int \fIverbose\fP,
@@ -2437,7 +2437,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 buffer deallocation failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_info\fP(
  		int \fIverbose\fP,
@@ -2477,7 +2477,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 buffer deallocation failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_get_next_data\fP(
  		int \fIverbose\fP,
@@ -2558,9 +2558,9 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 failures. The most common error occurs when no more survey data
 records remain to be found in the buffer; in this case,
-\fIerror\fP = -14.
+\fIerror\fP = \-14.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_extract\fP(
  		int \fIverbose\fP,
@@ -2643,7 +2643,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 extract failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_insert\fP(
  		int \fIverbose\fP,
@@ -2727,7 +2727,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 insert failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_get_next_nav\fP(
  		int \fIverbose\fP,
@@ -2787,9 +2787,9 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 failures. The most common error occurs when no more survey data
 records remain to be found in the buffer; in this case,
-\fIerror\fP = -14.
+\fIerror\fP = \-14.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_extract_nav\fP(
  		int \fIverbose\fP,
@@ -2849,7 +2849,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 extract failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_insert_nav\fP(
  		int \fIverbose\fP,
@@ -2908,7 +2908,7 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 insert failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_buffer_get_ptr\fP(
  		int \fIverbose\fP,
@@ -2968,9 +2968,9 @@ Otherwise, the values are set as:
 The other values are simply set as:
  	\fI*format\fP = 0
  	\fI*pings\fP = 1
- 	\fIbounds[0]\fP = -360.
+ 	\fIbounds[0]\fP = \-360.
  	\fIbounds[1]\fP = 360.
- 	\fIbounds[2]\fP = -90.
+ 	\fIbounds[2]\fP = \-90.
  	\fIbounds[3]\fP = 90.
  	\fIbtime_i[0]\fP = 1962;
  	\fIbtime_i[1]\fP = 2;
@@ -2991,7 +2991,7 @@ The other values are simply set as:
 A status value is returned to
 indicate success or failure.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_env\fP(
  		int \fIverbose\fP,
@@ -3016,7 +3016,7 @@ Otherwise, the values are set as:
  	                   "xv" (other than Linux OS)
  	\fImbproject\fP =  "none"
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_format\fP(
  		int \fIverbose\fP,
@@ -3035,7 +3035,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_format_register\fP(
  		int \fIverbose\fP,
@@ -3062,7 +3062,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_format_info\fP(
  		int \fIverbose\fP,
@@ -3123,7 +3123,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_format_system\fP(
  		int \fIverbose\fP,
@@ -3146,7 +3146,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_format_description\fP(
  		int \fIverbose\fP,
@@ -3170,7 +3170,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_format_dimensions\fP(
  		int \fIverbose\fP,
@@ -3198,7 +3198,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_format_flags\fP(
  		int \fIverbose\fP,
@@ -3226,7 +3226,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_format_source\fP(
  		int \fIverbose\fP,
@@ -3258,7 +3258,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_format_beamwidth\fP(
  		int \fIverbose\fP,
@@ -3286,7 +3286,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_datalist_open\fP(
  		int \fIverbose\fP,
@@ -3316,7 +3316,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_datalist_read\fP(
  		int \fIverbose\fP,
@@ -3346,7 +3346,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_datalist_close\fP(
  		int \fIverbose\fP,
@@ -3365,7 +3365,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_alloc\fP(
  		int \fIverbose\fP,
@@ -3389,7 +3389,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_deall\fP(
  		int \fIverbose\fP,
@@ -3410,7 +3410,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_error\fP(
  		int \fIerror\fP,
@@ -3422,7 +3422,7 @@ short error message in the string **\fImessage\fP. The \fIverbose\fP
 value controls the standard error output verbosity of the function.  The return
 status value signals success if \fIformat\fP is valid and failure otherwise.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_navint_add\fP(
  		int \fIverbose\fP,
@@ -3451,7 +3451,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_navint_interp\fP(
  		int \fIverbose\fP,
@@ -3488,7 +3488,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_attint_add\fP(
  		int \fIverbose\fP,
@@ -3520,7 +3520,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_attint_interp\fP(
  		int \fIverbose\fP,
@@ -3553,7 +3553,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_hedint_add\fP(
  		int \fIverbose\fP,
@@ -3580,7 +3580,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_hedint_interp\fP(
  		int \fIverbose\fP,
@@ -3608,7 +3608,7 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_get_double\fP(
  		double \fI*value\fP,
@@ -3620,7 +3620,7 @@ first \fInchar\fP characters of the string
 \fI*str\fP for a floating point value, storing
 this value as a double in \fI*value\fP.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_get_int\fP(
  		int \fI*value\fP,
@@ -3632,7 +3632,7 @@ first \fInchar\fP characters of the string
 \fI*str\fP for an integer value, storing
 this value as a int in \fI*value\fP.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_get_binary_short\fP(
  		int \fIswapped\fP,
@@ -3644,7 +3644,7 @@ a short int value from the first two bytes pointed to
 by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
 the byte order of \fI*value\fP is swapped.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_get_binary_int\fP(
  		int \fIswapped\fP,
@@ -3656,7 +3656,7 @@ an int value from the first four bytes pointed to
 by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
 the byte order of \fI*value\fP is swapped.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_get_binary_float\fP(
  		int \fIswapped\fP,
@@ -3668,7 +3668,7 @@ a float value from the first four bytes pointed to
 by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
 the byte order of \fI*value\fP is swapped.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_get_binary_double\fP(
  		int \fIswapped\fP,
@@ -3680,7 +3680,7 @@ a double value from the first eight bytes pointed to
 by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
 the byte order of \fI*value\fP is swapped.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_put_binary_short\fP(
  		int \fIswapped\fP,
@@ -3692,7 +3692,7 @@ a short int value into the first two bytes pointed to
 by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
 the byte order of \fIvalue\fP is swapped.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_put_binary_int\fP(
  		int \fIswapped\fP,
@@ -3704,7 +3704,7 @@ an int value into the first four bytes pointed to
 by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
 the byte order of \fIvalue\fP is swapped.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_put_binary_float\fP(
  		int \fIswapped\fP,
@@ -3716,7 +3716,7 @@ a float value into the first four bytes pointed to
 by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
 the byte order of \fIvalue\fP is swapped.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_put_binary_double\fP(
  		int \fIswapped\fP,
@@ -3728,7 +3728,7 @@ a double value into the first eight bytes pointed to
 by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
 the byte order of \fIvalue\fP is swapped.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_get_bounds\fP(
  		char \fI*text\fP,
@@ -3756,7 +3756,7 @@ The function \fBmb_ddmmss_to_degree\fP parses the string
 value from a "dd:mm:ss" (dd=degrees, mm=minutes, ss=seconds)
 value.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_takeoff_to_rollpitch\fP(
  		int \fIverbose\fP,
@@ -3771,7 +3771,7 @@ translates angles from the "takeoff" coordinate
 reference frame to the "rollpitch" coordinate system.
 See the discussion of coordinate systems below.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_rollpitch_to_takeoff\fP(
  		int \fIverbose\fP,
@@ -3786,16 +3786,16 @@ translates angles from the "rollpitch" coordinate
 reference frame to the "takeoff" coordinate system.
 See the discussion of coordinate systems below.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_double_compare\fP(double \fI*a\fP,
  		double \fI*b\fP);
 
 The function \fBmb_double_compare\fP
 is used with the \fBqsort\fP function.
-This function returns 1 if a > b and -1 if a <= b.
+This function returns 1 if a > b and \-1 if a <= b.
 
----------------------------------------------------------
+\---------------------------------------------------------
 .br
 int \fBmb_int_compare\fP(
  		int \fI*a\fP,
@@ -3803,7 +3803,7 @@ int \fBmb_int_compare\fP(
 
 The function \fBmb_int_compare\fP
 is used with the \fBqsort\fP function.
-This function returns 1 if a > b and -1 if a <= b.
+This function returns 1 if a > b and \-1 if a <= b.
 
 .SH COORDINATE SYSTEMS USED IN MB-SYSTEM
 I. Introduction
@@ -3857,13 +3857,13 @@ roll and pitch have components in both theta and phi.
  	y = rSIN(theta)SIN(phi)
  	z = rCOS(theta)
 
- 	theta = 0    ---> vertical, along positive z-axis
- 	theta = PI/2 ---> horizontal, in x-y plane
- 	phi = -PI/2  ---> aft, in y-z plane with y negative
- 	phi = 0      ---> port, in x-z plane with x positive
- 	phi = PI/2   ---> forward, in y-z plane with y positive
- 	phi = PI     ---> starboard, in x-z plane with x negative
- 	phi = 3*PI/2 ---> aft, in y-z plane with y negative
+ 	theta = 0    \---> vertical, along positive z-axis
+ 	theta = PI/2 \---> horizontal, in x-y plane
+ 	phi = \-PI/2  \---> aft, in y-z plane with y negative
+ 	phi = 0      \---> port, in x-z plane with x positive
+ 	phi = PI/2   \---> forward, in y-z plane with y positive
+ 	phi = PI     \---> starboard, in x-z plane with x negative
+ 	phi = 3*PI/2 \---> aft, in y-z plane with y negative
 
 III.2. Roll-Pitch Coordinates
 
@@ -3884,12 +3884,12 @@ alpha and beta.
  	y = rSIN(alpha)
  	z = rCOS(alpha)SIN(beta)
 
-  	alpha = -PI/2 ---> horizontal, in x-y plane with y negative
- 	alpha = 0     ---> ship level, zero pitch, in x-z plane
- 	alpha = PI/2  ---> horizontal, in x-y plane with y positive
- 	beta = 0      ---> starboard, along positive x-axis
- 	beta = PI/2   ---> in y-z plane rotated by alpha
- 	beta = PI     ---> port, along negative x-axis
+  	alpha = \-PI/2 \---> horizontal, in x-y plane with y negative
+ 	alpha = 0     \---> ship level, zero pitch, in x-z plane
+ 	alpha = PI/2  \---> horizontal, in x-y plane with y positive
+ 	beta = 0      \---> starboard, along positive x-axis
+ 	beta = PI/2   \---> in y-z plane rotated by alpha
+ 	beta = PI     \---> port, along negative x-axis
 
 IV. SeaBeam Coordinates
 
@@ -3912,9 +3912,9 @@ angle-forward value. To summarize:
  	is equivalent to
  	-PI/2 <= angle-forward <= PI/2
 
- 	phi = -PI/2 ---> angle-forward = -PI/2 (aft)
- 	phi = 0     ---> angle-forward = 0     (starboard)
- 	phi = PI/2  ---> angle-forward = PI/2  (forward)
+ 	phi = \-PI/2 \---> angle-forward = \-PI/2 (aft)
+ 	phi = 0     \---> angle-forward = 0     (starboard)
+ 	phi = PI/2  \---> angle-forward = PI/2  (forward)
 
     Starboard:
 
@@ -3924,9 +3924,9 @@ angle-forward value. To summarize:
  	is equivalent to
  	-PI/2 <= angle-forward <= PI/2
 
- 	phi = PI/2   ---> angle-forward = -PI/2 (forward)
- 	phi = PI     ---> angle-forward = 0     (port)
- 	phi = 3*PI/2 ---> angle-forward = PI/2  (aft)
+ 	phi = PI/2   \---> angle-forward = \-PI/2 (forward)
+ 	phi = PI     \---> angle-forward = 0     (port)
+ 	phi = 3*PI/2 \---> angle-forward = PI/2  (aft)
 
 V. Usage of Coordinate Systems in \fBMB-System\fP
 

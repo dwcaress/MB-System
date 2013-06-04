@@ -1,6 +1,6 @@
-.TH mblevitus 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mblevitus 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmblevitus\fP - Create a water velocity profile which is representative
+\fBmblevitus\fP \- Create a water velocity profile which is representative
 of the mean annual water column for a specified 1 degree by 1 degree
 region.
 
@@ -8,7 +8,7 @@ region.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmblevitus\fP [\fB-R\fIlon/lat \fB-O\fIoutfile \fB-V -H\fP]
+\fBmblevitus\fP [\fB\-R\fIlon/lat \fB\-O\fIoutfile \fB\-V \-H\fP]
 
 .SH DESCRIPTION
 \fBmblevitus\fP generates a mean water sound velocity profile for a 
@@ -77,7 +77,7 @@ Default: \fIlon\fP=0, \fIlat\fP=0.
 .B \-V
 Normally, \fBmblevitus\fP outputs only a minor bit of information 
 to the stdout stream.  If the
-\fB-V\fP flag is given, then \fBmblevitus\fP works in a "verbose" mode and
+\fB\-V\fP flag is given, then \fBmblevitus\fP works in a "verbose" mode and
 also outputs the program version being used and the complete
 water column structure used to calculate the water velocity profile.
 
@@ -87,7 +87,7 @@ for processing Hydrosweep DS bathymetry data collected on the
 Cocos-Nazca spreading center at 95W longitude and 2N latitude.
 The following will suffice:
 .br
- 	mblevitus -R-95/2 -Ovelocity_profile -V
+ 	mblevitus \-R-95/2 \-Ovelocity_profile \-V
 .br
 The output will be:
 
@@ -95,7 +95,7 @@ The output will be:
  MB-system Version 4.5
 
  Location for mean annual water velocity profile:
-   Requested:  -95.0000 longitude   2.0000 latitude
+   Requested:  \-95.0000 longitude   2.0000 latitude
    Used:       265.5000 longitude   2.5000 latitude
  Values defined directly by Levitus database:      27
  Values assuming deepest salinity and temperature: 19
@@ -217,8 +217,8 @@ The contents of the output file velocity_profile are:
  12000.000000 1670.864136
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbvelocitytool\fP(l), \fBmbprocess\fP(l), \fBmbset\fP(l), 
-\fBmbm_xbt\fP(l)
+\fBmbsystem\fP(1), \fBmbvelocitytool\fP(1), \fBmbprocess\fP(1), \fBmbset\fP(1), 
+\fBmbm_xbt\fP(1)
 
 .SH BUGS
 None known.

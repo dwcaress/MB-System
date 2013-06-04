@@ -98,7 +98,7 @@ sudo ./configure \
 #------------------------------------------------------------------------------
 
 # Build in ~/buildtest
-CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DBYTESWAPPED" \
+CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
 ./configure \
     --prefix=/Users/caress/buildtest \
     --with-netcdf-include=/sw/include \

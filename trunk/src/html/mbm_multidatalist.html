@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_multidatalist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  18 August 2011 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,7 +28,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbm_multidatalist</B> <B>-I</B><I>datalist</I> 
+<B>mbm_multidatalist</B> <B>-I</B><I>datalist</I>
 [<B>-X</B><I>nprocesses</I> [<B>-N</B> <B>-H</B> <B>-V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -36,26 +36,26 @@ Version 5.0
 
 <P>
 <B>mbm_multidatalist</B> is a macro used to efficiently generate ancilliary files
-for the swath data files referenced in the input datalist file. This is 
-accomplished by executing <B>mbdatalist</B> with the <B>-O</B> or <B>-N</B> option 
+for the swath data files referenced in the input datalist file. This is
+accomplished by executing <B>mbdatalist</B> with the <B>-O</B> or <B>-N</B> option
 for each swath file.
 <P>
-Programs such as <B>mbgrid</B> try to check statistics or &quot;inf&quot; 
+Programs such as <B>mbgrid</B> try to check statistics or &quot;inf&quot;
 files to see if the corresponding data files include data within
 the specified geographic bounds. Other programs look for
 &quot;fast bathymetry&quot; or &quot;fast navigation&quot; (&quot;fbt&quot; or &quot;fnv&quot;) files
-in order to read the data more quickly. The <B>-N</B> option causes 
-<B>mbm_multidatalist</B> to create these three types of ancillary files 
-for each swath data file. By default, <B>mbm_multidatalist</B> 
-creates the &quot;inf&quot;, &quot;fbt&quot;, and &quot;fnv&quot; files only when they don't 
+in order to read the data more quickly. The <B>-N</B> option causes
+<B>mbm_multidatalist</B> to create these three types of ancillary files
+for each swath data file. By default, <B>mbm_multidatalist</B>
+creates the &quot;inf&quot;, &quot;fbt&quot;, and &quot;fnv&quot; files only when they don't
 already exist or are out of date (older than the data file).
-The <B>-N</B> option causes <B>mbm_multidatalist</B> to create 
-(or recreate) the ancillary files 
-for each swath data file. 
+The <B>-N</B> option causes <B>mbm_multidatalist</B> to create
+(or recreate) the ancillary files
+for each swath data file.
 <P>
 The <B>-X</B><I>nprocesses</I> option sets the number of parallel processes that can be
-started by <B>mbm_multidatalist</B>. In general, the most efficient (fastest) execution of 
-the overall command will be achieved when <I>nprocesses</I> equals the number of 
+started by <B>mbm_multidatalist</B>. In general, the most efficient (fastest) execution of
+the overall command will be achieved when <I>nprocesses</I> equals the number of
 available CPUs or cores.
 <P>
 <A NAME="lbAF">&nbsp;</A>
@@ -100,9 +100,9 @@ already exists, and to forgo copying those that do exist.
 <I>datalist</I>
 <BR>
 
-Sets the input datalist filename. A datalist is an ascii 
+Sets the input datalist filename. A datalist is an ascii
 file containing a list of the input swath sonar
-data files to be copied and their formats.  
+data files to be copied and their formats.
 In the <I>datalist</I> file, each
 swath data file should be followed by a data format identifier, e.g.:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
@@ -119,11 +119,11 @@ is given in the <B>MBIO</B> manual page.
 
 <DD>
 This argument causes <B>mbm_multidatalist</B> to generate the three ancillary
-data files (&quot;inf&quot;, &quot;fbt&quot;, and &quot;fnv&quot;) even if they already exist and are up to date. 
+data files (&quot;inf&quot;, &quot;fbt&quot;, and &quot;fnv&quot;) even if they already exist and are up to date.
 <DT><B>-V</B>
 
 <DD>
-Causes <B>mbm_multidatalist</B> to operate in &quot;verbose&quot; mode 
+Causes <B>mbm_multidatalist</B> to operate in &quot;verbose&quot; mode
 so that it outputs
 more information than usual.
 <DT><B>-X</B>
@@ -160,25 +160,25 @@ files for each swath data file:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Running&nbsp;mbm_multidatalist...<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Executing&nbsp;mbdatalist&nbsp;-I20110805_053612.mb88&nbsp;-O&nbsp;-V<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Executing&nbsp;mbdatalist&nbsp;-I20110805_054149.mb88&nbsp;-O&nbsp;-V<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbdatalist<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbm_multidatalist.1&nbsp;1938&nbsp;2012-02-22&nbsp;20:58:08Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbdatalist<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.3.1904<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbm_multidatalist.1&nbsp;1938&nbsp;2012-02-22&nbsp;20:58:08Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.3.1904<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;inf&nbsp;file&nbsp;for&nbsp;20110805_054149.mb88<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;inf&nbsp;file&nbsp;for&nbsp;20110805_053612.mb88<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;fbt&nbsp;file&nbsp;for&nbsp;20110805_054149.mb88<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;fbt&nbsp;file&nbsp;for&nbsp;20110805_053612.mb88<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;fnv&nbsp;file&nbsp;for&nbsp;20110805_054149.mb88<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Generating&nbsp;fnv&nbsp;file&nbsp;for&nbsp;20110805_053612.mb88<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Total&nbsp;swath&nbsp;files:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Total&nbsp;swath&nbsp;files:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
 <P>
 Note that the terminal messages from the two <B>mbdatalist</B> processes are
@@ -187,15 +187,13 @@ mixed because the processes are executed in parallel.
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbdatalist.html">mbdatalist</A></B>(l), <B><A HREF="mbcopy.html">mbcopy</A></B>(l), 
-<B><A HREF="mbdatalist.html">mbdatalist</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbdatalist.html">mbdatalist</A></B>(1), <B><A HREF="mbcopy.html">mbcopy</A></B>(1),
+<B><A HREF="mbdatalist.html">mbdatalist</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
-Perhaps. 
-<P>
-<P>
+Perhaps.
 <P>
 
 <HR>
@@ -215,7 +213,7 @@ Perhaps.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 18 August 2011</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

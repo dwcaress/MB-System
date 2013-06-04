@@ -40,7 +40,7 @@
  *       INCLUDE FILES
  *****************************************************************************/
 #ifdef HAVE_CONFIG_H
-#include <mbsystem_config.h>
+#include <mb_config.h>
 #endif
 
 #if defined(__hpux)

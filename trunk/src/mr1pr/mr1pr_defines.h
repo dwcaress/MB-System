@@ -2,7 +2,7 @@
  *    The MB-system:	mr1pr_defines.h	3/7/2003
  *	$Id$
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /* This source code is part of the MR1PR library used to read and write
- * swath sonar data in the MR1PR format devised and used by the 
+ * swath sonar data in the MR1PR format devised and used by the
  * Hawaii Mapping Research Group of the University of Hawaii.
  * This source code was made available by Roger Davis of the
  * University of Hawaii under the GPL. Minor modifications have
@@ -44,7 +44,7 @@
  *	Hawaii MR1 post-processing software definitions.
  */
 #ifdef HAVE_CONFIG_H
-#  include <mbsystem_config.h>
+#include <mb_config.h>
 #endif
 
 #ifndef __MR1PR_DEFINES__
@@ -128,7 +128,7 @@ typedef struct ps_struct {
 
 /* MR1Timeval --
    This structure is defined for the MB-System version
-   of this code because MB-System explicitely avoids 
+   of this code because MB-System explicitely avoids
    using standard time structures and functions, thereby
    avoiding the wide variability in time handling amongst
    Unix-like operating systems. */

@@ -79,7 +79,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/src/mbsystem_config.h
+CONFIG_HEADER = $(top_builddir)/src/mbio/mb_config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BUILD_FFTW_TRUE@am__EXEEXT_1 = mbsegypsd$(EXEEXT)
@@ -214,7 +214,7 @@ mbsvplist_DEPENDENCIES =
 am_mbtime_OBJECTS = mbtime.$(OBJEXT)
 mbtime_OBJECTS = $(am_mbtime_OBJECTS)
 mbtime_DEPENDENCIES =
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f

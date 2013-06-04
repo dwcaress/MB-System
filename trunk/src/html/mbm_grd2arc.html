@@ -11,15 +11,15 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_grd2arc</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbm_grd2arc</B> - Macro to convert a GMT 
-grid file in the GMT NetCDF grid format 
-to an ArcView ASCII grid. 
+<B>mbm_grd2arc</B> - Macro to convert a GMT
+grid file in the GMT NetCDF grid format
+to an ArcView ASCII grid.
 <P>
 <A NAME="lbAC">&nbsp;</A>
 <H2>VERSION</H2>
@@ -34,12 +34,12 @@ mbm_grd2arc <B>-I</B><I>grdfile</I> <B>-O</B><I>arcfile</I> [<B>-H</B> <B>-N</B>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbm_grd2arc</B> is a macro to convert a GMT 
-grid file in the GMT NetCDF grid format 
+<B>mbm_grd2arc</B> is a macro to convert a GMT
+grid file in the GMT NetCDF grid format
 to an ArcView ASCII grid. This allows users to import the grid
-into Arc/Info and ArcView. The grids must have the same grid 
+into Arc/Info and ArcView. The grids must have the same grid
 interval in both longitude and latitude. If the grid was created
-using <B>mbgrid</B> or <B>mbmosaic</B>, the <B>-E</B> option 
+using <B>mbgrid</B> or <B>mbmosaic</B>, the <B>-E</B> option
 must have been used in that program
 to set the grid cell sizes equal (see the mbgrid and mbmosaic
 manual pages).
@@ -50,8 +50,8 @@ cell size of the grid using the GMT program <B>grdinfo</B>.
 The grid dimensions, the lower left position, and the
 grid cell size are written to the header of the output
 ArcView ASCII grid file.
-The macro then uses the GMT program <B>grd2xyz</B> to 
-dump each of the grid values to a temporary ASCII file. 
+The macro then uses the GMT program <B>grd2xyz</B> to
+dump each of the grid values to a temporary ASCII file.
 This temporary file is read and parsed one value at
 a time.  Any NaN values are
 replaced by the <I>nodata</I> value specified with the <B>-N</B>
@@ -87,7 +87,7 @@ of its operation and then exit immediately.
 <BR>
 
 Sets the filename of the input GMT grid file. This file must be
-in the GMT NetCDF GRD format. 
+in the GMT NetCDF GRD format.
 <DT><B>-N</B>
 
 <DD>
@@ -121,7 +121,7 @@ GRD format:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-E30.0/0m!&nbsp;-A2&nbsp;-N&nbsp;-G3&nbsp;-C1&nbsp;-V<BR>
 <BR>
 
-In this case, the <B>-E</B> option was used 
+In this case, the <B>-E</B> option was used
 to force <B>mbgrid</B> to use equal longitude and latitude
 grid cell sizes. See the <B>mbgrid</B> or <B>mbmosaic</B> manual pages for
 details on the usage of the <B>-E</B> option in those
@@ -159,15 +159,13 @@ Running the example above produced the following output:
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbgrid.html">mbgrid</A></B>(l),
-<B><A HREF="mbmosaic.html">mbmosaic</A></B>(l), <B><A HREF="mbm_arc2grd.html">mbm_arc2grd</A></B>(l), <B><A HREF="mbm_grid.html">mbm_grid</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbgrid.html">mbgrid</A></B>(1),
+<B><A HREF="mbmosaic.html">mbmosaic</A></B>(1), <B><A HREF="mbm_arc2grd.html">mbm_arc2grd</A></B>(1), <B><A HREF="mbm_grid.html">mbm_grid</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
 Maybe. Maybe not.
-<P>
-<P>
 <P>
 
 <HR>
@@ -187,7 +185,7 @@ Maybe. Maybe not.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

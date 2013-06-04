@@ -11,14 +11,14 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbbackangle</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  7 June 2010 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbbackangle</B> - Generates tables of the average amplitude or 
-sidescan values in swath sonar data as a function of 
+<B>mbbackangle</B> - Generates tables of the average amplitude or
+sidescan values in swath sonar data as a function of
 the grazing angle with the seafloor.
 <P>
 <A NAME="lbAC">&nbsp;</A>
@@ -29,63 +29,63 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbbackangle</B> [<B>-A</B><I>kind</I> 
-<B>-C</B> <B>-D</B> <B>-F</B><I>format</I>  
+<B>mbbackangle</B> [<B>-A</B><I>kind</I>
+<B>-C</B> <B>-D</B> <B>-F</B><I>format</I>
 <B>-G</B><I>kind/angle/max/nx/ny</I>
-<B>-I</B><I>file</I>  
+<B>-I</B><I>file</I>
 <B>-N</B><I>nangle/anglemax</I> <B>-P</B><I>pings</I> <B>-Q</B>
 <B>-R</B><I>refangle</I> <B>-T</B><I>topogridfile</I> <B>-Z</B><I>altitude</I> <B>-V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-The program <B>mbbackangle</B> reads a swath sonar data file 
+The program <B>mbbackangle</B> reads a swath sonar data file
 containing beam amplitude and/or sidescan data and generates tables
 of the average amplitude and/or sidescan values as a function of
 the grazing angle with the seafloor. These tables can be used
 by the program <B>mbprocess</B> to correct the sidescan or
 amplitude data for the variation with grazing angle. No assumption
 is made about the nature of the data or the sonar used to
-collect it. 
+collect it.
 <P>
-The user specifies the angular width 
+The user specifies the angular width
 of the swath considered and the number of angular bins in that
 swath; the average amplitude or sidescan value within each bin
 form the output data. By default, the grazing angle is calculated simply using the
-acrosstrack distance and depth at the beam or pixel location. 
-If bathymetry is not available, the seafloor is assumed to be flat 
+acrosstrack distance and depth at the beam or pixel location.
+If bathymetry is not available, the seafloor is assumed to be flat
 with a sonar altitude specified by the <B>-Z</B> option.
 If the <B>-Q</B> option is used, then the acrosstrack bottom slope
 at the beam or pixel location is factored into the grazing angle
 values. For bins outside the nadir region (angles &gt; 15.0 degrees
 from vertical), the averaging extends over the neighboring bins (three bins
 averaged for each value). The user also specifies the number of pings
-to be read to generate each table; the default is 50 pings. 
+to be read to generate each table; the default is 50 pings.
 <P>
-The results are written to a file named by 
+The results are written to a file named by
 adding a &quot;.sga&quot; suffix to the swath filename for sidescan and
 &quot;.aga&quot; for amplitude. These files contain a series of amplitude vs.
 grazing angle tables, each time tagged according to the average time
-of the pings used to generate that table. The swath file's 
+of the pings used to generate that table. The swath file's
 <B>mbprocess</B> parameter file is also modified (or created if necessary)
-so that sidescan or amplitude correction is enabled. 
+so that sidescan or amplitude correction is enabled.
 <P>
-The correction tables are read and interpolated according to ping time 
-by <B>mbprocess</B>. The correction value for each amplitude or sidescan 
-sample is also interpolated using the samples apparent grazing angle. 
-The grazing angle is calculated using a flat bottom assumption 
-by default but, if the <B>-Q</B> option is used, will instead be 
+The correction tables are read and interpolated according to ping time
+by <B>mbprocess</B>. The correction value for each amplitude or sidescan
+sample is also interpolated using the samples apparent grazing angle.
+The grazing angle is calculated using a flat bottom assumption
+by default but, if the <B>-Q</B> option is used, will instead be
 calculated using the acrosstrack slope in the bathymetry (if available) .
 If the <B>-T</B> option is used to specify a topography grid of the area
 of interest, then the grazing angle is calculated using that grid rather
 than any bathymetry data within the file being processed.
 <P>
-If the values are in dB, and therefore log scaled, then the corrections 
-are subtracted from the raw values and then the value of the correction 
-table at the reference angle (specified with the <B>-R</B> option) is 
+If the values are in dB, and therefore log scaled, then the corrections
+are subtracted from the raw values and then the value of the correction
+table at the reference angle (specified with the <B>-R</B> option) is
 added back in. In the case of linear data, the correction operation is
 to divide by the correction value and then multiply by the reference
-value. At present, only SeaBeam 2100 sidescan values are linear; all 
+value. At present, only SeaBeam 2100 sidescan values are linear; all
 other amplitude and sidescan data supported by <B>MB-System</B> are
 in dB.
 <P>
@@ -123,8 +123,8 @@ Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</
 <I>kind</I>
 <BR>
 
-Determines if beam amplitude (<I>kind</I> = 1) 
-and/or sidescan (<I>kind</I> = 2) data will be processed. 
+Determines if beam amplitude (<I>kind</I> = 1)
+and/or sidescan (<I>kind</I> = 2) data will be processed.
 Default: both amplitude and sidescan data are processed.
 <DT><B>-C</B>
 
@@ -133,7 +133,7 @@ Normally, <B>mbbackangle</B> produces a table of amplitude vs
 grazing angle values which is asymmetric about the vertical
 (zero angle) axis. If <B>-C</B> is specified, the amplitude
 vs grazing angle function will be forced to be symmetric.
-Generally, it is better to not use this option in <B>mbbackangle</B>, 
+Generally, it is better to not use this option in <B>mbbackangle</B>,
 and to instead use <B>mbset</B> to set symmetric or asymmetric
 sidescan correction in the <B>mbprocess</B> parameter file.
 <DT><B>-D</B>
@@ -147,11 +147,11 @@ stdout rather than to &quot;.sga&quot; or &quot;.aga&quot; files..
 <I>format</I>
 <BR>
 
-Sets the <B>MBIO</B> integer format identifier 
+Sets the <B>MBIO</B> integer format identifier
 for the input file specified with the
 <B>-I</B> option. By default, <B>mbbackangle</B>
 infers the format from the &quot;*.mbXX&quot; <B>MB-System</B> suffix
-convention. 
+convention.
 <DT><B>-G</B>
 
 <DD>
@@ -182,11 +182,11 @@ of its operation and then exit immediately.
 <I>filename</I>
 <BR>
 
-Sets the input filename. If <I>format</I> &gt; 0 (set with the 
-<B>-F</B> option) then the swath sonar data contained in <I>infile</I> 
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-F</B> option) then the swath sonar data contained in <I>infile</I>
 is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
 is assumed to be an ascii file containing a list of the input swath sonar
-data files to be processed and their formats.  The program will read 
+data files to be processed and their formats.  The program will read
 and process the data in each one of these files. Each input file will
 have an associated output file with either the &quot;.sga&quot; or &quot;.aga&quot; suffix.
 In the <I>infile</I> file, each
@@ -210,7 +210,7 @@ amplitude values according to their grazing angles and averaging
 the amplitudes within each bin. This option sets the number of
 grazing angle bins (<I>nangle</I>) and the maximum angle considered
 (<I>angle</I>). The grazing angle function will be defined at
-<I>nangle</I> points spaced equally from -<I>angle</I> to 
+<I>nangle</I> points spaced equally from -<I>angle</I> to
 +<I>angle</I>. The <I>nangle</I> value should be an odd integer
 so that the middle bin is centered on the angle 0.0.
 Default: <I>nangle</I> = 81, <I>angle</I> = 80.0.
@@ -239,7 +239,7 @@ into the grazing angle calculation for each data point.
 
 <DD>
 <I>refangle</I>
-Sets the reference angle that will be used by <B>mbprocess</B> in 
+Sets the reference angle that will be used by <B>mbprocess</B> in
 applying the amplitude and/or sidescan correction tables generated
 by <B>mbbackangle</B>. Default: <I>refangle</I> = 30.0 degrees.
 <DT><B>-T</B>
@@ -280,7 +280,7 @@ vs grazing angle table.
 
 Suppose one has a Simrad EM300 data file called
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0003_20020425_022926.mb57
-which contains 131 pings. In order to correct the beam amplitude and sidescan 
+which contains 131 pings. In order to correct the beam amplitude and sidescan
 with mbprocess, first use <B>mbbackangle</B> to generate the
 amplitude vs grazing angle tables:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbbackangle&nbsp;-I&nbsp;mbari_1998_988_msn.mb57&nbsp;\<BR>
@@ -298,7 +298,7 @@ pings. The output looks like:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbbackangle<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbbackangle.1&nbsp;1863&nbsp;2010-06-08&nbsp;00:44:13Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.0.4<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Pings&nbsp;to&nbsp;average:&nbsp;&nbsp;&nbsp;&nbsp;50<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Number&nbsp;of&nbsp;angle&nbsp;bins:&nbsp;81<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Maximum&nbsp;angle:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80.000000<BR>
@@ -308,9 +308,9 @@ pings. The output looks like:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Using&nbsp;flat&nbsp;bottom&nbsp;assumption&nbsp;in&nbsp;calculating&nbsp;correction&nbsp;tables...<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Outputting&nbsp;gridded&nbsp;histograms&nbsp;of&nbsp;beam&nbsp;amplitude&nbsp;vs&nbsp;grazing&nbsp;angle...<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Outputting&nbsp;gridded&nbsp;histograms&nbsp;of&nbsp;sidescan&nbsp;amplitude&nbsp;vs&nbsp;grazing&nbsp;angle...<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>processing&nbsp;swath&nbsp;file:&nbsp;mbari_1998_988_msn.mb57&nbsp;57<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7274&nbsp;records&nbsp;processed<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>805564&nbsp;amplitude&nbsp;data&nbsp;processed<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>146&nbsp;tables&nbsp;written&nbsp;to&nbsp;mbari_1998_988_msn.mb57.aga<BR>
@@ -319,7 +319,7 @@ pings. The output looks like:
 <P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Plot&nbsp;generation&nbsp;shellscript&nbsp;&lt;mbari_1998_988_msn.mb57_aga.grd.cmd&gt;&nbsp;created.<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Plot&nbsp;generation&nbsp;shellscript&nbsp;&lt;mbari_1998_988_msn.mb57_sga.grd.cmd&gt;&nbsp;created.<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7274&nbsp;total&nbsp;records&nbsp;processed<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>805564&nbsp;total&nbsp;amplitude&nbsp;data&nbsp;processed<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>146&nbsp;total&nbsp;aga&nbsp;tables&nbsp;written<BR>
@@ -328,10 +328,10 @@ pings. The output looks like:
 <P>
 The output files include the amplitude versus grazing angle tables in
 mbari_1998_988_msn.mb57.aga and mbari_1998_988_msn.mb57.sga, the
-gridded histogram files mbari_1998_988_msn.mb57_aga.grd and 
-mbari_1998_988_msn.mb57_sga.grd, and the plotting shellscripts 
-mbari_1998_988_msn.mb57_aga.grd.cmd and 
-mbari_1998_988_msn.mb57_sga.grd.cmd. The <B>mbprocess</B> parameter file 
+gridded histogram files mbari_1998_988_msn.mb57_aga.grd and
+mbari_1998_988_msn.mb57_sga.grd, and the plotting shellscripts
+mbari_1998_988_msn.mb57_aga.grd.cmd and
+mbari_1998_988_msn.mb57_sga.grd.cmd. The <B>mbprocess</B> parameter file
 mbari_1998_988_msn.mb57.par has also been either
 created (if necessary) or modified to enable sidescan
 correction using the &quot;.sga&quot; tables. The first of the six tables
@@ -440,7 +440,7 @@ in mbari_1998_988_msn.mb57.sga looks like:
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbprocess.html">mbprocess</A></B>(l), <B><A HREF="mbset.html">mbset</A></B>(l), <B><A HREF="mbfilter.html">mbfilter</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbset.html">mbset</A></B>(1), <B><A HREF="mbfilter.html">mbfilter</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
@@ -465,7 +465,7 @@ None worth bragging about.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 7 June 2010</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

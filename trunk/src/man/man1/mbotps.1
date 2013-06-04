@@ -1,38 +1,38 @@
-.TH mbotps 1 "29 December 2010" "MB-System 5.0" "MB-System 5.0"
+.TH mbotps 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbotps\fP - Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution.
+\fBmbotps\fP \- Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbotps\fP [\fB-A\fP\fItideformat\fP \fB-B\fP\fIyear/month/day/hour/minute/second\fP
-\fB-D\fP\fIinterval\fP \fB-E\fP\fIyear/month/day/hour/minute/second 
-\fB-F\fP\fIformat\fP \fB-I\fP\fIdatalist.mb-1\fP 
-\fB-M\fP \fB-O\fP\fIoutput\fP \fB-R\fP\fIlon/lat\fP \fB-V\fP]
+\fBmbotps\fP [\fB\-A\fP\fItideformat\fP \fB\-B\fP\fIyear/month/day/hour/minute/second\fP
+\fB\-D\fP\fIinterval\fP \fB\-E\fP\fIyear/month/day/hour/minute/second
+\fB\-F\fP\fIformat\fP \fB\-I\fP\fIdatalist.mb-1\fP
+\fB\-M\fP \fB\-O\fP\fIoutput\fP \fB\-R\fP\fIlon/lat\fP \fB\-V\fP]
 
 .SH DESCRIPTION
 \fBMBotps\fP is a utility that predicts tides using the OTPSnc (OSU Tidal Prediction
-Software) package that can be downloaded at: 
+Software) package that can be downloaded at:
     http://www.coas.oregonstate.edu/research/po/research/tide/
 The OTPSnc utilities are operated in a batch mode using command files with
-a fairly arcane format. \fBMBotps\fP provides a command line interface that 
+a fairly arcane format. \fBMBotps\fP provides a command line interface that
 allows \fBMB-System\fP users to easily obtain tide models for specified locations
-and times. \fBMBotps\fP is built during a normal installation of \fBMB-System\fP, 
-but will work only if the OTPSnc package has been installed separately, the program 
+and times. \fBMBotps\fP is built during a normal installation of \fBMB-System\fP,
+but will work only if the OTPSnc package has been installed separately, the program
 \fBpredict_tide\fP is in the user's path, and the user has both read and write
 permission in the directory containing the OTPSnc programs.
 
-\fBMBotps\fP can be operated in two modes. First, users may use the \fB-R\fP,
-\fB-B\fP, and \fB-E\fP options to specify a location and the beginning and end times of
-a tidal model for that location. The \fB-D\fP option sets the time interval of values in 
-the output tidal model, and the \fB-O\fP option sets the output tidal model filename.
+\fBMBotps\fP can be operated in two modes. First, users may use the \fB\-R\fP,
+\fB\-B\fP, and \fB\-E\fP options to specify a location and the beginning and end times of
+a tidal model for that location. The \fB\-D\fP option sets the time interval of values in
+the output tidal model, and the \fB\-O\fP option sets the output tidal model filename.
 
 Alternatively, instead of specifying a place and time range, the user may specify
-one or more swath data files using the \fB-I\fP option. A tidal model is produced for
-each swath file in which tidal values are calculated using the sonar navigation 
-locations at intervals specified with the \fB-D\fP option, and if the \fB-M\fP option
-is specified, the swath file's processing parameter file is modified so that \fBmbprocess\fP 
+one or more swath data files using the \fB\-I\fP option. A tidal model is produced for
+each swath file in which tidal values are calculated using the sonar navigation
+locations at intervals specified with the \fB\-D\fP option, and if the \fB\-M\fP option
+is specified, the swath file's processing parameter file is modified so that \fBmbprocess\fP
 applies the tidal model during processing.
 
 .SH AUTHORSHIP
@@ -81,10 +81,10 @@ This option sets the ending time for the output tidal model
 \fIformat\fP
 .br
 Sets the data format of the input swath data file specified with the
-\fB-I\fP option. If \fIformat\fP < 0, then the input file specified
-with the \fB-I\fP option will actually contain a list of input swath sonar
-data files. This program uses the \fBMBIO\fP library and will read any 
-swath sonar format with timestamps supported by \fBMBIO\fP. 
+\fB\-I\fP option. If \fIformat\fP < 0, then the input file specified
+with the \fB\-I\fP option will actually contain a list of input swath sonar
+data files. This program uses the \fBMBIO\fP library and will read any
+swath sonar format with timestamps supported by \fBMBIO\fP.
 A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. The default format is
@@ -97,11 +97,11 @@ of its operation and then exit immediately.
 .B \-I
 \fIfilename\fP
 .br
-Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP 
+Sets the input filename. If \fIformat\fP > 0 (set with the
+\fB\-f\fP option) then the swath sonar data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
-data files to be processed and their formats.  The program will read 
+data files to be processed and their formats.  The program will read
 the data in each one of these files.
 In the \fIinfile\fP file, each
 data file should be followed by a data format identifier, e.g.:
@@ -114,7 +114,7 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
 .B \-M
-If the \fB-I\fP option has been used so that tidal models are created for swath files,
+If the \fB\-I\fP option has been used so that tidal models are created for swath files,
 then this option causes each swath file's parameter file to be modified so that
 \fBmbprocess\fP will read and apply the ancilliary tidal model file created by
 \fBmbotps\fP.
@@ -127,37 +127,37 @@ Sets the filename of the tidal model output.
 .B \-R
 \fIlongitude/latitude\fP
 .br
-Sets the longitude and latitude position at which the tidal model will be 
+Sets the longitude and latitude position at which the tidal model will be
 calculated.
 .TP
 .B \-V
 Increases the verbosity of \fBmbotps\fP.
 
 .SH EXAMPLES
-Suppose one wishes to obtain a tidal model for the location 121W 36N extending 
+Suppose one wishes to obtain a tidal model for the location 121W 36N extending
 at 60 second intervals over the day February 21, 2009. The following will suffice:
- 	mbotps -R-125/36 -B2009/02/21/00/00/00 -E2009/02/21/23/59/59 -V
+ 	mbotps \-R-125/36 \-B2009/02/21/00/00/00 \-E2009/02/21/23/59/59 \-V
 .br
 .br
 The shell output looks like:
  	Program mbotps
  	Version $Id$
  	MB-system Version 5.1.2beta12
- 	
+
  	 Lat/Lon/Time file:tmp_mbotps_llt_6995.txt
- 	 Constituents to include: m2  s2  n2  k2  k1  o1  p1  q1  
+ 	 Constituents to include: m2  s2  n2  k2  k1  o1  p1  q1
  	 Predict OCEAN tide
  	 Interpolate minor constituents
- 	
+
  	 Model:        ss/sandbox/tides/OTPSnc/DATA/Model_tpxo7.2
  	 Model is on grid uniform in lat,lon
- 	 Lat limits:    -90.125 90.125
+ 	 Lat limits:    \-90.125 90.125
  	 Lon limits:    0.125 360.125
- 	 Constituents: m2  s2  n2  k2  k1  o1  p1  q1  mf  mm  m4  ms4 mn4 
+ 	 Constituents: m2  s2  n2  k2  k1  o1  p1  q1  mf  mm  m4  ms4 mn4
  	 Predict elevations (m)
- 	 Constituents to include: m2  s2  n2  k2  k1  o1  p1  q1  
+ 	 Constituents to include: m2  s2  n2  k2  k1  o1  p1  q1
  	 Reading model... done
- 	
+
  	Results are really in tide_tpxo7.2_model.txt
 .br
 .br
@@ -171,27 +171,27 @@ data that look like:
  	#     http://www.coas.oregonstate.edu/research/po/research/tide/
  	# Run by user <caress> on cpu <shepard-9.local> at <Wed Dec 23 01:56:31 2009>
  	# Model:        ss/sandbox/tides/OTPSnc/DATA/Model_tpxo7.2
- 	# Constituents included: m2  s2  n2  k2  k1  o1  p1  q1  
- 	2009 02 21 00 00 00   -0.6870
- 	2009 02 21 00 01 00   -0.6840
- 	2009 02 21 00 02 00   -0.6820
- 	2009 02 21 00 03 00   -0.6790
- 	2009 02 21 00 04 00   -0.6770
- 	2009 02 21 00 05 00   -0.6740
- 	2009 02 21 00 06 00   -0.6710
- 	2009 02 21 00 07 00   -0.6690
+ 	# Constituents included: m2  s2  n2  k2  k1  o1  p1  q1
+ 	2009 02 21 00 00 00   \-0.6870
+ 	2009 02 21 00 01 00   \-0.6840
+ 	2009 02 21 00 02 00   \-0.6820
+ 	2009 02 21 00 03 00   \-0.6790
+ 	2009 02 21 00 04 00   \-0.6770
+ 	2009 02 21 00 05 00   \-0.6740
+ 	2009 02 21 00 06 00   \-0.6710
+ 	2009 02 21 00 07 00   \-0.6690
  	.................
- 	2009 02 21 23 54 00   -0.7970
- 	2009 02 21 23 55 00   -0.7960
- 	2009 02 21 23 56 00   -0.7940
- 	2009 02 21 23 57 00   -0.7930
- 	2009 02 21 23 58 00   -0.7910
- 	2009 02 21 23 59 00   -0.7890
+ 	2009 02 21 23 54 00   \-0.7970
+ 	2009 02 21 23 55 00   \-0.7960
+ 	2009 02 21 23 56 00   \-0.7940
+ 	2009 02 21 23 57 00   \-0.7930
+ 	2009 02 21 23 58 00   \-0.7910
+ 	2009 02 21 23 59 00   \-0.7890
 
 Now, suppose that one wants to apply tide corrections directly to a set of EM3002
 data in GSF format. First, execute \fBmbotps\fP with the datalist for the swath
 data specified as input:
- 	mbotps -Idatalist.mb-1 -V
+ 	mbotps \-Idatalist.mb-1 \-V
 .br
 The resulting shell output looks like:
 .br
@@ -202,24 +202,24 @@ The resulting shell output looks like:
  	---------------------------------------
 
  	Processing tides for himbb05291.d23.mb121
- 	
+
  	35602 records read from himbb05291.d23.mb121.fnv
- 	
+
  	 Lat/Lon/Time file:tmp_mbotps_llt_7413.txt
- 	 Constituents to include: m2  s2  n2  k2  k1  o1  p1  q1  
+ 	 Constituents to include: m2  s2  n2  k2  k1  o1  p1  q1
  	 Predict OCEAN tide
  	 Interpolate minor constituents
- 	
+
  	 Model:        ss/sandbox/tides/OTPSnc/DATA/Model_tpxo7.2
  	 Model is on grid uniform in lat,lon
- 	 Lat limits:    -90.125 90.125
+ 	 Lat limits:    \-90.125 90.125
  	 Lon limits:    0.125 360.125
- 	 Constituents: m2  s2  n2  k2  k1  o1  p1  q1  mf  mm  m4  ms4 mn4 
+ 	 Constituents: m2  s2  n2  k2  k1  o1  p1  q1  mf  mm  m4  ms4 mn4
  	 Predict elevations (m)
- 	 Constituents to include: m2  s2  n2  k2  k1  o1  p1  q1  
+ 	 Constituents to include: m2  s2  n2  k2  k1  o1  p1  q1
  	 Reading model... done
  	 Results are in tmp_mbotps_llttd_7413.txt
- 	
+
  	Results are really in himbb05291.d23.mb121.tde
 .br
 .br
@@ -232,7 +232,7 @@ The output tide files have the same structure shown above:
  	#     http://www.coas.oregonstate.edu/research/po/research/tide/
  	# Run by user <caress> on cpu <shepard-9.local> at <Wed Dec 23 23:04:55 2009>
  	# Model:        ss/sandbox/tides/OTPSnc/DATA/Model_tpxo7.2
- 	# Constituents included: m2  s2  n2  k2  k1  o1  p1  q1  
+ 	# Constituents included: m2  s2  n2  k2  k1  o1  p1  q1
  	2005 10 18 19 01 36    0.0800
  	2005 10 18 19 02 36    0.0790
  	2005 10 18 19 03 36    0.0770
@@ -247,13 +247,12 @@ In addition to generating *.tde files for each swath file referenced by the
 input datalist structure, \fBmbotps\fP modifies the parameter file associated
 with each swath file (creating it if necessary) so that tide correction is enabled
 using the *.tde file and tide format 2. When \fBmbprocess\fP is run on the same
-datalist, the files will be reprocessed, and the processing will include the 
+datalist, the files will be reprocessed, and the processing will include the
 application of the tide correction to all bathymetry.
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbprocess\fP, \fBmbset\fP
+\fBmbsystem\fP(1), \fBmbprocess\fP, \fBmbset\fP
 
 .SH BUGS
 Installing the Fortran90 OTPSnc package from Oregon State is not particularly
 easy.
-

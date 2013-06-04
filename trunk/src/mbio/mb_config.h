@@ -1,5 +1,5 @@
-/* src/mbsystem_config.h.  Generated from mbsystem_config.h.in by configure.  */
-/* src/mbsystem_config.h.in.  Generated from configure.in by autoheader.  */
+/* src/mbio/mb_config.h.  Generated from mb_config.h.in by configure.  */
+/* src/mbio/mb_config.h.in.  Generated from configure.in by autoheader.  */
 
 /* Machine is littleendian, (Byteswapping on) */
 #define BYTESWAPPED 1
@@ -84,7 +84,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 3.5.2084"
+#define PACKAGE_STRING "mbsystem 3.5.2095"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -93,13 +93,13 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.5.2084"
+#define PACKAGE_VERSION "3.5.2095"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.5.2084"
+#define VERSION "3.5.2095"
 
 /* Turned on WIN32 define in config */
 /* #undef WIN32 */

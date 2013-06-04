@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_io.h	4/21/96
+ *    The MB-system:	mb_define.h	4/21/96
  *    $Id$
  *
  *    Copyright (c) 1996-2013 by
@@ -162,7 +162,7 @@
  *
  */
 #ifdef HAVE_CONFIG_H
-#  include <mbsystem_config.h>
+#include <mb_config.h>
 #endif
 
 /* include for mb_s_char types */

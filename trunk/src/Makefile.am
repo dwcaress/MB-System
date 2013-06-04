@@ -1,5 +1,3 @@
-include_HEADERS = mbsystem_config.h
-
 if BUILD_MOTIF
   XBUILD_SUB = mbedit mbnavedit mbvelocitytool mbnavadjust
 endif

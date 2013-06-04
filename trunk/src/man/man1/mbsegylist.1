@@ -1,25 +1,25 @@
 .TH mbsegylist 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbsegylist\fP - List selected header values in segy format seismic data files.
+\fBmbsegylist\fP \- List selected header values in segy format seismic data files.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsegylist\fP [\fB-A\fP \fB-D\fP\fIdecimate\fP
-\fB-H\fP \fB-G\fP\fIdelimeter\fP \fB-I\fP\fIinfilename\fP
-\fB-L\fP\fIlonflip\fP \fB-O\fP\fIoutput_format\fP
-\fB-U\fP\fIcheck\fP \fB-V\fP \fB-Z\fP\fIsegment\fP]
+\fBmbsegylist\fP [\fB\-A\fP \fB\-D\fP\fIdecimate\fP
+\fB\-H\fP \fB\-G\fP\fIdelimeter\fP \fB\-I\fP\fIinfilename\fP
+\fB\-L\fP\fIlonflip\fP \fB\-O\fP\fIoutput_format\fP
+\fB\-U\fP\fIcheck\fP \fB\-V\fP \fB\-Z\fP\fIsegment\fP]
 
 .SH DESCRIPTION
 \fBMBsegylist\fP is a utility to output specified header values
 from segy seismic data files to stdout. The
-option \fB-O\fP\fIoutput_format\fP is
+option \fB\-O\fP\fIoutput_format\fP is
 used to control the type and order of values output.
 By default, \fBmbsegylist\fP  produces ASCII files in
 spreadsheet style, with data columns separated by tabs. Alternatively,
 the output can be binary, with each field represented
-as a double precision float (\fB-A\fP option).
+as a double precision float (\fB\-A\fP option).
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -68,10 +68,10 @@ Sets the filename of the input segy seismic data file.
 \fIlonflip\fP
 .br
 Sets the range of the longitude values returned.
-If \fIlonflip\fP=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If \fIlonflip\fP=0
+If \fIlonflip\fP=\-1 then the longitude values will be in
+the range from \-360 to 0 degrees. If \fIlonflip\fP=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If \fIlonflip\fP=1
+the range from \-180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
@@ -90,10 +90,10 @@ heading and not to values like time
 strings orpositions with hemisphere
 characters.
 .IP
-\fB-\fP
+\fB\-\fP
 special character: this causes the value
 indicated by the next character to be
-multiplied by -1. This applies only
+multiplied by \-1. This applies only
 to simple numeric values such as
 depth and heading and not to values
 like time strings or positions with
@@ -174,20 +174,20 @@ delay, sample length, number samples, trace length)
 .B \-V
 Normally, \fBmbsegylist\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBmbsegylist\fP works in a "verbose" mode and
+\fB\-V\fP flag is given, then \fBmbsegylist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
 .B \-Z
 \fIsegment\fP
 .br
 Causes the ascii output of different input segy files
-(e.g. when a datalist is specified with the \fB-I\fP option)
+(e.g. when a datalist is specified with the \fB\-I\fP option)
 to be separated by lines with \fIsegment\fP. If \fIsegment\fP
 is a single character, then the output is a multiple segment
 file of the sort accepted by the \fBGMT\fP program \fBpsxy\fP.
 This option only works with ascii output, and is thus disabled
-when the \fB-A\fP option is specified. The most common usage
-is \fB-Z\fP\I>\fP.
+when the \fB\-A\fP option is specified. The most common usage
+is \fB\-Z\fP\I>\fP.
 
 .SH EXAMPLES
 Suppose one has a subbottom profiler segy data file called
@@ -195,23 +195,23 @@ Suppose one has a subbottom profiler segy data file called
 
 In order to obtain a listing of the shot number, time tag, and position
 of the traces in the file, use \fBmbsegylist\fP as follows:
- 	mbsegylist -I 20040722_152111.s7k.segy -OSTXY
+ 	mbsegylist \-I 20040722_152111.s7k.segy \-OSTXY
 
 The output will be as follows:
 
-    56  2004/07/22/15/20/37.029000      -121.857289       36.775508
-    57  2004/07/22/15/20/37.590000      -121.857289       36.775514
-    58  2004/07/22/15/20/38.152000      -121.857289       36.775519
-    59  2004/07/22/15/20/38.713000      -121.857289       36.775525
-    60  2004/07/22/15/20/39.275000      -121.857289       36.775531
-    61  2004/07/22/15/20/39.837000      -121.857289       36.775536
-    62  2004/07/22/15/20/40.398000      -121.857289       36.775542
-    63  2004/07/22/15/20/40.960000      -121.857289       36.775547
-    64  2004/07/22/15/20/41.521000      -121.857289       36.775553
+    56  2004/07/22/15/20/37.029000      \-121.857289       36.775508
+    57  2004/07/22/15/20/37.590000      \-121.857289       36.775514
+    58  2004/07/22/15/20/38.152000      \-121.857289       36.775519
+    59  2004/07/22/15/20/38.713000      \-121.857289       36.775525
+    60  2004/07/22/15/20/39.275000      \-121.857289       36.775531
+    61  2004/07/22/15/20/39.837000      \-121.857289       36.775536
+    62  2004/07/22/15/20/40.398000      \-121.857289       36.775542
+    63  2004/07/22/15/20/40.960000      \-121.857289       36.775547
+    64  2004/07/22/15/20/41.521000      \-121.857289       36.775553
   	.....
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbextractsegy\fP(l), \fBmbsegyinfo\fP(l), \fBmbsegygrid\fP(l),
+\fBmbsystem\fP(1), \fBmbextractsegy\fP(1), \fBmbsegyinfo\fP(1), \fBmbsegygrid\fP(1),
 \fBSIOSEIS\fP(http://sioseis.ucsd.edu/ )
 
 .SH BUGS

@@ -1,17 +1,17 @@
-.TH mbinfo 1 "5 April 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mbinfo 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbinfo\fP - Output some basic statistics of swath sonar data files.
+\fBmbinfo\fP \- Output some basic statistics of swath sonar data files.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP
-\fB-F\fIformat\fP \fB-G\fP \fB-I\fIfilename\fP
-\fB-L\fIlonflip\fP \fB-M\fIlondim/latdim\fP
-\fB-N\fP \fB-O\fP \fB-P\fIping\fP
-\fB-R\fIwest/east/south/north\fP \fB-S\fIspeed\fP \fB-W\fP
-\fB-X\fIoutputformat\fP \fB-V -H\fP]
+\fBmbinfo\fP [\fB\-B\fIyr/mo/da/hr/mn/sc\fP \fB\-C \-E\fIyr/mo/da/hr/mn/sc\fP
+\fB\-F\fIformat\fP \fB\-G\fP \fB\-I\fIfilename\fP
+\fB\-L\fIlonflip\fP \fB\-M\fIlondim/latdim\fP
+\fB\-N\fP \fB\-O\fP \fB\-P\fIping\fP
+\fB\-R\fIwest/east/south/north\fP \fB\-S\fIspeed\fP \fB\-W\fP
+\fB\-X\fIoutputformat\fP \fB\-V \-H\fP]
 
 .SH DESCRIPTION
 \fBMBinfo\fP is a utility for reading a swath sonar data file
@@ -44,15 +44,15 @@ of ".inf" files allows this information to be determined without
 having to read through each swath file.To create an ".inf" file, simply direct the
 output of \fBmbinfo\fP to a file named by adding the
 suffix ".inf" to the input swath
-data filename. This can also be accomplished using the \fB-O\fP
-option of \fBmbinfo\fP, or the \fB-N\fP and \fB-O\fP options of
+data filename. This can also be accomplished using the \fB\-O\fP
+option of \fBmbinfo\fP, or the \fB\-N\fP and \fB\-O\fP options of
 \fBmbdatalist\fP.
 
 Data archives use metadata harvesting tools that often work better with
 information structured for machine parsing rather than for easy
 reading by humans. To output a variant of "*.inf" files in the JSON
-format (with "_inf.json" suffixes), use the \fB-X\fP\fI1\fP option.
-Similarly, specifying the \fB-X\fP\fI2\fP option will result in XML
+format (with "_inf.json" suffixes), use the \fB\-X\fP\fI1\fP option.
+Similarly, specifying the \fB\-X\fP\fI2\fP option will result in XML
 output in files with "_xml.inf" suffixes.
 
 The program \fBmbprocess\fP can insert metadata recognized
@@ -77,8 +77,8 @@ The program output can also be extended to include a coarse
 mask representing where data lies within the file's bounding
 box. This mask is shown as a table of 0's and 1's, where
 the 1's indicate bins with data. The dimensions of the mask
-are specified with the \fB-M\fP\fIlondim/latdim\fP option.
-For instance, if the user specifies \fB-M\fP\fI10/10\fP, then
+are specified with the \fB\-M\fP\fIlondim/latdim\fP option.
+For instance, if the user specifies \fB\-M\fP\fI10/10\fP, then
 \fBmbinfo\fP will read through the data once to establish the
 usual statistics, including the data bounding box. Then, the
 program will initialize a 10 X 10 grid with the minimum and
@@ -103,7 +103,7 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the starting time for data allowed in the input data.
-The \fB-E\fP option sets the ending time for data. If the
+The \fB\-E\fP option sets the ending time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -114,14 +114,14 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
 .B \-C
 Normally, \fBmbinfo\fP ignores comments encountered in the
-data file.  If the \fB-C\fP flag is given, all of the comments will be
+data file.  If the \fB\-C\fP flag is given, all of the comments will be
 printed out.
 .TP
 .B \-E
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the ending time for data allowed in the input data.
-The \fB-B\fP option sets the starting time for data. If the
+The \fB\-B\fP option sets the starting time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -135,7 +135,7 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .br
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
-with the \fB-I\fP option will actually contain a list of input swath sonar
+with the \fB\-I\fP option will actually contain a list of input swath sonar
 data files. This program uses the \fBMBIO\fP library
 and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
@@ -160,7 +160,7 @@ of its operation and then exit immediately.
 \fIfilename\fP
 .br
 Sets the input filename. If \fIformat\fP > 0 (set with the
-\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP
+\fB\-f\fP option) then the swath sonar data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read
@@ -179,10 +179,10 @@ is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 \fIlonflip\fP
 .br
 Sets the range of the longitude values returned.
-If \fIlonflip\fP=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If \fIlonflip\fP=0
+If \fIlonflip\fP=\-1 then the longitude values will be in
+the range from \-360 to 0 degrees. If \fIlonflip\fP=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If \fIlonflip\fP=1
+the range from \-180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fBmbinfo\fP selects the bext longitude range based
@@ -195,7 +195,7 @@ The program output can be extended to include a coarse
 mask representing where data lies within the file's bounding
 box. This mask is shown as a table of 0's and 1's, where
 the 1's indicate bins with data. The dimensions of the mask
-are specified with the \fB-M\fP\fIlondim/latdim\fP option.
+are specified with the \fB\-M\fP\fIlondim/latdim\fP option.
 .TP
 .B \-N
 .br
@@ -239,7 +239,7 @@ Default: \fIpings\fP = 1 (no variance calculations).
 Sets the longitude and latitude bounds within which swath sonar
 data will be read. Only the data which lies within these bounds will
 be read.
-Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
+Default: \fIwest\fP=\-360, east\fI=360\fP, \fIsouth\fP=\-90, \fInorth\fP=90.
 .TP
 .B \-S
 \fIspeed\fP
@@ -257,12 +257,12 @@ the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .B \-V
 Normally, \fBmbinfo\fP only prints out the statistics obtained
 by reading all of the data.  If the
-\fB-V\fP flag is given, then \fBmbinfo\fP works in a "verbose" mode and
+\fB\-V\fP flag is given, then \fBmbinfo\fP works in a "verbose" mode and
 outputs the program version being used and all read error status messages.
 .TP
 .B \-W
 Normally, \fBmbinfo\fP reports depth values in meters. If the
-\fB-W\fP flag is given, then \fBmbinfo\fP reports these values
+\fB\-W\fP flag is given, then \fBmbinfo\fP reports these values
 in feet.
 .TP
 .B \-X
@@ -270,11 +270,11 @@ in feet.
 .br
 Normally, \fBmbinfo\fP reports information as text formatted for easy
 reading. If this option is given with \fIoutputformat\fP=1, then the
-output will be in the JSON format. If the \fB-O\fP option is used to
+output will be in the JSON format. If the \fB\-O\fP option is used to
 explicitly make "*.inf" files, then the output will be JSON and the output
 filenames will be named using the original data file path with an "_inf.json"
 suffix appended. If this option is given with \fIoutputformat\fP=2, then the
-output will be in the XML format. If the \fB-O\fP option is used to
+output will be in the XML format. If the \fB\-O\fP option is used to
 explicitly make "*.inf" files, then the output will be XML and the output
 filenames will be named using the original data file path with an "_inf.xml"
 suffix appended.
@@ -283,7 +283,7 @@ suffix appended.
 Suppose one wishes to know something about the contents of
 a Hydrosweep file (format 24) called example_hs.mb24.
 The following will suffice:
- 	mbinfo -F24 -Iexample_hs.mb24
+ 	mbinfo \-F24 \-Iexample_hs.mb24
 
 The following output is produced:
 
@@ -320,18 +320,18 @@ The following output is produced:
 
  Start of Data:
  Time:  08 14 1993 18:00:25.000000  JD226
- Lon:  -49.3011     Lat:   12.1444     Depth:  4920.0000 meters
+ Lon:  \-49.3011     Lat:   12.1444     Depth:  4920.0000 meters
  Speed: 18.3600 km/hr ( 9.9243 knots)  Heading:  97.2000 degrees
  Sonar Depth:    0.0000 m  Sonar Altitude: 4920.0000 m
 
  End of Data:
  Time:  08 14 1993 19:14:58.000000  JD226
- Lon:  -49.1111     Lat:   12.1149     Depth:  5021.0000 meters
+ Lon:  \-49.1111     Lat:   12.1149     Depth:  5021.0000 meters
  Speed: 17.2800 km/hr ( 9.3405 knots)  Heading:  97.0000 degrees
  Sonar Depth:    0.0000 m  Sonar Altitude: 5021.0000 m
 
  Limits:
- Minimum Longitude:     -49.3061   Maximum Longitude:     -49.1064
+ Minimum Longitude:     \-49.3061   Maximum Longitude:     \-49.1064
  Minimum Latitude:       12.0750   Maximum Latitude:       12.1806
  Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
  Minimum Altitude:     4087.0000   Maximum Altitude:     5034.0000
@@ -341,7 +341,7 @@ The following output is produced:
 
 Suppose we wanted to know how noisy the outer beams are relative
 to the inner beams.  We might try:
- 	mbinfo -F24 -P5 -Iexample_hs.mb24
+ 	mbinfo \-F24 \-P5 \-Iexample_hs.mb24
 
 obtaining:
 
@@ -377,18 +377,18 @@ obtaining:
 
  Start of Data:
  Time:  08 14 1993 18:00:25.000000  JD226
- Lon:  -49.3011     Lat:   12.1444     Depth:  4920.0000 meters
+ Lon:  \-49.3011     Lat:   12.1444     Depth:  4920.0000 meters
  Speed: 18.3600 km/hr ( 9.9243 knots)  Heading:  97.2000 degrees
  Sonar Depth:    0.0000 m  Sonar Altitude: 4920.0000 m
 
  End of Data:
  Time:  08 14 1993 19:14:58.000000  JD226
- Lon:  -49.1111     Lat:   12.1149     Depth:  5021.0000 meters
+ Lon:  \-49.1111     Lat:   12.1149     Depth:  5021.0000 meters
  Speed: 17.2800 km/hr ( 9.3405 knots)  Heading:  97.0000 degrees
  Sonar Depth:    0.0000 m  Sonar Altitude: 5021.0000 m
 
  Limits:
- Minimum Longitude:     -49.3061   Maximum Longitude:     -49.1064
+ Minimum Longitude:     \-49.3061   Maximum Longitude:     \-49.1064
  Minimum Latitude:       12.0750   Maximum Latitude:       12.1806
  Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
  Minimum Altitude:     4087.0000   Maximum Altitude:     5034.0000
@@ -398,7 +398,7 @@ obtaining:
  Beam Bathymetry Variances:
  Pings Averaged: 5
   Beam     N      Mean     Variance    Sigma
-  ----     -      ----     --------    -----
+  \----     \-      \----     \--------    \-----
     0      0       0.00       0.00      0.00
     1      0       0.00       0.00      0.00
     2    110    4719.59     342.69     18.51
@@ -460,7 +460,7 @@ obtaining:
    58      0       0.00       0.00      0.00
 
 .SH SEE ALSO
-\fBmbsystem\fP(l)
+\fBmbsystem\fP(1)
 
 .SH BUGS
 No bugs, only features. Maybe too many features...

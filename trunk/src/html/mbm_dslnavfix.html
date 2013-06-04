@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_dslnavfix</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,15 +28,15 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbm_dslnavfix</B> <B>-F</B><I>navformat</I> 
-<B>-I</B><I>infile</I> <B>-J</B><I>utm_zone</I> 
-<B>-O</B><I>outfile</I> 
+<B>mbm_dslnavfix</B> <B>-F</B><I>navformat</I>
+<B>-I</B><I>infile</I> <B>-J</B><I>utm_zone</I>
+<B>-O</B><I>outfile</I>
 [<B>-D</B><I>decimate</I> <B>-E</B><I>ellipsoid</I> <B>-H</B> <B>-V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbm_dslnavfix</B> is a macro to translate 
+<B>mbm_dslnavfix</B> is a macro to translate
 WHOI DSL AMS-120 navigation from
 UTM eastings and northings to longitude and latitude.
 The WHOI DSL group typically provides processed AMS-120
@@ -66,10 +66,10 @@ processing WHOI DSL AMS-120 data with MB-System:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;files&nbsp;into&nbsp;a&nbsp;single&nbsp;file.<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>cat&nbsp;*.nav&nbsp;&gt;&nbsp;cruise.rnav<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2)&nbsp;Translate&nbsp;the&nbsp;DSL&nbsp;UTM&nbsp;navigation&nbsp;into&nbsp;geographic<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;coordinates.&nbsp;In&nbsp;the&nbsp;&quot;old&quot;&nbsp;case&nbsp;the&nbsp;navigation&nbsp;is&nbsp;<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;a&nbsp;format&nbsp;designated&nbsp;by&nbsp;<B>-F</B><I>1</I>&nbsp;and&nbsp;
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;the&nbsp;new&nbsp;case&nbsp;by&nbsp;<B>-F</B><I>2</I>.&nbsp;Note&nbsp;that&nbsp;
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;you&nbsp;must&nbsp;know&nbsp;the&nbsp;UTM&nbsp;zone&nbsp;used&nbsp;-&nbsp;here&nbsp;we&nbsp;assume&nbsp;
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;coordinates.&nbsp;In&nbsp;the&nbsp;&quot;old&quot;&nbsp;case&nbsp;the&nbsp;navigation&nbsp;is<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;a&nbsp;format&nbsp;designated&nbsp;by&nbsp;<B>-F</B><I>1</I>&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;the&nbsp;new&nbsp;case&nbsp;by&nbsp;<B>-F</B><I>2</I>.&nbsp;Note&nbsp;that
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;you&nbsp;must&nbsp;know&nbsp;the&nbsp;UTM&nbsp;zone&nbsp;used&nbsp;-&nbsp;here&nbsp;we&nbsp;assume
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;zone&nbsp;is&nbsp;+27.
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_dslnavfix&nbsp;-Icruise.rnav&nbsp;\<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Ocruise.mrg2&nbsp;-F1&nbsp;-J27&nbsp;-V<BR>
@@ -80,14 +80,14 @@ processing WHOI DSL AMS-120 data with MB-System:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-IDSL120.940630_1100.bat.dat&nbsp;\<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-ODSL120.940630_1100.mb112<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4)&nbsp;Set&nbsp;the&nbsp;translated&nbsp;navigation&nbsp;to&nbsp;be&nbsp;merged&nbsp;with<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;of&nbsp;the&nbsp;format&nbsp;112&nbsp;or&nbsp;142&nbsp;files&nbsp;using&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;of&nbsp;the&nbsp;format&nbsp;112&nbsp;or&nbsp;142&nbsp;files&nbsp;using
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>mbset</B>:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbset&nbsp;-I&nbsp;DSL120.940630_1100.mb112&nbsp;\<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-P&nbsp;NAVFORMAT:2&nbsp;\<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-P&nbsp;NAVFILE:cruise.mrg2&nbsp;\<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-V<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4)&nbsp;Process&nbsp;the&nbsp;data&nbsp;using&nbsp;<B>mbprocess</B>,<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;producing&nbsp;a&nbsp;processed&nbsp;file&nbsp;called&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;producing&nbsp;a&nbsp;processed&nbsp;file&nbsp;called
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DSL120.940630_1100p.mb112&nbsp;with&nbsp;longitude&nbsp;and
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;latitude&nbsp;navigation.
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbprocess&nbsp;-I&nbsp;DSL120.940630_1100.mb112<BR>
@@ -175,18 +175,18 @@ Sets the UTM zone used for the translation. The UTM zones
 are 6 degrees wide in longitude and begin with zone 1 extending
 from 180 W to 174 W, zone 2 extending from 174 W to 168 W, and
 so on through zone 60. Negative zone
-values are used for the Southern Hemisphere. 
+values are used for the Southern Hemisphere.
 <DT><B>-O</B>
 
 <DD>
 <I>outfile</I>
 <BR>
 
-Sets the output filename for the translated navigation. 
+Sets the output filename for the translated navigation.
 <DT><B>-V</B>
 
 <DD>
-Causes <B>mbm_plot</B> to operate in &quot;verbose&quot; mode 
+Causes <B>mbm_plot</B> to operate in &quot;verbose&quot; mode
 so that it outputs
 more information than usual.
 <P>
@@ -203,12 +203,12 @@ as outlined above and execute the macro as suggested:
 <BR>
 
 The output will appear as follows:
-<BR>&nbsp;
+<P>
 <BR>&nbsp;Running&nbsp;mbm_dslnavfix...
-<BR>&nbsp;
+<P>
 <BR>&nbsp;Program&nbsp;Status:
 <BR>&nbsp;--------------
-<BR>&nbsp;
+<P>
 <BR>&nbsp;&nbsp;&nbsp;Input&nbsp;DSL&nbsp;navigation&nbsp;format:&nbsp;&nbsp;&nbsp;1
 <BR>&nbsp;&nbsp;&nbsp;Input&nbsp;DSL&nbsp;navigation&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dsl.nav
 <BR>&nbsp;&nbsp;&nbsp;Output&nbsp;navigation&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dsl.mrg2
@@ -216,28 +216,26 @@ The output will appear as follows:
 <BR>&nbsp;&nbsp;&nbsp;Temporary&nbsp;geographic&nbsp;nav&nbsp;file:&nbsp;tmp_geo_8044.nav
 <P>
 <BR>&nbsp;&nbsp;&nbsp;------------
-<BR>&nbsp;
+<P>
 <BR>&nbsp;&nbsp;&nbsp;Projection:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UTM&nbsp;Zone&nbsp;27
 <BR>&nbsp;&nbsp;&nbsp;Projection&nbsp;units:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;meters
-<BR>&nbsp;
+<P>
 <BR>&nbsp;&nbsp;&nbsp;------------
-<BR>&nbsp;
+<P>
 <BR>&nbsp;586&nbsp;navigation&nbsp;records&nbsp;read...
-<BR>&nbsp;
+<P>
 <BR>&nbsp;Running&nbsp;mapproject...
 <BR>&nbsp;mapproject&nbsp;tmp_proj_8044.nav&nbsp;-Ju27/1:1000000&nbsp;-I&nbsp;\
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-20:0/0:0/-19:0/1:0r&nbsp;&gt;&nbsp;tmp_geo_8044.nav<BR>
-<BR>&nbsp;
+<P>
 <BR>&nbsp;Deleting&nbsp;tmp_proj_8044.nav,&nbsp;tmp_geo_8044.nav...
-<BR>&nbsp;
+<P>
 <BR>&nbsp;Done...
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>BUGS</H2>
 
 Let us know...
-<P>
-<P>
 <P>
 
 <HR>
@@ -256,7 +254,7 @@ Let us know...
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
