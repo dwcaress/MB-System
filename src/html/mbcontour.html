@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbcontour</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,28 +28,28 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbcontour</B> <B>-J</B><I>parameters</I> <B>-R</B><I>west/east/south/north 
-</I>[<B>-A</B><I>cont_int/col_int/tic_int/lab_int/tic_int/lab_hgt/lab_spacing</I> 
-<B>-B</B><I>tickinfo</I> <B>-b</B><I>yr/mo/da/hr/mn/sc</I> 
-<B>-C</B><I>contourfile</I> <B>-c</B><I>copies</I> 
-<B>-D</B><I>time_tick/time_annot/date_annot/time_tick_len</I> 
-<B>-E</B><I>yr/mo/da/hr/mn/sc</I> 
-<B>-f</B><I>format</I> <B>-F</B><I>red/green/blue</I> <B>-G</B><I>name_hgt[/name_perp]</I>  
-<B>-I</B><I>infile</I> <B>-K</B> <B>-L</B><I>lonflip</I> 
+<B>mbcontour</B> <B>-J</B><I>parameters</I> <B>-R</B><I>west/east/south/north
+</I>[<B>-A</B><I>cont_int/col_int/tic_int/lab_int/tic_int/lab_hgt/lab_spacing</I>
+<B>-B</B><I>tickinfo</I> <B>-b</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-C</B><I>contourfile</I> <B>-c</B><I>copies</I>
+<B>-D</B><I>time_tick/time_annot/date_annot/time_tick_len</I>
+<B>-E</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-f</B><I>format</I> <B>-F</B><I>red/green/blue</I> <B>-G</B><I>name_hgt[/name_perp]</I>
+<B>-I</B><I>infile</I> <B>-K</B> <B>-L</B><I>lonflip</I>
 <B>-M</B><I>pingnumber_tick/pingnumber_annot/pingnumber_tick_len</I>
-<B>-N</B><I>nplot</I> <B>-O</B> <B>-P</B> <B>-p</B><I>pings</I> 
-<B>-Q</B> <B>-S</B><I>speed </I><B>-T</B><I>timegap</I> <B>-U</B> <B>-W</B> <B>-X</B><I>x-shift</I> 
-<B>-Y</B><I>y-shift</I> <B>-Z</B><I>algorithm</I> 
+<B>-N</B><I>nplot</I> <B>-O</B> <B>-P</B> <B>-p</B><I>pings</I>
+<B>-Q</B> <B>-S</B><I>speed </I><B>-T</B><I>timegap</I> <B>-U</B> <B>-W</B> <B>-X</B><I>x-shift</I>
+<B>-Y</B><I>y-shift</I> <B>-Z</B><I>algorithm</I>
 <B>-V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbcontour</B> is a utility for swath contouring of swath bathymetry 
+<B>mbcontour</B> is a utility for swath contouring of swath bathymetry
 data using Postscript.  Like <B>mbswath</B>, <B>mbcontour</B>
 is fully compatible with the GMT package version 4. Two contouring
-algorithms are available; the <B>-Z</B> option specifies which is used. 
-The first, default approach draws contours between successive pings; 
+algorithms are available; the <B>-Z</B> option specifies which is used.
+The first, default approach draws contours between successive pings;
 this algorithm is simple and therefore fast but produces poor
 looking contours when beams from one ping lie &quot;behind&quot; beams from a
 previous ping (this happens for sonars that ping at nonnull pitch
@@ -57,13 +57,13 @@ angles or for the &quot;inside&quot; beams when ships make sharp turns). The
 second algorithm constructs a triangular network from the available
 soundings and contours the network; this approach is complicated
 and therefore slow but produces good looking contours under most
-conditions. The contour levels  and colors can be controlled 
-directly or set implicitly using contour and color change intervals. 
+conditions. The contour levels  and colors can be controlled
+directly or set implicitly using contour and color change intervals.
 Contours can also be set to have ticks pointing downhill.
 <P>
-Shiptracks can also be plotted using the <B>-D</B>, <B>-G</B>, and 
+Shiptracks can also be plotted using the <B>-D</B>, <B>-G</B>, and
 <B>-M</B> options. The <B>-D</B> option controls the basic track
-plotting, including time annotation. The <B>-G</B> 
+plotting, including time annotation. The <B>-G</B>
 option causes the start of each swath data file to be annotated with
 the filename. The <B>-M</B> option controls ping number annotation,
 or shot number annotation in the case of segy format seismic data.
@@ -73,7 +73,7 @@ an ascii file in the same directory having the same name except
 that &quot;.inf&quot; is appended to the end. The program assumes that this
 ascii file contains the output of the program <B>mbinfo</B> run on
 the input data file. If the &quot;.inf&quot; file exists, <B>mbcontour</B> reads
-the minimum and maximum longitude and latitude bounds from the 
+the minimum and maximum longitude and latitude bounds from the
 <B>mbinfo</B> output and compares those to the bounds
 for the plot. If the &quot;.inf&quot; file indicates that none of the data
 in the input file lies inside the plot bounds, that input
@@ -116,15 +116,15 @@ annotations, and tickmarks controlled by these parameters.  Contours will be
 generated at invervals of <I>cont_int</I> meters.  Color changes
 will occur at intervals of <I>col_int</I> meters.  Contours will have
 downhill facing tickmarks <I>tic_int</I> inches long every <I>tic_int</I>
-meters. Contours will have annotations 
+meters. Contours will have annotations
 <I>label_len</I> inches high every <I>lab_int</I> meters. The origins of
 contour labels will be separated by at least <I>lab_spacing</I>
-inches (potentially overlapping labels will be omitted); 
+inches (potentially overlapping labels will be omitted);
 if <I>lab_spacing</I> = 0.0 then the spacing will be defined by
 <I>lab_hgt</I>. If fewer than seven parameters are specified, the
 default values are used for the  missing parameters.
-Defaults: <I>cont_int</I> = 25; <I>col_int</I> = 100; 
-<I>tic_int</I> = 100; <I>lab_int</I> = 100; <I>tic_int</I> = 0.1; 
+Defaults: <I>cont_int</I> = 25; <I>col_int</I> = 100;
+<I>tic_int</I> = 100; <I>lab_int</I> = 100; <I>tic_int</I> = 0.1;
 <I>lab_hgt</I> = 0.05; <I>lab_spacing</I> = 0.0.
 <DT><B>-B</B>
 
@@ -140,7 +140,7 @@ Sets map boundary tickmark intervals. See <B>psbasemap</B> for details.
 <BR>
 
 Sets the starting time for data allowed in the input data; pings
-with times before the starting time will be ignored. 
+with times before the starting time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
 <DT><B>-C</B>
 
@@ -148,16 +148,16 @@ Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
 <I>contourfile</I>
 <BR>
 
-Sets the file from which the contour levels and their 
+Sets the file from which the contour levels and their
 style and color are read.
 This file consists of lines in the format:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>level&nbsp;label&nbsp;tick&nbsp;red&nbsp;green&nbsp;blue</I><BR>
 <BR>
 
-where <I>level</I> is the depth value to be contoured 
+where <I>level</I> is the depth value to be contoured
 in meters, <I>label</I>
-is either 'a' for annotated or 'n' for not annotated, 
-<I>tick</I> is either 't' for tick marks or 'n' for no 
+is either 'a' for annotated or 'n' for not annotated,
+<I>tick</I> is either 't' for tick marks or 'n' for no
 tick marks, and <I>red</I>, <I>green</I>,
 and <I>blue</I> set the color of the contour lines (these values can
 range from 0 to 255). If a GMT cpt file is given as the <I>contourfile</I>,
@@ -171,17 +171,17 @@ of the <B>-A</B> option will be ignored.
 <I>time_tick/time_annot/date_annot/time_tick_len</I>
 <BR>
 
-Sets the parameters governing the annotation of the shiptrack.  
+Sets the parameters governing the annotation of the shiptrack.
 Time marks are made with &quot;X&quot; marks along the shiptrack; annotated
 time marks show the time in HH:MM format next to the time mark
 and annotated date marks show the time and julian day in
 HH:MM/DDD format.  The &quot;X&quot; marks are
-<I>time_tick_len</I> inches high for normal time marks and 
+<I>time_tick_len</I> inches high for normal time marks and
 1.5 times <I>time_tick_len</I> inches high for annotated time or date
-marks.  The interval of time ticks, annotated time ticks, and 
-annotated date ticks are given in hours by 
+marks.  The interval of time ticks, annotated time ticks, and
+annotated date ticks are given in hours by
 <I>time_tick</I>, <I>time_annot</I>, and <I>date_annot</I>, respectively.
-Defaults: <I>time_tick</I> = 0.25; <I>time_annot</I> = 1.0; 
+Defaults: <I>time_tick</I> = 0.25; <I>time_annot</I> = 1.0;
 <I>date_annot</I> = 4.0; <I>time_tick_len</I> = 0.1.
 <DT><B>-E</B>
 
@@ -190,7 +190,7 @@ Defaults: <I>time_tick</I> = 0.25; <I>time_annot</I> = 1.0;
 <BR>
 
 Sets the ending time for data allowed in the input data; pings
-with times after the ending time will be ignored. 
+with times after the ending time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
 <DT><B>-f</B>
 
@@ -201,7 +201,7 @@ Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
 Sets the data format used if the input is read from stdin
 or from a file. If <I>format</I> &lt; 0, then the input file specified
 with the <B>-I</B> option will actually contain a list of input swath sonar
-data files. This program uses the <B>MBIO</B> library 
+data files. This program uses the <B>MBIO</B> library
 and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
@@ -223,7 +223,7 @@ Turns on swath file name annotation. The <I>name_hgt</I> parameter
 sets the height of the lettering in inches. By default, the file
 name will be plotted along the shiptrack. If the <I>name_perp</I>
 parameter is given as 1, then the file name will be plotted
-perpendicular to the shiptrack. The <B>-G</B> option implies 
+perpendicular to the shiptrack. The <B>-G</B> option implies
 track plotting, so if the <B>-D</B> option is not also specified, then
 track plotting will be turned on with default parameters.
 Default: <I>name_hgt</I> = 0.1.
@@ -238,11 +238,11 @@ of its operation and then exit immediately.
 <I>infile</I>
 <BR>
 
-Sets the input filename. If <I>format</I> &gt; 0 (set with the 
-<B>-f</B> option) then the swath sonar data contained in <I>infile</I> 
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-f</B> option) then the swath sonar data contained in <I>infile</I>
 is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
 is assumed to be an ascii file containing a list of the input swath sonar
-data files to be processed and their formats.  The program will read 
+data files to be processed and their formats.  The program will read
 and plot the data in each one of these files.
 In the <I>infile</I> file, each
 data file should be followed by a data format identifier, e.g.:
@@ -253,22 +253,22 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the <B>MBIO</B> library and will read any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
-is given in the <B>MBIO</B> manual page. 
+is given in the <B>MBIO</B> manual page.
 <BR>
 
 An input datafile may be accompanied by a &quot;fast bathymetry&quot; or &quot;fbt&quot; file
-and by a &quot;fast navigation&quot; or &quot;fnv&quot; file. The &quot;fbt&quot; and &quot;fnv&quot; file naming 
-convention is to add the 
+and by a &quot;fast navigation&quot; or &quot;fnv&quot; file. The &quot;fbt&quot; and &quot;fnv&quot; file naming
+convention is to add the
 &quot;.fbt&quot; or &quot;.fbt&quot; suffix to the original swath
-data filename. 
-An &quot;fbt&quot; file contains only swath bathymetry information 
+data filename.
+An &quot;fbt&quot; file contains only swath bathymetry information
 in a compact format (format 71),
 and is thus quick to read. In the
-event that bathymetry contours 
+event that bathymetry contours
 is being generated, <B>mbcontour</B>
 will attempt to read an &quot;fbt&quot; file in lieu of the original data.
 An &quot;fnv&quot; file contains only navigation information in a compact
-ASCII format (format 166), and is thus even quicker to read. 
+ASCII format (format 166), and is thus even quicker to read.
 When <B>mbcontour</B> is only generating a shiptrack plot, it will
 attempt to read an &quot;fnv&quot; file in lieu of the original data.
 <BR>
@@ -277,7 +277,7 @@ Default: <I>infile</I> = &quot;stdin&quot;.
 <DT><B>-J</B>
 
 <DD>
-Selects the map projection. Scale is inch/degree, 1:xxxxx. 
+Selects the map projection. Scale is inch/degree, 1:xxxxx.
 or width in inches (upper case modifier).
 <BR>
 
@@ -310,7 +310,7 @@ or width in inches (upper case modifier).
 <B>-Ju</B><I>zone/scale</I> (UTM - Universal Transverse Mercator)
 <BR>
 
-<B>-Jy</B><I>lon0/lats/scale</I> (Basic Cylindrical Projection) 
+<B>-Jy</B><I>lon0/lats/scale</I> (Basic Cylindrical Projection)
 <BR>
 
 <P>
@@ -390,9 +390,9 @@ More <I>PostScript</I> code will be appended later [Default terminates the plot 
 
 Sets the range of the longitude values returned by the swath sonar i/o routines.
 If <I>lonflip</I>=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If <I>lonflip</I>=0 
+the range from -360 to 0 degrees. If <I>lonflip</I>=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If <I>lonflip</I>=1 
+the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
@@ -402,12 +402,12 @@ Default: <I>lonflip</I> = 0.
 <I>pingnumber_tick/pingnumber_annot/pingnumber_tick_len</I>
 <BR>
 
-Sets the parameters governing the pingnumber annotation of the shiptrack.  
+Sets the parameters governing the pingnumber annotation of the shiptrack.
 Tick marks are made along the shiptrack at <I>pingnumber_tick</I> intervals; these
-are <I>time_tick_len</I> inches long. Longer tick marks are made along the 
-shiptrack at <I>pingnumber_annot</I> intervals; these are 1.5 times <I>time_tick_len</I> 
+are <I>time_tick_len</I> inches long. Longer tick marks are made along the
+shiptrack at <I>pingnumber_annot</I> intervals; these are 1.5 times <I>time_tick_len</I>
 inches long.
-Defaults: <I>pingnumber_tick</I> = 50; <I>pingnumber_annot</I> = 100; 
+Defaults: <I>pingnumber_tick</I> = 50; <I>pingnumber_annot</I> = 100;
 <I>pingnumber_tick_len</I> = 0.1.
 <DT><B>-N</B>
 
@@ -444,7 +444,7 @@ Default: <I>pings</I> = 1 (no ping averaging).
 <DD>
 Causes the program to plot the triangles constructed as part of the
 contouring if the &quot;triangle algorithm&quot; is specified using the
-<B>-Z</B><I>1</I> option. This allows the data distribution to be 
+<B>-Z</B><I>1</I> option. This allows the data distribution to be
 directly viewed.
 <DT><B>-R</B>
 
@@ -452,9 +452,9 @@ directly viewed.
 <I>west/east/south/north</I>
 <BR>
 
-Sets the longitude and latitude bounds within which swath sonar 
-data will be read and plotted. Only the data which lies within 
-these bounds will be read. 
+Sets the longitude and latitude bounds within which swath sonar
+data will be read and plotted. Only the data which lies within
+these bounds will be read.
 Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
 <DT><B>-S</B>
 
@@ -462,7 +462,7 @@ Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
 <I>speed</I>
 <BR>
 
-Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 processed. Default: <I>speed</I> = 0.
 <DT><B>-T</B>
@@ -513,7 +513,7 @@ of beams to be contoured; thus it is sensible to keep the number
 of pings contoured at a time small (e.g. use <B>-N</B><I>5</I>).
 The time required for the &quot;ping to ping&quot; algorithm varies linearly
 with the number of pings contoured; thus larger numbers of pings
-may be reasonably contoured at a time (e.g. use <B>-N</B><I>50</I>). 
+may be reasonably contoured at a time (e.g. use <B>-N</B><I>50</I>).
 Default: <I>algorithm</I> = 0.
 <DT><B>-#</B>
 
@@ -527,28 +527,24 @@ Suppose the user has a Hydrosweep data file in the L-DEO in-house
 binary format (<B>MBIO</B> format id 24) called hs_ew9302_161_mn.mb24
 which lies in the region w/s/e/n = -32.1874/-26.6236/54.6349/56.7536.
 The following will suffice to generate a traditional four-color contour plot:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;-R-25.7252/-23.0683/59.7415/61.0699&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Ba0.5314g0.5314&nbsp;-A50.0000/250.0000/250.0000/250.0000/0.01/0.1&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;mbcontour.ps<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-25.7252/-23.0683/59.7415/61.0699<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Ba0.5314g0.5314&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-A50.0/250.0/250.0/250.0/0.01/0.1&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;mbcontour.ps<BR>
 <BR>
 
 where the file datalist contains:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>hs_ew9302_161_mn.mb24&nbsp;24<BR>
 <BR>
 
-A plot including a navigation track can also be created using 
+A plot including a navigation track can also be created using
 <B>mbcontour</B>.  Here the <B>-D</B> flag is used to add a plot
 of the ship track annotated with time marks every 0.25 hours,
 annotated time marks every hour, and day annotations every four hours:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;-R-25.7252/-23.0683/59.7415/61.0699&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Ba0.5314g0.5314&quot;:.Data&nbsp;File&nbsp;hs_ew9302_161_bmn.mb24:&quot;&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-D0.25/1/4/0.1&nbsp;-A50.0000/250.0000/250.0000/250.0000/0.01/0.1&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;hs_ew9302_161_bmn.mb24.ps<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-25.7252/-23.0683/59.7415/61.0699&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT>-Ba0.5314g0.5314&quot;:.File&nbsp;hs_ew9302_161_bmn.mb24:&quot;&nbsp;&nbsp;-D0.25/1/4/0.1&nbsp;&nbsp;-A50.0/250.0/250.0/250.0/0.01/0.1&nbsp;&nbsp;-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;hs_ew9302_161_bmn.mb24.ps<BR>
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbm_plot.html">mbm_plot</A></B>(l), <B><A HREF="mbswath.html">mbswath</A></B>(l), 
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbm_plot.html">mbm_plot</A></B>(l), <B><A HREF="mbswath.html">mbswath</A></B>(l),
 <B>gmtsystem</B>(l), <B>psbasemap</B>(l), <B>psto24</B>(l)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
@@ -574,7 +570,7 @@ Please let us know.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

@@ -12,7 +12,8 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
-  Version 5.4.2081       May 23, 2013
+  Version 5.4.2095       June 3, 2013
+  Version 5.4.2082       May 24, 2013
   Version 5.3.2053       April 4, 2013
   Version 5.3.2051       March 20, 2013
   Version 5.3.2042       March 12, 2013
@@ -138,6 +139,11 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2095 (June 3, 2013)
+
+Many changes implementing fixes to the new build system from Bob Covill,
+Hamish Bowman, and Christian Ferreira.
 
 -----> 5.4.2082 (May 24, 2013)
 

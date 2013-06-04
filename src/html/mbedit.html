@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbedit</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  29 April 2011 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -27,59 +27,59 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbedit</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> 
-<B>-D</B> <B>-E</B><I>yr/mo/da/hr/mn/sc</I> 
+<B>mbedit</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-D</B> <B>-E</B><I>yr/mo/da/hr/mn/sc</I>
 <B>-F</B><I>format</I> <B> -G -I</B><I>infile</I> <B>-X -V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>MBedit</B> is an interactive editor 
-used to identify and flag artifacts in swath sonar 
+<B>MBedit</B> is an interactive editor
+used to identify and flag artifacts in swath sonar
 bathymetry data. Once a file has been
 read in, <B>MBedit</B> displays the bathymetry profiles
 from several pings, allowing the user to identify and flag anomalous
 beams. In extreme circumstances,
-entire pings may be nulled (see &quot;KEYBOARD ACTIONS&quot;). 
+entire pings may be nulled (see &quot;KEYBOARD ACTIONS&quot;).
 <P>
-In the default mode the edit events are output to 
-an &quot;edit save&quot; file. The program can also be operated 
+In the default mode the edit events are output to
+an &quot;edit save&quot; file. The program can also be operated
 in a &quot;browse&quot; mode where no edit events are output.
-If saved, the edit events can be applied 
+If saved, the edit events can be applied
 to the data using the program <B>mbprocess</B>, which
-outputs a processed swath data file. 
+outputs a processed swath data file.
 The <B>mbprocess</B> program is also used to merge
 edited navigation, recalculate bathymetry, and apply
 other corrections to swath bathymetry data. Users
 may cause <B>mbprocess</B> to be run automatically by
 specifying the <B>-X</B> option when starting <B>mbedit</B>.
 <P>
-In previous  versions of <B>MB-System</B> 
+In previous  versions of <B>MB-System</B>
 (version 4.6.10 or earlier), <B>mbedit</B>
 produced output swath data files directly by reading and
 storing all of the swath data information in memory (including
-non-survey data records). This approach limited the 
+non-survey data records). This approach limited the
 amount of data that could be handled
 at once, frequently requiring users to process files in
 small pieces. The current version only stores the bathymetry
 data and only outputs changes to the beam flag status
 (good data or bad data) of bathymetry soundings.
 <P>
-The default <B>mbedit</B> display consists of several 
+The default <B>mbedit</B> display consists of several
 bathymetry acrosstrack profiles plotted with vertical
 offsets between each profile (in waterfall fashion). The
 profiles are plotted within
-a box with annotation showing the scaling of the x 
+a box with annotation showing the scaling of the x
 (acrosstrack distance) and y (depth) axes. Alternatively, the
 display can show the profiles without the waterfall offsets,
 with the view being either in the alongtrack direction, or in
 the acrosstrack dimension.
 <P>
 The number of pings displayed,
-and the width, vertical exageration, and annotation of the plot 
+and the width, vertical exageration, and annotation of the plot
 are all set by the user. Unflagged bathymetry points
 are shown as small filled black squares, and flagged bathymtetry points
-are shown as small unfilled red or blue squares. Soundings 
+are shown as small unfilled red or blue squares. Soundings
 flagged manually are shown in red, and those flagged by filter
 algorithms are shown in green. When a sounding is selected in the
 info mode, it is displayed as a large, filled, blue square.
@@ -89,9 +89,9 @@ bathymetry profiles for each ping. If the <B>Show Flagged Profile</B>
 toggle is set on, then red line segments connect the flagged depth
 values in the acrosstrack bathymetry profile.
 Each of the displayed pings has a label giving the record number
-in the data file, the ping time, and the center beam depth. 
+in the data file, the ping time, and the center beam depth.
 <P>
-The editing is driven by the left mouse button and 
+The editing is driven by the left mouse button and
 involves four basic edit modes and one information mode. In toggle
 mode each mouse pick toggles the nearest bathymetry point between
 flagged and unflagged states. In pick mode each mouse pick flags
@@ -99,9 +99,9 @@ the nearest bathymetry point. In erase mode the left mouse button
 is held down as the cursor is dragged over the data; all bathymetry
 points touched by the mouse are flagged. Restore mode is just like
 erase mode, except that the affected bathymetry values are unflagged.
-In grab mode, a red rectangle is drawn as the mouse is dragged 
-with the left button down. When the button is released, all 
-unflagged soundings within the rectangle are flagged. Finally, 
+In grab mode, a red rectangle is drawn as the mouse is dragged
+with the left button down. When the button is released, all
+unflagged soundings within the rectangle are flagged. Finally,
 info mode acts like pick mode, except that instead of flagging
 the nearest sounding, the program displays information about the
 selected ping and sounding above the bathymetry profile box.
@@ -115,13 +115,13 @@ button unflags all soundings from the current position forward
 to the end of the data held in memory. The <B>Controls</B> menu
 includes a <B>Filters...</B> button that brings up a dialog
 which sets the automatic flagging functions. At present, these
-include a median filter algorithm, a &quot;wrong side filter&quot;, &quot;data 
+include a median filter algorithm, a &quot;wrong side filter&quot;, &quot;data
 cutting&quot; by beam number, and &quot;data cutting&quot; by acrosstrack
-distance. The &quot;wrong side&quot; filter flags soundings positioned on 
-the &quot;wrong&quot; side of the swath (port soundings incorrectly located 
-on the starboard side, or vice versa). The two &quot;data cutting&quot; 
-algorithms flag beams inside or outside of specified beam number 
-ranges or acrosstrack distance ranges, respectively.  Additional 
+distance. The &quot;wrong side&quot; filter flags soundings positioned on
+the &quot;wrong&quot; side of the swath (port soundings incorrectly located
+on the starboard side, or vice versa). The two &quot;data cutting&quot;
+algorithms flag beams inside or outside of specified beam number
+ranges or acrosstrack distance ranges, respectively.  Additional
 automatic filters will be added in later versions.
 <P>
 If the ping includes flagged depths outside the plotting box, the ping label
@@ -133,7 +133,7 @@ bad bathymetry points which lie outside the box defined by the current
 vertical exageration and plot width values. In the case where unflagged
 depths lie outside the plotting box (red label), clicking on the small
 black box to the left of the ping label automatically flags all of the
-depth values outside the plotting box. Alternatively, 
+depth values outside the plotting box. Alternatively,
 users can decrease the
 vertical exageration and/or increase the plot width to bring the
 offending bathymetry points into view. Users should be aware that
@@ -143,24 +143,24 @@ the first and last pings in view.
 <P>
 The middle and right mouse buttons allow the user to step forward
 and backward, respectively, through the data file. The <B>Forward</B>
-and <B>Reverse</B> buttons provide a duplicate stepping capability. 
+and <B>Reverse</B> buttons provide a duplicate stepping capability.
 Left-handed users may reverse the right and left mouse button functions by pulling down
 the <B>Reverse Mouse Buttons</B> menu item from the <B>Controls</B> button.
 <P>
-<B>MBedit</B> can hold up to 25000 swath bathymetry 
+<B>MBedit</B> can hold up to 25000 swath bathymetry
 profiles at a time in memory. In the case that
 a data file contains more survey data records than can be held in memory,
 users will find it necessary to step through multiple buffers of
 data. The <B>Next Buffer</B> button will cause <B>MBedit</B> to
 dump the current buffer contents and read in a new set of data.
-The handling of buffered data is set 
+The handling of buffered data is set
 using the <B>Buffer Controls</B> dialog accessed by pulling down the
 <B>Buffer Controls...</B> menu item from the <B>Controls</B> button.
 The <B>Buffer Controls</B> dialog includes two slider controls, one
 entitled <B>Data Buffer Size</B> and the other <B>Buffer Retain Size</B>.
 Users on memory limited machines may find it necessary to set the
 maximum buffer size to a smaller number using the
-<B>Data Buffer Size</B> slider.  The <B>Buffer Retain Size</B> 
+<B>Data Buffer Size</B> slider.  The <B>Buffer Retain Size</B>
 slider sets the number of data records
 retained from the old buffer when more data are loaded.
 <P>
@@ -184,20 +184,20 @@ the <B>mbprocess</B> mode to apply the edits when generating a
 processed swath output file. If no parameter file named &quot;ifile.par&quot;
 exists, <B>mbedit</B> creates one.
 <P>
-If a user seeks to open a swath sonar data 
+If a user seeks to open a swath sonar data
 file and an associated edit save file already exists, the user is
 given an option to apply the saved edits to the data as it is loaded.
 If the user chooses not to apply the saved edits, those edits will
 be lost as a new edit save file is created.
-If (as is usually the case) the saved edits are to be 
+If (as is usually the case) the saved edits are to be
 applied, <B>MBedit</B> copies the edit
 save file to a file named &quot;mbedit_tmp.esf&quot; and reads the saved
-edits from that second file. In this way, the use of 
+edits from that second file. In this way, the use of
 edit save files and <B>mbprocess</B> allows users
 to edit a swath data file multiple times without generating
 multiple output files. Subsequent editing sessions serve to
 update the processed data rather than generate additional
-edited data files. 
+edited data files.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -224,7 +224,7 @@ Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</
 <BR>
 
 Sets the starting time for data allowed in the input data; pings
-with times before the starting time will be ignored. 
+with times before the starting time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
 <DT><B>-D</B>
 
@@ -240,7 +240,7 @@ is to output the edited data to a file.
 <BR>
 
 Sets the ending time for data allowed in the input data; pings
-with times after the ending time will be ignored. 
+with times after the ending time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
 <DT><B>-F</B>
 
@@ -248,7 +248,7 @@ Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
 <I>format</I>
 <BR>
 
-Sets the format at startup for the input and output swath sonar data using 
+Sets the format at startup for the input and output swath sonar data using
 <B>MBIO</B> integer format identifiers. This value can also be set
 interactively when specifying the input file.
 This program uses the <B>MBIO</B> library and will read any swath sonar
@@ -295,7 +295,7 @@ editing session is in the browse mode.
 Normally, <B>MBedit</B> outputs information to the stderr stream
 regarding the number of records loaded and dumped.  If the
 <B>-V</B> flag is given, then <B>MBedit</B> works in a &quot;verbose&quot; mode and
-outputs the program version being used, all error status messages, 
+outputs the program version being used, all error status messages,
 and a large amount of other information including all of the
 beams flagged or zeroed.
 <P>
@@ -307,46 +307,46 @@ beams flagged or zeroed.
 <DT><B>File</B>
 
 <DD>
-This button accesses a pulldown menu with two push buttons: 
-<B>Open</B> and <B>File Selection List</B>, 
+This button accesses a pulldown menu with two push buttons:
+<B>Open</B> and <B>File Selection List</B>,
 <DT><B>File-&gt;Open</B>
 
 <DD>
 This button brings up a popup window which allows the user to
 specify an input swath sonar bathymetry data file, its <B>MBIO</B>
-format id, and  the output mode. 
-This program uses the <B>MBIO</B> library and 
+format id, and  the output mode.
+This program uses the <B>MBIO</B> library and
 will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data
 formats currently supported by <B>MBIO</B> and their
-identifier values is given in the <B>MBIO</B> manual page. 
+identifier values is given in the <B>MBIO</B> manual page.
 If the swath sonar data file is named using the <B>MB-System</B>
 suffix convention (format 11 files end with &quot;.mb11&quot;, format
 41 files end with &quot;.mb41&quot;, etc.), then the program will
 automatically use the appropriate format id; otherwise the
 format must be set by the user.
 The popup window also allows the output mode to be set to &quot;browse&quot;
-so that no edit events are output. 
+so that no edit events are output.
 When a valid file is specified and the <B>OK</B> button
 is clicked, file will be added to an internal list of swath files
 available for editing, and then that file will be loaded into
 memory for editing (if another file was already loaded, that file
-is closed out gracefully before the new file is loaded). 
+is closed out gracefully before the new file is loaded).
 If the specified input is a datalist (format
-id = -1), then all of the files referenced through that datalist 
+id = -1), then all of the files referenced through that datalist
 will be added to the internal list, and the first of those files
-loaded. When a file is loaded for editing, <B>MBedit</B> reads 
+loaded. When a file is loaded for editing, <B>MBedit</B> reads
 as much data as will fit into the data buffer (typically 25000 records)
 and several pings are displayed as stacked bathymetry profiles.
 <DT><B>File-&gt;File Selection List</B>
 
 <DD>
 This button brings up a popup window displaying the internal list of
-swath files available for editing. The list has four columns. 
+swath files available for editing. The list has four columns.
 The first (left-most) column is either blank or shows &quot;&lt;locked&gt;&quot; or &quot;&lt;loaded&gt;&quot;.
 If a file is loaded for editing by this program, it shows as &quot;&lt;loaded&gt;&quot;.
 If a file is being edited or processed by another program, it shows as
-&quot;&lt;locked&gt;&quot;. Locked files cannot be opened for editing, and any file 
+&quot;&lt;locked&gt;&quot;. Locked files cannot be opened for editing, and any file
 loaded for editing by <B>MBedit</B> will show as &quot;locked&quot; to other
 programs. The second column is either blank or shows &quot;&lt;esf&gt;&quot;. This indicates if
 a file has been previously edited so that an edit save file already
@@ -354,29 +354,29 @@ exists. The third and fourth columns show the filename path and the <B>MBIO</B>
 format id, respectively.
 Users can select one of the files in the available list. If the &quot;Edit Selected File&quot;
 button is clicked, the selected file will be opened for editing (and any
-file already loaded will be closed first). If the &quot;Remove Selected File&quot; 
+file already loaded will be closed first). If the &quot;Remove Selected File&quot;
 button is selected, then the selected file will be removed from the available
 list.
 <DT><B>View</B>
 
 <DD>
-This button accesses a pulldown menu with several toggle buttons: 
-<B>Waterfall View</B>, 
-<B>Alongtrack View</B>, 
-<B>Acrosstrack View</B>, 
-<B>Show Flagged Profile</B>, 
-<B>Show Bottom Detect Algorithms</B>, 
-<B>Wide Bathymetry Profiles</B>, 
-<B>Plot Time Stamps</B>, 
-<B>Plot Ping Interval</B>, 
-<B>Plot Longitude</B>, 
-<B>Plot Latitude</B>, 
-<B>Plot Heading</B>, 
-<B>Plot Speed</B>, 
-<B>Plot Center Beam Depth</B>, 
-<B>Plot Sonar Altitude</B>, 
-<B>Plot Sonar Depth</B>, 
-<B>Plot Roll</B>, 
+This button accesses a pulldown menu with several toggle buttons:
+<B>Waterfall View</B>,
+<B>Alongtrack View</B>,
+<B>Acrosstrack View</B>,
+<B>Show Flagged Profile</B>,
+<B>Show Bottom Detect Algorithms</B>,
+<B>Wide Bathymetry Profiles</B>,
+<B>Plot Time Stamps</B>,
+<B>Plot Ping Interval</B>,
+<B>Plot Longitude</B>,
+<B>Plot Latitude</B>,
+<B>Plot Heading</B>,
+<B>Plot Speed</B>,
+<B>Plot Center Beam Depth</B>,
+<B>Plot Sonar Altitude</B>,
+<B>Plot Sonar Depth</B>,
+<B>Plot Roll</B>,
 <B>Plot Pitch</B>, and
 <B>Plot Heave</B>.
 <BR>
@@ -391,21 +391,21 @@ be set at any time.
 <DT><B>View-&gt;Waterfall View</B>
 
 <DD>
-Sets the <B>mbedit</B> display so that the 
+Sets the <B>mbedit</B> display so that the
 bathymetry acrosstrack profiles are plotted with vertical
-offsets between each profile (in waterfall fashion). 
+offsets between each profile (in waterfall fashion).
 <DT><B>View-&gt;Alongtrack View</B>
 
 <DD>
-Sets the <B>mbedit</B> display so that the 
+Sets the <B>mbedit</B> display so that the
 bathymetry acrosstrack profiles are viewed in the alongtrack
-direction without vertical offsets between the pings. 
+direction without vertical offsets between the pings.
 <DT><B>View-&gt;Acrosstrack View</B>
 
 <DD>
-Sets the <B>mbedit</B> display so that the 
+Sets the <B>mbedit</B> display so that the
 bathymetry acrosstrack profiles are viewed in the acrosstrack
-direction without vertical offsets between the pings. 
+direction without vertical offsets between the pings.
 <DT><B>View-&gt;Show Flagged Profile</B>
 
 <DD>
@@ -421,7 +421,7 @@ associated with the flagged depth points.
 <DD>
 This toggle allows the user to specify whether the beams are
 colored according to their flagging status (toggle set to &quot;Off&quot;
-or according to the bottom detect algorithm used by the sonar 
+or according to the bottom detect algorithm used by the sonar
 (toggle set to &quot;On&quot;). The default is to color each sounding
 according to its flagging status - unflagged beams are black,
 manually flagged beams are red, and filter flagged beams are
@@ -442,7 +442,7 @@ present additional information on the left side of the window.
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display time stamp
-information to the left of the bathymetry profiles. 
+information to the left of the bathymetry profiles.
 <DT><B>View-&gt;Plot Ping Interval</B>
 
 <DD>
@@ -453,61 +453,61 @@ automatically scaled vertical time series plot of the time between pings.
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display an
-automatically scaled vertical time series plot of the 
+automatically scaled vertical time series plot of the
 navigation longitude associated with each ping.
 <BR>&nbsp;This&nbsp;plot&nbsp;appears&nbsp;to&nbsp;the&nbsp;left&nbsp;of&nbsp;the&nbsp;bathymetry&nbsp;profiles.
 <DT><B>View-&gt;Plot Latitude</B>
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display an
-automatically scaled vertical time series plot of the 
+automatically scaled vertical time series plot of the
 navigation latitude associated with each ping.
 <BR>&nbsp;This&nbsp;plot&nbsp;appears&nbsp;to&nbsp;the&nbsp;left&nbsp;of&nbsp;the&nbsp;bathymetry&nbsp;profiles.
 <DT><B>View-&gt;Plot Heading</B>
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display an
-automatically scaled vertical time series plot of the 
+automatically scaled vertical time series plot of the
 heading associated with each ping.
 <BR>&nbsp;This&nbsp;plot&nbsp;appears&nbsp;to&nbsp;the&nbsp;left&nbsp;of&nbsp;the&nbsp;bathymetry&nbsp;profiles.
 <DT><B>View-&gt;Plot Speed</B>
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display an
-automatically scaled vertical time series plot of the 
+automatically scaled vertical time series plot of the
 speed associated with each ping.
 <BR>&nbsp;This&nbsp;plot&nbsp;appears&nbsp;to&nbsp;the&nbsp;left&nbsp;of&nbsp;the&nbsp;bathymetry&nbsp;profiles.
 <DT><B>View-&gt;Plot Center Beam Depth</B>
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display an
-automatically scaled vertical time series plot of the 
+automatically scaled vertical time series plot of the
 speed associated with each ping.
 <BR>&nbsp;This&nbsp;plot&nbsp;appears&nbsp;to&nbsp;the&nbsp;left&nbsp;of&nbsp;the&nbsp;bathymetry&nbsp;profiles.
 <DT><B>View-&gt;Plot Sonar Depth</B>
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display an
-automatically scaled vertical time series plot of the 
+automatically scaled vertical time series plot of the
 sonar depth associated with each ping.
 <BR>&nbsp;This&nbsp;plot&nbsp;appears&nbsp;to&nbsp;the&nbsp;left&nbsp;of&nbsp;the&nbsp;bathymetry&nbsp;profiles.
 <DT><B>View-&gt;Plot Sonar Altitude</B>
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display an
-automatically scaled vertical time series plot of the 
+automatically scaled vertical time series plot of the
 sonar altitude associated with each ping.
 <BR>&nbsp;This&nbsp;plot&nbsp;appears&nbsp;to&nbsp;the&nbsp;left&nbsp;of&nbsp;the&nbsp;bathymetry&nbsp;profiles.
 <DT><B>View-&gt;Plot Roll</B>
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display an
-automatically scaled vertical time series plot of the 
+automatically scaled vertical time series plot of the
 roll associated with each ping. In addition to the roll
 time series shown in black, an estimate of the acrosstrack
 seafloor slope is shown in red (calculated by linear
-regression of the unflagged soundings for each ping), and 
-the difference between the roll and apparent slope is shown 
+regression of the unflagged soundings for each ping), and
+the difference between the roll and apparent slope is shown
 in blue. If the sonar roll has been correctly applied, the
 roll and seafloor slope should be uncorrelated. If there is
 a timing error in the roll correction, then the apparent
@@ -517,22 +517,22 @@ seafloor slope may correlate strongly with the roll.
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display an
-automatically scaled vertical time series plot of the 
+automatically scaled vertical time series plot of the
 pitch associated with each ping.
 <BR>&nbsp;This&nbsp;plot&nbsp;appears&nbsp;to&nbsp;the&nbsp;left&nbsp;of&nbsp;the&nbsp;bathymetry&nbsp;profiles.
 <DT><B>View-&gt;Plot Heave</B>
 
 <DD>
 This toggle, when set, causes <B>mbedit</B> to display an
-automatically scaled vertical time series plot of the 
+automatically scaled vertical time series plot of the
 heave associated with each ping.
 <BR>&nbsp;This&nbsp;plot&nbsp;appears&nbsp;to&nbsp;the&nbsp;left&nbsp;of&nbsp;the&nbsp;bathymetry&nbsp;profiles.
 <DT><B>Controls</B>
 
 <DD>
-This button accesses a pulldown menu with six items: 
-<B>Go To Specified Time...</B>, <B>Buffer Controls...</B>, 
-<B>Annotation...</B>, <B>Filters...</B>, 
+This button accesses a pulldown menu with six items:
+<B>Go To Specified Time...</B>, <B>Buffer Controls...</B>,
+<B>Annotation...</B>, <B>Filters...</B>,
 <B>Reverse Right/Left Key Macros</B>, and
 <B>Reverse Mouse Buttons</B>.
 The first (top) four items bring up a dialog of
@@ -602,12 +602,12 @@ inside the slider area, but not on the slider itself.
 <DD>
 This menu item brings up a dialog which
 allows the user to turn automatic bathymetry filtering algorithms
-on and off and to set the filter parameters 
+on and off and to set the filter parameters
 through the widgets discussed immediately below.
 Clicking on the <B>Apply</B> button first removes any previous
 automatic filter flags and then applies the current
 filter settings to the swath bathymetry data. These actions
-are applied only from the current position 
+are applied only from the current position
 to the end of the data currently
 in memory. The filtering is not applied (or unapplied) to
 pings earlier in the data file than the current position.
@@ -621,7 +621,7 @@ bathymetry profiles on and off.
 When median filtering is enabled, the median depth is
 calculated for each bathymetry ping. Each sounding in the
 ping is compared with the median value; any sounding that
-differs from the median by a percentage 
+differs from the median by a percentage
 greater than a threshold percentage
 is flagged as bad data.
 <DT><B>Controls-&gt;Filters-&gt;% Median Depth Threshold</B>
@@ -634,8 +634,8 @@ filter in units of percentage of the median depth.
 <DD>
 This toggle button turns automatic wrong side filtering of
 bathymetry profiles on and off. This filter expects
-bathymetry beams to be numbered from port to 
-starboard. Any beam numbered less than the 
+bathymetry beams to be numbered from port to
+starboard. Any beam numbered less than the
 center beam with a positive
 (starboard) acrosstrack distance is considered to
 be on the &quot;wrong side&quot;, and any beam numbered higher than
@@ -649,7 +649,7 @@ a threshold number of the midway beam.
 
 <DD>
 This slider sets the threshold of beam locations
-checked by the wrong side filter. 
+checked by the wrong side filter.
 <DT><B>Controls-&gt;Filters-&gt;Flag by Beam Number</B>
 
 <DD>
@@ -667,11 +667,11 @@ This produces flagging of both swath edges.
 <DT><B>Controls-&gt;Filters-&gt;Start Flagging Beam Number</B>
 
 <DD>
-This slider sets the beam number at which flagging by beam number starts. 
+This slider sets the beam number at which flagging by beam number starts.
 <DT><B>Controls-&gt;Filters-&gt;End Flagging Beam Number</B>
 
 <DD>
-This slider sets the beam number at which flagging by beam number ends. 
+This slider sets the beam number at which flagging by beam number ends.
 <DT><B>Controls-&gt;Filters-&gt;Flag by Distance</B>
 
 <DD>
@@ -680,32 +680,32 @@ acrosstrack distance on and off. The flagging is controlled by
 start and end distance values (set by the two
 sliders discussed immediately below). If the start distance
 is less than or equal to the end distance, then
-all beams with acrosstrack distances between 
+all beams with acrosstrack distances between
 the start and end distances are
 flagged, producing a flagged zone within the swath. If
 the start distance is greater than the end distance,
-then all beams with acrosstrack distance less than 
+then all beams with acrosstrack distance less than
 the end distance are flagged,
-and all beams with acrosstrack distance greater than 
+and all beams with acrosstrack distance greater than
 the start distance are flagged.
 This produces flagging of both swath edges.
 <DT><B>Controls-&gt;Filters-&gt;Start Flagging Distance</B>
 
 <DD>
-This slider sets the beam number at which flagging 
-by acrosstrack distance starts. 
+This slider sets the beam number at which flagging
+by acrosstrack distance starts.
 <DT><B>Controls-&gt;Filters-&gt;End Flagging Distance</B>
 
 <DD>
-This slider sets the beam number at which flagging 
-by acrosstrack distance ends. 
+This slider sets the beam number at which flagging
+by acrosstrack distance ends.
 <DT><B>Controls-&gt;Reverse Right/Left Key Macros</B>
 
 <DD>
 This toggle button, when set, reverses the
 key macros associated with flagging all beams
 to the left or right of the last picked beam. This
-means that the 'A', 'a', 'J', and 'j' keys will 
+means that the 'A', 'a', 'J', and 'j' keys will
 flag to the right rather than to the left. Similarly,
 the  'D', 'd', 'L', and 'l' keys will flag to the
 left rather than to the right. This option allows users
@@ -721,25 +721,25 @@ the convenience of left-handed users.
 <DT><B>Start</B>
 
 <DD>
-This button causes the set of displayed pings to step backward to the 
+This button causes the set of displayed pings to step backward to the
 beginning of the current buffer. The middle mouse button causes
 the same action if the 'G' or 'g' key is down.
 <DT><B>Reverse</B>
 
 <DD>
-This button causes the set of displayed pings to step <I>nstep</I> 
+This button causes the set of displayed pings to step <I>nstep</I>
 pings backward in the current buffer.  The middle mouse button causes
 the same action.
 <DT><B>Forward</B>
 
 <DD>
-This button causes the set of displayed pings to step <I>nstep</I> 
+This button causes the set of displayed pings to step <I>nstep</I>
 pings forward in the current buffer.  The right mouse button causes
 the same action.
 <DT><B>End</B>
 
 <DD>
-This button causes the set of displayed pings to step forward to the 
+This button causes the set of displayed pings to step forward to the
 end of the current buffer. The right mouse button causes
 the same action if the 'G' or 'g' key is down.
 <DT><B>Next Buffer</B>
@@ -754,7 +754,7 @@ has been written out, then the input and output files are closed.
 <DD>
 When the last file in the list of files available for editing has been loaded,
 this button shows as &quot;Done&quot;. Otherwise, it shows as &quot;Next File&quot;. In either
-case, this button causes the program to write out all of the edited navigation 
+case, this button causes the program to write out all of the edited navigation
 data and then close the current file. If the current file is not the last
 one in the available list, then the next unlocked file will be loaded for editing.
 <DT><B>Quit</B>
@@ -792,7 +792,7 @@ inside the slider area, but not on the slider itself.
 
 <DD>
 This set of radio buttons allows the user to specify the edit mode. If
-mode is set to <I>Toggle</I>, then clicking the left mouse button will 
+mode is set to <I>Toggle</I>, then clicking the left mouse button will
 cause the nearest beam to toggle between flagged and unflagged.  If mode
 is set to <I>Pick</I>, then clicking the left mouse button will cause
 the nearest unflagged beam to be flagged.  If mode
@@ -800,33 +800,33 @@ is set to <I>Erase</I>, then the cursor will change to an erasor and
 any beam with the cursor while the left mouse button is held down
 will be flagged.  If mode is set to <I>Restore</I>, the behavior will
 be the same as for <I>Erase</I> except that the affected beams will be
-unflagged instead of flagged. In <I>Grab</I> mode, a red rectangle is drawn 
-as the mouse is dragged with the left button down. When the button is 
-released, all unflagged soundings within the rectangle are flagged.  
+unflagged instead of flagged. In <I>Grab</I> mode, a red rectangle is drawn
+as the mouse is dragged with the left button down. When the button is
+released, all unflagged soundings within the rectangle are flagged.
 <I>Info</I> mode acts like pick mode, except that instead of flagging
 the nearest sounding, the program displays information about the
-selected ping and sounding above the bathymetry profile box. 
-The edit mode can also be set using key macros (see the keyboard 
-action section):  
+selected ping and sounding above the bathymetry profile box.
+The edit mode can also be set using key macros (see the keyboard
+action section):
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Toggle:<TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'Q',&nbsp;'q',&nbsp;'U',&nbsp;'u'&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Pick:<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'W',&nbsp;'w',&nbsp;'I',&nbsp;'i'&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Erase:<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'E',&nbsp;'e',&nbsp;'O',&nbsp;'o'&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Restore:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'R',&nbsp;'r',&nbsp;'P',&nbsp;'p'&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Grab:<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'Y',&nbsp;'y',&nbsp;'},&nbsp;']'&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Info:<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'T',&nbsp;'t',&nbsp;'{',&nbsp;'['&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Toggle:<TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'Q',&nbsp;'q',&nbsp;'U',&nbsp;'u'<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Pick:<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'W',&nbsp;'w',&nbsp;'I',&nbsp;'i'<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Erase:<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'E',&nbsp;'e',&nbsp;'O',&nbsp;'o'<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Restore:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'R',&nbsp;'r',&nbsp;'P',&nbsp;'p'<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Grab:<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'Y',&nbsp;'y',&nbsp;'},&nbsp;']'<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Info:<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>'T',&nbsp;'t',&nbsp;'{',&nbsp;'['<BR>
 <DT><B>Unflag View</B>
 
 <DD>
 This button flags all unflagged beams among the currently
-displayed pings. Pings in the buffer before or after the current 
+displayed pings. Pings in the buffer before or after the current
 display are unaffected.
 <DT><B>Unflag View</B>
 
 <DD>
 This button unflags all flagged beams among the currently
-displayed pings. Pings in the buffer before or after the current 
+displayed pings. Pings in the buffer before or after the current
 display are unaffected.
 <DT><B>Unflag Forward</B>
 
@@ -855,22 +855,22 @@ or <B>Reverse</B> buttons are pushed.
 <DD>
 The left mouse button is used to pick beams.  Good beams are
 shown as filled black squares and bad (flagged) beams as unfilled red
-or green squares.  The 
+or green squares.  The
 result of picking a particular beam depends on the current edit mode,
 as set by the <B>Mode</B> button or keyboard macros defined below. The
-last picked beam (and ping) is remembered for use with 
+last picked beam (and ping) is remembered for use with
 some of the keyboard actions described below.
 <DT><B>Middle Mouse Button</B>
 
 <DD>
-The middle mouse button causes the set of displayed pings to step <I>nstep</I> 
+The middle mouse button causes the set of displayed pings to step <I>nstep</I>
 pings backward in the current buffer.  The control button <B>Reverse</B> causes
 the same action. If the 'G' or 'g' key is depressed, the display will jump
 to the beginning of the current buffer.
 <DT><B>Right Mouse Button</B>
 
 <DD>
-The right mouse button causes the set of displayed pings to step <I>nstep</I> 
+The right mouse button causes the set of displayed pings to step <I>nstep</I>
 pings forward in the current buffer.  The control button <B>Forward</B> causes
 the same action. If the 'G' or 'g' key is depressed, the display will jump
 to the end of the current buffer.
@@ -899,7 +899,7 @@ ping to be flagged as bad.
 <DD>
 <B>Right:</B>
 
-Pressing one of these keys causes all of the unflagged beams 
+Pressing one of these keys causes all of the unflagged beams
 in the current display to to be flagged as bad. This is equivalent
 to the CFlag View button.
 <DT><B>'C', 'c', '&gt;', or '.'</B>
@@ -907,7 +907,7 @@ to the CFlag View button.
 <DD>
 <B>Right:</B>
 
-Pressing one of these keys causes all of the flagged beams 
+Pressing one of these keys causes all of the flagged beams
 in the current display to to be unflagged. This is equivalent
 to the <B>Unflag View</B> button.
 <DT><B>'S', 's', 'K', or 'k'</B>
@@ -922,21 +922,21 @@ ping to be unflagged as good.
 <DD>
 <B>Left:</B>
 
-Pressing one of these keys causes all of the beams including and to 
+Pressing one of these keys causes all of the beams including and to
 the left of the last picked beam to be flagged as bad.
 <DT><B>'D', 'd', 'L', or 'l'</B>
 
 <DD>
 <B>Right:</B>
 
-Pressing one of these keys causes all of the beams including and to 
+Pressing one of these keys causes all of the beams including and to
 the right of the last picked beam to be flagged as bad.
 <DT><B>'!'</B>
 
 <DD>
 <B>Zero Ping:</B>
 
-Pressing this key causes all of the beams in the ping 
+Pressing this key causes all of the beams in the ping
 associated with the last picked beam to be zeroed. This
 should be used only for completely ridiculous values, as
 the values are not recoverable.
@@ -947,7 +947,7 @@ the values are not recoverable.
 
 Pressing one of these keys sets the edit mode to &quot;toggle&quot; so that
 clicking the left mouse button will cause
-the nearest beam to toggle between flagged and unflagged.  
+the nearest beam to toggle between flagged and unflagged.
 The edit mode can also be set using the <B>Mode</B> toggle buttons.
 <DT><B>'W', 'w', 'I', or 'i'</B>
 
@@ -956,7 +956,7 @@ The edit mode can also be set using the <B>Mode</B> toggle buttons.
 
 Pressing one of these keys sets the edit mode to &quot;pick&quot; so that
 clicking the left mouse button will cause
-the nearest unflagged beam to be flagged.  
+the nearest unflagged beam to be flagged.
 The edit mode can also be set using the <B>Mode</B> toggle buttons.
 <DT><B>'E', 'e', 'O', or 'o'</B>
 
@@ -974,7 +974,7 @@ The edit mode can also be set using the <B>Mode</B> toggle buttons.
 <B>Restore Mode:</B>
 
 Pressing one of these keys sets the edit mode to &quot;restore&quot; so that
-clicking the left mouse button will cause any beam under the cursor 
+clicking the left mouse button will cause any beam under the cursor
 while the left mouse button is held down to be unflagged.
 The edit mode can also be set using the <B>Mode</B> toggle buttons.
 <DT><B>'T', 't', '{', or '['</B>
@@ -983,9 +983,9 @@ The edit mode can also be set using the <B>Mode</B> toggle buttons.
 <B>Grab Mode:</B>
 
 Pressing one of these keys sets the edit mode to &quot;grab&quot; so that
-dragging the left mouse button will draw a red rectangle. Any beams 
-inside the rectangle when the left mouse button is released will 
-be flagged. The edit mode can also be set using the <B>Mode</B> 
+dragging the left mouse button will draw a red rectangle. Any beams
+inside the rectangle when the left mouse button is released will
+be flagged. The edit mode can also be set using the <B>Mode</B>
 toggle buttons.
 <DT><B>'Y', 'y', '}', or ']'</B>
 
@@ -999,34 +999,34 @@ The edit mode can also be set using the <B>Mode</B> toggle buttons.
 <DT><B>'2'</B>
 
 <DD>
-Sets the <B>mbedit</B> display so that the 
+Sets the <B>mbedit</B> display so that the
 bathymetry acrosstrack profiles are plotted with vertical
-offsets between each profile (in waterfall fashion). 
+offsets between each profile (in waterfall fashion).
 <DT><B>'3'</B>
 
 <DD>
-Sets the <B>mbedit</B> display so that the 
+Sets the <B>mbedit</B> display so that the
 bathymetry acrosstrack profiles are viewed in the alongtrack
-direction without vertical offsets between the pings. 
+direction without vertical offsets between the pings.
 <DT><B>'4'</B>
 
 <DD>
-Sets the <B>mbedit</B> display so that the 
+Sets the <B>mbedit</B> display so that the
 bathymetry acrosstrack profiles are viewed in the acrosstrack
-direction without vertical offsets between the pings. 
+direction without vertical offsets between the pings.
 <P>
 </DL>
 <A NAME="lbAK">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbprocess.html">mbprocess</A></B>(l), <B><A HREF="mbset.html">mbset</A></B>(l), 
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbprocess.html">mbprocess</A></B>(l), <B><A HREF="mbset.html">mbset</A></B>(l),
 <B><A HREF="mbclean.html">mbclean</A></B>(l), <B><A HREF="mbeditviz.html">mbeditviz</A></B>(l), <B><A HREF="mbinfo.html">mbinfo</A></B>(l)
 <P>
 <A NAME="lbAL">&nbsp;</A>
 <H2>BUGS</H2>
 
 This program is only fun when the data are good. The main
-window for <B>mbedit</B> is not resizeable.
+window for <B>mbedit</B> is not resizable.
 <P>
 
 <HR>
@@ -1048,7 +1048,7 @@ window for <B>mbedit</B> is not resizeable.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 29 April 2011</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

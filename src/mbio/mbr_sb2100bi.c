@@ -241,7 +241,7 @@ The data records are:\n\
 All data files will begin with the ascii File Header Record.\n\
 \n\
 All data files created by a sonar should include a Sonar\n\
-Paramater Record before any ping data. Data files originating\n\
+Parameter Record before any ping data. Data files originating\n\
 in the original SeaBeam 2100 format may not have a Sonar\n\
 Parameter Record. Sonar Text Records may occur between the \n\
 File Header Record and any other data records.\n\

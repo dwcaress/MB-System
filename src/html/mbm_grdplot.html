@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_grdplot</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  4 October 2012 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -37,7 +37,7 @@ Version 5.0
 <B>-O</B><I>root</I> <B>-P</B><I>pagesize</I>
 <B>-S</B><I>[color/shade]</I> <B>-T</B>
 <B>-U</B><I>orientation</I> <B>-V</B>
-<B>-W</B><I>[color_style</I>[<I>/pallette</I>[<I>ncolors</I>]] | <I>cptfile]</I> ]
+<B>-W</B><I>[color_style</I>[<I>/palette</I>[<I>ncolors</I>]] | <I>cptfile]</I> ]
 <P>
 Additional Options:
 <BR>
@@ -91,7 +91,7 @@ production of nice looking maps with a few command line
 arguments. For users seeking more control over the plot
 appearance, a number of additional optional arguments are
 provided. Truly ambitious users may edit the plot shellscript
-to take advantage of <B>GMT</B> capabilites not supported by this
+to take advantage of <B>GMT</B> capabilities not supported by this
 macro. A companion macro <B>mbm_grd3dplot</B> can be used
 similarly to generate 3D perspective views of gridded data.
 <P>
@@ -285,7 +285,7 @@ more information than usual.
 <DT><B>-W</B>
 
 <DD>
-<I>[color_style</I>[<I>/pallette</I>[<I>ncolors</I>]] | cptfile]
+<I>[color_style</I>[<I>/palette</I>[<I>ncolors</I>]] | cptfile]
 <BR>
 
 This option controls the color scheme used for color
@@ -295,16 +295,16 @@ If <I>color_style</I> = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If <I>color_style</I> = 2, the color scheme
 will be a set of discrete color intervals. The color
-pallette used is set using <I>pallette</I>. Five pallettes
+palette used is set using <I>palette</I>. Five palettes
 are available:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;</TT>Haxby&nbsp;colors&nbsp;[default]<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;</TT>high&nbsp;Intensity&nbsp;colors<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;3:<TT>&nbsp;&nbsp;&nbsp;</TT>low&nbsp;Intensity&nbsp;colors<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;4:<TT>&nbsp;&nbsp;&nbsp;</TT>grayscale<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;5:<TT>&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;grayscale<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>Haxby&nbsp;colors&nbsp;[default]<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>high&nbsp;Intensity&nbsp;colors<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;3:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>low&nbsp;Intensity&nbsp;colors<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;4:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>grayscale<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;5:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;grayscale<BR>
 <BR>
 
-A complete description of the color pallettes is given
+A complete description of the color palettes is given
 in the COMPLETE DESCRIPTION OF OPTIONS section below.
 <P>
 The <I>ncolors</I> parameter sets the number of color
@@ -313,7 +313,7 @@ represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
 <P>
 If the option argument is the path to an existing <B>GMT</B>
-color pallette (CPT) file, then that CPT file and its
+color palette (CPT) file, then that CPT file and its
 color scheme will be used for the plot
 <P>
 </DL>
@@ -799,7 +799,8 @@ is given in the <B>MBIO</B> manual page.
 <DT><B>-MNN</B>
 
 <DD>
-[<I>time_tick/time_annot/date_annot/time_tick_len</I>[<I>/name_hgt/name_perp</I>] | <I>F</I> | <I>FP</I>]
+[<I>time_tick/time_annot/date_annot/time_tick_len</I>[<I>/name_hgt/name_perp</I>]
+| <I>F</I> | <I>FP</I>]
 <BR>
 
 This option sets the annotation of the swath file navigation
@@ -1231,7 +1232,7 @@ more information than usual.
 <DT><B>-W</B>
 
 <DD>
-<I>[color_style</I>[<I>/pallette</I>[<I>ncolors</I>]] | cptfile]
+<I>[color_style</I>[<I>/palette</I>[<I>ncolors</I>]] | cptfile]
 <BR>
 
 This option controls the color scheme used for color
@@ -1241,63 +1242,63 @@ If <I>color_style</I> = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If <I>color_style</I> = 2, the color scheme
 will be a set of discrete color intervals. The color
-pallette used is set using <I>pallette</I>. Seven pallettes
+palette used is set using <I>palette</I>. Seven palettes
 are available:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;</TT>Haxby&nbsp;colors&nbsp;[default]<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;</TT>high&nbsp;Intensity&nbsp;colors<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;3:<TT>&nbsp;&nbsp;&nbsp;</TT>low&nbsp;Intensity&nbsp;colors<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;4:<TT>&nbsp;&nbsp;&nbsp;</TT>grayscale<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;5:<TT>&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;grayscale<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;6:<TT>&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;black<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;7:<TT>&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;white<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>Haxby&nbsp;colors&nbsp;[default]<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>high&nbsp;Intensity&nbsp;colors<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;3:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>low&nbsp;Intensity&nbsp;colors<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;4:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>grayscale<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;5:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;grayscale<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;6:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;black<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;7:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;white<BR>
 <P>
-The RGB definitions of the color pallettes are:
+The RGB definitions of the color palettes are:
 <P>
-color pallette 1 - Haxby Color Table
+color palette 1 - Haxby Color Table
 <BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;240&nbsp;205&nbsp;138&nbsp;106&nbsp;&nbsp;50&nbsp;&nbsp;40&nbsp;&nbsp;37
 <BR>&nbsp;&nbsp;green:&nbsp;255&nbsp;186&nbsp;161&nbsp;189&nbsp;236&nbsp;255&nbsp;236&nbsp;235&nbsp;190&nbsp;127&nbsp;&nbsp;57
 <BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;255&nbsp;133&nbsp;&nbsp;68&nbsp;&nbsp;87&nbsp;121&nbsp;162&nbsp;174&nbsp;255&nbsp;255&nbsp;251&nbsp;175
 <P>
-color pallette 2 - High Intensity Colors
+color palette 2 - High Intensity Colors
 <BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;128&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;128&nbsp;255
 <BR>&nbsp;&nbsp;green:&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;64&nbsp;128&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;128&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0
 <BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255
 <P>
-color pallette 3 - Low Intensity Colors
+color palette 3 - Low Intensity Colors
 <BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;200&nbsp;194&nbsp;179&nbsp;141&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;90&nbsp;141
 <BR>&nbsp;&nbsp;green:&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;49&nbsp;&nbsp;90&nbsp;141&nbsp;179&nbsp;200&nbsp;141&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0
 <BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;141&nbsp;179&nbsp;200&nbsp;179&nbsp;141
 <P>
-color pallette 4 - Grayscale
+color palette 4 - Grayscale
 <BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;255&nbsp;230&nbsp;204&nbsp;179&nbsp;153&nbsp;128&nbsp;102&nbsp;&nbsp;77&nbsp;&nbsp;51&nbsp;&nbsp;26&nbsp;&nbsp;&nbsp;0
 <BR>&nbsp;&nbsp;green:&nbsp;255&nbsp;230&nbsp;204&nbsp;179&nbsp;153&nbsp;128&nbsp;102&nbsp;&nbsp;77&nbsp;&nbsp;51&nbsp;&nbsp;26&nbsp;&nbsp;&nbsp;0
 <BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;255&nbsp;230&nbsp;204&nbsp;179&nbsp;153&nbsp;128&nbsp;102&nbsp;&nbsp;77&nbsp;&nbsp;51&nbsp;&nbsp;26&nbsp;&nbsp;&nbsp;0
 <P>
-color pallette 5 - Uniform Grayscale
+color palette 5 - Uniform Grayscale
 <BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128
 <BR>&nbsp;&nbsp;green:&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128
 <BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128
 <P>
-color pallette 6 - Uniform Black
+color palette 6 - Uniform Black
 <BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0
 <BR>&nbsp;&nbsp;green:&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0
 <BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0
 <P>
-color pallette 7 - Uniform White
+color palette 7 - Uniform White
 <BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255
 <BR>&nbsp;&nbsp;green:&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255
 <BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255
 <P>
-The Haxby colors have been adapted from a pallette
+The Haxby colors have been adapted from a palette
 developed by Dr. William Haxby of the Lamont-Doherty
-Earth Observatory; this pallette is pleasing to the
+Earth Observatory; this palette is pleasing to the
 eye and well suited for shading. The high intensity
 colors describe linear paths through RGB space from
 red to blue to green to purple; because the colors are high
 intensity they are not well suited to shading.
 The low intensity colors are similar to the high
 intensity, but muted and thus well suited to shading.
-The grayscale pallette runs linearly from white to
+The grayscale palette runs linearly from white to
 black and is commonly used for plots of sidescan and amplitude
 data. The uniform grayscale is useful for non-color
 shaded relief plots.
@@ -1308,7 +1309,7 @@ represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
 <P>
 If the option argument is the path to an existing <B>GMT</B>
-color pallette (CPT) file, then that CPT file and its
+color palette (CPT) file, then that CPT file and its
 color scheme will be used for the plot
 <DT><B>-X</B>
 
@@ -1320,7 +1321,7 @@ in the background before <B>mbm_grdplot</B> exits.
 
 <DD>
 Normally, <B>mbm_grdplot</B> generates nicely rounded numbers
-for the boundaries of the color pallette. Often, the resulting
+for the boundaries of the color palette. Often, the resulting
 color bounds extend well outside the range of the gridded data.
 This option causes the minimum and maximum color boundaries to
 exactly conform to the minimum and maximum values of the grid,
@@ -1333,17 +1334,17 @@ values specified by the user.
 <BR>
 
 This option overrides the minimum and maximum values of
-the gridded data, affecting the color pallette and the
+the gridded data, affecting the color palette and the
 contour interval if those parameters are not specified
 by the user. By default (i.e. <I>mode</I> is omitted
-or equal to 0), the macro selects the color pallette bounds
+or equal to 0), the macro selects the color palette bounds
 so that they encompass <I>min</I> and <I>max</I> while using
 nicely rounded numbers. If <I>mode</I> is omitted or equal
-to 0, then the color pallette will end near <I>min</I> and
+to 0, then the color palette will end near <I>min</I> and
 <I>max</I> whether it is linear stretched or histogram equalized.
 If <I>mode</I> = 1, then the color stretching calculations
 will be done using <I>min</I> and <I>max</I>, but then the
-first and last values in the color pallette will be set to
+first and last values in the color palette will be set to
 the actual minimum and maximum values.so that all the data
 are displayed.
 <P>
@@ -1370,7 +1371,7 @@ colors for shallow regions; this is the opposite of the
 convention we usually use. In order to fix the colors, we have
 to either rescale the data by multiplying the bathymetry
 by -1 (accomplished with -MGS-1), or flip the color
-pallette (accomplished with -D). We use the latter approach:
+palette (accomplished with -D). We use the latter approach:
 <P>
 <BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grdplot&nbsp;-Igrd_sb2112_example_bath&nbsp;-G1&nbsp;-C&nbsp;-D&nbsp;\<BR>
 <BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-V&nbsp;-Ogrd_sb2112_example_bathfill<BR>
@@ -1412,9 +1413,9 @@ scale and the second number (1) causes histogram
 equalization of the shading sidescan data to be
 implemented. In order to maintain the convention that
 high sidescan amplitudes are black, we flip both the
-color pallette (as in the previous example) and the
+color palette (as in the previous example) and the
 shading scale with -D1/1. We could also flip the shading
-by specifing a negative shading magnitude (-A-0.4).
+by specifying a negative shading magnitude (-A-0.4).
 In this case, we forgo specifying the image resolution,
 resulting in a grainy plot:
 <P>
@@ -1456,8 +1457,8 @@ As an example, the contents of the plotting shellscript
 <BR>&nbsp;gmtset&nbsp;COLOR_FOREGROUND&nbsp;255/255/255
 <BR>&nbsp;gmtset&nbsp;COLOR_NAN&nbsp;255/255/255
 <BR>&nbsp;#
-<BR>&nbsp;#&nbsp;Make&nbsp;color&nbsp;pallette&nbsp;table&nbsp;file
-<BR>&nbsp;echo&nbsp;Making&nbsp;color&nbsp;pallette&nbsp;table&nbsp;file...
+<BR>&nbsp;#&nbsp;Make&nbsp;color&nbsp;palette&nbsp;table&nbsp;file
+<BR>&nbsp;echo&nbsp;Making&nbsp;color&nbsp;palette&nbsp;table&nbsp;file...
 <BR>&nbsp;echo&nbsp;&nbsp;&nbsp;3000&nbsp;255&nbsp;255&nbsp;255&nbsp;&nbsp;&nbsp;3150&nbsp;255&nbsp;186&nbsp;133&nbsp;&gt;&nbsp;\
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grd_sb2112_example_bathfill.cpt<BR>
 <BR>&nbsp;echo&nbsp;&nbsp;&nbsp;3150&nbsp;255&nbsp;186&nbsp;133&nbsp;&nbsp;&nbsp;3300&nbsp;255&nbsp;161&nbsp;&nbsp;68&nbsp;&gt;&gt;&nbsp;\
@@ -1593,7 +1594,7 @@ more complex.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 4 October 2012</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

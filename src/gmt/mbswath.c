@@ -880,7 +880,7 @@ int main (int argc, char **argv)
 		image = MBSWATH_IMAGE_8;
 	if (GMT_n_colors <= 0)
 		{
-		fprintf(stderr,"\nColor pallette table not properly specified:\n");
+		fprintf(stderr,"\nColor palette table not properly specified:\n");
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		error = MB_ERROR_BAD_PARAMETER;

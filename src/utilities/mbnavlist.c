@@ -480,7 +480,7 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 
-	/* set auxilliary nav source if requested
+	/* set auxiliary nav source if requested
 		- note this is superceded by data_kind if the -K option is used */
 	if (aux_nav_channel > 0)
 		{

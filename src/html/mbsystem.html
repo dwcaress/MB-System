@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbsystem</H1>
-Section:  MB-System 5.3  (1)<BR>Updated:  7 July 2012 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.3  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -545,7 +545,7 @@ processing scheme as follows:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;SVP&nbsp;is&nbsp;output&nbsp;to&nbsp;the&nbsp;&quot;.svp&quot;&nbsp;file.
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;parameter&nbsp;file&nbsp;is&nbsp;updated&nbsp;and
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;to&nbsp;recalculate&nbsp;the&nbsp;bathymetry&nbsp;by
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raytracing&nbsp;throught&nbsp;SVP&nbsp;model&nbsp;from
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raytracing&nbsp;through&nbsp;the&nbsp;SVP&nbsp;model&nbsp;from
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;&quot;.svp&quot;&nbsp;file.
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524.mb57
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
@@ -809,7 +809,7 @@ marked with an *:
 <P>
 The following are MB-system programs which are not used in the
 version 5 parallel processing scheme. These programs are
-included in the version 5 releases for backward compatability
+included in the version 5 releases for backward compatibility
 with the old serial processing scheme:
 <BR>&nbsp;<B>hsdump</B>:&nbsp;&nbsp;Lists&nbsp;contents&nbsp;of&nbsp;the&nbsp;various&nbsp;sorts&nbsp;of
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>data&nbsp;records&nbsp;in&nbsp;Hydrosweep&nbsp;DS&nbsp;data.<BR>
@@ -1323,7 +1323,7 @@ colors for shallow regions; this is the opposite of the
 convention we usually use. In order to fix the colors, we have
 to either rescale the data by multiplying the bathymetry
 by -1 (accomplished with -MGS-1), or flip the color
-pallette (accomplished with -D). We use the latter approach.
+palette (accomplished with -D). We use the latter approach.
 Finally, because this grid is so small, the default shaded
 relief image is likely to be grainy. To fix this problem, we
 specify a dots per inch resolution of 72 (-MGQ72); this
@@ -1349,9 +1349,9 @@ scale and the second number (1) causes histogram
 equalization of the shading sidescan data to be
 implemented. In order to maintain the convention that
 high sidescan amplitudes are black, we flip both the
-color pallette (as in the previous example) and the
+color palette (as in the previous example) and the
 shading scale with -D1/1. We could also flip the shading
-by specifing a negative shading magnitude (-A-0.4).
+by specifying a negative shading magnitude (-A-0.4).
 In this case, we forgo specifying the image resolution,
 resulting in a grainy plot:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grdplot&nbsp;-IZGridBath.grd&nbsp;\<BR>
@@ -1405,7 +1405,7 @@ does not store beam flags, so the only to apply bathymetry edits is
 to null the flagged beams. This is not recommended, as it precludes
 unflagging flagged beams later determined to be good.
 <P>
-Also, the raw Kongsberg format stores the intial sidescan samples derived from subsampling
+Also, the raw Kongsberg format stores the initial sidescan samples derived from subsampling
 the bottom returns in each of the formed beams. The locations of these
 samples on the seafloor are irregular, and the number of samples varies
 greatly from ping to ping. This raw sidescan is not well suited for
@@ -1496,7 +1496,7 @@ to null the flagged beams. This is not recommended, as it precludes
 unflagging flagged beams later determined to be good.
 <P>
 Also, the raw
-Simrad formats store the intial sidescan samples derived from subsampling
+Simrad formats store the initial sidescan samples derived from subsampling
 the bottom returns in each of the formed beams. The locations of these
 samples on the seafloor are irregular, and the number of samples varies
 greatly from ping to ping. This raw sidescan is not well suited for
@@ -1670,7 +1670,7 @@ breaks.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 7 July 2012</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
