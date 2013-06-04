@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavlist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  9 November 2011 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,29 +28,29 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbnavlist</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-D</B><I>decimate</I>
-<B>-E</B><I>yr/mo/da/hr/mn/sc</I> <B>-F</B><I>format</I> 
+<B>-E</B><I>yr/mo/da/hr/mn/sc</I> <B>-F</B><I>format</I>
 <B>-G</B><I>delimeter</I> <B>-H</B> <B>-I</B><I>file</I> <B>-K</B><I>kind</I>
 <B>-L</B><I>lonflip</I> <B>-N</B><I>navchannel</I>
-<B>-O</B><I>output_format</I> <B>-R</B><I>west/east/south/north</I> 
+<B>-O</B><I>output_format</I> <B>-R</B><I>west/east/south/north</I>
 <B>-S</B><I>speed</I> <B>-T</B><I>timegap</I> <B>-V</B> <B>-Z</B><I>segment</I>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
 <B>mbnavlist</B> prints the specified contents of navigation records
-in a swath sonar data file to stdout. By default, <B>mbnavlist</B> 
+in a swath sonar data file to stdout. By default, <B>mbnavlist</B>
 produces ASCII files in
 spreadsheet style, with data columns separated by tabs. Alternatively,
 other column delimiters can be used (<B>-G</B> option), or
-the output can be binary, with each field represented 
+the output can be binary, with each field represented
 as a double precision float (<B>-A</B> option).  The output stream can
 be decimated using the <B>-D</B> option. The output of
 <B>mbnavlist</B> can be piped to plotting and data analysis programs. The
-option <B>-O</B><I>output_format</I> can be 
+option <B>-O</B><I>output_format</I> can be
 used to control the data types that
-are sent to stdout. 
+are sent to stdout.
 <P>
-By default, <B>mbnavlist</B> extracts navigation from the 
+By default, <B>mbnavlist</B> extracts navigation from the
 data record type listed as the &quot;navigation source&quot; for a particular
 data format. Swath data formats may contain synchronous navigation
 (navigation is included in survey data records), asynchronous navigation
@@ -63,18 +63,18 @@ asynchronous data records. In this case one channel is always designated
 as the primary or active navigation channel. The <B>-N</B> option allows
 the user to specify that <B>mbnavlist</B> outputs navigation from
 the primary asynchronous navigation (<B>-N</B><I>0</I>) or from one
-of three auxilliary navigation channels 
+of three auxiliary navigation channels
 (<B>-N</B><I>1</I>, <B>-N</B><I>2</I>, or <B>-N</B><I>3</I>). If the data
 format only uses asynchronous navigation, then the default
 navigation source will already be the primary asynchronous navigation
 and <B>-N</B> need not be used. If <B>-N</B> is used but the data file
-does not contain asynchronous navigation or the specified auxilliary
+does not contain asynchronous navigation or the specified auxiliary
 navigation channels, then <B>mbnavlist</B> will output nothing. To
-determine if a datafile contains asynchronous navigation and/or auxilliary
+determine if a datafile contains asynchronous navigation and/or auxiliary
 navigation, run <B>mbinfo</B> using its <B>-N</B> option to get counts
 of all data record types in the file.
 <P>
-Just to make things more complicated, many data formats formats pass 
+Just to make things more complicated, many data formats formats pass
 heading and attitude data in records separate from position, and often
 with different timestamps and sampling rates. If, for instance, the
 attitude data are sampled at 10 Hz but position is only sampled at
@@ -135,7 +135,7 @@ Default: ASCII output with fields separated by tabs.
 <BR>
 
 This option sets the starting time for data allowed in the input data.
-The <B>-E</B> option sets the ending time for data. If the 
+The <B>-E</B> option sets the ending time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -149,8 +149,8 @@ Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
 <I>decimate</I>
 <BR>
 
-Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1), 
-every available data record is output. If <I>decimate</I>&gt;1, then only 
+Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1),
+every available data record is output. If <I>decimate</I>&gt;1, then only
 every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate</I>=1.
 <DT><B>-E</B>
 
@@ -159,7 +159,7 @@ every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate<
 <BR>
 
 This option sets the ending time for data allowed in the input data.
-The <B>-B</B> option sets the starting time for data. If the 
+The <B>-B</B> option sets the starting time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -173,8 +173,8 @@ Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
 <I>format</I>
 <BR>
 
-Sets the format for the input swath sonar data using 
-<B>MBIO</B> integer format identifiers. 
+Sets the format for the input swath sonar data using
+<B>MBIO</B> integer format identifiers.
 This program uses the <B>MBIO</B> library and will read any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
@@ -198,11 +198,11 @@ of its operation and then exit immediately.
 <I>file</I>
 <BR>
 
-Sets the input filename. If <I>format</I> &gt; 0 (set with the 
-<B>-F</B> option) then the swath sonar data contained in <I>file</I> 
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-F</B> option) then the swath sonar data contained in <I>file</I>
 is read and processed. If <I>format</I> &lt; 0, then <I>file</I>
 is assumed to be an ascii file containing a list of the input swath sonar
-data files to be processed and their formats.  The program will read 
+data files to be processed and their formats.  The program will read
 the data in each one of these files.
 In the <I>file</I> file, each
 data file should be followed by a data format identifier, e.g.:
@@ -213,7 +213,7 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the <B>MBIO</B> library and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
-is given in the <B>MBIO</B> manual page. 
+is given in the <B>MBIO</B> manual page.
 Default: <I>file</I> = &quot;datalist.mb-1&quot;.
 <DT><B>-K</B>
 
@@ -267,9 +267,9 @@ This option supercedes the <B>-N</B> option.
 
 Sets the range of the longitude values returned.
 If <I>lonflip</I>=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If <I>lonflip</I>=0 
+the range from -360 to 0 degrees. If <I>lonflip</I>=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If <I>lonflip</I>=1 
+the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
@@ -292,12 +292,12 @@ asynchronous data records. In this case one channel is always designated
 as the primary or active navigation channel. The <B>-N</B> option allows
 the user to specify that <B>mbnavlist</B> outputs navigation from
 the primary asynchronous navigation (<B>-N</B><I>0</I>) or from one
-of three auxilliary navigation channels 
+of three auxiliary navigation channels
 (<B>-N</B><I>1</I>, <B>-N</B><I>2</I>, or <B>-N</B><I>3</I>). If <B>-N</B> is
 used but the data file
-does not contain asynchronous navigation or the specified auxilliary
+does not contain asynchronous navigation or the specified auxiliary
 navigation channels, then <B>mbnavlist</B> will output nothing. To
-determine if a datafile contains asynchronous navigation and/or auxilliary
+determine if a datafile contains asynchronous navigation and/or auxiliary
 navigation, run <B>mbinfo</B> using its <B>-N</B> option to get counts
 of all data record types in the file. This option is superceded by the
 <B>-K</B> option.
@@ -313,9 +313,9 @@ of one or more of the following characters:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>c</B>&nbsp;&nbsp;for&nbsp;sonar&nbsp;depth&nbsp;(meters)<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>H</B>&nbsp;&nbsp;for&nbsp;heading&nbsp;(degrees)<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>h</B>&nbsp;&nbsp;for&nbsp;course&nbsp;made&nbsp;good&nbsp;(degrees)<BR>
-<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>J</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;jd&nbsp;hh&nbsp;mm&nbsp;ss.ssssss)&nbsp;<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>J</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;jd&nbsp;hh&nbsp;mm&nbsp;ss.ssssss)<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;jd&nbsp;is&nbsp;the&nbsp;julian&nbsp;day&nbsp;of&nbsp;the&nbsp;year
-<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>j</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;jd&nbsp;dm&nbsp;ss.ssssss)&nbsp;<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>j</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;jd&nbsp;dm&nbsp;ss.ssssss)<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;jd&nbsp;is&nbsp;the&nbsp;julian&nbsp;day&nbsp;of&nbsp;the&nbsp;year
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;dm&nbsp;is&nbsp;the&nbsp;minute&nbsp;of&nbsp;the&nbsp;day
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>L</B>&nbsp;&nbsp;for&nbsp;cumulative&nbsp;along-track&nbsp;distance&nbsp;(km)<BR>
@@ -339,7 +339,7 @@ of one or more of the following characters:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>Y</B>&nbsp;&nbsp;for&nbsp;latitude&nbsp;(decimal&nbsp;degrees)<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>y</B>&nbsp;&nbsp;for&nbsp;latitude&nbsp;(degrees&nbsp;+&nbsp;decimal&nbsp;minutes&nbsp;+&nbsp;N/S)<BR>
 <P>
-Default <I>output_format</I> = <B>tMXYHs</B> (time, unix time, latitude, 
+Default <I>output_format</I> = <B>tMXYHs</B> (time, unix time, latitude,
 longitude, heading, speed).
 <DT><B>-R</B>
 
@@ -347,9 +347,9 @@ longitude, heading, speed).
 <I>west/east/south/north</I>
 <BR>
 
-Sets the longitude and latitude bounds within which swath sonar 
+Sets the longitude and latitude bounds within which swath sonar
 data will be read. Only the data which lies within these bounds will
-be read. 
+be read.
 Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
 <DT><B>-S</B>
 
@@ -357,7 +357,7 @@ Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
 <I>speed</I>
 <BR>
 
-Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: <I>speed</I> = 0.
 <DT><B>-T</B>
@@ -395,7 +395,7 @@ is <B>-Z</B>I&gt;.
 <H2>EXAMPLES</H2>
 
 Suppose one wishes to obtain a navigation list from a Simrad EM300 data file
-in the MBARI format (MBIO id 57) called mbari_1998_107_msn.mb57. To 
+in the MBARI format (MBIO id 57) called mbari_1998_107_msn.mb57. To
 obtain a listing with time in unix second forms followed
 by longitude and latitude, the following will suffice:
 <P>
@@ -488,7 +488,7 @@ to the desired record type identifier from this table.
 <A NAME="lbAK">&nbsp;</A>
 <H2>BUGS</H2>
 
-<B>mbnavlist</B> is not able to list all of the navigation information 
+<B>mbnavlist</B> is not able to list all of the navigation information
 available in some swath data formats.
 <P>
 
@@ -510,7 +510,7 @@ available in some swath data formats.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 9 November 2011</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

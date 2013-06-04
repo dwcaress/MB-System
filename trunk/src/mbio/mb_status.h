@@ -29,8 +29,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.4.2083"
-#define	MB_BUILD_DATE	"26 May 2013"
+#define	MB_VERSION	"5.4.2095"
+#define	MB_BUILD_DATE	"3 June 2013"
 #define	MB_SVN		"$Id$"
 
 /* MBIO function boolean convention */
@@ -262,9 +262,9 @@ static char *notice_msg[] =
 	"MB_DATA_SENSOR_PARAMETERS (ID=25): GSF sensor parameter record",
 	"MB_DATA_NAVIGATION_ERROR (ID=26): GSF navigation error record",
 	"MB_DATA_RAW_LINE (ID=27): uninterpretable ASCII line",
-	"MB_DATA_NAV1 (ID=28): Auxilliary nav system 1",
-	"MB_DATA_NAV2 (ID=29): Auxilliary nav system 2",
-	"MB_DATA_NAV3 (ID=30): Auxilliary nav system 3",
+	"MB_DATA_NAV1 (ID=28): Auxiliary nav system 1",
+	"MB_DATA_NAV2 (ID=29): Auxiliary nav system 2",
+	"MB_DATA_NAV3 (ID=30): Auxiliary nav system 3",
 	"MB_DATA_TILT (ID=31): Mechanical tilt record",
 	"MB_DATA_MOTION (ID=32): Motion (DVL) sensor record",
 	"MB_DATA_CTD (ID=33): CTD record",

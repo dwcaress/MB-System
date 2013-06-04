@@ -508,7 +508,7 @@ int main (int argc, char **argv)
 	fprintf(output,"\nSEGY Data File:      %s\n",read_file);
 	fprintf(output,"\nFile Header Info:\n");
 	fprintf(output,"  Channels:                   %8d\n",fileheader.channels);
-	fprintf(output,"  Auxilliary Channels:        %8d\n",fileheader.aux_channels);
+	fprintf(output,"  Auxiliary Channels:         %8d\n",fileheader.aux_channels);
 	fprintf(output,"  Sample Interval (usec):     %8d\n",fileheader.sample_interval);
 	fprintf(output,"  Number of Samples in Trace: %8d\n",fileheader.number_samples);
 	fprintf(output,"  Trace length (sec):         %8f\n",tracelength);

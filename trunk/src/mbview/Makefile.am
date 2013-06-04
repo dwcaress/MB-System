@@ -1,7 +1,7 @@
 bin_PROGRAMS = mbgrdviz mbeditviz
 
 AM_CPPFLAGS = -I@top_srcdir@/src -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @MOTIF_INC_DIR@ @GL_INC_DIR@ @GMT_INC_DIR@
-LIBS = @MOTIF_LIB_DIR@ @GL_LIB_DIR@
+LIBS = @MOTIF_LIB_DIR@ @GL_LIB_DIR@ ${libgmt_LIBS}
 
 include_HEADERS = mbview.h
 
@@ -17,7 +17,7 @@ mbeditviz_CFLAGS=-DMBEDITVIZ_DECLARE_GLOBALS
 
 lib_LTLIBRARIES = libmbview.la
 
-libmbview_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libmbview_la_LDFLAGS = -no-undefined -version-info 0:0:0 -lm
 libmbview_la_CFLAGS=-DMBVIEW_LIBRARY -L@top_srcdir@/src/mbio
 
 libmbview_la_SOURCES = \

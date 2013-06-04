@@ -6,7 +6,7 @@ dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
-AC_INIT([mbsystem],[3.5.2084])
+AC_INIT([mbsystem],[3.5.2095])
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 
@@ -192,7 +192,7 @@ PKG_CHECK_MODULES([libgmt], [gmt], [GOT_GMT=yes], [GOT_GMT=no])
 dnl Package check failed so check manually
 if test "$GOT_GMT" = "no" ; then
 
-libgmt_LIBS="-lgmt"
+libgmt_LIBS="-lgmt -lgmtps -lpsl"
 dnl arg for command line
 AC_ARG_WITH(gmt-lib, [  --with-gmt-lib=DIR	Location of GMT library],
 	[libgmt_CFLAGS="-L${withval}"] [GOT_GMT=yes], [GOT_GMT=no])

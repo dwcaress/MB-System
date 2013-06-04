@@ -11,14 +11,14 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_grdcut</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
 <B>mbm_grdcut</B> - Macro to extract a specified subarea of a
-GMT GRD grid file as another GRD file. 
+GMT GRD grid file as another GRD file.
 <P>
 <A NAME="lbAC">&nbsp;</A>
 <H2>VERSION</H2>
@@ -33,7 +33,7 @@ mbm_grdcut <B>-I</B><I>infile</I> <B>-O</B><I>outfile</I> <B>-R</B><I>w/e/s/n</I
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbm_grdcut</B> is a macro to painlessly cut out a region from a 
+<B>mbm_grdcut</B> is a macro to painlessly cut out a region from a
 GMT GRD grid file.
 The GMT program grdcut requires that one specify bounds which
 exactly match grid cell boundaries. Frequently, one just wants
@@ -72,7 +72,7 @@ of its operation and then exit immediately.
 <BR>
 
 Sets the filename of the input GMT grid file. This file must be
-in the GMT NetCDF GRD format. 
+in the GMT NetCDF GRD format.
 <DT><B>-O</B>
 
 <DD>
@@ -80,14 +80,14 @@ in the GMT NetCDF GRD format.
 <BR>
 
 Sets the filename of the output GMT grid file. This file will be
-in the GMT NetCDF GRD format. 
+in the GMT NetCDF GRD format.
 <DT><B>-R</B>
 
 <DD>
 <I>w/e/s/n</I>
 <BR>
 
-Sets the bounds of the area to be extracted from the input grid file. 
+Sets the bounds of the area to be extracted from the input grid file.
 <DT><B>-V</B>
 
 <DD>
@@ -100,10 +100,10 @@ The <B>-V</B> option causes <B>mbm_grdcut</B> to print out status messages.
 Suppose that we have used <B>mbgrid</B> to obtain a
 topography grid file called KohalaA_bath.grd in the GMT NetCDF
 GRD format:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbgrid&nbsp;-Idatalist&nbsp;\<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-OKohalaA_bath&nbsp;\<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-155.72855/-155.31928/20.09488/20.47645&nbsp;\<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-E30.0/0m!&nbsp;-A2&nbsp;-N&nbsp;-G3&nbsp;-C1&nbsp;-V<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbgrid&nbsp;-Idatalist&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-OKohalaA_bath&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-R-155.72855/-155.31928/20.09488/20.47645&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-E30.0/0m!&nbsp;-A2&nbsp;-N&nbsp;-G3&nbsp;-C1&nbsp;-V
 <BR>
 
 Further suppose that one wishes to extract a smaller grid with
@@ -117,29 +117,29 @@ desired bounds, calculates the exact, nearest bounds
 that <B>grdcut</B> will accept, and then executes <B>grdcut</B>.
 <P>
 To obtain the desired sub-grid, the following will suffice:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grdcut&nbsp;-I&nbsp;KohalaA_bath.grd&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;Kohala_plunge&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-155:31/-155:26/20:13/20:18&nbsp;-V<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbm_grdcut&nbsp;-I&nbsp;KohalaA_bath.grd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-O&nbsp;Kohala_plunge&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-R-155:31/-155:26/20:13/20:18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-V
 <BR>
 
 The resulting output is:
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbm_grdcut&nbsp;status:<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kohalaa.grd<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z.grd<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;Grid&nbsp;bounds:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.72855&nbsp;-155.3192906&nbsp;&nbsp;20.09488&nbsp;20.47628103<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;grid&nbsp;dimensions:&nbsp;&nbsp;1426&nbsp;&nbsp;1329<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Grid&nbsp;cell&nbsp;sizes:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0002871995719&nbsp;&nbsp;0.0002871995719<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Requested&nbsp;Grid&nbsp;bounds:&nbsp;&nbsp;-155.516666666667&nbsp;-155.433333333333&nbsp;&nbsp;20.2166666666667&nbsp;20.3<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;Grid&nbsp;bounds:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.51688391551&nbsp;-155.433596039659&nbsp;&nbsp;20.2166526184856&nbsp;20.2999404943366<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;grid&nbsp;dimensions:&nbsp;291&nbsp;&nbsp;291<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Running&nbsp;grdcut...<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grdcut&nbsp;kohalaa.grd&nbsp;-Gz.grd&nbsp;-R-155.51688391551/-155.433596039659/20.2166526184856/20.2999404943366&nbsp;-V<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grdcut:&nbsp;File&nbsp;spec:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>W&nbsp;E&nbsp;S&nbsp;N&nbsp;dx&nbsp;dy&nbsp;nx&nbsp;ny:<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grdcut:&nbsp;Old:&nbsp;-155.729&nbsp;-155.319&nbsp;20.0949&nbsp;20.4763&nbsp;0.0002872&nbsp;0.0002872&nbsp;1426&nbsp;1329<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grdcut:&nbsp;New:&nbsp;-155.517&nbsp;-155.434&nbsp;20.2167&nbsp;20.2999&nbsp;0.0002872&nbsp;0.0002872&nbsp;&nbsp;291&nbsp;&nbsp;291<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;mbm_grdcut&nbsp;status:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kohalaa.grd
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z.grd
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;Grid&nbsp;bounds:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.72855&nbsp;-155.3192906&nbsp;&nbsp;20.09488&nbsp;20.47628103
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;grid&nbsp;dimensions:&nbsp;&nbsp;1426&nbsp;&nbsp;1329
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Grid&nbsp;cell&nbsp;sizes:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0002871995719&nbsp;&nbsp;0.0002871995719
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Requested&nbsp;Grid&nbsp;bounds:&nbsp;&nbsp;-155.516666666667&nbsp;-155.433333333333&nbsp;&nbsp;20.2166666666667&nbsp;20.3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;Grid&nbsp;bounds:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.51688391551&nbsp;-155.433596039659&nbsp;&nbsp;20.2166526184856&nbsp;20.2999404943366
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;grid&nbsp;dimensions:&nbsp;291&nbsp;&nbsp;291
 <P>
-<BR>&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Running&nbsp;grdcut...
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdcut&nbsp;kohalaa.grd&nbsp;-Gz.grd&nbsp;-R-155.51688391551/-155.433596039659/20.2166526184856/20.2999404943366&nbsp;-V
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdcut:&nbsp;File&nbsp;spec:&nbsp;&nbsp;&nbsp;&nbsp;W&nbsp;E&nbsp;S&nbsp;N&nbsp;dx&nbsp;dy&nbsp;nx&nbsp;ny:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdcut:&nbsp;Old:&nbsp;-155.729&nbsp;-155.319&nbsp;20.0949&nbsp;20.4763&nbsp;0.0002872&nbsp;0.0002872&nbsp;1426&nbsp;1329
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdcut:&nbsp;New:&nbsp;-155.517&nbsp;-155.434&nbsp;20.2167&nbsp;20.2999&nbsp;0.0002872&nbsp;0.0002872&nbsp;&nbsp;291&nbsp;&nbsp;291
+<P>
+<P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
@@ -152,8 +152,6 @@ The resulting output is:
 This macro is new and hasn't been tested in serious
 usage yet - let us know what to fix, add, or
 change!.
-<P>
-<P>
 <P>
 
 <HR>
@@ -173,7 +171,7 @@ change!.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

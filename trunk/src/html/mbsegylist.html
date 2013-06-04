@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbsegylist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -27,9 +27,9 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbsegylist</B> [<B>-A</B> <B>-D</B><I>decimate</I> 
-<B>-H</B> <B>-G</B><I>delimeter</I> <B>-I</B><I>infilename</I> 
-<B>-L</B><I>lonflip</I> <B>-O</B><I>output_format</I> 
+<B>mbsegylist</B> [<B>-A</B> <B>-D</B><I>decimate</I>
+<B>-H</B> <B>-G</B><I>delimeter</I> <B>-I</B><I>infilename</I>
+<B>-L</B><I>lonflip</I> <B>-O</B><I>output_format</I>
 <B>-U</B><I>check</I> <B>-V</B> <B>-Z</B><I>segment</I>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -37,12 +37,12 @@ Version 5.0
 
 <B>MBsegylist</B> is a utility to output specified header values
 from segy seismic data files to stdout. The
-option <B>-O</B><I>output_format</I> is 
-used to control the type and order of values output. 
+option <B>-O</B><I>output_format</I> is
+used to control the type and order of values output.
 By default, <B>mbsegylist</B>  produces ASCII files in
 spreadsheet style, with data columns separated by tabs. Alternatively,
-the output can be binary, with each field represented 
-as a double precision float (<B>-A</B> option).  
+the output can be binary, with each field represented
+as a double precision float (<B>-A</B> option).
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -80,8 +80,8 @@ Default: ASCII output with fields separated by tabs.
 <I>decimate</I>
 <BR>
 
-Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1), 
-every available data record is output. If <I>decimate</I>&gt;1, then only 
+Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1),
+every available data record is output. If <I>decimate</I>&gt;1, then only
 every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate</I>=1.
 <DT><B>-G</B>
 
@@ -111,9 +111,9 @@ Sets the filename of the input segy seismic data file.
 
 Sets the range of the longitude values returned.
 If <I>lonflip</I>=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If <I>lonflip</I>=0 
+the range from -360 to 0 degrees. If <I>lonflip</I>=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If <I>lonflip</I>=1 
+the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
@@ -126,27 +126,27 @@ Default: <I>lonflip</I> = 0.
 Determines the form of the output; <I>output_format</I> is a string composed
 of one or more of the following characters:
 <DT><DD>
-<B>/</B> 
-special character: this causes the value 
+<B>/</B>
+special character: this causes the value
 indicated by the next character to be  inverted. This applies only to simple
-numeric values such as depth and 
-heading and not to values like time  
-strings orpositions with hemisphere 
+numeric values such as depth and
+heading and not to values like time
+strings orpositions with hemisphere
 characters.
 <DT><DD>
-<B>-</B>  
-special character: this causes the value 
-indicated by the next character to be 
-multiplied by -1. This applies only 
-to simple numeric values such as  
-depth and heading and not to values   
-like time strings or positions with 
+<B>-</B>
+special character: this causes the value
+indicated by the next character to be
+multiplied by -1. This applies only
+to simple numeric values such as
+depth and heading and not to values
+like time strings or positions with
 hemisphere characters.
 <DT><DD>
 <B>C</B>
 for CMP (or RP or CDP) gather number of a trace
 <DT><DD>
-<B>c</B> 
+<B>c</B>
 for trace number within a CMP (or RP or CDP) gather
 <DT><DD>
 <B>D</B>
@@ -159,27 +159,27 @@ for sample length (seconds)
 for time interval since last trace (seconds)
 <DT><DD>
 <B>J</B>
-for a time string (yyyy jd hh mm ss.ssssss) 
+for a time string (yyyy jd hh mm ss.ssssss)
 where jd is the day of the year
 <DT><DD>
-<B>j</B> 
-for a time string (yyyy jd dm ss.ssssss) 
+<B>j</B>
+for a time string (yyyy jd dm ss.ssssss)
 where jd is the day of the year
 and dm is the minute of the day
 <DT><DD>
-<B>L</B> 
+<B>L</B>
 for trace length (seconds)
 <DT><DD>
-<B>M</B> 
+<B>M</B>
 for unix (epoch) time in decimal seconds since 1/1/70 00:00:00
 <DT><DD>
-<B>m</B> 
+<B>m</B>
 for time in decimal seconds since first record
 <DT><DD>
-<B>N</B> 
+<B>N</B>
 for number of samples in the trace
 <DT><DD>
-<B>n</B> 
+<B>n</B>
 for trace counter (starts from 0)
 <DT><DD>
 <B>R</B>  for range from source to receiver (m)
@@ -208,13 +208,12 @@ for trace counter (starts from 0)
 <DT><DD>
 <B>Z</B>  for source or sonar depth (positive downwards) (m)
 <DT><DD>
-<B>
-z</B>  for depth (positive downwards) (m)
+<B>z</B>  for depth (positive downwards) (m)
 <BR>
 
 <P>
-Default <I>output_format</I> = <B>TiXYSsCcDINL</B> 
-(time, time interval, lon, lat, shot, shot trace #, cmp, cmp trace #, 
+Default <I>output_format</I> = <B>TiXYSsCcDINL</B>
+(time, time interval, lon, lat, shot, shot trace #, cmp, cmp trace #,
 delay, sample length, number samples, trace length)
 <DT><B>-V</B>
 
@@ -242,7 +241,7 @@ is <B>-Z</B>I&gt;.
 <A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
-Suppose one has a subbottom profiler segy data file called 
+Suppose one has a subbottom profiler segy data file called
 20040722_152111.s7k.segy.
 <P>
 In order to obtain a listing of the shot number, time tag, and position
@@ -291,7 +290,7 @@ Si. Oui. Ya. Da. Yes. Mess.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

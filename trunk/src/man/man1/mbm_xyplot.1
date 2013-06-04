@@ -1,4 +1,4 @@
-.TH mbm_xyplot 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_xyplot 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_xyplot\fP - Create an executable shellscript which will generate
 a GMT plot of xy data.
@@ -52,7 +52,7 @@ data-point-number.
 The standard syntax with which one selects columns to plot may also be
 embedded into a larger Perl expression, which will be evaluated for
 each line of the data file. In this way, one may do on-the-fly
-mathimatics or substring extractions as required.  Indeed, one may
+mathematics or substring extractions as required.  Indeed, one may
 specify most any Perl expression that when evaluated, will be a
 numeric result for plotting. For example, one can multiply the values
 in a column by a constant, add the values of two columns together or
@@ -68,7 +68,7 @@ purposes.
 For users seeking more control over the plot
 appearance, a number of additional optional arguments are
 provided. Truly ambitious users may edit the plot shellscript
-to take advantage of GMT capabilites not supported by this
+to take advantage of GMT capabilities not supported by this
 macro.
 
 .SH AUTHORSHIP
@@ -224,7 +224,7 @@ results.
 The file parameters are an optional list of flags and their arguments
 concatinated and strung together with colons. A full specification has
 the following general syntax although individual flags and their
-arguements need not appear in any particular order as long as argument
+arguments need not appear in any particular order as long as argument
 follows corresponding flag.:
 
 
@@ -728,14 +728,15 @@ whose data looks like the following:
 
 filename: gps.raw:
 
-$GPGGA,000023.00,5427.89080,N,14600.29458,W,1,10,0.9,19.01,M,6.40,M,,*70
-$GPGGA,000024.00,5427.89248,N,14600.30088,W,1,10,0.9,19.39,M,6.40,M,,*7B
-$GPGGA,000025.00,5427.89424,N,14600.30713,W,1,10,0.9,19.72,M,6.40,M,,*7C
+$GPGGA,23.0,5427.89080,N,14600.29458,W,1,10,0.9,19.01,M,6.40,M,,*70
+$GPGGA,24.0,5427.89248,N,14600.30088,W,1,10,0.9,19.39,M,6.40,M,,*7B
+$GPGGA,25.0,5427.89424,N,14600.30713,W,1,10,0.9,19.72,M,6.40,M,,*7C
 
 We can specify a comma delimited file and convert the latitude and
 longitude fields to decimal degrees on the fly with the following:
 
-     mbm_xyplot \-ID,:C'substr(c[5],0,3)+substr(c[5],3,length(c[5]))/60_substr(c[3],0,2)+substr(c[3],2,length(c[3]))/60':gps.raw
+     mbm_xyplot \-ID,:C'substr(c[5],0,3)+substr(c[5],3,length(c[5]))\
+        /60_substr(c[3],0,2)+substr(c[3],2,length(c[3]))/60':gps.raw
 
 This is about as ugly as it gets. However, it is quite
 straightforward and very handy, so let us pick this apart. The -I flag
