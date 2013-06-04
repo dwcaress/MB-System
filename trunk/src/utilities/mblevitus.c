@@ -129,9 +129,9 @@
 #include "mb_define.h"
 
 /* global defines */
-#define	NO_DATA	-1000000000.0
-#define	NDEPTH_MAX	46
-#define	NLEVITUS_MAX	33
+#define	MBLEVITUS_NO_DATA	-1000000000.0
+#define	NDEPTH_MAX		46
+#define	NLEVITUS_MAX		33
 
 static char rcs_id[] = "$Id$";
 
@@ -363,7 +363,7 @@ int main (int argc, char **argv)
 	for (i=0;i<NDEPTH_MAX;i++)
 	  {
 	  if (i < NLEVITUS_MAX)
-	    if (salinity[i][ilat] > NO_DATA)
+	    if (salinity[i][ilat] > MBLEVITUS_NO_DATA)
 		{
 		last_good = i;
 		nvelocity++;

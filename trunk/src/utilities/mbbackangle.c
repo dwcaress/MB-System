@@ -147,15 +147,15 @@
 #include <sys/stat.h>
 #include <time.h>
 
+/* GMT include files */
+#include "gmt.h"
+
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_process.h"
 #include "mb_aux.h"
-
-/* GMT include files */
-#include "gmt.h"
 
 /* get NaN detector */
 #if defined(isnanf)

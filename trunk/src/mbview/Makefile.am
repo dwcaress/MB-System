@@ -2,6 +2,7 @@ bin_PROGRAMS = mbgrdviz mbeditviz
 
 AM_CPPFLAGS = -I@top_srcdir@/src -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @MOTIF_INC_DIR@ @GL_INC_DIR@ @GMT_INC_DIR@
 LIBS = @MOTIF_LIB_DIR@ @GL_LIB_DIR@ ${libgmt_LIBS}
+AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 
 include_HEADERS = mbview.h
 

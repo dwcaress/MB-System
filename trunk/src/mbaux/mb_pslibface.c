@@ -106,14 +106,14 @@
 #include <string.h>
 #include <time.h>
 
+/* GMT include files */
+#include "gmt.h"
+#include "pslib.h"
+
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_define.h"
 #include "mb_aux.h"
-
-/* GMT include files */
-#include "gmt.h"
-#include "pslib.h"
 
 /* global variables */
 int	argc_save;
