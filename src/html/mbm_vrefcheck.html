@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_vrefcheck</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -36,14 +36,14 @@ Version 5.0
 
 <B>mbm_vrefcheck</B> is a macro which generates a plot of high pass
 filtered apparent crosstrack seafloor slope.  The noise in this signal
-appears to be dominated by noise in the vertical reference data 
+appears to be dominated by noise in the vertical reference data
 used by the sonar system.  The crosstrack slopes are obtained by running
 <B>mblist</B>. The resulting time series is filtered using the <B>GMT</B>
 utility <B>filter1d</B>, which uses a time domain median filter with
 a time width of 5 minutes.  The filtered signal contains little of
 the actual bathymetric signal, and thus represents a combination of
-noise in the seafloor reflection travel times and the vertical 
-reference data stream.  Close inspection of Hydrosweep data collected 
+noise in the seafloor reflection travel times and the vertical
+reference data stream.  Close inspection of Hydrosweep data collected
 on the R/V Ewing with an interactive editor (<B>mbedit</B>) reveals
 clear variability in the observed crosstrack slope, even when
 surveying essentially flat seafloor.  This suggests that the filtered
@@ -99,8 +99,8 @@ will be used as <I>xmax</I>.
 <I>format</I>
 <BR>
 
-Sets the format for the input swath sonar data using 
-<B>MBIO</B> integer format identifiers. 
+Sets the format for the input swath sonar data using
+<B>MBIO</B> integer format identifiers.
 This macro uses the <B>MBIO</B> library and will read any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
@@ -119,7 +119,7 @@ Data file from which the input data will be read.
 <I>xscale</I>
 <BR>
 
-Sets the x-axis scale of the plot in inches/hour.  
+Sets the x-axis scale of the plot in inches/hour.
 Default: <I>xscale</I> = 1.2.
 <DT><B>-X</B>
 
@@ -127,15 +127,15 @@ Default: <I>xscale</I> = 1.2.
 <I>xaxis</I>
 <BR>
 
-Sets the length of the x-axis in inches.  
+Sets the length of the x-axis in inches.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
-Suppose one has obtained a Hydrosweep DS swath sonar data file 
+Suppose one has obtained a Hydrosweep DS swath sonar data file
 called hs_ew9302_157_bcen.mb24 in the
-L-DEO binary in-house format (format id 24). In order to generate a 
+L-DEO binary in-house format (format id 24). In order to generate a
 vertical reference noise plot:
 <BR>
 
@@ -144,17 +144,13 @@ vertical reference noise plot:
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mblist.html">mblist</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mblist.html">mblist</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
 This script is hard wired for the R/V Ewing installation. This will
 have to be fixed for it to be useful elsewhere.
-<P>
-<P>
-<P>
-<P>
 <P>
 
 <HR>
@@ -174,7 +170,7 @@ have to be fixed for it to be useful elsewhere.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

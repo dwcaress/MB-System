@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavedit</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  29 April 2011 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -27,37 +27,37 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbnavedit</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> 
-<B>-D</B> <B>-E</B><I>yr/mo/da/hr/mn/sc</I> 
+<B>mbnavedit</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-D</B> <B>-E</B><I>yr/mo/da/hr/mn/sc</I>
 <B>-F</B><I>format </I><B>-G</B> <B>-I</B><I>infile </I><B>-N -P -T -X -V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>MBnavedit</B> is an interactive editor used to identify and fix 
-problems with the navigation of swath sonar data. 
+<B>MBnavedit</B> is an interactive editor used to identify and fix
+problems with the navigation of swath sonar data.
 <P>
-In the default mode the edited navigation is output to 
+In the default mode the edited navigation is output to
 a file with the suffix &quot;.nve&quot; appended to the input swath
-data filename. The program can also be operated 
+data filename. The program can also be operated
 in a &quot;browse&quot; mode where no navigation is output.
-If saved, the edited navigation can be merged 
+If saved, the edited navigation can be merged
 with the swath data using the program <B>mbprocess</B>, which
-outputs a processed swath data file. 
+outputs a processed swath data file.
 The <B>mbprocess</B> program is also used to apply
 bathymetry edits, recalculate bathymetry, and apply
 other corrections to swath bathymetry data. Users
 may cause <B>mbprocess</B> to be run automatically by
 specifying the <B>-X</B> option when starting <B>MBnavedit</B>.
 <P>
-In previous  versions of <B>MB-System</B> 
+In previous  versions of <B>MB-System</B>
 (version 4.6.10 or earlier), <B>MBnavedit</B>
 produced output swath data files directly by reading and
 storing all of the swath data information in memory (including
-non-survey data records). This approach limited the 
+non-survey data records). This approach limited the
 amount of data that could be handled
 at once, frequently requiring users to process files in
-small pieces. The current version only stores 
+small pieces. The current version only stores
 and outputs the navigation data.
 <P>
 Once the navigation
@@ -66,9 +66,9 @@ read in, <B>MBnavedit</B> displays autoscaled plots of the longitude,
 latitude, speed, heading, and sonar depth time series, along with a plot of
 the time interval between navigation values. The user may select
 outliers and interpolate over them or, in the case of heading or
-speed data, replace the erroneous values with estimates derived 
+speed data, replace the erroneous values with estimates derived
 from &quot;course-made-good&quot; or &quot;speed-made-good&quot;, respectively.
-Data can only be selected and altered in a single 
+Data can only be selected and altered in a single
 plot at a time (this avoids confusion and prevents mistakes).
 <P>
 The nature of the navigation data being edited depends upon the
@@ -79,16 +79,16 @@ the raw navigation has been interpolated to yield values at the
 same time stamps as the sonar pings. Other data formats do not
 hold navigation values in the survey data records, and instead use
 separate navigation records with different time stamps. This
-asynchronous navigation requires that MBIO interpolate or 
+asynchronous navigation requires that MBIO interpolate or
 extrapolate the navigation as the survey data records are read.
 For data formats with synchronous navigation, the navigation
 values edited using <B>MBnavedit</B> are those in the survey data
-records. For data formats with only asynchronous navigation, 
+records. For data formats with only asynchronous navigation,
 <B>MBnavedit</B> displays and operates on the values from the
 navigation records. The <B>MBIO</B> manual page includes a listing
 of which type of navigation is used by the supported data formats.
 <P>
-For some data formats, the user can also 
+For some data formats, the user can also
 inspect plots of roll, pitch, and heaved
 data to determine if the ship's vertical reference sensors
 were working properly.
@@ -102,21 +102,21 @@ can be operated in a &quot;browse&quot; mode where no data is output.
 <P>
 Three algorithms for obtaining and using smooth navigation models are
 available. Replacing the original navigation with a smoothed
-version can be advantageous in some cases of very noisy 
-navigation (typically from sonars on towed platforms or 
+version can be advantageous in some cases of very noisy
+navigation (typically from sonars on towed platforms or
 submerged vehicles). The first smoothing scheme is the covolution
 of a Gaussian kernal of user-defined time width with the data.
 Users may select and flag outlier navigation points; any flagged
 points are not used to calculate the Gaussian-weighted mean
 navigation values.
-The second approach is simple dead reckoning 
+The second approach is simple dead reckoning
 from the initial position using the current (possibly edited)
 heading and speed values. The dead reckoning navigation can also
 incorporate user-specified longitude and latitude drift rates.
-The third algorithm is an inversion for a smooth 
+The third algorithm is an inversion for a smooth
 navigation that minimizes
 speed and acceleration while fitting the original navigation
-in a least squares sense. The inversion weighting against 
+in a least squares sense. The inversion weighting against
 speed and acceleration are user specified, and only unflagged
 navigation values are used in the inversion.
 <P>
@@ -128,17 +128,17 @@ The time interval plot allows
 users to spot problems with time stamps and to change the
 time stamps, if necessary. The most obvious time stamp errors
 are multiple pings with the same time stamps (producing a zero
-time interval value), or 
+time interval value), or
 sequential pings with decreasing time stamps (resulting in
 negative time interval values). <B>MBnavedit</B>
-provides two tools for dealing with zero or negative time intervals: 
+provides two tools for dealing with zero or negative time intervals:
 time stamp interpolation or deletion of the affected pings. Control
 dialogs allow users to apply either to the entire buffer at once.
 Time stamp interpolation may also be accomplished by selecting
 the relevant values in the time interval display, and then
 selecting interpolation.
 <P>
-If the navigation is 
+If the navigation is
 asynchronous, that generally means the time interval should be
 constant since navigation systems are set to output values at
 a uniform rate. A problem with the time stamps of asynchronous
@@ -150,12 +150,12 @@ to reset the time stamp.
 If the navigation is synchronous with the sonar
 pings, then the time interval will likely vary because the ping
 rate for most sonars varies with the sonars altitude above the
-seafloor. In this case, time stamp problems will 
-not produce spikes in the speed-made-good plot 
+seafloor. In this case, time stamp problems will
+not produce spikes in the speed-made-good plot
 because the navigation has been interpolated
 using the existing time stamps. Time interval spikes may also
 reflect problems with the sonar (e.g. occasional failure to ping
-at the appropriate time) rather than erroneous time stamps. 
+at the appropriate time) rather than erroneous time stamps.
 <P>
 <A NAME="lbAH">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -180,7 +180,7 @@ Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</
 <BR>
 
 Sets the starting time for data allowed in the input data; pings
-with times before the starting time will be ignored. 
+with times before the starting time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
 <DL COMPACT>
 <DT><B>-D</B>
@@ -197,7 +197,7 @@ is to output the edited data to a file.
 <BR>
 
 Sets the ending time for data allowed in the input data; pings
-with times after the ending time will be ignored. 
+with times after the ending time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
 <DT><B>-F</B>
 
@@ -205,7 +205,7 @@ Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
 <I>format</I>
 <BR>
 
-Sets the format at startup for the input and output swath sonar data using 
+Sets the format at startup for the input and output swath sonar data using
 <B>MBIO</B> integer format identifiers. This value can also be set
 interactively when specifying the input file.
 This program uses the <B>MBIO</B> library and will read or write any swath sonar
@@ -247,7 +247,7 @@ This flag, when used in conjunction with the <B>-X</B> flag,
 causes <B>MBnavedit</B> to invoke <B>mbprocess</B> with it's
 <B>-N</B> option. In turn, this causes <B>mbprocess</B> to
 generate an output, processed swath data file without any
-comment records. 
+comment records.
 <DT><B>-O</B>
 
 <DD>
@@ -259,7 +259,7 @@ discussed above in the <B>-I</B> option.
 <DT><B>-P</B>
 
 <DD>
-Causes <B>MBnavedit</B> to load and work with navigation from 
+Causes <B>MBnavedit</B> to load and work with navigation from
 survey data records even if the data format uses asynchronous
 navigation records. In this case, the only edits which will
 actually be applied to the output data are changes to the
@@ -270,7 +270,7 @@ time stamps of the survey records.
 Normally, <B>MBnavedit</B> outputs information to the stderr stream
 regarding the number of records loaded and dumped.  If the
 <B>-V</B> flag is given, then <B>MBnavedit</B> works in a &quot;verbose&quot; mode and
-outputs the program version being used, all error status messages, 
+outputs the program version being used, all error status messages,
 and a large amount of other information including all of the
 beams flagged or zeroed.
 <DT><B>-X</B>
@@ -291,46 +291,46 @@ editing session is in the browse mode.
 <DT><B>File</B>
 
 <DD>
-This button accesses a pulldown menu with two push buttons: 
-<B>Open</B> and <B>File Selection List</B>, 
+This button accesses a pulldown menu with two push buttons:
+<B>Open</B> and <B>File Selection List</B>,
 <DT><B>File-&gt;Open</B>
 
 <DD>
 This button brings up a popup window which allows the user to
 specify an input swath sonar bathymetry data file, its <B>MBIO</B>
-format id, and  the output mode. 
-This program uses the <B>MBIO</B> library and 
+format id, and  the output mode.
+This program uses the <B>MBIO</B> library and
 will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data
 formats currently supported by <B>MBIO</B> and their
-identifier values is given in the <B>MBIO</B> manual page. 
+identifier values is given in the <B>MBIO</B> manual page.
 If the swath sonar data file is named using the <B>MB-System</B>
 suffix convention (format 11 files end with &quot;.mb11&quot;, format
 41 files end with &quot;.mb41&quot;, etc.), then the program will
 automatically use the appropriate format id; otherwise the
 format must be set by the user.
 The popup window also allows the output mode to be set to &quot;browse&quot;
-so that no edit events are output. 
+so that no edit events are output.
 When a valid file is specified and the <B>OK</B> button
 is clicked, file will be added to an internal list of swath files
 available for editing, and then that file will be loaded into
 memory for editing (if another file was already loaded, that file
-is closed out gracefully before the new file is loaded). 
+is closed out gracefully before the new file is loaded).
 If the specified input is a datalist (format
-id = -1), then all of the files referenced through that datalist 
+id = -1), then all of the files referenced through that datalist
 will be added to the internal list, and the first of those files
-loaded. When a file is loaded for editing, <B>MBnavedit</B> reads 
+loaded. When a file is loaded for editing, <B>MBnavedit</B> reads
 as much data as will fit into the data buffer (typically 25000 records)
 and several pings are displayed as stacked bathymetry profiles.
 <DT><B>File-&gt;File Selection List</B>
 
 <DD>
 This button brings up a popup window displaying the internal list of
-swath files available for editing. The list has four columns. 
+swath files available for editing. The list has four columns.
 The first (left-most) column is either blank or shows &quot;&lt;locked&gt;&quot; or &quot;&lt;loaded&gt;&quot;.
 If a file is loaded for editing by this program, it shows as &quot;&lt;loaded&gt;&quot;.
 If a file is being edited or processed by another program, it shows as
-&quot;&lt;locked&gt;&quot;. Locked files cannot be opened for editing, and any file 
+&quot;&lt;locked&gt;&quot;. Locked files cannot be opened for editing, and any file
 loaded for editing by <B>MBnavedit</B> will show as &quot;locked&quot; to other
 programs. The second column is either blank or shows &quot;&lt;nve&gt;&quot;. This indicates if
 a file has been previously edited so that an edited navigation file already
@@ -338,21 +338,21 @@ exists. The third and fourth columns show the filename path and the <B>MBIO</B>
 format id, respectively.
 Users can select one of the files in the available list. If the &quot;Edit Selected File&quot;
 button is clicked, the selected file will be opened for editing (and any
-file already loaded will be closed first). If the &quot;Remove Selected File&quot; 
+file already loaded will be closed first). If the &quot;Remove Selected File&quot;
 button is selected, then the selected file will be removed from the available
 list.
 <DT><B>Controls</B>
 
 <DD>
 This button activates a pulldown menu with five buttons:
-<B>Time Stepping</B>, <B>Nav Modeling</B>, <B>Time Interpolation</B>, 
+<B>Time Stepping</B>, <B>Nav Modeling</B>, <B>Time Interpolation</B>,
 <B>Delete Bad Times</B>, and <B>Position Offset</B>. Each
 of these buttons brings up a dialog window containing widgets
 that set parameters or perform actions.
 <DT><B>Controls-&gt;Time Stepping-&gt;Time Span Shown</B>
 
 <DD>
-This slider sets the number of seconds of data shown at a time. 
+This slider sets the number of seconds of data shown at a time.
 This value is also set by the <B>Show Entire Buffer</B> button (sets
 time shown to all available data) and the <B>Pick Time Interval</B>
 function (sets time shown to an interactively specified interval).
@@ -370,10 +370,10 @@ This toggle button turns navigation modeling off.
 <DD>
 This toggle button enables navigation smoothing by convolution
 with a Gaussian kernel of user defined time width.
-When this toggle button is highlighted, a smooth 
+When this toggle button is highlighted, a smooth
 navigation model is calculated and displayed
 as a blue line in both the longitude and latitude plots.
-The <B>Show Smooth Inversion</B> toggle buttons 
+The <B>Show Smooth Inversion</B> toggle buttons
 also appear (already enabled)
 for both the longitude and latitude plots
 among the plot display toggles on the left side of the main
@@ -382,7 +382,7 @@ among the plot display toggles on the left side of the main
 
 <DD>
 This toggle button enables dead reckoning navigation calculation.
-When this toggle button is highlighted, a dead reckoning 
+When this toggle button is highlighted, a dead reckoning
 navigation model is calculated from the initial position
 using the current heading and speed data and displayed
 as a blue line in both the longitude and latitude plots.
@@ -393,13 +393,13 @@ among the plot display toggles on the left side of the main
 <DT><B>Controls-&gt;Navigation Modeling-&gt;Smooth Inversion</B>
 
 <DD>
-This toggle button enables inversion for a smooth navigation 
+This toggle button enables inversion for a smooth navigation
 model which fits the original positions in a least squares
 sense while minimizing speed and acceleration.
-When this toggle button is highlighted, a smooth 
+When this toggle button is highlighted, a smooth
 navigation model is calculated and displayed
 as a blue line in both the longitude and latitude plots.
-The <B>Show Smooth Inversion</B> toggle buttons 
+The <B>Show Smooth Inversion</B> toggle buttons
 also appear (already enabled)
 for both the longitude and latitude plots
 among the plot display toggles on the left side of the main
@@ -410,7 +410,7 @@ among the plot display toggles on the left side of the main
 This slider sets the width in seconds of the Gaussian smoothing
 kernel. If Gaussian mean smoothing is enabled, changing this slider
 causes the smoothing to be recalculated and the results shown on
-the longitude and latitude plots. 
+the longitude and latitude plots.
 <DT><B>Controls-&gt;Navigation Modeling-&gt;Dead Reckoning Longitude Drift</B>
 
 <DD>
@@ -476,7 +476,7 @@ to disappear.
 <DD>
 This button causes all data in
 the current buffer associated
-with negative or zero time intervals to be deleted. 
+with negative or zero time intervals to be deleted.
 The <B>Delete Bad Times</B>
 dialog disappears after this action is taken.
 <DT><B>Controls-&gt;Delete Bad Times-&gt;Dismiss</B>
@@ -498,7 +498,7 @@ latitude offset in degrees.
 
 <DD>
 This button applies the current longitude and latitude
-offsets to all of the navigation data. 
+offsets to all of the navigation data.
 The <B>Position Offset</B>
 dialog disappears after this action is taken.
 <DT><B>Controls-&gt;Position Offset-&gt;Dismiss</B>
@@ -509,24 +509,24 @@ to disappear.
 <DT><B>Start</B>
 
 <DD>
-This button causes the set of displayed pings to step backward to the 
+This button causes the set of displayed pings to step backward to the
 beginning of the current buffer.
 <DT><B>Reverse</B>
 
 <DD>
-This button causes the set of displayed pings to step <I>nstep</I> 
+This button causes the set of displayed pings to step <I>nstep</I>
 pings backward in the current buffer.  The middle mouse button causes
 the same action.
 <DT><B>Forward</B>
 
 <DD>
-This button causes the set of displayed pings to step <I>nstep</I> 
+This button causes the set of displayed pings to step <I>nstep</I>
 pings forward in the current buffer.  The right mouse button causes
 the same action.
 <DT><B>End</B>
 
 <DD>
-This button causes the set of displayed pings to step forward to the 
+This button causes the set of displayed pings to step forward to the
 end of the current buffer.
 <DT><B>Next Buffer</B>
 
@@ -557,7 +557,7 @@ times.
 <DD>
 When the last file in the list of files available for editing has been loaded,
 this button shows as &quot;Done&quot;. Otherwise, it shows as &quot;Next File&quot;. In either
-case, this button causes the program to write out all of the edited navigation 
+case, this button causes the program to write out all of the edited navigation
 data and then close the current file. If the current file is not the last
 one in the available list, then the next unlocked file will be loaded for editing.
 <DT><B>Quit</B>
@@ -573,7 +573,7 @@ about the program.
 <DT><B>Interpolate</B>
 
 <DD>
-This button causes the selected data to be 
+This button causes the selected data to be
 replaced by linear interpolation
 of the surrounding unselected data. If the selection extends to the
 edge of the data, the selected data will be replaced by the first
@@ -581,9 +581,9 @@ unselected datum on the other side.
 <DT><B>Interpolate Repeats</B>
 
 <DD>
-This button causes any repeated values in the selected data to be 
+This button causes any repeated values in the selected data to be
 replaced by linear interpolation between the first of the repeated
-values and the next different value. 
+values and the next different value.
 <DT><B>Revert Selection</B>
 
 <DD>
@@ -598,16 +598,16 @@ dialog.
 This button causes any selected longitude or latitude values
 to be replaced by values from navigation modeling. Either
 dead reckoning or smooth inversion navigation modeling
-must be enabled. The longitude and latitude values are 
+must be enabled. The longitude and latitude values are
 replaced in pairs (if a longitude value is selected, the
 corresponding latitude value will also be replaced, and
 vice versa). The typical sequence is to:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;1)&nbsp;adjust&nbsp;the&nbsp;modeling&nbsp;until&nbsp;an&nbsp;acceptable&nbsp;solution&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1)&nbsp;adjust&nbsp;the&nbsp;modeling&nbsp;until&nbsp;an&nbsp;acceptable&nbsp;solution
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;achieved.
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;2)&nbsp;click&nbsp;on&nbsp;the&nbsp;<B>Select&nbsp;All</B>&nbsp;toggle&nbsp;button
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;3)&nbsp;click&nbsp;in&nbsp;either&nbsp;the&nbsp;longitude&nbsp;or&nbsp;latitude&nbsp;plot&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;3)&nbsp;click&nbsp;in&nbsp;either&nbsp;the&nbsp;longitude&nbsp;or&nbsp;latitude&nbsp;plot
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;so&nbsp;that&nbsp;all&nbsp;values&nbsp;in&nbsp;that&nbsp;window&nbsp;are&nbsp;selected
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;4)&nbsp;click&nbsp;on&nbsp;the&nbsp;<B>Use&nbsp;Solution</B>&nbsp;button&nbsp;so&nbsp;that&nbsp;the&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;4)&nbsp;click&nbsp;on&nbsp;the&nbsp;<B>Use&nbsp;Solution</B>&nbsp;button&nbsp;so&nbsp;that&nbsp;the
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;navigation&nbsp;model&nbsp;is&nbsp;adopted&nbsp;for&nbsp;all&nbsp;longitude
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;latitude&nbsp;values
 <DT><B>Flag</B>
@@ -638,31 +638,31 @@ of a modeling solution).
 Clicking on this toggle button sets the edit mode to &quot;pick&quot;. In
 this case, clicking the left mouse button will cause the
 nearest data value to toggle between selected (red) and
-unselected. 
+unselected.
 <DT><B>Select</B>
 
 <DD>
 Clicking on this toggle button sets the edit mode to &quot;select&quot;. In
-this case, clicking and dragging the left mouse button will 
-cause any data value touched by the cursor to become selected. 
+this case, clicking and dragging the left mouse button will
+cause any data value touched by the cursor to become selected.
 <DT><B>Deselect</B>
 
 <DD>
 Clicking on this toggle button sets the edit mode to &quot;deselect&quot;. In
-this case, clicking and dragging the left mouse button will 
-cause any data value touched by the cursor to become unselected. 
+this case, clicking and dragging the left mouse button will
+cause any data value touched by the cursor to become unselected.
 <DT><B>Select All</B>
 
 <DD>
 Clicking on this toggle button sets the edit mode to &quot;select all&quot;. In
 this case, clicking in any of the editable plots will cause all
-of the data in that plot to be selected. 
+of the data in that plot to be selected.
 <DT><B>Deselect All</B>
 
 <DD>
 Clicking on this toggle button sets the edit mode to &quot;select all&quot;. In
 this case, clicking in any of the editable plots will cause all
-of the data in that plot to be unselected. 
+of the data in that plot to be unselected.
 <DT><B>Time Interval Plot</B>
 
 <DD>
@@ -769,25 +769,25 @@ pitch, and heave data).
 
 <DD>
 The left mouse button is used to pick data values.  Unselected data
-values are shown as filled black squares and selected values 
+values are shown as filled black squares and selected values
 as empty red squares.  The manner in which data are selected or
-unselected is controlled by the edit mode, as set by the 
+unselected is controlled by the edit mode, as set by the
 <B>Pick</B>, <B>Select</B>, <B>Deselect</B>, <B>Select All</B>, and
 <B>Deselect All</B> buttons.
 <DT><B>Middle Mouse Button</B>
 
 <DD>
-The middle mouse button causes the set of displayed data to 
+The middle mouse button causes the set of displayed data to
 step backward in the current buffer by the amount of time
-set on the <B>Time Step</B> slider.  
+set on the <B>Time Step</B> slider.
 The control button <B>Reverse</B> causes
 the same action.
 <DT><B>Right Mouse Button</B>
 
 <DD>
-The right mouse button causes the set of displayed data to 
+The right mouse button causes the set of displayed data to
 step forward in the current buffer by the amount of time
-set on the <B>Time Step</B> slider.  
+set on the <B>Time Step</B> slider.
 The control button <B>Forward</B> causes
 the same action.
 <P>
@@ -795,13 +795,13 @@ the same action.
 <A NAME="lbAL">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbio.html">mbio</A></B>(l), <B><A HREF="mbprocess.html">mbprocess</A></B>(l), <B><A HREF="mbset.html">mbset</A></B>(l), 
-<B><A HREF="mbedit.html">mbedit</A></B>(l), <B><A HREF="mbeditviz.html">mbeditviz</A></B>(l), <B><A HREF="mbinfo.html">mbinfo</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbio.html">mbio</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbset.html">mbset</A></B>(1),
+<B><A HREF="mbedit.html">mbedit</A></B>(1), <B><A HREF="mbeditviz.html">mbeditviz</A></B>(1), <B><A HREF="mbinfo.html">mbinfo</A></B>(1)
 <P>
 <A NAME="lbAM">&nbsp;</A>
 <H2>BUGS</H2>
 
-This program doesn't handle the roll, pitch, and heave data in a general way. 
+This program doesn't handle the roll, pitch, and heave data in a general way.
 <P>
 
 <HR>
@@ -824,7 +824,7 @@ This program doesn't handle the roll, pitch, and heave data in a general way.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 29 April 2011</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

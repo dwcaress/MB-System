@@ -3,7 +3,8 @@ AM_CPPFLAGS = -I@top_srcdir@/src -I@top_srcdir@/src/gsf -I@top_srcdir@/src/proj 
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L@top_srcdir@/src/gsf -L@top_srcdir@/src/surf -L@top_srcdir@/src/mr1pr -L@top_srcdir@/src/proj
 
 
-include_HEADERS = mb_format.h mb_status.h \
+include_HEADERS = mb_config.h \
+        mb_format.h mb_status.h \
         mb_io.h mb_swap.h \
         mb_define.h mb_process.h \
         mb_segy.h mb_info.h \

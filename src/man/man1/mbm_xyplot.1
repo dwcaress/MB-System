@@ -1,32 +1,32 @@
 .TH mbm_xyplot 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbm_xyplot\fP - Create an executable shellscript which will generate
+\fBmbm_xyplot\fP \- Create an executable shellscript which will generate
 a GMT plot of xy data.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_xyplot\fP \fB-I\fP\fI[filepars:]file\fP
-[\fB-I\fP\fI[filepars:]file\fP \fB-G\fP\fIfill\fP \fB-H\fP
-\fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize\fP
-\fB-S\fP\fIsymbol/size\fP
-\fB-U\fP\fIorientation\fP \fB-V\fP
-\fB-W\fP\fIpen\fP ]
+\fBmbm_xyplot\fP \fB\-I\fP\fI[filepars:]file\fP
+[\fB\-I\fP\fI[filepars:]file\fP \fB\-G\fP\fIfill\fP \fB\-H\fP
+\fB\-O\fP\fIroot\fP \fB\-P\fP\fIpagesize\fP
+\fB\-S\fP\fIsymbol/size\fP
+\fB\-U\fP\fIorientation\fP \fB\-V\fP
+\fB\-W\fP\fIpen\fP ]
 
 Additional Options:
 .br
-[\fB-B\fP\fItickinfo\fP \fP
-\fB-J\fP\fIprojection\fP[\fI/scale | width\fP]
-\fB-L\fP\fItitle\fP[\fI:xlabel:ylabel\fP] \fB-M\fP\fImisc\fP
-\fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Z\fP]
+[\fB\-B\fP\fItickinfo\fP \fP
+\fB\-J\fP\fIprojection\fP[\fI/scale | width\fP]
+\fB\-L\fP\fItitle\fP[\fI:xlabel:ylabel\fP] \fB\-M\fP\fImisc\fP
+\fB\-Q\fP \fB\-R\fP\fIw/e/s/n\fP \fB\-X\fP \fB\-Z\fP]
 
 Miscellaneous Options:
 .br
-[\fB-MGD\fP\fIgmtdef/value\fP
-\fB-MGL\fP[\fIf\fP][\fIx\fP]\fIlon0/lat0/slat/length\fP[\fIm\fP]
-\fB-MGT\fP\fIx/y/size/angle/font/just/text\fP
-\fB-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP] ]
+[\fB\-MGD\fP\fIgmtdef/value\fP
+\fB\-MGL\fP[\fIf\fP][\fIx\fP]\fIlon0/lat0/slat/length\fP[\fIm\fP]
+\fB\-MGT\fP\fIx/y/size/angle/font/just/text\fP
+\fB\-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP] ]
 
 .SH DESCRIPTION
 \fBmbm_xyplot\fP is a macro to generate a shellscript of GMT commands which,
@@ -90,11 +90,11 @@ Suzanne H. O'Hara (sohara@ldeo.columbia.edu)
 \fIfill\fP
 .br
 Select filling of symbols for xy plotting.
-Set the shade (0\-255) or color
+Set the shade (0-255) or color
 (r/g/b) [Default is no fill]. To reset no fill,
 use \fIfill\fP = "N".
 For polygons, you may optionally specify
-\fB-Gp\fP\fIicon_size/pattern\fP, where
+\fB\-Gp\fP\fIicon_size/pattern\fP, where
 \fIpattern\fP gives the number of the
 image pattern (1-32) OR the name of a
 icon-format file.  \fIicon_size\fP sets
@@ -119,7 +119,7 @@ line and symbol characteristics and a flag to specify when multiple
 data segments are embedded in a single file. The looks like the
 following.:
 
-\fB -I\fP\fBD\fP\fIdelimiter\fP:\fBC\fP\fIcolumnsexpression\fP:\fBG\fP\fIcolor\fP:\fBS\fP\fIsymbol\fP:\fBW\fP\fIweight\fP:\fBM\fP:\fBxyfile\fR
+\fB \-I\fP\fBD\fP\fIdelimiter\fP:\fBC\fP\fIcolumnsexpression\fP:\fBG\fP\fIcolor\fP:\fBS\fP\fIsymbol\fP:\fBW\fP\fIweight\fP:\fBM\fP:\fBxyfile\fR
 
 Default parameters are whitespace [ D(\\s+) ], column 1 vs column 2
 [ Cc[1]_c[2] ], black lines without symbols [ SN ], [ GN ], [ W1 ], and no
@@ -163,7 +163,7 @@ COMPLETE DESCRIPTION OF OPTIONS section below.
 .br
 Normally the orientation of the plot (portrait or landscape)
 is selected automatically so as to maximize the plot scale.
-The \fB-U\fP option allows the user to set the plot orientation. If
+The \fB\-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 1, a portrait plot will be produced; if
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
@@ -193,7 +193,7 @@ basemap annotations based on the map boundaries.
 \fIfill\fP
 .br
 Select filling of symbols for xy plotting.
-Set the shade (0\-255) or color
+Set the shade (0-255) or color
 (r/g/b) [Default is no fill]. To reset no fill,
 use \fIfill\fP = "N".
 For polygons, you may optionally specify
@@ -228,7 +228,7 @@ arguments need not appear in any particular order as long as argument
 follows corresponding flag.:
 
 
-\fB -I\fP\fBD\fP\fIdelimiter\fP:\fBC\fP\fIcolumnsexpression\fP:\fBG\fP\fIcolor\fP:\fBS\fP\fIsymbol\fP:\fBW\fP\fIweight\fP:\fBM\fP:\fBxyfile\fR
+\fB \-I\fP\fBD\fP\fIdelimiter\fP:\fBC\fP\fIcolumnsexpression\fP:\fBG\fP\fIcolor\fP:\fBS\fP\fIsymbol\fP:\fBW\fP\fIweight\fP:\fBM\fP:\fBxyfile\fR
 
 The delimiter may be any character string. The default delimiter is
 whitespace.
@@ -258,12 +258,12 @@ columns contain x and y coordinates in meters, one would specify
 
 The line and symbol characteristics are set using the \fBG\fP,
 \fBS\fP, and \fBW\fP options.  For example, the command
-\fB-IG\fP\fI255/0/0:\fP\fBS\fP\fIa/0.1:xy.dat\fP will plot the (x,y)
+\fB\-IG\fP\fI255/0/0:\fP\fBS\fP\fIa/0.1:xy.dat\fP will plot the (x,y)
 data pairs in the file xy.dat as 0.1 inch diameter red stars.
 [Default is a solid black line]. See the psxy man page for more
 details.
 
-When multiple data files are specified (with multiple \fB-I\fP
+When multiple data files are specified (with multiple \fB\-I\fP
 statements, the last \fBG\fP, \fBS\fP, and \fBW\fP options specified
 are for subsequent files. In order to plot different files using
 different line or symbol characteristics, new sets of commands can be
@@ -271,7 +271,7 @@ specified for each file.
 
 Finally, note that there are two ways in which one may plot multiple
 data sets on the same plot. One may specify multiple sets of file arguments
-[i.e. \fB-I\fP\fI[filepars:]xy_file\fP], one for each file to be
+[i.e. \fB\-I\fP\fI[filepars:]xy_file\fP], one for each file to be
 plotted. This allows the most flexibility, including different
 one-the-fly manipulations and colors for each xy series.
 
@@ -281,7 +281,7 @@ invoke this feature. A single file may then contain all the data, one
 series after the next, with lines containing a single ">" and nothing
 more to delineate breaks in data segments. This is the default break
 character for psxy, and currently the only break character supported by
-mbm_xyplot. For example \fB-IM\fP:xy.dat would plot multiple data
+mbm_xyplot. For example \fB\-IM\fP:xy.dat would plot multiple data
 series in the file xy.dat whose segements were separated as in the
 following snippet:
 
@@ -302,7 +302,7 @@ following snippet:
 .br
 Selects the map projection. By default the map projection is
 Mercator and the plot scale is chosen to fit on the selected
-page size (see \fB-P\fP option). The user may specify a
+page size (see \fB\-P\fP option). The user may specify a
 different projection to be used, in which case the plot scale
 is still automatically chosen to fit the page. The user may
 also specify both the projection and the plot scale. If
@@ -322,17 +322,17 @@ size will be chosen.
 .br
 \fB\-Jm\fP\fIscale\fP (Mercator)
 .br
-\fB\-Joa\fP\fIlon0/lat0/azimuth/scale\fP (Oblique Mercator - point and azimuth)
+\fB\-Joa\fP\fIlon0/lat0/azimuth/scale\fP (Oblique Mercator \- point and azimuth)
 .br
-\fB\-Job\fP\fIlon0/lat0/lon1/lat1/scale\fP (Oblique Mercator - two points)
+\fB\-Job\fP\fIlon0/lat0/lon1/lat1/scale\fP (Oblique Mercator \- two points)
 .br
-\fB\-Joc\fP\fIlon0/lat0/lonp/latp/scale\fP (Oblique Mercator - point and pole)
+\fB\-Joc\fP\fIlon0/lat0/lonp/latp/scale\fP (Oblique Mercator \- point and pole)
 .br
 \fB\-Jq\fP\fIlon0/scale\fP (Equidistant Cylindrical Projection (Plate Carree))
 .br
-\fB\-Jt\fP\fIlon0/scale\fP (TM - Transverse Mercator)
+\fB\-Jt\fP\fIlon0/scale\fP (TM \- Transverse Mercator)
 .br
-\fB\-Ju\fP\fIzone/scale\fP (UTM - Universal Transverse Mercator)
+\fB\-Ju\fP\fIzone/scale\fP (UTM \- Universal Transverse Mercator)
 .br
 \fB\-Jy\fP\fIlon0/lats/scale\fP (Basic Cylindrical Projection)
 .br
@@ -394,11 +394,11 @@ alone, no x or y-axis labels will be provided.
 .TP
 .B \-M
 A series of "miscellaneous" options are provided which are
-given as \fB-M\fP followed by a two character identifier, followed
+given as \fB\-M\fP followed by a two character identifier, followed
 by any other parameters associated with that option.
-The \fB-M\fP options may be strung together separated by
+The \fB\-M\fP options may be strung together separated by
 colons, e.g. "-MGQ100:GU:CA200/10", which is equivalent to
-"-MGQ -MGU -MCA200/10".
+"-MGQ \-MGU \-MCA200/10".
 .TP
 .B \-MGD
 \fIgmtdef/value\fP
@@ -602,7 +602,7 @@ cross.  Give length in inch.
 .br
 Normally the orientation of the plot (portrait or landscape)
 is selected automatically so as to maximize the plot scale.
-The \fB-U\fP option allows the user to set the plot orientation. If
+The \fB\-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 1, a portrait plot will be produced; if
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
@@ -628,7 +628,7 @@ in the background before \fBmbm_xyplot\fP exits.
 \fBmbm_xyplot\fP extracts the desired columns of the input data
 and creates secondary files with the xy values to be plotted.
 Normally these files are left in place by the plot shellscript
-to be used multiple times. The \fB-Z\fP option causes the
+to be used multiple times. The \fB\-Z\fP option causes the
 shellscript to delete those secondary files.
 
 .SH EXAMPLES
@@ -638,7 +638,7 @@ In order to obtain an xy plot of the center beam depth
 versus time, we first extract the time-depth xy doubles
 from the swath sonar file using \fBmblist\fP:
 
- 	mblist -F41 -Isb2112_example.mb41 -OmZ > mz.dat
+ 	mblist \-F41 \-Isb2112_example.mb41 \-OmZ > mz.dat
 
 Here time is in seconds from the start of the file and the
 depths are in meters, positive upward (topography rather
@@ -647,7 +647,7 @@ Now, we use \fBmbm_xyplot\fP to generate
 shellscripts which in turn generate plots when executed.
 First, we generate a simple black line plot:
 
- 	mbm_xyplot -Imz.dat -Omz
+ 	mbm_xyplot \-Imz.dat \-Omz
 
 The above command generates an executable shellscript
 mz_line.cmd; executing this shellscript will generate a
@@ -660,7 +660,7 @@ we wish to compare the two sets of depths. We can plot the
 swath sonar derived depths as a black line and the seismic
 derived depths as red stars as follows:
 
- 	mbm_xyplot -Omz_sr -Imz.dat \\
+ 	mbm_xyplot \-Omz_sr \-Imz.dat \\
  		-IG255/0/0:Sa/0.1:sr.dat
 
 As an example, the contents of the plotting shellscript
@@ -671,11 +671,11 @@ As an example, the contents of the plotting shellscript
  # Created by macro mbm_xyplot
  #
  # This shellscript created by following command line:
- # mbm_xyplot -Imz.dat -Omz
+ # mbm_xyplot \-Imz.dat \-Omz
  #
  # Save existing GMT defaults
  echo Saving GMT defaults...
- gmtdefaults -L > gmtdefaults$$
+ gmtdefaults \-L > gmtdefaults$$
  #
  # Set new GMT defaults
  echo Setting new GMT defaults...
@@ -697,18 +697,18 @@ As an example, the contents of the plotting shellscript
  psxy mz.dat \\
  	-Jx0.0011071486125582637/0.0062732342007434947 \\
  	-R0/8128.99/-4382/-3306 \\
- 	-X1 -Y0.5 -K -V > mz.ps
+ 	-X1 \-Y0.5 \-K \-V > mz.ps
  #
 # Make basemap
  echo Running psbasemap...
- psbasemap -Jx0.0011071486125582637/0.0062732342007434947 \\
+ psbasemap \-Jx0.0011071486125582637/0.0062732342007434947 \\
  	-R0/8128.99/-4382/-3306 \\
  	-B500/100:."Data File mz.dat": \\
- 	-O -V >> mz.ps
+ 	-O \-V >> mz.ps
  #
  # Delete surplus files
  echo Deleting surplus files...
- rm -f
+ rm \-f
  #
  # Reset GMT default fonts
  echo Resetting GMT fonts...
@@ -716,7 +716,7 @@ As an example, the contents of the plotting shellscript
  #
  # Run xpsview
  echo Running xpsview in background...
- xpsview -ps a -or landscape -maxp 4m mz.ps &
+ xpsview \-ps a \-or landscape \-maxp 4m mz.ps &
  #
  # All done!
  echo All done!
@@ -728,9 +728,9 @@ whose data looks like the following:
 
 filename: gps.raw:
 
-$GPGGA,23.0,5427.89080,N,14600.29458,W,1,10,0.9,19.01,M,6.40,M,,*70
-$GPGGA,24.0,5427.89248,N,14600.30088,W,1,10,0.9,19.39,M,6.40,M,,*7B
-$GPGGA,25.0,5427.89424,N,14600.30713,W,1,10,0.9,19.72,M,6.40,M,,*7C
+ $GPGGA,23.0,5427.89080,N,14600.29458,W,1,10,0.9,19.01,M,6.40,M,,*70
+ $GPGGA,24.0,5427.89248,N,14600.30088,W,1,10,0.9,19.39,M,6.40,M,,*7B
+ $GPGGA,25.0,5427.89424,N,14600.30713,W,1,10,0.9,19.72,M,6.40,M,,*7C
 
 We can specify a comma delimited file and convert the latitude and
 longitude fields to decimal degrees on the fly with the following:
@@ -739,7 +739,7 @@ longitude fields to decimal degrees on the fly with the following:
         /60_substr(c[3],0,2)+substr(c[3],2,length(c[3]))/60':gps.raw
 
 This is about as ugly as it gets. However, it is quite
-straightforward and very handy, so let us pick this apart. The -I flag
+straightforward and very handy, so let us pick this apart. The \-I flag
 specifies the file to plot and its parameters. The D subfield followed
 by ',' indicates the file is comma delimited. The C subfield followed
 by the Perl expression extracts fields to plot. There are two
@@ -756,10 +756,10 @@ inadvertently interpreted by the shell.
 
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbcontour\fP(l),
-\fBmbswath\fP(l), \fBmbdefaults\fP(l),
-\fBmbm_grdplot\fP(l), \fBmbm_grd3dplot\fP(l),
-\fBmbm_plot\fP(l)
+\fBmbsystem\fP(1), \fBmbcontour\fP(1),
+\fBmbswath\fP(1), \fBmbdefaults\fP(1),
+\fBmbm_grdplot\fP(1), \fBmbm_grd3dplot\fP(1),
+\fBmbm_plot\fP(1)
 
 .SH BUGS
 Please let us know.

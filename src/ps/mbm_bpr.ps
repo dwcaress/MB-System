@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
 %%Creator: groff version 1.19.2
-%%CreationDate: Mon Jun  3 18:26:26 2013
+%%CreationDate: Tue Jun  4 01:14:30 2013
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
@@ -229,23 +229,23 @@ def/PL 792 def/LS false def/ENC0[/asciicircum/asciitilde/Scaron/Zcaron
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 10/Times-Roman@0 SF 149.28(mbm_bpr\(1\) MB-System)72 48 R 149.28
-(5.0 mbm_bpr\(1\))2.5 F/F1 10.95/Times-Bold@0 SF -.219(NA)72 84 S(ME)
-.219 E/F2 10/Times-Bold@0 SF(mbm_bpr)108 96 Q F0 3.357(-M)3.357 G .857(\
-B-System macro to process data from a Seabird SBE53 pressure sensor int\
-o a tidal model)-3.357 F(for use by mbprocess.)108 108 Q F1(VERSION)72
-136.8 Q F0 -1.11(Ve)108 148.8 S(rsion 5.0)1.11 E F1(SYNOPSIS)72 177.6 Q
-F2(mbm_bpr -I)108 189.6 Q/F3 10/Times-Italic@0 SF(bpr\214le)A F2(-O)2.5
-E F3(tide\214le)A F0([)2.5 E F2(-D)A F3(of)A(fset)-.18 E F2(R)2.5 E F3
-(lon/lat)A F2(-T -H -V)2.5 E F3(])A F1(DESCRIPTION)72 218.4 Q F2
-(mbm_bpr)108 230.4 Q F0 .04(is a perl shellscript used to translate pre\
-ssure data from a Seabird SBE53 pressure sensor used as)2.54 F 3.285(aB)
-108 242.4 S .784(ottom Pressure Recorder \(BPR\) into tidal data that c\
-an be used to correct sw)-3.285 F .784(ath bath)-.1 F .784
-(ymetry data. The)-.05 F .628(user speci\214es an input BPR data \214le\
- in the *.tid format produced by Seabird softw)108 254.4 R .629
-(are and the output path)-.1 F(for the resulting tide\214le.)108 266.4 Q
-(By def)108 290.4 Q
+/F0 10/Times-Roman@0 SF 148.125(mbm_bpr\(1\) MB\255System)72 48 R
+148.125(5.0 mbm_bpr\(1\))2.5 F/F1 10.95/Times-Bold@0 SF -.219(NA)72 84 S
+(ME).219 E/F2 10/Times-Bold@0 SF(mbm_bpr)108 96 Q F0 3.069<ad4d>3.069 G
+.568(B\255System macro to process data from a Seabird SBE53 pressure se\
+nsor into a tidal model)-3.069 F(for use by mbprocess.)108 108 Q F1
+(VERSION)72 136.8 Q F0 -1.11(Ve)108 148.8 S(rsion 5.0)1.11 E F1
+(SYNOPSIS)72 177.6 Q F2(mbm_bpr \255I)108 189.6 Q/F3 10/Times-Italic@0
+SF(bpr\214le)A F2<ad4f>2.5 E F3(tide\214le)A F0([)2.5 E F2<ad44>A F3(of)
+A(fset)-.18 E F2(R)2.5 E F3(lon/lat)A F2<ad5420ad4820ad56>2.5 E F3(])A
+F1(DESCRIPTION)72 218.4 Q F2(mbm_bpr)108 230.4 Q F0 .04(is a perl shell\
+script used to translate pressure data from a Seabird SBE53 pressure se\
+nsor used as)2.54 F 3.285(aB)108 242.4 S .784(ottom Pressure Recorder \
+\(BPR\) into tidal data that can be used to correct sw)-3.285 F .784
+(ath bath)-.1 F .784(ymetry data. The)-.05 F .628(user speci\214es an i\
+nput BPR data \214le in the *.tid format produced by Seabird softw)108
+254.4 R .629(are and the output path)-.1 F
+(for the resulting tide\214le.)108 266.4 Q(By def)108 290.4 Q
 (ault, the output tide\214le will be in the form of a te)-.1 E
 (xt \214le with tw)-.15 E 2.5(oc)-.1 G(olumns:)-2.5 E(time_d tide.)123
 302.4 Q 1.036(Here time_d are time v)108 314.4 R 1.035(alues in decimal\
@@ -255,84 +255,86 @@ e is in format 1 as supported by).25 F F2(mbpr)3.02 E(ocess)-.18 E F0
 3.02(,s)C 3.02(ot)-3.02 G 3.02(om)-3.02 G(ak)-3.02 E 3.02(eu)-.1 G .52
 (se of)-3.02 F(this tide data to correct sw)108 338.4 Q(ath bath)-.1 E
 (ymetry)-.05 E 2.5(,u)-.65 G(se)-2.5 E F2(mbset)2.5 E F0(as follo)2.5 E
-(ws:)-.25 E(mbset -Idatalist.mb-1 -PTIDEFILE:tide\214lename -PTIDEFORMA)
-123 350.4 Q -.5(T:)-1.11 G(1).5 E .701(where datalist.mb-1 is the datal\
-ist referring to the data \214les to be processed. After using)108 362.4
-R F2(mbset)3.201 E F0 .701(to turn on)3.201 F(tide correction, run)108
-374.4 Q F2(mbpr)2.5 E(ocess)-.18 E F0(:)A(mbprocess -Idatalist.mb-1)123
-386.4 Q(If the)108 410.4 Q F2(-T)2.5 E F0
-(option is speci\214ed, then the output \214le will ha)2.5 E .3 -.15
-(ve t)-.2 H(he form of:).15 E(year month day hour min sec tide)123 422.4
-Q .055(In this case, the tide\214le is in format 2 as supported by)108
-434.4 R F2(mbpr)2.555 E(ocess)-.18 E F0 2.556(,s)C 2.556(ot)-2.556 G
-2.556(om)-2.556 G(ak)-2.556 E 2.556(eu)-.1 G .056
+(ws:)-.25 E(mbset \255Idatalist.mb\2551 \255PTIDEFILE:tide\214lename \
+\255PTIDEFORMA)123 350.4 Q -.5(T:)-1.11 G(1).5 E .573(where datalist.mb\
+\2551 is the datalist referring to the data \214les to be processed. Af\
+ter using)108 362.4 R F2(mbset)3.072 E F0 .572(to turn on)3.072 F
+(tide correction, run)108 374.4 Q F2(mbpr)2.5 E(ocess)-.18 E F0(:)A
+(mbprocess \255Idatalist.mb\2551)123 386.4 Q(If the)108 410.4 Q F2<ad54>
+2.5 E F0(option is speci\214ed, then the output \214le will ha)2.5 E .3
+-.15(ve t)-.2 H(he form of:).15 E(year month day hour min sec tide)123
+422.4 Q .055
+(In this case, the tide\214le is in format 2 as supported by)108 434.4 R
+F2(mbpr)2.555 E(ocess)-.18 E F0 2.556(,s)C 2.556(ot)-2.556 G 2.556(om)
+-2.556 G(ak)-2.556 E 2.556(eu)-.1 G .056
 (se of this tide data to correct)-2.556 F(sw)108 446.4 Q(ath bath)-.1 E
 (ymetry)-.05 E 2.5(,u)-.65 G(se)-2.5 E F2(mbset)2.5 E F0(as follo)2.5 E
-(ws:)-.25 E(mbset -Idatalist.mb-1 -PTIDEFILE:tide\214lename -PTIDEFORMA)
-123 458.4 Q -.5(T:)-1.11 G(2).5 E .701(where datalist.mb-1 is the datal\
-ist referring to the data \214les to be processed. After using)108 470.4
-R F2(mbset)3.201 E F0 .701(to turn on)3.201 F(tide correction, run)108
-482.4 Q F2(mbpr)2.5 E(ocess)-.18 E F0(.)A .365(The macro)108 506.4 R F2
-(mbm_bpr)2.865 E F0 .366(calculates depth from pressure and latitude us\
-ing the empirical formula for sea)2.865 F -.1(wa)-.15 G(ter).1 E(in:)108
-518.4 Q(N. P)128 530.4 Q 2.5(.F)-1.11 G(ofonof)-2.65 E 2.5(fa)-.25 G
-(nd R. C. Millard, Jr)-2.5 E
+(ws:)-.25 E(mbset \255Idatalist.mb\2551 \255PTIDEFILE:tide\214lename \
+\255PTIDEFORMA)123 458.4 Q -.5(T:)-1.11 G(2).5 E .573(where datalist.mb\
+\2551 is the datalist referring to the data \214les to be processed. Af\
+ter using)108 470.4 R F2(mbset)3.072 E F0 .572(to turn on)3.072 F
+(tide correction, run)108 482.4 Q F2(mbpr)2.5 E(ocess)-.18 E F0(.)A .365
+(The macro)108 506.4 R F2(mbm_bpr)2.865 E F0 .366(calculates depth from\
+ pressure and latitude using the empirical formula for sea)2.865 F -.1
+(wa)-.15 G(ter).1 E(in:)108 518.4 Q(N. P)128 530.4 Q 2.5(.F)-1.11 G
+(ofonof)-2.65 E 2.5(fa)-.25 G(nd R. C. Millard, Jr)-2.5 E
 (., \324\324Algorithms for computation of fundamental)-.55 E
 (properties of sea)128 542.4 Q -.1(wa)-.15 G(ter).1 E
 (,\325\325 Unesco T)-.4 E(ech. P)-.7 E(apers in Mar)-.15 E 2.5(.S)-.55 G
 (ci., No. 44 1983.)-2.5 E .126
 (and then calculates tidal data as the dif)108 554.4 R .126
 (ference between the observ)-.25 F .126(ed depth and a v)-.15 F .125
-(ertical reference depth. If)-.15 F 3.73(al)108 566.4 S 1.23
-(ocation is supplied using the)-3.73 F F2(-R)3.73 E F0(option,)3.73 E F2
-(mbm_bpr)3.73 E F0 1.23
-(uses the latitude in the depth calculation and also)3.73 F -.15(ex)108
+(ertical reference depth. If)-.15 F 3.59(al)108 566.4 S 1.09
+(ocation is supplied using the)-3.59 F F2<ad52>3.59 E F0(option,)3.59 E
+F2(mbm_bpr)3.591 E F0 1.091
+(uses the latitude in the depth calculation and also)3.591 F -.15(ex)108
 578.4 S .448(tracts a tidal model corresponding the to BPR deplo).15 F
 .448(yment site and timespan using the program)-.1 F F2(mbotps)2.948 E
 F0(.)A .849(The v)108 590.4 R .849(ertical reference is then the a)-.15
 F -.15(ve)-.2 G .849(rage dif).15 F .85
 (ference between the tidal model and the observ)-.25 F .85(ed depths.)
--.15 F(If)5.85 E .505(the user does not supply a location using the)108
-602.4 R F2(-R)3.005 E F0 .505
-(option, a location on the equator is assumed for the depth)3.005 F
+-.15 F(If)5.85 E .387(the user does not supply a location using the)108
+602.4 R F2<ad52>2.887 E F0 .386
+(option, a location on the equator is assumed for the depth)2.887 F
 1.328(calculation and the v)108 614.4 R 1.328(ertical reference is the \
 mean depth of the middle half of the depth time series \(i.e.)-.15 F
 .282(depths from 1/4 to 3/4 of the total time span\).)108 626.4 R .281
 (The user can specify an additional of)5.281 F .281
-(fset to apply to the tide)-.25 F(data using the)108 638.4 Q F2(-D)2.5 E
-F3(of)A(fset)-.18 E F0(option.)2.5 E .62(If the)108 662.4 R F2(-T)3.12 E
-F0 .62(option is not used, then)3.12 F F2(mbm_bpr)3.12 E F0 .62
-(will also output a shellscript that will, if e)3.12 F -.15(xe)-.15 G
-.62(cuted, generate a).15 F .566(GMT postscript plot of the tide data o\
-utput. If a location has been speci\214ed so that a tidal model w)108
+(fset to apply to the tide)-.25 F(data using the)108 638.4 Q F2<ad44>2.5
+E F3(of)A(fset)-.18 E F0(option.)2.5 E .495(If the)108 662.4 R F2<ad54>
+2.995 E F0 .495(option is not used, then)2.995 F F2(mbm_bpr)2.995 E F0
+.495(will also output a shellscript that will, if e)2.995 F -.15(xe)-.15
+G .496(cuted, generate a).15 F .566(GMT postscript plot of the tide dat\
+a output. If a location has been speci\214ed so that a tidal model w)108
 674.4 R .565(as also)-.1 F
 (generated, the model will be plotted with the tide data.)108 686.4 Q
-(MB-System 5.0)72 768 Q(19 March 2012)140.11 E(1)198.45 E 0 Cg EP
+(MB\255System 5.0)72 768 Q 2.5(3J)144.185 G(une 2013)-2.5 E(1)204.835 E
+0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 10/Times-Roman@0 SF 149.28(mbm_bpr\(1\) MB-System)72 48 R 149.28
-(5.0 mbm_bpr\(1\))2.5 F/F1 10.95/Times-Bold@0 SF -.548(AU)72 84 S
+/F0 10/Times-Roman@0 SF 148.125(mbm_bpr\(1\) MB\255System)72 48 R
+148.125(5.0 mbm_bpr\(1\))2.5 F/F1 10.95/Times-Bold@0 SF -.548(AU)72 84 S
 (THORSHIP).548 E F0(Da)108 96 Q(vid W)-.2 E 2.5(.C)-.92 G
 (aress \(caress@mbari.or)-2.5 E(g\))-.18 E(Montere)113 108 Q 2.5(yB)-.15
 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 120 Q
-(Lamont-Doherty Earth Observ)113 132 Q(atory)-.25 E
+(Lamont\255Doherty Earth Observ)113 132 Q(atory)-.25 E
 (Suzanne H. O'Hara \(sohara@ldeo.columbia.edu\))108 144 Q
-(Lamont-Doherty Earth Observ)113 156 Q(atory)-.25 E F1(OPTIONS)72 184.8
-Q/F2 10/Times-Bold@0 SF<ad44>108 196.8 Q/F3 10/Times-Italic@0 SF(of)
-23.08 E(fset)-.18 E F0(An of)144 208.8 Q
+(Lamont\255Doherty Earth Observ)113 156 Q(atory)-.25 E F1(OPTIONS)72
+184.8 Q/F2 10/Times-Bold@0 SF<ad44>108 196.8 Q/F3 10/Times-Italic@0 SF
+(of)23.08 E(fset)-.18 E F0(An of)144 208.8 Q
 (fset to be added to the calculated tidal data, in meters. Def)-.25 E
 (ault:)-.1 E F3(of)2.5 E(fset)-.18 E F0(=0.)A F2<ad48>108 225.6 Q F0
 .162(This "help" \215ag cause the program to print out a description of\
  its operation and then e)22.52 F .162(xit immedi-)-.15 F(ately)144
 237.6 Q(.)-.65 E F2<ad49>108 254.4 Q F3(bpr\214le)26.41 E F0(Input pres\
-sure data from the SBE53 pressure sensor in the Sea-Bird *.tid format.)
-144 266.4 Q F2<ad4f>108 283.2 Q F3(tide\214le)22.52 E F0 1.459(Output t\
-ide data \214le path. The format of the tide data controlled by the use\
- \(or not\) of the)144 295.2 R F2(-T)3.958 E F0(option.)144 307.2 Q F2
-<ad52>108 324 Q F3(longitude/latitude)23.08 E F0
+sure data from the SBE53 pressure sensor in the Sea\255Bird *.tid forma\
+t.)144 266.4 Q F2<ad4f>108 283.2 Q F3(tide\214le)22.52 E F0 1.334(Outpu\
+t tide data \214le path. The format of the tide data controlled by the \
+use \(or not\) of the)144 295.2 R F2<ad54>3.834 E F0(option.)144 307.2 Q
+F2<ad52>108 324 Q F3(longitude/latitude)23.08 E F0
 (Sets the location of the BPR deplo)144 336 Q(yment. Here)-.1 E F3
 (longitude)2.5 E F0(and)2.5 E F3(latitude)2.5 E F0(are in decimal de)2.5
 E(grees.)-.15 E F2<ad54>108 352.8 Q F0 .298(Changes the tide data forma\
@@ -340,17 +342,17 @@ t output. The format of the tide data are normally in the form of a te)
 23.63 F(xt)-.15 E(\214le with tw)144 364.8 Q 2.5(oc)-.1 G(olumns:)-2.5 E
 (time_d tide)159 376.8 Q .588(where time_d are time v)144 388.8 R .588(\
 alues in decimal epoch seconds \(seconds since 1970 Jan 1 00:00:00\) an\
-d)-.25 F .144(the tide v)144 400.8 R .144(alues are in meters.)-.25 F
-.145(If the)5.145 F F2(-T)2.645 E F0 .145
-(option is speci\214ed, then the output \214le will instead ha)2.645 F
-.445 -.15(ve t)-.2 H(he).15 E(form of:)144 412.8 Q
+d)-.25 F .02(the tide v)144 400.8 R .02(alues are in meters.)-.25 F .02
+(If the)5.02 F F2<ad54>2.52 E F0 .02
+(option is speci\214ed, then the output \214le will instead ha)2.52 F
+.32 -.15(ve t)-.2 H(he).15 E(form of:)144 412.8 Q
 (year month day hour min sec tide)159 424.8 Q F2<ad56>108 441.6 Q F0
 (Causes)23.08 E F2(mbm_bpr)2.5 E F0(to operate in "v)2.5 E
 (erbose" mode so that it outputs more information than usual.)-.15 E F1
 (Examples)72 470.4 Q F0 .934(Suppose one has deplo)108 482.4 R .934
 (yed an SBE53 at 110 de)-.1 F 3.434(g4)-.15 G .934(0.92220'W 26de)-3.434
 F 3.434(g2)-.15 G .933(7.18960'N at about 1200 m depth.)-3.434 F
-(The Sea-Bird processing softw)108 494.4 Q
+(The Sea\255Bird processing softw)108 494.4 Q
 (are outputs data in *.tid \214les with output something lik)-.1 E(e:)
 -.1 E 7.5(10)120.5 506.4 S(3/14/2012 16:27:21 99999.9999)-7.5 E(20.2731)
 10 E 7.5(20)120.5 518.4 S(3/14/2012 16:28:21 99999.9999)-7.5 E(20.2696)
@@ -371,112 +373,114 @@ F 3.434(g2)-.15 G .933(7.18960'N at about 1200 m depth.)-3.434 F
 (17 03/14/2012)118 698.4 R(16:43:21 99999.9999)2.5 E(18.1037)10 E 5
 (18 03/14/2012)118 710.4 R(16:44:21 99999.9999)2.5 E(17.2487)10 E 5
 (19 03/14/2012)118 722.4 R(16:45:21 99999.9999)2.5 E(15.9275)10 E
-(MB-System 5.0)72 768 Q(19 March 2012)140.11 E(2)198.45 E 0 Cg EP
+(MB\255System 5.0)72 768 Q 2.5(3J)144.185 G(une 2013)-2.5 E(2)204.835 E
+0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 10/Times-Roman@0 SF 149.28(mbm_bpr\(1\) MB-System)72 48 R 149.28
-(5.0 mbm_bpr\(1\))2.5 F 5(20 03/14/2012)118 84 R(16:46:21 99999.9999)2.5
-E(14.7406)10 E 5(21 03/14/2012)118 96 R(16:47:21 99999.9999)2.5 E
-(13.7798)10 E 5(22 03/14/2012)118 108 R(16:48:21 99999.9999)2.5 E
-(13.0540)10 E 5(23 03/14/2012)118 120 R(16:49:21 99999.9999)2.5 E
-(12.3869)10 E 5(24 03/14/2012)118 132 R(16:50:21 99999.9999)2.5 E
-(11.8464)10 E 5(25 03/14/2012)118 144 R(16:51:21 99999.9999)2.5 E
-(11.1999)10 E 5(26 03/14/2012)118 156 R 5(16:52:21 528.8065)2.5 F
-(10.5061)10 E 5(27 03/14/2012)118 168 R 5(16:53:21 583.2633)2.5 F
-(9.9686)12.5 E 5(28 03/14/2012)118 180 R 5(16:54:21 637.7951)2.5 F
-(9.3547)12.5 E 5(29 03/14/2012)118 192 R 5(16:55:21 693.5947)2.5 F
-(8.8287)12.5 E 5(30 03/14/2012)118 204 R 5(16:56:21 748.5921)2.5 F
-(8.3998)12.5 E 5(31 03/14/2012)118 216 R 5(16:57:21 804.0302)2.5 F
-(8.0251)12.5 E 5(32 03/14/2012)118 228 R 5(16:58:21 859.5471)2.5 F
-(7.6560)12.5 E 5(33 03/14/2012)118 240 R 5(16:59:21 914.8043)2.5 F
-(7.3006)12.5 E 5(34 03/14/2012)118 252 R 5(17:00:21 969.7692)2.5 F
-(7.0322)12.5 E 5(35 03/14/2012)118 264 R 2.5(17:01:21 1023.0636)2.5 F
-(6.6673)12.5 E 5(36 03/14/2012)118 276 R 2.5(17:02:21 1077.7238)2.5 F
-(6.3327)12.5 E 5(37 03/14/2012)118 288 R 2.5(17:03:21 1132.0991)2.5 F
-(6.0528)12.5 E 5(38 03/14/2012)118 300 R 2.5(17:04:21 1186.9391)2.5 F
-(5.8203)12.5 E 5(39 03/14/2012)118 312 R 2.5(17:05:21 1241.4040)2.5 F
-(5.6089)12.5 E 5(40 03/14/2012)118 324 R 2.5(17:06:21 1295.6002)2.5 F
-(5.4167)12.5 E 5(41 03/14/2012)118 336 R 2.5(17:07:21 1350.1353)2.5 F
-(5.2188)12.5 E 5(42 03/14/2012)118 348 R 2.5(17:08:21 1404.8882)2.5 F
-(5.0195)12.5 E 5(43 03/14/2012)118 360 R 2.5(17:09:21 1460.2095)2.5 F
-(4.9215)12.5 E 5(44 03/14/2012)118 372 R 2.5(17:10:21 1514.6683)2.5 F
-(4.7630)12.5 E 5(45 03/14/2012)118 384 R 2.5(17:11:21 1568.9270)2.5 F
-(4.5651)12.5 E 5(46 03/14/2012)118 396 R 2.5(17:12:21 1623.3903)2.5 F
-(4.4452)12.5 E 5(47 03/14/2012)118 408 R 2.5(17:13:21 1678.6771)2.5 F
-(4.3075)12.5 E 5(48 03/14/2012)118 420 R 2.5(17:14:21 1733.7411)2.5 F
-(4.1910)12.5 E 5(49 03/14/2012)118 432 R 2.5(17:15:21 1789.1549)2.5 F
-(4.0284)12.5 E 5(50 03/14/2012)118 444 R 2.5(17:16:21 1844.5557)2.5 F
-(3.8760)12.5 E 5(51 03/14/2012)118 456 R 2.5(17:17:21 1869.8892)2.5 F
-(3.7976)12.5 E 5(52 03/14/2012)118 468 R 2.5(17:18:21 1869.8176)2.5 F
-(3.7534)12.5 E 5(53 03/14/2012)118 480 R 2.5(17:19:21 1869.8197)2.5 F
-(3.7088)12.5 E 5(54 03/14/2012)118 492 R 2.5(17:20:21 1869.8224)2.5 F
-(3.6828)12.5 E 5(55 03/14/2012)118 504 R 2.5(17:21:21 1869.8241)2.5 F
-(3.6682)12.5 E .015(where the third column is the pressure in dbar and \
-the fourth column is temperature in de)108 516 R .016(grees C.)-.15 F
-.016(The pres-)5.016 F .377(sure increases and the temperature decrease\
-s as the sensor sinks to the sea\215oor follo)108 528 R .377(wing deplo)
--.25 F .376(yment of)-.1 F 2.876(fa)-.25 G
+/F0 10/Times-Roman@0 SF 148.125(mbm_bpr\(1\) MB\255System)72 48 R
+148.125(5.0 mbm_bpr\(1\))2.5 F 5(20 03/14/2012)118 84 R
+(16:46:21 99999.9999)2.5 E(14.7406)10 E 5(21 03/14/2012)118 96 R
+(16:47:21 99999.9999)2.5 E(13.7798)10 E 5(22 03/14/2012)118 108 R
+(16:48:21 99999.9999)2.5 E(13.0540)10 E 5(23 03/14/2012)118 120 R
+(16:49:21 99999.9999)2.5 E(12.3869)10 E 5(24 03/14/2012)118 132 R
+(16:50:21 99999.9999)2.5 E(11.8464)10 E 5(25 03/14/2012)118 144 R
+(16:51:21 99999.9999)2.5 E(11.1999)10 E 5(26 03/14/2012)118 156 R 5
+(16:52:21 528.8065)2.5 F(10.5061)10 E 5(27 03/14/2012)118 168 R 5
+(16:53:21 583.2633)2.5 F(9.9686)12.5 E 5(28 03/14/2012)118 180 R 5
+(16:54:21 637.7951)2.5 F(9.3547)12.5 E 5(29 03/14/2012)118 192 R 5
+(16:55:21 693.5947)2.5 F(8.8287)12.5 E 5(30 03/14/2012)118 204 R 5
+(16:56:21 748.5921)2.5 F(8.3998)12.5 E 5(31 03/14/2012)118 216 R 5
+(16:57:21 804.0302)2.5 F(8.0251)12.5 E 5(32 03/14/2012)118 228 R 5
+(16:58:21 859.5471)2.5 F(7.6560)12.5 E 5(33 03/14/2012)118 240 R 5
+(16:59:21 914.8043)2.5 F(7.3006)12.5 E 5(34 03/14/2012)118 252 R 5
+(17:00:21 969.7692)2.5 F(7.0322)12.5 E 5(35 03/14/2012)118 264 R 2.5
+(17:01:21 1023.0636)2.5 F(6.6673)12.5 E 5(36 03/14/2012)118 276 R 2.5
+(17:02:21 1077.7238)2.5 F(6.3327)12.5 E 5(37 03/14/2012)118 288 R 2.5
+(17:03:21 1132.0991)2.5 F(6.0528)12.5 E 5(38 03/14/2012)118 300 R 2.5
+(17:04:21 1186.9391)2.5 F(5.8203)12.5 E 5(39 03/14/2012)118 312 R 2.5
+(17:05:21 1241.4040)2.5 F(5.6089)12.5 E 5(40 03/14/2012)118 324 R 2.5
+(17:06:21 1295.6002)2.5 F(5.4167)12.5 E 5(41 03/14/2012)118 336 R 2.5
+(17:07:21 1350.1353)2.5 F(5.2188)12.5 E 5(42 03/14/2012)118 348 R 2.5
+(17:08:21 1404.8882)2.5 F(5.0195)12.5 E 5(43 03/14/2012)118 360 R 2.5
+(17:09:21 1460.2095)2.5 F(4.9215)12.5 E 5(44 03/14/2012)118 372 R 2.5
+(17:10:21 1514.6683)2.5 F(4.7630)12.5 E 5(45 03/14/2012)118 384 R 2.5
+(17:11:21 1568.9270)2.5 F(4.5651)12.5 E 5(46 03/14/2012)118 396 R 2.5
+(17:12:21 1623.3903)2.5 F(4.4452)12.5 E 5(47 03/14/2012)118 408 R 2.5
+(17:13:21 1678.6771)2.5 F(4.3075)12.5 E 5(48 03/14/2012)118 420 R 2.5
+(17:14:21 1733.7411)2.5 F(4.1910)12.5 E 5(49 03/14/2012)118 432 R 2.5
+(17:15:21 1789.1549)2.5 F(4.0284)12.5 E 5(50 03/14/2012)118 444 R 2.5
+(17:16:21 1844.5557)2.5 F(3.8760)12.5 E 5(51 03/14/2012)118 456 R 2.5
+(17:17:21 1869.8892)2.5 F(3.7976)12.5 E 5(52 03/14/2012)118 468 R 2.5
+(17:18:21 1869.8176)2.5 F(3.7534)12.5 E 5(53 03/14/2012)118 480 R 2.5
+(17:19:21 1869.8197)2.5 F(3.7088)12.5 E 5(54 03/14/2012)118 492 R 2.5
+(17:20:21 1869.8224)2.5 F(3.6828)12.5 E 5(55 03/14/2012)118 504 R 2.5
+(17:21:21 1869.8241)2.5 F(3.6682)12.5 E .015(where the third column is \
+the pressure in dbar and the fourth column is temperature in de)108 516
+R .016(grees C.)-.15 F .016(The pres-)5.016 F .377(sure increases and t\
+he temperature decreases as the sensor sinks to the sea\215oor follo)108
+528 R .377(wing deplo)-.25 F .376(yment of)-.1 F 2.876(fa)-.25 G
 (ship. Once the sensor is on the sea\215oor)108 540 Q 2.5(,p)-.4 G
 (ressure v)-2.5 E(ariations re\215ect the tides.)-.25 E 1.6 -.8(To e)108
 564 T(xtract a tidal model, use).65 E/F1 10/Times-Bold@0 SF(mbm_bpr)2.5
 E F0(as follo)2.5 E(ws:)-.25 E
-(mbm_bpr -I BPR.tid -OBPR.tde -R-110.682037/27.453160 -V)118 576 Q
-(The output to the shell looks lik)108 588 Q(e:)-.1 E 2.5
+(mbm_bpr \255I BPR.tid \255OBPR.tde \255R\255110.682037/27.453160 \255V)
+118 576 Q(The output to the shell looks lik)108 588 Q(e:)-.1 E 2.5
 (Program Status:)118 600 R(1771 pressure v)123 612 Q
 (alues read from BPR.tid)-.25 E -1.11(Ve)123 624 S
-(rtical reference to tidal model for position -110.682037 27.453160)1.11
-E -.35(Ti)123 636 S(de will be output as <time_d tide> v).35 E(alues)
--.25 E 2.5(Ap)123 648 S(lot will be generated)-2.5 E(Ex)123 660 Q 17.152
-(ecuting: mbotps -A1 -D1200 -R-110.682037/27.453160 -B2012/03/14/16/52/\
-21)-.15 F(-E2012/03/15/22/22/21 -OBPR.tid_tidemodel.txt)108 672 Q
+(rtical reference to tidal model for position \255110.682037 27.453160)
+1.11 E -.35(Ti)123 636 S(de will be output as <time_d tide> v).35 E
+(alues)-.25 E 2.5(Ap)123 648 S(lot will be generated)-2.5 E(Ex)123 660 Q
+14.842(ecuting: mbotps \255A1 \255D1200 \255R\255110.682037/27.453160 \
+\255B2012/03/14/16/52/21)-.15 F
+(\255E2012/03/15/22/22/21 \255OBPR.tid_tidemodel.txt)108 672 Q
 (Results are really in BPR.tid_tidemodel.txt)123 684 Q(1690 pressure v)
 123 696 Q(alues output to BPR.tde)-.25 E -1.11(Ve)123 708 S
-(rtical reference: 1267.31678290355 m)1.11 E(Ex)123 720 Q 1.083(ecuting\
- mbm_xyplot -R1331743941.000000/1331850141.000000/-0.5071/0.5071 -IW0/0\
-/0:BPR.tde)-.15 F(MB-System 5.0)72 768 Q(19 March 2012)140.11 E(3)198.45
-E 0 Cg EP
+(rtical reference: 1267.31678290355 m)1.11 E(Ex)123 720 Q 37.095(ecutin\
+g mbm_xyplot \255R1331743941.000000/1331850141.000000/\2550.5071/0.5071)
+-.15 F(MB\255System 5.0)72 768 Q 2.5(3J)144.185 G(une 2013)-2.5 E(3)
+204.835 E 0 Cg EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 10/Times-Roman@0 SF 149.28(mbm_bpr\(1\) MB-System)72 48 R 149.28
-(5.0 mbm_bpr\(1\))2.5 F .29
-(-IW255/0/0:BPR.tid_tidemodel.txt -OBPR.tde_tideplot -L"T)108 84 R .29
-(ide Data from BPR <BPR.tde> \(black\) & T)-.35 F(ide)-.35 E
-(Model \(red\):Seconds:T)108 96 Q(ide \(meters\)" -V)-.35 E(Ex)123 108 Q
-(ecuting <BPR.tde_tideplot.cmd> also in)-.15 E -.2(vo)-.4 G -.1(ke).2 G
-2.5(sg).1 G 2.5(vt)-2.5 G 2.5(ov)-2.5 G(ie)-2.5 E 2.5(wt)-.25 G
+/F0 10/Times-Roman@0 SF 148.125(mbm_bpr\(1\) MB\255System)72 48 R
+148.125(5.0 mbm_bpr\(1\))2.5 F 4.465(\255IW0/0/0:BPR.tde \255IW255/0/0:\
+BPR.tid_tidemodel.txt \255OBPR.tde_tideplot \255L"T)108 84 R 4.465
+(ide Data from BPR)-.35 F(<BPR.tde> \(black\) & T)108 96 Q
+(ide Model \(red\):Seconds:T)-.35 E(ide \(meters\)" \255V)-.35 E(Ex)123
+108 Q(ecuting <BPR.tde_tideplot.cmd> also in)-.15 E -.2(vo)-.4 G -.1(ke)
+.2 G 2.5(sg).1 G 2.5(vt)-2.5 G 2.5(ov)-2.5 G(ie)-2.5 E 2.5(wt)-.25 G
 (he plot on the screen.)-2.5 E
 (The output tidal data \214le BPR.tde has the form:)108 120 Q
-(1331745441.000000 -0.0803109226781089)118 132 Q
-(1331745501.000000 -0.129052283649798)118 144 Q
-(1331745561.000000 -0.127622718432121)118 156 Q
-(1331745621.000000 -0.125784706023751)118 168 Q
-(1331745681.000000 -0.124627438960488)118 180 Q
-(1331745741.000000 -0.123334022838208)118 192 Q
-(1331745801.000000 -0.12285750111073)118 204 Q
-(1331745861.000000 -0.121768308595847)118 216 Q 1.364(where the \214rst\
- column is time in seconds since January 1, 1970 \(epoch seconds, aka u\
-nix seconds, aka)108 228 R .22(time_d v)108 240 R .22(alues within)-.25
-F/F1 10/Times-Bold@0 SF(MB-System)2.72 E F0 .221(\), and the second col\
-umn is the tidal signal in meters. In this case the ref-)B 3.22
+(1331745441.000000 \2550.0803109226781089)118 132 Q
+(1331745501.000000 \2550.129052283649798)118 144 Q
+(1331745561.000000 \2550.127622718432121)118 156 Q
+(1331745621.000000 \2550.125784706023751)118 168 Q
+(1331745681.000000 \2550.124627438960488)118 180 Q
+(1331745741.000000 \2550.123334022838208)118 192 Q
+(1331745801.000000 \2550.12285750111073)118 204 Q
+(1331745861.000000 \2550.121768308595847)118 216 Q 1.364(where the \214\
+rst column is time in seconds since January 1, 1970 \(epoch seconds, ak\
+a unix seconds, aka)108 228 R .088(time_d v)108 240 R .088(alues within)
+-.25 F/F1 10/Times-Bold@0 SF(MB\255System)2.589 E F0 .089(\), and the s\
+econd column is the tidal signal in meters. In this case the ref-)B 3.22
 (erence tidal model is pro)108 252 R 3.22(vided by)-.15 F F1(mbotps)5.72
 E F0 5.72(,a)C 3.22
 (nd the plot created by running the output shellscript)-5.72 F .234
 (BPR.tde_tideplot.cmd plots both the tidal data calculated by)108 264 R
 F1(mbm_bpr)2.734 E F0 .235(and the tidal model e)2.734 F .235
 (xtracted using)-.15 F F1(mbotps)108 276 Q F0(.)A/F2 10.95/Times-Bold@0
-SF(SEE ALSO)72 304.8 Q F1(mbsystem)108 316.8 Q F0(\(l\),)A F1(mbpr)2.5 E
-(ocess)-.18 E F0(\(l\),)A F1(mbset)2.5 E F0(\(l\))A F2(REFERENCES)72
+SF(SEE ALSO)72 304.8 Q F1(mbsystem)108 316.8 Q F0(\(1\),)A F1(mbpr)2.5 E
+(ocess)-.18 E F0(\(1\),)A F1(mbset)2.5 E F0(\(1\))A F2(REFERENCES)72
 345.6 Q F0 1.422(N. P)108 357.6 R 3.922(.F)-1.11 G(ofonof)-4.072 E 3.922
 (fa)-.25 G 1.422(nd R. C. Millard, Jr)-3.922 F 1.422(., \324\324Algorit\
 hms for computation of fundamental properties of sea-)-.55 F -.1(wa)108
 369.6 S(ter).1 E(,\325\325 Unesco T)-.4 E(ech. P)-.7 E(apers in Mar)-.15
 E 2.5(.S)-.55 G(ci., No. 44 1983.)-2.5 E F2 -.11(BU)72 398.4 S(GS).11 E
-F0(Lobsters, really)108 410.4 Q(.)-.65 E(MB-System 5.0)72 768 Q
-(19 March 2012)140.11 E(4)198.45 E 0 Cg EP
+F0(Lobsters, really)108 410.4 Q(.)-.65 E(MB\255System 5.0)72 768 Q 2.5
+(3J)144.185 G(une 2013)-2.5 E(4)204.835 E 0 Cg EP
 %%Trailer
 end
 %%EOF

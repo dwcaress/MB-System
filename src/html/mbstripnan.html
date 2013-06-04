@@ -11,13 +11,13 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbstripNaN</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbstripNaN</B> - filter to remove NaN nodes 
+<B>mbstripNaN</B> - filter to remove NaN nodes
 <P>
 <A NAME="lbAC">&nbsp;</A>
 <H2>VERSION</H2>
@@ -33,10 +33,10 @@ Version 5.0
 <H2>DESCRIPTION</H2>
 
 <B>mbstripNaN</B> is a utility for removing NaN nodes that are produced
-by the GMT utilities <B>grd2xyz</B> and <B>blockmean</B> with the -bo 
+by the GMT utilities <B>grd2xyz</B> and <B>blockmean</B> with the -bo
 option.  The standard output
-of <B>mbstripNaN</B> may be fed into the standard input of <B>surface</B> with 
-the -bi option.  This is used by the <B>mbm_grd2geovrml</B> utility in 
+of <B>mbstripNaN</B> may be fed into the standard input of <B>surface</B> with
+the -bi option.  This is used by the <B>mbm_grd2geovrml</B> utility in
 order to spline fill areas of no data so that irregular bathymetry may
 be effectively visualized using GeoVRML which has no concept of NaN.
 <P>
@@ -48,7 +48,7 @@ The code is simple.  Here it is:
 <BR>&nbsp;&nbsp;#include&nbsp;&lt;<A HREF="file:/usr/include/math.h">math.h</A>&gt;
 <P>
 <BR>&nbsp;&nbsp;/*
-<BR>&nbsp;&nbsp;&nbsp;*&nbsp;Read&nbsp;double&nbsp;x,y,z&nbsp;on&nbsp;stdin&nbsp;and&nbsp;send&nbsp;to&nbsp;stdout&nbsp;all&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;*&nbsp;Read&nbsp;double&nbsp;x,y,z&nbsp;on&nbsp;stdin&nbsp;and&nbsp;send&nbsp;to&nbsp;stdout&nbsp;all
 <BR>&nbsp;&nbsp;&nbsp;*&nbsp;triplets&nbsp;but&nbsp;ones&nbsp;where&nbsp;z&nbsp;==&nbsp;NaN
 <BR>&nbsp;&nbsp;&nbsp;*/
 <BR>&nbsp;&nbsp;main&nbsp;()&nbsp;{
@@ -60,7 +60,7 @@ The code is simple.  Here it is:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;}<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;}<BR>
 <BR>&nbsp;&nbsp;&nbsp;}
-<BR>&nbsp;&nbsp;
+<P>
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>EXAMPLE</H2>
@@ -69,8 +69,8 @@ The code is simple.  Here it is:
 This is a command that <B>mbm_grd2geovrml</B> constructs and executes:
 <P>
 <BR>&nbsp;&nbsp;#
-<BR>&nbsp;&nbsp;#&nbsp;Convert&nbsp;grid&nbsp;to&nbsp;xyz&nbsp;format&nbsp;for&nbsp;filling&nbsp;in&nbsp;blank&nbsp;
-<BR>&nbsp;&nbsp;#&nbsp;areas,&nbsp;preprocess&nbsp;w/blockmean,&nbsp;use&nbsp;surface&nbsp;to&nbsp;
+<BR>&nbsp;&nbsp;#&nbsp;Convert&nbsp;grid&nbsp;to&nbsp;xyz&nbsp;format&nbsp;for&nbsp;filling&nbsp;in&nbsp;blank
+<BR>&nbsp;&nbsp;#&nbsp;areas,&nbsp;preprocess&nbsp;w/blockmean,&nbsp;use&nbsp;surface&nbsp;to
 <BR>&nbsp;&nbsp;#&nbsp;extrapolate&nbsp;to&nbsp;no&nbsp;data&nbsp;areas
 <BR>&nbsp;&nbsp;#
 <BR>&nbsp;&nbsp;grd2xyz&nbsp;-bo&nbsp;Samp_OregonMarginI_bath.grd&nbsp;|&nbsp;blockmean&nbsp;\
@@ -78,7 +78,7 @@ This is a command that <B>mbm_grd2geovrml</B> constructs and executes:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;-R-125.2/-124.867/45/45.1332&nbsp;|&nbsp;mbstripNaN&nbsp;|&nbsp;surface&nbsp;\
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;-bi&nbsp;-I0.00336363636363635/0.00134545454545457&nbsp;\
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;-S0.333312&nbsp;-T0.35&nbsp;-GTmp_OregonMarginI_bath.grd&nbsp;-V&nbsp;\
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;-R-125.2/-124.867/45/45.1332&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-R-125.2/-124.867/45/45.1332
 <P>
 <P>
 <A NAME="lbAG">&nbsp;</A>
@@ -96,9 +96,7 @@ This is a command that <B>mbm_grd2geovrml</B> constructs and executes:
 <H2>BUGS</H2>
 
 <P>
-How many bugs can there be in an 8 line program?  
-<P>
-
+How many bugs can there be in an 8 line program?
 <P>
 
 <HR>
@@ -116,7 +114,7 @@ How many bugs can there be in an 8 line program?
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

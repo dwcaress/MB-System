@@ -1,29 +1,29 @@
 .TH mbnavlist 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbnavlist\fP - List navigation data in swath sonar data files.
+\fBmbnavlist\fP \- List navigation data in swath sonar data files.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavlist\fP [\fB-B\fP\fIyr/mo/da/hr/mn/sc\fP \fB-D\fP\fIdecimate\fP
-\fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP
-\fB-G\fP\fIdelimeter\fP \fB-H\fP \fB-I\fP\fIfile\fP \fB-K\fP\fIkind\fP
-\fB-L\fP\fIlonflip\fP \fB-N\fP\fInavchannel\fP
-\fB-O\fP\fIoutput_format\fP \fB-R\fP\fIwest/east/south/north\fP
-\fB-S\fP\fIspeed\fP \fB-T\fP\fItimegap\fP \fB-V\fP \fB-Z\fP\fIsegment\fP]
+\fBmbnavlist\fP [\fB\-B\fP\fIyr/mo/da/hr/mn/sc\fP \fB\-D\fP\fIdecimate\fP
+\fB\-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB\-F\fP\fIformat\fP
+\fB\-G\fP\fIdelimeter\fP \fB\-H\fP \fB\-I\fP\fIfile\fP \fB\-K\fP\fIkind\fP
+\fB\-L\fP\fIlonflip\fP \fB\-N\fP\fInavchannel\fP
+\fB\-O\fP\fIoutput_format\fP \fB\-R\fP\fIwest/east/south/north\fP
+\fB\-S\fP\fIspeed\fP \fB\-T\fP\fItimegap\fP \fB\-V\fP \fB\-Z\fP\fIsegment\fP]
 
 .SH DESCRIPTION
 \fBmbnavlist\fP prints the specified contents of navigation records
 in a swath sonar data file to stdout. By default, \fBmbnavlist\fP
 produces ASCII files in
 spreadsheet style, with data columns separated by tabs. Alternatively,
-other column delimiters can be used (\fB-G\fP option), or
+other column delimiters can be used (\fB\-G\fP option), or
 the output can be binary, with each field represented
-as a double precision float (\fB-A\fP option).  The output stream can
-be decimated using the \fB-D\fP option. The output of
+as a double precision float (\fB\-A\fP option).  The output stream can
+be decimated using the \fB\-D\fP option. The output of
 \fBmbnavlist\fP can be piped to plotting and data analysis programs. The
-option \fB-O\fP\fIoutput_format\fP can be
+option \fB\-O\fP\fIoutput_format\fP can be
 used to control the data types that
 are sent to stdout.
 
@@ -37,18 +37,18 @@ navigation while the original asynchronous navigation is preserved in
 separate navigation records). Some data formats provide for multiple
 navigation sources, so that there are more than one channel of
 asynchronous data records. In this case one channel is always designated
-as the primary or active navigation channel. The \fB-N\fP option allows
+as the primary or active navigation channel. The \fB\-N\fP option allows
 the user to specify that \fBmbnavlist\fP outputs navigation from
-the primary asynchronous navigation (\fB-N\fP\fI0\fP) or from one
+the primary asynchronous navigation (\fB\-N\fP\fI0\fP) or from one
 of three auxiliary navigation channels
-(\fB-N\fP\fI1\fP, \fB-N\fP\fI2\fP, or \fB-N\fP\fI3\fP). If the data
+(\fB\-N\fP\fI1\fP, \fB\-N\fP\fI2\fP, or \fB\-N\fP\fI3\fP). If the data
 format only uses asynchronous navigation, then the default
 navigation source will already be the primary asynchronous navigation
-and \fB-N\fP need not be used. If \fB-N\fP is used but the data file
+and \fB\-N\fP need not be used. If \fB\-N\fP is used but the data file
 does not contain asynchronous navigation or the specified auxiliary
 navigation channels, then \fBmbnavlist\fP will output nothing. To
 determine if a datafile contains asynchronous navigation and/or auxiliary
-navigation, run \fBmbinfo\fP using its \fB-N\fP option to get counts
+navigation, run \fBmbinfo\fP using its \fB\-N\fP option to get counts
 of all data record types in the file.
 
 Just to make things more complicated, many data formats formats pass
@@ -61,11 +61,11 @@ is the survey data) or at the position record times (if the navigation
 source is the asynchronous position data, but not at the attitude data
 times. Moreover, the attitude data will be interpolated onto the times
 of sonar pings or position fixes. In order to extract the full attitude
-data stream, the \fB-K\fP\fIkind\fP option may be used, where \fIkind\fP
+data stream, the \fB\-K\fP\fIkind\fP option may be used, where \fIkind\fP
 is the identifier for the record type to be used as the trigger for output.
 Any desired values not contained in the selected record will be interpolated
 onto the times of the selected record. In order to identify the records
-available in a particular data file, use \fBmbinfo\fP with the \fB-N\fP
+available in a particular data file, use \fBmbinfo\fP with the \fB\-N\fP
 option. This will show if a data file contains records of type MB_DATA_ATTITUDE,
 which has a record type identifier of 18, A list of the record type
 identifiers used within \fBMB-System\fP is given below, although not
@@ -99,7 +99,7 @@ Default: ASCII output with fields separated by tabs.
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the starting time for data allowed in the input data.
-The \fB-E\fP option sets the ending time for data. If the
+The \fB\-E\fP option sets the ending time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -119,7 +119,7 @@ every "\fIdecimate\fP"th record will be output. Default: \fIdecimate\fP=1.
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the ending time for data allowed in the input data.
-The \fB-B\fP option sets the starting time for data. If the
+The \fB\-B\fP option sets the starting time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -152,7 +152,7 @@ of its operation and then exit immediately.
 \fIfile\fP
 .br
 Sets the input filename. If \fIformat\fP > 0 (set with the
-\fB-F\fP option) then the swath sonar data contained in \fIfile\fP
+\fB\-F\fP option) then the swath sonar data contained in \fIfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read
@@ -174,7 +174,7 @@ Default: \fIfile\fP = "datalist.mb-1".
 This option sets the type of data record used as the trigger for
 output. By default, data are output when the record type listed as
 the "navigation source" for a particular data format is encountered.
-The \fB-K\fP option causes output to be keyed to data records of
+The \fB\-K\fP option causes output to be keyed to data records of
 type \fIkind\fP, where \fIkind\fP may be integer values such as:
      MB_DATA_DATA			1	/* general survey data */
      MB_DATA_CALIBRATE		4	/* Hydrosweep DS */
@@ -202,21 +202,21 @@ type \fIkind\fP, where \fIkind\fP may be integer values such as:
      MB_DATA_ATTITUDE2		56      /* ancillary attitude system 2 */
      MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
 .br
-For example, using \fB-K\fP\fI18\fP will cause \fBmbnavlist\fP to output
+For example, using \fB\-K\fP\fI18\fP will cause \fBmbnavlist\fP to output
 at the times of attitude data records. One consequence will be that
-any roll, pitch, or heave values specified with the \fB-O\fP option will
+any roll, pitch, or heave values specified with the \fB\-O\fP option will
 be output without modification, whereas other values (e.g. position) will
 be interpolated onto the time of the attitude record.
-This option supercedes the \fB-N\fP option.
+This option supercedes the \fB\-N\fP option.
 .TP
 .B \-L
 \fIlonflip\fP
 .br
 Sets the range of the longitude values returned.
-If \fIlonflip\fP=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If \fIlonflip\fP=0
+If \fIlonflip\fP=\-1 then the longitude values will be in
+the range from \-360 to 0 degrees. If \fIlonflip\fP=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If \fIlonflip\fP=1
+the range from \-180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
@@ -234,18 +234,18 @@ navigation while the original asynchronous navigation is preserved in
 separate navigation records). Some data formats provide for multiple
 navigation sources, so that there are more than one channel of
 asynchronous data records. In this case one channel is always designated
-as the primary or active navigation channel. The \fB-N\fP option allows
+as the primary or active navigation channel. The \fB\-N\fP option allows
 the user to specify that \fBmbnavlist\fP outputs navigation from
-the primary asynchronous navigation (\fB-N\fP\fI0\fP) or from one
+the primary asynchronous navigation (\fB\-N\fP\fI0\fP) or from one
 of three auxiliary navigation channels
-(\fB-N\fP\fI1\fP, \fB-N\fP\fI2\fP, or \fB-N\fP\fI3\fP). If \fB-N\fP is
+(\fB\-N\fP\fI1\fP, \fB\-N\fP\fI2\fP, or \fB\-N\fP\fI3\fP). If \fB\-N\fP is
 used but the data file
 does not contain asynchronous navigation or the specified auxiliary
 navigation channels, then \fBmbnavlist\fP will output nothing. To
 determine if a datafile contains asynchronous navigation and/or auxiliary
-navigation, run \fBmbinfo\fP using its \fB-N\fP option to get counts
+navigation, run \fBmbinfo\fP using its \fB\-N\fP option to get counts
 of all data record types in the file. This option is superceded by the
-\fB-K\fP option.
+\fB\-K\fP option.
 .TP
 .B \-O
 \fIoutput_format\fP
@@ -291,7 +291,7 @@ longitude, heading, speed).
 Sets the longitude and latitude bounds within which swath sonar
 data will be read. Only the data which lies within these bounds will
 be read.
-Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
+Default: \fIwest\fP=\-360, east\fI=360\fP, \fIsouth\fP=\-90, \fInorth\fP=90.
 .TP
 .B \-S
 \fIspeed\fP
@@ -309,20 +309,20 @@ the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .B \-V
 Normally, \fBmbnavlist\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBmbnavlist\fP works in a "verbose" mode and
+\fB\-V\fP flag is given, then \fBmbnavlist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
 .B \-Z
 \fIsegment\fP
 .br
 Causes the ascii output of different input swath files
-(e.g. when a datalist is specified with the \fB-I\fP option)
+(e.g. when a datalist is specified with the \fB\-I\fP option)
 to be separated by lines with \fIsegment\fP. If \fIsegment\fP
 is a single character, then the output is a multiple segment
 file of the sort accepted by the \fBGMT\fP program \fBpsxy\fP.
 This option only works with ascii output, and is thus disabled
-when the \fB-A\fP option is specified. The most common usage
-is \fB-Z\fP\I>\fP.
+when the \fB\-A\fP option is specified. The most common usage
+is \fB\-Z\fP\I>\fP.
 
 .SH EXAMPLES
 Suppose one wishes to obtain a navigation list from a Simrad EM300 data file
@@ -330,23 +330,23 @@ in the MBARI format (MBIO id 57) called mbari_1998_107_msn.mb57. To
 obtain a listing with time in unix second forms followed
 by longitude and latitude, the following will suffice:
 
- 	mbnavlist -F57 -i mbari_1998_107_msn.mb57 -OMXY | more
+ 	mbnavlist \-F57 \-i mbari_1998_107_msn.mb57 \-OMXY | more
 
 The output will be as follows:
 
- 	889125106.792000        -155.898471       19.979325
- 	889125108.148000        -155.898586       19.979400
- 	889125109.496000        -155.898738       19.979454
- 	889125110.852000        -155.898876       19.979504
- 	889125112.207000        -155.899020       19.979544
- 	889125113.571000        -155.899204       19.979591
- 	889125114.921000        -155.899479       19.979485
+ 	889125106.792000        \-155.898471       19.979325
+ 	889125108.148000        \-155.898586       19.979400
+ 	889125109.496000        \-155.898738       19.979454
+ 	889125110.852000        \-155.898876       19.979504
+ 	889125112.207000        \-155.899020       19.979544
+ 	889125113.571000        \-155.899204       19.979591
+ 	889125114.921000        \-155.899479       19.979485
  	.....
 .SH MB-SYSTEM DATA RECORD TYPES
 This list gives the data record types and numerical identifiers
 used within \fBMB-System\fP. Users can specify that \fBmbnavlist\fP
 output be keyed to the time stamps of particular record types by
-using the \fB-K\fP\fIkind\fP option where \fIkind\fP corresponds
+using the \fB\-K\fP\fIkind\fP option where \fIkind\fP corresponds
 to the desired record type identifier from this table.
 
      MB_DATA_KINDS			54
@@ -410,7 +410,7 @@ to the desired record type identifier from this table.
      MB_DATA_ATTITUDE3		57	ancillary attitude system 3
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbinfo\fP(l)
+\fBmbsystem\fP(1), \fBmbinfo\fP(1)
 
 .SH BUGS
 \fBmbnavlist\fP is not able to list all of the navigation information

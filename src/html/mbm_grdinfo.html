@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_grdinfo</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -34,13 +34,13 @@ mbm_grdinfo <B>-I</B><I>infile</I> [<B>-R</B><I>w/e/s/n</I> <B>-H</B> <B>-V</B>]
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbm_grdinfo</B> is a macro to get information 
+<B>mbm_grdinfo</B> is a macro to get information
 regarding a GMT grd file when the
 region of interest is a subset of the area covered in the
-input file. If no bounds are specified, the program grdinfo 
-is called directly.  If longitude and latitude bounds are 
-specified, then the specified region is cut from the input 
-file using the macro mbm_grdinfo, and the information is 
+input file. If no bounds are specified, the program grdinfo
+is called directly.  If longitude and latitude bounds are
+specified, then the specified region is cut from the input
+file using the macro mbm_grdinfo, and the information is
 obtained from the subset temporary grd file using grdinfo.
 <P>
 <A NAME="lbAF">&nbsp;</A>
@@ -73,7 +73,7 @@ of its operation and then exit immediately.
 <BR>
 
 Sets the filename of the input GMT grid file. This file must be
-in the GMT NetCDF GRD format. 
+in the GMT NetCDF GRD format.
 <DT><B>-R</B>
 
 <DD>
@@ -81,7 +81,7 @@ in the GMT NetCDF GRD format.
 <BR>
 
 Sets the bounds of the area of interest in the grid file. The
-information reported will pertain to this area only. 
+information reported will pertain to this area only.
 <DT><B>-V</B>
 
 <DD>
@@ -106,11 +106,11 @@ bounds of 155 degrees 31 minutes W to 155 degrees 26 minutes W
 in longitude and 20 degrees 13 minutes N to 20 degrees 18 minutes N
 in latitude. The following will suffice:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grdinfo&nbsp;-I&nbsp;KohalaA_bath.grd&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-155:31/-155:26/20:13/20:18&nbsp;<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-V<BR>
-<BR>&nbsp;
+<P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbm_grdplot.html">mbm_grdplot</A></B>(l), <B><A HREF="mbm_grdinfo.html">mbm_grdinfo</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbm_grdplot.html">mbm_grdplot</A></B>(1), <B><A HREF="mbm_grdinfo.html">mbm_grdinfo</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
@@ -118,8 +118,6 @@ in latitude. The following will suffice:
 This macro is new and hasn't been tested in serious
 usage yet - let us know what to fix, add, or
 change!.
-<P>
-<P>
 <P>
 
 <HR>
@@ -139,7 +137,7 @@ change!.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

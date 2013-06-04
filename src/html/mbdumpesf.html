@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbdumpesf</H1>
-Section:  MB-System 5.0  (l)<BR>Updated:  7 June 2010 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (l)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -34,9 +34,9 @@ Version 5.0
 
 Swath bathymetry data is typically edited either with interactive
 tools such as <B>mbedit</B> or automatic filters such as <B>mbclean</B>.
-In <B>MB-System</B>, the beam flags are stored in binary &quot;edit save files&quot; 
+In <B>MB-System</B>, the beam flags are stored in binary &quot;edit save files&quot;
 (file suffix &quot;.esf&quot;). The program <B>mbdumpesf</B> reads esf files and
-outputs each of the edit events as a text line to stdout. 
+outputs each of the edit events as a text line to stdout.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -91,7 +91,7 @@ as a text stream, use <B>mbdumpesf</B>:
 The output will look something like:
 <BR>
 
-<BR>&nbsp;
+<P>
 <BR>
 
 EDITS READ: i:0 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:21 action:1
@@ -118,7 +118,7 @@ EDITS READ: i:6 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:27 action
 EDITS READ: i:7 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:28 action:1
 <BR>
 
-<BR>&nbsp;
+<P>
 <BR>
 
 Here the large time value is epoch seconds (seconds since 1/1/1970), and the
@@ -133,7 +133,7 @@ edit event action values are:
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbedit.html">mbedit</A></B>(l), <B><A HREF="mbeditviz.html">mbeditviz</A></B>(l), fBmbclean(l), <B><A HREF="mbunclean.html">mbunclean</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbedit.html">mbedit</A></B>(1), <B><A HREF="mbeditviz.html">mbeditviz</A></B>(1), fBmbclean(1), <B><A HREF="mbunclean.html">mbunclean</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
@@ -158,7 +158,7 @@ Too simple to have any interesting problems.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 7 June 2010</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

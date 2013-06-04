@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>MBPS</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,10 +28,10 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbps</B> [<B>-F</B><I>format </I><B>-I</B><I>filename </I><B>-Nnpingsmax</B><I> </I><B>-Ppings</B><I>
-</I><B>-A</B><I>alpha </I><B>-B</B><I>yr/mo/da/hr/mn/sc 
-</I><B>-D</B><I>view_direction </I><B>-E</B><I>yr/mo/da/hr/mn/sc </I><B>-G</B><I>gap 
-</I><B>-K</B><I>eta </I><B>-S</B><I>speedmin </I><B>-T</B><I>&quot;title&quot; </I><B>-X</B><I>ve  
-</I><B>-W</B><I>meters_per_inch </I><B>-Y</B><I>display_stats </I><B>-Z</B><I>display_scales 
+</I><B>-A</B><I>alpha </I><B>-B</B><I>yr/mo/da/hr/mn/sc
+</I><B>-D</B><I>view_direction </I><B>-E</B><I>yr/mo/da/hr/mn/sc </I><B>-G</B><I>gap
+</I><B>-K</B><I>eta </I><B>-S</B><I>speedmin </I><B>-T</B><I>&quot;title&quot; </I><B>-X</B><I>ve
+</I><B>-W</B><I>meters_per_inch </I><B>-Y</B><I>display_stats </I><B>-Z</B><I>display_scales
 </I><B>-V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -89,7 +89,7 @@ the x-axis (across-track). Default = <I>alpha = 70.
 <BR>
 
 This option sets the starting time for data allowed in the input data.
-The <B>-E</B> option sets the ending time for data. If the 
+The <B>-E</B> option sets the ending time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -113,7 +113,7 @@ P/p (view from the port side), S/s (starboard), or B/b (back). Default
 <BR>
 
 This option sets the ending time for data allowed in the input data.
-The <B>-B</B> option sets the starting time for data. If the 
+The <B>-B</B> option sets the starting time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -127,8 +127,8 @@ Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
 <I>format</I>
 <BR>
 
-Sets the format for the input swath sonar data using 
-<B>MBIO</B> integer format identifiers. 
+Sets the format for the input swath sonar data using
+<B>MBIO</B> integer format identifiers.
 This program uses the <B>MBIO</B> library and will read any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
@@ -139,8 +139,8 @@ is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
 <I>gap</I>
 <BR>
 
-Sets the manner in which data gaps are displayed.  If <I>gap </I>= 1 then 
-gaps are filled with black.  If <I>gap </I>= 0 then gaps are not filled and appear the same as the background color of the paper. 
+Sets the manner in which data gaps are displayed.  If <I>gap </I>= 1 then
+gaps are filled with black.  If <I>gap </I>= 0 then gaps are not filled and appear the same as the background color of the paper.
 Default: <I>gap </I>= 1.
 <DT><B>-H</B>
 
@@ -183,7 +183,7 @@ no ping averaging is performed. If <I>pings</I> &gt; 0, then
 that number of input pings will be averaged to produce one output
 ping.  If <I>pings</I> = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
-beam spacing. 
+beam spacing.
 Default: <I>pings</I> = 1 (no ping averaging).
 <DT><B>-S</B>
 
@@ -191,9 +191,9 @@ Default: <I>pings</I> = 1 (no ping averaging).
 <I>speedmin</I>
 <BR>
 
-Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be used. Default: <I>speed</I> = 0.
-<DT><B>-T </B>
+<DT><B>-T</B>
 
 <DD>
 <I>&quot;title&quot;</I>
@@ -248,7 +248,7 @@ L-DGO edmb format (data.edmb), starting at 09:00 and ending at
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbcontour.html">mbcontour</A></B>(l), <B><A HREF="mbswath.html">mbswath</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbcontour.html">mbcontour</A></B>(1), <B><A HREF="mbswath.html">mbswath</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
@@ -274,7 +274,7 @@ plots will result if this is not the case.  <B>mbps </B>only draws polygons bewt
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

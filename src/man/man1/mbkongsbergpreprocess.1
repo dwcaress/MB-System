@@ -1,14 +1,14 @@
 .TH mbkongsbergpreprocess 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbkongsbergpreprocess\fP - performs preprocessing of data from third generation Kongsberg multibeam sonars (e.g. EM122, EM302, EM710).
+\fBmbkongsbergpreprocess\fP \- performs preprocessing of data from third generation Kongsberg multibeam sonars (e.g. EM122, EM302, EM710).
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbkongsbergpreprocess\fP [\fB-A\fP \fB-C\fP \fB-D\fP\fIoutputdirectory\fP \fB-F\fP\fIformat\fP
-\fB-I\fIfile \fB-O\fP\fIoutfile\fP \fB-SF\fP\fIdatatype/source\fP
-\fB-T\fP\fItimelag\fP \fB-H -V\fP]
+\fBmbkongsbergpreprocess\fP [\fB\-A\fP \fB\-C\fP \fB\-D\fP\fIoutputdirectory\fP \fB\-F\fP\fIformat\fP
+\fB\-I\fIfile \fB\-O\fP\fIoutfile\fP \fB\-SF\fP\fIdatatype/source\fP
+\fB\-T\fP\fItimelag\fP \fB\-H \-V\fP]
 
 .SH DESCRIPTION
 \fBmbkongsbergpreprocess\fP reads data from a third generation
@@ -29,11 +29,11 @@ ping data. When multiple sources
 of navigation, heading, and/or attitude have been recorded in
 a data stream, \fBmbkongsbergpreprocess\fP allows the user to specify
 which asynchronous data are extracted and interpolated onto the
-survey data using the \fB-S\fP option.
+survey data using the \fB\-S\fP option.
 
 This program allows the correction of a time latency
 (or time lag)  error between the sonar data and the attitude and
-navigation data using the \fB-T\fP option.
+navigation data using the \fB\-T\fP option.
 
 The format 58 files This program also creates four ancilliary files containing the full
 asynchronous attitude, sonar depth, and heading data and the synchronous
@@ -69,7 +69,7 @@ produces noisy values that in turn produce noisy bathymetry when the
 soundings are recalculated by raytracing. Thus, if one needs to recalculate
 bathymetry with a new model for the sound speed structure of the water
 column (often called a sound velocity profile or SVP), the data should first
-be preprocessed using the \fB-A\fP option.
+be preprocessed using the \fB\-A\fP option.
 .TP
 .B \-C
 .br
@@ -88,7 +88,7 @@ This option causes all format 59 output files to be placed in the specified dire
 .br
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
-with the \fB-I\fP option will actually contain a list of input swath sonar
+with the \fB\-I\fP option will actually contain a list of input swath sonar
 data files. This program only reads third generation Kongsberg multibeam
 format data files (\fBMBIO\fP formats 58 and 59).
 .TP
@@ -100,7 +100,7 @@ of its operation and then exit immediately.
 \fIinfile\fP
 .br
 Sets the input file path. If \fIformat\fP > 0 (set with the
-\fB-f\fP option or \fBmbdefaults\fP) then the swath sonar data contained in \fIinfile\fP
+\fB\-f\fP option or \fBmbdefaults\fP) then the swath sonar data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read
@@ -118,7 +118,7 @@ format data files (\fBMBIO\fP formats 58 and 59).
 .br
 This option causes \fBmbkongsbergpreprocess\fP to output all data to a single file
 specified as \fIoutfile\fP. By default, the program creates output files for
-each input file. If the \fB-D\fP\fIoutputdirectory\fP option is also used, then
+each input file. If the \fB\-D\fP\fIoutputdirectory\fP option is also used, then
 the output file \fIoutfile\fP will be in \fIoutputdirectory\fP.
 .TP
 .B \-S
@@ -157,16 +157,16 @@ Suppose that one has collected a set of three Kongsberg EM122 data files named:
 .br
 First, we want to generate a "datalist" file referencing the raw survey files. The
 following will suffice:
-    /bin/ls -1 *all | awk '{print $1" 58"}' > datalist_raw.mb-1
+    /bin/ls \-1 *all | awk '{print $1" 58"}' > datalist_raw.mb-1
 .br
 We want to use \fBmbkongsbergpreprocess\fP to gracefully interpolate the
 asynchronous navigation, heading and attitude data onto the survey data and
 to generate data files in the extended format (MBF_EM710MBA = 59). To learn
 which potential sources of navigation, heading and attitude are available, use
-\fBmbinfo\fP with the \fB-N\fP option:
-    $ mbinfo -I 0000_20111219_154640_METEOR_EM122.all -N
+\fBmbinfo\fP with the \fB\-N\fP option:
+    $ mbinfo \-I 0000_20111219_154640_METEOR_EM122.all \-N
 
-The \fB-N\fP option causes \fBmbinfo\fP to generate a list of the data record
+The \fB\-N\fP option causes \fBmbinfo\fP to generate a list of the data record
 types read in the file at the end of the file statistics:
 .br
     Swath Data File:      0000_20111219_154640_METEOR_EM122.all
@@ -202,24 +202,24 @@ types read in the file at the end of the file statistics:
 
     Start of Data:
     Time:  12 19 2011 15:46:27.537000  JD353 (2011-12-19T15:46:27.537000)
-    Lon:   -11.562232000     Lat:    36.848179850     Depth:  4931.4829 meters
+    Lon:   \-11.562232000     Lat:    36.848179850     Depth:  4931.4829 meters
     Speed: 17.6040 km/hr ( 9.5157 knots)  Heading: 129.1900 degrees
     Sonar Depth:    5.6975 m  Sonar Altitude: 5025.2964 m
 
     End of Data:
     Time:  12 19 2011 16:36:25.308000  JD353 (2011-12-19T16:36:25.308000)
-    Lon:   -11.489473500     Lat:    36.771997400     Depth:  3242.5244 meters
+    Lon:   \-11.489473500     Lat:    36.771997400     Depth:  3242.5244 meters
     Speed: 12.7800 km/hr ( 6.9081 knots)  Heading: 274.9200 degrees
     Sonar Depth:    6.4334 m  Sonar Altitude: 3236.0911 m
 
     Limits:
-    Minimum Longitude:     -11.635798757   Maximum Longitude:     -11.391532562
+    Minimum Longitude:     \-11.635798757   Maximum Longitude:     \-11.391532562
     Minimum Latitude:       36.723994163   Maximum Latitude:       36.919907119
     Minimum Sonar Depth:     5.0135   Maximum Sonar Depth:     6.9798
     Minimum Altitude:     3175.1121   Maximum Altitude:     5027.8770
     Minimum Depth:        2391.9229   Maximum Depth:        5121.0713
-    Minimum Amplitude:     -59.2000   Maximum Amplitude:      -9.1000
-    Minimum Sidescan:      -90.1300   Maximum Sidescan:       -0.4700
+    Minimum Amplitude:     \-59.2000   Maximum Amplitude:      \-9.1000
+    Minimum Sidescan:      \-90.1300   Maximum Sidescan:       \-0.4700
 
     Data Record Type Notices:
     DN: 334 MB_DATA_DATA (ID=1): survey data
@@ -237,7 +237,7 @@ types read in the file at the end of the file statistics:
     DN: 1512 MB_DATA_ATTITUDE2 (56): ancillary attitude system 2
 
     Nonfatal Error Notices:
-    EN: 20551 MB_ERROR_NO_DATA_REQUESTED (ID=-11): No data requested for buffer load
+    EN: 20551 MB_ERROR_NO_DATA_REQUESTED (ID=\-11): No data requested for buffer load
 
     Problem Notices:
 
@@ -249,21 +249,21 @@ MB_DATA_ATTITUDE1 (\fIsource\fP = 55), and MB_DATA_ATTITUDE2 (\fIsource\fP = 56)
 
 To extract and use the default navigation, heading, and attitude data, the
 following will suffice:
-    mbkongsbergpreprocess -I datalist_raw.mb-1 -V
+    mbkongsbergpreprocess \-I datalist_raw.mb-1 \-V
 
 An equivalent command that explicitly specifies the default asynchronous data
-sources using \fB-S\fP\fI1/source\fP for navigation, \fB-S\fP\fI2/source\fP for
-heading, and \fB-S\fP\fI3/source\fP for attitude is:
-    mbkongsbergpreprocess -I datalist_raw.mb-1 -V \fB-S\fP\fI1/12\fP \fB-S\fP\fI2/12\fP \fB-S\fP\fI3/18\fP
+sources using \fB\-S\fP\fI1/source\fP for navigation, \fB\-S\fP\fI2/source\fP for
+heading, and \fB\-S\fP\fI3/source\fP for attitude is:
+    mbkongsbergpreprocess \-I datalist_raw.mb-1 \-V \fB\-S\fP\fI1/12\fP \fB\-S\fP\fI2/12\fP \fB\-S\fP\fI3/18\fP
 
 To interpolate navigation and heading from the secondary navigation source, use
-    \fB-S\fP\fI1/30\fP \fB-S\fP\fI2/30\fP
+    \fB\-S\fP\fI1/30\fP \fB\-S\fP\fI2/30\fP
 
 To interpolate attitude from ancillary attitude system 2, use:
-    \fB-S\fP\fI3/56\fP
+    \fB\-S\fP\fI3/56\fP
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbformat\fP(l), \fBmbinfo\fP(l)
+\fBmbsystem\fP(1), \fBmbformat\fP(1), \fBmbinfo\fP(1)
 
 .SH BUGS
 Not true bugs. More like arachnids.

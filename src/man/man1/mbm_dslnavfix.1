@@ -1,19 +1,19 @@
-.TH mbm_dslnavfix 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_dslnavfix 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbm_dslnavfix\fP - Translate WHOI DSL AMS-120 navigation from
+\fBmbm_dslnavfix\fP \- Translate WHOI DSL AMS-120 navigation from
 UTM eastings and northings to longitude and latitude.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_dslnavfix\fP \fB-F\fP\fInavformat\fP 
-\fB-I\fP\fIinfile\fP \fB-J\fP\fIutm_zone\fP 
-\fB-O\fP\fIoutfile\fP 
-[\fB-D\fP\fIdecimate\fP \fB-E\fP\fIellipsoid\fP \fB-H\fP \fB-V\fP]
+\fBmbm_dslnavfix\fP \fB\-F\fP\fInavformat\fP
+\fB\-I\fP\fIinfile\fP \fB\-J\fP\fIutm_zone\fP
+\fB\-O\fP\fIoutfile\fP
+[\fB\-D\fP\fIdecimate\fP \fB\-E\fP\fIellipsoid\fP \fB\-H\fP \fB\-V\fP]
 
 .SH DESCRIPTION
-\fBmbm_dslnavfix\fP is a macro to translate 
+\fBmbm_dslnavfix\fP is a macro to translate
 WHOI DSL AMS-120 navigation from
 UTM eastings and northings to longitude and latitude.
 The WHOI DSL group typically provides processed AMS-120
@@ -42,31 +42,31 @@ processing WHOI DSL AMS-120 data with MB-System:
  	   files into a single file.
  		cat *.nav > cruise.rnav
  	2) Translate the DSL UTM navigation into geographic
- 	   coordinates. In the "old" case the navigation is 
-           in a format designated by \fB-F\fP\fI1\fP and 
-           in the new case by \fB-F\fP\fI2\fP. Note that 
-           you must know the UTM zone used - here we assume 
+ 	   coordinates. In the "old" case the navigation is
+           in a format designated by \fB\-F\fP\fI1\fP and
+           in the new case by \fB\-F\fP\fI2\fP. Note that
+           you must know the UTM zone used \- here we assume
            the zone is +27.
- 		mbm_dslnavfix -Icruise.rnav \\
- 			-Ocruise.mrg2 -F1 -J27 -V
+ 		mbm_dslnavfix \-Icruise.rnav \\
+ 			-Ocruise.mrg2 \-F1 \-J27 \-V
  	3) Copy the bathymetry and sidescan data in each
  	   file from format 111 to format 112 or from
            format 141 to 142.
- 		mbcopy -F111/112 \\
+ 		mbcopy \-F111/112 \\
  			-IDSL120.940630_1100.bat.dat \\
  			-ODSL120.940630_1100.mb112
  	4) Set the translated navigation to be merged with
-           each of the format 112 or 142 files using 
+           each of the format 112 or 142 files using
            \fBmbset\fP:
- 		mbset -I DSL120.940630_1100.mb112 \\
+ 		mbset \-I DSL120.940630_1100.mb112 \\
  			-P NAVFORMAT:2 \\
  			-P NAVFILE:cruise.mrg2 \\
  			-V
  	4) Process the data using \fBmbprocess\fP,
-           producing a processed file called 
+           producing a processed file called
            DSL120.940630_1100p.mb112 with longitude and
            latitude navigation.
- 		mbprocess -I DSL120.940630_1100.mb112
+ 		mbprocess \-I DSL120.940630_1100.mb112
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -111,9 +111,9 @@ Default: Clarke-1866 as per USGS standard.
 \fInavformat\fP
 .br
 Sets the input navigation format. The available formats
-include the old, pre-OIC format (\fB-F\fP\fI1\fP), the new, OIC
-associated formats (\fB-F\fP\fI2\fP), and navigation obtained
-using \fBmblist\fP with the \fB-OtXY\fP option.
+include the old, pre-OIC format (\fB\-F\fP\fI1\fP), the new, OIC
+associated formats (\fB\-F\fP\fI2\fP), and navigation obtained
+using \fBmblist\fP with the \fB\-OtXY\fP option.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -131,15 +131,15 @@ Sets the UTM zone used for the translation. The UTM zones
 are 6 degrees wide in longitude and begin with zone 1 extending
 from 180 W to 174 W, zone 2 extending from 174 W to 168 W, and
 so on through zone 60. Negative zone
-values are used for the Southern Hemisphere. 
+values are used for the Southern Hemisphere.
 .TP
 .B \-O
 \fIoutfile\fP
 .br
-Sets the output filename for the translated navigation. 
+Sets the output filename for the translated navigation.
 .TP
 .B \-V
-Causes \fBmbm_plot\fP to operate in "verbose" mode 
+Causes \fBmbm_plot\fP to operate in "verbose" mode
 so that it outputs
 more information than usual.
 
@@ -147,40 +147,38 @@ more information than usual.
 Suppose we have obtained a WHOI DSL navigation file
 as outlined above and execute the macro as suggested:
 .br
- 		mbm_dslnavfix -Icruise.rnav \\
- 			-Ocruise.mrg2 -F1 -J27 -V
+ 		mbm_dslnavfix \-Icruise.rnav \\
+ 			-Ocruise.mrg2 \-F1 \-J27 \-V
 .br
 The output will appear as follows:
- 
+
  Running mbm_dslnavfix...
- 
+
  Program Status:
- --------------
- 
+ \--------------
+
    Input DSL navigation format:   1
    Input DSL navigation file:     dsl.nav
    Output navigation file:        dsl.mrg2
    Temporary projected nav file:  tmp_proj_8044.nav
    Temporary geographic nav file: tmp_geo_8044.nav
 
-   ------------
- 
+   \------------
+
    Projection:                    UTM Zone 27
    Projection units:              meters
- 
-   ------------
- 
+
+   \------------
+
  586 navigation records read...
- 
+
  Running mapproject...
- mapproject tmp_proj_8044.nav -Ju27/1:1000000 -I \\
+ mapproject tmp_proj_8044.nav \-Ju27/1:1000000 \-I \\
  	-R-20:0/0:0/-19:0/1:0r > tmp_geo_8044.nav
- 
+
  Deleting tmp_proj_8044.nav, tmp_geo_8044.nav...
- 
+
  Done...
 
 .SH BUGS
 Let us know...
-
-

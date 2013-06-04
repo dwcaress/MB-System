@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbtime</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -32,13 +32,13 @@ Version 5.0
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-The program <B>mbtime</B> converts time values between unix time (seconds since 
-1970/01/01 00:00:00.000000) and calendar time (e.g. 2008/006/05/17/24/32.000000). 
+The program <B>mbtime</B> converts time values between unix time (seconds since
+1970/01/01 00:00:00.000000) and calendar time (e.g. 2008/006/05/17/24/32.000000).
 Unix time is also known as POSIX time or epoch time, and are typically represented
 in <B>MB-System</B> documentation (and source code) as &quot;time_d&quot; values.
-The input time is set using the command line arguments <B>-M</B><I>time_d</I> for 
-epoch seconds and <B>-T</B><I>year/month/day/hour/minute/second</I> for 
-calendar time. The output time (in the form not specified as input) is 
+The input time is set using the command line arguments <B>-M</B><I>time_d</I> for
+epoch seconds and <B>-T</B><I>year/month/day/hour/minute/second</I> for
+calendar time. The output time (in the form not specified as input) is
 written to stdout.
 <P>
 <A NAME="lbAF">&nbsp;</A>
@@ -73,7 +73,7 @@ of its operation and then exit immediately.
 Sets the input time to be <I>time_d</I> in unix time, which
 is defined as seconds since 00:00:00.000000 01 January 1970. If <B>-M</B> is
 specified, this time will be converted to calendar time and output
-to stdout in the form 
+to stdout in the form
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>yyyy/mm/dd/hh/mm/ss.ssssss<BR>
 <DT><B>-T</B>
 
@@ -82,9 +82,9 @@ to stdout in the form
 <BR>
 
 Sets the input time to be <I>year/month/day/hour/minute/second</I>.
-If <B>-T</B> is specified, this time will be converted to 
+If <B>-T</B> is specified, this time will be converted to
 <I>time_d</I> in epoch (Unix) seconds, which
-are seconds since 00:00:00.000000 01 January 1970. 
+are seconds since 00:00:00.000000 01 January 1970.
 The <I>time_d</I> value will be output to stdout.
 <DT><B>-V</B>
 
@@ -97,7 +97,7 @@ also outputs the program version being used.
 <A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
-Suppose one wishes to convert the current time (06 June 2008 18:37:14.000000) 
+Suppose one wishes to convert the current time (06 June 2008 18:37:14.000000)
 to unix seconds. The following command:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbtime&nbsp;-T2008/06/06/18/37/14.0<BR>
 <BR>
@@ -116,7 +116,7 @@ yields the following result:
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbio.html">mbio</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbio.html">mbio</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
@@ -141,7 +141,7 @@ Never bugs, but perhaps our good friends, the terrestrial isopods.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 26 October 2009</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

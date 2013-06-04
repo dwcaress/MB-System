@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavadjust</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  24 September 2011 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,7 +28,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbnavadjust</B> [<B>-V -H -D -R</B>] 
+<B>mbnavadjust</B> [<B>-V -H -D -R</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -39,20 +39,20 @@ in overlapping and crossing swaths. The primary purpose of
 <B>mbnavadjust</B> is to eliminate relative navigational errors in swath
 data obtained from poorly navigated sonars. Submerged platforms
 such as towed vehicles, remotely operated vehicles (ROVs) and
-autonomous underwater vehicles (AUVs) are frequently not navigated 
-with accuracy equivalent to the lateral resolution of 
+autonomous underwater vehicles (AUVs) are frequently not navigated
+with accuracy equivalent to the lateral resolution of
 swath bathymetry obtained with high frequency sonars operated
 close to the seafloor. This is  particularly true for systems
 that depend on ultra-short baseline navigation (USBL) or on
 inertial navigation (as opposed to long baseline (LBL) navigation
-obtained using transponder networks). Many old, pre-GPS surveys with 
-hull mounted sonars also suffer from poor navigation relative to the 
-resolution of the swath bathymetry, and can thus be improved with 
-application of this tool. <B>MBnavadjust</B> also works well to 
+obtained using transponder networks). Many old, pre-GPS surveys with
+hull mounted sonars also suffer from poor navigation relative to the
+resolution of the swath bathymetry, and can thus be improved with
+application of this tool. <B>MBnavadjust</B> also works well to
 co-register surveys at different scales. For instance, our
 initial use of this tool involved co-registering a deep-towed Reson
 8101 multibeam survey of the Loihi Seamount summit (offshore Hawaii)
-with a hull mounted Simrad EM300 multibeam survey. 
+with a hull mounted Simrad EM300 multibeam survey.
 <P>
 When swath surveys are poorly navigated, features clearly imaged
 by the sonar may not match in overlapping and crossing swaths.
@@ -64,19 +64,19 @@ of reasonableness, and also causes features in overlapping swaths
 to match within the sonar's resolution. The analysis and adjustment
 can be limited to lateral (x and y or longitude and latitude) offsets
 when all vertical offsets have been corrected prior to importation
-into <B>MBnavadjust</B> (e.g. tidal corrections have been made). 
+into <B>MBnavadjust</B> (e.g. tidal corrections have been made).
 Otherwise, the offset analysis and inversions are three dimensional.
 <P>
 Previous attempts to address this problem (e.g. Nishimura et al. [1988])
 have focused on automating the identification of matching features
-and their navigational offsets. The automated approach is 
+and their navigational offsets. The automated approach is
 problematic because seafloor features are complex, and the
 cross correlation function of matching features often exhibits
 multiple local minima. Our approach is to automate the identification
 of matching features and the ultimate solution for an optimal
 indentification while depending on interactive determination of
 the navigational offsets. We have not found an automatic algorithm
-that can reliably replace the human eye and brain in correctly 
+that can reliably replace the human eye and brain in correctly
 lining up real seafloor features.
 <P>
 <B>MBnavadjust</B> operates within the context of the <B>mbprocess</B>
@@ -110,7 +110,7 @@ read all of the documentation provided below prior to attempting
 a first use of this software.
 The meaning and use of the individual widgets and windows employed in
 the graphical interface is provided in the <B>INTERACTIVE CONTROLS</B>
-section. The <B>USING MBNAVADJUST</B> section provides a more coherent 
+section. The <B>USING MBNAVADJUST</B> section provides a more coherent
 discussion of how to use <B>mbnavadjust</B>, how this program interacts
 with the <B>mbprocess</B> parallel processing scheme, and the underlying
 concepts and algorithms.
@@ -155,9 +155,9 @@ want to start over.
 
 <DD>
 Normally, <B>mbnavadjust</B> outputs nothing to the stderr stream.
-If the <B>-V</B> flag is given, then <B>mbnavadjust</B> 
+If the <B>-V</B> flag is given, then <B>mbnavadjust</B>
 works in a &quot;verbose&quot; mode and
-outputs the program version being used, all error status messages, 
+outputs the program version being used, all error status messages,
 and a large amount of other information.
 <P>
 </DL>
@@ -175,8 +175,8 @@ This is the primary window of <B>mbnavadjust</B>.
 
 <DD>
 This button activates a pulldown menu with six items:
-<B>New</B>, <B>Open</B>, <B>Close</B>, 
-<B>Import Swath Data</B>, and <B>Quit</B>. 
+<B>New</B>, <B>Open</B>, <B>Close</B>,
+<B>Import Swath Data</B>, and <B>Quit</B>.
 <P>
 <DT><B>File-&gt;New</B>
 
@@ -198,14 +198,14 @@ This menu item causes <B>mbnavadjust</B> to close the current project.
 
 <DD>
 This menu item brings up a popup window which allows the user to
-specify a swath sonar data file or a list of 
+specify a swath sonar data file or a list of
 swath files to be imported into the current
 <B>mbnavadjust</B> project.
-This program uses the <B>MBIO</B> library and 
-will read any swath sonar 
+This program uses the <B>MBIO</B> library and
+will read any swath sonar
 formats supported by <B>MBIO</B>. A list of the swath sonar data
 formats currently supported by <B>MBIO</B> and their
-identifier values is given in the <B>MBIO</B> manual page. 
+identifier values is given in the <B>MBIO</B> manual page.
 If the swath sonar data file is named using the <B>MB-System</B>
 suffix convention (format 11 files end with &quot;.mb11&quot;, format
 41 files end with &quot;.mb41&quot;, etc.), then the program will
@@ -230,100 +230,100 @@ These widgets are discussed in the <B>Controls</B> section below.
 <BR>&nbsp;.TP
 <B>View</B>
 
-This button brings up a pulldown menu with fifteen items in three 
+This button brings up a pulldown menu with fifteen items in three
 groups. This menu controls the contents of the list widget in the lower
 right <B>MBnavadjust Window</B>. If an <B>mbnavadjust</B> project
-has been created or opened, the <B>Data Table</B> list 
-widget will display a table of items controlled by these menu items, 
+has been created or opened, the <B>Data Table</B> list
+widget will display a table of items controlled by these menu items,
 and the corresponding menu item will be disabled. Selection of another item
 items will change what is displayed in the <B>Data Table</B> list
 widget accordingly.
 <P>
-The first group includes the <B>Show Surveys</B>, 
-<B>Show Data Files</B>, <B>Show Data File Sections</B>, <B>Show All Crossings</B>, 
+The first group includes the <B>Show Surveys</B>,
+<B>Show Data Files</B>, <B>Show Data File Sections</B>, <B>Show All Crossings</B>,
 <B>Show All Crossings</B>, <B>Show &gt;25% Crossings</B>, <B>Show &gt;50% Crossings</B>,
 <B>Show True Crossings</B>, and <B>Show Ties</B> items.
 <DT><B>View-&gt;Show Surveys</B>
 
 <DD>
-This menu item causes the <B>Data Table</B> list widget to display a list of the 
-surveys in the current <B>mbnavadjust</B> project. Within <B>MBnavadjust</B>, a 
+This menu item causes the <B>Data Table</B> list widget to display a list of the
+surveys in the current <B>mbnavadjust</B> project. Within <B>MBnavadjust</B>, a
 survey is a group of swath files that are contiguous in time.
 <DT><B>View-&gt;Show Data Files</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of the swath
-data files in the current <B>mbnavadjust</B> project. 
+data files in the current <B>mbnavadjust</B> project.
 <DT><B>View-&gt;Show Data File Sections</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of the swath
-data sections in the current <B>mbnavadjust</B> project. 
+data sections in the current <B>mbnavadjust</B> project.
 <DT><B>View-&gt;Show All Crossings</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of all the swath
-crossings in the current <B>mbnavadjust</B> project. 
+crossings in the current <B>mbnavadjust</B> project.
 When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
 selected crossing in the &quot;Nav Err&quot; window.
 <DT><B>View-&gt;Show &gt;25% Crossings</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of all the swath
-crossings in the current <B>mbnavadjust</B> project for which the two sections overlap by 
-more than 25%. 
+crossings in the current <B>mbnavadjust</B> project for which the two sections overlap by
+more than 25%.
 When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
 selected crossing in the &quot;Nav Err&quot; window.
 <DT><B>View-&gt;Show &gt;50% Crossings</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of all the swath
-crossings in the current <B>mbnavadjust</B> project for which the two sections overlap by 
-more than 50%.. 
+crossings in the current <B>mbnavadjust</B> project for which the two sections overlap by
+more than 50%..
 When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
 selected crossing in the &quot;Nav Err&quot; window.
 <DT><B>View-&gt;Show True Crossings</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of all the swath
-crossings  in the current <B>mbnavadjust</B> project for which the navigation tracks cross. 
+crossings  in the current <B>mbnavadjust</B> project for which the navigation tracks cross.
 When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
 selected crossing in the &quot;Nav Err&quot; window.
 <DT><B>View-&gt;Show Ties</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of the tie points
-in the current <B>mbnavadjust</B> project. 
+in the current <B>mbnavadjust</B> project.
 <P>
-The second group includes the 
-<B>Show All Surveys</B>, <B>Show Only Selected Survey</B>, <B>Show Only Selected File</B>, 
+The second group includes the
+<B>Show All Surveys</B>, <B>Show Only Selected Survey</B>, <B>Show Only Selected File</B>,
 and <B>Show Only Selected Section</B> items. One of these options is always active, and
 modifies what is displayed in the <B>Data Table</B> list.
 <DT><B>View-&gt;Show All Surveys</B>
 
 <DD>
 This menu item allows all of the possible items (file, sections, crossings, ties)
-to be displayed in the <B>Data Table</B> list. 
+to be displayed in the <B>Data Table</B> list.
 <DT><B>View-&gt;Show Only Selected Surveys</B>
 
 <DD>
-This menu item limits the items (file, sections, crossings, ties) displayed in 
+This menu item limits the items (file, sections, crossings, ties) displayed in
 the <B>Data Table</B> list to those associated with the most recently
-selected survey (e.g. a survey selected by clicking in the <B>Data Table</B> list 
+selected survey (e.g. a survey selected by clicking in the <B>Data Table</B> list
 while the &lt;View-&gt;Show Surveys&gt; option is active).
 <DT><B>View-&gt;Show Only Selected File</B>
 
 <DD>
-This menu item limits the items (file, sections, crossings, ties) displayed in 
+This menu item limits the items (file, sections, crossings, ties) displayed in
 the <B>Data Table</B> list to those associated with the most recently
-selected file (e.g. a file selected by clicking in the <B>Data Table</B> list 
+selected file (e.g. a file selected by clicking in the <B>Data Table</B> list
 while the &lt;View-&gt;Show Files&gt; option is active).
 <DT><B>View-&gt;Show Only Selected Section</B>
 
 <DD>
-This menu item limits the items (file, sections, crossings, ties) displayed in 
+This menu item limits the items (file, sections, crossings, ties) displayed in
 the <B>Data Table</B> list to those associated with the most recently
-selected section (e.g. a section selected by clicking in the <B>Data Table</B> list 
+selected section (e.g. a section selected by clicking in the <B>Data Table</B> list
 while the &lt;View-&gt;Show Sections&gt; option is active).
 <P>
 The third group includes two options:
@@ -340,10 +340,10 @@ in the middle, and vertical on the bottom.
 <DT><B>Action</B>
 
 <DD>
-This button brings up a pulldown menu with nine items: 
-<B>Set File Poor Navigation</B>, <B>Set File Good Navigation</B>, 
-<B>Set File Fixed Navigation</B>, <B>Auto-Pick Offsets</B>, 
-<B>Check for New Crossings</B>, <B>Analyze Crossings</B>, <B>Zero All Z Offsets</B>, 
+This button brings up a pulldown menu with nine items:
+<B>Set File Poor Navigation</B>, <B>Set File Good Navigation</B>,
+<B>Set File Fixed Navigation</B>, <B>Auto-Pick Offsets</B>,
+<B>Check for New Crossings</B>, <B>Analyze Crossings</B>, <B>Zero All Z Offsets</B>,
 <B>Invert Navigation</B>, and <B>Apply Adjusted Navigation</B>.
 <DT><B>Action-&gt;Set File Poor Navigation</B>
 
@@ -354,7 +354,7 @@ when the <B>Data Table</B> list widget shows a list of the imported
 swath files and one file has been selected by clicking in that list.
 In the case where no files are fixed, the final adjusted navigation model
 is centered on the average navigation offsets required for good files.
-The offsets tieing to files with poor navigation are ignored in 
+The offsets tieing to files with poor navigation are ignored in
 calculating the averages.
 <DT><B>Action-&gt;Set File Good Navigation</B>
 
@@ -366,14 +366,14 @@ when the <B>Data Table</B> list widget shows a list of the imported
 swath files and one file has been selected by clicking in that list.
 In the case where no files are fixed, the final adjusted navigation model
 is centered on the average navigation offsets required for good files.
-The offsets tieing to files with good navigation are used in 
+The offsets tieing to files with good navigation are used in
 calculating the averages.
 <DT><B>Action-&gt;Set File Fixed Navigation</B>
 
 <DD>
 This menu item causes <B>mbnavadjust</B> to treat the navigation of
 a selected swath data file as fixed, which means that all navigation
-points for this file will have zero offsets in the final adjusted navigation. 
+points for this file will have zero offsets in the final adjusted navigation.
 Effectively, all of the offsets between fixed and unfixed files are taken up in
 the adjustments of the unfixed files.
 This option is only activated
@@ -382,7 +382,7 @@ swath files and one file has been selected by clicking in that list.
 <DT><B>Action-&gt;Auto-Pick Offsets</B>
 
 <DD>
-This menu item causes <B>mbnavadjust</B> to automatically pick offsets in 
+This menu item causes <B>mbnavadjust</B> to automatically pick offsets in
 all of the unset crossings currently displayed in the <B>Data Table</B> list.
 If &lt;View-&gt;Show True Crossings&gt; has been selected, then only true crossings are
 displayed and only the unset true crossings will be automatically picked.
@@ -422,7 +422,7 @@ This menu item causes <B>mbnavadjust</B> to export the adjusted
 navigation model from the current inversion to the
 swath files in the project.This option is
 only activated when the inversion is current, meaning that no new
-data have been imported and no changes to offset picks have been 
+data have been imported and no changes to offset picks have been
 made since the last inversion.
 <DT><B>About</B>
 
@@ -439,7 +439,7 @@ close the window.
 <DD>
 This list widget displays one of five tables of information regarding
 the current <B>mbnavadjust</B> project. These tables are a list of the
-imported swath surveys, the data files, the shorter data sections 
+imported swath surveys, the data files, the shorter data sections
 comprising each data file, a list of the identified crossing swaths, and
 a list of the navigation tie points defined interactively by the user.
 The <B>View</B> pulldown menu allows the user to set which table is displayed.
@@ -478,13 +478,13 @@ The file list will look something like:
 Here the first column is the file counter and survey counter separated by a colon.
 The second column indicates the file navigations state; &quot;gd&quot; indicates good
 navigation, &quot;pr&quot; indicates poor navigation, and &quot;fx&quot; indicates fixed
-navigation. The third column shows the number of sections extracted from this file. 
+navigation. The third column shows the number of sections extracted from this file.
 The fourth and fifth columns show any heading
-or roll bias offsets in degrees applied to the swath data for that file. 
+or roll bias offsets in degrees applied to the swath data for that file.
 The sixth column gives the name of the swath data file imported into
 <B>mbnavadjust</B>. Note that the name shown here is that of the &quot;raw&quot;
-swath file. The data imported by <B>mbnavadjust</B> is, 
-if possible, extracted from a &quot;processed&quot; swath file 
+swath file. The data imported by <B>mbnavadjust</B> is,
+if possible, extracted from a &quot;processed&quot; swath file
 generated by <B>mbprocess</B> rather than the
 associated &quot;raw&quot; file.
 <P>
@@ -523,8 +523,8 @@ The crossing list will look something like:
 <BR>
 
 Here the first column indicates the processing status for the
-crossing. The first character is the status flag. If the status flag is &quot;U&quot;, 
-then no decision has been made about skipping or tieing this crossing. 
+crossing. The first character is the status flag. If the status flag is &quot;U&quot;,
+then no decision has been made about skipping or tieing this crossing.
 New crossings always show a &quot;U&quot; flag prior to being
 inspected by a user. If the first character is &quot;-&quot;, then the crossing
 has been skipped, and if the first character is &quot;*&quot;, then at least one
@@ -561,7 +561,7 @@ control points are specified by file, section, and nav point numbers separated
 by &quot;:&quot;. The fifth through seventh columns are the longitude, latitude and vertical
 offsets (in meters) set interactively by the user. These represent the distance the second
 navigation control point must be moved relative to the first in order to make
-the bathymetry in the two swaths match. The tenth through twelth columns show the 
+the bathymetry in the two swaths match. The tenth through twelth columns show the
 magnitude of the three axes of the uncertainly ellipsoid associated with each tie.
 The uncertainly ellipsoid is estimated as a 3x3 tensor and used to weight the tie
 offsets in the navigation adjustment inversion. Here the major and second axes are
@@ -569,7 +569,7 @@ always close to horizontal, and the minor is axis is always close to vertical.
 The last three columns are nonzero only
 after an inversion for an optimal navigation solution has been performed. These
 represent the residual, or difference, between the offset calculated for this tie
-point in the inversion and that set by the user 
+point in the inversion and that set by the user
 (displayed in the fifth through seventh columns).
 <P>
 If the file list is displayed and one file is selected by clicking in
@@ -586,7 +586,7 @@ window.
 
 This dialog window is brought up by clicking the <B>Option-&gt;Controls</B>
 menu item in the <B>MBnavadjust Window</B>. This window includes two slider
-widgets setting data importation parameters, four slider widgets setting 
+widgets setting data importation parameters, four slider widgets setting
 data display parameters, a button to apply any changes, and a button to
 dismiss the window.
 <P>
@@ -595,7 +595,7 @@ dismiss the window.
 
 <DD>
 When <B>mbnavadjust</B> imports swath data, it breaks each data file
-up into a set of sections, or pieces. The geographical coverages of all sections 
+up into a set of sections, or pieces. The geographical coverages of all sections
 are then compared to determine where swaths overlap or cross. This control
 sets the section track length. The ideal section length varies with the sonar
 altitude and ping rate. If the section length is too short, there will be too
@@ -612,9 +612,9 @@ length as the criterea for breaking files up into sections.
 
 <DD>
 When swath bathymetry sections are displayed in the <B>Nav Err</B> window,
-the primary display consists of bathymetric contours. 
+the primary display consists of bathymetric contours.
 The time required for calculating these
-contours is linear with the number of soundings. This slider allows users to 
+contours is linear with the number of soundings. This slider allows users to
 decimate the pings used for the contour displays. If the decimation is set
 to 1, all soundings are used. If the decimation is set to 2, the soundings from
 every second ping are used for contouring.
@@ -663,14 +663,14 @@ This window allows users to interactively inspect crossing swaths,
 define navigation tie points where bathymetric features can be matched,
 and set the navigation offsets at those tie points. This window can
 be brought up in a number of ways. If one pulls down the
-menu option &lt;Action-&gt;Analyze Crossings&gt;, then the &quot;Nav Error&quot; window 
+menu option &lt;Action-&gt;Analyze Crossings&gt;, then the &quot;Nav Error&quot; window
 will come up with the first crossing loaded. Alternatively, if the
 &lt;View-&gt;Show All Crossings&gt; menu item has been selected so that a table of
 crossings is displayed, clicking once on any of the crossing items in
 this tabel will bring up the  &quot;Nav Error&quot; window with that crossing loaded.
 Similarly, if tie points have been established and the tie point table
 displayed by selecting the &lt;View-&gt;Show Ties&gt; menu item, then clicking on
-any of the tie items this table will bring up the &quot;Nav Error&quot; window 
+any of the tie items this table will bring up the &quot;Nav Error&quot; window
 and load the crossing that includes the selected tie point. If the
 &quot;Nav Error&quot; window is already displayed, clicking on crossing or tie items
 in the display tables will load the selected crossing in place of whatever
@@ -692,16 +692,16 @@ lateral offset.
 <DD>
 This canvas displays color bathymetric contours from both overlapping
 swaths in the current swath crossing. Initially, the display is scaled
-so that the entire area covered by the current crossing is visible. The 
+so that the entire area covered by the current crossing is visible. The
 bathymetric contours of the second swath can be moved relative to those
 of the first by dragging with the left mouse button in the canvas. The
-current navigational offset changes as the contours shift. The location 
+current navigational offset changes as the contours shift. The location
 of the current lateral offset also changes simultaneously on the misfit plot. The
-user can display a subregion of the current map by dragging a rectangle in the canvas 
+user can display a subregion of the current map by dragging a rectangle in the canvas
 with the middle mouse button. This zoom operation can be repeated as many times
 as desired. The right mouse button is used to set the location of the current
 navigational tie point. When the right mouse button is clicked on a point in
-the contour map, the closest navigation control points from each swath to 
+the contour map, the closest navigation control points from each swath to
 that position are selected for the current tie point. In practice, the user
 should right-click on the bathymetric feature being matched to set the
 tie point correctly.
@@ -801,7 +801,7 @@ returns the working offset values to that of the existing tie.
 <DD>
 This very important button causes the current navigational offset to be set for the
 current tie point and crossing. This button is the only way that the navigational offsets
-are actually applied to the <B>mbnavadjust</B> project. If the user closes the Nav Err window, 
+are actually applied to the <B>mbnavadjust</B> project. If the user closes the Nav Err window,
 changes the loaded crossing, or changes the active tie point without clicking &lt;Set Offset&gt;,
 whatever navigational offset was viewed will be lost. Tie points are displayed in yellow
 once they are set, and in red when either the navigational offset or the navigation
@@ -841,16 +841,16 @@ This button closes the Nav Err window.
 
 <DD>
 This button shifts the current offset to the value identified as the minimum misfit in
-the current misfit display. The minimum misfit is shown as the large black X on the 
+the current misfit display. The minimum misfit is shown as the large black X on the
 color lateral misfit plot and on the vertical misfit profile.
 <DT><B>Minimum XY Misfit</B>
 
 <DD>
 This button shifts the current lateral offset to the values identified as the minimum lateral misfit in
-the current misfit display. The vertical offset is not changed. The minimum lateral 
+the current misfit display. The vertical offset is not changed. The minimum lateral
 misfit is shown as the small black X on the lateral misfit plot. This button is generally
 used when the data are already corrected for all vertical offsets (e.g. tides), and so
-all z offsets can be confined to zero values. 
+all z offsets can be confined to zero values.
 <DT><B>Center on Zero Offset</B>
 
 <DD>
@@ -872,7 +872,7 @@ roll bias and pitch bias problems should be resolved before swath data are
 imported into <B>mbnavadjust</B>. However, these settings make it possible to
 deal with bias issues if they are discovered during the navigation adjustment
 process. This window includes two toggle
-buttons to set the bias mode, four slider widgets to set the bias parameters, 
+buttons to set the bias mode, four slider widgets to set the bias parameters,
 a button to apply the bias settings to all swath files, a button to apply the bias
 settings to the current swath file, and a button to
 dismiss the window.
@@ -893,7 +893,7 @@ is deselected when this toggle is selected.
 <DT><B>Section 1 Biases (deg) -&gt; Heading</B>
 
 <DD>
-This slider widget sets the heading bias for swath section 1. The 
+This slider widget sets the heading bias for swath section 1. The
 <DT><B>Section 1 Biases (deg) -&gt; Roll</B>
 
 <DD>
@@ -940,7 +940,7 @@ In order to get started, one must either open an existing
 <B>mbnavadjust</B> project or initialize a new one. Both options
 are available under the &lt;File&gt; menu with the &lt;File-&gt;New&gt; and &lt;File-&gt;Open&gt;
 menu buttons. When one pulls down the &lt;File-&gt;New&gt; option, a dialog opens
-that allows navigation of the filesystem and specification of 
+that allows navigation of the filesystem and specification of
 a project name. Whatever project location and name is chosen,
 a directory &quot;{project_path}/{project_name}.dir&quot; and a file
 &quot;{project_path}/{project_name}.nvh&quot; will be created. Once
@@ -961,7 +961,7 @@ of the imported swath files, a table of the swath crossings, and a table
 of the interactively defined navigation tie points. If no swath data has
 yet been imported, then the all of the tables will be empty. Once some data
 files are imported, the swath file table will have entries and
-some number of crossings will be defined (assuming that 
+some number of crossings will be defined (assuming that
 swaths do overlap and cross), but no tie points will yet be defined.
 <P>
 In order to import swath data into an <B>mbnavadjust</B> project,
@@ -972,30 +972,30 @@ of recursive datalists). As with other <B>MB-System</B> programs, the format
 id will be automatically determined if possible for each file selected.
 If a filename does not follow the the <B>MB-System</B> naming convention, the
 user may need to manually set the format id in the appropriately labeled
-dialog text widget. 
+dialog text widget.
 <P>
 Each file that is imported is broken into
 a number of sections. The maximum size of the sections in line length or
-in number of soundings is set in a dialog opened by clicking on 
+in number of soundings is set in a dialog opened by clicking on
 &lt;Option-&gt;Controls&gt;. Navigation control points are selected at regular
-intervals within each section. The control point distance interval is 
-approximately  one tenth of the specified segment length, so there are 
-up to 11 control points for each section. The data for each section is 
-written as a format 71 bathymetry-only file in the &quot;*.dir&quot; directory. 
-As the files are imported, the areal extent of each section is 
+intervals within each section. The control point distance interval is
+approximately  one tenth of the specified segment length, so there are
+up to 11 control points for each section. The data for each section is
+written as a format 71 bathymetry-only file in the &quot;*.dir&quot; directory.
+As the files are imported, the areal extent of each section is
 compared to the other sections. Any pair of sections that overlap
 is added to a list of crossings to be investigated graphically. This list
 can be displayed by pulling down the &lt;View-&gt;Show Crossings&gt; menu item.
 <P>
-As the user later works through the crossings, he or she will will define 
+As the user later works through the crossings, he or she will will define
 tie points whenever the overlapping bathymetry allows the navigational offset
-to be determined reliably in three dimensions. Each tie point will reference 
-two of the navigation control points, one from each swath in the crossing. 
-Ultimately, some crossings will allow one, or in some case multiple tie 
+to be determined reliably in three dimensions. Each tie point will reference
+two of the navigation control points, one from each swath in the crossing.
+Ultimately, some crossings will allow one, or in some case multiple tie
 points to be defined. Other crossings will still have no tie points, either
 because the swaths don't really overlap or because there aren't any
-distinctive features to match. When all of the crossings have been inspected, 
-then the user can invoke inversion for an optimal navigation solution. 
+distinctive features to match. When all of the crossings have been inspected,
+then the user can invoke inversion for an optimal navigation solution.
 In cases where the data are known to be already corrected for vertical offsets,
 such as tides, then the user can uniformly set the vertical (z) components of
 offsets to zero.
@@ -1011,14 +1011,14 @@ offsets to zero.
 The heart of <B>mbnavadjust</B> is the interactive inspection of the
 swath crossings. One can bring up the crossing inspection window
 (entitled &quot;Nav Error&quot;) in a number of ways. If one pulls down the
-menu option &lt;Action-&gt;Analyze Crossings&gt;, then the &quot;Nav Error&quot; window 
+menu option &lt;Action-&gt;Analyze Crossings&gt;, then the &quot;Nav Error&quot; window
 will come up with the first crossing loaded. Alternatively, if the
 &lt;View-&gt;Show Crossings&gt; menu item has been selected so that a table of
 crossings is displayed, clicking once on any of the crossing items in
 this tabel will bring up the  &quot;Nav Error&quot; window with that crossing loaded.
 Similarly, if tie points have been established and the tie point table
 displayed by selecting the &lt;View-&gt;Show Ties&gt; menu item, then clicking on
-any of the tie items this table will bring up the &quot;Nav Error&quot; window 
+any of the tie items this table will bring up the &quot;Nav Error&quot; window
 and load the crossing that includes the selected tie point. If the
 &quot;Nav Error&quot; window is already displayed, clicking on crossing or tie items
 in the display tables will load the selected crossing in place of whatever
@@ -1043,17 +1043,17 @@ regrettably complicated in function also.
 The purpose is to allow the user to determine if any seafloor features
 can be confidently matched in the overlapping swaths. If so, one or more
 tie points can be defined. In order to ease the identification of matching
-features, two simultaneous displays are provided. 
+features, two simultaneous displays are provided.
 The larger plot on the right consists of overlain
 bathymetric contours derived from each of the two swaths. The smaller
-canvas on the left shows a color two dimensional plot 
+canvas on the left shows a color two dimensional plot
 of the RMS misfit between the two swaths. The misfit is shown
 as a function of relative lateral offsets between the two swaths. Put another
 way, the misfit plot shows how good, or bad, the misfit becomes as one moves
 one swath relative to another. The lowest misfit values are shown in red; higher
 misfits are shown in blues to purples. The location of the global (three dimensional)
 minimum misfit is marked by the large black &quot;X&quot;, the location of the minimum misfit
-using the current vertical offset value is marked by a small black &quot;x&quot;, 
+using the current vertical offset value is marked by a small black &quot;x&quot;,
 and the location of the current navigation offset is
 shown by a small red square with a black outline.
 <P>
@@ -1069,13 +1069,13 @@ a user's ability to reliably determine navigational offsets (and to conclude
 where navigational offsets cannot be determined).
 <P>
 The &quot;Nav Err&quot; window includes two buttons that are particularly useful during
-efforts to match seafloor features. The &lt;Minimum Misfit&gt; 
-button below the misfit display will cause 
+efforts to match seafloor features. The &lt;Minimum Misfit&gt;
+button below the misfit display will cause
 <B>mbnavadjust</B> to set the current navigational offset to that
 associated with the smallest misfit for the current misfit display. This button
 is often used first to get close to the right offsets.
 The &lt;Zero Offset&gt; button above the contour display will return both displays
-to a state of zero navigational offset. 
+to a state of zero navigational offset.
 <P>
 The relationship between the contoured bathymetry and the misfit plot
 is usually quite clear. If a strongly matching seafloor feature
@@ -1090,7 +1090,7 @@ seafloor feature to match, the misfit plot will not display a strong
 minimum and it will be impossible to determine the relative navigational
 offset. Alternatively, the existence of multiple similar features can
 produce multiple local minima in the misfit map. In this case, the ambiguity
-between multiple possible solutions prevents the determination of the 
+between multiple possible solutions prevents the determination of the
 navigational offset. We have found that combining both contour
 and misfit displays allows interactive, visually based decision making that
 is more generally reliable than any automated scheme we can devise.
@@ -1106,8 +1106,8 @@ in the contour and misfit plots is relative. It may turn
 out that both swaths are poorly navigated and have to be moved, or that all
 of the offset can be applied to one swath or the other. The set of decisions about
 how to distribute the relative navigation offsets among the affected swath files
-intrinsically involves speed and acceleration changes. Fortunately, 
-we are able to formulate the automated inversion process discussed below to obtain an 
+intrinsically involves speed and acceleration changes. Fortunately,
+we are able to formulate the automated inversion process discussed below to obtain an
 optimal navigation solution.
 <P>
 <A NAME="lbAQ">&nbsp;</A>
@@ -1127,7 +1127,7 @@ unless the bathymetry is strongly oversampled.
 Users may also use a &quot;zoom&quot; feature to focus on small areas in the contour plot.
 The center mouse button is used to drag a box over a region of interest in the
 contour plot. When the center button is released, both the contour and misfit plots
-are regenerated to show the smaller area. 
+are regenerated to show the smaller area.
 Users may zoom as many times in succession as
 desired. One cannot undo the individual zoom events, but clicking the &lt;Full Size&gt;
 button in the &quot;Nav Err&quot; window will cause the plots to show the original, full
@@ -1136,8 +1136,8 @@ area covered by the two swaths in the current crossing.
 The misfit plot represents lateral offsets scaled according to the current
 contour plot display. Specifically, the width and height of the misfit plot
 correspond to one half the width and height of the bathymetry contour plot.
-When the bathymetry plot area changes due to a zoom event, the misfit is 
-recalculated and redisplayed centered around the current offset. The color map 
+When the bathymetry plot area changes due to a zoom event, the misfit is
+recalculated and redisplayed centered around the current offset. The color map
 used for the misfit display is automatically scaled according to the
 minimum and maximum misfit values.
 <P>
@@ -1148,20 +1148,20 @@ minimum and maximum misfit values.
 In order to actually set the relative navigational offset between two particular
 points on overlapping or crossing swaths, the user must first create a tie point.
 This is accomplished by clicking on the &lt;Add Tie&gt; button in the &quot;Nav Err&quot; window.
-Once a tie point exists, it will be shown on the contour plot as two 
+Once a tie point exists, it will be shown on the contour plot as two
 yellow or red-filled, black
-outlined squares connected by a thin black line. Each of the squares 
+outlined squares connected by a thin black line. Each of the squares
 is located along one of the swath navigation tracks, and represents one of
-the navigation control points defined during data importation. 
+the navigation control points defined during data importation.
 There can be multiple tie points for each crossing, and
-each one is created by clicking on the &lt;Add Tie&gt; button. 
+each one is created by clicking on the &lt;Add Tie&gt; button.
 <P>
 Only one tie point
 will be active at any time. The active tie point is displayed with larger boxes
 (the inactive tie points are only 1/4 the size. If only one tie point has been
-defined, it will always be active. If more than one tie point exists, 
+defined, it will always be active. If more than one tie point exists,
 clicking on the &lt;Select Tie&gt; button in the &quot;Nav Err&quot; window will change the
-active tie point to the next in the list for the displayed crossing 
+active tie point to the next in the list for the displayed crossing
 (the tie points are selected in the order in which they were
 created). If the user wishes to delete a tie point, then click &lt;Select Tie&gt; until
 the undesirable tie point is active, and then click &lt;Delete Tie&gt;.
@@ -1178,19 +1178,19 @@ overlapping features, it is important to remember that the navigational
 offset will be applied to the navigation points indicated for the current
 tie. Thus, the feature being matched should derive from data (soundings)
 associated with those particular points on the shiptrack. This is
-accomplished by clicking on the bathymetric feature in the contour display 
+accomplished by clicking on the bathymetric feature in the contour display
 with the right mouse button. The &quot;right-click&quot; causes <B>mbnavadjust</B> to
 find the soundings from each swath that are closest to the point clicked, and
-then to shift the current tie point to the navigation points on each swath 
+then to shift the current tie point to the navigation points on each swath
 that include these soundings (that is, the navigation points associated with
 the sonar pings that include the closest soundings).
 <P>
 In order to set, and save, a navigational offset that causes a bathymetric
 feature to be matched in overlapping swaths, the user must click the
-&lt;Set Offset&gt; button above the contour display. If a user changes 
+&lt;Set Offset&gt; button above the contour display. If a user changes
 the active tie point or loads a different crossing
 without clicking &lt;Set Tie&gt;, then no offset information will be saved.
-Conversely, for any crossing with one or more tie points, 
+Conversely, for any crossing with one or more tie points,
 the &lt;Reset Offset&gt; button will reset the navigational
 offset to the last value set for the current crossing and tie point.
 <P>
@@ -1198,32 +1198,32 @@ So, in practice, setting navigational offsets that will be used in obtaining
 an optimal navigation solution involves the following steps:
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1.&nbsp;Identify&nbsp;a&nbsp;bathymetric&nbsp;feature&nbsp;with&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;overlapping&nbsp;data&nbsp;so&nbsp;that&nbsp;it&nbsp;can&nbsp;be&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1.&nbsp;Identify&nbsp;a&nbsp;bathymetric&nbsp;feature&nbsp;with<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;overlapping&nbsp;data&nbsp;so&nbsp;that&nbsp;it&nbsp;can&nbsp;be<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;matched.<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2.&nbsp;Create&nbsp;a&nbsp;tie&nbsp;point&nbsp;by&nbsp;clicking&nbsp;the&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2.&nbsp;Create&nbsp;a&nbsp;tie&nbsp;point&nbsp;by&nbsp;clicking&nbsp;the<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&lt;Add&nbsp;Tie&gt;&nbsp;button.<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3.&nbsp;Set&nbsp;the&nbsp;tie&nbsp;point&nbsp;location&nbsp;by&nbsp;right<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;-clicking&nbsp;on&nbsp;the&nbsp;feature.<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4.&nbsp;If&nbsp;necessary,&nbsp;zoom&nbsp;the&nbsp;display&nbsp;to&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;focus&nbsp;on&nbsp;the&nbsp;bathymetric&nbsp;feature&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4.&nbsp;If&nbsp;necessary,&nbsp;zoom&nbsp;the&nbsp;display&nbsp;to<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;focus&nbsp;on&nbsp;the&nbsp;bathymetric&nbsp;feature<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;of&nbsp;interest&nbsp;by&nbsp;dragging&nbsp;a&nbsp;box<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;with&nbsp;the&nbsp;middle&nbsp;mouse&nbsp;button.<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5.&nbsp;Adjust&nbsp;the&nbsp;offsets&nbsp;so&nbsp;that&nbsp;the&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;feature&nbsp;is&nbsp;matched&nbsp;in&nbsp;both&nbsp;swaths&nbsp;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;(operating&nbsp;in&nbsp;the&nbsp;contour&nbsp;display,&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5.&nbsp;Adjust&nbsp;the&nbsp;offsets&nbsp;so&nbsp;that&nbsp;the<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;feature&nbsp;is&nbsp;matched&nbsp;in&nbsp;both&nbsp;swaths<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;(operating&nbsp;in&nbsp;the&nbsp;contour&nbsp;display,<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;the&nbsp;misfit&nbsp;display,&nbsp;or&nbsp;both).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>6.&nbsp;Click&nbsp;the&nbsp;&lt;Set&nbsp;Offset&gt;&nbsp;button.<BR>
 <BR>
 
 These steps should be followed for every feature that can be matched
-in overlapping swaths. 
+in overlapping swaths.
 <P>
 In some cases, the user will find it useful
 to create and set multiple tie points in a single crossing. Other crossings
-may not allow any features to be matched. Users should click the 
+may not allow any features to be matched. Users should click the
 &lt;Skip Crossing&gt; button on crossings that do not allow one or more offsets
-to be determined. In fact, <B>mbnavadjust</B> will 
+to be determined. In fact, <B>mbnavadjust</B> will
 only allow the calculation of a navigation
 solution when all of the crossings have been acted on by either having tie
 points set or by having been explicitly skipped.
@@ -1275,7 +1275,7 @@ tie point offsets well. An infinite penalty weight produces uniformly
 zero adjustments. In contrast, a small penalty weight allows the tie point offsets
 to be fit as well as possible even if large speed and acceleration spikes
 are a consequence. Hoever, even with a zero penalty weight the inversion may
-not be able to exactly satisfy all of the tie point offsets. If some of 
+not be able to exactly satisfy all of the tie point offsets. If some of
 the tie point offsets are conflicting (e.g. one tie point requires a navigation
 control point to move to the west while another tie point requires a
 move to the east), then the offsets cannot all be simultaneously fit
@@ -1286,7 +1286,7 @@ and the &quot;best&quot; solution is selected and applied to the data. The detai
 how the &quot;best&quot; solution is identified are given in the section &quot;Details
 of the Inversion&quot; section below. A log of the inversion parameters, the results
 from each of the inversion iterations, and detailed results from the final
-inversion are output to the Message text window. The program then 
+inversion are output to the Message text window. The program then
 outputs an adjusted navigation file for each of the input swath files and
 updates (or creates) the parameter file for each swath file so that
 <B>mbprocess</B> will merge the adjusted navigation.
@@ -1329,7 +1329,7 @@ and the processed swath file generated by running <B>mbprocess</B> is:
 Refer to the <B>mbprocess</B> and <B>mbset</B> manual pages for details on
 the control and use of <B>mbprocess</B>.
 <P>
-Note that the relevant parameter file settings will reflect the most recent 
+Note that the relevant parameter file settings will reflect the most recent
 inversion in <B>mbnavadjust</B>.
 Users do need to be aware that the order of navigation processing is important
 because, when possible, <B>mbnavadjust</B> imports existing processed data files.
@@ -1348,14 +1348,14 @@ second.
 Once an inversion has been performed, the user should inspect the fit for each
 of the tie points before accepting and applying the adjusted navigation. The relationship
 between the interactively defined navigation offsets and the offsets associated with
-the inversion can be investigated numerically in the tie points table or 
-visually in the &quot;Nav Err&quot; window. 
+the inversion can be investigated numerically in the tie points table or
+visually in the &quot;Nav Err&quot; window.
 <P>
 We suggest first examining the tie points table
 by pulling down the &lt;View-&gt;Show Ties&gt; menu item. This table shows, from left to
 right, the identity of each tie point, the longitude and latitude offsets defined
-by the user (in meters), and the longitude and latitude residuals, or 
-differences between these offsets and those associated with the inversion (in meters). 
+by the user (in meters), and the longitude and latitude residuals, or
+differences between these offsets and those associated with the inversion (in meters).
 If any of these residuals are unexpectedly large, simply clicking on the table line
 showing the suspect navigation tie will bring up the &quot;Nav Err&quot; window and load the
 crossing including that navigation tie. Once an inversion is performed, the
@@ -1382,28 +1382,28 @@ navigation. Once again, we emphasize that users should always finalize an
 
 <P>
 The inversion is constructed as a sparse overdetermined least squares
-matrix problem. Suppose we have N navigation control points in all of the 
+matrix problem. Suppose we have N navigation control points in all of the
 swath files and have defined M tie points. The form of the problem is:
 <BR>
 
-<BR>&nbsp;
+<P>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>A</B>&nbsp;<B>X</B>&nbsp;=&nbsp;<B>D</B><BR>
 <BR>
 
-<BR>&nbsp;
+<P>
 <BR>
 
 Here <B>X</B> is the vector of unknowns, which happen to be the changes in the longitude
 and latitude values of all of the navigation control points. So, there
 are 2N unknowns. Note that we
 do not solve directly for longitude and latitude, but rather for the change,
-or perturbation, to the longitude and latitude values. 
+or perturbation, to the longitude and latitude values.
 The matrix <B>A</B> contains 2N columns corresponding to
 the unknowns and a row for each of the constraints we can apply to
 the navigation adjustment problem. The number of elements in the &quot;data&quot;
-vector <B>D</B> also corresponds to the number of constraints. 
+vector <B>D</B> also corresponds to the number of constraints.
 We apply four sets of constraints in this inverse problem:
 <BR>
 
@@ -1421,28 +1421,28 @@ We apply four sets of constraints in this inverse problem:
 The first kind of constraint is simply expressed as:
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>XLONj&nbsp;=&nbsp;0<BR>
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>XLATj = 0<BR>
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
-where XLONj is the longitude change 
+where XLONj is the longitude change
 and XLATj is the latitude change for the &quot;j&quot;th navigation control point.
 <P>
 The second contraint (speed) is also one of minimization:
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-XLONj&nbsp;+&nbsp;XLONj+1<BR>
@@ -1454,7 +1454,7 @@ The second contraint (speed) is also one of minimization:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-Tj&nbsp;+&nbsp;Tj+1<BR>
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-XLATj&nbsp;+&nbsp;XLATj+1<BR>
@@ -1466,10 +1466,10 @@ The second contraint (speed) is also one of minimization:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-Tj&nbsp;+&nbsp;Tj+1<BR>
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
-Here XLONj+1 and XLATj+1 are the longitude and latitude changes 
+Here XLONj+1 and XLATj+1 are the longitude and latitude changes
 for the &quot;j+1&quot;th navigational control point and Tj and Tj+1 are the
 times of the &quot;j&quot;th and &quot;j+1&quot;th navigational control points. The
 denominator in these expressions is thus the time difference between
@@ -1484,7 +1484,7 @@ are imported.
 The third contraint (acceleration) is also one of minimization:
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>XLONj&nbsp;-&nbsp;2&nbsp;*&nbsp;XLONj+1&nbsp;+&nbsp;XLONj+2<BR>
@@ -1496,7 +1496,7 @@ The third contraint (acceleration) is also one of minimization:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-Tj&nbsp;+&nbsp;Tj+2<BR>
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>XLATj&nbsp;-2&nbsp;*&nbsp;XLATj+1&nbsp;+&nbsp;XLATj+2<BR>
@@ -1508,12 +1508,12 @@ The third contraint (acceleration) is also one of minimization:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-Tj&nbsp;+&nbsp;Tj+2<BR>
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
-The second derivative calculation requires three sequential 
+The second derivative calculation requires three sequential
 navigation control points: j, j+1, and j+2.
-Here XLONj+2 and XLATj+2 are the longitude and latitude changes 
+Here XLONj+2 and XLATj+2 are the longitude and latitude changes
 for the &quot;j+2&quot;th navigational control point and Tj and Tj+2 are the
 times of the &quot;j&quot;th and &quot;j+2&quot;th navigational control points. The
 denominator in these expressions is thus the time difference between
@@ -1521,25 +1521,25 @@ the &quot;j&quot;th and &quot;j+1&quot;th navigation points.
 <P>
 The final, and most important constraints
 are the relative navigation ofsets defined for each of the M tie points.
-Since each offset has a longitude and a latitude value, there are 2M 
+Since each offset has a longitude and a latitude value, there are 2M
 rows in <B>A</B> and elements in <B>D</B> associated with the tie points.
 If the &quot;i&quot;th tie point specifies an offset DLONi and DLATi between the &quot;j1&quot;th and &quot;j2&quot;th
 navigation control points, then the constraint may be expressed as:
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-XLONj1&nbsp;+&nbsp;XLONj2&nbsp;=&nbsp;DLONi<BR>
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-XLATj1&nbsp;+&nbsp;XLATj2&nbsp;=&nbsp;DLATi<BR>
 <BR>
 
-<BR>&nbsp;&nbsp;
+<P>
 <BR>
 
 <P>
@@ -1551,19 +1551,19 @@ so we will always be solving an overdetermined least squares problem.
 Each of the above equations contribute one row to the matrix problem, and each
 of these rows has at most three nonzero elements in <B>A</B>. As a result,
 this matrix problem is also always extremely sparse. This condition allows
-us to use one of a class of approximate least squares solution algorithms that are 
+us to use one of a class of approximate least squares solution algorithms that are
 efficient in solving sparse problems. The algorithm used for <B>mbnavadjust</B>
 inversions is that of Olsen [1987].
 <P>
 The importance of the speed and acceleration minimization constraints is varied
-by multiplying the associated matrix row elements by a penalty weight value. 
+by multiplying the associated matrix row elements by a penalty weight value.
 In practice, the inversion is constructed and solved with many different
 penalty weights, and the &quot;best&quot; inversion is selected and applied. Generally
 speaking, we seek the smoothest inversion that satisfactorily fits the
 tie point offsets. We set smoothness using the penalty weight value so that larger
-penalty weights correspond to smoother solutions. 
+penalty weights correspond to smoother solutions.
 We measure the fit to the tie point offsets using the usual least squares
-calculation: 
+calculation:
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2<BR>
@@ -1586,28 +1586,28 @@ Chi is quite small. If the initial Chi is greater than the target precision for
 the inversion (set from the Controls panel), <B>mbnavadjust</B> sets the
 reference fit to this initial value. Otherwise, the reference fit is set to
 the target precision. The default value is 0.1 meters, which is appropriate for
-high resolution, low-altitude surveys. Larger values will be more appropriate 
-for large altitude (e.g. deep water hull-mounted) surveys. The program then 
-recalculates solutions with different penalty weights until the resulting Chi 
-is between 1.05 and 1.1 times the reference fit. This last solution is chosen 
-as the best solution, reported as the navigation adjustment inversion solution, 
-and applied to that swath data navigation.  The justification for choosing the 
-optimal solution in this fashion is that this approach insures that the smoothness 
-constraint is sufficient large to be impacting the fit, but not so large that 
+high resolution, low-altitude surveys. Larger values will be more appropriate
+for large altitude (e.g. deep water hull-mounted) surveys. The program then
+recalculates solutions with different penalty weights until the resulting Chi
+is between 1.05 and 1.1 times the reference fit. This last solution is chosen
+as the best solution, reported as the navigation adjustment inversion solution,
+and applied to that swath data navigation.  The justification for choosing the
+optimal solution in this fashion is that this approach insures that the smoothness
+constraint is sufficient large to be impacting the fit, but not so large that
 the fit has been substantially degraded.
 <P>
 <A NAME="lbAX">&nbsp;</A>
 <H2>REFERENCES</H2>
 
 <P>
-Nishimura, C. E., and D. W. Forsyth, Improvements in navigation 
+Nishimura, C. E., and D. W. Forsyth, Improvements in navigation
 using SeaBeam crossing errors, <I>Mar. Geophys. Res.</I>, <B>9</B>, 333-352, 1988.
 <BR>
 
 <BR>
 
 Olson, A. H., A Chebyshev condition for accelerating convergence of iterative tomographic
-methods - Solving large least squares problems, 
+methods - Solving large least squares problems,
 Phys. Earth Planet. Inter., 47, 333-345, 1987.
 <BR>
 
@@ -1618,15 +1618,14 @@ Parker, R. L., <B>Geophysical Inverse Theory</B>, Princeton University Press, Pr
 <A NAME="lbAY">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbio.html">mbio</A></B>(l), <B><A HREF="mbprocess.html">mbprocess</A></B>(l), 
-<B><A HREF="mbnavedit.html">mbnavedit</A></B>(l), <B><A HREF="mbset.html">mbset</A></B>(l)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbio.html">mbio</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1),
+<B><A HREF="mbnavedit.html">mbnavedit</A></B>(1), <B><A HREF="mbset.html">mbset</A></B>(1)
 <P>
 <A NAME="lbAZ">&nbsp;</A>
 <H2>BUGS</H2>
 
 It used to be too new to be bulletproof, now its too complicated to be bulletproof.
 Good luck.
-<P>
 <P>
 
 <HR>
@@ -1668,7 +1667,7 @@ Good luck.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 24 September 2011</P></CENTER>
+Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

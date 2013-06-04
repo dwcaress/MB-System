@@ -1,6 +1,6 @@
 .TH mbhysweeppreprocess 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbhysweeppreprocess\fP - performs preprocessing of multibeam data
+\fBmbhysweeppreprocess\fP \- performs preprocessing of multibeam data
 in the Hysweep HSX format (\fBMBIO\fP format 201).
 
 .SH VERSION
@@ -8,12 +8,12 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbhysweeppreprocess\fP
-[\fB-A\fP\fIoffsettype/x/y/z/t\fP \fB-B\fP\fIrollbias/pitchbias/headingbias\fP
-\fB-D\fP\fIsonardepthfile\fP \fB-I\fP\fIdatalist\fP
-\fB-J\fP\fIprojection\fP  \fB-L\fP
-\fB-M\fP\fInavformat\fP \fB-N\fP\fInavfile\fP
-\fB-T\fP\fItimelag\fP
-\fB-H\fP \fB-V\fP]
+[\fB\-A\fP\fIoffsettype/x/y/z/t\fP \fB\-B\fP\fIrollbias/pitchbias/headingbias\fP
+\fB\-D\fP\fIsonardepthfile\fP \fB\-I\fP\fIdatalist\fP
+\fB\-J\fP\fIprojection\fP  \fB\-L\fP
+\fB\-M\fP\fInavformat\fP \fB\-N\fP\fInavfile\fP
+\fB\-T\fP\fItimelag\fP
+\fB\-H\fP \fB\-V\fP]
 
 .SH DESCRIPTION
 \fBmbhysweeppreprocess\fP reads a Hysweep HSX (format 201) file, interpolates the
@@ -68,10 +68,10 @@ where yyyy=year, mm=month, dd=day, hh=hour, mm=minute, ss.sss = seconds, and zzz
 .B \-F
 \fIformat\fP
 .br
-Sets the format of the input file specified with the \fB-I\fP option. This is normally omitted unless
+Sets the format of the input file specified with the \fB\-I\fP option. This is normally omitted unless
 the input filename does not conform to the \fBMB-System\fP file naming conventions. For this
 program, the only relevant options are \fIformat\fP = 201 for an HSX format file, or
-\fIformat\fP= -1 for a datalist referencing multiple format 201 files.
+\fIformat\fP= \-1 for a datalist referencing multiple format 201 files.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -81,7 +81,7 @@ of its operation and then exit immediately.
 \fIinfile\fP
 .br
 Sets the input file path. If \fIformat\fP > 0 (set with the
-\fB-f\fP option or \fBmbdefaults\fP) then the swath sonar data contained in \fIinfile\fP
+\fB\-f\fP option or \fBmbdefaults\fP) then the swath sonar data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read
@@ -108,10 +108,10 @@ assume the data are associated with UTM zone 1 north. The projection identifier 
 conform to the same usage as with projections specified for \fBmbgrid\fP.
 For  instance, to fully specify a particular northern UTM zone, set projection = UTMXXN
 where XX gives the UTM zone (defined from 01 to 60). As an example, a northern UTM
-zone 12 projection can be specified using -JUTM12N.  Southern UTM zones are specified as
+zone 12 projection can be specified using \-JUTM12N.  Southern UTM zones are specified as
 UTMXXS. The European Petroleum Survey Group (EPSG) has defined a large number of PCS's
 used worldwide and assigned number id's to each; one can also specify the northern
-UTM zone 12 projection using its EPSG designation, or -Jepsg32612. The complete list
+UTM zone 12 projection using its EPSG designation, or \-Jepsg32612. The complete list
 of projected coordinate systems supported by \fBMB-System\fP is given in the \fBmbgrid\fP
 manual page.
 .TP
@@ -124,7 +124,7 @@ navigation, attitude, and other data records.
 \fInavformat\fP
 .br
 Sets the input navigation file format used by the file specified with the
-\fB-N\fP option.
+\fB\-N\fP option.
  At present, the only option for the navigation file format is \fInavformat\fP=1:
     yyyy:mm:dd:hh:mm:ss.sss sssss.sss eeeeeeee.eee nnnnnnnn.nnn zzzz.zzz aaa.aaa hhh.hhh
 .br
@@ -139,7 +139,7 @@ Default: \fInavformat\fP=1.
 The program will read navigation from the file \fInavfile\fP
 and merge those data with the multibeam data in the HSX file.
 If a timelag model is specified using
-\fB-T\fP\fItimelag\fP, the time lag will be applied to the navigation and
+\fB\-T\fP\fItimelag\fP, the time lag will be applied to the navigation and
 attitude data before merging with the sonar data. The navigation and attitude
 data from \fInavfile\fP will also be embedded in asynchronous data records
 in the output format 201 data. Any pre-existing navigation data records will
@@ -173,11 +173,11 @@ been applied to any of the existing data
 In order to merge the better navigation and sonar depth before
 starting MB-System processing, do something like:
 .br
-    mbhysweeppreprocess -I datalist_hsx.mb-1 \
-            -A1/0.42/2.005/-1.34/0.0 \
-            -A2/0.46/0.22/0.55/0.0 \
-            -A3/0.46/0.22/0.55/0.0 \
-            -JUTM01N -NROVnav.txt
+    mbhysweeppreprocess \-I datalist_hsx.mb-1 \
+            \-A1/0.42/2.005/-1.34/0.0 \
+            \-A2/0.46/0.22/0.55/0.0 \
+            \-A3/0.46/0.22/0.55/0.0 \
+            \-JUTM01N \-NROVnav.txt
 .br
 The program will output something like the following:
     Data available for merging:
@@ -190,9 +190,9 @@ The program will output something like the following:
          Roll bias:       0.000
          Pitch bias:      0.000
          Heading bias:    0.000
-         Sonar:    0.420    2.005   -1.340    0.000
-         MRU:      0.420    2.005   -1.340    0.000
-         Nav:      0.420    2.005   -1.340    0.000
+         Sonar:    0.420    2.005   \-1.340    0.000
+         MRU:      0.420    2.005   \-1.340    0.000
+         Nav:      0.420    2.005   \-1.340    0.000
 
     Data records read from: 000_2004.HSX
          Positions (POS):                   2651
@@ -315,7 +315,7 @@ The program will output something like the following:
          Other:                             0
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbformat\fP(l), \fBmbinfo\fP(l)
+\fBmbsystem\fP(1), \fBmbformat\fP(1), \fBmbinfo\fP(1)
 
 .SH BUGS
 At this point, the HSX i/o module and preprocessor are only tested with a single

@@ -181,7 +181,7 @@ option.
 .B \-V
 This option causes an expanded annotated listing of the characteristics
 of the projected point.
-.B -v is implied with this option.
+.B \-v is implied with this option.
 .TP
 .BI \-T " ulow,uhi,vlow,vhi,res[,umax,vmax]"
 This option creates a set of bivariate Chebyshev polynomial
@@ -202,7 +202,7 @@ is an integer number specifying the power of 10 precision of the
 approximation.
 For example, a
 .I res
-of -3 specifies an approximation with an accuracy better than .001.
+of \-3 specifies an approximation with an accuracy better than .001.
 .I Umax,
 and
 .I vmax
@@ -256,7 +256,7 @@ with trailing, zero-valued minute-second fields deleted.
 .SH EXAMPLE
 The following script
 .RS 5
- \f(CWproj +proj=utm +lon_0=112w +ellps=clrk66 -r <<EOF
+ \f(CWproj +proj=utm +lon_0=112w +ellps=clrk66 \-r <<EOF
  45d15'33.1"	111.5W
  45d15.551666667N	-111d30
  +45.25919444444	111d30'000w
@@ -266,7 +266,7 @@ will perform UTM forward projection with a standard UTM
 central meridian nearest longitude 112\(deW.
 The geographic values of this example are equivalent and meant
 as examples of various forms of DMS input.
-The x\-y output data will appear as three lines of:
+The x-y output data will appear as three lines of:
 .RS 5
  \f(CW460769.27	5011648.45
 .RE
@@ -288,7 +288,7 @@ Circle) computations.
 .B cs2cs(1U), nad2nad(1U), geod(1U), pj_init(3U),
 .br
 .I "Cartographic Projection Procedures for the UNIX Environment\(emA User's Manual,"
-(Evenden, 1990, Open-file report 90\-284).
+(Evenden, 1990, Open-file report 90-284).
 .br
 .I "Map Projections Used by the U. S. Geological Survey"
 (Snyder, 1984,

@@ -1,13 +1,13 @@
-.TH mbm_bpr 1 "19 March 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_bpr 1 "3 June 2013" "MB\-System 5.0" "MB\-System 5.0"
 .SH NAME
-\fBmbm_bpr\fP - MB-System macro to process data from a Seabird SBE53 pressure
+\fBmbm_bpr\fP \- MB\-System macro to process data from a Seabird SBE53 pressure
 sensor into a tidal model for use by mbprocess.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_bpr\fP \fB-I\fP\fIbprfile\fP \fB-O\fP\fItidefile\fP [\fB-D\fP\fIoffset\fI \fBR\fP\fIlon/lat\fP \fB-T -H -V\fP]
+\fBmbm_bpr\fP \fB\-I\fP\fIbprfile\fP \fB\-O\fP\fItidefile\fP [\fB\-D\fP\fIoffset\fI \fBR\fP\fIlon/lat\fP \fB\-T \-H \-V\fP]
 
 .SH DESCRIPTION
 \fBmbm_bpr\fP is a perl shellscript used to translate pressure data from a Seabird SBE53 pressure
@@ -22,21 +22,21 @@ tidefile will be in the form of a text file with two columns:
 Here time_d are time values in decimal epoch seconds (seconds since 1970 Jan 1 00:00:00) and the tide values
 are in meters. In this case, the tidefile is in format 1 as supported by \fBmbprocess\fP, so to make use of this
 tide data to correct swath bathymetry, use \fBmbset\fP as follows:
-      mbset -Idatalist.mb-1 -PTIDEFILE:tidefilename -PTIDEFORMAT:1
+      mbset \-Idatalist.mb\-1 \-PTIDEFILE:tidefilename \-PTIDEFORMAT:1
 .br
-where datalist.mb-1 is the datalist referring to the data files to be processed. After using \fBmbset\fP to
+where datalist.mb\-1 is the datalist referring to the data files to be processed. After using \fBmbset\fP to
 turn on tide correction, run \fBmbprocess\fP:
-      mbprocess -Idatalist.mb-1
+      mbprocess \-Idatalist.mb\-1
 .br
 
-If the \fB-T\fP option is specified, then the output file will have the form of:
+If the \fB\-T\fP option is specified, then the output file will have the form of:
       year month day hour min sec tide
 .br
 In this case, the tidefile is in format 2 as supported by \fBmbprocess\fP, so to make use of this
 tide data to correct swath bathymetry, use \fBmbset\fP as follows:
-      mbset -Idatalist.mb-1 -PTIDEFILE:tidefilename -PTIDEFORMAT:2
+      mbset \-Idatalist.mb\-1 \-PTIDEFILE:tidefilename \-PTIDEFORMAT:2
 .br
-where datalist.mb-1 is the datalist referring to the data files to be processed. After using \fBmbset\fP to
+where datalist.mb\-1 is the datalist referring to the data files to be processed. After using \fBmbset\fP to
 turn on tide correction, run \fBmbprocess\fP.
 
 The macro \fBmbm_bpr\fP calculates depth from pressure and latitude using the empirical formula for seawater in:
@@ -45,16 +45,16 @@ The macro \fBmbm_bpr\fP calculates depth from pressure and latitude using the em
         properties of seawater,’’ Unesco Tech. Papers in Mar. Sci., No. 44 1983.
 .br
 and then calculates tidal data as the difference between the observed depth and a vertical
-reference depth. If a location is supplied using the \fB-R\fP option,
+reference depth. If a location is supplied using the \fB\-R\fP option,
 \fBmbm_bpr\fP uses the latitude in the depth calculation and also extracts a tidal model
 corresponding the to BPR deployment site and timespan using the program \fBmbotps\fP. The vertical
 reference is then the average difference between the tidal model and the observed depths.
-If the user does not supply a location using the \fB-R\fP option,
+If the user does not supply a location using the \fB\-R\fP option,
 a location on the equator is assumed for the depth calculation and the vertical reference is
 the mean depth of the middle half of the depth time series (i.e. depths from 1/4 to 3/4 of the total time span).
-The user can specify an additional offset to apply to the tide data using the \fB-D\fP\fIoffset\fP option.
+The user can specify an additional offset to apply to the tide data using the \fB\-D\fP\fIoffset\fP option.
 
-If the \fB-T\fP option is not used, then \fBmbm_bpr\fP will also output a shellscript that will, if
+If the \fB\-T\fP option is not used, then \fBmbm_bpr\fP will also output a shellscript that will, if
 executed, generate a GMT postscript plot of the tide data output. If a location has been specified so that
 a tidal model was also generated, the model will be plotted with the tide data.
 
@@ -65,11 +65,11 @@ David W. Caress (caress@mbari.org)
 .br
 Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-  Lamont-Doherty Earth Observatory
+  Lamont\-Doherty Earth Observatory
 .br
 Suzanne H. O'Hara (sohara@ldeo.columbia.edu)
 .br
-  Lamont-Doherty Earth Observatory
+  Lamont\-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP
@@ -85,12 +85,12 @@ of its operation and then exit immediately.
 .B \-I
 \fIbprfile\fP
 .br
-Input pressure data from the SBE53 pressure sensor in the Sea-Bird *.tid format.
+Input pressure data from the SBE53 pressure sensor in the Sea\-Bird *.tid format.
 .TP
 .B \-O
 \fItidefile\fP
 .br
-Output tide data file path. The format of the tide data controlled by the use (or not) of the \fB-T\fP option.
+Output tide data file path. The format of the tide data controlled by the use (or not) of the \fB\-T\fP option.
 .TP
 .B \-R
 \fIlongitude/latitude\fP
@@ -105,7 +105,7 @@ in the form of a text file with two columns:
 .br
 where time_d are time values in decimal epoch seconds (seconds since 1970 Jan 1 00:00:00) and the tide values
 are in meters.
-If the \fB-T\fP option is specified, then the output file will instead have the form of:
+If the \fB\-T\fP option is specified, then the output file will instead have the form of:
       year month day hour min sec tide
 .TP
 .B \-V
@@ -114,7 +114,7 @@ more information than usual.
 
 .SH Examples
 Suppose one has deployed an SBE53 at 110 deg 40.92220'W 26deg 27.18960'N at about 1200 m depth.
-The Sea-Bird processing software outputs data in *.tid files with output something like:
+The Sea\-Bird processing software outputs data in *.tid files with output something like:
      1   03/14/2012 16:27:21 99999.9999    20.2731
      2   03/14/2012 16:28:21 99999.9999    20.2696
      3   03/14/2012 16:29:21 99999.9999    20.2589
@@ -176,39 +176,39 @@ The pressure increases and the temperature decreases as the sensor sinks to the 
 deployment off a ship. Once the sensor is on the seafloor, pressure variations reflect the tides.
 
 To extract a tidal model, use \fBmbm_bpr\fP as follows:
-    mbm_bpr -I BPR.tid -OBPR.tde -R-110.682037/27.453160 -V
+    mbm_bpr \-I BPR.tid \-OBPR.tde \-R\-110.682037/27.453160 \-V
 .br
 The output to the shell looks like:
     Program  Status:
       1771 pressure values read from BPR.tid
-      Vertical reference to tidal model for position -110.682037 27.453160
+      Vertical reference to tidal model for position \-110.682037 27.453160
       Tide will be output as <time_d tide> values
       A plot will be generated
-      Executing: mbotps -A1 -D1200 -R-110.682037/27.453160 -B2012/03/14/16/52/21 -E2012/03/15/22/22/21 -OBPR.tid_tidemodel.txt
+      Executing: mbotps \-A1 \-D1200 \-R\-110.682037/27.453160 \-B2012/03/14/16/52/21 \-E2012/03/15/22/22/21 \-OBPR.tid_tidemodel.txt
       Results are really in BPR.tid_tidemodel.txt
       1690 pressure values output to BPR.tde
       Vertical reference: 1267.31678290355 m
-      Executing mbm_xyplot -R1331743941.000000/1331850141.000000/-0.5071/0.5071 -IW0/0/0:BPR.tde -IW255/0/0:BPR.tid_tidemodel.txt -OBPR.tde_tideplot -L"Tide Data from BPR <BPR.tde> (black) & Tide Model (red):Seconds:Tide (meters)" -V
+      Executing mbm_xyplot \-R1331743941.000000/1331850141.000000/\-0.5071/0.5071 \-IW0/0/0:BPR.tde \-IW255/0/0:BPR.tid_tidemodel.txt \-OBPR.tde_tideplot \-L"Tide Data from BPR <BPR.tde> (black) & Tide Model (red):Seconds:Tide (meters)" \-V
       Executing <BPR.tde_tideplot.cmd> also invokes gv to view the plot on the screen.
 .br
 The output tidal data file BPR.tde has the form:
-    1331745441.000000 -0.0803109226781089
-    1331745501.000000 -0.129052283649798
-    1331745561.000000 -0.127622718432121
-    1331745621.000000 -0.125784706023751
-    1331745681.000000 -0.124627438960488
-    1331745741.000000 -0.123334022838208
-    1331745801.000000 -0.12285750111073
-    1331745861.000000 -0.121768308595847
+    1331745441.000000 \-0.0803109226781089
+    1331745501.000000 \-0.129052283649798
+    1331745561.000000 \-0.127622718432121
+    1331745621.000000 \-0.125784706023751
+    1331745681.000000 \-0.124627438960488
+    1331745741.000000 \-0.123334022838208
+    1331745801.000000 \-0.12285750111073
+    1331745861.000000 \-0.121768308595847
 .br
 where the first column is time in seconds since January 1, 1970 (epoch seconds, aka unix
-seconds, aka time_d values within \fBMB-System\fP), and the second column is the tidal signal
+seconds, aka time_d values within \fBMB\-System\fP), and the second column is the tidal signal
 in meters. In this case the reference tidal model is provided by \fBmbotps\fP, and the
 plot created by running the output shellscript BPR.tde_tideplot.cmd plots both the tidal data
 calculated by \fBmbm_bpr\fP and the tidal model extracted using \fBmbotps\fP.
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbprocess\fP(l), \fBmbset\fP(l)
+\fBmbsystem\fP(1), \fBmbprocess\fP(1), \fBmbset\fP(1)
 
 .SH REFERENCES
 N. P. Fofonoff and R. C. Millard, Jr., ‘‘Algorithms for computation of fundamental

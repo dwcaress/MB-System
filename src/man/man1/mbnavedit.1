@@ -1,40 +1,40 @@
-.TH mbnavedit 1 "29 April 2011" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavedit 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
+\fBmbnavedit\fP \- Interactive navigation editor for swath sonar data.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
-\fB-D\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-F\fIformat \fB-G\fP \fB-I\fIinfile \fB-N -P -T -X -V -H\fP]
+\fBmbnavedit\fP [\fB\-B\fIyr/mo/da/hr/mn/sc\fP
+\fB\-D\fP \fB\-E\fIyr/mo/da/hr/mn/sc\fP
+\fB\-F\fIformat \fB\-G\fP \fB\-I\fIinfile \fB\-N \-P \-T \-X \-V \-H\fP]
 
 .SH DESCRIPTION
-\fBMBnavedit\fP is an interactive editor used to identify and fix 
-problems with the navigation of swath sonar data. 
+\fBMBnavedit\fP is an interactive editor used to identify and fix
+problems with the navigation of swath sonar data.
 
-In the default mode the edited navigation is output to 
+In the default mode the edited navigation is output to
 a file with the suffix ".nve" appended to the input swath
-data filename. The program can also be operated 
+data filename. The program can also be operated
 in a "browse" mode where no navigation is output.
-If saved, the edited navigation can be merged 
+If saved, the edited navigation can be merged
 with the swath data using the program \fBmbprocess\fP, which
-outputs a processed swath data file. 
+outputs a processed swath data file.
 The \fBmbprocess\fP program is also used to apply
 bathymetry edits, recalculate bathymetry, and apply
 other corrections to swath bathymetry data. Users
 may cause \fBmbprocess\fP to be run automatically by
-specifying the \fB-X\fP option when starting \fBMBnavedit\fP.
+specifying the \fB\-X\fP option when starting \fBMBnavedit\fP.
 
-In previous  versions of \fBMB-System\fP 
+In previous  versions of \fBMB-System\fP
 (version 4.6.10 or earlier), \fBMBnavedit\fP
 produced output swath data files directly by reading and
 storing all of the swath data information in memory (including
-non-survey data records). This approach limited the 
+non-survey data records). This approach limited the
 amount of data that could be handled
 at once, frequently requiring users to process files in
-small pieces. The current version only stores 
+small pieces. The current version only stores
 and outputs the navigation data.
 
 Once the navigation
@@ -43,9 +43,9 @@ read in, \fBMBnavedit\fP displays autoscaled plots of the longitude,
 latitude, speed, heading, and sonar depth time series, along with a plot of
 the time interval between navigation values. The user may select
 outliers and interpolate over them or, in the case of heading or
-speed data, replace the erroneous values with estimates derived 
+speed data, replace the erroneous values with estimates derived
 from "course-made-good" or "speed-made-good", respectively.
-Data can only be selected and altered in a single 
+Data can only be selected and altered in a single
 plot at a time (this avoids confusion and prevents mistakes).
 
 The nature of the navigation data being edited depends upon the
@@ -56,16 +56,16 @@ the raw navigation has been interpolated to yield values at the
 same time stamps as the sonar pings. Other data formats do not
 hold navigation values in the survey data records, and instead use
 separate navigation records with different time stamps. This
-asynchronous navigation requires that MBIO interpolate or 
+asynchronous navigation requires that MBIO interpolate or
 extrapolate the navigation as the survey data records are read.
 For data formats with synchronous navigation, the navigation
 values edited using \fBMBnavedit\fP are those in the survey data
-records. For data formats with only asynchronous navigation, 
+records. For data formats with only asynchronous navigation,
 \fBMBnavedit\fP displays and operates on the values from the
 navigation records. The \fBMBIO\fP manual page includes a listing
 of which type of navigation is used by the supported data formats.
 
-For some data formats, the user can also 
+For some data formats, the user can also
 inspect plots of roll, pitch, and heaved
 data to determine if the ship's vertical reference sensors
 were working properly.
@@ -77,21 +77,21 @@ can be operated in a "browse" mode where no data is output.
 
 Three algorithms for obtaining and using smooth navigation models are
 available. Replacing the original navigation with a smoothed
-version can be advantageous in some cases of very noisy 
-navigation (typically from sonars on towed platforms or 
+version can be advantageous in some cases of very noisy
+navigation (typically from sonars on towed platforms or
 submerged vehicles). The first smoothing scheme is the covolution
 of a Gaussian kernal of user-defined time width with the data.
 Users may select and flag outlier navigation points; any flagged
 points are not used to calculate the Gaussian-weighted mean
 navigation values.
-The second approach is simple dead reckoning 
+The second approach is simple dead reckoning
 from the initial position using the current (possibly edited)
 heading and speed values. The dead reckoning navigation can also
 incorporate user-specified longitude and latitude drift rates.
-The third algorithm is an inversion for a smooth 
+The third algorithm is an inversion for a smooth
 navigation that minimizes
 speed and acceleration while fitting the original navigation
-in a least squares sense. The inversion weighting against 
+in a least squares sense. The inversion weighting against
 speed and acceleration are user specified, and only unflagged
 navigation values are used in the inversion.
 
@@ -101,17 +101,17 @@ The time interval plot allows
 users to spot problems with time stamps and to change the
 time stamps, if necessary. The most obvious time stamp errors
 are multiple pings with the same time stamps (producing a zero
-time interval value), or 
+time interval value), or
 sequential pings with decreasing time stamps (resulting in
 negative time interval values). \fBMBnavedit\fP
-provides two tools for dealing with zero or negative time intervals: 
+provides two tools for dealing with zero or negative time intervals:
 time stamp interpolation or deletion of the affected pings. Control
 dialogs allow users to apply either to the entire buffer at once.
 Time stamp interpolation may also be accomplished by selecting
 the relevant values in the time interval display, and then
 selecting interpolation.
 
-If the navigation is 
+If the navigation is
 asynchronous, that generally means the time interval should be
 constant since navigation systems are set to output values at
 a uniform rate. A problem with the time stamps of asynchronous
@@ -123,12 +123,12 @@ to reset the time stamp.
 If the navigation is synchronous with the sonar
 pings, then the time interval will likely vary because the ping
 rate for most sonars varies with the sonars altitude above the
-seafloor. In this case, time stamp problems will 
-not produce spikes in the speed-made-good plot 
+seafloor. In this case, time stamp problems will
+not produce spikes in the speed-made-good plot
 because the navigation has been interpolated
 using the existing time stamps. Time interval spikes may also
 reflect problems with the sonar (e.g. occasional failure to ping
-at the appropriate time) rather than erroneous time stamps. 
+at the appropriate time) rather than erroneous time stamps.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -144,7 +144,7 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 Sets the starting time for data allowed in the input data; pings
-with times before the starting time will be ignored. 
+with times before the starting time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
 .B \-D
@@ -157,13 +157,13 @@ is to output the edited data to a file.
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 Sets the ending time for data allowed in the input data; pings
-with times after the ending time will be ignored. 
+with times after the ending time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \-F
 \fIformat\fP
 .br
-Sets the format at startup for the input and output swath sonar data using 
+Sets the format at startup for the input and output swath sonar data using
 \fBMBIO\fP integer format identifiers. This value can also be set
 interactively when specifying the input file.
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
@@ -196,20 +196,20 @@ be \fIinfile\fP with ".ed" appended.
 Normally, all \fBMB-System\fP processing
 programs embed comment records describing the processing actions
 and parameters into output swath data files.
-This flag, when used in conjunction with the \fB-X\fP flag,
+This flag, when used in conjunction with the \fB\-X\fP flag,
 causes \fBMBnavedit\fP to invoke \fBmbprocess\fP with it's
-\fB-N\fP option. In turn, this causes \fBmbprocess\fP to
+\fB\-N\fP option. In turn, this causes \fBmbprocess\fP to
 generate an output, processed swath data file without any
-comment records. 
+comment records.
 .TP
 .B \-O
 \fIoutfile\fP
 .br
 Sets the output data file, overriding the file naming conventions
-discussed above in the \fB-I\fP option.
+discussed above in the \fB\-I\fP option.
 .TP
 .B \-P
-Causes \fBMBnavedit\fP to load and work with navigation from 
+Causes \fBMBnavedit\fP to load and work with navigation from
 survey data records even if the data format uses asynchronous
 navigation records. In this case, the only edits which will
 actually be applied to the output data are changes to the
@@ -218,15 +218,15 @@ time stamps of the survey records.
 .B \-V
 Normally, \fBMBnavedit\fP outputs information to the stderr stream
 regarding the number of records loaded and dumped.  If the
-\fB-V\fP flag is given, then \fBMBnavedit\fP works in a "verbose" mode and
-outputs the program version being used, all error status messages, 
+\fB\-V\fP flag is given, then \fBMBnavedit\fP works in a "verbose" mode and
+outputs the program version being used, all error status messages,
 and a large amount of other information including all of the
 beams flagged or zeroed.
 .TP
 .B \-X
 This option causes \fBmbprocess\fP to run automatically
 on an input swath data file when the \fBMBnavedit\fP editing session
-is completed. The \fB-X\fP option effectively means that the
+is completed. The \fB\-X\fP option effectively means that the
 corresponding processed swath data is generated or updated immediately.
 The program \fBmbprocess\fP will not be invoked if the
 editing session is in the browse mode.
@@ -234,44 +234,44 @@ editing session is in the browse mode.
 .SH INTERACTIVE CONTROLS
 .TP
 .B File
-This button accesses a pulldown menu with two push buttons: 
-\fBOpen\fP and \fBFile Selection List\fP, 
+This button accesses a pulldown menu with two push buttons:
+\fBOpen\fP and \fBFile Selection List\fP,
 .TP
 .B File->Open
 This button brings up a popup window which allows the user to
 specify an input swath sonar bathymetry data file, its \fBMBIO\fP
-format id, and  the output mode. 
-This program uses the \fBMBIO\fP library and 
+format id, and  the output mode.
+This program uses the \fBMBIO\fP library and
 will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data
 formats currently supported by \fBMBIO\fP and their
-identifier values is given in the \fBMBIO\fP manual page. 
+identifier values is given in the \fBMBIO\fP manual page.
 If the swath sonar data file is named using the \fBMB-System\fP
 suffix convention (format 11 files end with ".mb11", format
 41 files end with ".mb41", etc.), then the program will
 automatically use the appropriate format id; otherwise the
 format must be set by the user.
 The popup window also allows the output mode to be set to "browse"
-so that no edit events are output. 
+so that no edit events are output.
 When a valid file is specified and the \fBOK\fP button
 is clicked, file will be added to an internal list of swath files
 available for editing, and then that file will be loaded into
 memory for editing (if another file was already loaded, that file
-is closed out gracefully before the new file is loaded). 
+is closed out gracefully before the new file is loaded).
 If the specified input is a datalist (format
-id = -1), then all of the files referenced through that datalist 
+id = \-1), then all of the files referenced through that datalist
 will be added to the internal list, and the first of those files
-loaded. When a file is loaded for editing, \fBMBnavedit\fP reads 
+loaded. When a file is loaded for editing, \fBMBnavedit\fP reads
 as much data as will fit into the data buffer (typically 25000 records)
 and several pings are displayed as stacked bathymetry profiles.
 .TP
 .B File->File Selection List
 This button brings up a popup window displaying the internal list of
-swath files available for editing. The list has four columns. 
+swath files available for editing. The list has four columns.
 The first (left-most) column is either blank or shows "<locked>" or "<loaded>".
 If a file is loaded for editing by this program, it shows as "<loaded>".
 If a file is being edited or processed by another program, it shows as
-"<locked>". Locked files cannot be opened for editing, and any file 
+"<locked>". Locked files cannot be opened for editing, and any file
 loaded for editing by \fBMBnavedit\fP will show as "locked" to other
 programs. The second column is either blank or shows "<nve>". This indicates if
 a file has been previously edited so that an edited navigation file already
@@ -279,19 +279,19 @@ exists. The third and fourth columns show the filename path and the \fBMBIO\fP
 format id, respectively.
 Users can select one of the files in the available list. If the "Edit Selected File"
 button is clicked, the selected file will be opened for editing (and any
-file already loaded will be closed first). If the "Remove Selected File" 
+file already loaded will be closed first). If the "Remove Selected File"
 button is selected, then the selected file will be removed from the available
 list.
 .TP
 .B Controls
 This button activates a pulldown menu with five buttons:
-\fBTime Stepping\fP, \fBNav Modeling\fP, \fBTime Interpolation\fP, 
+\fBTime Stepping\fP, \fBNav Modeling\fP, \fBTime Interpolation\fP,
 \fBDelete Bad Times\fP, and \fBPosition Offset\fP. Each
 of these buttons brings up a dialog window containing widgets
 that set parameters or perform actions.
 .TP
 .B Controls->Time Stepping->Time Span Shown
-This slider sets the number of seconds of data shown at a time. 
+This slider sets the number of seconds of data shown at a time.
 This value is also set by the \fBShow Entire Buffer\fP button (sets
 time shown to all available data) and the \fBPick Time Interval\fP
 function (sets time shown to an interactively specified interval).
@@ -306,10 +306,10 @@ This toggle button turns navigation modeling off.
 .B Controls->Navigation Modeling->Gaussian Mean
 This toggle button enables navigation smoothing by convolution
 with a Gaussian kernel of user defined time width.
-When this toggle button is highlighted, a smooth 
+When this toggle button is highlighted, a smooth
 navigation model is calculated and displayed
 as a blue line in both the longitude and latitude plots.
-The \fBShow Smooth Inversion\fP toggle buttons 
+The \fBShow Smooth Inversion\fP toggle buttons
 also appear (already enabled)
 for both the longitude and latitude plots
 among the plot display toggles on the left side of the main
@@ -317,7 +317,7 @@ among the plot display toggles on the left side of the main
 .TP
 .B Controls->Navigation Modeling->Dead Reckoning
 This toggle button enables dead reckoning navigation calculation.
-When this toggle button is highlighted, a dead reckoning 
+When this toggle button is highlighted, a dead reckoning
 navigation model is calculated from the initial position
 using the current heading and speed data and displayed
 as a blue line in both the longitude and latitude plots.
@@ -327,13 +327,13 @@ among the plot display toggles on the left side of the main
 \fBMBnavedit\fP window.
 .TP
 .B Controls->Navigation Modeling->Smooth Inversion
-This toggle button enables inversion for a smooth navigation 
+This toggle button enables inversion for a smooth navigation
 model which fits the original positions in a least squares
 sense while minimizing speed and acceleration.
-When this toggle button is highlighted, a smooth 
+When this toggle button is highlighted, a smooth
 navigation model is calculated and displayed
 as a blue line in both the longitude and latitude plots.
-The \fBShow Smooth Inversion\fP toggle buttons 
+The \fBShow Smooth Inversion\fP toggle buttons
 also appear (already enabled)
 for both the longitude and latitude plots
 among the plot display toggles on the left side of the main
@@ -343,7 +343,7 @@ among the plot display toggles on the left side of the main
 This slider sets the width in seconds of the Gaussian smoothing
 kernel. If Gaussian mean smoothing is enabled, changing this slider
 causes the smoothing to be recalculated and the results shown on
-the longitude and latitude plots. 
+the longitude and latitude plots.
 .TP
 .B Controls->Navigation Modeling->Dead Reckoning Longitude Drift
 This slider sets the longitude drift rate in degrees/hour
@@ -400,7 +400,7 @@ to disappear.
 .B Controls->Delete Bad Times->Apply
 This button causes all data in
 the current buffer associated
-with negative or zero time intervals to be deleted. 
+with negative or zero time intervals to be deleted.
 The \fBDelete Bad Times\fP
 dialog disappears after this action is taken.
 .TP
@@ -418,7 +418,7 @@ latitude offset in degrees.
 .TP
 .B Controls->Position Offset->Apply
 This button applies the current longitude and latitude
-offsets to all of the navigation data. 
+offsets to all of the navigation data.
 The \fBPosition Offset\fP
 dialog disappears after this action is taken.
 .TP
@@ -427,21 +427,21 @@ This button causes the \fBDelete Bad Times\fP dialog
 to disappear.
 .TP
 .B Start
-This button causes the set of displayed pings to step backward to the 
+This button causes the set of displayed pings to step backward to the
 beginning of the current buffer.
 .TP
 .B Reverse
-This button causes the set of displayed pings to step \fInstep\fP 
+This button causes the set of displayed pings to step \fInstep\fP
 pings backward in the current buffer.  The middle mouse button causes
 the same action.
 .TP
 .B Forward
-This button causes the set of displayed pings to step \fInstep\fP 
+This button causes the set of displayed pings to step \fInstep\fP
 pings forward in the current buffer.  The right mouse button causes
 the same action.
 .TP
 .B End
-This button causes the set of displayed pings to step forward to the 
+This button causes the set of displayed pings to step forward to the
 end of the current buffer.
 .TP
 .B Next Buffer
@@ -468,7 +468,7 @@ times.
 .B Done | Next File
 When the last file in the list of files available for editing has been loaded,
 this button shows as "Done". Otherwise, it shows as "Next File". In either
-case, this button causes the program to write out all of the edited navigation 
+case, this button causes the program to write out all of the edited navigation
 data and then close the current file. If the current file is not the last
 one in the available list, then the next unlocked file will be loaded for editing.
 .TP
@@ -481,16 +481,16 @@ This button causes a dialog to appear showing some information
 about the program.
 .TP
 .B Interpolate
-This button causes the selected data to be 
+This button causes the selected data to be
 replaced by linear interpolation
 of the surrounding unselected data. If the selection extends to the
 edge of the data, the selected data will be replaced by the first
 unselected datum on the other side.
 .TP
 .B Interpolate Repeats
-This button causes any repeated values in the selected data to be 
+This button causes any repeated values in the selected data to be
 replaced by linear interpolation between the first of the repeated
-values and the next different value. 
+values and the next different value.
 .TP
 .B Revert Selection
 This button causes the selected data to revert to their
@@ -503,16 +503,16 @@ dialog.
 This button causes any selected longitude or latitude values
 to be replaced by values from navigation modeling. Either
 dead reckoning or smooth inversion navigation modeling
-must be enabled. The longitude and latitude values are 
+must be enabled. The longitude and latitude values are
 replaced in pairs (if a longitude value is selected, the
 corresponding latitude value will also be replaced, and
 vice versa). The typical sequence is to:
-    1) adjust the modeling until an acceptable solution 
+    1) adjust the modeling until an acceptable solution
        is achieved.
     2) click on the \fBSelect All\fP toggle button
-    3) click in either the longitude or latitude plot 
+    3) click in either the longitude or latitude plot
        so that all values in that window are selected
-    4) click on the \fBUse Solution\fP button so that the 
+    4) click on the \fBUse Solution\fP button so that the
        navigation model is adopted for all longitude
        and latitude values
 .TP
@@ -540,27 +540,27 @@ of a modeling solution).
 Clicking on this toggle button sets the edit mode to "pick". In
 this case, clicking the left mouse button will cause the
 nearest data value to toggle between selected (red) and
-unselected. 
+unselected.
 .TP
 .B Select
 Clicking on this toggle button sets the edit mode to "select". In
-this case, clicking and dragging the left mouse button will 
-cause any data value touched by the cursor to become selected. 
+this case, clicking and dragging the left mouse button will
+cause any data value touched by the cursor to become selected.
 .TP
 .B Deselect
 Clicking on this toggle button sets the edit mode to "deselect". In
-this case, clicking and dragging the left mouse button will 
-cause any data value touched by the cursor to become unselected. 
+this case, clicking and dragging the left mouse button will
+cause any data value touched by the cursor to become unselected.
 .TP
 .B Select All
 Clicking on this toggle button sets the edit mode to "select all". In
 this case, clicking in any of the editable plots will cause all
-of the data in that plot to be selected. 
+of the data in that plot to be selected.
 .TP
 .B Deselect All
 Clicking on this toggle button sets the edit mode to "select all". In
 this case, clicking in any of the editable plots will cause all
-of the data in that plot to be unselected. 
+of the data in that plot to be unselected.
 .TP
 .B Time Interval Plot
 This toggle button turns the time interval plot on and off.
@@ -643,29 +643,29 @@ pitch, and heave data).
 .TP
 .B Left Mouse Button
 The left mouse button is used to pick data values.  Unselected data
-values are shown as filled black squares and selected values 
+values are shown as filled black squares and selected values
 as empty red squares.  The manner in which data are selected or
-unselected is controlled by the edit mode, as set by the 
+unselected is controlled by the edit mode, as set by the
 \fBPick\fP, \fBSelect\fP, \fBDeselect\fP, \fBSelect All\fP, and
 \fBDeselect All\fP buttons.
 .TP
 .B Middle Mouse Button
-The middle mouse button causes the set of displayed data to 
+The middle mouse button causes the set of displayed data to
 step backward in the current buffer by the amount of time
-set on the \fBTime Step\fP slider.  
+set on the \fBTime Step\fP slider.
 The control button \fBReverse\fP causes
 the same action.
 .TP
 .B Right Mouse Button
-The right mouse button causes the set of displayed data to 
+The right mouse button causes the set of displayed data to
 step forward in the current buffer by the amount of time
-set on the \fBTime Step\fP slider.  
+set on the \fBTime Step\fP slider.
 The control button \fBForward\fP causes
 the same action.
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbprocess\fP(l), \fBmbset\fP(l), 
-\fBmbedit\fP(l), \fBmbeditviz\fP(l), \fBmbinfo\fP(l)
+\fBmbsystem\fP(1), \fBmbio\fP(1), \fBmbprocess\fP(1), \fBmbset\fP(1),
+\fBmbedit\fP(1), \fBmbeditviz\fP(1), \fBmbinfo\fP(1)
 
 .SH BUGS
-This program doesn't handle the roll, pitch, and heave data in a general way. 
+This program doesn't handle the roll, pitch, and heave data in a general way.

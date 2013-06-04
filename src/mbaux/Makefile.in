@@ -63,7 +63,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/src/mbsystem_config.h
+CONFIG_HEADER = $(top_builddir)/src/mbio/mb_config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -121,7 +121,7 @@ libmbxgr_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libmbxgr_la_LDFLAGS) $(LDFLAGS) -o $@
 @BUILD_MOTIF_TRUE@am_libmbxgr_la_rpath = -rpath $(libdir)
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f

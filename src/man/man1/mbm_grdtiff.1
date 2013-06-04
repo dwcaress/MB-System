@@ -1,25 +1,25 @@
 .TH mbm_grdtiff 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbm_grdtiff\fP - Create an executable shellscript which will generate
+\fBmbm_grdtiff\fP \- Create an executable shellscript which will generate
 a TIFF image of gridded data in a GMT grd file.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_grdtiff\fP \fB-I\fP\fIfile\fP
-[\fB-A\fP\fImagnitude[/azimuth/elevation]\fP
-\fB-G\fP\fIcolor_mode\fP \fB-H\fP \fB-K\fP\fIintensity_file\fP
-\fB-O\fP\fIroot\fP \fB-S\fP\fI[color/shade]\fP
-\fB-V\fP
-\fB-W\fP\fI[color_style\fP[\fI/palette\fP[\fIncolors\fP]] | \fIcptfile]\fP ]
+\fBmbm_grdtiff\fP \fB\-I\fP\fIfile\fP
+[\fB\-A\fP\fImagnitude[/azimuth/elevation]\fP
+\fB\-G\fP\fIcolor_mode\fP \fB\-H\fP \fB\-K\fP\fIintensity_file\fP
+\fB\-O\fP\fIroot\fP \fB\-S\fP\fI[color/shade]\fP
+\fB\-V\fP
+\fB\-W\fP\fI[color_style\fP[\fI/palette\fP[\fIncolors\fP]] | \fIcptfile]\fP ]
 
 
 Additional Options:
 .br
-[\fB-D\fP\fIflipcolor/flipshade\fP
-\fB-MGS\fP\fIscalefactor\fP \fB-Q\fP \fB-R\fP\fIw/e/s/n\fP
-\fB-X\fP \fB-Y\fP \fB-Z\fP\fImin/max[/mode]\fP]
+[\fB\-D\fP\fIflipcolor/flipshade\fP
+\fB\-MGS\fP\fIscalefactor\fP \fB\-Q\fP \fB\-R\fP\fIw/e/s/n\fP
+\fB\-X\fP \fB\-Y\fP \fB\-Z\fP\fImin/max[/mode]\fP]
 
 .SH DESCRIPTION
 \fBmbm_grdtiff\fP is a macro to generate a shellscript
@@ -72,7 +72,7 @@ Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0;
 .B \-C
 \fIcontour_control\fP
 .br
-If \fB-C\fP is given alone, it causes unannotated contours
+If \fB\-C\fP is given alone, it causes unannotated contours
 to be drawn using a contour interval calculated from the
 data. The user may also use \fIcontour_control\fP
 to specify the contour interval. See the COMPLETE DESCRIPTION OF OPTIONS
@@ -86,13 +86,13 @@ cool colors (or dark grays) for low grid values
 to hot colors (or light grays) for high grid values.
 This option reverses the color table so that cool colors (dark grays)
 correspond to high values and hot colors (light grays) to low values.
-If \fB-D\fP is given alone, it applies to the color table used
+If \fB\-D\fP is given alone, it applies to the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
-or using an intensity file (\fB-K\fP and \fB-G\fP\fI3\fP options), then
+is to be shaded,  either by synthetic illumination (\fB\-G\fP\fI2\fP)
+or using an intensity file (\fB\-K\fP and \fB\-G\fP\fI3\fP options), then
 setting \fIflipshade\fP = 1 will cause the shading convention
 to be reversed (e.g. high intensities overlaid as light shading).
-Using \fB-D\fP\fI0/1\fP will flip the shading convention
+Using \fB\-D\fP\fI0/1\fP will flip the shading convention
 but leave the default color convention.
 .TP
 .B \-G
@@ -104,7 +104,7 @@ Turns on color fill plot and sets the style of the plot.
         \fIcolor_mode\fP = 2: Color/gray fill shaded by
                         synthetic illumination.
         \fIcolor_mode\fP = 3: Color/gray fill shaded by
-                        an intensity file. The \fB-K\fP
+                        an intensity file. The \fB\-K\fP
                         option must be used to specify
  			the intensity file.
         \fIcolor_mode\fP = 4: Color/gray fill of slope
@@ -152,13 +152,13 @@ constructing the color or shading tables so that
 the boundaries in the tables encompass equal fractions of
 the datapoints. This serves to focus color or shading contrasts
 in value ranges corresponding to the bulk of the data values.
-If \fB-S\fP is given alone or with \fIcolor\fP = 1,
+If \fB\-S\fP is given alone or with \fIcolor\fP = 1,
 it enables equalization of the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
-or using an intensity file (\fB-K\fP and \fB-G\fP\fI3\fP options), then
+is to be shaded,  either by synthetic illumination (\fB\-G\fP\fI2\fP)
+or using an intensity file (\fB\-K\fP and \fB\-G\fP\fI3\fP options), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
-Using \fB-S\fP\fI0/1\fP will equalize the shading without
+Using \fB\-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
 .TP
 .B \-U
@@ -166,7 +166,7 @@ equalizing the color table.
 .br
 Normally the orientation of the plot (portrait or landscape)
 is selected automatically so as to maximize the plot scale.
-The \fB-U\fP option allows the user to set the plot orientation. If
+The \fB\-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 1, a portrait plot will be produced; if
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
@@ -227,13 +227,13 @@ cool colors (or dark grays) for low grid values
 to hot colors (or light grays) for high grid values.
 This option reverses the color table so that cool colors (dark grays)
 correspond to high values and hot colors (light grays) to low values.
-If \fB-D\fP is given alone, it applies to the color table used
+If \fB\-D\fP is given alone, it applies to the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
-or using an intensity file (\fB-K\fP and \fB-G\fP\fI3\fP options), then
+is to be shaded,  either by synthetic illumination (\fB\-G\fP\fI2\fP)
+or using an intensity file (\fB\-K\fP and \fB\-G\fP\fI3\fP options), then
 setting \fIflipshade\fP = 1 will cause the shading convention
 to be reversed (e.g. high intensities overlaid as light shading).
-Using \fB-D\fP\fI0/1\fP will flip the shading convention
+Using \fB\-D\fP\fI0/1\fP will flip the shading convention
 but leave the default color convention.
 .TP
 .B \-G
@@ -245,7 +245,7 @@ Turns on color fill plot and sets the style of the plot.
         \fIcolor_mode\fP = 2: Color/gray fill shaded by
                         synthetic illumination.
         \fIcolor_mode\fP = 3: Color/gray fill shaded by
-                        an intensity file. The \fB-K\fP
+                        an intensity file. The \fB\-K\fP
                         option must be used to specify
  			the intensity file.
         \fIcolor_mode\fP = 4: Color/gray fill of slope
@@ -283,11 +283,11 @@ conform in order to the list of data grid files they will shade.
 .TP
 .B \-M
 A series of "miscellaneous" options are provided which are
-given as \fB-M\fP followed by a two character identifier, followed
+given as \fB\-M\fP followed by a two character identifier, followed
 by any other parameters associated with that option.
-The \fB-M\fP options may be strung together separated by
+The \fB\-M\fP options may be strung together separated by
 colons, e.g. "-MGQ100:GU:CA200/10", which is equivalent to
-"-MGQ -MGU -MCA200/10".
+"-MGQ \-MGU \-MCA200/10".
 .TP
 .B \-MGD
 \fIgmtdef/value\fP
@@ -303,7 +303,7 @@ set the basemap annotation font to Courier, use
 .br
 The gridded data is multiplied by \fIscalefactor\fP.
 This option is most often used flip the sign of the
-data (\fIscalefactor\fP = -1). [Default no scaling]
+data (\fIscalefactor\fP = \-1). [Default no scaling]
 .TP
 .B \-O
 \fIroot\fP
@@ -342,13 +342,13 @@ constructing the color or shading tables so that
 the boundaries in the tables encompass equal fractions of
 the datapoints. This serves to focus color or shading contrasts
 in value ranges corresponding to the bulk of the data values.
-If \fB-S\fP is given alone or with \fIcolor\fP = 1,
+If \fB\-S\fP is given alone or with \fIcolor\fP = 1,
 it enables equalization of the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
-or using an intensity file (\fB-K\fP and \fB-G\fP\fI3\fP options), then
+is to be shaded,  either by synthetic illumination (\fB\-G\fP\fI2\fP)
+or using an intensity file (\fB\-K\fP and \fB\-G\fP\fI3\fP options), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
-Using \fB-S\fP\fI0/1\fP will equalize the shading without
+Using \fB\-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
 .TP
 .B \-V
@@ -378,37 +378,37 @@ are available:
 
 The RGB definitions of the color palettes are:
 
-color palette 1 - Haxby Color Table
+color palette 1 \- Haxby Color Table
   red:   255 255 255 255 240 205 138 106  50  40  37
   green: 255 186 161 189 236 255 236 235 190 127  57
   blue:  255 133  68  87 121 162 174 255 255 251 175
 
-color palette 2 - High Intensity Colors
+color palette 2 \- High Intensity Colors
   red:   255 255 255 255 128   0   0   0   0 128 255
   green:   0  64 128 255 255 255 255 128   0   0   0
   blue:    0   0   0   0   0   0 255 255 255 255 255
 
-color palette 3 - Low Intensity Colors
+color palette 3 \- Low Intensity Colors
   red:   200 194 179 141  90   0   0   0   0  90 141
   green:   0  49  90 141 179 200 141  90   0   0   0
   blue:    0   0   0   0   0   0 141 179 200 179 141
 
-color palette 4 - Grayscale
+color palette 4 \- Grayscale
   red:   255 230 204 179 153 128 102  77  51  26   0
   green: 255 230 204 179 153 128 102  77  51  26   0
   blue:  255 230 204 179 153 128 102  77  51  26   0
 
-color palette 5 - Uniform Grayscale
+color palette 5 \- Uniform Grayscale
   red:   128 128 128 128 128 128 128 128 128 128 128
   green: 128 128 128 128 128 128 128 128 128 128 128
   blue:  128 128 128 128 128 128 128 128 128 128 128
 
-color palette 6 - Uniform Black
+color palette 6 \- Uniform Black
   red:     0   0   0   0   0   0   0   0   0   0   0
   green:   0   0   0   0   0   0   0   0   0   0   0
   blue:    0   0   0   0   0   0   0   0   0   0   0
 
-color palette 7 - Uniform White
+color palette 7 \- Uniform White
   red:   255 255 255 255 255 255 255 255 255 255 255
   green: 255 255 255 255 255 255 255 255 255 255 255
   blue:  255 255 255 255 255 255 255 255 255 255 255
@@ -447,7 +447,7 @@ for the boundaries of the color palette. Often, the resulting
 color bounds extend well outside the range of the gridded data.
 This option causes the minimum and maximum color boundaries to
 exactly conform to the minimum and maximum values of the grid,
-or, if the \fB-Z\fP option is used, the minimum and maximum
+or, if the \fB\-Z\fP option is used, the minimum and maximum
 values specified by the user.
 .TP
 .B \-Z
@@ -473,64 +473,64 @@ Suppose we have obtained two GRD files,
 one containing gridded bathymetry
 (testbath.grd) and the other mosaiced amplitude
 (testamp.grd).
-In order to generate a color fill TIFF image, we use the -G1 option.
+In order to generate a color fill TIFF image, we use the \-G1 option.
 Because the data has been gridded as bathymetry (positive
 down) rather than as topography (positive up), the default
 plot will have "hot" colors for deep regions and "cold"
 colors for shallow regions; this is the opposite of the
 convention we usually use. In order to fix the colors, we have
 to either rescale the data by multiplying the bathymetry
-by -1 (accomplished with -MGS-1), or flip the color
-palette (accomplished with -D). We use the latter approach:
+by \-1 (accomplished with \-MGS-1), or flip the color
+palette (accomplished with \-D). We use the latter approach:
 
-  	mbm_grdtiff -Itestbath.grd -G1 -D \\
-  	    -V -Obath_fill
+  	mbm_grdtiff \-Itestbath.grd \-G1 \-D \\
+  	    \-V \-Obath_fill
 
 In order to generate a grayscale plot of the amplitude mosaic,
-we use -G1 and -W1/4. We also use -D so that high amplitude
+we use \-G1 and \-W1/4. We also use \-D so that high amplitude
 amplitudes are shown as dark.
 
-  	mbm_grdtiff -Itestamp.grd -G1 -D -W1/4 \\
-  	    -V -Oamp_fill
+  	mbm_grdtiff \-Itestamp.grd \-G1 \-D \-W1/4 \\
+  	    \-V \-Oamp_fill
 
 Now consider generating a shaded relief view of the
 gridded bathymetry. We choose to illuminate
 the bathymetry from the northeast (azimuth of 45 degrees)
 and to use a shading magnitude of 0.4 (-A0.4/45).
 We also use
-the -X flag this so that the plot generation shellscript is
+the \-X flag this so that the plot generation shellscript is
 executed immediately. Here is the command:
 
-  	mbm_grdtiff -Itestbath.grd \\
-  	    -G2 -A0.4/45 -D -X -V \\
-  	    -Obath_shade
+  	mbm_grdtiff \-Itestbath.grd \\
+  	    \-G2 \-A0.4/45 \-D \-X \-V \\
+  	    \-Obath_shade
 
 Now, consider generating a plot of the bathymetry
 overlaid with the mosaiced amplitude.
-The amplitude overlay is specified using the -K option.
+The amplitude overlay is specified using the \-K option.
 We want the colors for the bathymetry to be chosen without
 histogram equalization, but we also want histogram
 equalization to be applied to the amplitude data used for
-shading. To do this, we use -S0/1, where the first number
+shading. To do this, we use \-S0/1, where the first number
 (0) specifies no histogram equalization of the color
 scale and the second number (1) causes histogram
 equalization of the shading amplitude data to be
 implemented. In order to maintain the convention that
 high amplitude amplitudes are black, we flip both the
 color palette (as in the previous example) and the
-shading scale with -D1/1. We could also flip the shading
+shading scale with \-D1/1. We could also flip the shading
 by specifying a negative shading magnitude (-A-0.4).
 
-  	mbm_grdtiff -Itestbath.grd \\
-  	    -G3 -Ktestamp.grd \\
-  	    -S0/1 -D1/1 -A0.4 -X -V \\
-  	    -Obath_amp
+  	mbm_grdtiff \-Itestbath.grd \\
+  	    \-G3 \-Ktestamp.grd \\
+  	    \-S0/1 \-D1/1 \-A0.4 \-X \-V \\
+  	    \-Obath_amp
 
 As an example, the contents of the plotting shellscript
 "bath_fill_tiff.cmd" are:
 
 .br
-#! /bin/csh -f
+#! /bin/csh \-f
 .br
 #
 .br
@@ -542,7 +542,7 @@ As an example, the contents of the plotting shellscript
 .br
 # This shellscript created by following command line:
 .br
-# mbm_grdtiff -Itestbath.grd -G1 -D -V -Obath_fill
+# mbm_grdtiff \-Itestbath.grd \-G1 \-D \-V \-Obath_fill
 .br
 #
 .br
@@ -552,7 +552,7 @@ set TIFF_FILE       = bath_fill.tif
 .br
 set CPT_FILE        = bath_fill.cpt
 .br
-set MAP_REGION      = -49.28/-49.13/12.05/12.2
+set MAP_REGION      = \-49.28/-49.13/12.05/12.2
 .br
 #
 .br
@@ -560,7 +560,7 @@ set MAP_REGION      = -49.28/-49.13/12.05/12.2
 .br
 echo Saving GMT defaults...
 .br
-gmtdefaults -L > gmtdefaults$$
+gmtdefaults \-L > gmtdefaults$$
 .br
 #
 .br
@@ -582,25 +582,25 @@ gmtset DEGREE_FORMAT 3
 .br
 echo Making color palette table file...
 .br
-echo  -5250 255 255 255  -5100 255 186 133 > $CPT_FILE
+echo  \-5250 255 255 255  \-5100 255 186 133 > $CPT_FILE
 .br
-echo  -5100 255 186 133  -4950 255 161  68 >> $CPT_FILE
+echo  \-5100 255 186 133  \-4950 255 161  68 >> $CPT_FILE
 .br
-echo  -4950 255 161  68  -4800 255 189  87 >> $CPT_FILE
+echo  \-4950 255 161  68  \-4800 255 189  87 >> $CPT_FILE
 .br
-echo  -4800 255 189  87  -4650 240 236 121 >> $CPT_FILE
+echo  \-4800 255 189  87  \-4650 240 236 121 >> $CPT_FILE
 .br
-echo  -4650 240 236 121  -4500 205 255 162 >> $CPT_FILE
+echo  \-4650 240 236 121  \-4500 205 255 162 >> $CPT_FILE
 .br
-echo  -4500 205 255 162  -4350 138 236 174 >> $CPT_FILE
+echo  \-4500 205 255 162  \-4350 138 236 174 >> $CPT_FILE
 .br
-echo  -4350 138 236 174  -4200 106 235 255 >> $CPT_FILE
+echo  \-4350 138 236 174  \-4200 106 235 255 >> $CPT_FILE
 .br
-echo  -4200 106 235 255  -4050  50 190 255 >> $CPT_FILE
+echo  \-4200 106 235 255  \-4050  50 190 255 >> $CPT_FILE
 .br
-echo  -4050  50 190 255  -3900  40 127 251 >> $CPT_FILE
+echo  \-4050  50 190 255  \-3900  40 127 251 >> $CPT_FILE
 .br
-echo  -3900  40 127 251  -3750  37  57 175 >> $CPT_FILE
+echo  \-3900  40 127 251  \-3750  37  57 175 >> $CPT_FILE
 .br
 #
 .br
@@ -616,7 +616,7 @@ set INTENSITY_FILE   =
 .br
 echo Running mbgrdtiff...
 .br
-mbgrdtiff -I $DATA_FILE \
+mbgrdtiff \-I $DATA_FILE \
 .br
 	-O $TIFF_FILE \
 .br
@@ -630,7 +630,7 @@ mbgrdtiff -I $DATA_FILE \
 .br
 echo Deleting surplus files...
 .br
-/bin/rm -f $CPT_FILE
+/bin/rm \-f $CPT_FILE
 .br
 #
 .br
@@ -656,8 +656,8 @@ echo All done!
 .br
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbm_grdplot\fP(l), \fBmbgrid\fP(l), \fBmbmosaic\fP(l),
-\fBmbm_grid\fP(l), \fBmbgrdtiff\fP(l), \fBgmt\fP(l)(l), \fBgrdimage\fP(l)
+\fBmbsystem\fP(1), \fBmbm_grdplot\fP(1), \fBmbgrid\fP(1), \fBmbmosaic\fP(1),
+\fBmbm_grid\fP(1), \fBmbgrdtiff\fP(1), \fBgmt\fP(1)(1), \fBgrdimage\fP(1)
 
 .SH BUGS
 This macro either has too many options, or not enough
