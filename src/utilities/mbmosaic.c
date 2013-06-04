@@ -176,6 +176,9 @@
 #include <string.h>
 #include <time.h>
 
+/* GMT include files */
+#include "gmt.h"
+
 /* mbio include files */
 #include "mb_status.h"
 #include "mb_format.h"
@@ -183,9 +186,6 @@
 #include "mb_info.h"
 #include "mb_process.h"
 #include "mb_aux.h"
-
-/* GMT include files */
-#include "gmt.h"
 
 /* gridding algorithms */
 #define	MBMOSAIC_SINGLE_BEST	1

@@ -43,12 +43,11 @@
  *	mr1pr_defines.h --
  *	Hawaii MR1 post-processing software definitions.
  */
-#ifdef HAVE_CONFIG_H
-#include <mb_config.h>
-#endif
-
 #ifndef __MR1PR_DEFINES__
 #define __MR1PR_DEFINES__
+
+#ifdef HAVE_CONFIG_H
+#include <mb_config.h>
 
 /* XDR i/o include file */
 #ifdef HAVE_RPC_RPC_H
@@ -58,6 +57,45 @@
 # include <rpc/types.h>
 # include <rpc/xdr.h>
 #endif
+
+#else /* no HAVE_CONFIG_H */
+
+/* XDR i/o include file */
+#ifdef IRIX
+#include <rpc/rpc.h>
+#endif
+#ifdef IRIX64
+#include <rpc/rpc.h>
+#endif
+#ifdef SOLARIS
+#include <rpc/rpc.h>
+#endif
+#ifdef LINUX
+#include <rpc/rpc.h>
+#endif
+#ifdef LYNX
+#include <rpc/rpc.h>
+#endif
+#ifdef SUN
+#include <rpc/xdr.h>
+#endif
+#ifdef HPUX
+#include <rpc/rpc.h>
+#endif
+#ifdef DARWIN
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#endif
+#ifdef CYGWIN
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#endif
+#ifdef OTHER
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#endif
+
+#endif /* HAVE_CONFIG_H */
 
 /* Various system dependent defines */
 #ifdef SUN

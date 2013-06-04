@@ -68,7 +68,7 @@ make uninstall (to remove a previously installed version)
 #------------------------------------------------------------------------------
 
 # Build in place:
-CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED" \
+CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
     --with-netcdf-include=/sw/include \
@@ -83,7 +83,7 @@ CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED" \
 #------------------------------------------------------------------------------
 
 # Build in /usr/local:
-CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED" \
+CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
 sudo ./configure \
     --prefix=/usr/local \
     --with-netcdf-include=/sw/include \

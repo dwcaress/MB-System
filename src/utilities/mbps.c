@@ -133,13 +133,13 @@
 #include <math.h>
 #include <string.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_define.h"
-
 /* GMT include files */
 #include "gmt.h"
 #include "pslib.h"
+
+/* MBIO include files */
+#include "mb_status.h"
+#include "mb_define.h"
 
 /*--------------------------------------------------------------------*/
 

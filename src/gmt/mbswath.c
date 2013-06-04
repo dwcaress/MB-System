@@ -257,14 +257,14 @@
 #include <string.h>
 #include <time.h>
 
+/* GMT include files */
+#include "gmt.h"
+#include "pslib.h"
+
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_define.h"
-
-/* GMT include files */
-#include "gmt.h"
-#include "pslib.h"
 
 /* GMT argument handling define */
 #define MBSWATH_GMT_ARG_MAX     128

@@ -287,13 +287,13 @@
 #include <string.h>
 #include <time.h>
 
+/* GMT include files */
+#include "gmt.h"
+
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_define.h"
-
-/* GMT include files */
-#include "gmt.h"
 
 /* TIFF 6.0 and geoTIFF tag array */
 #define TIFF_HEADER_SIZE 1024
