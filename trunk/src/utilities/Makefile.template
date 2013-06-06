@@ -227,10 +227,6 @@ $(BINDIR)/mbsegypsd:	mbsegypsd.o $(LIBDIR)/libmbio.a $(PROJLIB) $(LIBDIR)/libmba
 	$(CC) $(CFLAGS) mbsegypsd.o $(LIBDIR)/libmbio.a $(PROJLIB) $(LIBDIR)/libmbaux.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(FFTWLIBDIR)/libfftw3.a \
 		$(LFLAGS) -o $(BINDIR)/mbsegypsd
-$(BINDIR)/mbprofilepsd:	mbprofilepsd.o $(LIBDIR)/libmbio.a $(PROJLIB) $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) mbprofilepsd.o $(LIBDIR)/libmbio.a $(PROJLIB) $(LIBDIR)/libmbaux.a \
-		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(FFTWLIBDIR)/libfftw3.a \
-		$(LFLAGS) -o $(BINDIR)/mbprofilepsd
 $(BINDIR)/mbhysweeppreprocess:	mbhysweeppreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbhysweeppreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbhysweeppreprocess
@@ -318,8 +314,6 @@ mbroutetime.o:	mbroutetime.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_
 	$(CC) -c $(CFLAGS) -I../mbio mbroutetime.c
 mbsegypsd.o:	mbsegypsd.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h ../mbio/mb_segy.h
 	$(CC) -c $(CFLAGS) -I../mbio -I$(GMTINCDIR) -I$(NETCDFINCDIR) -I$(FFTWINCDIR) mbsegypsd.c
-mbprofilepsd.o:	mbprofilepsd.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
-	$(CC) -c $(CFLAGS) -I../mbio -I$(GMTINCDIR) -I$(NETCDFINCDIR) -I$(FFTWINCDIR) mbprofilepsd.c
 mbhysweeppreprocess.o:	mbhysweeppreprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbhysweeppreprocess.c
 mbkongsbergpreprocess.o:	mbkongsbergpreprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h

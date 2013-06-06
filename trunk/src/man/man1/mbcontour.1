@@ -112,7 +112,7 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 Sets the file from which the contour levels and their
 style and color are read.
 This file consists of lines in the format:
- 	\fIlevel label tick red green blue\fP
+    \fIlevel label tick red green blue\fP
 .br
 where \fIlevel\fP is the depth value to be contoured
 in meters, \fIlabel\fP
@@ -193,8 +193,8 @@ data files to be processed and their formats.  The program will read
 and plot the data in each one of these files.
 In the \fIinfile\fP file, each
 data file should be followed by a data format identifier, e.g.:
- 	datafile1 11
- 	datafile2 24
+    datafile1 11
+    datafile2 24
 .br
 This program uses the \fBMBIO\fP library and will read any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
@@ -413,25 +413,25 @@ Suppose the user has a Hydrosweep data file in the L-DEO in-house
 binary format (\fBMBIO\fP format id 24) called hs_ew9302_161_mn.mb24
 which lies in the region w/s/e/n = \-32.1874/-26.6236/54.6349/56.7536.
 The following will suffice to generate a traditional four-color contour plot:
- 	mbcontour \-Idatalist \-Jm2.44652 \
- 		-R-25.7252/-23.0683/59.7415/61.0699
- 		-Ba0.5314g0.5314 \
- 		-A50.0/250.0/250.0/250.0/0.01/0.1 \
- 		-p1 \-P \-X1 \-Y1 \-K \-V > mbcontour.ps
+    mbcontour \-Idatalist \-Jm2.44652 \
+        -R-25.7252/-23.0683/59.7415/61.0699
+        -Ba0.5314g0.5314 \
+        -A50.0/250.0/250.0/250.0/0.01/0.1 \
+        -p1 \-P \-X1 \-Y1 \-K \-V > mbcontour.ps
 .br
 where the file datalist contains:
- 	hs_ew9302_161_mn.mb24 24
+    hs_ew9302_161_mn.mb24 24
 .br
 A plot including a navigation track can also be created using
 \fBmbcontour\fP.  Here the \fB\-D\fP flag is used to add a plot
 of the ship track annotated with time marks every 0.25 hours,
 annotated time marks every hour, and day annotations every four hours:
- 	mbcontour \-Idatalist \-Jm2.44652 \
- 		-R-25.7252/-23.0683/59.7415/61.0699 \
- 		-Ba0.5314g0.5314":.File hs_ew9302_161_bmn.mb24:" \
- 		-D0.25/1/4/0.1 \
- 		-A50.0/250.0/250.0/250.0/0.01/0.1 \
- 		-p1 \-P \-X1 \-Y1 \-K \-V > hs_ew9302_161_bmn.mb24.ps
+    mbcontour \-Idatalist \-Jm2.44652 \
+        -R-25.7252/-23.0683/59.7415/61.0699 \
+        -Ba0.5314g0.5314":.File hs_ew9302_161_bmn.mb24:" \
+        -D0.25/1/4/0.1 \
+        -A50.0/250.0/250.0/250.0/0.01/0.1 \
+        -p1 \-P \-X1 \-Y1 \-K \-V > hs_ew9302_161_bmn.mb24.ps
 
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbm_plot\fP(1), \fBmbswath\fP(1),

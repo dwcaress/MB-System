@@ -1,6 +1,6 @@
 bin_PROGRAMS = proj geod
 
-AM_CPPFLAGS = -I@top_srcdir@/src
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio
 
 include_HEADERS = proj_api.h
 

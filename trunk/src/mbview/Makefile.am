@@ -1,18 +1,16 @@
 bin_PROGRAMS = mbgrdviz mbeditviz
 
-AM_CPPFLAGS = -I@top_srcdir@/src -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @MOTIF_INC_DIR@ @GL_INC_DIR@ @GMT_INC_DIR@
-LIBS = @MOTIF_LIB_DIR@ @GL_LIB_DIR@ ${libgmt_LIBS}
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @MOTIF_INC_DIR@ @GL_INC_DIR@ @GMT_INC_DIR@
+LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ @GL_LIB_DIR@ -L@top_srcdir@/src/mbio -L@top_srcdir@/src/mbaux -lmbio
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 
 include_HEADERS = mbview.h
 
 mbgrdviz_SOURCES =  mbgrdviz_main.c mbgrdviz_callbacks.c  mbgrdviz_creation.c
-mbgrdviz_LDADD = -L@top_srcdir@/src/mbio -L@top_srcdir@/src/proj -L@top_srcdir@/src/mr1pr -L@top_srcdir@/src/surf -L@top_srcdir@/src/mbaux -lmbio -lmbproj -lmbxgr \
-	@MOTIF_LIB@ @GL_LIB@ libmbview.la
+mbgrdviz_LDADD =  -lmbaux -lmbxgr @MOTIF_LIB@ @GL_LIB@ libmbview.la
 
 mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_callbacks.c mbeditviz_prog.c mbeditviz_creation.c
-mbeditviz_LDADD = -L@top_srcdir@/src/mbio -L@top_srcdir@/src/proj -L@top_srcdir@/src/mr1pr -L@top_srcdir@/src/surf -L@top_srcdir@/src/mbaux -lmbio -lmbproj -lmbaux -lmbxgr \
-	@MOTIF_LIB@ @GL_LIB@ libmbview.la
+mbeditviz_LDADD = -lmbaux -lmbxgr @MOTIF_LIB@ @GL_LIB@ libmbview.la
 mbeditviz_CFLAGS=-DMBEDITVIZ_DECLARE_GLOBALS
 
 

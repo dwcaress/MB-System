@@ -1,3 +1,4 @@
+#!
 eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                     & eval 'exec perl -S $0 $argv:q'
                          if 0;
@@ -31,9 +32,9 @@ $ver = '$Id$';
 # - TsmApi version 2.2 or higher.  http://www.tsmapi.com
 # - ImageMagick 3.7.7 or higher. http://www.imagemagick.org/
 #
-# Basic Usage: 
-#  mbm_grd2geovrml <base_name> --tvdir <dir> --vrmldir <dir> 
-#                  -olat <latitude> -olon <longitude> 
+# Basic Usage:
+#  mbm_grd2geovrml <base_name> --tvdir <dir> --vrmldir <dir>
+#                  -olat <latitude> -olon <longitude>
 #
 #   Where <base_name> is the bathymetry grid filename without the .grd.gz
 #    or .grd extensions.
@@ -46,8 +47,8 @@ $ver = '$Id$';
 #   --olat 21 --olon -157
 #
 # Additional Options:
-#  [ --nowrz --pallette <pal> --newimage [<type>] --white 
-#    --zmax <maxclip> --zmin <minclip> 
+#  [ --nowrz --pallette <pal> --newimage [<type>] --white
+#    --zmax <maxclip> --zmin <minclip>
 #    --elevscale <vert_exag> --noview --vrmlurl <base_addr> ]
 #
 # Author:
@@ -132,9 +133,9 @@ sub usage {
     Usage: $0 <grd_file> --tvdir <tvdir> --vrmldir <vrmldir>
            --olat <lat> --olon <lon> --vrmlurl <base_addr>
            [ --nowrz --pallette <pal> --newimage [<type>] --basename <string>
-             --white --zmax <maxclip> --zmin <minclip> 
+             --white --zmax <maxclip> --zmin <minclip>
              --elevscale <vert_exag> --noview ]
-    
+
     Where: <grd_file>:  the full name of the GMT grd file to be converted
            <tvdir>:     the location of TerraVision tile set to be created
            <vrmldir>:   the location of geoVRML tile set to be created
@@ -149,14 +150,14 @@ sub usage {
     Optional mbm_grd2geovrml parameters:
       --nowrz:      Write geoVRML .wrl files instead of gzipped .wrz
       --pallette:   Number of Color Lookup Table (1:Haxby,2:High,3:Low,4:Gray)
-           <pal>:  
+           <pal>:
       --newimage    Force creation of new image, otherwise uses one in $TMPDIR.
           <type>:   <type> may be a number 1..5 to pass on to the mbm_grdtiff
                     -G option.  The default is 2: synthetic illumination, use
                     5 for slope shaded.  If <type> is an image file name then
                     that image is assumed to be orthorectified and coincident
                     with the DEM.  This can be used to drape a side-scan image
-                    over the terrain model.  
+                    over the terrain model.
       --basename    Append <string> to <grd_file> for the directories that
       <string>:     will be created in <tvdir> and <vrmldir>.  Should use
                     if a <type> option is given to --newimage, e.g. _ss.
@@ -168,7 +169,7 @@ sub usage {
 
     Optional make_geovrml(1) parameters:
       --elevscale   Vertical exaggeration for geoVRML (default is 1)
-      <vert_exag>:  
+      <vert_exag>:
       --noview:     Do not include viewpoints for each tile in geoVRML
 
   Examples:
@@ -275,7 +276,7 @@ else {
 	print "\n*** Option '$newimage' not valid for --newimage.\n\n";
     usage;
 }
-	
+
 
 #
 # Check that $zmin < $zmax ( I wasted 40 minutes with this user mistake!)
@@ -283,7 +284,7 @@ else {
 if ( $clipmin > $clipmax ) {
 	print "\n*** minclip must be less than maxclip.  Below sea level is < 0.\n\n";
 	die;
-}	
+}
 
 #
 # Set up file names
@@ -305,7 +306,7 @@ $grdFile =~ s/\.gz$//;
 #
 # Now that we got grd file name, replace $baseFile with $basename if specified
 #
-$baseFile = $basename if $basename; 
+$baseFile = $basename if $basename;
 
 #
 # Temporary grid files (get removed upon successful completion)
@@ -314,8 +315,8 @@ $sampGrdFile = "Samp_$grdFile";
 $tmpGrdFile = "Tmp_$grdFile";
 $fillGrdFile = "Fill_$grdFile";
 $fixGrdFile = "Fix_$grdFile";
-@tmpFiles = ($grdFile, $sampGrdFile, 
-			 $tmpGrdFile, $fillGrdFile, 
+@tmpFiles = ($grdFile, $sampGrdFile,
+			 $tmpGrdFile, $fillGrdFile,
 			 $fixGrdFile, "${baseFile}_tiff.cmd");
 
 #
@@ -345,7 +346,7 @@ print OUT "# Starting $0 on " . scalar localtime() . "\n";
 print OUT "# $ver\n";
 print OUT "# \n";
 print OUT "# Command line that generated this file and its results:\n";
-print OUT "#   $0 $allArgs \n"; 
+print OUT "#   $0 $allArgs \n";
 print OUT "# \n";
 print OUT "# \n";
 close OUT;
@@ -368,7 +369,7 @@ else {
 
 #
 # Clip the grid if specified on command line
-#	
+#
 if ( defined $clipmax || defined $clipmin ) {
 	$cmd = "mv $grdFile tmp_${grdFile}";
 	execute($cmd, "Clipping grid file, rename original in prep for grdclip");
@@ -420,7 +421,7 @@ foreach ( split('\n', $grdInfo) ) {
 print "x_min= $x_min, x_max= $x_max, x_inc= $x_inc\n";
 print "y_min= $y_min, y_max= $y_max, y_inc= $y_inc\n";
 print "nx= $nx, ny= $ny\n";
-die "*** Can't continue without grid dimensions." unless 
+die "*** Can't continue without grid dimensions." unless
 	($x_min && $x_max && $x_inc && $y_min && $y_max && $y_inc && $nx && $ny);
 execute("grdinfo $grdFile", "Get grid dimensions & resolution");	# For the log output file
 
@@ -447,7 +448,7 @@ $cmd = "grdsample $grdFile -I${xSampInc} -Q -G${sampGrdFile}";
 execute($cmd, "Subsample grid");
 
 #
-# 1. Convert grid to xyz format for filling in blank areas 
+# 1. Convert grid to xyz format for filling in blank areas
 # 2. preprocess w/blockmean
 # 3. use surface to extrapolate to no data areas
 #
@@ -524,7 +525,7 @@ $DOption = '';
 if ( $color_mode == 1 ) { $imgType = "Color/gray fill"; }
 elsif ( $color_mode == 2 ) { $imgType = "synthetic illumination shaded"; }
 elsif ( $color_mode == 4 ) { $imgType = "fill of slope magnitude"; }
-elsif ( $color_mode == 5 ) { 
+elsif ( $color_mode == 5 ) {
 	$imgType = "shaded by slope magnitude";
 	$DOption = "-D0/1";		# Flips shaping
 }
@@ -567,8 +568,8 @@ if ( $newimageFlag && -f $newimage ) {
 			$y_dim = $2;
 			last;
 		}
-	} 
-	print "Image $baseFile.tif: x_dim = $x_dim, y_dim = $y_dim\n"; 
+	}
+	print "Image $baseFile.tif: x_dim = $x_dim, y_dim = $y_dim\n";
 
 	#
 	# Many EM300 coverages have side scanned data moasiced to twice the bath res
@@ -667,7 +668,7 @@ sub execute {
 	my $which = `which $item[0]`;
 	chop $which;
 	die "\nCan't find $item[0] in your search path:\n$which" unless -f $which;
-		
+
 	#
 	# Write comments & commands to output file
 	#
@@ -689,8 +690,7 @@ sub execute {
 		print OUT "# ", $_;
 	}
 	close OUT;
-	
+
 	##$ret = $ret / 256 / 255;
 	##die "\nReturn value > 0. See above for any error message.\n" unless $ret <= 0;
 }
-

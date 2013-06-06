@@ -3,7 +3,8 @@ if BUILD_FFTW
 endif
 
 
-bin_PROGRAMS = mbformat \
+bin_PROGRAMS = hsdump \
+        mbformat \
         mbdefaults \
         mbdatalist \
         mbinfo \
@@ -34,7 +35,7 @@ bin_PROGRAMS = mbformat \
         mb7k2jstar \
         mb7kpreprocess \
         mbrolltimelag \
-	mbauvloglist \
+        mbauvloglist \
         mb7k2ss \
         mbabsorption \
         mbdumpesf \
@@ -46,158 +47,141 @@ bin_PROGRAMS = mbformat \
         mbkongsbergpreprocess \
         $(FFTW_PROG)
 
-#Removed hsdump
 #Remove mbps if WIN32?
-#Add mbprofilepsd to FFTW_PROG in future?
-
 
 include_HEADERS = levitus.h
 
-AM_CPPFLAGS = -I@top_srcdir@/src -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux -I@top_srcdir@/src/surf -I@top_srcdir@/src/gsf @CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@
-LIBS = -L@top_srcdir@/src/mbio -L@top_srcdir@/src/gsf -L@top_srcdir@/src/proj -L@top_srcdir@/src/mr1pr -L@top_srcdir@/src/surf ${libnetcdf_LIBS} ${libgmt_LIBS}
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux -I@top_srcdir@/src/gsf @CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@
+LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} -L@top_srcdir@/src/mbio -L@top_srcdir@/src/mbaux -lmbio
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 
+hsdump_SOURCES = hsdump.c
+hsdump_LDADD =
+
 mbformat_SOURCES = mbformat.c
-mbformat_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbformat_LDADD =
 
 mbdefaults_SOURCES = mbdefaults.c
-mbdefaults_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbdefaults_LDADD =
 
 mbdatalist_SOURCES = mbdatalist.c
-mbdatalist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbdatalist_LDADD =
 
 mbinfo_SOURCES = mbinfo.c
-mbinfo_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbinfo_LDADD =
 
 mbset_SOURCES = mbset.c
-mbset_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbset_LDADD =
 
 mbprocess_SOURCES = mbprocess.c
-mbprocess_LDADD = -L@top_srcdir@/src/mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mbprocess_LDADD = -lmbaux
 
 mbcopy_SOURCES = mbcopy.c
-mbcopy_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbcopy_LDADD =
 
 mblist_SOURCES = mblist.c
-mblist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mblist_LDADD =
 
 mbnavlist_SOURCES = mbnavlist.c
-mbnavlist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbnavlist_LDADD =
 
 mbsvplist_SOURCES = mbsvplist.c
-mbsvplist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbsvplist_LDADD =
 
 mbbackangle_SOURCES = mbbackangle.c
-mbbackangle_LDADD = -L@top_srcdir@/src/mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mbbackangle_LDADD = -lmbaux
 
 mbclean_SOURCES = mbclean.c
-mbclean_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbclean_LDADD =
 
 mbareaclean_SOURCES = mbareaclean.c
-mbareaclean_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbareaclean_LDADD =
 
 mbhistogram_SOURCES = mbhistogram.c
-mbhistogram_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbhistogram_LDADD =
 
 mbgrid_SOURCES = mbgrid.c
-mbgrid_LDADD = -L@top_srcdir@/src/mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mbgrid_LDADD = -lmbaux
 
 mbmosaic_SOURCES = mbmosaic.c
-mbmosaic_LDADD = -L@top_srcdir@/src/mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mbmosaic_LDADD = -lmbaux
 
 mblevitus_SOURCES = mblevitus.c
-mblevitus_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mblevitus_LDADD =
 
 mbrollbias_SOURCES = mbrollbias.c
-mbrollbias_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbrollbias_LDADD =
 
 mbextractsegy_SOURCES = mbextractsegy.c
-mbextractsegy_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbextractsegy_LDADD =
 
 mbsegylist_SOURCES = mbsegylist.c
-mbsegylist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbsegylist_LDADD =
 
 mbsegyinfo_SOURCES = mbsegyinfo.c
-mbsegyinfo_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbsegyinfo_LDADD =
 
 mbsegygrid_SOURCES = mbsegygrid.c
-mbsegygrid_LDADD = -L@top_srcdir@/src/mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mbsegygrid_LDADD = -lmbaux
 
 mbauvnavusbl_SOURCES = mbauvnavusbl.c
-mbauvnavusbl_LDADD = -L@top_srcdir@/src/mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mbauvnavusbl_LDADD = -lmbaux
 
 mbgetesf_SOURCES = mbgetesf.c
-mbgetesf_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbgetesf_LDADD =
 
 mbneptune2esf_SOURCES = mbneptune2esf.c
-mbneptune2esf_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbneptune2esf_LDADD =
 
 mbps_SOURCES = mbps.c
-mbps_LDADD = -L@top_srcdir@/src/mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbps -lpsl -lgmtps
+mbps_LDADD = ${libgmt_LIBS} -lmbps -lpsl -lgmtps
 
 mbstripnan_SOURCES = mbstripnan.c
-mbstripnan_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbstripnan_LDADD =
 
 mb7k2jstar_SOURCES = mb7k2jstar.c
-mb7k2jstar_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mb7k2jstar_LDADD =
 
 mb7kpreprocess_SOURCES = mb7kpreprocess.c
-mb7kpreprocess_LDADD = -L@top_srcdir@/src/mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mb7kpreprocess_LDADD = -lmbaux
 
 mbrolltimelag_SOURCES = mbrolltimelag.c
-mbrolltimelag_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbrolltimelag_LDADD =
 
 mbauvloglist_SOURCES = mbauvloglist.c
-mbauvloglist_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbauvloglist_LDADD =
 
 mb7k2ss_SOURCES = mb7k2ss.c
-mb7k2ss_LDADD = -L@top_srcdir@/src/mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mb7k2ss_LDADD = -lmbaux
 
 mbabsorption_SOURCES = mbabsorption.c
-mbabsorption_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbabsorption_LDADD =
 
 mbdumpesf_SOURCES = mbdumpesf.c
-mbdumpesf_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbdumpesf_LDADD =
 
 mbtime_SOURCES = mbtime.c
-mbtime_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbtime_LDADD =
 
 mbctdlist_SOURCES = mbctdlist.c
-mbctdlist_LDADD = -L@top_srcdir@/src/mbaux \
-	${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mbctdlist_LDADD = -lmbaux
 
 mbfilter_SOURCES = mbfilter.c
-mbfilter_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbfilter_LDADD =
 
 mbroutetime_SOURCES = mbroutetime.c
-mbroutetime_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbroutetime_LDADD =
 
 mbhysweeppreprocess_SOURCES = mbhysweeppreprocess.c
-mbhysweeppreprocess_LDADD = -L@top_srcdir@/src/mbaux -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mbhysweeppreprocess_LDADD = -lmbaux
 
 mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
-mbkongsbergpreprocess_LDADD = -L@top_srcdir@/src/mbaux -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi -lmbaux
+mbkongsbergpreprocess_LDADD = -lmbaux
 
 if BUILD_FFTW
 mbsegypsd_SOURCES = mbsegypsd.c
-mbsegypsd_CFLAGS = ${libgmt_CFLAGS} ${libfftw_CFLAGS} -L@top_srcdir@/src/mbaux
-mbsegypsd_LDADD = ${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi \
-	-lmbaux ${libfftw_LIBS}
-
-## Removed mbprofilepsd -- does not build??
-# mbprofilepsd_SOURCES = mbprofilepsd.c
-# mbprofilepsd_CFLAGS = ${libfftw_CFLAGS} -L@top_srcdir@/src/mbaux
-# mbprofilepsd_LDADD = ${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi \
-#	-lmbaux ${libfftw_LIBS}
+mbsegypsd_CFLAGS = ${libgmt_CFLAGS} ${libfftw_CFLAGS}
+mbsegypsd_LDADD = ${libgmt_LIBS} ${libfftw_LIBS} -lmbaux
 endif
 
 BUILT_SOURCES = levitus.h

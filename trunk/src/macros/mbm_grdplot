@@ -1,3 +1,4 @@
+#!
 eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                     & eval 'exec perl -S $0 $argv:q'
                          if 0;
@@ -1687,8 +1688,8 @@ $yoffset = ($height - $plot_height
 $degree_format = "ddd:mm";
 if (!$gridprojected)
 	{
-	$xsize = $xmax - $xmin;
-	$ysize = $ymax - $ymin;
+	$xsize = ($xmax - $xmin) / 3;
+	$ysize = ($ymax - $ymin) / 3;
 	if ($xsize < $ysize)
 		{
 		$size = $xsize;
@@ -3897,8 +3898,8 @@ sub GetBaseTick {
 		}
 	else
 		{
-		$base_tick_x = ($xmax - $xmin) / 5;
-		$base_tick_y = ($ymax - $ymin) / 5;
+		$base_tick_x = ($xmax - $xmin) / 3;
+		$base_tick_y = ($ymax - $ymin) / 3;
 		}
 
 	# deal with seismic grids (time vs trace number)
