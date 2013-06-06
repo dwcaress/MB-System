@@ -67,14 +67,10 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_mbotps_OBJECTS = mbotps-mbotps.$(OBJEXT)
+am_mbotps_OBJECTS = mbotps.$(OBJEXT)
 nodist_mbotps_OBJECTS =
 mbotps_OBJECTS = $(am_mbotps_OBJECTS) $(nodist_mbotps_OBJECTS)
-am__DEPENDENCIES_1 =
-mbotps_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-mbotps_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(mbotps_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+mbotps_DEPENDENCIES =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -140,7 +136,7 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
-LIBS = @LIBS@
+LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} -L@top_srcdir@/src/mbio -L@top_srcdir@/src/mbaux -lmbio
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
@@ -238,10 +234,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I@top_srcdir@/src -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux -I@top_srcdir@/src/surf -I@top_srcdir@/src/gsf @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux
+AM_CFLAGS = 
 mbotps_SOURCES = mbotps.c
-mbotps_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L@top_srcdir@/src/mbio -L@top_srcdir@/src/gsf -L@top_srcdir@/src/proj -L@top_srcdir@/src/mr1pr -L@top_srcdir@/src/surf
-mbotps_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
+mbotps_LDADD = -lmbaux
 nodist_mbotps_SOURCES = otps.h
 BUILT_SOURCES = otps.h
 CLEANFILES = otps.h
@@ -329,7 +325,7 @@ clean-binPROGRAMS:
 	rm -f $$list
 mbotps$(EXEEXT): $(mbotps_OBJECTS) $(mbotps_DEPENDENCIES) $(EXTRA_mbotps_DEPENDENCIES) 
 	@rm -f mbotps$(EXEEXT)
-	$(mbotps_LINK) $(mbotps_OBJECTS) $(mbotps_LDADD) $(LIBS)
+	$(LINK) $(mbotps_OBJECTS) $(mbotps_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -337,7 +333,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbotps-mbotps.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbotps.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -359,20 +355,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-mbotps-mbotps.o: mbotps.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbotps_CFLAGS) $(CFLAGS) -MT mbotps-mbotps.o -MD -MP -MF $(DEPDIR)/mbotps-mbotps.Tpo -c -o mbotps-mbotps.o `test -f 'mbotps.c' || echo '$(srcdir)/'`mbotps.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mbotps-mbotps.Tpo $(DEPDIR)/mbotps-mbotps.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbotps.c' object='mbotps-mbotps.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbotps_CFLAGS) $(CFLAGS) -c -o mbotps-mbotps.o `test -f 'mbotps.c' || echo '$(srcdir)/'`mbotps.c
-
-mbotps-mbotps.obj: mbotps.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbotps_CFLAGS) $(CFLAGS) -MT mbotps-mbotps.obj -MD -MP -MF $(DEPDIR)/mbotps-mbotps.Tpo -c -o mbotps-mbotps.obj `if test -f 'mbotps.c'; then $(CYGPATH_W) 'mbotps.c'; else $(CYGPATH_W) '$(srcdir)/mbotps.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mbotps-mbotps.Tpo $(DEPDIR)/mbotps-mbotps.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbotps.c' object='mbotps-mbotps.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbotps_CFLAGS) $(CFLAGS) -c -o mbotps-mbotps.obj `if test -f 'mbotps.c'; then $(CYGPATH_W) 'mbotps.c'; else $(CYGPATH_W) '$(srcdir)/mbotps.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

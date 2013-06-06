@@ -111,3 +111,22 @@ CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
     --with-motif-lib=/sw/lib
 
 #------------------------------------------------------------------------------
+libtoolize --force --copy
+aclocal
+autoheader
+automake --add-missing --include-deps
+autoconf
+autoupdate
+autoreconf --force --install --warnings=all
+
+CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
+./configure \
+    --prefix=/Users/caress/sandbox/mbsystem \
+    --with-netcdf-include=/sw/include \
+    --with-netcdf-lib=/sw/lib \
+    --with-gmt-include=/sw/include \
+    --with-gmt-lib=/sw/lib \
+    --with-fftw-include=/sw/include \
+    --with-fftw-lib=/sw/lib \
+    --with-motif-include=/sw/include \
+    --with-motif-lib=/sw/lib

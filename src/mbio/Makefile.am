@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I@top_srcdir@/src -I@top_srcdir@/src/gsf -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_CPPFLAGS = -I@top_srcdir@/src/gsf -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@
 
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L@top_srcdir@/src/gsf -L@top_srcdir@/src/surf -L@top_srcdir@/src/mr1pr -L@top_srcdir@/src/proj
 

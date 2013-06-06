@@ -1,6 +1,6 @@
 .\" @(#)pj_init.3 \- 4.1
 .nr LL 5.5i
-.TH PJ_INIT 3U "2001/04/05 Rel. 4.4" 
+.TH PJ_INIT 3 "2001/04/05 Rel. 4.4"
 .ad b
 .hy 1
 .SH NAME
@@ -27,9 +27,9 @@ projUV pj_fwd(projUV val, projPJ proj)
 
 projUV pj_inv(projUV val, projPJ proj)
 
-int pj_transform(projPJ src_cs, projPJ dst_cs, long point_count, 
+int pj_transform(projPJ src_cs, projPJ dst_cs, long point_count,
                  int point_offset, double *x, double *y, double *z)
-               
+
 void pj_free(projPJ proj)
 
 .SH DESCRIPTION
@@ -109,4 +109,3 @@ libproj.a \- library of projections and support procedures
 (Evenden, 1990, Open-file report 90\-284).
 .SH HOME PAGE
 http://proj.osgeo.org
-

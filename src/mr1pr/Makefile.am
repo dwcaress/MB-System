@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I@top_srcdir@/src
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio
 
 include_HEADERS = mr1pr.h mr1pr_defines.h
 

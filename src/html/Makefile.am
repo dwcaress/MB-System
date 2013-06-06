@@ -2,6 +2,7 @@ dist_html_DATA = \
 caress2001.gif \
 ChayesJul2003.gif \
 gpl.html \
+hsdump.html \
 index.html \
 mb7k2jstar.html \
 mb7k2ss.html \
@@ -90,4 +91,4 @@ mbsystem_whatsnew.html \
 MBTeamJul2003.gif \
 mbtime.html \
 mbvelocitytool.html \
-ValJul2003.gif 
+ValJul2003.gif

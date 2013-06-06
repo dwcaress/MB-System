@@ -151,7 +151,7 @@ Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
 Sets the file from which the contour levels and their
 style and color are read.
 This file consists of lines in the format:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>level&nbsp;label&nbsp;tick&nbsp;red&nbsp;green&nbsp;blue</I><BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<I>level&nbsp;label&nbsp;tick&nbsp;red&nbsp;green&nbsp;blue</I>
 <BR>
 
 where <I>level</I> is the depth value to be contoured
@@ -246,8 +246,8 @@ data files to be processed and their formats.  The program will read
 and plot the data in each one of these files.
 In the <I>infile</I> file, each
 data file should be followed by a data format identifier, e.g.:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;datafile1&nbsp;11
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;datafile2&nbsp;24
 <BR>
 
 This program uses the <B>MBIO</B> library and will read any swath sonar
@@ -527,19 +527,19 @@ Suppose the user has a Hydrosweep data file in the L-DEO in-house
 binary format (<B>MBIO</B> format id 24) called hs_ew9302_161_mn.mb24
 which lies in the region w/s/e/n = -32.1874/-26.6236/54.6349/56.7536.
 The following will suffice to generate a traditional four-color contour plot:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-25.7252/-23.0683/59.7415/61.0699<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Ba0.5314g0.5314&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-A50.0/250.0/250.0/250.0/0.01/0.1&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;mbcontour.ps<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-R-25.7252/-23.0683/59.7415/61.0699
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Ba0.5314g0.5314&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-A50.0/250.0/250.0/250.0/0.01/0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;mbcontour.ps
 <BR>
 
 where the file datalist contains:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>hs_ew9302_161_mn.mb24&nbsp;24<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;hs_ew9302_161_mn.mb24&nbsp;24
 <BR>
 
 A plot including a navigation track can also be created using
 <B>mbcontour</B>.  Here the <B>-D</B> flag is used to add a plot
 of the ship track annotated with time marks every 0.25 hours,
 annotated time marks every hour, and day annotations every four hours:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-25.7252/-23.0683/59.7415/61.0699&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT>-Ba0.5314g0.5314&quot;:.File&nbsp;hs_ew9302_161_bmn.mb24:&quot;&nbsp;&nbsp;-D0.25/1/4/0.1&nbsp;&nbsp;-A50.0/250.0/250.0/250.0/0.01/0.1&nbsp;&nbsp;-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;hs_ew9302_161_bmn.mb24.ps<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-R-25.7252/-23.0683/59.7415/61.0699&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Ba0.5314g0.5314&quot;:.File&nbsp;hs_ew9302_161_bmn.mb24:&quot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-D0.25/1/4/0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-A50.0/250.0/250.0/250.0/0.01/0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;hs_ew9302_161_bmn.mb24.ps
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
