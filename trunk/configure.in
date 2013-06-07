@@ -6,7 +6,7 @@ dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
-AC_INIT([mbsystem],[5.4.2116])
+AC_INIT([mbsystem],[5.4.2117])
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 
