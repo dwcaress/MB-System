@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhsdump.c	6/16/93
- *    $Id: mbhsdump.c 2063 2013-05-22 00:05:57Z caress $
+ *    $Id$
  *
  *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
@@ -116,7 +116,7 @@
 #include "mb_define.h"
 #include "mbsys_hsds.h"
 
-static char rcs_id[] = "$Id: mbhsdump.c 2063 2013-05-22 00:05:57Z caress $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

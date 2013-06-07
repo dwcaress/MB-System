@@ -55,58 +55,57 @@ PROJLIB  = $(LIBDIR)/libmbproj.a
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
 ### make all makes the MB-system utilites and man pages
-all:	$(BINDIR)/hsdump \
-	$(BINDIR)/mbformat \
-	$(BINDIR)/mbdefaults \
-	$(BINDIR)/mbdatalist \
-	$(BINDIR)/mbinfo \
-	$(BINDIR)/mbset \
-	$(BINDIR)/mbprocess \
-	$(BINDIR)/mbcopy \
-	$(BINDIR)/mblist \
-	$(BINDIR)/mbnavlist \
-	$(BINDIR)/mbsvplist \
+all:	$(BINDIR)/mb7k2jstar \
+	$(BINDIR)/mb7k2ss \
+	$(BINDIR)/mb7kpreprocess \
+	$(BINDIR)/mbabsorption \
+	$(BINDIR)/mbareaclean \
+	$(BINDIR)/mbauvloglist \
+	$(BINDIR)/mbauvnavusbl \
 	$(BINDIR)/mbbackangle \
 	$(BINDIR)/mbclean \
-	$(BINDIR)/mbareaclean \
-	$(BINDIR)/mbhistogram \
-	$(BINDIR)/mbgrid \
-	$(BINDIR)/mbmosaic \
-	$(BINDIR)/mblevitus \
-	$(BINDIR)/mbrollbias \
-	$(BINDIR)/mbextractsegy \
-	$(BINDIR)/mbsegylist \
-	$(BINDIR)/mbsegyinfo \
-	$(BINDIR)/mbsegygrid \
-	$(BINDIR)/mbsegypsd \
-	$(BINDIR)/mbauvnavusbl \
-	$(BINDIR)/mbgetesf \
-	$(BINDIR)/mbneptune2esf \
-	$(BINDIR)/mbps \
-	$(BINDIR)/mbstripnan \
-	$(BINDIR)/mbrollbias \
-	$(BINDIR)/mb7k2jstar \
-	$(BINDIR)/mb7kpreprocess \
-	$(BINDIR)/mbrolltimelag	\
-	$(BINDIR)/mbauvloglist\
-	$(BINDIR)/mb7k2ss \
-	$(BINDIR)/mbabsorption \
-	$(BINDIR)/mbdumpesf\
-	$(BINDIR)/mbtime \
+	$(BINDIR)/mbcopy \
 	$(BINDIR)/mbctdlist \
+	$(BINDIR)/mbdatalist \
+	$(BINDIR)/mbdefaults \
+	$(BINDIR)/mbdumpesf \
+	$(BINDIR)/mbextractsegy \
 	$(BINDIR)/mbfilter \
-	$(BINDIR)/mbroutetime \
+	$(BINDIR)/mbformat \
+	$(BINDIR)/mbgetesf \
+	$(BINDIR)/mbgrid \
+	$(BINDIR)/mbhistogram \
+	$(BINDIR)/mbhsdump \
 	$(BINDIR)/mbhysweeppreprocess \
-	$(BINDIR)/mbkongsbergpreprocess
+	$(BINDIR)/mbinfo \
+	$(BINDIR)/mbkongsbergpreprocess \
+	$(BINDIR)/mblevitus \
+	$(BINDIR)/mblist \
+	$(BINDIR)/mbmosaic \
+	$(BINDIR)/mbnavlist \
+	$(BINDIR)/mbneptune2esf \
+	$(BINDIR)/mbprocess \
+	$(BINDIR)/mbps \
+	$(BINDIR)/mbrollbias \
+	$(BINDIR)/mbrolltimelag \
+	$(BINDIR)/mbroutetime \
+	$(BINDIR)/mbsegygrid \
+	$(BINDIR)/mbsegyinfo \
+	$(BINDIR)/mbsegylist \
+	$(BINDIR)/mbsegypsd \
+	$(BINDIR)/mbset \
+	$(BINDIR)/mbstripnan \
+	$(BINDIR)/mbsvplist \
+	$(BINDIR)/mbtime
 
 ### make clean removes the object files
 clean:
 	rm -f *.o
 
 ### link the executables
-$(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
-		-o $(BINDIR)/hsdump
+$(BINDIR)/mbhsdump:	mbhsdump.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbhsdump.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
+		-o $(BINDIR)/mbhsdump
 $(BINDIR)/mbformat:	mbformat.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbformat.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
 		-o $(BINDIR)/mbformat
@@ -239,8 +238,8 @@ $(BINDIR)/mbkongsbergpreprocess:	mbkongsbergpreprocess.o $(LIBDIR)/libmbio.a $(L
 		$(LFLAGS) -o $(BINDIR)/mbkongsbergpreprocess
 
 ### compile the source files
-hsdump.o:	hsdump.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
-	$(CC) -c $(CFLAGS) -I../mbio hsdump.c
+mbhsdump.o:	mbhsdump.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
+	$(CC) -c $(CFLAGS) -I../mbio mbhsdump.c
 mbformat.o:	mbformat.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio mbformat.c
 mbdefaults.o:	mbdefaults.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h

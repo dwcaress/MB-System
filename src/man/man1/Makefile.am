@@ -1,5 +1,5 @@
 man_MANS = geod.1 \
-hsdump.1 \
+mbhsdump.1 \
 mb7k2jstar.1 \
 mb7k2ss.1 \
 mb7kpreprocess.1 \
@@ -77,6 +77,6 @@ mbswath.1 \
 mbsystem.1 \
 mbtime.1 \
 mbvelocitytool.1 \
-proj.1 
+proj.1
 
 EXTRA_DIST = $(man_MANS)
