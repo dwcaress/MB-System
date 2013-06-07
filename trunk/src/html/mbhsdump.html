@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbhsdump</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbhsdump</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbhsdump</B> - lists the information contained in Hydrosweep DS data files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbhsdump</B> [<B>-F</B><I>format </I><B>-I</B><I>infile </I><B>-O</B><I>kind </I><B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbhsdump</B> lists the information contained in data records on
+Hydrosweep DS data files, including survey, calibrate, water velocity
+and comment records. The default input stream is stdin. Prior to version 5.4
+this program was named hsdump.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the format for the input and output swath sonar data using
+<B>MBIO</B> integer format identifiers.
+This program is specific to Hydrosweep DS data, and cannot be used
+with data from any other swath sonar system or with data in a Hydrosweep
+format that does not include water velocity records. Currently, the two formats
+which can be used are the raw Hydrosweep DS format (<B>MBIO</B> id 21)
+and the L-DEO in-house binary Hydrosweep format (<B>MBIO</B> id 24).
+Default: <I>format</I> = 5.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Data file from which the input data will be read. If
+no input file is specified, the input will be read
+from stdin. Default: <I>infile</I> = stdin.
+<DT><B>-O</B>
+
+<DD>
+<I>kind</I>
+<BR>
+
+Sets the kind of data record which will be listed, where the choices
+for kind include:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Survey&nbsp;data&nbsp;record<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Comment&nbsp;record<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Calibrate&nbsp;data&nbsp;record<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Mean&nbsp;velocity&nbsp;data&nbsp;record<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Velocity&nbsp;profile&nbsp;data&nbsp;record<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>6:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Standby&nbsp;data&nbsp;record<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Navigation&nbsp;source&nbsp;data&nbsp;record<BR>
+<BR>
+
+This option can be given multiple times to set more than one
+kind of data record for listing.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbhsdump</B> lists only the contents of the data records
+which are specified with the <B>-O</B> option.  If the
+<B>-V</B> flag is given, then <B>mbhsdump</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used, any comment records encountered
+in the data stream, and all error status messages.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to list out the water velocity records
+contained in the raw Hydrosweep (format 21) file hsraw.
+The following will suffice:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbhsdump&nbsp;-F21&nbsp;-O4&nbsp;-O5&nbsp;-Ihsraw<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbinfo.html">mbinfo</A></B>(1), <B><A HREF="mblist.html">mblist</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Other than the name change, this program hasn't been altered in this century.
+It is probably stale.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
