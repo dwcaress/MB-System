@@ -1,12 +1,12 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl configure.in for mbsystem
-AC_PREREQ([2.69])
+AC_PREREQ([2.65])
 
 dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
-AC_INIT([mbsystem],[5.4.2117])
+AC_INIT([mbsystem],[5.4.2120])
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 
