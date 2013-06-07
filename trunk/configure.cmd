@@ -1,11 +1,23 @@
 #------------------------------------------------------------------------------
-# From Bob Covill
-# Updated March 16, 2013
+# Notes on using an autotools based build system with the MB-System source
+# code archive.
 #------------------------------------------------------------------------------
-# To modify build system...
-# Edit configure.in and Makefile.am (in each folder)
-# and then run the following:
+#
+# David W. Caress
+# June 7, 2013
 #------------------------------------------------------------------------------
+#
+# This build system was begun by Bob Covill in 2012, and then completed
+# with a distributed, multi-continental effort by Bob Covill, Christian
+# Ferreira, Hamish Bowman, Kurt Schwehr, and David Caress in May and June
+# of 2013.
+#
+#------------------------------------------------------------------------------
+# To modify the build system...
+#------------------------------------------------------------------------------
+#
+# Edit the file "configure.in" in the top directory and "Makefile.am" in each
+# directory and then run the following sequence of commands:
 
 # Build libtool files for AM_PROG_LIBTOOL
 libtoolize --force --copy
@@ -20,33 +32,32 @@ autoconf
 autoupdate
 autoreconf --force --install --warnings=all
 
+# When you run ./configure, a number of configure options are saved  to a
+# header file:
+#     ./src/mbio/mb_config.h
+# This file has a template:
+#     ./src/mbio/mb_config.h.in
+# This file is conditionally included by:
+#     ./src/mbio/mb_define.h
+# which is in turn included by essentially every MB-System C source file.
+# The condition under which mb_config.h is used is simply the use of the
+# configure script to generate the makefiles. If one uses the alternate
+# "install_makefiles" build system, then an alternate header file named
+#     ./src/mbio/mb_config2.h
+# is used instead.
+#
 #------------------------------------------------------------------------------
-# More notes from Bob Covill
-# May 28, 2013
+# To use the build system...
 #------------------------------------------------------------------------------
+# To generate the makefiles needed to build MB-System, run ./configure
+# with the options appropriate for your situation. Some examples are
+# given below.
 #
-# 1. The actual ./configure script is controlled by a template file
-# configure.in . Any changes to configure should be added there.
-#
-# 2. A number of configure options are saved when you run ./configure to a
-# header file ./src/mbsystem_config.h . Again this has a
-# template ./src/mbsystem_config.h.in .
-#
-# 3. Each folder has a Makefile template Makefile.am.
-#
-# 4. Any changes to the configure system should be done in the above
-# templates. After any of the files are changed the configure system has
-# to be rebuilt with the autoreconf command ...
-autoreconf --force --install --warnings=all
-# This will generate a new configure script and update the Makefile.in
-# files.
-#
-# 5. Once you run a successful ./configure the final Makefiles are
-# generated.
-#
-# 6. After configure you can run the usual ...
+# After configure you can run the make utility in the usual fashion
 make
 make install
+#
+# Some other useful make commands include:
 make clean (to clean up compiled code)
 make distclean (to clean up compiled code and configure output)
 make uninstall (to remove a previously installed version)
@@ -65,6 +76,9 @@ make uninstall (to remove a previously installed version)
 # --with-motif-include location of Motif headers (optional)
 # --with-opengl-lib location of OpenGL libs (optional)
 # --with-opengl-include location of OpenGL headers (optional)
+
+#------------------------------------------------------------------------------
+# Configure script command line examples:
 #------------------------------------------------------------------------------
 
 # Build in place:
@@ -111,6 +125,9 @@ CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
     --with-motif-lib=/sw/lib
 
 #------------------------------------------------------------------------------
+
+# Reconstruct the build system, and then use it to build in place
+# in my personal development tree
 libtoolize --force --copy
 aclocal
 autoheader
@@ -131,3 +148,9 @@ CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib
+
+make
+make install
+
+#------------------------------------------------------------------------------
+
