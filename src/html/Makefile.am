@@ -1,4 +1,4 @@
-dist_html_DATA = \
+dist_mbsystemhtml_DATA = \
 caress2001.gif \
 ChayesJul2003.gif \
 gpl.html \

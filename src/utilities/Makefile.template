@@ -55,7 +55,8 @@ PROJLIB  = $(LIBDIR)/libmbproj.a
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
 ### make all makes the MB-system utilites and man pages
-all:	$(BINDIR)/mbformat \
+all:	$(BINDIR)/hsdump \
+	$(BINDIR)/mbformat \
 	$(BINDIR)/mbdefaults \
 	$(BINDIR)/mbdatalist \
 	$(BINDIR)/mbinfo \
@@ -103,6 +104,9 @@ clean:
 	rm -f *.o
 
 ### link the executables
+$(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
+		-o $(BINDIR)/hsdump
 $(BINDIR)/mbformat:	mbformat.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbformat.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
 		-o $(BINDIR)/mbformat
@@ -235,6 +239,8 @@ $(BINDIR)/mbkongsbergpreprocess:	mbkongsbergpreprocess.o $(LIBDIR)/libmbio.a $(L
 		$(LFLAGS) -o $(BINDIR)/mbkongsbergpreprocess
 
 ### compile the source files
+hsdump.o:	hsdump.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
+	$(CC) -c $(CFLAGS) -I../mbio hsdump.c
 mbformat.o:	mbformat.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio mbformat.c
 mbdefaults.o:	mbdefaults.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h

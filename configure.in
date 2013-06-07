@@ -6,11 +6,11 @@ dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
-AC_INIT([mbsystem],[5.4.2112])
+AC_INIT([mbsystem],[5.4.2114])
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 
-AC_DEFINE(VERSION_DATE, "6 June 2013", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "7 June 2013", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -577,6 +577,10 @@ AM_CONDITIONAL([BUILD_GL], [test "$GOT_GL" = yes])
 dnl variables for shared data
 mbsystemdatadir="$datadir/$PACKAGE"
 AC_SUBST(mbsystemdatadir)
+mbsystemhtmldir="$datadir/doc/$PACKAGE/html"
+AC_SUBST(mbsystemhtmldir)
+mbsystempsdir="$datadir/doc/$PACKAGE/ps"
+AC_SUBST(mbsystempsdir)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
 	  src/gsf/Makefile src/surf/Makefile \

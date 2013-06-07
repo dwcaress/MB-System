@@ -1,4 +1,4 @@
-dist_ps_DATA = \
+dist_mbsystemps_DATA = \
 hsdump.ps \
 mb7k2jstar.ps \
 mb7k2ss.ps \
