@@ -3,7 +3,7 @@ if BUILD_FFTW
 endif
 
 
-bin_PROGRAMS = hsdump \
+bin_PROGRAMS = mbhsdump \
         mbformat \
         mbdefaults \
         mbdatalist \
@@ -58,7 +58,7 @@ AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux -I@top_srcdir@/sr
 AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux -L$(top_builddir)/src/gsf -L$(top_builddir)/src/mr1pr -L$(top_builddir)/src/proj -L$(top_builddir)/src/surf
 LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la
 
-hsdump_SOURCES = hsdump.c
+mbhsdump_SOURCES = mbhsdump.c
 
 mbformat_SOURCES = mbformat.c
 
