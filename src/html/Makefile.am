@@ -2,7 +2,6 @@ dist_mbsystemhtml_DATA = \
 caress2001.gif \
 ChayesJul2003.gif \
 gpl.html \
-hsdump.html \
 index.html \
 mb7k2jstar.html \
 mb7k2ss.html \
@@ -29,6 +28,7 @@ mbgrdtiff.html \
 mbgrdviz.html \
 mbgrid.html \
 mbhistogram.html \
+mbhsdump.html \
 mbhysweeppreprocess.html \
 mbinfo.html \
 mbio.html \

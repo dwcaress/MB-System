@@ -1,5 +1,4 @@
 dist_mbsystemps_DATA = \
-hsdump.ps \
 mb7k2jstar.ps \
 mb7k2ss.ps \
 mb7kpreprocess.ps \
@@ -25,6 +24,7 @@ mbgrdtiff.ps \
 mbgrdviz.ps \
 mbgrid.ps \
 mbhistogram.ps \
+mbhsdump.ps \
 mbhysweeppreprocess.ps \
 mbinfo.ps \
 mbio.ps \
