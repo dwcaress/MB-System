@@ -8975,7 +8975,7 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap,
 
 		/* write out data */
 		write_len = wc->beam[i].wtc_beam_samples;
-		status = mb_fileio_put(verbose, mbio_ptr, wc->beam[i].wtc_amp, &write_len, error);
+		status = mb_fileio_put(verbose, mbio_ptr, (char *)wc->beam[i].wtc_amp, &write_len, error);
 		}
 	    }
 

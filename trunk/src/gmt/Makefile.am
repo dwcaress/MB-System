@@ -1,16 +1,16 @@
-AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @CDF_INC_DIR@ @GMT_INC_DIR@
-LIBS = -L@top_srcdir@/src/mbio -L@top_srcdir@/src/mbaux -lmbio
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
+
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @CDF_INC_DIR@ @GMT_INC_DIR@
+
+AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux -L$(top_builddir)/src/gsf -L$(top_builddir)/src/mr1pr -L$(top_builddir)/src/proj -L$(top_builddir)/src/surf
+LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la
 
 bin_PROGRAMS = mbcontour mbgrdtiff mbswath
 
 mbcontour_SOURCES = mbcontour.c
-mbcontour_CFLAGS = ${libgmt_CFLAGS}
-mbcontour_LDADD = -lmbaux
+mbcontour_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
 
 mbgrdtiff_SOURCES = mbgrdtiff.c
-mbgrdtiff_LDADD =
 
 mbswath_SOURCES = mbswath.c
-mbswath_CFLAGS = ${libgmt_CFLAGS}
-mbswath_LDADD = -lmbaux
+mbswath_LDADD = $(top_builddir)/src/mbaux/libmbaux.la

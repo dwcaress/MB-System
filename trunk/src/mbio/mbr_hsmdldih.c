@@ -111,14 +111,12 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
 
 /* mbio include files */
+#include "mb_define.h"
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
 #include "mbsys_hsmd.h"
 #include "mbf_hsmdldih.h"
 

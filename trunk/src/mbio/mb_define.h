@@ -161,8 +161,15 @@
  *
  *
  */
+
+/* include this code only once */
+#ifndef MB_DEFINE_DEF
+#define MB_DEFINE_DEF
+
 #ifdef HAVE_CONFIG_H
-#include <mb_config.h>
+#include "mb_config.h"
+#else
+#include "mb_config2.h"
 #endif
 
 /* include for mb_s_char types */
@@ -179,9 +186,24 @@
 # include <rpc/xdr.h>
 #endif
 
-/* include this code only once */
-#ifndef MB_DEFINE_DEF
-#define MB_DEFINE_DEF
+/* MB-system version id */
+#define	MB_VERSION	VERSION
+#define	MB_BUILD_DATE	VERSION_DATE
+#define	MB_SVN		"$Id$"
+
+/* type definitions of signed and unsigned char */
+typedef unsigned char	mb_u_char;
+
+/* From stdint.h if available */
+#if defined INT8_MAX || defined int8_t
+typedef int8_t mb_s_char;
+#else
+typedef signed char	mb_s_char;
+#endif
+
+/* type definitions of signed and unsigned long int (64 bit integer) */
+typedef unsigned long long	mb_u_long;
+typedef long long	mb_s_long;
 
 /* declare buffer maximum */
 #define	MB_BUFFER_MAX	5000
@@ -195,6 +217,10 @@
 /* other string length defines */
 #define MB_NAME_LENGTH		32
 #define MB_DESCRIPTION_LENGTH	2048
+
+/* typedef for path string */
+typedef char mb_path[MB_PATH_MAXLINE];
+typedef char mb_name[MB_NAME_LENGTH];
 
 /* maximum number of asynchronous data saved */
 #define MB_ASYNCH_SAVE_MAX 10000
@@ -228,24 +254,6 @@
 #define MB_MEM_TYPE_BATHYMETRY		1
 #define MB_MEM_TYPE_AMPLITUDE		2
 #define MB_MEM_TYPE_SIDESCAN		3
-
-/* type definitions of signed and unsigned char */
-typedef unsigned char	mb_u_char;
-
-/* From stdint.h if available */
-#if defined INT8_MAX || defined int8_t
-typedef int8_t mb_s_char;
-#else
-typedef signed char	mb_s_char;
-#endif
-
-/* type definitions of signed and unsigned long int (64 bit integer) */
-typedef unsigned long long	mb_u_long;
-typedef long long	mb_s_long;
-
-/* typedef for path string */
-typedef char mb_path[MB_PATH_MAXLINE];
-typedef char mb_name[MB_NAME_LENGTH];
 
 /* declare PI if needed */
 #ifndef M_PI

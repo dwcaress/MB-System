@@ -67,21 +67,15 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_mbcontour_OBJECTS = mbcontour-mbcontour.$(OBJEXT)
+am_mbcontour_OBJECTS = mbcontour.$(OBJEXT)
 mbcontour_OBJECTS = $(am_mbcontour_OBJECTS)
-mbcontour_DEPENDENCIES =
-mbcontour_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(mbcontour_CFLAGS) \
-	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+mbcontour_DEPENDENCIES = $(top_builddir)/src/mbaux/libmbaux.la
 am_mbgrdtiff_OBJECTS = mbgrdtiff.$(OBJEXT)
 mbgrdtiff_OBJECTS = $(am_mbgrdtiff_OBJECTS)
-mbgrdtiff_DEPENDENCIES =
-am_mbswath_OBJECTS = mbswath-mbswath.$(OBJEXT)
+mbgrdtiff_LDADD = $(LDADD)
+am_mbswath_OBJECTS = mbswath.$(OBJEXT)
 mbswath_OBJECTS = $(am_mbswath_OBJECTS)
-mbswath_DEPENDENCIES =
-mbswath_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(mbswath_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+mbswath_DEPENDENCIES = $(top_builddir)/src/mbaux/libmbaux.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -148,7 +142,7 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
-LIBS = -L@top_srcdir@/src/mbio -L@top_srcdir@/src/mbaux -lmbio
+LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
@@ -246,16 +240,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @CDF_INC_DIR@ @GMT_INC_DIR@
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux -L$(top_builddir)/src/gsf -L$(top_builddir)/src/mr1pr -L$(top_builddir)/src/proj -L$(top_builddir)/src/surf
 mbcontour_SOURCES = mbcontour.c
-mbcontour_CFLAGS = ${libgmt_CFLAGS}
-mbcontour_LDADD = -lmbaux
+mbcontour_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
 mbgrdtiff_SOURCES = mbgrdtiff.c
-mbgrdtiff_LDADD = 
 mbswath_SOURCES = mbswath.c
-mbswath_CFLAGS = ${libgmt_CFLAGS}
-mbswath_LDADD = -lmbaux
+mbswath_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
 all: all-am
 
 .SUFFIXES:
@@ -338,13 +330,13 @@ clean-binPROGRAMS:
 	rm -f $$list
 mbcontour$(EXEEXT): $(mbcontour_OBJECTS) $(mbcontour_DEPENDENCIES) $(EXTRA_mbcontour_DEPENDENCIES) 
 	@rm -f mbcontour$(EXEEXT)
-	$(mbcontour_LINK) $(mbcontour_OBJECTS) $(mbcontour_LDADD) $(LIBS)
+	$(LINK) $(mbcontour_OBJECTS) $(mbcontour_LDADD) $(LIBS)
 mbgrdtiff$(EXEEXT): $(mbgrdtiff_OBJECTS) $(mbgrdtiff_DEPENDENCIES) $(EXTRA_mbgrdtiff_DEPENDENCIES) 
 	@rm -f mbgrdtiff$(EXEEXT)
 	$(LINK) $(mbgrdtiff_OBJECTS) $(mbgrdtiff_LDADD) $(LIBS)
 mbswath$(EXEEXT): $(mbswath_OBJECTS) $(mbswath_DEPENDENCIES) $(EXTRA_mbswath_DEPENDENCIES) 
 	@rm -f mbswath$(EXEEXT)
-	$(mbswath_LINK) $(mbswath_OBJECTS) $(mbswath_LDADD) $(LIBS)
+	$(LINK) $(mbswath_OBJECTS) $(mbswath_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -352,9 +344,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbcontour-mbcontour.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbcontour.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrdtiff.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbswath-mbswath.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbswath.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -376,34 +368,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-mbcontour-mbcontour.o: mbcontour.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbcontour_CFLAGS) $(CFLAGS) -MT mbcontour-mbcontour.o -MD -MP -MF $(DEPDIR)/mbcontour-mbcontour.Tpo -c -o mbcontour-mbcontour.o `test -f 'mbcontour.c' || echo '$(srcdir)/'`mbcontour.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mbcontour-mbcontour.Tpo $(DEPDIR)/mbcontour-mbcontour.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbcontour.c' object='mbcontour-mbcontour.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbcontour_CFLAGS) $(CFLAGS) -c -o mbcontour-mbcontour.o `test -f 'mbcontour.c' || echo '$(srcdir)/'`mbcontour.c
-
-mbcontour-mbcontour.obj: mbcontour.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbcontour_CFLAGS) $(CFLAGS) -MT mbcontour-mbcontour.obj -MD -MP -MF $(DEPDIR)/mbcontour-mbcontour.Tpo -c -o mbcontour-mbcontour.obj `if test -f 'mbcontour.c'; then $(CYGPATH_W) 'mbcontour.c'; else $(CYGPATH_W) '$(srcdir)/mbcontour.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mbcontour-mbcontour.Tpo $(DEPDIR)/mbcontour-mbcontour.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbcontour.c' object='mbcontour-mbcontour.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbcontour_CFLAGS) $(CFLAGS) -c -o mbcontour-mbcontour.obj `if test -f 'mbcontour.c'; then $(CYGPATH_W) 'mbcontour.c'; else $(CYGPATH_W) '$(srcdir)/mbcontour.c'; fi`
-
-mbswath-mbswath.o: mbswath.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbswath_CFLAGS) $(CFLAGS) -MT mbswath-mbswath.o -MD -MP -MF $(DEPDIR)/mbswath-mbswath.Tpo -c -o mbswath-mbswath.o `test -f 'mbswath.c' || echo '$(srcdir)/'`mbswath.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mbswath-mbswath.Tpo $(DEPDIR)/mbswath-mbswath.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbswath.c' object='mbswath-mbswath.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbswath_CFLAGS) $(CFLAGS) -c -o mbswath-mbswath.o `test -f 'mbswath.c' || echo '$(srcdir)/'`mbswath.c
-
-mbswath-mbswath.obj: mbswath.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbswath_CFLAGS) $(CFLAGS) -MT mbswath-mbswath.obj -MD -MP -MF $(DEPDIR)/mbswath-mbswath.Tpo -c -o mbswath-mbswath.obj `if test -f 'mbswath.c'; then $(CYGPATH_W) 'mbswath.c'; else $(CYGPATH_W) '$(srcdir)/mbswath.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mbswath-mbswath.Tpo $(DEPDIR)/mbswath-mbswath.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbswath.c' object='mbswath-mbswath.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mbswath_CFLAGS) $(CFLAGS) -c -o mbswath-mbswath.obj `if test -f 'mbswath.c'; then $(CYGPATH_W) 'mbswath.c'; else $(CYGPATH_W) '$(srcdir)/mbswath.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

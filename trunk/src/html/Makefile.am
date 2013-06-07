@@ -87,6 +87,7 @@ mbsystem.html \
 mbsystem_logo.gif \
 mbsystem_logo_small.gif \
 mbsystem_man_list.html \
+mbsystem_version.txt \
 mbsystem_whatsnew.html \
 MBTeamJul2003.gif \
 mbtime.html \

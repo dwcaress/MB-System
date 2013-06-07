@@ -262,8 +262,8 @@
 #include <sys/stat.h>
 
 /* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
+#include "mb_status.h"
 #include "mb_process.h"
 #include "mb_io.h"
 #include "mb_swap.h"

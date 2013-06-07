@@ -13,16 +13,16 @@ lib_LTLIBRARIES = libmbps.la libmbaux.la $(XGRLIB)
 
 libmbps_la_LDFLAGS = -no-undefined -version-info 0:0:0 ${libgmt_CFLAGS}
 libmbps_la_SOURCES = mb_pslibface.c
-libmbps_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} -lpsl -lgmtps
+libmbps_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS}
 #Need -lgmtps in linux but remove for WIN32?
 
-libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0 ${libgmt_CFLAGS}
+libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0 ${libgmt_CFLAGS} -L$(top_builddir)/src/mbio
 libmbaux_la_SOURCES = \
 		      mb_spline.c mb_zgrid.c mb_surface.c mb_cheb.c \
 		      mb_delaun.c mb_track.c mb_truecont.c mb_readgrd.c \
 		      mb_intersectgrid.c
-libmbaux_la_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L@top_srcdir@/src/mbio
-libmbaux_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} -lpsl -lmbio libmbps.la
+libmbaux_la_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
+libmbaux_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} -lmbio libmbps.la
 
 if BUILD_MOTIF
  libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0 ${libgmt_CFLAGS}
