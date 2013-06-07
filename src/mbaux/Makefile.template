@@ -42,7 +42,7 @@ ARCHIVE = ar rcv
 all:	$(LIBDIR)/libmbaux.a \
 	$(LIBDIR)/libmbps.a \
 	$(LIBDIR)/libmbxgr.a \
-	mb_aux.h \
+	$(INCDIR)/mb_aux.h \
 	$(INCDIR)/mb_xgraphics.h
 
 ### make clean removes the object files
@@ -107,9 +107,9 @@ mb_intersectgrid.o:	mb_intersectgrid.c ../mbio/mb_status.h mb_aux.h
 	$(CC) -c $(CFLAGS) -I../mbio mb_intersectgrid.c
 
 ### copy the include files to the include file directory
-mb_aux.h:	mb_aux.h
-	cp mb_aux.h mb_aux.h
-	chmod 664 mb_aux.h
+$(INCDIR)/mb_aux.h:	mb_aux.h
+	cp mb_aux.h $(INCDIR)/mb_aux.h
+	chmod 664 $(INCDIR)/mb_aux.h
 $(INCDIR)/mb_xgraphics.h:	mb_xgraphics.h
 	cp mb_xgraphics.h $(INCDIR)/mb_xgraphics.h
 	chmod 664 $(INCDIR)/mb_xgraphics.h

@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  3/7/2003
 #	$Id$
 #
-#     Copyright (c) 2003 by
+#     Copyright (c) 2003-2013 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -14,7 +14,7 @@
 # Makefile template for MB-system at the src/mr1pr directory level
 # The source code in src/mr1pr derives from and is copyright by
 # the University of Hawaii.
-# 
+#
 # Author:	Roger Davis, University of Hawaii (MR1PR library)
 # Author:	D. W. Caress (MB-System implementation)
 # Date:		March 7, 2003
@@ -45,9 +45,9 @@ LIBDIR = ../../lib
 INCDIR = ../../include
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
-# 
-# Compilers 
-CC = cc 
+#
+# Compilers
+CC = cc
 #
 # Compile and load flags:
 CFLAGS = -O2
@@ -58,7 +58,7 @@ ARCHIVE = ar rcv
 ### make all makes the mbaux library and associated include files
 all:	 $(INCDIR)/mr1pr.h \
 	$(INCDIR)/mr1pr_defines.h \
-	$(LIBDIR)/libmr1pr.a 
+	$(LIBDIR)/libmr1pr.a
 
 ### make clean removes the object files
 clean:
@@ -69,12 +69,12 @@ $(LIBDIR)/libmr1pr.a:	\
 		io.o \
 		iov1.o \
 		misc.o \
-		memalloc.o  
+		memalloc.o
 	$(ARCHIVE) $(LIBDIR)/libmr1pr.a \
 		io.o \
 		iov1.o \
 		misc.o \
-		memalloc.o  
+		memalloc.o
 	ranlib $(LIBDIR)/libmr1pr.a
 
 ### compile the source files

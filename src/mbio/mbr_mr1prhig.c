@@ -117,14 +117,12 @@
 #include <math.h>
 #include <string.h>
 #include <time.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
 
 /* mbio include files */
+#include "mb_define.h"
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
 #include "mbsys_mr1.h"
 #include "mbf_mr1prhig.h"
 

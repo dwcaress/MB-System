@@ -100,6 +100,9 @@
 /* Version number of package */
 #undef VERSION
 
+/* Set VERSION_DATE define in mb_config.h */
+#undef VERSION_DATE
+
 /* Turned on WIN32 define in config */
 #undef WIN32
 

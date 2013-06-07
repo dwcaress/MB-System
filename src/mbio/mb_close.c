@@ -129,10 +129,10 @@
 #include <string.h>
 
 /* mbio include files */
+#include "mb_define.h"
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
 #include "mb_segy.h"
 #include "../surf/sapi.h"
 #include "gsf.h"

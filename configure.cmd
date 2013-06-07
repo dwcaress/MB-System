@@ -117,6 +117,7 @@ autoheader
 automake --add-missing --include-deps
 autoconf
 autoupdate
+
 autoreconf --force --install --warnings=all
 
 CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \

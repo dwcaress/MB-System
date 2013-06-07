@@ -33,7 +33,7 @@ Version 5.0
 <B>-C</B><I>[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]</I>
 <B>-D</B>[<I>flipcolor/flipshade</I>]
 <B>-G</B><I>color_mode[F]</I> <B>-H</B>
-<B>-N</B><I>[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F | FP]</I>
+<B>-N</B><I>[ttick/tannot/dannot/tlen[/nhgt] | F | FP]</I>
 <B>-O</B><I>root</I> <B>-P</B><I>pagesize </I>
 <B>-S</B><I>[color/shade]</I> <B>-T</B>
 <B>-U</B><I>orientation</I> <B>-V</B>
@@ -65,7 +65,7 @@ Miscellaneous Options:
 <B>-MMN</B><I>nplot</I> <B>-MMP</B><I>pings </I>
 <B>-MMS</B><I>speedmin</I>
 <B>-MMT</B><I>timegap</I> <B>-MMZ</B><I>algorithm</I>
-<B>-MNA</B><I>[name_hgt[/P] | P]</I>
+<B>-MNA</B><I>[nhgt[/P] | P]</I>
 <B>-MNP</B><I>[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]</I>
 <B>-MTC</B><I>fill</I> <B>-MTD</B><I>resolution</I>
 <B>-MTG</B><I>fill</I> <B>-MTI</B><I>river[/pen]</I>
@@ -810,15 +810,15 @@ Default: <I>algorithm</I> = 0 unless <I>format</I> = 41.
 <DT><B>-MNA</B>
 
 <DD>
-<I>[name_hgt[/P] | P]</I>
+<I>[nhgt[/P] | P]</I>
 <BR>
 
 Turns on filename annotation of navigation tracks. If <B>-MNA</B> is given
 without specifying any controlling parameters, then the lettering height
-<I>name_hgt</I> is 0.15 and the filenames are plotted parallel to the
+<I>nhgt</I> is 0.15 and the filenames are plotted parallel to the
 navigation track from the start of the track. The lettering height can be
-specified using either <B>-MNA</B><I>name_hgt</I> or <B>-MNA</B><I>name_hgt/P</I>.
-If <B>-MNA</B><I>P</I> or <B>-MNA</B><I>name_hgt/P</I> is specified,
+specified using either <B>-MNA</B><I>nhgt</I> or <B>-MNA</B><I>nhgt/P</I>.
+If <B>-MNA</B><I>P</I> or <B>-MNA</B><I>nhgt/P</I> is specified,
 the filename will be plotted perpendicular to the navigation track.
 Filename annotation can also be specified using the <B>-N</B> option.
 Defaults: Filename annotation off.
@@ -830,8 +830,8 @@ Defaults: Filename annotation off.
 
 Turns on ping number (or shot number) annotation of navigation tracks.
 Tick marks are made along the shiptrack at <I>pingnumber_tick</I> intervals; these
-are <I>time_tick_len</I> inches long. Longer tick marks are made along the
-shiptrack at <I>pingnumber_annot</I> intervals; these are 1.5 times <I>time_tick_len</I>
+are <I>tlen</I> inches long. Longer tick marks are made along the
+shiptrack at <I>pingnumber_annot</I> intervals; these are 1.5 times <I>tlen</I>
 inches long.
 Defaults: Pingnumber annotation off. If the <B>-MNP</B> option is given without
 specifying the controlling parameters, then <I>pingnumber_tick</I> = 50,
@@ -1074,8 +1074,7 @@ texture = solid].
 <DT><B>-N</B>
 
 <DD>
-<I>[time_tick/time_annot/date_annot/time_tick_len
-[/name_hgt/name_perp]] | F | FP]</I>
+<I>[ttick/tannot/dannot/tlen[/nhgt/nperp]] | F | FP]</I>
 <BR>
 
 This option causes a navigation track plot to be generated, and
@@ -1087,15 +1086,15 @@ track annotation. Time marks are made with &quot;X&quot; marks along the
 shiptrack; annotated time marks show the time in HH:MM format
 next to the time mark and annotated date marks show the time
 and julian day in HH:MM/DDD format.  The &quot;X&quot; marks are
-<I>time_tick_len</I> inches high for normal time marks and
-1.5 times <I>time_tick_len</I> inches high for annotated time or date
+<I>tlen</I> inches high for normal time marks and
+1.5 times <I>tlen</I> inches high for annotated time or date
 marks.  The interval of time ticks, annotated time ticks, and
-annotated date ticks are given in hours by <I>time_tick</I>,
-<I>time_annot</I>, and <I>date_annot</I>, respectively.
-If the <I>name_hgt</I> parameter is not given when the other parameters
+annotated date ticks are given in hours by <I>ttick</I>,
+<I>tannot</I>, and <I>dannot</I>, respectively.
+If the <I>nhgt</I> parameter is not given when the other parameters
 are specified, then no filename annotation will be done. If given,
-<I>name_hgt</I> sets the height in inches of the filename annotation
-and turns that annotation on. If given as 1, <I>name_perp</I> causes
+<I>nhgt</I> sets the height in inches of the filename annotation
+and turns that annotation on. If given as 1, <I>nperp</I> causes
 the filename annotation to be perpendicular to the shiptrack rather
 than parallel (the default). If the <B>-N</B><I>F</I> is given, then
 a navigation track will be generated using the default parameters
@@ -1103,9 +1102,9 @@ and also with filename annotation along the shiptrack. If the
 <B>-N</B><I>FP</I> is given, then a navigation track will be generated
 with the default parameters and also with filename annotation
 perpendicular to the shiptrack.
-Defaults if annotation is enabled: <I>time_tick</I> = 0.25;
-<I>time_annot</I> = 1.0; <I>date_annot</I> = 4.0;
-<I>time_tick_len</I> = 0.1; <I>name_hgt</I> = 0.1; <I>name_perp</I> = 0.
+Defaults if annotation is enabled: <I>ttick</I> = 0.25;
+<I>tannot</I> = 1.0; <I>dannot</I> = 4.0;
+<I>tlen</I> = 0.1; <I>nhgt</I> = 0.1; <I>nperp</I> = 0.
 <DT><B>-O</B>
 
 <DD>

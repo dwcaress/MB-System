@@ -12,7 +12,7 @@ Version 5.0
 \fB\-C\fP\fI[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\fP
 \fB\-D\fP[\fIflipcolor/flipshade\fP]
 \fB\-G\fP\fIcolor_mode[F]\fP \fB\-H\fP
-\fB\-N\fP\fI[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F | FP]\fP
+\fB\-N\fP\fI[ttick/tannot/dannot/tlen[/nhgt] | F | FP]\fP
 \fB\-O\fP\fIroot\fP \fB\-P\fP\fIpagesize \fP
 \fB\-S\fP\fI[color/shade]\fP \fB\-T\fP
 \fB\-U\fP\fIorientation\fP \fB\-V\fP
@@ -42,7 +42,7 @@ Miscellaneous Options:
 \fB\-MMN\fP\fInplot\fP \fB\-MMP\fP\fIpings \fP
 \fB\-MMS\fP\fIspeedmin\fP
 \fB\-MMT\fP\fItimegap\fP \fB\-MMZ\fP\fIalgorithm\fP
-\fB\-MNA\fP\fI[name_hgt[/P] | P]\fP
+\fB\-MNA\fP\fI[nhgt[/P] | P]\fP
 \fB\-MNP\fP\fI[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\fP
 \fB\-MTC\fP\fIfill\fP \fB\-MTD\fP\fIresolution\fP
 \fB\-MTG\fP\fIfill\fP \fB\-MTI\fP\fIriver[/pen]\fP
@@ -679,14 +679,14 @@ may be reasonably contoured at a time (e.g. use \fB\-N\fP\fI50\fP).
 Default: \fIalgorithm\fP = 0 unless \fIformat\fP = 41.
 .TP
 .B \-MNA
-\fI[name_hgt[/P] | P]\fP
+\fI[nhgt[/P] | P]\fP
 .br
 Turns on filename annotation of navigation tracks. If \fB\-MNA\fP is given
 without specifying any controlling parameters, then the lettering height
-\fIname_hgt\fP is 0.15 and the filenames are plotted parallel to the
+\fInhgt\fP is 0.15 and the filenames are plotted parallel to the
 navigation track from the start of the track. The lettering height can be
-specified using either \fB\-MNA\fP\fIname_hgt\fP or \fB\-MNA\fP\fIname_hgt/P\fP.
-If \fB\-MNA\fP\fIP\fP or \fB\-MNA\fP\fIname_hgt/P\fP is specified,
+specified using either \fB\-MNA\fP\fInhgt\fP or \fB\-MNA\fP\fInhgt/P\fP.
+If \fB\-MNA\fP\fIP\fP or \fB\-MNA\fP\fInhgt/P\fP is specified,
 the filename will be plotted perpendicular to the navigation track.
 Filename annotation can also be specified using the \fB\-N\fP option.
 Defaults: Filename annotation off.
@@ -696,8 +696,8 @@ Defaults: Filename annotation off.
 .br
 Turns on ping number (or shot number) annotation of navigation tracks.
 Tick marks are made along the shiptrack at \fIpingnumber_tick\fP intervals; these
-are \fItime_tick_len\fP inches long. Longer tick marks are made along the
-shiptrack at \fIpingnumber_annot\fP intervals; these are 1.5 times \fItime_tick_len\fP
+are \fItlen\fP inches long. Longer tick marks are made along the
+shiptrack at \fIpingnumber_annot\fP intervals; these are 1.5 times \fItlen\fP
 inches long.
 Defaults: Pingnumber annotation off. If the \fB\-MNP\fP option is given without
 specifying the controlling parameters, then \fIpingnumber_tick\fP = 50,
@@ -900,8 +900,7 @@ GMT Technical reference for a discussion of GMT pen values.
 texture = solid].
 .TP
 .B \-N
-\fI[time_tick/time_annot/date_annot/time_tick_len
-[/name_hgt/name_perp]] | F | FP]\fP
+\fI[ttick/tannot/dannot/tlen[/nhgt/nperp]] | F | FP]\fP
 .br
 This option causes a navigation track plot to be generated, and
 can also set the start of each swath file to be annotated with the
@@ -912,15 +911,15 @@ track annotation. Time marks are made with "X" marks along the
 shiptrack; annotated time marks show the time in HH:MM format
 next to the time mark and annotated date marks show the time
 and julian day in HH:MM/DDD format.  The "X" marks are
-\fItime_tick_len\fP inches high for normal time marks and
-1.5 times \fItime_tick_len\fP inches high for annotated time or date
+\fItlen\fP inches high for normal time marks and
+1.5 times \fItlen\fP inches high for annotated time or date
 marks.  The interval of time ticks, annotated time ticks, and
-annotated date ticks are given in hours by \fItime_tick\fP,
-\fItime_annot\fP, and \fIdate_annot\fP, respectively.
-If the \fIname_hgt\fP parameter is not given when the other parameters
+annotated date ticks are given in hours by \fIttick\fP,
+\fItannot\fP, and \fIdannot\fP, respectively.
+If the \fInhgt\fP parameter is not given when the other parameters
 are specified, then no filename annotation will be done. If given,
-\fIname_hgt\fP sets the height in inches of the filename annotation
-and turns that annotation on. If given as 1, \fIname_perp\fP causes
+\fInhgt\fP sets the height in inches of the filename annotation
+and turns that annotation on. If given as 1, \fInperp\fP causes
 the filename annotation to be perpendicular to the shiptrack rather
 than parallel (the default). If the \fB\-N\fP\fIF\fP is given, then
 a navigation track will be generated using the default parameters
@@ -928,9 +927,9 @@ and also with filename annotation along the shiptrack. If the
 \fB\-N\fP\fIFP\fP is given, then a navigation track will be generated
 with the default parameters and also with filename annotation
 perpendicular to the shiptrack.
-Defaults if annotation is enabled: \fItime_tick\fP = 0.25;
-\fItime_annot\fP = 1.0; \fIdate_annot\fP = 4.0;
-\fItime_tick_len\fP = 0.1; \fIname_hgt\fP = 0.1; \fIname_perp\fP = 0.
+Defaults if annotation is enabled: \fIttick\fP = 0.25;
+\fItannot\fP = 1.0; \fIdannot\fP = 4.0;
+\fItlen\fP = 0.1; \fInhgt\fP = 0.1; \fInperp\fP = 0.
 .TP
 .B \-O
 \fIroot\fP

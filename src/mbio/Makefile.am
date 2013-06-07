@@ -1,7 +1,5 @@
+AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 AM_CPPFLAGS = -I@top_srcdir@/src/gsf -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@
-
-AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L@top_srcdir@/src/gsf -L@top_srcdir@/src/surf -L@top_srcdir@/src/mr1pr -L@top_srcdir@/src/proj
-
 
 include_HEADERS = mb_config.h \
         mb_format.h mb_status.h \
@@ -120,7 +118,8 @@ libmbio_la_SOURCES = \
 
 
 libmbio_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @XDR_LIB@ \
-		   -lmbgsf -lmbmr1pr -lmbsapi -lmbproj
+		   $(top_builddir)/src/gsf/libmbgsf.la $(top_builddir)/src/mr1pr/libmbmr1pr.la \
+                   $(top_builddir)/src/surf/libmbsapi.la $(top_builddir)/src/proj/libmbproj.la
 
 nodist_libmbio_la_SOURCES = projections.h
 

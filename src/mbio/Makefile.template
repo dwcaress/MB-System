@@ -47,7 +47,8 @@ PROJINCDIR  = $(INCDIR)
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
 ### make all makes the mbio library, man page, and associated include files
-all:	$(INCDIR)/mb_config.h $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
+all:	$(INCDIR)/mb_config.h $(INCDIR)/mb_config2.h \
+	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mb_io.h $(INCDIR)/mb_swap.h \
 	$(INCDIR)/mb_define.h $(INCDIR)/mb_process.h \
 	$(INCDIR)/mb_segy.h $(INCDIR)/mb_info.h \
@@ -92,7 +93,7 @@ all:	$(INCDIR)/mb_config.h $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 
 ### make clean removes the object files
 clean:
-	rm -f *.o
+	rm -f *.o mb_config2.h
 
 ### put together the static library
 $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
@@ -503,6 +504,49 @@ mbr_swplssxp.o: mbr_swplssxp.c mb_status.h mb_format.h mb_io.h mb_config.h mb_de
 $(INCDIR)/mb_config.h:	mb_config.h
 	cp mb_config.h $(INCDIR)/mb_config.h
 	chmod 664 $(INCDIR)/mb_config.h
+mb_config2.h:	mb_config.h Makefile
+	echo "/* MB-System configuration file mb_config2.h to be included by mb_define.h */" > mb_config2.h
+	echo "/*  when MB-System is built using install_makefiles */" >> mb_config2.h
+	grep "#define VERSION" mb_config.h >> mb_config2.h
+	echo "/* */" >> mb_config2.h
+	echo "/*  Define XDR includes according to OS */" >> mb_config2.h
+	echo "#ifdef IRIX" >> mb_config2.h
+	echo "#include <rpc/rpc.h>" >> mb_config2.h
+	echo "#endif" >> mb_config2.h
+	echo "#ifdef IRIX64" >> mb_config2.h
+	echo "#include <rpc/rpc.h>" >> mb_config2.h
+	echo "#endif" >> mb_config2.h
+	echo "#ifdef SOLARIS" >> mb_config2.h
+	echo "#include <rpc/rpc.h>" >> mb_config2.h
+	echo "#endif" >> mb_config2.h
+	echo "#ifdef LINUX" >> mb_config2.h
+	echo "#include <rpc/rpc.h>" >> mb_config2.h
+	echo "#endif" >> mb_config2.h
+	echo "#ifdef LYNX" >> mb_config2.h
+	echo "#include <rpc/rpc.h>" >> mb_config2.h
+	echo "#endif" >> mb_config2.h
+	echo "#ifdef SUN" >> mb_config2.h
+	echo "#include <rpc/xdr.h>" >> mb_config2.h
+	echo "#endif" >> mb_config2.h
+	echo "#ifdef HPUX" >> mb_config2.h
+	echo "#include <rpc/rpc.h>" >> mb_config2.h
+	echo "#endif" >> mb_config2.h
+	echo "#ifdef DARWIN" >> mb_config2.h
+	echo "#include <rpc/types.h>" >> mb_config2.h
+	echo "#include <rpc/xdr.h>" >> mb_config2.h
+	echo "#endif" >> mb_config2.h
+	echo "#ifdef CYGWIN" >> mb_config2.h
+	echo "#include <rpc/types.h>" >> mb_config2.h
+	echo "#include <rpc/xdr.h>" >> mb_config2.h
+	echo "#endif" >> mb_config2.h
+	echo "#ifdef OTHER" >> mb_config2.h
+	echo "#include <rpc/types.h>" >> mb_config2.h
+	echo "#include <rpc/xdr.h>" >> mb_config2.h
+	echo "#endif" >> mb_config2.h
+	echo " " >> mb_config2.h
+$(INCDIR)/mb_config2.h:	mb_config2.h
+	cp mb_config2.h $(INCDIR)/mb_config2.h
+	chmod 664 $(INCDIR)/mb_config2.h
 $(INCDIR)/mb_format.h:	mb_format.h
 	cp mb_format.h $(INCDIR)/mb_format.h
 	chmod 664 $(INCDIR)/mb_format.h
