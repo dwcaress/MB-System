@@ -52,7 +52,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = src/html
-DIST_COMMON = $(dist_html_DATA) $(srcdir)/Makefile.am \
+DIST_COMMON = $(dist_mbsystemhtml_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -99,8 +99,8 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(htmldir)"
-DATA = $(dist_html_DATA)
+am__installdirs = "$(DESTDIR)$(mbsystemhtmldir)"
+DATA = $(dist_mbsystemhtml_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -228,6 +228,8 @@ localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mbsystemdatadir = @mbsystemdatadir@
+mbsystemhtmldir = @mbsystemhtmldir@
+mbsystempsdir = @mbsystempsdir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
@@ -242,7 +244,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_html_DATA = \
+dist_mbsystemhtml_DATA = \
 caress2001.gif \
 ChayesJul2003.gif \
 gpl.html \
@@ -377,27 +379,27 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-dist_htmlDATA: $(dist_html_DATA)
+install-dist_mbsystemhtmlDATA: $(dist_mbsystemhtml_DATA)
 	@$(NORMAL_INSTALL)
-	@list='$(dist_html_DATA)'; test -n "$(htmldir)" || list=; \
+	@list='$(dist_mbsystemhtml_DATA)'; test -n "$(mbsystemhtmldir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(htmldir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(htmldir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(mbsystemhtmldir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(mbsystemhtmldir)" || exit 1; \
 	fi; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(htmldir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(htmldir)" || exit $$?; \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(mbsystemhtmldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(mbsystemhtmldir)" || exit $$?; \
 	done
 
-uninstall-dist_htmlDATA:
+uninstall-dist_mbsystemhtmlDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(dist_html_DATA)'; test -n "$(htmldir)" || list=; \
+	@list='$(dist_mbsystemhtml_DATA)'; test -n "$(mbsystemhtmldir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(htmldir)'; $(am__uninstall_files_from_dir)
+	dir='$(DESTDIR)$(mbsystemhtmldir)'; $(am__uninstall_files_from_dir)
 tags: TAGS
 TAGS:
 
@@ -439,7 +441,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(htmldir)"; do \
+	for dir in "$(DESTDIR)$(mbsystemhtmldir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -492,7 +494,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_htmlDATA
+install-data-am: install-dist_mbsystemhtmlDATA
 
 install-dvi: install-dvi-am
 
@@ -536,21 +538,22 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_htmlDATA
+uninstall-am: uninstall-dist_mbsystemhtmlDATA
 
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dist_htmlDATA install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	uninstall uninstall-am uninstall-dist_htmlDATA
+	install-data install-data-am install-dist_mbsystemhtmlDATA \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am uninstall uninstall-am \
+	uninstall-dist_mbsystemhtmlDATA
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

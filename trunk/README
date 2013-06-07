@@ -33,8 +33,6 @@ navigation, modeling bathymetry calculation, and adjusting survey navigation.
 -------------------------------------------------------------------------------
 MB-SYSTEM PROGRAMS
 -------------------------------------------------------------------------------
-geod(1)                  - direct geodesic computations invgeod - inverse
-                            geodesic computations
 hsdump(1)                - hsdump lists the information contained in Hydrosweep
                             DS data files
 mb7k2jstar(1)            - extracts subbottom profiler and/or sidescan sonar
@@ -457,4 +455,3 @@ how rapidly problems will be fixed, we strongly encourage users to notify us of
 bugs (and fixes!!). We will continue to support this software for the forseeable
 future.
 -------------------------------------------------------------------------------
-
