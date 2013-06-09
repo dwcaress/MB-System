@@ -1869,6 +1869,7 @@ Have a nice day...\n");
 					expect = EM3_NONE;
 				}
 			done = MB_NO;
+			good_end_bytes = MB_YES;
 			}
 
 		/* bail out if there is an error */

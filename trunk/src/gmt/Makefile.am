@@ -8,7 +8,7 @@ LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la
 bin_PROGRAMS = mbcontour mbgrdtiff mbswath
 
 mbcontour_SOURCES = mbcontour.c
-mbcontour_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
+mbcontour_LDADD = $(top_builddir)/src/mbaux/libmbaux.la $(top_builddir)/src/mbaux/libmbps.la
 
 mbgrdtiff_SOURCES = mbgrdtiff.c
 

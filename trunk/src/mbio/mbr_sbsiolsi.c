@@ -665,7 +665,7 @@ int mbr_wt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		else if (store->kind == MB_DATA_COMMENT)
 			{
 			strcpy(datacomment,"cc");
-			strncat(datacomment,store->comment,MBSYS_SB_MAXLINE);
+			strncat(datacomment,store->comment,MBSYS_SB_MAXLINE-1);
 			}
 		}
 
