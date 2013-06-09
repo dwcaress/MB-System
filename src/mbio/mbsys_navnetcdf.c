@@ -68,6 +68,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
+	char	c;
 	int	i;
 
 	/* print input debug statements */
@@ -115,21 +116,35 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbEastLongitude = 0.;
 	    store->mbWestLongitude = 0.;
 	    strcpy(store->mbMeridian180, " ");
-	    strcpy(store->mbGeoDictionnary, "                    ");
-	    strcpy(store->mbGeoRepresentation, "                    ");
-	    strcpy(store->mbGeodesicSystem, "                    ");
-	    strcpy(store->mbEllipsoidName, "                                                                                                                                                                                                                                                                ");
+	    for (i=0;i<MBSYS_NAVNETCDF_ATTRIBUTELEN;i++)
+		{
+		if (i < MBSYS_NAVNETCDF_ATTRIBUTELEN-1)
+			c = ' ';
+		else
+			c = '\0';
+		store->mbGeoDictionnary[i] = c;
+		store->mbGeoRepresentation[i] = c;
+		store->mbGeodesicSystem[i] = c;
+		}
 	    store->mbEllipsoidA = 0.;
 	    store->mbEllipsoidInvF = 0.;
 	    store->mbEllipsoidE2 = 0.;
 	    store->mbProjType = -1;
 	    for (i=0;i<10;i++)
 		store->mbProjParameterValue[i] = 0.;
-	    strcpy(store->mbProjParameterCode, "                                                                                                                                                                                                                                                                ");
-	    strcpy(store->mbShip, "                                                                                                                                                                                                                                                                ");
-	    strcpy(store->mbSurvey, "                                                                                                                                                                                                                                                                ");
-	    strcpy(store->mbReference, "                                                                                                                                                                                                                                                                ");
 	    store->mbPointCounter = 0;
+	    for (i=0;i<MBSYS_NAVNETCDF_COMMENTLEN-1;i++)
+		{
+		if (i < MBSYS_NAVNETCDF_COMMENTLEN-1)
+			c = ' ';
+		else
+			c = '\0';
+		store->mbEllipsoidName[i] = c;
+		store->mbProjParameterCode[i] = c;
+		store->mbShip[i] = c;
+		store->mbSurvey[i] = c;
+		store->mbReference[i] = c;
+		}
 
 	    /* variable attributes */
 	    strcpy(store->mbHistDate_type, "integer");
