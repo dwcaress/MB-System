@@ -430,7 +430,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		if (strncmp(line, "COMM", 4) == 0)
 			{
 			store->kind = MB_DATA_COMMENT;
-			result = fgets(store->comment,MB_PATH_MAXLINE,mb_io_ptr->mbfp);
+			result = fgets(store->comment,MBSYS_HSDS_MAXLINE,mb_io_ptr->mbfp);
 			if (result == NULL)
 				{
 				status = MB_FAILURE;

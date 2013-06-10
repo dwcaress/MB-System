@@ -989,8 +989,8 @@ int mbr_mr1aldeo_rd_ping(int verbose, XDR *xdrs,
 		}
 
 	/* read ping header */
-	status = xdr_long(xdrs, &data->sec);
-	status = xdr_long(xdrs, &data->usec);
+	status = xdr_int(xdrs, &data->sec);
+	status = xdr_int(xdrs, &data->usec);
 	status = xdr_double(xdrs, &data->png_lon);
 	status = xdr_double(xdrs, &data->png_lat);
 	status = xdr_float(xdrs, &data->png_course);
@@ -1520,8 +1520,8 @@ int mbr_mr1aldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1aldeo_struct *dat
 		}
 
 	/* write ping header */
-	status = xdr_long(xdrs, &data->sec);
-	status = xdr_long(xdrs, &data->usec);
+	status = xdr_int(xdrs, &data->sec);
+	status = xdr_int(xdrs, &data->usec);
 	status = xdr_double(xdrs, &data->png_lon);
 	status = xdr_double(xdrs, &data->png_lat);
 	status = xdr_float(xdrs, &data->png_course);
