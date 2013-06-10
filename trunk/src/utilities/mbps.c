@@ -845,12 +845,12 @@ int main (int argc, char **argv)
        ps_plotinit_hires(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
                gmtdefs.paper_width, gmtdefs.page_rgb,
                gmtdefs.encoding.name,
-               GMT_epsinfo (argv[0]));
+               (struct EPS *)GMT_epsinfo (argv[0]));
 #else
        ps_plotinit(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
                gmtdefs.paper_width, gmtdefs.page_rgb,
                gmtdefs.encoding.name,
-               GMT_epsinfo (argv[0]));
+               (struct EPS *)GMT_epsinfo (argv[0]));
 #endif
        GMT_echo_command (argc, argv);
 

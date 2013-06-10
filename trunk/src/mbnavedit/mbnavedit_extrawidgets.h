@@ -53,16 +53,16 @@
 #endif
 
 #ifdef MBNAVEDIT_DECLARE_GLOBALS
-#define EXTERNAL
+#define MBNAVEDIT_EXTERNAL
 #else
-#define EXTERNAL extern
+#define MBNAVEDIT_EXTERNAL extern
 #endif
 
 /* Global Widget Declarations Added By Hand */
 
-EXTERNAL Widget       fileSelectionBox_list;
-EXTERNAL Widget       fileSelectionBox_text;
-EXTERNAL Widget       scrolledWindow_hscrollbar;
-EXTERNAL Widget       scrolledWindow_vscrollbar;
+MBNAVEDIT_EXTERNAL Widget       fileSelectionBox_list;
+MBNAVEDIT_EXTERNAL Widget       fileSelectionBox_text;
+MBNAVEDIT_EXTERNAL Widget       scrolledWindow_hscrollbar;
+MBNAVEDIT_EXTERNAL Widget       scrolledWindow_vscrollbar;
 
 /*--------------------------------------------------------------------*/

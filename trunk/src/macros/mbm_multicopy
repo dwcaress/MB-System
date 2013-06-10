@@ -1,6 +1,4 @@
-eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
-                    & eval 'exec perl -S $0 $argv:q'
-                         if 0;
+#!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_multicopy.perl	7/17/2011
 #   $Id: mbm_multi7kprocess.pl 19XX 2011-07-17 15:15:00Z ferreira $

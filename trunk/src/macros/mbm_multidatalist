@@ -1,6 +1,4 @@
-eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
-                    & eval 'exec perl -S $0 $argv:q'
-                         if 0;
+#!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_multidatalist.perl	7/18/2011
 #   $Id: mbm_multidatalisz.pl 19XX 2011-07-18 15:40:00Z ferreira $

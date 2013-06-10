@@ -329,24 +329,24 @@ struct mbview_world_struct
      MBVIEWGLOBAL flag is defined - other blocks of code will
      have these variables declared as extern  */
 #ifdef MBVIEWGLOBAL
-#define EXTERNAL
+#define MBVIEW_EXTERNAL
 #else
-#define EXTERNAL extern
+#define MBVIEW_EXTERNAL extern
 #endif
 
 /* general library global variables */
-EXTERNAL int	mbv_verbose;
-EXTERNAL int	mbv_ninstance;
-EXTERNAL Widget	parent_widget;
-EXTERNAL XtAppContext	app_context;
-EXTERNAL int	work_function_enabled;
-EXTERNAL int	work_function_set;
-EXTERNAL unsigned long	timer_timeout_time;
-EXTERNAL int	timer_timeout_count;
-EXTERNAL int	timer_count;
-EXTERNAL struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
-EXTERNAL struct mbview_shared_struct shared;
-EXTERNAL char	*mbsystem_library_name;
+MBVIEW_EXTERNAL int	mbv_verbose;
+MBVIEW_EXTERNAL int	mbv_ninstance;
+MBVIEW_EXTERNAL Widget	parent_widget;
+MBVIEW_EXTERNAL XtAppContext	app_context;
+MBVIEW_EXTERNAL int	work_function_enabled;
+MBVIEW_EXTERNAL int	work_function_set;
+MBVIEW_EXTERNAL unsigned long	timer_timeout_time;
+MBVIEW_EXTERNAL int	timer_timeout_count;
+MBVIEW_EXTERNAL int	timer_count;
+MBVIEW_EXTERNAL struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
+MBVIEW_EXTERNAL struct mbview_shared_struct shared;
+MBVIEW_EXTERNAL char	*mbsystem_library_name;
 
 /* global declarations */
 #ifdef MBVIEWGLOBAL

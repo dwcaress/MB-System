@@ -1,6 +1,4 @@
-eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
-                    & eval 'exec perl -S $0 $argv:q'
-                         if 0;
+#!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_bpr.perl	5/13/2002
 #    $Id$

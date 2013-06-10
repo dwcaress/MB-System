@@ -61,9 +61,9 @@
 #endif
 
 #ifdef MBEDITVIZ_DECLARE_GLOBALS
-#define EXTERNAL
+#define MBVIEW_EXTERNAL
 #else
-#define EXTERNAL extern
+#define MBVIEW_EXTERNAL extern
 #endif
 
 /* MBeditviz defines */
@@ -195,50 +195,50 @@ struct mbev_grid_struct
 /* mbeditviz global control parameters */
 
 /* status parameters */
-EXTERNAL int	mbev_status;
-EXTERNAL int	mbev_error;
-EXTERNAL int	mbev_verbose;
+MBVIEW_EXTERNAL int	mbev_status;
+MBVIEW_EXTERNAL int	mbev_error;
+MBVIEW_EXTERNAL int	mbev_verbose;
 
 /* gui parameters */
-EXTERNAL int	mbev_message_on;
+MBVIEW_EXTERNAL int	mbev_message_on;
 
 /* mode parameters */
-EXTERNAL int	mbev_mode_output;
-EXTERNAL int	mbev_grid_algorithm;
+MBVIEW_EXTERNAL int	mbev_mode_output;
+MBVIEW_EXTERNAL int	mbev_grid_algorithm;
 
 /* data parameters */
-EXTERNAL int	mbev_num_files;
-EXTERNAL int	mbev_num_files_alloc;
-EXTERNAL int	mbev_num_files_loaded;
-EXTERNAL int	mbev_num_pings_loaded;
-EXTERNAL int	mbev_num_soundings_loaded;
-EXTERNAL double mbev_bounds[4];
-EXTERNAL struct mbev_file_struct *mbev_files;
-EXTERNAL struct mbev_grid_struct mbev_grid;
-EXTERNAL size_t	mbev_instance;
+MBVIEW_EXTERNAL int	mbev_num_files;
+MBVIEW_EXTERNAL int	mbev_num_files_alloc;
+MBVIEW_EXTERNAL int	mbev_num_files_loaded;
+MBVIEW_EXTERNAL int	mbev_num_pings_loaded;
+MBVIEW_EXTERNAL int	mbev_num_soundings_loaded;
+MBVIEW_EXTERNAL double mbev_bounds[4];
+MBVIEW_EXTERNAL struct mbev_file_struct *mbev_files;
+MBVIEW_EXTERNAL struct mbev_grid_struct mbev_grid;
+MBVIEW_EXTERNAL size_t	mbev_instance;
 
 /* gridding parameters */
-EXTERNAL double	mbev_grid_bounds[4];
-EXTERNAL double	mbev_grid_boundsutm[4];
-EXTERNAL double mbev_grid_cellsize;
-EXTERNAL int mbev_grid_nx;
-EXTERNAL int mbev_grid_ny;
+MBVIEW_EXTERNAL double	mbev_grid_bounds[4];
+MBVIEW_EXTERNAL double	mbev_grid_boundsutm[4];
+MBVIEW_EXTERNAL double mbev_grid_cellsize;
+MBVIEW_EXTERNAL int mbev_grid_nx;
+MBVIEW_EXTERNAL int mbev_grid_ny;
 
 /* global patch test parameters */
-EXTERNAL double	mbev_rollbias;
-EXTERNAL double	mbev_pitchbias;
-EXTERNAL double	mbev_headingbias;
-EXTERNAL double	mbev_timelag;
-EXTERNAL double	mbev_rollbias_3dsdg;
-EXTERNAL double	mbev_pitchbias_3dsdg;
-EXTERNAL double	mbev_headingbias_3dsdg;
-EXTERNAL double	mbev_timelag_3dsdg;
+MBVIEW_EXTERNAL double	mbev_rollbias;
+MBVIEW_EXTERNAL double	mbev_pitchbias;
+MBVIEW_EXTERNAL double	mbev_headingbias;
+MBVIEW_EXTERNAL double	mbev_timelag;
+MBVIEW_EXTERNAL double	mbev_rollbias_3dsdg;
+MBVIEW_EXTERNAL double	mbev_pitchbias_3dsdg;
+MBVIEW_EXTERNAL double	mbev_headingbias_3dsdg;
+MBVIEW_EXTERNAL double	mbev_timelag_3dsdg;
 
 /* selected sounding parameters */
-EXTERNAL struct mb3dsoundings_struct mbev_selected;
+MBVIEW_EXTERNAL struct mb3dsoundings_struct mbev_selected;
 
 /* timer function */
-EXTERNAL int	timer_function_set;
+MBVIEW_EXTERNAL int	timer_function_set;
 
 int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon);
 void do_mbeditviz_mode_change( Widget w, XtPointer client_data, XtPointer call_data);

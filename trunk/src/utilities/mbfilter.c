@@ -360,7 +360,7 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
+	char	date[25], user[128], *user_ptr, host[MB_PATH_MAXLINE];
 
 	/* processing control variables */
 	int	datakind = MBFILTER_SS;
