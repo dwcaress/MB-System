@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+  Version 5.4.2126       June 17, 2013
   Version 5.4.2123       June 10, 2013
   Version 5.4.2082       May 24, 2013
   Version 5.3.2053       April 4, 2013
@@ -140,7 +141,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.4.2124 (June 17, 2013)
+-----> 5.4.2126 (June 17, 2013)
 
 Build system: Implemented changes to the build system contributed by
 Kurt Schwehr that enable building MB-System without support for GSF or inclusion
