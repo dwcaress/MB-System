@@ -4910,7 +4910,7 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 }*/
 		if (clipmode == MBGRID_INTERP_ALL)
 			clip = MAX(gxdim,gydim);
-		mb_zgrid2(sgrid,&gxdim,&gydim,&xmin,&ymin,
+		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
 			work1,work2,work3,&cay,&clip);
 #endif

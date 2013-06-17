@@ -68,6 +68,8 @@ bin_PROGRAMS = mbhsdump$(EXEEXT) mbformat$(EXEEXT) mbdefaults$(EXEEXT) \
 	mbfilter$(EXEEXT) mbroutetime$(EXEEXT) \
 	mbhysweeppreprocess$(EXEEXT) mbkongsbergpreprocess$(EXEEXT) \
 	$(am__EXEEXT_1)
+@BUILD_GSF_TRUE@am__append_1 = -I@top_srcdir@/src/gsf
+@BUILD_GSF_TRUE@am__append_2 = -L$(top_builddir)/src/gsf
 subdir = src/utilities
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -114,7 +116,7 @@ mbclean_OBJECTS = $(am_mbclean_OBJECTS)
 mbclean_LDADD = $(LDADD)
 am_mbcopy_OBJECTS = mbcopy.$(OBJEXT)
 mbcopy_OBJECTS = $(am_mbcopy_OBJECTS)
-mbcopy_DEPENDENCIES = $(top_builddir)/src/gsf/libmbgsf.la
+mbcopy_LDADD = $(LDADD)
 am_mbctdlist_OBJECTS = mbctdlist.$(OBJEXT)
 mbctdlist_OBJECTS = $(am_mbctdlist_OBJECTS)
 mbctdlist_DEPENDENCIES = $(top_builddir)/src/mbaux/libmbaux.la
@@ -452,8 +454,12 @@ top_srcdir = @top_srcdir@
 #Remove mbps if WIN32?
 include_HEADERS = levitus.h
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
-AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux -I@top_srcdir@/src/gsf @CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@
-AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux -L$(top_builddir)/src/gsf -L$(top_builddir)/src/mr1pr -L$(top_builddir)/src/proj -L$(top_builddir)/src/surf
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux \
+	@CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@ $(am__append_1)
+AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux \
+	-L$(top_builddir)/src/gsf -L$(top_builddir)/src/mr1pr \
+	-L$(top_builddir)/src/proj -L$(top_builddir)/src/surf \
+	$(am__append_2)
 mbhsdump_SOURCES = mbhsdump.c
 mbformat_SOURCES = mbformat.c
 mbdefaults_SOURCES = mbdefaults.c
@@ -463,7 +469,10 @@ mbset_SOURCES = mbset.c
 mbprocess_SOURCES = mbprocess.c
 mbprocess_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
 mbcopy_SOURCES = mbcopy.c
-mbcopy_LDADD = $(top_builddir)/src/gsf/libmbgsf.la
+# libmbiola.la already links against gsf if gsf is being built
+#if BUILD_GSF
+#  mbcopy_LDADD = $(top_builddir)/src/gsf/libmbgsf.la
+#endif
 mblist_SOURCES = mblist.c
 mbnavlist_SOURCES = mbnavlist.c
 mbsvplist_SOURCES = mbsvplist.c

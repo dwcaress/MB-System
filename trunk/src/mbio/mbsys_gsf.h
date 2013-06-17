@@ -81,15 +81,9 @@
  *
  */
 
-#ifndef __GSF_H__
 #include "gsf.h"
-#endif
-#ifndef _GSF_FT_H_
 #include "gsf_ft.h"
-#endif
-#ifndef _GSF_ENC_H_
 #include "gsf_enc.h"
-#endif
 
 /* internal data structure */
 struct mbsys_gsf_struct

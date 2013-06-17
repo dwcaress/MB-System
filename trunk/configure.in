@@ -1,16 +1,16 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl configure.in for mbsystem
-AC_PREREQ([2.65])
+AC_PREREQ([2.69])
 
 dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
-AC_INIT([mbsystem],[5.4.2123])
+AC_INIT([mbsystem],[5.4.2124])
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 
-AC_DEFINE(VERSION_DATE, "10 June 2013", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "17 June 2013", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -103,6 +103,13 @@ OTPS_DIR="/usr/local/OTPSnc"
 dnl check for command line option and reset
 AC_ARG_WITH(otps_dir, [  --with-otps_dir=DIR        Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
 AC_SUBST(OTPS_DIR)
+
+AC_MSG_CHECKING([whether to build with Generic Sensor Format (GSF)])
+AC_ARG_WITH([gsf], AS_HELP_STRING([--without-gsf], [Disable unlicensed SAIC Generic Sensor Format (GSF)]), [ ], [with_gsf=yes])
+AC_MSG_RESULT([$with_gsf])
+
+AS_IF([test x"$with_gsf" = xyes], [AC_DEFINE(WITH_GSF, 1, [Build with GSF])])
+AM_CONDITIONAL([BUILD_GSF], [test x"$with_gsf" = xyes])
 
 dnl Check for NetCDF lib
 echo "Check for NetCDF"
@@ -633,3 +640,5 @@ else
 	echo "OpenGL Support: Disabled"
 fi
 echo "Using $OTPS_DIR for OSU Tidal Prediction Software"
+
+AS_ECHO(["Build with Generic Sensor Format (GSF) Support: $with_gsf"])

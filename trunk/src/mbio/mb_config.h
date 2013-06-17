@@ -84,7 +84,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.4.2123"
+#define PACKAGE_STRING "mbsystem 5.4.2124"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -93,19 +93,22 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.4.2123"
+#define PACKAGE_VERSION "5.4.2124"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "5.4.2123"
+#define VERSION "5.4.2124"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "10 June 2013"
+#define VERSION_DATE "17 June 2013"
 
 /* Turned on WIN32 define in config */
 /* #undef WIN32 */
+
+/* Build with GSF */
+#define WITH_GSF 1
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

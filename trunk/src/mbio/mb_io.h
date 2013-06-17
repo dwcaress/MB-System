@@ -187,13 +187,9 @@
 #ifndef MB_IO_DEF
 #define MB_IO_DEF
 
-#ifndef MB_DEFINE_DEF
+#include "mb_config.h"
 #include "mb_define.h"
-#endif
-
-#ifndef MB_STATUS_DEF
 #include "mb_status.h"
-#endif
 
 struct mb_io_ping_struct
 	{
@@ -283,7 +279,11 @@ struct mb_io_struct
 				    last record read */
 	long	file3_bytes;	/* number of bytes read from file */
 	int	ncid;		/* netCDF datastream ID */
+#ifdef WITH_GSF
 	int	gsfid;		/* GSF datastream ID */
+#else
+        int     _gsfid_placeholder;
+#endif
 	void	*xdrs;		/* XDR stream handle */
 	void	*xdrs2;		/* XDR stream handle #2 */
 	void	*xdrs3;		/* XDR stream handle #2 */
