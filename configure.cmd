@@ -148,9 +148,9 @@ CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib
+#--without-gsf
 
 make
 make install
 
 #------------------------------------------------------------------------------
-

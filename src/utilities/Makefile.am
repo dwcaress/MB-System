@@ -53,9 +53,16 @@ include_HEADERS = levitus.h
 
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 
-AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux -I@top_srcdir@/src/gsf @CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@
+if BUILD_GSF
+  AM_CPPFLAGS += -I@top_srcdir@/src/gsf
+endif
 
 AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux -L$(top_builddir)/src/gsf -L$(top_builddir)/src/mr1pr -L$(top_builddir)/src/proj -L$(top_builddir)/src/surf
+if BUILD_GSF
+  AM_LDFLAGS += -L$(top_builddir)/src/gsf
+endif
+
 LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la
 
 mbhsdump_SOURCES = mbhsdump.c
@@ -74,7 +81,10 @@ mbprocess_SOURCES = mbprocess.c
 mbprocess_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
 
 mbcopy_SOURCES = mbcopy.c
-mbcopy_LDADD = $(top_builddir)/src/gsf/libmbgsf.la
+# libmbiola.la already links against gsf if gsf is being built
+#if BUILD_GSF
+#  mbcopy_LDADD = $(top_builddir)/src/gsf/libmbgsf.la
+#endif
 
 mblist_SOURCES = mblist.c
 

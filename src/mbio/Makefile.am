@@ -13,7 +13,7 @@ include_HEADERS = mb_config.h \
         mbsys_ldeoih.h \
         mbsys_reson.h mbsys_sb2000.h \
         mbsys_hsmd.h mbsys_dsl.h \
-        mbsys_gsf.h mbsys_mstiff.h \
+        mbsys_mstiff.h \
         mbsys_oic.h mbsys_hdcs.h \
         mbsys_singlebeam.h mbsys_xse.h \
         mbsys_hs10.h \
@@ -38,11 +38,14 @@ include_HEADERS = mb_config.h \
         mbf_sbsioswb.h \
         mbf_hsmdaraw.h mbf_hsmdldih.h \
         mbf_dsl120pf.h mbf_dsl120sf.h \
-        mbf_gsfgenmb.h mbf_mstiffss.h \
+        mbf_mstiffss.h \
         mbf_oicgeoda.h mbf_oicmbari.h \
         mbf_omghdcsj.h mbf_mgd77dat.h \
         mbf_mbarirov.h mbf_mbarrov2.h \
         mbf_mbpronav.h mbf_xtfr8101.h
+if BUILD_GSF
+  include_HEADERS += mbsys_gsf.h mbf_gsfgenmb.h
+endif
 
 lib_LTLIBRARIES = libmbio.la
 
@@ -70,7 +73,7 @@ libmbio_la_SOURCES = \
                 mbsys_ldeoih.c mbsys_reson.c \
                 mbsys_elac.c mbsys_elacmk2.c \
                 mbsys_sb2000.c mbsys_hsmd.c mbsys_dsl.c \
-                mbsys_gsf.c mbsys_mstiff.c \
+                mbsys_mstiff.c \
                 mbsys_oic.c mbsys_hdcs.c \
                 mbsys_singlebeam.c mbsys_xse.c \
                 mbsys_hs10.c mbsys_atlas.c \
@@ -100,7 +103,7 @@ libmbio_la_SOURCES = \
                 mbr_sb2000sb.c mbr_sb2000ss.c \
                 mbr_hsmdaraw.c mbr_hsmdldih.c \
                 mbr_dsl120pf.c mbr_dsl120sf.c \
-                mbr_gsfgenmb.c mbr_mstiffss.c \
+                mbr_mstiffss.c \
                 mbr_oicgeoda.c mbr_oicmbari.c \
                 mbr_omghdcsj.c mbr_mgd77dat.c \
                 mbr_asciixyz.c mbr_hydrob93.c \
@@ -115,11 +118,16 @@ libmbio_la_SOURCES = \
                 mbr_hir2rnav.c mbr_hysweep1.c \
                 mbr_xtfb1624.c mbr_swplssxi.c \
                 mbr_swplssxp.c
-
+if BUILD_GSF
+  libmbio_la_SOURCES += mbsys_gsf.c mbr_gsfgenmb.c
+endif
 
 libmbio_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @XDR_LIB@ \
-		   $(top_builddir)/src/gsf/libmbgsf.la $(top_builddir)/src/mr1pr/libmbmr1pr.la \
+		   $(top_builddir)/src/mr1pr/libmbmr1pr.la \
                    $(top_builddir)/src/surf/libmbsapi.la $(top_builddir)/src/proj/libmbproj.la
+if BUILD_GSF
+  libmbio_la_LIBADD += $(top_builddir)/src/gsf/libmbgsf.la
+endif
 
 nodist_libmbio_la_SOURCES = projections.h
 
@@ -130,4 +138,3 @@ DISTCLEANFILES = projections.h
 
 projections.h: Makefile
 	echo 'char *projectionfile = "$(mbsystemdatadir)/Projections.dat";' >$@
-#	echo 'char *projectionfile = "$(datadir)/mbsystem/Projections.dat";' >$@

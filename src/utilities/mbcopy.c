@@ -204,7 +204,9 @@
 #include "mbsys_simrad.h"
 #include "mbsys_simrad2.h"
 #include "mbsys_ldeoih.h"
-#include "mbsys_gsf.h"
+#ifdef WITH_GSF
+#  include "mbsys_gsf.h"
+#endif
 #include "mbsys_hsds.h"
 #include "mbsys_reson8k.h"
 
@@ -215,7 +217,9 @@
 #define	MBCOPY_XSE_TO_ELACMK2		3
 #define	MBCOPY_SIMRAD_TO_SIMRAD2	4
 #define	MBCOPY_ANY_TO_MBLDEOIH		5
-#define	MBCOPY_RESON8K_TO_GSF		6
+#ifdef WITH_GSF
+#  define	MBCOPY_RESON8K_TO_GSF		6
+#endif
 
 /* function prototypes */
 int setup_transfer_rules(int verbose, int ibeams, int obeams,
@@ -252,10 +256,12 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		char *comment,
 		void *ombio_ptr, void *ostore_ptr,
 		int *error);
+#ifdef WITH_GSF
 int mbcopy_reson8k_to_gsf(int verbose,
 		void *imbio_ptr,
 		void *ombio_ptr,
 		int *error);
+#endif
 
 static char rcs_id[] = "$Id$";
 
@@ -733,13 +739,16 @@ int main (int argc, char **argv)
 	else if (pings == 1
 		&& omb_io_ptr->format == MBF_MBLDEOIH)
 		copymode = MBCOPY_ANY_TO_MBLDEOIH;
+#ifdef WITH_GSF
 	else if (pings == 1
 		&& imb_io_ptr->format == MBF_XTFR8101
 		&& omb_io_ptr->format ==  MBF_GSFGENMB )
 		copymode = MBCOPY_RESON8K_TO_GSF;
+#endif
 	else
 		copymode = MBCOPY_PARTIAL;
 
+#ifdef WITH_GSF
 	/* quit if an unsupported copy to GSF is requested */
 	if (omb_io_ptr->format == MBF_GSFGENMB && copymode == MBCOPY_PARTIAL)
 		{
@@ -749,6 +758,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\tand contributing it to the MB-System community\n");
 		exit(error);
 		}
+#endif
 
 	/* print debug statements */
 	if (verbose >= 2)
@@ -1310,6 +1320,7 @@ int main (int argc, char **argv)
 			status = mbcopy_simrad_to_simrad2(verbose,
 				    istore_ptr, ostore_ptr, &error);
 			}
+#ifdef WITH_GSF
 		else if (copymode == MBCOPY_RESON8K_TO_GSF
 			&& error == MB_ERROR_NO_ERROR)
 			{
@@ -1318,6 +1329,7 @@ int main (int argc, char **argv)
 			status = mbcopy_reson8k_to_gsf(verbose,
 				    imbio_ptr, ombio_ptr, &error);
 			}
+#endif
 		else if (copymode == MBCOPY_ANY_TO_MBLDEOIH
 			&& error == MB_ERROR_NO_ERROR)
 			{
@@ -1414,7 +1426,9 @@ int main (int argc, char **argv)
 		    case MBCOPY_SIMRAD_TO_SIMRAD2:
 		    case MBCOPY_ELACMK2_TO_XSE:
 		    case MBCOPY_XSE_TO_ELACMK2:
+#ifdef WITH_GSF
 		    case MBCOPY_RESON8K_TO_GSF:
+#endif
 		      status = mb_insert(verbose, ombio_ptr, ostore_ptr,
 						kind, time_i, time_d,
 						navlon, navlat, speed, heading,
@@ -3072,6 +3086,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+#ifdef WITH_GSF
 int mbcopy_reson8k_to_gsf(int verbose,
 		void *imbio_ptr,
 		void *ombio_ptr,
@@ -3479,4 +3494,5 @@ int mbcopy_reson8k_to_gsf(int verbose,
 	/* return status */
 	return(status);
 }
+#endif
 /*--------------------------------------------------------------------*/

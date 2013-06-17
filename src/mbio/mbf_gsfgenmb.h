@@ -61,9 +61,7 @@
  *      reading and writing.
  */
 
-#ifndef __GSF_H__
 #include "gsf.h"
-#endif
 
 struct mbf_gsfgenmb_struct
 	{

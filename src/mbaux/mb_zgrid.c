@@ -317,6 +317,7 @@ int mb_zgrid(float *z, int *nx, int *ny,
     eps = ((float) nmax) * 0.000016;
     if (eps < 0.02)
     	eps = 0.02;
+    eps = 0.0;
     big = (float)9e29;
     nconvtestincrease = 0;
 
@@ -992,6 +993,7 @@ L3720:
 	}
 L3730:
 	convtest = dzmaxf / ((float)1. - root) - eps;
+	fprintf(stderr,"dzmaxf:%f root:%f convtest:%f\n",dzmaxf,root,convtest);
 	if (iter > ITERTRANSITION && convtest > convtestlast)
 	    nconvtestincrease++;
 	fprintf(stderr,"Zgrid iteration %d convergence test: %f last:%f\n",iter,convtest,convtestlast);

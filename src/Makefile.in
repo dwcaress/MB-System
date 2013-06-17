@@ -257,7 +257,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_MOTIF_TRUE@XBUILD_SUB = mbedit mbnavedit mbvelocitytool mbnavadjust
 @BUILD_GL_TRUE@XBUILD_SUB_GL = mbview
-SUBDIRS = gsf surf mr1pr proj mbio mbaux utilities gmt otps macros $(XBUILD_SUB) $(XBUILD_SUB_GL) man html ps share
+@BUILD_GSF_TRUE@XBUILD_SUB_GSF = gsf
+SUBDIRS = $(XBUILD_SUB_GSF) surf mr1pr proj mbio mbaux utilities gmt otps macros $(XBUILD_SUB) $(XBUILD_SUB_GL) man html ps share
 all: all-recursive
 
 .SUFFIXES:

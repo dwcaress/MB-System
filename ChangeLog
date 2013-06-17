@@ -140,6 +140,25 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2124 (June 17, 2013)
+
+Build system: Implemented changes to the build system contributed by
+Kurt Schwehr that enable building MB-System without support for GSF or inclusion
+of the GSF source code from SAIC. This optional removal of GSF support addresses
+the lack of a proper open source or free software license for the GSF source
+code distribution from SAIC. MB-System distributions that include GSF code or
+require the GSF library cannot be included in official open source package
+collections such as Debian.
+
+Mbgrid: Changed the usage of the zgrid interpolation by mbgrid. Release 5.3.1989
+included changes to speed up interpolation by calculating a smooth model for a
+low resolution grid and then resampling this onto the full resolution grid. This
+approach has the problem that the low resolution interpolation can work poorly
+near data. Mbgrid still does low resolution interpolation as part of the
+slope estimation stage of algorithms 5 and 6 and as part of background
+interpolation, but once again does the primary interpolation stage at full
+resolution.
+
 -----> 5.4.2123 (June 10, 2013)
 
 Many changes implementing fixes to the new build system from Bob Covill,
