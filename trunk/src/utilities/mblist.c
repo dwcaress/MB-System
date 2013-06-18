@@ -2811,7 +2811,7 @@ int main (int argc, char **argv)
 		  if (check_ss == MB_YES && j != beam_vertical)
 			beam_status = MB_FAILURE;
 		  else if (check_ss == MB_YES && j == beam_vertical)
-			if (ss[pixel_vertical] > MB_SIDESCAN_NULL)
+			if (ss[pixel_vertical] <= MB_SIDESCAN_NULL)
 				beam_status = MB_FAILURE;
 		  if (use_time_interval == MB_YES && first == MB_YES)
 			beam_status = MB_FAILURE;
@@ -3763,7 +3763,7 @@ int main (int argc, char **argv)
 			    && beamflag[beam_vertical] == MB_FLAG_NULL)
 				pixel_status = MB_FAILURE;
 			}
-		  if (check_ss == MB_YES && ss[j] > MB_SIDESCAN_NULL)
+		  if (check_ss == MB_YES && ss[j] <= MB_SIDESCAN_NULL)
 			pixel_status = MB_FAILURE;
 		  if (use_time_interval == MB_YES && first == MB_YES)
 			pixel_status = MB_FAILURE;

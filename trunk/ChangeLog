@@ -12,7 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
-  Version 5.4.2127       June 17, 2013
+  Version 5.4.2128       June 18, 2013
   Version 5.4.2123       June 10, 2013
   Version 5.4.2082       May 24, 2013
   Version 5.3.2053       April 4, 2013
@@ -141,7 +141,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.4.2127 (June 17, 2013)
+-----> 5.4.2128 (June 18, 2013)
 
 Mblist: Fixed bug that flagged as bad all sidescan pixels with negative values.
 
