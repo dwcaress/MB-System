@@ -52,9 +52,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@BUILD_GSF_TRUE@am__append_1 = mbsys_gsf.h mbf_gsfgenmb.h
-@BUILD_GSF_TRUE@am__append_2 = mbsys_gsf.c mbr_gsfgenmb.c
-@BUILD_GSF_TRUE@am__append_3 = $(top_builddir)/src/gsf/libmbgsf.la
+@BUILD_GSF_TRUE@am__append_1 = -I@top_srcdir@/src/gsf 
+@BUILD_GSF_TRUE@am__append_2 = mbsys_gsf.h mbf_gsfgenmb.h
+@BUILD_GSF_TRUE@am__append_3 = mbsys_gsf.c mbr_gsfgenmb.c
+@BUILD_GSF_TRUE@am__append_4 = $(top_builddir)/src/gsf/libmbgsf.la
 subdir = src/mbio
 DIST_COMMON = $(am__include_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/mb_config.h.in
@@ -102,7 +103,7 @@ am__DEPENDENCIES_1 =
 libmbio_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(top_builddir)/src/mr1pr/libmbmr1pr.la \
 	$(top_builddir)/src/surf/libmbsapi.la \
-	$(top_builddir)/src/proj/libmbproj.la $(am__append_3)
+	$(top_builddir)/src/proj/libmbproj.la $(am__append_4)
 am__libmbio_la_SOURCES_DIST = mb_format.c mb_error.c mb_swap.c \
 	mb_compare.c mb_navint.c mb_read_init.c mb_write_init.c \
 	mb_close.c mb_fileio.c mb_mem.c mb_coor_scale.c \
@@ -268,6 +269,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -370,7 +372,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
-AM_CPPFLAGS = -I@top_srcdir@/src/gsf -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_CPPFLAGS = -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr \
+	-I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@ \
+	$(am__append_1)
 include_HEADERS = mb_config.h mb_format.h mb_status.h mb_io.h \
 	mb_swap.h mb_define.h mb_process.h mb_segy.h mb_info.h \
 	mbsys_sb.h mbsys_hsds.h mbsys_sb2100.h mbsys_simrad.h \
@@ -390,7 +394,7 @@ include_HEADERS = mb_config.h mb_format.h mb_status.h mb_io.h \
 	mbf_hsmdldih.h mbf_dsl120pf.h mbf_dsl120sf.h mbf_mstiffss.h \
 	mbf_oicgeoda.h mbf_oicmbari.h mbf_omghdcsj.h mbf_mgd77dat.h \
 	mbf_mbarirov.h mbf_mbarrov2.h mbf_mbpronav.h mbf_xtfr8101.h \
-	$(am__append_1)
+	$(am__append_2)
 lib_LTLIBRARIES = libmbio.la
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbio_la_SOURCES = mb_format.c mb_error.c mb_swap.c mb_compare.c \
@@ -425,11 +429,11 @@ libmbio_la_SOURCES = mb_format.c mb_error.c mb_swap.c mb_compare.c \
 	mbr_xtfr8101.c mbr_mbnetcdf.c mbr_nvnetcdf.c mbr_samesurf.c \
 	mbr_reson7kr.c mbr_edgjstar.c mbr_segysegy.c mbr_image83p.c \
 	mbr_imagemba.c mbr_hir2rnav.c mbr_hysweep1.c mbr_xtfb1624.c \
-	mbr_swplssxi.c mbr_swplssxp.c $(am__append_2)
+	mbr_swplssxi.c mbr_swplssxp.c $(am__append_3)
 libmbio_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @XDR_LIB@ \
 	$(top_builddir)/src/mr1pr/libmbmr1pr.la \
 	$(top_builddir)/src/surf/libmbsapi.la \
-	$(top_builddir)/src/proj/libmbproj.la $(am__append_3)
+	$(top_builddir)/src/proj/libmbproj.la $(am__append_4)
 nodist_libmbio_la_SOURCES = projections.h
 BUILT_SOURCES = projections.h
 CLEANFILES = projections.h

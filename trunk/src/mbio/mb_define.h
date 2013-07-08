@@ -280,6 +280,9 @@ typedef char mb_name[MB_NAME_LENGTH];
 #define	ROUND(X)	X < 0.0 ? ceil(X - 0.5) : floor(X + 0.5)
 #endif
 
+/* safe square root define - sets argument to zero if negative */
+#define SAFESQRT(X) sqrt(MAX(0.0, X))
+
 /* position projection flag (0 = longitude latitude, 1 = projected eastings northings) */
 #define	MB_PROJECTION_GEOGRAPHIC	0
 #define	MB_PROJECTION_PROJECTED		1

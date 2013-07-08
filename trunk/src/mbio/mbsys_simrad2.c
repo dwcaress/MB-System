@@ -1950,7 +1950,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			*speed = 0.0;
 
 		/* set beamwidths in mb_io structure */
-		if (store->run_tran_beam > 0)
+		if (store->run_tran_beam > 0 && store->run_tran_beam < 30)
 		    mb_io_ptr->beamwidth_ltrack
 			= 0.1 * store->run_tran_beam;
 		else if (ping->png_tx > 0)
@@ -1986,7 +1986,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		    {
 		    mb_io_ptr->beamwidth_ltrack = 1.0;
 		    }
-		if (store->run_rec_beam > 0)
+		if (store->run_rec_beam > 0 && store->run_rec_beam < 30)
 		    {
 		    mb_io_ptr->beamwidth_xtrack
 			= 0.1 * store->run_rec_beam;

@@ -464,8 +464,8 @@ int main (int argc, char **argv)
 		fclose(ofp);
 
 		/* remove the temporary files */
-		sprintf(line, "/bin/rm -f %s %s\n", lltfile, otpsfile);
-		system(line);
+		unlink("lltfile");
+		unlink("otpsfile");
 
 		/* some helpful output */
 		fprintf(stderr, "\nResults are really in %s\n", tidefile);
@@ -740,8 +740,8 @@ int main (int argc, char **argv)
 			fclose(ofp);
 
 			/* remove the temporary files */
-			sprintf(line, "/bin/rm -f %s %s\n", lltfile, otpsfile);
-			system(line);
+			unlink(lltfile);
+			unlink(otpsfile);
 
 			/* some helpful output */
 			fprintf(stderr, "\nResults are really in %s\n", tidefile);

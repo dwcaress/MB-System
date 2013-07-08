@@ -6,11 +6,11 @@ dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
-AC_INIT([mbsystem],[5.4.2128])
+AC_INIT([mbsystem],[5.4.2129])
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 
-AC_DEFINE(VERSION_DATE, "18 June 2013", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "8 July 2013", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -30,6 +30,7 @@ AC_PROG_MAKE_SET
 LT_INIT
 AC_SUBST([LIBTOOL_DEPS])
 LT_INIT
+LT_LIB_M
 
 dnl Check Endian size
 BYTESWAP=no
@@ -121,7 +122,7 @@ PKG_CHECK_MODULES([libnetcdf], [netcdf], [GOT_CDF=yes], [GOT_CDF=no])
 dnl Package check failed so check manually
 if test "$GOT_CDF" = "no" ; then
 
-libnetcdf_LIBS="-lnetcdf -lm"
+libnetcdf_LIBS="-lnetcdf"
 
 dnl arg for command line
 AC_ARG_WITH(netcdf-lib, [  --with-netcdf-lib=DIR	Location of NetCDF library],
@@ -219,7 +220,7 @@ fi
     else
 	echo "Looking for libgmt in $libgmt_CFLAGS ..."
 	save_LDFLAGS=$LDFLAGS
-	LDFLAGS="$LDFLAGS $libgmt_CFLAGS $libnetcdf_LIBS -lnetcdf -lm"
+	LDFLAGS="$LDFLAGS $libgmt_CFLAGS $libnetcdf_LIBS -lnetcdf"
 	AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no], )
 	LDFLAGS="$save_LDFLAGS"
 	if test "$GMT_SETTING" = "no"; then
@@ -309,7 +310,6 @@ fi
 	else
 		GOT_FFTW=yes
 		USE_FFTW=mbsegypsd
-		libfftw_LIBS=-lfftw3
 	fi
     fi
  fi
@@ -589,8 +589,9 @@ AC_SUBST(mbsystemhtmldir)
 mbsystempsdir="$datadir/doc/$PACKAGE/ps"
 AC_SUBST(mbsystempsdir)
 
+echo "WITH GSF"
 AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
-	  src/gsf/Makefile src/surf/Makefile \
+	  src/surf/Makefile \
 	  src/mr1pr/Makefile src/proj/Makefile src/mbaux/Makefile \
 	  src/utilities/Makefile src/gmt/Makefile \
 	  src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile \
@@ -598,6 +599,9 @@ AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
 	  src/otps/Makefile src/mbview/Makefile  \
 	  src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile \
 	  src/html/Makefile src/ps/Makefile src/share/Makefile])
+if test "$with_gsf" = "yes" ; then
+AC_CONFIG_FILES([src/gsf/Makefile])
+fi
 AC_OUTPUT
 
 dnl Summary Report

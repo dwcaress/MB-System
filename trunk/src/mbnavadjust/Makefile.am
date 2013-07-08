@@ -6,7 +6,7 @@ AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux
 LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
        $(top_builddir)/src/mbio/libmbio.la $(top_builddir)/src/mbaux/libmbaux.la \
        $(top_builddir)/src/mbaux/libmbxgr.la \
-       -lXm -lXt -lX11
+       -lXm -lXt -lX11 $(LIBM)
 
 bin_PROGRAMS = mbnavadjust
 mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust_callbacks.c mbnavadjust_creation.c \

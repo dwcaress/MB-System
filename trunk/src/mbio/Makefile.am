@@ -1,5 +1,9 @@
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
-AM_CPPFLAGS = -I@top_srcdir@/src/gsf -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_CPPFLAGS = -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@
+if BUILD_GSF
+  AM_CPPFLAGS += -I@top_srcdir@/src/gsf 
+endif
+
 
 include_HEADERS = mb_config.h \
         mb_format.h mb_status.h \

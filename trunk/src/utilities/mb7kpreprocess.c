@@ -4953,6 +4953,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
 							bathymetry->depth[i] = zz + sonardepth;
+/* if (i==128)fprintf(stderr,"range:%f zz:%f sonardepth:%f depth:%f\n",rr,zz,sonardepth,bathymetry->depth[i]); */
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
 /* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",

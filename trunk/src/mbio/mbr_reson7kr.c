@@ -891,7 +891,7 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		/* get attitude structure */
 		altitude = &(store->altitude);
 
-		/* add latest heading sample */
+		/* add latest altitude sample */
 		mb_altint_add(verbose, mbio_ptr,
 				(double)(store->time_d),
 				(double)(altitude->altitude),

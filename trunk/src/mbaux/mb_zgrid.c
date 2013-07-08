@@ -296,6 +296,7 @@ int mb_zgrid(float *z, int *nx, int *ny,
     int nmax;
     int	nconvtestincrease;
     float eps, zim, zjm;
+    float dzcriteria;
     int npt;
     float wgt, zip, zjp, tpy, zxy;
     int ii,jj, kkk;
@@ -312,12 +313,16 @@ int mb_zgrid(float *z, int *nx, int *ny,
     	nmax = *nx;
     else
         nmax = *ny;
-    if (*nrng < nmax)
-    	nmax = *nrng;
+    /* if (*nrng < nmax)
+    	nmax = *nrng; */
     eps = ((float) nmax) * 0.000016;
     if (eps < 0.02)
     	eps = 0.02;
-    eps = 0.0;
+
+    /* trying dzmax > eps as a simple convergence criterea */
+    dzcriteria = 0.001;
+    convtestlast = 0.0;
+
     big = (float)9e29;
     nconvtestincrease = 0;
 
@@ -992,8 +997,8 @@ L3720:
 	    goto L3730;
 	}
 L3730:
-	convtest = dzmaxf / ((float)1. - root) - eps;
-	fprintf(stderr,"dzmaxf:%f root:%f convtest:%f\n",dzmaxf,root,convtest);
+	/* convtest = dzmaxf / ((float)1. - root) - eps; */
+	convtest = dzmaxf - dzcriteria;
 	if (iter > ITERTRANSITION && convtest > convtestlast)
 	    nconvtestincrease++;
 	fprintf(stderr,"Zgrid iteration %d convergence test: %f last:%f\n",iter,convtest,convtestlast);

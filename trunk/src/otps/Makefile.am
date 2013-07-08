@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux
 AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux
-LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la $(top_builddir)/src/mbaux/libmbaux.la
+LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la $(top_builddir)/src/mbaux/libmbaux.la $(LIBM)
 
 bin_PROGRAMS = mbotps
 mbotps_SOURCES = mbotps.c
