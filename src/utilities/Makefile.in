@@ -348,8 +348,9 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
-LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la
+LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la $(LIBM)
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
@@ -457,9 +458,8 @@ AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux \
 	@CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@ $(am__append_1)
 AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux \
-	-L$(top_builddir)/src/gsf -L$(top_builddir)/src/mr1pr \
-	-L$(top_builddir)/src/proj -L$(top_builddir)/src/surf \
-	$(am__append_2)
+	-L$(top_builddir)/src/mr1pr -L$(top_builddir)/src/proj \
+	-L$(top_builddir)/src/surf $(am__append_2)
 mbhsdump_SOURCES = mbhsdump.c
 mbformat_SOURCES = mbformat.c
 mbdefaults_SOURCES = mbdefaults.c
@@ -469,10 +469,6 @@ mbset_SOURCES = mbset.c
 mbprocess_SOURCES = mbprocess.c
 mbprocess_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
 mbcopy_SOURCES = mbcopy.c
-# libmbiola.la already links against gsf if gsf is being built
-#if BUILD_GSF
-#  mbcopy_LDADD = $(top_builddir)/src/gsf/libmbgsf.la
-#endif
 mblist_SOURCES = mblist.c
 mbnavlist_SOURCES = mbnavlist.c
 mbsvplist_SOURCES = mbsvplist.c

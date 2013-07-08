@@ -137,7 +137,7 @@ autoupdate
 
 autoreconf --force --install --warnings=all
 
-CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
+CFLAGS="-g -I/usr/X11R6/include -L/usr/X11R6/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
     --with-netcdf-include=/sw/include \
@@ -147,7 +147,7 @@ CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
     --with-fftw-include=/sw/include \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
-    --with-motif-lib=/sw/lib
+    --with-motif-lib=/sw/lib 
 #--without-gsf
 
 make

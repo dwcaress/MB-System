@@ -578,32 +578,34 @@ int main (int argc, char **argv)
 
 		/* if the -K option is used look for a particular
 			sort of data record */
-		if (error <= MB_ERROR_NO_ERROR
-			&& data_kind > 0)
+		if (error <= MB_ERROR_NO_ERROR)
 			{
-			if (error <= MB_ERROR_NO_ERROR
-				&& kind == data_kind)
+			if (data_kind > 0)
 				{
-				error = MB_ERROR_NO_ERROR;
-				status = MB_SUCCESS;
+				if (kind == data_kind)
+					{
+					error = MB_ERROR_NO_ERROR;
+					status = MB_SUCCESS;
+					}
+				else
+					{
+					error = MB_ERROR_IGNORE;
+					status = MB_FAILURE;
+					}
 				}
 			else
 				{
-				error = MB_ERROR_IGNORE;
-				status = MB_FAILURE;
+				if (kind == nav_source)
+					{
+					error = MB_ERROR_NO_ERROR;
+					status = MB_SUCCESS;
+					}
+				else
+					{
+					error = MB_ERROR_IGNORE;
+					status = MB_FAILURE;
+					}
 				}
-			}
-		else if (error <= MB_ERROR_NO_ERROR
-			&& kind != nav_source)
-			{
-			error = MB_ERROR_IGNORE;
-			status = MB_FAILURE;
-			}
-		else if (error <= MB_ERROR_NO_ERROR
-			&& kind == nav_source)
-			{
-			error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
 			}
 
 		/* extract additional nav info */
@@ -647,6 +649,7 @@ int main (int argc, char **argv)
 				roll = aroll[inav];
 				pitch = apitch[inav];
 				heave = aheave[inav];
+				sonardepth = draft - heave;
 
 /*fprintf(stdout, "kind:%d error:%d %d of %d: time:%4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n",
 kind, error, i, n,

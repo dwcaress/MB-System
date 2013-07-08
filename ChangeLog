@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+  Version 5.4.2129       July 8, 2013
   Version 5.4.2128       June 18, 2013
   Version 5.4.2123       June 10, 2013
   Version 5.4.2082       May 24, 2013
@@ -140,6 +141,27 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2129 (July 8, 2013)
+
+Build system: Attempted to implement changes to the build system suggested by
+Kurt Schwehr and Hamish Bowman.
+
+Mbrolltimelag: Augmented to allow specification of the time lag interval used
+in correllation calculations with arbitrary start and end times.
+
+Mbnavlist: Fixed problems with outputting attitude data from some variants of
+Kongsberg data.
+
+Mbgrid: Changed the convergence criteria for the zgrid interpolation algorithm
+to simply be that the largest change in the grid value is no more than 1 mm.
+
+Formats 56 and 57: Augmented handling of Kongsberg EM1002 data to recognize and
+fix erroneous transmit and receive beamwidth values.
+
+Mbprocess and mbvelocitytool: Augmented raytracing code to handle high angle
+rays without rounding errors producing a square root of a negative number.
+This fixed problems with sample EM1002 data.
 
 -----> 5.4.2128 (June 18, 2013)
 

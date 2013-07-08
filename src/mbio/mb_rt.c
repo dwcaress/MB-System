@@ -610,13 +610,13 @@ int mb_rt_quad1(int verbose, int *error)
 	/* find circular path */
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
 	model->zc = model->layer_depth_center[model->layer];
-	model->xc = model->xx + sqrt(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
+	model->xc = model->xx + SAFESQRT(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
 	vi = model->layer_vel_top[model->layer]
 		+ (model->zz - model->layer_depth_top[model->layer])
 		* model->layer_gradient[model->layer];
 	ip = 1.0 / model->pp;
 	ipvi = ip/vi;
-	beta = log(ipvi + sqrt(ipvi * ipvi - 1.0));
+	beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
 
 	/* Check if ray turns in layer */
 	if (model->zc + model->radius < model->layer_depth_bottom[model->layer])
@@ -628,7 +628,7 @@ int mb_rt_quad1(int verbose, int *error)
 		if (model->dt >= model->tt_left)
 			{
 			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
-			model->xf = model->xc - sqrt(model->radius * model->radius
+			model->xf = model->xc - SAFESQRT(model->radius * model->radius
 				- (model->zf - model->zc) * (model->zf - model->zc));
 			model->dt = model->tt_left;
 			model->tt_left = 0.0;
@@ -639,7 +639,7 @@ int mb_rt_quad1(int verbose, int *error)
 			{
 			ivf = 1.0 / model->layer_vel_top[model->layer];
 			model->dt = fabs((log(ip * ivf +
-				ip * sqrt(ivf * ivf - model->pp * model->pp)) + beta)
+				ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) + beta)
 				/ model->layer_gradient[model->layer]);
 
 			/* ray turns and exits layer before
@@ -649,7 +649,7 @@ int mb_rt_quad1(int verbose, int *error)
 				model->turned = MB_YES;
 				model->ray_status = MB_RT_UP_TURN;
 				model->zf = model->layer_depth_top[model->layer];
-				model->xf = model->xc + sqrt(model->radius * model->radius
+				model->xf = model->xc + SAFESQRT(model->radius * model->radius
 					- (model->zf - model->zc) * (model->zf - model->zc));
 				model->tt_left = model->tt_left - model->dt;
 				model->layer--;
@@ -661,7 +661,7 @@ int mb_rt_quad1(int verbose, int *error)
 				model->turned = MB_YES;
 				model->ray_status = MB_RT_UP_TURN;
 				mb_rt_get_depth(verbose, beta, 1, -1, &model->zf, error);
-				model->xf = model->xc + sqrt(model->radius * model->radius
+				model->xf = model->xc + SAFESQRT(model->radius * model->radius
 					- (model->zf - model->zc) * (model->zf - model->zc));
 				model->dt = model->tt_left;
 				model->tt_left = 0.0;
@@ -673,7 +673,7 @@ int mb_rt_quad1(int verbose, int *error)
 		/* ray cannot turn in this layer */
 		ivf = 1.0 / model->layer_vel_bottom[model->layer];
 		model->dt = fabs((log(ip * ivf +
-			ip * sqrt(ivf * ivf - model->pp * model->pp)) - beta)
+			ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) - beta)
 			/ model->layer_gradient[model->layer]);
 
 
@@ -681,7 +681,7 @@ int mb_rt_quad1(int verbose, int *error)
 		if (model->dt <= model->tt_left)
 			{
 			model->zf = model->layer_depth_bottom[model->layer];
-			model->xf = model->xc - sqrt(model->radius * model->radius
+			model->xf = model->xc - SAFESQRT(model->radius * model->radius
 				- (model->zf - model->zc) * (model->zf - model->zc));
 			model->tt_left = model->tt_left - model->dt;
 			model->layer++;
@@ -692,7 +692,7 @@ int mb_rt_quad1(int verbose, int *error)
 			model->turned = MB_YES;
 			model->ray_status = MB_RT_UP_TURN;
 			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
-			model->xf = model->xc - sqrt(model->radius * model->radius
+			model->xf = model->xc - SAFESQRT(model->radius * model->radius
 				- (model->zf - model->zc) * (model->zf - model->zc));
 			model->dt = model->tt_left;
 			model->tt_left = 0.0;
@@ -734,25 +734,26 @@ int mb_rt_quad2(int verbose, int *error)
 	/* find circular path */
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
 	model->zc = model->layer_depth_center[model->layer];
-	model->xc = model->xx - sqrt(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
+	model->xc = model->xx - SAFESQRT(MAX(0.0, model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc)));
+
 	vi = model->layer_vel_top[model->layer]
 		+ (model->zz - model->layer_depth_top[model->layer])
 		* model->layer_gradient[model->layer];
 	ip = 1.0 / model->pp;
 	ipvi = ip/vi;
-	beta = log(ipvi + sqrt(ipvi * ipvi - 1.0));
+	beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
 
 	/* Check if ray ends in layer */
 	ivf = 1.0 / model->layer_vel_top[model->layer];
 	model->dt = fabs((log(ip * ivf +
-		ip * sqrt(ivf * ivf - model->pp * model->pp)) - beta)
+		ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) - beta)
 		/ model->layer_gradient[model->layer]);
 
 	/* ray exits layer before exhausting tt_left */
 	if (model->dt <= model->tt_left)
 		{
 		model->zf = model->layer_depth_top[model->layer];
-		model->xf = model->xc + sqrt(model->radius * model->radius
+		model->xf = model->xc + SAFESQRT(model->radius * model->radius
 			- (model->zf - model->zc) * (model->zf - model->zc));
 		model->tt_left = model->tt_left - model->dt;
 		model->layer--;
@@ -761,7 +762,7 @@ int mb_rt_quad2(int verbose, int *error)
 	else if (model->dt > model->tt_left)
 		{
 		mb_rt_get_depth(verbose, beta, 1, 1, &model->zf, error);
-		model->xf = model->xc + sqrt(model->radius * model->radius
+		model->xf = model->xc + SAFESQRT(model->radius * model->radius
 			- (model->zf - model->zc) * (model->zf - model->zc));
 		model->dt = model->tt_left;
 		model->tt_left = 0.0;
@@ -802,25 +803,25 @@ int mb_rt_quad3(int verbose, int *error)
 	/* find circular path */
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
 	model->zc = model->layer_depth_center[model->layer];
-	model->xc = model->xx - sqrt(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
+	model->xc = model->xx - SAFESQRT(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
 	vi = model->layer_vel_top[model->layer]
 		+ (model->zz - model->layer_depth_top[model->layer])
 		* model->layer_gradient[model->layer];
 	ip = 1.0 / model->pp;
 	ipvi = ip/vi;
-	beta = log(ipvi + sqrt(ipvi * ipvi - 1.0));
+	beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
 
 	/* Check if ray ends in layer */
 	ivf = 1.0 / model->layer_vel_bottom[model->layer];
 	model->dt = fabs((log(ip * ivf +
-		ip * sqrt(ivf * ivf - model->pp * model->pp)) - beta)
+		ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) - beta)
 		/ model->layer_gradient[model->layer]);
 
 	/* ray exits layer before exhausting tt_left */
 	if (model->dt <= model->tt_left)
 		{
 		model->zf = model->layer_depth_bottom[model->layer];
-		model->xf = model->xc + sqrt(model->radius * model->radius
+		model->xf = model->xc + SAFESQRT(model->radius * model->radius
 			- (model->zf - model->zc) * (model->zf - model->zc));
 		model->tt_left = model->tt_left - model->dt;
 		model->layer++;
@@ -829,7 +830,7 @@ int mb_rt_quad3(int verbose, int *error)
 	else if (model->dt > model->tt_left)
 		{
 		mb_rt_get_depth(verbose, beta, 1, 1, &model->zf, error);
-		model->xf = model->xc + sqrt(model->radius * model->radius
+		model->xf = model->xc + SAFESQRT(model->radius * model->radius
 			- (model->zf - model->zc) * (model->zf - model->zc));
 		model->dt = model->tt_left;
 		model->tt_left = 0.0;
@@ -870,13 +871,13 @@ int mb_rt_quad4(int verbose, int *error)
 	/* find circular path */
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
 	model->zc = model->layer_depth_center[model->layer];
-	model->xc = model->xx + sqrt(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
+	model->xc = model->xx + SAFESQRT(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
 	vi = model->layer_vel_top[model->layer]
 		+ (model->zz - model->layer_depth_top[model->layer])
 		* model->layer_gradient[model->layer];
 	ip = 1.0 / model->pp;
 	ipvi = ip/vi;
-	beta = log(ipvi + sqrt(ipvi * ipvi - 1.0));
+	beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
 
 	/* Check if ray turns in layer */
 	if (model->zc - model->radius > model->layer_depth_top[model->layer])
@@ -888,7 +889,7 @@ int mb_rt_quad4(int verbose, int *error)
 		if (model->dt >= model->tt_left)
 			{
 			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
-			model->xf = model->xc - sqrt(model->radius * model->radius
+			model->xf = model->xc - SAFESQRT(model->radius * model->radius
 				- (model->zf - model->zc) * (model->zf - model->zc));
 			model->dt = model->tt_left;
 			model->tt_left = 0.0;
@@ -899,7 +900,7 @@ int mb_rt_quad4(int verbose, int *error)
 			{
 			ivf = 1.0 / model->layer_vel_bottom[model->layer];
 			model->dt = fabs((log(ip * ivf +
-				ip * sqrt(ivf * ivf - model->pp * model->pp)) + beta)
+				ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) + beta)
 				/ model->layer_gradient[model->layer]);
 
 			/* ray turns and exits layer before
@@ -909,7 +910,7 @@ int mb_rt_quad4(int verbose, int *error)
 				model->turned = MB_NO;
 				model->ray_status = MB_RT_DOWN_TURN;
 				model->zf = model->layer_depth_bottom[model->layer];
-				model->xf = model->xc + sqrt(model->radius * model->radius
+				model->xf = model->xc + SAFESQRT(model->radius * model->radius
 					- (model->zf - model->zc) * (model->zf - model->zc));
 				model->tt_left = model->tt_left - model->dt;
 				model->layer++;
@@ -921,7 +922,7 @@ int mb_rt_quad4(int verbose, int *error)
 				model->turned = MB_NO;
 				model->ray_status = MB_RT_DOWN_TURN;
 				mb_rt_get_depth(verbose, beta, 1, -1, &model->zf, error);
-				model->xf = model->xc + sqrt(model->radius * model->radius
+				model->xf = model->xc + SAFESQRT(model->radius * model->radius
 					- (model->zf - model->zc) * (model->zf - model->zc));
 				model->dt = model->tt_left;
 				model->tt_left = 0.0;
@@ -933,7 +934,7 @@ int mb_rt_quad4(int verbose, int *error)
 		/* ray cannot turn in this layer */
 		ivf = 1.0 / model->layer_vel_top[model->layer];
 		model->dt = fabs((log(ip * ivf +
-			ip * sqrt(ivf * ivf - model->pp * model->pp)) - beta)
+			ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) - beta)
 			/ model->layer_gradient[model->layer]);
 
 
@@ -941,7 +942,7 @@ int mb_rt_quad4(int verbose, int *error)
 		if (model->dt <= model->tt_left)
 			{
 			model->zf = model->layer_depth_top[model->layer];
-			model->xf = model->xc - sqrt(model->radius * model->radius
+			model->xf = model->xc - SAFESQRT(model->radius * model->radius
 				- (model->zf - model->zc) * (model->zf - model->zc));
 			model->tt_left = model->tt_left - model->dt;
 			model->layer--;
@@ -952,7 +953,7 @@ int mb_rt_quad4(int verbose, int *error)
 			model->turned = MB_YES;
 			model->ray_status = MB_RT_UP_TURN;
 			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
-			model->xf = model->xc - sqrt(model->radius * model->radius
+			model->xf = model->xc - SAFESQRT(model->radius * model->radius
 				- (model->zf - model->zc) * (model->zf - model->zc));
 			model->dt = model->tt_left;
 			model->tt_left = 0.0;
