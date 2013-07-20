@@ -91,6 +91,9 @@
  *	SNR	Sonar Runtime Settings
  *	TID	Tide Correction
  *	COM	Comment - MB-System extension
+ *	PRJ	Projected coordinate system definition for eastings and
+ *	            northings in file - MB-System extension
+ *	MSS	Sidescan laid out on seafloor - MB-System extension
  *
  */
 
@@ -130,6 +133,7 @@
 #define MBSYS_HYSWEEP_RECORDTYPE_VER	33
 #define MBSYS_HYSWEEP_RECORDTYPE_COM	101
 #define MBSYS_HYSWEEP_RECORDTYPE_PRJ	102
+#define MBSYS_HYSWEEP_RECORDTYPE_MSS	103
 
 /* sonar types */
 #define	MBSYS_HYSWEEP_SONAR_UNKNOWN			0	/* *Not Specified - 0 */
@@ -208,6 +212,9 @@
 
 #define	MBSYS_HYSWEEP_DEVICE_NUM_MAX	12
 #define	MBSYS_HYSWEEP_OFFSET_NUM_MAX	12
+
+#define MBSYS_HYSWEEP_MSS_NUM_PIXELS    1024
+#define	MBSYS_HYSWEEP_MAXLINE	        32768
 
 /* HYSWEEP device offset structure */
 struct mbsys_hysweep_device_offset_struct
@@ -351,6 +358,10 @@ struct mbsys_hysweep_struct
 	int	time_i[7];
 	double	time_d;
 
+        /* Char array used to read data */
+        char    readline[MBSYS_HYSWEEP_MAXLINE];
+        char    writeline[MBSYS_HYSWEEP_MAXLINE];
+
 	/* HYSWEEP type of current data record */
 	int	type;			/* HYSWEEP current data record type */
 
@@ -488,30 +499,6 @@ struct mbsys_hysweep_struct
 	double	FIX_time_after_midnight;	/* time in seconds after midnight */
 	int	FIX_event_number;		/* FIX event number */
 
-	/* Interpolated position and attitude data for multibeam ping
-		In the case of data previously handled by MB-System this
-		will derive from HCP, GYR, POS, DFT records with the same time
-		stamp as the multibeam RMB record that will be placed
-		immediately before the RMB record in the file.
-		In the case of data not previously handled by MB-System these
-		values will be extracted by interpolation at the time the
-		RMB record is read. Subsequent data writing will have the
-		interpolated records placed before the RMB records, and will
-		have the interpolated HCP, GYR, POS, and DFT records set
-		as "enabled". Any original asynchronous HCP, GYR, POS, and
-		DFT records will have the "enabled" flag unset. Four new
-		devices will be declared as well. */
-	double	RMBint_heave;		/* heave (meters) */
-	double	RMBint_roll;		/* roll (+ port side up) */
-	double	RMBint_pitch;		/* pitch (+ bow up) */
-	double	RMBint_heading;		/* heading (degrees) */
-	double	RMBint_x;		/* easting */
-	double	RMBint_y;		/* northing */
-	double	RMBint_lon;		/* longitude (degrees) */
-	double	RMBint_lat;		/* latitude (degrees) */
-	double	RMBint_draft;		/* draft correction */
-	double	RMBint_tide;		/* tide correction */
-
 	/* HYSWEEP RMB - raw multibeam data
 		RMB dn t st sf bd n sv pn psa
 			dn: device number 
@@ -599,6 +586,30 @@ struct mbsys_hysweep_struct
 	int	*RMB_sounding_quality;		/* beam quality codes (from sonar unit) */
 	int	*RMB_sounding_flags;		/* beam edit flags */
 
+	/* Interpolated position and attitude data for multibeam ping
+		In the case of data previously handled by MB-System this
+		will derive from HCP, GYR, POS, DFT records with the same time
+		stamp as the multibeam RMB record that will be placed
+		immediately before the RMB record in the file.
+		In the case of data not previously handled by MB-System these
+		values will be extracted by interpolation at the time the
+		RMB record is read. Subsequent data writing will have the
+		interpolated records placed before the RMB records, and will
+		have the interpolated HCP, GYR, POS, and DFT records set
+		as "enabled". Any original asynchronous HCP, GYR, POS, and
+		DFT records will have the "enabled" flag unset. Four new
+		devices will be declared as well. */
+	double	RMBint_heave;		/* heave (meters) */
+	double	RMBint_roll;		/* roll (+ port side up) */
+	double	RMBint_pitch;		/* pitch (+ bow up) */
+	double	RMBint_heading;		/* heading (degrees) */
+	double	RMBint_x;		/* easting */
+	double	RMBint_y;		/* northing */
+	double	RMBint_lon;		/* longitude (degrees) */
+	double	RMBint_lat;		/* latitude (degrees) */
+	double	RMBint_draft;		/* draft correction */
+	double	RMBint_tide;		/* tide correction */
+
 	/* RSS - Raw Sidescan
 		RSS dn t sf np ns sv pn alt sr amin amax bs freq
 			dn: device number
@@ -643,6 +654,37 @@ struct mbsys_hysweep_struct
 	int	RSS_frequency;		/* frequency 0 or 1 for simultaneous dual frequency operation */
 	int	*RSS_port;		/* port sidescan amplitude samples */
 	int	*RSS_starboard;		/* starboard sidescan amplitude samples */
+
+        /* MSS - MB-System Sidescan
+                MSS dn t pn n ps
+			dn: device number
+			t: time tag (seconds past midnight)
+			pn: ping number (or 0 if not tracked)
+			n: number of pixels
+			ps: pixel size in meters
+
+		Immediately following the MSS record is one record containing
+		the amplitude samples. Zero samples are null values
+		indicating no data.
+
+		Example:
+		MSS 3 61323.082 1500.00 1024 0.340 27535
+		0.00 0.00 109.25 97.13 .... 95.34 120.76 111.26 0.00 (1024 samples) */
+	int	MSS_device_number;	/* device number */
+	double	MSS_time;		/* time tag (seconds past midnight) */
+	double	MSS_sound_velocity;	/* sound velocity in m/sec  */
+	int	MSS_num_pixels;	        /* number of pixels (typically 1024) */
+	double	MSS_pixel_size;	        /* pixel size (meters) */
+	int	MSS_ping_number;	/* ping number (or 0 if not tracked) */
+        double  MSS_ss[MBSYS_HYSWEEP_MSS_NUM_PIXELS];           /* processed sidescan */
+        int     MSS_ss_cnt[MBSYS_HYSWEEP_MSS_NUM_PIXELS];           /* processed sidescan */
+        double  MSS_ss_across[MBSYS_HYSWEEP_MSS_NUM_PIXELS];    /* processed sidescan acrosstrack (meters) */
+        double  MSS_ss_along[MBSYS_HYSWEEP_MSS_NUM_PIXELS];     /* processed sidescan alongtrack (meters) */
+        int     MSS_table_num_alloc;        /* sidescan working array allocated dimensions */
+        double  *MSS_table_altitude_sort;   /* sidescan working array - altitude = depth - draft + heave */
+        double  *MSS_table_range;           /* sidescan working array - range twtt (seconds) */
+        double  *MSS_table_acrosstrack;     /* sidescan working array - acrosstrack (meters) */
+        double  *MSS_table_alongtrack;      /* sidescan working array - alongtrack (meters) */
 
 	/* SNR - dynamic sonar settings
 		up to 12 fields depending on sonar type
@@ -866,3 +908,7 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_hysweep_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
+int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr,
+                        int pixel_size_set, double *pixel_size,
+                        int swath_width_set, double *swath_width,
+                        int pixel_int, int *error);

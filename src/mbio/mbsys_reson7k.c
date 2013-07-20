@@ -10019,7 +10019,7 @@ ibeam,k,kk,ss_cnt[kk],ss[kk], xtrackss, (k-nss/2)*(*pixel_size), ssalongtrack[kk
 			{
 			/* get acrosstrack distance versus range table from bathymetry */
 			nrangetable = 0;
-			for (i=bathymetry->number_beams-1;i>=0;i--)
+			for (i=0;i<bathymetry->number_beams;i++)
 				{
 				if (mb_beam_ok(beamflag[i]))
 					{
