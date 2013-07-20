@@ -147,10 +147,23 @@ CFLAGS="-g -I/usr/X11R6/include -L/usr/X11R6/lib" \
     --with-fftw-include=/sw/include \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
-    --with-motif-lib=/sw/lib 
+    --with-motif-lib=/sw/lib
 #--without-gsf
 
 make
 make install
 
 #------------------------------------------------------------------------------
+gcc -o conftest -g -I/usr/X11R6/include -L/usr/X11R6/lib   -L/usr/local/gmt/lib -L/sw/lib -lnetcdf -lnetcdf conftestcopy.c -lgmt  -lm
+
+CFLAGS="-g -I/usr/X11R6/include -L/usr/X11R6/lib" LDFLAGS="-L/sw/lib -lgdal" \
+./configure \
+    --prefix=/Users/caress/sandbox/mbsystem \
+    --with-netcdf-include=/sw/include \
+    --with-netcdf-lib=/sw/lib \
+    --with-gmt-include=/usr/local/gmt/include \
+    --with-gmt-lib=/usr/local/gmt/lib \
+    --with-fftw-include=/sw/include \
+    --with-fftw-lib=/sw/lib \
+    --with-motif-include=/sw/include \
+    --with-motif-lib=/sw/lib

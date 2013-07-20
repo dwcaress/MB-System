@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+  Version 5.4.2130       July 20, 2013
   Version 5.4.2129       July 8, 2013
   Version 5.4.2128       June 18, 2013
   Version 5.4.2123       June 10, 2013
@@ -141,6 +142,18 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+Format 201 (Hysweep): Substantially changed i/o logic to handle the many
+different variants of data logged through Hysweep.
+
+Format 201 (Hysweep): Augmented to handle sidescan data in conjunction with
+multibeam bathymetry. The i/o module will lay the raw sidescan out on the
+bathymetry to generate "processed" sidescan. That will be included in any output
+file as MSS records (an MB-System extension to the HSX format), which can be
+corrected and filtered in the usual way.
+
+Format 88 (Reson s7k): Fixed bug in which sidescan generated from backscatter
+records was flipped port to starboard.
 
 -----> 5.4.2129 (July 8, 2013)
 
