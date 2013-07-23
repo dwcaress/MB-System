@@ -767,6 +767,7 @@ int main (int argc, char **argv)
 			break;
 		case XML:
 			fprintf(output,"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+			fprintf(output,"<mbinfo>\n");
 			break;
 		case '?':
 			break;
@@ -1464,7 +1465,7 @@ int main (int argc, char **argv)
 							else if (strncmp(comment, "METASONARVERSION:", 17) == 0)
 								{
 								if (meta_sonarversion == 0)
-					    			fprintf(output,"\t\t<sonar_version>%s<sonar_version>\n", &comment[17]);
+					    			fprintf(output,"\t\t<sonar_version>%s</sonar_version>\n", &comment[17]);
 								meta_sonarversion++;
 								}
 							else if (strncmp(comment, "METASONAR:", 10) == 0)
@@ -3026,6 +3027,21 @@ int main (int argc, char **argv)
 					break;
 			}
 		}
+
+	/* close root element for XML export */
+	switch (output_format)
+	{
+		case FREE_TEXT:
+			break;
+		case JSON:
+			break;
+		case XML:
+			fprintf(output,"</mbinfo>\n");
+			break;
+		case '?':
+			break;
+	}
+
 	/* close output file */
 	if (output_usefile == MB_YES
 	    && output != NULL)
