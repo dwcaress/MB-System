@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+  Version 5.4.2132       July 26, 2013
   Version 5.4.2130       July 20, 2013
   Version 5.4.2129       July 8, 2013
   Version 5.4.2128       June 18, 2013
@@ -143,6 +144,17 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2132 (July 26, 2013)
+
+Format 88 (Reson s7k): Fixed layout of snippet backscatter into sidescan in the
+near-nadir region.
+
+Format 88 (Reson s7k): Mbprocess now routinely recreates multibeam sidescan
+during processing. This allows backscatter from beams flagged as bad to be
+excluded from the multibeam sidescan.
+
+Mbinfo: Fixes to XML output from mbinfo (Christian Ferreira)
+
 Format 201 (Hysweep): Substantially changed i/o logic to handle the many
 different variants of data logged through Hysweep.
 
@@ -153,7 +165,8 @@ file as MSS records (an MB-System extension to the HSX format), which can be
 corrected and filtered in the usual way.
 
 Format 88 (Reson s7k): Fixed bug in which sidescan generated from backscatter
-records was flipped port to starboard.
+records was flipped port to starboard. Also fixed layout of backscatter in the
+near-nadir region.
 
 -----> 5.4.2129 (July 8, 2013)
 

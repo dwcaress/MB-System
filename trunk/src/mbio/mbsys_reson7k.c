@@ -9931,8 +9931,10 @@ nsample_use, sint, angle, range, beam_foot,
 nsample_use * ss_spacing / beam_foot); */
 					sample_start = MAX(((int)snippettimeseries->detect_sample - (nsample_use / 2)),
 								(int)snippettimeseries->begin_sample);
-					sample_end = MIN(((int)snippettimeseries->detect_sample + (nsample_use / 2) - 1),
+					sample_end = MIN(((int)snippettimeseries->detect_sample + (nsample_use / 2)),
 								(int)snippettimeseries->end_sample);
+/* fprintf(stderr,"beam:%d snippet samples: b:%d d:%d e:%d   start:%d end:%d\n",
+ibeam,snippettimeseries->begin_sample,snippettimeseries->detect_sample,snippettimeseries->end_sample,sample_start,sample_end); */
 					for (k=sample_start;k<=sample_end;k++)
 						{
 						if (xtrack < 0.0)
@@ -9983,7 +9985,7 @@ nsample_use, sint, angle, range, beam_foot,
 nsample_use * ss_spacing / beam_foot); */
 					sample_detect = volatilesettings->sample_rate * bathymetry->range[ibeam];
 					sample_start = MAX(sample_detect - (nsample_use / 2), snippet->begin_sample);
-					sample_end = MIN(sample_detect + (nsample_use / 2) - 1, snippet->end_sample);
+					sample_end = MIN(sample_detect + (nsample_use / 2), snippet->end_sample);
 					if ((beam->sample_type & 15) == 3)
 						data_uint = (unsigned int *) snippet->amplitude;
 					else if ((beam->sample_type & 15) == 2)

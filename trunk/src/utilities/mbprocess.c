@@ -257,6 +257,7 @@
 #include "mbsys_atlas.h"
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
+#include "mbsys_reson7k.h"
 
 /* define sidescan correction table structure */
 struct mbprocess_sscorr_struct
@@ -5963,6 +5964,14 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			status = mbsys_simrad3_makess(verbose,
 					imbio_ptr,store_ptr,
 					pixel_size_set,&pixel_size,
+					swath_width_set,&swath_width,
+					pixel_int,
+					&error);
+                        else if (process.mbp_format == MBF_RESON7KR)
+			status = mbsys_reson7k_makess(verbose,
+					imbio_ptr,store_ptr,
+					R7KRECID_7kV2SnippetData,
+                                        pixel_size_set,&pixel_size,
 					swath_width_set,&swath_width,
 					pixel_int,
 					&error);
