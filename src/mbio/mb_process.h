@@ -1337,6 +1337,8 @@ int mb_esf_open(int verbose, char *esffile,
 			int load, int output,
 			struct mb_esf_struct *esf,
 			int *error);
+int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf,
+			double time_d, double tolerance, int *error);
 int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 			double time_d, int pingmultiplicity, int nbath, char *beamflag,
 			int *error);

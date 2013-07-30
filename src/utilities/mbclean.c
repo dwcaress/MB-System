@@ -260,7 +260,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "MBCLEAN";
 	char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
-	char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Rmaxheadingrate -Sspike_slope/mode/format -Xbeamsleft/beamsright -Ydistanceleft/distanceright \n\t-V -H]";
+	char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Rmaxheadingrate \n\t-Sspike_slope/mode/format -Ttolerance -Xbeamsleft/beamsright -Ydistanceleft/distanceright \n\t-V -H]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -401,12 +401,12 @@ int main (int argc, char **argv)
 	double  backup_dist = 0; //2010/04/27 DY
 
 	/* max acrosstrack filter variable  2010/03/07 DY */
-	double max_acrosstrack=120;
+	double max_acrosstrack = 120;
 
 	/* max heading_rate variable  2010/04/27 DY */
 	double max_heading_rate;
-	double last_heading=0.0;
-	double last_time=0.0;
+	double last_heading = 0.0;
+	double last_time = 0.0;
 
 	/* slope processing variables */
 	double	mtodeglon;
@@ -420,6 +420,10 @@ int main (int argc, char **argv)
 	double	dd2;
 	double	slope;
 	double	slope2;
+
+	/* fix_edit_timestamps variables */
+	int	fix_edit_timestamps = MB_NO;
+	double	tolerance = 0.0;
 
 	/* save file control variables */
 	int	esffile_open = MB_NO;
@@ -461,7 +465,7 @@ int main (int argc, char **argv)
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:L:l:I:i:M:m:Q:q:R:r:S:s:U:u:X:x:Y:y:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:L:l:I:i:M:m:Q:q:R:r:S:s:T:t:U:u:X:x:Y:y:")) != -1)
 	  {
 	    switch (c)
 		{
@@ -557,6 +561,12 @@ int main (int argc, char **argv)
 			  spikemax = tan(spikemax);
 			flag++;
 			break;
+		case 'T':
+		case 't':
+			fix_edit_timestamps = MB_YES;
+			sscanf (optarg,"%lf", &tolerance);
+			flag++;
+			break;
 		case 'U':
 		case 'u':
 			sscanf (optarg,"%d", &num_good_min);
@@ -607,7 +617,8 @@ int main (int argc, char **argv)
 		&& check_range == MB_NO
 		&& check_fraction == MB_NO
 		&& check_deviation == MB_NO
-		&& check_num_good_min == MB_NO)
+		&& check_num_good_min == MB_NO
+		&& fix_edit_timestamps == MB_NO)
 		check_slope = MB_YES;
 
 	/* print starting message */
@@ -680,6 +691,8 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       num_good_min:         %d\n",num_good_min);
 		fprintf(stderr,"dbg2       zap_long_across:      %d\n",zap_long_across);
 		fprintf(stderr,"dbg2       max_acrosstrack:      %f\n",max_acrosstrack);
+		fprintf(stderr,"dbg2       fix_edit_timestamps:  %d\n",fix_edit_timestamps);
+		fprintf(stderr,"dbg2       tolerance:            %f\n",tolerance);
 		}
 
 	/* if help desired then print it and exit */
@@ -1034,6 +1047,11 @@ int main (int argc, char **argv)
 							ping[j].bathy[ping[j].beams_bath/2]);
 					}
 				    }
+
+				/* if requested set all edit timestamps within tolerance of
+					ping[nrec].time_d to ping[nrec].time_d */
+				status = mb_esf_fixtimestamps(verbose, &esf,
+		    				ping[nrec].time_d, tolerance, &error);
 
 				/* apply saved edits */
 				status = mb_esf_apply(verbose, &esf,

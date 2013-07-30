@@ -1,4 +1,4 @@
-.TH mbclean 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean 1 "27 July 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP \- Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -11,7 +11,8 @@ Version 5.0
 \fB\-G\fIfraction_low/fraction_high\fP
 \fB\-I\fIinfile\fP \fB\-L\fIlonflip\fP \fB\-O\fIoutfile\fP
 \fB\-M\fImode\fP \fB\-Q\fIbackup\fP \fB\-R\fImaxheadingrate\fP \fB\-S\fIslope/mode/units\fP
-\fB\-U\fInmin\fP \fB\-X\fIbeamsleft/beamsright\fP \fB\-Y\fIdistanceleft/distanceright\fP \fB\-V \-H\fP]
+\fB\-T\fItolerance\fP \fB\-U\fInmin\fP \fB\-X\fIbeamsleft/beamsright\fP
+\fB\-Y\fIdistanceleft/distanceright\fP \fB\-V \-H\fP]
 
 .SH DESCRIPTION
 \fBmbclean\fP identifies and flags artifacts in swath sonar bathymetry data.
@@ -256,6 +257,17 @@ If \fImode\fP is 3 both along track and across track slopes are checked.
 A beam is not considered a spike if either the preceding or subsequent beam
 has already been flagged.
 Default: \fIslope\fP = 1.0
+.TP
+.B \-T
+\fItolerance\fP
+.br
+If requested this option will reset the timestamps of edit events from an
+existing esf file to exactly match the timestamps of the survey pings. The
+/fItolerance/fP value sets how close timestamps must be in seconds to be
+considered a match. This option handles the case where survey data have been
+processed using non-\fBMB-System\fP software and a user is extracting the
+edits from one set of files with \fBmbgetesf\fP and then applying them to
+another using \fBmbprocess\fP. 
 .TP
 .B \-U
 \fInmin\fP
