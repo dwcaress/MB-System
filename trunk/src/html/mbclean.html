@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbclean</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  27 July 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -32,7 +32,8 @@ Version 5.0
 <B>-G</B><I>fraction_low/fraction_high</I>
 <B>-I</B><I>infile</I> <B>-L</B><I>lonflip</I> <B>-O</B><I>outfile</I>
 <B>-M</B><I>mode</I> <B>-Q</B><I>backup</I> <B>-R</B><I>maxheadingrate</I> <B>-S</B><I>slope/mode/units</I>
-<B>-U</B><I>nmin</I> <B>-X</B><I>beamsleft/beamsright</I> <B>-Y</B><I>distanceleft/distanceright</I> <B>-V -H</B>]
+<B>-T</B><I>tolerance</I> <B>-U</B><I>nmin</I> <B>-X</B><I>beamsleft/beamsright</I>
+<B>-Y</B><I>distanceleft/distanceright</I> <B>-V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -314,6 +315,19 @@ If <I>mode</I> is 3 both along track and across track slopes are checked.
 A beam is not considered a spike if either the preceding or subsequent beam
 has already been flagged.
 Default: <I>slope</I> = 1.0
+<DT><B>-T</B>
+
+<DD>
+<I>tolerance</I>
+<BR>
+
+If requested this option will reset the timestamps of edit events from an
+existing esf file to exactly match the timestamps of the survey pings. The
+/fItolerance/fP value sets how close timestamps must be in seconds to be
+considered a match. This option handles the case where survey data have been
+processed using non-<B>MB-System</B> software and a user is extracting the
+edits from one set of files with <B>mbgetesf</B> and then applying them to
+another using <B>mbprocess</B>. 
 <DT><B>-U</B>
 
 <DD>
@@ -513,7 +527,7 @@ bathymetry data (e.g. <B>mbedit</B>).
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 27 July 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

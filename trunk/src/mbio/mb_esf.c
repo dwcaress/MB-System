@@ -430,6 +430,71 @@ fprintf(stderr,"esstream %s opened with mode %s\n",esf->esstream,fmode);*/
 }
 
 /*--------------------------------------------------------------------*/
+/* 	function mb_esf_fixtimestamps fixes timestamps of all edits
+        in esf that are within tolerance of time_d - those timestamps
+        are set to time_d so that the edits correspond to this ping.
+        This function is used to rectify edit timestamps when edits are
+        being extracted from one version of a dataset and applied to
+        another. */
+int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf,
+		double time_d, double tolerance, int *error)
+{
+  	char	*function_name = "mb_esf_fixtimestamps";
+	int	status = MB_SUCCESS;
+	int	firstedit, lastedit;
+	int	apply, action;
+	int	beamoffset;
+	char	beamflagorg;
+	int	ibeam;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
+		fprintf(stderr,"dbg2       nedit:            %d\n",esf->nedit);
+		for (i=0;i<esf->nedit;i++)
+			fprintf(stderr,"dbg2       edit event: %d %.6f %5d %3d %3d\n",
+				i,esf->edit[i].time_d,esf->edit[i].beam,
+				esf->edit[i].action,esf->edit[i].use);
+		fprintf(stderr,"dbg2       time_d:           %f\n",time_d);
+		fprintf(stderr,"dbg2       tolerance:        %f\n",tolerance);
+		}
+
+	/* all edits that have timestamps within tolerance of time_d will have
+	their timestamps set to time_d */
+	for (j = 0; j < esf->nedit; j++)
+		{
+		if (fabs(esf->edit[j].time_d - time_d) < tolerance)
+		    {
+		    esf->edit[j].time_d = time_d;
+		    }
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return value:\n");
+		for (i=0;i<esf->nedit;i++)
+			fprintf(stderr,"dbg2       edit event: %d %.6f %5d %3d %3d\n",
+				i,esf->edit[i].time_d,esf->edit[i].beam,
+				esf->edit[i].action,esf->edit[i].use);
+		fprintf(stderr,"dbg2       error:  %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+}
+
+
+/*--------------------------------------------------------------------*/
 /* 	function mb_esf_apply applies saved edits to the beamflags
 	in a ping. If an output esf file is open the applied edits
 	are saved to that file. */

@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+  Version 5.4.2133       July 29, 2013
   Version 5.4.2132       July 26, 2013
   Version 5.4.2130       July 20, 2013
   Version 5.4.2129       July 8, 2013
@@ -143,6 +144,21 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2133 (July 29, 2013)
+
+Heading and nav interpolation (src/mbaux/mb_spline.c): Modified function
+mb_linear_interp_degrees() so that return values must be in the range
+  0.0 <= value < 360.0
+to fix bad heading values near due north.
+
+Mbclean: added -Ttolerance option which will recast the timestamps of edit
+events read from edit save files to match the pingtimes, where the tolerance
+value in seconds defines how close the timestamps must be to be considered the
+same. This is used to override timestamp differences greater than 0.0011 seconds
+that can arise when edits are extracted from one set of files (perhaps processed
+using software other than MB-System) using mbgetesf and then applied to a
+different set of files (presumably as part of MB-System processing).
 
 -----> 5.4.2132 (July 26, 2013)
 
