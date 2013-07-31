@@ -1778,6 +1778,10 @@ int main (int argc, char **argv)
 			ping->png_latitude = 20000000 * navlat;
 
 			/* insert heading */
+			if (heading < 0.0)
+				heading += 360.0;
+			else if (heading > 360.0)
+				heading -= 360.0;
 			ping->png_heading = (int) rint(heading * 100);
 
 			/* insert roll pitch and heave */

@@ -145,6 +145,14 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2134 (July 31, 2013)
+
+Heading and nav interpolation (src/mbaux/mb_spline.c): Fixed function
+mb_linear_interp_degrees() so that negative latitude values are allowed.
+
+Mbkongsbergpreprocess: Added checking so that interpolated heading and
+navigation are in the correct domains.
+
 -----> 5.4.2133 (July 29, 2013)
 
 Heading and nav interpolation (src/mbaux/mb_spline.c): Modified function
