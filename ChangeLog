@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+* Version 5.4.2135       August 7, 2013
   Version 5.4.2133       July 29, 2013
   Version 5.4.2132       July 26, 2013
   Version 5.4.2130       July 20, 2013
@@ -144,6 +145,12 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2135 (August 7, 2013)
+
+Mbdatalist: Fixed generation of old-format fbt files.
+
+Web page documentation: Updated basic web pages included in the distribution.
 
 -----> 5.4.2134 (July 31, 2013)
 

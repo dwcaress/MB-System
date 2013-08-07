@@ -117,6 +117,7 @@ foreach $file (@preformatted_files) {
     `cp $file ../html`;
     chmod 0664, "../html/$file";
     }
+`cp ../../ChangeLog ../html/ChangeLog.txt`;
 
 # Get list of man page files to process
 @manual_pages = `/bin/ls -1 ../man/man*/* | grep [mh][bs]`;

@@ -199,21 +199,117 @@ painlessly installed using the fink package available from the
 <hr width="67%">
 </center>
 <center>
-<p><a name="MB-install"></a><b><font size="+2">How to Install MB-System</font></b></p>
+<p><a name="MB-install"></a><b><font size="+2">How to Install MB-System Using the Configure Script</font></b></p>
 </center>
-<p>The MB-System source code is extracted by first uncompressing the
-tar
-file and then running tar:</p>
+<p>The MB-System source code is extracted from the distribution using the tar utility:</p>
 <ul>
-  <pre>% tar xvzf MB-System.tar.gz</pre>
+  <pre>tar xvzf MB-System.tar.gz</pre>
 </ul>
-<p>This will create a directory called (for the 5.3.1955 distribution): </p>
+<p>This will create a directory called (for the 5.4.2035 distribution): </p>
 <ul>
-  <pre>mbsystem-5.3.1955</pre>
+  <pre>mbsystem-5.4.2035</pre>
 </ul>
+<p>In order to build and install MB-System from an interactive shell, you need to change your current directory to the distribution:</p>
+<ul>
+  <pre>cd mbsystem-5.4.2035</pre>
+</ul>
+<p>Next run the configure script found in that directory:</p>
+<ul>
+  <pre>./configure</pre>
+</ul>
+<p>The configure script will (hopefully) figure out the compiler and linker options required for your system, and then generate Makefile files through the source code directory structure that control the compiling and linking of the MB-System libraries and programs. Once the Makefiles exist, then building and installing is a two-step process. First execute:</p>
+<ul>
+  <pre>make</pre>
+</ul>
+<p>to compile everything. Then execute:</p>
+<ul>
+<pre>make install</pre></ul>
+<p>to copy the libraries, programs, scripts, manual pages, and web pages to the target destinations. </p>
+<p>Depending on how user permissions are set on your system and where the package is to be installed, it may be necessary to execute some or all of the above commands with superuser privileges. On older styles of Unix and Linux, this was typically accomplished by using the su command to become root, or superuser, a step that requires knowing the root password for the system. Following a successful invocation of su in a command shell, all commands have superuser privileges. On MacOsX and other &quot;modern&quot; flavors of Unix and Linux, it's more common to use the sudo command in front of other commands in order to execute them with superuser privileges. An administrator password is required for the first instance of sudo, but not for subsequent instances (at least for a period of time, typically five minutes). In this case, the commands become:</p>
+<ul>
+  <pre>sudo ./configure
+sudo make
+sudo make install</pre>
+</ul>
+<p>The default destination is /usr/local, and so one should find the MB-System executable programs and scripts in /usr/local/bin, the shared libraries in /usr/local/lib, the manual pages in /usr/local/man, and the projection and Levitus databases accessed by MB-System in /usr/local/share/mbsystem. However, one can control the installation destination of the configure script on the command line by using a &quot;--prefix&quot; argument. For example, to install MB-System into /Users/caress/sandbox/mbsystem, you can use:</p>
+<ul>
+  <pre>sudo ./configure \
+		--prefix=/Users/caress/sandbox/mbsystem
+</pre>
+</ul>
+<p>MB-System depends on librarys from a number of different packages, including NetCDF, GMT, FFTW3, X11, and Motif. Sometimes a user will have more than one installation of a package available, and specifying which is used is desirable. Also, unfortunately the configure script does not always successfully find all needed packages. Consequently, the configure script allows users to set the locations on the command line when necessary. The complete set of configure's command line options is:</p>
+<ul>
+<pre>--prefix=install 		Location for mbsystem (/usr/local/mbsystem)
+--with-netcdf-lib 		Location of NetCDF libs
+--with-netcdf-include 	Location of NetCDF headers
+--with-gmt-lib 		Location of GMT libs
+--with-gmt-include 	Location of GMT headers
+--with-fftw-lib 		Location of FFTW3 libs (optional)
+--with-fftw-include 	Location of FFTW3 headers (optional)
+--with-motif-lib 		Location of Motif libs (optional)
+--with-motif-include 	Location of Motif headers (optional)
+--with-opengl-lib 		Location of OpenGL libs (optional)
+--with-opengl-include 	Location of OpenGL headers (optional)
+--without-gsf 			Build without support for the GSF format (optional)
+</pre>
+</ul>
+<p>Note that specification of FFTW3, Motif, and OpenGL is optional. If the configure script does not find these packages and the user does not specify their locations, then some MB-System programs will not be built. Lack of FFTW3 means that mbsegypsd is not built. No OpenGL results in the visualization programs mbgrdviz and mbeditviz not being built. Lack of Motif means that no graphical programs of any type are built. </p>
+<p>Many MacOsX users have their NetCDF, GMT, FFTW3, and OpenMotif installations through the Fink package manager, which installs packages in /sw. The configure script fails to find packages in /sw, and so the user must explicitly specify those packages. An installation of MB-System into /usr/local on a Mac using Fink may use a configure command that looks something like:</p>
+<ul>
+<pre>sudo ./configure \
+--prefix=/usr/local \
+--with-netcdf-include=/sw/include \
+--with-netcdf-lib=/sw/lib \
+--with-gmt-include=/sw/include \
+--with-gmt-lib=/sw/lib \
+--with-fftw-include=/sw/include \
+--with-fftw-lib=/sw/lib \
+--with-motif-include=/sw/include \
+--with-motif-lib=/sw/lib
+</pre>
+</ul>
+<p>One can also add to the commands seen by the compiler (&quot;CFLAGS&quot;) and linker (&quot;LDFLAGS&quot;) if desired or necessary by prefacing the configure command with arguments setting the environment variables CFLAGS and LDFLAGS. For instance, in order to compile MB-System for user with a debugger, all compiler commands must include the &quot;-g&quot; argument. So, to enable use of the gdb debugger, the configure command becomes:</p>
+<ul>
+<pre>CFLAGS=&quot;-g&quot; \
+sudo ./configure \
+--prefix=/usr/local \
+--with-netcdf-include=/sw/include \
+--with-netcdf-lib=/sw/lib \
+--with-gmt-include=/sw/include \
+--with-gmt-lib=/sw/lib \
+--with-fftw-include=/sw/include \
+--with-fftw-lib=/sw/lib \
+--with-motif-include=/sw/include \
+--with-motif-lib=/sw/lib
+</pre>
+</ul>
+<p>Again, the current configure script is not always successful at resolving the required compiler and linker flags. On MacOsX 10.8, configure fails to find the X11 windows system and GDAL, a library required by the newest versions of GMT. So, the complete configure command required to build MB-System and install it into /usr/local on a Mac running MacOsX 10.8 is:</p>
+<ul>
+<pre>CFLAGS=&quot;-g -I/usr/X11R6/include -L/usr/X11R6/lib&quot; LDFLAGS=&quot;-L/sw/lib -lgdal&quot; \
+sudo ./configure \
+--prefix=/usr/local \
+--with-netcdf-include=/sw/include \
+--with-netcdf-lib=/sw/lib \
+--with-gmt-include=/sw/include \
+--with-gmt-lib=/sw/lib \
+--with-fftw-include=/sw/include \
+--with-fftw-lib=/sw/lib \
+--with-motif-include=/sw/include \
+--with-motif-lib=/sw/lib
+</pre>
+</ul>
+<p>The configure script has been generated using the autoconf package. The current configure script does not resolve all of the flags and locations needed to build MB-System on all platforms, but does allow for flexible installation and generation and use of shared libraries without requiring interactive editing. These improvements make MB-System distributions much more amenable to inclusion in package manager systems like Debian and Fink. We hope to improve the configure script so that less intervention is required.</p>
+<center>
+  <p></p>
+<hr width="67%">
+</center>
+<center>
+<p><a name="MB-install-old"></a><b><font size="+2">How to Install MB-System Using the Install_makefiles Script</font></b></p>
+</center>
+<p>For over two decades, the only means to build MB-System distributions was a crude Perl script called install_makefiles that needed to be edited to set the operating system and the locations of prerequisite packages. Although a autoconf-type configure script is now provided, as described above, the old install_makefiles script is still included in the MB-System distribution and remains an alternative means to build and install MB-System.</p>
 <p>In order to
-configure your installation, you must edit the perl script
-mbsystem-5.1.3/install_makefiles, and set a number of parameters to reflect the system architecture, the location of the installation, and the locations of certain required libraries.
+use this alternative build system, you must edit the perl script
+mbsystem/install_makefiles, and set a number of parameters to reflect the system architecture, the location of the installation, and the locations of certain required libraries.
 This script will read template makefiles in the MB-System
 source
 directories and create makefiles with the correct dependencies, compile flags, and link flags. The important parameters to be set in install_makefiles are listed below. The install_makefiles script includes comments suggesting parameters to use for many common computer systems.</p>

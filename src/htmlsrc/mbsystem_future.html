@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
 <html>
 <head>
-  <title>MB-System Future Development</title>
+  <title>MB-System Development Plan</title>
   <meta content="text/html" http-equiv="Content-Type">
   <meta content="MB-System: Mapping the Seafloor" name="Title">
   <meta content="David Caress, Dale Chayes" name="Author">
@@ -15,88 +15,99 @@
 <body alink="#cc9900" vlink="#997040" link="#336699" bgcolor="#ffffff"
  text="#000000">
 <center>
-<h1>Plans for Future MB-System Development</h1>
+<h1>MB-System Development Plan</h1>
 </center>
-Listed below are some notions for the future development of MB-System.
-We include these here not as a promise of what we will do, but rather
-to
-encourage discussion with MB-System users regarding what we might do.
-Comments
-and suggestions are welcome: <a href="mailto:%20mbsystem@mbari.org">email
-us</a> at the MB-System <a 
- href="http://listserver.mbari.org/sympa/arc/mbsystem">Discussion
-List</a>!
+<p>On January 17-18, 2012, an MB-System planning meeting was held at the Lamont-Doherty Earth Observatory to define the priorities for the next five years of MB-System development. This meeting brought together  a small group composed of the core MB-System developers, users that have substantially contributed to the project over the past few years, and representatives of organizations that have expressed interest in parallel development efforts contributing to MB-System.The priorities identified by the participants are reflected in the renewal proposal to the National Science Foundation submitted by David Caress and Dale Chayes in August 2012 and funded for 2013-2017.</p>
+<p>Full notes from this meeting have been posted <a href="http://www.mbari.org/data/mbsystem/2012NSFProposal/20120117MBPlanning.html">here</a> and <a href="http://www.ldeo.columbia.edu/res/pi/MB-System/2012NSFProposal/20120117MBPlanning.html">here</a>.
+<br>The proposal has been posted <a href="http://www.mbari.org/data/mbsystem/2012NSFProposal/20120815MB-SystemNSFProposal.pdf">here</a> and <a href="http://www.ldeo.columbia.edu/res/pi/MB-System/2012NSFProposal/20120815MB-SystemNSFProposal.pdf">here</a>.</p>
+<p>The focus of the NSF-funded software development efforts at MBARI and L-DEO will be:</p>
 <ul>
-  <li>MB-System architecture changes we would like to achieve:
+  <li><strong>Re-architect underlying MBIO library</strong><br>The scope of requested new capabilities require substantially recasting the MBIO application programming interface (API) and the associated functions:</li>
+  <ul>
+    <li>Store and pass beam quality information needed for determining if soundings meet IHO (International Hydrographic Organization) quality standards.</li>
+    <li>Recast the internal coordinate systems consistently through the code.</li>
+    <li>Handle corrections to sensor offsets and biases for all sensors.</li>
+  </ul>
+</ul>
+<ul>
+  <li><strong>Support new and important data formats</strong></li>
+  <ul>
+    <li>Keep up to date with data from Kongsberg multibeam installations on UNOLS vessels</li>
+    <li>Keep up to date ith data from Reson multibeam installations on WHOI NSDF platforms (Sentry, Jason, Alvin)</li>
+    <li>Support input from Bathymetry Attributed Grid (BAG) files</li>
+    <li>Support other data formats associated with NSF-supported projects as they become relevant.</li>
+  </ul>
+</ul>
+<ul>
+  <li><strong>Improve performance of common tasks</strong>
+<br>Several straightforward improvements have been identified that can substantially reduce the time required for analysis and processing:</li>
+  <ul>
+    <li>Augmenting the datalist scheme so that surveys as well as individual files have .inf metadata files, and thus data trees outside bounds of interest can be skipped.</li>
+    <li>Recasting ancillary files (esp. fbt) for improved read performance.</li>
+    <li>Allow raw files and processed files to be located on different filesystems to improve processing performance.</li>
+  </ul>
+</ul>
+<ul>
+  <li><strong>Fix existing problems with support of current generation Kongsberg data</strong>
+  <br>The beam angles for current generation Kongsberg multibeam sonar data are not calculated correctly, and an iterative method used to estimate these angles in an optional pre-processing stage is slow. Fixing this issue is high priority.<strong></strong></li>
+</ul>
+<ul>
+  <li><strong>Improve <em>mbeditivz</em></strong>
+<br>Improve patch test calibration capability of <em>mbeditviz</em> by allowing the soundings to be colored according to a variety of parameters.</li>
+</ul>
+<ul>
+  <li><strong>Add capability to generate additional data products:</strong></li>
+  <ul>
+    <li>Shapefiles for ESRI and other GIS</li>
+    <li>KML file for Google Earth</li>
+    <li>Bathymetry Attributed Grid (BAG) files</li>
+  </ul>
+</ul>
+<ul>
+  <li><strong>Support reading from compressed files in gzip format.</strong>
+<br>This will reduce data storage requirements, and is a priority of NGDC, MGDS, and R2R.</li>
+</ul>
+<ul>
+  <li><strong>Rewrite the graphical utilities to use Qt graphics </strong>
+  <br>The interactive programs currently use obsolete Motif/X11 graphics. In addition to improving performance and moving MB to a modern graphics context, switching to Qt will enable true cross-platform portability, including to Windows computers. </li>
+</ul>
+<ul>
+  <li><strong>Develop tools for working with multibeam water column data</strong>
+  <br>The use of recorded beamformed time series data from multibeam sonars to image biological and other water column targets is of great interest to many users. This issue was the highest ranked desired capability at the MB-System planning meeting. Water column data are also an asset in troubleshooting interference in multibeam sonar systems. We will develop a new MB-System tool to display water column data and to identify and display targets. <strong><u></u></strong></li>
+</ul>
+<ul>
+  <li><strong>Implement the CHRT algorithm as an MB-System tool. </strong>
+  <br>CUBE is an algorithm developed by Brian Calder [Calder and Mayer, 2003] that automatically processes swath bathymetry soundings and provides depth estimates and uncertainties at defined points and identifies soundings inconsistent with the best estimates. Thus, CUBE can be used both to identify bad (or suspect) soundings and to generate gridded bathymetry models. This is a particularly useful feature in shallow water data sets with very large numbers of tracks and soundings. The CUBE source code is held proprietary by the University of New Hampshire, and cannot be distributed as open source. During the previous grant period we enabled the CUBE function of the commercial software Fledermaus to integrate with an MB-System development environment. Calder is now developing a new version of his algorithm called CHRT, and he plans to disseminate this proprietary software in a server-client structure, where the standard CHRT server is distributed freely in compiled form. We will thus be able to develop an open source CHRT client tool within MB-System, enabling MB-System users to use Calder&rsquo;s algorithm without having to buy Fledermaus.</li>
+</ul>
+<ul>
+  <li><strong>Develop real-time display tool</strong>
+  <br>We will implement a display tool that reads swath data from real-time streams, updates a gridded representation of the bathymetry, and displays the current grid and tracklines in a 2D/3D view using the new, Qt-based <em>mbview</em> visualization library.</li>
+</ul>
+<ul>
+  <li><strong>Develop a &ldquo;test suite&rdquo; to allow automatic determination that an MB-System installation is successful. </strong>
+  <br>As MB-System has become more complex it has become clear that we need an automated method to verify new builds. Using our existing example data set, we will develop a test procedure implemented in a script that will exercise a new build of MB-System and compare the results against a pre-defined set of results. </li>
+</ul>
+<p>The participants of the MB-System planning meeting also identified updating documentation and improving training resources for both users and developers as significant priorities. We plan to:</p>
+<ul>
+  <li><strong>Rewrite the MB-System Cookbook to reflect the current software. </strong>
+  <br>We will rewrite the cookbook to reflect the current state of the software.<strong></strong></li>
+</ul>
+<ul>
+  <li><strong>Create an MB-System Wiki to store and disseminate user-created documentation and training materials. </strong>
+  <br>A number of users have created their own MB-System presentations, how-to documents, and even some quite good how-to videos. </li>
+</ul>
+<ul>
+  <li><strong>Hold MB-System workshops to assist groups that want to develop data format modules and applications and for user training. </strong>
+    <br>
+    We proposed to hold annual workshops intended for 10-20 participants each. During years 1, 3, and 5 we intended to hold developer workshops at MBARI. During years 2 and 4 we intended to hold user workshops at LDEO.
     <ul>
-      <li>Move installation method from install_makefiles script to a configure script using autoconf or something similar. This will probably result in significant changes to the structure of the source code package.</li>
+      <li>NSF was unable to fund these workshops</li>
+      <li>We are looking for alternative support for at least some workshops.</li>
     </ul>
   </li>
 </ul>
-<ul>
-  <li>
-    Data formats we would like to support:</li>
-  <ul>
-    <li>
-      Atlas SURF format (Fansweep and Odom sonars) - Atlas released
-      the
-      source code for an API&nbsp;to read and write SURF data under the GNU
-      GPL some years ago. However, the SURF format is supported read-only, which means
-      that SURF format data may be plotted, gridded, and mosaiced, but not
-      reprocessed. We will fuly support the SURF format when  we find
-      time. A large amount of German and Australian government mapping data
-    are in the SURF format.</li>
-    <li>
-      Caris HDCS format (the result of processing swath bathymetry data with
-      the Caris HIPS software package) - this is another propritary format. A
-      large amount of multibeam data collected by and for NOAA's hydrographic
-      groups are in this format. These data will not be available to the
-      general
-      public until the format is known or the data is translated to an open
-    format.</li>
-    <li>
-      Triton-Elics XTF format (produced by the Triton Isis datalogging
-      systems). This is an open, but poorly documented, widely used mapping data collection format.
-    Supporting XTF is unlikely to become a priority for the core MB-System team, but some MB-System users have expressed interest in developing the capability. We shall see...</li>
-    <li>Conversion to GSF. We should enable mbcopy to translate a wide
-      variety of data formats into GSF. Some work on this is planned for 2009.<br>
-    </li>
-  </ul>
-</ul>
-<ul>
-  <li>Capabilities we would like to add to MB-System:</li>
-  <ul>
-    <li>
-Improved mblevitus. We need an updated tool to deliver water sound
-speed
-models based on more complete and recent databases than the 1982
-Levitus
-database used now.</li>
-    <li>
-Graphical project management tool. With the release of version 5.0,
-MB-System
-now has most of the low-level elements in place to enable efficient
-processing
-project management. Now we need to make a tool that uses the underlying
-structure provided by mbprocess and the related programs.</li>
-    <li>
-Improved sidescan processing. We currently use amplitude-vs-grazing
-angle correction tables derived by averaging the raw data. We would
-likely do better to model the correction functions as piecewise
-analytic functions. We also need an interactive
-tool for developing sidescan correction parameters.</li>
-    <li>
-Extended grid format including sums and weights so that grids can be
-updated
-when that is more efficient than recreating from scratch.</li>
-    <li>
-Realtime survey visualization tool. We would like a flexible tool for viewing
-swath data during surveys
-with interactively controlled scales and map styles.</li>
-  </ul>
-</ul>
 <center>
-<p><br>
+  <p><br>
 Last Updated: $Id$</p>
 </center>
 <p>

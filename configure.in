@@ -6,11 +6,11 @@ dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
-AC_INIT([mbsystem],[5.4.2134])
+AC_INIT([mbsystem],[5.4.2135])
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 
-AC_DEFINE(VERSION_DATE, "31 July 2013", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "7 August 2013", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
