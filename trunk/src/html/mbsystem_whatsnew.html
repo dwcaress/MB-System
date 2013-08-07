@@ -10,9 +10,25 @@
 </HEAD>
 <BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
 
-<H1 ALIGN=CENTER>What's New in MB-System Version 5.3</H1>
+<H1 ALIGN=CENTER>What's New in MB-System Version 5.4</H1>
 
-<P>The version 5.3.x releases of MB-System includes a number of changes and
+<P>The version 5.4.x releases of MB-System includes a number of changes and
+improvements relative to the earlier version 5 releases. The most significant change is the addition of an autoconf-based build system including a configure script. A detailed listing of bug fixes and other changes is found in the <a href="ChangeLog.txt">ChangeLog</a> file. The particulars follow: </P>
+
+<UL>
+  <LI>New autoconf based build system.</LI>
+  
+  <UL>
+  <LI>The MB-System distribution now comes with a configure script that can be used to build the software without editing any files.</LI>
+  <LI>The configure script generates Makefiles that support installing the executables, libraries, header files, and man pages in locations outside the MB-System source directories (e.g. in /usr/local).</LI>
+  <LI>The configure script generated Makefiles build shared libraries.</LI>
+  <LI>The older &quot;install_makefiles&quot; build system is still included in the distribution, and can be used to build MB-System.</LI>
+  </UL>
+</UL>
+
+<H1 ALIGN=CENTER>What Was New in MB-System Version 5.3</H1>
+
+<P>The version 5.3.x releases of MB-System included a number of changes and
 improvements relative to the earlier version 5 releases. Two of these changes, a new &quot;fast bathymetry&quot; or fbt file format, and the implementation of file locking, will generate files that older versions of MB-System cannot read. Consequently, we recommend that any MB-System users that work together on common datasets upgrade simultaneously to release 5.3.1887 or higher. The particulars follow: </P>
 
 <UL>
@@ -32,6 +48,7 @@ processing environments. </LI>
     will not be readable by older versions of MB-System.. </LI>
   </UL>
 </UL>
+
 
 <UL>
   <LI>File locking by data editing tools MBedit, MBeditvia, MBnavedit, MBclean, and the processing program MBprocess.</LI>

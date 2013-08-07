@@ -1175,6 +1175,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* get heading (360 degrees = 65536) */
 		oldstore.heading = 182.044444 * store->heading;
+
 		oldstore.speed = 0.01 * store->speed;
 
 		/* get beams_bath, beams_amp, pixels_ss */
@@ -1189,6 +1190,10 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* get scaling */
 		oldstore.depth_scale = 1000 * store->depth_scale;
 		oldstore.distance_scale = 1000 * store->distance_scale;
+
+		/* set scaled transducer_depth and altitude */
+		oldstore.transducer_depth = 1000 * store->sonardepth;
+		oldstore.altitude = 1000 * store->altitude;
 
 		/* get sidescan type */
 		oldstore.ss_type = store->ss_type;
@@ -1286,16 +1291,15 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			depthmax = 0.0;
 			for (i=0;i<oldstore.beams_bath;i++)
 				{
-				depthmax = MAX(depthmax, (depthscale * oldstore.bath[i] + transducer_depth));
+				depthmax = MAX(depthmax, (depthscale * store->bath[i] + transducer_depth));
 				}
 			if (depthmax > 0.0)
 				oldstore.depth_scale = MAX((int) (1 + depthmax / 30.0), 1);
 			newdepthscale = 0.001 * oldstore.depth_scale;
 			for (i=0;i<oldstore.beams_bath;i++)
 				{
-				oldstore.bath[i] = (depthscale * oldstore.bath[i] + transducer_depth) / newdepthscale;
+				store->bath[i] = (short int)((store->depth_scale * store->bath[i] + transducer_depth) / newdepthscale);
 				}
-
 			short_transducer_depth = (short)(oldstore.transducer_depth / oldstore.depth_scale);
 			short_altitude = (short)(oldstore.altitude / oldstore.depth_scale);
 
