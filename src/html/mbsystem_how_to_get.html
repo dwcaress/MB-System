@@ -15,7 +15,28 @@
 <body alink="#cc9900" vlink="#997040" link="#336699" bgcolor="#ffffff"
  text="#000000">
 <center>
-  <dd><a name="MB-get"></a><b><font size="+2">How To Get The MB-System Source Distribution</font></b></dd>
+  <dd><a name="MB-get-and-install"></a><b><font size="+2">How to Get and Install MB-System</font></b></dd>
+</center>
+<ul>
+  <ul>
+<ul>
+    <li><a href="#MB-get">How to get the MB-System source distribution</a></li>
+    <li><a href="#Subversion">Access MB-System source version control system</a></li>
+    <li><a href="#MB-dist">Packaged MB-System distributions</a></li>
+    <li><a href="#MB-required">Other required and suggested software and data</a></li>
+    <li><a href="#MB-unpack">How to unpack an MB-System source code distribution</a></li>
+    <li><a href="#MB-install">How to install MB-System using the configure script</a></li>
+    <li><a href="#MB-install-old">How to install MB-System using the install_makefiles script</a></li>
+</ul>
+</ul>
+</ul>
+<center>
+<p></p>
+<hr width="67%">
+<p></p>
+</center>
+<center>
+  <dd><a name="MB-get"></a><b><font size="+2">How to Get The MB-System Source Distribution</font></b></dd>
 </center>
 <p>The source code for MB-System is available as a compressed tar
 archive
@@ -199,32 +220,62 @@ painlessly installed using the fink package available from the
 <hr width="67%">
 </center>
 <center>
-<p><a name="MB-install"></a><b><font size="+2">How to Install MB-System Using the Configure Script</font></b></p>
+<p><a name="MB-unpack"></a><b><font size="+2">How to Unpack an MB-System Source Code Distribution</font></b></p>
 </center>
 <p>The MB-System source code is extracted from the distribution using the tar utility:</p>
 <ul>
   <pre>tar xvzf MB-System.tar.gz</pre>
 </ul>
+<p>or for some older systems with feature-limited versions of tar, a combination of gunzip and tar:</p>
+<ul>
+  <pre>gunzip MB-System.tar.gz
+tar xvf MB-System.tar</pre>
+</ul>
 <p>This will create a directory called (for the 5.4.2035 distribution): </p>
 <ul>
-  <pre>mbsystem-5.4.2035</pre>
+  <pre>mbsystem-5.4.2136</pre>
 </ul>
 <p>In order to build and install MB-System from an interactive shell, you need to change your current directory to the distribution:</p>
 <ul>
-  <pre>cd mbsystem-5.4.2035</pre>
+  <pre>cd mbsystem-5.4.2136</pre>
 </ul>
-<p>Next run the configure script found in that directory:</p>
+<center>
+<p></p>
+<hr width="67%">
+</center>
+<center>
+<p><a name="MB-install"></a><b><font size="+2">How to Install MB-System Using the Configure Script</font></b></p>
+</center>
+<p>The basic steps for building MB-System using the configure script are:</p>
+<p>1. Move to the top of the MB-System distribution directory:</p>
 <ul>
-  <pre>./configure</pre>
+        cd mbsystem-5.4.2136
 </ul>
-<p>The configure script will (hopefully) figure out the compiler and linker options required for your system, and then generate Makefile files through the source code directory structure that control the compiling and linking of the MB-System libraries and programs. Once the Makefiles exist, then building and installing is a two-step process. First execute:</p>
+
+<p>2. Run the configure script to generate the Makefile files throughout the
+    distribution directory structure. The command line options for configure
+    are discussed below.</p>
 <ul>
-  <pre>make</pre>
+        [...pre-options...]./configure [...options...]
 </ul>
-<p>to compile everything. Then execute:</p>
+
+    3. Run the make utility to build the software within the source distribution.
 <ul>
-<pre>make install</pre></ul>
-<p>to copy the libraries, programs, scripts, manual pages, and web pages to the target destinations. </p>
+        make
+</ul>
+
+    4. Run the make utility with the install option to install the software
+    within the target location that was specified while running configure. This step copies the libraries, programs, scripts, manual pages, and web pages to the target destinations.
+    <ul>
+        make install
+</ul>
+<p>The configure script is intended to discern the enviroment, locate prerequisite
+packages, and construct the makefiles with a minimum of user intervention. In
+practice, users generally need to set at least some options when using the
+configure script in order to successfully build, install, and run MB-System.
+If NetCDF and GMT installations cannot be located, MB-System cannot be built. If
+FFTW3, Motif, or OpenGL cannot be found MB-System will be built, but without
+the applications that depend on these packages.</p>
 <p>Depending on how user permissions are set on your system and where the package is to be installed, it may be necessary to execute some or all of the above commands with superuser privileges. On older styles of Unix and Linux, this was typically accomplished by using the su command to become root, or superuser, a step that requires knowing the root password for the system. Following a successful invocation of su in a command shell, all commands have superuser privileges. On MacOsX and other &quot;modern&quot; flavors of Unix and Linux, it's more common to use the sudo command in front of other commands in order to execute them with superuser privileges. An administrator password is required for the first instance of sudo, but not for subsequent instances (at least for a period of time, typically five minutes). In this case, the commands become:</p>
 <ul>
   <pre>sudo ./configure
@@ -234,22 +285,22 @@ sudo make install</pre>
 <p>The default destination is /usr/local, and so one should find the MB-System executable programs and scripts in /usr/local/bin, the shared libraries in /usr/local/lib, the manual pages in /usr/local/man, and the projection and Levitus databases accessed by MB-System in /usr/local/share/mbsystem. However, one can control the installation destination of the configure script on the command line by using a &quot;--prefix&quot; argument. For example, to install MB-System into /Users/caress/sandbox/mbsystem, you can use:</p>
 <ul>
   <pre>sudo ./configure \
-		--prefix=/Users/caress/sandbox/mbsystem
+--prefix=/Users/caress/sandbox/mbsystem
 </pre>
 </ul>
 <p>MB-System depends on librarys from a number of different packages, including NetCDF, GMT, FFTW3, X11, and Motif. Sometimes a user will have more than one installation of a package available, and specifying which is used is desirable. Also, unfortunately the configure script does not always successfully find all needed packages. Consequently, the configure script allows users to set the locations on the command line when necessary. The complete set of configure's command line options is:</p>
 <ul>
 <pre>--prefix=install 		Location for mbsystem (/usr/local/mbsystem)
 --with-netcdf-lib 		Location of NetCDF libs
---with-netcdf-include 	Location of NetCDF headers
---with-gmt-lib 		Location of GMT libs
---with-gmt-include 	Location of GMT headers
+--with-netcdf-include 		Location of NetCDF headers
+--with-gmt-lib 			Location of GMT libs
+--with-gmt-include 		Location of GMT headers
 --with-fftw-lib 		Location of FFTW3 libs (optional)
---with-fftw-include 	Location of FFTW3 headers (optional)
+--with-fftw-include 		Location of FFTW3 headers (optional)
 --with-motif-lib 		Location of Motif libs (optional)
---with-motif-include 	Location of Motif headers (optional)
+--with-motif-include 		Location of Motif headers (optional)
 --with-opengl-lib 		Location of OpenGL libs (optional)
---with-opengl-include 	Location of OpenGL headers (optional)
+--with-opengl-include 		Location of OpenGL headers (optional)
 --without-gsf 			Build without support for the GSF format (optional)
 </pre>
 </ul>

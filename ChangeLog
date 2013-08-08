@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+* Version 5.4.2136       August 8, 2013
 * Version 5.4.2135       August 7, 2013
   Version 5.4.2133       July 29, 2013
   Version 5.4.2132       July 26, 2013
@@ -145,6 +146,13 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2136 (August 8, 2013)
+
+Build system: Attempted to fix problems with the autoconf build system on
+Ubuntu machines. Reset the automake version to 2.65 from 2.69 as specified
+in the mbsystem/configure.in file. Also added a conditional reference to
+libmbgsf to the requirements for mbcopy in mbsystem/src/utilities/Makefile.am.
 
 -----> 5.4.2135 (August 7, 2013)
 

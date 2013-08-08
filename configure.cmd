@@ -32,6 +32,9 @@ autoconf
 autoupdate
 autoreconf --force --install --warnings=all
 
+# Reset the autotools version to 2.65 to accomodate some Linux distributions
+sed -i.bak s/2\.69/2\.65/ configure.in
+
 # When you run ./configure, a number of configure options are saved  to a
 # header file:
 #     ./src/mbio/mb_config.h
@@ -65,17 +68,18 @@ make uninstall (to remove a previously installed version)
 #------------------------------------------------------------------------------
 # Configure script command line options:
 #------------------------------------------------------------------------------
-# --prefix=install location for mbsystem (/usr/local/mbsystem)
-# --with-netcdf-lib location of NetCDF libs
-# --with-netcdf-include location of NetCDF headers
-# --with-gmt-lib location of GMT libs
-# --with-gmt-include location of GMT headers
-# --with-fftw-lib location of FFTW3 libs (optional)
-# --with-fftw-include location of FFTW3 headers (optional)
-# --with-motif-lib location of Motif libs (optional)
-# --with-motif-include location of Motif headers (optional)
-# --with-opengl-lib location of OpenGL libs (optional)
-# --with-opengl-include location of OpenGL headers (optional)
+# --prefix=install      - location for mbsystem (/usr/local/mbsystem)
+# --with-netcdf-lib     - location of NetCDF libs
+# --with-netcdf-include - location of NetCDF headers
+# --with-gmt-lib        - location of GMT libs
+# --with-gmt-include    - location of GMT headers
+# --with-fftw-lib       - location of FFTW3 libs (optional)
+# --with-fftw-include   - location of FFTW3 headers (optional)
+# --with-motif-lib      - location of Motif libs (optional)
+# --with-motif-include  - location of Motif headers (optional)
+# --with-opengl-lib     - location of OpenGL libs (optional)
+# --with-opengl-include - location of OpenGL headers (optional)
+# --without-gsf         - build without including or supporting GSF
 
 #------------------------------------------------------------------------------
 # Configure script command line examples:
@@ -136,6 +140,7 @@ autoconf
 autoupdate
 
 autoreconf --force --install --warnings=all
+sed -i.bak s/2\.69/2\.65/ configure.in
 
 CFLAGS="-g -I/usr/X11R6/include -L/usr/X11R6/lib" \
 ./configure \
