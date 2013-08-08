@@ -72,7 +72,7 @@ compatibility, but we expect most users to use the configure script.
 BUILDING AND INSTALLING MB-SYSTEM WITH CONFIGURE
 -------------------------------------------------------------------------------
 
-The basis steps for building MB-System using the configure script are:
+The basic steps for building MB-System using the configure script are:
 
     1. Move to the top of the MB-System distribution directory:
         % cd mbsystem-5.4.2081
@@ -97,6 +97,23 @@ configure script in order to successfully build, install, and run MB-System.
 If NetCDF and GMT installations cannot be located, MB-System cannot be built. If
 FFTW3, Motif, or OpenGL cannot be found MB-System will be built, but without
 the applications that depend on these packages.
+
+Depending on how user permissions are set on your system and where the package
+is to be installed, it may be necessary to execute some or all of the above
+commands with superuser privileges. On older styles of Unix and Linux, this
+was typically accomplished by using the su command to become root, or
+superuser, a step that requires knowing the root password for the system.
+Following a successful invocation of su in a command shell, all commands have
+superuser privileges. On MacOsX and other "modern" flavors of Unix and Linux,
+it's more common to use the sudo command in front of other commands in order
+to execute them with superuser privileges. An administrator password is
+required for the first instance of sudo, but not for subsequent instances (at
+least for a period of time, typically five minutes). In this case, the commands
+become:
+
+	% sudo ./configure
+	% sudo make
+	% sudo make install
 
 The available configure options are:
     --help                         list all options
