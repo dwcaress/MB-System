@@ -2,7 +2,6 @@ if BUILD_FFTW
  FFTW_PROG = mbsegypsd
 endif
 
-
 bin_PROGRAMS = mbhsdump \
         mbformat \
         mbdefaults \

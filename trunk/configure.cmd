@@ -156,6 +156,9 @@ CFLAGS="-g -I/usr/X11R6/include -L/usr/X11R6/lib" \
 #--without-gsf
 
 make
+
+cd src/htmlsrc ; make_mbhtml ; cd ../..
+
 make install
 
 #------------------------------------------------------------------------------
