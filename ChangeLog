@@ -12,7 +12,8 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
-* Version 5.4.2136       August 8, 2013
+  Version 5.4.2137       August 9, 2013
+  Version 5.4.2136       August 8, 2013
 * Version 5.4.2135       August 7, 2013
   Version 5.4.2133       July 29, 2013
   Version 5.4.2132       July 26, 2013
@@ -146,6 +147,12 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2137 (August 9, 2013)
+
+Build system: Still attempting to fix problems with the autoconf build system on
+Ubuntu machines. Change mbsystem/src/opts/Makefile.am so that building this
+utility does not depend on GMT libraries (since it doesn't).
 
 -----> 5.4.2136 (August 8, 2013)
 
