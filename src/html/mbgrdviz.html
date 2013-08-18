@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbgrdviz</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  16 August 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -35,44 +35,47 @@ Version 5.0
 <P>
 <I>Overview</I>
 <P>
-<B>MBgrdviz</B> is an interactive 2D/3D visualization tool for <B>GMT</B> topography 
-grid files. <B>MBgrdviz</B> can be used for general data visualization and also has features 
+<B>MBgrdviz</B> is an interactive 2D/3D visualization tool for <B>GMT</B> topography
+grid files. <B>MBgrdviz</B> can be used for general data visualization and also has features
 integrating it with swath mapping data processing and swath survey planning.
 <P>
-Once a topographic grid has been read, it may be displayed either as a 2D map or as 
-a 3D model. The 2D view can be panned and zoomed; the 3D view also allows arbitrary 
-rotations of both the topography model and the viewpoint. 
+Once a topographic grid has been read, it may be displayed either as a 2D map or as
+a 3D model. The 2D view can be panned and zoomed; the 3D view also allows arbitrary
+rotations of both the topography model and the viewpoint.
 <P>
 In addition to the primary topography, other data sets (e.g. sidescan sonar
 mosaics) can be read and displayed as overlays on the topography. Navigation
 of ships or underwater vehicles can be read and displayed; if associated with
 swath data the extent of mapping coverage can be displayed. Site data (individual
 point locations) can be read, displayed, interactively created and modified, and
-saved. Route data (collections of waypoints) can also be read, displayed, 
+saved. Route data (collections of waypoints) can also be read, displayed,
 interactively created and modified, and saved.
 <P>
 The topography data can be shown using a number of colortables. The colortables can
 be linearly stretched between minimum and maximum values, or applied using
 a histogram equalization. The display may also be shaded using an
 illumination model, slope magnitude, or overlay grid data. Overlay data
-can be displayed draped on the topography. Topographic 
-contours can be displayed using a user defined contour interval. 
+can be displayed draped on the topography. Topographic
+contours can be displayed using a user defined contour interval.
 <P>
-In addition to modifying the view, users can interact with the display in 
-several ways. Users can pick single points on the surface to determine position 
-and topography values, or pick and drag to determine range and bearing between 
+In addition to modifying the view, users can interact with the display in
+several ways. Users can pick single points on the surface to determine position
+and topography values, or pick and drag to determine range and bearing between
 two locations. Arbitrary rectangular regions with north-south and east-west boundaries or
-arbitrarily oriented rectangular areas can be defined by picking and dragging. 
+arbitrarily oriented rectangular areas can be defined by picking and dragging.
 The data within a region can be opened as a new display; areas can be used
 for survey planning.
 <P>
-Topographic profiles associated with two-point picks, selected navigation, or 
+Topographic profiles associated with two-point picks, selected navigation, or
 selected routes can be displayed in a separate window and saved.
 <P>
-<B>MBgrdviz</B> can be used to select swath data files for bathymetry editing.
-If survey navigation has been read and displayed, a user may interactively select
-files of interest, and then start up the interactive, visualization based bathymetry
-editor <B>MBeditviz</B> to work on those files.
+<B>MBgrdviz</B> can be used to select swath data files for editing or analysis
+using other <B>MB-System</B> tools. If survey navigation has been read and
+displayed, a user may interactively select files of interest, and then start up
+the interactive waterfall bathymetry editor <B>MBedit</B> to work on those files.
+Also available are the interactive, visualization based bathymetry editor
+<B>MBeditviz</B>, the navigation editor <B>MBnavedit</B>, and the water sound
+speed modeling tool <B>MBvelocitytool</B>.
 <P>
 <B>MBgrdviz</B> supports as many as ten displays deriving either from reading
 topography grids or extracting user defined regions from existing displays.
@@ -80,26 +83,26 @@ topography grids or extracting user defined regions from existing displays.
 <I>Starting Up</I>
 <P>
 When <B>MBgrdviz</B> is invoked on the command line, a single window comes up with
-the title <B>MBgrdviz</B> and two menus: <B>File</B> and <B>Help</B>. The <B>Help</B> 
-menu contains a single item named <B>About</B>, which brings up a simple 
-information window including the MB-System release version identifier. 
-The <B>File</B> menu contains several items, but initially only the <B>Open Primary 
-Grid</B> and <B>Quit</B> items are enabled. Selecting <B>Open Primary Grid</B> brings 
-up a filesystem browser window that allows users to find and select the desired 
-<B>GMT</B> topography grid. By default, the browser filter is set to display only 
-files ending with a &quot;.grd&quot; suffix. Users can change this filter (e.g. setting it 
-to &quot;*&quot; will display all files) and then hit the <B>Filter</B> button to relist the 
-files as desired. Once the desired topography grid file has been located and 
-selected so that its full path appears in the <B>Selection</B> text item, clicking 
-the <B>OK</B> button will cause <B>MBgrdviz</B> to read the grid and open an <B>MBview</B> 
-display window. Initially, the topography will be displayed in 2D, or map view mode. 
+the title <B>MBgrdviz</B> and two menus: <B>File</B> and <B>Help</B>. The <B>Help</B>
+menu contains a single item named <B>About</B>, which brings up a simple
+information window including the MB-System release version identifier.
+The <B>File</B> menu contains several items, but initially only the <B>Open Primary
+Grid</B> and <B>Quit</B> items are enabled. Selecting <B>Open Primary Grid</B> brings
+up a filesystem browser window that allows users to find and select the desired
+<B>GMT</B> topography grid. By default, the browser filter is set to display only
+files ending with a &quot;.grd&quot; suffix. Users can change this filter (e.g. setting it
+to &quot;*&quot; will display all files) and then hit the <B>Filter</B> button to relist the
+files as desired. Once the desired topography grid file has been located and
+selected so that its full path appears in the <B>Selection</B> text item, clicking
+the <B>OK</B> button will cause <B>MBgrdviz</B> to read the grid and open an <B>MBview</B>
+display window. Initially, the topography will be displayed in 2D, or map view mode.
 The default color table will be &quot;Haxby&quot;, and the topography will be shaded using slope magnitude.
 <P>
 <I>Picking, Zooming, Panning in 2D View</I>
 <P>
-<B>MBgrdviz</B> will initially be in the &quot;pan and zoom&quot; mouse mode. 
+<B>MBgrdviz</B> will initially be in the &quot;pan and zoom&quot; mouse mode.
 <P>
-In this mode, if the cursor is over 
+In this mode, if the cursor is over
 topography when the left button is clicked, a red X will appear at the
 pick point and an info window on the left side of the <B>MBview</B> display window
 will show the longitude, latitude, and topography value of the pick point.
@@ -115,7 +118,7 @@ and moving the cursor up to zoom in or down to zoom out.
 <P>
 <I>Manipulating a 3D View</I>
 <P>
-The user can switch from 2D map view to 3D view mode using the &lt;View-&gt;3D Display&gt; menu item 
+The user can switch from 2D map view to 3D view mode using the &lt;View-&gt;3D Display&gt; menu item
 (and can switch back using the&lt;View-&gt;Map Display&gt; menu item). In the 3D view mode, picking,
 panning, and zooming are done in the same fashion as in the map view. However, the
 display is a perspective view that includes both rotation of the topographic model and
@@ -126,7 +129,7 @@ clicked and moved up (more exageration) or down (less exageration). To rotate th
 select the &quot;Rotate View&quot; button (or the &lt;Mouse-&gt;Rotate View&gt;
 menu item). The left button can be used to pick topography, the middle button will rotate the model
 when clicked and dragged, and the right button will change the vertical exageration when
-clicked and moved up (more exageration) or down (less exageration). 
+clicked and moved up (more exageration) or down (less exageration).
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -159,19 +162,19 @@ of its operation and then exit immediately.
 
 Sets a GMT grid file to be read and displayed at startup.
 This option is usually used only when <B>MBgrdviz</B> is started
-automatically from some other process. 
+automatically from some other process.
 <DT><B>-T</B>
 
 <DD>
 Sets a test grid to be calculated and displayed at startup.This
 allows the program to be tested even when a grid file is
-unavailable. 
+unavailable.
 <DT><B>-V</B>
 
 <DD>
-Normally, <B>MBgrdviz</B> outputs limited information to the stderr stream.  
+Normally, <B>MBgrdviz</B> outputs limited information to the stderr stream.
 If the <B>-V</B> flag is given, then <B>MBgrdviz</B> works in a &quot;verbose&quot; mode and
-outputs the program version being used, all error status messages, 
+outputs the program version being used, all error status messages,
 and a large amount of other information including all of the
 beams flagged or zeroed.
 <P>
@@ -191,7 +194,7 @@ a new <B>MBview</B> window will appear displaying the topography.
 
 <DD>
 This menu button pops up a file browser that allows the user to
-select an input site file. A site file specifies one or more 
+select an input site file. A site file specifies one or more
 individual locations that can be displayed and interactively moved.
 Site files are text with each line delineating a single site with
 white space delimited columns
@@ -213,7 +216,7 @@ white space delimited columns
 <DT><B>[MBgrdviz]:&lt;File-&gt;Quit&gt;</B>
 
 <DD>
-This button causes the program to exit (mostly) gracefully. 
+This button causes the program to exit (mostly) gracefully.
 <DT><B>[MBgrdviz]:&lt;Help-&gt;About&gt;</B>
 
 <DD>
@@ -369,6 +372,27 @@ program's name, version, and authors.
 <DT><B>[MBview]:&lt;Action-&gt;Save Route File&gt;</B>
 
 <DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Route as Winfrog PTS File&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Route as Winfrog WPT File&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Route as Degrees + Decimal Minutes File&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Route as Hypack LNW File&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Profile File&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Open Selected Nav in MBedit&gt;</B>
+
+<DD>
+<DT>B [MBview]:&lt;Action-&gt;Open Selected Nav in MBeditviz&gt;<DD>
+<DT>B [MBview]:&lt;Action-&gt;Open Selected Nav in MBnavedit&gt;<DD>
+<DT>B [MBview]:&lt;Action-&gt;Open Selected Nav in MBvelocitytool&gt;<DD>
 <DT><B>[MBview]:&lt;Action-&gt;Open Region as New View&gt;</B>
 
 <DD>
@@ -684,7 +708,7 @@ This program is not done, nor is it adequately documented.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 16 August 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

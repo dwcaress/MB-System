@@ -79,6 +79,7 @@ make uninstall (to remove a previously installed version)
 # --with-motif-include  - location of Motif headers (optional)
 # --with-opengl-lib     - location of OpenGL libs (optional)
 # --with-opengl-include - location of OpenGL headers (optional)
+# --with-otps-dir       - location of OTPS installation (optional)
 # --without-gsf         - build without including or supporting GSF
 
 #------------------------------------------------------------------------------
@@ -142,7 +143,7 @@ autoupdate
 autoreconf --force --install --warnings=all
 sed -i.bak s/2\.69/2\.65/ configure.in
 
-CFLAGS="-g -I/usr/X11R6/include -L/usr/X11R6/lib" \
+CFLAGS="-g -I/usr/X11R6/include" LDFLAGS="-L/usr/X11R6/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
     --with-netcdf-include=/sw/include \
@@ -152,7 +153,8 @@ CFLAGS="-g -I/usr/X11R6/include -L/usr/X11R6/lib" \
     --with-fftw-include=/sw/include \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
-    --with-motif-lib=/sw/lib
+    --with-motif-lib=/sw/lib \
+    --with-otps-dir=/usr/local/OTPS2
 #--without-gsf
 
 make

@@ -52,8 +52,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@BUILD_GSF_TRUE@am__append_1 = -I@top_srcdir@/src/gsf 
-@BUILD_GSF_TRUE@am__append_2 = mbsys_gsf.h mbf_gsfgenmb.h
+@BUILD_GSF_TRUE@am__append_1 = mbsys_gsf.h mbf_gsfgenmb.h
+@BUILD_GSF_TRUE@am__append_2 = -I@top_srcdir@/src/gsf
 @BUILD_GSF_TRUE@am__append_3 = mbsys_gsf.c mbr_gsfgenmb.c
 @BUILD_GSF_TRUE@am__append_4 = $(top_builddir)/src/gsf/libmbgsf.la
 subdir = src/mbio
@@ -371,10 +371,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
-AM_CPPFLAGS = -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr \
-	-I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@ \
-	$(am__append_1)
+lib_LTLIBRARIES = libmbio.la
 include_HEADERS = mb_config.h mb_format.h mb_status.h mb_io.h \
 	mb_swap.h mb_define.h mb_process.h mb_segy.h mb_info.h \
 	mbsys_sb.h mbsys_hsds.h mbsys_sb2100.h mbsys_simrad.h \
@@ -394,8 +391,11 @@ include_HEADERS = mb_config.h mb_format.h mb_status.h mb_io.h \
 	mbf_hsmdldih.h mbf_dsl120pf.h mbf_dsl120sf.h mbf_mstiffss.h \
 	mbf_oicgeoda.h mbf_oicmbari.h mbf_omghdcsj.h mbf_mgd77dat.h \
 	mbf_mbarirov.h mbf_mbarrov2.h mbf_mbpronav.h mbf_xtfr8101.h \
+	$(am__append_1)
+AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
+AM_CPPFLAGS = -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr \
+	-I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@ \
 	$(am__append_2)
-lib_LTLIBRARIES = libmbio.la
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbio_la_SOURCES = mb_format.c mb_error.c mb_swap.c mb_compare.c \
 	mb_navint.c mb_read_init.c mb_write_init.c mb_close.c \

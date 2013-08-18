@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbotps</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  15 August 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -35,16 +35,61 @@ Version 5.0
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>MBotps</B> is a utility that predicts tides using the OTPSnc (OSU Tidal Prediction
+<B>MBotps</B> is a utility that predicts tides using the OTPS (OSU Tidal Prediction
 Software) package that can be downloaded at:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://www.coas.oregonstate.edu/research/po/research/tide/">http://www.coas.oregonstate.edu/research/po/research/tide/</A>
-The OTPSnc utilities are operated in a batch mode using command files with
+The OTPS utilities are operated in a batch mode using command files with
 a fairly arcane format. <B>MBotps</B> provides a command line interface that
 allows <B>MB-System</B> users to easily obtain tide models for specified locations
 and times. <B>MBotps</B> is built during a normal installation of <B>MB-System</B>,
-but will work only if the OTPSnc package has been installed separately, the program
-<B>predict_tide</B> is in the user's path, and the user has both read and write
-permission in the directory containing the OTPSnc programs.
+but will work only if the OTPS package has been installed separately and
+the OTPS location has been specified. See the INSTALL file in the <B>MB-System</B>
+top directory for guidance on the build process.
+<P>
+There are actually three variants of the OTPS package available for download and
+installation: OTPS, OTPSnc, and OTPS2. The three versions use different tide
+model formats, but otherwise are used in the same way. OTPS uses tide models
+stored in a native binary format, OTPSnc  uses tide models in a netCDF format,
+and OTPS2 uses hybrid tide models combining a low resolution global model with
+higher resolution representation of many coastal regions.
+<P>
+The local OTPSnc installation can include more than one tidal model; several global
+and local models are available from the Oregon State tide group. By default,
+<B>mbotps</B> attempts to use a global tide model named tpxo7.2. Users can use
+the <B>-T</B><I>model</I> option to specify the desired model. If no model is
+specified, and tpxo7.2 is not available, then <B>mbotps</B> will use the first
+valid model found. It is the user's responsibility to ensure that the positions
+of requested tide values lie within the specified tide model's domain.
+<P>
+The OTPSnc models generally take the form of four files, all of which should be
+placed in a directory named &quot;DATA&quot; in the OTPSnc installation. For a model named
+ES2008, the files are:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Model_ES2008
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;gridES2008.nc
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;hf.ES2008.nc
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;uv.ES2008.nc
+<BR>
+
+Here the first file is a text file that references the other three; for
+<B>mbotps</B> the model name consists of the text that follows &quot;Model_&quot; in the
+first file's name. Most of the models one can obtain from the OSU tide group
+are intended to be used by running the OTPSnc program <B>predict_tide</B> from the
+OTPSnc installation directory, and thus reference the data files using relative
+paths. For example, the original contents of Model_ES2008 are:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DATA/gridES2008.nc
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DATA/hf.ES2008.nc
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DATA/uv.ES2008.nc
+<BR>
+
+In order for the OTPSnc to work when called by <B>mbotps</B>, the model data file
+paths must be global rather than relative. If the OTPSnc package has been
+installed in /usr/local/OTPSnc, then the model file Model_ES2008 should be
+edited to have the following contents:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/OTPSnc/DATA/gridES2008.nc
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/OTPSnc/DATA/DATA/hf.ES2008.nc
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/OTPSnc/DATA/DATA/uv.ES2008.nc
+<BR>
+
 <P>
 <B>MBotps</B> can be operated in two modes. First, users may use the <B>-R</B>,
 <B>-B</B>, and <B>-E</B> options to specify a location and the beginning and end times of
@@ -183,6 +228,14 @@ Sets the filename of the tidal model output.
 
 Sets the longitude and latitude position at which the tidal model will be
 calculated.
+<DT><B>-T</B>
+
+<DD>
+<I>filename</I>
+<BR>
+
+Sets the name of the OTPSnc tidal model to be used. This model must be part of
+the local OTPSnc installation.
 <DT><B>-V</B>
 
 <DD>
@@ -200,56 +253,78 @@ at 60 second intervals over the day February 21, 2009. The following will suffic
 <BR>
 
 The shell output looks like:
+<P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.1&nbsp;2096&nbsp;2013-06-04&nbsp;08:17:22Z&nbsp;caress&nbsp;$<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.1.2beta12<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.c&nbsp;2129&nbsp;2013-07-08&nbsp;07:45:32Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.4.2137<BR>
 <P>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Lat/Lon/Time&nbsp;file:tmp_mbotps_llt_6995.txt<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Constituents&nbsp;to&nbsp;include:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Predict&nbsp;OCEAN&nbsp;tide<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Interpolate&nbsp;minor&nbsp;constituents<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Checking&nbsp;for&nbsp;available&nbsp;OTPS&nbsp;tide&nbsp;models<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OTPS&nbsp;location:&nbsp;/usr/local/OTPSnc<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Valid&nbsp;OTPS&nbsp;tidal&nbsp;models:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tpxo7.2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Number&nbsp;of&nbsp;available&nbsp;OTPS&nbsp;tide&nbsp;models:&nbsp;1<BR>
 <P>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ss/sandbox/tides/OTPSnc/DATA/Model_tpxo7.2<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Model&nbsp;is&nbsp;on&nbsp;grid&nbsp;uniform&nbsp;in&nbsp;lat,lon<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Lat&nbsp;limits:&nbsp;&nbsp;&nbsp;&nbsp;-90.125&nbsp;90.125<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Lon&nbsp;limits:&nbsp;&nbsp;&nbsp;&nbsp;0.125&nbsp;360.125<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Constituents:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1&nbsp;&nbsp;mf&nbsp;&nbsp;mm&nbsp;&nbsp;m4&nbsp;&nbsp;ms4&nbsp;mn4<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Predict&nbsp;elevations&nbsp;(m)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Constituents&nbsp;to&nbsp;include:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Reading&nbsp;model...&nbsp;done<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Using&nbsp;OTPS&nbsp;tide&nbsp;model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tpxo7.2<BR>
 <P>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Results&nbsp;are&nbsp;really&nbsp;in&nbsp;tide_tpxo7.2_model.txt<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Lat/Lon/Time&nbsp;file:tmp_mbotps_llt_10311.txt<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Predict&nbsp;OCEAN&nbsp;tide<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Interpolate&nbsp;minor&nbsp;constituents<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OTPSnc/DATA/Model_tpxo7.2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Model&nbsp;is&nbsp;on&nbsp;grid&nbsp;uniform&nbsp;in&nbsp;lat,lon<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Lat&nbsp;limits:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-90.1250000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90.1250000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Lon&nbsp;limits:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.125000000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;360.125000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Constituents:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1&nbsp;&nbsp;mf&nbsp;&nbsp;mm&nbsp;&nbsp;m4&nbsp;&nbsp;ms4&nbsp;mn4<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Predict&nbsp;elevations&nbsp;(m)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Constituents&nbsp;to&nbsp;include:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1&nbsp;&nbsp;mf&nbsp;&nbsp;mm&nbsp;&nbsp;m4&nbsp;&nbsp;ms4&nbsp;mn4<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reading&nbsp;model...&nbsp;done<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Results&nbsp;are&nbsp;in&nbsp;tmp_mbotps_llttd_10311.txt<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Results&nbsp;are&nbsp;really&nbsp;in&nbsp;tide_model.txt<BR>
 <BR>
 
-<BR>
-
-The output tidal model is in the file tide_tpxo7.2_model.txt, which includes
+The output tidal model is in the file tide_model.txt, which includes
 data that look like:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.1&nbsp;2096&nbsp;2013-06-04&nbsp;08:17:22Z&nbsp;caress&nbsp;$<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;MB-System&nbsp;Version:&nbsp;5.1.2beta12<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.c&nbsp;2129&nbsp;2013-07-08&nbsp;07:45:32Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;MB-System&nbsp;Version:&nbsp;5.4.2137<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;which&nbsp;in&nbsp;turn&nbsp;calls&nbsp;OTPS&nbsp;program&nbsp;predict_tide&nbsp;obtained&nbsp;from:<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://www.coas.oregonstate.edu/research/po/research/tide/">http://www.coas.oregonstate.edu/research/po/research/tide/</A><BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Run&nbsp;by&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;shepard-9.local&gt;&nbsp;at&nbsp;&lt;Wed&nbsp;Dec&nbsp;23&nbsp;01:56:31&nbsp;2009&gt;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ss/sandbox/tides/OTPSnc/DATA/Model_tpxo7.2<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Constituents&nbsp;included:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;00&nbsp;00&nbsp;&nbsp;&nbsp;-0.6870<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;01&nbsp;00&nbsp;&nbsp;&nbsp;-0.6840<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;02&nbsp;00&nbsp;&nbsp;&nbsp;-0.6820<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;03&nbsp;00&nbsp;&nbsp;&nbsp;-0.6790<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;04&nbsp;00&nbsp;&nbsp;&nbsp;-0.6770<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;05&nbsp;00&nbsp;&nbsp;&nbsp;-0.6740<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;06&nbsp;00&nbsp;&nbsp;&nbsp;-0.6710<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;07&nbsp;00&nbsp;&nbsp;&nbsp;-0.6690<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;OTPSnc&nbsp;tide&nbsp;model:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tpxo7.2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Output&nbsp;format:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;tide<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;where&nbsp;tide&nbsp;is&nbsp;in&nbsp;meters<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Run&nbsp;by&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;deitz&gt;&nbsp;at&nbsp;&lt;Thu&nbsp;Aug&nbsp;15&nbsp;17:53:22&nbsp;2013&gt;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OTPSnc/DATA/Model_tpxo7.2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Constituents&nbsp;included:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1&nbsp;&nbsp;mf&nbsp;&nbsp;mm&nbsp;&nbsp;m4&nbsp;&nbsp;ms4&nbsp;mn4<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;00&nbsp;00&nbsp;&nbsp;&nbsp;-0.6840<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;01&nbsp;00&nbsp;&nbsp;&nbsp;-0.6820<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;02&nbsp;00&nbsp;&nbsp;&nbsp;-0.6790<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;03&nbsp;00&nbsp;&nbsp;&nbsp;-0.6770<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;04&nbsp;00&nbsp;&nbsp;&nbsp;-0.6740<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;05&nbsp;00&nbsp;&nbsp;&nbsp;-0.6720<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;06&nbsp;00&nbsp;&nbsp;&nbsp;-0.6690<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;07&nbsp;00&nbsp;&nbsp;&nbsp;-0.6660<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;08&nbsp;00&nbsp;&nbsp;&nbsp;-0.6640<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;09&nbsp;00&nbsp;&nbsp;&nbsp;-0.6610<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;10&nbsp;00&nbsp;&nbsp;&nbsp;-0.6580<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;11&nbsp;00&nbsp;&nbsp;&nbsp;-0.6560<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;12&nbsp;00&nbsp;&nbsp;&nbsp;-0.6530<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;00&nbsp;13&nbsp;00&nbsp;&nbsp;&nbsp;-0.6500<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.................<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;54&nbsp;00&nbsp;&nbsp;&nbsp;-0.7970<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;55&nbsp;00&nbsp;&nbsp;&nbsp;-0.7960<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;56&nbsp;00&nbsp;&nbsp;&nbsp;-0.7940<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;57&nbsp;00&nbsp;&nbsp;&nbsp;-0.7930<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;58&nbsp;00&nbsp;&nbsp;&nbsp;-0.7910<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;59&nbsp;00&nbsp;&nbsp;&nbsp;-0.7890<BR>
-<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;54&nbsp;00&nbsp;&nbsp;&nbsp;-0.7980<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;55&nbsp;00&nbsp;&nbsp;&nbsp;-0.7970<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;56&nbsp;00&nbsp;&nbsp;&nbsp;-0.7950<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;57&nbsp;00&nbsp;&nbsp;&nbsp;-0.7940<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;58&nbsp;00&nbsp;&nbsp;&nbsp;-0.7920<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009&nbsp;02&nbsp;21&nbsp;23&nbsp;59&nbsp;00&nbsp;&nbsp;&nbsp;-0.7900<BR>
+<BR>
+
+<BR>
+
 Now, suppose that one wants to apply tide corrections directly to a set of EM3002
 data in GSF format. First, execute <B>mbotps</B> with the datalist for the swath
 data specified as input:
@@ -260,8 +335,16 @@ The resulting shell output looks like:
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.1&nbsp;2096&nbsp;2013-06-04&nbsp;08:17:22Z&nbsp;caress&nbsp;$<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.1.2beta12<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.c&nbsp;2129&nbsp;2013-07-08&nbsp;07:45:32Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.4.2137<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Checking&nbsp;for&nbsp;available&nbsp;OTPS&nbsp;tide&nbsp;models<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>OTPS&nbsp;location:&nbsp;/usr/local/OTPSnc<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Valid&nbsp;OTPS&nbsp;tidal&nbsp;models:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tpxo7.2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Number&nbsp;of&nbsp;available&nbsp;OTPS&nbsp;tide&nbsp;models:&nbsp;1<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Using&nbsp;OTPS&nbsp;tide&nbsp;model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tpxo7.2<BR>
 <P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>---------------------------------------<BR>
 <P>
@@ -291,14 +374,20 @@ The resulting shell output looks like:
 
 The output tide files have the same structure shown above:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.1&nbsp;2096&nbsp;2013-06-04&nbsp;08:17:22Z&nbsp;caress&nbsp;$<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;MB-System&nbsp;Version:&nbsp;5.1.2beta12<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.c&nbsp;2129&nbsp;2013-07-08&nbsp;07:45:32Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;MB-System&nbsp;Version:&nbsp;5.4.2137<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;which&nbsp;in&nbsp;turn&nbsp;calls&nbsp;OTPS&nbsp;program&nbsp;predict_tide&nbsp;obtained&nbsp;from:<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://www.coas.oregonstate.edu/research/po/research/tide/">http://www.coas.oregonstate.edu/research/po/research/tide/</A><BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Run&nbsp;by&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;shepard-9.local&gt;&nbsp;at&nbsp;&lt;Wed&nbsp;Dec&nbsp;23&nbsp;23:04:55&nbsp;2009&gt;<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ss/sandbox/tides/OTPSnc/DATA/Model_tpxo7.2<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Constituents&nbsp;included:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;OTPSnc&nbsp;tide&nbsp;model:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tpxo7.2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Output&nbsp;format:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;tide<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;where&nbsp;tide&nbsp;is&nbsp;in&nbsp;meters<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Run&nbsp;by&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;deitz&gt;&nbsp;at&nbsp;&lt;Thu&nbsp;Aug&nbsp;15&nbsp;17:53:22&nbsp;2013&gt;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OTPSnc/DATA/Model_tpxo7.2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Constituents&nbsp;included:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1&nbsp;&nbsp;mf&nbsp;&nbsp;mm&nbsp;&nbsp;m4&nbsp;&nbsp;ms4&nbsp;mn4<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2005&nbsp;10&nbsp;18&nbsp;19&nbsp;01&nbsp;36&nbsp;&nbsp;&nbsp;&nbsp;0.0800<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2005&nbsp;10&nbsp;18&nbsp;19&nbsp;02&nbsp;36&nbsp;&nbsp;&nbsp;&nbsp;0.0790<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2005&nbsp;10&nbsp;18&nbsp;19&nbsp;03&nbsp;36&nbsp;&nbsp;&nbsp;&nbsp;0.0770<BR>
@@ -346,7 +435,7 @@ easy.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 15 August 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

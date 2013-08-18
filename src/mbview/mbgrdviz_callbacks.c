@@ -208,6 +208,8 @@ int do_mbgrdviz_opentest(size_t instance,
 void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_open_mbedit( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_open_mbeditviz( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_open_mbnavedit( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_open_mbvelocitytool( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_arearoute_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
@@ -2089,6 +2091,16 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_open_mbeditviz,
 					"Open Selected Nav in MBeditviz",
+					MBV_PICKMASK_NAVANY,
+					&error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_open_mbnavedit,
+					"Open Selected Nav in MBnavedit",
+					MBV_PICKMASK_NAVANY,
+					&error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_open_mbvelocitytool,
+					"Open Selected Nav in MBvelocitytool",
 					MBV_PICKMASK_NAVANY,
 					&error);
 
@@ -5407,6 +5419,16 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 					"Open Selected Nav in MBeditviz",
 					MBV_PICKMASK_NAVANY,
 					&error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_open_mbnavedit,
+					"Open Selected Nav in MBnavedit",
+					MBV_PICKMASK_NAVANY,
+					&error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_open_mbvelocitytool,
+					"Open Selected Nav in MBvelocitytool",
+					MBV_PICKMASK_NAVANY,
+					&error);
 
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_open_region,
@@ -5661,6 +5683,156 @@ fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselec
 		strncat(mbeditviz_cmd, " &", MB_PATH_MAXLINE);
 fprintf(stderr,"Calling mbeditviz: %s\n", mbeditviz_cmd);
 		system(mbeditviz_cmd);
+		}
+
+	/* update widgets of all mbview windows */
+	status = mbview_update(verbose, instance, &error);
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (i != instance && mbview_id[i] == MB_YES)
+			status = mbview_update(verbose, i, &error);
+		}
+}
+/*---------------------------------------------------------------------------------------*/
+
+void do_mbgrdviz_open_mbnavedit( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	char function_name[] = "do_mbgrdviz_open_mbnavedit";
+	int	status = MB_SUCCESS;
+
+	/* mbview instance */
+	size_t	instance;
+	struct mbview_struct *data;
+	struct mbview_shareddata_struct *shareddata;
+	struct mbview_nav_struct *nav;
+	mb_path	mbnavedit_cmd;
+	mb_path	filearg;
+	int	nselected;
+	int	i;
+
+    	/* get source mbview instance */
+	instance = (size_t) client_data;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
+		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
+		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		}
+
+	/* getting instance from client_data doesn't seem
+		to work so use survey_instance instead */
+	instance = survey_instance;
+fprintf(stderr,"Called do_mbgrdviz_open_mbnavedit instance:%ld\n", instance);
+
+    	/* check data source for area to bounding desired survey */
+	status = mbview_getdataptr(verbose, instance, &data, &error);
+	status = mbview_getsharedptr(verbose, &shareddata, &error);
+
+	/* check if any nav is selected */
+	nselected = 0;
+	sprintf(mbnavedit_cmd, "mbnavedit");
+	if (status == MB_SUCCESS && shareddata->nnav > 0)
+		{
+		for (i=0;i<shareddata->nnav;i++)
+			{
+			nav = (struct mbview_nav_struct *) &(shareddata->navs[i]);
+fprintf(stderr,"Nav %d name:%s path:%s format:%d nselected:%d\n",
+i, nav->name, nav->pathraw, nav->format, nav->nselected);
+			if (nav->nselected > 0)
+				{
+				sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
+				strncat(mbnavedit_cmd, filearg, MB_PATH_MAXLINE-3);
+				nselected += nav->nselected;
+fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselected, filearg);
+				}
+			}
+		}
+
+	/* open all data files with selected nav into mbnavedit */
+	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0)
+		{
+		strncat(mbnavedit_cmd, " &", MB_PATH_MAXLINE);
+fprintf(stderr,"Calling mbnavedit: %s\n", mbnavedit_cmd);
+		system(mbnavedit_cmd);
+		}
+
+	/* update widgets of all mbview windows */
+	status = mbview_update(verbose, instance, &error);
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (i != instance && mbview_id[i] == MB_YES)
+			status = mbview_update(verbose, i, &error);
+		}
+}
+/*---------------------------------------------------------------------------------------*/
+
+void do_mbgrdviz_open_mbvelocitytool( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	char function_name[] = "do_mbgrdviz_open_mbvelocitytool";
+	int	status = MB_SUCCESS;
+
+	/* mbview instance */
+	size_t	instance;
+	struct mbview_struct *data;
+	struct mbview_shareddata_struct *shareddata;
+	struct mbview_nav_struct *nav;
+	mb_path	mbvelocitytool_cmd;
+	mb_path	filearg;
+	int	nselected;
+	int	i;
+
+    	/* get source mbview instance */
+	instance = (size_t) client_data;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
+		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
+		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		}
+
+	/* getting instance from client_data doesn't seem
+		to work so use survey_instance instead */
+	instance = survey_instance;
+fprintf(stderr,"Called do_mbgrdviz_open_mbvelocitytool instance:%ld\n", instance);
+
+    	/* check data source for area to bounding desired survey */
+	status = mbview_getdataptr(verbose, instance, &data, &error);
+	status = mbview_getsharedptr(verbose, &shareddata, &error);
+
+	/* check if any nav is selected */
+	nselected = 0;
+	sprintf(mbvelocitytool_cmd, "mbvelocitytool");
+	if (status == MB_SUCCESS && shareddata->nnav > 0)
+		{
+		for (i=0;i<shareddata->nnav;i++)
+			{
+			nav = (struct mbview_nav_struct *) &(shareddata->navs[i]);
+fprintf(stderr,"Nav %d name:%s path:%s format:%d nselected:%d\n",
+i, nav->name, nav->pathraw, nav->format, nav->nselected);
+			if (nav->nselected > 0)
+				{
+				sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
+				strncat(mbvelocitytool_cmd, filearg, MB_PATH_MAXLINE-3);
+				nselected += nav->nselected;
+fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselected, filearg);
+				}
+			}
+		}
+
+	/* open all data files with selected nav into mbvelocitytool */
+	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0)
+		{
+		strncat(mbvelocitytool_cmd, " &", MB_PATH_MAXLINE);
+fprintf(stderr,"Calling mbvelocitytool: %s\n", mbvelocitytool_cmd);
+		system(mbvelocitytool_cmd);
 		}
 
 	/* update widgets of all mbview windows */

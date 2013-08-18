@@ -69,6 +69,8 @@ $(BINDIR)/mbotps: mbotps.o \
 		$(LFLAGS) -o $(BINDIR)/mbotps
 
 ### compile the source files
-mbotps.o:	mbotps.c ../mbio/mb_status.h ../mbio/mb_define.h
-	echo "	char *otps_location = "'"$(OTPSDIR)"'";" > otps.h
+mbotps.o:	mbotps.c ../mbio/mb_status.h ../mbio/mb_define.h otps.h
 	$(CC) -c $(CFLAGS) -I../mbio mbotps.c
+
+otps.h:	Makefile
+	echo "	char *otps_location = "'"$(OTPSDIR)"'";" > otps.h

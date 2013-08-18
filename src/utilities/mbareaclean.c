@@ -754,6 +754,16 @@ int main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
+	beamflag = NULL;
+	beamflagorg = NULL;
+	detect = NULL;
+	bath = NULL;
+	amp = NULL;
+	bathlon = NULL;
+	bathlat = NULL;
+	ss = NULL;
+	sslon = NULL;
+	sslat = NULL;
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(char), (void **)&beamflag, &error);

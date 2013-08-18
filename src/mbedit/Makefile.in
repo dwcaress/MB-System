@@ -15,8 +15,6 @@
 
 @SET_MAKE@
 
-# TODO: X11 / Motif config by autoconf
-
 VPATH = @srcdir@
 am__make_dryrun = \
   { \
@@ -54,6 +52,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = mbedit$(EXEEXT)
+@BUILD_GSF_TRUE@am__append_1 = -I@top_srcdir@/src/gsf
+@BUILD_GSF_TRUE@am__append_2 = -L$(top_builddir)/src/gsf
 subdir = src/mbedit
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -140,7 +140,7 @@ LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
-LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
+LIBS = ${libnetcdf_LIBS} @MOTIF_LIB_DIR@ \
        $(top_builddir)/src/mbio/libmbio.la $(top_builddir)/src/mbaux/libmbaux.la \
        $(top_builddir)/src/mbaux/libmbxgr.la \
        -lXm -lXt -lX11 $(LIBM)
@@ -244,8 +244,12 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @MOTIF_INC_DIR@
-AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux
+AM_CFLAGS = ${libnetcdf_CFLAGS}
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux \
+	@CDF_INC_DIR@ @MOTIF_INC_DIR@ $(am__append_1)
+AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux \
+	-L$(top_builddir)/src/mr1pr -L$(top_builddir)/src/proj \
+	-L$(top_builddir)/src/surf $(am__append_2)
 mbedit_SOURCES = mbedit.c mbedit_bxutils.c mbedit_callbacks.c mbedit_creation.c mbedit_prog.c mbedit_creation.h mbedit.h
 all: all-am
 
