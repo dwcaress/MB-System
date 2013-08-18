@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+  Version 5.4.2138       August 18, 2013
   Version 5.4.2137       August 9, 2013
   Version 5.4.2136       August 8, 2013
 * Version 5.4.2135       August 7, 2013
@@ -147,6 +148,18 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2138 (August 18, 2013)
+
+Build system: Further modifications to the Makefile.am files.
+
+MBopts: Now allows users to specify the tide model used by OTPS. Also now works
+with all three variants of the OTPS package.
+
+MBareaclean: Fixed memory allocations problems.
+
+MBgrdviz: Added capability to launch mbnavedit and mbvelocitytool on selected
+swath data (contributed by Christian Ferreira).
 
 -----> 5.4.2137 (August 9, 2013)
 

@@ -80,6 +80,9 @@
 #include <X11/StringDefs.h>
 #include <Xm/Xm.h>
 #include "mbview.h"
+
+/* mbeditviz include file - define globals here */
+#define MBEDITVIZ_DECLARE_GLOBALS
 #include "mbeditviz.h"
 
 /* id variables */

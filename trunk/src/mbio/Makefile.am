@@ -1,9 +1,4 @@
-AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
-AM_CPPFLAGS = -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@
-if BUILD_GSF
-  AM_CPPFLAGS += -I@top_srcdir@/src/gsf 
-endif
-
+lib_LTLIBRARIES = libmbio.la
 
 include_HEADERS = mb_config.h \
         mb_format.h mb_status.h \
@@ -51,7 +46,12 @@ if BUILD_GSF
   include_HEADERS += mbsys_gsf.h mbf_gsfgenmb.h
 endif
 
-lib_LTLIBRARIES = libmbio.la
+AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
+
+AM_CPPFLAGS = -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@
+if BUILD_GSF
+  AM_CPPFLAGS += -I@top_srcdir@/src/gsf
+endif
 
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
 

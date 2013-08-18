@@ -1,3 +1,5 @@
+bin_PROGRAMS = mbcontour mbgrdtiff mbswath
+
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 
 AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux @CDF_INC_DIR@ @GMT_INC_DIR@
@@ -8,8 +10,6 @@ if BUILD_GSF
 endif
 
 LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la $(LIBM)
-
-bin_PROGRAMS = mbcontour mbgrdtiff mbswath
 
 mbcontour_SOURCES = mbcontour.c
 mbcontour_LDADD = $(top_builddir)/src/mbaux/libmbaux.la $(top_builddir)/src/mbaux/libmbps.la

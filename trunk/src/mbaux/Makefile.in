@@ -291,16 +291,15 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I@top_srcdir@/src/mbio @CDF_INC_DIR@ @GMT_INC_DIR@
-AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
-@BUILD_MOTIF_TRUE@XGRINC = mb_xgraphics.h
-include_HEADERS = mb_aux.h $(XGRINC)
 @BUILD_MOTIF_TRUE@XGRLIB = libmbxgr.la
 lib_LTLIBRARIES = libmbps.la libmbaux.la $(XGRLIB)
+@BUILD_MOTIF_TRUE@XGRINC = mb_xgraphics.h
+include_HEADERS = mb_aux.h $(XGRINC)
+AM_CPPFLAGS = -I@top_srcdir@/src/mbio @CDF_INC_DIR@ @GMT_INC_DIR@
+AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 libmbps_la_LDFLAGS = -no-undefined -version-info 0:0:0 ${libgmt_CFLAGS}
 libmbps_la_SOURCES = mb_pslibface.c
 libmbps_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS}
-#Need -lgmtps in linux but remove for WIN32?
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0 ${libgmt_CFLAGS} -L$(top_builddir)/src/mbio
 libmbaux_la_SOURCES = \
 		      mb_spline.c mb_zgrid.c mb_surface.c mb_cheb.c \

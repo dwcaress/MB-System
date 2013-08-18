@@ -54,6 +54,7 @@
 #include <math.h>
 #include <string.h>
 #include <time.h>
+#include <sys/stat.h>
 
 /* MBIO include files */
 #include "mb_status.h"
@@ -79,7 +80,7 @@ int main (int argc, char **argv)
 	static char rcs_id[] = "$Id$";
 	static char program_name[] = "mbotps";
 	static char help_message[] =  "MBotps predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions.";
-	static char usage_message[] = "mbotps -Rlon/lat -Byear/month/day/hour/minute/second\n\t-Eyear/month/day/hour/minute/second -Dinterval -Ooutput\n\t[-Idatalist.mb-1 -Fformat -V]";
+	static char usage_message[] = "mbotps [-Atideformat -Byear/month/day/hour/minute/second -Dinterval\n\t-Eyear/month/day/hour/minute/second -Fformat\n\t-Idatalist.mb-1 -Ooutput -Rlon/lat -Tmodel -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -134,6 +135,8 @@ int main (int argc, char **argv)
 	char	comment[MB_COMMENT_MAXLINE];
 
 	/* mbotps control parameters */
+	int	notpsmodels = 0;
+	int	nmodeldatafiles = 0;
 	int	mbotps_mode = MBOTPS_MODE_POSITION;
 	double	tidelon;
 	double	tidelat;
@@ -152,11 +155,18 @@ int main (int argc, char **argv)
 	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int	pid;
 
-	FILE	*tfp, *ofp;
+	FILE	*tfp, *mfp, *ofp;
+	struct stat file_status;
+	int	fstat;
 	mb_path	lltfile;
 	mb_path	otpsfile;
 	mb_path	line;
 	mb_path	predict_tide;
+	int	otps_model_set = MB_NO;
+	mb_path	otps_model;
+	mb_path	modelname;
+	mb_path	modelfile;
+	mb_path	modeldatafile;
 	int	read_data;
 	int	ntime;
 	int	nread;
@@ -183,7 +193,8 @@ int main (int argc, char **argv)
 
 	/* set defaults for the AUV survey we were running on Coaxial Segment, Juan de Fuca Ridge
 		while I wrote this code */
-	sprintf(tidefile, "tide_tpxo7.2_model.txt");
+	sprintf(otps_model, "tpxo7.2");
+	sprintf(tidefile, "tide_model.txt");
 	tidelon = -129.588618;
 	tidelat = 46.50459;
 	interval = 60.0;
@@ -203,7 +214,7 @@ int main (int argc, char **argv)
 	etime_i[6] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:I:i:MmO:o:R:r:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:I:i:MmO:o:R:r:T:t:VvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -263,6 +274,11 @@ int main (int argc, char **argv)
 		case 'r':
 			sscanf (optarg,"%lf/%lf", &tidelon, &tidelat);
 			break;
+		case 'T':
+		case 't':
+			sscanf (optarg,"%s", otps_model);
+			otps_model_set = MB_YES;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -285,6 +301,76 @@ int main (int argc, char **argv)
 		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
 		}
 
+	/* if help desired then print it and exit */
+	if (help)
+		{
+		fprintf(stderr,"\n%s\n",help_message);
+		fprintf(stderr,"\nusage: %s\n", usage_message);
+		}
+
+	/* Check for available tide models */
+	if (help || verbose > 0)
+		{
+		fprintf(stderr,"\nChecking for available OTPS tide models\n");
+		fprintf(stderr,"OTPS location: %s\nValid OTPS tidal models:\n", otps_location);
+		}
+	notpsmodels = 0;
+	sprintf(line, "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location);
+	if ((tfp = popen(line, "r")) != NULL)
+		{
+		/* send relevant input to predict_tide through its stdin stream */
+		while (fgets(line, sizeof(line), tfp))
+			{
+			sscanf(line, "%s", modelname);
+			sprintf(modelfile, "%s/DATA/Model_%s", otps_location, modelname);
+			nmodeldatafiles = 0;
+
+			/* check the files referenced in the model file */
+			if ((mfp = fopen(modelfile, "r")) != NULL)
+				{
+				/* stat the file referenced in each line */
+				while (fgets(modeldatafile, MB_PATH_MAXLINE, mfp) != NULL)
+					{
+					if (strlen(modeldatafile) > 0)
+						modeldatafile[strlen(modeldatafile)-1] = '\0';
+					if ((fstat = stat(modeldatafile, &file_status)) == 0
+						&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+						{
+						nmodeldatafiles++;
+						}
+					}
+				fclose(mfp);
+				}
+			if (nmodeldatafiles >= 3)
+				{
+				if (help || verbose > 0)
+					fprintf(stderr,"     %s\n", modelname);
+				if (otps_model_set == MB_NO)
+					{
+					if (notpsmodels == 0 || strcmp(modelname, "tpxo7.2") == 0)
+						strcpy(otps_model, modelname);
+					}
+				notpsmodels++;
+				}
+			}
+
+		/* close the process */
+		pclose(tfp);
+		}
+	else
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open ls using popen()\n");
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(MB_FAILURE);
+		}
+	if (help || verbose > 0)
+		{
+		fprintf(stderr,"Number of available OTPS tide models: %d\n", notpsmodels);
+		fprintf(stderr,"\nUsing OTPS tide model:            %s\n", otps_model);
+		}
+
 	/* print starting debug statements */
 	if (verbose >= 2)
 		{
@@ -294,6 +380,9 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Control Parameters:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       help:             %d\n",help);
+		fprintf(stderr,"dbg2       otps_location:    %s\n",otps_location);
+		fprintf(stderr,"dbg2       otps_model_set:   %d\n",otps_model_set);
+		fprintf(stderr,"dbg2       otps_model:       %s\n",otps_model);
 		fprintf(stderr,"dbg2       mbotps_mode:      %d\n",mbotps_mode);
 		fprintf(stderr,"dbg2       tidelon:          %f\n",tidelon);
 		fprintf(stderr,"dbg2       tidelat:          %f\n",tidelat);
@@ -319,11 +408,19 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       read_file:        %s\n",read_file);
 		}
 
-	/* if help desired then print it and exit */
+	/* exit if no valid OTPS models can be found */
+	if (notpsmodels <= 0)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to find a valid OTPS tidal model\n");
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(MB_FAILURE);
+		}
+
+	/* if help was all that was desired then exit */
 	if (help)
 		{
-		fprintf(stderr,"\n%s\n",help_message);
-		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
 
@@ -374,9 +471,10 @@ int main (int argc, char **argv)
 			}
 
 		/* send relevant input to predict_tide through its stdin stream */
-		fprintf(tfp, "%s/DATA/Model_tpxo7.2\n", otps_location);
+		fprintf(tfp, "%s/DATA/Model_%s\n", otps_location,otps_model);
 		fprintf(tfp, "%s\n", lltfile);
-		fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");
+		fprintf(tfp, "z\n\nAP\noce\n1\n");
+		/*fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");*/
 		fprintf(tfp, "%s\n", otpsfile);
 
 		/* close the process */
@@ -405,6 +503,9 @@ int main (int argc, char **argv)
 		fprintf(ofp, "# Tide model generated by program %s\n", program_name);
 		fprintf(ofp, "# which in turn calls OTPS program predict_tide obtained from:\n");
 		fprintf(ofp, "#     http://www.coas.oregonstate.edu/research/po/research/tide/\n");
+		fprintf(ofp, "#\n");
+		fprintf(ofp, "# OTPSnc tide model: \n");
+		fprintf(ofp, "#      %s\n",otps_model);
 		if (tideformat == 2)
 			{
 			fprintf(ofp, "# Output format:\n");
@@ -663,9 +764,10 @@ int main (int argc, char **argv)
 				}
 
 			/* send relevant input to predict_tide through its stdin stream */
-			fprintf(tfp, "%s/DATA/Model_tpxo7.2\n", otps_location);
+			fprintf(tfp, "%s/DATA/Model_%s\n", otps_location,otps_model);
 			fprintf(tfp, "%s\n", lltfile);
-			fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");
+			fprintf(tfp, "z\n\nAP\noce\n1\n");
+			/*fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");*/
 			fprintf(tfp, "%s\n", otpsfile);
 
 			/* close the process */
