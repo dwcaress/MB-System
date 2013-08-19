@@ -130,6 +130,9 @@ CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
     --with-motif-lib=/sw/lib
 
 #------------------------------------------------------------------------------
+# First clean up old installation and build
+make uninstall
+make clean
 
 # Reconstruct the build system, and then use it to build in place
 # in my personal development tree
