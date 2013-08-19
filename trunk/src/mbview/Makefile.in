@@ -106,7 +106,8 @@ libmbview_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/src/surf/libmbsapi.la \
 	$(top_builddir)/src/proj/libmbproj.la \
 	$(top_builddir)/src/mbio/libmbio.la \
-	$(top_builddir)/src/mbaux/libmbaux.la
+	$(top_builddir)/src/mbaux/libmbaux.la $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_libmbview_la_OBJECTS = libmbview_la-MB3DView.lo \
 	libmbview_la-MB3DSiteList.lo libmbview_la-MB3DRouteList.lo \
 	libmbview_la-MB3DNavList.lo libmbview_la-mbview_callbacks.lo \
@@ -133,7 +134,8 @@ mbeditviz_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(top_builddir)/src/mbaux/libmbaux.la \
 	$(top_builddir)/src/mbaux/libmbxgr.la \
 	$(top_builddir)/src/mbaux/libmbps.la \
-	$(top_builddir)/src/mbview/libmbview.la $(am__DEPENDENCIES_1)
+	$(top_builddir)/src/mbview/libmbview.la $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_mbgrdviz_OBJECTS = mbgrdviz_main.$(OBJEXT) \
 	mbgrdviz_callbacks.$(OBJEXT) mbgrdviz_creation.$(OBJEXT)
 mbgrdviz_OBJECTS = $(am_mbgrdviz_OBJECTS)
@@ -142,7 +144,8 @@ mbgrdviz_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(top_builddir)/src/mbaux/libmbaux.la \
 	$(top_builddir)/src/mbaux/libmbxgr.la \
 	$(top_builddir)/src/mbaux/libmbps.la \
-	$(top_builddir)/src/mbview/libmbview.la $(am__DEPENDENCIES_1)
+	$(top_builddir)/src/mbview/libmbview.la $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -337,7 +340,8 @@ libmbview_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @XDR_LIB@ \
        $(top_builddir)/src/proj/libmbproj.la \
        $(top_builddir)/src/mbio/libmbio.la \
        $(top_builddir)/src/mbaux/libmbaux.la \
-       @MOTIF_LIB@ @GL_LIB@
+       @MOTIF_LIB@ @GL_LIB@ \
+       ${libnetcdf_LIBS} ${libgmt_LIBS}
 
 mbgrdviz_SOURCES = mbgrdviz_main.c mbgrdviz_callbacks.c  mbgrdviz_creation.c
 mbgrdviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
@@ -345,7 +349,7 @@ mbgrdviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
        $(top_builddir)/src/mbaux/libmbxgr.la $(top_builddir)/src/mbaux/libmbps.la \
         $(top_builddir)/src/mbview/libmbview.la \
        @MOTIF_LIB@ @GL_LIB@ \
-       -lXm -lXt -lX11 $(LIBM)
+       ${libnetcdf_LIBS} ${libgmt_LIBS} $(LIBM)
 
 mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_callbacks.c mbeditviz_prog.c mbeditviz_creation.c
 mbeditviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
@@ -353,7 +357,7 @@ mbeditviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
        $(top_builddir)/src/mbaux/libmbxgr.la $(top_builddir)/src/mbaux/libmbps.la \
         $(top_builddir)/src/mbview/libmbview.la \
        @MOTIF_LIB@ @GL_LIB@ \
-       -lXm -lXt -lX11 $(LIBM)
+       ${libnetcdf_LIBS} ${libgmt_LIBS} $(LIBM)
 
 all: all-am
 

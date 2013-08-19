@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+  Version 5.4.2139       August 19, 2013
   Version 5.4.2138       August 18, 2013
   Version 5.4.2137       August 9, 2013
   Version 5.4.2136       August 8, 2013
@@ -148,6 +149,10 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2139 (August 19, 2013)
+
+Build system: Further modification to the src/mbview/Makefile.am file.
 
 -----> 5.4.2138 (August 18, 2013)
 

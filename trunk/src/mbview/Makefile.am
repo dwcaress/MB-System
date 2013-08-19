@@ -39,7 +39,8 @@ libmbview_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @XDR_LIB@ \
        $(top_builddir)/src/proj/libmbproj.la \
        $(top_builddir)/src/mbio/libmbio.la \
        $(top_builddir)/src/mbaux/libmbaux.la \
-       @MOTIF_LIB@ @GL_LIB@
+       @MOTIF_LIB@ @GL_LIB@ \
+       ${libnetcdf_LIBS} ${libgmt_LIBS}
 
 mbgrdviz_SOURCES =  mbgrdviz_main.c mbgrdviz_callbacks.c  mbgrdviz_creation.c
 mbgrdviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
@@ -47,7 +48,7 @@ mbgrdviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
        $(top_builddir)/src/mbaux/libmbxgr.la $(top_builddir)/src/mbaux/libmbps.la \
         $(top_builddir)/src/mbview/libmbview.la \
        @MOTIF_LIB@ @GL_LIB@ \
-       -lXm -lXt -lX11 $(LIBM)
+       ${libnetcdf_LIBS} ${libgmt_LIBS} $(LIBM)
 
 mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_callbacks.c mbeditviz_prog.c mbeditviz_creation.c
 mbeditviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
@@ -55,4 +56,4 @@ mbeditviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
        $(top_builddir)/src/mbaux/libmbxgr.la $(top_builddir)/src/mbaux/libmbps.la \
         $(top_builddir)/src/mbview/libmbview.la \
        @MOTIF_LIB@ @GL_LIB@ \
-       -lXm -lXt -lX11 $(LIBM)
+       ${libnetcdf_LIBS} ${libgmt_LIBS} $(LIBM)
