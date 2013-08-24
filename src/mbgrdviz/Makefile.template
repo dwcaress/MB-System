@@ -1,0 +1,103 @@
+#     The MB-system:	Makefile.template  7/27/2003
+#	$Id: Makefile.template 2063 2013-05-22 00:05:57Z caress $
+#
+#     Copyright (c) 2003-2013 by
+#     David W. Caress (caress@mbari.org)
+#       Monterey Bay Aquarium Research Institute
+#       Moss Landing, CA 95039
+#     and Dale N. Chayes (dale@ldeo.columbia.edu)
+#       Lamont-Doherty Earth Observatory
+#       Palisades, NY  10964
+#
+#     See README file for copying and redistribution conditions.
+#
+# Makefile template for MB-system at the src/mbgrdviz directory level
+# Author:	D. W. Caress
+# Date:		August 24, 2013
+#
+# $Log: Makefile.template,v $
+#
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
+
+# *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+#
+# Locations of GMT libraries, binaries, and include files:
+GMTLIBDIR = /sw/lib
+GMTINCDIR = /sw/include
+NETCDFINCDIR = /sw/include
+#
+# Locations of Motif include files and libraries:
+MOTIFINCDIR = /sw/include
+MOTIFLIBS = -L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11
+#
+# Locations of OpenGL libraries:
+OPENGLLIBS = -lGLU -lGL
+#
+# Compilers
+CC = cc
+#
+# Compile and load flags:
+CFLAGS = -g -I/usr/include/X11R6 -DDARWIN -DGMT3_3
+LFLAGS = -lm -L/usr/local/netcdf/lib -lnetcdf
+ARCHIVE = ar rcv
+
+### set gsflib - could be version supplied with MB-System or other installation
+GSFLIB  = $(LIBDIR)/libmbgsf.a
+
+### set projlib - could be version supplied with MB-System or other installation
+PROJLIB  = $(LIBDIR)/libmbproj.a
+#
+# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
+
+### make all makes the executable and man page
+all: $(BINDIR)/mbgrdviz
+
+### make the library
+
+### link the executables
+$(BINDIR)/mbgrdviz: mbgrdviz_main.o \
+		mbgrdviz_callbacks.o \
+		mbgrdviz_creation.o \
+		$(LIBDIR)/libmbview.a \
+		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
+		$(PROJLIB) \
+		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbps.a \
+		$(LIBDIR)/libmbxgr.a \
+		$(GSFLIB) \
+		$(GMTLIBDIR)/libpsl.a
+	$(CC) $(CFLAGS) mbgrdviz_main.o \
+		mbgrdviz_callbacks.o \
+		mbgrdviz_creation.o \
+		$(LIBDIR)/libmbview.a \
+		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
+		$(PROJLIB) \
+		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbxgr.a \
+		$(GSFLIB) \
+		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libpsl.a \
+		$(OPENGLLIBS) $(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbgrdviz
+
+### compile the source files
+mbgrdviz_creation.o: mbgrdviz_creation.c mbgrdviz_creation.h
+	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbgrdviz_creation.c
+mbgrdviz_main.o: mbgrdviz_main.c mbview.h
+	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbgrdviz_main.c
+mbgrdviz_callbacks.o: mbgrdviz_callbacks.c mbview.h \
+	../mbio/mb_define.h ../mbio/mb_status.h ../mbio/mb_format.h
+	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbgrdviz_callbacks.c
+
+## copy the include files to the include file directory
+
+### copy the man page to the man page directory
+
+clean:
+	rm -f *.o

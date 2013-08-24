@@ -150,6 +150,11 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+Build system, MBgrdviz, MBeditviz, MBview: Moved source files for MBgrdviz
+and MBeditviz from src/mbview to src/mbgrdviz and src/mbeditviz, respectively.
+This move separates the application source files for MBgrdviz and MBeditviz
+from the source files of the mbview library.
+
 -----> 5.4.2139 (August 19, 2013)
 
 Build system: Further modification to the src/mbview/Makefile.am file.
