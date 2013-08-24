@@ -88,12 +88,12 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 
 ### compile the source files
 mbgrdviz_creation.o: mbgrdviz_creation.c mbgrdviz_creation.h
-	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbgrdviz_creation.c
-mbgrdviz_main.o: mbgrdviz_main.c mbview.h
-	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbgrdviz_main.c
-mbgrdviz_callbacks.o: mbgrdviz_callbacks.c mbview.h \
+	$(CC) $(CFLAGS) -I../mbio -I../mbview -I$(MOTIFINCDIR) -c mbgrdviz_creation.c
+mbgrdviz_main.o: mbgrdviz_main.c ../mbview/mbview.h
+	$(CC) $(CFLAGS) -I../mbio -I../mbview -I$(MOTIFINCDIR) -c mbgrdviz_main.c
+mbgrdviz_callbacks.o: mbgrdviz_callbacks.c ../mbview/mbview.h \
 	../mbio/mb_define.h ../mbio/mb_status.h ../mbio/mb_format.h
-	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbgrdviz_callbacks.c
+	$(CC) $(CFLAGS) -I../mbio -I../mbview -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbgrdviz_callbacks.c
 
 ## copy the include files to the include file directory
 

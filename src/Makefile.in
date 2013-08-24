@@ -85,8 +85,8 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 ETAGS = etags
 CTAGS = ctags
 DIST_SUBDIRS = gsf surf mr1pr proj mbio mbaux utilities gmt otps \
-	macros mbedit mbnavedit mbvelocitytool mbnavadjust mbview man \
-	html ps share
+	macros mbedit mbnavedit mbvelocitytool mbnavadjust mbview \
+	mbgrdviz mbeditviz man html ps share
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -257,9 +257,13 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_MOTIF_TRUE@XBUILD_SUB = mbedit mbnavedit mbvelocitytool mbnavadjust
-@BUILD_GL_TRUE@XBUILD_SUB_GL = mbview
+@BUILD_GL_TRUE@XBUILD_SUB_GL = mbview mbgrdviz mbeditviz
 @BUILD_GSF_TRUE@XBUILD_SUB_GSF = gsf
-SUBDIRS = $(XBUILD_SUB_GSF) surf mr1pr proj mbio mbaux utilities gmt otps macros $(XBUILD_SUB) $(XBUILD_SUB_GL) man html ps share
+SUBDIRS = $(XBUILD_SUB_GSF) surf mr1pr proj mbio mbaux \
+	utilities gmt otps macros \
+	$(XBUILD_SUB) $(XBUILD_SUB_GL) \
+	man html ps share
+
 all: all-recursive
 
 .SUFFIXES:

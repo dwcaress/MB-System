@@ -4,6 +4,7 @@ AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 
 AM_CPPFLAGS = -I@top_srcdir@/src/mbio \
        -I@top_srcdir@/src/mbaux \
+       -I@top_srcdir@/src/mbview \
        -I@top_srcdir@/src/proj \
        -I@top_srcdir@/src/mr1pr \
        -I@top_srcdir@/src/surf \
@@ -14,6 +15,7 @@ endif
 
 AM_LDFLAGS = -L$(top_builddir)/src/mbio \
        -L$(top_builddir)/src/mbaux \
+       -L$(top_builddir)/src/mbview \
        -L$(top_builddir)/src/mr1pr \
        -L$(top_builddir)/src/proj \
        -L$(top_builddir)/src/surf
@@ -28,3 +30,4 @@ mbgrdviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
         $(top_builddir)/src/mbview/libmbview.la \
        @MOTIF_LIB@ @GL_LIB@ \
        ${libnetcdf_LIBS} ${libgmt_LIBS} $(LIBM)
+

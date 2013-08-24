@@ -25,6 +25,7 @@ all:
 	cd proj; make all
 	cd mbio; make all
 	cd mbaux; make all
+	cd mbview; make all
 	cd utilities; make all
 	cd gmt; make all
 	cd macros; make all
@@ -32,7 +33,8 @@ all:
 	cd mbnavedit; make all
 	cd mbnavadjust; make all
 	cd mbvelocitytool; make all
-	cd mbview; make all
+	cd mbgrdviz; make all
+	cd mbeditviz; make all
 	cd otps; make all
 	cd man; make all
 	cd html; make all
@@ -46,6 +48,7 @@ clean:
 	- cd proj; make clean
 	- cd mbio; make clean
 	- cd mbaux; make clean
+	- cd mbview; make clean
 	- cd utilities; make clean
 	- cd gmt; make clean
 	- cd macros; make clean
@@ -53,7 +56,8 @@ clean:
 	- cd mbnavedit; make clean
 	- cd mbnavadjust; make clean
 	- cd mbvelocitytool; make clean
-	- cd mbview; make clean
+	- cd mbgrdviz; make clean
+	- cd mbeditviz; make clean
 	- cd otps; make clean
 	- cd man; make clean
 	- cd html; make clean
