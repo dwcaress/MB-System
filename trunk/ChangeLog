@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+  Version 5.4.2143       August 24, 2013
   Version 5.4.2141       August 24, 2013
   Version 5.4.2139       August 19, 2013
   Version 5.4.2138       August 18, 2013
@@ -150,6 +151,11 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2143 (August 24, 2013)
+
+MBsxppreprocess: Added nonfunctional stub for program mbsxppreprocess to be
+developed by David Finlayson.
 
 -----> 5.4.2141 (August 24, 2013)
 

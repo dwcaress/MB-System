@@ -44,6 +44,7 @@ bin_PROGRAMS = mbhsdump \
         mbroutetime \
         mbhysweeppreprocess \
         mbkongsbergpreprocess \
+        mbsxppreprocess \
         $(FFTW_PROG)
 
 #Remove mbps if WIN32?
@@ -160,6 +161,9 @@ mbhysweeppreprocess_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
 
 mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
 mbkongsbergpreprocess_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
+
+mbsxppreprocess_SOURCES = mbsxppreprocess.c
+mbsxppreprocess_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
 
 if BUILD_FFTW
 mbsegypsd_SOURCES = mbsegypsd.c
