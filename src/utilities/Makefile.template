@@ -96,6 +96,7 @@ all:	$(BINDIR)/mb7k2jstar \
 	$(BINDIR)/mbset \
 	$(BINDIR)/mbstripnan \
 	$(BINDIR)/mbsvplist \
+	$(BINDIR)/mbsxppreprocess \
 	$(BINDIR)/mbtime
 
 ### make clean removes the object files
@@ -236,6 +237,9 @@ $(BINDIR)/mbhysweeppreprocess:	mbhysweeppreprocess.o $(LIBDIR)/libmbio.a $(LIBDI
 $(BINDIR)/mbkongsbergpreprocess:	mbkongsbergpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbkongsbergpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbkongsbergpreprocess
+$(BINDIR)/mbsxppreprocess:	mbsxppreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbsxppreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mbsxppreprocess
 
 ### compile the source files
 mbhsdump.o:	mbhsdump.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
@@ -323,3 +327,5 @@ mbhysweeppreprocess.o:	mbhysweeppreprocess.c ../mbio/mb_format.h ../mbio/mb_stat
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbhysweeppreprocess.c
 mbkongsbergpreprocess.o:	mbkongsbergpreprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbkongsbergpreprocess.c
+mbsxppreprocess.o:	mbsxppreprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
+	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbsxppreprocess.c
