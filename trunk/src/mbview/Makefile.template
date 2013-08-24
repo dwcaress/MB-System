@@ -53,7 +53,7 @@ PROJLIB  = $(LIBDIR)/libmbproj.a
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
 ### make all makes the executable and man page
-all: $(INCDIR)/mbview.h $(LIBDIR)/libmbview.a $(BINDIR)/mbgrdviz $(BINDIR)/mbeditviz
+all: $(INCDIR)/mbview.h $(LIBDIR)/libmbview.a
 
 ### make the library
 $(LIBDIR)/libmbview.a:	MB3DView.o \
@@ -102,63 +102,6 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 	ranlib $(LIBDIR)/libmbview.a
 
 ### link the executables
-$(BINDIR)/mbgrdviz: mbgrdviz_main.o \
-		mbgrdviz_callbacks.o \
-		mbgrdviz_creation.o \
-		$(LIBDIR)/libmbview.a \
-		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbaux.a \
-		$(PROJLIB) \
-		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
-		$(LIBDIR)/libmbps.a \
-		$(LIBDIR)/libmbxgr.a \
-		$(GSFLIB) \
-		$(GMTLIBDIR)/libpsl.a
-	$(CC) $(CFLAGS) mbgrdviz_main.o \
-		mbgrdviz_callbacks.o \
-		mbgrdviz_creation.o \
-		$(LIBDIR)/libmbview.a \
-		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbaux.a \
-		$(PROJLIB) \
-		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
-		$(LIBDIR)/libmbxgr.a \
-		$(GSFLIB) \
-		$(GMTLIBDIR)/libgmt.a \
-		$(GMTLIBDIR)/libpsl.a \
-		$(OPENGLLIBS) $(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbgrdviz
-$(BINDIR)/mbeditviz: mbeditviz_main.o \
-		mbeditviz_callbacks.o \
-		mbeditviz_prog.o \
-		mbeditviz_creation.o \
-		$(LIBDIR)/libmbview.a \
-		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbaux.a \
-		$(PROJLIB) \
-		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
-		$(LIBDIR)/libmbps.a \
-		$(LIBDIR)/libmbxgr.a \
-		$(GSFLIB) \
-		$(GMTLIBDIR)/libgmt.a \
-		$(GMTLIBDIR)/libpsl.a
-	$(CC) $(CFLAGS) mbeditviz_main.o \
-		mbeditviz_callbacks.o \
-		mbeditviz_prog.o \
-		mbeditviz_creation.o \
-		$(LIBDIR)/libmbview.a \
-		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbaux.a \
-		$(PROJLIB) \
-		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
-		$(LIBDIR)/libmbxgr.a \
-		$(GSFLIB) \
-		$(GMTLIBDIR)/libgmt.a \
-		$(GMTLIBDIR)/libpsl.a \
-		$(OPENGLLIBS) $(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbeditviz
 
 ### compile the source files
 MB3DView.o: MB3DView.c MB3DView.h mbview.h mbviewprivate.h \
@@ -210,13 +153,6 @@ mbview_bxutils.o: mbview_bxutils.c
 	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbview_bxutils.c
 mb_glwdrawa.o: mb_glwdrawa.c mb_glwdrawa.h mb_glwdrawap.h
 	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mb_glwdrawa.c
-mbgrdviz_creation.o: mbgrdviz_creation.c mbgrdviz_creation.h
-	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbgrdviz_creation.c
-mbgrdviz_main.o: mbgrdviz_main.c mbview.h
-	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbgrdviz_main.c
-mbgrdviz_callbacks.o: mbgrdviz_callbacks.c mbview.h \
-        ../mbio/mb_define.h ../mbio/mb_status.h ../mbio/mb_format.h
-	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbgrdviz_callbacks.c
 Mb3dsdg.o: Mb3dsdg.c Mb3dsdg.h
 	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c Mb3dsdg.c
 mb3dsoundings_callbacks.o: mb3dsoundings_callbacks.c Mb3dsdg.h mb3dsoundingsprivate.h
@@ -226,17 +162,6 @@ MBpedit.o: MBpedit.c MBpedit.h
 mbpingedit_callbacks.o: mbpingedit_callbacks.c Mb3dsdg.h mbpingeditprivate.h \
         ../mbio/mb_define.h ../mbio/mb_status.h ../mbio/mb_format.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I../mbio -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbpingedit_callbacks.c
-mbeditviz_creation.o: mbeditviz_creation.c mbeditviz_creation.h
-	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbeditviz_creation.c
-mbeditviz_main.o: mbeditviz_main.c mbeditviz.h mbview.h \
-        ../mbio/mb_define.h ../mbio/mb_status.h ../mbio/mb_format.h
-	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -c mbeditviz_main.c
-mbeditviz_callbacks.o: mbeditviz_callbacks.c mbeditviz.h mbview.h \
-        ../mbio/mb_define.h ../mbio/mb_status.h ../mbio/mb_format.h
-	$(CC) $(CFLAGS) -I../mbio -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbeditviz_callbacks.c
-mbeditviz_prog.o: mbeditviz_prog.c mbeditviz.h mbview.h ../mbio/mb_define.h \
-        ../mbio/mb_status.h ../mbio/mb_format.h ../mbaux/mb_aux.h
-	$(CC) $(CFLAGS)  -DMBEDITVIZ_DECLARE_GLOBALS -I../mbio -I../mbaux -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbeditviz_prog.c
 
 ## copy the include files to the include file directory
 $(INCDIR)/mbview.h:	mbview.h
