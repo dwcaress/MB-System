@@ -514,14 +514,26 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_date(verbose,*time_d,time_i);
 
 		/* get navigation */
-		*navlon = mb_ping->longitude;
-		*navlat = mb_ping->latitude;
+		if (mb_ping->longitude != GSF_NULL_LONGITUDE)
+			*navlon = mb_ping->longitude;
+		else
+			*navlon = 0.0;
+		if (mb_ping->latitude != GSF_NULL_LATITUDE)
+			*navlat = mb_ping->latitude;
+		else
+			*navlat = 0.0;
 
 		/* get heading */
-		*heading = mb_ping->heading;
+		if (mb_ping->heading != GSF_NULL_HEADING)
+			*heading = mb_ping->heading;
+		else
+			*heading = 0.0;
 
 		/* get speed */
-		*speed = 1.852 * mb_ping->speed;
+		if (mb_ping->speed != GSF_NULL_SPEED)
+			*speed = 1.852 * mb_ping->speed;
+		else
+			*speed = 0.0;
 
 		/* set beamwidths in mb_io structure */
 		gsfstatus = gsfGetSwathBathyBeamWidths(records,
@@ -963,14 +975,26 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_ping->ping_time.tv_nsec = (int) (1000000000 * (time_d - mb_ping->ping_time.tv_sec));
 
 		/* get navigation */
-		mb_ping->longitude = navlon;
-		mb_ping->latitude = navlat;
+		if (navlon != 0.0)
+			mb_ping->longitude = navlon;
+		else
+			mb_ping->longitude = GSF_NULL_LONGITUDE;
+		if (navlat != 0.0)
+			mb_ping->latitude = navlat;
+		else
+			mb_ping->longitude = GSF_NULL_LATITUDE;
 
 		/* get heading */
-		mb_ping->heading = heading;
+		if (heading != 0.0)
+			mb_ping->heading = heading;
+		else
+			mb_ping->heading = GSF_NULL_HEADING;
 
 		/* get speed */
-		mb_ping->speed = speed / 1.852;
+		if (speed != 0.0)
+			mb_ping->speed = speed / 1.852;
+		else
+			mb_ping->speed = speed;
 
 		/* get numbers of beams */
 		mb_ping->number_beams = nbath;
@@ -1801,22 +1825,50 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_date(verbose,*time_d,time_i);
 
 		/* get navigation */
-		*navlon = mb_ping->longitude;
-		*navlat = mb_ping->latitude;
+		if (mb_ping->longitude != GSF_NULL_LONGITUDE)
+			*navlon = mb_ping->longitude;
+		else
+			*navlon = 0.0;
+		if (mb_ping->latitude != GSF_NULL_LATITUDE)
+			*navlat = mb_ping->latitude;
+		else
+			*navlat = 0.0;
 
 		/* get heading */
-		*heading = mb_ping->heading;
+		if (mb_ping->heading != GSF_NULL_HEADING)
+			*heading = mb_ping->heading;
+		else
+			*heading = 0.0;
 
 		/* get speed */
-		*speed = 1.852 * mb_ping->speed;
+		if (mb_ping->speed != GSF_NULL_SPEED)
+			*speed = 1.852 * mb_ping->speed;
+		else
+			*speed = 0.0;
 
 		/* get draft */
-		*draft = mb_ping->depth_corrector;
+		if (mb_ping->depth_corrector != GSF_NULL_DEPTH_CORRECTOR)
+			*draft = mb_ping->depth_corrector;
+		else
+			*draft = 0.0;
 
 		/* get roll pitch and heave */
 		*roll = mb_ping->roll;
 		*pitch = mb_ping->pitch;
 		*heave = mb_ping->heave;
+
+		if (mb_ping->roll != GSF_NULL_ROLL)
+			*roll = mb_ping->roll;
+		else
+			*roll = 0.0;
+		if (mb_ping->pitch != GSF_NULL_PITCH)
+			*pitch = mb_ping->pitch;
+		else
+			*pitch = 0.0;
+		if (mb_ping->heave != GSF_NULL_HEAVE)
+			*heave = mb_ping->heave;
+		else
+			*heave = 0.0;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1983,22 +2035,46 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 				    - mb_ping->ping_time.tv_sec));
 
 		/* get navigation */
-		mb_ping->longitude = navlon;
-		mb_ping->latitude = navlat;
+		if (navlon != 0.0)
+			mb_ping->longitude = navlon;
+		else
+			mb_ping->longitude = GSF_NULL_LONGITUDE;
+		if (navlat != 0.0)
+			mb_ping->latitude = navlat;
+		else
+			mb_ping->longitude = GSF_NULL_LATITUDE;
 
 		/* get heading */
-		mb_ping->heading = heading;
+		if (heading != 0.0)
+			mb_ping->heading = heading;
+		else
+			mb_ping->heading = GSF_NULL_HEADING;
 
 		/* get speed */
-		mb_ping->speed = speed / 1.852;
+		if (speed != 0.0)
+			mb_ping->speed = speed / 1.852;
+		else
+			mb_ping->speed = speed;
 
 		/* get draft */
-		mb_ping->depth_corrector = draft;
+		if (draft != 0.0)
+			mb_ping->depth_corrector = draft;
+		else
+			mb_ping->depth_corrector = GSF_NULL_DEPTH_CORRECTOR;
 
 		/* get roll pitch and heave */
-		mb_ping->roll = roll;
-		mb_ping->pitch = pitch;
-		mb_ping->heave = heave;
+		if (roll != 0.0)
+			mb_ping->roll = heading;
+		else
+			mb_ping->roll = GSF_NULL_ROLL;
+		if (pitch != 0.0)
+			mb_ping->pitch = heading;
+		else
+			mb_ping->pitch = GSF_NULL_PITCH;
+		if (heave != 0.0)
+			mb_ping->heave = heading;
+		else
+			mb_ping->heave = GSF_NULL_HEAVE;
 
 		/* get scale factors */
 		gsfSetDefaultScaleFactor(mb_ping);
