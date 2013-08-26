@@ -594,7 +594,7 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	if (verbose >= 4 && data->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"\ndbg4  New ping to be written by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg4  New ping values:\n");
 		fprintf(stderr,"dbg4       kind:       %d\n",
 			data->kind);

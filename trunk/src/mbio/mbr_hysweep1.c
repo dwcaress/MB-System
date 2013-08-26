@@ -542,12 +542,11 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		/* ignore heading and sonar depth errors */
 		interp_error = MB_ERROR_NO_ERROR;
 
-		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, store->RMBint_heading, speed,
-				    &(store->RMBint_lon), &(store->RMBint_lat), &speed, &interp_error);
-		if (interp_status == MB_SUCCESS)
 		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d,
 				    &(store->RMBint_heave), &(store->RMBint_roll),
 				    &(store->RMBint_pitch), &interp_error);
+		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, store->RMBint_heading, speed,
+				    &(store->RMBint_lon), &(store->RMBint_lat), &speed, &interp_error);
 		if (interp_status == MB_SUCCESS)
 			{
 			if (mb_io_ptr->projection_initialized == MB_YES)
@@ -567,8 +566,10 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			}
 		else
 			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_MISSING_NAVATTITUDE;
+			store->RMBint_lon = 0.0;
+			store->RMBint_lat = 0.0;
+			store->RMBint_x = 0.0;
+			store->RMBint_y = 0.0;
 			}
 /* fprintf(stderr,"RMB %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d   %f %f   %f %f\n",
 store->time_i[0],store->time_i[1],store->time_i[2],store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],

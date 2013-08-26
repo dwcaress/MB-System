@@ -1190,6 +1190,10 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* get scaling */
 		oldstore.depth_scale = 1000 * store->depth_scale;
 		oldstore.distance_scale = 1000 * store->distance_scale;
+		if (oldstore.depth_scale == 0)
+			oldstore.depth_scale = 10;
+		if (oldstore.distance_scale == 0)
+			oldstore.distance_scale = 10;
 
 		/* set scaled transducer_depth and altitude */
 		oldstore.transducer_depth = 1000 * store->sonardepth;

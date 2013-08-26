@@ -12,6 +12,7 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
+  Version 5.4.2144       August 26, 2013
   Version 5.4.2143       August 24, 2013
   Version 5.4.2141       August 24, 2013
   Version 5.4.2139       August 19, 2013
@@ -151,6 +152,19 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2144 (August 26, 2013)
+
+Buildsystem: Added src/mbgrdviz/Makefile.in and src/mbeditviz/Makefile.in to the
+subversion source archive.
+
+Format 201 (Hysweep HSX): Changed mbr_rt_hysweep1() in mbr_hysweep1.c so that
+survey records without navigation and/or attitude data do not have an error
+set. This means that data missing nav and/or attitude will still be
+processable.
+
+Format 121 (GSF): Now recognizes and appropriately treats null values for
+position, attitude, speed, and sonar depth.
 
 -----> 5.4.2143 (August 24, 2013)
 
