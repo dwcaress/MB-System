@@ -22,7 +22,7 @@
  *
  * Author:	D. W. Caress
  * Date:	October 12, 2005
- *
+ * 
  * $Log: mb7kpreprocess.c,v $
  * Revision 5.23  2008/11/16 21:51:18  caress
  * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.

@@ -81,6 +81,7 @@ make uninstall (to remove a previously installed version)
 # --with-opengl-include - location of OpenGL headers (optional)
 # --with-otps-dir       - location of OTPS installation (optional)
 # --without-gsf         - build without including or supporting GSF
+# --enable-static       - build using static libraries - shared libraries are default
 
 #------------------------------------------------------------------------------
 # Configure script command line examples:
@@ -130,6 +131,11 @@ CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
     --with-motif-lib=/sw/lib
 
 #------------------------------------------------------------------------------
+#
+# Full autoconf and build sequence
+#   - Do this in the development tree prior to a commit to the source archive or
+#     prior to making a source distribution
+#
 # First clean up old installation and build
 make uninstall
 make clean
@@ -144,6 +150,8 @@ autoconf
 autoupdate
 
 autoreconf --force --install --warnings=all
+
+# Force configure.in to reduce the automake version requirement from 2.69 to 2.65
 sed -i.bak s/2\.69/2\.65/ configure.in
 
 CFLAGS="-g -I/usr/X11R6/include" LDFLAGS="-L/usr/X11R6/lib" \
@@ -167,16 +175,28 @@ cd src/htmlsrc ; make_mbhtml ; cd ../..
 make install
 
 #------------------------------------------------------------------------------
-gcc -o conftest -g -I/usr/X11R6/include -L/usr/X11R6/lib   -L/usr/local/gmt/lib -L/sw/lib -lnetcdf -lnetcdf conftestcopy.c -lgmt  -lm
 
-CFLAGS="-g -I/usr/X11R6/include -L/usr/X11R6/lib" LDFLAGS="-L/sw/lib -lgdal" \
+# Install on Ubuntu 12.04.02LTS using only apt-get for prerequisites
+
+# Required environment variables to be set in ~/.bashrc
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+export PATH=/usr/lib/gmt/bin:$PATH
+
+# Prerequisites
+sudo apt-get install xorg-dev libmotif-dev libmotif4 libxp-dev mesa-common-dev \
+    libsdl1.2-dev libsdl-image1.2-dev build-essential gfortran \
+    nautilus-open-terminal libfftw3-3 libfftw3-dev \
+    libnetcdf-dev netcdf-bin gdal-bin gdal1-dev gmt libgmt-dev gv
+
+# configure call
+CFLAGS="-g" LDFLAGS="-lpsl" \
 ./configure \
-    --prefix=/Users/caress/sandbox/mbsystem \
-    --with-netcdf-include=/sw/include \
-    --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/usr/local/gmt/include \
-    --with-gmt-lib=/usr/local/gmt/lib \
-    --with-fftw-include=/sw/include \
-    --with-fftw-lib=/sw/lib \
-    --with-motif-include=/sw/include \
-    --with-motif-lib=/sw/lib
+    --prefix=/usr/local \
+    --with-gmt-include=/usr/include/gmt \
+    --with-gmt-lib=/usr/lib
+
+# build and install into /usr/local/bin, /usr/local/lib, etc
+make
+sudo make install
+
+#------------------------------------------------------------------------------

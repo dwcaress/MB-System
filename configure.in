@@ -6,11 +6,11 @@ dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
-AC_INIT([mbsystem],[5.4.2144])
+AC_INIT([mbsystem],[5.4.2145])
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 
-AC_DEFINE(VERSION_DATE, "26 August 2013", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "27 August 2013", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -188,17 +188,25 @@ AC_SUBST([CDF_INC_DIR], [$CDF_INC_DIR])
 dnl done with CDF headers
 
 
-dnl Check for Generic Mapping Tools (GMT) lib
-dnl TODO -- add check for libpsl and libgmtps
-dnl World be nice if GMT had package file (.pc)?
+dnl Check for Generic Mapping Tools (GMT) libs
+dnl - these are libgmt, libpsl, and libgmtps
+dnl Would certainly be nice if GMT had pkg-config file (gmt.pc)...
 echo "Check for Generic Mapping Tools (GMT)"
 GOT_GMT=no
 GMT_SETTING=no
 GMT_INC_DIR=
 dnl first check for pacakge
 PKG_CHECK_MODULES([libgmt], [gmt], [GOT_GMT=yes], [GOT_GMT=no])
+PKG_CHECK_MODULES([libgmtps], [gmt], [GOT_GMTPS=yes], [GOT_GMTPS=no])
+PKG_CHECK_MODULES([libpsl], [gmt], [GOT_PSL=yes], [GOT_PSL=no])
 
 dnl Package check failed so check manually
+if test "$GOT_GMTPS" = "no" ; then
+ GOT_GMT=no
+fi
+if test "$GOT_PSL" = "no" ; then
+ GOT_GMT=no
+fi
 if test "$GOT_GMT" = "no" ; then
 
 libgmt_LIBS="-lgmt -lgmtps -lpsl"
@@ -227,6 +235,8 @@ fi
 	fi
     fi
  fi
+ echo "Setting libgmt_LIBS=$libgmt_LIBS"
+ echo "Setting libgmt_CFLAGS=$libgmt_CFLAGS"
  AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
  AC_SUBST([libgmt_CFLAGS], [$libgmt_CFLAGS])
 fi
@@ -265,6 +275,7 @@ fi
 	fi
     fi
  fi
+echo "Setting GMT_INC_DIR=$GMT_INC_DIR"
 AC_SUBST([GMT_INC_DIR], [$GMT_INC_DIR])
 dnl done with GMT headers
 
