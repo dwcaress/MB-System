@@ -1,4 +1,4 @@
-/* src/mbio/mb_config.h.in.  Generated from configure.in by autoheader.  */
+/* src/mbio/mb_config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Machine is littleendian, (Byteswapping on) */
 #undef BYTESWAPPED
