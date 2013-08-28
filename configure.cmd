@@ -7,16 +7,16 @@
 # June 7, 2013
 #------------------------------------------------------------------------------
 #
-# This build system was begun by Bob Covill in 2012, and then completed
+# This build system was begun by Bob Covill in 2011, and then completed
 # with a distributed, multi-continental effort by Bob Covill, Christian
-# Ferreira, Hamish Bowman, Kurt Schwehr, and David Caress in May and June
+# Ferreira, Hamish Bowman, Kurt Schwehr, and David Caress in May to August
 # of 2013.
 #
 #------------------------------------------------------------------------------
 # To modify the build system...
 #------------------------------------------------------------------------------
 #
-# Edit the file "configure.in" in the top directory and "Makefile.am" in each
+# Edit the file "configure.ac" in the top directory and "Makefile.am" in each
 # directory and then run the following sequence of commands:
 
 # Build libtool files for AM_PROG_LIBTOOL
@@ -33,7 +33,7 @@ autoupdate
 autoreconf --force --install --warnings=all
 
 # Reset the autotools version to 2.65 to accomodate some Linux distributions
-sed -i.bak s/2\.69/2\.65/ configure.in
+sed -i.bak s/2\.69/2\.65/ configure.ac
 
 # When you run ./configure, a number of configure options are saved  to a
 # header file:
@@ -151,8 +151,8 @@ autoupdate
 
 autoreconf --force --install --warnings=all
 
-# Force configure.in to reduce the automake version requirement from 2.69 to 2.65
-sed -i.bak s/2\.69/2\.65/ configure.in
+# Force configure.ac to reduce the automake version requirement from 2.69 to 2.65
+sed -i.bak s/2\.69/2\.65/ configure.ac
 
 CFLAGS="-g -I/usr/X11R6/include" LDFLAGS="-L/usr/X11R6/lib" \
 ./configure \
@@ -165,7 +165,8 @@ CFLAGS="-g -I/usr/X11R6/include" LDFLAGS="-L/usr/X11R6/lib" \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib \
-    --with-otps-dir=/usr/local/OTPS2
+    --with-otps-dir=/usr/local/OTPS2 \
+    --disable_static
 #--without-gsf
 
 make
@@ -188,14 +189,38 @@ sudo apt-get install xorg-dev libmotif-dev libmotif4 libxp-dev mesa-common-dev \
     nautilus-open-terminal libfftw3-3 libfftw3-dev \
     libnetcdf-dev netcdf-bin gdal-bin gdal1-dev gmt libgmt-dev gv
 
-# configure call
-CFLAGS="-g" LDFLAGS="-lpsl" \
-./configure \
-    --prefix=/usr/local \
+# The GMT installation does not include a pkg-config *.pc file, but it is
+# simple to construct one. On Ubuntu pkg-config looks in /usr/lib/pkgconfig,
+# so one can put a file there called gmt.pc with the contents:
+#---------------
+# <start gmt.pc>
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include/gmt
+ccompiler=gcc
+cppcompiler=g++
+
+Name: gmt
+Description: GMT Libraries
+Version: 4.5.6
+Libs: -L${libdir} -lgmt -lgmtps -lpsl
+Cflags: -I${includedir}
+# <end gmt.pc>
+#---------------
+
+# If the GMT installation has been augmented with a /usr/lib/pkgconfig/gmt.pc
+# file so that pkg-config knows about GMT, then the configure call is just:
+./configure --prefix=/usr/local
+
+# If the GMT installation is not known to pkg-config, then the installation
+# points of the libraries and the header files must be specified:
+./configure --prefix=/usr/local \
     --with-gmt-include=/usr/include/gmt \
     --with-gmt-lib=/usr/lib
 
-# build and install into /usr/local/bin, /usr/local/lib, etc
+# Either way, once configure has been run, build and install MB-System
+# into /usr/local/bin, /usr/local/lib, etc with the simple make commands:
 make
 sudo make install
 

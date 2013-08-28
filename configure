@@ -2359,12 +2359,12 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
 
 
 $as_echo "#define VERSION_DATE \"27 August 2013\"" >>confdefs.h
@@ -2470,6 +2470,100 @@ IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
+
+$as_echo " "
+$as_echo "------------------------------------------------------------------------------"
+$as_echo "    The MB-system:	configure	12/7/2011"
+$as_echo "    $Id$"
+$as_echo " "
+$as_echo "    Copyright (c) 2011-2013 by"
+$as_echo "    D. W. Caress (caress@lamont.ldgo.columbia.edu)"
+$as_echo "    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"
+$as_echo "    Lamont-Doherty Earth Observatory"
+$as_echo "    Palisades, NY  10964"
+$as_echo " "
+$as_echo "    See README file for copying and redistribution conditions."
+$as_echo "------------------------------------------------------------------------------"
+$as_echo " "
+$as_echo "    The initial version of the MB-System autoconf-based build system"
+$as_echo "    was contributed by Bob Covill on 7 December 2011. Further"
+$as_echo "    refinement of the build system involved contributions from"
+$as_echo "    Bob Covill, Kurt Schwehr, Hamish Bowman, David Caress, and"
+$as_echo "    Christian Ferreira."
+$as_echo " "
+$as_echo "------------------------------------------------------------------------------"
+$as_echo "    To modify this build system..."
+$as_echo "------------------------------------------------------------------------------"
+$as_echo " "
+$as_echo "    Edit the file configure.ac in the top directory and the files"
+$as_echo "    Makefile.am in each directory under src. Then run the following sequence"
+$as_echo "    of commands:"
+$as_echo " "
+$as_echo "        # Build libtool files for LT_INIT"[]
+$as_echo "        libtoolize --force --copy"
+$as_echo "        aclocal"
+$as_echo " "
+$as_echo "        # Build custom header for configure"[]
+$as_echo "        autoheader"
+$as_echo "        automake --add-missing --include-deps"
+$as_echo "        autoconf"
+$as_echo " "
+$as_echo "        # To update configure files use the following:"[]
+$as_echo "        autoupdate"
+$as_echo "        autoreconf --force --install --warnings=all"
+$as_echo " "
+$as_echo "        # Reset the autotools version to 2.65 to accomodate some Linux distributions"[]
+$as_echo "        sed -i.bak s/2\.69/2\.65/ configure.ac"
+$as_echo " "
+$as_echo "    When you run ./configure, a number of configure options are saved  to a"
+$as_echo "    header file:"
+$as_echo "        ./src/mbio/mb_config.h"
+$as_echo "    This file has a template:"
+$as_echo "        ./src/mbio/mb_config.h.in"
+$as_echo "    This file is conditionally included by:"
+$as_echo "        ./src/mbio/mb_define.h"
+$as_echo "    which is in turn included by essentially every MB-System C source file."
+$as_echo "    The condition under which mb_config.h is used is simply the use of the"
+$as_echo "    configure script to generate the makefiles. If one uses the alternate"
+$as_echo "    install_makefiles build system, then an alternate header file named"
+$as_echo "        ./src/mbio/mb_config2.h"
+$as_echo "    is used instead."
+$as_echo " "
+$as_echo "------------------------------------------------------------------------------"
+$as_echo "    To use the build system..."
+$as_echo "------------------------------------------------------------------------------"
+$as_echo "    To generate the makefiles needed to build MB-System, run ./configure"
+$as_echo "    with the options appropriate for your situation. These options are"
+$as_echo "    listed here:"
+$as_echo "        --prefix=install      - location for mbsystem (/usr/local/mbsystem)"
+$as_echo "        --with-netcdf-lib     - location of NetCDF libs"
+$as_echo "        --with-netcdf-include - location of NetCDF headers"
+$as_echo "        --with-gmt-lib        - location of GMT libs"
+$as_echo "        --with-gmt-include    - location of GMT headers"
+$as_echo "        --with-fftw-lib       - location of FFTW3 libs (optional)"
+$as_echo "        --with-fftw-include   - location of FFTW3 headers (optional)"
+$as_echo "        --with-motif-lib      - location of Motif libs (optional)"
+$as_echo "        --with-motif-include  - location of Motif headers (optional)"
+$as_echo "        --with-opengl-lib     - location of OpenGL libs (optional)"
+$as_echo "        --with-opengl-include - location of OpenGL headers (optional)"
+$as_echo "        --with-otps-dir       - location of OTPS installation (optional)"
+$as_echo "        --without-gsf         - build without including or supporting GSF"
+$as_echo "        --enable-static       - build using static libraries - shared libraries are default"
+$as_echo " "
+$as_echo "    After configure you can run the make utility in the usual fashion"
+$as_echo "        make"
+$as_echo "        make install"
+$as_echo " "
+$as_echo "    Some other useful make commands include: "
+$as_echo "        make clean (to clean up compiled code)"
+$as_echo "        make distclean (to clean up compiled code and configure output)"
+$as_echo "        make uninstall (to remove a previously installed version)"
+$as_echo "------------------------------------------------------------------------------"
+$as_echo " "
+$as_echo "Configure will now attempt to construct the Makefiles required to build MB-System"
+$as_echo "MB-System Version $PACKAGE_VERSION"
+$as_echo "HOST System Type: ${host}"
+$as_echo " "
 
 am__api_version='1.11'
 
@@ -12465,7 +12559,7 @@ fi
 
 case "${host_os}" in
 	solaris*|sonos*) CFLAGS="${CFLAGS} -DSUN" ;;
-	*) echo "Build does not require -DSUN CFLAG" ;;
+	*) $as_echo "Build does not require -DSUN CFLAG" ;;
 esac
 
 case "${host_os}" in
@@ -12473,10 +12567,10 @@ case "${host_os}" in
 
 $as_echo "#define WIN32 1" >>confdefs.h
 
-	echo "Added WIN32 define to mb_config.h"
+	$as_echo "Added WIN32 define to mb_config.h"
 	;;
 	*)
-	echo "Not WIN32 system"
+	$as_echo "Not WIN32 system"
 	;;
 esac
 
@@ -12767,7 +12861,7 @@ fi
 
 
 
-echo "Check for OSU Tidal Prediction Software"
+$as_echo "Check for OSU Tidal Prediction Software"
 OTPS_DIR="/usr/local/OTPSnc"
 
 # Check whether --with-otps_dir was given.
@@ -12804,7 +12898,7 @@ else
 fi
 
 
-echo "Check for NetCDF"
+$as_echo "Check for NetCDF"
 GOT_CDF=no
 CDF_SETTING=no
 
@@ -13055,12 +13149,12 @@ fi
  if test "$CDF_SETTING" = "yes" ; then
     GOT_CDF=yes
     libnetcdf_CFLAGS=
-    echo "Using pre-installed libcdf."
+    $as_echo "Using pre-installed libcdf."
  else
     if test "$GOT_CDF" = "no" ; then
 	as_fn_error $? "Did not find libnetcdf, use --with-netcdf-lib" "$LINENO" 5
     else
-	echo "Looking for libnetcdf in $libnetcdf_CFLAGS ..."
+	$as_echo "Looking for libnetcdf in $libnetcdf_CFLAGS ..."
 	save_LDFLAGS=$LDFLAGS
 	LDFLAGS="$LDFLAGS $libnetcdf_CFLAGS"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for nc_open in -lnetcdf" >&5
@@ -13139,12 +13233,12 @@ fi
 fi
  if test "$CDF_SETTING" = "yes" ; then
     GOT_CDF=yes
-    echo "Using pre-installed NetCDF headers."
+    $as_echo "Using pre-installed NetCDF headers."
  else
     if test "$GOT_CDF" = "no" ; then
 	as_fn_error $? "Did not find required NetCDF headers, use --with-netcdf-include" "$LINENO" 5
     else
-	echo "Checking netcdf.h in $CDF_INC_DIR..."
+	$as_echo "Checking netcdf.h in $CDF_INC_DIR..."
 	save_CPPFLAGS=$CPPFLAGS
 	save_CFLAGS=$CFLAGS
 	CPPFLAGS="$CPPFLAGS $CDF_INC_DIR"
@@ -13167,7 +13261,7 @@ fi
 CDF_INC_DIR=$CDF_INC_DIR
 
 
-echo "Check for Generic Mapping Tools (GMT)"
+$as_echo "Check for Generic Mapping Tools (GMT)"
 GOT_GMTPKG=no
 
 pkg_failed=no
@@ -13445,14 +13539,20 @@ fi
 	fi
 	if test "$GMT_SETTING" = "yes" ; then
 		libgmt_CFLAGS=
-		echo "Using pre-installed libgmt."
+		$as_echo "Using pre-installed libgmt."
 	else
 		if test "$GOT_GMTLIBS" = "no" ; then
 			as_fn_error $? "Did not find libgmt, use --with-gmt-lib" "$LINENO" 5
 		else
-			echo "Looking for libgmt in $libgmt_CFLAGS ..."
+			$as_echo "Looking for libgmt in $libgmt_CFLAGS ..."
 			save_LDFLAGS=$LDFLAGS
-			LDFLAGS="$LDFLAGS $libgmt_CFLAGS $libnetcdf_LIBS -lnetcdf"
+			save_LIBS=$LIBS
+			LDFLAGS="$LDFLAGS $libgmt_CFLAGS"
+			LIBS="$LDFLAGS $libnetcdf_LIBS -lnetcdf $LIBM"
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: LDFLAGS $LDFLAGS" >&5
+$as_echo "$as_me: LDFLAGS $LDFLAGS" >&6;}
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: LIBS $LIBS" >&5
+$as_echo "$as_me: LIBS $LIBS" >&6;}
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GMT_begin in -lgmt" >&5
 $as_echo_n "checking for GMT_begin in -lgmt... " >&6; }
 if ${ac_cv_lib_gmt_GMT_begin+:} false; then :
@@ -13496,6 +13596,7 @@ else
 fi
 
 			LDFLAGS="$save_LDFLAGS"
+			LIBS="$save_LIBS"
 			if test "$GMT_SETTING" = "no"; then
 				as_fn_error $? "Did not find libgmt, use --with-gmt-lib or check installation" "$LINENO" 5
 			fi
@@ -13527,12 +13628,12 @@ fi
 
 	if test "$GMT_SETTING" = "yes" ; then
 		GOT_GMTHEADERS=yes
-		echo "Using pre-installed gmt headers."
+		$as_echo "Using pre-installed gmt headers."
 	else
 		if test "$GOT_GMTHEADERS" = "no" ; then
 			as_fn_error $? "Did not find required GMT headers, use --with-gmt-include" "$LINENO" 5
 		else
-			echo "Checking gmt.h in $GMT_INC_DIR..."
+			$as_echo "Checking gmt.h in $GMT_INC_DIR..."
 			save_CPPFLAGS=$CPPFLAGS
 			save_CFLAGS=$CFLAGS
 			CPPFLAGS="$CPPFLAGS $GMT_INC_DIR"
@@ -13552,16 +13653,16 @@ fi
 			fi
 		fi
 	fi
-	echo "Setting GMT_INC_DIR=$GMT_INC_DIR"
+	$as_echo "Setting GMT_INC_DIR=$GMT_INC_DIR"
 	GMT_INC_DIR=$GMT_INC_DIR
 
 	fi
 
-echo "Setting libgmt_LIBS=$libgmt_LIBS"
+$as_echo "Setting libgmt_LIBS=$libgmt_LIBS"
 libgmt_LIBS=$libgmt_LIBS
 
 
-echo "Setting libgmt_CFLAGS=$libgmt_CFLAGS"
+$as_echo "Setting libgmt_CFLAGS=$libgmt_CFLAGS"
 libgmt_CFLAGS=$libgmt_CFLAGS
 
 
@@ -13700,12 +13801,12 @@ fi
     GOT_FFTW=yes
     libfftw_CFLAGS=
     USE_FFTW=mbsegypsd
-    echo "Using pre-installed FFTW3 lib."
+    $as_echo "Using pre-installed FFTW3 lib."
  else
     if test "$GOT_FFTW" = "no" ; then
-	echo "Did not find libfftw3, use --with-fftw-lib, (FFTW disabled)"
+	$as_echo "Did not find libfftw3, use --with-fftw-lib, (FFTW disabled)"
     else
-	echo "Looking for libfftw3 in $libfftw_CFLAGS ..."
+	$as_echo "Looking for libfftw3 in $libfftw_CFLAGS ..."
 	save_LDFLAGS=$LDFLAGS
 	LDFLAGS="$LDFLAGS $libfftw_CFLAGS"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for fftw_plan_dft_1d in -lfftw3" >&5
@@ -13752,7 +13853,7 @@ fi
 
 	LDFLAGS="$save_LDFLAGS"
 	if test "$FFTW_SETTING" = "no"; then
-	   	echo "libfftw not found, FFTW support is disabled"
+	   	$as_echo "libfftw not found, FFTW support is disabled"
 		GOT_FFTW=no
 		USE_FFTW=
 	else
@@ -13794,12 +13895,12 @@ fi
 fi
  if test "$FFTW_SETTING" = "yes" ; then
     GOT_FFTW=yes
-    echo "Using pre-installed fftw3 headers."
+    $as_echo "Using pre-installed fftw3 headers."
  else
     if test "$GOT_FFTW" = "no" ; then
-	echo "Did not find FFTW headers, use --with-fftw-inc, (FFTW Disabled)"
+	$as_echo "Did not find FFTW headers, use --with-fftw-inc, (FFTW Disabled)"
     else
-	echo "Checking fftw3.h in $FFTW_INC_DIR..."
+	$as_echo "Checking fftw3.h in $FFTW_INC_DIR..."
 	save_CPPFLAGS=$CPPFLAGS
 	save_CFLAGS=$CFLAGS
 	CPPFLAGS="$CPPFLAGS $FFTW_INC_DIR"
@@ -13815,7 +13916,7 @@ fi
 	CPPFLAGS=$save_CPPFLAGS
 	CFLAGS=$save_CFLAGS
 	if test "$FFTW_SETTING" = "no"; then
-	   echo "Did not find FFTW headers, FFTW support disabled"
+	   $as_echo "Did not find FFTW headers, FFTW support disabled"
 	   GOT_FFTW=no
 	   USE_FFTW=
 	   FFTW_LIB=
@@ -13989,12 +14090,12 @@ fi
 
  if test "$MOTIF_SETTING" = "yes" ; then
     GOT_MOTIF=yes
-    echo "Using pre-installed MOTIF libs."
+    $as_echo "Using pre-installed MOTIF libs."
  else
     if test "$GOT_MOTIF" = "no" ; then
-	echo "Did not find Motif libs (Xt, Xm, and X11), use --with-motif-lib, (Motif disabled)"
+	$as_echo "Did not find Motif libs (Xt, Xm, and X11), use --with-motif-lib, (Motif disabled)"
     else
-	echo "Looking for Motif Libs in $MOTIF_LIB_DIR ..."
+	$as_echo "Looking for Motif Libs in $MOTIF_LIB_DIR ..."
 	save_LDFLAGS=$LDFLAGS
 	save_LIBS=$LIBS
 	LDFLAGS="$MOTIF_LIB_DIR $LDFLAGS"
@@ -14132,7 +14233,7 @@ fi
 	LDFLAGS=$save_LDFLAGS
 	LIBS=$save_LIBS
 	if test "$MOTIF_SETTING" = "no"; then
-	   	echo "Motif libs not found, Motif support is disabled"
+	   	$as_echo "Motif libs not found, Motif support is disabled"
 		GOT_MOTIF=no
 	else
 		GOT_MOTIF=yes
@@ -14172,12 +14273,12 @@ fi
 fi
  if test "$MOTIF_SETTING" = "yes" ; then
     GOT_MOTIF=yes
-    echo "Using pre-installed Motif headers."
+    $as_echo "Using pre-installed Motif headers."
  else
     if test "$GOT_MOTIF" = "no" ; then
-	echo "Did not find Motif headers, use --with-motif-inc, (Motif Disabled)"
+	$as_echo "Did not find Motif headers, use --with-motif-inc, (Motif Disabled)"
     else
-	echo "Checking X11/Intrinsic.h in $MOTIF_INC_DIR..."
+	$as_echo "Checking X11/Intrinsic.h in $MOTIF_INC_DIR..."
 	save_CPPFLAGS=$CPPFLAGS
 	save_CFLAGS=$CFLAGS
 	CPPFLAGS="$CPPFLAGS $MOTIF_INC_DIR"
@@ -14193,7 +14294,7 @@ fi
 	CPPFLAGS=$save_CPPFLAGS
 	CFLAGS=$save_CFLAGS
 	if test "$MOTIF_SETTING" = "no"; then
-	   echo "Did not find Motif headers, Motif support disabled"
+	   $as_echo "Did not find Motif headers, Motif support disabled"
 	   GOT_MOTIF=no
 	   MOTIF_LIB=
 	fi
@@ -14314,12 +14415,12 @@ fi
 
  if test "$GL_SETTING" = "yes" ; then
     GOT_GL=yes
-    echo "Using pre-installed OpenGL libs."
+    $as_echo "Using pre-installed OpenGL libs."
  else
     if test "$GOT_GL" = "no" ; then
-	echo "Did not find OpenGL libs (GL and GLU), use --with-opengl-lib, (OpenGL disabled)"
+	$as_echo "Did not find OpenGL libs (GL and GLU), use --with-opengl-lib, (OpenGL disabled)"
     else
-	echo "Looking for OpenGL Libs in $GL_LIB_DIR ..."
+	$as_echo "Looking for OpenGL Libs in $GL_LIB_DIR ..."
 	save_LDFLAGS=$LDFLAGS
 	save_LIBS=$LIBS
 	LDFLAGS="$GL_LIB_DIR $LDFLAGS"
@@ -14401,7 +14502,7 @@ fi
 	LDFLAGS=$save_LDFLAGS
 	LIBS=$save_LIBS
 	if test "$GL_SETTING" = "no"; then
-	   	echo "OpenGL libs not found, OpenGL support is disabled"
+	   	$as_echo "OpenGL libs not found, OpenGL support is disabled"
 		GOT_GL=no
 	else
 		GOT_GL=yes
@@ -14449,12 +14550,12 @@ done
 fi
  if test "$GL_SETTING" = "yes" ; then
     GOT_GL=yes
-    echo "Using pre-installed OpenGL headers."
+    $as_echo "Using pre-installed OpenGL headers."
  else
     if test "$GOT_GL" = "no" ; then
-	echo "Did not find OpenGL headers, use --with-opengl-inc, (OpenGL Disabled)"
+	$as_echo "Did not find OpenGL headers, use --with-opengl-inc, (OpenGL Disabled)"
     else
-	echo "Checking OpenGL Headers in $GL_INC_DIR..."
+	$as_echo "Checking OpenGL Headers in $GL_INC_DIR..."
 	save_CPPFLAGS=$CPPFLAGS
 	save_CFLAGS=$CFLAGS
 	CPPFLAGS="$CPPFLAGS $GL_INC_DIR"
@@ -14477,7 +14578,7 @@ done
 	CPPFLAGS=$save_CPPFLAGS
 	CFLAGS=$save_CFLAGS
 	if test "$GL_SETTING" = "no"; then
-	   echo "Did not find OpenGL headers, OpenGL support disabled"
+	   $as_echo "Did not find OpenGL headers, OpenGL support disabled"
 	   GOT_GL=no
 	   GL_LIB=
 	fi
@@ -14513,7 +14614,8 @@ mbsystemhtmldir="$datadir/doc/$PACKAGE/html"
 mbsystempsdir="$datadir/doc/$PACKAGE/ps"
 
 
-echo "WITH GSF"
+$as_echo " "
+$as_echo "About to create Makefiles..."
 ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/surf/Makefile src/mr1pr/Makefile src/proj/Makefile src/mbaux/Makefile src/utilities/Makefile src/gmt/Makefile src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile src/mbvelocitytool/Makefile src/mbnavadjust/Makefile src/otps/Makefile src/mbview/Makefile src/mbgrdviz/Makefile src/mbeditviz/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile src/ps/Makefile src/share/Makefile"
 
 if test "$with_gsf" = "yes" ; then
@@ -16841,44 +16943,46 @@ $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
 
-echo ""
-echo ""
-echo "Configure Summary for ${host}"
-echo "See config.log for configure details"
-echo "See INSTALL for build instructions and hints"
-echo "---------------------------------------------"
-echo "MB-System will be installed in: ${prefix}"
-echo ""
+$as_echo ""
+$as_echo "------------------------------------------------------------------------------"
+$as_echo "MB-System Configure Summary"
+$as_echo "------------------------------------------------------------------------------"
+$as_echo "MB-System will be installed in: ${prefix}"
+$as_echo "Installation host:              ${host}"
 if test "x$enable_static" = xyes ; then
-	echo "Building Static Libs: Yes"
+	$as_echo "Building Static Libs: Yes"
 else
-	echo "Building Static Libs: No"
+	$as_echo "Building Static Libs: No"
 fi
 if test "x$enable_shared" = xyes ; then
-	echo "Building Shared Libs: Yes"
+	$as_echo "Building Shared Libs: Yes"
 else
-	echo "Building Shared Libs: No"
+	$as_echo "Building Shared Libs: No"
 fi
 if test $BYTESWAP = "yes" ; then
-	echo "Byteswapping: Enabled"
+	$as_echo "Byteswapping: Enabled"
 else
-	echo "Byteswapping: Disabled"
+	$as_echo "Byteswapping: Disabled"
 fi
 if test "$GOT_FFTW" = "yes" ; then
-	echo "FFTW Support: Enabled"
+	$as_echo "FFTW Support: Enabled"
 else
-	echo "FFTW Support: Disabled"
+	$as_echo "FFTW Support: Disabled"
 fi
 if test "$GOT_MOTIF" = "yes" ; then
-	echo "Motif Support: Enabled"
+	$as_echo "Motif Support: Enabled"
 else
-	echo "Motif Support: Disabled"
+	$as_echo "Motif Support: Disabled"
 fi
 if test "$GOT_GL" = "yes" ; then
-	echo "OpenGL Support: Enabled"
+	$as_echo "OpenGL Support: Enabled"
 else
-	echo "OpenGL Support: Disabled"
+	$as_echo "OpenGL Support: Disabled"
 fi
-echo "Using $OTPS_DIR for OSU Tidal Prediction Software"
+$as_echo "Using $OTPS_DIR for OSU Tidal Prediction Software"
 
 $as_echo "Build with Generic Sensor Format (GSF) Support: $with_gsf"
+$as_echo "------------------------------------------------------------------------------"
+$as_echo "See config.log for details of configure results"
+$as_echo "See INSTALL for further build instructions and hints"
+$as_echo "------------------------------------------------------------------------------"

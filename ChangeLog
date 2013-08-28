@@ -12,7 +12,12 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
-  Version 5.4.2146       August 27, 2013
+Here "*" denotes source distribution release made available for ftp download.
+Releases without an "*" are discrete revisions available from the source code
+archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+
+  Version 5.4.2148       August 28, 2013
+  Version 5.4.2147       August 27, 2013
   Version 5.4.2144       August 26, 2013
   Version 5.4.2143       August 24, 2013
   Version 5.4.2141       August 24, 2013
@@ -154,10 +159,16 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.4.2146 (August 27, 2013)
+-----> 5.4.2148 (August 28, 2013)
+
+Buildsystem: More tweaking of configure.ac file, including making the comments
+output more sensible.
+
+-----> 5.4.2147 (August 27, 2013)
 
 Buildsystem: More tweaking of configure.in file trying to get MB-System to build
-on Ubuntu 12.04.02LTS.
+on Ubuntu 12.04.02LTS. Moved configure.in to configure.ac to conform to current
+autoconf file naming conventions.
 
 -----> 5.4.2144 (August 26, 2013)
 
