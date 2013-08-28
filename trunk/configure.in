@@ -6,7 +6,7 @@ dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
-AC_INIT([mbsystem],[5.4.2145])
+AC_INIT([mbsystem],[5.4.2146])
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 
@@ -187,97 +187,103 @@ fi
 AC_SUBST([CDF_INC_DIR], [$CDF_INC_DIR])
 dnl done with CDF headers
 
-
 dnl Check for Generic Mapping Tools (GMT) libs
 dnl - these are libgmt, libpsl, and libgmtps
 dnl Would certainly be nice if GMT had pkg-config file (gmt.pc)...
 echo "Check for Generic Mapping Tools (GMT)"
-GOT_GMT=no
-GMT_SETTING=no
-GMT_INC_DIR=
+GOT_GMTPKG=no
 dnl first check for pacakge
-PKG_CHECK_MODULES([libgmt], [gmt], [GOT_GMT=yes], [GOT_GMT=no])
-PKG_CHECK_MODULES([libgmtps], [gmt], [GOT_GMTPS=yes], [GOT_GMTPS=no])
-PKG_CHECK_MODULES([libpsl], [gmt], [GOT_PSL=yes], [GOT_PSL=no])
-
-dnl Package check failed so check manually
+PKG_CHECK_MODULES([libgmt], [gmt], [GOT_LIBGMT=yes], [GOT_LIBGMT=no])
+PKG_CHECK_MODULES([libgmtps], [gmt], [GOT_LIBGMTPS=yes], [GOT_LIBGMTPS=no])
+PKG_CHECK_MODULES([libpsl], [gmt], [GOT_LIBPSL=yes], [GOT_LIBPSL=no])
+if test "$GOT_LIBGMT" = "yes" ; then
+	GOT_GMTPKG=yes
+fi
 if test "$GOT_GMTPS" = "no" ; then
- GOT_GMT=no
+	GOT_GMTPKG=no
 fi
 if test "$GOT_PSL" = "no" ; then
- GOT_GMT=no
+	GOT_GMTPKG=no
 fi
-if test "$GOT_GMT" = "no" ; then
 
-libgmt_LIBS="-lgmt -lgmtps -lpsl"
-dnl arg for command line
-AC_ARG_WITH(gmt-lib, [  --with-gmt-lib=DIR	Location of GMT library],
-	[libgmt_CFLAGS="-L${withval}"] [GOT_GMT=yes], [GOT_GMT=no])
-dnl First check if lib installed
-if test "$GOT_GMT" = "no" ; then
- AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no],)
-fi
- if test "$GMT_SETTING" = "yes" ; then
-    GOT_GMT=yes
-    libgmt_CFLAGS=
-    echo "Using pre-installed libgmt."
- else
-    if test "$GOT_GMT" = "no" ; then
-	AC_MSG_ERROR([Did not find libgmt, use --with-gmt-lib])
-    else
-	echo "Looking for libgmt in $libgmt_CFLAGS ..."
-	save_LDFLAGS=$LDFLAGS
-	LDFLAGS="$LDFLAGS $libgmt_CFLAGS $libnetcdf_LIBS -lnetcdf"
-	AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no], )
-	LDFLAGS="$save_LDFLAGS"
-	if test "$GMT_SETTING" = "no"; then
-	   AC_MSG_ERROR([Did not find libgmt, use --with-gmt-lib or check installation])
+dnl pkg-config check failed so try to find libraries and headers manually
+if test "$GOT_GMTPKG" = "no" ; then
+
+	GMT_SETTING=no
+	GOT_GMTLIBS=no
+	libgmt_LIBS="-lgmt -lgmtps -lpsl"
+	dnl arg for command line
+	AC_ARG_WITH(gmt-lib, [  --with-gmt-lib=DIR	Location of GMT libraries],
+	       [libgmt_CFLAGS="-L${withval}"] [GOT_GMTLIBS=yes], [GOT_GMTLIBS=no])
+	dnl First check if lib installed
+	if test "$GOT_GMTLIBS" = "no" ; then
+		AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no],)
 	fi
-    fi
- fi
- echo "Setting libgmt_LIBS=$libgmt_LIBS"
- echo "Setting libgmt_CFLAGS=$libgmt_CFLAGS"
- AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
- AC_SUBST([libgmt_CFLAGS], [$libgmt_CFLAGS])
-fi
-dnl done with GMT lib
-
-dnl Now check GMT headers
-GOT_GMT=no
-GMT_SETTING=no
-dnl add command line option
-AC_ARG_WITH(gmt-include, [  --with-gmt-include=DIR	Location of GMT headers],
-	[GMT_INC_DIR="-I${withval}"] [GOT_GMT=yes], [GOT_GMT=no])
-
-dnl First check if gmt headers installed
-dnl Only if no arg given
-if test "$GOT_GMT" = "no" ; then
- AC_CHECK_HEADER(gmt.h, [GMT_SETTING=yes], [GMT_SETTING=no])
-fi
-
- if test "$GMT_SETTING" = "yes" ; then
-    GOT_GMT=yes
-    echo "Using pre-installed gmt headers."
- else
-    if test "$GOT_GMT" = "no" ; then
-	AC_MSG_ERROR([Did not find required GMT headers, use --with-gmt-include])
-    else
-	echo "Checking gmt.h in $GMT_INC_DIR..."
-	save_CPPFLAGS=$CPPFLAGS
-	save_CFLAGS=$CFLAGS
-	CPPFLAGS="$CPPFLAGS $GMT_INC_DIR"
-	CFLAGS="$CFLAGS $GMT_INC_DIR $CDF_INC_DIR"
-	AC_CHECK_HEADER(gmt.h, [GMT_SETTING=yes], [GMT_SETTING=no])
-	CPPFLAGS=$save_CPPFLAGS
-	CFLAGS=$save_CFLAGS
-	if test "$GMT_SETTING" = "no"; then
-	   AC_MSG_ERROR([Did not find required GMT headers, use --with-gmt-include])
+	if test "$GMT_SETTING" = "yes" ; then
+		libgmt_CFLAGS=
+		echo "Using pre-installed libgmt."
+	else
+		if test "$GOT_GMTLIBS" = "no" ; then
+			AC_MSG_ERROR([Did not find libgmt, use --with-gmt-lib])
+		else
+			echo "Looking for libgmt in $libgmt_CFLAGS ..."
+			save_LDFLAGS=$LDFLAGS
+			LDFLAGS="$LDFLAGS $libgmt_CFLAGS $libnetcdf_LIBS -lnetcdf"
+			AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no], )
+			LDFLAGS="$save_LDFLAGS"
+			if test "$GMT_SETTING" = "no"; then
+				AC_MSG_ERROR([Did not find libgmt, use --with-gmt-lib or check installation])
+			fi
+		fi
 	fi
-    fi
- fi
-echo "Setting GMT_INC_DIR=$GMT_INC_DIR"
-AC_SUBST([GMT_INC_DIR], [$GMT_INC_DIR])
-dnl done with GMT headers
+
+	dnl Now look for GMT headers
+	GOT_GMTHEADERS=no
+	GMT_SETTING=no
+	GMT_INC_DIR=
+	dnl add command line option
+	AC_ARG_WITH(gmt-include, [  --with-gmt-include=DIR	Location of GMT headers],
+		[GMT_INC_DIR="-I${withval}"] [GOT_GMTHEADERS=yes], [GOT_GMTHEADERS=no])
+
+	dnl First check if gmt headers installed
+	dnl Only if no arg given
+	if test "$GOT_GMTHEADERS" = "no" ; then
+		AC_CHECK_HEADER(gmt.h, [GMT_SETTING=yes], [GMT_SETTING=no])
+	fi
+
+	if test "$GMT_SETTING" = "yes" ; then
+		GOT_GMTHEADERS=yes
+		echo "Using pre-installed gmt headers."
+	else
+		if test "$GOT_GMTHEADERS" = "no" ; then
+			AC_MSG_ERROR([Did not find required GMT headers, use --with-gmt-include])
+		else
+			echo "Checking gmt.h in $GMT_INC_DIR..."
+			save_CPPFLAGS=$CPPFLAGS
+			save_CFLAGS=$CFLAGS
+			CPPFLAGS="$CPPFLAGS $GMT_INC_DIR"
+			CFLAGS="$CFLAGS $GMT_INC_DIR $CDF_INC_DIR"
+			AC_CHECK_HEADER(gmt.h, [GMT_SETTING=yes], [GMT_SETTING=no])
+			CPPFLAGS=$save_CPPFLAGS
+			CFLAGS=$save_CFLAGS
+			if test "$GMT_SETTING" = "no"; then
+				AC_MSG_ERROR([Did not find required GMT headers, use --with-gmt-include])
+			fi
+		fi
+	fi
+	echo "Setting GMT_INC_DIR=$GMT_INC_DIR"
+	AC_SUBST([GMT_INC_DIR], [$GMT_INC_DIR])
+	dnl done with GMT headers
+fi
+
+echo "Setting libgmt_LIBS=$libgmt_LIBS"
+AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
+
+echo "Setting libgmt_CFLAGS=$libgmt_CFLAGS"
+AC_SUBST([libgmt_CFLAGS], [$libgmt_CFLAGS])
+
+dnl done with GMT
+
 
 dnl Deal with FFTW for mbsegypsd
 dnl seems to want fftw3 ... do not check for older fftw?
