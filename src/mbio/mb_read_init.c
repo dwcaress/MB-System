@@ -915,18 +915,18 @@ int mb_read_init(int verbose, char *file,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)*mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)*mbio_ptr);
 		fprintf(stderr,"dbg2       ->numfile:  %d\n",mb_io_ptr->numfile);
 		fprintf(stderr,"dbg2       ->file:     %s\n",mb_io_ptr->file);
 		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
 		    fprintf(stderr,"dbg2       ->file2:    %s\n",mb_io_ptr->file2);
 		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3)
 		    fprintf(stderr,"dbg2       ->file3:    %s\n",mb_io_ptr->file3);
-		fprintf(stderr,"dbg2       ->mbfp:     %lu\n",(size_t)mb_io_ptr->mbfp);
+		fprintf(stderr,"dbg2       ->mbfp:     %p\n",(void *)mb_io_ptr->mbfp);
 		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
-		    fprintf(stderr,"dbg2       ->mbfp2:    %lu\n",(size_t)mb_io_ptr->mbfp2);
+		    fprintf(stderr,"dbg2       ->mbfp2:    %p\n",(void *)mb_io_ptr->mbfp2);
 		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3)
-		    fprintf(stderr,"dbg2       ->mbfp3:    %lu\n",(size_t)mb_io_ptr->mbfp3);
+		    fprintf(stderr,"dbg2       ->mbfp3:    %p\n",(void *)mb_io_ptr->mbfp3);
 		fprintf(stderr,"dbg2       btime_d:    %f\n",*btime_d);
 		fprintf(stderr,"dbg2       etime_d:    %f\n",*etime_d);
 		fprintf(stderr,"dbg2       beams_bath: %d\n",*beams_bath);

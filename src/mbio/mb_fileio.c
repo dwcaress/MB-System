@@ -59,7 +59,7 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -138,7 +138,7 @@ int mb_fileio_close(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -180,10 +180,10 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       size:       %lu\n",(size_t)size);
-		fprintf(stderr,"dbg2       *size:      %lu\n",(size_t)(*size));
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       size:       %p\n",(void *)size);
+		fprintf(stderr,"dbg2       *size:      %p\n",(void *)(*size));
 		}
 
 	/* get mbio descriptor */
@@ -203,8 +203,8 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       size:       %lu\n",(size_t)size);
-		fprintf(stderr,"dbg2       *size:      %lu\n",(size_t)(*size));
+		fprintf(stderr,"dbg2       size:       %p\n",(void *)size);
+		fprintf(stderr,"dbg2       *size:      %p\n",(void *)(*size));
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -228,10 +228,10 @@ int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       size:       %lu\n",(size_t)size);
-		fprintf(stderr,"dbg2       *size:      %lu\n",(size_t)(*size));
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       size:       %p\n",(void *)size);
+		fprintf(stderr,"dbg2       *size:      %p\n",(void *)(*size));
 		}
 
 	/* get mbio descriptor */
@@ -251,8 +251,8 @@ int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       size:       %lu\n",(size_t)size);
-		fprintf(stderr,"dbg2       *size:      %lu\n",(size_t)(*size));
+		fprintf(stderr,"dbg2       size:       %p\n",(void *)size);
+		fprintf(stderr,"dbg2       *size:      %p\n",(void *)(*size));
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);

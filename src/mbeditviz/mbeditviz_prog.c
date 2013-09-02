@@ -971,7 +971,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 							}
 						}
 					}
-fprintf(stderr,"num_pings:%d ping:%p beamflags: %p %p\n",file->num_pings,ping,ping->beamflag,ping->beamflagorg);
+/* fprintf(stderr,"num_pings:%d ping:%p beamflags: %p %p\n",file->num_pings,ping,ping->beamflag,ping->beamflagorg); */
 
 				/* copy data into ping arrays */
 				if (mbev_error == MB_ERROR_NO_ERROR
