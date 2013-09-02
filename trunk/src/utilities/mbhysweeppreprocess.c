@@ -517,8 +517,8 @@ int main (int argc, char **argv)
 			exit(error);
 			}
 
-		/* count the binary data records described by the header
-			then rewind the file to the start of the binary data */
+		/* count the data records
+			then rewind the file to the start */
 		nnav = 0;
 		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != NULL)
 			{
@@ -1737,6 +1737,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 							nav_time_d-1, nav_lat-1,
 							nnav, time_d, &navlat, &j,
 							&error);
+fprintf(stderr,"Interp Nav: %f %f %f\n",time_d,navlon,navlat);
 				}
 			else if (ndat_nav > 0)
 				{

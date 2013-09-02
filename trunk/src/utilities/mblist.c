@@ -4871,8 +4871,8 @@ int set_bathyslope(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       bath:            %lu\n",(size_t)bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %lu\n",(size_t)bathacrosstrack);
+		fprintf(stderr,"dbg2       bath:            %p\n",(void *)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %p\n",(void *)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d %f %f\n",
@@ -5202,7 +5202,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:        %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:        %p\n",(void *)mbio_ptr);
 		}
 
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -5382,7 +5382,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:        %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:        %p\n",(void *)mbio_ptr);
 		}
 
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -5512,7 +5512,7 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:        %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:        %p\n",(void *)mbio_ptr);
 		}
 
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;

@@ -89,9 +89,9 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
 		fprintf(stderr,"dbg2       segyfile:            %s\n",segyfile);
-		fprintf(stderr,"dbg2       mbsegyio_ptr:        %lu\n",(size_t)mbsegyio_ptr);
-		fprintf(stderr,"dbg2       asciiheader:         %lu\n",(size_t)segyasciiheader);
-		fprintf(stderr,"dbg2       fileheader:          %lu\n",(size_t)segyfileheader);
+		fprintf(stderr,"dbg2       mbsegyio_ptr:        %p\n",(void *)mbsegyio_ptr);
+		fprintf(stderr,"dbg2       asciiheader:         %p\n",(void *)segyasciiheader);
+		fprintf(stderr,"dbg2       fileheader:          %p\n",(void *)segyfileheader);
 		}
 
 	/* allocate memory for mbsegyio descriptor */
@@ -216,8 +216,8 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       asciiheader:         %lu\n",(size_t)asciiheader);
-		fprintf(stderr,"dbg2       fileheader:          %lu\n",(size_t)fileheader);
+		fprintf(stderr,"dbg2       asciiheader:         %p\n",(void *)asciiheader);
+		fprintf(stderr,"dbg2       fileheader:          %p\n",(void *)fileheader);
 		for (j=0;j<40;j++)
 			{
 			fprintf(stderr,"dbg2       asciiheader[%d]:",j);
@@ -260,7 +260,7 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2       num extended headers: %d\n",fileheader->num_ext_headers);
 		for (i=238;i<238+94;i++)
 			fprintf(stderr,"dbg2       extra[%d]:          %d\n",i,fileheader->extra[i]);
-		fprintf(stderr,"dbg2       fp:            %lu\n",(size_t)mb_segyio_ptr->fp);
+		fprintf(stderr,"dbg2       fp:            %p\n",(void *)mb_segyio_ptr->fp);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:       %d\n",status);
@@ -294,8 +294,8 @@ int mb_segy_write_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
 		fprintf(stderr,"dbg2       segyfile:            %s\n",segyfile);
-		fprintf(stderr,"dbg2       asciiheader:         %lu\n",(size_t)asciiheader);
-		fprintf(stderr,"dbg2       fileheader:          %lu\n",(size_t)fileheader);
+		fprintf(stderr,"dbg2       asciiheader:         %p\n",(void *)asciiheader);
+		fprintf(stderr,"dbg2       fileheader:          %p\n",(void *)fileheader);
 		if (asciiheader != NULL)
 		for (j=0;j<40;j++)
 			{
@@ -337,7 +337,7 @@ int mb_segy_write_init(int verbose, char *segyfile,
 			for (i=0;i<338;i++)
 				fprintf(stderr,"dbg2       extra[%d]::          %d",i,fileheader->extra[i]);
 			}
-		fprintf(stderr,"dbg2       mbsegyio_ptr:        %lu\n",(size_t)mbsegyio_ptr);
+		fprintf(stderr,"dbg2       mbsegyio_ptr:        %p\n",(void *)mbsegyio_ptr);
 		}
 
 	/* allocate memory for mbsegyio descriptor */
@@ -480,7 +480,7 @@ int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
-		fprintf(stderr,"dbg2       fp:          %lu\n",(size_t)mb_segyio_ptr->fp);
+		fprintf(stderr,"dbg2       fp:          %p\n",(void *)mb_segyio_ptr->fp);
 		}
 
 	/* deallocate memory */
@@ -499,7 +499,7 @@ int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       fp:            %lu\n",(size_t)mb_segyio_ptr->fp);
+		fprintf(stderr,"dbg2       fp:            %p\n",(void *)mb_segyio_ptr->fp);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:       %d\n",status);
@@ -539,10 +539,10 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       mbsegyio_ptr:     %lu\n",(size_t)mbsegyio_ptr);
-		fprintf(stderr,"dbg2       traceheaderptr:   %lu\n",(size_t)traceheaderptr);
-		fprintf(stderr,"dbg2       traceptr:         %lu\n",(size_t)traceptr);
-		fprintf(stderr,"dbg2       *traceptr:        %lu\n",(size_t)*traceptr);
+		fprintf(stderr,"dbg2       mbsegyio_ptr:     %p\n",(void *)mbsegyio_ptr);
+		fprintf(stderr,"dbg2       traceheaderptr:   %p\n",(void *)traceheaderptr);
+		fprintf(stderr,"dbg2       traceptr:         %p\n",(void *)traceptr);
+		fprintf(stderr,"dbg2       *traceptr:        %p\n",(void *)*traceptr);
 		}
 
 	/* get segyio pointer */
@@ -873,8 +873,8 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       mbsegyio_ptr:  %lu\n",(size_t)mbsegyio_ptr);
-		fprintf(stderr,"dbg2       traceheader:   %lu\n",(size_t)traceheader);
+		fprintf(stderr,"dbg2       mbsegyio_ptr:  %p\n",(void *)mbsegyio_ptr);
+		fprintf(stderr,"dbg2       traceheader:   %p\n",(void *)traceheader);
 		fprintf(stderr,"dbg2       seq_num:       %d\n",traceheader->seq_num);
 		fprintf(stderr,"dbg2       seq_reel:      %d\n",traceheader->seq_reel);
 		fprintf(stderr,"dbg2       shot_num:      %d\n",traceheader->shot_num);

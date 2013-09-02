@@ -166,7 +166,7 @@ int mb_rt_init(int verbose, int number_node,
 			fprintf(stderr,"dbg2       depth: %f  velocity:%f\n",
 				depth[i], velocity[i]);
 			}
-		fprintf(stderr,"dbg2       modelptr:         %lu\n",(size_t)modelptr);
+		fprintf(stderr,"dbg2       modelptr:         %p\n",(void *)modelptr);
 		}
 
 	/* allocate memory for model structure */
@@ -250,7 +250,7 @@ int mb_rt_init(int verbose, int number_node,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       modelptr:   %lu\n",(size_t)*modelptr);
+		fprintf(stderr,"dbg2       modelptr:   %p\n",(void *)*modelptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -271,7 +271,7 @@ int mb_rt_deall(int verbose, void **modelptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       modelptr:         %lu\n",(size_t)modelptr);
+		fprintf(stderr,"dbg2       modelptr:         %p\n",(void *)modelptr);
 		}
 
 	/* deallocate memory for velocity model */
@@ -318,7 +318,7 @@ int mb_rt(int verbose, void *modelptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       modelptr:         %lu\n",(size_t)modelptr);
+		fprintf(stderr,"dbg2       modelptr:         %p\n",(void *)modelptr);
 		fprintf(stderr,"dbg2       number_node:      %d\n",model->number_node);
 		fprintf(stderr,"dbg2       layer depth velocity:\n");
 		for (i=0;i<model->number_node;i++)

@@ -208,7 +208,7 @@ int mb_esf_load(int verbose, char *swathfile,
 			fprintf(stderr,"dbg2       edit event:  %d %.6f %5d %3d %3d\n",
 				i,esf->edit[i].time_d,esf->edit[i].beam,
 				esf->edit[i].action,esf->edit[i].use);
-		fprintf(stderr,"dbg2       esf->esffp:  %lu\n",(size_t)esf->esffp);
+		fprintf(stderr,"dbg2       esf->esffp:  %p\n",(void *)esf->esffp);
 		fprintf(stderr,"dbg2       error:       %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
@@ -253,8 +253,8 @@ int mb_esf_open(int verbose, char *esffile,
 		fprintf(stderr,"dbg2       esffile:     %s\n",esffile);
 		fprintf(stderr,"dbg2       load:        %d\n",load);
 		fprintf(stderr,"dbg2       output:      %d\n",output);
-		fprintf(stderr,"dbg2       esf:         %lu\n",(size_t)esf);
-		fprintf(stderr,"dbg2       error:       %lu\n",(size_t)error);
+		fprintf(stderr,"dbg2       esf:         %p\n",(void *)esf);
+		fprintf(stderr,"dbg2       error:       %p\n",(void *)error);
 		}
 
 	/* initialize the esf structure */
@@ -418,8 +418,8 @@ fprintf(stderr,"esstream %s opened with mode %s\n",esf->esstream,fmode);*/
 				esf->edit[i].action,esf->edit[i].use);
 		fprintf(stderr,"dbg2       esf->esffile:  %s\n",esf->esffile);
 		fprintf(stderr,"dbg2       esf->esstream: %s\n",esf->esstream);
-		fprintf(stderr,"dbg2       esf->esffp:    %lu\n",(size_t)esf->esffp);
-		fprintf(stderr,"dbg2       esf->essfp:    %lu\n",(size_t)esf->essfp);
+		fprintf(stderr,"dbg2       esf->esffp:    %p\n",(void *)esf->esffp);
+		fprintf(stderr,"dbg2       esf->essfp:    %p\n",(void *)esf->essfp);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:       %d\n",status);
@@ -673,8 +673,8 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %lu\n",(size_t)esf->edit);
-		fprintf(stderr,"dbg2       esf->esffp:       %lu\n",(size_t)esf->esffp);
+		fprintf(stderr,"dbg2       esf->edit:        %p\n",(void *)esf->edit);
+		fprintf(stderr,"dbg2       esf->esffp:       %p\n",(void *)esf->esffp);
 		fprintf(stderr,"dbg2       time_d:           %f\n",time_d);
 		fprintf(stderr,"dbg2       beam:             %d\n",beam);
 		fprintf(stderr,"dbg2       action:           %d\n",action);
@@ -716,8 +716,8 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %lu\n",(size_t)esf->edit);
-		fprintf(stderr,"dbg2       esf->esffp:       %lu\n",(size_t)esf->esffp);
+		fprintf(stderr,"dbg2       esf->edit:        %p\n",(void *)esf->edit);
+		fprintf(stderr,"dbg2       esf->esffp:       %p\n",(void *)esf->esffp);
 		fprintf(stderr,"dbg2       error:            %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:           %d\n",status);
@@ -744,8 +744,8 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %lu\n",(size_t)esf->edit);
-		fprintf(stderr,"dbg2       esf->essfp:       %lu\n",(size_t)esf->essfp);
+		fprintf(stderr,"dbg2       esf->edit:        %p\n",(void *)esf->edit);
+		fprintf(stderr,"dbg2       esf->essfp:       %p\n",(void *)esf->essfp);
 		fprintf(stderr,"dbg2       time_d:           %f\n",time_d);
 		fprintf(stderr,"dbg2       beam:             %d\n",beam);
 		fprintf(stderr,"dbg2       action:           %d\n",action);
@@ -787,8 +787,8 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %lu\n",(size_t)esf->edit);
-		fprintf(stderr,"dbg2       esf->essfp:       %lu\n",(size_t)esf->essfp);
+		fprintf(stderr,"dbg2       esf->edit:        %p\n",(void *)esf->edit);
+		fprintf(stderr,"dbg2       esf->essfp:       %p\n",(void *)esf->essfp);
 		fprintf(stderr,"dbg2       error:            %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:           %d\n",status);
@@ -813,8 +813,8 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %lu\n",(size_t)esf->edit);
-		fprintf(stderr,"dbg2       esf->esffp:       %lu\n",(size_t)esf->esffp);
+		fprintf(stderr,"dbg2       esf->edit:        %p\n",(void *)esf->edit);
+		fprintf(stderr,"dbg2       esf->esffp:       %p\n",(void *)esf->esffp);
 		}
 
 	/* deallocate the arrays */
@@ -846,9 +846,9 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %lu\n",(size_t)esf->edit);
-		fprintf(stderr,"dbg2       esf->esffp:       %lu\n",(size_t)esf->esffp);
-		fprintf(stderr,"dbg2       esf->essfp:       %lu\n",(size_t)esf->essfp);
+		fprintf(stderr,"dbg2       esf->edit:        %p\n",(void *)esf->edit);
+		fprintf(stderr,"dbg2       esf->esffp:       %p\n",(void *)esf->esffp);
+		fprintf(stderr,"dbg2       esf->essfp:       %p\n",(void *)esf->essfp);
 		fprintf(stderr,"dbg2       error:            %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:           %d\n",status);
