@@ -78,8 +78,7 @@ mbgrdviz_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(top_builddir)/src/mbaux/libmbaux.la \
 	$(top_builddir)/src/mbaux/libmbxgr.la \
 	$(top_builddir)/src/mbaux/libmbps.la \
-	$(top_builddir)/src/mbview/libmbview.la $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(top_builddir)/src/mbview/libmbview.la $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -221,13 +220,19 @@ install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
 libfftw_CFLAGS = @libfftw_CFLAGS@
+libfftw_LDFLAGS = @libfftw_LDFLAGS@
 libfftw_LIBS = @libfftw_LIBS@
+libfftw_RPATH = @libfftw_RPATH@
 libgmt_CFLAGS = @libgmt_CFLAGS@
+libgmt_LDFLAGS = @libgmt_LDFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
+libgmt_RPATH = @libgmt_RPATH@
 libgmtps_CFLAGS = @libgmtps_CFLAGS@
 libgmtps_LIBS = @libgmtps_LIBS@
 libnetcdf_CFLAGS = @libnetcdf_CFLAGS@
+libnetcdf_LDFLAGS = @libnetcdf_LDFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
+libnetcdf_RPATH = @libnetcdf_RPATH@
 libpsl_CFLAGS = @libpsl_CFLAGS@
 libpsl_LIBS = @libpsl_LIBS@
 localedir = @localedir@
@@ -258,14 +263,15 @@ AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux \
 AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux \
 	-L$(top_builddir)/src/mbview -L$(top_builddir)/src/mr1pr \
 	-L$(top_builddir)/src/proj -L$(top_builddir)/src/surf \
-	$(am__append_2)
+	${libgmt_LDFLAGS} ${libnetcdf_LDFLAGS} ${libgmt_RPATH} \
+	${libnetcdf_RPATH} $(am__append_2)
 mbgrdviz_SOURCES = mbgrdviz_main.c mbgrdviz_callbacks.c  mbgrdviz_creation.c
-mbgrdviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
+mbgrdviz_LDADD = ${libgmt_LIBS} ${libnetcdf_LIBS} @MOTIF_LIB_DIR@ \
        $(top_builddir)/src/mbio/libmbio.la $(top_builddir)/src/mbaux/libmbaux.la \
        $(top_builddir)/src/mbaux/libmbxgr.la $(top_builddir)/src/mbaux/libmbps.la \
         $(top_builddir)/src/mbview/libmbview.la \
        @MOTIF_LIB@ @GL_LIB@ \
-       ${libnetcdf_LIBS} ${libgmt_LIBS} $(LIBM)
+       $(LIBM)
 
 all: all-am
 

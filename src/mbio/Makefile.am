@@ -56,7 +56,9 @@ if BUILD_GSF
   AM_CPPFLAGS += -I@top_srcdir@/src/gsf
 endif
 
-libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0 \
+			${libgmt_LDFLAGS} ${libnetcdf_LDFLAGS} \
+			${libgmt_RPATH} ${libnetcdf_RPATH}
 
 libmbio_la_SOURCES = \
 		mb_format.c mb_error.c \
@@ -129,7 +131,7 @@ if BUILD_GSF
   libmbio_la_SOURCES += mbsys_gsf.c mbr_gsfgenmb.c
 endif
 
-libmbio_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @XDR_LIB@ \
+libmbio_la_LIBADD = ${libgmt_LIBS} ${libnetcdf_LIBS} @XDR_LIB@ \
 		   $(top_builddir)/src/mr1pr/libmbmr1pr.la \
                    $(top_builddir)/src/surf/libmbsapi.la $(top_builddir)/src/proj/libmbproj.la
 if BUILD_GSF

@@ -139,7 +139,7 @@ LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
-LIBS = ${libnetcdf_LIBS} $(top_builddir)/src/mbio/libmbio.la $(LIBM)
+LIBS = ${libgmt_LIBS} ${libnetcdf_LIBS} $(top_builddir)/src/mbio/libmbio.la $(LIBM)
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
@@ -214,13 +214,19 @@ install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
 libfftw_CFLAGS = @libfftw_CFLAGS@
+libfftw_LDFLAGS = @libfftw_LDFLAGS@
 libfftw_LIBS = @libfftw_LIBS@
+libfftw_RPATH = @libfftw_RPATH@
 libgmt_CFLAGS = @libgmt_CFLAGS@
+libgmt_LDFLAGS = @libgmt_LDFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
+libgmt_RPATH = @libgmt_RPATH@
 libgmtps_CFLAGS = @libgmtps_CFLAGS@
 libgmtps_LIBS = @libgmtps_LIBS@
 libnetcdf_CFLAGS = @libnetcdf_CFLAGS@
+libnetcdf_LDFLAGS = @libnetcdf_LDFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
+libnetcdf_RPATH = @libnetcdf_RPATH@
 libpsl_CFLAGS = @libpsl_CFLAGS@
 libpsl_LIBS = @libpsl_LIBS@
 localedir = @localedir@
@@ -247,7 +253,8 @@ AM_CFLAGS = ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I@top_srcdir@/src/mbio @CDF_INC_DIR@ $(am__append_1)
 AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mr1pr \
 	-L$(top_builddir)/src/proj -L$(top_builddir)/src/surf \
-	$(am__append_2)
+	${libgmt_LDFLAGS} ${libnetcdf_LDFLAGS} ${libgmt_RPATH} \
+	${libnetcdf_RPATH} $(am__append_2)
 mbotps_SOURCES = mbotps.c
 nodist_mbotps_SOURCES = otps.h
 BUILT_SOURCES = otps.h

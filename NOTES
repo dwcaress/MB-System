@@ -129,8 +129,8 @@ The available configure options are:
     --with-motif-include=path      location of Motif headers (optional)
     --with-opengl-lib=path         location of OpenGL libs (optional)
     --with-opengl-include=path     location of OpenGL headers (optional)
-    --disable-static               disable building static libraries
-                                   (i.e. build only shared libraries)
+    --enable-static                enable building static libraries - the default
+                                     is to build only shared libraries)
 
 Users can also define custom compiler flags on the command line to be used by
 configure. For example, the command:

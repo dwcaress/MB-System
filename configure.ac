@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.4.2149])
+AC_INIT([mbsystem],[5.4.2150])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "2 September 2013", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "12 September 2013", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -232,22 +232,22 @@ libnetcdf_LIBS="-lnetcdf"
 
 dnl arg for command line
 AC_ARG_WITH(netcdf-lib, [  --with-netcdf-lib=DIR	Location of NetCDF library],
-	[libnetcdf_CFLAGS="-L${withval}"] [GOT_CDF=yes], [GOT_CDF=no])
+	[libnetcdf_LDFLAGS="-L${withval}"] [libnetcdf_RPATH="-R ${withval}"] [GOT_CDF=yes], [GOT_CDF=no])
 dnl First check if lib installed
 if test "$GOT_CDF" = "no" ; then
  AC_CHECK_LIB([netcdf], [nc_open], [CDF_SETTING=yes], [CDF_SETTING=no],)
 fi
  if test "$CDF_SETTING" = "yes" ; then
     GOT_CDF=yes
-    libnetcdf_CFLAGS=
+    libnetcdf_LDFLAGS=
     AS_ECHO(["Using pre-installed libcdf."])
  else
     if test "$GOT_CDF" = "no" ; then
 	AC_MSG_ERROR([Did not find libnetcdf, use --with-netcdf-lib])
     else
-	AS_ECHO(["Looking for libnetcdf in $libnetcdf_CFLAGS ..."])
+	AS_ECHO(["Looking for libnetcdf in $libnetcdf_LDFLAGS ..."])
 	save_LDFLAGS=$LDFLAGS
-	LDFLAGS="$LDFLAGS $libnetcdf_CFLAGS"
+	LDFLAGS="$LDFLAGS $libnetcdf_LDFLAGS"
 	AC_CHECK_LIB([netcdf], [nc_open], [CDF_SETTING=yes], [CDF_SETTING=no], )
 	LDFLAGS="$save_LDFLAGS"
 	if test "$CDF_SETTING" = "no"; then
@@ -257,7 +257,8 @@ fi
  fi
  dnl Use ac_subst to set vars that would be set by pkg_check
  AC_SUBST([libnetcdf_LIBS], [$libnetcdf_LIBS])
- AC_SUBST([libnetcdf_CFLAGS], [$libnetcdf_CFLAGS])
+ AC_SUBST([libnetcdf_LDFLAGS], [$libnetcdf_LDFLAGS])
+ AC_SUBST([libnetcdf_RPATH], ["$libnetcdf_RPATH"])
 fi
 dnl done with CDF lib
 
@@ -321,22 +322,22 @@ if test "$GOT_GMTPKG" = "no" ; then
 	libgmt_LIBS="-lgmt -lgmtps -lpsl"
 	dnl arg for command line
 	AC_ARG_WITH(gmt-lib, [  --with-gmt-lib=DIR	Location of GMT libraries],
-	       [libgmt_CFLAGS="-L${withval}"] [GOT_GMTLIBS=yes], [GOT_GMTLIBS=no])
+	       [libgmt_LDFLAGS="-L${withval}"] [libgmt_RPATH="-R ${withval}"] [GOT_GMTLIBS=yes], [GOT_GMTLIBS=no])
 	dnl First check if lib installed
 	if test "$GOT_GMTLIBS" = "no" ; then
 		AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no],)
 	fi
 	if test "$GMT_SETTING" = "yes" ; then
-		libgmt_CFLAGS=
+		libgmt_LDFLAGS=
 		AS_ECHO(["Using pre-installed libgmt."])
 	else
 		if test "$GOT_GMTLIBS" = "no" ; then
 			AC_MSG_ERROR([Did not find libgmt, use --with-gmt-lib])
 		else
-			AS_ECHO(["Looking for libgmt in $libgmt_CFLAGS ..."])
+			AS_ECHO(["Looking for libgmt in $libgmt_LDFLAGS ..."])
 			save_LDFLAGS=$LDFLAGS
 			save_LIBS=$LIBS
-			LDFLAGS="$LDFLAGS $libgmt_CFLAGS"
+			LDFLAGS="$LDFLAGS $libgmt_LDFLAGS $libnetcdf_LDFLAGS"
 			LIBS="$LDFLAGS $libnetcdf_LIBS -lnetcdf $LIBM"
 			AC_MSG_NOTICE(LDFLAGS $LDFLAGS)
 			AC_MSG_NOTICE(LIBS $LIBS)
@@ -391,8 +392,9 @@ fi
 AS_ECHO(["Setting libgmt_LIBS=$libgmt_LIBS"])
 AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
 
-AS_ECHO(["Setting libgmt_CFLAGS=$libgmt_CFLAGS"])
-AC_SUBST([libgmt_CFLAGS], [$libgmt_CFLAGS])
+AS_ECHO(["Setting libgmt_LDFLAGS=$libgmt_LDFLAGS"])
+AC_SUBST([libgmt_LDFLAGS], [$libgmt_LDFLAGS])
+AC_SUBST([libgmt_RPATH], ["$libgmt_RPATH"])
 
 dnl done with GMT
 
@@ -412,14 +414,14 @@ if test "$GOT_FFTW" = "no" ; then
 libfftw_LIBS="-lfftw3"
 dnl arg for command line
 AC_ARG_WITH(fftw-lib, [  --with-fftw-lib=DIR	Location of FFTW3 library],
-	[libfftw_CFLAGS="-L${withval}"] [GOT_FFTW=yes], [GOT_FFTW=no])
+	[libfftw_LDFLAGS="-L${withval}"] [libfftw_RPATH="-R ${withval}"] [GOT_FFTW=yes], [GOT_FFTW=no])
 dnl First check if lib installed
 if test "$GOT_FFTW" = "no" ; then
  AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d], [FFTW_SETTING=yes], [FFTW_SETTING=no])
 fi
  if test "$FFTW_SETTING" = "yes" ; then
     GOT_FFTW=yes
-    libfftw_CFLAGS=
+    libfftw_LDFLAGS=
     USE_FFTW=mbsegypsd
     AS_ECHO(["Using pre-installed FFTW3 lib."])
  else
@@ -428,7 +430,7 @@ fi
     else
 	AS_ECHO(["Looking for libfftw3 in $libfftw_CFLAGS ..."])
 	save_LDFLAGS=$LDFLAGS
-	LDFLAGS="$LDFLAGS $libfftw_CFLAGS"
+	LDFLAGS="$LDFLAGS $libfftw_LDFLAGS"
 	AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d], [FFTW_SETTING=yes], [FFTW_SETTING=no])
 	LDFLAGS="$save_LDFLAGS"
 	if test "$FFTW_SETTING" = "no"; then
@@ -442,7 +444,8 @@ fi
     fi
  fi
  if test "$GOT_FFTW" = "yes" ; then
-	AC_SUBST([libfftw_CFLAGS], [$libfftw_CFLAGS])
+	AC_SUBST([libfftw_LDFLAGS], [$libfftw_LDFLAGS])
+	AC_SUBST([libfftw_RPATH], ["$libfftw_RPATH"])
 	AC_SUBST([libfftw_LIBS], [$libfftw_LIBS])
  fi
 fi

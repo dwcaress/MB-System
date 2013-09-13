@@ -165,8 +165,7 @@ CFLAGS="-g -I/usr/X11R6/include" LDFLAGS="-L/usr/X11R6/lib" \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib \
-    --with-otps-dir=/usr/local/OTPS2 \
-    --disable_static
+    --with-otps-dir=/usr/local/OTPS2
 #--without-gsf
 
 make
