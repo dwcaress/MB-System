@@ -752,9 +752,9 @@ do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_da
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* figure out what kind of file is to be opened */
@@ -799,9 +799,9 @@ do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPoi
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -843,9 +843,9 @@ do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointe
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -887,9 +887,9 @@ do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPoint
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -931,9 +931,9 @@ do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -975,9 +975,9 @@ do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPoint
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -1019,9 +1019,9 @@ do_mbgrdviz_fileSelectionBox_openvector( Widget w, XtPointer client_data, XtPoin
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -1063,9 +1063,9 @@ do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointe
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -1107,9 +1107,9 @@ do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPoint
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -1151,9 +1151,9 @@ do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, Xt
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -1195,9 +1195,9 @@ do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, Xt
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -1239,9 +1239,9 @@ do_mbgrdviz_fileSelectionBox_savedegdecmin( Widget w, XtPointer client_data, XtP
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -1283,9 +1283,9 @@ do_mbgrdviz_fileSelectionBox_savelnw( Widget w, XtPointer client_data, XtPointer
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -1327,9 +1327,9 @@ do_mbgrdviz_fileSelectionBox_saveprofile( Widget w, XtPointer client_data, XtPoi
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -1371,9 +1371,9 @@ do_mbgrdviz_fileSelectionBox_realtime( Widget w, XtPointer client_data, XtPointe
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* get instance */
@@ -1409,9 +1409,9 @@ do_mbgrdviz_close( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 /*---------------------------------------------------------------------------------------*/
@@ -1428,9 +1428,9 @@ do_mbgrdviz_quit( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 /*---------------------------------------------------------------------------------------*/
@@ -1448,7 +1448,7 @@ int do_mbgrdviz_dismiss_notify(size_t instance)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:  %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:  %zu\n",instance);
 		}
 
 	/* set mbview window <id> to inactive */
@@ -1498,9 +1498,9 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* figure out what kind of file is to be opened */
@@ -2158,7 +2158,7 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
 		}
 
@@ -2278,7 +2278,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
 		}
 
@@ -2446,7 +2446,7 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
 		}
 
@@ -2458,7 +2458,7 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr)
 	    status = mbview_getsitecount(verbose, instance, &nsite, &error);
 	    if (status == MB_SUCCESS && nsite <= 0)
 	    	{
-		fprintf(stderr,"Unable to write site file...\nCurrently %d sites defined for instance %ld!\n",
+		fprintf(stderr,"Unable to write site file...\nCurrently %d sites defined for instance %zu!\n",
 			nsite, instance);
 		XBell((Display *) XtDisplay(mainWindow),100);
 		status = MB_FAILURE;
@@ -2482,7 +2482,7 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr)
 		if (status == MB_FAILURE)
 	    		{
 			nsite = 0;
-			fprintf(stderr,"Unable to write site file...\nArray allocation for %d sites failed for instance %ld!\n",
+			fprintf(stderr,"Unable to write site file...\nArray allocation for %d sites failed for instance %zu!\n",
 				nsite, instance);
 			XBell((Display *) XtDisplay(mainWindow),100);
 			}
@@ -2585,7 +2585,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
 		}
 
@@ -2771,7 +2771,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
 		}
 
@@ -2791,7 +2791,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 	    	nroutewrite = nroute;
 	    if (nroute <= 0)
 	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %ld!\n",
+		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
 			nroute, instance);
 		XBell((Display *) XtDisplay(mainWindow),100);
 		status = MB_FAILURE;
@@ -2875,7 +2875,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 				/* if error initializing memory then cancel dealing with this route */
 				else
 	    				{
-					fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %ld!\n",
+					fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
 						npointtotal, instance);
 					XBell((Display *) XtDisplay(mainWindow),100);
 					npoint = 0;
@@ -2999,7 +2999,7 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
 		}
 
@@ -3011,7 +3011,7 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr)
 	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
 	    if (nroute <= 0)
 	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %ld!\n",
+		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
 			nroute, instance);
 		XBell((Display *) XtDisplay(mainWindow),100);
 		status = MB_FAILURE;
@@ -3064,7 +3064,7 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr)
 			    /* if error initializing memory then cancel dealing with this route */
 			    else
 	    			    {
-				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %ld!\n",
+				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
 					    npointtotal, instance);
 				    XBell((Display *) XtDisplay(mainWindow),100);
 				    npoint = 0;
@@ -3154,7 +3154,7 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
 		}
 
@@ -3166,7 +3166,7 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr)
 	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
 	    if (nroute <= 0)
 	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %ld!\n",
+		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
 			nroute, instance);
 		XBell((Display *) XtDisplay(mainWindow),100);
 		status = MB_FAILURE;
@@ -3219,7 +3219,7 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr)
 			    /* if error initializing memory then cancel dealing with this route */
 			    else
 	    			    {
-				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %ld!\n",
+				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
 					    npointtotal, instance);
 				    XBell((Display *) XtDisplay(mainWindow),100);
 				    npoint = 0;
@@ -3314,7 +3314,7 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
 		}
 
@@ -3326,7 +3326,7 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr)
 	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
 	    if (nroute <= 0)
 	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %ld!\n",
+		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
 			nroute, instance);
 		XBell((Display *) XtDisplay(mainWindow),100);
 		status = MB_FAILURE;
@@ -3379,7 +3379,7 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr)
 			    /* if error initializing memory then cancel dealing with this route */
 			    else
 	    			    {
-				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %ld!\n",
+				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
 					    npointtotal, instance);
 				    XBell((Display *) XtDisplay(mainWindow),100);
 				    npoint = 0;
@@ -3501,7 +3501,7 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
 		}
 
@@ -3513,7 +3513,7 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr)
 	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
 	    if (nroute <= 0)
 	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %ld!\n",
+		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
 			nroute, instance);
 		XBell((Display *) XtDisplay(mainWindow),100);
 		status = MB_FAILURE;
@@ -3569,7 +3569,7 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr)
 			    /* if error initializing memory then cancel dealing with this route */
 			    else
 	    			    {
-				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %ld!\n",
+				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
 					    npointtotal, instance);
 				    XBell((Display *) XtDisplay(mainWindow),100);
 				    npoint = 0;
@@ -3719,7 +3719,7 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
 		}
 
@@ -3921,7 +3921,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
 		}
 
@@ -3938,7 +3938,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
 	    status = mbview_getprofilecount(verbose, instance, &npoints, &error);
 	    if (npoints <= 0)
 	    	{
-		fprintf(stderr,"Unable to write profile file...\nCurrently %d profile points defined for instance %ld!\n",
+		fprintf(stderr,"Unable to write profile file...\nCurrently %d profile points defined for instance %zu!\n",
 			npoints, instance);
 		XBell((Display *) XtDisplay(mainWindow),100);
 		status = MB_FAILURE;
@@ -4005,7 +4005,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
 			/* if error initializing memory then cancel dealing with this profile */
 			else
 	    			{
-				fprintf(stderr,"Unable to write profile...\nArray allocation for %d points failed for instance %ld!\n",
+				fprintf(stderr,"Unable to write profile...\nArray allocation for %d points failed for instance %zu!\n",
 					npoints, instance);
 				XBell((Display *) XtDisplay(mainWindow),100);
 				npoints = 0;
@@ -4093,7 +4093,7 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       swathbounds:     %d\n",swathbounds);
 		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
 		}
@@ -4270,7 +4270,7 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       swathfile:       %s\n",swathfile);
 		fprintf(stderr,"dbg2       pathstatus:      %d\n",pathstatus);
 		fprintf(stderr,"dbg2       pathraw:         %s\n",pathraw);
@@ -4701,7 +4701,7 @@ int do_mbgrdviz_readgrd(size_t instance, char *grdfile,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       grdfile:         %s\n",grdfile);
 		}
 
@@ -4986,7 +4986,7 @@ int do_mbgrdviz_readgrd(size_t instance, char *grdfile,
 	    fprintf(stderr,"  ymax:                     %f\n", *ymax);
 	    fprintf(stderr,"  dx:                       %f\n", *dx);
 	    fprintf(stderr,"  dy:                       %f\n", *dy);
-	    fprintf(stderr,"  data:                     %lu\n", (size_t)*data);
+	    fprintf(stderr,"  data:                     %p\n", *data);
 	    }
 
 	/* all done */
@@ -5025,7 +5025,7 @@ int do_mbgrdviz_opentest(size_t instance,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       factor1:         %f\n",factor1);
 		fprintf(stderr,"dbg2       factor2:         %f\n",factor2);
 		fprintf(stderr,"dbg2       factor3:         %f\n",factor3);
@@ -5138,9 +5138,9 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 	/* get new instance number */
@@ -5344,13 +5344,13 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 		/* open up mbview window */
 		if (status == MB_SUCCESS)
 			{
-/*fprintf(stderr,"about to open mbview instance:%ld\n",instance);*/
+/*fprintf(stderr,"about to open mbview instance:%zu\n",instance);*/
 			status = mbview_open(verbose, instance, &error);
 			if (status == MB_SUCCESS)
 				mbview_id[instance] = MB_YES;
 			else
 				mbview_id[instance] = MB_NO;
-/*fprintf(stderr,"done opening mbview instance:%ld\n",instance);*/
+/*fprintf(stderr,"done opening mbview instance:%zu\n",instance);*/
 
 			/* add action button */
 			if (status == MB_SUCCESS)
@@ -5558,6 +5558,7 @@ void do_mbgrdviz_open_mbedit( Widget w, XtPointer client_data, XtPointer call_da
 	mb_path	mbedit_cmd;
 	mb_path	filearg;
 	int	nselected;
+        int     shellstatus;
 	int	i;
 
     	/* get source mbview instance */
@@ -5568,15 +5569,15 @@ void do_mbgrdviz_open_mbedit( Widget w, XtPointer client_data, XtPointer call_da
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 	/* getting instance from client_data doesn't seem
 		to work so use survey_instance instead */
 	instance = survey_instance;
-fprintf(stderr,"Called do_mbgrdviz_open_mbedit instance:%ld\n", instance);
+fprintf(stderr,"Called do_mbgrdviz_open_mbedit instance:%zu\n", instance);
 
     	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
@@ -5607,7 +5608,7 @@ fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselec
 		{
 		strncat(mbedit_cmd, " &", MB_PATH_MAXLINE);
 fprintf(stderr,"Calling mbedit: %s\n", mbedit_cmd);
-		system(mbedit_cmd);
+		shellstatus = system(mbedit_cmd);
 		}
 
 	/* update widgets of all mbview windows */
@@ -5633,6 +5634,7 @@ void do_mbgrdviz_open_mbeditviz( Widget w, XtPointer client_data, XtPointer call
 	mb_path	mbeditviz_cmd;
 	mb_path	filearg;
 	int	nselected;
+        int     shellstatus;
 	int	i;
 
     	/* get source mbview instance */
@@ -5643,15 +5645,15 @@ void do_mbgrdviz_open_mbeditviz( Widget w, XtPointer client_data, XtPointer call
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 	/* getting instance from client_data doesn't seem
 		to work so use survey_instance instead */
 	instance = survey_instance;
-fprintf(stderr,"Called do_mbgrdviz_open_mbeditviz instance:%ld\n", instance);
+fprintf(stderr,"Called do_mbgrdviz_open_mbeditviz instance:%zu\n", instance);
 
     	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
@@ -5682,7 +5684,7 @@ fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselec
 		{
 		strncat(mbeditviz_cmd, " &", MB_PATH_MAXLINE);
 fprintf(stderr,"Calling mbeditviz: %s\n", mbeditviz_cmd);
-		system(mbeditviz_cmd);
+		shellstatus = system(mbeditviz_cmd);
 		}
 
 	/* update widgets of all mbview windows */
@@ -5708,6 +5710,7 @@ void do_mbgrdviz_open_mbnavedit( Widget w, XtPointer client_data, XtPointer call
 	mb_path	mbnavedit_cmd;
 	mb_path	filearg;
 	int	nselected;
+        int     shellstatus;
 	int	i;
 
     	/* get source mbview instance */
@@ -5718,15 +5721,15 @@ void do_mbgrdviz_open_mbnavedit( Widget w, XtPointer client_data, XtPointer call
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 	/* getting instance from client_data doesn't seem
 		to work so use survey_instance instead */
 	instance = survey_instance;
-fprintf(stderr,"Called do_mbgrdviz_open_mbnavedit instance:%ld\n", instance);
+fprintf(stderr,"Called do_mbgrdviz_open_mbnavedit instance:%zu\n", instance);
 
     	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
@@ -5757,7 +5760,7 @@ fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselec
 		{
 		strncat(mbnavedit_cmd, " &", MB_PATH_MAXLINE);
 fprintf(stderr,"Calling mbnavedit: %s\n", mbnavedit_cmd);
-		system(mbnavedit_cmd);
+		shellstatus = system(mbnavedit_cmd);
 		}
 
 	/* update widgets of all mbview windows */
@@ -5783,6 +5786,7 @@ void do_mbgrdviz_open_mbvelocitytool( Widget w, XtPointer client_data, XtPointer
 	mb_path	mbvelocitytool_cmd;
 	mb_path	filearg;
 	int	nselected;
+        int     shellstatus;
 	int	i;
 
     	/* get source mbview instance */
@@ -5793,15 +5797,15 @@ void do_mbgrdviz_open_mbvelocitytool( Widget w, XtPointer client_data, XtPointer
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 	/* getting instance from client_data doesn't seem
 		to work so use survey_instance instead */
 	instance = survey_instance;
-fprintf(stderr,"Called do_mbgrdviz_open_mbvelocitytool instance:%ld\n", instance);
+fprintf(stderr,"Called do_mbgrdviz_open_mbvelocitytool instance:%zu\n", instance);
 
     	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
@@ -5832,7 +5836,7 @@ fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselec
 		{
 		strncat(mbvelocitytool_cmd, " &", MB_PATH_MAXLINE);
 fprintf(stderr,"Calling mbvelocitytool: %s\n", mbvelocitytool_cmd);
-		system(mbvelocitytool_cmd);
+		shellstatus = system(mbvelocitytool_cmd);
 		}
 
 	/* update widgets of all mbview windows */
@@ -5864,9 +5868,9 @@ void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_da
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* check data source for area to bounding desired survey */
@@ -6031,9 +6035,9 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* check data source for area to bounding desired survey */
@@ -6791,9 +6795,9 @@ do_mbgrdviz_arearoute_dismiss( Widget w, XtPointer client_data, XtPointer call_d
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 	/* reset current working route so the last one generated is saved */
 	working_route = -1;
@@ -6823,9 +6827,9 @@ do_mbgrdviz_arearoute_parameterchange( Widget w, XtPointer client_data, XtPointe
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
     	/* check data source for area to bounding desired survey */
@@ -6936,7 +6940,7 @@ do_mbgrdviz_arearoute_recalc(size_t instance)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:   %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:   %zu\n",instance);
 		}
 
     	/* check data source for area to bounding desired survey */
@@ -7061,7 +7065,7 @@ do_mbgrdviz_arearoute_info(size_t instance)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:   %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:   %zu\n",instance);
 		}
 
     	/* check data source for area to bounding desired survey */
@@ -7128,9 +7132,9 @@ do_mbgrdviz_arearoute_linespacing_increment( Widget w, XtPointer client_data, Xt
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 	/* reset line spacing spinbox increment as value changes */
@@ -7171,9 +7175,9 @@ do_mbgrdviz_arearoute_altitude_increment( Widget w, XtPointer client_data, XtPoi
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 	/* reset line spacing spinbox increment as value changes */
@@ -7216,9 +7220,9 @@ do_mbgrdviz_arearoute_depth_increment( Widget w, XtPointer client_data, XtPointe
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 	/* reset line spacing spinbox increment as value changes */
@@ -7266,9 +7270,9 @@ do_mbgrdviz_realtime_start( Widget w, XtPointer client_data, XtPointer call_data
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 
@@ -7284,9 +7288,9 @@ do_mbgrdviz_realtimesetup_path_reset( Widget w, XtPointer client_data, XtPointer
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 
@@ -7302,9 +7306,9 @@ do_mbgrdviz_realtime_pause( Widget w, XtPointer client_data, XtPointer call_data
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 
@@ -7320,9 +7324,9 @@ do_mbgrdviz_realtime_stop( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 
@@ -7338,9 +7342,9 @@ do_mbgrdviz_realtime_resume( Widget w, XtPointer client_data, XtPointer call_dat
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 
@@ -7356,9 +7360,9 @@ do_mbgrdviz_realtimesetup_path_apply( Widget w, XtPointer client_data, XtPointer
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 
@@ -7375,9 +7379,9 @@ do_mbgrdviz_realtimesetup_icon( Widget w, XtPointer client_data, XtPointer call_
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 
@@ -7393,9 +7397,9 @@ do_mbgrdviz_realtimesetup_path_browse( Widget w, XtPointer client_data, XtPointe
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 	do_mbgrdviz_fileSelectionBox_realtime( w, client_data, call_data);
@@ -7414,9 +7418,9 @@ do_mbgrdviz_realtimesetup_updaterate( Widget w, XtPointer client_data, XtPointer
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 
@@ -7432,9 +7436,9 @@ do_mbgrdviz_realtimesetup_path_test( Widget w, XtPointer client_data, XtPointer 
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }
 
@@ -7450,8 +7454,8 @@ do_mbgrdviz_realtimesetup_pathmode( Widget w, XtPointer client_data, XtPointer c
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 }

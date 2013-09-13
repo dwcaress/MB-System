@@ -169,8 +169,8 @@ int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *err
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
-		fprintf(stderr,"dbg2       parent:                  %lu\n", (size_t)parent);
-		fprintf(stderr,"dbg2       app:                     %lu\n", (size_t)app);
+		fprintf(stderr,"dbg2       parent:                  %p\n", parent);
+		fprintf(stderr,"dbg2       app:                     %p\n", app);
 		}
 
 	/* set parent widget and app context */
@@ -869,7 +869,7 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       soundingdata:  %lu\n",(size_t)soundingdata);
+		fprintf(stderr,"dbg2       soundingdata:  %p\n",soundingdata);
 		}
 
 	/* set the data pointer */
@@ -1080,14 +1080,14 @@ int mb3dsoundings_reset_glx()
 	XtSetArg(args[ac], mbGLwNvisualInfo, &(mb3dsoundings.vi)); ac++;
 	XtGetValues(mb3dsoundings.glwmda, args, ac);
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s glXCreateContext(%lu,%lu)\n",
-__FILE__,__LINE__,function_name,(size_t)mb3dsoundings.dpy,(size_t)mb3dsoundings.vi);
+fprintf(stderr,"%s:%d:%s glXCreateContext(%p,%p)\n",
+__FILE__,__LINE__,function_name,mb3dsoundings.dpy,mb3dsoundings.vi);
 #endif
 	mb3dsoundings.glx_context = glXCreateContext(mb3dsoundings.dpy, mb3dsoundings.vi,
                 	     NULL, GL_TRUE);
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,(size_t)XtDisplay(mb3dsoundings.glwmda),(size_t)XtWindow(mb3dsoundings.glwmda),(size_t)mb3dsoundings.glx_context);
+fprintf(stderr,"%s:%d:%s glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,XtDisplay(mb3dsoundings.glwmda),XtWindow(mb3dsoundings.glwmda),mb3dsoundings.glx_context);
 #endif
 	glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda),
 			XtWindow(mb3dsoundings.glwmda),
@@ -2761,8 +2761,8 @@ soundingdata->num_soundings); */
 
 	/* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,(size_t)XtDisplay(mb3dsoundings.glwmda),(size_t)XtWindow(mb3dsoundings.glwmda),(size_t)mb3dsoundings.glx_context);
+fprintf(stderr,"%s:%d:%s glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,XtDisplay(mb3dsoundings.glwmda),XtWindow(mb3dsoundings.glwmda),mb3dsoundings.glx_context);
 #endif
 	glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda),
 			XtWindow(mb3dsoundings.glwmda),

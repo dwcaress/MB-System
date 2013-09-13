@@ -785,6 +785,7 @@ int mb_make_info(int verbose, int force,
 	int	fnvmodtime = 0;
 	struct stat file_status;
 	int	fstat;
+	int	shellstatus;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -836,7 +837,7 @@ int mb_make_info(int verbose, int force,
 			format, file);
 		if (verbose >= 2)
 			fprintf(stderr,"\t%s\n",command);
-		system(command);
+		shellstatus = system(command);
 		}
 
 	/* make new fbt file if not there or out of date */
@@ -872,7 +873,7 @@ int mb_make_info(int verbose, int force,
 			fprintf(stderr,"Generating fbt file for %s\n",file);
 		sprintf(command, "mbcopy -F %d/71 -I %s -D -O %s.fbt",
 			format, file, file);
-		system(command);
+		shellstatus = system(command);
 		}
 
 	/* make new fnv file if not there or out of date */
@@ -895,7 +896,7 @@ int mb_make_info(int verbose, int force,
 			fprintf(stderr,"Generating fnv file for %s\n",file);
 		sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN > %s.fnv",
 			format, file, file);
-		system(command);
+		shellstatus = system(command);
 		}
 
 	/* print output debug statements */

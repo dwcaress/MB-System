@@ -713,6 +713,8 @@ int main (int argc, char **argv)
 	double	prx[5], pry[5];
 	int	use_weight;
 	int	fork_status;
+        char    *bufptr;
+        size_t  freadsize;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -1750,10 +1752,10 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		if ((rfp = popen(plot_cmd,"r")) != NULL)
 			{
 			/* parse the grdinfo results */
-			fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
-			fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
-			fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
-			fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
 			pclose(rfp);
 			if (strncmp(plot_stdout,"Pixel node registration used", 28) == 0)
 				{
@@ -1825,8 +1827,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			nbackground = 0;
 			while (fread(&tlon, sizeof(double), 1, rfp) == 1)
 				{
-				fread(&tlat, sizeof(double), 1, rfp);
-				fread(&tvalue, sizeof(double), 1, rfp);
+				freadsize = fread(&tlat, sizeof(double), 1, rfp);
+				freadsize = fread(&tvalue, sizeof(double), 1, rfp);
 				if (lonflip == -1 && tlon > 0.0)
 					tlon -= 360.0;
 				else if (lonflip == 0 && tlon < -180.0)

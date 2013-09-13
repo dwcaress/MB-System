@@ -274,6 +274,7 @@ int main (int argc, char **argv)
 	double	tracemin, tracemax, tracerms;
 	double	linetracemin, linetracemax;
 	double	draft, roll, pitch, heave;
+	int	shellstatus;
 	int	i, j;
 
 	/* get current default values */
@@ -904,7 +905,7 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				    /* use mbsegyinfo to generate a sinf file */
 				    sprintf(command, "mbsegyinfo -I %s -O", output_file);
 		   		    fprintf(stderr, "Executing: %s\n", command);
-				    system(command);
+				    shellstatus = system(command);
 
 				    /* get bearing and plot scale */
 				    dx = (endlon - startlon) / mtodeglon;
@@ -1467,7 +1468,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		    /* use mbsegyinfo to generate a sinf file */
 		    sprintf(command, "mbsegyinfo -I %s -O", output_file);
 		    fprintf(stderr, "Executing: %s\n", command);
-		    system(command);
+		    shellstatus = system(command);
 
 		    /* get bearing and plot scale */
 		    dx = (endlon - startlon) / mtodeglon;
@@ -1563,7 +1564,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 	/* close plotting script file */
 	fclose(sfp);
 	sprintf(command, "chmod +x %s", scriptfile);
-	system(command);
+	shellstatus = system(command);
 
 	/* deallocate route arrays */
 	if (route_file_set == MB_YES)

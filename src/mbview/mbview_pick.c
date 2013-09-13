@@ -151,7 +151,7 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       which:            %d\n",which);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
@@ -310,7 +310,7 @@ int mbview_extract_pick_profile(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -448,7 +448,7 @@ int mbview_picksize(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -604,7 +604,7 @@ int mbview_pick_text(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -974,7 +974,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       which:            %d\n",which);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
@@ -1610,7 +1610,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       which:            %d\n",which);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
@@ -2185,7 +2185,7 @@ int mbview_drawpick(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -2368,7 +2368,7 @@ int mbview_drawregion(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -2448,7 +2448,7 @@ int mbview_drawarea(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */

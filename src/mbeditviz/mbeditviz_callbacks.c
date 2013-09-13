@@ -315,8 +315,8 @@ int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       mbev_verbose:   %d\n",mbev_verbose);
-		fprintf(stderr,"dbg2       parentwidget:   %lu\n",(size_t)parentwidget);
-		fprintf(stderr,"dbg2       appcon:         %lu\n",(size_t)appcon);
+		fprintf(stderr,"dbg2       parentwidget:   %p\n",parentwidget);
+		fprintf(stderr,"dbg2       appcon:         %p\n",appcon);
 		}
 
 	parent = parentwidget;
@@ -407,9 +407,9 @@ do_mbeditviz_mode_change( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -468,9 +468,9 @@ do_mbeditviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -509,9 +509,9 @@ do_mbeditviz_fileselection_list( Widget w, XtPointer client_data, XtPointer call
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -555,9 +555,9 @@ do_mbeditviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPoin
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -599,9 +599,9 @@ do_mbeditviz_quit( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -658,9 +658,9 @@ do_mbeditviz_viewall( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -754,9 +754,9 @@ do_mbeditviz_viewselected( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -860,9 +860,9 @@ do_mbeditviz_regrid( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -931,9 +931,9 @@ do_mbeditviz_updategrid( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -996,9 +996,9 @@ do_mbeditviz_changecellsize( Widget w, XtPointer client_data, XtPointer call_dat
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -1045,9 +1045,9 @@ do_mbeditviz_gridparameters( Widget w, XtPointer client_data, XtPointer call_dat
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -1528,7 +1528,7 @@ int do_mbeditviz_mbview_dismiss_notify(size_t instance)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:   %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:   %zu\n",instance);
 		}
 
 if (mbev_verbose > 0)
@@ -1576,9 +1576,9 @@ do_mbeditviz_deleteselected( Widget w, XtPointer client_data, XtPointer call_dat
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -1615,9 +1615,9 @@ do_mbeditviz_changeoutputmode( Widget w, XtPointer client_data, XtPointer call_d
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)
@@ -1988,11 +1988,11 @@ void do_mbeditviz_pickonepoint_notify(size_t instance)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:    %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:    %zu\n",instance);
 		}
 
 if (mbev_verbose > 0)
-fprintf(stderr,"do_mbeditviz_pickonepoint_notify:%ld\n", instance);
+fprintf(stderr,"do_mbeditviz_pickonepoint_notify:%zu\n", instance);
 
 
 if (mbev_verbose > 0)
@@ -2009,11 +2009,11 @@ void do_mbeditviz_picktwopoint_notify(size_t instance)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:    %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:    %zu\n",instance);
 		}
 
 if (mbev_verbose > 0)
-fprintf(stderr,"do_mbeditviz_picktwopoint_notify:%ld\n", instance);
+fprintf(stderr,"do_mbeditviz_picktwopoint_notify:%zu\n", instance);
 
 
 if (mbev_verbose > 0)
@@ -2030,11 +2030,11 @@ void do_mbeditviz_pickarea_notify(size_t instance)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:    %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:    %zu\n",instance);
 		}
 
 if (mbev_verbose > 0)
-fprintf(stderr,"do_mbeditviz_pickarea_notify:%ld\n", instance);
+fprintf(stderr,"do_mbeditviz_pickarea_notify:%zu\n", instance);
 
 	mbeditviz_selectarea(instance);
 	mbev_status = mb3dsoundings_open(mbev_verbose, &mbev_selected, &mbev_error);
@@ -2059,11 +2059,11 @@ void do_mbeditviz_pickregion_notify(size_t instance)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:    %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:    %zu\n",instance);
 		}
 
 if (mbev_verbose > 0)
-fprintf(stderr,"do_mbeditviz_pickregion_notify:%ld\n", instance);
+fprintf(stderr,"do_mbeditviz_pickregion_notify:%zu\n", instance);
 
 	mbeditviz_selectregion(instance);
 	mbev_status = mb3dsoundings_open(mbev_verbose, &mbev_selected, &mbev_error);
@@ -2087,11 +2087,11 @@ void do_mbeditviz_picksite_notify(size_t instance)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:    %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:    %zu\n",instance);
 		}
 
 if (mbev_verbose > 0)
-fprintf(stderr,"do_mbeditviz_picksite_notify:%ld\n", instance);
+fprintf(stderr,"do_mbeditviz_picksite_notify:%zu\n", instance);
 
 
 if (mbev_verbose > 0)
@@ -2108,11 +2108,11 @@ void do_mbeditviz_pickroute_notify(size_t instance)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:    %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:    %zu\n",instance);
 		}
 
 if (mbev_verbose > 0)
-fprintf(stderr,"do_mbeditviz_pickroute_notify:%ld\n", instance);
+fprintf(stderr,"do_mbeditviz_pickroute_notify:%zu\n", instance);
 
 
 if (mbev_verbose > 0)
@@ -2129,11 +2129,11 @@ void do_mbeditviz_picknav_notify(size_t instance)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:    %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:    %zu\n",instance);
 		}
 
 if (mbev_verbose > 0)
-fprintf(stderr,"do_mbeditviz_picknav_notify:%ld\n", instance);
+fprintf(stderr,"do_mbeditviz_picknav_notify:%zu\n", instance);
 
 
 	mbeditviz_selectnav(instance);
@@ -2169,9 +2169,9 @@ do_mbeditviz_regrid_notify( Widget w, XtPointer client_data, XtPointer call_data
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
 if (mbev_verbose > 0)

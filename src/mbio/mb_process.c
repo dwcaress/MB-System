@@ -342,6 +342,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	int	status = MB_SUCCESS;
 	int	len;
 	int	explicit;
+	char	*bufptr;
 	int	i;
 
 	/* print input debug statements */
@@ -1226,7 +1227,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_ifile_specified = MB_YES;
 	if (file[0] != '/')
 	    {
-	    getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
+	    bufptr = getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
 	    strcat(process->mbp_ifile, "/");
 	    strcat(process->mbp_ifile, file);
 	    }
@@ -1731,6 +1732,7 @@ int mb_pr_writepar(int verbose, char *file,
 	int	status = MB_SUCCESS;
 	time_t	right_now;
 	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	char	*bufptr;
 	int	i;
 
 	/* print input debug statements */
@@ -1876,7 +1878,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    }
 	else
 	    {
-	    getcwd(pwd, MB_PATH_MAXLINE);
+	    bufptr = getcwd(pwd, MB_PATH_MAXLINE);
 	    if (lastslash != NULL)
 		{
 		strcat(pwd, "/");
@@ -6122,6 +6124,7 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose,
 	mb_path	lock_date;
 	int	lock_purpose;
 	mb_path	command;
+	int	shellstatus;
 
 	/* user, host variables */
 	char	user[MBP_FILENAMESIZE], *user_ptr;
@@ -6165,7 +6168,7 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose,
 			&& purpose == lock_purpose)
 			{
 			sprintf(command, "/bin/rm -f %s", lockfile);
-			system(command);
+			shellstatus = system(command);
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			}

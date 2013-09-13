@@ -57,7 +57,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       topogridfile:              %s\n", topogridfile);
 		fprintf(stderr,"dbg2       lonflip:                   %d\n", *lonflip);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)(*topogrid_ptr));
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", *topogrid_ptr);
 		}
 
 	/* allocate memory for topogrid structure */
@@ -134,7 +134,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       lonflip:                   %d\n", *lonflip);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)topogrid);
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", topogrid);
 		fprintf(stderr,"dbg2       topogrid->file:            %s\n", topogrid->file);
 		fprintf(stderr,"dbg2       topogrid->projection_mode: %d\n", topogrid->projection_mode);
 		fprintf(stderr,"dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
@@ -150,7 +150,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 		fprintf(stderr,"dbg2       topogrid->ymax:            %f\n", topogrid->ymax);
 		fprintf(stderr,"dbg2       topogrid->dx:              %f\n", topogrid->dx);
 		fprintf(stderr,"dbg2       topogrid->dy               %f\n", topogrid->dy);
-		fprintf(stderr,"dbg2       topogrid->data:            %lu\n", (size_t)topogrid->data);
+		fprintf(stderr,"dbg2       topogrid->data:            %p\n", topogrid->data);
 		fprintf(stderr,"dbg2       error:                     %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n",status);
@@ -173,8 +173,8 @@ int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       topogrid_ptr:              %lu\n", (size_t)topogrid_ptr);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)(*topogrid_ptr));
+		fprintf(stderr,"dbg2       topogrid_ptr:              %p\n", topogrid_ptr);
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", *topogrid_ptr);
 		}
 
 	/* deallocate the topogrid structure */
@@ -238,7 +238,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr,
 		fprintf(stderr,"dbg2       vx:                        %f\n", vx);
 		fprintf(stderr,"dbg2       vy:                        %f\n", vy);
 		fprintf(stderr,"dbg2       vz:                        %f\n", vz);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)topogrid);
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", topogrid);
 		fprintf(stderr,"dbg2       topogrid->projection_mode: %d\n", topogrid->projection_mode);
 		fprintf(stderr,"dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
 		fprintf(stderr,"dbg2       topogrid->nodatavalue:     %f\n", topogrid->nodatavalue);
@@ -253,7 +253,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr,
 		fprintf(stderr,"dbg2       topogrid->ymax:            %f\n", topogrid->ymax);
 		fprintf(stderr,"dbg2       topogrid->dx:              %f\n", topogrid->dx);
 		fprintf(stderr,"dbg2       topogrid->dy               %f\n", topogrid->dy);
-		fprintf(stderr,"dbg2       topogrid->data:            %lu\n", (size_t)topogrid->data);
+		fprintf(stderr,"dbg2       topogrid->data:            %p\n", topogrid->data);
 		}
 
 	/* test different ranges along the vector until the grid is intersected */
@@ -405,7 +405,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr,
 		fprintf(stderr,"dbg2       altitude:                  %f\n", altitude);
 		fprintf(stderr,"dbg2       sonardepth:                %f\n", sonardepth);
 		fprintf(stderr,"dbg2       pitch:                     %f\n", pitch);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)topogrid);
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", topogrid);
 		fprintf(stderr,"dbg2       topogrid->projection_mode: %d\n", topogrid->projection_mode);
 		fprintf(stderr,"dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
 		fprintf(stderr,"dbg2       topogrid->nodatavalue:     %f\n", topogrid->nodatavalue);
@@ -420,7 +420,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr,
 		fprintf(stderr,"dbg2       topogrid->ymax:            %f\n", topogrid->ymax);
 		fprintf(stderr,"dbg2       topogrid->dx:              %f\n", topogrid->dx);
 		fprintf(stderr,"dbg2       topogrid->dy               %f\n", topogrid->dy);
-		fprintf(stderr,"dbg2       topogrid->data:            %lu\n", (size_t)topogrid->data);
+		fprintf(stderr,"dbg2       topogrid->data:            %p\n", topogrid->data);
 		}
 
 	/* loop over all of the angles */

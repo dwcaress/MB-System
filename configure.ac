@@ -19,7 +19,7 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.4.2150])
+AC_INIT([mbsystem],[5.4.2151])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)

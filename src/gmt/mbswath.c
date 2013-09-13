@@ -1570,7 +1570,7 @@ int get_footprints(int verbose, int mode, int fp_mode,
 		fprintf(stderr,"dbg2       fp mode:     %d\n",fp_mode);
 		fprintf(stderr,"dbg2       factor:      %f\n",factor);
 		fprintf(stderr,"dbg2       depth_def:   %f\n",depth_def);
-		fprintf(stderr,"dbg2       swath:       %lu\n",(size_t)swath);
+		fprintf(stderr,"dbg2       swath:       %p\n",swath);
 		fprintf(stderr,"dbg2       mtodeglon:   %f\n",mtodeglon);
 		fprintf(stderr,"dbg2       mtodeglat:   %f\n",mtodeglat);
 		fprintf(stderr,"dbg2       pings:       %d\n",swath->npings);
@@ -2213,7 +2213,7 @@ int get_shading(int verbose, int mode, int ampshademode, struct swath *swath,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mode:       %d\n",mode);
-		fprintf(stderr,"dbg2       swath:      %lu\n",(size_t)swath);
+		fprintf(stderr,"dbg2       swath:      %p\n",swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
 		fprintf(stderr,"dbg2       mtodeglon:  %f\n",mtodeglon);
 		fprintf(stderr,"dbg2       mtodeglat:  %f\n",mtodeglat);
@@ -2471,7 +2471,7 @@ int plot_data_footprint(int verbose, int mode,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mode:       %d\n",mode);
-		fprintf(stderr,"dbg2       swath:      %lu\n",(size_t)swath);
+		fprintf(stderr,"dbg2       swath:      %p\n",swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
 		fprintf(stderr,"dbg2       first:      %d\n",first);
 		fprintf(stderr,"dbg2       nplot:      %d\n",nplot);
@@ -2579,7 +2579,7 @@ int plot_data_point(int verbose, int mode,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mode:       %d\n",mode);
-		fprintf(stderr,"dbg2       swath:      %lu\n",(size_t)swath);
+		fprintf(stderr,"dbg2       swath:      %p\n",swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
 		fprintf(stderr,"dbg2       first:      %d\n",first);
 		fprintf(stderr,"dbg2       nplot:      %d\n",nplot);
@@ -2946,7 +2946,7 @@ int ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       one:        %d\n",one);
 		fprintf(stderr,"dbg2       two:        %d\n",two);
-		fprintf(stderr,"dbg2       swath:      %lu\n",(size_t)swath);
+		fprintf(stderr,"dbg2       swath:      %p\n",swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
 		}
 

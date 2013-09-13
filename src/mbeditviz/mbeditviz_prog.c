@@ -619,6 +619,7 @@ int mbeditviz_load_file(int ifile)
 	int	icenter, iport, istbd;
 	double	centerdistance, portdistance, stbddistance;
 	int	iping, ibeam;
+	int	shellstatus;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -1167,7 +1168,7 @@ fprintf(stderr,"     Beam bathymetry: %d %f %f %f\n",ibeam,ping->bath[ibeam],pin
 					{
 					sprintf(command, "mbgetesf -I %s -M2 -O %s.gef", file->path, file->path);
 					fprintf(stderr,"Generating global edit file:\n\t%s\n",command);
-					system(command);
+					shellstatus = system(command);
 					}
 
 				/* now read and apply the global edits */
@@ -1706,8 +1707,8 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:        %lu\n",(size_t)file);
-		fprintf(stderr,"dbg2       ping:        %lu\n",(size_t)ping);
+		fprintf(stderr,"dbg2       file:        %p\n",file);
+		fprintf(stderr,"dbg2       ping:        %p\n",ping);
 		fprintf(stderr,"dbg2       rollbias:    %f\n",rollbias);
 		fprintf(stderr,"dbg2       pitchbias:   %f\n",pitchbias);
 		fprintf(stderr,"dbg2       headingbias: %f\n",headingbias);
@@ -2816,8 +2817,8 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:       %lu\n",(size_t)file);
-		fprintf(stderr,"dbg2       ping:       %lu\n",(size_t)ping);
+		fprintf(stderr,"dbg2       file:       %p\n",file);
+		fprintf(stderr,"dbg2       ping:       %p\n",ping);
 		fprintf(stderr,"dbg2       ibeam:      %d\n",ibeam);
 		fprintf(stderr,"dbg2       beam_ok:    %d\n",beam_ok);
 		fprintf(stderr,"dbg2       apply_now:  %d\n",apply_now);
@@ -3473,7 +3474,7 @@ int mbeditviz_selectregion(size_t instance)
 		fprintf(stderr,"\ndbg2  Function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:     %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:     %zu\n",instance);
 		}
 
     	/* check data source for selected area */
@@ -3674,7 +3675,7 @@ int mbeditviz_selectarea(size_t instance)
 		fprintf(stderr,"\ndbg2  Function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:     %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:     %zu\n",instance);
 		}
 
     	/* check data source for selected area */
@@ -3856,7 +3857,7 @@ int mbeditviz_selectnav(size_t instance)
 		fprintf(stderr,"\ndbg2  Function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:     %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:     %zu\n",instance);
 		}
 if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_selectnav: \n");

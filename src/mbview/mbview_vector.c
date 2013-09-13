@@ -87,7 +87,7 @@ int mbview_getvectorcount(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* get view */
@@ -136,7 +136,7 @@ int mbview_getvectorpointcount(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr,"dbg2       vec:                     %d\n", vec);
 		}
 
@@ -198,10 +198,10 @@ int mbview_allocvectorarrays(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       npointtotal:               %d\n", npointtotal);
-		fprintf(stderr,"dbg2       veclon:                    %lu\n", (size_t)*veclon);
-		fprintf(stderr,"dbg2       veclat:                    %lu\n", (size_t)*veclat);
-		fprintf(stderr,"dbg2       vecz:                      %lu\n", (size_t)*vecz);
-		fprintf(stderr,"dbg2       vecdata:                   %lu\n", (size_t)*vecdata);
+		fprintf(stderr,"dbg2       veclon:                    %p\n", *veclon);
+		fprintf(stderr,"dbg2       veclat:                    %p\n", *veclat);
+		fprintf(stderr,"dbg2       vecz:                      %p\n", *vecz);
+		fprintf(stderr,"dbg2       vecdata:                   %p\n", *vecdata);
 		}
 
 	/* allocate the arrays using mb_realloc */
@@ -219,10 +219,10 @@ int mbview_allocvectorarrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       veclon:                    %lu\n", (size_t)*veclon);
-		fprintf(stderr,"dbg2       veclat:                    %lu\n", (size_t)*veclat);
-		fprintf(stderr,"dbg2       vecz:                      %lu\n", (size_t)*vecz);
-		fprintf(stderr,"dbg2       vecdata:                   %lu\n", (size_t)*vecdata);
+		fprintf(stderr,"dbg2       veclon:                    %p\n", *veclon);
+		fprintf(stderr,"dbg2       veclat:                    %p\n", *veclat);
+		fprintf(stderr,"dbg2       vecz:                      %p\n", *vecz);
+		fprintf(stderr,"dbg2       vecdata:                   %p\n", *vecdata);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -254,10 +254,10 @@ int mbview_freevectorarrays(int verbose,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       veclon:                    %lu\n", (size_t)*veclon);
-		fprintf(stderr,"dbg2       veclat:                    %lu\n", (size_t)*veclat);
-		fprintf(stderr,"dbg2       vecz:                      %lu\n", (size_t)*vecz);
-		fprintf(stderr,"dbg2       vecdata:                   %lu\n", (size_t)*vecdata);
+		fprintf(stderr,"dbg2       veclon:                    %p\n", *veclon);
+		fprintf(stderr,"dbg2       veclat:                    %p\n", *veclat);
+		fprintf(stderr,"dbg2       vecz:                      %p\n", *vecz);
+		fprintf(stderr,"dbg2       vecdata:                   %p\n", *vecdata);
 		}
 
 	/* free the arrays using mb_free */
@@ -272,10 +272,10 @@ int mbview_freevectorarrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       veclon:                    %lu\n", (size_t)*veclon);
-		fprintf(stderr,"dbg2       veclat:                    %lu\n", (size_t)*veclat);
-		fprintf(stderr,"dbg2       vecz:                      %lu\n", (size_t)*vecz);
-		fprintf(stderr,"dbg2       vecdata:                   %lu\n", (size_t)*vecdata);
+		fprintf(stderr,"dbg2       veclon:                    %p\n", *veclon);
+		fprintf(stderr,"dbg2       veclat:                    %p\n", *veclat);
+		fprintf(stderr,"dbg2       vecz:                      %p\n", *vecz);
+		fprintf(stderr,"dbg2       vecdata:                   %p\n", *vecdata);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -317,7 +317,7 @@ int mbview_addvector(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr,"dbg2       npoint:                    %d\n", npoint);
 		for (i=0;i<npoint;i++)
 			{
@@ -506,8 +506,8 @@ shared.shareddata.vectors[ivec].vectorpts[i].point.zdisplay[instance]);*/
 				{
 				fprintf(stderr,"dbg2       vec %d %d nls:          %d\n",i,j,shared.shareddata.vectors[i].segments[j].nls);
 				fprintf(stderr,"dbg2       vec %d %d nls_alloc:    %d\n",i,j,shared.shareddata.vectors[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       vec %d %d endpoints[0]: %lu\n",i,j,(size_t)&shared.shareddata.vectors[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       vec %d %d endpoints[1]: %lu\n",i,j,(size_t)&shared.shareddata.vectors[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       vec %d %d endpoints[0]: %p\n",i,j,&shared.shareddata.vectors[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       vec %d %d endpoints[1]: %p\n",i,j,&shared.shareddata.vectors[i].segments[j].endpoints[1]);
 				}
 			}
 		}
@@ -548,7 +548,7 @@ int mbview_enableviewvectors(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* set values */
@@ -605,7 +605,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       select:           %d\n",select);
 		fprintf(stderr,"dbg2       which:            %d\n",which);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
@@ -736,8 +736,8 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 				{
 				fprintf(stderr,"dbg2       vec %d %d nls:          %d\n",i,j,shared.shareddata.vectors[i].segments[j].nls);
 				fprintf(stderr,"dbg2       vec %d %d nls_alloc:    %d\n",i,j,shared.shareddata.vectors[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       vec %d %d endpoints[0]: %lu\n",i,j,(size_t)&shared.shareddata.vectors[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       vec %d %d endpoints[1]: %lu\n",i,j,(size_t)&shared.shareddata.vectors[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       vec %d %d endpoints[0]: %p\n",i,j,&shared.shareddata.vectors[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       vec %d %d endpoints[1]: %p\n",i,j,&shared.shareddata.vectors[i].segments[j].endpoints[1]);
 				}
 			}
 		}
@@ -776,7 +776,7 @@ int mbview_vector_delete(size_t instance, int ivec)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       ivec:            %d\n",ivec);
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -857,7 +857,7 @@ int mbview_drawvector(size_t instance, int rez)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		}
 

@@ -241,6 +241,7 @@ int mb_esf_open(int verbose, char *esffile,
 	struct stat file_status;
 	int	fstat;
 	char	fmode[16];
+	int	shellstatus;
 	int	i;
 
 	/* print input debug statements */
@@ -378,7 +379,7 @@ esf->edit[i].action,esf->edit[i].use); */
 	    		{
 			sprintf(command, "cp %s %s.tmp\n",
 				esffile, esffile);
-	    		system(command);
+	    		shellstatus = system(command);
 			}
 		    }
 

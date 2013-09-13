@@ -133,8 +133,8 @@ int mbpingedit_startup(int verbose, Widget parent, XtAppContext app, int *error)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
-		fprintf(stderr,"dbg2       parent:                  %lu\n", (size_t)parent);
-		fprintf(stderr,"dbg2       app:                     %lu\n", (size_t)app);
+		fprintf(stderr,"dbg2       parent:                  %p\n", parent);
+		fprintf(stderr,"dbg2       app:                     %p\n", app);
 		}
 
 	/* set parent widget and app context */

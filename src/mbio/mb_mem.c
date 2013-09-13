@@ -169,7 +169,7 @@ int mb_mem_debug_on(int verbose, int *error)
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%lu source:%s line:%d\n",
+			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n",
 				i,(void *)mb_alloc_ptr[i],mb_alloc_size[i],
 				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
@@ -214,7 +214,7 @@ int mb_mem_debug_off(int verbose, int *error)
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%lu source:%s line:%d\n",
+			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n",
 				i,(void *)mb_alloc_ptr[i],mb_alloc_size[i],
 				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
@@ -248,7 +248,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       size:       %lu\n",size);
+		fprintf(stderr,"dbg2       size:       %zu\n",size);
 		fprintf(stderr,"dbg2       ptr:        %p\n",(void *)ptr);
 		fprintf(stderr,"dbg2       *ptr:       %p\n",(void *)*ptr);
 		}
@@ -280,7 +280,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 		{
 		fprintf(stderr,"\ndbg5  Memory allocated in MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%lu\n",
+		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%zu\n",
 			n_mb_alloc,(void *)*ptr,size);
 		}
 
@@ -308,7 +308,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%lu source:%s line:%d\n",
+			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n",
 				i,(void *)mb_alloc_ptr[i],mb_alloc_size[i],
 				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
@@ -345,7 +345,7 @@ int mb_mallocd(int verbose, char *sourcefile, int sourceline,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       sourcefile: %s\n",sourcefile);
 		fprintf(stderr,"dbg2       sourceline: %d\n",sourceline);
-		fprintf(stderr,"dbg2       size:       %lu\n",size);
+		fprintf(stderr,"dbg2       size:       %zu\n",size);
 		fprintf(stderr,"dbg2       ptr:        %p\n",(void *)ptr);
 		fprintf(stderr,"dbg2       *ptr:       %p\n",(void *)*ptr);
 		}
@@ -377,7 +377,7 @@ int mb_mallocd(int verbose, char *sourcefile, int sourceline,
 		{
 		fprintf(stderr,"\ndbg5  Memory allocated in MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%lu\n",
+		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%zu\n",
 			n_mb_alloc,(void *)*ptr,size);
 		}
 
@@ -407,7 +407,7 @@ int mb_mallocd(int verbose, char *sourcefile, int sourceline,
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%lu source:%s line:%d\n",
+			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n",
 				i,(void *)mb_alloc_ptr[i],mb_alloc_size[i],
 				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
@@ -442,7 +442,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       size:       %lu\n",size);
+		fprintf(stderr,"dbg2       size:       %zu\n",size);
 		fprintf(stderr,"dbg2       ptr:        %p\n",(void *)ptr);
 		fprintf(stderr,"dbg2       *ptr:       %p\n",(void *)*ptr);
 		}
@@ -510,7 +510,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 		{
 		mb_alloc_overflow = MB_YES;
 #ifdef MB_MEM_DEBUG
-		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %d in function %s\n",*ptr, function_name);
+		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %p in function %s\n",*ptr, function_name);
 #endif
 		}
 	    }
@@ -520,7 +520,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 		{
 		fprintf(stderr,"\ndbg5  Memory reallocated in MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%lu\n",
+		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%zu\n",
 			n_mb_alloc,(void *)*ptr,size);
 		}
 
@@ -530,7 +530,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%lu source:%s line:%d\n",
+			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n",
 				i,(void *)mb_alloc_ptr[i],mb_alloc_size[i],
 				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
@@ -572,7 +572,7 @@ int mb_reallocd(int verbose, char *sourcefile, int sourceline,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       sourcefile: %s\n",sourcefile);
 		fprintf(stderr,"dbg2       sourceline: %d\n",sourceline);
-		fprintf(stderr,"dbg2       size:       %lu\n",size);
+		fprintf(stderr,"dbg2       size:       %zu\n",size);
 		fprintf(stderr,"dbg2       ptr:        %p\n",(void *)ptr);
 		fprintf(stderr,"dbg2       *ptr:       %p\n",(void *)*ptr);
 		}
@@ -656,7 +656,7 @@ int mb_reallocd(int verbose, char *sourcefile, int sourceline,
 		{
 		fprintf(stderr,"\ndbg5  Memory reallocated in MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%lu source:%s line:%d\n",
+		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%zu source:%s line:%d\n",
 			n_mb_alloc,(void *)*ptr,size,sourcefile,sourceline);
 		}
 
@@ -666,7 +666,7 @@ int mb_reallocd(int verbose, char *sourcefile, int sourceline,
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%lu source:%s line:%d\n",
+			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n",
 				i,(void *)mb_alloc_ptr[i],mb_alloc_size[i],
 				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
@@ -754,7 +754,7 @@ int mb_free(int verbose, void **ptr, int *error)
 		{
 		fprintf(stderr,"\ndbg5  Allocated memory freed in MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%lu\n",
+		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%zu\n",
 			iptr,ptrvalue,ptrsize);
 		}
 
@@ -764,7 +764,7 @@ int mb_free(int verbose, void **ptr, int *error)
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%lu source:%s line:%d\n",
+			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n",
 				i,(void *)mb_alloc_ptr[i],mb_alloc_size[i],
 				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
@@ -853,7 +853,7 @@ int mb_freed(int verbose, char *sourcefile, int sourceline, void **ptr, int *err
 		{
 		fprintf(stderr,"\ndbg5  Allocated memory freed in MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%lu\n",
+		fprintf(stderr,"dbg5       i:%d  ptr:%p  size:%zu\n",
 			iptr,(void *)ptrvalue,ptrsize);
 		}
 
@@ -863,7 +863,7 @@ int mb_freed(int verbose, char *sourcefile, int sourceline, void **ptr, int *err
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%lu source:%s line:%d\n",
+			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n",
 				i,(void *)mb_alloc_ptr[i],mb_alloc_size[i],
 				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
@@ -910,7 +910,7 @@ int mb_memory_clear(int verbose, int *error)
 			{
 			fprintf(stderr,"\ndbg5  Allocated memory freed in MBIO function <%s>\n",
 				function_name);
-			fprintf(stderr,"dbg4       i:%d  ptr:%12p  size:%lu\n",
+			fprintf(stderr,"dbg4       i:%d  ptr:%12p  size:%zu\n",
 				i,(void *)mb_alloc_ptr[i],mb_alloc_size[i]);
 			}
 
@@ -980,7 +980,7 @@ int mb_memory_status(int verbose, int *nalloc, int *nallocmax,
 		fprintf(stderr,"dbg2       nalloc:     %d\n",*nalloc);
 		fprintf(stderr,"dbg2       nallocmax:  %d\n",*nallocmax);
 		fprintf(stderr,"dbg2       overflow:   %d\n",*overflow);
-		fprintf(stderr,"dbg2       allocsize:  %lu\n",*allocsize);
+		fprintf(stderr,"dbg2       allocsize:  %zu\n",*allocsize);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -1011,7 +1011,7 @@ int mb_memory_list(int verbose, int *error)
 		fprintf(stderr,"\ndbg4  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%lu source:%s line:%d\n",
+			fprintf(stderr,"dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n",
 				i,(void *)mb_alloc_ptr[i],mb_alloc_size[i],
 				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
@@ -1082,7 +1082,7 @@ int mb_register_array(int verbose, void *mbio_ptr,
 		status = mb_realloc(verbose, mb_io_ptr->n_regarray_alloc * sizeof(int),
 					(void **)&(mb_io_ptr->regarray_type), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, mb_io_ptr->n_regarray_alloc * sizeof(int),
+		status = mb_realloc(verbose, mb_io_ptr->n_regarray_alloc * sizeof(size_t),
 					(void **)&(mb_io_ptr->regarray_size), error);
 		for (i=mb_io_ptr->n_regarray;i<mb_io_ptr->n_regarray_alloc;i++)
 			{
@@ -1120,7 +1120,7 @@ int mb_register_array(int verbose, void *mbio_ptr,
 			mb_io_ptr->regarray_type[mb_io_ptr->n_regarray] = type;
 			mb_io_ptr->regarray_size[mb_io_ptr->n_regarray] = size;
 			mb_io_ptr->n_regarray++;
-/*fprintf(stderr,"Array registered: handle:%lx ptr:%lx  stored handle:%lx ptr:%lx type:%d size:%d\n",
+/*fprintf(stderr,"Array registered: handle:%lx ptr:%lx  stored handle:%lx ptr:%lx type:%d size:%zu\n",
 (size_t)handle, (size_t)*handle,
 (size_t)mb_io_ptr->regarray_handle[mb_io_ptr->n_regarray-1],
 (size_t)mb_io_ptr->regarray_ptr[mb_io_ptr->n_regarray-1],
@@ -1135,7 +1135,7 @@ mb_io_ptr->regarray_size[mb_io_ptr->n_regarray-1]);*/
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       *handle:    %lx\n",(size_t)*handle);
+		fprintf(stderr,"dbg2       *handle:    %p\n",(void *)*handle);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -1449,8 +1449,8 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       handle:     %lx\n",(size_t)handle);
-		fprintf(stderr,"dbg2       *handle:    %lx\n",(size_t)*handle);
+		fprintf(stderr,"dbg2       handle:     %p\n",(void *)handle);
+		fprintf(stderr,"dbg2       *handle:    %p\n",(void *)*handle);
 		}
 
 	/* get mbio descriptor */
@@ -1511,8 +1511,8 @@ int mb_list_arrays(int verbose, void *mbio_ptr, int *error)
 	fprintf(stderr,"\nRegistered Array List:\n");
 	for (i=0;i<mb_io_ptr->n_regarray;i++)
 		{
-		fprintf(stderr,"Array %d: handle:%lx ptr:%lx type:%d size:%d\n",
-				i,(size_t)mb_io_ptr->regarray_handle[i],(size_t)mb_io_ptr->regarray_ptr[i],
+		fprintf(stderr,"Array %d: handle:%p ptr:%p type:%d size:%zu\n",
+				i,(void *)mb_io_ptr->regarray_handle[i],(void *)mb_io_ptr->regarray_ptr[i],
 				mb_io_ptr->regarray_type[i],mb_io_ptr->regarray_size[i]);
 		}
 

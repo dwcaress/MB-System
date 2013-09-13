@@ -106,7 +106,7 @@ int mbview_getprofilecount(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* get view */
@@ -153,7 +153,7 @@ int mbview_allocprofilepoints(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       npoints:                   %d\n", npoints);
-		fprintf(stderr,"dbg2       points:                    %lu\n", (size_t)*points);
+		fprintf(stderr,"dbg2       points:                    %p\n", *points);
 		}
 
 	/* allocate the arrays using mb_realloc */
@@ -167,7 +167,7 @@ int mbview_allocprofilepoints(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       points:                    %lu\n", (size_t)*points);
+		fprintf(stderr,"dbg2       points:                    %p\n", *points);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -197,7 +197,7 @@ int mbview_freeprofilepoints(int verbose,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       points:                    %lu\n", (size_t)*points);
+		fprintf(stderr,"dbg2       points:                    %p\n", *points);
 		}
 
 	/* free the arrays using mb_free */
@@ -209,7 +209,7 @@ int mbview_freeprofilepoints(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       points:                    %lu\n", (size_t)*points);
+		fprintf(stderr,"dbg2       points:                    %p\n", *points);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -248,14 +248,14 @@ int mbview_allocprofilearrays(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       npoints:                   %d\n", npoints);
-		fprintf(stderr,"dbg2       distance:                  %lu\n", (size_t)*distance);
-		fprintf(stderr,"dbg2       zdata:                     %lu\n", (size_t)*zdata);
-		fprintf(stderr,"dbg2       boundary:                  %lu\n", (size_t)*boundary);
-		fprintf(stderr,"dbg2       xlon:                      %lu\n", (size_t)*xlon);
-		fprintf(stderr,"dbg2       ylat:                      %lu\n", (size_t)*ylat);
-		fprintf(stderr,"dbg2       distovertopo:              %lu\n", (size_t)*distovertopo);
-		fprintf(stderr,"dbg2       bearing:                   %lu\n", (size_t)*bearing);
-		fprintf(stderr,"dbg2       slope:                     %lu\n", (size_t)*slope);
+		fprintf(stderr,"dbg2       distance:                  %p\n", *distance);
+		fprintf(stderr,"dbg2       zdata:                     %p\n", *zdata);
+		fprintf(stderr,"dbg2       boundary:                  %p\n", *boundary);
+		fprintf(stderr,"dbg2       xlon:                      %p\n", *xlon);
+		fprintf(stderr,"dbg2       ylat:                      %p\n", *ylat);
+		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
+		fprintf(stderr,"dbg2       bearing:                   %p\n", *bearing);
+		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		}
 
 	/* allocate the arrays using mb_realloc */
@@ -274,14 +274,14 @@ int mbview_allocprofilearrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       distance:                  %lu\n", (size_t)*distance);
-		fprintf(stderr,"dbg2       zdata:                     %lu\n", (size_t)*zdata);
-		fprintf(stderr,"dbg2       boundary:                  %lu\n", (size_t)*boundary);
-		fprintf(stderr,"dbg2       xlon:                      %lu\n", (size_t)*xlon);
-		fprintf(stderr,"dbg2       ylat:                      %lu\n", (size_t)*ylat);
-		fprintf(stderr,"dbg2       distovertopo:              %lu\n", (size_t)*distovertopo);
-		fprintf(stderr,"dbg2       bearing:                   %lu\n", (size_t)*bearing);
-		fprintf(stderr,"dbg2       slope:                     %lu\n", (size_t)*slope);
+		fprintf(stderr,"dbg2       distance:                  %p\n", *distance);
+		fprintf(stderr,"dbg2       zdata:                     %p\n", *zdata);
+		fprintf(stderr,"dbg2       boundary:                  %p\n", *boundary);
+		fprintf(stderr,"dbg2       xlon:                      %p\n", *xlon);
+		fprintf(stderr,"dbg2       ylat:                      %p\n", *ylat);
+		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
+		fprintf(stderr,"dbg2       bearing:                   %p\n", *bearing);
+		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -318,14 +318,14 @@ int mbview_freeprofilearrays(int verbose,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       distance:                  %lu\n", (size_t)*distance);
-		fprintf(stderr,"dbg2       zdata:                     %lu\n", (size_t)*zdata);
-		fprintf(stderr,"dbg2       boundary:                  %lu\n", (size_t)*boundary);
-		fprintf(stderr,"dbg2       xlon:                      %lu\n", (size_t)*xlon);
-		fprintf(stderr,"dbg2       ylat:                      %lu\n", (size_t)*ylat);
-		fprintf(stderr,"dbg2       distovertopo:              %lu\n", (size_t)*distovertopo);
-		fprintf(stderr,"dbg2       bearing:                   %lu\n", (size_t)*bearing);
-		fprintf(stderr,"dbg2       slope:                     %lu\n", (size_t)*slope);
+		fprintf(stderr,"dbg2       distance:                  %p\n", *distance);
+		fprintf(stderr,"dbg2       zdata:                     %p\n", *zdata);
+		fprintf(stderr,"dbg2       boundary:                  %p\n", *boundary);
+		fprintf(stderr,"dbg2       xlon:                      %p\n", *xlon);
+		fprintf(stderr,"dbg2       ylat:                      %p\n", *ylat);
+		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
+		fprintf(stderr,"dbg2       bearing:                   %p\n", *bearing);
+		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		}
 
 	/* free the arrays using mb_free */
@@ -344,14 +344,14 @@ int mbview_freeprofilearrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       distance:                  %lu\n", (size_t)*distance);
-		fprintf(stderr,"dbg2       zdata:                     %lu\n", (size_t)*zdata);
-		fprintf(stderr,"dbg2       boundary:                  %lu\n", (size_t)*boundary);
-		fprintf(stderr,"dbg2       xlon:                      %lu\n", (size_t)*xlon);
-		fprintf(stderr,"dbg2       ylat:                      %lu\n", (size_t)*ylat);
-		fprintf(stderr,"dbg2       distovertopo:              %lu\n", (size_t)*distovertopo);
-		fprintf(stderr,"dbg2       bearing:                   %lu\n", (size_t)*bearing);
-		fprintf(stderr,"dbg2       slope:                     %lu\n", (size_t)*slope);
+		fprintf(stderr,"dbg2       distance:                  %p\n", *distance);
+		fprintf(stderr,"dbg2       zdata:                     %p\n", *zdata);
+		fprintf(stderr,"dbg2       boundary:                  %p\n", *boundary);
+		fprintf(stderr,"dbg2       xlon:                      %p\n", *xlon);
+		fprintf(stderr,"dbg2       ylat:                      %p\n", *ylat);
+		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
+		fprintf(stderr,"dbg2       bearing:                   %p\n", *bearing);
+		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -395,7 +395,7 @@ int mbview_getprofile(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* get view */
@@ -479,7 +479,7 @@ int mbview_reset_prglx(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n", instance);
 		}
 
 	/* get view */
@@ -523,14 +523,14 @@ int mbview_reset_prglx(size_t instance)
 		ac++;
 		XtGetValues(view->prglwmda, args, ac);
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXCreateContext(%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)view->prvi);
+fprintf(stderr,"%s:%d:%s instance:%zu glXCreateContext(%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,view->prvi);
 #endif
 		view->prglx_context = glXCreateContext(view->dpy, view->prvi,
                 		     NULL, GL_TRUE);
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->prglwmda),view->prglx_context);
 #endif
 		glXMakeCurrent(view->dpy,XtWindow(view->prglwmda),view->prglx_context);
 
@@ -549,10 +549,10 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 			function_name);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                %d\n",status);
-		fprintf(stderr,"dbg2       view->dpy:             %lu\n", (size_t)view->dpy);
-		fprintf(stderr,"dbg2       view->prvi:            %lu\n", (size_t)view->prvi);
-		fprintf(stderr,"dbg2       view->prglwmda:        %lu\n", (size_t)view->prglwmda);
-		fprintf(stderr,"dbg2       view->prglx_context:   %lu\n", (size_t)view->prglx_context);
+		fprintf(stderr,"dbg2       view->dpy:             %p\n", view->dpy);
+		fprintf(stderr,"dbg2       view->prvi:            %p\n", view->prvi);
+		fprintf(stderr,"dbg2       view->prglwmda:        %p\n", view->prglwmda);
+		fprintf(stderr,"dbg2       view->prglx_context:   %p\n", view->prglx_context);
 		fprintf(stderr,"dbg2       view->prglx_init:      %d\n", view->prglx_init);
 		}
 
@@ -577,7 +577,7 @@ int mbview_destroy_prglx(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n", instance);
 		}
 
 	/* get view */
@@ -602,10 +602,10 @@ int mbview_destroy_prglx(size_t instance)
 			function_name);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                %d\n",status);
-		fprintf(stderr,"dbg2       view->dpy:             %lu\n", (size_t)view->dpy);
-		fprintf(stderr,"dbg2       view->prvi:            %lu\n", (size_t)view->prvi);
-		fprintf(stderr,"dbg2       view->prglwmda:        %lu\n", (size_t)view->prglwmda);
-		fprintf(stderr,"dbg2       view->prglx_context:   %lu\n", (size_t)view->prglx_context);
+		fprintf(stderr,"dbg2       view->dpy:             %p\n", view->dpy);
+		fprintf(stderr,"dbg2       view->prvi:            %p\n", view->prvi);
+		fprintf(stderr,"dbg2       view->prglwmda:        %p\n", view->prglwmda);
+		fprintf(stderr,"dbg2       view->prglx_context:   %p\n", view->prglx_context);
 		fprintf(stderr,"dbg2       view->prglx_init:      %d\n", view->prglx_init);
 		}
 
@@ -639,7 +639,7 @@ int mbview_plotprofile(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n", instance);
 		}
 
 	/* get view */
@@ -665,8 +665,8 @@ int mbview_plotprofile(size_t instance)
 
 		/* set projection to 2D */
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->prglwmda),view->prglx_context);
 #endif
 		glXMakeCurrent(view->dpy,XtWindow(view->prglwmda),view->prglx_context);
 
@@ -827,7 +827,7 @@ int mbview_profile_text(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n", instance);
 		}
 
 	/* get view */

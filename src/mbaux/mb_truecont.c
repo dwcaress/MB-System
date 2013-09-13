@@ -181,7 +181,7 @@ int mb_contour_init(
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
-		fprintf(stderr,"dbg2       data:                 %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       data:                 %p\n",data);
 		fprintf(stderr,"dbg2       npings_max:           %d\n",npings_max);
 		fprintf(stderr,"dbg2       beams_bath:           %d\n",beams_bath);
 		fprintf(stderr,"dbg2       contour algorithm:    %d\n",contour_algorithm);
@@ -454,7 +454,7 @@ int mb_contour_deall(
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n",verbose);
-		fprintf(stderr,"dbg2       data:                    %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       data:                    %p\n",data);
 		}
 
 	/* deallocate memory for bathymetry data */
@@ -544,7 +544,7 @@ int mb_contour(
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n",verbose);
-		fprintf(stderr,"dbg2       data:                    %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       data:                    %p\n",data);
 		fprintf(stderr,"dbg2       data->contour_alg:       %d\n",data->contour_algorithm);
 		}
 
@@ -603,7 +603,7 @@ int mb_tcontour(
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n",verbose);
-		fprintf(stderr,"dbg2       data:                    %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       data:                    %p\n",data);
 		fprintf(stderr,"dbg2       data->contour_algorithm: %d\n",data->contour_algorithm);
 		fprintf(stderr,"dbg2       data->plot_contours:     %d\n",data->plot_contours);
 		fprintf(stderr,"dbg2       data->plot_triangles:    %d\n",data->plot_triangles);
@@ -1393,7 +1393,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n",verbose);
-		fprintf(stderr,"dbg2       data:                    %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       data:                    %p\n",data);
 		fprintf(stderr,"dbg2       data->contour_algorithm: %d\n",data->contour_algorithm);
 		fprintf(stderr,"dbg2       data->plot_contours:     %d\n",data->plot_contours);
 		fprintf(stderr,"dbg2       data->plot_triangles:    %d\n",data->plot_triangles);

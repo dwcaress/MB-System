@@ -466,10 +466,10 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
 		fprintf(stderr,"dbg2       nc_status:               %d\n", nc_status);
-		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %lu\n", store->mbHistoryRecNbr);
-		fprintf(stderr,"dbg2       mbNameLength:            %lu\n", store->mbNameLength);
-		fprintf(stderr,"dbg2       mbCommentLength:         %lu\n", store->mbCommentLength);
-		fprintf(stderr,"dbg2       mbPositionNbr:           %lu\n", store->mbPositionNbr);
+		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %zu\n", store->mbHistoryRecNbr);
+		fprintf(stderr,"dbg2       mbNameLength:            %zu\n", store->mbNameLength);
+		fprintf(stderr,"dbg2       mbCommentLength:         %zu\n", store->mbCommentLength);
+		fprintf(stderr,"dbg2       mbPositionNbr:           %zu\n", store->mbPositionNbr);
 		}
 
 	    /* get global attributes */
@@ -1784,10 +1784,10 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
 		fprintf(stderr,"dbg2       nc_status:               %d\n", nc_status);
-		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %lu\n", storelocal->mbHistoryRecNbr);
-		fprintf(stderr,"dbg2       mbNameLength:            %lu\n", storelocal->mbNameLength);
-		fprintf(stderr,"dbg2       mbCommentLength:         %lu\n", storelocal->mbCommentLength);
-		fprintf(stderr,"dbg2       mbPositionNbr:           %lu\n", storelocal->mbPositionNbr);
+		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %zu\n", storelocal->mbHistoryRecNbr);
+		fprintf(stderr,"dbg2       mbNameLength:            %zu\n", storelocal->mbNameLength);
+		fprintf(stderr,"dbg2       mbCommentLength:         %zu\n", storelocal->mbCommentLength);
+		fprintf(stderr,"dbg2       mbPositionNbr:           %zu\n", storelocal->mbPositionNbr);
 		}
 
 	    /* define the variables */

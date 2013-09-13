@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2151       September 12, 2013
   Version 5.4.2149       September 2, 2013
   Version 5.4.2148       August 28, 2013
   Version 5.4.2147       August 27, 2013
@@ -160,7 +161,10 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.4.2150 (September 12, 2013)
+-----> 5.4.2151 (September 12, 2013)
+
+Many *.c files: hundreds of small changes to eliminate compiler warning messages
+on various types of systems.
 
 Buildsystem: Changes to configure.ac, autogen.sh, and src/*/Makefile.am files
 based on suggestions from Frank Delahoyde of SIO and Kurt Schwehr of Google.

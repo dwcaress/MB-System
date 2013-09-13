@@ -240,6 +240,7 @@ int mb_read_init(int verbose, char *file,
 	FILE	*pfp;
 	struct stat file_status;
 	int	fstat;
+	int	nscan;
 	int	i;
 	char	*stdin_string = "stdin";
 
@@ -885,7 +886,7 @@ int mb_read_init(int verbose, char *file,
 	sprintf(prjfile, "%s.prj", file);
 	if ((pfp = fopen(prjfile, "r")) != NULL)
 		{
-		fscanf(pfp,"%s", projection_id);
+		nscan = fscanf(pfp,"%s", projection_id);
 		proj_status = mb_proj_init(verbose,projection_id,
 			&(mb_io_ptr->pjptr), error);
 		if (proj_status == MB_SUCCESS)

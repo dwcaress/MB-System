@@ -139,6 +139,9 @@ int main (int argc, char **argv)
 	char	lock_date[25];
 	mb_path	lockfile;
 
+	char	*bufptr;
+	int	shellstatus;
+
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
 	FILE	*output;
@@ -446,7 +449,7 @@ int main (int argc, char **argv)
 			    == MB_SUCCESS)
 			{
 			nfile++;
-			getcwd(pwd, MB_PATH_MAXLINE);
+			bufptr = getcwd(pwd, MB_PATH_MAXLINE);
 			mb_get_relative_path(verbose, file, pwd, &error);
 			if (make_inf == MB_YES)
 			    {
@@ -481,16 +484,16 @@ int main (int argc, char **argv)
 				{
 				fprintf(output, "Copying %s %d %f\n", file, format, file_weight);
 				sprintf(command, "cp %s* .", file);
-				system(command);
+				shellstatus = system(command);
 				if ((filename = strrchr(file, '/')) != NULL)
 					filename++;
 				else
 					filename = file;
 				if (nfile == 1)
-					system("rm datalist.mb-1");
+					shellstatus = system("rm datalist.mb-1");
 			    	sprintf(command, "echo %s %d %f >> datalist.mb-1",
 					filename, format, file_weight);
-				system(command);
+				shellstatus = system(command);
 			    	}
 			    }
 			else
@@ -563,7 +566,7 @@ int main (int argc, char **argv)
 					sprintf(lockfile, "%s.lck", file);
 					fprintf(output, "\tRemoving lock file %s\n", lockfile);
 					sprintf(command, "/bin/rm -f %s", lockfile);
-					system(command);
+					shellstatus = system(command);
 					}
 				    }
 
