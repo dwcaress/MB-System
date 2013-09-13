@@ -356,7 +356,7 @@ LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
-LIBS = ${libnetcdf_LIBS} ${libgmt_LIBS} $(top_builddir)/src/mbio/libmbio.la $(LIBM)
+LIBS = ${libgmt_LIBS} ${libnetcdf_LIBS} $(top_builddir)/src/mbio/libmbio.la $(LIBM)
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
@@ -431,13 +431,19 @@ install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
 libfftw_CFLAGS = @libfftw_CFLAGS@
+libfftw_LDFLAGS = @libfftw_LDFLAGS@
 libfftw_LIBS = @libfftw_LIBS@
+libfftw_RPATH = @libfftw_RPATH@
 libgmt_CFLAGS = @libgmt_CFLAGS@
+libgmt_LDFLAGS = @libgmt_LDFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
+libgmt_RPATH = @libgmt_RPATH@
 libgmtps_CFLAGS = @libgmtps_CFLAGS@
 libgmtps_LIBS = @libgmtps_LIBS@
 libnetcdf_CFLAGS = @libnetcdf_CFLAGS@
+libnetcdf_LDFLAGS = @libnetcdf_LDFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
+libnetcdf_RPATH = @libnetcdf_RPATH@
 libpsl_CFLAGS = @libpsl_CFLAGS@
 libpsl_LIBS = @libpsl_LIBS@
 localedir = @localedir@
@@ -464,12 +470,15 @@ top_srcdir = @top_srcdir@
 
 #Remove mbps if WIN32?
 include_HEADERS = levitus.h
-AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
+
+#AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 AM_CPPFLAGS = -I@top_srcdir@/src/mbio -I@top_srcdir@/src/mbaux \
 	@CDF_INC_DIR@ @GMT_INC_DIR@ @FFTW_INC_DIR@ $(am__append_1)
 AM_LDFLAGS = -L$(top_builddir)/src/mbio -L$(top_builddir)/src/mbaux \
 	-L$(top_builddir)/src/mr1pr -L$(top_builddir)/src/proj \
-	-L$(top_builddir)/src/surf $(am__append_2)
+	-L$(top_builddir)/src/surf ${libgmt_LDFLAGS} \
+	${libnetcdf_LDFLAGS} ${libgmt_RPATH} ${libnetcdf_RPATH} \
+	$(am__append_2)
 mbhsdump_SOURCES = mbhsdump.c
 mbformat_SOURCES = mbformat.c
 mbdefaults_SOURCES = mbdefaults.c

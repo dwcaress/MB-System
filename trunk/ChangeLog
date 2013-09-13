@@ -160,6 +160,11 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2150 (September 12, 2013)
+
+Buildsystem: Changes to configure.ac, autogen.sh, and src/*/Makefile.am files
+based on suggestions from Frank Delahoyde of SIO and Kurt Schwehr of Google.
+
 -----> 5.4.2149 (September 2, 2013)
 
 Src directories src/mbio and src/utilities: Fixed a number of debug print

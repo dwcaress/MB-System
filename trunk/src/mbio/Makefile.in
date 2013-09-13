@@ -346,13 +346,19 @@ install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
 libfftw_CFLAGS = @libfftw_CFLAGS@
+libfftw_LDFLAGS = @libfftw_LDFLAGS@
 libfftw_LIBS = @libfftw_LIBS@
+libfftw_RPATH = @libfftw_RPATH@
 libgmt_CFLAGS = @libgmt_CFLAGS@
+libgmt_LDFLAGS = @libgmt_LDFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
+libgmt_RPATH = @libgmt_RPATH@
 libgmtps_CFLAGS = @libgmtps_CFLAGS@
 libgmtps_LIBS = @libgmtps_LIBS@
 libnetcdf_CFLAGS = @libnetcdf_CFLAGS@
+libnetcdf_LDFLAGS = @libnetcdf_LDFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
+libnetcdf_RPATH = @libnetcdf_RPATH@
 libpsl_CFLAGS = @libpsl_CFLAGS@
 libpsl_LIBS = @libpsl_LIBS@
 localedir = @localedir@
@@ -400,7 +406,10 @@ AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 AM_CPPFLAGS = -I@top_srcdir@/src/proj -I@top_srcdir@/src/mr1pr \
 	-I@top_srcdir@/src/surf @CDF_INC_DIR@ @GMT_INC_DIR@ \
 	$(am__append_2)
-libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0 \
+			${libgmt_LDFLAGS} ${libnetcdf_LDFLAGS} \
+			${libgmt_RPATH} ${libnetcdf_RPATH}
+
 libmbio_la_SOURCES = mb_format.c mb_error.c mb_swap.c mb_compare.c \
 	mb_navint.c mb_read_init.c mb_write_init.c mb_close.c \
 	mb_fileio.c mb_mem.c mb_coor_scale.c mb_check_info.c mb_time.c \
@@ -434,7 +443,7 @@ libmbio_la_SOURCES = mb_format.c mb_error.c mb_swap.c mb_compare.c \
 	mbr_reson7kr.c mbr_edgjstar.c mbr_segysegy.c mbr_image83p.c \
 	mbr_imagemba.c mbr_hir2rnav.c mbr_hysweep1.c mbr_xtfb1624.c \
 	mbr_swplssxi.c mbr_swplssxp.c $(am__append_3)
-libmbio_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @XDR_LIB@ \
+libmbio_la_LIBADD = ${libgmt_LIBS} ${libnetcdf_LIBS} @XDR_LIB@ \
 	$(top_builddir)/src/mr1pr/libmbmr1pr.la \
 	$(top_builddir)/src/surf/libmbsapi.la \
 	$(top_builddir)/src/proj/libmbproj.la $(am__append_4)

@@ -18,16 +18,18 @@ AM_LDFLAGS = -L$(top_builddir)/src/mbio \
        -L$(top_builddir)/src/mbview \
        -L$(top_builddir)/src/mr1pr \
        -L$(top_builddir)/src/proj \
-       -L$(top_builddir)/src/surf
+       -L$(top_builddir)/src/surf \
+	${libgmt_LDFLAGS} ${libnetcdf_LDFLAGS} \
+	${libgmt_RPATH} ${libnetcdf_RPATH}
 if BUILD_GSF
   AM_LDFLAGS +=  -L$(top_builddir)/src/gsf
 endif
 
 mbgrdviz_SOURCES =  mbgrdviz_main.c mbgrdviz_callbacks.c  mbgrdviz_creation.c
-mbgrdviz_LDADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @MOTIF_LIB_DIR@ \
+mbgrdviz_LDADD = ${libgmt_LIBS} ${libnetcdf_LIBS} @MOTIF_LIB_DIR@ \
        $(top_builddir)/src/mbio/libmbio.la $(top_builddir)/src/mbaux/libmbaux.la \
        $(top_builddir)/src/mbaux/libmbxgr.la $(top_builddir)/src/mbaux/libmbps.la \
         $(top_builddir)/src/mbview/libmbview.la \
        @MOTIF_LIB@ @GL_LIB@ \
-       ${libnetcdf_LIBS} ${libgmt_LIBS} $(LIBM)
+       $(LIBM)
 
