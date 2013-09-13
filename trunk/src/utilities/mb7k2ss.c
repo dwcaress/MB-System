@@ -345,6 +345,7 @@ int main (int argc, char **argv)
 
 	int	read_data;
 	int	found, done;
+	int	shellstatus;
 	int	i, j, n;
 
 	startline = 1;
@@ -2405,7 +2406,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 	/* close plotting script file */
 	fclose(sfp);
 	sprintf(command, "chmod +x %s", scriptfile);
-	system(command);
+	shellstatus = system(command);
 
 	/* output counts */
 	fprintf(stdout, "\nTotal data records read:\n");

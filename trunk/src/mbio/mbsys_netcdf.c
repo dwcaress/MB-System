@@ -361,7 +361,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbReferenceDepth_maximum = 2147483647;
 	    store->mbReferenceDepth_valid_minimum = -2147483647;
 	    store->mbReferenceDepth_valid_maximum = 2147483647;
-	    store->mbReferenceDepth_missing_value = -2147483648;
+	    store->mbReferenceDepth_missing_value = -2147483648LL;
 	    strcpy(store->mbReferenceDepth_format_C, "%.2f");
 	    strcpy(store->mbReferenceDepth_orientation, "direct");
 	    strcpy(store->mbDynamicDraught_type, "real");
@@ -669,7 +669,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbDepth_maximum = 2147483647;
 	    store->mbDepth_valid_minimum = -2147483647;
 	    store->mbDepth_valid_maximum = 2147483647;
-	    store->mbDepth_missing_value = -2147483648;
+	    store->mbDepth_missing_value = -2147483648LL;
 	    strcpy(store->mbDepth_format_C, "%d");
 	    strcpy(store->mbDepth_orientation, "inverse");
 	    strcpy(store->mbAcrossBeamAngle_type, "real");

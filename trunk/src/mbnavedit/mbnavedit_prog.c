@@ -644,7 +644,7 @@ int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %lu\n",(size_t)xgid);
+		fprintf(stderr,"dbg2       xgid:         %p\n",xgid);
 		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
 		for (i=0;i<ncol;i++)
 			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
@@ -770,6 +770,7 @@ int mbnavedit_open_file(int useprevious)
 	mb_path lock_cpu;
 	mb_path lock_user;
 	char	lock_date[25];
+        int     shellstatus;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -876,7 +877,7 @@ int mbnavedit_open_file(int useprevious)
 		    sprintf(command, "cp %s %s\n",
 			nfile, ifile_use);
 		    format_use = MBF_MBPRONAV;
-		    system(command);
+		    shellstatus = system(command);
 		    fstat = stat(ifile_use, &file_status);
 		    if (fstat != 0
 			|| (file_status.st_mode & S_IFMT) == S_IFDIR)
@@ -1046,6 +1047,7 @@ int mbnavedit_close_file()
 	char	*function_name = "mbnavedit_close_file";
 	int	status = MB_SUCCESS;
 	char	command[MB_PATH_MAXLINE];
+        int     shellstatus;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1098,7 +1100,7 @@ int mbnavedit_close_file()
 			sprintf(command, "mbprocess -I %s\n",ifile);
 		    if (verbose >= 1)
 			fprintf(stderr,"\nExecuting command:\n%s\n",command);
-		    system(command);
+		    shellstatus = system(command);
 
 		    /* turn message off */
 		    do_message_off();

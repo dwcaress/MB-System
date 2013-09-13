@@ -146,10 +146,10 @@ int mbview_projectdata(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_projectdata: %ld\n", instance);
+fprintf(stderr,"mbview_projectdata: %zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -555,12 +555,12 @@ int mbview_derivative(size_t instance, int i, int j)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		}
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_derivative: %ld\n", instance);
+fprintf(stderr,"mbview_derivative: %zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -717,10 +717,10 @@ int mbview_projectglobaldata(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
+fprintf(stderr,"mbview_projectglobaldata: %zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -986,7 +986,7 @@ int mbview_zscalegridpoint(size_t instance, int k)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
 		}
 if (mbv_verbose >= 2)
@@ -1061,12 +1061,12 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       globalview:       %d\n",globalview);
 		fprintf(stderr,"dbg2       offset_factor:    %f\n",offset_factor);
 		}
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_zscalepoint: %ld\n", instance);
+fprintf(stderr,"mbview_zscalepoint: %zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -1130,12 +1130,12 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       globalview:       %d\n",globalview);
 		fprintf(stderr,"dbg2       offset_factor:    %f\n",offset_factor);
 		}
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_zscalepointw: %ld\n", instance);
+fprintf(stderr,"mbview_zscalepointw: %zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -1200,10 +1200,10 @@ int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_updatepointw: %ld\n", instance);
+fprintf(stderr,"mbview_updatepointw: %zu\n", instance);
 
 	/* update grid and display coordinates for pointw for all
 		active instances other than instance, which has
@@ -1258,10 +1258,10 @@ int mbview_updatesegmentw(size_t instance, struct mbview_linesegmentw_struct *se
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_updatesegmentw: %ld\n", instance);
+fprintf(stderr,"mbview_updatesegmentw: %zu\n", instance);
 
 	/* update grid and display coordinates for segmentw for all
 		active instances other than instance, which has
@@ -1303,10 +1303,10 @@ int mbview_zscale(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_zscale: %ld\n", instance);
+fprintf(stderr,"mbview_zscale: %zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -1554,7 +1554,7 @@ int mbview_projectforward(size_t instance, int needlonlat,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       needlonlat:       %d\n",needlonlat);
 		fprintf(stderr,"dbg2       xgrid:            %f\n",xgrid);
 		fprintf(stderr,"dbg2       ygrid:            %f\n",ygrid);
@@ -1631,7 +1631,7 @@ int mbview_projectinverse(size_t instance, int needlonlat,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       needlonlat:       %d\n",needlonlat);
 		fprintf(stderr,"dbg2       xdisplay:         %f\n",xdisplay);
 		fprintf(stderr,"dbg2       ydisplay:         %f\n",ydisplay);
@@ -1702,7 +1702,7 @@ int mbview_projectfromlonlat(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
 		fprintf(stderr,"dbg2       zdata:            %f\n",zdata);
@@ -1758,7 +1758,7 @@ int mbview_projectgrid2ll(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xgrid:            %f\n",xgrid);
 		fprintf(stderr,"dbg2       ygrid:            %f\n",ygrid);
 		}
@@ -1816,7 +1816,7 @@ int mbview_projectll2xygrid(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
 		}
@@ -1883,10 +1883,10 @@ int mbview_projectll2xyzgrid(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
-		fprintf(stderr,"dbg2       zdata:            %lu\n",(size_t)zdata);
+		fprintf(stderr,"dbg2       zdata:            %p\n",zdata);
 		}
 
 	/* get view */
@@ -1982,7 +1982,7 @@ int mbview_projectll2display(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
 		fprintf(stderr,"dbg2       zdata:            %f\n",zdata);
@@ -2072,7 +2072,7 @@ int mbview_projectdisplay2ll(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xdisplay:         %f\n",xdisplay);
 		fprintf(stderr,"dbg2       ydisplay:         %f\n",ydisplay);
 		fprintf(stderr,"dbg2       zdisplay:         %f\n",zdisplay);
@@ -2149,7 +2149,7 @@ int mbview_projectdistance(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xlon1:            %f\n",xlon1);
 		fprintf(stderr,"dbg2       ylat1:            %f\n",ylat1);
 		fprintf(stderr,"dbg2       zdata1:           %f\n",zdata1);
@@ -2285,7 +2285,7 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       earthcentered:    %d\n",earthcentered);
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
@@ -2421,7 +2421,7 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
 		}
@@ -2490,7 +2490,7 @@ int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xx:               %f\n",xx);
 		fprintf(stderr,"dbg2       yy:               %f\n",yy);
 		fprintf(stderr,"dbg2       zz:               %f\n",zz);
@@ -2701,7 +2701,7 @@ int mbview_greatcircle_distbearing(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       lon1:             %f\n",lon1);
 		fprintf(stderr,"dbg2       lat1:             %f\n",lat1);
 		fprintf(stderr,"dbg2       lon2:             %f\n",lon2);
@@ -2800,7 +2800,7 @@ int mbview_greatcircle_dist(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       lon1:             %f\n",lon1);
 		fprintf(stderr,"dbg2       lat1:             %f\n",lat1);
 		fprintf(stderr,"dbg2       lon2:             %f\n",lon2);
@@ -2860,7 +2860,7 @@ int mbview_greatcircle_endposition(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       lon1:             %f\n",lon1);
 		fprintf(stderr,"dbg2       lat1:             %f\n",lat1);
 		fprintf(stderr,"dbg2       bearing:          %f\n",bearing);
@@ -2929,11 +2929,11 @@ int mbview_colorclear(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_colorclear: %ld\n", instance);
+fprintf(stderr,"mbview_colorclear: %zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -2974,11 +2974,11 @@ int mbview_zscaleclear(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_zscaleclear: %ld\n", instance);
+fprintf(stderr,"mbview_zscaleclear: %zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -3019,7 +3019,7 @@ int mbview_setcolorparms(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -3160,8 +3160,8 @@ int mbview_make_histogram(
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %lu\n",(size_t)view);
-		fprintf(stderr,"dbg2       data:             %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       view:             %p\n",view);
+		fprintf(stderr,"dbg2       data:             %p\n",data);
 		fprintf(stderr,"dbg2       which_data:       %d\n",which_data);
 		}
 
@@ -3360,8 +3360,8 @@ int mbview_colorpoint(
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %lu\n",(size_t)view);
-		fprintf(stderr,"dbg2       data:             %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       view:             %p\n",view);
+		fprintf(stderr,"dbg2       data:             %p\n",data);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
@@ -3586,9 +3586,9 @@ int mbview_colorpoint_histogram(
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %lu\n",(size_t)view);
-		fprintf(stderr,"dbg2       data:             %lu\n",(size_t)data);
-		fprintf(stderr,"dbg2       histogram:        %lu\n",(size_t)histogram);
+		fprintf(stderr,"dbg2       view:             %p\n",view);
+		fprintf(stderr,"dbg2       data:             %p\n",data);
+		fprintf(stderr,"dbg2       histogram:        %p\n",histogram);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
@@ -4177,8 +4177,8 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %lu\n",(size_t)view);
-		fprintf(stderr,"dbg2       data:             %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       view:             %p\n",view);
+		fprintf(stderr,"dbg2       data:             %p\n",data);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		}
@@ -4271,7 +4271,7 @@ int mbview_contour(size_t instance, int rez)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		}
 
@@ -4311,7 +4311,7 @@ int mbview_contour(size_t instance, int rez)
 	glBegin(GL_LINES);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_contour: instance:%ld rez:%d stride:%d contour interval:%f\n",
+fprintf(stderr,"mbview_contour: instance:%zu rez:%d stride:%d contour interval:%f\n",
 instance, rez, stride, data->contour_interval);
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
@@ -4641,7 +4641,7 @@ int mbview_getzdata(size_t instance,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xgrid:            %f\n",xgrid);
 		fprintf(stderr,"dbg2       ygrid:            %f\n",ygrid);
 		}

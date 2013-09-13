@@ -427,7 +427,7 @@ struct mb_io_struct
 	void	**regarray_ptr;
 	void	**regarray_oldptr;
 	int	*regarray_type;
-	int	*regarray_size;
+	size_t	*regarray_size;
 
 	/* variables for saving information */
 	char	save_label[12];

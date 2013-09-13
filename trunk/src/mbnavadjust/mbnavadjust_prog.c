@@ -639,9 +639,9 @@ int mbnavadjust_set_graphics(void *cn_xgid, void *cr_xgid, void *zc_xgid)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       cn_xgid:      %lu\n",(size_t)cn_xgid);
-		fprintf(stderr,"dbg2       cr_xgid:      %lu\n",(size_t)cr_xgid);
-		fprintf(stderr,"dbg2       zc_xgid:      %lu\n",(size_t)zc_xgid);
+		fprintf(stderr,"dbg2       cn_xgid:      %p\n",cn_xgid);
+		fprintf(stderr,"dbg2       cr_xgid:      %p\n",cr_xgid);
+		fprintf(stderr,"dbg2       zc_xgid:      %p\n",zc_xgid);
 		}
 
 	/* set graphics id */
@@ -834,7 +834,7 @@ int mbnavadjust_file_open(char *projectname)
 	/* local variables */
 	char	*function_name = "mbnavadjust_file_open";
 	int	status = MB_SUCCESS;
-	char	*slashptr, *nameptr;
+	char	*slashptr, *nameptr, *bufptr;
 	struct stat statbuf;
 
 	/* print input debug statements */
@@ -878,7 +878,7 @@ int mbnavadjust_file_open(char *projectname)
 				}
 			else
 				{
-				getcwd(project.path, MB_PATH_MAXLINE);
+				bufptr = getcwd(project.path, MB_PATH_MAXLINE);
 				strcat(project.path,"/");
 				}
 			strcpy(project.home,project.path);
@@ -1445,6 +1445,7 @@ int mbnavadjust_read_project()
 	double	dummy;
 	int	nscan, idummy, jdummy;
 	int	s1id, s2id;
+	int	shellstatus;
 	int	i, j, k, l;
 
 	/* print input debug statements */
@@ -1456,7 +1457,7 @@ int mbnavadjust_read_project()
 
 	/* first save copy of the project file */
 	sprintf(command,"cp %s %s.save", project.home, project.home);
-	system(command);
+	shellstatus = system(command);
 
 	/* open and read home file */
 	status = MB_SUCCESS;
@@ -6229,7 +6230,7 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       file_id:      %d\n",file_id);
 		fprintf(stderr,"dbg2       section_id:   %d\n",section_id);
-		fprintf(stderr,"dbg2       swath_ptr:    %ld  %lu\n",(size_t)swath_ptr, (size_t)*swath_ptr);
+		fprintf(stderr,"dbg2       swath_ptr:    %p  %p\n",swath_ptr, *swath_ptr);
 		fprintf(stderr,"dbg2       num_pings:    %d\n",num_pings);
 		}
 
@@ -6527,8 +6528,8 @@ int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_p
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       file_id:      %d\n",file_id);
-		fprintf(stderr,"dbg2       swathraw_ptr: %lu\n",(size_t)swathraw_ptr);
-		fprintf(stderr,"dbg2       swath_ptr:    %lu\n",(size_t)swath_ptr);
+		fprintf(stderr,"dbg2       swathraw_ptr: %p\n",swathraw_ptr);
+		fprintf(stderr,"dbg2       swath_ptr:    %p\n",swath_ptr);
 		fprintf(stderr,"dbg2       zoffset:      %f\n",zoffset);
 		}
 
@@ -6641,8 +6642,8 @@ int mbnavadjust_section_contour(int fileid, int sectionid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       fileid:       %d\n",fileid);
 		fprintf(stderr,"dbg2       sectionid:    %d\n",sectionid);
-		fprintf(stderr,"dbg2       swath:        %lu\n",(size_t)swath);
-		fprintf(stderr,"dbg2       contour:      %lu\n",(size_t)contour);
+		fprintf(stderr,"dbg2       swath:        %p\n",swath);
+		fprintf(stderr,"dbg2       contour:      %p\n",contour);
 		fprintf(stderr,"dbg2       nvector:      %d\n",contour->nvector);
 		fprintf(stderr,"dbg2       nvector_alloc:%d\n",contour->nvector_alloc);
 		}
@@ -12268,7 +12269,7 @@ int mbnavadjust_set_modelplot_graphics(void *mp_xgid, int *mp_brdr)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       mp_xgid:      %lu\n",(size_t)mp_xgid);
+		fprintf(stderr,"dbg2       mp_xgid:      %p\n",mp_xgid);
 		fprintf(stderr,"dbg2       mp_brdr:      %d %d %d %d\n",
 			mp_brdr[0], mp_brdr[1], mp_brdr[2], mp_brdr[3]);
 		}

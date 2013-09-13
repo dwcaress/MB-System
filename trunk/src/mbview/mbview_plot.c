@@ -134,7 +134,7 @@ int mbview_reset_glx(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -145,13 +145,13 @@ int mbview_reset_glx(size_t instance)
 	if (view->glx_init == MB_YES)
 		{
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->glwmda),view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXDestroyContext(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXDestroyContext(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->glwmda),view->glx_context);
 #endif
 		glXDestroyContext(view->dpy, view->glx_context);
 		view->glx_init = MB_NO;
@@ -167,14 +167,14 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 	ac++;
 	XtGetValues(view->glwmda, args, ac);
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXCreateContext(%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)view->vi);
+fprintf(stderr,"%s:%d:%s instance:%zu glXCreateContext(%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,view->vi);
 #endif
 	view->glx_context = glXCreateContext(view->dpy, view->vi,
                 	     NULL, GL_TRUE);
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->glwmda),view->glx_context);
 #endif
 	glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
 	view->glx_init = MB_YES;
@@ -196,11 +196,11 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 			function_name);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
-		fprintf(stderr,"dbg2       view->dpy:             %lu\n", (size_t)view->dpy);
-		fprintf(stderr,"dbg2       view->vi:              %lu\n", (size_t)view->vi);
-		fprintf(stderr,"dbg2       view->glwmda:          %lu\n", (size_t)view->glwmda);
-		fprintf(stderr,"dbg2       view->glx_context:     %lu\n", (size_t)view->glx_context);
-		fprintf(stderr,"dbg2       view->glx_init:        %lu\n", (size_t)view->glx_init);
+		fprintf(stderr,"dbg2       view->dpy:             %p\n", view->dpy);
+		fprintf(stderr,"dbg2       view->vi:              %p\n", view->vi);
+		fprintf(stderr,"dbg2       view->glwmda:          %p\n", view->glwmda);
+		fprintf(stderr,"dbg2       view->glx_context:     %p\n", view->glx_context);
+		fprintf(stderr,"dbg2       view->glx_init:        %d\n", view->glx_init);
 		fprintf(stderr,"dbg2       view->lastdrawrez:     %d\n", view->lastdrawrez);
 		fprintf(stderr,"dbg2       view->contourlorez:    %d\n", view->contourlorez);
 		fprintf(stderr,"dbg2       view->contourhirez:    %d\n", view->contourhirez);
@@ -237,7 +237,7 @@ int mbview_drawdata(size_t instance, int rez)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		}
 
@@ -642,7 +642,7 @@ int mbview_plotlowall(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* replot all active instances except for instance
@@ -680,7 +680,7 @@ int mbview_plotlowhighall(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* replot all active instances except for instance
@@ -717,7 +717,7 @@ int mbview_plothighall(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* replot all active instances except for instance
@@ -758,7 +758,7 @@ int mbview_plotlow(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -782,7 +782,7 @@ int mbview_plotlow(size_t instance)
 		    /* set plot_done to MB_YES */
 		    view->plot_done = MB_YES;
 if (mbv_verbose >= 2)
-fprintf(stderr, "Plot finished! instance:%ld recursion:%d\n", instance, view->plot_recursion);
+fprintf(stderr, "Plot finished! instance:%zu recursion:%d\n", instance, view->plot_recursion);
 		    }
 
 	    /* decrement the plot recursion level */
@@ -824,7 +824,7 @@ int mbview_plotlowhigh(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -851,7 +851,7 @@ int mbview_plotlowhigh(size_t instance)
 		    /* set plot_done to MB_YES */
 		    view->plot_done = MB_YES;
 if (mbv_verbose >= 2)
-fprintf(stderr, "Plot finished! instance:%ld recursion:%d\n", instance, view->plot_recursion);
+fprintf(stderr, "Plot finished! instance:%zu recursion:%d\n", instance, view->plot_recursion);
 		    }
 
 	    /* decrement the plot recursion level */
@@ -892,7 +892,7 @@ int mbview_plothigh(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -917,7 +917,7 @@ int mbview_plothigh(size_t instance)
 		    /* set plot_done to MB_YES */
 		    view->plot_done = MB_YES;
 if (mbv_verbose >= 2)
-fprintf(stderr, "Plot finished! instance:%ld recursion:%d\n", instance, view->plot_recursion);
+fprintf(stderr, "Plot finished! instance:%zu recursion:%d\n", instance, view->plot_recursion);
 		    }
 
 	    /* decrement the plot recursion level */
@@ -958,7 +958,7 @@ int mbview_plotfull(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -983,7 +983,7 @@ int mbview_plotfull(size_t instance)
 		    /* set plot_done to MB_YES */
 		    view->plot_done = MB_YES;
 if (mbv_verbose >= 2)
-fprintf(stderr, "Plot finished! instance:%ld recursion:%d\n", instance, view->plot_recursion);
+fprintf(stderr, "Plot finished! instance:%zu recursion:%d\n", instance, view->plot_recursion);
 		    }
 
 	    /* decrement the plot recursion level */
@@ -1025,7 +1025,7 @@ int mbview_plot(size_t instance, int rez)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		}
 
@@ -1039,8 +1039,8 @@ int mbview_plot(size_t instance, int rez)
 
 		/* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->glwmda),view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
 
@@ -1048,7 +1048,7 @@ __FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view
 mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 
-/*fprintf(stderr,"\nmbview_plot: instance:%ld rez:%d recursion:%ld\n",instance,rez,view->plot_recursion);
+/*fprintf(stderr,"\nmbview_plot: instance:%zu rez:%d recursion:%zu\n",instance,rez,view->plot_recursion);
 fprintf(stderr,"     view->plot_done:        %d\n",view->plot_done);
 fprintf(stderr,"     view->plot_recursion:   %d\n",view->plot_recursion);
 fprintf(stderr,"     view->projected:        %d\n",view->projected);
@@ -1186,8 +1186,8 @@ fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
 
 			/* make correct window current for OpenGL (may have changed due to recursion) */
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->glwmda),view->glx_context);
 #endif
 			glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
 
@@ -1197,8 +1197,8 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 
 			/* swap opengl buffers */
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXSwapBuffers(%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda));
+fprintf(stderr,"%s:%d:%s instance:%zu glXSwapBuffers(%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->glwmda));
 #endif
 			glXSwapBuffers (view->dpy, XtWindow(view->glwmda));
 #ifdef MBV_GET_GLX_ERRORS
@@ -1249,7 +1249,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
 		}
@@ -1426,7 +1426,7 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
@@ -1446,11 +1446,11 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel,
 
 		/* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->glwmda),view->glx_context);
 #endif
 	glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
-/*fprintf(stderr,"\nmbview_findpointrez: instance:%ld point:%d %d  bounds:%d %d %d %d\n",
+/*fprintf(stderr,"\nmbview_findpointrez: instance:%zu point:%d %d  bounds:%d %d %d %d\n",
 instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 
 #ifdef MBV_GET_GLX_ERRORS
@@ -1763,7 +1763,7 @@ int mbview_viewbounds(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
 
 	/* get view */
@@ -1776,8 +1776,8 @@ int mbview_viewbounds(size_t instance)
 
 	/* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->glwmda),view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
 
@@ -2174,8 +2174,8 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
-		fprintf(stderr,"dbg2       seg:              %lu\n", (size_t)seg);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
+		fprintf(stderr,"dbg2       seg:              %p\n", seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
@@ -2269,8 +2269,8 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
-		fprintf(stderr,"dbg2       seg:              %lu\n", (size_t)seg);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
+		fprintf(stderr,"dbg2       seg:              %p\n", seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
@@ -2488,8 +2488,8 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
-		fprintf(stderr,"dbg2       seg:              %lu\n", (size_t)seg);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
+		fprintf(stderr,"dbg2       seg:              %p\n", seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
@@ -2815,8 +2815,8 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
-		fprintf(stderr,"dbg2       seg:              %lu\n", (size_t)seg);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
+		fprintf(stderr,"dbg2       seg:              %p\n", seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
@@ -2909,8 +2909,8 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
-		fprintf(stderr,"dbg2       seg:              %lu\n", (size_t)seg);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
+		fprintf(stderr,"dbg2       seg:              %p\n", seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
@@ -3133,8 +3133,8 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
-		fprintf(stderr,"dbg2       seg:              %lu\n", (size_t)seg);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
+		fprintf(stderr,"dbg2       seg:              %p\n", seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
@@ -3493,7 +3493,7 @@ int mbview_glerrorcheck(size_t instance, char *sourcefile, int line, char *sourc
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       sourcefile:       %s\n",sourcefile);
 		fprintf(stderr,"dbg2       line:             %d\n",line);
 		fprintf(stderr,"dbg2       sourcefunction:   %s\n",sourcefunction);
@@ -3503,7 +3503,7 @@ int mbview_glerrorcheck(size_t instance, char *sourcefile, int line, char *sourc
 	gl_error = (GLenum)glGetError();
 	gl_error_msg = (GLubyte *)gluErrorString(gl_error);
 	if (gl_error != GL_NO_ERROR)
-		fprintf(stderr,"GLerror: Instance:%lu %s:%d Function %s: OpenGL error: %s\n",
+		fprintf(stderr,"GLerror: Instance:%zu %s:%d Function %s: OpenGL error: %s\n",
 			instance, sourcefile, line, sourcefunction, gl_error_msg);
 
 	/* print output debug statements */

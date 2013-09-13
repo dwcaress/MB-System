@@ -4428,6 +4428,7 @@ int mb_get_relative_path(int verbose,
 	int	pathlen;
 	int	pwdlen;
 	int	same, isame, ndiff;
+	char	*bufptr;
 	int	i;
 
 	/* print input debug statements */
@@ -4450,8 +4451,8 @@ int mb_get_relative_path(int verbose,
 	if (pathlen > 0 && path[0] != '/' )
 	    {
 	    strncpy(relativepath,path,MB_PATH_MAXLINE);
-	    getcwd(path, MB_PATH_MAXLINE);
-	    if (strlen(path) + pathlen + 1 >= MB_PATH_MAXLINE)
+	    bufptr = getcwd(path, MB_PATH_MAXLINE);
+	    if (bufptr == NULL || strlen(path) + pathlen + 1 >= MB_PATH_MAXLINE)
 	        {
 	        strcpy(path,relativepath);
 		status = MB_FAILURE;
@@ -4471,8 +4472,8 @@ int mb_get_relative_path(int verbose,
 	     strncpy(pwd,ipwd,MB_PATH_MAXLINE);
 	else
 	    {
-	    getcwd(pwd, MB_PATH_MAXLINE);
-	    if (strlen(pwd) + pwdlen + 1 >= MB_PATH_MAXLINE)
+	    bufptr = getcwd(pwd, MB_PATH_MAXLINE);
+	    if (bufptr == NULL || strlen(pwd) + pwdlen + 1 >= MB_PATH_MAXLINE)
 	        {
 	        strncpy(pwd,ipwd,MB_PATH_MAXLINE);
 		status = MB_FAILURE;

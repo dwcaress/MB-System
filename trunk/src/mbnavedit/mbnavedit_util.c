@@ -934,9 +934,9 @@ static char* getNextCStrDelim
     if (!*str) return(NULL);	/* At end */
 
 #ifdef __CENTERLINE__
-    mblen((char *)NULL, sizeof(wchar_t));
+    len = mblen((char *)NULL, sizeof(wchar_t));
 #else
-    mblen(NULL, sizeof(wchar_t));
+    len = mblen(NULL, sizeof(wchar_t));
 #endif
     while (*comma)
     {

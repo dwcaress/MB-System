@@ -379,7 +379,7 @@ int mb_readgrd(int verbose, char *grdfile,
 		fprintf(stderr,"  ymax:                     %f\n", *ymax);
 		fprintf(stderr,"  dx:                       %f\n", *dx);
 		fprintf(stderr,"  dy:                       %f\n", *dy);
-		fprintf(stderr,"  data:                     %lu\n", (size_t)*data);
+		fprintf(stderr,"  data:                     %p\n", *data);
 		}
 
 	/* print output debug statements */
@@ -418,7 +418,7 @@ int mb_readgrd(int verbose, char *grdfile,
 		fprintf(stderr,"dbg2       ymax:                     %f\n", *ymax);
 		fprintf(stderr,"dbg2       dx:                       %f\n", *dx);
 		fprintf(stderr,"dbg2       dy:                       %f\n", *dy);
-		fprintf(stderr,"dbg2       data:                     %lu\n", (size_t)*data);
+		fprintf(stderr,"dbg2       data:                     %p\n", *data);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);

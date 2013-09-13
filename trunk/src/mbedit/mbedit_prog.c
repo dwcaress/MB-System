@@ -782,7 +782,7 @@ int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %lu\n",(size_t)xgid);
+		fprintf(stderr,"dbg2       xgid:         %p\n",xgid);
 		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
 		for (i=0;i<ncol;i++)
 			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
@@ -954,23 +954,23 @@ int mbedit_get_filters( int *b_m, double *d_m,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2       b_m:     %lu\n",(size_t)b_m);
-		fprintf(stderr,"dbg2       d_m:     %lu\n",(size_t)d_m);
- 		fprintf(stderr,"dbg2       f_m:     %lu\n",(size_t)f_m);
-		fprintf(stderr,"dbg2       f_m_t:   %lu\n",(size_t)f_m_t);
-		fprintf(stderr,"dbg2       f_m_x:   %lu\n",(size_t)f_m_x);
-		fprintf(stderr,"dbg2       f_m_l:   %lu\n",(size_t)f_m_l);
- 		fprintf(stderr,"dbg2       f_w:     %lu\n",(size_t)f_w);
-		fprintf(stderr,"dbg2       f_w_t:   %lu\n",(size_t)f_w_t);
- 		fprintf(stderr,"dbg2       f_b:     %lu\n",(size_t)f_b);
-		fprintf(stderr,"dbg2       f_b_b:   %lu\n",(size_t)f_b_b);
-		fprintf(stderr,"dbg2       f_b_e:   %lu\n",(size_t)f_b_e);
- 		fprintf(stderr,"dbg2       f_d:     %lu\n",(size_t)f_d);
-		fprintf(stderr,"dbg2       f_d_b:   %lu\n",(size_t)f_d_b);
-		fprintf(stderr,"dbg2       f_d_e:   %lu\n",(size_t)f_d_e);
- 		fprintf(stderr,"dbg2       f_a:     %lu\n",(size_t)f_a);
-		fprintf(stderr,"dbg2       f_a_b:   %lu\n",(size_t)f_a_b);
-		fprintf(stderr,"dbg2       f_a_e:   %lu\n",(size_t)f_a_e);
+		fprintf(stderr,"dbg2       b_m:     %p\n",b_m);
+		fprintf(stderr,"dbg2       d_m:     %p\n",d_m);
+ 		fprintf(stderr,"dbg2       f_m:     %p\n",f_m);
+		fprintf(stderr,"dbg2       f_m_t:   %p\n",f_m_t);
+		fprintf(stderr,"dbg2       f_m_x:   %p\n",f_m_x);
+		fprintf(stderr,"dbg2       f_m_l:   %p\n",f_m_l);
+ 		fprintf(stderr,"dbg2       f_w:     %p\n",f_w);
+		fprintf(stderr,"dbg2       f_w_t:   %p\n",f_w_t);
+ 		fprintf(stderr,"dbg2       f_b:     %p\n",f_b);
+		fprintf(stderr,"dbg2       f_b_b:   %p\n",f_b_b);
+		fprintf(stderr,"dbg2       f_b_e:   %p\n",f_b_e);
+ 		fprintf(stderr,"dbg2       f_d:     %p\n",f_d);
+		fprintf(stderr,"dbg2       f_d_b:   %p\n",f_d_b);
+		fprintf(stderr,"dbg2       f_d_e:   %p\n",f_d_e);
+ 		fprintf(stderr,"dbg2       f_a:     %p\n",f_a);
+		fprintf(stderr,"dbg2       f_a_b:   %p\n",f_a_b);
+		fprintf(stderr,"dbg2       f_a_e:   %p\n",f_a_e);
 		}
 
 	/* set max beam number and acrosstrack distance */
@@ -5211,6 +5211,7 @@ int mbedit_close_file()
 	char	*function_name = "mbedit_close_file";
 	int	status = MB_SUCCESS;
 	char	command[MB_PATH_MAXLINE];
+        int     shellstatus;
 	int	i;
 
 	/* print input debug statements */
@@ -5282,7 +5283,7 @@ int mbedit_close_file()
 
 		    /* run mbprocess */
 		    sprintf(command, "mbprocess -I %s\n",ifile);
-		    system(command);
+		    shellstatus = system(command);
 		    }
 	    }
 
@@ -5828,7 +5829,7 @@ int mbedit_plot_all(
 		fprintf(stderr,"dbg2       show_mode:   %d\n",sh_mode);
 		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
-		fprintf(stderr,"dbg2       nplt:        %lu\n",(size_t)nplt);
+		fprintf(stderr,"dbg2       nplt:        %p\n",nplt);
 		fprintf(stderr,"dbg2       autoscale:   %d\n",autoscale);
 		}
 

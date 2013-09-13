@@ -1129,6 +1129,7 @@ int get_segy_limits(int verbose,
 	int	rp0, rp1, rpdel;
 	int	rptrace0, rptrace1, rptracedel;
 	int	nscan;
+	int	shellstatus;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1163,7 +1164,7 @@ int get_segy_limits(int verbose,
 		if (verbose >= 1)
 			fprintf(stderr,"\nGenerating sinf file for %s\n",segyfile);
 		sprintf(command, "mbsegyinfo -I %s -O", segyfile);
-		system(command);
+		shellstatus = system(command);
 		}
 
 

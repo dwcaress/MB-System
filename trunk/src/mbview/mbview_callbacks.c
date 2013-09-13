@@ -339,8 +339,8 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
-		fprintf(stderr,"dbg2       parent:                  %lu\n", (size_t)parent);
-		fprintf(stderr,"dbg2       app:                     %lu\n", (size_t)app);
+		fprintf(stderr,"dbg2       parent:                  %p\n", parent);
+		fprintf(stderr,"dbg2       app:                     %p\n", app);
 		}
 
 	/* set parent widget and app context */
@@ -616,7 +616,7 @@ int mbview_reset(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:                %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                %zu\n", instance);
 		}
 
 	/* get view */
@@ -1024,7 +1024,7 @@ int mbview_init(int verbose, size_t *instance, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       instance:                  %ld\n",*instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n",*instance);
 		fprintf(stderr,"dbg2       error:                     %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n",status);
@@ -1053,7 +1053,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* get view */
@@ -1067,7 +1067,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       datahandle:                %lu\n", (size_t)*datahandle);
+		fprintf(stderr,"dbg2       datahandle:                %p\n", *datahandle);
 
 		/* widget controls */
 		fprintf(stderr,"dbg2       title:                     %s\n", data->title);
@@ -1145,17 +1145,17 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr,"dbg2       primary_ymax:              %f\n", data->primary_ymax);
 		fprintf(stderr,"dbg2       primary_dx:                %f\n", data->primary_dx);
 		fprintf(stderr,"dbg2       primary_dy:                %f\n", data->primary_dy);
-		fprintf(stderr,"dbg2       primary_data:              %lu\n", (size_t)data->primary_data);
-		fprintf(stderr,"dbg2       primary_x:                 %lu\n", (size_t)data->primary_x);
-		fprintf(stderr,"dbg2       primary_y:                 %lu\n", (size_t)data->primary_y);
-		fprintf(stderr,"dbg2       primary_z:                 %lu\n", (size_t)data->primary_z);
-		fprintf(stderr,"dbg2       primary_dxdz:              %lu\n", (size_t)data->primary_dzdx);
-		fprintf(stderr,"dbg2       primary_dydz:              %lu\n", (size_t)data->primary_dzdy);
-		fprintf(stderr,"dbg2       primary_r:                 %lu\n", (size_t)data->primary_r);
-		fprintf(stderr,"dbg2       primary_g:                 %lu\n", (size_t)data->primary_g);
-		fprintf(stderr,"dbg2       primary_b:                 %lu\n", (size_t)data->primary_b);
-		fprintf(stderr,"dbg2       primary_stat_color:        %lu\n", (size_t)data->primary_stat_color);
-		fprintf(stderr,"dbg2       primary_stat_z:            %lu\n", (size_t)data->primary_stat_z);
+		fprintf(stderr,"dbg2       primary_data:              %p\n", data->primary_data);
+		fprintf(stderr,"dbg2       primary_x:                 %p\n", data->primary_x);
+		fprintf(stderr,"dbg2       primary_y:                 %p\n", data->primary_y);
+		fprintf(stderr,"dbg2       primary_z:                 %p\n", data->primary_z);
+		fprintf(stderr,"dbg2       primary_dxdz:              %p\n", data->primary_dzdx);
+		fprintf(stderr,"dbg2       primary_dydz:              %p\n", data->primary_dzdy);
+		fprintf(stderr,"dbg2       primary_r:                 %p\n", data->primary_r);
+		fprintf(stderr,"dbg2       primary_g:                 %p\n", data->primary_g);
+		fprintf(stderr,"dbg2       primary_b:                 %p\n", data->primary_b);
+		fprintf(stderr,"dbg2       primary_stat_color:        %p\n", data->primary_stat_color);
+		fprintf(stderr,"dbg2       primary_stat_z:            %p\n", data->primary_stat_z);
 
 		/* secondary grid data */
 		fprintf(stderr,"dbg2       secondary_sameas_primary:  %d\n", data->secondary_sameas_primary);
@@ -1169,7 +1169,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr,"dbg2       secondary_ymax:            %f\n", data->secondary_ymax);
 		fprintf(stderr,"dbg2       secondary_dx:              %f\n", data->secondary_dx);
 		fprintf(stderr,"dbg2       secondary_dy:              %f\n", data->secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:            %lu\n", (size_t)data->secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:            %p\n", data->secondary_data);
 
 		/* site data */
 		fprintf(stderr,"dbg2       site_view_mode:       %d\n",data->site_view_mode);
@@ -1227,8 +1227,8 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr,"dbg2       nav_mode:                  %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                      %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:                %d\n",shared.shareddata.nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:              %lu\n",(size_t)shared.shareddata.nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:        %lu\n",(size_t)shared.shareddata.nav_point_selected);
+		fprintf(stderr,"dbg2       nav_selected:              %p\n",shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:        %p\n",shared.shareddata.nav_point_selected);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
@@ -1282,8 +1282,8 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr,"dbg2       vector_mode:               %d\n",shared.shareddata.vector_mode);
 		fprintf(stderr,"dbg2       nvector:                   %d\n",shared.shareddata.nvector);
 		fprintf(stderr,"dbg2       nvector_alloc:             %d\n",shared.shareddata.nvector_alloc);
-		fprintf(stderr,"dbg2       vector_selected:           %lu\n",(size_t)shared.shareddata.vector_selected);
-		fprintf(stderr,"dbg2       vector_point_selected:     %lu\n",(size_t)shared.shareddata.vector_point_selected);
+		fprintf(stderr,"dbg2       vector_selected:           %d\n",shared.shareddata.vector_selected);
+		fprintf(stderr,"dbg2       vector_point_selected:     %d\n",shared.shareddata.vector_point_selected);
 		for (i=0;i<shared.shareddata.nvector;i++)
 			{
 			fprintf(stderr,"dbg2       vector %d color:         %d\n",i,shared.shareddata.vectors[i].color);
@@ -1365,7 +1365,7 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       sharedhandle:              %lu\n", (size_t)*sharedhandle);
+		fprintf(stderr,"dbg2       sharedhandle:              %p\n", *sharedhandle);
 
 		/* site data */
 		fprintf(stderr,"dbg2       site_mode:            %d\n",shared.shareddata.site_mode);
@@ -1417,8 +1417,8 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr,"dbg2       nav_mode:                  %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                      %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:                %d\n",shared.shareddata.nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:              %lu\n",(size_t)shared.shareddata.nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:        %lu\n",(size_t)shared.shareddata.nav_point_selected);
+		fprintf(stderr,"dbg2       nav_selected:              %p\n",shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:        %p\n",shared.shareddata.nav_point_selected);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
@@ -1476,8 +1476,8 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr,"dbg2       vector_mode:               %d\n",shared.shareddata.vector_mode);
 		fprintf(stderr,"dbg2       nvector:                   %d\n",shared.shareddata.nvector);
 		fprintf(stderr,"dbg2       nvector_alloc:             %d\n",shared.shareddata.nvector_alloc);
-		fprintf(stderr,"dbg2       vector_selected:           %lu\n",(size_t)shared.shareddata.vector_selected);
-		fprintf(stderr,"dbg2       vector_point_selected:     %lu\n",(size_t)shared.shareddata.vector_point_selected);
+		fprintf(stderr,"dbg2       vector_selected:           %d\n",shared.shareddata.vector_selected);
+		fprintf(stderr,"dbg2       vector_point_selected:     %d\n",shared.shareddata.vector_point_selected);
 		for (i=0;i<shared.shareddata.nvector;i++)
 			{
 			fprintf(stderr,"dbg2       vector %d color:         %d\n",i,shared.shareddata.vectors[i].color);
@@ -1539,8 +1539,8 @@ int mbview_setwindowparms(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
-		fprintf(stderr,"dbg2       mbview_dismiss_notify:     %lu\n", (size_t)mbview_dismiss_notify);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
+		fprintf(stderr,"dbg2       mbview_dismiss_notify:     %p\n", mbview_dismiss_notify);
 		fprintf(stderr,"dbg2       title:                     %s\n", title);
 		fprintf(stderr,"dbg2       xo:                        %d\n", xo);
 		fprintf(stderr,"dbg2       yo:                        %d\n", yo);
@@ -1633,7 +1633,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr,"dbg2       display_mode:              %d\n", display_mode);
 		fprintf(stderr,"dbg2       mouse_mode:                %d\n", mouse_mode);
 		fprintf(stderr,"dbg2       grid_mode:                 %d\n", grid_mode);
@@ -1756,9 +1756,9 @@ int mbview_open(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
-		fprintf(stderr,"dbg2       view:                      %lu\n", (size_t)view);
-		fprintf(stderr,"dbg2       data:                      %lu\n", (size_t)data);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
+		fprintf(stderr,"dbg2       view:                      %p\n", view);
+		fprintf(stderr,"dbg2       data:                      %p\n", data);
 
 		/* widget controls */
 		fprintf(stderr,"dbg2       title:                     %s\n", data->title);
@@ -1835,17 +1835,17 @@ int mbview_open(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2       primary_ymax:              %f\n", data->primary_ymax);
 		fprintf(stderr,"dbg2       primary_dx:                %f\n", data->primary_dx);
 		fprintf(stderr,"dbg2       primary_dy:                %f\n", data->primary_dy);
-		fprintf(stderr,"dbg2       primary_data:              %lu\n", (size_t) data->primary_data);
-		fprintf(stderr,"dbg2       primary_x:                 %lu\n", (size_t) data->primary_x);
-		fprintf(stderr,"dbg2       primary_y:                 %lu\n", (size_t) data->primary_y);
-		fprintf(stderr,"dbg2       primary_z:                 %lu\n", (size_t) data->primary_z);
-		fprintf(stderr,"dbg2       primary_dxdz:              %lu\n", (size_t) data->primary_dzdx);
-		fprintf(stderr,"dbg2       primary_dydz:              %lu\n", (size_t) data->primary_dzdy);
-		fprintf(stderr,"dbg2       primary_r:                 %lu\n", (size_t) data->primary_r);
-		fprintf(stderr,"dbg2       primary_g:                 %lu\n", (size_t) data->primary_g);
-		fprintf(stderr,"dbg2       primary_b:                 %lu\n", (size_t) data->primary_b);
-		fprintf(stderr,"dbg2       primary_stat_color:        %lu\n", (size_t) data->primary_stat_color);
-		fprintf(stderr,"dbg2       primary_stat_z:            %lu\n", (size_t) data->primary_stat_z);
+		fprintf(stderr,"dbg2       primary_data:              %p\n",  data->primary_data);
+		fprintf(stderr,"dbg2       primary_x:                 %p\n",  data->primary_x);
+		fprintf(stderr,"dbg2       primary_y:                 %p\n",  data->primary_y);
+		fprintf(stderr,"dbg2       primary_z:                 %p\n",  data->primary_z);
+		fprintf(stderr,"dbg2       primary_dxdz:              %p\n",  data->primary_dzdx);
+		fprintf(stderr,"dbg2       primary_dydz:              %p\n",  data->primary_dzdy);
+		fprintf(stderr,"dbg2       primary_r:                 %p\n",  data->primary_r);
+		fprintf(stderr,"dbg2       primary_g:                 %p\n",  data->primary_g);
+		fprintf(stderr,"dbg2       primary_b:                 %p\n",  data->primary_b);
+		fprintf(stderr,"dbg2       primary_stat_color:        %p\n",  data->primary_stat_color);
+		fprintf(stderr,"dbg2       primary_stat_z:            %p\n",  data->primary_stat_z);
 
 		/* secondary grid data */
 		fprintf(stderr,"dbg2       secondary_sameas_primary:  %d\n", data->secondary_sameas_primary);
@@ -1859,7 +1859,7 @@ int mbview_open(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2       secondary_ymax:            %f\n", data->secondary_ymax);
 		fprintf(stderr,"dbg2       secondary_dx:              %f\n", data->secondary_dx);
 		fprintf(stderr,"dbg2       secondary_dy:              %f\n", data->secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:            %lu\n", (size_t) data->secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:            %p\n",  data->secondary_data);
 
 		/* site data */
 		fprintf(stderr,"dbg2       site_view_mode:       %d\n",data->site_view_mode);
@@ -1918,8 +1918,8 @@ int mbview_open(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2       nav_mode:              %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                  %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:            %d\n",shared.shareddata.nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:          %lu\n", (size_t) shared.shareddata.nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:    %lu\n", (size_t) shared.shareddata.nav_point_selected);
+		fprintf(stderr,"dbg2       nav_selected:          %p\n",  shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:    %p\n",  shared.shareddata.nav_point_selected);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
@@ -2423,7 +2423,7 @@ int mbview_update(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* get view */
@@ -2524,7 +2524,7 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* get view */
@@ -2782,7 +2782,7 @@ int mbview_action_sensitivity(size_t instance)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       mbv_verbose:               %d\n", mbv_verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* check if all available instances are active */
@@ -2912,7 +2912,7 @@ int mbview_set_widgets(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		}
 
 	/* get view */
@@ -3023,8 +3023,8 @@ int mbview_addaction(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
-		fprintf(stderr,"dbg2       instance:             %ld\n",instance);
-		fprintf(stderr,"dbg2       mbview_action_notify: %lu\n",(size_t)mbview_action_notify);
+		fprintf(stderr,"dbg2       instance:             %zu\n",instance);
+		fprintf(stderr,"dbg2       mbview_action_notify: %p\n",mbview_action_notify);
 		fprintf(stderr,"dbg2       label:                %s\n",label);
 		fprintf(stderr,"dbg2       sensitive:            %d\n",sensitive);
 		}
@@ -3091,9 +3091,9 @@ int mbview_addpicknotify(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
-		fprintf(stderr,"dbg2       instance:             %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:             %zu\n",instance);
 		fprintf(stderr,"dbg2       picktype:             %d\n",picktype);
-		fprintf(stderr,"dbg2       mbview_pick_notify:   %lu\n",(size_t)mbview_pick_notify);
+		fprintf(stderr,"dbg2       mbview_pick_notify:   %p\n",mbview_pick_notify);
 		}
 
 	/* get view */
@@ -3166,8 +3166,8 @@ int mbview_setsensitivitynotify(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n",verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n",instance);
-		fprintf(stderr,"dbg2       mbview_sensitivity_notify: %lu\n",(size_t)mbview_sensitivity_notify);
+		fprintf(stderr,"dbg2       instance:                  %zu\n",instance);
+		fprintf(stderr,"dbg2       mbview_sensitivity_notify: %p\n",mbview_sensitivity_notify);
 		}
 
 	/* get view */
@@ -3278,7 +3278,7 @@ do_mbview_projection_popup( Widget w, XtPointer client_data, XtPointer call_data
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
-fprintf(stderr,"do_mbview_projection_popup: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_projection_popup: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -3506,7 +3506,7 @@ do_mbview_projection_popdown( Widget w, XtPointer client_data, XtPointer call_da
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 0)
-fprintf(stderr,"do_mbview_projection_popdown: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_projection_popdown: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -3530,7 +3530,7 @@ do_mbview_display_spheroid( Widget w, XtPointer client_data, XtPointer call_data
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
-fprintf(stderr,"do_mbview_display_spheroid: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_display_spheroid: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -3575,7 +3575,7 @@ do_mbview_display_geographic( Widget w, XtPointer client_data, XtPointer call_da
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
-fprintf(stderr,"do_mbview_display_geographic: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_display_geographic: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -3624,7 +3624,7 @@ do_mbview_display_utm( Widget w, XtPointer client_data, XtPointer call_data)
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
-fprintf(stderr,"do_mbview_display_utm: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_display_utm: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -3739,7 +3739,7 @@ do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
     event = acs->event;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_glwda_input: %d %d  instance:%ld type:%d\n",
+fprintf(stderr,"do_mbview_glwda_input: %d %d  instance:%zu type:%d\n",
 acs->width, acs->height, instance, event->xany.type);
 
     /* If there is input in the drawing area and the drawing area is still initialized */
@@ -5066,7 +5066,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 	  }
 
      /* update action buttons according to pick state */
-/* fprintf(stderr,"About to call mbview_action_sensitivity %ld\n",instance); */
+/* fprintf(stderr,"About to call mbview_action_sensitivity %zu\n",instance); */
      mbview_action_sensitivity(instance);
 
      } /* end of inputs from window */
@@ -5091,7 +5091,7 @@ do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 0)
-fprintf(stderr,"do_mbview_dismiss: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_dismiss: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -5147,7 +5147,7 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
 		fprintf(stderr,"dbg2       destroywidgets:  %d\n",destroywidgets);
 		}
 
@@ -5166,8 +5166,8 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 		    {
 		    /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,XtWindow(view->prglwmda),view->prglx_context);
 #endif
 		    glXMakeCurrent(view->dpy,XtWindow(view->prglwmda),view->prglx_context);
 
@@ -5176,8 +5176,8 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXDestroyContext(%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)view->prglx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,view->prglx_context);
 #endif
 		    glXDestroyContext(view->dpy, view->prglx_context);
 		    view->prglx_init = MB_NO;
@@ -5192,8 +5192,8 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		    {
 		    /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 #endif
 		    glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 
@@ -5202,8 +5202,8 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld glXDestroyContext(%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)view->glx_context);
+fprintf(stderr,"%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n",
+__FILE__,__LINE__,function_name,instance,view->dpy,view->glx_context);
 #endif
 		    glXDestroyContext(view->dpy, view->glx_context);
 		    view->glx_init = MB_NO;
@@ -5215,8 +5215,8 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 
 		/* destroy the topLevelShell and all its children */
 #ifdef MBV_DEBUG_GLX
-fprintf(stderr,"%s:%d:%s instance:%ld XtDestroyWidget(%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)view->topLevelShell);
+fprintf(stderr,"%s:%d:%s instance:%zu XtDestroyWidget(%p)\n",
+__FILE__,__LINE__,function_name,instance,view->topLevelShell);
 #endif
 		XtDestroyWidget(view->topLevelShell);
 
@@ -5499,7 +5499,7 @@ do_mbview_display_2D( Widget w, XtPointer client_data, XtPointer call_data)
     set_mbview_mouse_mode(instance, data->mouse_mode);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_display_2d instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_display_2d instance:%zu mode:%d\n",
 instance, data->display_mode);
 
     /* set contour flags */
@@ -5543,7 +5543,7 @@ do_mbview_display_3D( Widget w, XtPointer client_data, XtPointer call_data)
     set_mbview_mouse_mode(instance, data->mouse_mode);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_display_3d instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_display_3d instance:%zu mode:%d\n",
 instance, data->display_mode);
 
     /* set contour flags */
@@ -5583,7 +5583,7 @@ do_mbview_data_primary( Widget w, XtPointer client_data, XtPointer call_data)
     data->grid_mode = MBV_GRID_VIEW_PRIMARY;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_data_primary instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_data_primary instance:%zu mode:%d\n",
 instance, data->grid_mode);
 
     /* set togglebuttons */
@@ -5626,7 +5626,7 @@ do_mbview_data_primaryslope( Widget w, XtPointer client_data, XtPointer call_dat
     data->grid_mode = MBV_GRID_VIEW_PRIMARYSLOPE;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_data_primaryslope instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_data_primaryslope instance:%zu mode:%d\n",
 instance, data->grid_mode);
 
     /* set togglebuttons */
@@ -5669,7 +5669,7 @@ do_mbview_data_secondary( Widget w, XtPointer client_data, XtPointer call_data)
     data->grid_mode = MBV_GRID_VIEW_SECONDARY;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_data_secondary instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_data_secondary instance:%zu mode:%d\n",
 instance, data->grid_mode);
 
     /* set togglebuttons */
@@ -5704,7 +5704,7 @@ do_mbview_histogram( Widget w, XtPointer client_data, XtPointer call_data)
     ac = 0;
     XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
     XtGetValues(w, args, ac);
-/*fprintf(stderr,"do_mbview_histogram instance:%ld\n", instance);*/
+/*fprintf(stderr,"do_mbview_histogram instance:%zu\n", instance);*/
 
     /* get view */
     view = &(mbviews[instance]);
@@ -5729,7 +5729,7 @@ do_mbview_histogram( Widget w, XtPointer client_data, XtPointer call_data)
 	    }
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_histogram instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_histogram instance:%zu mode:%d\n",
 instance, data->grid_mode);
 
     /* clear color status array */
@@ -5762,7 +5762,7 @@ do_mbview_overlay_none( Widget w, XtPointer client_data, XtPointer call_data)
     data = &(view->data);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_overlay_none instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_overlay_none instance:%zu\n", instance);
 
     /* set mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
@@ -5811,7 +5811,7 @@ do_mbview_overlay_slope( Widget w, XtPointer client_data, XtPointer call_data)
     data = &(view->data);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_overlay_slope instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_overlay_slope instance:%zu\n", instance);
 
     /* set mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
@@ -5860,7 +5860,7 @@ do_mbview_overlay_illumination( Widget w, XtPointer client_data, XtPointer call_
     data = &(view->data);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_overlay_illumination instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_overlay_illumination instance:%zu\n", instance);
 
     /* set mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
@@ -5909,7 +5909,7 @@ do_mbview_overlay_secondary( Widget w, XtPointer client_data, XtPointer call_dat
     data = &(view->data);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_overlay_secondary instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_overlay_secondary instance:%zu\n", instance);
 
     /* set mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
@@ -5966,7 +5966,7 @@ do_mbview_overlay_contour( Widget w, XtPointer client_data, XtPointer call_data)
 	data->grid_contour_mode = MBV_VIEW_OFF;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_overlay_contour instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_overlay_contour instance:%zu mode:%d\n",
 instance, data->grid_contour_mode);
 
     /* draw */
@@ -6019,7 +6019,7 @@ do_mbview_site( Widget w, XtPointer client_data, XtPointer call_data)
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_site instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_site instance:%zu mode:%d\n",
 instance, data->site_view_mode);
 
     /* draw */
@@ -6073,7 +6073,7 @@ do_mbview_route( Widget w, XtPointer client_data, XtPointer call_data)
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_route instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_route instance:%zu mode:%d\n",
 instance, data->route_view_mode);
 
     /* draw */
@@ -6120,7 +6120,7 @@ do_mbview_nav( Widget w, XtPointer client_data, XtPointer call_data)
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_nav instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_nav instance:%zu mode:%d\n",
 instance, data->nav_view_mode);
 
     /* draw */
@@ -6167,7 +6167,7 @@ do_mbview_navdrape( Widget w, XtPointer client_data, XtPointer call_data)
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_navdrape instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_navdrape instance:%zu mode:%d\n",
 instance, data->navdrape_view_mode);
 
     /* draw */
@@ -6213,7 +6213,7 @@ do_mbview_vector( Widget w, XtPointer client_data, XtPointer call_data)
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_vector instance:%ld mode:%d\n",
+fprintf(stderr,"do_mbview_vector instance:%zu mode:%d\n",
 instance, data->vector_view_mode);
 
     /* draw */
@@ -6263,7 +6263,7 @@ do_mbview_colortable_haxby( Widget w, XtPointer client_data, XtPointer call_data
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colortable_haxby instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_colortable_haxby instance:%zu\n", instance);
 
     /* clear color status array */
     mbview_setcolorparms(instance);
@@ -6315,7 +6315,7 @@ do_mbview_colortable_bright( Widget w, XtPointer client_data, XtPointer call_dat
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colortable_bright instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_colortable_bright instance:%zu\n", instance);
 
     /* clear color status array */
     mbview_setcolorparms(instance);
@@ -6367,7 +6367,7 @@ do_mbview_colortable_muted( Widget w, XtPointer client_data, XtPointer call_data
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colortable_muted instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_colortable_muted instance:%zu\n", instance);
 
     /* clear color status array */
     mbview_setcolorparms(instance);
@@ -6419,7 +6419,7 @@ do_mbview_colortable_gray( Widget w, XtPointer client_data, XtPointer call_data)
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colortable_gray instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_colortable_gray instance:%zu\n", instance);
 
     /* clear color status array */
     mbview_setcolorparms(instance);
@@ -6471,7 +6471,7 @@ do_mbview_colortable_flat( Widget w, XtPointer client_data, XtPointer call_data)
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colortable_flat instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_colortable_flat instance:%zu\n", instance);
 
     /* clear color status array */
     mbview_setcolorparms(instance);
@@ -6524,7 +6524,7 @@ do_mbview_colortable_sealevel( Widget w, XtPointer client_data, XtPointer call_d
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colortable_sealevel instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_colortable_sealevel instance:%zu\n", instance);
 
     /* clear color status array */
     mbview_setcolorparms(instance);
@@ -6787,7 +6787,7 @@ set_mbview_mouse_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_mouse_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"do_mbview_mouse_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -6970,7 +6970,7 @@ set_mbview_grid_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"set_mbview_grid_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"set_mbview_grid_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7010,7 +7010,7 @@ set_mbview_histogram_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"set_mbview_histogram_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"set_mbview_histogram_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7036,7 +7036,7 @@ set_mbview_shade_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_shade_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"do_mbview_shade_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7083,7 +7083,7 @@ set_mbview_contour_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_contour_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"do_mbview_contour_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7109,7 +7109,7 @@ set_mbview_site_view_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_site_view_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"do_mbview_site_view_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7135,7 +7135,7 @@ set_mbview_route_view_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_route_view_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"do_mbview_route_view_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7161,7 +7161,7 @@ set_mbview_nav_view_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_nav_view_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"do_mbview_nav_view_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7187,7 +7187,7 @@ set_mbview_navdrape_view_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_nav_view_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"do_mbview_nav_view_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7213,7 +7213,7 @@ set_mbview_vector_view_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_vector_view_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"do_mbview_vector_view_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7239,7 +7239,7 @@ set_mbview_display_mode(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"set_mbview_display_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"set_mbview_display_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7271,7 +7271,7 @@ set_mbview_colortable(size_t instance, int mode)
     MB3DViewData	*mb3dviewptr;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colortable: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"do_mbview_colortable: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7331,7 +7331,7 @@ set_mbview_colortable_mode(size_t instance, int mode)
     struct mbview_struct *data;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colortable_mode: instance:%ld mode:%d\n", instance, mode);
+fprintf(stderr,"do_mbview_colortable_mode: instance:%zu mode:%d\n", instance, mode);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -7356,7 +7356,7 @@ do_mbview_aboutpopdown( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_aboutpopdown: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_aboutpopdown: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7381,7 +7381,7 @@ do_mbview_aboutpopup( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_aboutpopup: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_aboutpopup: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7408,7 +7408,7 @@ do_mbview_colorboundspopup( Widget w, XtPointer client_data, XtPointer call_data
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colorboundspopup: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_colorboundspopup: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7487,7 +7487,7 @@ do_mbview_colorboundspopdown( Widget w, XtPointer client_data, XtPointer call_da
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colorboundspopdown: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_colorboundspopdown: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7515,7 +7515,7 @@ do_mbview_colorboundsapply( Widget w, XtPointer client_data, XtPointer call_data
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colorboundsapply: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_colorboundsapply: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7649,7 +7649,7 @@ do_mbview_shadeparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 0)
-fprintf(stderr,"do_mbview_shadeparmspopup: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_shadeparmspopup: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7705,7 +7705,7 @@ do_mbview_shadeparmspopdown( Widget w, XtPointer client_data, XtPointer call_dat
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_shadeparmspopdown: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_shadeparmspopdown: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7734,7 +7734,7 @@ do_mbview_shadeparmsapply( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_shadeparmsapply: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_shadeparmsapply: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7837,7 +7837,7 @@ int do_mbview_3dparmstext(size_t instance)
 	struct mbview_struct *data;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_3dparmstext: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_3dparmstext: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7891,7 +7891,7 @@ do_mbview_3dparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_3dparmspopup: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_3dparmspopup: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7920,7 +7920,7 @@ do_mbview_3dparmspopdown( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_3dparmspopdown: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_3dparmspopdown: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -7947,7 +7947,7 @@ do_mbview_3dparmsapply( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_3dparmsapply: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_3dparmsapply: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -8071,7 +8071,7 @@ int do_mbview_2dparmstext(size_t instance)
 	struct mbview_struct *data;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_2dparmstext: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_2dparmstext: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -8108,7 +8108,7 @@ do_mbview_2dparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_2dparmspopup: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_2dparmspopup: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -8137,7 +8137,7 @@ do_mbview_2dparmspopdown( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_2dparmspopdown: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_2dparmspopdown: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -8164,7 +8164,7 @@ do_mbview_2dparmsapply( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_2dparmsapply: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_2dparmsapply: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -8232,7 +8232,7 @@ do_mbview_resolutionpopup( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_resolutionpopup: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_resolutionpopup: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -8272,7 +8272,7 @@ do_mbview_resolutionpopdown( Widget w, XtPointer client_data, XtPointer call_dat
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_resolutionpopdown: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_resolutionpopdown: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -8300,7 +8300,7 @@ do_mbview_resolutionchange( Widget w, XtPointer client_data, XtPointer call_data
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_resolutionchange: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_resolutionchange: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -8348,7 +8348,7 @@ fprintf(stderr,"do_mbview_resolutionchange: instance:%ld\n", instance);
     view->contourfullrez = MB_NO;
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_resolutionchange instance:%ld resolutions: %d %d decimations: %d %d\n",
+fprintf(stderr,"do_mbview_resolutionchange instance:%zu resolutions: %d %d decimations: %d %d\n",
 instance, data->lorez_dimension, data->hirez_dimension,
 data->lorez_navdecimate, data->hirez_navdecimate);
 
@@ -8468,7 +8468,7 @@ fprintf(stderr,"do_mbview_sitelistselect:\n");
 			mbview_pick_text(i);
 			/* draw */
 if (mbv_verbose >= 2)
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect instance:%ld\n",instance);
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect instance:%zu\n",instance);
 			mbview_plotlowhigh(i);
 			mbview_plotlowhighall(i);
 			}
@@ -8683,7 +8683,7 @@ fprintf(stderr,"do_mbview_navlistselect:\n");
 
 			/* draw */
 if (mbv_verbose >= 2)
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect: instance:%ld\n", i);
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect: instance:%zu\n", i);
 			mbview_plotlowhigh(i);
 			mbview_plotlowhighall(i);
 
@@ -9222,7 +9222,7 @@ do_mbview_profile_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 0)
-fprintf(stderr,"do_mbview_profile_dismiss: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_profile_dismiss: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -9268,7 +9268,7 @@ do_mbview_view_profile( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_view_profile: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_view_profile: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -9339,7 +9339,7 @@ do_mbview_profile_resize( Widget w, XtPointer client_data, XEvent *event, Boolea
 	instance = (size_t)client_data;
 
 if (mbv_verbose >= 0)
-fprintf(stderr,"do_mbview_profile_resize: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_profile_resize: instance:%zu\n", instance);
 
 	/* do this only if a resize event happens */
 	if (cevent->type == ConfigureNotify)
@@ -9383,7 +9383,7 @@ do_mbview_profile_exager( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_profile_exager: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_profile_exager: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -9418,7 +9418,7 @@ do_mbview_profile_width( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_profile_width: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_profile_width: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -9453,7 +9453,7 @@ do_mbview_profile_slope( Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_profile_slope: instance:%ld\n", instance);
+fprintf(stderr,"do_mbview_profile_slope: instance:%zu\n", instance);
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -9652,12 +9652,12 @@ int do_mbview_setbackgroundwork(size_t instance)
 			work_function_set = MB_YES;
 		else
 			status = MB_FAILURE;
-/*fprintf(stderr,"do_mbview_setbackgroundwork: instance:%ld id:%d\n",
+/*fprintf(stderr,"do_mbview_setbackgroundwork: instance:%zu id:%d\n",
 instance, id);*/
 		}
 
 else
-fprintf(stderr,"do_mbview_setbackgroundwork: FUNCTION ALREADY SET for instance:%ld!!\n",
+fprintf(stderr,"do_mbview_setbackgroundwork: FUNCTION ALREADY SET for instance:%zu!!\n",
 instance);
 
 	return(status);
@@ -9712,7 +9712,7 @@ int do_mbview_workfunction(XtPointer client_data)
 	found = MB_NO;
 	mode = MBV_BACKGROUND_NONE;
 
-/*fprintf(stderr,"\ndo_mbview_workfunction called: instance:%ld timer_count:%d\n", instance, timer_count);*/
+/*fprintf(stderr,"\ndo_mbview_workfunction called: instance:%zu timer_count:%d\n", instance, timer_count);*/
 
 	/* first make sure no plotting is active */
 	for (i = 0; i < MBV_MAX_WINDOWS && plotting == MB_NO; i++)
@@ -9811,7 +9811,7 @@ int do_mbview_workfunction(XtPointer client_data)
 			}
 		}
 	    }
-/*fprintf(stderr, "do_mbview_workfunction: plotting:%d found:%d instance:%ld mode:%d\n",
+/*fprintf(stderr, "do_mbview_workfunction: plotting:%d found:%d instance:%zu mode:%d\n",
 plotting,found,instance,mode);*/
 
 	/* do the work if instance found */

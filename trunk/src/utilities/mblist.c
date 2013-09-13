@@ -595,6 +595,7 @@ int main (int argc, char **argv)
 	double	pulse_length;
 	double	receive_gain;
 
+        int     shellstatus;
 	int	read_data;
 	int	nbeams;
 	int	i, j, k, m;
@@ -4605,10 +4606,11 @@ int main (int argc, char **argv)
 	    if (netcdf_cdl == MB_NO)
 	        {
 		sprintf(output_file_temp, "ncgen -o %s %s.cdl", output_file, output_file);
-		if (0 == system(output_file_temp))
+		shellstatus = system(output_file_temp);
+		if (shellstatus == 0)
 		    {
 		    sprintf(output_file_temp, "rm %s.cdl", output_file);
-		    system(output_file_temp);
+		    shellstatus = system(output_file_temp);
 		    }
 		}
 	    }
