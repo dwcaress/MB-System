@@ -4656,7 +4656,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 									ndat_nav, time_d, &navlat, &jdnav,
 									&error);
 						if (interp_status == MB_SUCCESS)
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp(verbose,
 									dat_nav_time_d-1, dat_nav_speed-1,
 									ndat_nav, time_d, &speed, &jdnav,
 									&error);
@@ -4705,6 +4705,10 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						{
 						heading = 0.0;
 						}
+					if (heading < 0.0)
+						heading += 360.0;
+					else if (heading >= 360.0)
+						heading -= 360.0;
 
 					/* get altitude */
 					if (interp_status != MB_SUCCESS)

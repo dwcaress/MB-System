@@ -2097,6 +2097,10 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ping->png_latitude = 20000000 * navlat;
 
 		/* get heading */
+		if (heading < 0.0)
+			heading += 360.0;
+		else if (heading >= 360.0)
+			heading -= 360.0;
 		ping->png_heading = (int) rint(heading * 100);
 
 		/* get speed  */
@@ -3356,6 +3360,10 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		ping->png_latitude = 20000000 * navlat;
 
 		/* get heading */
+		if (heading < 0.0)
+			heading += 360.0;
+		else if (heading >= 360.0)
+			heading -= 360.0;
 		ping->png_heading = (int) rint(heading * 100);
 
 		/* get speed  */

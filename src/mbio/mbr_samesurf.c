@@ -704,13 +704,13 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg4       GlobalData.numberOfProfile:             %s\n", store->GlobalData.numberOfProfile);
 		fprintf(stderr,"dbg4       GlobalData.chartZero:                   %f\n", store->GlobalData.chartZero);
 		fprintf(stderr,"dbg4       GlobalData.tideZero:                    %f\n", store->GlobalData.tideZero);
-		fprintf(stderr,"dbg4       GlobalData.numberOfMeasuredSoundings:   %ld\n", store->GlobalData.numberOfMeasuredSoundings);
-		fprintf(stderr,"dbg4       GlobalData.actualNumberOfSoundingSets:  %ld\n", store->GlobalData.actualNumberOfSoundingSets);
+		fprintf(stderr,"dbg4       GlobalData.numberOfMeasuredSoundings:   %d\n", store->GlobalData.numberOfMeasuredSoundings);
+		fprintf(stderr,"dbg4       GlobalData.actualNumberOfSoundingSets:  %d\n", store->GlobalData.actualNumberOfSoundingSets);
 		fprintf(stderr,"dbg4       GlobalData.timeDateOfTideModification:  %s\n", store->GlobalData.timeDateOfTideModification);
 		fprintf(stderr,"dbg4       GlobalData.timeDateOfDepthModification: %s\n", store->GlobalData.timeDateOfDepthModification);
 		fprintf(stderr,"dbg4       GlobalData.timeDateOfPosiModification:  %s\n", store->GlobalData.timeDateOfPosiModification);
 		fprintf(stderr,"dbg4       GlobalData.timeDateOfParaModification:  %s\n", store->GlobalData.timeDateOfParaModification);
-		fprintf(stderr,"dbg4       GlobalData.correctedParameterFlags:     %ld\n", store->GlobalData.correctedParameterFlags);
+		fprintf(stderr,"dbg4       GlobalData.correctedParameterFlags:     %d\n", store->GlobalData.correctedParameterFlags);
 		fprintf(stderr,"dbg4       GlobalData.offsetHeave:                 %f\n", store->GlobalData.offsetHeave);
 		fprintf(stderr,"dbg4       GlobalData.offsetRollPort:              %f\n", store->GlobalData.offsetRollPort);
 		fprintf(stderr,"dbg4       GlobalData.offsetRollStar:              %f\n", store->GlobalData.offsetRollStar);
@@ -874,12 +874,12 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg4       MultibeamSignalParameters.rxSets[%3d]:               %f %f\n",
 			i, store->MultibeamSignalParameters.rxSets[i].time, store->MultibeamSignalParameters.rxSets[i].gain);
 
-		fprintf(stderr,"dbg4       MultibeamTransmitterParameters.txSets[0].txBeamIndex: %ld\n", store->MultibeamTransmitterParameters.txSets[0].txBeamIndex);
+		fprintf(stderr,"dbg4       MultibeamTransmitterParameters.txSets[0].txBeamIndex: %d\n", store->MultibeamTransmitterParameters.txSets[0].txBeamIndex);
 		fprintf(stderr,"dbg4       MultibeamTransmitterParameters.txSets[0].txLevel:     %f\n", store->MultibeamTransmitterParameters.txSets[0].txLevel);
 		fprintf(stderr,"dbg4       MultibeamTransmitterParameters.txSets[0].txBeamAngle: %f\n", store->MultibeamTransmitterParameters.txSets[0].txBeamAngle);
 		fprintf(stderr,"dbg4       MultibeamTransmitterParameters.txSets[0].pulseLength: %f\n", store->MultibeamTransmitterParameters.txSets[0].pulseLength);
 
-		fprintf(stderr,"dbg4       SidescanData.sidescanFlag:              %ld\n", store->SidescanData.sidescanFlag);
+		fprintf(stderr,"dbg4       SidescanData.sidescanFlag:              %d\n", store->SidescanData.sidescanFlag);
 		fprintf(stderr,"dbg4       SidescanData.actualNrOfSsDataPort:      %d\n", store->SidescanData.actualNrOfSsDataPort);
 		fprintf(stderr,"dbg4       SidescanData.actualNrOfSsDataStb:       %d\n", store->SidescanData.actualNrOfSsDataStb);
 		fprintf(stderr,"dbg4       SidescanData.minSsTimePort:             %f\n", store->SidescanData.minSsTimePort);

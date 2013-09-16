@@ -1737,7 +1737,6 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 							nav_time_d-1, nav_lat-1,
 							nnav, time_d, &navlat, &j,
 							&error);
-fprintf(stderr,"Interp Nav: %f %f %f\n",time_d,navlon,navlat);
 				}
 			else if (ndat_nav > 0)
 				{
@@ -1777,6 +1776,10 @@ fprintf(stderr,"Interp Nav: %f %f %f\n",time_d,navlon,navlat);
 				{
 				heading = 0.0;
 				}
+			if (heading < 0.0)
+				heading += 360.0;
+			else if (heading >= 360.0)
+				heading -= 360.0;
 
 			/* merge sonardepth from best available source */
 			if (nsonardepth > 0)

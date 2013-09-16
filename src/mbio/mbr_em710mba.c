@@ -5098,7 +5098,6 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		fprintf(stderr,"dbg5       png_msec:              %d\n",ping->png_msec);
 		fprintf(stderr,"dbg5       png_count:             %d\n",ping->png_count);
 		fprintf(stderr,"dbg5       png_serial:            %d\n",ping->png_serial);
-
 		fprintf(stderr,"dbg5       png_latitude:          %f\n",ping->png_latitude);
 		fprintf(stderr,"dbg5       png_longitude:         %f\n",ping->png_longitude);
 		fprintf(stderr,"dbg5       png_heading:           %d\n",ping->png_heading);

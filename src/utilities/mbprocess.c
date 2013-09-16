@@ -5018,6 +5018,10 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 					ntime-1, nheading-1,
 					nnav, time_d, &heading, &itime,
 					&error);
+                            if (heading < 0.0)
+                                heading += 360.0;
+                            else if (heading > 360.0)
+                                heading -= 360.0;
 			    }
 
 			/* interpolate speed */
@@ -5338,7 +5342,7 @@ alpha, beta, lever_heave);*/
 			    || process.mbp_heading_mode == MBP_HEADING_CALCOFFSET))
 			{
 			heading += process.mbp_headingbias;
-			if (heading > 360.0)
+			if (heading >= 360.0)
 			    heading -= 360.0;
 			else if (heading < 0.0)
 			    heading += 360.0;
@@ -5934,6 +5938,8 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_NAV))
 			{
+if (heading < 0.0)
+fprintf(stderr,"INSERTING NEGATIVE HEADING:%f\n",heading);
 			status = mb_insert_nav(verbose,imbio_ptr,store_ptr,
 					time_i,time_d,navlon,navlat,
 					speed,heading,draft,roll,pitch,heave,&error);

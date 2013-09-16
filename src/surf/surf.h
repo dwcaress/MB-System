@@ -64,8 +64,8 @@
 /*
    time/date-sets are presented in ASCII-Characters
       DDMMYYHHMMSS.NN<0x0>
-   name-strings and Label-strings are presented in 
-   c-string-annotation    ABCDEFG<0x0> 
+   name-strings and Label-strings are presented in
+   c-string-annotation    ABCDEFG<0x0>
 */
 
 #define LABEL_SIZE          16
@@ -74,10 +74,10 @@
 #define TEXT_SIZE           80
 
 
-/* if number of sets or contents are modified , 
+/* if number of sets or contents are modified ,
    you should update VERSION !!! */
 
-  
+
 #define SURF_VERSION "SURF V3.0"
 
 #define SURF_VERS3_0 "SURF V3.0"
@@ -95,15 +95,15 @@
 /* datatypes of different SURF-datasets */
 
    /* marker types */
-            
+
 #define      MIN_M          -4
 #define      EOD_M          -4
-#define      NROF_M         -3       
-#define      SDA_M          -2       
-#define      SIX_M          -1      
-            
+#define      NROF_M         -3
+#define      SDA_M          -2
+#define      SIX_M          -1
+
    /* six types */
-         
+
 #define      DESCRIPTOR      1
 #define      GLOBALDATA      2
 #define      STATISTICS      3
@@ -119,19 +119,19 @@
 #define      FREESIXDESCR   13
 #define      FREESNDGDESCR  14
 #define      FREEBEAMDESCR  15
-#define      SIXATTDATA     16 
+#define      SIXATTDATA     16
 #define      VENDORTEXT     17
 #define      CPROFTPES      18
 #define      MAXSIX         18
 
    /* sda types */
-         
+
 #define      MINSDA          40
 #define      SOUNDING        40
 #define      CENTERPOSITION  41
 #define      SINGLEBEAMDEPTH 42
-#define      MULTIBEAMDEPTH  43 
-#define      MULTIBEAMTT     44 
+#define      MULTIBEAMDEPTH  43
+#define      MULTIBEAMTT     44
 #define      MULTIBEAMRECV   45
 #define      SIGNALPARMS     46
 #define      SIGNALAMPLITUDE 47  /* wird nicht mehr benutzt V2.0 */
@@ -147,7 +147,7 @@
 #define      MAXSDA          56
 
    /* nrof types */
-         
+
 #define      MAX_NROF_BEAMS_PER_TABLE          80
 #define      MAX_NROF_CPROFILES_PER_TABLE      81
 #define      MAX_NROF_POLYGONS_PER_TABLE       82
@@ -158,7 +158,11 @@
 #define      NROF_TX_TVG_SETS                  87
 #define      MAX_NR_OF_TYPES                   87
 
-
+#ifdef __LP64__
+#define SURF_U_LONG unsigned int
+#else
+#define SURF_U_LONG unsigned long
+#endif
 
 
 /* SURF-dataset "Descriptor" */
@@ -170,34 +174,34 @@ typedef short SurfMarkerDescriptor;
 typedef struct
             {
               short       typ        ;
-              u_long      nr         ;
+              SURF_U_LONG nr         ;
             } SurfSixDescriptor;
-              
+
 typedef struct
             {
               short       typ        ;
-              u_long      nr         ;
+              SURF_U_LONG nr         ;
             } SurfSdaDescriptor;
 
 typedef struct
             {
               short       typ        ;
-              u_long      nr         ;
+              SURF_U_LONG nr         ;
             } SurfNrofDescriptor;
 
-typedef struct 
+typedef struct
             {
               char                  label    [LABEL_SIZE]          ;
               SurfMarkerDescriptor  six                            ;
-              SurfSixDescriptor     descriptor                     ; 
-              SurfSixDescriptor     globalData                     ; 
-              SurfSixDescriptor     statistics                     ; 
-              SurfSixDescriptor     positionSensor                 ; 
-              SurfSixDescriptor     transducer                     ; 
-              SurfSixDescriptor     angleTab                       ; 
-              SurfSixDescriptor     cProfile                       ; 
-              SurfSixDescriptor     polygon                        ; 
-              SurfSixDescriptor     events                         ; 
+              SurfSixDescriptor     descriptor                     ;
+              SurfSixDescriptor     globalData                     ;
+              SurfSixDescriptor     statistics                     ;
+              SurfSixDescriptor     positionSensor                 ;
+              SurfSixDescriptor     transducer                     ;
+              SurfSixDescriptor     angleTab                       ;
+              SurfSixDescriptor     cProfile                       ;
+              SurfSixDescriptor     polygon                        ;
+              SurfSixDescriptor     events                         ;
               SurfSixDescriptor     freeText                       ;
               SurfSixDescriptor     addStatistics                  ;   /* new V3.0 */
               SurfSixDescriptor     tpeStatics                     ;   /* new V3.0 */
@@ -209,36 +213,36 @@ typedef struct
               SurfSixDescriptor     vendorText                     ;   /* new V3.0 */
 
               SurfMarkerDescriptor  sda                            ;
-              SurfSdaDescriptor     soundings                      ; 
-              SurfSdaDescriptor     centerPositions                ; 
-              SurfSdaDescriptor     singleBeamDepth                ; 
-              SurfSdaDescriptor     multiBeamDepth                 ; 
-              SurfSdaDescriptor     multiBeamTT                    ; 
-              SurfSdaDescriptor     multiBeamRecv                  ; 
-              SurfSdaDescriptor     signalParams                   ; 
-              SurfSdaDescriptor     signalAmplitudes               ;/* wird ab V2.0 nicht mehr benutzt*/ 
-              SurfSdaDescriptor     beamAmplitudes                 ; 
-              SurfSdaDescriptor     extendBeamAmplitudes           ; 
-              SurfSdaDescriptor     sidescanData                   ; 
+              SurfSdaDescriptor     soundings                      ;
+              SurfSdaDescriptor     centerPositions                ;
+              SurfSdaDescriptor     singleBeamDepth                ;
+              SurfSdaDescriptor     multiBeamDepth                 ;
+              SurfSdaDescriptor     multiBeamTT                    ;
+              SurfSdaDescriptor     multiBeamRecv                  ;
+              SurfSdaDescriptor     signalParams                   ;
+              SurfSdaDescriptor     signalAmplitudes               ;/* wird ab V2.0 nicht mehr benutzt*/
+              SurfSdaDescriptor     beamAmplitudes                 ;
+              SurfSdaDescriptor     extendBeamAmplitudes           ;
+              SurfSdaDescriptor     sidescanData                   ;
               SurfSdaDescriptor     txParams                       ;
               SurfSdaDescriptor     positionCpes                   ;   /* new V3.0 */
               SurfSdaDescriptor     multiTpeParams                 ;   /* new V3.0 */
               SurfSdaDescriptor     singleTpeParams                ;   /* new V3.0 */
               SurfSdaDescriptor     sndgAttData                    ;   /* new V3.0 */
-              SurfSdaDescriptor     beamAttData                    ;   /* new V3.0 */ 
+              SurfSdaDescriptor     beamAttData                    ;   /* new V3.0 */
 
               SurfMarkerDescriptor  nrof                           ;
-              SurfNrofDescriptor    maxNrOfBeams                   ; 
-              SurfNrofDescriptor    maxNrOfCProfileElements        ; 
-              SurfNrofDescriptor    maxNrOfPolygonElements         ; 
-              SurfNrofDescriptor    maxNrOfEvents                  ; 
-              SurfNrofDescriptor    maxNrOfFreeTextBlocks          ; 
-              SurfNrofDescriptor    maxNrOfSidescanData            ; 
-              SurfNrofDescriptor    nrOfRxTvgSets                  ; 
-              SurfNrofDescriptor    nrOfTxTvgSets                  ; 
+              SurfNrofDescriptor    maxNrOfBeams                   ;
+              SurfNrofDescriptor    maxNrOfCProfileElements        ;
+              SurfNrofDescriptor    maxNrOfPolygonElements         ;
+              SurfNrofDescriptor    maxNrOfEvents                  ;
+              SurfNrofDescriptor    maxNrOfFreeTextBlocks          ;
+              SurfNrofDescriptor    maxNrOfSidescanData            ;
+              SurfNrofDescriptor    nrOfRxTvgSets                  ;
+              SurfNrofDescriptor    nrOfTxTvgSets                  ;
 
               SurfMarkerDescriptor  eod                            ;
-            } SurfDescriptor;       
+            } SurfDescriptor;
 
 
 
@@ -247,7 +251,7 @@ typedef struct
 /* SURF-dataset "Globaldata" */
 
   /* Values of 'typeOfSounder' */
-  
+
 #define MANUAL_DATA              'M'
 #define DIGITIZED_DATA           'D'
 #define VERTICAL_SOUNDER         'V'
@@ -258,7 +262,7 @@ typedef struct
 
 
   /* Values of 'presentationOfPosition' */
-  
+
 #define EASTING_NORTHING         'E' /* Values will be scaled in [rad] */
 #define X_Y                      'X' /* Values will be scaled in [m]   */
 
@@ -289,13 +293,13 @@ typedef struct
               char    numberOfProfile           [STRING_SIZE];
               float   chartZero                              ;  /* rel. NN*/
               float   tideZero                               ;  /* rel. NN*/
-              u_long  numberOfMeasuredSoundings              ;  
-              u_long  actualNumberOfSoundingSets             ;
+              SURF_U_LONG  numberOfMeasuredSoundings              ;
+              SURF_U_LONG  actualNumberOfSoundingSets             ;
               char    timeDateOfTideModification  [TIME_SIZE];
               char    timeDateOfDepthModification [TIME_SIZE];
               char    timeDateOfPosiModification  [TIME_SIZE];
               char    timeDateOfParaModification  [TIME_SIZE];
-              u_long  correctedParameterFlags                ;
+              SURF_U_LONG  correctedParameterFlags                ;
               float   offsetHeave                            ;
               float   offsetRollPort                         ;
               float   offsetRollStar                         ;
@@ -365,7 +369,7 @@ typedef struct
               float   maxBeamPositionAhead           ;
               float   minDepth                       ;
               float   maxDepth                       ;
-            } SurfStatistics;  
+            } SurfStatistics;
 
 
 
@@ -407,16 +411,16 @@ typedef struct
 typedef struct
             {
               char    label[LABEL_SIZE]              ;
-              u_long  flag;
-              u_long  nrNotDeletedDepth              ;
-              u_long  nrNotReducedDepth              ;
-              u_long  nrNotDeletedSoundings          ;
+              SURF_U_LONG  flag;
+              SURF_U_LONG  nrNotDeletedDepth              ;
+              SURF_U_LONG  nrNotReducedDepth              ;
+              SURF_U_LONG  nrNotDeletedSoundings          ;
               SurfReductionParameters   redParm      ;
               SurfLastFilterParameters  filterParm   ;
               char    serverReduction[TEXT_SIZE]     ;
               double  dFuture[10]                    ;
-              u_short iFuture[8]                     ;            
-            } SurfAddStatistics;  
+              u_short iFuture[8]                     ;
+            } SurfAddStatistics;
 
 
 
@@ -433,7 +437,7 @@ typedef struct
               char    positionSensorName         [STRING_SIZE];
               char    sensorUnion                 [UNION_SIZE];
             } SurfPositionSensorArray;
-              
+
 
     /*  Now special Sensors */
 
@@ -467,7 +471,7 @@ typedef struct
               float   polarfixAntennaPositionStar             ;
               float   polarfixAntennaPositionHeight           ;
             } SurfPositionPolarfix;
-              
+
     /*  other overlayed Sets */
 
 #define UNKNOWNPOSSENS   "UNKNOWN"
@@ -502,7 +506,7 @@ typedef struct
               float   sensorAntennaPositionStar               ;
               float   sensorAntennaPositionHeight             ;
             } SurfPositionAnySensor;
-              
+
 
 
 
@@ -542,7 +546,7 @@ typedef struct
               float   transducerTwoThetaMFreq        ;
               float   transducerTwoThetaLFreq        ;
             } SurfTransducerParameterTable;
-              
+
 
 
 
@@ -555,9 +559,9 @@ typedef struct
 typedef struct
             {
                float  depth                          ;
-               float  cValue                         ; 
+               float  cValue                         ;
             } CProfileValues;
-              
+
 
 typedef struct
             {
@@ -574,7 +578,7 @@ typedef struct
         (sizeof(SurfCProfileTable) + \
         ((MAX_NR_OF_PROFILES - 1) * sizeof(CProfileValues)))
 
-              
+
 
 
 /* SURF-dataset "C-profile-TPE-Values" */
@@ -594,12 +598,12 @@ typedef struct
         (sizeof(SurfCProfileTpeTable) + \
         ((MAX_NR_OF_PROFILES - 1) * sizeof(float)))
 
-              
 
 
 
 
-/* SURF-dataset "Polygon" */          
+
+/* SURF-dataset "Polygon" */
 
 #define SURF_POLYGONS_LABEL "POLYGON"
 
@@ -622,12 +626,12 @@ typedef struct
         (sizeof(SurfPolygons) + \
         ((NR_OF_POLYGONS - 1) * sizeof(SurfPolygonValues)))
 
-              
 
 
 
 
-/* SURF-dataset "Events " */          
+
+/* SURF-dataset "Events " */
 
 #define SURF_EVENT_LABEL "EVENTS"
 #define EVENT_SIZE 84
@@ -644,7 +648,7 @@ typedef struct
             {
               char              label    [LABEL_SIZE];
               SurfEventValues   values            [1];
-            } SurfEvents;   
+            } SurfEvents;
 
 #define SIZE_OF_SURF_EVENT_ARRAY(NR_OF_EVENTS) \
         (NR_OF_EVENTS == 0)?\
@@ -653,7 +657,7 @@ typedef struct
         (sizeof(SurfEvents) + \
         ((NR_OF_EVENTS - 1) * sizeof(SurfEventValues)))
 
-              
+
 
 
 
@@ -673,7 +677,7 @@ typedef enum {
 typedef struct
             {
               char    label    [LABEL_SIZE];
-              u_long  tpeFlag                        ;
+              SURF_U_LONG  tpeFlag                        ;
               char    timeDateOfLastTpeCalculation[TIME_SIZE];
               double  ltncyHprMb                     ;
               double  ltncyNavHss                    ;
@@ -701,7 +705,7 @@ typedef struct
               double  reserve2                       ;
               double  reserve3                       ;
               double  reserve4                       ;
-            } SurfTpeStatics;  
+            } SurfTpeStatics;
 
 
 
@@ -712,7 +716,7 @@ typedef struct
 typedef struct
             {
               char    descr[STRING_SIZE]          ;
-            } SurfFreeSixDataDescr;   
+            } SurfFreeSixDataDescr;
 
 #define SIZE_OF_SURF_SIX_ATTACHED_DESCR(NR_OF_SIX_ATTACHED_DATA) \
             (NR_OF_SIX_ATTACHED_DATA == 0)?\
@@ -720,7 +724,7 @@ typedef struct
             :\
             (sizeof(SurfFreeSixDataDescr) + \
             ((NR_OF_SIX_ATTACHED_DATA - 1) * sizeof(SurfFreeSixDataDescr)))
-        
+
 
 
 
@@ -730,7 +734,7 @@ typedef struct
 typedef struct
             {
               char    descr[STRING_SIZE]          ;
-            } SurfFreeSndgDataDescr;   
+            } SurfFreeSndgDataDescr;
 
 #define SIZE_OF_SURF_SNDG_ATTACHED_DESCR(NR_OF_SNDG_ATTACHED_DATA) \
             (NR_OF_SNDG_ATTACHED_DATA == 0)?\
@@ -738,7 +742,7 @@ typedef struct
             :\
             (sizeof(SurfFreeSndgDataDescr) + \
             ((NR_OF_SNDG_ATTACHED_DATA - 1) * sizeof(SurfFreeSndgDataDescr)))
-        
+
 
 
 
@@ -749,7 +753,7 @@ typedef struct
 typedef struct
             {
               char    descr[STRING_SIZE]          ;
-            } SurfFreeBeamDataDescr;   
+            } SurfFreeBeamDataDescr;
 
 #define SIZE_OF_SURF_BEAM_ATTACHED_DESCR(NR_OF_BEAM_ATTACHED_DATA) \
             (NR_OF_BEAM_ATTACHED_DATA == 0)?\
@@ -757,7 +761,7 @@ typedef struct
             :\
             (sizeof(SurfFreeBeamDataDescr) + \
             ((NR_OF_BEAM_ATTACHED_DATA - 1) * sizeof(SurfFreeBeamDataDescr)))
-        
+
 
 
 
@@ -765,7 +769,7 @@ typedef struct
 
 /* SURF-dataset "Free SixAttached Data"  */           /* new V3.0 */
 
-typedef double SurfFreeSixAttachedData;   
+typedef double SurfFreeSixAttachedData;
 
 #define SIZE_OF_SURF_SIX_ATTACHED_DATA(NR_OF_SIX_ATTACHED_DATA) \
             (NR_OF_SIX_ATTACHED_DATA == 0)?\
@@ -773,13 +777,13 @@ typedef double SurfFreeSixAttachedData;
             :\
             (sizeof(SurfFreeSixAttachedData) + \
             ((NR_OF_SIX_ATTACHED_DATA - 1) * sizeof(SurfFreeSixAttachedData)))
-        
 
 
 
 
 
-/* SURF-dataset "Free Text " */          
+
+/* SURF-dataset "Free Text " */
 
 #define SURF_FREE_TEXT_LABEL "FREETEXT"
 #define FREE_TEXT_BLOCK_SIZE        4
@@ -793,7 +797,7 @@ typedef struct
             {
               char              label    [LABEL_SIZE];
               SurfFreeTextBlocks blocks[1];
-            } SurfFreeText;   
+            } SurfFreeText;
 
 #define SIZE_OF_FREE_TEXT_ARRAY(NR_OF_FREE_TEXT_BLOCKS) \
         (NR_OF_FREE_TEXT_BLOCKS == 0)?\
@@ -801,13 +805,13 @@ typedef struct
         :\
         (sizeof(SurfFreeText) + \
         ((NR_OF_FREE_TEXT_BLOCKS - 1) * sizeof(SurfFreeTextBlocks)))
-        
 
 
 
 
 
-/* SURF-dataset " Vendor Text " */          
+
+/* SURF-dataset " Vendor Text " */
 
 typedef struct
             {
@@ -823,14 +827,14 @@ typedef struct
 /* SURF-elements describing SDA-files  */
 /*                                     */
 /***************************************/
-              
+
 
 
 
 /* SURF-dataset "Sounding-Data" */
 
   /* soundingFlag */
-  
+
 #define SF_DELETED                 1
 #define SF_COURSE_MANIPULATED      2
 #define SF_HEAVE_MANIPULATED       4
@@ -852,7 +856,7 @@ typedef struct
 #define SF_PORT_FAN             (SF_FAN_PAT_1)
 #define SF_STAR_FAN             (SF_FAN_PAT_1+SF_FAN_PAT_2)
 
-  
+
 typedef struct
             {
               u_short soundingFlag                   ;
@@ -869,13 +873,13 @@ typedef struct
               float   cKeel                          ;
               float   cMean                          ;
               float   dynChartZero                   ;
-            } SurfSoundingData;  
+            } SurfSoundingData;
 
 
 
-/* SURF-dataset "Free SoundingAttached Data"  */             /* new V3.0 */   
+/* SURF-dataset "Free SoundingAttached Data"  */             /* new V3.0 */
 
-typedef float SurfFreeSoundingAttachedData;                
+typedef float SurfFreeSoundingAttachedData;
 
 #define SIZE_OF_SURF_SNDG_ATTACHED_DATA(NR_OF_SNDG_ATTACHED_DATA) \
             (NR_OF_SNDG_ATTACHED_DATA == 0)?\
@@ -883,13 +887,13 @@ typedef float SurfFreeSoundingAttachedData;
             :\
             (sizeof(SurfFreeSoundingAttachedData) + \
             ((NR_OF_SNDG_ATTACHED_DATA - 1) * sizeof(SurfFreeSoundingAttachedData)))
-        
 
 
 
-             
+
+
   /* positionFlag */
-  
+
 #define PF_DELETED                 1
 
 
@@ -903,13 +907,13 @@ typedef struct
               float   centerPositionY                ;
               float   speed                          ;
             } SurfCenterPosition;
-              
 
 
 
-/* SURF-dataset "Position-Cep"  */                    /* new V3.0 */   
 
-typedef float SurfPositionCepData;                
+/* SURF-dataset "Position-Cep"  */                    /* new V3.0 */
+
+typedef float SurfPositionCepData;
 
 
 
@@ -942,7 +946,7 @@ typedef struct
               float   depthMFreq                     ;
               float   depthLFreq                     ;
             } SurfSingleBeamDepth;
-              
+
 
 
 
@@ -955,7 +959,7 @@ typedef struct
               float   beamPositionAhead              ;
               float   beamPositionStar               ;
             } SurfMultiBeamDepth;
-              
+
 
 
 
@@ -965,7 +969,7 @@ typedef struct
             {
               float   travelTimeOfRay                ;
             } SurfMultiBeamTT;
-              
+
 
 
 
@@ -976,17 +980,17 @@ typedef struct
               float   headingWhileReceiving          ;
               float   heaveWhileReceiving            ;
             } SurfMultiBeamReceive;
-              
+
 
 
 
 /* SURF-dataset "Beam-Amplitudes" */                    /* new V2.0 */
 
 typedef struct
-            { 
+            {
               u_short beamAmplitude                  ;  /* new V2.0 */
             } SurfAmplitudes;
-              
+
 
 
 
@@ -998,13 +1002,13 @@ typedef struct
               u_short nis                            ;
               u_short beamAmplitude                  ;
             } SurfExtendedAmplitudes;
-              
+
 
 
 
 /* SURF-dataset "Free Beamattached Data"  */            /* new V3.0 */
 
-typedef float SurfFreeBeamAttachedData;               
+typedef float SurfFreeBeamAttachedData;
 
 #define SIZE_OF_SURF_BEAM_ATTACHED_DATA(NR_OF_BEAM_ATTACHED_DATA) \
             (NR_OF_BEAM_ATTACHED_DATA == 0)?\
@@ -1012,7 +1016,7 @@ typedef float SurfFreeBeamAttachedData;
             :\
             (sizeof(SurfFreeBeamAttachedData) + \
             ((NR_OF_BEAM_ATTACHED_DATA - 1) * sizeof(SurfFreeBeamAttachedData)))
-        
+
 
 
 /* SURF-dataset "RxSignalparameter" */                 /* new V2.0 */
@@ -1024,7 +1028,7 @@ typedef struct
             }TvgRxSets;
 
 typedef struct
-            { 
+            {
              u_short bscatClass                     ;/* new V2.2 */
              u_short nrActualGainSets               ;
              float   rxGup                          ;
@@ -1047,14 +1051,14 @@ typedef struct
 
 typedef struct
             {
-             u_long txBeamIndex   ;  /* Code of external Beamshapetab */
+             SURF_U_LONG txBeamIndex   ;  /* Code of external Beamshapetab */
              float  txLevel       ;  /* scale : dB rel 1 uPa */
              float  txBeamAngle   ;  /* scale : rad */
              float  pulseLength   ;  /* scale : sec */
             }TxSets;
 
 typedef struct
-            { 
+            {
              TxSets  txSets[1]                      ;  /* new V2.0 */
             } SurfTxParameter;
 
@@ -1085,13 +1089,13 @@ typedef struct
         :\
         (sizeof(SurfSignalAmplitudes) + \
         ((NR_OF_AMPLITUDES - 1) * sizeof(u_char)))
-        
+
 
 /* SURF-dataset "Sidescandata"  */
 
 typedef struct
             {
-              u_long  sidescanFlag                   ;  /* new V2.0 */
+              SURF_U_LONG  sidescanFlag                   ;  /* new V2.0 */
               u_short actualNrOfSsDataPort           ;
               u_short actualNrOfSsDataStb            ;
               float   minSsPosPort                   ;
@@ -1110,7 +1114,7 @@ typedef struct
         ((NR_OF_AMPLITUDES - 1) * sizeof(u_char)))
 
 
-        
+
 
 /* SURF-dataset "TPE-values"  */                         /* new V3.0 */
 
@@ -1121,15 +1125,12 @@ typedef struct
               float   minDetectionVolumeTpe          ;
             } SurfTpeValues;
 
-typedef SurfTpeValues SurfMultiBeamTpeValues;               
+typedef SurfTpeValues SurfMultiBeamTpeValues;
 
-typedef SurfTpeValues SurfSingleBeamTpeValues;   
+typedef SurfTpeValues SurfSingleBeamTpeValues;
 
-              
+
 
 
 
 #endif /* ifndef _SURF */
-
-
-

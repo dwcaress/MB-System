@@ -112,6 +112,14 @@
 #define MemZero(m, n)		(void) memset((void *) (m), (int) 0, (size_t) (n))
 #endif
 
+/* Handle XDR weirdness with respect to int and long */
+#ifdef __LP64__
+#define MR1PR_LONG int
+#else
+#define MR1PR_LONG long
+#endif
+
+
 /* MR1 channel defines */
 #define ACP_NSIDES		(2)
 #define ACP_PORT		(0)
@@ -166,7 +174,7 @@ typedef struct ps_struct {
 
 /* MR1Timeval --
    This structure is defined for the MB-System version
-   of this code because MB-System explicitely avoids
+   of this code because MB-System explicitly avoids
    using standard time structures and functions, thereby
    avoiding the wide variability in time handling amongst
    Unix-like operating systems. */

@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I@top_srcdir@/src/mbio
+AM_CPPFLAGS = -I${top_srcdir}/src/mbio
 
 include_HEADERS = gsf.h
 

@@ -263,7 +263,7 @@ struct mb_io_struct
 
 	/* file descriptor, file name, and usage flag */
 	FILE	*mbfp;		/* file descriptor */
-	char	file[MB_PATH_MAXLINE];	/* file name */
+	mb_path	file;	        /* file name */
 	long	file_pos;	/* file position at start of
 				    last record read */
 	long	file_bytes;	/* number of bytes read from file */
@@ -374,6 +374,7 @@ struct mb_io_struct
 
 	/* variables for projections to and from projected coordinates */
 	int	projection_initialized;
+        char	projection_id[MB_NAME_LENGTH];
 	void 	*pjptr;
 
 	/* variables for interpolating/extrapolating navigation

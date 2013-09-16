@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.4.2151])
+AC_INIT([mbsystem],[5.4.2152],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "12 September 2013", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "16 September 2013", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -222,43 +222,46 @@ dnl Check for NetCDF lib
 AS_ECHO(["Check for NetCDF"])
 GOT_CDF=no
 CDF_SETTING=no
-dnl first check for pacakge
+dnl first check for package
 PKG_CHECK_MODULES([libnetcdf], [netcdf], [GOT_CDF=yes], [GOT_CDF=no])
 
 dnl Package check failed so check manually
 if test "$GOT_CDF" = "no" ; then
 
 libnetcdf_LIBS="-lnetcdf"
+libnetcdf_LDFLAGS=
 
 dnl arg for command line
 AC_ARG_WITH(netcdf-lib, [  --with-netcdf-lib=DIR	Location of NetCDF library],
-	[libnetcdf_LDFLAGS="-L${withval}"] [libnetcdf_RPATH="-R ${withval}"] [GOT_CDF=yes], [GOT_CDF=no])
+	[netcdf_libdir="${withval}"] [GOT_CDF=yes], [GOT_CDF=no])
 dnl First check if lib installed
 if test "$GOT_CDF" = "no" ; then
  AC_CHECK_LIB([netcdf], [nc_open], [CDF_SETTING=yes], [CDF_SETTING=no],)
 fi
  if test "$CDF_SETTING" = "yes" ; then
     GOT_CDF=yes
-    libnetcdf_LDFLAGS=
     AS_ECHO(["Using pre-installed libcdf."])
  else
     if test "$GOT_CDF" = "no" ; then
 	AC_MSG_ERROR([Did not find libnetcdf, use --with-netcdf-lib])
     else
-	AS_ECHO(["Looking for libnetcdf in $libnetcdf_LDFLAGS ..."])
+	AS_ECHO(["Looking for libnetcdf in $netcdf_libdir ..."])
 	save_LDFLAGS=$LDFLAGS
-	LDFLAGS="$LDFLAGS $libnetcdf_LDFLAGS"
+	LDFLAGS="$LDFLAGS -L$netcdf_libdir"
 	AC_CHECK_LIB([netcdf], [nc_open], [CDF_SETTING=yes], [CDF_SETTING=no], )
 	LDFLAGS="$save_LDFLAGS"
 	if test "$CDF_SETTING" = "no"; then
 	   AC_MSG_ERROR([Did not find libnetcdf, use --with-netcdf-lib or check installation])
 	fi
+	libnetcdf_LIBS="-L$netcdf_libdir -R $netcdf_libdir $libnetcdf_LIBS"
+#
+#       Save the netcdf library path for later gmt tests
+#
+	libnetcdf_LDFLAGS="-L$netcdf_libdir"
     fi
  fi
  dnl Use ac_subst to set vars that would be set by pkg_check
- AC_SUBST([libnetcdf_LIBS], [$libnetcdf_LIBS])
- AC_SUBST([libnetcdf_LDFLAGS], [$libnetcdf_LDFLAGS])
- AC_SUBST([libnetcdf_RPATH], ["$libnetcdf_RPATH"])
+ AC_SUBST([libnetcdf_LIBS], ["$libnetcdf_LIBS"])
 fi
 dnl done with CDF lib
 
@@ -267,7 +270,7 @@ GOT_CDF=no
 CDF_SETTING=no
 dnl add command line option
 AC_ARG_WITH(netcdf-include, [  --with-netcdf-include=DIR	Location of NetCDF headers],
-	[CDF_INC_DIR="-I${withval}"] [GOT_CDF=yes], [GOT_CDF=no])
+	[libnetcdf_CPPFLAGS="-I${withval}"] [GOT_CDF=yes], [GOT_CDF=no])
 dnl First check if cdf headers installed
 if test "$GOT_CDF" = "no" ; then
  AC_CHECK_HEADER(netcdf.h, [CDF_SETTING=yes], [CDF_SETTING=no])
@@ -279,11 +282,11 @@ fi
     if test "$GOT_CDF" = "no" ; then
 	AC_MSG_ERROR([Did not find required NetCDF headers, use --with-netcdf-include])
     else
-	AS_ECHO(["Checking netcdf.h in $CDF_INC_DIR..."])
+	AS_ECHO(["Checking netcdf.h in $libnetcdf_CPPFLAGS..."])
 	save_CPPFLAGS=$CPPFLAGS
 	save_CFLAGS=$CFLAGS
-	CPPFLAGS="$CPPFLAGS $CDF_INC_DIR"
-	CFLAGS="$CFLAGS $CDF_INC_DIR"
+	CPPFLAGS="$CPPFLAGS $libnetcdf_CPPFLAGS"
+	CFLAGS="$CFLAGS $libnetcdf_CPPFLAGS"
 	AC_CHECK_HEADER(netcdf.h, [CDF_SETTING=yes], [CDF_SETTING=no],)
 	CPPFLAGS=$save_CPPFLAGS
 	CFLAGS=$save_CFLAGS
@@ -292,7 +295,7 @@ fi
 	fi
     fi
  fi
-AC_SUBST([CDF_INC_DIR], [$CDF_INC_DIR])
+AC_SUBST([libnetcdf_CPPFLAGS], [$libnetcdf_CPPFLAGS])
 dnl done with CDF headers
 
 dnl Check for Generic Mapping Tools (GMT) libs
@@ -300,7 +303,7 @@ dnl - these are libgmt, libpsl, and libgmtps
 dnl Would certainly be nice if GMT had pkg-config file (gmt.pc)...
 AS_ECHO(["Check for Generic Mapping Tools (GMT)"])
 GOT_GMTPKG=no
-dnl first check for pacakge
+dnl first check for package
 PKG_CHECK_MODULES([libgmt], [gmt], [GOT_LIBGMT=yes], [GOT_LIBGMT=no])
 PKG_CHECK_MODULES([libgmtps], [gmt], [GOT_LIBGMTPS=yes], [GOT_LIBGMTPS=no])
 PKG_CHECK_MODULES([libpsl], [gmt], [GOT_LIBPSL=yes], [GOT_LIBPSL=no])
@@ -322,23 +325,22 @@ if test "$GOT_GMTPKG" = "no" ; then
 	libgmt_LIBS="-lgmt -lgmtps -lpsl"
 	dnl arg for command line
 	AC_ARG_WITH(gmt-lib, [  --with-gmt-lib=DIR	Location of GMT libraries],
-	       [libgmt_LDFLAGS="-L${withval}"] [libgmt_RPATH="-R ${withval}"] [GOT_GMTLIBS=yes], [GOT_GMTLIBS=no])
+	       [gmt_libdir="${withval}"] [GOT_GMTLIBS=yes], [GOT_GMTLIBS=no])
 	dnl First check if lib installed
 	if test "$GOT_GMTLIBS" = "no" ; then
 		AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no],)
 	fi
 	if test "$GMT_SETTING" = "yes" ; then
-		libgmt_LDFLAGS=
 		AS_ECHO(["Using pre-installed libgmt."])
 	else
 		if test "$GOT_GMTLIBS" = "no" ; then
 			AC_MSG_ERROR([Did not find libgmt, use --with-gmt-lib])
 		else
-			AS_ECHO(["Looking for libgmt in $libgmt_LDFLAGS ..."])
+			AS_ECHO(["Looking for libgmt in $gmt_libdir ..."])
 			save_LDFLAGS=$LDFLAGS
 			save_LIBS=$LIBS
-			LDFLAGS="$LDFLAGS $libgmt_LDFLAGS $libnetcdf_LDFLAGS"
-			LIBS="$LDFLAGS $libnetcdf_LIBS -lnetcdf $LIBM"
+			LDFLAGS="$LDFLAGS -L$gmt_libdir $libnetcdf_LDFLAGS"
+			LIBS="$LDFLAGS -lnetcdf $LIBM"
 			AC_MSG_NOTICE(LDFLAGS $LDFLAGS)
 			AC_MSG_NOTICE(LIBS $LIBS)
 			AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no], )
@@ -347,16 +349,17 @@ if test "$GOT_GMTPKG" = "no" ; then
 			if test "$GMT_SETTING" = "no"; then
 				AC_MSG_ERROR([Did not find libgmt, use --with-gmt-lib or check installation])
 			fi
+			libgmt_LIBS="-L$gmt_libdir -R$gmt_libdir $libgmt_LIBS"
 		fi
 	fi
 
 	dnl Now look for GMT headers
 	GOT_GMTHEADERS=no
 	GMT_SETTING=no
-	GMT_INC_DIR=
+	libgmt_CPPFLAGS=
 	dnl add command line option
 	AC_ARG_WITH(gmt-include, [  --with-gmt-include=DIR	Location of GMT headers],
-		[GMT_INC_DIR="-I${withval}"] [GOT_GMTHEADERS=yes], [GOT_GMTHEADERS=no])
+		[libgmt_CPPFLAGS="-I${withval}"] [GOT_GMTHEADERS=yes], [GOT_GMTHEADERS=no])
 
 	dnl First check if gmt headers installed
 	dnl Only if no arg given
@@ -371,11 +374,11 @@ if test "$GOT_GMTPKG" = "no" ; then
 		if test "$GOT_GMTHEADERS" = "no" ; then
 			AC_MSG_ERROR([Did not find required GMT headers, use --with-gmt-include])
 		else
-			AS_ECHO(["Checking gmt.h in $GMT_INC_DIR..."])
+			AS_ECHO(["Checking gmt.h in $libgmt_CPPFLAGS..."])
 			save_CPPFLAGS=$CPPFLAGS
 			save_CFLAGS=$CFLAGS
-			CPPFLAGS="$CPPFLAGS $GMT_INC_DIR"
-			CFLAGS="$CFLAGS $GMT_INC_DIR $CDF_INC_DIR"
+			CPPFLAGS="$CPPFLAGS $libgmt_CPPFLAGS $libnetcdf_CPPFLAGS"
+			CFLAGS="$CFLAGS $libgmt_CPPFLAGS $libnetcdf_CPPFLAGS"
 			AC_CHECK_HEADER(gmt.h, [GMT_SETTING=yes], [GMT_SETTING=no])
 			CPPFLAGS=$save_CPPFLAGS
 			CFLAGS=$save_CFLAGS
@@ -384,17 +387,13 @@ if test "$GOT_GMTPKG" = "no" ; then
 			fi
 		fi
 	fi
-	AS_ECHO(["Setting GMT_INC_DIR=$GMT_INC_DIR"])
-	AC_SUBST([GMT_INC_DIR], [$GMT_INC_DIR])
+	AS_ECHO(["Setting libgmt_CPPFLAGS=$libgmt_CPPFLAGS"])
+	AC_SUBST([libgmt_CPPFLAGS], [$libgmt_CPPFLAGS])
 	dnl done with GMT headers
 fi
 
 AS_ECHO(["Setting libgmt_LIBS=$libgmt_LIBS"])
-AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
-
-AS_ECHO(["Setting libgmt_LDFLAGS=$libgmt_LDFLAGS"])
-AC_SUBST([libgmt_LDFLAGS], [$libgmt_LDFLAGS])
-AC_SUBST([libgmt_RPATH], ["$libgmt_RPATH"])
+AC_SUBST([libgmt_LIBS], ["$libgmt_LIBS"])
 
 dnl done with GMT
 
@@ -404,8 +403,8 @@ dnl seems to want fftw3 ... do not check for older fftw?
 GOT_FFTW=no
 FFTW_SETTING=no
 USE_FFTW=
-FFTW_INC_DIR=
-dnl first check for pacakge
+libfftw_CPPFLAGS=
+dnl first check for package
 PKG_CHECK_MODULES([libfftw], [fftw3], [GOT_FFTW=yes], [GOT_FFTW=no])
 
 dnl Package check failed so check manually
@@ -414,14 +413,13 @@ if test "$GOT_FFTW" = "no" ; then
 libfftw_LIBS="-lfftw3"
 dnl arg for command line
 AC_ARG_WITH(fftw-lib, [  --with-fftw-lib=DIR	Location of FFTW3 library],
-	[libfftw_LDFLAGS="-L${withval}"] [libfftw_RPATH="-R ${withval}"] [GOT_FFTW=yes], [GOT_FFTW=no])
+	[fftw_libdir="${withval}"] [GOT_FFTW=yes], [GOT_FFTW=no])
 dnl First check if lib installed
 if test "$GOT_FFTW" = "no" ; then
  AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d], [FFTW_SETTING=yes], [FFTW_SETTING=no])
 fi
  if test "$FFTW_SETTING" = "yes" ; then
     GOT_FFTW=yes
-    libfftw_LDFLAGS=
     USE_FFTW=mbsegypsd
     AS_ECHO(["Using pre-installed FFTW3 lib."])
  else
@@ -430,7 +428,7 @@ fi
     else
 	AS_ECHO(["Looking for libfftw3 in $libfftw_CFLAGS ..."])
 	save_LDFLAGS=$LDFLAGS
-	LDFLAGS="$LDFLAGS $libfftw_LDFLAGS"
+	LDFLAGS="$LDFLAGS -L$fftw_libdir"
 	AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d], [FFTW_SETTING=yes], [FFTW_SETTING=no])
 	LDFLAGS="$save_LDFLAGS"
 	if test "$FFTW_SETTING" = "no"; then
@@ -440,13 +438,12 @@ fi
 	else
 		GOT_FFTW=yes
 		USE_FFTW=mbsegypsd
+		libfftw_LIBS="-L$fftw_libdir -R $fftw_libdir $libfftw_LIBS"
 	fi
     fi
  fi
  if test "$GOT_FFTW" = "yes" ; then
-	AC_SUBST([libfftw_LDFLAGS], [$libfftw_LDFLAGS])
-	AC_SUBST([libfftw_RPATH], ["$libfftw_RPATH"])
-	AC_SUBST([libfftw_LIBS], [$libfftw_LIBS])
+	AC_SUBST([libfftw_LIBS], ["$libfftw_LIBS"])
  fi
 fi
 dnl done with FFTW lib
@@ -459,7 +456,7 @@ GOT_FFTW=no
 FFTW_SETTING=no
 dnl add command line option
 AC_ARG_WITH(fftw-include, [  --with-fftw-include=DIR	Location of FFTW headers],
-	[FFTW_INC_DIR="-I${withval}"] [GOT_FFTW=yes], [GOT_FFTW=no])
+	[libfftw_CPPFLAGS="-I${withval}"] [GOT_FFTW=yes], [GOT_FFTW=no])
 
 dnl First check if fftw headers installed
 if test "$GOT_FFTW" = "no" ; then
@@ -472,11 +469,11 @@ fi
     if test "$GOT_FFTW" = "no" ; then
 	AS_ECHO(["Did not find FFTW headers, use --with-fftw-inc, (FFTW Disabled)"])
     else
-	AS_ECHO(["Checking fftw3.h in $FFTW_INC_DIR..."])
+	AS_ECHO(["Checking fftw3.h in $libfftw_CPPFLAGS..."])
 	save_CPPFLAGS=$CPPFLAGS
 	save_CFLAGS=$CFLAGS
-	CPPFLAGS="$CPPFLAGS $FFTW_INC_DIR"
-	CFLAGS="$CFLAGS $FFTW_INC_DIR"
+	CPPFLAGS="$CPPFLAGS $libfftw_CPPFLAGS"
+	CFLAGS="$CFLAGS $libfftw_CPPFLAGS"
 	AC_CHECK_HEADER(fftw3.h, [FFTW_SETTING=yes], [FFTW_SETTING=no],)
 	CPPFLAGS=$save_CPPFLAGS
 	CFLAGS=$save_CFLAGS
@@ -491,7 +488,7 @@ fi
 
 if test "$GOT_FFTW" = "yes" ; then
 	AC_SUBST([fftw_app], [$USE_FFTW])
-	AC_SUBST([FFTW_INC_DIR], [$FFTW_INC_DIR])
+	AC_SUBST([libfftw_CPPFLAGS], [$libfftw_CPPFLAGS])
 fi
 dnl done with FFTW headers
 fi
@@ -503,12 +500,11 @@ dnl Deal with Motif for GUI
 dnl Xm, Xt and X11
 GOT_MOTIF=no
 MOTIF_SETTING=no
-MOTIF_LIB="-lXm -lXt -lX11"
-MOTIF_LIB_DIR=
-MOTIF_INC_DIR=
+motif_LIBS="-lXm -lXt -lX11"
+motif_CPPFLAGS=
 dnl arg for command line
 AC_ARG_WITH(motif-lib, [  --with-motif-lib=DIR	Location of MOTIF library],
-	[MOTIF_LIB_DIR="-L${withval}"] [GOT_MOTIF=yes], [GOT_MOTIF=no])
+	[motif_libdir="${withval}"] [GOT_MOTIF=yes], [GOT_MOTIF=no])
 dnl First check if lib installed
 if test "$GOT_MOTIF" = "no" ; then
   AC_CHECK_LIB([Xm], [XmCreatePushButton], [MOTIF_SETTING=yes], [MOTIF_SETTING=no])
@@ -528,11 +524,11 @@ dnl Now try from args
     if test "$GOT_MOTIF" = "no" ; then
 	AS_ECHO(["Did not find Motif libs (Xt, Xm, and X11), use --with-motif-lib, (Motif disabled)"])
     else
-	AS_ECHO(["Looking for Motif Libs in $MOTIF_LIB_DIR ..."])
+	AS_ECHO(["Looking for Motif Libs in $motif_libdir ..."])
 	save_LDFLAGS=$LDFLAGS
 	save_LIBS=$LIBS
-	LDFLAGS="$MOTIF_LIB_DIR $LDFLAGS"
-	LIBS="$MOTIF_LIB_DIR $LDFLAGS"
+	LDFLAGS="$LDFLAGS -L$motif_libdir"
+	LIBS="$LIBS $motif_LIBS"
 	AC_CHECK_LIB([Xm], [XmCreatePushButton], [MOTIF_SETTING=yes], [MOTIF_SETTING=no])
   	if test "$MOTIF_SETTING" = "yes" ; then
 		AC_CHECK_LIB([Xt], [XtAppMainLoop], [MOTIF_SETTING=yes], [MOTIF_SETTING=no])
@@ -547,14 +543,13 @@ dnl Now try from args
 		GOT_MOTIF=no
 	else
 		GOT_MOTIF=yes
-		MOTIF_LIB="-lXm -lXt -lX11"
+		motif_LIBS="-L$motif_libdir -R $motif_libdir $motif_LIBS"
 	fi
     fi
  fi
 
 if test "$GOT_MOTIF" = "yes" ; then
-	AC_SUBST([MOTIF_LIB_DIR], [$MOTIF_LIB_DIR])
-	AC_SUBST([MOTIF_LIB], [$MOTIF_LIB])
+	AC_SUBST([motif_LIBS], ["$motif_LIBS"])
 fi
 dnl done with Motif libs
 
@@ -564,7 +559,7 @@ GOT_MOTIF=no
 MOTIF_SETTING=no
 dnl add command line option
 AC_ARG_WITH(motif-include, [  --with-motif-include=DIR	Location of Motif headers],
-	[MOTIF_INC_DIR="-I${withval}"] [GOT_MOTIF=yes], [GOT_MOTIF=no])
+	[motif_CPPFLAGS="-I${withval}"] [GOT_MOTIF=yes], [GOT_MOTIF=no])
 
 dnl First check if Motif headers installed
 if test "$GOT_MOTIF" = "no" ; then
@@ -580,21 +575,20 @@ fi
 	AS_ECHO(["Checking X11/Intrinsic.h in $MOTIF_INC_DIR..."])
 	save_CPPFLAGS=$CPPFLAGS
 	save_CFLAGS=$CFLAGS
-	CPPFLAGS="$CPPFLAGS $MOTIF_INC_DIR"
-	CFLAGS="$CFLAGS $MOTIF_INC_DIR"
+	CPPFLAGS="$CPPFLAGS $motif_CPPFLAGS"
+	CFLAGS="$CFLAGS $motif_CPPFLAGS"
 	AC_CHECK_HEADER(X11/Intrinsic.h, [MOTIF_SETTING=yes], [MOTIF_SETTING=no],)
 	CPPFLAGS=$save_CPPFLAGS
 	CFLAGS=$save_CFLAGS
 	if test "$MOTIF_SETTING" = "no"; then
 	   AS_ECHO(["Did not find Motif headers, Motif support disabled"])
 	   GOT_MOTIF=no
-	   MOTIF_LIB=
 	fi
     fi
  fi
 
 if test "$GOT_MOTIF" = "yes" ; then
-	AC_SUBST([MOTIF_INC_DIR], [$MOTIF_INC_DIR])
+	AC_SUBST([motif_CPPFLAGS], [$motif_CPPFLAGS])
 	AC_DEFINE(GOT_MOTIF, 1, [Turned on Motif define in config])
 fi
 dnl done with Motif headers
@@ -611,12 +605,11 @@ dnl Only check for GL if Motif Passed
 if test "$GOT_MOTIF" = "yes" ; then
 
 GL_SETTING=no
-GL_LIB="-lGL -lGLU"
-GL_LIB_DIR=
-GL_INC_DIR=
+GL_LIBS="-lGL -lGLU"
+GL_CPPFLAGS=
 dnl arg for command line
 AC_ARG_WITH(opengl-lib, [  --with-opengl-lib=DIR	Location of OpenGL library],
-	[GL_LIB_DIR="-L${withval}"] [GOT_GL=yes], [GOT_GL=no])
+	[opengl_libdir="${withval}"] [GOT_GL=yes], [GOT_GL=no])
 dnl First check if lib installed
 if test "$GOT_GL" = "no" ; then
   AC_CHECK_LIB([GL], [main], [GL_SETTING=yes], [GL_SETTING=no])
@@ -633,11 +626,11 @@ dnl Now try from args
     if test "$GOT_GL" = "no" ; then
 	AS_ECHO(["Did not find OpenGL libs (GL and GLU), use --with-opengl-lib, (OpenGL disabled)"])
     else
-	AS_ECHO(["Looking for OpenGL Libs in $GL_LIB_DIR ..."])
+	AS_ECHO(["Looking for OpenGL Libs in $opengl_libdir ..."])
 	save_LDFLAGS=$LDFLAGS
 	save_LIBS=$LIBS
-	LDFLAGS="$GL_LIB_DIR $LDFLAGS"
-	LIBS="$GL_LIB_DIR $LDFLAGS"
+	LDFLAGS="$LDFLAGS -L$opengl_libdir"
+	LIBS="$LIBS $GL_LIBS"
 	AC_CHECK_LIB([GL], [main], [GL_SETTING=yes], [GL_SETTING=no])
   	if test "$GL_SETTING" = "yes" ; then
 		AC_CHECK_LIB([GLU], [main], [GL_SETTING=yes], [GL_SETTING=no])
@@ -649,14 +642,13 @@ dnl Now try from args
 		GOT_GL=no
 	else
 		GOT_GL=yes
-		GL_LIB="-lGL -lGLU"
+		GL_LIBS="-L$opengl_libdir -R $opengl_libdir $GL_LIBS"
 	fi
     fi
  fi
 
 if test "$GOT_GL" = "yes" ; then
-	AC_SUBST([GL_LIB_DIR], [$GL_LIB_DIR])
-	AC_SUBST([GL_LIB], [$GL_LIB])
+	AC_SUBST([GL_LIBS], ["$GL_LIBS"])
 fi
 dnl done with GL libs
 
@@ -668,7 +660,7 @@ GOT_GL=no
 GL_SETTING=no
 dnl add command line option
 AC_ARG_WITH(opengl-include, [  --with-opengl-include=DIR	Location of OpenGL headers],
-	[GL_INC_DIR="-I${withval}"] [GOT_GL=yes], [GOT_GL=no])
+	[GL_CPPFLAGS="-I${withval}"] [GOT_GL=yes], [GOT_GL=no])
 
 dnl First check if OpenGL headers installed
 if test "$GOT_GL" = "no" ; then
@@ -681,24 +673,23 @@ fi
     if test "$GOT_GL" = "no" ; then
 	AS_ECHO(["Did not find OpenGL headers, use --with-opengl-inc, (OpenGL Disabled)"])
     else
-	AS_ECHO(["Checking OpenGL Headers in $GL_INC_DIR..."])
+	AS_ECHO(["Checking OpenGL Headers in $GL_CPPFLAGS..."])
 	save_CPPFLAGS=$CPPFLAGS
 	save_CFLAGS=$CFLAGS
-	CPPFLAGS="$CPPFLAGS $GL_INC_DIR"
-	CFLAGS="$CFLAGS $GL_INC_DIR"
+	CPPFLAGS="$CPPFLAGS $GL_CPPFLAGS"
+	CFLAGS="$CFLAGS $GL_CPPFLAGS"
 	AC_CHECK_HEADERS(GL/gl.h GL/glu.h GL/glx.h, [GL_SETTING=yes], [GL_SETTING=no])
 	CPPFLAGS=$save_CPPFLAGS
 	CFLAGS=$save_CFLAGS
 	if test "$GL_SETTING" = "no"; then
 	   AS_ECHO(["Did not find OpenGL headers, OpenGL support disabled"])
 	   GOT_GL=no
-	   GL_LIB=
 	fi
     fi
  fi
 
 if test "$GOT_GL" = "yes" ; then
-	AC_SUBST([GL_INC_DIR], [$GL_INC_DIR])
+	AC_SUBST([GL_CPPFLAGS], [$GL_CPPFLAGS])
 	AC_DEFINE(GOT_GL, 1, [Turned on OpenGL define in config])
 fi
 dnl done with OpenGL headers

@@ -8744,13 +8744,6 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 		mb_get_binary_int(MB_YES, &buffer[index], &(snippettimeseries->detect_sample)); index += 4;
 		mb_get_binary_int(MB_YES, &buffer[index], &(snippettimeseries->end_sample)); index += 4;
 
-		if (snippettimeseries->begin_sample > snippettimeseries->end_sample
-		    || snippettimeseries->detect_sample > snippettimeseries->end_sample)
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
-
 		/* allocate memory for snippettimeseries if needed */
 		if (status == MB_SUCCESS
 			&& snippettimeseries->nalloc

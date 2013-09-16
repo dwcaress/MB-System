@@ -413,6 +413,7 @@ int mb_read_init(int verbose, char *file,
 
 	/* initialize projection parameters */
 	mb_io_ptr->projection_initialized = MB_NO;
+	mb_io_ptr->projection_id[0] = '\0';
 	mb_io_ptr->pjptr = NULL;
 
 	/* initialize ancillary variables used
@@ -892,6 +893,7 @@ int mb_read_init(int verbose, char *file,
 		if (proj_status == MB_SUCCESS)
 			{
 			mb_io_ptr->projection_initialized = MB_YES;
+			strcpy(mb_io_ptr->projection_id, projection_id);
 			}
 		else
 			{

@@ -54,6 +54,12 @@
 #include <xdr_win32.h>
 #endif
 
+#ifdef __LP64__
+#define SAPI_U_LONG unsigned int
+#else
+#define SAPI_U_LONG unsigned long
+#endif
+
 /*
    ALL DATA ARE SCALED IN MKS
    That means scalings are METER,SECONDS,RAD
@@ -130,13 +136,13 @@ typedef struct
               char    numberOfProfile           [STRING_SIZE];
               float   chartZero                              ;  /* rel. NN*/
               float   tideZero                               ;  /* rel. NN*/
-              u_long  numberOfMeasuredSoundings              ;
-              u_long  actualNumberOfSoundingSets             ;
+              SAPI_U_LONG  numberOfMeasuredSoundings              ;
+              SAPI_U_LONG  actualNumberOfSoundingSets             ;
               char    timeDateOfTideModification  [TIME_SIZE];
               char    timeDateOfDepthModification [TIME_SIZE];
               char    timeDateOfPosiModification  [TIME_SIZE];
               char    timeDateOfParaModification  [TIME_SIZE];
-              u_long  correctedParameterFlags                ;
+              SAPI_U_LONG  correctedParameterFlags                ;
               float   offsetHeave                            ;
               float   offsetRollPort                         ;
               float   offsetRollStar                         ;
@@ -593,7 +599,7 @@ typedef struct
 
 typedef struct
             {
-             u_long txBeamIndex   ;  /* Code of external Beamshapetab */
+             SAPI_U_LONG txBeamIndex   ;  /* Code of external Beamshapetab */
              float  txLevel       ;  /* scale : dB rel 1 uPa */
              float  txBeamAngle   ;  /* scale : rad */
              float  pulseLength   ;  /* scale : sec */
@@ -611,7 +617,7 @@ typedef struct
 
 typedef struct
             {
-              u_long  sidescanFlag                   ;
+              SAPI_U_LONG  sidescanFlag                   ;
               u_short actualNrOfSsDataPort           ;
               u_short actualNrOfSsDataStb            ;
               float   minSsTimePort                  ;
@@ -713,7 +719,3 @@ extern long SAPI_getXYZfromSinglebeamSoundingLF(long depthOverChartZero,
 
 
 #endif /* ifndef _SAPI */
-
-
-
-
