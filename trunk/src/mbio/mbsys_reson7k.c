@@ -9910,6 +9910,11 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 				ibeam = snippettimeseries->beam_number;
 
 				/* only use snippets from non-null and unflagged beams */
+				/* note: errors have been observed in data produced by a Reson
+					simulator in which the detect_sample was
+					was outside the range of begin_sample to end_sample
+					- the current code effectively ignores this case because
+					sample_end < sample_start, so no samples are processed. */
 				if (mb_beam_ok(beamflag[ibeam]))
 					{
 					nsample = snippettimeseries->end_sample - snippettimeseries->begin_sample + 1;

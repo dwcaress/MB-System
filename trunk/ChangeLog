@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2152       September 16, 2013
   Version 5.4.2151       September 12, 2013
   Version 5.4.2149       September 2, 2013
   Version 5.4.2148       August 28, 2013
@@ -161,12 +162,26 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2152 (September 16, 2013)
+
+Formats 58 (Kongsberg raw), 59 (Kongsberg extended), 88 (Reson 7k):
+Fixed problem with interpolation of heading for Kongsberg and Reson data.
+Eliminated possibility of negative headings being inserted into the storage
+data structure.
+
+Format 222: Inserted initial implementation of SEA SwathPlus sxp data format
+(format id 222) contributed by David Finlayson with minor changes. This format
+support is still developmental.
+
+Build system: Applied patch contributed by Frank Delahoyde with additional fixes
+to configure.ac and the src/*/Makefile.am files.
+
 -----> 5.4.2151 (September 12, 2013)
 
 Many *.c files: hundreds of small changes to eliminate compiler warning messages
 on various types of systems.
 
-Buildsystem: Changes to configure.ac, autogen.sh, and src/*/Makefile.am files
+Build system: Changes to configure.ac, autogen.sh, and src/*/Makefile.am files
 based on suggestions from Frank Delahoyde of SIO and Kurt Schwehr of Google.
 
 -----> 5.4.2149 (September 2, 2013)

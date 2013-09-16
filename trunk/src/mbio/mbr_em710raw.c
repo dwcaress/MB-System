@@ -5126,7 +5126,6 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		fprintf(stderr,"dbg5       msec:               %d\n",store->msec);
 		fprintf(stderr,"dbg5       png_date:           %d\n",ping->png_date);
 		fprintf(stderr,"dbg5       png_msec:           %d\n",ping->png_msec);
-
 		fprintf(stderr,"dbg5       png_date:              %d\n",ping->png_date);
 		fprintf(stderr,"dbg5       png_msec:              %d\n",ping->png_msec);
 		fprintf(stderr,"dbg5       png_count:             %d\n",ping->png_count);

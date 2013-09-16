@@ -1739,6 +1739,10 @@ int main (int argc, char **argv)
 							dat_heading_time_d-1, dat_heading_heading-1,
 							ndat_heading, time_d, &heading, &jheading,
 							&error);
+				if (heading < 0.0)
+					heading += 360.0;
+				else if (heading >= 360.0)
+					heading -= 360.0;
 				}
 			else
 				{

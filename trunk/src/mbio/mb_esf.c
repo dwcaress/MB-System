@@ -442,11 +442,6 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf,
 {
   	char	*function_name = "mb_esf_fixtimestamps";
 	int	status = MB_SUCCESS;
-	int	firstedit, lastedit;
-	int	apply, action;
-	int	beamoffset;
-	char	beamflagorg;
-	int	ibeam;
 	int	i, j;
 
 	/* print input debug statements */

@@ -350,7 +350,7 @@ int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
 			*y = ya[klo] + b * (x - xa[klo]);
 			if (*y >= 360.0)
 				*y -= 360.0;
-			else if (*y < -360.0)
+			else if (*y < 0.0)
 				*y += 360.0;
 			*i=klo;
 			}

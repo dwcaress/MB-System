@@ -698,7 +698,7 @@ int mb_free(int verbose, void **ptr, int *error)
 	int	i;
 	int	iptr;
 	size_t	ptrsize;
-	long	ptrvalue;
+	void	*ptrvalue;
 
 	/* print input debug statements */
 	if (verbose >= 2 || mb_mem_debug)
@@ -721,7 +721,7 @@ int mb_free(int verbose, void **ptr, int *error)
 	if (iptr > -1)
 		{
 		/* remove it from list */
-		ptrvalue = (size_t) mb_alloc_ptr[iptr];
+		ptrvalue = mb_alloc_ptr[iptr];
 		ptrsize = mb_alloc_size[iptr];
 		for (i=iptr;i<n_mb_alloc-1;i++)
 			{

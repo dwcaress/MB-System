@@ -1729,6 +1729,10 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 					file->n_async_heading, time_d, heading, &iheading,
 					&mbev_error);
 			*heading += headingbias;
+			if (*heading >= 360.0)
+				*heading -= 360.0;
+			else if (*heading < 0.0)
+				*heading += 360.0;
 			}
 		else
 			{

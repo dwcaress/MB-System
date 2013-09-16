@@ -740,6 +740,10 @@ int main (int argc, char **argv)
 								nav_time_d-1, nav_heading-1,
 								nnav, time_d, &heading, &j,
 								&error);
+					if (heading < 0.0)
+						heading += 360.0;
+					else if (heading >= 360.0)
+						heading -= 360.0;
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp(verbose,
 								nav_time_d-1, nav_sonardepth-1,
