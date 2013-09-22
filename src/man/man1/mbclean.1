@@ -1,4 +1,4 @@
-.TH mbclean 1 "27 July 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean 1 "16 September 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP \- Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -40,22 +40,21 @@ as follows:
  		(\fB\-X\fP option).
  	2. Flag outer beams by acrosstrack distance
  		(\fB\-Y\fP option).
- 	2. Flag soundings outside specified acceptable
+ 	3. Flag soundings outside specified acceptable
  		depth range (\fB\-B\fP option).
- 	7. Flag pings with excessive heading change rate
-	        (\fB\-Q\fP option).
- 	7. Zap "rails" (\fB\-Q\fP option).
- 	3. Flag soundings outside acceptable depth range
+ 	4. Flag pings with excessive heading change rate
+	        (\fB\-R\fP option).
+ 	5. Zap "rails" (\fB\-Q\fP option).
+ 	6. Flag soundings outside acceptable depth range
  		using fractions of local median depth
  		(\fB\-G\fP option).
- 	4. Flag soundings outside acceptable depth range
+ 	7. Flag soundings outside acceptable depth range
  		using deviation from local median depth
  		(\fB\-A\fP option).
- 	5. Flag soundings associated with spikes (\fB\-S\fP option).
- 	6. Flag soundings associated with excessive slopes
+ 	8. Flag soundings associated with spikes (\fB\-S\fP option).
+ 	9. Flag soundings associated with excessive slopes
  		(\fB\-C\fP option or default).
- 	7. Zap "rails" (\fB\-Q\fP option).
- 	8. Flag all soundings in pings with too few
+ 	10. Flag all soundings in pings with too few
  		good soundings (\fB\-U\fP option).
 
 This program flags beams by outputting the flags as
@@ -231,6 +230,13 @@ have.  These are identified when one or more outer beams lies
 more than \fIbackup\fP meters inboard of a more inner beam; all beams
 meeting this criteria are flagged.
 .TP
+.B \-R
+\fImaxheadingrate\fP
+.br
+The value \fImaxheadingrate\fP is the maximum acceptable rate of change in
+heading in degrees/second. All soundings associated with pings for which the
+heading was changing at a greater rate will be flagged.
+.TP
 .B \-S
 \fIslope/mode/unit\fP
 .br
@@ -267,7 +273,7 @@ existing esf file to exactly match the timestamps of the survey pings. The
 considered a match. This option handles the case where survey data have been
 processed using non-\fBMB-System\fP software and a user is extracting the
 edits from one set of files with \fBmbgetesf\fP and then applying them to
-another using \fBmbprocess\fP. 
+another using \fBmbprocess\fP.
 .TP
 .B \-U
 \fInmin\fP

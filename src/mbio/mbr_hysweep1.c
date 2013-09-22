@@ -479,7 +479,7 @@ store->POS_x,store->POS_y,navlon,navlat);*/
 			/* add latest attitude */
 			mb_attint_add(verbose, mbio_ptr,
 					store->time_d, -store->HCP_heave,
-					-store->HCP_roll, -store->HCP_pitch, error);
+					-store->HCP_roll, store->HCP_pitch, error);
 			}
 		}
 
@@ -3499,9 +3499,9 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			sprintf(line, "HCP %d %.3f %.2f %.2f %.2f\r\n",
 				*device_number_MB_HCP,
 				store->RMB_time,
-				store->HCP_heave,
-				store->HCP_roll,
-				store->HCP_pitch);
+				(-store->RMBint_heave),
+				(-store->RMBint_roll),
+				store->RMBint_pitch);
 			fputs(line, mbfp);
 /* fprintf(stderr,"writeline: %s",line); */
 			}

@@ -1028,7 +1028,7 @@ int main (int argc, char **argv)
 					{
 					dat_rph_time_d[ndat_rph] = istore->time_d;
 					dat_rph_roll[ndat_rph] = -istore->HCP_roll;
-					dat_rph_pitch[ndat_rph] = -istore->HCP_pitch;
+					dat_rph_pitch[ndat_rph] = istore->HCP_pitch;
 					dat_rph_heave[ndat_rph] = -istore->HCP_heave;
 					ndat_rph++;
 					}
@@ -1396,6 +1396,18 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		for (i=0;i<ndat_heading;i++)
 			{
 			dat_heading_heading[i] += offset_sonar_heading;
+			if (dat_heading_heading[i] >= 360.0)
+				dat_heading_heading[i] -= 360.0;
+			else if (dat_heading_heading[i] < 0.0)
+				dat_heading_heading[i] += 360.0;
+			}
+		for (i=0;i<nnav;i++)
+			{
+			nav_heading[i] += offset_sonar_heading;
+			if (nav_heading[i] >= 360.0)
+				nav_heading[i] -= 360.0;
+			else if (nav_heading[i] < 0.0)
+				nav_heading[i] += 360.0;
 			}
 		}
 

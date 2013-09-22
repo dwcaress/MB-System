@@ -170,10 +170,13 @@ CFLAGS="-g -I/usr/X11R6/include" LDFLAGS="-L/usr/X11R6/lib" \
 
 make
 
+make install
+
 cd src/htmlsrc ; make_mbhtml ; cd ../..
 
 make install
 
+#
 #------------------------------------------------------------------------------
 
 # Install on Ubuntu 12.04.02LTS using only apt-get for prerequisites
