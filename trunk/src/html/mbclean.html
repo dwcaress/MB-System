@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbclean</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  27 July 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  16 September 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -64,22 +64,21 @@ as follows:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-X</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2.&nbsp;Flag&nbsp;outer&nbsp;beams&nbsp;by&nbsp;acrosstrack&nbsp;distance<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-Y</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;specified&nbsp;acceptable<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;specified&nbsp;acceptable<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>depth&nbsp;range&nbsp;(<B>-B</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7.&nbsp;Flag&nbsp;pings&nbsp;with&nbsp;excessive&nbsp;heading&nbsp;change&nbsp;rate<BR>
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>        (<B>-Q</B> option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7.&nbsp;Zap&nbsp;&quot;rails&quot;&nbsp;(<B>-Q</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4.&nbsp;Flag&nbsp;pings&nbsp;with&nbsp;excessive&nbsp;heading&nbsp;change&nbsp;rate<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>        (<B>-R</B> option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5.&nbsp;Zap&nbsp;&quot;rails&quot;&nbsp;(<B>-Q</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>6.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>using&nbsp;fractions&nbsp;of&nbsp;local&nbsp;median&nbsp;depth<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-G</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>using&nbsp;deviation&nbsp;from&nbsp;local&nbsp;median&nbsp;depth<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-A</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5.&nbsp;Flag&nbsp;soundings&nbsp;associated&nbsp;with&nbsp;spikes&nbsp;(<B>-S</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>6.&nbsp;Flag&nbsp;soundings&nbsp;associated&nbsp;with&nbsp;excessive&nbsp;slopes<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>8.&nbsp;Flag&nbsp;soundings&nbsp;associated&nbsp;with&nbsp;spikes&nbsp;(<B>-S</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>9.&nbsp;Flag&nbsp;soundings&nbsp;associated&nbsp;with&nbsp;excessive&nbsp;slopes<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-C</B>&nbsp;option&nbsp;or&nbsp;default).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7.&nbsp;Zap&nbsp;&quot;rails&quot;&nbsp;(<B>-Q</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>8.&nbsp;Flag&nbsp;all&nbsp;soundings&nbsp;in&nbsp;pings&nbsp;with&nbsp;too&nbsp;few<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>10.&nbsp;Flag&nbsp;all&nbsp;soundings&nbsp;in&nbsp;pings&nbsp;with&nbsp;too&nbsp;few<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>good&nbsp;soundings&nbsp;(<B>-U</B>&nbsp;option).<BR>
 <P>
 This program flags beams by outputting the flags as
@@ -286,6 +285,15 @@ have crosstrack distances (and depths) much less than they should
 have.  These are identified when one or more outer beams lies
 more than <I>backup</I> meters inboard of a more inner beam; all beams
 meeting this criteria are flagged.
+<DT><B>-R</B>
+
+<DD>
+<I>maxheadingrate</I>
+<BR>
+
+The value <I>maxheadingrate</I> is the maximum acceptable rate of change in
+heading in degrees/second. All soundings associated with pings for which the
+heading was changing at a greater rate will be flagged.
 <DT><B>-S</B>
 
 <DD>
@@ -327,7 +335,7 @@ existing esf file to exactly match the timestamps of the survey pings. The
 considered a match. This option handles the case where survey data have been
 processed using non-<B>MB-System</B> software and a user is extracting the
 edits from one set of files with <B>mbgetesf</B> and then applying them to
-another using <B>mbprocess</B>. 
+another using <B>mbprocess</B>.
 <DT><B>-U</B>
 
 <DD>
@@ -527,7 +535,7 @@ bathymetry data (e.g. <B>mbedit</B>).
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 27 July 2013</P></CENTER>
+Last Updated: 16 September 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
