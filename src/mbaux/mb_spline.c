@@ -282,10 +282,184 @@ int mb_linear_interp(int verbose, double *xa, double *ya,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
+int mb_linear_interp_longitude(int verbose, double *xa, double *ya,
 		int n, double x, double *y, int *i, int *error)
 {
-	char	*function_name = "mb_linear_interp_degrees";
+	char	*function_name = "mb_linear_interp_longitude";
+	int	status = MB_SUCCESS;
+	int	klo, khi, k;
+	double	h, b;
+	double	yahi, yalo;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
+		fprintf(stderr,"dbg2       xa:               %p\n",xa);
+		fprintf(stderr,"dbg2       ya:               %p\n",ya);
+		fprintf(stderr,"dbg2       n:                %d\n",n);
+		fprintf(stderr,"dbg2       x:                %f\n",x);
+		}
+
+	/* check for n >= 1 */
+	if (n < 1)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_NOT_ENOUGH_DATA;
+		}
+
+	/* perform interpolation */
+	if (status == MB_SUCCESS)
+		{
+		/* do not extrapolate before or after the model, just use the
+		 * first or last values */
+		if (x <= xa[1])
+			{
+			*y = ya[1];
+			*i = 1;
+			}
+		else if (x >= xa[n])
+			{
+			*y = ya[n];
+			*i = n;
+			}
+		/* in range of model so linearly interpolate */
+		else
+			{
+			klo=1;
+			khi=n;
+			while (khi-klo > 1)
+				{
+				k=(khi+klo) >> 1;
+				if (xa[k] > x) khi=k;
+				else klo=k;
+				}
+			if (khi == 1) khi = 2;
+			if (klo == n) klo = n - 1;
+			h=xa[khi]-xa[klo];
+			yahi = ya[khi];
+			yalo = ya[klo];
+			if (yahi - yalo > 180.0)
+				yahi -= 360.0;
+			else if (yahi - yalo < -180.0)
+				yahi += 360.0;
+			b = (yahi - yalo) / h;
+			*y = ya[klo] + b * (x - xa[klo]);
+			if (*y >= 180.0)
+				*y -= 360.0;
+			else if (*y < -180.0)
+				*y += 360.0;
+			*i=klo;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       y:          %f\n",*y);
+		fprintf(stderr,"dbg2       i:          %d\n",*i);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_linear_interp_latitude(int verbose, double *xa, double *ya,
+		int n, double x, double *y, int *i, int *error)
+{
+	char	*function_name = "mb_linear_interp_latitude";
+	int	status = MB_SUCCESS;
+	int	klo, khi, k;
+	double	h, b;
+	double	yahi, yalo;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
+		fprintf(stderr,"dbg2       xa:               %p\n",xa);
+		fprintf(stderr,"dbg2       ya:               %p\n",ya);
+		fprintf(stderr,"dbg2       n:                %d\n",n);
+		fprintf(stderr,"dbg2       x:                %f\n",x);
+		}
+
+	/* check for n >= 1 */
+	if (n < 1)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_NOT_ENOUGH_DATA;
+		}
+
+	/* perform interpolation */
+	if (status == MB_SUCCESS)
+		{
+		/* do not extrapolate before or after the model, just use the
+		 * first or last values */
+		if (x <= xa[1])
+			{
+			*y = ya[1];
+			*i = 1;
+			}
+		else if (x >= xa[n])
+			{
+			*y = ya[n];
+			*i = n;
+			}
+		/* in range of model so linearly interpolate */
+		else
+			{
+			klo=1;
+			khi=n;
+			while (khi-klo > 1)
+				{
+				k=(khi+klo) >> 1;
+				if (xa[k] > x) khi=k;
+				else klo=k;
+				}
+			if (khi == 1) khi = 2;
+			if (klo == n) klo = n - 1;
+			h=xa[khi]-xa[klo];
+			yahi = ya[khi];
+			yalo = ya[klo];
+			b = (yahi - yalo) / h;
+			*y = ya[klo] + b * (x - xa[klo]);
+			if (*y > 90.0)
+				*y = 90.0;
+			else if (*y < -90.0)
+				*y = -90.0;
+			*i=klo;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       y:          %f\n",*y);
+		fprintf(stderr,"dbg2       i:          %d\n",*i);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_linear_interp_heading(int verbose, double *xa, double *ya,
+		int n, double x, double *y, int *i, int *error)
+{
+	char	*function_name = "mb_linear_interp_heading";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;
 	double	h, b;

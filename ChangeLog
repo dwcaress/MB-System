@@ -16,7 +16,8 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-  Version 5.4.2152       September 22, 2013
+  Version 5.4.2154       September 26, 2013
+  Version 5.4.2153       September 22, 2013
   Version 5.4.2152       September 16, 2013
   Version 5.4.2151       September 12, 2013
   Version 5.4.2149       September 2, 2013
@@ -162,6 +163,15 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2154 (September 26, 2013)
+
+MBkongsbergpreprocess, MB7kpreprocess, MBhysweeppreprocess, mbprocess:
+Fixed errors in navigation interpolation introduced in 5.4.2152.
+
+Format 84 (MBF_XTFR8101): Fixed initialization of the storage data structure.
+
+Committed from CCGS Sir Wilfrid Laurier at 116d 04.4876' W, 68d 57.30' N.
 
 -----> 5.4.2153 (September 22, 2013)
 

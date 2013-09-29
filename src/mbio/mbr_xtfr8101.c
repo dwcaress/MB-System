@@ -432,6 +432,7 @@ int mbr_zero_xtfr8101(int verbose, char *data_ptr, int *error)
 	/* initialize everything to zeros */
 	if (data != NULL)
 		{
+		memset(data, 0, sizeof(struct mbf_xtfr8101_struct));
 		data->kind = MB_DATA_NONE;
 		data->sonar = MBSYS_RESON8K_UNKNOWN;
 		}

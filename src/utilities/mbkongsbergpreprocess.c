@@ -1715,12 +1715,12 @@ int main (int argc, char **argv)
 			/* merge navigation from best available source */
 			if (ndat_nav > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_longitude(verbose,
 							dat_nav_time_d-1, dat_nav_lon-1,
 							ndat_nav, time_d, &navlon, &jnav,
 							&error);
 				if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_latitude(verbose,
 							dat_nav_time_d-1, dat_nav_lat-1,
 							ndat_nav, time_d, &navlat, &jnav,
 							&error);
@@ -1735,7 +1735,7 @@ int main (int argc, char **argv)
 			/* merge heading from best available source */
 			if (ndat_heading > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_heading(verbose,
 							dat_heading_time_d-1, dat_heading_heading-1,
 							ndat_heading, time_d, &heading, &jheading,
 							&error);

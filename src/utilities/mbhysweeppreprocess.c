@@ -1740,24 +1740,24 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			/* merge navigation from best available source */
 			if (nnav > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_longitude(verbose,
 							nav_time_d-1, nav_lon-1,
 							nnav, time_d, &navlon, &j,
 							&error);
 				if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_latitude(verbose,
 							nav_time_d-1, nav_lat-1,
 							nnav, time_d, &navlat, &j,
 							&error);
 				}
 			else if (ndat_nav > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_longitude(verbose,
 							dat_nav_time_d-1, dat_nav_lon-1,
 							ndat_nav, time_d, &navlon, &j,
 							&error);
 				if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_latitude(verbose,
 							dat_nav_time_d-1, dat_nav_lat-1,
 							ndat_nav, time_d, &navlat, &j,
 							&error);
@@ -1772,14 +1772,14 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			/* merge heading from best available source */
 			if (nnav > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_heading(verbose,
 							nav_time_d-1, nav_heading-1,
 							nnav, time_d, &heading, &j,
 							&error);
 				}
 			else if (ndat_heading > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_heading(verbose,
 							dat_heading_time_d-1, dat_heading_heading-1,
 							ndat_heading, time_d, &heading, &j,
 							&error);
