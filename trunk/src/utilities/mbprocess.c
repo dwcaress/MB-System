@@ -5001,11 +5001,11 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			    }
 			else
 			    {
-			    intstat = mb_linear_interp(verbose,
+			    intstat = mb_linear_interp_longitude(verbose,
 					ntime-1, nlon-1,
 					nnav, time_d, &navlon, &itime,
 					&error);
-			    intstat = mb_linear_interp(verbose,
+			    intstat = mb_linear_interp_latitude(verbose,
 					ntime-1, nlat-1,
 					nnav, time_d, &navlat, &itime,
 					&error);
@@ -5014,7 +5014,7 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			/* interpolate heading */
 			if (process.mbp_nav_heading == MBP_NAV_ON)
 			    {
-			    intstat = mb_linear_interp_degrees(verbose,
+			    intstat = mb_linear_interp_heading(verbose,
 					ntime-1, nheading-1,
 					nnav, time_d, &heading, &itime,
 					&error);
@@ -5168,11 +5168,11 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			    }
 			else
 			    {
-			    intstat = mb_linear_interp(verbose,
+			    intstat = mb_linear_interp_longitude(verbose,
 					natime-1, nalon-1,
 					nanav, time_d, &navlon, &iatime,
 					&error);
-			    intstat = mb_linear_interp(verbose,
+			    intstat = mb_linear_interp_latitude(verbose,
 					natime-1, nalat-1,
 					nanav, time_d, &navlat, &iatime,
 					&error);

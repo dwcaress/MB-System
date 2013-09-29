@@ -4571,12 +4571,12 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 					j = 0;
 					if (nins > 0)
 						{
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_longitude(verbose,
 									ins_time_d-1, ins_lon-1,
 									nins, time_d, &navlon, &jins,
 									&error);
 						if (interp_status == MB_SUCCESS)
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_latitude(verbose,
 									ins_time_d-1, ins_lat-1,
 									nins, time_d, &navlat, &jins,
 									&error);
@@ -4588,12 +4588,12 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						}
 					else if (nrock > 0)
 						{
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_longitude(verbose,
 									rock_time_d-1, rock_lon-1,
 									nrock, time_d, &navlon, &jrock,
 									&error);
 						if (interp_status == MB_SUCCESS)
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_latitude(verbose,
 									rock_time_d-1, rock_lat-1,
 									nrock, time_d, &navlat, &jrock,
 									&error);
@@ -4617,12 +4617,12 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						}
 					else if (ndsl > 0)
 						{
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_longitude(verbose,
 									dsl_time_d-1, dsl_lon-1,
 									ndsl, time_d, &navlon, &jdsl,
 									&error);
 						if (interp_status == MB_SUCCESS)
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_latitude(verbose,
 									dsl_time_d-1, dsl_lat-1,
 									ndsl, time_d, &navlat, &jdsl,
 									&error);
@@ -4646,12 +4646,12 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						}
 					else if (ndat_nav > 0)
 						{
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_longitude(verbose,
 									dat_nav_time_d-1, dat_nav_lon-1,
 									ndat_nav, time_d, &navlon, &jdnav,
 									&error);
 						if (interp_status == MB_SUCCESS)
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_latitude(verbose,
 									dat_nav_time_d-1, dat_nav_lat-1,
 									ndat_nav, time_d, &navlat, &jdnav,
 									&error);
@@ -4675,28 +4675,28 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						}
 					else if (nins > 0)
 						{
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_heading(verbose,
 									ins_time_d-1, ins_heading-1,
 									nins, time_d, &heading, &jins,
 									&error);
 						}
 					else if (nrock > 0)
 						{
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_heading(verbose,
 									rock_time_d-1, rock_heading-1,
 									nrock, time_d, &heading, &jrock,
 									&error);
 						}
 					else if (ndsl > 0)
 						{
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_heading(verbose,
 									dsl_time_d-1, dsl_heading-1,
 									ndsl, time_d, &heading, &jdsl,
 									&error);
 						}
 					else if (ndat_heading > 0)
 						{
-						interp_status = mb_linear_interp_degrees(verbose,
+						interp_status = mb_linear_interp_heading(verbose,
 									dat_heading_time_d-1, dat_heading_heading-1,
 									ndat_heading, time_d, &heading, &jdheading,
 									&error);
@@ -5908,48 +5908,48 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				j = 0;
 				if (nins > 0)
 					{
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_longitude(verbose,
 								ins_time_d-1, ins_lon-1,
 								nins, time_d, &navlon, &jins,
 								&error);
 					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_latitude(verbose,
 								ins_time_d-1, ins_lat-1,
 								nins, time_d, &navlat, &jins,
 								&error);
 					}
 				else if (nrock > 0)
 					{
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_longitude(verbose,
 								rock_time_d-1, rock_lon-1,
 								nrock, time_d, &navlon, &jrock,
 								&error);
 					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_latitude(verbose,
 								rock_time_d-1, rock_lat-1,
 								nrock, time_d, &navlat, &jrock,
 								&error);
 					}
 				else if (ndsl > 0)
 					{
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_longitude(verbose,
 								dsl_time_d-1, dsl_lon-1,
 								ndsl, time_d, &navlon, &jdsl,
 								&error);
 					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_latitude(verbose,
 								dsl_time_d-1, dsl_lat-1,
 								ndsl, time_d, &navlat, &jdsl,
 								&error);
 					}
 				else if (ndat_nav > 0)
 					{
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_longitude(verbose,
 								dat_nav_time_d-1, dat_nav_lon-1,
 								ndat_nav, time_d, &navlon, &jdnav,
 								&error);
 					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_latitude(verbose,
 								dat_nav_time_d-1, dat_nav_lat-1,
 								ndat_nav, time_d, &navlat, &jdnav,
 								&error);

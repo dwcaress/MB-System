@@ -368,7 +368,11 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 	int n, double x, double *y, int *i, int *error);
 int mb_linear_interp(int verbose, double *xa, double *ya,
 		int n, double x, double *y, int *i, int *error);
-int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
+int mb_linear_interp_longitude(int verbose, double *xa, double *ya,
+		int n, double x, double *y, int *i, int *error);
+int mb_linear_interp_latitude(int verbose, double *xa, double *ya,
+		int n, double x, double *y, int *i, int *error);
+int mb_linear_interp_heading(int verbose, double *xa, double *ya,
 		int n, double x, double *y, int *i, int *error);
 
 /* mb_cheb function prototypes */

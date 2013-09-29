@@ -726,24 +726,20 @@ int main (int argc, char **argv)
 					/* get navigation */
 					j = 0;
 					speed = 0.0;
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_longitude(verbose,
 								nav_time_d-1, nav_lon-1,
 								nnav, time_d, &navlon, &j,
 								&error);
 					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_latitude(verbose,
 								nav_time_d-1, nav_lat-1,
 								nnav, time_d, &navlat, &j,
 								&error);
 					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose,
+					interp_status = mb_linear_interp_heading(verbose,
 								nav_time_d-1, nav_heading-1,
 								nnav, time_d, &heading, &j,
 								&error);
-					if (heading < 0.0)
-						heading += 360.0;
-					else if (heading >= 360.0)
-						heading -= 360.0;
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp(verbose,
 								nav_time_d-1, nav_sonardepth-1,
