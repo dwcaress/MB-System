@@ -418,6 +418,7 @@ int main (int argc, char **argv)
 	char    cptfile[MB_PATH_MAXLINE];
         char    intensfile[MB_PATH_MAXLINE];
         char    tiff_file[MB_PATH_MAXLINE];
+        char    world_file[MB_PATH_MAXLINE];
 	int	intensity;
         double  bounds[4];
 #ifdef GMT_MINOR_VERSION
@@ -453,6 +454,7 @@ int main (int argc, char **argv)
         int     value_int;
 	double  value_double;
 	char	*projection = "-Jx1.0";
+        int     make_worldfile = MB_NO;
 
 	/* get current mb default values */
 	status = mb_lonflip(verbose,&lonflip);
@@ -496,7 +498,7 @@ int main (int argc, char **argv)
 		}
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhC:c:I:i:K:k:L:l:O:o:R:r:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhC:c:I:i:K:k:L:l:O:o:R:r:Ww")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -533,6 +535,11 @@ int main (int argc, char **argv)
 		case 'v':
 			verbose++;
 			break;
+                case 'W':
+                case 'w':
+                        make_worldfile = MB_YES;
+                        flag++;
+                        break;
 		case '?':
 			errflg++;
 		}
@@ -566,12 +573,13 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       help:       %d\n",help);
-		fprintf(stderr,"dbg2       cptfile:    %s\n",cptfile);
-		fprintf(stderr,"dbg2       grdfile:    %s\n",grdfile);
-		fprintf(stderr,"dbg2       intensfile: %s\n",intensfile);
-		fprintf(stderr,"dbg2       tiff_file:  %s\n",tiff_file);
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       help:            %d\n",help);
+		fprintf(stderr,"dbg2       cptfile:         %s\n",cptfile);
+		fprintf(stderr,"dbg2       grdfile:         %s\n",grdfile);
+		fprintf(stderr,"dbg2       intensfile:      %s\n",intensfile);
+		fprintf(stderr,"dbg2       tiff_file:       %s\n",tiff_file);
+		fprintf(stderr,"dbg2       make_worldfile:  %d\n",make_worldfile);
 		}
 
 	/* if help desired then print it and exit */
@@ -1175,6 +1183,32 @@ int main (int argc, char **argv)
 
 	/* close the tiff file */
 	fclose(tfp);
+
+	/* open world file */
+        if (make_worldfile == MB_YES)
+            {
+            strcpy(world_file, tiff_file);
+            world_file[strlen(tiff_file)-4] = '\0';
+            strcat(world_file,".tfw");
+            if ((tfp = fopen(world_file,"w")) == NULL)
+                {
+                error = MB_ERROR_OPEN_FAIL;
+                fprintf(stderr,"\nUnable to open output world file: %s\n",
+                      world_file);
+                fprintf(stderr,"\nProgram <%s> Terminated\n",
+                      program_name);
+                exit(error);
+                }
+
+            /* write out world file contents */
+            fprintf(tfp, "%f\r\n0.0\r\n0.0\r\n%f\r\n%f\r\n%f\r\n",
+                    header.x_inc, -header.y_inc,
+                    header.x_min - 0.5 * header.x_inc,
+                    header.y_max + 0.5 * header.y_inc);
+
+            /* close the world file */
+            fclose(tfp);
+            }
 
 	/* deallocate arrays */
 	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&grid, &error);

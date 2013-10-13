@@ -1,0 +1,281 @@
+#!/usr/bin/env perl
+#--------------------------------------------------------------------
+#    The MB-system:	mbm_plot.perl	10/5/2013
+#    $Id$
+#
+#    Copyright (c) 2013-2013 by
+#    D. W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, CA
+#    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#      Lamont-Doherty Earth Observatory
+#      Palisades, NY  10964
+#
+#    See README file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Command:
+#   mbm_makesvp
+#
+# Purpose:
+#   Macro to extract sound speed and depth data from a datalist of swath files,
+#   and generate a sound velocity profile model from averages of the sound
+#   speed values in regular depth ranges. This macro is intended for use
+#   with mapping data from submerged platforms (e.g. ROVs and AUVs) carrying
+#   CTD or SSV sensors.
+#
+# Basic Usage:
+#   mbm_makesvp -Idatalist [-H -V -Ddepthinterval]
+#
+# Author:
+#   David W. Caress
+#   Lamont-Doherty Earth Observatory
+#   Palisades, NY  10964
+#   October 5, 2013
+#
+# Version:
+#   $Id$
+#
+# Revisions:
+#   $Log: mbm_makesvp.perl,v $
+#
+$program_name = "mbm_makesvp";
+
+# Deal with command line arguments
+$command_line = "@ARGV";
+&MBGetopts('D:d:F:f:HhI:i:O:o:Vv');
+$help =    		($opt_H || $opt_h);
+$depthinterval =    	($opt_D || $opt_d || 25);
+$format =    		($opt_F || $opt_f);
+$datalist =    		($opt_I || $opt_i);
+$output =    		($opt_O || $opt_o);
+$verbose = 		($opt_V || $opt_v);
+
+# print out help message if required
+if ($help)
+	{
+	print "\n$program_name:\n";
+	print "\nVersion: $Id$\n";
+	print "\nMacro to extract sound speed and depth data from a datalist of swath files,\n";
+	print "\nand generate a sound velocity profile model from averages of the sound\n";
+	print "\nspeed values in regular depth ranges. This macro is intended for use\n";
+	print "\nwith mapping data from submerged platforms (e.g. ROVs and AUVs) carrying\n";
+	print "\nCTD or SSV sensors.\n";
+	print "\nBasic Usage: \n";
+	print "\t$program_name -Idatalist [-H -V -Ddepthinterval]\n";
+	exit 0;
+	}
+
+# check for input file
+if (!$datalist)
+	{
+	print "\a";
+	die "No input datalist specified - $program_name aborted\n";
+	}
+elsif (! -e $datalist)
+	{
+	print "\a";
+	die "Specified input datalist cannot be opened - $program_name aborted\n";
+	}
+
+# tell the world we got started
+if ($verbose)
+	{
+	print "\nRunning $program_name...\n";
+	}
+
+# loop over all files referenced in datalist
+if ($verbose)
+	{
+	print "\nGetting depth and sound speed data using mbctdlist...\n\n";
+	}
+if (!$format)
+    {
+    $mbformat = `mbformat -K -I$datalist`;
+    ($format) = $mbformat =~ /\S+\s+(\S+)/;
+    }
+
+@mbctdlist = `mbctdlist -F$format -I$datalist  -O^cs`;
+$nsoundspeed = 0;
+$depthmin = 999999999.99;
+$depthmax = 0.0;
+$depthmin = 999999999.99;
+$depthmax = 0.0;
+while (@mbctdlist)
+	{
+	$line = shift @mbctdlist;
+	if ($line =~ /(\S+)\s+(\S+)/)
+		{
+		($depth,$soundspeed) = $line =~ /(\S+)\s+(\S+)/;
+		push(@depths, $depth);
+		push(@soundspeeds, $soundspeed);
+		$nsoundspeed++;
+		if ($nsoundspeed == 1)
+		    {
+		    $depthmin = $depth;
+		    $depthmax = $depth;
+		    $soundspeedmin = $soundspeed;
+		    $soundspeedmax = $soundspeed;
+		    }
+		if ($depth < $depthmin)
+		    {
+		    $depthmin = $depth;
+		    }
+		if ($depth > $depthmax)
+		    {
+		    $depthmax = $depth;
+		    }
+		if ($soundspeed < $soundspeedmin)
+		    {
+		    $soundspeedmin = $soundspeed;
+		    }
+		if ($soundspeed > $soundspeed)
+		    {
+		    $soundspeedmax = $soundspeedmax;
+		    }
+		}
+	}
+if ($verbose)
+	{
+	print "\nRead $nsoundspeed depth & sound speed values...\n";
+	print "     Depth range:       $depthmin $depthmax\n";
+	print "     Sound speed range: $soundspeedmin $soundspeedmax\n";
+	}
+
+# Check that data have been successfully read
+if ($nsoundspeed <= 0)
+	{
+	die "Failed to read any depth & sound speed values - $program_name aborted\n";
+	}
+
+# Construct the depth bins for averaging
+$depthminuse = $depthinterval * (int ($depthmin / $depthinterval));
+$depthmaxuse = $depthinterval * (1 + int ($depthmax / $depthinterval));
+$ndepthbin = int(($depthmaxuse - $depthminuse) / $depthinterval);
+for ($i=0; $i < $ndepthbin; $i++)
+	{
+	push(@depthbinsum, 0.0);
+	push(@depthbincount, 0);
+	}
+for ($j=0; $j < $nsoundspeed; $j++)
+	{
+	$ibin = int(($depths[$j] - $depthminuse) / $depthinterval);
+	$depthbinsum[$ibin] += $soundspeeds[$j];
+	$depthbincount[$ibin]++;
+	}
+
+# Output the binned sound speed values
+if ($output)
+	{
+	open(F,">$output") || die "Cannot open output file: $output\n$program_name aborted.\n";
+	}
+
+for ($i=0; $i < $ndepthbin; $i++)
+	{
+	if ($depthbincount[$i] > 0)
+		{
+		$depth = $depthminuse + $i * $depthinterval + 0.5 * $depthinterval;
+		$soundspeed = $depthbinsum[$i] / $depthbincount[$i];
+		print "$depth $soundspeed\n";
+		if ($output)
+			{
+			print F "$depth $soundspeed\n";
+			}
+		}
+	}
+if ($output)
+	{
+	close(F);
+	}
+
+
+# exit
+exit 0;
+
+#-----------------------------------------------------------------------
+# This version of Getopts has been augmented to support multiple
+# calls to the same option. If an arg in argumentative is followed
+# by "+" rather than ":",  then the corresponding scalar will
+# be concatenated rather than overwritten by multiple calls to
+# the same arg.
+#
+# Usage:
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
+#			    # -c does not take arg. Sets opt_* as a
+#                           # side effect.
+
+sub MBGetopts {
+    local($argumentative) = @_;
+    local(@args,$_,$first,$rest);
+    local($errs) = 0;
+
+    @args = split( / */, $argumentative );
+    while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
+	($first,$rest) = ($1,$2);
+	$pos = index($argumentative,$first);
+	if($pos >= $[) {
+	    if($args[$pos+1] eq ':') {
+		shift(@ARGV);
+		if($rest eq '') {
+		    ++$errs unless @ARGV;
+		    $rest = shift(@ARGV);
+		}
+		eval "\$opt_$first = \$rest;";
+		eval "\$flg_$first = 1;";
+	    }
+	    elsif($args[$pos+1] eq '+') {
+		shift(@ARGV);
+		if($rest eq '') {
+		    ++$errs unless @ARGV;
+		    $rest = shift(@ARGV);
+		}
+		if (eval "\$opt_$first") {
+		    eval "\$opt_$first = \$opt_$first
+				. \":\" . \$rest;";
+		}
+		else {
+		    eval "\$opt_$first = \$rest;";
+		}
+		eval "\$flg_$first = 1;";
+	    }
+	    elsif($args[$pos+1] eq '%') {
+		shift(@ARGV);
+		if($rest ne '') {
+		    eval "\$opt_$first = \$rest;";
+		}
+		else {
+		    $rest = $ARGV[0];
+		    ($one) = $rest =~ /^-(.).*/;
+		    $pos = index($argumentative,$one);
+		    if(!$one || $pos < $[) {
+			eval "\$opt_$first = \$rest;";
+			shift(@ARGV);
+		    }
+		}
+		eval "\$flg_$first = 1;";
+	    }
+	    else {
+		eval "\$opt_$first = 1";
+		eval "\$flg_$first = 1;";
+		if($rest eq '') {
+		    shift(@ARGV);
+		}
+		else {
+		    $ARGV[0] = "-$rest";
+		}
+	    }
+	}
+	else {
+	    print STDERR "Unknown option: $first\n";
+	    ++$errs;
+	    if($rest ne '') {
+		$ARGV[0] = "-$rest";
+	    }
+	    else {
+		shift(@ARGV);
+	    }
+	}
+    }
+    $errs == 0;
+}
+#-----------------------------------------------------------------------

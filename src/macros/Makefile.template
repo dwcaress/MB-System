@@ -119,7 +119,8 @@ all:	$(BINDIR)/mbm_xbt \
 	$(BINDIR)/mbm_multiprocess \
 	$(BINDIR)/mbm_multidatalist \
 	$(BINDIR)/mbm_multicopy \
-	$(BINDIR)/mbm_bpr
+	$(BINDIR)/mbm_bpr \
+	$(BINDIR)/mbm_makesvp
 
 
 ### make clean does nothing
@@ -192,3 +193,6 @@ $(BINDIR)/mbm_multicopy:	mbm_multicopy
 $(BINDIR)/mbm_bpr:	mbm_bpr
 	cp mbm_bpr $(BINDIR)/mbm_bpr
 	chmod 775 $(BINDIR)/mbm_bpr
+$(BINDIR)/mbm_makesvp:	mbm_makesvp
+	cp mbm_makesvp $(BINDIR)/mbm_makesvp
+	chmod 775 $(BINDIR)/mbm_makesvp

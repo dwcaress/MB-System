@@ -305,9 +305,9 @@ double	*ssalongtrack = NULL;
 char	comment[MB_COMMENT_MAXLINE];
 double	*p = NULL;
 int	nraypathmax;
-int	*nraypath;
-double	**raypathx;
-double	**raypathy;
+int	*nraypath = NULL;
+double	**raypathx = NULL;
+double	**raypathy = NULL;
 double	*depth = NULL;
 double	*acrosstrack = NULL;
 double	rayxmax;
@@ -320,10 +320,10 @@ double	bath_min = 0.0;
 double	bath_max = 0.0;
 
 /* residual variables */
-double	*angle;
-double	*residual;
-double	*res_sd;
-int	*nresidual;
+double	*angle = NULL;
+double	*residual = NULL;
+double	*res_sd = NULL;
+int	*nresidual = NULL;
 
 /* beam range variables */
 int	beam_first = 0;
@@ -2964,6 +2964,16 @@ int mbvt_deallocate_swath()
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&residual,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&res_sd,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&nresidual,&error);
+                nraypath = NULL;
+                raypathx = NULL;
+                raypathy = NULL;
+                depth = NULL;
+                acrosstrack = NULL;
+                angle = NULL;
+                residual = NULL;
+                res_sd = NULL;
+                nresidual = NULL;
+
 		for (i=0;i<MBVT_BUFFER_SIZE;i++)
 			{
 			if (ping[i].allocated > 0 && ping[i].allocated != 60)
@@ -3025,7 +3035,8 @@ int mbvt_process_multibeam()
 	double	delta, a, b;
 	int	ns;
 	double	depth_predict, res;
-	double	sonardepth, sonardepthshift;
+	double	sonardepth, sonardepthshift, heave_use;
+        int     found;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -3095,8 +3106,18 @@ int mbvt_process_multibeam()
 		else
 			ssv_start = ping[k].ssv;
 
-		/* get depth of sonar - apply shift is sonar is above water */
-		sonardepth = ping[k].heave[i] + ping[k].sonardepth;
+		/* find a good heave value */
+                found = MB_NO;
+		for (i = 0; i < ping[k].beams_bath && found == MB_NO; i++)
+		    {
+		    if (mb_beam_ok(ping[k].beamflag[i]))
+			{
+			heave_use = ping[k].heave[i];
+                        found = MB_YES;
+                        }
+                    }
+
+		sonardepth = heave_use + ping[k].sonardepth;
 		sonardepthshift = 0.0;
 		if (first == MB_YES)
 			raydepthmin = MIN(raydepthmin, sonardepth);
@@ -3216,6 +3237,7 @@ int mbvt_process_multibeam()
 		    		fprintf(stderr,"dbg5       %4d %10f %10f %10f %10f\n",
 					i,acrosstrack[i],depth[i],
 					depth_predict,res);
+
 			}
 		  }
 		}

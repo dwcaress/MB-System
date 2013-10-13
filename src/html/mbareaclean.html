@@ -11,13 +11,13 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbareaclean</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  29 September 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbareaclean</B> - Tool to automatically flag bad beams in swath 
+<B>mbareaclean</B> - Tool to automatically flag bad beams in swath
 sonar bathymetry data within a specified area.
 <P>
 <A NAME="lbAC">&nbsp;</A>
@@ -28,18 +28,18 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbareaclean</B>  <B>-R</B><I>west/east/south/north</I>  <B>-S</B><I>binsize</I> 
-[<B>-D</B><I>threshold</I> <B>-F</B><I>format</I> <B>-I</B><I>infile</I> 
-<B>-B -G -H -M</B><I>threshold</I>[<I>/nmin</I>[<I>/nmax</I>]] 
+<B>mbareaclean</B>  <B>-R</B><I>west/east/south/north</I>  <B>-S</B><I>binsize</I>
+[<B>-D</B><I>threshold</I> <B>-F</B><I>format</I> <B>-I</B><I>infile</I>
+<B>-B -G -H -M</B><I>threshold</I>[<I>/nmin</I>[<I>/nmax</I>]]
 <B>-N</B>[-]<I>min_beam</I>[<I>/maxbeam</I>] <B>-T</B><I>type</I> -V]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbareaclean</B> identifies and flags artifacts in swath sonar 
-bathymetry data within a specified area of interest. 
+<B>mbareaclean</B> identifies and flags artifacts in swath sonar
+bathymetry data within a specified area of interest.
 The input data are one swath file or a datalist referencing multiple
-swath files. The user may specify the work area in longitude and latitude 
+swath files. The user may specify the work area in longitude and latitude
 bounds, along with a bin size in meters. If these are not specified, the
 program will attempt to set useful values. The area is divided into a grid with
 square cells of the specified bin size. As the data are read, each of
@@ -48,11 +48,11 @@ data are read, one or more statistical tests are performed on the soundings
 within each bin, providing there are a sufficient number of soundings.
 <P>
 The user may specify one or both of the following actions:
-<BR>&nbsp;&nbsp;1)&nbsp;Previously&nbsp;unflagged&nbsp;soundings&nbsp;that&nbsp;fail&nbsp;a&nbsp;test&nbsp;are&nbsp;
+<BR>&nbsp;&nbsp;1)&nbsp;Previously&nbsp;unflagged&nbsp;soundings&nbsp;that&nbsp;fail&nbsp;a&nbsp;test&nbsp;are
 flagged as bad
-<BR>&nbsp;&nbsp;2)&nbsp;Previously&nbsp;flagged&nbsp;soundings&nbsp;that&nbsp;pass&nbsp;all&nbsp;tests&nbsp;are&nbsp;
+<BR>&nbsp;&nbsp;2)&nbsp;Previously&nbsp;flagged&nbsp;soundings&nbsp;that&nbsp;pass&nbsp;all&nbsp;tests&nbsp;are
 unflagged (the <B>-G</B> option)..
-<BR>&nbsp;&nbsp;
+<P>
 The edit events are output to edit save files which can be applied
 to the data by the program <B>mbprocess</B>. These are the same edit save
 files created and/or modified by <B>mbclean</B> and <B>mbedit</B>.
@@ -62,38 +62,38 @@ program will create edit save files if necessary, or append to those that
 already exist.
 <P>
 At present only two algorithms for identifying good and bad beams is
-implemented. The first is a simple median filter controlled by the 
+implemented. The first is a simple median filter controlled by the
 <B>-M</B><I>threshold/nmin[/nmax]</I> option. Soundings that differ from the
-median depth by a value greater than <I>threshold</I> times the sonar 
+median depth by a value greater than <I>threshold</I> times the sonar
 altitude will be considered &quot;bad&quot;. So, if <I>threshold</I> = 0.05, then
 any sounding that is 5% greater or less than the median depth will be
-considered bad. The <I>nmin</I> parameter sets the minimum number of 
-soundings required to use the median filter. The <I>nmax</I> parameter 
+considered bad. The <I>nmin</I> parameter sets the minimum number of
+soundings required to use the median filter. The <I>nmax</I> parameter
 sets the maximum number of soundings allowed within a cell. If the number
 of initially good beams in a cell exceeds <I>nmax</I>, then only the <I>nmax</I>
 soundings nearest the median value remain unflagged, and the rest are
-flagged even if they meet the threshold test. The default values are 
-<I>threshold</I> = 0.25, <I>nmin</I> = 10, and <I>nmax</I> = infinite. 
+flagged even if they meet the threshold test. The default values are
+<I>threshold</I> = 0.25, <I>nmin</I> = 10, and <I>nmax</I> = infinite.
 <P>
 The second algorithm is a simple standard deviation filter controlled by the
 <B>-D</B><I>threshold/nmin</I> option. Soundings that differ from the
-mean depth by a value greater than <I>threshold</I> times the standard deviation 
+mean depth by a value greater than <I>threshold</I> times the standard deviation
 of the bin will be considered &quot;bad&quot;. So, if <I>threshold</I> = 2, then
 any sounding that is more than 2 standard deviations greater or less than the mean depth will be
-considered bad. The <I>nmin</I> parameter sets the minimum number of 
-soundings required to use the filter, The default values are 
+considered bad. The <I>nmin</I> parameter sets the minimum number of
+soundings required to use the filter, The default values are
 <I>threshold</I> = 2.0 and <I>nmin</I> = 10.
 <P>
-Two options allow limiting the soundings that may be flagged. 
-<B>-N</B>[-]<I>min_beam/maxbeam</I> limits flagging to only those beams in 
-(or out) of the given range. 
-<B>-T</B><I>type</I> limits flagging to soundings using the specified bottom 
+Two options allow limiting the soundings that may be flagged.
+<B>-N</B>[-]<I>min_beam/maxbeam</I> limits flagging to only those beams in
+(or out) of the given range.
+<B>-T</B><I>type</I> limits flagging to soundings using the specified bottom
 detection algorithm.
 Many sounders use amplitude detection algorithms for the central beams
-and phase detection algorithms for the outer beams, falling back to 
-amplitude detection when phase detection fails. 
+and phase detection algorithms for the outer beams, falling back to
+amplitude detection when phase detection fails.
 Amplitude detections in the outer beams are second rate soundings and
-frequently have a higher range of errors than other soundings. 
+frequently have a higher range of errors than other soundings.
 Using <B>-N</B> and <B>-T</B> together allows stricter cleaning algorithms
 to be applied to these lower quality data. For example to flag bad all
 amplitude detections in the outer thirty beams which are more than one standard deviation
@@ -119,9 +119,8 @@ Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><DT><B>-B</B>
+<DT><B>-B</B>
 
-<DD>
 <DD>
 <BR>
 
@@ -134,13 +133,13 @@ or <B>-G</B> are specified, then the program will by default use this option.
 <I>threshold</I>[<I>/nmin</I>]
 <BR>
 
-Turns on use of a standard deviation filter test for the soundings. 
+Turns on use of a standard deviation filter test for the soundings.
 Soundings that differ from the
-mean depth by a value greater than <I>threshold</I> times the standard deviation 
+mean depth by a value greater than <I>threshold</I> times the standard deviation
 will be considered &quot;bad&quot;. So, if <I>threshold</I> = 2.0, then
 any sounding that is twice the standard deviation from the mean depth will be
-considered bad. The <I>nmin</I> parameter sets the minimum number of 
-soundings required to use the standard deviation filter. The default values are 
+considered bad. The <I>nmin</I> parameter sets the minimum number of
+soundings required to use the standard deviation filter. The default values are
 <I>threshold</I> = 2.0 and <I>nmin</I> = 10.
 <DT><B>-F</B>
 
@@ -148,10 +147,10 @@ soundings required to use the standard deviation filter. The default values are
 <I>format</I>
 <BR>
 
-Sets the data format used to read <I>infile</I>. 
+Sets the data format used to read <I>infile</I>.
 If <I>format</I> &lt; 0, then the input file specified
 with the <B>-I</B> option will actually contain a list of input swath sonar
-data files. This program uses the <B>MBIO</B> library 
+data files. This program uses the <B>MBIO</B> library
 and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
@@ -174,11 +173,11 @@ of its operation and then exit immediately.
 <I>infile</I>
 <BR>
 
-Sets the input filename. If <I>format</I> &gt; 0 (set with the 
-<B>-F</B> option) then the swath sonar data contained in <I>infile</I> 
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-F</B> option) then the swath sonar data contained in <I>infile</I>
 is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
 is assumed to be an ascii file containing a list of the input swath sonar
-data files to be processed and their formats.  The program will read 
+data files to be processed and their formats.  The program will read
 and process the data in all of these files. Each input file will
 have an associated output file with either the &quot;.esf&quot; suffix.
 In the <I>infile</I> file, each
@@ -199,11 +198,11 @@ is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;datalist
 
 Turns on use of a median filter test for the soundings. If no other test is
 specified, the median filter test is used by default. Soundings that differ from the
-median depth by a value greater than <I>threshold</I> times the sonar 
+median depth by a value greater than <I>threshold</I> times the sonar
 altitude will be considered &quot;bad&quot;. So, if <I>threshold</I> = 0.05, then
 any sounding that is 5% greater or less than the median depth will be
-considered bad. The <I>nmin</I> parameter sets the minimum number of 
-soundings required to use the median filter, The default values are 
+considered bad. The <I>nmin</I> parameter sets the minimum number of
+soundings required to use the median filter, The default values are
 <I>threshold</I> = 0.25 and <I>nmin</I> = 10.
 <DT><B>-N</B>
 
@@ -214,10 +213,10 @@ soundings required to use the median filter, The default values are
 Limits the beams to which flagging will be applied.
 Only soundings for beams from <I>min_beam</I> to <I>max_beam</I>, inclusive, will have flags applied.
 If <I>min_beam</I> is preceded by a <B>-</B> then only beams outside the range will be flagged.
-If <I>max_beam</I> is not given it will be set so that an equal number of beams lay above it as 
+If <I>max_beam</I> is not given it will be set so that an equal number of beams lay above it as
 lay below <I>min_beam</I>. So for a Simrad EM1002 sounder with 111 beams <B>-N-30</B> will only flag
-beam numbers 1 to 29 and 82 to 111. 
-All good soundings, regardless of beam, will be included in the calculations of median, mean 
+beam numbers 1 to 29 and 82 to 111.
+All good soundings, regardless of beam, will be included in the calculations of median, mean
 and standard deviation for the bin.
 <DT><B>-R</B>
 
@@ -225,9 +224,9 @@ and standard deviation for the bin.
 <I>west/east/south/north</I>
 <BR>
 
-Sets the longitude and latitude bounds within which swath sonar 
+Sets the longitude and latitude bounds within which swath sonar
 data will be read, binned, and tested. Soundings lying outside these
-bounds will be ignored. 
+bounds will be ignored.
 <BR>
 
 Default: The program will determine and use a square area encompassing
@@ -255,7 +254,7 @@ Limits the soundings to which flagging will be applied to only those which
 use the specified bottom detection algorithm.
 <I>detect_type</I> must be one of:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;-&nbsp;unknown&nbsp;algorithm
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;-&nbsp;amplitude&nbsp;detection&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;-&nbsp;amplitude&nbsp;detection
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;-&nbsp;phase&nbsp;detection
 <DT><B>-V</B>
 
@@ -263,7 +262,7 @@ use the specified bottom detection algorithm.
 Normally, <B>mbareaclean</B> works &quot;silently&quot; without outputting
 anything to the stderr stream.  If the
 <B>-V</B> flag is given, then <B>mbareaclean</B> works in a &quot;verbose&quot; mode and
-outputs the program version being used, all error status messages, 
+outputs the program version being used, all error status messages,
 and the number of beams flagged as bad.
 <P>
 </DL>
@@ -272,7 +271,7 @@ and the number of beams flagged as bad.
 
 Suppose we are working with a set of 5 Reson 8101 multibeam data files comprising a
 shallow water survey. One of these files has previously been edited with <B>mbedit</B>,
-so an esf file exists and contains a number of pre-existing edits. 
+so an esf file exists and contains a number of pre-existing edits.
 If we know that this survey is contained in the area specified
 by -R-122.42556/-122.41974/47.67111/47.67529, then we can invoke <B>mbareaclean</B>
 using:
@@ -300,27 +299,27 @@ filtering is 10. The results look like:
 <BR>&nbsp;Output:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flag&nbsp;unflagged&nbsp;soundings&nbsp;identified&nbsp;as&nbsp;bad:&nbsp;&nbsp;ON
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Unflag&nbsp;flagged&nbsp;soundings&nbsp;identified&nbsp;as&nbsp;good:&nbsp;OFF
-<BR>&nbsp;
+<P>
 <BR>&nbsp;Processing&nbsp;001_1730.fbt
 <BR>&nbsp;Sorting&nbsp;41580&nbsp;old&nbsp;edits...
 <BR>&nbsp;10000&nbsp;of&nbsp;41580&nbsp;old&nbsp;edits&nbsp;sorted...
 <BR>&nbsp;20000&nbsp;of&nbsp;41580&nbsp;old&nbsp;edits&nbsp;sorted...
 <BR>&nbsp;30000&nbsp;of&nbsp;41580&nbsp;old&nbsp;edits&nbsp;sorted...
 <BR>&nbsp;40000&nbsp;of&nbsp;41580&nbsp;old&nbsp;edits&nbsp;sorted...
-<BR>&nbsp;pings:1169&nbsp;&nbsp;beams:&nbsp;&nbsp;&nbsp;20233&nbsp;good&nbsp;&nbsp;&nbsp;41686&nbsp;flagged&nbsp;&nbsp;&nbsp;56150&nbsp;null&nbsp;
-<BR>&nbsp;
+<BR>&nbsp;pings:1169&nbsp;&nbsp;beams:&nbsp;&nbsp;&nbsp;20233&nbsp;good&nbsp;&nbsp;&nbsp;41686&nbsp;flagged&nbsp;&nbsp;&nbsp;56150&nbsp;null
+<P>
 <BR>&nbsp;Processing&nbsp;003_1733.fbt
-<BR>&nbsp;pings:&nbsp;991&nbsp;&nbsp;beams:&nbsp;&nbsp;&nbsp;52439&nbsp;good&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;159&nbsp;flagged&nbsp;&nbsp;&nbsp;47493&nbsp;null&nbsp;
-<BR>&nbsp;
+<BR>&nbsp;pings:&nbsp;991&nbsp;&nbsp;beams:&nbsp;&nbsp;&nbsp;52439&nbsp;good&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;159&nbsp;flagged&nbsp;&nbsp;&nbsp;47493&nbsp;null
+<P>
 <BR>&nbsp;Processing&nbsp;005_1736.fbt
-<BR>&nbsp;pings:1011&nbsp;&nbsp;beams:&nbsp;&nbsp;&nbsp;53080&nbsp;good&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;588&nbsp;flagged&nbsp;&nbsp;&nbsp;48443&nbsp;null&nbsp;
-<BR>&nbsp;
+<BR>&nbsp;pings:1011&nbsp;&nbsp;beams:&nbsp;&nbsp;&nbsp;53080&nbsp;good&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;588&nbsp;flagged&nbsp;&nbsp;&nbsp;48443&nbsp;null
+<P>
 <BR>&nbsp;Processing&nbsp;007_1739.fbt
-<BR>&nbsp;pings:&nbsp;922&nbsp;&nbsp;beams:&nbsp;&nbsp;&nbsp;48854&nbsp;good&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;212&nbsp;flagged&nbsp;&nbsp;&nbsp;44056&nbsp;null&nbsp;
-<BR>&nbsp;
+<BR>&nbsp;pings:&nbsp;922&nbsp;&nbsp;beams:&nbsp;&nbsp;&nbsp;48854&nbsp;good&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;212&nbsp;flagged&nbsp;&nbsp;&nbsp;44056&nbsp;null
+<P>
 <BR>&nbsp;Processing&nbsp;009_1741.fbt
-<BR>&nbsp;pings:1017&nbsp;&nbsp;beams:&nbsp;&nbsp;&nbsp;53416&nbsp;good&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;586&nbsp;flagged&nbsp;&nbsp;&nbsp;48715&nbsp;null&nbsp;
-<BR>&nbsp;
+<BR>&nbsp;pings:1017&nbsp;&nbsp;beams:&nbsp;&nbsp;&nbsp;53416&nbsp;good&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;586&nbsp;flagged&nbsp;&nbsp;&nbsp;48715&nbsp;null
+<P>
 <BR>&nbsp;MBareaclean&nbsp;Processing&nbsp;Totals:
 <BR>&nbsp;-------------------------
 <BR>&nbsp;5&nbsp;total&nbsp;swath&nbsp;data&nbsp;files&nbsp;processed
@@ -332,24 +331,24 @@ filtering is 10. The results look like:
 <BR>&nbsp;&nbsp;&nbsp;2&nbsp;soundings:&nbsp;&nbsp;53668&nbsp;flagged:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;unflagged:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;file:005_1736
 <BR>&nbsp;&nbsp;&nbsp;3&nbsp;soundings:&nbsp;&nbsp;49066&nbsp;flagged:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;unflagged:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;file:007_1739
 <BR>&nbsp;&nbsp;&nbsp;4&nbsp;soundings:&nbsp;&nbsp;54002&nbsp;flagged:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;unflagged:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;file:009_1741
-<BR>&nbsp;
+<P>
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbclean.html">mbclean</A></B>(1), <B><A HREF="mbedit.html">mbedit</A></B>(1), 
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbclean.html">mbclean</A></B>(1), <B><A HREF="mbedit.html">mbedit</A></B>(1),
 <B><A HREF="mbinfo.html">mbinfo</A></B>(1) <B><A HREF="mbprocess.html">mbprocess</A></B>(1),
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
-The algorithms implemented in <B>mbareaclean</B> simply 
+The algorithms implemented in <B>mbareaclean</B> simply
 don't detect all bathymetric artifacts that
 are obvious to the eye on contour charts.  Although
-the autofiltering tools <B>mbareaclean</B> and <B>mbclean</B> 
+the autofiltering tools <B>mbareaclean</B> and <B>mbclean</B>
 often do a credible first pass at
 flagging obvious artifacts, we strongly recommend that
-any swath bathymetry processing stream include 
+any swath bathymetry processing stream include
 interactive editing of the
 bathymetry data (e.g. <B>mbedit</B>).
 <P>
@@ -371,7 +370,7 @@ bathymetry data (e.g. <B>mbedit</B>).
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 29 September 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

@@ -111,6 +111,8 @@
 #define MBSEGYGRID_GAIN_AGCSEAFLOOR	3
 #define MBSEGYGRID_GEOMETRY_VERTICAL	0
 #define MBSEGYGRID_GEOMETRY_REAL	1
+#define MBSEGYGRID_FILTER_OFF		0
+#define MBSEGYGRID_FILTER_COSINE	1
 
 /* NaN value */
 float	NaN;
@@ -187,6 +189,7 @@ int main (int argc, char **argv)
 	struct mb_segytraceheader_struct traceheader;
 	float	*trace = NULL;
 	float	*worktrace = NULL;
+	float	*filtertrace = NULL;
 
 	/* grid controls */
 	char	fileroot[MB_PATH_MAXLINE];
@@ -216,6 +219,8 @@ int main (int argc, char **argv)
 	int	agcmode = MB_NO;
 	double	agcwindow = 0.0;
 	double	agcmaxvalue = 0.0;
+	int	filtermode = MBSEGYGRID_FILTER_OFF;
+	double	filterwindow = 0.0;
 	int	geometrymode = MBSEGYGRID_GEOMETRY_VERTICAL;
 	int	ntraces;
 	int	ngridx = 0;
@@ -261,17 +266,22 @@ int main (int argc, char **argv)
 	int	iystart, iyend;
 	double	factor, gtime, btime, stime, dtime, ttime, tmax;
 	double	cosfactor, sinfactor, rangefactor, range;
+	double	filtersum;
 	double	btimesave = 0.0;
 	double	stimesave = 0.0;
 	double	dtimesave = 0.0;
 	double	mtodeglon, mtodeglat;
 	double	navlon, navlat;
 	double	line_distance, line_dx, line_dy, trace_x;
+	double	cos_arg;
 	int	plot_status;
 	int	worktrace_alloc;
+	int	filtertrace_alloc;
+	int	nfilter;
 	int	iagchalfwindow;
 	int	ixc, iyc;
-	int	i, j, k, n;
+	int	jstart, jend;
+	int	i, ii, j, k, n;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -284,7 +294,7 @@ int main (int argc, char **argv)
 	GMT_make_fnan(NaN);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:G:g:I:i:O:o:R:r:S:s:T:t:VvW:w:Hh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:F:f:G:g:I:i:O:o:R:r:S:s:T:t:VvW:w:Hh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -320,6 +330,11 @@ int main (int argc, char **argv)
 		case 'D':
 		case 'd':
 			n = sscanf (optarg,"%d/%d", &decimatex, &decimatey);
+			flag++;
+			break;
+		case 'F':
+		case 'f':
+			n = sscanf (optarg,"%d/%lf", &filtermode, &filterwindow);
 			flag++;
 			break;
 		case 'G':
@@ -456,6 +471,8 @@ int main (int argc, char **argv)
 		fprintf(outfp,"dbg2       gain:           %f\n",gain);
 		fprintf(outfp,"dbg2       gainwindow:     %f\n",gainwindow);
 		fprintf(outfp,"dbg2       gaindelay:      %f\n",gaindelay);
+		fprintf(outfp,"dbg2       filtermode:     %d\n",filtermode);
+		fprintf(outfp,"dbg2       filterwindow:   %f\n",filterwindow);
 		fprintf(outfp,"dbg2       geometrymode:   %d\n",geometrymode);
 		fprintf(outfp,"dbg2       scale2distance: %d\n",scale2distance);
 		fprintf(outfp,"dbg2       shotscale:      %f\n",shotscale);
@@ -474,7 +491,7 @@ int main (int argc, char **argv)
 	if (traceend < 1 || traceend < tracestart || timesweep <= 0.0
 		|| (plotmode == MBSEGYGRID_PLOTBYDISTANCE && startlon == 0.0))
 		{
-		get_segy_limits(5,
+		get_segy_limits(verbose,
 				segyfile,
 				&sinftracemode,
 				&sinftracestart,
@@ -901,6 +918,54 @@ i,iy,factor,i,trace[i]);*/
 igainstart,igainend,tmax,factor);*/
 						}
 
+					/* apply filtering if desired */
+					if (filtermode != MBSEGYGRID_FILTER_OFF)
+						{
+						if (worktrace == NULL || traceheader.nsamps > worktrace_alloc)
+							{
+							status = mb_reallocd(verbose,__FILE__,__LINE__,
+										traceheader.nsamps * sizeof(float),
+										(void **)&worktrace, &error);
+							worktrace_alloc = traceheader.nsamps;
+							}
+						nfilter = 2 * ((int)(0.5 * filterwindow / sampleinterval)) + 1;
+						if (filtertrace == NULL || nfilter > filtertrace_alloc)
+							{
+							status = mb_reallocd(verbose,__FILE__,__LINE__,
+										nfilter * sizeof(float),
+										(void **)&filtertrace, &error);
+							filtertrace_alloc = nfilter;
+							}
+						filtersum = 0.0;
+						for (j=0;j<nfilter;j++)
+							{
+							cos_arg = (0.5 * M_PI * (j - nfilter / 2)) / (0.5 * nfilter);
+							filtertrace[j] = cos(cos_arg);
+							filtersum += filtertrace[j];
+/*fprintf(stderr,"FILTER: j:%d nfilter:%d cos_arg:%f cos:%f filtertrace:%f sum:%f\n",j,nfilter,cos_arg,cos(cos_arg),filtertrace[j],filtersum);*/
+							}
+						for (i=0;i<=traceheader.nsamps;i++)
+							{
+							worktrace[i] = 0.0;
+							filtersum = 0.0;
+							jstart = MAX(nfilter / 2 - i, 0);
+							jend = MIN(nfilter - 1, nfilter - 1 + (traceheader.nsamps - 1 - nfilter / 2 - i));
+							for (j=jstart;j<=jend;j++)
+								{
+								ii = i - nfilter/2 + j;
+								worktrace[i] += filtertrace[j] * trace[ii];
+								filtersum += filtertrace[j];
+/* fprintf(stderr,"      i:%d j:%d ii:%d trace:%f sum:%f\n",i,j,ii,worktrace[i],filtersum); */
+								}
+							worktrace[i] /= filtersum;
+/* fprintf(stderr,"i:%d jstart:%d jend:%d trace: %f %f\n",i,jstart,jend,trace[i], worktrace[i]);*/
+							}
+						for (i=0;i<=traceheader.nsamps;i++)
+							{
+							trace[i] = worktrace[i];
+							}
+						}
+
 					/* apply agc if desired */
 					if (agcmode == MB_YES && agcwindow > 0.0)
 						{
@@ -1059,6 +1124,8 @@ igainstart,igainend,tmax,factor);*/
 	/* deallocate memory for grid array */
 	if (worktrace != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&worktrace, &error);
+	if (filtertrace != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&filtertrace, &error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&grid, &error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&gridweight, &error);
 
@@ -1123,10 +1190,13 @@ int get_segy_limits(int verbose,
 	int	sinfmodtime = 0;
 	struct stat file_status;
 	int	fstat;
-	double	delay0, delay1, delaydel;
+	double	delay0 = 0.0;
+	double	delay1 = 0.0;
+	double	delaydel = 0.0;
 	int	shot0, shot1, shotdel;
 	int	shottrace0, shottrace1, shottracedel;
-	int	rp0, rp1, rpdel;
+	int	rp0, rp1;
+	int	rpdel = 0;
 	int	rptrace0, rptrace1, rptracedel;
 	int	nscan;
 	int	shellstatus;

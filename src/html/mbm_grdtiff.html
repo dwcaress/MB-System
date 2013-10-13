@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_grdtiff</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  28 September 2013 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -40,7 +40,7 @@ Additional Options:
 <BR>
 
 [<B>-D</B><I>flipcolor/flipshade</I>
-<B>-MGS</B><I>scalefactor</I> <B>-Q</B> <B>-R</B><I>w/e/s/n</I>
+<B>-MGS</B><I>scalefactor</I> <B>-MGW</B> <B>-Q</B> <B>-R</B><I>w/e/s/n</I>
 <B>-X</B> <B>-Y</B> <B>-Z</B><I>min/max[/mode]</I>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -65,7 +65,10 @@ using <B>mbgrid</B> or <B>mbmosaic</B> can be loaded into the
 GRASS, ArcInfo, ArcView, and ArcGIS GIS packages as geographically located
 coverages. The <B>mbgrid</B> and <B>mbmosaic</B> manual pages each contain
 an appendix with a complete list of the projected coordinate systems that
-may used in grid generation.
+may used in grid generation. Some software packages (e.g. Winfrog) do not
+recognize the embedded coordinate system information, and install require
+a parallel &quot;world&quot; file to specify the bounds and resolution. The <B>-MGW</B>
+option causes a world file to be generated with a &quot;.tfw&quot; suffix.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -382,6 +385,13 @@ set the basemap annotation font to Courier, use
 The gridded data is multiplied by <I>scalefactor</I>.
 This option is most often used flip the sign of the
 data (<I>scalefactor</I> = -1). [Default no scaling]
+<DT><B>-MGW</B>
+
+<DD>
+The <B>-MGW</B> option causes a &quot;world&quot; file to be generated parallel to the
+GeoTiff image with a &quot;.tfw&quot; suffix. Some software packages (e.g. Winfrog) do
+not recognize the coordinate information embedded in the GeoTiff file, and
+look for a world file.
 <DT><B>-O</B>
 
 <DD>
@@ -841,7 +851,7 @@ options. You choose.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 28 September 2013</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

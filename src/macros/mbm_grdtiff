@@ -196,7 +196,7 @@ if ($help)
 	print "\t\t-V -Wcolor_style[/pallette[/ncolors]] ]\n";
 	print "Additional Options:\n";
 	print "\t\t[-Dflipcolor/flipshade\n";
-	print "\t\t-MGSscalefactor -Q -Rw/e/s/n -X -Y -Zmin/max[/mode]]\n";
+	print "\t\t-MGSscalefactor -MGW -Q -Rw/e/s/n -X -Y -Zmin/max[/mode]]\n";
 	exit 0;
 	}
 
@@ -244,6 +244,12 @@ if ($misc)
 			{
 			($data_scale) = $cmd =~
 				/^[Gg][Ss](\S+)/;
+			}
+
+		# turn on world file generation
+		if ($cmd =~ /^[Gg][Ww]/)
+			{
+			$make_worldfile = 1;
 			}
 		}
 	}
@@ -1319,6 +1325,10 @@ if ($color_mode)
 	elsif ($color_mode == 5)
 		{
 		printf FCMD "-K $file_slope \\\n\t";
+		}
+	if ($make_worldfile == 1)
+		{
+		printf FCMD "-W \\\n\t";
 		}
 	printf FCMD "-V \n";
 	}

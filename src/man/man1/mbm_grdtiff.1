@@ -1,4 +1,4 @@
-.TH mbm_grdtiff 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grdtiff 1 "28 September 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grdtiff\fP \- Create an executable shellscript which will generate
 a TIFF image of gridded data in a GMT grd file.
@@ -18,7 +18,7 @@ Version 5.0
 Additional Options:
 .br
 [\fB\-D\fP\fIflipcolor/flipshade\fP
-\fB\-MGS\fP\fIscalefactor\fP \fB\-Q\fP \fB\-R\fP\fIw/e/s/n\fP
+\fB\-MGS\fP\fIscalefactor\fP \fB\-MGW\fP \fB\-Q\fP \fB\-R\fP\fIw/e/s/n\fP
 \fB\-X\fP \fB\-Y\fP \fB\-Z\fP\fImin/max[/mode]\fP]
 
 .SH DESCRIPTION
@@ -41,7 +41,10 @@ using \fBmbgrid\fP or \fBmbmosaic\fP can be loaded into the
 GRASS, ArcInfo, ArcView, and ArcGIS GIS packages as geographically located
 coverages. The \fBmbgrid\fP and \fBmbmosaic\fP manual pages each contain
 an appendix with a complete list of the projected coordinate systems that
-may used in grid generation.
+may used in grid generation. Some software packages (e.g. Winfrog) do not
+recognize the embedded coordinate system information, and install require
+a parallel "world" file to specify the bounds and resolution. The \fB-MGW\fP
+option causes a world file to be generated with a ".tfw" suffix.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -304,6 +307,12 @@ set the basemap annotation font to Courier, use
 The gridded data is multiplied by \fIscalefactor\fP.
 This option is most often used flip the sign of the
 data (\fIscalefactor\fP = \-1). [Default no scaling]
+.TP
+.B \-MGW
+The \fB-MGW\fP option causes a "world" file to be generated parallel to the
+GeoTiff image with a ".tfw" suffix. Some software packages (e.g. Winfrog) do
+not recognize the coordinate information embedded in the GeoTiff file, and
+look for a world file.
 .TP
 .B \-O
 \fIroot\fP

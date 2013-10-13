@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2155       October 13, 2013
   Version 5.4.2154       September 26, 2013
   Version 5.4.2153       September 22, 2013
   Version 5.4.2152       September 16, 2013
@@ -163,6 +164,22 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2155 (October 13, 2013)
+
+MBvelocitytool: Fixed problems with bad calculations after loading more than
+one swath data.
+
+MBgrdtiff, mbm_grdtiff: Added capability to output a *.tfw "world" file parallel
+to the GeoTiff image. Some software does not recognize the coordinate system
+information embedded in the GeoTiff file.
+
+MBsegygrid: Added capability for simple time domain low-pass filtering.
+
+MBrphsbias: Added incomplete new program that will, when complete, use a brute
+force multidimensional search obtain optimized estimates for bias parameters
+from a specified dataset. There is no documentation yet as the program currently
+does nothing but compile and read data.
 
 -----> 5.4.2154 (September 26, 2013)
 
