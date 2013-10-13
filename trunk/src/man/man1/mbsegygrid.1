@@ -1,4 +1,4 @@
-.TH mbsegygrid 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbsegygrid 1 "12 October 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsegygrid\fP \- Generate time vs. trace number grids of seismic data from segy files.
 
@@ -41,6 +41,9 @@ A simple time-varying gain can be applied to the traces before gridding using
 the \fB\-G\fP option. The start time for the gain may be either the start
 of the trace or the seafloor arrival time.
 
+Simple time-domain low-pass filtering can be applied to the traces before
+gridding using the \fB\-F\fP option.
+
 Regions of the grid without data are indicated in the output by NaN values.
 
 .SH AUTHORSHIP
@@ -80,6 +83,13 @@ value of \fImaxvalue\fP.
 Sets the decimation of traces (\fIdecimatex\fP) and samples (\fIdecimatey\fP) used in
 generating the output grid. The downsampling of the data is actually accomplished by averaging
 the values within each grid bin rather than omitting traces or samples.
+.TP
+.B \-F
+\fImode/window\fP
+.br
+Sets the application of low-pass filtering to the trace data. The filtering is applied
+by convolving a filter function of length \fIwindow\fP seconds with the trace. Currently the only
+available filter is a cosine taper, set using \fImode\fP = 1.
 .TP
 .B \-G
 \fImode/gain[/window]\fP

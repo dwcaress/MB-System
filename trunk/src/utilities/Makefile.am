@@ -20,7 +20,6 @@ bin_PROGRAMS = mbhsdump \
         mbgrid \
         mbmosaic \
         mblevitus \
-        mbrollbias \
         mbextractsegy \
         mbsegylist \
         mbsegyinfo \
@@ -31,6 +30,7 @@ bin_PROGRAMS = mbhsdump \
         mbps \
         mbstripnan \
         mbrollbias \
+        mbrphsbias \
         mb7k2jstar \
         mb7kpreprocess \
         mbrolltimelag \
@@ -62,7 +62,7 @@ if BUILD_GSF
   AM_CPPFLAGS += -I${top_srcdir}/src/gsf
 endif
 
-AM_LDFLAGS = 
+AM_LDFLAGS =
 
 LIBS =  ${top_builddir}/src/mbio/libmbio.la \
        	${libgmt_LIBS} ${libnetcdf_LIBS} \
@@ -110,6 +110,8 @@ mbmosaic_SOURCES = mbmosaic.c
 mbmosaic_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
 mblevitus_SOURCES = mblevitus.c
+
+mbrphsbias_SOURCES = mbrphsbias.c
 
 mbrollbias_SOURCES = mbrollbias.c
 
@@ -170,7 +172,7 @@ mbsxppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
 if BUILD_FFTW
 mbsegypsd_SOURCES = mbsegypsd.c
-mbsegypsd_LDFLAGS = 
+mbsegypsd_LDFLAGS =
 
 mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
                   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libfftw_LIBS}

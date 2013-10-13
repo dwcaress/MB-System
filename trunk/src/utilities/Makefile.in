@@ -58,10 +58,10 @@ bin_PROGRAMS = mbhsdump$(EXEEXT) mbformat$(EXEEXT) mbdefaults$(EXEEXT) \
 	mbnavlist$(EXEEXT) mbsvplist$(EXEEXT) mbbackangle$(EXEEXT) \
 	mbclean$(EXEEXT) mbareaclean$(EXEEXT) mbhistogram$(EXEEXT) \
 	mbgrid$(EXEEXT) mbmosaic$(EXEEXT) mblevitus$(EXEEXT) \
-	mbrollbias$(EXEEXT) mbextractsegy$(EXEEXT) mbsegylist$(EXEEXT) \
-	mbsegyinfo$(EXEEXT) mbsegygrid$(EXEEXT) mbauvnavusbl$(EXEEXT) \
-	mbgetesf$(EXEEXT) mbneptune2esf$(EXEEXT) mbps$(EXEEXT) \
-	mbstripnan$(EXEEXT) mbrollbias$(EXEEXT) mb7k2jstar$(EXEEXT) \
+	mbextractsegy$(EXEEXT) mbsegylist$(EXEEXT) mbsegyinfo$(EXEEXT) \
+	mbsegygrid$(EXEEXT) mbauvnavusbl$(EXEEXT) mbgetesf$(EXEEXT) \
+	mbneptune2esf$(EXEEXT) mbps$(EXEEXT) mbstripnan$(EXEEXT) \
+	mbrollbias$(EXEEXT) mbrphsbias$(EXEEXT) mb7k2jstar$(EXEEXT) \
 	mb7kpreprocess$(EXEEXT) mbrolltimelag$(EXEEXT) \
 	mbauvloglist$(EXEEXT) mb7k2ss$(EXEEXT) mbabsorption$(EXEEXT) \
 	mbdumpesf$(EXEEXT) mbtime$(EXEEXT) mbctdlist$(EXEEXT) \
@@ -193,6 +193,9 @@ mbrolltimelag_LDADD = $(LDADD)
 am_mbroutetime_OBJECTS = mbroutetime.$(OBJEXT)
 mbroutetime_OBJECTS = $(am_mbroutetime_OBJECTS)
 mbroutetime_LDADD = $(LDADD)
+am_mbrphsbias_OBJECTS = mbrphsbias.$(OBJEXT)
+mbrphsbias_OBJECTS = $(am_mbrphsbias_OBJECTS)
+mbrphsbias_LDADD = $(LDADD)
 am_mbsegygrid_OBJECTS = mbsegygrid.$(OBJEXT)
 mbsegygrid_OBJECTS = $(am_mbsegygrid_OBJECTS)
 mbsegygrid_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -254,11 +257,11 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mblist_SOURCES) $(mbmosaic_SOURCES) $(mbnavlist_SOURCES) \
 	$(mbneptune2esf_SOURCES) $(mbprocess_SOURCES) $(mbps_SOURCES) \
 	$(mbrollbias_SOURCES) $(mbrolltimelag_SOURCES) \
-	$(mbroutetime_SOURCES) $(mbsegygrid_SOURCES) \
-	$(mbsegyinfo_SOURCES) $(mbsegylist_SOURCES) \
-	$(mbsegypsd_SOURCES) $(mbset_SOURCES) $(mbstripnan_SOURCES) \
-	$(mbsvplist_SOURCES) $(mbsxppreprocess_SOURCES) \
-	$(mbtime_SOURCES)
+	$(mbroutetime_SOURCES) $(mbrphsbias_SOURCES) \
+	$(mbsegygrid_SOURCES) $(mbsegyinfo_SOURCES) \
+	$(mbsegylist_SOURCES) $(mbsegypsd_SOURCES) $(mbset_SOURCES) \
+	$(mbstripnan_SOURCES) $(mbsvplist_SOURCES) \
+	$(mbsxppreprocess_SOURCES) $(mbtime_SOURCES)
 DIST_SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mb7kpreprocess_SOURCES) $(mbabsorption_SOURCES) \
 	$(mbareaclean_SOURCES) $(mbauvloglist_SOURCES) \
@@ -273,10 +276,10 @@ DIST_SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mblist_SOURCES) $(mbmosaic_SOURCES) $(mbnavlist_SOURCES) \
 	$(mbneptune2esf_SOURCES) $(mbprocess_SOURCES) $(mbps_SOURCES) \
 	$(mbrollbias_SOURCES) $(mbrolltimelag_SOURCES) \
-	$(mbroutetime_SOURCES) $(mbsegygrid_SOURCES) \
-	$(mbsegyinfo_SOURCES) $(mbsegylist_SOURCES) \
-	$(am__mbsegypsd_SOURCES_DIST) $(mbset_SOURCES) \
-	$(mbstripnan_SOURCES) $(mbsvplist_SOURCES) \
+	$(mbroutetime_SOURCES) $(mbrphsbias_SOURCES) \
+	$(mbsegygrid_SOURCES) $(mbsegyinfo_SOURCES) \
+	$(mbsegylist_SOURCES) $(am__mbsegypsd_SOURCES_DIST) \
+	$(mbset_SOURCES) $(mbstripnan_SOURCES) $(mbsvplist_SOURCES) \
 	$(mbsxppreprocess_SOURCES) $(mbtime_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -494,6 +497,7 @@ mbgrid_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbmosaic_SOURCES = mbmosaic.c
 mbmosaic_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mblevitus_SOURCES = mblevitus.c
+mbrphsbias_SOURCES = mbrphsbias.c
 mbrollbias_SOURCES = mbrollbias.c
 mbextractsegy_SOURCES = mbextractsegy.c
 mbsegylist_SOURCES = mbsegylist.c
@@ -718,6 +722,9 @@ mbrolltimelag$(EXEEXT): $(mbrolltimelag_OBJECTS) $(mbrolltimelag_DEPENDENCIES) $
 mbroutetime$(EXEEXT): $(mbroutetime_OBJECTS) $(mbroutetime_DEPENDENCIES) $(EXTRA_mbroutetime_DEPENDENCIES) 
 	@rm -f mbroutetime$(EXEEXT)
 	$(LINK) $(mbroutetime_OBJECTS) $(mbroutetime_LDADD) $(LIBS)
+mbrphsbias$(EXEEXT): $(mbrphsbias_OBJECTS) $(mbrphsbias_DEPENDENCIES) $(EXTRA_mbrphsbias_DEPENDENCIES) 
+	@rm -f mbrphsbias$(EXEEXT)
+	$(LINK) $(mbrphsbias_OBJECTS) $(mbrphsbias_LDADD) $(LIBS)
 mbsegygrid$(EXEEXT): $(mbsegygrid_OBJECTS) $(mbsegygrid_DEPENDENCIES) $(EXTRA_mbsegygrid_DEPENDENCIES) 
 	@rm -f mbsegygrid$(EXEEXT)
 	$(LINK) $(mbsegygrid_OBJECTS) $(mbsegygrid_LDADD) $(LIBS)
@@ -786,6 +793,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbrollbias.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbrolltimelag.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbroutetime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbrphsbias.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsegygrid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsegyinfo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsegylist.Po@am__quote@

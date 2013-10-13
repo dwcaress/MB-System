@@ -89,6 +89,7 @@ all:	$(BINDIR)/mb7k2jstar \
 	$(BINDIR)/mbrollbias \
 	$(BINDIR)/mbrolltimelag \
 	$(BINDIR)/mbroutetime \
+	$(BINDIR)/mbrphsbias \
 	$(BINDIR)/mbsegygrid \
 	$(BINDIR)/mbsegyinfo \
 	$(BINDIR)/mbsegylist \
@@ -145,6 +146,9 @@ $(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBD
 $(BINDIR)/mbrollbias:	mbrollbias.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbrollbias.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
 		-o $(BINDIR)/mbrollbias
+$(BINDIR)/mbrphsbias:	mbrphsbias.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbrphsbias.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
+		-o $(BINDIR)/mbrphsbias
 $(BINDIR)/mbgetesf:	mbgetesf.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbgetesf.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
 		-o $(BINDIR)/mbgetesf
@@ -267,6 +271,8 @@ mbmosaic.o:	mbmosaic.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define
 mblevitus.o:	mblevitus.c ../mbio/mb_status.h ../mbio/mb_define.h Makefile
 	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
 	$(CC) -c $(CFLAGS) -I../mbio mblevitus.c
+mbrphsbias.o:	mbrphsbias.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
+	$(CC) -c $(CFLAGS) -I../mbio mbrphsbias.c
 mbrollbias.o:	mbrollbias.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio mbrollbias.c
 mbgetesf.o:	mbgetesf.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
