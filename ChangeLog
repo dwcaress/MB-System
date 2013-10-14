@@ -16,10 +16,11 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.4.2156       October 14, 2013
   Version 5.4.2155       October 13, 2013
   Version 5.4.2154       September 26, 2013
   Version 5.4.2153       September 22, 2013
-  Version 5.4.2152       September 16, 2013
+* Version 5.4.2152       September 16, 2013
   Version 5.4.2151       September 12, 2013
   Version 5.4.2149       September 2, 2013
   Version 5.4.2148       August 28, 2013
@@ -164,6 +165,15 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2156 (October 14, 2013)
+
+Mbm_makesvp: New macro to extract sound speed and depth data from a datalist of
+swath files, and generate a sound velocity profile model from averages of the
+sound speed values in regular depth ranges. This macro uses mbctdlist to extract
+the sound speed values embedded in swath data files is intended for use with
+mapping data from submerged platforms (e.g. ROVs and AUVs) carrying CTD or
+sound speed sensors. 
 
 -----> 5.4.2155 (October 13, 2013)
 
