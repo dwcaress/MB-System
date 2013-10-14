@@ -47,7 +47,7 @@ $command_line = "@ARGV";
 $help =    		($opt_H || $opt_h);
 $depthinterval =    	($opt_D || $opt_d || 25);
 $format =    		($opt_F || $opt_f);
-$datalist =    		($opt_I || $opt_i);
+$inputfile =    	($opt_I || $opt_i | "datalist.mb-1");
 $output =    		($opt_O || $opt_o);
 $verbose = 		($opt_V || $opt_v);
 
@@ -55,24 +55,24 @@ $verbose = 		($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
-	print "\nMacro to extract sound speed and depth data from a datalist of swath files,\n";
-	print "\nand generate a sound velocity profile model from averages of the sound\n";
-	print "\nspeed values in regular depth ranges. This macro is intended for use\n";
-	print "\nwith mapping data from submerged platforms (e.g. ROVs and AUVs) carrying\n";
-	print "\nCTD or SSV sensors.\n";
-	print "\nBasic Usage: \n";
-	print "\t$program_name -Idatalist [-H -V -Ddepthinterval]\n";
+	print "Version: $Id$\n";
+	print "Macro to extract sound speed and depth data from a datalist of swath files,\n";
+	print "and generate a sound velocity profile model from averages of the sound\n";
+	print "speed values in regular depth ranges. This macro is intended for use\n";
+	print "with mapping data from submerged platforms (e.g. ROVs and AUVs) carrying\n";
+	print "CTD or SSV sensors.\n";
+	print "Basic Usage: \n";
+	print "\t$program_name -Iinputfile [-H -V -Ddepthinterval]\n";
 	exit 0;
 	}
 
 # check for input file
-if (!$datalist)
+if (!$inputfile)
 	{
 	print "\a";
 	die "No input datalist specified - $program_name aborted\n";
 	}
-elsif (! -e $datalist)
+elsif (! -e $inputfile)
 	{
 	print "\a";
 	die "Specified input datalist cannot be opened - $program_name aborted\n";
@@ -91,11 +91,11 @@ if ($verbose)
 	}
 if (!$format)
     {
-    $mbformat = `mbformat -K -I$datalist`;
+    $mbformat = `mbformat -K -I$inputfile`;
     ($format) = $mbformat =~ /\S+\s+(\S+)/;
     }
 
-@mbctdlist = `mbctdlist -F$format -I$datalist  -O^cs`;
+@mbctdlist = `mbctdlist -F$format -I$inputfile  -O^cs`;
 $nsoundspeed = 0;
 $depthmin = 999999999.99;
 $depthmax = 0.0;
@@ -180,6 +180,10 @@ for ($i=0; $i < $ndepthbin; $i++)
 		if ($output)
 			{
 			print F "$depth $soundspeed\n";
+			}
+		else
+			{
+			print "$depth $soundspeed\n";
 			}
 		}
 	}

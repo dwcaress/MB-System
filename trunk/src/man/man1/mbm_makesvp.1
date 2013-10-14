@@ -1,0 +1,106 @@
+.TH mbm_makesvp 1 "13 October 2013" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbm_makesvp\fP \- Macro to extract sound speed and depth data from a datalist of swath files,
+and generate a sound velocity profile model from averages of the sound speed values in regular depth ranges.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbm_makesvp\fP \fB\-I\fP\fIinputfile\fP [\fB\-H \-V\fP
+\fB\-D\fP\fIdepthinterval\fP \fB\-O\fP\fIoutputfile\fP]
+
+.SH DESCRIPTION
+\fBmbm_makesvp\fP is a macro to extract sound speed and depth data from a datalist of swath files,
+and generate a sound velocity profile model from averages of the sound
+speed values in regular depth ranges. 
+
+This macro uses \fBmbctdlist\fP to extract the sound speed values embedded in swath data files.
+This macro is intended for use with mapping data from submerged platforms (e.g. ROVs and AUVs) carrying
+CTD or sound speed sensors. Since the sound speed values are generally recorded during the
+entire ROV or AUV survey, these values can be used to construct a model for sound speed as
+a function of depth at the survey location.
+The sound speed and sonar depth value pairs are binned according to the \fIdepthinterval\fP
+value, and average sound speed values are reported for bins with at least one value.
+The \fB\-O\fP option specifies the output filename; by default the model is output to
+the stdout stream.
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH OPTIONS
+.TP
+.B\-D
+\fIdepthinterval\fP
+.br
+Sets the size in meters of the depth bins used to calculate an average sound speed
+versus depth model. The default value is 25 meters.
+.TP
+.B \-F
+\fIformat\fP
+.br
+Sets the data format for the input data.
+If \fIformat\fP < 0, then the input file specified
+with the \fB\-I\fP option will actually contain a list of input swath sonar
+data files. This program uses the \fBMBIO\fP library
+and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = \-1.
+.TP
+.B \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-I
+\fIinputfile\fP
+.br
+Sets the input filename. If \fIformat\fP > 0 (set with the
+\fB\-f\fP option) then the swath sonar data contained in \fIinfile\fP
+is read and processed. If \fIformat\fP < 0 (the default),
+then \fIinfile\fP
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the \fIinputfile\fP file, each
+data file should be followed by a data format identifier, e.g.:
+ 	datafile1 11
+ 	datafile2 24
+.br
+This program uses the \fBMBIO\fP library and will read any swath sonar
+format supported by \fBMBIO\fP. However, not all formats contain
+sound speed or CTD information, and useful results can only be expected
+from data actually including the relevant values.
+A list of the swath sonar data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page. The default input filename is
+"datalist.mb-1".
+.TP
+.B \-O
+\fIoutput\fP
+.br
+Sets the name of the output file for the sound speed versus depth model. By default,
+the model is output to the stdout stream.
+.TP
+.B \-V
+The \fB\-V\fP option causes \fBmbm_makesvp\fP to print out status messages.
+
+.SH EXAMPLES
+Suppose we have a set of swath files from an AUV-based survey in a directory and we
+want to construct an average sound speed versus depth model from these data. The
+command:
+.br
+	mbm_makesvp -Idatalist.mb-1 -D25 -Osvp.txt -V
+will generate a model of sound speed versus depth in the output file "svp.txt".
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbctdlist\fP(1)
+
+.SH BUGS
+Likely yes.
