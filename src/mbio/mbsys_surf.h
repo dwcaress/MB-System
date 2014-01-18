@@ -86,7 +86,7 @@
 
 /* include SAPI header file */
 #ifndef _SAPI
-#include "sapi.h"
+#include "mb_sapi.h"
 #endif
 
 #define	MBSYS_SURF_MAXBEAMS		1440

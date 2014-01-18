@@ -214,7 +214,7 @@ $behaviorWaypointID = 0;
 $behaviorWaypointDepthID = 1;
 $behaviorWaypointWallID = 2;
 @behaviorNames = ("Waypoint", "WaypointDepth", "WaypointWall");
-@behaviorIDs = ($behaviorWaypointDepthID, $behaviorWaypointDepthID, $behaviorWaypointDepthID, $behaviorWaypointDepthID);
+@behaviorIDs = ($behaviorWaypointDepthID, $behaviorWaypointDepthID, $behaviorWaypointDepthID, $behaviorWaypointDepthID, $behaviorWaypointDepthID);
 $depthmax = 5900.0;
 $depthabort = 6000.0;
 $maxclimbslope = 0.5734;
@@ -265,8 +265,9 @@ if ($help) {
     print "MBgrdviz into an MBARI AUV mission script. Developed for use\r\n";
     print "in survey planning for the MBARI Mapping AUV.\r\n";
     print "Usage: mbm_route2mission -Iroutefile \r\n";
-    print "\t\t[-Aaltitudemin/altitudeabort[/altitudedesired[/altitudedesired2[/altitudedesired3]]] \r\n";
-    print "\t\t-Bbehavior -Caborttime -Ddepthconstant[/depthconstant2] -Fforwarddistance -Ggpsmode \r\n";
+    print "\t\t[-Aaltitudemin/altitudeabort[/altitudedesired1[/altitudedesired2[/altitudedesired3]]] \r\n";
+    print "\t\t-Bbehavior1[/behavior2[/behavior3[/behavior4[/behavior5]]]] \r\n";
+    print "\t\t-Caborttime -Ddepthconstant[/depthconstant2] -Fforwarddistance -Ggpsmode \r\n";
     print "\t\t-Jdepthprofilefile -Lapproachdepth -M[sonarlist] -N \r\n";
     print "-Omissionfile \r\n\t\t-P[startlon/startlat | startdistance] \r\n";
     print "\t\t-Rtransmitpower/receivegain[/rangeminfraction[/pulsewidth]] \r\n";
@@ -2195,12 +2196,11 @@ printf " %.2f m\n",$mmissiondepths[$i];
 				}
 			print MFILE "maxCrossTrackError = 10; \r\n";             #Meters; Maximum cross-track displacement
 			print MFILE "starboardMaxCrossTrackError = 40; \r\n";    #Meters; Maximum starboard cross-track displacement
-			print MFILE "standOff           = 50; \r\n";             #Meters; Stand off from the wall
-			print MFILE "sonarTimeOut       = 10; \r\n";             #Seconds;
-			print MFILE "rangeInst          = 3; \r\n";              #n/a: 1) Dvl; 2) Reson; 3)  837 Multibeam
-			print MFILE "projection         = 3; \r\n";              #n/a: 1) Waypoint; 2) Body; 3) Minimum
+			print MFILE "standOff           = 60; \r\n";             #Meters; Stand off from the wall
+			print MFILE "sonarTimeOut       = 2; \r\n";             #Seconds;
 			print MFILE "windowLen          = 1; \r\n";
-
+			print MFILE "useWallEstimator   = True; \r\n";
+			print MFILE "wallFeedForward    = True; \r\n";
 			print MFILE "} \r\n";
 			print WFILE "$mlons[$i] $mlats[$i]\n";
 			}

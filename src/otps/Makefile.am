@@ -10,7 +10,7 @@ endif
 AM_LDFLAGS = 
 
 LIBS = ${top_builddir}/src/mbio/libmbio.la \
-	${libgmt_LIBS} ${libnetcdf_LIBS} \
+	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
 	$(LIBM)
 
 mbotps_SOURCES = mbotps.c

@@ -1181,6 +1181,9 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    if (xdr_status == MB_YES)
 		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->comment, strlength);
 	    }
+	    
+	else
+	    xdr_status = MB_NO;
 
 	/* set error if required */
 	if (xdr_status == MB_NO)

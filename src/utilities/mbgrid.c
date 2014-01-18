@@ -655,6 +655,7 @@ int main (int argc, char **argv)
 	int	*work2 = NULL;
 	int	*work3 = NULL;
 #endif
+        double  bdata_origin_x, bdata_origin_y;
 	float	*output = NULL;
 	float	*sgrid = NULL;
 	int	*num = NULL;
@@ -1460,6 +1461,11 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		clipmode = MBGRID_INTERP_ALL;
         if (clipmode == MBGRID_INTERP_ALL)
                 clip = MAX(xdim, ydim);
+        
+        /* set origin used to reduce data value size before conversion from
+         * double to float when calling the interpolation routines */
+        bdata_origin_x = 0.5 * (wbnd[0] + wbnd[1]);
+        bdata_origin_y = 0.5 * (wbnd[2] + wbnd[3]);
 
 	/* set plot label strings */
 	if (use_projection == MB_YES)
@@ -1860,8 +1866,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 						exit(error);
 						}
 					}
-				bxdata[nbackground] = (float) tlon;
-				bydata[nbackground] = (float) tlat;
+				bxdata[nbackground] = (float) (tlon - bdata_origin_x);
+				bydata[nbackground] = (float) (tlat - bdata_origin_y);
 				bzdata[nbackground] = (float) tvalue;
 #else
 				if (nbackground >= nbackground_alloc)
@@ -1879,8 +1885,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 						exit(error);
 						}
 					}
-				bdata[nbackground*3] = (float) tlon;
-				bdata[nbackground*3+1] = (float) tlat;
+				bdata[nbackground*3] = (float) (tlon - bdata_origin_x);
+				bdata[nbackground*3+1] = (float) (tlat - bdata_origin_y);
 				bdata[nbackground*3+2] = (float) tvalue;
 #endif
 				nbackground++;
@@ -2240,9 +2246,9 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 			kgrid = i * sydim + j;
 			if (cnt[kgrid] > 0)
 				{
-				sxdata[ndata] = wbnd[0] + sdx * i;
-				sydata[ndata] = wbnd[2] + sdy * j;
-				szdata[ndata] = gridsmall[kgrid];
+				sxdata[ndata] = (float)(wbnd[0] + sdx * i - bdata_origin_x);
+				sydata[ndata] = (float)(wbnd[2] + sdy * j - bdata_origin_y);
+				szdata[ndata] = (float)gridsmall[kgrid];
 				ndata++;
  				}
 			}
@@ -2250,7 +2256,9 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 	/* do the interpolation */
 	fprintf(outfp,"\nDoing Surface spline interpolation with %d data points...\n",ndata);
 	mb_surface(verbose, ndata, sxdata, sydata, szdata,
-		wbnd[0], wbnd[1], wbnd[2], wbnd[3], sdx, sdy,
+		(wbnd[0] - bdata_origin_x), (wbnd[1] - bdata_origin_x),
+                (wbnd[2] - bdata_origin_y), (wbnd[3] - bdata_origin_y),
+                sdx, sdy,
 		tension, sgrid);
 #else
 	/* allocate and initialize sgrid */
@@ -2288,19 +2296,19 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 			kgrid = i * sydim + j;
 			if (cnt[kgrid] > 0)
 				{
-				sdata[ndata++] = wbnd[0] + sdx * i;
-				sdata[ndata++] = wbnd[2] + sdy * j;
-				sdata[ndata++] = gridsmall[kgrid];
+				sdata[ndata++] = (float)(wbnd[0] + sdx * i - bdata_origin_x);
+				sdata[ndata++] = (float)(wbnd[2] + sdy * j - bdata_origin_y);
+				sdata[ndata++] = (float)gridsmall[kgrid];
 				}
 			}
 	ndata = ndata/3;
 
 	/* do the interpolation */
-	cay = tension;
-	xmin = wbnd[0] - 0.5 * sdx;
-	ymin = wbnd[2] - 0.5 * sdy;
-	ddx = sdx;
-	ddy = sdy;
+	cay = (float)tension;
+	xmin = (float)(wbnd[0] - 0.5 * sdx - bdata_origin_x);
+	ymin = (float)(wbnd[2] - 0.5 * sdy - bdata_origin_y);
+	ddx = (float)sdx;
+	ddy = (float)sdy;
 	fprintf(outfp,"\nDoing Zgrid spline interpolation with %d data points...\n",ndata);
 /*for (i=0;i<ndata/3;i++)
 {
@@ -3544,8 +3552,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			      /* get position in grid */
 			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
 			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
-/*fprintf(outfp, "ib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   dx:%f dy:%f  origin: lon:%f lat:%f\n",
-ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
+/* if (ib==beams_bath/2)fprintf(outfp, "ib:%d ix:%d iy:%d   bath: lon:%.10f lat:%.10f bath:%f   dx:%.10f dy:%.10f  origin: lon:%.10f lat:%.10f\n",
+ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]); */
 
 			      /* check if within allowed time */
 			      if (check_time == MB_YES)
@@ -4753,9 +4761,9 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue)
 					{
-					sxdata[ndata] = wbnd[0] + dx*i;
-					sydata[ndata] = wbnd[2] + dy*j;
-					szdata[ndata] = grid[kgrid];
+					sxdata[ndata] = (float)(wbnd[0] + dx*i - bdata_origin_x);
+					sydata[ndata] = (float)(wbnd[2] + dy*j - bdata_origin_y);
+					szdata[ndata] = (float)grid[kgrid];
 					ndata++;
 					}
 				}
@@ -4769,18 +4777,18 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sxdata[ndata] = wbnd[0] + dx*i;
-					sydata[ndata] = wbnd[2] + dy*j;
-					szdata[ndata] = border;
+					sxdata[ndata] = (float)(wbnd[0] + dx*i - bdata_origin_x);
+					sydata[ndata] = (float)(wbnd[2] + dy*j - bdata_origin_y);
+					szdata[ndata] = (float)border;
 					ndata++;
 					}
 				j = gydim - 1;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sxdata[ndata] = wbnd[0] + dx*i;
-					sydata[ndata] = wbnd[2] + dy*j;
-					szdata[ndata] = border;
+					sxdata[ndata] = (float)(wbnd[0] + dx*i - bdata_origin_x);
+					sydata[ndata] = (float)(wbnd[2] + dy*j - bdata_origin_y);
+					szdata[ndata] = (float)border;
 					ndata++;
 					}
 				}
@@ -4790,18 +4798,18 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sxdata[ndata] = wbnd[0] + dx*i;
-					sydata[ndata] = wbnd[2] + dy*j;
-					szdata[ndata] = border;
+					sxdata[ndata] = (float)(wbnd[0] + dx*i - bdata_origin_x);
+					sydata[ndata] = (float)(wbnd[2] + dy*j - bdata_origin_y);
+					szdata[ndata] = (float)border;
 					ndata++;
 					}
 				i = gxdim - 1;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sxdata[ndata] = wbnd[0] + dx*i;
-					sydata[ndata] = wbnd[2] + dy*j;
-					szdata[ndata] = border;
+					sxdata[ndata] = (float)(wbnd[0] + dx*i - bdata_origin_x);
+					sydata[ndata] = (float)(wbnd[2] + dy*j - bdata_origin_y);
+					szdata[ndata] = (float)border;
 					ndata++;
 					}
 				}
@@ -4809,9 +4817,11 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 		/* do the interpolation */
 		fprintf(outfp,"\nDoing Surface spline interpolation with %d data points...\n",ndata);
-		mb_surface(verbose,ndata,sxdata,sydata,szdata,
-			gbnd[0],gbnd[1],gbnd[2],gbnd[3],dx,dy,
-			tension,sgrid);
+		mb_surface(verbose, ndata, sxdata, sydata, szdata,
+			(float)(gbnd[0] - bdata_origin_x), (float)(gbnd[1] - bdata_origin_x),
+                        (float)(gbnd[2] - bdata_origin_y), (float)(gbnd[3] - bdata_origin_y),
+                        dx, dy,
+			tension, sgrid);
 #else
 		/* allocate and initialize sgrid */
 		status = mb_mallocd(verbose,__FILE__,__LINE__,3*ndata*sizeof(float),(void **)&sdata,&error);
@@ -4848,9 +4858,9 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue)
 					{
-					sdata[ndata++] = wbnd[0] + dx*i;
-					sdata[ndata++] = wbnd[2] + dy*j;
-					sdata[ndata++] = grid[kgrid];
+					sdata[ndata++] = (float)(wbnd[0] + dx*i - bdata_origin_x);
+					sdata[ndata++] = (float)(wbnd[2] + dy*j - bdata_origin_y);
+					sdata[ndata++] = (float)grid[kgrid];
 					}
 				}
 
@@ -4863,17 +4873,17 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sdata[ndata++] = wbnd[0] + dx*i;
-					sdata[ndata++] = wbnd[2] + dy*j;
-					sdata[ndata++] = border;
+					sdata[ndata++] = (float)(wbnd[0] + dx*i - bdata_origin_x);
+					sdata[ndata++] = (float)(wbnd[2] + dy*j - bdata_origin_y);
+					sdata[ndata++] = (float)border;
 					}
 				j = gydim - 1;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sdata[ndata++] = wbnd[0] + dx*i;
-					sdata[ndata++] = wbnd[2] + dy*j;
-					sdata[ndata++] = border;
+					sdata[ndata++] = (float)(wbnd[0] + dx*i - bdata_origin_x);
+					sdata[ndata++] = (float)(wbnd[2] + dy*j - bdata_origin_y);
+					sdata[ndata++] = (float)border;
 					}
 				}
 			for (j=1;j<gydim-1;j++)
@@ -4882,28 +4892,28 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sdata[ndata++] = wbnd[0] + dx*i;
-					sdata[ndata++] = wbnd[2] + dy*j;
-					sdata[ndata++] = border;
+					sdata[ndata++] = (float)(wbnd[0] + dx*i - bdata_origin_x);
+					sdata[ndata++] = (float)(wbnd[2] + dy*j - bdata_origin_y);
+					sdata[ndata++] = (float)border;
 					}
 				i = gxdim - 1;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sdata[ndata++] = wbnd[0] + dx*i;
-					sdata[ndata++] = wbnd[2] + dy*j;
-					sdata[ndata++] = border;
+					sdata[ndata++] = (float)(wbnd[0] + dx*i - bdata_origin_x);
+					sdata[ndata++] = (float)(wbnd[2] + dy*j - bdata_origin_y);
+					sdata[ndata++] = (float)border;
 					}
 				}
 			}
                 ndata = ndata/3;
 
 		/* do the interpolation */
-		cay = tension;
-		xmin = wbnd[0] - 0.5 * dx;
-		ymin = wbnd[2] - 0.5 * dy;
-		ddx = dx;
-		ddy = dy;
+		cay = (float)tension;
+		xmin = (float)(wbnd[0] - 0.5 * dx - bdata_origin_x);
+		ymin = (float)(wbnd[2] - 0.5 * dy - bdata_origin_y);
+		ddx = (float)dx;
+		ddy = (float)dy;
 		fprintf(outfp,"\nDoing Zgrid spline interpolation with %d data points...\n",ndata);
 /*for (i=0;i<ndata/3;i++)
 {
@@ -5210,15 +5220,17 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		/* do the interpolation */
 		fprintf(outfp,"\nDoing spline interpolation with %d data points from background...\n",nbackground);
 #ifdef USESURFACE
-		mb_surface(verbose,nbackground,bxdata,bydata,bzdata,
-			wbnd[0],wbnd[1],wbnd[2],wbnd[3],dx,dy,
-			tension,sgrid);
+		mb_surface(verbose, nbackground, bxdata, bydata, bzdata,
+			(float)(wbnd[0] - bdata_origin_x), (float)(wbnd[1] - bdata_origin_x),
+                        (float)(wbnd[2] - bdata_origin_y), (float)(wbnd[3] - bdata_origin_y),
+                        dx, dy,
+			tension, sgrid);
 #else
-		cay = tension;
-		xmin = wbnd[0] - 0.5 * dx;
-		ymin = wbnd[2] - 0.5 * dy;
-		ddx = dx;
-		ddy = dy;
+		cay = (float)tension;
+		xmin = (float)(wbnd[0] - 0.5 * dx - bdata_origin_x);
+		ymin = (float)(wbnd[2] - 0.5 * dy - bdata_origin_y);
+		ddx = (float)dx;
+		ddy = (float)dy;
 		clip = MAX(gxdim,gydim);
 		fprintf(outfp,"\nDoing Zgrid spline interpolation with %d background points...\n",nbackground);
 		mb_zgrid2(sgrid,&gxdim,&gydim,&xmin,&ymin,

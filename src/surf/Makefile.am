@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio
 
-include_HEADERS = sapi.h
+include_HEADERS = mb_sapi.h
 
 lib_LTLIBRARIES = libmbsapi.la
 

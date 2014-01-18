@@ -5903,6 +5903,10 @@ int mbedit_plot_all(
 		{
 		xtrack_max = 1000.0;
 		}
+	else if (autoscale && xtrack_max > 100000.0)
+		{
+		xtrack_max = 100000.0;
+		}
 
 	/* if autoscale on reset plot width */
 	if (autoscale == MB_YES && xtrack_max > 0.0)

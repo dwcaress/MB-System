@@ -154,11 +154,13 @@ autoreconf --force --install --warnings=all
 # Force configure.ac to reduce the automake version requirement from 2.69 to 2.65
 sed -i.bak s/2\.69/2\.65/ configure.ac
 
-CFLAGS="-g -I/usr/X11R6/include" LDFLAGS="-L/usr/X11R6/lib" \
+CFLAGS="-g -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
     --with-netcdf-include=/sw/include \
     --with-netcdf-lib=/sw/lib \
+    --with-proj-include=/sw/include \
+    --with-proj-lib=/sw/lib \
     --with-gmt-include=/sw/include \
     --with-gmt-lib=/sw/lib \
     --with-fftw-include=/sw/include \
@@ -166,7 +168,8 @@ CFLAGS="-g -I/usr/X11R6/include" LDFLAGS="-L/usr/X11R6/lib" \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib \
     --with-otps-dir=/usr/local/OTPS2
-#--without-gsf
+#    --without-gsf \
+#    --enable-bundledproj
 
 make
 

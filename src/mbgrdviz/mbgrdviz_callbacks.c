@@ -72,13 +72,14 @@ extern int isnanf(float x);
 #define MBGRDVIZ_OPENNAV		5
 #define MBGRDVIZ_OPENSWATH		6
 #define MBGRDVIZ_SAVEROUTE		7
-#define MBGRDVIZ_SAVEWINFROGPTS		8
-#define MBGRDVIZ_SAVEWINFROGWPT		9
-#define MBGRDVIZ_SAVEDEGDECMIN		10
-#define MBGRDVIZ_SAVELNW		11
-#define MBGRDVIZ_SAVESITE		12
-#define MBGRDVIZ_SAVEPROFILE		13
-#define MBGRDVIZ_REALTIME		14
+#define MBGRDVIZ_SAVERISISCRIPT		8
+#define MBGRDVIZ_SAVEWINFROGPTS		9
+#define MBGRDVIZ_SAVEWINFROGWPT		10
+#define MBGRDVIZ_SAVEDEGDECMIN		11
+#define MBGRDVIZ_SAVELNW		12
+#define MBGRDVIZ_SAVESITE		13
+#define MBGRDVIZ_SAVEPROFILE		14
+#define MBGRDVIZ_REALTIME		15
 
 /* Projection defines */
 #define ModelTypeProjected	     1
@@ -89,6 +90,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_SITE_VERSION "1.00"
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
 #define MBGRDVIZ_PROFILE_VERSION "1.00"
+#define MBGRDVIZ_RISISCRIPT_VERSION "1.00"
 
 /* Survey planning parameters */
 #define MBGRDVIZ_SURVEY_MODE_UNIFORM			0
@@ -149,6 +151,7 @@ void do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtP
 void do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_saverisiscript( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_savedegdecmin( Widget w, XtPointer client_data, XtPointer call_data);
@@ -1134,6 +1137,50 @@ do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPoint
 }
 /*---------------------------------------------------------------------------------------*/
 void
+do_mbgrdviz_fileSelectionBox_saverisiscript( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	char function_name[] = "do_mbgrdviz_fileSelectionBox_saverisiscript";
+        Cardinal ac = 0;
+        Arg      args[256];
+	size_t	instance;
+	int	actionid;
+        XmString	tmp0;
+	Boolean	argok;
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct*)call_data;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       w:           %p\n",w);
+		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
+		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
+		}
+
+    	/* get instance */
+	instance = (size_t) client_data;
+
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Save Risi Script File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_SAVERISISCRIPT * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+
+}
+/*---------------------------------------------------------------------------------------*/
+void
 do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_savewinfrogpts";
@@ -1593,6 +1640,14 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		/* write route file */
 		do_mbview_message_on("Saving route data...", instance);
 		status = do_mbgrdviz_saveroute(instance, file_ptr);
+		}
+
+	/* else write route data */
+	else if (mode == MBGRDVIZ_SAVERISISCRIPT)
+		{
+		/* write route file */
+		do_mbview_message_on("Saving route as Risi script...", instance);
+		status = do_mbgrdviz_saverisiscript(instance, file_ptr);
 		}
 
 	/* else write route data as Winfrog pts file */
@@ -2060,6 +2115,10 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_saveroute,
 					"Save Route File",
+					MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_saverisiscript,
+					"Save Risi Script File",
 					MBV_EXISTMASK_ROUTE, &error);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_savewinfrogpts,
@@ -2942,6 +3001,238 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 
 			/* write the route end */
 			fprintf(sfp,"> ## ENDROUTE\n");
+			}
+
+		    /* deallocate arrays */
+		    if (npointalloc > 0)
+	    		{
+			status = mbview_freeroutearrays(verbose,
+						&routelon,
+						&routelat,
+						&routewaypoint,
+						&routetopo,
+						&routebearing,
+						&distlateral,
+						&distovertopo,
+						&slope,
+						&error);
+			}
+		    }
+
+		/* close the output file */
+		fclose(sfp);
+
+		}
+	    }
+
+	/* all done */
+	return(status);
+}
+/*---------------------------------------------------------------------------------------*/
+
+int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr)
+{
+	char function_name[] = "do_mbgrdviz_saverisiscript";
+	int	status = MB_SUCCESS;
+	FILE	*sfp;
+	int	nroute = 0;
+	int	nroutewrite = 0;
+	int	npoint = 0;
+	int	nintpoint = 0;
+	int	npointtotal = 0;
+	int	npointalloc = 0;
+	double	*routelon = NULL;
+	double	*routelat = NULL;
+	int	*routewaypoint = NULL;
+	double	*routetopo = NULL;
+	double	*routebearing = NULL;
+	double	*distlateral = NULL;
+	double	*distovertopo = NULL;
+	double	*slope = NULL;
+	int	routecolor;
+	int	routesize;
+	mb_path	routename;
+	int	selected;
+	int	iroute, j;
+        int     projection_initialized = MB_NO;
+        double  lon_origin, lat_origin;
+        double  mtodeglon, mtodeglat;
+        int     iscript;
+        double  xx, yy, zz;
+        double  vvspeed = 0.2;
+        double  settlingtime = 3.0;
+
+	/* time, user, host variables */
+	time_t	right_now;
+	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	*unknown = "Unknown";
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
+		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
+		}
+
+	/* read data for valid instance */
+	if (instance != MBV_NO_WINDOW)
+	    {
+
+	    /* get the number of routes to be written to the outpuf file */
+	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
+	    for (iroute=0;iroute<nroute;iroute++)
+	    	{
+		mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
+		if (selected == MB_YES)
+			nroutewrite++;
+		}
+	    if (nroutewrite == 0)
+	    	nroutewrite = nroute;
+	    if (nroute <= 0)
+	    	{
+		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
+			nroute, instance);
+		XBell((Display *) XtDisplay(mainWindow),100);
+		status = MB_FAILURE;
+		}
+
+	    /* initialize the output file */
+	    if (status == MB_SUCCESS && nroutewrite > 0)
+	    	{
+		/* open the output file */
+		if ((sfp = fopen(output_file_ptr, "w")) != NULL)
+			{
+			/* write the route file header */
+			fprintf(sfp, "## Risi Script Version %s\r\n", MBGRDVIZ_RISISCRIPT_VERSION);
+			fprintf(sfp, "## Output by Program %s\r\n",program_name);
+			fprintf(sfp, "## Program Version %s\r\n",rcs_id);
+			fprintf(sfp, "## MB-System Version %s\r\n",MB_VERSION);
+			strncpy(date,"\0",25);
+			right_now = time((time_t *)0);
+			strncpy(date,ctime(&right_now),24);
+			if ((user_ptr = getenv("USER")) == NULL)
+				if ((user_ptr = getenv("LOGNAME")) == NULL)
+					user_ptr = unknown;
+			gethostname(host,MB_PATH_MAXLINE);
+			fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\r\n",
+				user_ptr,host,date);
+			fprintf(sfp, "## Number of routes: %d\r\n",nroutewrite);
+			fprintf(sfp, "## Risi script format:\r\n");
+			fprintf(sfp, "##   <id (starting at 1)> <x (m)> <y (m)> <z (m but ignored)> <speed (m/s)> <settling time (sec)>\r\n");
+			}
+
+		/* output error message */
+		else
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			fprintf(stderr,"\nUnable to Open route file <%s> for writing\r\n",output_file_ptr);
+			XBell((Display *) XtDisplay(mainWindow),100);
+			}
+		}
+
+	    /* if all ok proceed to extract and output routes */
+	    if (status == MB_SUCCESS && nroutewrite > 0)
+	    	{
+	        /* loop over routes */
+		for (iroute=0;iroute<nroute;iroute++)
+	    	    {
+		    /* check if this route is selected for writing */
+		    if (nroutewrite == nroute)
+		    	selected = MB_YES;
+		    else
+			mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
+
+		    /* output if selected */
+		    if (selected == MB_YES)
+		    	{
+			/* get point count for current route */
+			status = mbview_getroutepointcount(verbose, instance,
+				iroute, &npoint, &nintpoint, &error);
+
+			/* allocate route arrays */
+			npointtotal = npoint + nintpoint;
+			if (status == MB_SUCCESS
+				&& npointalloc < npointtotal)
+				{
+				status = mbview_allocroutearrays(verbose,
+							npointtotal,
+							&routelon,
+							&routelat,
+							&routewaypoint,
+							&routetopo,
+							&routebearing,
+							&distlateral,
+							&distovertopo,
+							&slope,
+							&error);
+				if (status == MB_SUCCESS)
+					{
+					npointalloc = npointtotal;
+					}
+
+				/* if error initializing memory then cancel dealing with this route */
+				else
+	    				{
+					fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
+						npointtotal, instance);
+					XBell((Display *) XtDisplay(mainWindow),100);
+					npoint = 0;
+					nintpoint = 0;
+					npointtotal = 0;
+					}
+				}
+
+			/* extract data for route */
+			status = mbview_getroute(verbose, instance,
+						iroute,
+						&npointtotal,
+						routelon,
+						routelat,
+						routewaypoint,
+						routetopo,
+						routebearing,
+						distlateral,
+						distovertopo,
+						slope,
+						&routecolor,
+						&routesize,
+						routename,
+						&error);
+
+			/* write the route header */
+			fprintf(sfp,"## ROUTENAME %s\r\n", routename);
+			fprintf(sfp,"## ROUTEPOINTS %d\r\n", npointtotal);
+			fprintf(sfp,"## STARTROUTE\r\n");
+
+			/* write the route points */
+                        iscript = 0;
+                        vvspeed = 0.2;
+                        settlingtime = 3.0;
+			for (j=0;j<npointtotal;j++)
+				{
+                                if (projection_initialized == MB_NO)
+                                    {
+                                    mb_coor_scale(verbose, routelat[j], &mtodeglon, &mtodeglat);
+                                    lon_origin = routelon[j];
+                                    lat_origin = routelat[j];
+                                    projection_initialized = MB_YES;
+                                    }
+				if (routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE)
+                                    {
+                                    iscript++;
+                                    xx = (routelon[j] - lon_origin) / mtodeglon;
+                                    yy = (routelat[j] - lat_origin) / mtodeglat;
+                                    zz = 0.0;
+			    	    fprintf(sfp,"%d, %.3f, %.3f, %.3f, %.3f, %.3f\r\n",
+                                            iscript, xx, yy, zz, vvspeed, settlingtime);
+                                    }
+				}
+
+			/* write the route end */
+			fprintf(sfp,"## ENDROUTE\r\n");
 			}
 
 		    /* deallocate arrays */
@@ -5386,6 +5677,10 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_saveroute,
 					"Save Route File",
+					MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_saverisiscript,
+					"Save Risi Script File",
 					MBV_EXISTMASK_ROUTE, &error);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_savewinfrogpts,

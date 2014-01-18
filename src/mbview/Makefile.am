@@ -6,7 +6,6 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
        -I${top_srcdir}/src/mbaux \
-       -I${top_srcdir}/src/proj \
        -I${top_srcdir}/src/mr1pr \
        -I${top_srcdir}/src/surf \
        ${libgmt_CPPFLAGS} \
@@ -28,9 +27,8 @@ libmbview_la_SOURCES = \
 libmbview_la_LIBADD = \
        ${top_builddir}/src/mr1pr/libmbmr1pr.la \
        ${top_builddir}/src/surf/libmbsapi.la \
-       ${top_builddir}/src/proj/libmbproj.la \
        ${top_builddir}/src/mbio/libmbio.la \
        ${top_builddir}/src/mbaux/libmbaux.la \
-       ${libgmt_LIBS} ${libnetcdf_LIBS} \
+       ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
        ${motif_LIBS} ${GL_LIBS} \
        ${XDR_LIB}

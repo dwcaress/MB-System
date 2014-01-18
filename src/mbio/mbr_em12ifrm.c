@@ -1800,6 +1800,8 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			char_value = 'B';
 		else if (data->swath_id == EM_SWATH_STARBOARD)
 			char_value = 'T';
+		else
+			char_value = 'C';
 		sprintf(&line[shift], "$12SO%c,%2.2d/%2.2d/%2.2d,%2.2d:%2.2d:%2.2d.%2.2d0,VOIE%c,",
 				char_value, data->day, data->month, data->year,
 				data->hour, data->minute, data->second,

@@ -1078,6 +1078,7 @@ tag,type,count,value_offset);*/
 		    {
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
+		    navtime2 = 0.0;
 		    }
 
 		/* if first two nav points don't bracket ping

@@ -66,7 +66,7 @@
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_define.h"
-#include "../surf/sapi.h"
+#include "../surf/mb_sapi.h"
 #include "mbsys_surf.h"
 
 double mbsys_get_depth(	SurfMultiBeamDepth* 			MultiBeamDepth,

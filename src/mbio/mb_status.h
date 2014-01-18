@@ -438,15 +438,19 @@ static char *unknown_notice_msg[] =
 #define mb_beam_set_select_spare_2(F)		(F | 0x82)
 
 /* Bottom detect flags */
+#define MB_DETECT_TYPE_NUM	4
 #define MB_DETECT_UNKNOWN	0
 #define MB_DETECT_AMPLITUDE	1
 #define MB_DETECT_PHASE		2
+#define MB_DETECT_LIDAR		3
 
 /* Source pulse type flags */
+#define MB_PULSE_TYPE_NUM	5
 #define MB_PULSE_UNKNOWN	0
 #define MB_PULSE_CW		1
 #define MB_PULSE_UPCHIRP	2
 #define MB_PULSE_DOWNCHIRP	3
+#define MB_PULSE_LIDAR  	4
 
 /* end conditional include */
 #endif

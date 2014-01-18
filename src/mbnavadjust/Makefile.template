@@ -40,7 +40,7 @@ LFLAGS =  -lmalloc -lm -lsun -g
 GSFLIB  = $(LIBDIR)/libmbgsf.a
 
 ### set projlib - could be version supplied with MB-System or other installation
-PROJLIB  = $(LIBDIR)/libmbproj.a
+PROJLIB  = $(LIBDIR)/libproj.a
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
@@ -59,7 +59,6 @@ $(BINDIR)/mbnavadjust: mbnavadjust.o \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbaux.a \
-		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a
 	$(CC) $(CFLAGS) mbnavadjust.o \
 		mbnavadjust_creation.o \
@@ -72,7 +71,6 @@ $(BINDIR)/mbnavadjust: mbnavadjust.o \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbaux.a \
-		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a \
 		$(MOTIFLIBS) $(LFLAGS) \
 		-o $(BINDIR)/mbnavadjust

@@ -256,7 +256,7 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error)
 		if (verbose >= 4)
 			{
 			fprintf(stderr,"\ndbg4  Remaining records in buffer: %d\n",buff->nbuffer);
-			for (i=0;i<buff->nbuffer;i++);
+			for (i=0;i<buff->nbuffer;i++)
 				fprintf(stderr,"dbg4       Record[%d] pointer: %p\n",i,(void *)(buff->buffer[i]));
 			}
 		for (i=0;i<buff->nbuffer;i++)
@@ -1289,16 +1289,15 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr,
 	else
 		{
 		store_ptr = buff->buffer[id];
+		status = mb_insert(verbose,mbio_ptr,store_ptr,
+			buff->buffer_kind[id],
+			time_i,time_d,navlon,navlat,speed,heading,
+			nbath,namp,nss,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,error);
 		}
-
-	status = mb_insert(verbose,mbio_ptr,store_ptr,
-		buff->buffer_kind[id],
-		time_i,time_d,navlon,navlat,speed,heading,
-		nbath,namp,nss,
-		beamflag,bath,amp,
-		bathacrosstrack,bathalongtrack,
-		ss,ssacrosstrack,ssalongtrack,
-		comment,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1370,14 +1369,13 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 	else
 		{
 		store_ptr = buff->buffer[id];
+		status = mb_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
+			roll,pitch,heave,
+			error);
 		}
-
-	status = mb_insert_nav(verbose,
-		mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,
-		speed,heading,draft,
-		roll,pitch,heave,
-		error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

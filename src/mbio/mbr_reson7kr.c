@@ -1011,13 +1011,17 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		{
 		/* get navigation */
 		speed = 0.0;
+		longitude = 0.0;
+		latitude = 0.0;
+		heading = 0.0;
+		sonar_depth = 0.0;
 		interp_status = mb_hedint_interp(verbose, mbio_ptr, store->time_d,
 				    &heading, &interp_error);
 		if (interp_status == MB_SUCCESS)
-		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed,
+			interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed,
 				    &longitude, &latitude, &speed, &interp_error);
 		if (interp_status == MB_SUCCESS)
-		interp_status = mb_depint_interp(verbose, mbio_ptr, store->time_d,
+			interp_status = mb_depint_interp(verbose, mbio_ptr, store->time_d,
 				    &sonar_depth, &interp_error);
 
 		/* if the optional data are not all available, this ping

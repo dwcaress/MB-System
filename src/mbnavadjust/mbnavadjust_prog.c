@@ -287,6 +287,11 @@ char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
 /* local prototypes */
 int mbnavadjust_crossing_compare(void *a, void *b);
+void mbnavadjust_plot(double xx,double yy,int ipen);
+void mbnavadjust_newpen(int icolor);
+void mbnavadjust_setline(int linewidth);
+void mbnavadjust_justify_string(double height,char *string, double *s);
+void mbnavadjust_plot_string(double x, double y, double hgt, double angle, char *label);
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_init_globals()
@@ -1309,7 +1314,7 @@ fprintf(stderr,"Writing project %s\n", project.name);
 				    + project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon_offset[tie->snav_2];
 			    navlat2 = project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat[tie->snav_2]
 				    + project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat_offset[tie->snav_2];
-			    fprintf(hfp,"%.8f %.8f 0.00 1\n%.8f %.8f 0.00 1\n>\n",
+			    fprintf(hfp,"%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n",
 				    navlon1,navlat1,navlon2,navlat2);
 			    nroute++;
 			    }
@@ -1359,7 +1364,7 @@ fprintf(stderr,"Output %d tie locations to %s\n",nroute,datalist);
 				    + project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon_offset[tie->snav_2];
 			    navlat2 = project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat[tie->snav_2]
 				    + project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat_offset[tie->snav_2];
-			    fprintf(hfp,"%.7f %.7f 0.00 1\n%.7f %.7f 0.00 1\n>\n",
+			    fprintf(hfp,"%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n",
 				    navlon1,navlat1,navlon2,navlat2);
 			    nroute++;
 			    }
@@ -1391,9 +1396,9 @@ fprintf(stderr,"Output %d fixed tie locations to %s\n",nroute,datalist);
 				section = &file->sections[j];
 				for (k=0;k<section->num_snav;k++)
 				    {
-				    fprintf(xfp, "%f %f %f\n", section->snav_lon[k], section->snav_lat[k],
+				    fprintf(xfp, "%.10f %.10f %.10f\n", section->snav_lon[k], section->snav_lat[k],
 								section->snav_lon_offset[k]/mbna_mtodeglon);
-				    fprintf(yfp, "%f %f %f\n", section->snav_lon[k], section->snav_lat[k],
+				    fprintf(yfp, "%.10f %.10f %.10f\n", section->snav_lon[k], section->snav_lat[k],
 								section->snav_lat_offset[k]/mbna_mtodeglat);
 				    }
 				}
@@ -3204,20 +3209,20 @@ beams_bath,beams_amp,pixels_ss);*/
 				&& time_d > 0.0 && time_i[0] > 0
 				&& nfp != NULL)
 				{
-				/*fprintf(stderr, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f\r\n",
+				/*fprintf(stderr, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f\r\n",
 					time_i[0], time_i[1], time_i[2], time_i[3],
 					time_i[4], time_i[5], time_i[6], time_d,
 					navlon, navlat, heading, speed);
-				fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f\r\n",
+				fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f\r\n",
 					time_i[0], time_i[1], time_i[2], time_i[3],
 					time_i[4], time_i[5], time_i[6], time_d,
 					navlon, navlat, heading, speed);*/
-				/*fprintf(stderr, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+				/*fprintf(stderr, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
 						time_i[0], time_i[1], time_i[2], time_i[3],
 						time_i[4], time_i[5], time_i[6], time_d,
 						navlon, navlat, heading, speed,
 						draft, roll, pitch, heave);*/
-				fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+				fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
 						time_i[0], time_i[1], time_i[2], time_i[3],
 						time_i[4], time_i[5], time_i[6], time_d,
 						navlon, navlat, heading, speed,
@@ -3248,8 +3253,8 @@ beams_bath,beams_amp,pixels_ss);*/
 							time_i[2],time_i[3],
 							time_i[4],time_i[5],time_i[6]);
 				fprintf(stderr,"dbg2       time_d:         %f\n",time_d);
-				fprintf(stderr,"dbg2       navlon:         %f\n",navlon);
-				fprintf(stderr,"dbg2       navlat:         %f\n",navlat);
+				fprintf(stderr,"dbg2       navlon:         %.10f\n",navlon);
+				fprintf(stderr,"dbg2       navlat:         %.10f\n",navlat);
 				fprintf(stderr,"dbg2       speed:          %f\n",speed);
 				fprintf(stderr,"dbg2       heading:        %f\n",heading);
 				fprintf(stderr,"dbg2       distance:       %f\n",distance);
@@ -5307,19 +5312,19 @@ int mbnavadjust_naverr_addtie()
 				for (i=0;i<section1->num_snav;i++)
 					{
 					fprintf(stderr,"dbg2       section1->snav_time_d[%d]: %f\n",i,section1->snav_time_d[i]);
-					fprintf(stderr,"dbg2       section1->snav_lon[%d]:    %f\n",i,section1->snav_lon[i]);
-					fprintf(stderr,"dbg2       section1->snav_lat[%d]:    %f\n",i,section1->snav_lat[i]);
+					fprintf(stderr,"dbg2       section1->snav_lon[%d]:    %.10f\n",i,section1->snav_lon[i]);
+					fprintf(stderr,"dbg2       section1->snav_lat[%d]:    %.10f\n",i,section1->snav_lat[i]);
 					}
 				fprintf(stderr,"dbg2       mbna_snav_2:        %d\n",mbna_snav_2);
 				fprintf(stderr,"dbg2       mbna_snav_2_time_d: %f\n",mbna_snav_2_time_d);
-				fprintf(stderr,"dbg2       mbna_snav_2_lon:    %f\n",mbna_snav_2_lon);
-				fprintf(stderr,"dbg2       mbna_snav_2_lat:    %f\n",mbna_snav_2_lat);
+				fprintf(stderr,"dbg2       mbna_snav_2_lon:    %.10f\n",mbna_snav_2_lon);
+				fprintf(stderr,"dbg2       mbna_snav_2_lat:    %.10f\n",mbna_snav_2_lat);
 				fprintf(stderr,"dbg2       section2->num_snav:  %d\n",section2->num_snav);
 				for (i=0;i<section2->num_snav;i++)
 					{
 					fprintf(stderr,"dbg2       section2->snav_time_d[%d]: %f\n",i,section2->snav_time_d[i]);
-					fprintf(stderr,"dbg2       section2->snav_lon[%d]:    %f\n",i,section2->snav_lon[i]);
-					fprintf(stderr,"dbg2       section2->snav_lat[%d]:    %f\n",i,section2->snav_lat[i]);
+					fprintf(stderr,"dbg2       section2->snav_lon[%d]:    %.10f\n",i,section2->snav_lon[i]);
+					fprintf(stderr,"dbg2       section2->snav_lat[%d]:    %.10f\n",i,section2->snav_lat[i]);
 					}
 				}
   			}
@@ -6336,6 +6341,11 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 					    mbna_ncolor, 0, NULL, NULL, NULL,
 					    0.0, 0.0, 0.0, 0.0,
 					    0, 0, 0.0, 0.0,
+					    &mbnavadjust_plot,
+					    &mbnavadjust_newpen,
+					    &mbnavadjust_setline,
+					    &mbnavadjust_justify_string,
+					    &mbnavadjust_plot_string,					    
 					    &error);
 			swath = (struct swath *) *swath_ptr;
 			swath->beams_bath = beams_bath;
@@ -6446,7 +6456,7 @@ swathraw->npings,i,pingraw->beamflag[i],pingraw->bath[i],pingraw->bathacrosstrac
 					&roll, &pitch, &heave,
 					&error);
 
-/*fprintf(stderr, "%d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %11.6f %11.6f %d:%d\n",
+/*fprintf(stderr, "%d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %15.10f %15.10f %d:%d\n",
 status,
 ping->time_i[0],ping->time_i[1],ping->time_i[2],
 ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],
@@ -6755,26 +6765,26 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
 		section = &project.files[crossing->file_id_1].sections[crossing->section_1];
 		fprintf(stderr,"dbg2       mbna_snav_1:        %d\n",mbna_snav_1);
 		fprintf(stderr,"dbg2       mbna_snav_1_time_d: %f\n",mbna_snav_1_time_d);
-		fprintf(stderr,"dbg2       mbna_snav_1_lon:    %f\n",mbna_snav_1_lon);
-		fprintf(stderr,"dbg2       mbna_snav_1_lat:    %f\n",mbna_snav_1_lat);
+		fprintf(stderr,"dbg2       mbna_snav_1_lon:    %.10f\n",mbna_snav_1_lon);
+		fprintf(stderr,"dbg2       mbna_snav_1_lat:    %.10f\n",mbna_snav_1_lat);
 		fprintf(stderr,"dbg2       section->num_snav:  %d\n",section->num_snav);
 		for (i=0;i<section->num_snav;i++)
 			{
 			fprintf(stderr,"dbg2       section1->snav_time_d[%d]: %f\n",i,section->snav_time_d[i]);
-			fprintf(stderr,"dbg2       section1->snav_lon[%d]:    %f\n",i,section->snav_lon[i]);
-			fprintf(stderr,"dbg2       section1->snav_lat[%d]:    %f\n",i,section->snav_lat[i]);
+			fprintf(stderr,"dbg2       section1->snav_lon[%d]:    %.10f\n",i,section->snav_lon[i]);
+			fprintf(stderr,"dbg2       section1->snav_lat[%d]:    %.10f\n",i,section->snav_lat[i]);
 			}
 		section = &project.files[crossing->file_id_2].sections[crossing->section_2];
 		fprintf(stderr,"dbg2       mbna_snav_2:        %d\n",mbna_snav_2);
 		fprintf(stderr,"dbg2       mbna_snav_2_time_d: %f\n",mbna_snav_2_time_d);
-		fprintf(stderr,"dbg2       mbna_snav_2_lon:    %f\n",mbna_snav_2_lon);
-		fprintf(stderr,"dbg2       mbna_snav_2_lat:    %f\n",mbna_snav_2_lat);
+		fprintf(stderr,"dbg2       mbna_snav_2_lon:    %.10f\n",mbna_snav_2_lon);
+		fprintf(stderr,"dbg2       mbna_snav_2_lat:    %.10f\n",mbna_snav_2_lat);
 		fprintf(stderr,"dbg2       section->num_snav:  %d\n",section->num_snav);
 		for (i=0;i<section->num_snav;i++)
 			{
 			fprintf(stderr,"dbg2       section2->snav_time_d[%d]: %f\n",i,section->snav_time_d[i]);
-			fprintf(stderr,"dbg2       section2->snav_lon[%d]:    %f\n",i,section->snav_lon[i]);
-			fprintf(stderr,"dbg2       section2->snav_lat[%d]:    %f\n",i,section->snav_lat[i]);
+			fprintf(stderr,"dbg2       section2->snav_lon[%d]:    %.10f\n",i,section->snav_lon[i]);
+			fprintf(stderr,"dbg2       section2->snav_lat[%d]:    %.10f\n",i,section->snav_lat[i]);
 			}
 		}
 
@@ -7103,10 +7113,10 @@ int mbnavadjust_crossing_overlapbounds(int crossing_id,
 		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       lonmin:      %f\n",*lonmin);
-		fprintf(stderr,"dbg2       lonmax:      %f\n",*lonmax);
-		fprintf(stderr,"dbg2       latmin:      %f\n",*latmin);
-		fprintf(stderr,"dbg2       latmax:      %f\n",*latmax);
+		fprintf(stderr,"dbg2       lonmin:      %.10f\n",*lonmin);
+		fprintf(stderr,"dbg2       lonmax:      %.10f\n",*lonmax);
+		fprintf(stderr,"dbg2       latmin:      %.10f\n",*latmin);
+		fprintf(stderr,"dbg2       latmax:      %.10f\n",*latmax);
 		fprintf(stderr,"dbg2       status:      %d\n",status);
 		}
 
@@ -7186,7 +7196,7 @@ grid_dx,grid_dy); */
 				    - (grid_nx / 2 + 0.5) * grid_dx;
 		grid_olat = 0.5 * (mbna_plot_lat_min + mbna_plot_lat_max)
 				    - (grid_ny / 2 + 0.5) * grid_dy;
-/* fprintf(stderr,"DEBUG %s %d: grid_olon:%f grid_olat:%f\n",
+/* fprintf(stderr,"DEBUG %s %d: grid_olon:%.10f grid_olat:%.10f\n",
 __FILE__,__LINE__,
 grid_olon,grid_olat); */
 
@@ -7207,7 +7217,7 @@ grid_olon,grid_olat); */
 		    mbna_misfit_offset_y = mbna_offset_y;
 		    mbna_misfit_offset_z = mbna_offset_z;
 		    }
-/* fprintf(stderr,"DEBUG %s %d: GRID parameters: dx:%f dy:%f nx:%d ny:%d  bounds:  grid: %f %f %f %f  plot: %f %f %f %f\n",
+/* fprintf(stderr,"DEBUG %s %d: GRID parameters: dx:%.10f dy:%.10f nx:%d ny:%d  bounds:  grid: %.10f %.10f %.10f %.10f  plot: %.10f %.10f %.10f %.10f\n",
 __FILE__,__LINE__,
 grid_dx, grid_dy, grid_nx, grid_ny,
 grid_olon, grid_olon + grid_nx * grid_dx,
@@ -7257,7 +7267,7 @@ mbna_misfit_offset_z,project.zoffsetwidth,nzmisfitcalc,zmin,zmax,zoff_dz); */
 					    gridn1[k] ++;
 					    }
 /* else
-fprintf(stderr,"DEBUG %s %d: BAD swath1: %d %d  %f %f  %f %f  %d %d\n",
+fprintf(stderr,"DEBUG %s %d: BAD swath1: %d %d  %.10f %.10f  %f %f  %d %d\n",
 __FILE__,__LINE__,
 i, j, swath1->pings[i].bathlon[j], swath1->pings[i].bathlat[j], x, y, igx, igy); */
 	    				}
@@ -7283,7 +7293,7 @@ i, j, swath1->pings[i].bathlon[j], swath1->pings[i].bathlat[j], x, y, igx, igy);
 					    gridn2[k] ++;
 					    }
 /* else
-fprintf(stderr,"DEBUG %s %d: BAD swath2: %d %d  %f %f  %f %f  %d %d\n",
+fprintf(stderr,"DEBUG %s %d: BAD swath2: %d %d  %.10f %.10f  %f %f  %d %d\n",
 __FILE__,__LINE__,
 i, j, swath2->pings[i].bathlon[j], swath2->pings[i].bathlat[j], x, y, igx, igy); */
 	    				}
@@ -7742,7 +7752,7 @@ mbna_minmisfit_xh,mbna_minmisfit_yh,mbna_minmisfit_zh); */
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-void plot(double xx,double yy,int ipen)
+void mbnavadjust_plot(double xx,double yy,int ipen)
 {
 	struct mbna_plot_vector *v;
 	double	x, y;
@@ -7798,7 +7808,7 @@ void plot(double xx,double yy,int ipen)
 	return;
 }
 /*--------------------------------------------------------------------*/
-void newpen(int icolor)
+void mbnavadjust_newpen(int icolor)
 {
 	struct mbna_plot_vector *v;
 
@@ -7825,7 +7835,12 @@ void newpen(int icolor)
 	return;
 }
 /*--------------------------------------------------------------------*/
-void justify_string(double height,char *string, double *s)
+void mbnavadjust_setline(int linewidth)
+{
+	return;
+}
+/*--------------------------------------------------------------------*/
+void mbnavadjust_justify_string(double height,char *string, double *s)
 {
 	int	len;
 
@@ -7838,7 +7853,7 @@ void justify_string(double height,char *string, double *s)
 	return;
 }
 /*--------------------------------------------------------------------*/
-void plot_string(double x, double y, double hgt, double angle, char *label)
+void mbnavadjust_plot_string(double x, double y, double hgt, double angle, char *label)
 {
 
 	return;
@@ -8626,7 +8641,7 @@ mbnavadjust_autopick(int do_vertical)
 				else
 					process = MB_YES;
 				}
-fprintf(stderr,"AUTOPICK crossing:%d do_vertical:%d process:%d\n",i,do_vertical,process);
+/* fprintf(stderr,"AUTOPICK crossing:%d do_vertical:%d process:%d\n",i,do_vertical,process); */
 
 			/* load the crossing */
 			if (process == MB_YES)
@@ -8656,7 +8671,7 @@ fprintf(stderr,"AUTOPICK crossing:%d do_vertical:%d process:%d\n",i,do_vertical,
 
 				/* set message dialog on */
 				sprintf(message,"Loading crossing %d...", mbna_current_crossing);
-				fprintf(stderr,"%s: %s\n",function_name,message);
+				fprintf(stderr,"\n%s: %s\n",function_name,message);
 				do_message_update(message);
 
     				/* load crossing */
@@ -8737,9 +8752,14 @@ if (MAX(mbna_minmisfit_sr1,mbna_minmisfit_sr2) < 0.5 * overlap_scale
 && MIN(mbna_minmisfit_sr1,mbna_minmisfit_sr2) > 0.0)
 fprintf(stderr," USE PICK");
 fprintf(stderr,"\n"); */
+
+fprintf(stderr,"Long misfit axis:%.3f Threshold:%.3f",
+MAX(mbna_minmisfit_sr1,mbna_minmisfit_sr2),0.5 * overlap_scale);
+
 				if (MAX(mbna_minmisfit_sr1,mbna_minmisfit_sr2) < 0.5 * overlap_scale
 					&& MIN(mbna_minmisfit_sr1,mbna_minmisfit_sr2) > 0.0)
 					{
+					fprintf(stderr," AUTOPICK SUCCEEDED\n");
 
 					/* set offsets to minimum misfit */
 					if (do_vertical == MB_YES)
@@ -8808,6 +8828,10 @@ i,j,tie->offset_z_m,
 (secondsonardepth2 - firstsonardepth2), (secondtime_d2 - firsttime_d2), dsonardepth2,
 tie->offset_z_m / (dsonardepth2 - dsonardepth1)); */
 						}
+					}
+				else
+					{
+					fprintf(stderr," AUTOPICK FAILED\n");
 					}
 
     				/* unload crossing */
@@ -11645,6 +11669,7 @@ mbnavadjust_applynav()
 	double	mbp_rollbias_stbd;
 	int	done;
 	int	isection, isnav;
+	double	seconds;
 	int	i;
 
  	/* print input debug statements */
@@ -11765,14 +11790,18 @@ mbnavadjust_applynav()
 				{
 				done = MB_YES;
 				}
-			    else if ((nscan = sscanf(buffer, "%d %d %d %d %d %d.%d %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+			    else if ((nscan = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 						    &time_i[0], &time_i[1], &time_i[2], &time_i[3],
-						    &time_i[4], &time_i[5], &time_i[6], &time_d,
+						    &time_i[4], &seconds, &time_d,
 						    &navlon, &navlat, &heading, &speed,
-						    &draft, &roll, &pitch, &heave)) >= 12)
+						    &draft, &roll, &pitch, &heave)) >= 11)
 				{
+				/* get integer seconds and microseconds */
+				time_i[5] = (int) floor(seconds);
+				time_i[6] = (int) ((seconds - (double)time_i[5]) * 1000000);
+				
 				/* fix nav from early version */
-				if (nscan < 16)
+				if (nscan < 15)
 				    {
 				    draft = 0.0;
 				    roll = 0.0;
@@ -11839,12 +11868,12 @@ fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
 					    print has the time_d value come out as "nan" - this is the worst sort
 					    of kluge for a real but mysterious bug - apologies to all who find this
 					    - DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
-				    sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.8f %.8f %.2f %.2f %.3f %.2f %.2f %.2f %.3f\r\n",
+				    sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f %.3f\r\n",
 						time_i[0], time_i[1], time_i[2], time_i[3],
 						time_i[4], time_i[5], time_i[6], time_d,
 						navlon, navlat, heading, speed,
 						draft, roll, pitch, heave, zoffset);
-				    sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.8f %.8f %.2f %.2f %.3f %.2f %.2f %.2f %.3f\r\n",
+				    sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f %.3f\r\n",
 						time_i[0], time_i[1], time_i[2], time_i[3],
 						time_i[4], time_i[5], time_i[6], time_d,
 						navlon, navlat, heading, speed,

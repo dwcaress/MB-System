@@ -39,48 +39,12 @@
 #define IOR 	-3
 #define EPS 0.0001
 
-/* function prototypes */
-int mb_contour_init(
-		int	verbose,
-		struct swath **data,
-		int	npings_max,
-		int	beams_bath,
-		int	contour_algorithm,
-		int	plot_contours,
-		int	plot_triangles,
-		int	plot_track,
-		int	plot_name,
-		int	plot_pingnumber,
-		double	contour_int,
-		double	color_int,
-		double	tick_int,
-		double	label_int,
-		double	tick_len,
-		double	label_hgt,
-		double	label_spacing,
-		int	ncolor,
-		int	nlevel,
-		double	*level_list,
-		int	*label_list,
-		int	*tick_list,
-		double	time_tick_int,
-		double	time_annot_int,
-		double	date_annot_int,
-		double	time_tick_len,
-		double	name_hgt,
-		int	pingnumber_tick_int,
-		int	pingnumber_annot_int,
-		double	pingnumber_tick_len,
-		int	*error);
-int mb_contour_deall(
-		int	verbose,
-		struct swath *data,
-		int	*error);
-int mb_contour(
-		int	verbose,
-		struct swath *data,
-		int	*error);
+/* local function prototypes */
 int mb_tcontour(
+		int	verbose,
+		struct swath *data,
+		int	*error);
+int mb_ocontour(
 		int	verbose,
 		struct swath *data,
 		int	*error);
@@ -114,7 +78,6 @@ int get_azimuth_tri(
 int check_label(struct swath *data,
 		int	nlab);
 int dump_contour(struct swath *data, double value);
-int mb_ocontour(int verbose, struct swath *data, int *error);
 int get_start_old(struct swath *data,
 		int *k, int *i, int *j, int *d, int *closed);
 int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd,
@@ -165,6 +128,11 @@ int mb_contour_init(
 		int	pingnumber_tick_int,
 		int	pingnumber_annot_int,
 		double	pingnumber_tick_len,
+		void 	(*contour_plot)(double, double, int),
+		void 	(*contour_newpen)(int),
+		void   	(*contour_setline)(int),
+		void 	(*contour_justify_string)(double, char *, double *),
+		void 	(*contour_plot_string)(double, double, double, double, char *),
 		int	*error)
 {
 	char	*function_name = "mb_contour_init";
@@ -210,6 +178,11 @@ int mb_contour_init(
 		fprintf(stderr,"dbg2       pingnumber tick int:  %d\n",pingnumber_tick_int);
 		fprintf(stderr,"dbg2       pingnumber annot int: %d\n",pingnumber_annot_int);
 		fprintf(stderr,"dbg2       pingnumber tick len:  %f\n",pingnumber_tick_len);
+		fprintf(stderr,"dbg2       contour_plot():       %p\n",contour_plot);
+		fprintf(stderr,"dbg2       contour_newpen():     %p\n",contour_newpen);
+		fprintf(stderr,"dbg2       contour_setline():    %p\n",contour_setline);
+		fprintf(stderr,"dbg2       contour_justify_string():  	 %p\n",contour_justify_string);
+		fprintf(stderr,"dbg2       contour_plot_string():  	 %p\n",contour_plot_string);
 		}
 
 	/* allocate memory for swath structure */
@@ -420,6 +393,13 @@ int mb_contour_init(
 				(void **)&(dataptr->angle),error);
 	status = mb_mallocd(verbose,__FILE__,__LINE__,(5*npings_max)*sizeof(int),
 				(void **)&(dataptr->justify),error);
+	
+	/* set plotting function pointers */
+	dataptr->contour_plot = contour_plot;
+ 	dataptr->contour_newpen = contour_newpen;
+ 	dataptr->contour_setline = contour_setline;
+ 	dataptr->contour_justify_string = contour_justify_string;
+ 	dataptr->contour_plot_string = contour_plot_string;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -904,16 +884,16 @@ int mb_tcontour(
 	/* plot the triangles if desired */
 	if (data->plot_triangles)
 	  {
-	  newpen(0);
+	  data->contour_newpen(0);
 	  for (itri=0;itri<data->ntri;itri++)
 		{
-		plot(data->x[data->iv[0][itri]],
+		data->contour_plot(data->x[data->iv[0][itri]],
 			data->y[data->iv[0][itri]],IMOVE);
-		plot(data->x[data->iv[1][itri]],
+		data->contour_plot(data->x[data->iv[1][itri]],
 			data->y[data->iv[1][itri]],IDRAW);
-		plot(data->x[data->iv[2][itri]],
+		data->contour_plot(data->x[data->iv[2][itri]],
 			data->y[data->iv[2][itri]],IDRAW);
-		plot(data->x[data->iv[0][itri]],
+		data->contour_plot(data->x[data->iv[0][itri]],
 			data->y[data->iv[0][itri]],ISTROKE);
 		}
 	  }
@@ -925,7 +905,7 @@ int mb_tcontour(
 	for (ival=0;ival<data->nlevel;ival++)
 		{
 		value = data->level_list[ival];
-		newpen(data->color_list[ival]);
+		data->contour_newpen(data->color_list[ival]);
 		tick = data->tick_list[ival];
 		label = data->label_list[ival];
 
@@ -1324,10 +1304,10 @@ int dump_contour(struct swath *data, double value)
 
 	/* plot the contours */
 	if (data->nsave < 2) return(MB_NO);
-	plot(data->xsave[0],data->ysave[0],IMOVE);
+	data->contour_plot(data->xsave[0],data->ysave[0],IMOVE);
 	for (i=1;i<data->nsave-1;i++)
-		plot(data->xsave[i],data->ysave[i],IDRAW);
-	plot(data->xsave[data->nsave-1],data->ysave[data->nsave-1],ISTROKE);
+		data->contour_plot(data->xsave[i],data->ysave[i],IDRAW);
+	data->contour_plot(data->xsave[data->nsave-1],data->ysave[data->nsave-1],ISTROKE);
 	data->nsave = 0;
 
 	/* plot the labels */
@@ -1338,17 +1318,17 @@ int dump_contour(struct swath *data, double value)
 		if (data->justify[i] == 1)
 			{
 			mb_coor_scale(0,data->ylabel[i],&mtodeglon,&mtodeglat);
-			justify_string(data->label_hgt,label,s);
+			data->contour_justify_string(data->label_hgt,label,s);
 			dx = 1.5*s[2]*cos(DTR*data->angle[i]);
 			dy = 1.5*mtodeglat/mtodeglon*s[2]
 				*sin(DTR*data->angle[i]);
 			x = data->xlabel[i] - dx;
 			y = data->ylabel[i] - dy;
-			plot_string(x,y,data->label_hgt,data->angle[i],label);
+			data->contour_plot_string(x,y,data->label_hgt,data->angle[i],label);
 			}
 		else
 			{
-			plot_string(data->xlabel[i],data->ylabel[i],
+			data->contour_plot_string(data->xlabel[i],data->ylabel[i],
 				data->label_hgt,data->angle[i],label);
 			}
 		}
@@ -1576,7 +1556,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 	for (ival=0;ival<data->nlevel;ival++)
 		{
 		value = data->level_list[ival];
-		newpen(data->color_list[ival]);
+		data->contour_newpen(data->color_list[ival]);
 		tick = data->tick_list[ival];
 		label = data->label_list[ival];
 

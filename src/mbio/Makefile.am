@@ -22,6 +22,7 @@ include_HEADERS = mb_config.h \
         mbsys_reson7k.h mbsys_jstar.h \
         mbsys_image83p.h mbsys_hysweep.h \
         mbsys_benthos.h mbsys_swathplus.h \
+	mbsys_3datdepthlidar.h \
         mbf_sbsiomrg.h mbf_sbsiocen.h \
         mbf_sbsiolsi.h mbf_sburicen.h \
         mbf_sbifremr.h mbf_hsatlraw.h \
@@ -48,11 +49,15 @@ endif
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -I@top_srcdir@/src/proj \
-	-I@top_srcdir@/src/mr1pr \
+AM_CPPFLAGS = -I@top_srcdir@/src/mr1pr \
 	-I@top_srcdir@/src/surf \
 	${libgmt_CPPFLAGS} \
 	${libnetcdf_CPPFLAGS}
+if BUILD_PROJ
+  AM_CPPFLAGS += -I@top_srcdir@/src/proj
+else
+  AM_CPPFLAGS += ${libproj_CPPFLAGS}
+endif
 if BUILD_GSF
   AM_CPPFLAGS += -I@top_srcdir@/src/gsf
 endif
@@ -89,7 +94,8 @@ libmbio_la_SOURCES = \
                 mbsys_netcdf.c mbsys_navnetcdf.c \
                 mbsys_reson7k.c mbsys_jstar.c \
                 mbsys_image83p.c mbsys_hysweep.c \
-                mbsys_benthos.c mbsys_swathplus.c\
+                mbsys_benthos.c mbsys_swathplus.c \
+		mbsys_3datdepthlidar.c \
                 mbr_sbsiomrg.c mbr_sbsiocen.c \
                 mbr_sbsiolsi.c mbr_sburicen.c \
                 mbr_sburivax.c mbr_sbifremr.c \
@@ -125,15 +131,14 @@ libmbio_la_SOURCES = \
                 mbr_image83p.c mbr_imagemba.c \
                 mbr_hir2rnav.c mbr_hysweep1.c \
                 mbr_xtfb1624.c mbr_swplssxi.c \
-                mbr_swplssxp.c
+                mbr_swplssxp.c mbr_3ddepthp.c
 if BUILD_GSF
   libmbio_la_SOURCES += mbsys_gsf.c mbr_gsfgenmb.c
 endif
 
 libmbio_la_LIBADD = $(top_builddir)/src/mr1pr/libmbmr1pr.la \
                    $(top_builddir)/src/surf/libmbsapi.la \
-		   $(top_builddir)/src/proj/libmbproj.la \
-		   ${libgmt_LIBS} ${libnetcdf_LIBS} ${XDR_LIB}
+		   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${XDR_LIB}
 if BUILD_GSF
   libmbio_la_LIBADD += $(top_builddir)/src/gsf/libmbgsf.la
 endif

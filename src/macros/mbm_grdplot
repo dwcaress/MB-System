@@ -1319,7 +1319,7 @@ if ($gridprojected == 0
 # set bounds string for plotting if not already set
 if (!$bounds_plot)
 	{
-	$bounds_plot = sprintf ("%1.8g/%1.8g/%1.8g/%1.8g",
+	$bounds_plot = sprintf ("%1.11g/%1.11g/%1.11g/%1.11g",
 		$xmin, $xmax, $ymin, $ymax);
 	}
 
@@ -3156,9 +3156,9 @@ if ($verbose)
 		{
 		print "    Data scale factor:        $data_scale\n";
 		}
-	printf "    Longitude min max:        %9.4f  %9.4f\n",
+	printf "    Longitude min max:        %14.9f  %14.9f\n",
 		$xmin, $xmax;
-	printf "    Latitude min max:         %9.4f  %9.4f\n",
+	printf "    Latitude min max:         %14.9f  %14.9f\n",
 		$ymin, $ymax;
 	printf "    Data min max:             %9.4g  %9.4g\n",
 		$zmin, $zmax;
@@ -3926,7 +3926,15 @@ sub GetBaseTick {
 	elsif ($gridprojected == 0)
 		{
 		$base_tick = &min($base_tick_x, $base_tick_y);
-		if ($base_tick < 0.0002777777)
+		if ($base_tick < 0.00006944444445)
+			{
+			$base_tick = "0.25c";
+			}
+		elsif ($base_tick < 0.00013888888889)
+			{
+			$base_tick = "0.5c";
+			}
+		elsif ($base_tick < 0.0002777777)
 			{
 			$base_tick = "1c";
 			}

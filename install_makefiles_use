@@ -104,12 +104,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Required parameters:
 $MBSYSTEM_HOME = "/Users/caress/sandbox/mbsystem";
 $OS = "DARWIN";
-$CFLAGS = "-Wall -g -O0 -I/usr/X11R6/include ";
+$CFLAGS = "-Wall -g -O0 -I/opt/X11/include ";
 $LFLAGS = "-Wall -g -O0 -lm -L/sw/lib -lgdal";
 $NETCDFLIBDIR = "/sw/lib";
 $NETCDFINCDIR = "/sw/include";
-$GMTLIBDIR = "/usr/local/gmt/lib";
-$GMTINCDIR = "/usr/local/gmt/include";
+$GMTLIBDIR = "/sw/lib";
+$GMTINCDIR = "/sw/include";
 $PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
 #
 # Required parameters for spectrogram program mbsegypsd
@@ -121,7 +121,7 @@ $FFTWINCDIR = "/sw/include";
 #   - graphical tools will not be built if these
 #     are commented out
 $MOTIFINCDIR = "/sw/include";
-$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+$MOTIFLIBS = "-L/sw/lib -L/opt/X11/lib -lXm -lXt -lX11";
 #
 # Required parameter for visualization tools
 #   - visualization tools will not be built if this
@@ -187,7 +187,7 @@ elsif ($preset eq "macosxfink")
 	$OS = "DARWIN";
 	$CC = "cc";
 	$MOTIFINCDIR = "$FINKPREFIX/include";
-	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/opt/X11/lib -lXm -lXt -lX11";
 	$OPENGLLIBS = "-lGLU -lGL";
 	$GMTLIBDIR = "$FINKPREFIX/lib";
 	$GMTINCDIR = "$FINKPREFIX/include";
@@ -197,7 +197,7 @@ elsif ($preset eq "macosxfink")
 	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
 	$FFTWLIBDIR = "$FINKPREFIX/lib";
 	$FFTWINCDIR = "$FINKPREFIX/include";
-	$CFLAGS = "-O3 -funroll-loops -fexpensive-optimizations -I/usr/X11R6/include -Wall -Wimplicit -pedantic -W -Wstrict-prototypes -Wredundant-decls  -Wimplicit-int -Wimplicit-function-declaration -Wnested-externs";
+	$CFLAGS = "-O3 -funroll-loops -fexpensive-optimizations -I/opt/X11/include -Wall -Wimplicit -pedantic -W -Wstrict-prototypes -Wredundant-decls  -Wimplicit-int -Wimplicit-function-declaration -Wnested-externs";
 	$LFLAGS = "-Wl -lm -bind_at_load";
 	}
 #
@@ -315,7 +315,7 @@ else
 # GMT are only available through the "unstable" fink tree).
 # The "-force_flat_namespace" linker flag was
 # required in $LFLAGS prior to 10.2.6
-#	$MBSYSTEM_HOME = "cmbsystem";
+#	$MBSYSTEM_HOME = "mbsystem";
 #	$OS = "DARWIN";
 #	$CC = "cc";
 #	$MOTIFINCDIR = "/sw/include";

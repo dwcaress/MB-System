@@ -171,6 +171,13 @@ struct swath
 	double	*angle;
 	int	*justify;
 
+	/* function pointers for plot functions */
+        void (*contour_plot)(double x, double y, int ipen);
+        void (*contour_newpen)(int ipen);
+        void (*contour_setline)(int linewidth);
+        void (*contour_justify_string)(double height, char *string, double *s);
+        void (*contour_plot_string)(double x, double y, double hgt, double angle, char *label);
+
 	};
 
 /* topography grid structure for mb_intersectgrid() */
@@ -194,7 +201,7 @@ struct mb_topogrid_struct
 	float	*data;
 	};
 
-/* mb_contour function prototypes */
+/* mb_contour and mb_track function prototypes */
 int mb_contour_init(
 		int	verbose,
 		struct swath **data,
@@ -226,6 +233,11 @@ int mb_contour_init(
 		int	pingnumber_tick_int,
 		int	pingnumber_annot_int,
 		double	pingnumber_tick_len,
+		void   (*contour_plot)(double, double, int),
+		void   (*contour_newpen)(int),
+		void   (*contour_setline)(int),
+		void   (*contour_justify_string)(double, char *, double *),
+		void   (*contour_plot_string)(double, double, double, double, char *),
 		int	*error);
 int mb_contour_deall(
 		int	verbose,
@@ -240,21 +252,21 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error);
 void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file, int *error);
 
 /* pslibface function prototypes */
-int plot_init(	int	verbose,
+int mb_plot_init(	int	verbose,
 		int	argc,
 		char	**argv,
 		double	*bounds_use,
 		double	*scale,
 		double	*inch2lon,
 		int	*error);
-int plot_end(int verbose, int *error);
-int plot_exit(int argc, char **argv);
-void set_colors(int ncol, int *rd, int *gn, int *bl);
-void plot(double x, double y, int ipen);
-void setline(int linewidth);
-void newpen(int ipen);
-void justify_string(double height, char *string, double *s);
-void plot_string(double x, double y, double hgt, double angle, char *label);
+int mb_plot_end(int verbose, int *error);
+int mb_plot_exit(int argc, char **argv);
+void mb_set_colors(int ncol, int *rd, int *gn, int *bl);
+void mb_plot(double x, double y, int ipen);
+void mb_setline(int linewidth);
+void mb_newpen(int ipen);
+void mb_justify_string(double height, char *string, double *s);
+void mb_plot_string(double x, double y, double hgt, double angle, char *label);
 
 /* mb_surface function prototypes */
 int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat,
@@ -268,52 +280,6 @@ int mb_zgrid2(float *z, int *nx, int *ny,
 		float *x1, float *y1, float *dx, float *dy, float *xyz,
 		int *n, float *zpij, int *knxt, int *imnew,
 		float *cay, int *nrng);
-
-/* mb_truecont function prototypes */
-int mb_contour_init(
-		int	verbose,
-		struct swath **data,
-		int	npings_max,
-		int	beams_bath,
-		int	contour_algorithm,
-		int	plot_contours,
-		int	plot_triangles,
-		int	plot_track,
-		int	plot_name,
-		int	plot_pingnumber,
-		double	contour_int,
-		double	color_int,
-		double	tick_int,
-		double	label_int,
-		double	tick_len,
-		double	label_hgt,
-		double	label_spacing,
-		int	ncolor,
-		int	nlevel,
-		double	*level_list,
-		int	*label_list,
-		int	*tick_list,
-		double	time_tick_int,
-		double	time_annot_int,
-		double	date_annot_int,
-		double	time_tick_len,
-		double	name_hgt,
-		int	pingnumber_tick_int,
-		int	pingnumber_annot_int,
-		double	pingnumber_tick_len,
-		int	*error);
-int mb_contour_deall(
-		int	verbose,
-		struct swath *data,
-		int	*error);
-int mb_contour(
-		int	verbose,
-		struct swath *data,
-		int	*error);
-int mb_tcontour(
-		int	verbose,
-		struct swath *data,
-		int	*error);
 
 /* mb_delaun function prototypes */
 int mb_delaun(
