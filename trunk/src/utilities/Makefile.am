@@ -45,6 +45,7 @@ bin_PROGRAMS = mbhsdump \
         mbhysweeppreprocess \
         mbkongsbergpreprocess \
         mbsxppreprocess \
+        mbpreprocess \
         $(FFTW_PROG)
 
 #Remove mbps if WIN32?
@@ -65,7 +66,7 @@ endif
 AM_LDFLAGS =
 
 LIBS =  ${top_builddir}/src/mbio/libmbio.la \
-       	${libgmt_LIBS} ${libnetcdf_LIBS} \
+       	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
         $(LIBM)
 
 mbhsdump_SOURCES = mbhsdump.c
@@ -170,12 +171,15 @@ mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbsxppreprocess_SOURCES = mbsxppreprocess.c
 mbsxppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
+mbpreprocess_SOURCES = mbpreprocess.c
+mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+
 if BUILD_FFTW
 mbsegypsd_SOURCES = mbsegypsd.c
 mbsegypsd_LDFLAGS =
 
 mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
-                  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libfftw_LIBS}
+                  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${libfftw_LIBS}
 endif
 
 BUILT_SOURCES = levitus.h

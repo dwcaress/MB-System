@@ -162,7 +162,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 /*--------------------------------------------------------------------*/
 int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error)
 {
-	char	*function_name = "mb_intersecttopogrid";
+	char	*function_name = "mb_topogrid_deall";
 	int	status = MB_SUCCESS;
 	struct mb_topogrid_struct *topogrid;
 
@@ -206,7 +206,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr,
 			double *lon, double *lat, double *topo, double *range,
 			int *error)
 {
-	char	*function_name = "mb_intersecttopogrid";
+	char	*function_name = "mb_topogrid_intersect";
 	int	status = MB_SUCCESS;
 	struct mb_topogrid_struct *topogrid;
 	int	done;
@@ -256,16 +256,59 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr,
 		fprintf(stderr,"dbg2       topogrid->data:            %p\n", topogrid->data);
 		}
 
-	/* test different ranges along the vector until the grid is intersected */
+	/* initialize search for intersection */
 	done = MB_NO;
 	iteration = 0;
-	dr = altitude / 20;
-	r = altitude / vz - dr;
-	topog = 0.0;
 	topotest = 0.0;
 	dtopo = 0.0;
 	rmin = 0.0;
-	rmax = 4 * altitude / vz;
+	
+	/* if altitude specified use it for initial guess */
+	if (altitude > 0.0)
+		{
+		dr = altitude / 20;
+		r = altitude / vz - dr;
+		rmax = 4 * altitude / vz;
+		}
+		
+	/* if altitude not specified use altitude at location */
+	else
+		{
+		nfound = 0;
+		topog = 0.0;
+		i = (int)((navlon - topogrid->xmin) / topogrid->dx);
+		j = (int)((navlat - topogrid->ymin) / topogrid->dy);
+		if (i >= 0 && i < topogrid->nx - 1
+		    && j >= 0 && j < topogrid->ny - 1)
+			{
+			for (ii=i;ii<=i+1;ii++)
+			for (jj=j;jj<=j+1;jj++)
+			    {
+			    k = ii * topogrid->ny + jj;
+			    if (topogrid->data[k] != topogrid->nodatavalue)
+				{
+				nfound++;
+				topog += topogrid->data[k];
+				}
+			    }
+			}
+		if (nfound > 0)
+			{
+			topog /= (double)nfound;
+			altitude = -sonardepth - topog;
+			dr = altitude / 20;
+			r = altitude / vz - dr;
+			rmax = 4 * altitude / vz;
+			}
+		else
+			{
+			done = MB_YES;
+			status = MB_FAILURE;
+			*error = MB_ERROR_NOT_ENOUGH_DATA;
+			}
+		}
+
+	/* test different ranges along the vector until the grid is intersected */
 	while (done == MB_NO && iteration < iteration_max)
 		{
 		/* update the range to be tested */

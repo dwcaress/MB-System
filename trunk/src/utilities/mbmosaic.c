@@ -543,6 +543,7 @@ int main (int argc, char **argv)
 	float	*sdata = NULL;
 	float	*output = NULL;
 	float	*sgrid = NULL;
+        double  bdata_origin_x, bdata_origin_y;
 	double	sxmin, symin;
 	float	xmin, ymin, ddx, ddy, zflag, cay;
 	void	*work1 = NULL;
@@ -1397,6 +1398,11 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		clipmode = MBMOSAIC_INTERP_ALL;
         if (clipmode == MBMOSAIC_INTERP_ALL)
                 clip = MAX(xdim, ydim);
+        
+        /* set origin used to reduce data value size before conversion from
+         * double to float when calling the interpolation routines */
+        bdata_origin_x = 0.5 * (wbnd[0] + wbnd[1]);
+        bdata_origin_y = 0.5 * (wbnd[2] + wbnd[3]);
 
 	/* if specified get static angle priorities */
 	if (priority_source == MBMOSAIC_PRIORITYTABLE_FILE
@@ -3084,9 +3090,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				kgrid = i*gydim + j;
 				if (grid[kgrid] < clipvalue)
 					{
-					sdata[ndata++] = sxmin + dx*i;
-					sdata[ndata++] = symin + dy*j;
-					sdata[ndata++] = grid[kgrid];
+					sdata[ndata++] = (float)(sxmin + dx*i - bdata_origin_x);
+					sdata[ndata++] = (float)(symin + dy*j - bdata_origin_y);
+					sdata[ndata++] = (float)grid[kgrid];
 					}
 				}
 		/* if desired set border */
@@ -3098,17 +3104,17 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				kgrid = i*gydim + j;
 				if (grid[kgrid] == clipvalue)
 					{
-					sdata[ndata++] = sxmin + dx*i;
-					sdata[ndata++] = symin + dy*j;
-					sdata[ndata++] = border;
+					sdata[ndata++] = (float)(sxmin + dx*i - bdata_origin_x);
+					sdata[ndata++] = (float)(symin + dy*j - bdata_origin_y);
+					sdata[ndata++] = (float)border;
 					}
 				j = gydim - 1;
 				kgrid = i*gydim + j;
 				if (grid[kgrid] == clipvalue)
 					{
-					sdata[ndata++] = sxmin + dx*i;
-					sdata[ndata++] = symin + dy*j;
-					sdata[ndata++] = border;
+					sdata[ndata++] = (float)(sxmin + dx*i - bdata_origin_x);
+					sdata[ndata++] = (float)(symin + dy*j - bdata_origin_y);
+					sdata[ndata++] = (float)border;
 					}
 				}
 			for (j=1;j<gydim-1;j++)
@@ -3117,17 +3123,17 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				kgrid = i*gydim + j;
 				if (grid[kgrid] == clipvalue)
 					{
-					sdata[ndata++] = sxmin + dx*i;
-					sdata[ndata++] = symin + dy*j;
-					sdata[ndata++] = border;
+					sdata[ndata++] = (float)(sxmin + dx*i - bdata_origin_x);
+					sdata[ndata++] = (float)(symin + dy*j - bdata_origin_y);
+					sdata[ndata++] = (float)border;
 					}
 				i = gxdim - 1;
 				kgrid = i*gydim + j;
 				if (grid[kgrid] == clipvalue)
 					{
-					sdata[ndata++] = sxmin + dx*i;
-					sdata[ndata++] = symin + dy*j;
-					sdata[ndata++] = border;
+					sdata[ndata++] = (float)(sxmin + dx*i - bdata_origin_x);
+					sdata[ndata++] = (float)(symin + dy*j - bdata_origin_y);
+					sdata[ndata++] = (float)border;
 					}
 				}
 			}
@@ -3136,11 +3142,11 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		/* do the interpolation */
 		if (verbose > 0)
 			fprintf(outfp,"\nDoing spline interpolation with %u data points...\n",ndata);
-		cay = tension;
-		xmin = sxmin - 0.5 * dx;
-		ymin = symin - 0.5 * dy;
-		ddx = dx;
-		ddy = dy;
+		cay = (float)tension;
+		xmin = (float)(sxmin - 0.5 * dx - bdata_origin_x);
+		ymin = (float)(symin - 0.5 * dy - bdata_origin_y);
+		ddx = (float)dx;
+		ddy = (float)dy;
 		if (clipmode == MBMOSAIC_INTERP_ALL)
 			clip = MAX(gxdim,gydim);
 		mb_zgrid2(sgrid,&gxdim,&gydim,&xmin,&ymin,

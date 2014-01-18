@@ -51,6 +51,7 @@
 #define	TYPE_TIMETAG	1
 #define	TYPE_INTEGER	2
 #define	TYPE_DOUBLE	3
+#define	TYPE_ANGLE	4
 
 static char rcs_id[] = "$Id$";
 
@@ -131,7 +132,7 @@ int main (int argc, char **argv)
 
 	/* set file to null */
 	file[0] = '\0';
-	printformat[0] = '\0';
+	strcpy(printformat, "default");
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "F:f:I:i:L:l:O:o:PpSsVvWwHh")) != -1)
@@ -163,7 +164,7 @@ int main (int argc, char **argv)
 		case 'O':
 		case 'o':
 			nscan = sscanf (optarg,"%s", printfields[nprintfields].name);
-			if (strlen(printformat) > 0)
+			if (strlen(printformat) > 0 && strcmp(printformat, "default") != 0)
 				{
 				printfields[nprintfields].formatset = MB_YES;
 				strcpy(printfields[nprintfields].format,printformat);
@@ -325,6 +326,22 @@ int main (int argc, char **argv)
 				fields[nfields].scale = 1.0;
 				recordsize += 8;
 				}
+			else if (strcmp(type, "angle") == 0)
+				{
+				fields[nfields].type = TYPE_ANGLE;
+				fields[nfields].size = 8;
+				if (angles_in_degrees == MB_YES
+					&&(strcmp(fields[nfields].name, "mRollCB") == 0
+						|| strcmp(fields[nfields].name, "mOmega_xCB") == 0
+						|| strcmp(fields[nfields].name, "mPitchCB") == 0
+						|| strcmp(fields[nfields].name, "mOmega_yCB") == 0
+						|| strcmp(fields[nfields].name, "mYawCB") == 0
+						|| strcmp(fields[nfields].name, "mOmega_zCB") == 0))
+					fields[nfields].scale = RTD;
+				else
+					fields[nfields].scale = 1.0;
+				recordsize += 8;
+				}
 			nfields++;
 			}
 		}
@@ -402,6 +419,10 @@ int main (int argc, char **argv)
 				{
 				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
 				dvalue *= fields[index].scale;
+				if (strcmp(fields[nfields].name, "mHeadK") == 0
+					&& angles_in_degrees == MB_YES
+					&& dvalue < 0.0)
+					dvalue += 360.0;
 				fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (fields[index].type == TYPE_INTEGER)
@@ -429,6 +450,16 @@ int main (int argc, char **argv)
 					}
 				else
 					fprintf(stdout, printfields[i].format, dvalue);
+				}
+			else if (fields[index].type == TYPE_ANGLE)
+				{
+				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
+				dvalue *= fields[index].scale;
+				if (strcmp(fields[nfields].name, "mYawCB") == 0
+					&& angles_in_degrees == MB_YES
+					&& dvalue < 0.0)
+					dvalue += 360.0;
+				fprintf(stdout, printfields[i].format, dvalue);
 				}
 			if (i < nprintfields - 1)
 				fprintf(stdout, "\t");

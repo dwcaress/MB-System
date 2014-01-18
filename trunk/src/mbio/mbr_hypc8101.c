@@ -1206,7 +1206,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 				if (status == MB_SUCCESS
 				    && (token = strtok(NULL, " ")) != NULL)
 				    {
-				    if ((nscan = sscanf(token, "%lf",&sb2_range)) == 1);
+				    if ((nscan = sscanf(token, "%lf",&sb2_range)) == 1)
 					{
 					data->tt[sb2_nbeams_read] = 100 * sb2_range;
 					sb2_nbeams_read++;
@@ -1229,7 +1229,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 				if (status == MB_SUCCESS
 				    && (token = strtok(NULL, " ")) != NULL)
 				    {
-				    if ((nscan = sscanf(token, "%lf",&sb2_quality)) == 1);
+				    if ((nscan = sscanf(token, "%lf",&sb2_quality)) == 1)
 					{
 					iquality = sb2_quality;
 					data->quality[4 * sb2_nquality_read]

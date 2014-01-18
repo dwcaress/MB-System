@@ -95,6 +95,8 @@ AS_ECHO(["    listed here:"])
 AS_ECHO(["        --prefix=install      - location for mbsystem (/usr/local/mbsystem)"])
 AS_ECHO(["        --with-netcdf-lib     - location of NetCDF libs"])
 AS_ECHO(["        --with-netcdf-include - location of NetCDF headers"])
+AS_ECHO(["        --with-proj-lib       - location of PROJ libs"])
+AS_ECHO(["        --with-proj-include   - location of PROJ headers"])
 AS_ECHO(["        --with-gmt-lib        - location of GMT libs"])
 AS_ECHO(["        --with-gmt-include    - location of GMT headers"])
 AS_ECHO(["        --with-fftw-lib       - location of FFTW3 libs (optional)"])
@@ -105,7 +107,9 @@ AS_ECHO(["        --with-opengl-lib     - location of OpenGL libs (optional)"])
 AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"])
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --without-gsf         - build without including or supporting GSF"])
-AS_ECHO(["        --enable-static       - build using static libraries - shared libraries are default"])
+AS_ECHO(["        --with-opengl-lib     - location of OpenGL libs (optional)"])
+AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"])
+AS_ECHO(["        --enable-bundledproj  - build using bundled proj package - default is to link with libproj"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
 AS_ECHO(["        make"])
@@ -165,7 +169,7 @@ AC_CHECK_HEADER(malloc.h, AC_DEFINE(HAVE_MALLOC_H, 1, [Have malloc.h]))
 dnl Parse host_os from CANONICAL and deterimine
 dnl if solaris flag required
 case "${host_os}" in
-	solaris*|sonos*) CFLAGS="${CFLAGS} -DSUN" ;;
+	solaris*|sunos*) CFLAGS="${CFLAGS} -DSUN" ;;
 	*) AS_ECHO(["Build does not require -DSUN CFLAG"]) ;;
 esac
 
@@ -297,6 +301,105 @@ fi
  fi
 AC_SUBST([libnetcdf_CPPFLAGS], [$libnetcdf_CPPFLAGS])
 dnl done with CDF headers
+
+
+dnl check whether to use bundled proj package or link with external libproj
+AC_ARG_ENABLE(bundledproj, [AS_HELP_STRING([--enable-bundledproj], [build and use the bundled proj package])],
+        [bundledproj=yes], [bundledproj=no])
+AM_CONDITIONAL([BUILD_PROJ], [test x"$bundledproj" = xyes])
+        
+dnl Using bundled PROJ
+if test "$bundledproj" = "yes" ; then
+    AS_ECHO(["Using bundled PROJ lib"])
+    libproj_LIBS="-lproj"
+    libproj_LDFLAGS=
+    AC_SUBST([libproj_LIBS], ["$libproj_LIBS"])
+
+dnl Linking with external PROJ
+else
+
+    dnl Check for PROJ lib
+    AS_ECHO(["Check for PROJ"])
+    GOT_PROJ=no
+    PROJ_SETTING=no
+    dnl first check for package
+    PKG_CHECK_MODULES([libproj], [proj], [GOT_PROJ=yes], [GOT_PROJ=no])
+    
+    dnl Package check failed so check manually
+    if test "$GOT_PROJ" = "no" ; then
+    
+    libproj_LIBS="-lproj"
+    libproj_LDFLAGS=
+    
+    dnl arg for command line
+    AC_ARG_WITH(proj-lib, [  --with-proj-lib=DIR	Location of PROJ library],
+            [proj_libdir="${withval}"] [GOT_PROJ=yes], [GOT_PROJ=no])
+    dnl First check if lib installed
+    if test "$GOT_PROJ" = "no" ; then
+     AC_CHECK_LIB([proj], [pj_init_plus], [PROJ_SETTING=yes], [PROJ_SETTING=no],)
+    fi
+     if test "$PROJ_SETTING" = "yes" ; then
+        GOT_PROJ=yes
+        AS_ECHO(["Using pre-installed libproj."])
+     else
+        if test "$GOT_PROJ" = "no" ; then
+            AC_MSG_ERROR([Did not find libproj, use --with-proj-lib])
+        else
+            AS_ECHO(["Looking for libproj in $proj_libdir ..."])
+            save_LDFLAGS=$LDFLAGS
+            LDFLAGS="$LDFLAGS -L$proj_libdir"
+            AC_CHECK_LIB([proj], [pj_init_plus], [PROJ_SETTING=yes], [PROJ_SETTING=no], )
+            LDFLAGS="$save_LDFLAGS"
+            if test "$PROJ_SETTING" = "no"; then
+               AC_MSG_ERROR([Did not find libproj, use --with-proj-lib or check installation])
+            fi
+            libproj_LIBS="-L$proj_libdir -R $proj_libdir $libproj_LIBS"
+    #
+    #       Save the proj library path for later gmt tests
+    #
+            libproj_LDFLAGS="-L$proj_libdir"
+        fi
+     fi
+     dnl Use ac_subst to set vars that would be set by pkg_check
+     AC_SUBST([libproj_LIBS], ["$libproj_LIBS"])
+    fi
+    dnl done with PROJ lib
+
+    dnl Now check PROJ headers
+    GOT_PROJ=no
+    PROJ_SETTING=no
+    dnl add command line option
+    AC_ARG_WITH(proj-include, [  --with-proj-include=DIR	Location of PROJ headers],
+            [libproj_CPPFLAGS="-I${withval}"] [GOT_PROJ=yes], [GOT_PROJ=no])
+    dnl First check if PROJ headers installed
+    if test "$GOT_PROJ" = "no" ; then
+        AC_CHECK_HEADER(proj_api.h, [PROJ_SETTING=yes], [PROJ_SETTING=no])
+    fi
+    if test "$PROJ_SETTING" = "yes" ; then
+        GOT_PROJ=yes
+        AS_ECHO(["Using pre-installed PROJ headers."])
+    else
+        if test "$GOT_PROJ" = "no" ; then
+            AC_MSG_ERROR([Did not find required PROJ headers, use --with-proj-include])
+        else
+            AS_ECHO(["Checking proj_api.h in $libproj_CPPFLAGS..."])
+            save_CPPFLAGS=$CPPFLAGS
+            save_CFLAGS=$CFLAGS
+            CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
+            CFLAGS="$CFLAGS $libproj_CPPFLAGS"
+            AC_CHECK_HEADER(proj_api.h, [PROJ_SETTING=yes], [PROJ_SETTING=no],)
+            CPPFLAGS=$save_CPPFLAGS
+            CFLAGS=$save_CFLAGS
+            if test "$PROJ_SETTING" = "no"; then
+               AC_MSG_ERROR([Did not find required PROJ headers, use --with-proj-include])
+            fi
+        fi
+    fi
+    AC_SUBST([libproj_CPPFLAGS], [$libproj_CPPFLAGS])
+    dnl done with PROJ headers
+    
+fi
+dnl Done linking with external PROJ
 
 dnl Check for Generic Mapping Tools (GMT) libs
 dnl - these are libgmt, libpsl, and libgmtps
@@ -702,7 +805,6 @@ dnl Close Motif check for OpenGL
 
 AM_CONDITIONAL([BUILD_GL], [test "$GOT_GL" = yes])
 
-
 dnl variables for shared data
 mbsystemdatadir="$datadir/$PACKAGE"
 AC_SUBST(mbsystemdatadir)
@@ -715,7 +817,7 @@ AS_ECHO([" "])
 AS_ECHO(["About to create Makefiles..."])
 AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
 	  src/surf/Makefile \
-	  src/mr1pr/Makefile src/proj/Makefile src/mbaux/Makefile \
+	  src/mr1pr/Makefile src/mbaux/Makefile \
 	  src/utilities/Makefile src/gmt/Makefile \
 	  src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile \
 	  src/mbvelocitytool/Makefile src/mbnavadjust/Makefile \
@@ -723,6 +825,9 @@ AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
 	  src/mbview/Makefile  src/mbgrdviz/Makefile  src/mbeditviz/Makefile  \
 	  src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile \
 	  src/html/Makefile src/ps/Makefile src/share/Makefile])
+if test "$bundledproj" = "yes" ; then
+AC_CONFIG_FILES([src/proj/Makefile])
+fi
 if test "$with_gsf" = "yes" ; then
 AC_CONFIG_FILES([src/gsf/Makefile])
 fi
@@ -768,6 +873,14 @@ fi
 AS_ECHO(["Using $OTPS_DIR for OSU Tidal Prediction Software"])
 
 AS_ECHO(["Build with Generic Sensor Format (GSF) Support: $with_gsf"])
+
+
+if test "$bundledproj" = "yes" ; then
+	AS_ECHO(["Building using bundled proj package"])
+else
+	AS_ECHO(["Building using system libproj library, not bundled proj package"])
+fi
+
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["See config.log for details of configure results"])
 AS_ECHO(["See INSTALL for further build instructions and hints"])

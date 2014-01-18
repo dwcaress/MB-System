@@ -329,7 +329,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_mallocd(int verbose, char *sourcefile, int sourceline,
+int mb_mallocd(int verbose, const char *sourcefile, int sourceline,
 		size_t size, void **ptr, int *error)
 {
 	char	*function_name = "mb_mallocd";
@@ -555,7 +555,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_reallocd(int verbose, char *sourcefile, int sourceline,
+int mb_reallocd(int verbose, const char *sourcefile, int sourceline,
 		size_t size, void **ptr, int *error)
 {
 	char	*function_name = "mb_reallocd";
@@ -788,7 +788,7 @@ int mb_free(int verbose, void **ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_freed(int verbose, char *sourcefile, int sourceline, void **ptr, int *error)
+int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, int *error)
 {
 	char	*function_name = "mb_freed";
 	int	status = MB_SUCCESS;

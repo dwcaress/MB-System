@@ -1530,7 +1530,6 @@ int mbsys_reson7k_print_header(int verbose,
 		fprintf(stderr,"dbg2       header:     %p\n",(void *)header);
 		}
 
-
 	/* print Reson 7k data record header information */
 	if (verbose >= 2)
 		first = debug_str;
@@ -8198,6 +8197,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 
 		mb_hedint_interp(verbose, mbio_ptr, store->time_d,
 				    &heading, error);
+		speed = 0.0;
 		mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed,
 				    &longitude, &latitude, &speed, error);
 		mb_attint_interp(verbose, mbio_ptr, store->time_d,

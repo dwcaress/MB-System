@@ -104,7 +104,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Required parameters:
 $MBSYSTEM_HOME = "/usr/local/mbsystem";
 $OS = "DARWIN";
-$CFLAGS = "-Wall -g -I/usr/X11R6/include ";
+$CFLAGS = "-Wall -g -I/opt/X11/include ";
 $LFLAGS = "-Wall -g -lm -L/sw/lib -lgdal";
 $NETCDFLIBDIR = "/sw/lib";
 $NETCDFINCDIR = "/sw/include";
@@ -121,7 +121,7 @@ $FFTWINCDIR = "/usr/local/fftw/include";
 #   - graphical tools will not be built if these
 #     are commented out
 $MOTIFINCDIR = "/sw/include";
-$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+$MOTIFLIBS = "-L/sw/lib -L/opt/X11/lib -lXm -lXt -lX11";
 #
 # Required parameter for visualization tools
 #   - visualization tools will not be built if this
@@ -187,7 +187,7 @@ elsif ($preset eq "macosxfink")
 	$OS = "DARWIN";
 	$CC = "cc";
 	$MOTIFINCDIR = "$FINKPREFIX/include";
-	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/opt/X11/lib -lXm -lXt -lX11";
 	$OPENGLLIBS = "-lGLU -lGL";
 	$GMTLIBDIR = "$FINKPREFIX/lib";
 	$GMTINCDIR = "$FINKPREFIX/include";
@@ -198,7 +198,7 @@ elsif ($preset eq "macosxfink")
 	$FFTWLIBDIR = "$FINKPREFIX/lib";
 	$FFTWINCDIR = "$FINKPREFIX/include";
 	$OTPSDIR = "/usr/local/OTPSnc";
-	$CFLAGS = "-O3 -funroll-loops -fexpensive-optimizations -I/usr/X11R6/include -Wall -Wimplicit -pedantic -W -Wstrict-prototypes -Wredundant-decls  -Wimplicit-int -Wimplicit-function-declaration -Wnested-externs";
+	$CFLAGS = "-O3 -funroll-loops -fexpensive-optimizations -I/opt/X11/include -Wall -Wimplicit -pedantic -W -Wstrict-prototypes -Wredundant-decls  -Wimplicit-int -Wimplicit-function-declaration -Wnested-externs";
 	$LFLAGS = "-Wl -lm -bind_at_load";
 	}
 #

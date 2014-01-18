@@ -279,11 +279,7 @@ struct mb_io_struct
 				    last record read */
 	long	file3_bytes;	/* number of bytes read from file */
 	int	ncid;		/* netCDF datastream ID */
-#ifdef WITH_GSF
 	int	gsfid;		/* GSF datastream ID */
-#else
-        int     _gsfid_placeholder;
-#endif
 	void	*xdrs;		/* XDR stream handle */
 	void	*xdrs2;		/* XDR stream handle #2 */
 	void	*xdrs3;		/* XDR stream handle #2 */
@@ -482,6 +478,11 @@ struct mb_io_struct
 		int *sonartype, int *error);
 	int (*mb_io_sidescantype)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
+        int (*mb_io_preprocess)(int verbose, void *mbio_ptr, void *store_ptr,
+		double time_d, double navlon, double navlat,
+		double speed, double heading, double sonardepth,
+		double roll, double pitch, double heave,
+		int *error);
 	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,

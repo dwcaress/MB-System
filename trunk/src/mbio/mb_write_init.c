@@ -184,7 +184,7 @@
 #include "mb_io.h"
 #include "mb_define.h"
 #include "mb_segy.h"
-#include "../surf/sapi.h"
+#include "../surf/mb_sapi.h"
 #ifdef WITH_GSF
 #  include "gsf.h"
 #endif

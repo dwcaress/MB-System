@@ -5,7 +5,6 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	-I${top_srcdir}/src/mbaux \
 	-I${top_srcdir}/src/mbview \
-	-I${top_srcdir}/src/proj \
 	-I${top_srcdir}/src/mr1pr \
 	-I${top_srcdir}/src/surf \
 	${libgmt_CPPFLAGS} \
@@ -23,6 +22,6 @@ mbeditviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \
 		  ${top_builddir}/src/mbaux/libmbxgr.la \
 		  ${top_builddir}/src/mbaux/libmbps.la \
 		  ${top_builddir}/src/mbview/libmbview.la \
-		  ${libgmt_LIBS} ${libnetcdf_LIBS} \
+		  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
 		  ${motif_LIBS} ${GL_LIBS} \
 		  $(LIBM)

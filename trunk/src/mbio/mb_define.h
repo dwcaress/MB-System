@@ -231,6 +231,9 @@ typedef char mb_name[MB_NAME_LENGTH];
 /* maximum number of CTD samples per record */
 #define MB_CTD_MAX 256
 
+/* maximum number of asynchronous nav samples per record */
+#define MB_NAV_MAX 256
+
 /* file mode (read or write) */
 #define	MB_FILEMODE_READ	0
 #define	MB_FILEMODE_WRITE	1
@@ -453,6 +456,11 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sonartype, int *error);
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
+int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+		double time_d, double navlon, double navlat,
+		double speed, double heading, double sonardepth,
+		double roll, double pitch, double heave,
+		int *error);
 int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -669,6 +677,27 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 int mb_altint_interp(int verbose, void *mbio_ptr,
 		double time_d, double *altitude,
 		int *error);
+int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int merge_nav_lonflip,
+                int *merge_nav_num, int *merge_nav_alloc,
+                double **merge_nav_time_d, double **merge_nav_lon,
+                double **merge_nav_lat, double **merge_nav_speed, int *error);
+int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_sensordepth_format,
+                int *merge_sensordepth_num, int *merge_sensordepth_alloc,
+                double **merge_sensordepth_time_d, double **merge_sensordepth_sensordepth,
+                int *error);
+int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_format,
+                int *merge_heading_num, int *merge_heading_alloc,
+                double **merge_heading_time_d, double **merge_heading_heading,
+                int *error);
+int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitude_format,
+                int *merge_attitude_num, int *merge_attitude_alloc,
+                double **merge_attitude_time_d, double **merge_attitude_roll,
+                double **merge_attitude_pitch, double **merge_attitude_heave,
+                int *error);
+int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_timeshift_format,
+                int *merge_timeshift_num, int *merge_timeshift_alloc,
+                double **merge_timeshift_time_d, double **merge_timeshift_timeshift,
+                int *error);
 
 int mb_swap_check();
 int mb_get_double(double *, char *, int);
@@ -730,9 +759,9 @@ int mb_mem_debug_off(int verbose, int *error);
 int mb_malloc(int verbose, size_t size, void **ptr, int *error);
 int mb_realloc(int verbose, size_t size, void **ptr, int *error);
 int mb_free(int verbose, void **ptr, int *error);
-int mb_mallocd(int verbose, char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
-int mb_reallocd(int verbose, char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
-int mb_freed(int verbose, char *sourcefile, int sourceline, void **ptr, int *error);
+int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
+int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
+int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, int *error);
 int mb_memory_clear(int verbose, int *error);
 int mb_memory_status(int verbose, int *nalloc, int *nallocmax,
 			int *overflow, size_t *allocsize, int *error);

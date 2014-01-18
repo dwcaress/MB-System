@@ -802,7 +802,7 @@ int mbnavedit_open_file(int useprevious)
 	strcat(nfile,".nve");
 
 	/* try to lock file */
-	if (uselockfiles == MB_YES)
+	if (output_mode == OUTPUT_MODE_OUTPUT && uselockfiles == MB_YES)
 		{
 		status = mb_pr_lockswathfile(verbose, ifile,
 				MBP_LOCK_EDITNAV, program_name, &error);
@@ -1067,45 +1067,46 @@ int mbnavedit_close_file()
 	    fclose(nfp);
 	    nfile_open = MB_NO;
 	    }
+            
+        /* if not in browse mode, deal with locking and processing */
+        if (output_mode == OUTPUT_MODE_OUTPUT)
+            {
 
-	/* unlock the raw swath file */
-	if (uselockfiles == MB_YES)
-		status = mb_pr_unlockswathfile(verbose, ifile,
-						MBP_LOCK_EDITNAV, program_name, &error);
+            /* unlock the raw swath file */
+            if (uselockfiles == MB_YES)
+                    status = mb_pr_unlockswathfile(verbose, ifile,
+                                                    MBP_LOCK_EDITNAV, program_name, &error);
+    
+            /* update mbprocess parameter file */
+            status = mb_pr_update_format(verbose, ifile,
+                        MB_YES, format,
+                        &error);
+            status = mb_pr_update_nav(verbose, ifile,
+                        MBP_NAV_ON, nfile, 9,
+                        MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON,
+                        MBP_NAV_LINEAR,
+                        (double) 0.0,
+                        &error);
+    
+            /* run mbprocess if desired */
+            if (run_mbprocess == MB_YES)
+                   {
+                   /* turn message on */
+                   do_message_on("Navigation edits being applied using mbprocess...");
 
-	    /* update mbprocess parameter file */
-	    status = mb_pr_update_format(verbose, ifile,
-			MB_YES, format,
-			&error);
-	    status = mb_pr_update_nav(verbose, ifile,
-			MBP_NAV_ON, nfile, 9,
-			MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON,
-			MBP_NAV_LINEAR,
-			(double) 0.0,
-			&error);
+                   /* run mbprocess */
+                   if (strip_comments == MB_YES)
+                       sprintf(command, "mbprocess -I %s -N\n",ifile);
+                   else
+                       sprintf(command, "mbprocess -I %s\n",ifile);
+                   if (verbose >= 1)
+                       fprintf(stderr,"\nExecuting command:\n%s\n",command);
+                   shellstatus = system(command);
 
-	/* set mbprocess parameters */
-	if (output_mode == OUTPUT_MODE_OUTPUT)
-	    {
-	    /* run mbprocess if desired */
-	    if (run_mbprocess == MB_YES)
-		    {
-		    /* turn message on */
-		    do_message_on("Navigation edits being applied using mbprocess...");
-
-		    /* run mbprocess */
-		    if (strip_comments == MB_YES)
-			sprintf(command, "mbprocess -I %s -N\n",ifile);
-		    else
-			sprintf(command, "mbprocess -I %s\n",ifile);
-		    if (verbose >= 1)
-			fprintf(stderr,"\nExecuting command:\n%s\n",command);
-		    shellstatus = system(command);
-
-		    /* turn message off */
-		    do_message_off();
-		    }
-	    }
+                   /* turn message off */
+                   do_message_off();
+                   }
+            }
 
 	/* check memory */
 	if (verbose >= 4)
@@ -1175,7 +1176,7 @@ int mbnavedit_dump_data(int hold)
 		for (iping=0;iping<nbuff-hold;iping++)
 			{
 			/* write the nav out */
-		    	fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+		    	fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.3f %.3f %.4f %.3f %.3f %.4f\r\n",
 				ping[iping].time_i[0],
 				ping[iping].time_i[1],
 				ping[iping].time_i[2],
@@ -1375,7 +1376,7 @@ int mbnavedit_load_data()
 				{
 				fprintf(stderr,"\ndbg5  Next good data found in function <%s>:\n",
 					function_name);
-				fprintf(stderr,"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %11.6f %11.6f %5.2f %5.1f %5.1f %5.2f %5.2f %5.2f\n",
+				fprintf(stderr,"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %15.10f %15.10f %6.3f %7.3f %8.4f %6.3f %6.3f %8.4f\n",
 					nbuff,ping[nbuff].id,ping[nbuff].record,
 					ping[nbuff].time_i[1],ping[nbuff].time_i[2],
 					ping[nbuff].time_i[0],ping[nbuff].time_i[3],

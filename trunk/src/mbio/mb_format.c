@@ -332,7 +332,10 @@ int mb_format_register(int verbose,
 	    /* handle old Simrad EM12 and EM121 formats */
 	    else if (*format == 52 || *format == 55)
 		i = MBF_EMOLDRAW;
-
+		
+	    else
+	        i = 0;
+		
 	    /* print output debug statements */
 	    if (verbose >= 2)
 		    {
@@ -654,6 +657,10 @@ int mb_format_register(int verbose,
 		{
 		status = mbr_register_swplssxp(verbose, mbio_ptr, error);
 		}
+ 	else if (*format == MBF_3DDEPTHP)
+		{
+		status = mbr_register_3ddepthp(verbose, mbio_ptr, error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -764,6 +771,9 @@ int mb_format_info(int verbose,
 	    /* handle old Simrad EM12 and EM121 formats */
 	    else if (*format == 52 || *format == 55)
 		i = MBF_EMOLDRAW;
+		
+	    else
+	        i = 0;
 
 	    /* print output debug statements */
 	    if (verbose >= 2)
@@ -1596,6 +1606,17 @@ int mb_format_info(int verbose,
 			nav_source, heading_source, vru_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
+		}
+ 	else if (*format == MBF_3DDEPTHP)
+		{
+		status = mbr_info_3ddepthp(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error); 
 		}
 	else if (*format == MBF_DATALIST)
 		{
@@ -3488,6 +3509,31 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
 		*format = MBF_SWPLSSXP;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for a 3DatDepth *.raa file format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".raa")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".RAA")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_3DDEPTHP;
 		found = MB_YES;
 		}
 	    }

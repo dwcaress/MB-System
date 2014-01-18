@@ -2917,12 +2917,12 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					break;
 				case 'C': /* Sonar altitude (m) */
-					printsimplevalue(verbose, output[i], altitude, 0, 3, ascii,
+					printsimplevalue(verbose, output[i], altitude, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'c': /* Sonar transducer depth (m) */
-					printsimplevalue(verbose, output[i], sonardepth, 0, 3, ascii,
+					printsimplevalue(verbose, output[i], sonardepth, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -2944,7 +2944,7 @@ int main (int argc, char **argv)
 					else
 					    {
 					    b = bathy_scale * bathacrosstrack[k];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+					    printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
@@ -2967,7 +2967,7 @@ int main (int argc, char **argv)
 					else
 					    {
 					    b = bathy_scale * bathalongtrack[k];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+					    printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
@@ -3023,12 +3023,12 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'H': /* heading */
-					printsimplevalue(verbose, output[i], heading, 6, 2, ascii,
+					printsimplevalue(verbose, output[i], heading, 7, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'h': /* course */
-					printsimplevalue(verbose, output[i], course, 6, 2, ascii,
+					printsimplevalue(verbose, output[i], course, 7, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -3092,12 +3092,12 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'L': /* along-track distance (km) */
-					printsimplevalue(verbose, output[i], distance_total, 7, 3, ascii,
+					printsimplevalue(verbose, output[i], distance_total, 8, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'l': /* along-track distance (m) */
-					printsimplevalue(verbose, output[i], 1000.0 * distance_total, 7, 3, ascii,
+					printsimplevalue(verbose, output[i], 1000.0 * distance_total, 8, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -3129,12 +3129,12 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'P': /* pitch */
-					printsimplevalue(verbose, output[i], pitch, 5, 2, ascii,
+					printsimplevalue(verbose, output[i], pitch, 6, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'p': /* draft */
-					printsimplevalue(verbose, output[i], draft, 5, 2, ascii,
+					printsimplevalue(verbose, output[i], draft, 7, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -3183,17 +3183,17 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					break;
 				case 'r': /* heave */
-					printsimplevalue(verbose, output[i], heave, 5, 2, ascii,
+					printsimplevalue(verbose, output[i], heave, 7, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'S': /* speed */
-					printsimplevalue(verbose, output[i], speed, 5, 2, ascii,
+					printsimplevalue(verbose, output[i], speed, 6, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 's': /* speed made good */
-					printsimplevalue(verbose, output[i], speed_made_good, 5, 2, ascii,
+					printsimplevalue(verbose, output[i], speed_made_good, 6, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -3286,7 +3286,7 @@ int main (int argc, char **argv)
 					    if ( fabs(time_interval) > 100. )
 						fprintf(output[i],"%g",time_interval);
 					    else
-						fprintf(output[i],"%7.3f",time_interval);
+						fprintf(output[i],"%10.6f",time_interval);
 					    }
 					else
 					    {
@@ -3300,7 +3300,7 @@ int main (int argc, char **argv)
 							*bathacrosstrack[k]
 						    + headingx*mtodeglon
 							*bathalongtrack[k];
-					printsimplevalue(verbose, output[i], dlon, 14, 9, ascii,
+					printsimplevalue(verbose, output[i], dlon, 15, 10, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -3323,7 +3323,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %9.6f%c",
+					    fprintf(output[i],"%3d %11.8f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -3343,7 +3343,7 @@ int main (int argc, char **argv)
 							*bathacrosstrack[k]
 						    + headingy*mtodeglat
 							*bathalongtrack[k];
-					printsimplevalue(verbose, output[i], dlat, 14, 9, ascii,
+					printsimplevalue(verbose, output[i], dlat, 15, 10, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -3366,7 +3366,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %9.6f%c",
+					    fprintf(output[i],"%3d %11.8f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -3396,7 +3396,7 @@ int main (int argc, char **argv)
 					else
 					    {
 					    b = -bathy_scale * bath[k];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+					    printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
@@ -3418,7 +3418,7 @@ int main (int argc, char **argv)
 					else
 					    {
 					    b = bathy_scale * bath[k];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+					    printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
@@ -3838,26 +3838,26 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					break;
 				case 'C': /* Sonar altitude (m) */
-					printsimplevalue(verbose, output[i], altitude, 0, 3, ascii,
+					printsimplevalue(verbose, output[i], altitude, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'c': /* Sonar transducer depth (m) */
-					printsimplevalue(verbose, output[i], sonardepth, 0, 3, ascii,
+					printsimplevalue(verbose, output[i], sonardepth, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
 					b = bathy_scale * ssacrosstrack[k];
-					printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+					printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							&invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'E': /* alongtrack dist. */
 				case 'e':
 					b = bathy_scale * ssalongtrack[k];
-					printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+					printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							&invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -3885,12 +3885,12 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					break;
 				case 'H': /* heading */
-					printsimplevalue(verbose, output[i], heading, 6, 2, ascii,
+					printsimplevalue(verbose, output[i], heading, 7, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'h': /* course */
-					printsimplevalue(verbose, output[i], course, 6, 2, ascii,
+					printsimplevalue(verbose, output[i], course, 7, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -3953,12 +3953,12 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'L': /* along-track distance (km) */
-					printsimplevalue(verbose, output[i], distance_total, 7, 3, ascii,
+					printsimplevalue(verbose, output[i], distance_total, 8, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'l': /* along-track distance (m) */
-					printsimplevalue(verbose, output[i], 1000.0 * distance_total, 7, 3, ascii,
+					printsimplevalue(verbose, output[i], 1000.0 * distance_total, 8, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -3990,12 +3990,12 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'P': /* pitch */
-					printsimplevalue(verbose, output[i], pitch, 5, 2, ascii,
+					printsimplevalue(verbose, output[i], pitch, 6, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'p': /* draft */
-					printsimplevalue(verbose, output[i], draft, 5, 2, ascii,
+					printsimplevalue(verbose, output[i], draft, 6, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -4019,17 +4019,17 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					break;
 				case 'r': /* heave */
-					printsimplevalue(verbose, output[i], heave, 5, 2, ascii,
+					printsimplevalue(verbose, output[i], heave, 7, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'S': /* speed */
-					printsimplevalue(verbose, output[i], speed, 5, 2, ascii,
+					printsimplevalue(verbose, output[i], speed, 6, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 's': /* speed made good */
-					printsimplevalue(verbose, output[i], speed_made_good, 5, 2, ascii,
+					printsimplevalue(verbose, output[i], speed_made_good, 6, 3, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -4121,7 +4121,7 @@ int main (int argc, char **argv)
 					    if ( fabs(time_interval) > 100. )
 						fprintf(output[i],"%g",time_interval);
 					    else
-						fprintf(output[i],"%7.3f",time_interval);
+						fprintf(output[i],"%10.6f",time_interval);
 					    }
 					else
 					    {
@@ -4135,7 +4135,7 @@ int main (int argc, char **argv)
 							*ssacrosstrack[k]
 						    + headingx*mtodeglon
 							*ssalongtrack[k];
-					printsimplevalue(verbose, output[i], dlon, 14, 9, ascii,
+					printsimplevalue(verbose, output[i], dlon, 15, 10, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -4158,7 +4158,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %9.6f%c",
+					    fprintf(output[i],"%3d %11.8f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -4178,7 +4178,7 @@ int main (int argc, char **argv)
 							*ssacrosstrack[k]
 						    + headingy*mtodeglat
 							*ssalongtrack[k];
-					printsimplevalue(verbose, output[i], dlat, 14, 9, ascii,
+					printsimplevalue(verbose, output[i], dlat, 15, 10, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
@@ -4201,7 +4201,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %9.6f%c",
+					    fprintf(output[i],"%3d %11.8f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -4231,7 +4231,7 @@ int main (int argc, char **argv)
 					else
 					    {
 					    b = -bathy_scale * bath[beam_vertical];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+					    printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
@@ -4253,7 +4253,7 @@ int main (int argc, char **argv)
 					else
 					    {
 					    b = bathy_scale * bath[beam_vertical];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+					    printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }

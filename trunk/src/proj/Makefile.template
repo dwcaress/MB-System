@@ -37,7 +37,7 @@ ARCHIVE = ar rcv
 
 ### make all makes the proj library, executables, man pages,
 ### and associated include files
-all:	$(LIBDIR)/libmbproj.a \
+all:	$(LIBDIR)/libproj.a \
 	$(INCDIR)/proj_api.h \
 	$(BINDIR)/proj \
 	$(BINDIR)/geod \
@@ -51,18 +51,18 @@ clean:
 
 ### link or copy the executables
 $(BINDIR)/geod: geod.o \
-		$(LIBDIR)/libmbproj.a
+		$(LIBDIR)/libproj.a
 	$(CC) $(CFLAGS) geod.o \
-		$(LIBDIR)/libmbproj.a \
+		$(LIBDIR)/libproj.a \
 		$(LFLAGS) -o $(BINDIR)/geod
 $(BINDIR)/proj: proj.o \
-		$(LIBDIR)/libmbproj.a
+		$(LIBDIR)/libproj.a
 	$(CC) $(CFLAGS) proj.o \
-		$(LIBDIR)/libmbproj.a \
+		$(LIBDIR)/libproj.a \
 		$(LFLAGS) -o $(BINDIR)/proj
 
 ### put together the library
-$(LIBDIR)/libmbproj.a: \
+$(LIBDIR)/libproj.a: \
 		PJ_aea.o \
 		PJ_aeqd.o \
 		PJ_airy.o \
@@ -216,7 +216,7 @@ $(LIBDIR)/libmbproj.a: \
 		proj_rouss.o \
 		rtodms.o \
 		vector1.o
-	$(ARCHIVE) $(LIBDIR)/libmbproj.a \
+	$(ARCHIVE) $(LIBDIR)/libproj.a \
 		PJ_aea.o \
 		PJ_aeqd.o \
 		PJ_airy.o \
@@ -370,7 +370,7 @@ $(LIBDIR)/libmbproj.a: \
 		proj_rouss.o \
 		rtodms.o \
 		vector1.o
-	ranlib $(LIBDIR)/libmbproj.a
+	ranlib $(LIBDIR)/libproj.a
 
 ### compile the source files
 PJ_aea.o:	PJ_aea.c \

@@ -7,14 +7,14 @@ include_HEADERS = proj_api.h
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c geodesic.h
 
-proj_LDADD = libmbproj.la
-geod_LDADD = libmbproj.la
+proj_LDADD = libproj.la
+geod_LDADD = libproj.la
 
-lib_LTLIBRARIES = libmbproj.la
+lib_LTLIBRARIES = libproj.la
 
-libmbproj_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libproj_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
-libmbproj_la_SOURCES = \
+libproj_la_SOURCES = \
       projects.h pj_list.h \
 PJ_aea.c \
 PJ_aeqd.c \

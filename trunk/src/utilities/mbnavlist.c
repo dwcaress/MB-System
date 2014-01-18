@@ -610,11 +610,13 @@ int main (int argc, char **argv)
 
 		/* extract additional nav info */
 		if (error == MB_ERROR_NO_ERROR)
+			{
 		   	status = mb_extract_nnav(verbose,mbio_ptr,store_ptr,
 					MB_ASYNCH_SAVE_MAX, &kind, &n,
 				    	atime_i,atime_d,anavlon,anavlat,
 				    	aspeed,aheading,adraft,
 					aroll,apitch,aheave,&error);
+			}
 
 		/* increment counter */
 		if (error == MB_ERROR_NO_ERROR)

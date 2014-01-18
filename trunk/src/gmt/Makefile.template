@@ -41,7 +41,7 @@ LFLAGS = -lm
 GSFLIB  = $(LIBDIR)/libmbgsf.a
 
 ### set projlib - could be version supplied with MB-System or other installation
-PROJLIB  = $(LIBDIR)/libmbproj.a
+PROJLIB  = $(LIBDIR)/libproj.a
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 

@@ -603,6 +603,7 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* get data type */
+	kind = MB_DATA_NONE;
 	if (status == MB_SUCCESS)
 		{
 		mb_get_binary_short(MB_NO, &line[0], &(data->func));

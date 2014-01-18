@@ -69,6 +69,7 @@ all:	$(INCDIR)/mb_config.h $(INCDIR)/mb_config2.h \
 	$(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h \
 	$(INCDIR)/mbsys_image83p.h $(INCDIR)/mbsys_hysweep.h \
 	$(INCDIR)/mbsys_benthos.h $(INCDIR)/mbsys_swathplus.h \
+	$(INCDIR)/mbsys_3datdepthlidar.h \
 	$(INCDIR)/mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiocen.h \
 	$(INCDIR)/mbf_sbsiolsi.h $(INCDIR)/mbf_sburicen.h \
 	$(INCDIR)/mbf_sbifremr.h $(INCDIR)/mbf_hsatlraw.h \
@@ -126,6 +127,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_reson7k.o mbsys_jstar.o \
 		mbsys_image83p.o mbsys_hysweep.o \
 		mbsys_benthos.o mbsys_swathplus.o \
+		mbsys_3datdepthlidar.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -161,7 +163,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_image83p.o mbr_imagemba.o \
 		mbr_hir2rnav.o mbr_hysweep1.o \
 		mbr_xtfb1624.o \
-                mbr_swplssxi.o mbr_swplssxp.o
+                mbr_swplssxi.o mbr_swplssxp.o \
+		mbr_3ddepthp.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -193,6 +196,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_reson7k.o mbsys_jstar.o \
 		mbsys_image83p.o mbsys_hysweep.o \
 		mbsys_benthos.o mbsys_swathplus.o \
+		mbsys_3datdepthlidar.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -228,7 +232,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_image83p.o mbr_imagemba.o \
 		mbr_hir2rnav.o mbr_hysweep1.o \
 		mbr_xtfb1624.o \
-                mbr_swplssxi.o mbr_swplssxp.o
+                mbr_swplssxi.o mbr_swplssxp.o \
+		mbr_3ddepthp.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -363,6 +368,8 @@ mbsys_benthos.o:	mbsys_benthos.c mb_status.h mb_format.h mb_io.h mb_config2.h mb
 	$(CC) -c $(CFLAGS) mbsys_benthos.c
 mbsys_swathplus.o:	mbsys_swathplus.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_swathplus.h
 	$(CC) -c $(CFLAGS) mbsys_swathplus.c
+mbsys_3datdepthlidar.o:	mbsys_3datdepthlidar.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_3datdepthlidar.h
+	$(CC) -c $(CFLAGS) mbsys_3datdepthlidar.c
 mbr_sbsiomrg.o:	mbr_sbsiomrg.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbsys_sb.h mbf_sbsiomrg.h
 	$(CC) -c $(CFLAGS) mbr_sbsiomrg.c
 mbr_sbsiocen.o: mbr_sbsiocen.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbsys_sb.h mbf_sbsiocen.h
@@ -499,6 +506,8 @@ mbr_swplssxi.o: mbr_swplssxi.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_d
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_swplssxi.c
 mbr_swplssxp.o: mbr_swplssxp.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbsys_swathplus.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_swplssxp.c
+mbr_3ddepthp.o: mbr_3ddepthp.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbsys_3datdepthlidar.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_3ddepthp.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_config.h:	mb_config.h
@@ -673,6 +682,9 @@ $(INCDIR)/mbsys_benthos.h:	mbsys_benthos.h
 $(INCDIR)/mbsys_swathplus.h:	mbsys_swathplus.h
 	cp mbsys_swathplus.h $(INCDIR)/mbsys_swathplus.h
 	chmod 664 $(INCDIR)/mbsys_swathplus.h
+$(INCDIR)/mbsys_3datdepthlidar.h:	mbsys_3datdepthlidar.h
+	cp mbsys_3datdepthlidar.h $(INCDIR)/mbsys_3datdepthlidar.h
+	chmod 664 $(INCDIR)/mbsys_3datdepthlidar.h
 $(INCDIR)/mbf_sbsiomrg.h:	mbf_sbsiomrg.h
 	cp mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiomrg.h
 	chmod 664 $(INCDIR)/mbf_sbsiomrg.h

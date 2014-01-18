@@ -2215,9 +2215,9 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp,
 		mb_get_int(    &(data->num_vel),    line+38+shift,  2);
 		}
 
+	nlines = 0;
 	if (status == MB_SUCCESS)
 		{
-
 		/* figure out how many lines to read */
 		if (data->num_vel > MBF_HSATLRAW_MAXVEL)
 			data->num_vel = MBF_HSATLRAW_MAXVEL;

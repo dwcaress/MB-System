@@ -285,9 +285,10 @@
 #define	MB_SYS_HYSWEEP		32
 #define	MB_SYS_BENTHOS		33
 #define	MB_SYS_SWATHPLUS	34
+#define MB_SYS_3DATDEPTHLIDAR   35
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	73
+#define	MB_FORMATS	74
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -529,6 +530,9 @@
 #define MBF_SWPLSSXP	222	/* SEA processed format for SWATHplus interferometric sonar,
                                         variable beams, bathymetry, amplitude,
                                         binary, single files, SEA. */
+#define MBF_3DDEPTHP    231     /* 3DatDepth processed format for 3DatDepth LIDAR,
+                                        variable beams, bathymetry, amplitude,
+                                        binary, single files, 3DatDepth. */
 
 /* format registration function prototypes */
 int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error);
@@ -608,6 +612,7 @@ int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error);
 int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error);
 int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error);
 int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error);
+int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error);
 int mbr_info_sbsiomrg(int verbose,
 			int *system,
 			int *beams_bath_max,
@@ -2130,6 +2135,25 @@ int mbr_info_swplssxp(int verbose,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
 			int *error);
-
+int mbr_info_3ddepthp(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
 /* end conditional include */
 #endif

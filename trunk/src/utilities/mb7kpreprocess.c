@@ -474,6 +474,7 @@ int main (int argc, char **argv)
 
 	/* timedelay parameters */
 	int	timedelaymode = MB7KPREPROCESS_TIMEDELAY_UNDEFINED;
+	char	timedelayfile[MB_PATH_MAXLINE];
 
 	/* timelag parameters */
 	int	timelagmode = MB7KPREPROCESS_TIMELAG_OFF;
@@ -2731,11 +2732,11 @@ sonardepth_sonardepth[nsonardepth]);*/
 			if (tfp == NULL)
 				{
 				/* open file for timedelay values */
-				sprintf(timelagfile, "%s_timedelay.txt", read_file);
-				if ((tfp = fopen(timelagfile, "w")) == NULL)
+				sprintf(timedelayfile, "%s_timedelay.txt", read_file);
+				if ((tfp = fopen(timedelayfile, "w")) == NULL)
 					{
 					error = MB_ERROR_OPEN_FAIL;
-					fprintf(stderr,"\nUnable to open time delay file <%s> for writing\n",timelagfile);
+					fprintf(stderr,"\nUnable to open time delay file <%s> for writing\n",timedelayfile);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
 						program_name);
 					exit(error);
