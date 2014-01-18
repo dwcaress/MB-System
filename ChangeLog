@@ -16,6 +16,8 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2159       January 18, 2014
+  Version 5.4.2158       January 18, 2014
 * Version 5.4.2157       October 14, 2013
   Version 5.4.2155       October 13, 2013
   Version 5.4.2154       September 26, 2013
@@ -166,6 +168,21 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2158 (January 18, 2014)
+
+Many changes, including:
+  - Support for new format of lidar data
+  - Fixes to support swath data with sub-cm lateral resolution
+  - Fix so that mbnavadjust works when built with shared libraries.
+    - this involved changes to the contouring code in the mbaux library.
+  - Augmentation of the AUV mission planning capability
+  - Improvement to mbm_grdplot output for maps of small areas
+  - Fixes to the configure build system
+    - now allows MB-System to be built using an externally installed
+      libproj or the proj library bundled with MB-System
+    - using --disable-gsf now works properly to build without any use of
+      or entanglement with libgsf.
+        
 -----> 5.4.2157 (October 14, 2013)
 
 Mbm_makesvp: New macro to extract sound speed and depth data from a datalist of

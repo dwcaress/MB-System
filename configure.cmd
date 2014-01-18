@@ -68,21 +68,24 @@ make uninstall (to remove a previously installed version)
 #------------------------------------------------------------------------------
 # Configure script command line options:
 #------------------------------------------------------------------------------
-# --prefix=install      - location for mbsystem (/usr/local/mbsystem)
-# --with-netcdf-lib     - location of NetCDF libs
-# --with-netcdf-include - location of NetCDF headers
-# --with-gmt-lib        - location of GMT libs
-# --with-gmt-include    - location of GMT headers
-# --with-fftw-lib       - location of FFTW3 libs (optional)
-# --with-fftw-include   - location of FFTW3 headers (optional)
-# --with-motif-lib      - location of Motif libs (optional)
-# --with-motif-include  - location of Motif headers (optional)
-# --with-opengl-lib     - location of OpenGL libs (optional)
-# --with-opengl-include - location of OpenGL headers (optional)
-# --with-otps-dir       - location of OTPS installation (optional)
-# --without-gsf         - build without including or supporting GSF
-# --enable-static       - build using static libraries - shared libraries are default
-
+    --prefix=install      - location for mbsystem (/usr/local/mbsystem)"])
+    --with-netcdf-lib     - location of NetCDF libs"])
+    --with-netcdf-include - location of NetCDF headers"])
+    --with-proj-lib       - location of PROJ libs"])
+    --with-proj-include   - location of PROJ headers"])
+    --with-gmt-lib        - location of GMT libs"])
+    --with-gmt-include    - location of GMT headers"])
+    --with-fftw-lib       - location of FFTW3 libs (optional)"])
+    --with-fftw-include   - location of FFTW3 headers (optional)"])
+    --with-motif-lib      - location of Motif libs (optional)"])
+    --with-motif-include  - location of Motif headers (optional)"])
+    --with-opengl-lib     - location of OpenGL libs (optional)"])
+    --with-opengl-include - location of OpenGL headers (optional)"])
+    --with-otps-dir       - location of OTPS installation (optional)"])
+    --without-gsf         - build without including or supporting GSF"])
+    --enable-bundledproj  - build using bundled proj package - the
+				default is to link with libproj"])
+                                
 #------------------------------------------------------------------------------
 # Configure script command line examples:
 #------------------------------------------------------------------------------
