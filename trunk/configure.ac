@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.4.2157],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.4.2159],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "14 October 2013", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "18 January 2014", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -107,8 +107,6 @@ AS_ECHO(["        --with-opengl-lib     - location of OpenGL libs (optional)"])
 AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"])
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --without-gsf         - build without including or supporting GSF"])
-AS_ECHO(["        --with-opengl-lib     - location of OpenGL libs (optional)"])
-AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"])
 AS_ECHO(["        --enable-bundledproj  - build using bundled proj package - default is to link with libproj"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])

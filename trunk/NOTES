@@ -116,30 +116,31 @@ become:
 	% sudo make install
 
 The available configure options are:
-    --help                         list all options
-    --prefix=path                  install location for mbsystem
-                                   (e.g. /usr/local/mbsystem)
-    --with-netcdf-lib=path         location of NetCDF libs
-    --with-netcdf-include=path     location of NetCDF headers
-    --with-gmt-lib=path            location of GMT libs
-    --with-gmt-include=path        location of GMT headers
-    --with-fftw-lib=path           location of FFTW3 libs (optional)
-    --with-fftw-include=path       location of FFTW3 headers (optional)
-    --with-motif-lib=path          location of Motif libs (optional)
-    --with-motif-include=path      location of Motif headers (optional)
-    --with-opengl-lib=path         location of OpenGL libs (optional)
-    --with-opengl-include=path     location of OpenGL headers (optional)
-    --enable-static                enable building static libraries - the default
-                                     is to build only shared libraries)
+    --prefix=install      - location for mbsystem (/usr/local/mbsystem)"])
+    --with-netcdf-lib     - location of NetCDF libs"])
+    --with-netcdf-include - location of NetCDF headers"])
+    --with-proj-lib       - location of PROJ libs"])
+    --with-proj-include   - location of PROJ headers"])
+    --with-gmt-lib        - location of GMT libs"])
+    --with-gmt-include    - location of GMT headers"])
+    --with-fftw-lib       - location of FFTW3 libs (optional)"])
+    --with-fftw-include   - location of FFTW3 headers (optional)"])
+    --with-motif-lib      - location of Motif libs (optional)"])
+    --with-motif-include  - location of Motif headers (optional)"])
+    --with-opengl-lib     - location of OpenGL libs (optional)"])
+    --with-opengl-include - location of OpenGL headers (optional)"])
+    --with-otps-dir       - location of OTPS installation (optional)"])
+    --without-gsf         - build without including or supporting GSF"])
+    --enable-bundledproj  - build using bundled proj package - the
+				default is to link with libproj"])
 
 Users can also define custom compiler flags on the command line to be used by
 configure. For example, the command:
-        % CFLAGS="-g -W -DBYTESWAPPED" ./configure --disable-static \
+        % CFLAGS="-g -W -DBYTESWAPPED" ./configure \
           --prefix=/usr/local/mbsystem
 will override the system default CFLAGS with "-g, -W, and -DBYTESWAPPED", build
-the package in the distribution directory without static libraries (shared
-libraries only), and install the package in /usr/local/mbsystem. The destination
-directories will be:
+the package in the distribution directory with shared libraries, and install
+the package in /usr/local/mbsystem. The destination directories will be:
         /usr/local/mbsystem/bin                      executable binaries and scripts
         /usr/local/mbsystem/lib                      libraries
         /usr/local/mbsystem/include                  header files
@@ -153,17 +154,25 @@ have been installed with Fink or MacPorts, then the locations of those
 prerequisite packages must be explicitly defined. Fink installs packages in
 /sw, and MacPorts installs into /opt. An example for installing in a Fink-centric
 system is:
-        % CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib -DDARWIN -DBYTESWAPPED" \
-        ./configure \
-        --prefix=/Users/caress/sandbox/mbsystem \
-        --with-netcdf-include=/sw/include \
-        --with-netcdf-lib=/sw/lib \
-        --with-gmt-include=/sw/include \
-        --with-gmt-lib=/sw/lib \
-        --with-fftw-include=/sw/include \
-        --with-fftw-lib=/sw/lib \
-        --with-motif-include=/sw/include \
-        --with-motif-lib=/sw/lib
+	% CFLAGS="-g -I/opt/X11/include" \
+	    LDFLAGS="-L/opt/X11/lib" \
+	    ./configure \
+	    --prefix=/Users/caress/sandbox/mbsystem \
+	    --with-netcdf-include=/sw/include \
+	    --with-netcdf-lib=/sw/lib \
+	    --with-proj-include=/sw/include \
+	    --with-proj-lib=/sw/lib \
+	    --with-gmt-include=/sw/include \
+	    --with-gmt-lib=/sw/lib \
+	    --with-fftw-include=/sw/include \
+	    --with-fftw-lib=/sw/lib \
+	    --with-motif-include=/sw/include \
+	    --with-motif-lib=/sw/lib \
+	    --with-otps-dir=/usr/local/OTPS
+This is for MacOSX 10.9 (Mavericks), in which X11 must be obtained from X.org
+and is installed in /opt. Previous versions of MacOsX installed X11 in /usr/X11R6.
+The only non-Fink package specified is OTPS (which is not available through
+package managers) in /usr/local.
 
 -------------------------------------------------------------------------------
 BUILDING AND INSTALLING MB-SYSTEM WITH INSTALL_MAKEFILES:
