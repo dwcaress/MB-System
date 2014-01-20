@@ -480,7 +480,7 @@ int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error)
 		data->swapped = 3;
 		data->tv_sec = 0;
 		data->tv_usec = 0;
-		data->interface = 0;
+		data->digitalinterface = 0;
 		for (i=0;i<5;i++)
 			data->reserved[i] = 0;
 		data->bat_type = DSL_BATH;
@@ -598,7 +598,7 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->swapped = data->swapped;
 		store->tv_sec = data->tv_sec;
 		store->tv_usec = data->tv_usec;
-		store->interface = data->interface;
+		store->digitalinterface = data->digitalinterface;
 		for (i=0;i<5;i++)
 			store->reserved[i] = data->reserved[i];
 		store->bat_type = data->bat_type;
@@ -708,7 +708,7 @@ int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->swapped = store->swapped;
 		data->tv_sec = store->tv_sec;
 		data->tv_usec = store->tv_usec;
-		data->interface = store->interface;
+		data->digitalinterface = store->digitalinterface;
 		for (i=0;i<5;i++)
 			data->reserved[i] = store->reserved[i];
 		data->bat_type = store->bat_type;
@@ -995,7 +995,7 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		index += 4;
 		mb_get_binary_int(MB_NO, &buffer[index], (int *) &data->tv_usec);
 		index += 4;
-		mb_get_binary_short(MB_NO,&buffer[index],&data->interface);
+		mb_get_binary_short(MB_NO,&buffer[index],&data->digitalinterface);
 		index += 2;
 		for (i=0;i<5;i++)
 			{
@@ -1038,7 +1038,7 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg5       swapped:          %c\n",data->swapped);
 		fprintf(stderr,"dbg5       tv_sec:           %d\n",data->tv_sec);
 		fprintf(stderr,"dbg5       tv_usec:          %d\n",data->tv_usec);
-		fprintf(stderr,"dbg5       interface:        %d\n",data->interface);
+		fprintf(stderr,"dbg5       digitalinterface: %d\n",data->digitalinterface);
 		for (i=0;i<5;i++)
 			fprintf(stderr,"dbg5       reserved:         %d\n", data->reserved[i]);
 		}
@@ -1520,7 +1520,7 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg5       swapped:          %c\n",data->swapped);
 		fprintf(stderr,"dbg5       tv_sec:           %d\n",data->tv_sec);
 		fprintf(stderr,"dbg5       tv_usec:          %d\n",data->tv_usec);
-		fprintf(stderr,"dbg5       interface:        %d\n",data->interface);
+		fprintf(stderr,"dbg5       digitalinterface: %d\n",data->digitalinterface);
 		for (i=0;i<5;i++)
 			fprintf(stderr,"dbg5       reserved:         %d\n", data->reserved[i]);
 		fprintf(stderr,"dbg5       bat_type:         %d\n",data->bat_type);
@@ -1617,7 +1617,7 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	index += 4;
 	mb_put_binary_int(MB_NO,data->tv_usec,&buffer[index]);
 	index += 4;
-	mb_put_binary_short(MB_NO,data->interface,&buffer[index]);
+	mb_put_binary_short(MB_NO,data->digitalinterface,&buffer[index]);
 	index += 2;
 	for (i=0;i<5;i++)
 		{
@@ -1806,7 +1806,7 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	index += 4;
 	mb_put_binary_int(MB_NO,data->tv_usec,&buffer[index]);
 	index += 4;
-	mb_put_binary_short(MB_NO,data->interface,&buffer[index]);
+	mb_put_binary_short(MB_NO,data->digitalinterface,&buffer[index]);
 	index += 2;
 	for (i=0;i<5;i++)
 		{

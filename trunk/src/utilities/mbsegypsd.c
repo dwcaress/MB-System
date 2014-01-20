@@ -869,11 +869,21 @@ int get_segy_limits(int verbose,
 	int	sinfmodtime = 0;
 	struct stat file_status;
 	int	fstat;
-	double	delay0, delay1, delaydel;
-	int	shot0, shot1, shotdel;
-	int	shottrace0, shottrace1, shottracedel;
-	int	rp0, rp1, rpdel;
-	int	rptrace0, rptrace1, rptracedel;
+	double	delay0 = 0.0;
+	double	delay1 = 0.0;
+	double	delaydel = 0.0;
+	int	shot0 = 0;
+	int	shot1 = 0;
+	int	shotdel = 0;
+	int	shottrace0 = 0;
+	int	shottrace1 = 0;
+	int	shottracedel = 0;
+	int	rp0 = 0;
+	int	rp1 = 0;
+	int	rpdel = 0;
+	int	rptrace0 = 0;
+	int	rptrace1 = 0;
+	int	rptracedel = 0;
 	int	nscan;
 	int	shellstatus;
 

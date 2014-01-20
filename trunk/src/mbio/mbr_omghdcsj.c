@@ -4532,6 +4532,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	ScaleFactor;
 	int	MaxVal;
 	int	offset, offset_start;
+	int	sum_size;
 	int	i, k;
 
 	/* print input debug statements */
@@ -5222,7 +5223,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 #endif
 
 	    /* write summary to file */
-	    int sum_size = MBF_OMGHDCSJ_SUMMARY_SIZE;
+	    sum_size = MBF_OMGHDCSJ_SUMMARY_SIZE;
 	    if (*fileVersion == 4)
 	    	sum_size += MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE;
 

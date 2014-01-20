@@ -814,6 +814,7 @@ void do_update_status()
 		}
 
 	/* set list_data */
+	iselect = MBNA_SELECT_NONE;
 	XmListDeleteAllItems(list_data);
 	if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS)
 		{

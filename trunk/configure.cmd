@@ -91,7 +91,7 @@ make uninstall (to remove a previously installed version)
 #------------------------------------------------------------------------------
 
 # Build in place:
-CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
+CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
     --with-netcdf-include=/sw/include \
@@ -106,7 +106,7 @@ CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
 #------------------------------------------------------------------------------
 
 # Build in /usr/local:
-CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
+CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 sudo ./configure \
     --prefix=/usr/local \
     --with-netcdf-include=/sw/include \
@@ -121,7 +121,7 @@ sudo ./configure \
 #------------------------------------------------------------------------------
 
 # Build in ~/buildtest
-CFLAGS="-I/usr/X11R6/include -L/usr/X11R6/lib" \
+CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/buildtest \
     --with-netcdf-include=/sw/include \
@@ -157,7 +157,7 @@ autoreconf --force --install --warnings=all
 # Force configure.ac to reduce the automake version requirement from 2.69 to 2.65
 sed -i.bak s/2\.69/2\.65/ configure.ac
 
-CFLAGS="-g -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
+CFLAGS="-g -Wall -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
     --with-netcdf-include=/sw/include \

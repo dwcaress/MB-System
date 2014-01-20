@@ -496,7 +496,8 @@ int main (int argc, char **argv)
 	char    string[500];
 
 	int	read_data;
-	double	speed_apparent, time_d_last;
+	double	speed_apparent;
+	double	time_d_last = 0.0;
 	int	val_int;
 	double	val_double;
 	int	ix, iy;

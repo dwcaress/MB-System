@@ -903,9 +903,9 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		    }
 		if (depthmax > 0.0)
-		    store->depth_scale = 0.001 * (float)(MAX((int) (1 + depthmax / 30.0), 1));
+		    store->depth_scale = 0.001 * (float)(MAX((int) (depthmax / 30.0), 1));
 		if (distmax > 0.0)
-		    store->distance_scale = 0.001 * (float)(MAX((int) (1 + distmax / 30.0), 1));
+		    store->distance_scale = 0.001 * (float)(MAX((int) (distmax / 30.0), 1));
 		if (ssmax > 0.0)
 			{
 			store->ss_scalepower = (mb_s_char)(log2(ssmax / 32767.0)) + 1;
