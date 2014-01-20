@@ -108,7 +108,7 @@ int main (int argc, char **argv)
 	/* output format list controls */
 	char	list[MAX_OPTIONS];
 	int	n_list;
-	double	distance_total;
+	double	distance_total = 0.0;
 	int	time_j[5];
 	int	mblist_next_value = MB_NO;
 	int	invert_next_value = MB_NO;

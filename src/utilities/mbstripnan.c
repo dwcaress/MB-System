@@ -41,6 +41,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#if defined(_WIN32) && !defined(isnan)
+#	define isnan(x) _isnan(x)
+#endif
+
 /*--------------------------------------------------------------------*/
 /*
  * Read double x,y,z on stdin and send to stdout all but NaNs

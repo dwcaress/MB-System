@@ -160,7 +160,7 @@ static double	z_mean;
 static double	z_scale = 1.0;		/* Root mean square range of z after removing planar trend  */
 static double	r_z_scale = 1.0;	/* reciprocal of z_scale  */
 static double	plane_c0, plane_c1, plane_c2;	/* Coefficients of best fitting plane to data  */
-static double small;			/* Let data point coincide with node if distance < small */
+static double smalldistance;		/* Let data point coincide with node if distance < smalldistance */
 static float *u;			/* Pointer to grid array */
 static char *iu;			/* Pointer to grid info array */
 static char mode_type[2] = {'I','D'};	/* D means include data points when iterating
@@ -595,7 +595,7 @@ void find_nearest_point()
 	double b0, b1, b2, b3, b4, b5;
 
 	last_index = -1;
-	small = 0.05 * ((grid_xinc < grid_yinc) ? grid_xinc : grid_yinc);
+	smalldistance = 0.05 * ((grid_xinc < grid_yinc) ? grid_xinc : grid_yinc);
 
 	for (i = 0; i < nx; i += grid)	/* Reset grid info */
 		for (j = 0; j < ny; j += grid)
@@ -612,7 +612,7 @@ void find_nearest_point()
 	 		y0 = ymin + block_j*grid_yinc;
 	 		dx = (data[k].x - x0)*r_grid_xinc;
 	 		dy = (data[k].y - y0)*r_grid_yinc;
-	 		if (fabs(dx) < small && fabs(dy) < small) {
+	 		if (fabs(dx) < smalldistance && fabs(dy) < smalldistance) {
 	 			iu[iu_index] = 5;
 	 			u[iu_index] = data[k].z;
 	 		}

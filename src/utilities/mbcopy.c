@@ -360,10 +360,10 @@ int main (int argc, char **argv)
 	double	heave;
 	int	mstatus;
 	int	merror = MB_ERROR_NO_ERROR;
-	int	mkind;
-	int	mpings;
+	int	mkind = MB_DATA_NONE;
+	int	mpings = 0;
 	int	mtime_i[7];
-	double	mtime_d;
+	double	mtime_d = 0.0;
 	double	mnavlon;
 	double	mnavlat;
 	double	mspeed;
@@ -3132,7 +3132,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 		fprintf(stderr,"dbg2       ombio_ptr:  %p\n",(void *)ombio_ptr);
 		fprintf(stderr,"dbg2       istore:     %p\n",(void *)istore);
 		fprintf(stderr,"dbg2       ostore:     %p\n",(void *)ostore);
-		fprintf(stderr,"dbg2       kind:       %p\n",(void *)istore->kind);
+		fprintf(stderr,"dbg2       kind:       %d\n",istore->kind);
 		}
 
 	/* copy the data  */

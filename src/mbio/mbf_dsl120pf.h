@@ -156,7 +156,7 @@ struct mbf_dsl120pf_struct
    	char	swapped;		/* data,header: 00-PC 01-SunHdr 11-Sun*/
 	int	tv_sec;			/* seconds */
 	int	tv_usec;		/* and microseconds */
-   	short	interface;	        /* digital interface: 0,1,or 2 -
+   	short	digitalinterface;	/* digital interface: 0,1,or 2 -
 					 * must be specified in config file */
     	short reserved[5];
 

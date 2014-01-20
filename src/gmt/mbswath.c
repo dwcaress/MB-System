@@ -465,7 +465,7 @@ int main (int argc, char **argv)
 	int	save_new;
 	int	first;
 	int	*npings;
-	int	nping_read;
+	int	nping_read = 0;
 	int	nplot;
 	double	amplog;
 	double	mtodeglon, mtodeglat;

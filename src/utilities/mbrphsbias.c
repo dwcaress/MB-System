@@ -106,7 +106,7 @@ static char rcs_id[] = "$Id$";
 int main (int argc, char **argv)
 {
 	char program_name[] = "MBrphsbias";
-	char help_message[] =  "MBrphsbias identifies and flags artifacts in swath bathymetry data";
+	char help_message[] =  "MBrphsbias analyzes sonar soundings to solve for bias parameters associated with the attitude sensors and first order speed of sound.\n";
 	char usage_message[] = "mbrphsbias [-Fformat -Iinfile -Rwest/east/south/north -Sbinsize	\n\t-B]";
 	extern char *optarg;
 	int	errflg = 0;
@@ -405,7 +405,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"Binsize: %f meters\n",binsize);
 		fprintf(stderr,"  longitude: %f\n",dx);
 		fprintf(stderr,"  latitude:  %f\n",dy);
-		fprintf(stderr,"Grid dimensions:\n",beams_tot);
+		fprintf(stderr,"Grid dimensions:\n");
 		fprintf(stderr,"  longitude: %d\n",nx);
 		fprintf(stderr,"  latitude:  %d\n",ny);
 		fprintf(stderr,"-------------------------\n");

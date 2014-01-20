@@ -158,7 +158,7 @@ int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->swapped = 3;
 	store->tv_sec = 0;
 	store->tv_usec = 0;
-	store->interface = 0;
+	store->digitalinterface = 0;
 	for (i=0;i<5;i++)
 		store->reserved[i] = 0;
 	store->bat_type = DSL_BATH;

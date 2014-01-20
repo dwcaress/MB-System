@@ -50,8 +50,6 @@
 #ifndef _WIN32
 #include <rpc/types.h>
 #include <rpc/xdr.h>
-#else
-#include <xdr_win32.h>
 #endif
 
 #ifdef __LP64__

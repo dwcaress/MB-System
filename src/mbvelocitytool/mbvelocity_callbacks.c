@@ -875,7 +875,7 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 
     /* local definitions */
     int	selected;
-    int	status;
+    int	status = 0;
     char    format_text[10];
     char    *input_file_ptr;
 

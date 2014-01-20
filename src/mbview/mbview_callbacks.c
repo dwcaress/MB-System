@@ -3883,7 +3883,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    	shade_mode = data->primary_shade_mode;
 		    else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
 		    	shade_mode = data->slope_shade_mode;
-		    else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+		    else /* if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) */
 		    	shade_mode = data->secondary_shade_mode;
 
 		    /* handle shading by illumination */
@@ -4035,7 +4035,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    	shade_mode = data->primary_shade_mode;
 		    else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
 		    	shade_mode = data->slope_shade_mode;
-		    else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+		    else /* if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) */
 		    	shade_mode = data->secondary_shade_mode;
 
 		    /* handle shading by illumination */

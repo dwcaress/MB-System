@@ -164,6 +164,7 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr);
+int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr);
@@ -1887,106 +1888,112 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 			&mbv_primary_data);
 
 		/* set parameters */
-		mbv_display_mode = MBV_DISPLAY_2D;
-		mbv_mouse_mode = MBV_MOUSE_MOVE;
-		mbv_grid_mode = MBV_GRID_VIEW_PRIMARY;
-		mbv_primary_histogram = MB_NO;
-		mbv_primaryslope_histogram = MB_NO;
-		mbv_secondary_histogram = MB_NO;
-		mbv_primary_shade_mode = MBV_SHADE_VIEW_SLOPE;
-		mbv_slope_shade_mode = MBV_SHADE_VIEW_NONE;
-		mbv_secondary_shade_mode = MBV_SHADE_VIEW_NONE;
-		mbv_grid_contour_mode = MBV_VIEW_OFF;
-		mbv_site_view_mode = MBV_VIEW_OFF;
-		mbv_route_view_mode = MBV_VIEW_OFF;
-		mbv_nav_view_mode = MBV_VIEW_OFF;
-		mbv_navdrape_view_mode = MBV_VIEW_OFF;
-		mbv_vector_view_mode = MBV_VIEW_OFF;
-		mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
-		mbv_primary_colortable_mode = MBV_COLORTABLE_NORMAL;
-		mbv_primary_colortable_min = mbv_primary_min;
-		mbv_primary_colortable_max = mbv_primary_max;
-		mbv_slope_colortable = MBV_COLORTABLE_HAXBY;
-		mbv_slope_colortable_mode = MBV_COLORTABLE_REVERSED;
-		mbv_slope_colortable_min = 0.0;
-		mbv_slope_colortable_max = 0.5;
-		mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
-		mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
-		mbv_secondary_colortable_min = 0.0;
-		mbv_secondary_colortable_max = 0.0;
-		mbv_exageration = 1.0;
-		mbv_modelelevation3d = 90.0;
-		mbv_modelazimuth3d = 0.0;
-		mbv_viewelevation3d = 90.0;
-		mbv_viewazimuth3d = 0.0;
-		mbv_illuminate_magnitude = 5.0;
-		mbv_illuminate_elevation = 30.0;
-		mbv_illuminate_azimuth = 90.0;
-		mbv_slope_magnitude = 1.0;
-		mbv_overlay_shade_magnitude = 1.0;
-		mbv_overlay_shade_center = 0.0;
-		mbv_overlay_shade_mode = MBV_COLORTABLE_NORMAL;
-		mbv_contour_interval
-			= pow(10.0, floor(log10(mbv_primary_max
-						- mbv_primary_min)) - 1.0);
-
-		/* set the display projection */
-		/* if grid projected then use the same projected coordinate system by default */
-		if (mbv_primary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
-			{
-			mbv_display_projection_mode = mbv_primary_grid_projection_mode;
-			strcpy(mbv_display_projection_id,mbv_primary_grid_projection_id);
-			}
-
-		/* else if grid geographic and covers much of the world use spheroid */
-		else if (mbv_primary_xmax - mbv_primary_xmin > 15.0
-			|| mbv_primary_ymax - mbv_primary_ymin > 15.0)
-			{
-			mbv_display_projection_mode = MBV_PROJECTION_SPHEROID;
-			sprintf(mbv_display_projection_id, "SPHEROID");
-			}
-
-		/* else if grid geographic then use appropriate UTM zone for non-polar grids */
-		else if (mbv_primary_ymax > -80.0
-			&& mbv_primary_ymin < 84.0)
-			{
-			mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
-			reference_lon = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
-			if (reference_lon > 180.0)
-				reference_lon -= 360.0;
-			utmzone = (int)(((reference_lon + 183.0)
-					/ 6.0) + 0.5);
-			if (0.5 * (mbv_primary_ymin + mbv_primary_ymax) >= 0.0)
-				projectionid = 32600 + utmzone;
-			else
-				projectionid = 32700 + utmzone;
-			sprintf(mbv_display_projection_id, "epsg%d", projectionid);
-			}
-
-		/* else if grid geographic and more northerly than 84 deg N then use
-			North Univeral Polar Stereographic Projection */
-		else if (mbv_primary_ymin > 84.0)
-			{
-			mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
-			projectionid = 32661;
-			sprintf(mbv_display_projection_id, "epsg%d", projectionid);
-			}
-
-		/* else if grid geographic and more southerly than 80 deg S then use
-			South Univeral Polar Stereographic Projection */
-		else if (mbv_primary_ymax < 80.0)
-			{
-			mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
-			projectionid = 32761;
-			sprintf(mbv_display_projection_id, "epsg%d", projectionid);
-			}
-
-		/* else just use geographic */
-		else
-			{
-			mbv_display_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-			sprintf(mbv_display_projection_id, "epsg%d", GCS_WGS_84);
-			}
+                if (status == MB_SUCCESS)
+                        {
+                        mbv_display_mode = MBV_DISPLAY_2D;
+                        mbv_mouse_mode = MBV_MOUSE_MOVE;
+                        mbv_grid_mode = MBV_GRID_VIEW_PRIMARY;
+                        mbv_primary_histogram = MB_NO;
+                        mbv_primaryslope_histogram = MB_NO;
+                        mbv_secondary_histogram = MB_NO;
+                        mbv_primary_shade_mode = MBV_SHADE_VIEW_SLOPE;
+                        mbv_slope_shade_mode = MBV_SHADE_VIEW_NONE;
+                        mbv_secondary_shade_mode = MBV_SHADE_VIEW_NONE;
+                        mbv_grid_contour_mode = MBV_VIEW_OFF;
+                        mbv_site_view_mode = MBV_VIEW_OFF;
+                        mbv_route_view_mode = MBV_VIEW_OFF;
+                        mbv_nav_view_mode = MBV_VIEW_OFF;
+                        mbv_navdrape_view_mode = MBV_VIEW_OFF;
+                        mbv_vector_view_mode = MBV_VIEW_OFF;
+                        mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
+                        mbv_primary_colortable_mode = MBV_COLORTABLE_NORMAL;
+                        mbv_primary_colortable_min = mbv_primary_min;
+                        mbv_primary_colortable_max = mbv_primary_max;
+                        mbv_slope_colortable = MBV_COLORTABLE_HAXBY;
+                        mbv_slope_colortable_mode = MBV_COLORTABLE_REVERSED;
+                        mbv_slope_colortable_min = 0.0;
+                        mbv_slope_colortable_max = 0.5;
+                        mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
+                        mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
+                        mbv_secondary_colortable_min = 0.0;
+                        mbv_secondary_colortable_max = 0.0;
+                        mbv_exageration = 1.0;
+                        mbv_modelelevation3d = 90.0;
+                        mbv_modelazimuth3d = 0.0;
+                        mbv_viewelevation3d = 90.0;
+                        mbv_viewazimuth3d = 0.0;
+                        mbv_illuminate_magnitude = 5.0;
+                        mbv_illuminate_elevation = 30.0;
+                        mbv_illuminate_azimuth = 90.0;
+                        mbv_slope_magnitude = 1.0;
+                        mbv_overlay_shade_magnitude = 1.0;
+                        mbv_overlay_shade_center = 0.0;
+                        mbv_overlay_shade_mode = MBV_COLORTABLE_NORMAL;
+                        mbv_contour_interval
+                                = pow(10.0, floor(log10(mbv_primary_max
+                                                        - mbv_primary_min)) - 1.0);
+                        }
+        
+                /* set the display projection */
+                if (status == MB_SUCCESS)
+                        {
+                        /* if grid projected then use the same projected coordinate system by default */
+                        if (mbv_primary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
+                                {
+                                mbv_display_projection_mode = mbv_primary_grid_projection_mode;
+                                strcpy(mbv_display_projection_id,mbv_primary_grid_projection_id);
+                                }
+        
+                        /* else if grid geographic and covers much of the world use spheroid */
+                        else if (mbv_primary_xmax - mbv_primary_xmin > 15.0
+                                || mbv_primary_ymax - mbv_primary_ymin > 15.0)
+                                {
+                                mbv_display_projection_mode = MBV_PROJECTION_SPHEROID;
+                                sprintf(mbv_display_projection_id, "SPHEROID");
+                                }
+        
+                        /* else if grid geographic then use appropriate UTM zone for non-polar grids */
+                        else if (mbv_primary_ymax > -80.0
+                                && mbv_primary_ymin < 84.0)
+                                {
+                                mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
+                                reference_lon = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
+                                if (reference_lon > 180.0)
+                                        reference_lon -= 360.0;
+                                utmzone = (int)(((reference_lon + 183.0)
+                                                / 6.0) + 0.5);
+                                if (0.5 * (mbv_primary_ymin + mbv_primary_ymax) >= 0.0)
+                                        projectionid = 32600 + utmzone;
+                                else
+                                        projectionid = 32700 + utmzone;
+                                sprintf(mbv_display_projection_id, "epsg%d", projectionid);
+                                }
+        
+                        /* else if grid geographic and more northerly than 84 deg N then use
+                                North Univeral Polar Stereographic Projection */
+                        else if (mbv_primary_ymin > 84.0)
+                                {
+                                mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
+                                projectionid = 32661;
+                                sprintf(mbv_display_projection_id, "epsg%d", projectionid);
+                                }
+        
+                        /* else if grid geographic and more southerly than 80 deg S then use
+                                South Univeral Polar Stereographic Projection */
+                        else if (mbv_primary_ymax < 80.0)
+                                {
+                                mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
+                                projectionid = 32761;
+                                sprintf(mbv_display_projection_id, "epsg%d", projectionid);
+                                }
+        
+                        /* else just use geographic */
+                        else
+                                {
+                                mbv_display_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
+                                sprintf(mbv_display_projection_id, "epsg%d", GCS_WGS_84);
+                                }
+                        }
 
 		/* set basic mbview view controls */
 		if (status == MB_SUCCESS)
@@ -2265,17 +2272,21 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr)
 			&mbv_secondary_data);
 
 		/* set parameters */
-		mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
-		mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
-		mbv_secondary_colortable_min = mbv_secondary_min;
-		mbv_secondary_colortable_max = mbv_secondary_max;
-		mbv_overlay_shade_magnitude = 1.0;
-		mbv_overlay_shade_center = 0.5 * (mbv_secondary_max + mbv_secondary_min);
-		mbv_overlay_shade_mode = MBV_COLORTABLE_NORMAL;
+		if (status == MB_SUCCESS)
+                        {
+                        mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
+                        mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
+                        mbv_secondary_colortable_min = mbv_secondary_min;
+                        mbv_secondary_colortable_max = mbv_secondary_max;
+                        mbv_overlay_shade_magnitude = 1.0;
+                        mbv_overlay_shade_center = 0.5 * (mbv_secondary_max + mbv_secondary_min);
+                        mbv_overlay_shade_mode = MBV_COLORTABLE_NORMAL;
+                        }
 
 		/* set more mbview control values */
 		if (status == MB_SUCCESS)
-		status = mbview_setsecondarygrid(verbose, instance,
+                        {
+                        status = mbview_setsecondarygrid(verbose, instance,
 					mbv_secondary_grid_projection_mode,
 					mbv_secondary_grid_projection_id,
 					mbv_secondary_nodatavalue,
@@ -2291,7 +2302,8 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr)
 					mbv_secondary_dy,
 					mbv_secondary_data,
 					&error);
-		mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_secondary_data, &error);
+                        mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_secondary_data, &error);
+                        }
 		if (status == MB_SUCCESS)
 		status = mbview_setsecondarycolortable(verbose, instance,
 					mbv_secondary_colortable,
@@ -5029,11 +5041,11 @@ int do_mbgrdviz_readgrd(size_t instance, char *grdfile,
 				{
 				projectionid = 32600 + utmzone;
 				}
-			else if (NorS == 'S')
+			else /* if (NorS == 'S') */
 				{
 				projectionid = 32700 + utmzone;
 				}
-				modeltype = ModelTypeProjected;
+			modeltype = ModelTypeProjected;
 			sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
 			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
 			sprintf(grid_projection_id, "epsg%d", projectionid);
@@ -5093,11 +5105,11 @@ int do_mbgrdviz_readgrd(size_t instance, char *grdfile,
 				{
 				projectionid = 32600 + utmzone;
 				}
-			else if (NorS == 'S')
+			else /* if (NorS == 'S') */
 				{
 				projectionid = 32700 + utmzone;
 				}
-				modeltype = ModelTypeProjected;
+			modeltype = ModelTypeProjected;
 			sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
 			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
 			sprintf(grid_projection_id, "epsg%d", projectionid);
@@ -5179,10 +5191,12 @@ int do_mbgrdviz_readgrd(size_t instance, char *grdfile,
     	status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * (*nxy),
     				(void **)&rawdata,&error);
     	if (status == MB_SUCCESS)
-	status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * (*nxy),
+            {
+            status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * (*nxy),
     				(void **)&usedata,&error);
-	*data = usedata;
-	if (status != MB_SUCCESS)
+            *data = usedata;
+            }
+	else
 	    {
 	    fprintf(stderr,"\nUnable to allocate memory to store data from grd file: %s\n",
 		    grdfile);
@@ -6373,7 +6387,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 				k = 1;
 			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
 				k = 2;
-			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
+			else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
 				k = 3;
 			}
 		else if (data->area.bearing >= 45.0 && data->area.bearing < 135.0)
@@ -6384,7 +6398,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 				k = 3;
 			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
 				k = 0;
-			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
+			else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
 				k = 2;
 			}
 		else if (data->area.bearing >= 135.0 && data->area.bearing < 225.0)
@@ -6395,10 +6409,10 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 				k = 2;
 			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
 				k = 1;
-			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
+			else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
 				k = 0;
 			}
-		else if (data->area.bearing >= 225.0 && data->area.bearing < 315.0)
+		else /* if (data->area.bearing >= 225.0 && data->area.bearing < 315.0) */
 			{
 			if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
 				k = 2;
@@ -6406,7 +6420,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 				k = 0;
 			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
 				k = 3;
-			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
+			else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
 				k = 1;
 			}
 		dsign = dsigna[k];

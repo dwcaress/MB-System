@@ -162,6 +162,10 @@ int mb_readgrd(int verbose, char *grdfile,
 					{
 					projectionid = 32700 + utmzone;
 					}
+				else
+					{
+					projectionid = 32600 + utmzone;
+					}
 				modeltype = ModelTypeProjected;
 				sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
 				*grid_projection_mode = MB_PROJECTION_PROJECTED;
@@ -221,9 +225,11 @@ int mb_readgrd(int verbose, char *grdfile,
     		status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
     					(void **)&rawdata, error);
     		if (status == MB_SUCCESS)
-		status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
+			{
+			status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
     					(void **)&usedata, error);
-		*data = usedata;
+			*data = usedata;
+			}
     		if (status == MB_SUCCESS && data_dzdx != NULL)
 			{
 			status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),

@@ -2012,7 +2012,7 @@ xlon, ylat, zdata, xx, yy, zz); */
 		yy = ylat / view->mtodeglat;
 		zz = data->exageration * zdata;
 		}
-	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
+	else /*if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) */
 		{
 		mbview_sphere_forward(instance, xlon, ylat, &xx, &yy, &zz);
 		effective_topography = data->exageration * (zdata - 0.5 * (data->primary_min + data->primary_max))
@@ -3180,7 +3180,7 @@ int mbview_make_histogram(
 		max = data->slope_colortable_max;
 		view->primaryslope_histogram_set = MB_YES;
 		}
-	else if (which_data == MBV_DATA_SECONDARY)
+	else /* if (which_data == MBV_DATA_SECONDARY) */
 		{
 		histogram = view->secondary_histogram;
 		min = data->secondary_colortable_min;

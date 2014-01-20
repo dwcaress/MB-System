@@ -155,7 +155,11 @@ int main (int argc, char **argv)
 	double	slopeminusmean;
 	double	rollminusmean;
 	double	r;
-	double	sum_x, sum_y, sum_xy, sum_x2, sum_y2;
+	double	sum_x = 0.0;
+	double	sum_y = 0.0;
+	double	sum_xy = 0.0;
+	double	sum_x2 = 0.0;
+	double	sum_y2 = 0.0;
 	double	mmm, bbb;
 
 	int	nrollmean;

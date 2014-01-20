@@ -186,6 +186,30 @@
 # include <rpc/xdr.h>
 #endif
 
+/* for Windows */
+#if defined(_WIN32) && (_MSC_VER < 1800)
+#	if !defined(copysign)
+#		define copysign(x,y) _copysign(x,y)
+#	endif
+#	if !defined(log2)
+#		define log2(x) (log(x) / log(2))
+#	endif
+#	if !defined(rint)
+#		define rint(x) (floor((x)+0.5))
+#	endif
+#endif
+
+#ifdef _WIN32
+#define sleep Sleep
+#define popen _popen
+#define pclose _pclose
+#define ftello ftell
+#define fseeko fseek
+#	ifndef isnan
+#		define isnan(x) _isnan(x)
+#	endif
+#endif
+
 /* MB-system version id */
 #define	MB_VERSION	VERSION
 #define	MB_BUILD_DATE	VERSION_DATE
