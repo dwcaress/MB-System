@@ -13,43 +13,6 @@
 # of 2013.
 #
 #------------------------------------------------------------------------------
-# To modify the build system...
-#------------------------------------------------------------------------------
-#
-# Edit the file "configure.ac" in the top directory and "Makefile.am" in each
-# directory and then run the following sequence of commands:
-
-# Build libtool files for AM_PROG_LIBTOOL
-libtoolize --force --copy
-aclocal
-
-# Build custom header for configure
-autoheader
-automake --add-missing --include-deps
-autoconf
-
-# To update configure files use the following:
-autoupdate
-autoreconf --force --install --warnings=all
-
-# Reset the autotools version to 2.65 to accomodate some Linux distributions
-sed -i.bak s/2\.69/2\.65/ configure.ac
-
-# When you run ./configure, a number of configure options are saved  to a
-# header file:
-#     ./src/mbio/mb_config.h
-# This file has a template:
-#     ./src/mbio/mb_config.h.in
-# This file is conditionally included by:
-#     ./src/mbio/mb_define.h
-# which is in turn included by essentially every MB-System C source file.
-# The condition under which mb_config.h is used is simply the use of the
-# configure script to generate the makefiles. If one uses the alternate
-# "install_makefiles" build system, then an alternate header file named
-#     ./src/mbio/mb_config2.h
-# is used instead.
-#
-#------------------------------------------------------------------------------
 # To use the build system...
 #------------------------------------------------------------------------------
 # To generate the makefiles needed to build MB-System, run ./configure
@@ -90,7 +53,7 @@ make uninstall (to remove a previously installed version)
 # Configure script command line examples:
 #------------------------------------------------------------------------------
 
-# Build in place:
+# Build in place on a Mac 10.9 with prerequisites installed through Fink in /sw:
 CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
@@ -105,7 +68,7 @@ CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 
 #------------------------------------------------------------------------------
 
-# Build in /usr/local:
+# Build in /usr/local on a Mac 10.9 with prerequisites installed through Fink in /sw:
 CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 sudo ./configure \
     --prefix=/usr/local \
@@ -120,7 +83,7 @@ sudo ./configure \
 
 #------------------------------------------------------------------------------
 
-# Build in ~/buildtest
+# Build in ~/buildtest on a Mac 10.9 with prerequisites installed through Fink in /sw:
 CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/buildtest \
@@ -133,56 +96,6 @@ CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib
 
-#------------------------------------------------------------------------------
-#
-# Full autoconf and build sequence
-#   - Do this in the development tree prior to a commit to the source archive or
-#     prior to making a source distribution
-#
-# First clean up old installation and build
-make uninstall
-make clean
-
-# Reconstruct the build system, and then use it to build in place
-# in my personal development tree
-libtoolize --force --copy
-aclocal
-autoheader
-automake --add-missing --include-deps
-autoconf
-autoupdate
-
-autoreconf --force --install --warnings=all
-
-# Force configure.ac to reduce the automake version requirement from 2.69 to 2.65
-sed -i.bak s/2\.69/2\.65/ configure.ac
-
-CFLAGS="-g -Wall -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
-./configure \
-    --prefix=/Users/caress/sandbox/mbsystem \
-    --with-netcdf-include=/sw/include \
-    --with-netcdf-lib=/sw/lib \
-    --with-proj-include=/sw/include \
-    --with-proj-lib=/sw/lib \
-    --with-gmt-include=/sw/include \
-    --with-gmt-lib=/sw/lib \
-    --with-fftw-include=/sw/include \
-    --with-fftw-lib=/sw/lib \
-    --with-motif-include=/sw/include \
-    --with-motif-lib=/sw/lib \
-    --with-otps-dir=/usr/local/OTPS2
-#    --without-gsf \
-#    --enable-bundledproj
-
-make
-
-make install
-
-cd src/htmlsrc ; make_mbhtml ; cd ../..
-
-make install
-
-#
 #------------------------------------------------------------------------------
 
 # Install on Ubuntu 12.04.02LTS using only apt-get for prerequisites
@@ -231,5 +144,92 @@ Cflags: -I${includedir}
 # into /usr/local/bin, /usr/local/lib, etc with the simple make commands:
 make
 sudo make install
+#
+#------------------------------------------------------------------------------
+# To modify the build system...
+#------------------------------------------------------------------------------
+#
+# Edit the file "configure.ac" in the top directory and "Makefile.am" in each
+# directory and then run the following sequence of commands:
 
+# Build libtool files for AM_PROG_LIBTOOL
+libtoolize --force --copy
+aclocal
+
+# Build custom header for configure
+autoheader
+automake --add-missing --include-deps
+autoconf
+
+# To update configure files use the following:
+autoupdate
+autoreconf --force --install --warnings=all
+
+# Reset the autotools version to 2.65 to accomodate some Linux distributions
+sed -i.bak s/2\.69/2\.65/ configure.ac
+
+# When you run ./configure, a number of configure options are saved  to a
+# header file:
+#     ./src/mbio/mb_config.h
+# This file has a template:
+#     ./src/mbio/mb_config.h.in
+# This file is conditionally included by:
+#     ./src/mbio/mb_define.h
+# which is in turn included by essentially every MB-System C source file.
+# The condition under which mb_config.h is used is simply the use of the
+# configure script to generate the makefiles. If one uses the alternate
+# "install_makefiles" build system, then an alternate header file named
+#     ./src/mbio/mb_config2.h
+# is used instead.
+#
+#------------------------------------------------------------------------------
+#
+# Full autoconf and build sequence after modifying the build system
+#   - Do this in the development tree prior to a commit to the source archive or
+#     prior to making a source distribution
+#
+# First clean up old installation and build
+make uninstall
+make clean
+
+# Reconstruct the build system, and then use it to build in place
+# in my personal development tree
+libtoolize --force --copy
+aclocal
+autoheader
+automake --add-missing --include-deps
+autoconf
+autoupdate
+
+autoreconf --force --install --warnings=all
+
+# Force configure.ac to reduce the automake version requirement from 2.69 to 2.65
+sed -i.bak s/2\.69/2\.65/ configure.ac
+
+CFLAGS="-g -Wall -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
+./configure \
+    --prefix=/Users/caress/sandbox/mbsystem \
+    --with-netcdf-include=/sw/include \
+    --with-netcdf-lib=/sw/lib \
+    --with-proj-include=/sw/include \
+    --with-proj-lib=/sw/lib \
+    --with-gmt-include=/sw/include \
+    --with-gmt-lib=/sw/lib \
+    --with-fftw-include=/sw/include \
+    --with-fftw-lib=/sw/lib \
+    --with-motif-include=/sw/include \
+    --with-motif-lib=/sw/lib \
+    --with-otps-dir=/usr/local/OTPS2
+#    --without-gsf \
+#    --enable-bundledproj
+
+make
+
+make install
+
+cd src/htmlsrc ; make_mbhtml ; cd ../..
+
+make install
+
+#
 #------------------------------------------------------------------------------
