@@ -169,7 +169,11 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.4.2158 (January 18, 2014)
+-----> 5.4.2161 (January 21, 2014)
+
+MBedit: fixed use of beamflag setting macros that were messed up yesterday.
+
+-----> 5.4.2160 (January 20, 2014)
 
 General: fixed many compiler warnings.
 General: implemented changes suggested by Joaquim Luis in order to enable
