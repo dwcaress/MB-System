@@ -562,10 +562,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose, void *mbio_ptr, void *store_ptr
 		/* set time */
 		pulse->time_d = store->time_d + 0.000001 * pulse->pulse_time_offset;
 		
-		/* fix error with forward_track_angle */
-		if (store->file_version == 1 && store->sub_version == 0)
-			pulse->forward_track_angle = 0.0;
-		
 		/* set navigation and attitude for pulses */
 		pulse->heading = store->heading;
 		pulse->navlon = store->navlon;

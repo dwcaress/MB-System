@@ -1,4 +1,4 @@
-man_MANS = geod.1 \
+man_MANS =  \
 mbhsdump.1 \
 mb7k2jstar.1 \
 mb7k2ss.1 \
@@ -76,7 +76,13 @@ mbsvplist.1 \
 mbswath.1 \
 mbsystem.1 \
 mbtime.1 \
-mbvelocitytool.1 \
-proj.1
+mbvelocitytool.1
 
-EXTRA_DIST = $(man_MANS)
+if BUILD_PROJ
+  man_PROJ = proj.1 geod.1 
+endif
+
+
+
+
+EXTRA_DIST = $(man_MANS) $(man_PROJ)

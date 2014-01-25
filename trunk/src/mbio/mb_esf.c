@@ -579,31 +579,29 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 			    {
 			    /* apply edit */
 			    if (esf->edit[j].action == MBP_EDIT_FLAG
-				&& beamflag[i] != MB_FLAG_NULL)
+				&& !mb_beam_check_flag_null(beamflag[i]))
 				{
 /*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_FLAG  flag:%d ",j,i,beamflag[i]);*/
-				beamflag[i]
-				    = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				beamflag[i] = mb_beam_set_flag_manual(beamflag[i]);
 				esf->edit[j].use++;
 				apply = MB_YES;
 				action = esf->edit[j].action;
 /*fprintf(stderr," %d\n",beamflag[i]);*/
 				}
 			    else if (esf->edit[j].action == MBP_EDIT_FILTER
-				&& beamflag[i] != MB_FLAG_NULL)
+				&& !mb_beam_check_flag_null(beamflag[i]))
 				{
 /*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_FILTER\n",j,i);*/
-				beamflag[i]
-				    = MB_FLAG_FLAG + MB_FLAG_FILTER;
+				beamflag[i] = mb_beam_set_flag_filter(beamflag[i]);
 				esf->edit[j].use++;
 				apply = MB_YES;
 				action = esf->edit[j].action;
 				}
 			    else if (esf->edit[j].action == MBP_EDIT_UNFLAG
-				&& beamflag[i] != MB_FLAG_NULL)
+				&& !mb_beam_check_flag_null(beamflag[i]))
 				{
 /*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_UNFLAG\n",j,i);*/
-				beamflag[i] = MB_FLAG_NONE;
+				beamflag[i] = mb_beam_set_flag_none(beamflag[i]);
 				esf->edit[j].use++;
 				apply = MB_YES;
 				action = esf->edit[j].action;
@@ -611,7 +609,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 			    else if (esf->edit[j].action == MBP_EDIT_ZERO)
 				{
 /*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_ZERO\n",j,i);*/
-				beamflag[i] = MB_FLAG_NULL;
+				beamflag[i] = mb_beam_set_flag_null(beamflag[i]);
 				esf->edit[j].use++;
 				apply = MB_YES;
 				action = esf->edit[j].action;

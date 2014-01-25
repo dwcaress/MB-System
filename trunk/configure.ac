@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.4.2161],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.4.2162],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "21 January 2014", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "24 January 2014", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -806,9 +806,9 @@ AM_CONDITIONAL([BUILD_GL], [test "$GOT_GL" = yes])
 dnl variables for shared data
 mbsystemdatadir="$datadir/$PACKAGE"
 AC_SUBST(mbsystemdatadir)
-mbsystemhtmldir="$datadir/doc/$PACKAGE/html"
+mbsystemhtmldir="$docdir/html"
 AC_SUBST(mbsystemhtmldir)
-mbsystempsdir="$datadir/doc/$PACKAGE/ps"
+mbsystempsdir="$docdir/ps"
 AC_SUBST(mbsystempsdir)
 
 AS_ECHO([" "])
@@ -879,6 +879,21 @@ else
 	AS_ECHO(["Building using system libproj library, not bundled proj package"])
 fi
 
+AS_ECHO(["------------------------------------------------------------------------------"])
+AS_ECHO(["Key Variables:"])
+AS_ECHO(["    prefix:                   ${prefix}"])
+AS_ECHO(["    exec_prefix:              ${exec_prefix}"])
+AS_ECHO(["    datarootdir:              ${datarootdir}"])
+AS_ECHO(["    PACKAGE_TARNAME:          ${PACKAGE_TARNAME}"])
+AS_ECHO(["------------------------------------------------------------------------------"])
+AS_ECHO(["Installation Locations:"])
+AS_ECHO(["    executables:              ${bindir}"])
+AS_ECHO(["    libraries:                ${libdir}"])
+AS_ECHO(["    header files:             ${includedir}"])
+AS_ECHO(["    data files:               ${mbsystemdatadir}"])
+AS_ECHO(["    man pages:                ${mandir}"])
+AS_ECHO(["    Html documentation:       ${mbsystemhtmldir}"])
+AS_ECHO(["    Postscript documentation: ${mbsystempsdir}"])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["See config.log for details of configure results"])
 AS_ECHO(["See INSTALL for further build instructions and hints"])

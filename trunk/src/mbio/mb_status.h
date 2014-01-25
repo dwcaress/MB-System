@@ -415,7 +415,7 @@ static char *unknown_notice_msg[] =
 #define mb_beam_check_flag_gt_2x_iho(F)		((int)((F & MB_FLAG_GT_2X_IHO) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_footprint(F)		((int)((F & MB_FLAG_FOOTPRINT) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_sonar(F)		((int)((F & MB_FLAG_SONAR    ) && (F & MB_FLAG_FLAG)))
-#define mb_beam_set_flag_null(F)		(MB_FLAG_NULL)
+#define mb_beam_set_flag_null(F)		(0x01)
 #define mb_beam_set_flag_none(F)		(0x00)
 #define mb_beam_set_flag_manual(F)		(F | 0x05)
 #define mb_beam_set_flag_filter(F)		(F | 0x09)
