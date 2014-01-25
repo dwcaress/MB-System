@@ -238,7 +238,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		*nss = 0;
 		for (i=0;i<mb_io_ptr->beams_bath_max;i++)
 			{
-			beamflag[i] = MB_FLAG_NULL;
+			beamflag[i] = mb_beam_set_flag_null(beamflag[i]);
 			bath[i] = 0.0;
 			bathacrosstrack[i] = 0.0;
 			bathalongtrack[i] = 0.0;

@@ -1723,7 +1723,7 @@ fprintf(stderr,"do_mbeditviz_update_gui status:%d\n", mbev_status);
 				ping = &(file->pings[j]);
 				for (k=0;k<ping->beams_bath;k++)
 					{
-					if (ping->beamflag[k] != MB_FLAG_NULL)
+					if (!mb_beam_check_flag_null(ping->beamflag[k]))
 						mbev_num_soundings_loaded ++;
 					}
 				}

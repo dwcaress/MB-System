@@ -31,24 +31,52 @@ make uninstall (to remove a previously installed version)
 #------------------------------------------------------------------------------
 # Configure script command line options:
 #------------------------------------------------------------------------------
-    --prefix=install      - location for mbsystem (/usr/local/mbsystem)"])
-    --with-netcdf-lib     - location of NetCDF libs"])
-    --with-netcdf-include - location of NetCDF headers"])
-    --with-proj-lib       - location of PROJ libs"])
-    --with-proj-include   - location of PROJ headers"])
-    --with-gmt-lib        - location of GMT libs"])
-    --with-gmt-include    - location of GMT headers"])
-    --with-fftw-lib       - location of FFTW3 libs (optional)"])
-    --with-fftw-include   - location of FFTW3 headers (optional)"])
-    --with-motif-lib      - location of Motif libs (optional)"])
-    --with-motif-include  - location of Motif headers (optional)"])
-    --with-opengl-lib     - location of OpenGL libs (optional)"])
-    --with-opengl-include - location of OpenGL headers (optional)"])
-    --with-otps-dir       - location of OTPS installation (optional)"])
-    --without-gsf         - build without including or supporting GSF"])
-    --enable-bundledproj  - build using bundled proj package - the
-				default is to link with libproj"])
-                                
+#   Installation location:
+#------------------------
+#    --prefix              - This is the common installation prefix for all files.
+#                            If exec_prefix is defined to a different value, prefix
+#                            is used only for architecture-independent files.
+#                            [Default: /usr/local]
+#    --exec_prefix         - The installation prefix for architecture-dependent files.
+#                            By default it's the same as prefix. You should avoid
+#                            installing anything directly to exec_prefix. However,
+#                            the default value for directories containing
+#                            architecture-dependent files should be relative to
+#                            exec_prefix.
+#                            [Default: ${prefix} ==> /usr/local]
+#    --datarootdir         - The root of the directory tree for read-only architecture-independent data files.
+#                            [Default: ${exec_prefix}/share ==> /usr/local/share]
+#    --bindir              - The directory for installing executables that users run.
+#                            [Default: ${exec_prefix}/bin ==> /usr/local/bin]
+#    --libdir              - The directory for installing object code libraries.
+#                            [Default: ${exec_prefix}/lib ==> /usr/local/lib]
+#    --includedir          - The directory for installing C header files.
+#                            [Default: ${exec_prefix}/include ==> /usr/local/include]
+#------------------------
+#   Prerequisite location:
+#------------------------
+#    --with-netcdf-lib     - location of NetCDF libs
+#    --with-netcdf-include - location of NetCDF headers
+#    --with-proj-lib       - location of PROJ libs
+#    --with-proj-include   - location of PROJ headers
+#    --with-gmt-lib        - location of GMT libs
+#    --with-gmt-include    - location of GMT headers
+#    --with-fftw-lib       - location of FFTW3 libs 
+#    --with-fftw-include   - location of FFTW3 headers 
+#    --with-motif-lib      - location of Motif libs 
+#    --with-motif-include  - location of Motif headers 
+#    --with-opengl-lib     - location of OpenGL libs 
+#    --with-opengl-include - location of OpenGL headers 
+#    --with-otps-dir       - location of OTPS installation 
+#------------------------
+#   Installation option:
+#------------------------
+#    --without-gsf         - build without including or supporting GSF
+#                            The default is to build the bundled 
+#                                gsf library as libmbgsf and link with it
+#    --enable-bundledproj  - build using bundled proj package - the
+#				default is to link with libproj
+#                                
 #------------------------------------------------------------------------------
 # Configure script command line examples:
 #------------------------------------------------------------------------------

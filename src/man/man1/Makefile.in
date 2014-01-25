@@ -249,7 +249,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-man_MANS = geod.1 \
+man_MANS = \
 mbhsdump.1 \
 mb7k2jstar.1 \
 mb7k2ss.1 \
@@ -327,10 +327,10 @@ mbsvplist.1 \
 mbswath.1 \
 mbsystem.1 \
 mbtime.1 \
-mbvelocitytool.1 \
-proj.1
+mbvelocitytool.1
 
-EXTRA_DIST = $(man_MANS)
+@BUILD_PROJ_TRUE@man_PROJ = proj.1 geod.1 
+EXTRA_DIST = $(man_MANS) $(man_PROJ)
 all: all-am
 
 .SUFFIXES:

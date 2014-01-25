@@ -1,4 +1,8 @@
-man_MANS = mbio.3  pj_init.3
+man_MANS = mbio.3  
 
-EXTRA_DIST = $(man_MANS)
+if BUILD_PROJ
+  man_PROJ = pj_init.3 
+endif
+
+EXTRA_DIST = $(man_MANS) $(man_PROJ)
 

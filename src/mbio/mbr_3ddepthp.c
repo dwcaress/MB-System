@@ -495,7 +495,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	size_t	read_len;
 	size_t	index;
 	unsigned short magic_number;
-	unsigned int *newscancheck;
+	unsigned int *newscancheck, newscancheckvalue;
 	int	done;
 	int	*need_parameter;
 	int	i;
@@ -636,6 +636,9 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* if read ok then get values */
 			if (status == MB_SUCCESS)
 				{
+				newscancheck = (unsigned int *) buffer;
+				newscancheckvalue = *newscancheck;
+				
 				store->current_scan++;
 				index = 0;
 				store->record_id = MBF_3DDEPTHP_RECORD_RAWLIDAR;
@@ -647,6 +650,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->minutes = (mb_u_char) buffer[index]; index++;
 				store->seconds = (mb_u_char) buffer[index]; index++;
 				mb_get_binary_int(MB_YES, (void *) &buffer[index], &(store->nanoseconds)); index += 4;
+//fprintf(stderr,"DATE: %d %d %d  %d  %d %d %d  %d\n",store->year,store->month,store->day,store->days_since_jan_1,store->hour,store->minutes,store->seconds,store->nanoseconds);
 				
 				/* fix timestamp problem with the original data files */
 				if (store->year == 113 && store->month == 11)
@@ -678,7 +682,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						status = MB_SUCCESS;
 						*error = MB_ERROR_NO_ERROR;
 						}
-					else if (*newscancheck == 0x040B0071)
+					else if (*newscancheck == newscancheckvalue)
 						{
 						done = MB_YES;
 						mb_io_ptr->save2 = MB_YES;

@@ -2581,6 +2581,7 @@ store->MSS_table_altitude_sort[nbathsort/2]); */
 		/* loop over raw sidescan putting each raw sample into the binning arrays */
 		/* get acrosstrack distance versus range table from bathymetry */
 		nrangetable = 0;
+		irangenadir = 0;
 		acrosstracktablemin = 99999.99;
 		for (i=0;i<store->RMB_num_beams;i++)
 			{
