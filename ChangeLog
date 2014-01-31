@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.4.2163       January 31, 2014
   Version 5.4.2162       January 24, 2014
 * Version 5.4.2159       January 18, 2014
   Version 5.4.2158       January 18, 2014
@@ -169,10 +170,22 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2163 (January 31, 2014)
+
+Format 71 (MBF_MBLDEOIH): fixed a recently introduced error in scaling of
+bathymetry values. This error impacts the fbt files, and consequently will
+mess up bathymetry gridding and plotting. It's important to update installations
+to 5.4.2163.
+
+MBextractsegy: Fixed so correct navigation is inserted in both the source and
+group position fields in the segy traceheader.
+
 -----> 5.4.2162 (January 24, 2014)
 
 Format 88 (MBF_RESON7KR): fixed crash when generating sidescan from pings with no valid beams.
+
 Format 201 (MBF_HYSWEEP1): fixed crash when generating sidescan from pings with no valid beams.
+
 Build system: Altered so the configure script works with standard options.
 
 -----> 5.4.2161 (January 21, 2014)
@@ -182,6 +195,7 @@ MBedit: fixed use of beamflag setting macros that were messed up yesterday.
 -----> 5.4.2160 (January 20, 2014)
 
 General: fixed many compiler warnings.
+
 General: implemented changes suggested by Joaquim Luis in order to enable
 building MB-System on Windows systems.
 

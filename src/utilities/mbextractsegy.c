@@ -1080,6 +1080,8 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 		    /* set nav and heading using most recent survey data */
 		    segytraceheader.src_long = (int)(lastlon * 360000.0);
 		    segytraceheader.src_lat = (int)(lastlat * 360000.0);
+		    segytraceheader.grp_long = (int)(lastlon * 360000.0);
+		    segytraceheader.grp_lat = (int)(lastlat * 360000.0);
 		    segytraceheader.heading = lastheading;
 		    segytraceheader.roll = roll;
 		    segytraceheader.pitch = pitch;
