@@ -903,9 +903,9 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		    }
 		if (depthmax > 0.0)
-		    store->depth_scale = 0.001 * (float)(MAX((int) (depthmax / 30.0), 1));
+		    store->depth_scale = 0.001 * (float)(MAX((depthmax / 30.0), 1.0));
 		if (distmax > 0.0)
-		    store->distance_scale = 0.001 * (float)(MAX((int) (distmax / 30.0), 1));
+		    store->distance_scale = 0.001 * (float)(MAX((distmax / 30.0), 1.0));
 		if (ssmax > 0.0)
 			{
 			store->ss_scalepower = (mb_s_char)(log2(ssmax / 32767.0)) + 1;
@@ -928,10 +928,20 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->beams_bath = nbath;
 		for (i=0;i<nbath;i++)
 			{
-			store->beamflag[i] = beamflag[i];
-			store->bath[i] = (bath[i] - store->sonardepth) / store->depth_scale;
-			store->bath_acrosstrack[i] = bathacrosstrack[i] / store->distance_scale;
-			store->bath_alongtrack[i] = bathalongtrack[i] / store->distance_scale;
+			if (beamflag[i] != MB_FLAG_NULL)
+				{
+				store->beamflag[i] = beamflag[i];
+				store->bath[i] = (bath[i] - store->sonardepth) / store->depth_scale;
+				store->bath_acrosstrack[i] = bathacrosstrack[i] / store->distance_scale;
+				store->bath_alongtrack[i] = bathalongtrack[i] / store->distance_scale;
+				}
+			else
+				{
+				store->beamflag[i] = beamflag[i];
+				store->bath[i] = 0;
+				store->bath_acrosstrack[i] = 0;
+				store->bath_alongtrack[i] = 0;
+				}
 			}
 		store->beams_amp = namp;
 		for (i=0;i<namp;i++)
