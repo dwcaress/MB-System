@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:02 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:37 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -330,8 +336,8 @@ BP
 . If the compressed data \214le does not e)3.53 F 1.029(xist then)-.15 F
 ('.grd' will be appended to)144 144 Q F2(bath_\214le)2.5 E F0
 (and it will be used, if it e)2.5 E(xists.)-.15 E/F3 10/Times-Bold@0 SF
-(\255tvdir)108 172.8 Q F2(tvpar)9.19 E(ent)-.37 E F0 1.535(The T)144
-196.8 R(erraV)-.7 E 1.535(ision tileset destination directory)-.6 F
+(\255tvdir)108 172.8 Q F2(tvpar)144 172.8 Q(ent)-.37 E F0 1.535(The T)
+144 196.8 R(erraV)-.7 E 1.535(ision tileset destination directory)-.6 F
 6.535(.A)-.65 G 1.536(subdirectory named)-2.5 F F2(bath_\214le)4.036 E
 F0 1.536(\(without the .grd)4.036 F -.15(ex)144 208.8 S
 (tension\) will be created here.).15 E F3(\255vrmldir)108 225.6 Q F2
@@ -340,7 +346,7 @@ F0 1.536(\(without the .grd)4.036 F -.15(ex)144 208.8 S
 1.669(subdirectory named)-2.5 F F2(bath_\214le)4.169 E F0 1.669
 (\(without the .grd)4.169 F -.15(ex)144 261.6 S
 (tension\) will be created here.).15 E F3(\255olat)108 290.4 Q F2(lat)
-14.19 E F3(\255olon)108 307.2 Q F2(lon)11.96 E F0 .178
+144 290.4 Q F3(\255olon)108 307.2 Q F2(lon)144 307.2 Q F0 .178
 (The geoOrigin latitude and longitude in decimal de)144 331.2 R .179
 (grees. Because of single precision arithmetic in)-.15 F .016
 (VRML97 it is necessary to de\214ne a geoOrigin from which of)144 343.2
@@ -452,9 +458,10 @@ F .706(gistration between the terrain data and the)-.15 F(image data.)
 453.6 R .995(xample, for printing purposes\) then use this option.)-.15
 F -.8(Ty)5.995 G(pically).8 E 3.495(,f)-.65 G .995(or computer visual)
 -3.495 F(display a black background w)144 465.6 Q(orks best.)-.1 E F1
-(\255zmax)108 494.4 Q F2(maxclip)7.53 E F1(\255zmin)108 511.2 Q F2
-(minclip)9.19 E F0 .001(Maxclip and minclip may be used clip the ele)144
-535.2 R -.25(va)-.25 G .001(tion data at set v).25 F 2.5(alues. F)-.25 F
+(\255zmax)108 494.4 Q F2(maxclip)144 494.4 Q F1(\255zmin)108 511.2 Q F2
+(minclip)144 511.2 Q F0 .001
+(Maxclip and minclip may be used clip the ele)144 535.2 R -.25(va)-.25 G
+.001(tion data at set v).25 F 2.5(alues. F)-.25 F
 (or instance, to clip the ele-)-.15 E -.25(va)144 547.2 S .042
 (tion data at seale).25 F -.15(ve)-.25 G 2.542(la).15 G .043
 (nd tile only bath)-2.542 F .043(ymetry use)-.05 F F1 .043(\255zmax 0)

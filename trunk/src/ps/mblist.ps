@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:02 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:37 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 9
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -301,7 +307,7 @@ E .931(ation, depth or sidescan v)-.05 F .931
 (alues are output as multiple \214elds as appropriate.)-.25 F(Def)144
 588 Q .325(ault: ASCII output with \214elds separated by tabs, or by an\
 other delimiter speci\214ed with the)-.1 F F2<ad47>2.825 E F0(option.)
-144 600 Q F2<ad42>108 616.8 Q F3(yr/mo/da/hr/mn/sc)23.63 E F0 .155
+144 600 Q F2<ad42>108 616.8 Q F3(yr/mo/da/hr/mn/sc)144 616.8 Q F0 .155
 (This option sets the starting time for data allo)144 628.8 R .155
 (wed in the input data.)-.25 F(The)5.155 E F2<ad45>2.655 E F0 .155
 (option sets the ending)2.655 F .195
@@ -328,17 +334,18 @@ BP
 /F0 10/Times-Roman@0 SF 163.16(mblist\(1\) MB-System)72 48 R 163.16
 (5.0 mblist\(1\))2.5 F/F1 10/Times-Italic@0 SF(mblist.nc)144 84 Q F0
 (\), if successful the CDL \214le will be remo)A -.15(ve)-.15 G(d.).15 E
-/F2 10/Times-Bold@0 SF<ad44>108 100.8 Q F1(dumpmode)23.08 E F0(Normally)
-144 112.8 Q 3.734(,t)-.65 G 1.234(he output format is controlled by the)
--3.734 F F2<ad4f>3.734 E F0 1.233(option and the number of beams or pix)
-3.734 F(els)-.15 E .32(which are output is controlled by the)144 124.8 R
-F2<ad4d>2.82 E F0(and)2.82 E F2<ad4e>2.82 E F0 2.82(options. The)2.82 F
-F2<ad44>2.82 E F0 .32(option pro)2.82 F .32(vides a short cut for)-.15 F
-1.235(producing complete dumps of the longtitude and latitude locations\
- of all beams or pix)144 136.8 R 1.235(els along)-.15 F 1.44
-(with the associated bath)144 148.8 R(ymetry)-.05 E 3.941(,t)-.65 G
-(opograph)-3.941 E 2.741 -.65(y, a)-.05 H 1.441(mplitude, or sidescan v)
-.65 F 3.941(alues. The)-.25 F 1.441("lon lat v)3.941 F(alue")-.25 E .386
+/F2 10/Times-Bold@0 SF<ad44>108 100.8 Q F1(dumpmode)144 100.8 Q F0
+(Normally)144 112.8 Q 3.734(,t)-.65 G 1.234
+(he output format is controlled by the)-3.734 F F2<ad4f>3.734 E F0 1.233
+(option and the number of beams or pix)3.734 F(els)-.15 E .32
+(which are output is controlled by the)144 124.8 R F2<ad4d>2.82 E F0
+(and)2.82 E F2<ad4e>2.82 E F0 2.82(options. The)2.82 F F2<ad44>2.82 E F0
+.32(option pro)2.82 F .32(vides a short cut for)-.15 F 1.235(producing \
+complete dumps of the longtitude and latitude locations of all beams or\
+ pix)144 136.8 R 1.235(els along)-.15 F 1.44(with the associated bath)
+144 148.8 R(ymetry)-.05 E 3.941(,t)-.65 G(opograph)-3.941 E 2.741 -.65
+(y, a)-.05 H 1.441(mplitude, or sidescan v).65 F 3.941(alues. The)-.25 F
+1.441("lon lat v)3.941 F(alue")-.25 E .386
 (triples are often useful for input into gridding programs \(e.g. the)
 144 160.8 R F2(GMT)2.886 E F0(program)2.886 E F2(surface)2.886 E F0
 2.886(\)o)C 2.886(ro)-2.886 G(ther)-2.886 E .993(utilities. All v)144
@@ -356,7 +363,7 @@ Q F0 2.5(=4)2.5 G 5(:l)-2.5 G(ongitude latitude amplitude)-5 E F1
 (option supercedes the)2.5 E F2<ad4f>2.5 E F0(,)A F2<ad4d>2.5 E F0 2.5
 (,a)C(nd)-2.5 E F2<ad4e>2.5 E F0 2.5(options. Def)2.5 F(ault:)-.1 E F1
 (mode)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F2<ad45>108 297.6 Q F1
-(yr/mo/da/hr/mn/sc)23.63 E F0 .155
+(yr/mo/da/hr/mn/sc)144 297.6 Q F0 .155
 (This option sets the ending time for data allo)144 309.6 R .155
 (wed in the input data.)-.25 F(The)5.155 E F2<ad42>2.655 E F0 .155
 (option sets the starting)2.655 F .195
@@ -368,8 +375,8 @@ the starting time is after the ending)144 333.6 R .194(time, then an)144
 ill be ignored. This scheme allo)-2.694 F .195(ws time)-.25 F(windo)144
 357.6 Q 5.376(wing both inside and outside a speci\214ed interv)-.25 F
 7.876(al. Def)-.25 F(ault:)-.1 E F1(yr/mo/da/hr/mn/sc)7.876 E F0(=)7.876
-E(2062/2/21/10/30/0.)144 369.6 Q F2<ad46>108 386.4 Q F1(format)24.19 E
-F0 .067(Sets the format for the input sw)144 398.4 R .067
+E(2062/2/21/10/30/0.)144 369.6 Q F2<ad46>108 386.4 Q F1(format)144 386.4
+Q F0 .067(Sets the format for the input sw)144 398.4 R .067
 (ath data using)-.1 F F2(MBIO)2.567 E F0(inte)2.567 E .068
 (ger format identi\214ers.)-.15 F .068(This program uses)5.068 F(the)144
 410.4 Q F2(MBIO)3.432 E F0 .932(library and will read an)3.432 F 3.432
@@ -379,13 +386,13 @@ F0 .067(Sets the format for the input sw)144 398.4 R .067
 1.231(and their identi\214er v)3.731 F 1.232(alues is gi)-.25 F -.15(ve)
 -.25 G 3.732(ni).15 G 3.732(nt)-3.732 G(he)-3.732 E F2(MBIO)3.732 E F0
 (manual)3.732 E(page. Def)144 434.4 Q(ault:)-.1 E F1(format)2.5 E F0 2.5
-(=1)2.5 G(1.)-2.5 E F2<ad47>108 451.2 Q F1(delimiter)22.52 E F0 .079(Se\
-ts the character\(s\) used to separate output \214elds when ascii colum\
-ns are output. Def)144 463.2 R .078(ault: tabs are)-.1 F
+(=1)2.5 G(1.)-2.5 E F2<ad47>108 451.2 Q F1(delimiter)144 451.2 Q F0 .079
+(Sets the character\(s\) used to separate output \214elds when ascii co\
+lumns are output. Def)144 463.2 R .078(ault: tabs are)-.1 F
 (used as delimiters.)144 475.2 Q F2<ad48>108 492 Q F0 .162(This "help" \
 \215ag cause the program to print out a description of its operation an\
-d then e)22.52 F .162(xit immedi-)-.15 F(ately)144 504 Q(.)-.65 E F2
-<ad49>108 520.8 Q F1(\214lename)26.41 E F0 1.084
+d then e)144 492 R .162(xit immedi-)-.15 F(ately)144 504 Q(.)-.65 E F2
+<ad49>108 520.8 Q F1(\214lename)144 520.8 Q F0 1.084
 (Sets the input \214lename. If)144 532.8 R F1(format)3.584 E F0 3.584
 (>0\()3.584 G 1.084(set with the)-3.584 F F2<ad46>3.584 E F0 1.084
 (option\) then the sw)3.584 F 1.083(ath data contained in)-.1 F F1
@@ -408,16 +415,16 @@ d then e)22.52 F .162(xit immedi-)-.15 F(ately)144 504 Q(.)-.65 E F2
 (alues is gi)-.25 F -.15(ve)-.25 G 3.064(ni).15 G 3.064(nt)-3.064 G(he)
 -3.064 E F2(MBIO)144 640.8 Q F0(manual page.)2.5 E(Def)5 E(ault:)-.1 E
 F1(in\214le)2.5 E F0 2.5(=")2.5 G(datalist.mb-1".)-2.5 E F2<ad4b>108
-657.6 Q F1(decimate)22.52 E F0 .408
+657.6 Q F1(decimate)144 657.6 Q F0 .408
 (Sets the decimation of the output data. By def)144 669.6 R .407
 (ault \(i.e.)-.1 F F1(decimate)2.907 E F0 .407(=1\), e)B -.15(ve)-.25 G
 .407(ry a).15 F -.25(va)-.2 G .407(ilable data record is).25 F
 (output. If)144 681.6 Q F1(decimate)2.5 E F0(>1, then only e)A -.15(ve)
 -.25 G(ry ").15 E F1(decimate)A F0("th record will be output. Def)A
 (ault:)-.1 E F1(decimate)2.5 E F0(=1.)A F2<ad4c>108 698.4 Q F1
-(lon\215ip)23.63 E F0 .572(Sets the range of the longitude v)144 710.4 R
-.572(alues returned.)-.25 F(If)5.572 E F1(lon\215ip)3.072 E F0 .572
-(=\2551 then the longitude v)B .572(alues will be in)-.25 F .489
+(lon\215ip)144 698.4 Q F0 .572(Sets the range of the longitude v)144
+710.4 R .572(alues returned.)-.25 F(If)5.572 E F1(lon\215ip)3.072 E F0
+.572(=\2551 then the longitude v)B .572(alues will be in)-.25 F .489
 (the range from \255360 to 0 de)144 722.4 R .488(grees. If)-.15 F F1
 (lon\215ip)2.988 E F0 .488(=0 then the longitude v)B .488
 (alues will be in the range from)-.25 F(MB-System 5.0)72 768 Q 2.5(3J)
@@ -432,10 +439,10 @@ BP
 (=1 then the longitude v)B 1.382
 (alues will be in the range from 0 to 360)-.25 F(de)144 96 Q 2.5
 (grees. Def)-.15 F(ault:)-.1 E F1(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
-E/F2 10/Times-Bold@0 SF<ad4d>108 112.8 Q F1(start_beam/end_beam)20.86 E
-F0(or)2.5 E F2(A)2.5 E F0(or)2.5 E F2(X)2.5 E F1 -.2(ex)C(cludeper).2 E
-(cent)-.37 E F0 .052(Determines the range of bath)144 124.8 R .052
-(ymetry beams for which records will be output.)-.05 F .052
+E/F2 10/Times-Bold@0 SF<ad4d>108 112.8 Q F1(start_beam/end_beam)144
+112.8 Q F0(or)2.5 E F2(A)2.5 E F0(or)2.5 E F2(X)2.5 E F1 -.2(ex)C
+(cludeper).2 E(cent)-.37 E F0 .052(Determines the range of bath)144
+124.8 R .052(ymetry beams for which records will be output.)-.05 F .052
 (If this option is used,)5.052 F .574(then an)144 136.8 R 3.074(yl)-.15
 G .574(ongitude and latitude v)-3.074 F .574
 (alues output will re\215ect the positions of indi)-.25 F .574
@@ -457,8 +464,8 @@ ord for each ping in which longitude and latitude)-.1 F -.25(va)144
 (nd amplitude v).65 F 1.067(alues re\215ect the v)-.25 F(alid)-.25 E
 (beam nearest to v)144 220.8 Q(ertical, and the sidescan v)-.15 E
 (alue re\215ects the pix)-.25 E(el nearest to v)-.15 E(ertical.)-.15 E
-F2<ad4e>108 237.6 Q F1(start_pixel/end_pixel)23.08 E F0(or)2.5 E F1(A)
-2.5 E F0 .372(Determines the range of sidescan pix)144 249.6 R .371
+F2<ad4e>108 237.6 Q F1(start_pixel/end_pixel)144 237.6 Q F0(or)2.5 E F1
+(A)2.5 E F0 .372(Determines the range of sidescan pix)144 249.6 R .371
 (els for which records will be output.)-.15 F(If)5.371 E F1
 (start_pixel/end_pixel)2.871 E F0 .258
 (is speci\214ed, then records will be output only for pix)144 261.6 R
@@ -475,7 +482,7 @@ le record for each ping in which longitude and latitude v)-.1 F .426
 F .028(el nearest to v)-.15 F .028(ertical. If)-.15 F F2<ad4e>2.528 E F1
 (A)A F0 .028(is gi)2.528 F -.15(ve)-.25 G .028(n, then a record will).15
 F(be output for all sidescan pix)144 321.6 Q(els.)-.15 E F2<ad4f>108
-338.4 Q F1(output_format)22.52 E F0 .389
+338.4 Q F1(output_format)144 338.4 Q F0 .389
 (Determines the form of the output.)144 350.4 R F1(Output_format)2.888 E
 F0 .388(is a string composed of one or more of the fol-)2.888 F(lo)144
 362.4 Q(wing characters:)-.25 E F2(/)144 379.2 Q F0 1.969
@@ -624,9 +631,9 @@ F1(.S)146.5 343.2 Q F0(Number of ra)5 E 2.5(ws)-.15 G(idescan pix)-2.5 E
 417.6 Q(ault)-.1 E/F2 10/Times-Italic@0 SF(output_format)2.5 E F0(=)2.5
 E F1(YXLZ)2.5 E F0(\(latitude, longitude, cumulati)2.5 E .3 -.15(ve a)
 -.25 H(long-track distance, and depth\).).15 E F1<ad50>108 434.4 Q F2
-(pings)24.19 E F0 1.219(Sets the ping a)144 446.4 R -.15(ve)-.2 G 1.219
-(raging of the input data. If).15 F F2(pings)3.719 E F0 3.72(=1)3.719 G
-3.72(,t)-3.72 G 1.22(hen no ping a)-3.72 F -.15(ve)-.2 G 1.22
+(pings)144 434.4 Q F0 1.219(Sets the ping a)144 446.4 R -.15(ve)-.2 G
+1.219(raging of the input data. If).15 F F2(pings)3.719 E F0 3.72(=1)
+3.719 G 3.72(,t)-3.72 G 1.22(hen no ping a)-3.72 F -.15(ve)-.2 G 1.22
 (raging is performed. If).15 F F2(pings)144 458.4 Q F0 2.652(>0)2.652 G
 2.652(,t)-2.652 G .152(hen that number of input pings will be a)-2.652 F
 -.15(ve)-.2 G .151(raged to produce one output ping.).15 F(If)5.151 E F2
@@ -634,8 +641,8 @@ E F1(YXLZ)2.5 E F0(\(latitude, longitude, cumulati)2.5 E .3 -.15(ve a)
 -.2 G .313(raging will automatically be done so that the along-track pi\
 ng spacing is equal).15 F(to the across-track beam spacing.)144 482.4 Q
 (Def)5 E(ault:)-.1 E F2(pings)2.5 E F0 2.5(=1\()2.5 G(no ping a)-2.5 E
--.15(ve)-.2 G(raging\).).15 E F1<ad51>108 499.2 Q F0 .335(Disables v)
-22.52 F .335(alue checking for v)-.25 F .335(alidity \(only positi)-.25
+-.15(ve)-.2 G(raging\).).15 E F1<ad51>108 499.2 Q F0 .335(Disables v)144
+499.2 R .335(alue checking for v)-.25 F .335(alidity \(only positi)-.25
 F .635 -.15(ve b)-.25 H(ath).15 E(ymetry)-.05 E 2.835(,a)-.65 G .335
 (mplitude, and sidescan v)-2.835 F .335(alues are)-.25 F -.25(va)144
 511.2 S 4.011(lid\). This).25 F(allo)4.011 E 1.511
@@ -644,23 +651,24 @@ F .635 -.15(ve b)-.25 H(ath).15 E(ymetry)-.05 E 2.835(,a)-.65 G .335
 (alues are output without change. Null v)-.25 F .303
 (alues are output as zero. This option is equi)-.25 F -.25(va)-.25 G
 (lent).25 E(to)144 535.2 Q F1<ad55>2.5 E F2(2)A F0(.)A F1<ad52>108 552 Q
-F2(west/east/south/north)23.08 E F0 .505
+F2(west/east/south/north)144 552 Q F0 .505
 (Sets the longitude and latitude bounds within which sw)144 564 R .505
 (ath data will be read. Only the data which)-.1 F
 (lies within these bounds will be read.)144 576 Q(Def)5 E(ault:)-.1 E F2
 (west)2.5 E F0(=\255360, east)A F2(=360)A F0(,)A F2(south)2.5 E F0
-(=\25590,)A F2(north)2.5 E F0(=90.)A F1<ad53>108 592.8 Q F2(speed)24.74
-E F0 .532(Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)
-144 604.8 R .531(wed in the input data; pings associated)-.25 F
+(=\25590,)A F2(north)2.5 E F0(=90.)A F1<ad53>108 592.8 Q F2(speed)144
+592.8 Q F0 .532
+(Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)144 604.8 R
+.531(wed in the input data; pings associated)-.25 F
 (with a smaller ship speed will not be copied. Def)144 616.8 Q(ault:)-.1
 E F2(speed)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1<ad54>108 633.6 Q F2(time)
-23.63 E(gap)-.4 E F0 .478(Sets the maximum time g)144 645.6 R .479
+144 633.6 Q(gap)-.4 E F0 .478(Sets the maximum time g)144 645.6 R .479
 (ap in minutes between adjacent pings allo)-.05 F .479
 (wed before the data is consid-)-.25 F(ered to ha)144 657.6 Q .3 -.15
 (ve a g)-.2 H(ap. Def).1 E(ault:)-.1 E F2(time)2.5 E(gap)-.4 E F0 2.5
-(=1)2.5 G(.)-2.5 E F1<ad55>108 674.4 Q F2 -.15(ch)23.08 G(ec).15 E(k)-.2
-E F0 1.352(Sets the manner in which)144 686.4 R F1(mblist)3.852 E F0
-1.351(handles \215agged and null bath)3.852 F(ymetry)-.05 E 3.851(,a)
+(=1)2.5 G(.)-2.5 E F1<ad55>108 674.4 Q F2 -.15(ch)144 674.4 S(ec).15 E
+(k)-.2 E F0 1.352(Sets the manner in which)144 686.4 R F1(mblist)3.852 E
+F0 1.351(handles \215agged and null bath)3.852 F(ymetry)-.05 E 3.851(,a)
 -.65 G 1.351(mplitude, and sidescan)-3.851 F -.25(va)144 698.4 S .342
 (lues. By def).25 F(ault,)-.1 E F1(mblist)2.842 E F0 .342
 (omits lines of output if the)2.842 F 2.843(yc)-.15 G .343
@@ -690,26 +698,26 @@ BP
 .15 E(k)-.2 E F0 3.37(=4)3.37 G 3.37(,t)-3.37 G .87(hen \215agged v)
 -3.37 F(alues)-.25 E(and null v)144 108 Q
 (alues will be output as "NaN".)-.25 E F1<ad56>108 124.8 Q F0(Normally)
-23.08 E(,)-.65 E F1(mblist)2.818 E F0 -.1(wo)2.818 G .317
+144 124.8 Q(,)-.65 E F1(mblist)2.818 E F0 -.1(wo)2.818 G .317
 (rks "silently" without outputting an).1 F .317
 (ything to the stderr stream.)-.15 F .317(If the)5.317 F F1<ad56>2.817 E
 F0(\215ag)2.817 E .56(is gi)144 136.8 R -.15(ve)-.25 G .56(n, then).15 F
 F1(mblist)3.06 E F0 -.1(wo)3.06 G .56(rks in a "v).1 F .56
 (erbose" mode and outputs the program v)-.15 F .56
 (ersion being used and)-.15 F(all error status messages.)144 148.8 Q F1
-<ad57>108 165.6 Q F0(Normally)20.3 E(,)-.65 E F1(mblist)3.389 E F0 .889
-(outputs bath)3.389 F .889
+<ad57>108 165.6 Q F0(Normally)144 165.6 Q(,)-.65 E F1(mblist)3.389 E F0
+.889(outputs bath)3.389 F .889
 (ymetry and across and along track distances in meters.)-.05 F .888
 (If the)5.888 F F1<ad57>3.388 E F0(\215ag is gi)144 177.6 Q -.15(ve)-.25
 G(n, then).15 E F1(mblist)2.5 E F0(outputs these v)2.5 E(alues in feet.)
--.25 E F1<ad58>108 194.4 Q F2(out\214le)23.08 E F0(Normally)144 206.4 Q
-(,)-.65 E F1(mblist)3.2 E F0 .7(outputs to stdout.)3.2 F .7(If the)5.7 F
-F1<ad58>3.2 E F0 .7(\215ag is gi)3.2 F -.15(ve)-.25 G .7(n, then).15 F
-F1(mblist)3.2 E F0 .7(creates a ne)3.2 F 3.2<778c>-.25 G(le)-3.2 E F2
-(out\214le)3.2 E F0(and outputs to it.)144 218.4 Q
+-.25 E F1<ad58>108 194.4 Q F2(out\214le)144 194.4 Q F0(Normally)144
+206.4 Q(,)-.65 E F1(mblist)3.2 E F0 .7(outputs to stdout.)3.2 F .7
+(If the)5.7 F F1<ad58>3.2 E F0 .7(\215ag is gi)3.2 F -.15(ve)-.25 G .7
+(n, then).15 F F1(mblist)3.2 E F0 .7(creates a ne)3.2 F 3.2<778c>-.25 G
+(le)-3.2 E F2(out\214le)3.2 E F0(and outputs to it.)144 218.4 Q
 (An output \214le must be speci\214ed if a netCDF \214le \()5 E F1
 <ad4320ad41>A F0 2.5(\)i)C 2.5(sr)-2.5 G(equired.)-2.5 E F1<ad5a>108
-235.2 Q F2(se)23.63 E(gment)-.4 E F0 .678
+235.2 Q F2(se)144 235.2 Q(gment)-.4 E F0 .678
 (Causes the ascii output of dif)144 247.2 R .678(ferent input sw)-.25 F
 .677(ath \214les \(e.g. when a datalist is speci\214ed with the)-.1 F F1
 <ad49>3.177 E F0 .372(option\) to be separated by lines with)144 259.2 R

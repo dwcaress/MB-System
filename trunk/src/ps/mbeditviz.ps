@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:01 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:35 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -388,16 +394,16 @@ E F1(mbeditviz)2.5 E F0(creates one.)2.5 E/F3 10.95/Times-Bold@0 SF
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 436.8 Q
 (Lamont-Doherty Earth Observ)113 448.8 Q(atory)-.25 E F3(OPTIONS)72
 477.6 Q F1<ad48>108 489.6 Q F0 .162(This "help" \215ag cause the progra\
-m to print out a description of its operation and then e)22.52 F .161
-(xit immedi-)-.15 F(ately)144 501.6 Q(.)-.65 E F1<ad49>108 518.4 Q F2
-(datalist)26.41 E F0 .86(Sets an)144 530.4 R F1(MB-System)3.36 E F0 .86
-(datalist \214le to be parsed on input for sw)3.36 F .86
+m to print out a description of its operation and then e)144 489.6 R
+.161(xit immedi-)-.15 F(ately)144 501.6 Q(.)-.65 E F1<ad49>108 518.4 Q
+F2(datalist)144 518.4 Q F0 .86(Sets an)144 530.4 R F1(MB-System)3.36 E
+F0 .86(datalist \214le to be parsed on input for sw)3.36 F .86
 (ath data \214les to list as a)-.1 F -.25(va)-.2 G .86(ilable for).25 F
 3.925(editing. This)144 542.4 R 1.425(option is usually used when)3.925
 F F1(MBeditviz)3.925 E F0 1.424
 (is started automatically from some other)3.925 F(process, such as)144
-554.4 Q F1(MBgrdviz)2.5 E F0(.)A F1<ad56>108 571.2 Q F0(Normally)23.08 E
-(,)-.65 E F1(MBeditviz)3.867 E F0 1.368
+554.4 Q F1(MBgrdviz)2.5 E F0(.)A F1<ad56>108 571.2 Q F0(Normally)144
+571.2 Q(,)-.65 E F1(MBeditviz)3.867 E F0 1.368
 (outputs limited information to the stderr stream.)3.867 F 1.368(If the)
 6.368 F F1<ad56>3.868 E F0 1.368(\215ag is gi)3.868 F -.15(ve)-.25 G(n,)
 .15 E(then)144 583.2 Q F1(MBeditviz)2.98 E F0 -.1(wo)2.98 G .48

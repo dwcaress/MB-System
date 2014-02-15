@@ -41,7 +41,7 @@
 #define	MB_SONARTYPE_INTERFEROMETRIC	4
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			59
+#define	MB_DATA_KINDS			61
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -102,6 +102,8 @@
 #define	MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
 #define	MB_DATA_SONARDEPTH		58	/* HYSWEEP dynamic draft */
 #define	MB_DATA_ALTITUDE		59	/* HYSWEEP single beam echosounder */
+#define	MB_DATA_GEN_SENS		60	/* WASSP generic sensor data */
+#define	MB_DATA_WC_PICKS 		61	/* WASSP water column picks */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1
@@ -289,6 +291,8 @@ static char *notice_msg[] =
 	"MB_DATA_ATTITUDE3 (57): ancillary attitude system 3",
 	"MB_DATA_SONARDEPTH (58): HYSWEEP dynamic draft",
 	"MB_DATA_ALTITUDE (59): HYSWEEP single beam echosounder",
+	"MB_DATA_GEN_SENS (60): WASSP generic sensor data",
+	"MB_DATA_WC_PICKS (61): WASSP water column picks",
 
 	/* notices for nonfatal error messages */
 	"MB_ERROR_TIME_GAP (ID=-1): Time gap in data",

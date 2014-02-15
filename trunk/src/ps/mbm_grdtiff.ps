@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:03 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:38 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 8
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -288,9 +294,9 @@ e list of the projected coordinate systems that may used in grid genera\
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 523.2 Q
 (Lamont-Doherty Earth Observ)113 535.2 Q(atory)-.25 E F1
 (SIMPLE DESCRIPTION OF B)72 564 Q(ASIC OPTIONS)-.329 E F2<ad41>108 576 Q
-F3(ma)23.08 E(gnitude[/azimuth/ele)-.1 E(vation])-.15 E F0 1.15(Sets th\
-e parameters which control the synthetic illumination of the gridded da\
-ta \(shaded relief\).)144 588 R .05(The v)144 600 R(alue)-.25 E F3(ma)
+F3(ma)144 576 Q(gnitude[/azimuth/ele)-.1 E(vation])-.15 E F0 1.15(Sets \
+the parameters which control the synthetic illumination of the gridded \
+data \(shaded relief\).)144 588 R .05(The v)144 600 R(alue)-.25 E F3(ma)
 2.55 E(gnitude)-.1 E F0 .05(is an ef)2.55 F(fecti)-.25 E .351 -.15
 (ve ve)-.25 H .051(rtical e).15 F .051
 (xageration which modulates the intensity of the shad-)-.15 F .882
@@ -303,7 +309,7 @@ ta \(shaded relief\).)144 588 R .05(The v)144 600 R(alue)-.25 E F3(ma)
 (grees from horizontal.)-.15 E(Def)5 E(aults:)-.1 E F3(ma)2.5 E(gnitude)
 -.1 E F0 2.5(=0)2.5 G(.2;)-2.5 E F3(azimuth)2.5 E F0 2.5(=0)2.5 G(.0;)
 -2.5 E F3(ele)2.5 E(vation)-.15 E F0 2.5(=3)2.5 G(0.0;)-2.5 E F2<ad43>
-108 652.8 Q F3(contour_contr)23.08 E(ol)-.45 E F0(If)144 664.8 Q F2
+108 652.8 Q F3(contour_contr)144 652.8 Q(ol)-.45 E F0(If)144 664.8 Q F2
 <ad43>3.459 E F0 .959(is gi)3.459 F -.15(ve)-.25 G 3.459(na).15 G .959
 (lone, it causes unannotated contours to be dra)-3.459 F .958
 (wn using a contour interv)-.15 F .958(al calcu-)-.25 F .214
@@ -312,10 +318,10 @@ ta \(shaded relief\).)144 588 R .05(The v)144 600 R(alue)-.25 E F3(ma)
 2.714 F .215(al. See the)-.25 F
 (COMPLETE DESCRIPTION OF OPTIONS section belo)144 688.8 Q 2.5(wf)-.25 G
 (or a more complete discussion.)-2.5 E F2<ad44>108 705.6 Q F3
-([\215ipcolor/\215ipshade])23.08 E F0(Normally)144 717.6 Q 3.321(,t)-.65
-G .821(he color or grayscale tables used for color maps run from cool c\
-olors \(or dark grays\))-3.321 F 1.289(for lo)144 729.6 R 3.789(wg)-.25
-G 1.289(rid v)-3.789 F 1.289
+([\215ipcolor/\215ipshade])144 705.6 Q F0(Normally)144 717.6 Q 3.321(,t)
+-.65 G .821(he color or grayscale tables used for color maps run from c\
+ool colors \(or dark grays\))-3.321 F 1.289(for lo)144 729.6 R 3.789(wg)
+-.25 G 1.289(rid v)-3.789 F 1.289
 (alues to hot colors \(or light grays\) for high grid v)-.25 F 3.79
 (alues. This)-.25 F 1.29(option re)3.79 F -.15(ve)-.25 G 1.29(rses the)
 .15 F(MB-System 5.0)72 768 Q(28 September 2013)131.775 E(1)190.115 E 0
@@ -343,7 +349,7 @@ F 137.31(5.0 mbm_grdtif)2.5 F(f\(1\))-.25 E .028
 F1<ad44>2.587 E F2(0/1)A F0 .087(will \215ip the shading con-)2.587 F
 -.15(ve)144 144 S(ntion b).15 E(ut lea)-.2 E .3 -.15(ve t)-.2 H(he def)
 .15 E(ault color con)-.1 E -.15(ve)-.4 G(ntion.).15 E F1<ad47>108 160.8
-Q F2(color_mode)22.52 E F0 -.45(Tu)144 172.8 S
+Q F2(color_mode)144 160.8 Q F0 -.45(Tu)144 172.8 S
 (rns on color \214ll plot and sets the style of the plot.).45 E F2
 (color_mode)164 184.8 Q F0 2.5(=1)2.5 G 2.5(:C)-2.5 G(olor/gray \214ll.)
 -2.5 E F2(color_mode)164 196.8 Q F0 2.5(=2)2.5 G 2.5(:C)-2.5 G
@@ -356,13 +362,14 @@ F1<ad4b>2.5 E F0(option must be used to specify)204 244.8 Q
 280.8 Q F2(color_mode)164 292.8 Q F0 2.5(=5)2.5 G 2.5(:C)-2.5 G
 (olor/gray \214ll shaded by)-2.5 E(slope magnitude.)204 304.8 Q F1<ad48>
 108 321.6 Q F0 .162(This "help" \215ag cause the program to print out a\
- description of its operation and then e)22.52 F .162(xit immedi-)-.15 F
-(ately)144 333.6 Q(.)-.65 E F1<ad49>108 350.4 Q F2(gr)26.41 E(d\214le)
--.37 E F0 .159(Sets the name of the gridded data \214le to be plotted.)
-144 362.4 R(Alternati)5.158 E -.15(ve)-.25 G(ly).15 E(,)-.65 E F2(gr)
-2.658 E(d\214le)-.37 E F0 .158(may be a list of grid \214les)2.658 F
+ description of its operation and then e)144 321.6 R .162(xit immedi-)
+-.15 F(ately)144 333.6 Q(.)-.65 E F1<ad49>108 350.4 Q F2(gr)144 350.4 Q
+(d\214le)-.37 E F0 .159
+(Sets the name of the gridded data \214le to be plotted.)144 362.4 R
+(Alternati)5.158 E -.15(ve)-.25 G(ly).15 E(,)-.65 E F2(gr)2.658 E
+(d\214le)-.37 E F0 .158(may be a list of grid \214les)2.658 F
 (\(one \214lename on each line\) to be plotted together)144 374.4 Q(.)
--.55 E F1<ad4b>108 391.2 Q F2(intensity_\214le)22.52 E F0 .37
+-.55 E F1<ad4b>108 391.2 Q F2(intensity_\214le)144 391.2 Q F0 .37
 (Sets the name of the gridded data \214le containing instensity v)144
 403.2 R .37(alues to be used for shading the map.)-.25 F(Alternati)144
 415.2 Q -.15(ve)-.25 G(ly).15 E(,)-.65 E F2(gr)2.704 E(d\214le)-.37 E F0
@@ -370,13 +377,13 @@ F1<ad4b>2.5 E F0(option must be used to specify)204 244.8 Q
 e used together)2.704 F 2.703(.I)-.55 G 2.703(fa)-2.703 G 1.499(list of\
  \214le is supplied, the intensity \214les must conform in order to the\
  data grid \214les the)144 427.2 R 3.999(yw)-.15 G(ill)-3.999 E(shade.)
-144 439.2 Q F1<ad4f>108 456 Q F2 -.45(ro)22.52 G(ot).45 E F0 .423(Sets \
-the root used to construct the \214lename of the output shellscript \()
-144 468 R F2 -.45(ro)C(ot).45 E F0 .422(.cmd\) and names of \214les)B
+144 439.2 Q F1<ad4f>108 456 Q F2 -.45(ro)144 456 S(ot).45 E F0 .423(Set\
+s the root used to construct the \214lename of the output shellscript \
+\()144 468 R F2 -.45(ro)C(ot).45 E F0 .422(.cmd\) and names of \214les)B
 .156(created when the shellscript is run.)144 480 R .157
 (Normally the name of the input grid \214le or grid \214le list is used)
 5.157 F(as the)144 492 Q F2 -.45(ro)2.5 G(ot).45 E F0(.)A F1<ad53>108
-508.8 Q F2([color/shade])24.74 E F0 1.393(This option enables ef)144
+508.8 Q F2([color/shade])144 508.8 Q F0 1.393(This option enables ef)144
 520.8 R(fecti)-.25 E 1.693 -.15(ve h)-.25 H 1.392
 (istogram equalization of the color and/or shading of the gridded).15 F
 .628(data. The equalization is not achie)144 532.8 R -.15(ve)-.25 G
@@ -399,19 +406,19 @@ A F2(2)A F0 3.138(\)o)C 3.138(ru)-3.138 G .638
 F0 3.137(=1)3.137 G .5(will cause the shading to be equalized.)144 604.8
 R(Using)5.5 E F1<ad53>3 E F2(0/1)A F0 .5
 (will equalize the shading without equalizing)3 F(the color table.)144
-616.8 Q F1<ad55>108 633.6 Q F2(orientation)23.08 E F0 .2(Normally the o\
-rientation of the plot \(portrait or landscape\) is selected automatica\
-lly so as to maxi-)144 645.6 R .333(mize the plot scale.)144 657.6 R
+616.8 Q F1<ad55>108 633.6 Q F2(orientation)144 633.6 Q F0 .2(Normally t\
+he orientation of the plot \(portrait or landscape\) is selected automa\
+tically so as to maxi-)144 645.6 R .333(mize the plot scale.)144 657.6 R
 (The)5.333 E F1<ad55>2.833 E F0 .333(option allo)2.833 F .333
 (ws the user to set the plot orientation. If)-.25 F F2(orientation)2.833
 E F0 2.834(=1)2.834 G 2.834(,a)-2.834 G
 (portrait plot will be produced; if)144 669.6 Q F2(orientation)2.5 E F0
 2.5(=2)2.5 G 2.5(,al)-2.5 G(andscape plot will be produced.)-2.5 E F1
-<ad56>108 686.4 Q F0(Causes)23.08 E F1(mbm_grdtiff)2.776 E F0 .276
-(to operate in "v)2.776 F .276
-(erbose" mode so that it outputs more information than usual.)-.15 F F1
-<ad57>108 703.2 Q F2([color_style)20.3 E F0([)A F2(/palette)A F0([)A F2
-(ncolor)A(s)-.1 E F0(]] | cpt\214le])A
+<ad56>108 686.4 Q F0(Causes)144 686.4 Q F1(mbm_grdtiff)2.5 E F0
+(to operate in "v)2.5 E
+(erbose" mode so that it outputs more information than usual.)-.15 E F1
+<ad57>108 703.2 Q F2([color_style)144 703.2 Q F0([)A F2(/palette)A F0([)
+A F2(ncolor)A(s)-.1 E F0(]] | cpt\214le])A
 (This option controls the color scheme used for color \214ll plots.)144
 715.2 Q(MB-System 5.0)72 768 Q(28 September 2013)131.775 E(2)190.115 E 0
 Cg EP
@@ -421,11 +428,11 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbm_grdtif)72 48 Q 137.31(f\(1\) MB-System)-.25
 F 137.31(5.0 mbm_grdtif)2.5 F(f\(1\))-.25 E(If)144 84 Q/F1 10
-/Times-Italic@0 SF(color_style)3.135 E F0 3.136(=1[)3.135 G(def)-3.136 E
+/Times-Italic@0 SF(color_style)3.136 E F0 3.136(=1[)3.136 G(def)-3.136 E
 .636(ault], then the color scheme used will be a continuous grading of \
-colors. If)-.1 F F1(color_style)144 96 Q F0 2.816(=2)2.816 G 2.816(,t)
--2.816 G .316(he color scheme will be a set of discrete color interv)
--2.816 F .315(als. The color palette used is)-.25 F(set using)144 108 Q
+colors. If)-.1 F F1(color_style)144 96 Q F0 2.815(=2)2.815 G 2.815(,t)
+-2.815 G .315(he color scheme will be a set of discrete color interv)
+-2.815 F .316(als. The color palette used is)-.25 F(set using)144 108 Q
 F1(palette)2.5 E F0 2.5(.F)C -2.15 -.25(iv e)-2.5 H(palettes are a)2.75
 E -.25(va)-.2 G(ilable:).25 E F1(palette)180 120 Q F0 2.5(=1)2.5 G 26.36
 (:H)-2.5 G(axby colors [def)-26.36 E(ault])-.1 E F1(palette)180 132 Q F0
@@ -433,54 +440,54 @@ E -.25(va)-.2 G(ilable:).25 E F1(palette)180 120 Q F0 2.5(=1)2.5 G 26.36
 180 144 Q F0 2.5(=3)2.5 G 26.36(:l)-2.5 G .5 -.25(ow I)-26.36 H
 (ntensity colors).25 E F1(palette)180 156 Q F0 2.5(=4)2.5 G 26.36(:g)
 -2.5 G(rayscale)-26.36 E F1(palette)180 168 Q F0 2.5(=5)2.5 G 26.36(:u)
--2.5 G(niform grayscale)-26.36 E 4.383(Ac)144 180 S 1.883
-(omplete description of the color palettes is gi)-4.383 F -.15(ve)-.25 G
+-2.5 G(niform grayscale)-26.36 E 4.384(Ac)144 180 S 1.883
+(omplete description of the color palettes is gi)-4.384 F -.15(ve)-.25 G
 4.383(ni).15 G 4.383(nt)-4.383 G 1.883(he COMPLETE DESCRIPTION OF)-4.383
 F(OPTIONS section belo)144 192 Q -.65(w.)-.25 G(The)144 216 Q F1(ncolor)
-2.607 E(s)-.1 E F0 .107(parameter sets the number of color v)2.607 F
+2.606 E(s)-.1 E F0 .107(parameter sets the number of color v)2.606 F
 .107(alues used in plotting, whether the colors are rep-)-.25 F(resente\
 d in a continuous color scale or a stepped, discrete color scale [def)
-144 228 Q(ault is 11].)-.1 E .522(If the option ar)144 252 R .522
+144 228 Q(ault is 11].)-.1 E .523(If the option ar)144 252 R .522
 (gument is the path to an e)-.18 F(xisting)-.15 E/F2 10/Times-Bold@0 SF
-(GMT)3.022 E F0 .523(color palette \(CPT\) \214le, then that CPT \214le)
+(GMT)3.022 E F0 .522(color palette \(CPT\) \214le, then that CPT \214le)
 3.022 F(and its color scheme will be used for the plot)144 264 Q/F3
 10.95/Times-Bold@0 SF(COMPLETE DESCRIPTION OF OPTIONS)72 292.8 Q F2
-<ad41>108 304.8 Q F1(ma)23.08 E(gnitude[/azimuth])-.1 E F0 1.15(Sets th\
-e parameters which control the synthetic illumination of the gridded da\
-ta \(shaded relief\).)144 316.8 R .05(The v)144 328.8 R(alue)-.25 E F1
-(ma)2.55 E(gnitude)-.1 E F0 .05(is an ef)2.55 F(fecti)-.25 E .351 -.15
-(ve ve)-.25 H .051(rtical e).15 F .051
-(xageration which modulates the intensity of the shad-)-.15 F .827
-(ing; typical v)144 340.8 R .827(alues are in the 0.1 to 0.5 range.)-.25
-F .827(The v)5.827 F(alue)-.25 E F1(azimuth)3.327 E F0 .826
-(is the azimuth from which the)3.326 F(data is illuminated.)144 352.8 Q
+<ad41>108 304.8 Q F1(ma)144 304.8 Q(gnitude[/azimuth])-.1 E F0 1.15(Set\
+s the parameters which control the synthetic illumination of the gridde\
+d data \(shaded relief\).)144 316.8 R .051(The v)144 328.8 R(alue)-.25 E
+F1(ma)2.551 E(gnitude)-.1 E F0 .051(is an ef)2.551 F(fecti)-.25 E .351
+-.15(ve ve)-.25 H .051(rtical e).15 F .05
+(xageration which modulates the intensity of the shad-)-.15 F .826
+(ing; typical v)144 340.8 R .826(alues are in the 0.1 to 0.5 range.)-.25
+F .827(The v)5.827 F(alue)-.25 E F1(azimuth)3.327 E F0 .827
+(is the azimuth from which the)3.327 F(data is illuminated.)144 352.8 Q
 (Def)5 E(aults:)-.1 E F1(ma)2.5 E(gnitude)-.1 E F0 2.5(=0)2.5 G(.2;)-2.5
 E F1(azimuth)2.5 E F0 2.5(=0)2.5 G(.0;)-2.5 E F2<ad44>108 369.6 Q F1
-([\215ipcolor/\215ipshade])23.08 E F0(Normally)144 381.6 Q 3.32(,t)-.65
-G .821(he color or grayscale tables used for color maps run from cool c\
-olors \(or dark grays\))-3.32 F 1.29(for lo)144 393.6 R 3.79(wg)-.25 G
-1.29(rid v)-3.79 F 1.289
-(alues to hot colors \(or light grays\) for high grid v)-.25 F 3.789
-(alues. This)-.25 F 1.289(option re)3.789 F -.15(ve)-.25 G 1.289
-(rses the).15 F .028
+([\215ipcolor/\215ipshade])144 369.6 Q F0(Normally)144 381.6 Q 3.321(,t)
+-.65 G .821(he color or grayscale tables used for color maps run from c\
+ool colors \(or dark grays\))-3.321 F 1.289(for lo)144 393.6 R 3.789(wg)
+-.25 G 1.289(rid v)-3.789 F 1.289
+(alues to hot colors \(or light grays\) for high grid v)-.25 F 3.79
+(alues. This)-.25 F 1.29(option re)3.79 F -.15(ve)-.25 G 1.29(rses the)
+.15 F .028
 (color table so that cool colors \(dark grays\) correspond to high v)144
-405.6 R .029(alues and hot colors \(light grays\) to)-.25 F(lo)144 417.6
-Q 3.955(wv)-.25 G 3.955(alues. If)-4.205 F F2<ad44>3.955 E F0 1.454
-(is gi)3.955 F -.15(ve)-.25 G 3.954(na).15 G 1.454(lone, it applies to \
+405.6 R .028(alues and hot colors \(light grays\) to)-.25 F(lo)144 417.6
+Q 3.954(wv)-.25 G 3.954(alues. If)-4.204 F F2<ad44>3.954 E F0 1.454
+(is gi)3.954 F -.15(ve)-.25 G 3.954(na).15 G 1.454(lone, it applies to \
 the color table used for color or gray \214ll plots,)-3.954 F .216
 (shaded or unshaded. If the plot is to be shaded,)144 429.6 R .216
 (either by synthetic illumination \()5.216 F F2<ad47>A F1(2)A F0 2.716
-(\)o)C 2.716(ru)-2.716 G .216(sing an)-2.716 F .022(intensity \214le \()
+(\)o)C 2.715(ru)-2.716 G .215(sing an)-2.715 F .021(intensity \214le \()
 144 441.6 R F2<ad4b>A F0(and)2.522 E F2<ad47>2.522 E F1(3)A F0 .022
 (options\), then setting)2.522 F F1(\215ipshade)2.522 E F0 2.522(=1w)
-2.522 G .022(ill cause the shading con)-2.522 F -.15(ve)-.4 G .021
-(ntion to).15 F .087(be re)144 453.6 R -.15(ve)-.25 G .087
+2.522 G .022(ill cause the shading con)-2.522 F -.15(ve)-.4 G .022
+(ntion to).15 F .088(be re)144 453.6 R -.15(ve)-.25 G .088
 (rsed \(e.g. high intensities o).15 F -.15(ve)-.15 G .087
 (rlaid as light shading\).).15 F(Using)5.087 E F2<ad44>2.587 E F1(0/1)A
-F0 .088(will \215ip the shading con-)2.588 F -.15(ve)144 465.6 S
+F0 .087(will \215ip the shading con-)2.587 F -.15(ve)144 465.6 S
 (ntion b).15 E(ut lea)-.2 E .3 -.15(ve t)-.2 H(he def).15 E
 (ault color con)-.1 E -.15(ve)-.4 G(ntion.).15 E F2<ad47>108 482.4 Q F1
-(color_mode)22.52 E F0 -.45(Tu)144 494.4 S
+(color_mode)144 482.4 Q F0 -.45(Tu)144 494.4 S
 (rns on color \214ll plot and sets the style of the plot.).45 E F1
 (color_mode)164 506.4 Q F0 2.5(=1)2.5 G 2.5(:C)-2.5 G(olor/gray \214ll.)
 -2.5 E F1(color_mode)164 518.4 Q F0 2.5(=2)2.5 G 2.5(:C)-2.5 G
@@ -495,16 +502,16 @@ F2<ad4b>2.5 E F0(option must be used to specify)204 566.4 Q
 144 638.4 Q F2(mbgrdtiff)2.5 E F0(and)2.5 E F2(grdimage)2.5 E F0
 (manual pages for information on shading with intensity \214les)2.5 E F2
 <ad48>108 655.2 Q F0 .162(This "help" \215ag cause the program to print\
- out a description of its operation and then e)22.52 F .161(xit immedi-)
--.15 F(ately)144 667.2 Q(.)-.65 E F2<ad49>108 684 Q F1(gr)26.41 E
-(d\214le)-.37 E F0 1.298
-(Sets the name of the gridded data \214le to be plotted.)144 696 R 1.299
+ out a description of its operation and then e)144 655.2 R .162
+(xit immedi-)-.15 F(ately)144 667.2 Q(.)-.65 E F2<ad49>108 684 Q F1(gr)
+144 684 Q(d\214le)-.37 E F0 1.299
+(Sets the name of the gridded data \214le to be plotted.)144 696 R 1.298
 (The data must be in a form acceptable to)6.298 F F2(GMT)144 708 Q F0
 -.15(ve)2.57 G .07(rsion 3 programs \(see the).15 F F2(GMT)2.57 E F0 .07
 (Cookbook & T)2.57 F .07(echnical Reference\).)-.7 F(Alternati)5.07 E
 -.15(ve)-.25 G(ly).15 E(,)-.65 E F1(gr)2.57 E(d\214le)-.37 E F0 .786(ma\
 y be a list of grid \214les \(one \214lename on each line\) to be plott\
-ed together)144 720 R 3.286(.T)-.55 G .786(his is useful when)-3.286 F
+ed together)144 720 R 3.285(.T)-.55 G .785(his is useful when)-3.285 F
 (MB-System 5.0)72 768 Q(28 September 2013)131.775 E(3)190.115 E 0 Cg EP
 %%Page: 4 4
 %%BeginPageSetup
@@ -515,34 +522,34 @@ F 137.31(5.0 mbm_grdtif)2.5 F(f\(1\))-.25 E(data from a re)144 84 Q
 (gion is brok)-.15 E(en up into se)-.1 E -.15(ve)-.25 G
 (ral grid \214les rather than a single v).15 E(ery lar)-.15 E
 (ge grid \214le.)-.18 E/F1 10/Times-Bold@0 SF<ad4b>108 100.8 Q/F2 10
-/Times-Italic@0 SF(intensity_\214le)22.52 E F0 .37
+/Times-Italic@0 SF(intensity_\214le)144 100.8 Q F0 .37
 (Sets the name of the gridded data \214le containing instensity v)144
 112.8 R .37(alues to be used for shading the map.)-.25 F(Alternati)144
-124.8 Q -.15(ve)-.25 G(ly).15 E(,)-.65 E F2(gr)2.703 E(d\214le)-.37 E F0
+124.8 Q -.15(ve)-.25 G(ly).15 E(,)-.65 E F2(gr)2.704 E(d\214le)-.37 E F0
 .204(may be a list of grid \214les \(one \214lename on each line\) to b\
-e used together)2.703 F 2.704(.I)-.55 G 2.704(fa)-2.704 G .821(list of \
+e used together)2.704 F 2.703(.I)-.55 G 2.703(fa)-2.703 G .821(list of \
 \214les is supplied, the intensity \214les must conform in order to the\
  list of data grid \214les the)144 136.8 R(y)-.15 E(will shade.)144
-148.8 Q F1<ad4d>108 165.6 Q F0 3.055(As)20.86 G .555
+148.8 Q F1<ad4d>108 165.6 Q F0 3.055(As)144 165.6 S .555
 (eries of "miscellaneous" options are pro)-3.055 F .555
 (vided which are gi)-.15 F -.15(ve)-.25 G 3.055(na).15 G(s)-3.055 E F1
 <ad4d>3.055 E F0(follo)3.055 E .555(wed by a tw)-.25 F 3.055(oc)-.1 G
-(har)-3.055 E(-)-.2 E 1.329(acter identi\214er)144 177.6 R 3.829(,f)-.4
-G(ollo)-3.829 E 1.329(wed by an)-.25 F 3.829(yo)-.15 G 1.328
-(ther parameters associated with that option.)-3.829 F(The)6.328 E F1
-<ad4d>3.828 E F0(options)3.828 E .636(may be strung together separated \
+(har)-3.055 E(-)-.2 E 1.328(acter identi\214er)144 177.6 R 3.828(,f)-.4
+G(ollo)-3.828 E 1.328(wed by an)-.25 F 3.828(yo)-.15 G 1.329
+(ther parameters associated with that option.)-3.828 F(The)6.329 E F1
+<ad4d>3.829 E F0(options)3.829 E .636(may be strung together separated \
 by colons, e.g. "-MGQ100:GU:CA200/10", which is equi)144 189.6 R -.25
 (va)-.25 G(lent).25 E(to "-MGQ \255MGU \255MCA200/10".)144 201.6 Q F1
-(\255MGD)108 218.4 Q F2(gmtdef/value)5.86 E F0(Allo)144 230.4 Q .227
-(ws the user to set the)-.25 F F1(GMT)2.727 E F0(def)2.727 E .227
+(\255MGD)108 218.4 Q F2(gmtdef/value)144 218.4 Q F0(Allo)144 230.4 Q
+.227(ws the user to set the)-.25 F F1(GMT)2.727 E F0(def)2.727 E .227
 (ault v)-.1 F .227
-(alues used as the plot is constructed. This command may)-.25 F 1.133
-(be gi)144 242.4 R -.15(ve)-.25 G 3.633(nr).15 G 1.133
-(epeatedly to set as man)-3.633 F(y)-.15 E F1(GMT)3.633 E F0(def)3.633 E
+(alues used as the plot is constructed. This command may)-.25 F 1.134
+(be gi)144 242.4 R -.15(ve)-.25 G 3.634(nr).15 G 1.133
+(epeatedly to set as man)-3.634 F(y)-.15 E F1(GMT)3.633 E F0(def)3.633 E
 1.133(aults as required. F)-.1 F 1.133(or e)-.15 F 1.133
 (xample, to set the basemap)-.15 F(annotation font to Courier)144 254.4
 Q 2.5(,u)-.4 G(se "-MGD)-2.5 E(ANO)-.4 E(T_FONT/Courier".)-.4 E F1
-(\255MGS)108 271.2 Q F2(scalefactor)7.52 E F0 .729
+(\255MGS)108 271.2 Q F2(scalefactor)144 271.2 Q F0 .728
 (The gridded data is multiplied by)144 283.2 R F2(scalefactor)3.229 E F0
 5.729(.T)C .729(his option is most often used \215ip the sign of the)
 -5.729 F(data \()144 295.2 Q F2(scalefactor)A F0 2.5<3dad>2.5 G
@@ -554,36 +561,36 @@ Q 2.5(,u)-.4 G(se "-MGD)-2.5 E(ANO)-.4 E(T_FONT/Courier".)-.4 E F1
 (infrog\) do not recognize the coordinate information)-.4 F
 (embedded in the GeoT)144 348 Q(if)-.35 E 2.5<668c>-.25 G
 (le, and look for a w)-2.5 E(orld \214le.)-.1 E F1<ad4f>108 364.8 Q F2
--.45(ro)22.52 G(ot).45 E F0 .422(Sets the root used to construct the \
-\214lename of the output shellscript \()144 376.8 R F2 -.45(ro)C(ot).45
-E F0 .423(.cmd\) and names of \214les)B .157
+-.45(ro)144 364.8 S(ot).45 E F0 .423(Sets the root used to construct th\
+e \214lename of the output shellscript \()144 376.8 R F2 -.45(ro)C(ot)
+.45 E F0 .422(.cmd\) and names of \214les)B .156
 (created when the shellscript is run.)144 388.8 R .157
 (Normally the name of the input grid \214le or grid \214le list is used)
 5.157 F(as the)144 400.8 Q F2 -.45(ro)2.5 G(ot).45 E F0(.)A F1<ad51>108
-417.6 Q F0(Normally)22.52 E 3.721(,t)-.65 G 1.221
-(he output plot generation shellscript includes lines which e)-3.721 F
--.15(xe)-.15 G 1.222(cute the program).15 F F1(xv)3.722 E F0(to)3.722 E
+417.6 Q F0(Normally)144 417.6 Q 3.722(,t)-.65 G 1.222
+(he output plot generation shellscript includes lines which e)-3.722 F
+-.15(xe)-.15 G 1.221(cute the program).15 F F1(xv)3.721 E F0(to)3.721 E
 .273(display the TIFF image on the screen.)144 429.6 R .273
 (This option causes those lines to be commented out so that)5.273 F -.15
 (exe)144 441.6 S(cuting the shellscript produces a TIFF image b).15 E
 (ut does not attempt to display it on the screen.)-.2 E F1<ad52>108
-458.4 Q F2(west/east/south/north)23.08 E .736(west, east, south,)144
+458.4 Q F2(west/east/south/north)144 458.4 Q .736(west, east, south,)144
 470.4 R F0(and)3.236 E F2(north)3.236 E F0 .736(specify the Re)3.236 F
 .736(gion of interest.)-.15 F 2.336 -.8(To s)5.736 H .736
-(pecify boundaries in de).8 F .736(grees and)-.15 F 1.162
+(pecify boundaries in de).8 F .736(grees and)-.15 F 1.161
 (minutes [and seconds], use the dd:mm[:ss] format.)144 482.4 R(Append)
-6.161 E F1(r)3.661 E F0 1.161(if lo)3.661 F 1.161
-(wer left and upper right map)-.25 F .208(coordinates are gi)144 494.4 R
--.15(ve)-.25 G 2.708(ni).15 G .208(nstead of wesn.)-2.708 F -1.1(Yo)
+6.161 E F1(r)3.661 E F0 1.161(if lo)3.661 F 1.162
+(wer left and upper right map)-.25 F .209(coordinates are gi)144 494.4 R
+-.15(ve)-.25 G 2.709(ni).15 G .209(nstead of wesn.)-2.709 F -1.1(Yo)
 5.208 G 2.708(um)1.1 G .208(ay ask for a lar)-2.708 F(ger)-.18 E F2
-(w/e/s/n)2.708 E F0(re)2.708 E .209(gion to ha)-.15 F .509 -.15(ve m)-.2
-H .209(ore room).15 F .199(between the image and the ax)144 506.4 R
+(w/e/s/n)2.708 E F0(re)2.708 E .208(gion to ha)-.15 F .508 -.15(ve m)-.2
+H .208(ore room).15 F .199(between the image and the ax)144 506.4 R
 2.699(es. A)-.15 F .199(smaller re)2.699 F .199
 (gion than speci\214ed in the grd\214le will result in a sub-)-.15 F
 (set of the grid [Def)144 518.4 Q(ault is re)-.1 E(gion gi)-.15 E -.15
 (ve)-.25 G 2.5(nb).15 G 2.5(yt)-2.5 G(he grd\214le].)-2.5 E F1<ad53>108
-535.2 Q F2([color/shade])24.74 E F0 1.392(This option enables ef)144
-547.2 R(fecti)-.25 E 1.692 -.15(ve h)-.25 H 1.392
+535.2 Q F2([color/shade])144 535.2 Q F0 1.393(This option enables ef)144
+547.2 R(fecti)-.25 E 1.693 -.15(ve h)-.25 H 1.392
 (istogram equalization of the color and/or shading of the gridded).15 F
 .628(data. The equalization is not achie)144 559.2 R -.15(ve)-.25 G
 3.128(db).15 G 3.128(yc)-3.128 G .628(hanging the data v)-3.128 F .628
@@ -591,25 +598,25 @@ H .209(ore room).15 F .199(between the image and the ax)144 506.4 R
  shading tables so that the boundaries in the tables encompass equal fr\
 actions of the data-)144 571.2 R .19(points. This serv)144 583.2 R .19
 (es to focus color or shading contrasts in v)-.15 F .19
-(alue ranges corresponding to the b)-.25 F .19(ulk of)-.2 F .837
+(alue ranges corresponding to the b)-.25 F .19(ulk of)-.2 F .838
 (the data v)144 595.2 R 3.338(alues. If)-.25 F F1<ad53>3.338 E F0 .838
 (is gi)3.338 F -.15(ve)-.25 G 3.338(na).15 G .838(lone or with)-3.338 F
 F2(color)3.338 E F0 3.338(=1)3.338 G 3.338(,i)-3.338 G 3.338(te)-3.338 G
 .838(nables equalization of the color table)-3.338 F .991
 (used for color or gray \214ll plots,)144 607.2 R .991
 (shaded or unshaded. If the plot is to be shaded,)5.991 F .991
-(either by syn-)5.991 F .637(thetic illumination \()144 619.2 R F1<ad47>
-A F2(2)A F0 3.137(\)o)C 3.137(ru)-3.137 G .637
-(sing an intensity \214le \()-3.137 F F1<ad4b>A F0(and)3.138 E F1<ad47>
-3.138 E F2(3)A F0 .638(options\), then setting)3.138 F F2(shade)3.138 E
-F0 3.138(=1)3.138 G .5(will cause the shading to be equalized.)144 631.2
+(either by syn-)5.991 F .638(thetic illumination \()144 619.2 R F1<ad47>
+A F2(2)A F0 3.138(\)o)C 3.138(ru)-3.138 G .638
+(sing an intensity \214le \()-3.138 F F1<ad4b>A F0(and)3.137 E F1<ad47>
+3.137 E F2(3)A F0 .637(options\), then setting)3.137 F F2(shade)3.137 E
+F0 3.137(=1)3.137 G .5(will cause the shading to be equalized.)144 631.2
 R(Using)5.5 E F1<ad53>3 E F2(0/1)A F0 .5
 (will equalize the shading without equalizing)3 F(the color table.)144
-643.2 Q F1<ad56>108 660 Q F0(Causes)23.08 E F1(mbm_grdtiff)2.775 E F0
-.275(to operate in "v)2.775 F .276
-(erbose" mode so that it outputs more information than usual.)-.15 F F1
-<ad57>108 676.8 Q F2([color_style)20.3 E F0([)A F2(/palette)A F0([)A F2
-(ncolor)A(s)-.1 E F0(]] | cpt\214le])A
+643.2 Q F1<ad56>108 660 Q F0(Causes)144 660 Q F1(mbm_grdtiff)2.5 E F0
+(to operate in "v)2.5 E
+(erbose" mode so that it outputs more information than usual.)-.15 E F1
+<ad57>108 676.8 Q F2([color_style)144 676.8 Q F0([)A F2(/palette)A F0([)
+A F2(ncolor)A(s)-.1 E F0(]] | cpt\214le])A
 (This option controls the color scheme used for color \214ll plots.)144
 688.8 Q(If)144 712.8 Q F2(color_style)3.136 E F0 3.136(=1[)3.136 G(def)
 -3.136 E .636(ault], then the color scheme used will be a continuous gr\
@@ -691,24 +698,24 @@ Q(ault is 11].)-.1 E .522(If the option ar)144 120 R .522
 (gument is the path to an e)-.18 F(xisting)-.15 E/F2 10/Times-Bold@0 SF
 (GMT)3.022 E F0 .523(color palette \(CPT\) \214le, then that CPT \214le)
 3.022 F(and its color scheme will be used for the plot)144 132 Q F2
-<ad58>108 148.8 Q F0(Normally)23.08 E(,)-.65 E F2(mbm_grdtiff)3.63 E F0
-1.129(creates an e)3.63 F -.15(xe)-.15 G 1.129
+<ad58>108 148.8 Q F0(Normally)144 148.8 Q(,)-.65 E F2(mbm_grdtiff)3.63 E
+F0 1.129(creates an e)3.63 F -.15(xe)-.15 G 1.129
 (cutable shellscript and then e).15 F 3.629(xits. This)-.15 F 1.129
 (option will cause)3.629 F(the shellscript to be e)144 160.8 Q -.15(xe)
 -.15 G(cuted in the background before).15 E F2(mbm_grdtiff)2.5 E F0 -.15
-(ex)2.5 G(its.).15 E F2<ad59>108 177.6 Q F0(Normally)23.08 E(,)-.65 E F2
-(mbm_grdplot)5.332 E F0 2.833
-(generates nicely rounded numbers for the boundaries of the color)5.332
-F .655(palette. Often, the resulting color bounds e)144 189.6 R .655
-(xtend well outside the range of the gridded data.)-.15 F(This)5.654 E
+(ex)2.5 G(its.).15 E F2<ad59>108 177.6 Q F0(Normally)144 177.6 Q(,)-.65
+E F2(mbm_grdplot)3.592 E F0 1.093
+(generates nicely rounded numbers for the boundaries of the color pal-)
+3.592 F 1.47(ette. Often, the resulting color bounds e)144 189.6 R 1.469
+(xtend well outside the range of the gridded data.)-.15 F(This)6.469 E
 .923(option causes the minimum and maximum color boundaries to e)144
 201.6 R .923(xactly conform to the minimum)-.15 F .496(and maximum v)144
 213.6 R .496(alues of the grid, or)-.25 F 2.996(,i)-.4 G 2.996(ft)-2.996
 G(he)-2.996 E F2<ad5a>2.996 E F0 .496
 (option is used, the minimum and maximum v)2.996 F(alues)-.25 E
 (speci\214ed by the user)144 225.6 Q(.)-.55 E F2<ad5a>108 242.4 Q F1
-(min/max[/mode])23.63 E F0 .786(This option o)144 254.4 R -.15(ve)-.15 G
-.786(rrides the minimum and maximum v).15 F .787
+(min/max[/mode])144 242.4 Q F0 .786(This option o)144 254.4 R -.15(ve)
+-.15 G .786(rrides the minimum and maximum v).15 F .787
 (alues of the gridded data, af)-.25 F .787(fecting the color)-.25 F .905
 (palette and the contour interv)144 266.4 R .905
 (al if those parameters are not speci\214ed by the user)-.25 F 3.405(.B)

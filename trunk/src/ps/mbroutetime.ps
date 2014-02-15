@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:05 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:40 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -246,7 +252,7 @@ F1 -.548(AU)72 259.2 S(THORSHIP).548 E F0(Da)108 271.2 Q(vid W)-.2 E 2.5
 2.5(yB)-.15 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 295.2 Q
 (Lamont-Doherty Earth Observ)113 307.2 Q(atory)-.25 E F1(OPTIONS)72 336
-Q F2<ad46>108 348 Q F3(format)24.19 E F0 .067
+Q F2<ad46>108 348 Q F3(format)144 348 Q F0 .067
 (Sets the format for the input sw)144 360 R .067(ath data using)-.1 F F2
 (MBIO)2.567 E F0(inte)2.567 E .068(ger format identi\214ers.)-.15 F .068
 (This program uses)5.068 F(the)144 372 Q F2(MBIO)3.432 E F0 .932
@@ -258,14 +264,15 @@ Q F2<ad46>108 348 Q F3(format)24.19 E F0 .067
 G 3.732(ni).15 G 3.732(nt)-3.732 G(he)-3.732 E F2(MBIO)3.732 E F0
 (manual)3.732 E(page. Def)144 396 Q(ault:)-.1 E F3(format)2.5 E F0 2.5
 (=1)2.5 G(1.)-2.5 E F2<ad48>108 412.8 Q F0 .162(This "help" \215ag caus\
-e the program to print out a description of its operation and then e)
-22.52 F .161(xit immedi-)-.15 F(ately)144 424.8 Q(.)-.65 E F2<ad49>108
-441.6 Q F3(\214lename)26.41 E F0 1.083(Sets the input \214lename. If)144
-453.6 R F3(format)3.584 E F0 3.584(>0\()3.584 G 1.084(set with the)
--3.584 F F2<ad46>3.584 E F0 1.084(option\) then the sw)3.584 F 1.084
-(ath data contained in)-.1 F F3(in\214le)144 465.6 Q F0 .215
-(is read and processed. If)2.715 F F3(format)2.715 E F0 2.715(<0)2.715 G
-2.715(,t)-2.715 G(hen)-2.715 E F3(in\214le)2.715 E F0 .214
+e the program to print out a description of its operation and then e)144
+412.8 R .161(xit immedi-)-.15 F(ately)144 424.8 Q(.)-.65 E F2<ad49>108
+441.6 Q F3(\214lename)144 441.6 Q F0 1.083
+(Sets the input \214lename. If)144 453.6 R F3(format)3.584 E F0 3.584
+(>0\()3.584 G 1.084(set with the)-3.584 F F2<ad46>3.584 E F0 1.084
+(option\) then the sw)3.584 F 1.084(ath data contained in)-.1 F F3
+(in\214le)144 465.6 Q F0 .215(is read and processed. If)2.715 F F3
+(format)2.715 E F0 2.715(<0)2.715 G 2.715(,t)-2.715 G(hen)-2.715 E F3
+(in\214le)2.715 E F0 .214
 (is assumed to be an ascii \214le containing a list)2.714 F .527
 (of the input sw)144 477.6 R .528
 (ath data \214les to be processed and their formats.)-.1 F .528
@@ -282,11 +289,11 @@ e the program to print out a description of its operation and then e)
 (alues is gi)-.25 F -.15(ve)-.25 G 3.063(ni).15 G 3.063(nt)-3.063 G(he)
 -3.063 E F2(MBIO)144 561.6 Q F0(manual page.)2.5 E(Def)5 E(ault:)-.1 E
 F3(in\214le)2.5 E F0 2.5(=")2.5 G(datalist.mb-1".)-2.5 E F2<ad56>108
-578.4 Q F0(The)23.08 E F2<ad56>2.5 E F0(option causes)2.5 E F2(mbr)2.5 E
-(outetime)-.18 E F0(to print out status messages.)2.5 E F1(EXAMPLES)72
-607.2 Q F0 1.344(Suppose you are going to run the MB)108 619.2 R 1.344
-(ARI Mapping A)-.35 F 1.345(UV on the Coaxial Se)-.55 F 1.345
-(gment of the Juan de Fuca)-.15 F 1.532(Ridge. Y)108 631.2 R 1.532
+578.4 Q F0(The)144 578.4 Q F2<ad56>2.5 E F0(option causes)2.5 E F2(mbr)
+2.5 E(outetime)-.18 E F0(to print out status messages.)2.5 E F1
+(EXAMPLES)72 607.2 Q F0 1.344(Suppose you are going to run the MB)108
+619.2 R 1.344(ARI Mapping A)-.35 F 1.345(UV on the Coaxial Se)-.55 F
+1.345(gment of the Juan de Fuca)-.15 F 1.532(Ridge. Y)108 631.2 R 1.532
 (ou ha)-1.1 F 1.832 -.15(ve c)-.2 H 1.532
 (reated a route \214le called Coaxial2009_1v3.rte using).15 F F2
 (mbgrdviz)4.032 E F0 4.032(.I)C 4.032(no)-4.032 G 1.532

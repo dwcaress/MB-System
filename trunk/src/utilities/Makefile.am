@@ -145,6 +145,7 @@ mb7kpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbrolltimelag_SOURCES = mbrolltimelag.c
 
 mbauvloglist_SOURCES = mbauvloglist.c
+mbauvloglist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
 mb7k2ss_SOURCES = mb7k2ss.c
 mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la

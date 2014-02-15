@@ -43,6 +43,7 @@
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_define.h"
+#include "mb_aux.h"
 
 /* local defines */
 #define	NFIELDSMAX	50
@@ -52,6 +53,16 @@
 #define	TYPE_INTEGER	2
 #define	TYPE_DOUBLE	3
 #define	TYPE_ANGLE	4
+
+#define INDEX_ZERO		-1
+#define INDEX_MERGE_LON		-2
+#define INDEX_MERGE_LAT		-3
+#define INDEX_MERGE_HEADING	-4
+#define INDEX_MERGE_SPEED	-5
+#define INDEX_MERGE_SENSORDEPTH	-6
+#define INDEX_MERGE_ROLL	-7
+#define INDEX_MERGE_PITCH	-8
+#define INDEX_MERGE_HEAVE	-9
 
 static char rcs_id[] = "$Id$";
 
@@ -72,6 +83,7 @@ int main (int argc, char **argv)
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
+	char	*message = NULL;
 
 	/* MBIO read control parameters */
 	int	pings;
@@ -113,7 +125,22 @@ int main (int argc, char **argv)
 	int	printheader = MB_NO;
 	int	angles_in_degrees = MB_NO;
 
-	double	time_d;
+	/* navigation, heading, attitude data for merging in fnv format */
+	int	nav_merge = MB_NO;
+	mb_path	nav_file;
+	int	nav_num = 0;
+	int	nav_alloc = 0;
+	double	*nav_time_d = NULL;
+	double	*nav_navlon = NULL;
+	double	*nav_navlat = NULL;
+	double	*nav_heading = NULL;
+	double	*nav_speed = NULL;
+	double	*nav_sensordepth = NULL;
+	double	*nav_roll = NULL;
+	double	*nav_pitch = NULL;
+	double	*nav_heave = NULL;
+
+	double	time_d = 0.0;
 	int	time_i[7];
 	int	time_j[5];
 	char	buffer[MB_PATH_MAXLINE];
@@ -122,8 +149,14 @@ int main (int argc, char **argv)
 	char	*result;
 	int	nscan;
 	double	dvalue;
+	double	sec;
 	int	ivalue;
 	int	index;
+	int	jinterp = 0;
+	int	nchar;
+	int	nget;
+	int	nav_ok;
+	int	interp_status;
 	int	i, j;
 
 	/* get current default values */
@@ -132,10 +165,11 @@ int main (int argc, char **argv)
 
 	/* set file to null */
 	file[0] = '\0';
+	nav_file[0] = '\0';
 	strcpy(printformat, "default");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:I:i:L:l:O:o:PpSsVvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "F:f:I:i:L:l:N:n:O:o:PpSsVvWwHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -159,6 +193,12 @@ int main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			sscanf (optarg,"%s", nav_file);
+			nav_merge = MB_YES;
 			flag++;
 			break;
 		case 'O':
@@ -241,6 +281,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
+		fprintf(stderr,"dbg2       nav_file:       %s\n",nav_file);
 		fprintf(stderr,"dbg2       printheader:    %d\n",printheader);
 		fprintf(stderr,"dbg2       angles_in_degrees:%d\n",angles_in_degrees);
 		fprintf(stderr,"dbg2       nprintfields:   %d\n",nprintfields);
@@ -259,6 +300,81 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 
+	/* if nav merging to be done get nav */
+	if (nav_merge == MB_YES && strlen(nav_file) > 0)
+		{
+		/* count the data points in the nav file */
+		nav_num = 0;
+		nchar = MB_PATH_MAXLINE-1;
+		if ((fp = fopen(nav_file, "r")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",nav_file);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+		while ((result = fgets(buffer,nchar,fp)) == buffer)
+			nav_num++;
+		fclose(fp);
+    
+		/* allocate arrays for nav */
+		if (nav_num > 0)
+			{
+			nav_alloc = nav_num;
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nav_alloc*sizeof(double),(void **)&nav_time_d,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nav_alloc*sizeof(double),(void **)&nav_navlon,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nav_alloc*sizeof(double),(void **)&nav_navlat,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nav_alloc*sizeof(double),(void **)&nav_heading,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nav_alloc*sizeof(double),(void **)&nav_speed,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nav_alloc*sizeof(double),(void **)&nav_sensordepth,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nav_alloc*sizeof(double),(void **)&nav_roll,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nav_alloc*sizeof(double),(void **)&nav_pitch,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nav_alloc*sizeof(double),(void **)&nav_heave,&error);
+	
+			/* if error initializing memory then quit */
+			if (error != MB_ERROR_NO_ERROR)
+				{
+				mb_error(verbose,error,&message);
+				fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+				fprintf(stderr,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
+				}
+			}
+    
+		/* read the data points in the nav file */
+		nav_num = 0;
+		if ((fp = fopen(nav_file, "r")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to Open navigation File <%s> for reading\n",nav_file);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+		while ((result = fgets(buffer,nchar,fp)) == buffer)
+			{
+			nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+				&time_i[0],&time_i[1],&time_i[2],
+				&time_i[3],&time_i[4],&sec,
+				&nav_time_d[nav_num],
+				&nav_navlon[nav_num],&nav_navlat[nav_num],
+				&nav_heading[nav_num],&nav_speed[nav_num],&nav_sensordepth[nav_num],
+				&nav_roll[nav_num],&nav_pitch[nav_num],&nav_heave[nav_num]);
+			if (nget >= 9)
+				nav_ok = MB_YES;
+			else
+				nav_ok = MB_NO;
+                        if (nav_num > 0 && nav_time_d[nav_num] <= nav_time_d[nav_num-1])
+                                nav_ok = MB_NO;
+			if (nav_ok == MB_YES)
+			    nav_num++;
+			}
+		fclose(fp);
+ 		}
+fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_file);
+		
 	/* open the input file */
 	if ((fp = fopen(file, "r")) == NULL)
 		{
@@ -303,10 +419,17 @@ int main (int argc, char **argv)
 				if (angles_in_degrees == MB_YES
 					&&(strcmp(fields[nfields].name, "mLatK") == 0
 						|| strcmp(fields[nfields].name, "mLonK") == 0
-						|| strcmp(fields[nfields].name, "mLonK") == 0
+						|| strcmp(fields[nfields].name, "mLatK") == 0
 						|| strcmp(fields[nfields].name, "mRollK") == 0
 						|| strcmp(fields[nfields].name, "mPitchK") == 0
-						|| strcmp(fields[nfields].name, "mHeadK") == 0))
+						|| strcmp(fields[nfields].name, "mHeadK") == 0
+						|| strcmp(fields[nfields].name, "mYawK") == 0
+						|| strcmp(fields[nfields].name, "mLonCB") == 0
+						|| strcmp(fields[nfields].name, "mLatCB") == 0
+						|| strcmp(fields[nfields].name, "mRollCB") == 0
+						|| strcmp(fields[nfields].name, "mPitchCB") == 0
+						|| strcmp(fields[nfields].name, "mHeadCB") == 0
+						|| strcmp(fields[nfields].name, "mYawCB") == 0))
 					fields[nfields].scale = RTD;
 				else
 					fields[nfields].scale = 1.0;
@@ -368,10 +491,82 @@ int main (int argc, char **argv)
 		{
 		if (strcmp(printfields[i].name,"zero") == 0)
 			{
-			printfields[i].index = -1;
+			printfields[i].index = INDEX_ZERO;
 			if (printfields[i].formatset == MB_NO)
 				{
-				strcpy(printfields[i].format, "%d");
+				strcpy(printfields[i].format, "%f");
+				}
+			}
+		else if (strcmp(printfields[i].name,"mergeLon") == 0)
+			{
+			printfields[i].index = INDEX_MERGE_LON;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.9f");
+				}
+			}
+		else if (strcmp(printfields[i].name,"mergeLat") == 0)
+			{
+			printfields[i].index = INDEX_MERGE_LAT;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.9f");
+				}
+			}
+		else if (strcmp(printfields[i].name,"mergeHeading") == 0)
+			{
+			printfields[i].index = INDEX_MERGE_HEADING;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.3f");
+				}
+			}
+		else if (strcmp(printfields[i].name,"mergeSpeed") == 0)
+			{
+			printfields[i].index = INDEX_MERGE_SPEED;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.3f");
+				}
+			}
+		else if (strcmp(printfields[i].name,"mergeDraft") == 0)
+			{
+			printfields[i].index = INDEX_MERGE_SENSORDEPTH;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.3f");
+				}
+			}
+		else if (strcmp(printfields[i].name,"mergeSensordepth") == 0)
+			{
+			printfields[i].index = INDEX_MERGE_SENSORDEPTH;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.3f");
+				}
+			}
+		else if (strcmp(printfields[i].name,"mergeRoll") == 0)
+			{
+			printfields[i].index = INDEX_MERGE_ROLL;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.3f");
+				}
+			}
+		else if (strcmp(printfields[i].name,"mergePitch") == 0)
+			{
+			printfields[i].index = INDEX_MERGE_PITCH;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.3f");
+				}
+			}
+		else if (strcmp(printfields[i].name,"mergeHeave") == 0)
+			{
+			printfields[i].index = INDEX_MERGE_HEAVE;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.3f");
 				}
 			}
 		else
@@ -410,16 +605,97 @@ int main (int argc, char **argv)
 		for (i=0;i<nprintfields;i++)
 			{
 			index = printfields[i].index;
-			if (index == -1)
+			if (index == INDEX_ZERO)
 				{
 				dvalue = 0.0;
+				fprintf(stdout, printfields[i].format, dvalue);
+				}
+			else if (index == INDEX_MERGE_LON)
+				{
+				interp_status = mb_linear_interp_longitude(verbose,
+							nav_time_d-1, nav_navlon-1,
+							nav_num, time_d, &dvalue, &jinterp,
+							&error);
+				if (jinterp < 2 || jinterp > nav_num-2)
+					dvalue = 0.0;
+				fprintf(stdout, printfields[i].format, dvalue);
+				}
+			else if (index == INDEX_MERGE_LAT)
+				{
+				interp_status = mb_linear_interp_latitude(verbose,
+							nav_time_d-1, nav_navlat-1,
+							nav_num, time_d, &dvalue, &jinterp,
+							&error);
+				if (jinterp < 2 || jinterp > nav_num-2)
+					dvalue = 0.0;
+				fprintf(stdout, printfields[i].format, dvalue);
+				}
+			else if (index == INDEX_MERGE_HEADING)
+				{
+				interp_status = mb_linear_interp_heading(verbose,
+							nav_time_d-1, nav_heading-1,
+							nav_num, time_d, &dvalue, &jinterp,
+							&error);
+				if (jinterp < 2 || jinterp > nav_num-2)
+					dvalue = 0.0;
+				fprintf(stdout, printfields[i].format, dvalue);
+				}
+			else if (index == INDEX_MERGE_SPEED)
+				{
+				interp_status = mb_linear_interp(verbose,
+							nav_time_d-1, nav_speed-1,
+							nav_num, time_d, &dvalue, &jinterp,
+							&error);
+				if (jinterp < 2 || jinterp > nav_num-2)
+					dvalue = 0.0;
+				fprintf(stdout, printfields[i].format, dvalue);
+				}
+			else if (index == INDEX_MERGE_SENSORDEPTH)
+				{
+				interp_status = mb_linear_interp(verbose,
+							nav_time_d-1, nav_sensordepth-1,
+							nav_num, time_d, &dvalue, &jinterp,
+							&error);
+				if (jinterp < 2 || jinterp > nav_num-2)
+					dvalue = 0.0;
+				fprintf(stdout, printfields[i].format, dvalue);
+				}
+			else if (index == INDEX_MERGE_ROLL)
+				{
+				interp_status = mb_linear_interp(verbose,
+							nav_time_d-1, nav_roll-1,
+							nav_num, time_d, &dvalue, &jinterp,
+							&error);
+				if (jinterp < 2 || jinterp > nav_num-2)
+					dvalue = 0.0;
+				fprintf(stdout, printfields[i].format, dvalue);
+				}
+			else if (index == INDEX_MERGE_PITCH)
+				{
+				interp_status = mb_linear_interp(verbose,
+							nav_time_d-1, nav_pitch-1,
+							nav_num, time_d, &dvalue, &jinterp,
+							&error);
+				if (jinterp < 2 || jinterp > nav_num-2)
+					dvalue = 0.0;
+				fprintf(stdout, printfields[i].format, dvalue);
+				}
+			else if (index == INDEX_MERGE_HEAVE)
+				{
+				interp_status = mb_linear_interp(verbose,
+							nav_time_d-1, nav_heave-1,
+							nav_num, time_d, &dvalue, &jinterp,
+							&error);
+				if (jinterp < 2 || jinterp > nav_num-2)
+					dvalue = 0.0;
 				fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (fields[index].type == TYPE_DOUBLE)
 				{
 				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
 				dvalue *= fields[index].scale;
-				if (strcmp(fields[nfields].name, "mHeadK") == 0
+				if ((strcmp(fields[nfields].name, "mHeadK") == 0
+					|| strcmp(fields[nfields].name, "mYawK") == 0)
 					&& angles_in_degrees == MB_YES
 					&& dvalue < 0.0)
 					dvalue += 360.0;
@@ -433,29 +709,28 @@ int main (int argc, char **argv)
 			else if (fields[index].type == TYPE_TIMETAG)
 				{
 				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
+				time_d = dvalue;
 				if (strcmp(printfields[i].format, "time_i") == 0)
 					{
-					time_d = dvalue;
 					mb_get_date(verbose,time_d,time_i);
 					fprintf(stdout,"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d",
 						time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
 					}
 				else if (strcmp(printfields[i].format, "time_j") == 0)
 					{
-					time_d = dvalue;
 					mb_get_date(verbose,time_d,time_i);
 					mb_get_jtime(verbose,time_i,time_j);
 					fprintf(stdout,"%4.4d %3.3d %2.2d %2.2d %2.2d.%6.6d",
 						time_i[0],time_j[1],time_i[3],time_i[4],time_i[5],time_i[6]);
 					}
 				else
-					fprintf(stdout, printfields[i].format, dvalue);
+					fprintf(stdout, printfields[i].format, time_d);
 				}
 			else if (fields[index].type == TYPE_ANGLE)
 				{
 				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
 				dvalue *= fields[index].scale;
-				if (strcmp(fields[nfields].name, "mYawCB") == 0
+				if (strcmp(fields[index].name, "mYawCB") == 0
 					&& angles_in_degrees == MB_YES
 					&& dvalue < 0.0)
 					dvalue += 360.0;
@@ -469,6 +744,20 @@ int main (int argc, char **argv)
 		nrecord++;
 		}
 	fclose(fp);
+
+	/* deallocate arrays for navigation */
+	if (nav_alloc > 0)
+		{
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_time_d,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_navlon,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_navlat,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_heading,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_speed,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_sensordepth,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_roll,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_pitch,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_heave,&error);
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)

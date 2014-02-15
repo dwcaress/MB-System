@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2164       February 15, 2014
 * Version 5.4.2163       January 31, 2014
   Version 5.4.2162       January 24, 2014
 * Version 5.4.2159       January 18, 2014
@@ -169,6 +170,17 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2164 (February 15, 2014)
+
+Format 241 (MBF_WASSPENL): added new format for WASSP multibeam sonar.
+
+Format 151 (MBF_OMGHDCSJ): applied patch supplied by Bob Covill.
+
+Mbrolltimelag: fixed so that the program works with data formats for which the
+roll source is the survey records.
+
+Mbauvloglist: added capability to merge navigation from external files.
 
 -----> 5.4.2163 (January 31, 2014)
 

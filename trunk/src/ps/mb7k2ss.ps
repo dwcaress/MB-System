@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:00 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:34 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -334,7 +340,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 152.61(mb7k2ss\(1\) MB-System)72 48 R 152.61
 (5.0 mb7k2ss\(1\))2.5 F/F1 10.95/Times-Bold@0 SF(OPTIONS)72 84 Q/F2 10
-/Times-Bold@0 SF<ad41>108 96 Q/F3 10/Times-Italic@0 SF(mode)23.08 E F0
+/Times-Bold@0 SF<ad41>108 96 Q/F3 10/Times-Italic@0 SF(mode)144 96 Q F0
 .887(This option sets the types of data to be e)144 108 R .887
 (xtracted and output.)-.15 F(If)5.887 E F2<ad41>3.388 E F3(1)A F0 .888
 (is gi)3.388 F -.15(ve)-.25 G .888(n, then an).15 F 3.388(yl)-.15 G
@@ -345,7 +351,7 @@ BP
 1.054(igh fre-)-3.554 F(quenc)144 132 Q 2.5(ys)-.15 G
 (idescan records are e)-2.5 E 2.5(xtracted. Def)-.15 F(ault: Lo)-.1 E
 2.5(wf)-.25 G(requenc)-2.5 E 2.5(ys)-.15 G(idescan records are e)-2.5 E
-(xtracted.)-.15 E F2<ad42>108 148.8 Q F3(bottompic)23.63 E
+(xtracted.)-.15 E F2<ad42>108 148.8 Q F3(bottompic)144 148.8 Q
 (kmode/bottompic)-.2 E(kthr)-.2 E(eshold)-.37 E F0 1.872
 (This option sets the source of the sonar \214rst arri)144 160.8 R -.25
 (va)-.25 G 4.372(lt).25 G 1.872(ime used for laying out sidescan on the)
@@ -370,24 +376,24 @@ E(kmode)-.2 E F0 2.527(=2)2.527 G 2.527(,t)-2.527 G(hen)-2.527 E F2
 Q F0 .3(This option causes)144 261.6 R F2(mb7k2ss)5.3 E F0 .301
 (to print out an)2.8 F 2.801(yc)-.15 G .301
 (omment records encountered in the input Reson 7k)-2.801 F(data.)144
-273.6 Q F2<ad44>108 290.4 Q F3(interpbins)23.08 E F0 2.137
+273.6 Q F2<ad44>108 290.4 Q F3(interpbins)144 290.4 Q F0 2.137
 (Causes interpolation o)144 302.4 R -.15(ve)-.15 G 4.637(rg).15 G 2.137
 (aps in the output sidescan resulting from draping the sidescan on)
 -4.687 F(topograph)144 314.4 Q 2.761 -.65(y. T)-.05 H(he).65 E F3
 (interpbins)3.961 E F0 -.25(va)3.961 G 1.461(lues sets the maximum g).25
 F 1.462(ap size o)-.05 F -.15(ve)-.15 G 3.962(rw).15 G 1.462
 (hich interpolation will be)-3.962 F(applied.)144 326.4 Q F2<ad46>108
-343.2 Q F3(format)24.19 E F0 .22(Sets the data format used if the input\
- is read from stdin or from a \214le. If)144 355.2 R F3(format)2.72 E F0
-2.72(<0)2.72 G 2.72(,t)-2.72 G .22(hen the input)-2.72 F .007
+343.2 Q F3(format)144 343.2 Q F0 .22(Sets the data format used if the i\
+nput is read from stdin or from a \214le. If)144 355.2 R F3(format)2.72
+E F0 2.72(<0)2.72 G 2.72(,t)-2.72 G .22(hen the input)-2.72 F .007
 (\214le speci\214ed with the)144 367.2 R F2<ad49>2.507 E F0 .008
 (option will actually contain a list of input sw)2.508 F .008
 (ath sonar data \214les. This pro-)-.1 F
 (gram only reads Reson 7k format data \214les \()144 379.2 Q F2(MBIO)A
 F0(format 88\).)2.5 E F2<ad48>108 396 Q F0 .162(This "help" \215ag caus\
-e the program to print out a description of its operation and then e)
-22.52 F .161(xit immedi-)-.15 F(ately)144 408 Q(.)-.65 E F2<ad49>108
-424.8 Q F3(in\214le)26.41 E F0 .514(Sets the input \214le path. If)144
+e the program to print out a description of its operation and then e)144
+396 R .161(xit immedi-)-.15 F(ately)144 408 Q(.)-.65 E F2<ad49>108 424.8
+Q F3(in\214le)144 424.8 Q F0 .514(Sets the input \214le path. If)144
 436.8 R F3(format)3.015 E F0 3.015(>0\()3.015 G .515(set with the)-3.015
 F F2<ad66>3.015 E F0 .515(option or)3.015 F F2(mbdefaults)3.015 E F0
 3.015(\)t)C .515(hen the sw)-3.015 F .515(ath sonar)-.1 F .797
@@ -404,8 +410,8 @@ F F2<ad66>3.015 E F0 .515(option or)3.015 F F2(mbdefaults)3.015 E F0
 (wed by a data format identi\214er)-.25 E 2.5(,e)-.4 G(.g.:)-2.5 E
 (data\214le1 88)180 496.8 Q(data\214le2 88)180 508.8 Q
 (This program only reads Reson 7k format data \214les \()144 520.8 Q F2
-(MBIO)A F0(format 88\).)2.5 E F2<ad4c>108 537.6 Q F3(startline/liner)
-23.63 E(oot)-.45 E F0 .035(This option sets the starting line number an\
+(MBIO)A F0(format 88\).)2.5 E F2<ad4c>108 537.6 Q F3(startline/liner)144
+537.6 Q(oot)-.45 E F0 .035(This option sets the starting line number an\
 d the output \214lename root used when)144 549.6 R F2<ad52>2.536 E F0
 .036(is speci\214ed so)2.536 F
 (that data are output according to planned surv)144 561.6 Q .3 -.15
@@ -428,7 +434,7 @@ he output \214lename \(or \214lenames if a datalist is being processed\
 (\214x replaced by a ".mb71\) suf)-.25 F 1.078
 (\214x. The record types to be)-.25 F -.15(ex)144 679.2 S
 (tracted are set using the).15 E F2<ad41>2.5 E F0(option.)2.5 E F2<ad51>
-108 696 Q F3 -.45(ro)22.52 G(utetime\214le).45 E F0 1.075
+108 696 Q F3 -.45(ro)144 696 S(utetime\214le).45 E F0 1.075
 (This option speci\214es a \214le containing the times that the surv)144
 708 R 1.375 -.15(ey r)-.15 H 1.075(eached the intended w).15 F
 (aypoints.)-.1 E(This te)144 720 Q
@@ -466,7 +472,7 @@ C(r)-2.766 E F1<ad52>2.766 E F0 .266(are in)2.766 F -.2(vo)-.4 G -.1(ke)
 .2 G .266(d, the output \214lename \(or \214les if a).1 F
 (datalist is being processed\) will be the input sw)144 192 Q
 (ath \214lename with an ".mb71" suf)-.1 E(\214x appended.)-.25 E F1
-<ad52>108 208.8 Q F2 -.45(ro)23.08 G(ute\214le).45 E F0 1.003
+<ad52>108 208.8 Q F2 -.45(ro)144 208.8 S(ute\214le).45 E F0 1.003
 (This option speci\214es an)144 220.8 R F1(mbgrdviz)3.502 E F0 1.002
 (route \214le containing the intended w)3.502 F 1.002
 (aypoints of the surv)-.1 F -.15(ey)-.15 G 3.502(.I)-.5 G(f)-3.502 E F2
@@ -483,24 +489,24 @@ E F0 .546(and will include the line number start-)3.046 F .316(ing with)
 (in)144 268.8 Q -.2(vo)-.4 G -.1(ke).2 G .631(d, the output \214lename \
 \(or \214les if a datalist is being processed\) will be the input sw).1
 F .63(ath \214le-)-.1 F(name with an ".mb71" suf)144 280.8 Q
-(\214x appended.)-.25 E F1<ad54>108 297.6 Q F2(topo)23.63 E(grid\214le)
--.1 E F0 1.204
+(\214x appended.)-.25 E F1<ad54>108 297.6 Q F2(topo)144 297.6 Q
+(grid\214le)-.1 E F0 1.204
 (This option speci\214es a GMT grid \214le containing a topograph)144
 309.6 R 3.705(ym)-.05 G 1.205(odel of the surv)-3.705 F 1.505 -.15(ey a)
 -.15 H 1.205(rea. When).15 F -.2(av)144 321.6 S(ailable,)-.05 E F1
 (mb7k2ss)2.98 E F0 2.98(,u)C .48(ses the topograph)-2.98 F 2.979(yt)-.05
 G 2.979(oc)-2.979 G .479(alculate the position of each ra)-2.979 F 2.979
-(ws)-.15 G .479(idescan sample on)-2.979 F 3.116
-(the sea\215oor prior to binning the sample into the sw)144 333.6 R
-3.117(ath data. This method is considerable)-.1 F(impro)144 345.6 Q -.15
-(ve)-.15 G .72(ment o).15 F -.15(ve)-.15 G 3.22(rt).15 G .719
-(he \215at bottom assumption used when topograph)-3.22 F 3.219(yi)-.05 G
-3.219(su)-3.219 G(na)-3.219 E -.25(va)-.2 G .719
-(ilable. The grid \214le).25 F(must contain topograph)144 357.6 Q 2.5
+(ws)-.15 G .479(idescan sample on)-2.979 F .318
+(the sea\215oor prior to binning the sample into the sw)144 333.6 R .318
+(ath data. This method is considerable impro)-.1 F -.15(ve)-.15 G(-).15
+E .011(ment o)144 345.6 R -.15(ve)-.15 G 2.511(rt).15 G .011
+(he \215at bottom assumption used when topograph)-2.511 F 2.511(yi)-.05
+G 2.511(su)-2.511 G(na)-2.511 E -.25(va)-.2 G .01
+(ilable. The grid \214le must con-).25 F(tain topograph)144 357.6 Q 2.5
 (y\()-.05 G(positi)-2.5 E .3 -.15(ve u)-.25 H(p\) rather than bath).15 E
 (ymetry \(positi)-.05 E .3 -.15(ve d)-.25 H -.25(ow).15 G(n\).).25 E F1
-<ad55>108 374.4 Q F2 -.15(ra)23.08 G(ng).15 E(ethr)-.1 E(eshold)-.37 E
-F0 .021(If the)144 386.4 R F1<ad52>2.521 E F0 .021
+<ad55>108 374.4 Q F2 -.15(ra)144 374.4 S(ng).15 E(ethr)-.1 E(eshold)-.37
+E F0 .021(If the)144 386.4 R F1<ad52>2.521 E F0 .021
 (option is speci\214ed,)2.521 F F1(mb7k2ss)2.521 E F0 .021
 (breaks up the output into \214les corresponding to surv)2.521 F .322
 -.15(ey l)-.15 H(ines).15 E .013(speci\214ed in a route \214le.)144
@@ -513,18 +519,19 @@ determine when a)5.013 F -.1(wa)144 410.4 S 1.841
 (and then ceases to decrease.)2.768 F(Def)144 434.4 Q(ault:)-.1 E F2
 -.15(ra)2.5 G(ng).15 E(ethr)-.1 E(eshold)-.37 E F0 2.5(=5)2.5 G 2.5(0m)
 -2.5 G(.)-2.5 E F1<ad56>108 451.2 Q F0 1.625
-(This option increases the v)23.08 F 1.626(erbosity of)-.15 F F1
+(This option increases the v)144 451.2 R 1.626(erbosity of)-.15 F F1
 (mb7k2ss)4.126 E F0 4.126(,c)C 1.626(ausing it to print out messages re)
 -4.126 F -.05(ga)-.15 G 1.626(rding its).05 F(progress to stdout.)144
-463.2 Q F1<ad57>108 480 Q F2(swathwidth)20.3 E F0 .106
+463.2 Q F1<ad57>108 480 Q F2(swathwidth)144 480 Q F0 .106
 (This option sets the output sidescan sw)2.606 F .106
 (ath width in meters. By def)-.1 F(ault)-.1 E F1(mb7k2ss)2.605 E F0
 (calcu-)2.605 E(lates the sw)144 492 Q
 (ath width to use all of the samples a)-.1 E -.25(va)-.2 G
 (ilable in the original data.).25 E F1<ad58>108 508.8 Q F0
-(This option switches port and starboard sidescan channels.)23.08 E/F3
-10.95/Times-Bold@0 SF(EXAMPLES)72 537.6 Q F0 .576(Suppose that we ha)108
-549.6 R .876 -.15(ve c)-.2 H .576(ollected tw).15 F 3.076(oR)-.1 G .577
+(This option switches port and starboard sidescan channels.)144 508.8 Q
+/F3 10.95/Times-Bold@0 SF(EXAMPLES)72 537.6 Q F0 .576
+(Suppose that we ha)108 549.6 R .876 -.15(ve c)-.2 H .576(ollected tw)
+.15 F 3.076(oR)-.1 G .577
 (eson 7k data\214les incorporating multibeam sonar data, sidescan data,)
 -3.076 F(and subbottom pro\214ler data, and that the \214lenames are:)
 108 561.6 Q(20070809_173212.s7k)128 573.6 Q .228
