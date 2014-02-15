@@ -92,7 +92,7 @@
 #define	MBSYS_HDCS_MAX_PIXELS		1024
 
 /* define tools (sonars) supported by OMG_HDCS */
-#define MBSYS_HDCS_NUM_TOOLS		46   /* as of June 2010 */
+#define MBSYS_HDCS_NUM_TOOLS		55   /* as of Sept. 2013 */
 #define MBSYS_HDCS_None			-1
 #define MBSYS_HDCS_SingleBeam		0
 #define MBSYS_HDCS_ELAC_BottomChart	1
@@ -140,6 +140,15 @@
 #define MBSYS_HDCS_R2Sonic_2024		43
 #define MBSYS_HDCS_SeaBat_7150 		44
 #define MBSYS_HDCS_OMG_GLORIA		45
+#define MBSYS_HDCS_ODOM_ES3 		46
+#define MBSYS_HDCS_EM2040 		47
+#define MBSYS_HDCS_HC5K 		48
+#define MBSYS_HDCS_R2Sonic_2022 	49
+#define MBSYS_HDCS_SeaBat_7111 		50
+#define MBSYS_HDCS_EdgeTech_4600 	51
+#define MBSYS_HDCS_ME70 		52
+#define MBSYS_HDCS_SeaBat_7101 		53
+#define MBSYS_HDCS_EM2040D 		54
 #define MBSYS_HDCS_COMMENT		999
 
 static char *mbsys_hdcs_tool_names[MBSYS_HDCS_NUM_TOOLS] = {
@@ -188,7 +197,16 @@ static char *mbsys_hdcs_tool_names[MBSYS_HDCS_NUM_TOOLS] = {
    "Reson 7125",
    "R2Sonic 2024",
    "Reson 7150",
-   "OMG GLORIA"
+   "OMG GLORIA",
+   "ODOM ES3",
+   "Kongsberg - EM2040",
+   "HydroChart 5000",
+   "R2Sonic 2022",
+   "Reson 7111",
+   "EdgeTech 4600",
+   "ME70",
+   "Reson 7101",
+   "Kongsberg - EM2040D"
 };
 
 
@@ -232,6 +250,7 @@ struct mbsys_hdcs_beam_struct
 	signed short Tx_steer;
 	signed short Rc_steer;
 	mb_u_char TxSector;
+	float Ifremer_qfactor;
 	unsigned int timestampOffset; /* really is a 64 bit integer, trying to compress */
 					/* would'nt even need if didn't have to relate wavefile
 			 		by this number */

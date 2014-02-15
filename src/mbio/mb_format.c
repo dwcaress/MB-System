@@ -661,6 +661,10 @@ int mb_format_register(int verbose,
 		{
 		status = mbr_register_3ddepthp(verbose, mbio_ptr, error);
 		}
+ 	else if (*format == MBF_WASSPENL)
+		{
+		status = mbr_register_wasspenl(verbose, mbio_ptr, error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -1610,6 +1614,17 @@ int mb_format_info(int verbose,
  	else if (*format == MBF_3DDEPTHP)
 		{
 		status = mbr_info_3ddepthp(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error); 
+		}
+ 	else if (*format == MBF_WASSPENL)
+		{
+		status = mbr_info_wasspenl(verbose, system,
 			beams_bath_max, beams_amp_max, pixels_ss_max,
 			format_name, system_name, format_description,
 			numfile, filetype,

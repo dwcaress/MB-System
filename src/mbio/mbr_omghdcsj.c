@@ -904,6 +904,12 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 			for (i = 0; i< 20; i++)
 			{
+				/*
+				if (summary->Beam_BitsDefining[3])
+				{
+					summary->Beam_BitsDefining[3] &= ~(1 << 6);
+				}
+				*/
 				int_ptr = (int *) &buffer[offset];
 				summary->Beam_BitsDefining[i] = mb_swap_int(*int_ptr); offset +=4;
 			}
@@ -2813,6 +2819,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			beam->Tx_steer = 0;
 			beam->Rc_steer = 0;
 			beam->TxSector = 0;
+			beam->Ifremer_qfactor = 0.0;
 			beam->timestampOffset = 0;
 			beam->no_RAMAN = 0;
 			beam->no_IR = 0;
@@ -2928,6 +2935,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			beam->Tx_steer = 0;
 			beam->Rc_steer = 0;
 			beam->TxSector = 0;
+			beam->Ifremer_qfactor = 0.0;
 			beam->timestampOffset = 0;
 			beam->no_RAMAN = 0;
 			beam->no_IR = 0;
@@ -3086,6 +3094,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			beam->Tx_steer = 0;
 			beam->Rc_steer = 0;
 			beam->TxSector = 0;
+			beam->Ifremer_qfactor = 0.0;
 			beam->timestampOffset = 0;
 			beam->no_RAMAN = 0;
 			beam->no_IR = 0;
@@ -3218,7 +3227,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 			if (summary->Beam_BitsDefining[1] & BEAM_uc_pseudoAngleIndependentBackscatter)
 			{
-			beam->pseudoAngleIndependentBackscatter = buffer[offset]; offset+=1;
+				beam->pseudoAngleIndependentBackscatter = buffer[offset]; offset+=1;
 			}
 			}
 
@@ -3296,6 +3305,13 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if (summary->Beam_BitsDefining[3] & BEAM_uc_TxSector)
 			{
 				beam->TxSector = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_f_Ifremer_qfactor)
+			{
+				float_ptr = (float *) &buffer[offset];
+				mb_swap_float(float_ptr);
+				beam->Ifremer_qfactor = *float_ptr;
+				offset+=4;
 			}
 			}
 
@@ -4414,6 +4430,7 @@ sample_count, beam->offset, offset_start);
 			sbeam->Tx_steer = beam->Tx_steer;
 			sbeam->Rc_steer = beam->Rc_steer;
 			sbeam->TxSector = beam->TxSector;
+			sbeam->Ifremer_qfactor = beam->Ifremer_qfactor;
 			sbeam->timestampOffset = beam->timestampOffset;
 			sbeam->no_RAMAN = beam->no_RAMAN;
 			sbeam->no_IR = beam->no_IR;
@@ -7402,6 +7419,12 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if (summary->Beam_BitsDefining[3] & BEAM_uc_TxSector)
 			{
 				buffer[offset] = beam->TxSector; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_f_Ifremer_qfactor)
+			{
+				float_ptr = (float *) &buffer[offset];
+				mb_swap_float(float_ptr);
+				beam->Ifremer_qfactor = *float_ptr; offset+=4;
 			}
 			}
 

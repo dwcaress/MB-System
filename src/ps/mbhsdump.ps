@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:02 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:36 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -248,7 +254,7 @@ F(program w)108 242.4 Q(as named hsdump.)-.1 E F1 -.548(AU)72 271.2 S
 -.15 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 307.2 Q
 (Lamont-Doherty Earth Observ)113 319.2 Q(atory)-.25 E F1(OPTIONS)72 348
-Q F2<ad46>108 360 Q F3(format)24.19 E F0 .716
+Q F2<ad46>108 360 Q F3(format)144 360 Q F0 .716
 (Sets the format for the input and output sw)144 372 R .715
 (ath sonar data using)-.1 F F2(MBIO)3.215 E F0(inte)3.215 E .715
 (ger format identi\214ers.)-.15 F 1.204(This program is speci\214c to H\
@@ -261,15 +267,15 @@ F(elocity)-.15 E .151(records. Currently)144 408 R 2.651(,t)-.65 G .151
 F0(id 21\) and the L-DEO in-house binary Hydrosweep format \()144 420 Q
 F2(MBIO)A F0(id 24\).)2.5 E(Def)5 E(ault:)-.1 E F3(format)2.5 E F0 2.5
 (=5)2.5 G(.)-2.5 E F2<ad48>108 436.8 Q F0 .391(This "help" \215ag cause\
-s the program to print out a description of its operation and then e)
-22.52 F .39(xit imme-)-.15 F(diately)144 448.8 Q(.)-.65 E F2<ad49>108
-465.6 Q F3(in\214le)26.41 E F0 .33(Data \214le from which the input dat\
-a will be read. If no input \214le is speci\214ed, the input will be re\
-ad)144 477.6 R(from stdin. Def)144 489.6 Q(ault:)-.1 E F3(in\214le)2.5 E
-F0 2.5(=s)2.5 G(tdin.)-2.5 E F2<ad4f>108 506.4 Q F3(kind)22.52 E F0(Set\
-s the kind of data record which will be listed, where the choices for k\
-ind include:)144 518.4 Q 25.72(1: Surv)180 530.4 R .3 -.15(ey d)-.15 H
-(ata record).15 E 25.72(2: Comment)180 542.4 R(record)2.5 E 25.72
+s the program to print out a description of its operation and then e)144
+436.8 R .39(xit imme-)-.15 F(diately)144 448.8 Q(.)-.65 E F2<ad49>108
+465.6 Q F3(in\214le)144 465.6 Q F0 .33(Data \214le from which the input\
+ data will be read. If no input \214le is speci\214ed, the input will b\
+e read)144 477.6 R(from stdin. Def)144 489.6 Q(ault:)-.1 E F3(in\214le)
+2.5 E F0 2.5(=s)2.5 G(tdin.)-2.5 E F2<ad4f>108 506.4 Q F3(kind)144 506.4
+Q F0(Sets the kind of data record which will be listed, where the choic\
+es for kind include:)144 518.4 Q 25.72(1: Surv)180 530.4 R .3 -.15(ey d)
+-.15 H(ata record).15 E 25.72(2: Comment)180 542.4 R(record)2.5 E 25.72
 (3: Calibrate)180 554.4 R(data record)2.5 E 25.72(4: Mean)180 566.4 R
 -.15(ve)2.5 G(locity data record).15 E 25.72(5: V)180 578.4 R
 (elocity pro\214le data record)-1.11 E 25.72(6: Standby)180 590.4 R
@@ -277,7 +283,7 @@ ind include:)144 518.4 Q 25.72(1: Surv)180 530.4 R .3 -.15(ey d)-.15 H
 (ation source data record)-.05 E(This option can be gi)144 614.4 Q -.15
 (ve)-.25 G 2.5(nm).15 G
 (ultiple times to set more than one kind of data record for listing.)
--2.5 E F2<ad56>108 631.2 Q F0(Normally)23.08 E(,)-.65 E F2(mbhsdump)
+-2.5 E F2<ad56>108 631.2 Q F0(Normally)144 631.2 Q(,)-.65 E F2(mbhsdump)
 3.047 E F0 .547(lists only the contents of the data records which are s\
 peci\214ed with the)3.047 F F2<ad4f>3.046 E F0 3.024(option. If)144
 643.2 R(the)3.024 E F2<ad56>3.024 E F0 .524(\215ag is gi)3.024 F -.15

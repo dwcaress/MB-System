@@ -286,6 +286,7 @@
 #define	MB_SYS_BENTHOS		33
 #define	MB_SYS_SWATHPLUS	34
 #define MB_SYS_3DATDEPTHLIDAR   35
+#define MB_SYS_WASSP            36
 
 /* Number of supported MBIO data formats */
 #define	MB_FORMATS	74
@@ -533,6 +534,10 @@
 #define MBF_3DDEPTHP    231     /* 3DatDepth processed format for 3DatDepth LIDAR,
                                         variable beams, bathymetry, amplitude,
                                         binary, single files, 3DatDepth. */
+#define MBF_WASSPENL    241     /* WASSP Multibeam Vendor Format,
+                                        WASSP multibeams,
+                                        bathymetry and amplitude,
+                                        122 or 244 beams, binary, Electronic Navigation Ltd. */
 
 /* format registration function prototypes */
 int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error);
@@ -613,6 +618,7 @@ int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error);
 int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error);
 int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error);
 int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error);
+int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error);
 int mbr_info_sbsiomrg(int verbose,
 			int *system,
 			int *beams_bath_max,
@@ -2136,6 +2142,26 @@ int mbr_info_swplssxp(int verbose,
 			double *beamwidth_ltrack,
 			int *error);
 int mbr_info_3ddepthp(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
+int mbr_info_wasspenl(int verbose,
 			int *system,
 			int *beams_bath_max,
 			int *beams_amp_max,

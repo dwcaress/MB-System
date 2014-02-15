@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:02 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:37 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 1
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -232,19 +238,19 @@ BP
 /F0 10/Times-Roman@0 SF(mbm_fmtv)72 48 Q 136.65(el\(1\) MB-System)-.15 F
 136.65(5.0 mbm_fmtv)2.5 F(el\(1\))-.15 E/F1 10.95/Times-Bold@0 SF -.219
 (NA)72 84 S(ME).219 E/F2 10/Times-Bold@0 SF(mbm_fmtv)108 96 Q(el)-.1 E
-F0 2.626<ad45>2.626 G .126(xtract sound v)-2.626 F .126
+F0 2.5<ad45>2.5 G(xtract sound v)-2.5 E
 (elocity info from Hydrosweep data \214les and create output in tab)-.15
-F .126(ular format.)-.2 F F1(VERSION)72 124.8 Q F0 -1.11(Ve)108 136.8 S
+E(ular format.)-.2 E F1(VERSION)72 124.8 Q F0 -1.11(Ve)108 136.8 S
 (rsion 5.0)1.11 E F1(SYNOPSIS)72 165.6 Q F2(mbm_fmtv)108 177.6 Q(el)-.1
 E F0([)2.5 E F2<ad46>A/F3 10/Times-Italic@0 SF(format)A F2<ad49>2.5 E F3
 (in\214lename)A F2(])2.5 E F1(DESCRIPTION)72 206.4 Q F2(mbm_fmtv)108
 218.4 Q(el)-.1 E F0 .315(is a macro that scans a Hydrosweep sw)2.815 F
 .315(ath sonar data \214le using the program)-.1 F F2(mbhsdump)2.815 E
 F0(and)2.815 E .865(generates a list in columnar format with time, date\
-, latitude, longitude, C-mean, and C-k)108 230.4 R .865
+, latitude, longitude, C-mean, and C-k)108 230.4 R .866
 (eel entrys. Com-)-.1 F 1.698
 (ment records \(lines\) at the top of the output be)108 242.4 R 1.698
-(gin with '#'.)-.15 F 1.699(The columns are tab-delimited. The only)
+(gin with '#'.)-.15 F 1.698(The columns are tab-delimited. The only)
 6.698 F(allo)108 254.4 Q(wed formats are 21 \(ra)-.25 E 2.5(wH)-.15 G
 (ydrosweep data\) and 24 \(L-DEO in-house binary Hydrosweep data\).)-2.5
 E F1 -.548(AU)72 283.2 S(THORSHIP).548 E F0(Da)108 295.2 Q(vid W)-.2 E
@@ -254,13 +260,13 @@ E F1 -.548(AU)72 283.2 S(THORSHIP).548 E F0(Da)108 295.2 Q(vid W)-.2 E
 (Lamont-Doherty Earth Observ)113 331.2 Q(atory)-.25 E
 (Suzanne H. O'Hara \(sohara@ldeo.columbia.edu\))108 343.2 Q
 (Lamont-Doherty Earth Observ)113 355.2 Q(atory)-.25 E F1(OPTIONS)72 384
-Q F2<ad46>108 396 Q F3(format)24.19 E F0 1.16
+Q F2<ad46>108 396 Q F3(format)144 396 Q F0 1.16
 (Sets the format for the input sw)144 408 R 1.16(ath sonar data using)
 -.1 F F2(MBIO)3.66 E F0(inte)3.66 E 1.16
 (ger format identi\214ers. The only)-.15 F(allo)144 420 Q 2.07
 (wed formats are 21 \(ra)-.25 F 4.57(wH)-.15 G 2.07
 (ydrosweep data\) and 24 \(L-DEO in-house binary Hydrosweep)-4.57 F
-(data\).)144 432 Q F2<ad49>108 448.8 Q F3(in\214lename)26.41 E F0
+(data\).)144 432 Q F2<ad49>108 448.8 Q F3(in\214lename)144 448.8 Q F0
 (Data \214le from which the input data will be read.)144 460.8 Q F1
 (SEE ALSO)72 489.6 Q F2(mbsystem)108 501.6 Q F0(\(1\))A F1 -.11(BU)72
 530.4 S(GS).11 E F0(Only one output format is currently supported.)108

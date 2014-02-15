@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:02 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:37 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -286,18 +292,18 @@ R .294(alues a)-.25 F -.25(va)-.2 G .294(ilable in the database.).25 F
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 535.2 Q
 (Lamont-Doherty Earth Observ)113 547.2 Q(atory)-.25 E F1(OPTIONS)72 576
 Q F2<ad48>108 588 Q F0 .162(This "help" \215ag cause the program to pri\
-nt out a description of its operation and then e)22.52 F .161
+nt out a description of its operation and then e)144 588 R .161
 (xit immedi-)-.15 F(ately)144 600 Q(.)-.65 E F2<ad4f>108 616.8 Q F3
-(out\214le)22.52 E F0(Sets the output \214le for the w)144 628.8 Q
+(out\214le)144 616.8 Q F0(Sets the output \214le for the w)144 628.8 Q
 (ater v)-.1 E(elocity pro\214le.)-.15 E(Def)5 E(ault:)-.1 E F3
 (out\214le)2.5 E F0 2.5(=")2.5 G -.15(ve)-2.5 G(locity".).15 E F2<ad52>
-108 645.6 Q F3(lon/lat)23.08 E F0 .337
+108 645.6 Q F3(lon/lat)144 645.6 Q F0 .337
 (Sets the longitude and latitude of the location of the w)144 657.6 R
 .338(ater v)-.1 F .338(elocity pro\214le.)-.15 F .338(Whole de)5.338 F
 .338(grees should)-.15 F(be used, as the database has a 1 de)144 669.6 Q
 (gree by 1 de)-.15 E(gree resolution.)-.15 E(Def)5 E(ault:)-.1 E F3(lon)
-2.5 E F0(=0,)A F3(lat)2.5 E F0(=0.)A F2<ad56>108 686.4 Q F0(Normally)
-23.08 E(,)-.65 E F2(mble)2.533 E(vitus)-.15 E F0 .032
+2.5 E F0(=0,)A F3(lat)2.5 E F0(=0.)A F2<ad56>108 686.4 Q F0(Normally)144
+686.4 Q(,)-.65 E F2(mble)2.533 E(vitus)-.15 E F0 .032
 (outputs only a minor bit of information to the stdout stream.)2.533 F
 .032(If the)5.032 F F2<ad56>2.532 E F0 .032(\215ag is)2.532 F(gi)144
 698.4 Q -.15(ve)-.25 G .107(n, then).15 F F2(mble)2.607 E(vitus)-.15 E

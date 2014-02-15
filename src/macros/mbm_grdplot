@@ -2150,10 +2150,20 @@ if ($color_mode && !$file_cpt)
 	{
 	# set slope cpt
 	if ($color_mode == 4)
-		{
-		foreach $i (0 .. $ncolors - 1) {
-			$d1 = $magnitude * $i / ($ncolors - 1);
-			push(@hist, $d1);
+                {
+                if ($color_style == 1)
+                        {
+                        foreach $i (0 .. $ncolors - 1) {
+                                $d1 = $magnitude * $i / ($ncolors - 1);
+                                push(@hist, $d1);
+                       }
+                        }
+                else
+                        {
+                        foreach $i (0 .. $ncolors) {
+                                $d1 = $magnitude * $i / $ncolors;
+                                push(@hist, $d1);
+                        }
 			}
 		}
 
@@ -2165,8 +2175,7 @@ if ($color_mode && !$file_cpt)
 			{
 			print "Running grdhisteq...\n";
 			}
-		$ncolors_minus = $ncolors - 1;
-		@grdhisteq = `grdhisteq $files_data[0] -C$ncolors_minus -D`;
+		@grdhisteq = `grdhisteq $files_data[0] -C$ncolors -D`;
 		foreach $d (@grdhisteq) {
 			($d1, $d2) = $d =~ /(\S+)\s+(\S+).*/;
 			if ($d2 > $d1)
@@ -2180,15 +2189,15 @@ if ($color_mode && !$file_cpt)
 			}
 
 		# reset number of colors if grdhisteq returned fewer intervals
-		if (scalar(@hist) < $ncolors)
+		if (scalar(@hist) < $ncolors + 1)
 			{
-			$ncolors = scalar(@hist);
+			$ncolors = scalar(@hist) - 1;
 			}
 
 		# rescale hist values if needed
 		if ($data_scale)
 			{
-			foreach $i (0 .. $ncolors - 1) {
+			foreach $i (0 .. $ncolors) {
 				$hist[$i] = $data_scale * $hist[$i];
 				}
 			}
@@ -2198,13 +2207,13 @@ if ($color_mode && !$file_cpt)
 			{
 			$hist[0] = $zmin;
 			}
-		if ($zmax > $hist[$ncolors-1])
+		if ($zmax > $hist[$ncolors])
 			{
-			$hist[$ncolors-1] = $zmax;
+			$hist[$ncolors] = $zmax;
 			}
 		$hist[0] = $hist[0] - 0.01*$dzz;
-		$hist[$ncolors-1] =
-			$hist[$ncolors-1] + 0.01*$dzz;
+		$hist[$ncolors] =
+			$hist[$ncolors] + 0.01*$dzz;
 		}
 
 	# generate cpt file
@@ -2338,6 +2347,7 @@ if ($color_mode && !$file_cpt)
 					$d2 = $zmax_t;
 					}
 				}
+print "COLOR STYLE 2 WITH FLIP: $i $d1 $d2\n";
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
@@ -2383,6 +2393,7 @@ if ($color_mode && !$file_cpt)
 					$d2 = $zmax_t;
 					}
 				}
+print "COLOR STYLE 2 WITHOUT FLIP: $i $d1 $d2\n";
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];

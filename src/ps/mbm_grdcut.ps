@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:02 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:38 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -253,16 +259,16 @@ F .046(cut requires that one specify bounds which e)108 230.4 R .046
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 319.2 Q
 (Lamont-Doherty Earth Observ)113 331.2 Q(atory)-.25 E F1(OPTIONS)72 360
 Q F2<ad48>108 372 Q F0 .162(This "help" \215ag cause the program to pri\
-nt out a description of its operation and then e)22.52 F .162
+nt out a description of its operation and then e)144 372 R .162
 (xit immedi-)-.15 F(ately)144 384 Q(.)-.65 E F2<ad49>108 400.8 Q F3
-(in\214le)26.41 E F0(Sets the \214lename of the input GMT grid \214le. \
-This \214le must be in the GMT NetCDF GRD format.)144 412.8 Q F2<ad4f>
-108 429.6 Q F3(out\214le)22.52 E F0(Sets the \214lename of the output G\
-MT grid \214le. This \214le will be in the GMT NetCDF GRD format.)144
-441.6 Q F2<ad52>108 458.4 Q F3(w/e/s/n)23.08 E F0
+(in\214le)144 400.8 Q F0(Sets the \214lename of the input GMT grid \214\
+le. This \214le must be in the GMT NetCDF GRD format.)144 412.8 Q F2
+<ad4f>108 429.6 Q F3(out\214le)144 429.6 Q F0(Sets the \214lename of th\
+e output GMT grid \214le. This \214le will be in the GMT NetCDF GRD for\
+mat.)144 441.6 Q F2<ad52>108 458.4 Q F3(w/e/s/n)144 458.4 Q F0
 (Sets the bounds of the area to be e)144 470.4 Q
 (xtracted from the input grid \214le.)-.15 E F2<ad56>108 487.2 Q F0(The)
-23.08 E F2<ad56>2.5 E F0(option causes)2.5 E F2(mbm_grdcut)2.5 E F0
+144 487.2 Q F2<ad56>2.5 E F0(option causes)2.5 E F2(mbm_grdcut)2.5 E F0
 (to print out status messages.)2.5 E F1(EXAMPLES)72 516 Q F0 .714
 (Suppose that we ha)108 528 R 1.013 -.15(ve u)-.2 H(sed).15 E F2(mbgrid)
 3.213 E F0 .713(to obtain a topograph)3.213 F 3.213(yg)-.05 G .713

@@ -22,7 +22,7 @@ include_HEADERS = mb_config.h \
         mbsys_reson7k.h mbsys_jstar.h \
         mbsys_image83p.h mbsys_hysweep.h \
         mbsys_benthos.h mbsys_swathplus.h \
-	mbsys_3datdepthlidar.h \
+	mbsys_3datdepthlidar.h mbsys_wassp.h \
         mbf_sbsiomrg.h mbf_sbsiocen.h \
         mbf_sbsiolsi.h mbf_sburicen.h \
         mbf_sbifremr.h mbf_hsatlraw.h \
@@ -95,7 +95,7 @@ libmbio_la_SOURCES = \
                 mbsys_reson7k.c mbsys_jstar.c \
                 mbsys_image83p.c mbsys_hysweep.c \
                 mbsys_benthos.c mbsys_swathplus.c \
-		mbsys_3datdepthlidar.c \
+		mbsys_3datdepthlidar.c mbsys_wassp.c \
                 mbr_sbsiomrg.c mbr_sbsiocen.c \
                 mbr_sbsiolsi.c mbr_sburicen.c \
                 mbr_sburivax.c mbr_sbifremr.c \
@@ -131,7 +131,8 @@ libmbio_la_SOURCES = \
                 mbr_image83p.c mbr_imagemba.c \
                 mbr_hir2rnav.c mbr_hysweep1.c \
                 mbr_xtfb1624.c mbr_swplssxi.c \
-                mbr_swplssxp.c mbr_3ddepthp.c
+                mbr_swplssxp.c mbr_3ddepthp.c \
+		mbr_wasspenl.c
 if BUILD_GSF
   libmbio_la_SOURCES += mbsys_gsf.c mbr_gsfgenmb.c
 endif

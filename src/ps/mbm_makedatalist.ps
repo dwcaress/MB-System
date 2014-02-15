@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:03 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:38 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -261,13 +267,13 @@ F -.15(ve)-.4 G .114(ntion \(see the).15 F F2(mbsystem)2.614 E F0
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 367.2 Q
 (Lamont-Doherty Earth Observ)113 379.2 Q(atory)-.25 E F1(OPTIONS)72 408
 Q F2<ad48>108 420 Q F0 .162(This "help" \215ag cause the program to pri\
-nt out a description of its operation and then e)22.52 F .162
+nt out a description of its operation and then e)144 420 R .162
 (xit immedi-)-.15 F(ately)144 432 Q(.)-.65 E F2<ad49>108 448.8 Q F3(dir)
-26.41 E(ectory)-.37 E F0(Sets the path of the tar)144 460.8 Q
-(get directory)-.18 E(.)-.65 E F2<ad4f>108 477.6 Q F3(datalist)22.52 E
-F0(Sets the name of the output datalist \214le. Def)144 489.6 Q
-(ault: datalist.mb-1)-.1 E F2<ad56>108 506.4 Q F0(The)23.08 E F2<ad56>
-2.5 E F0(option causes)2.5 E F2(mbm_mak)2.5 E(edatalist)-.1 E F0
+144 448.8 Q(ectory)-.37 E F0(Sets the path of the tar)144 460.8 Q
+(get directory)-.18 E(.)-.65 E F2<ad4f>108 477.6 Q F3(datalist)144 477.6
+Q F0(Sets the name of the output datalist \214le. Def)144 489.6 Q
+(ault: datalist.mb-1)-.1 E F2<ad56>108 506.4 Q F0(The)144 506.4 Q F2
+<ad56>2.5 E F0(option causes)2.5 E F2(mbm_mak)2.5 E(edatalist)-.1 E F0
 (to print out status messages.)2.5 E F1(EXAMPLES)72 535.2 Q F0 .937
 (Suppose we ha)108 547.2 R 1.237 -.15(ve a s)-.2 H .937(et of sw).15 F
 .937(ath \214les in a directory and we w)-.1 F .937

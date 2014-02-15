@@ -120,8 +120,8 @@ int main (int argc, char **argv)
 	double	file_weight;
 
 	/* cross correlation parameters */
-	int	navchannel = MB_DATA_DATA;
-	int	kind = MB_DATA_NONE;
+	int	navchannel = 1;
+	int	kind = MB_DATA_DATA;
 	int	npings = 100;
 	double	rthreshold = 0.9;
 	int	nlag = 41;

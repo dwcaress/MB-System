@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Fri Jan 31 13:53:03 2014
+%%Creator: groff version 1.22.2
+%%CreationDate: Thu Feb 13 01:44:39 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,6 +72,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -137,7 +138,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -175,8 +179,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -255,7 +261,7 @@ F0 -1.11(Ve)108 136.8 S(rsion 5.0)1.11 E F1(SYNOPSIS)72 165.6 Q F0
 (Lamont-Doherty Earth Observ)113 331.2 Q(atory)-.25 E F1
 (SIMPLE DESCRIPTION OF B)72 360 Q(ASIC OPTIONS)-.329 E F2<ad48>108 372 Q
 F0 .162(This "help" \215ag cause the program to print out a description\
- of its operation and then e)22.52 F .162(xit immedi-)-.15 F(ately)144
+ of its operation and then e)144 372 R .162(xit immedi-)-.15 F(ately)144
 384 Q(.)-.65 E F2<ad45>108 400.8 Q F3(ellipsoid)A F0 .803
 (Sets the ellipsoid to be used. The def)144 412.8 R .802
 (ault is to use the WGS-84 ellipsoid, in accordance with the)-.1 F -.35
@@ -268,10 +274,10 @@ nnot be used to accomplish a true datum)-.35 F 1.053(shift between N)144
 (AD-83 because the 1986 transition to N)-.35 F 1.054(AD-83 also in)-.35
 F -.2(vo)-.4 G(lv).2 E 1.054(ed addi-)-.15 F
 (tional adjustments to positions.)144 460.8 Q F2<ad46>108 477.6 Q F0
-(Causes)24.19 E F2(mbm_utm)2.5 E F0
+(Causes)144 477.6 Q F2(mbm_utm)2.5 E F0
 (to use or generate eastings and northings in feet rather than meters.)
 2.5 E F2<ad49>108 494.4 Q F3(in\214le)A F0 1.391
-(Sets the name of the data \214le to be processed.)6.41 F 1.39
+(Sets the name of the data \214le to be processed.)144 494.4 R 1.39
 (The \214rst tw)6.391 F 3.89(oc)-.1 G 1.39
 (olumns of the ASCII input data)-3.89 F .208
 (stream must be either longitude and latitude v)144 506.4 R .209
@@ -290,12 +296,12 @@ R .294(alues \(for geographic to projected transformation\))-.25 F .492
 2.993(ya)-.15 G .493(dditional col-)-2.993 F
 (umns of data are passed unaltered to the output.)144 595.2 Q F2<ad51>
 108 612 Q F0 .316(This option causes the transformation to be from proj\
-ected coordinates \(eastings and northings\) to)22.52 F 1.115
+ected coordinates \(eastings and northings\) to)144 612 R 1.115
 (geographic coordinates \(longitude and latitude\).)144 624 R 1.116
 (The def)6.116 F 1.116(ault is to transform from geographic to)-.1 F
 (projected coordinates.)144 636 Q F2<ad5a>108 652.8 Q F3(zone)A F0
-(Sets the UTM zone.)5.3 E F1(EXAMPLES)72 681.6 Q F0 .04(Suppose we ha)
-108 693.6 R .34 -.15(ve a \214)-.2 H .039
+(Sets the UTM zone.)144 652.8 Q F1(EXAMPLES)72 681.6 Q F0 .04
+(Suppose we ha)108 693.6 R .34 -.15(ve a \214)-.2 H .039
 (le containing longitude, latitude, and depth triples called llz.dat. T)
 .15 F 2.539(ot)-.8 G .039(ransform the coor)-2.539 F(-)-.2 E
 (dinates to eastings and northings in the UTM Zone 10 projection, use:)
