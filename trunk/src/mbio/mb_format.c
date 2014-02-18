@@ -3553,6 +3553,29 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
+	/* look for a WASSP *.000 file format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".000")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_WASSPENL;
+		found = MB_YES;
+		}
+	    }
+
 	/* finally check for parameter file */
 	sprintf(parfile, "%s.par", filename);
 	if (stat(parfile, &statbuf) == 0)
