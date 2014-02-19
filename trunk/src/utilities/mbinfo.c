@@ -2184,7 +2184,6 @@ int main (int argc, char **argv)
 						(void **)&bathvartot,&error);
 			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_bath_max*sizeof(int),
 						(void **)&nbathvartot,&error);
-			nbathtot_alloc = beams_bath_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
@@ -2212,7 +2211,6 @@ int main (int argc, char **argv)
 						(void **)&ampvartot,&error);
 			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_amp_max*sizeof(int),
 						(void **)&nampvartot,&error);
-			namptot_alloc = beams_amp_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
@@ -2240,7 +2238,6 @@ int main (int argc, char **argv)
 						(void **)&ssvartot,&error);
 			status = mb_reallocd(verbose,__FILE__,__LINE__,pixels_ss_max*sizeof(int),
 						(void **)&nssvartot,&error);
-			nsstot_alloc = pixels_ss_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
