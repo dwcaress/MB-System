@@ -16,7 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-  Version 5.4.2165       February 18, 2014
+  Version 5.4.2166       February 19, 2014
 * Version 5.4.2163       January 31, 2014
   Version 5.4.2162       January 24, 2014
 * Version 5.4.2159       January 18, 2014
@@ -170,6 +170,10 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2166 (February 19, 2014)
+
+Mbinfo: Fixed bug in variance calculation (memory overwrites of the relevant arrays).
 
 -----> 5.4.2165 (February 18, 2014)
 
