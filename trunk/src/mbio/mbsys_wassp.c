@@ -43,7 +43,7 @@ static char version_id[]="$Id$";
 int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
-	char	*function_name = "mbsys_wassp_alloc";
+	const char	*function_name = "mbsys_wassp_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
