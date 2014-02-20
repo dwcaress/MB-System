@@ -315,8 +315,8 @@ mb7kpreprocess.o:	mb7kpreprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mb
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mb7kpreprocess.c
 mbrolltimelag.o:	mbrolltimelag.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio mbrolltimelag.c
-mbauvloglist.o:	mbauvloglist.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
-	$(CC) -c $(CFLAGS) -I../mbio mbauvloglist.c
+mbauvloglist.o:	mbauvloglist.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h ../mbaux/mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbauvloglist.c
 mb7k2ss.o:	mb7k2ss.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h ../mbio/mbsys_reson7k.h ../mbio/mbsys_ldeoih.h
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb7k2ss.c
 mbabsorption.o:	mbabsorption.c ../mbio/mb_status.h ../mbio/mb_define.h
