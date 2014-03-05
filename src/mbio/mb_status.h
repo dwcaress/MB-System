@@ -28,11 +28,6 @@
 #ifndef MB_STATUS_DEF
 #define MB_STATUS_DEF
 
-/* MB-system version id */
-#define	MB_VERSION	"5.3.2012"
-#define	MB_BUILD_DATE	"25 January 2013"
-#define	MB_SVN		"$Id$"
-
 /* MBIO function boolean convention */
 #define	MB_YES	        1
 #define	MB_NO	        0
@@ -46,7 +41,7 @@
 #define	MB_SONARTYPE_INTERFEROMETRIC	4
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			59
+#define	MB_DATA_KINDS			61
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -107,6 +102,8 @@
 #define	MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
 #define	MB_DATA_SONARDEPTH		58	/* HYSWEEP dynamic draft */
 #define	MB_DATA_ALTITUDE		59	/* HYSWEEP single beam echosounder */
+#define	MB_DATA_GEN_SENS		60	/* WASSP generic sensor data */
+#define	MB_DATA_WC_PICKS 		61	/* WASSP water column picks */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1
@@ -262,9 +259,9 @@ static char *notice_msg[] =
 	"MB_DATA_SENSOR_PARAMETERS (ID=25): GSF sensor parameter record",
 	"MB_DATA_NAVIGATION_ERROR (ID=26): GSF navigation error record",
 	"MB_DATA_RAW_LINE (ID=27): uninterpretable ASCII line",
-	"MB_DATA_NAV1 (ID=28): Auxilliary nav system 1",
-	"MB_DATA_NAV2 (ID=29): Auxilliary nav system 2",
-	"MB_DATA_NAV3 (ID=30): Auxilliary nav system 3",
+	"MB_DATA_NAV1 (ID=28): Auxiliary nav system 1",
+	"MB_DATA_NAV2 (ID=29): Auxiliary nav system 2",
+	"MB_DATA_NAV3 (ID=30): Auxiliary nav system 3",
 	"MB_DATA_TILT (ID=31): Mechanical tilt record",
 	"MB_DATA_MOTION (ID=32): Motion (DVL) sensor record",
 	"MB_DATA_CTD (ID=33): CTD record",
@@ -294,6 +291,8 @@ static char *notice_msg[] =
 	"MB_DATA_ATTITUDE3 (57): ancillary attitude system 3",
 	"MB_DATA_SONARDEPTH (58): HYSWEEP dynamic draft",
 	"MB_DATA_ALTITUDE (59): HYSWEEP single beam echosounder",
+	"MB_DATA_GEN_SENS (60): WASSP generic sensor data",
+	"MB_DATA_WC_PICKS (61): WASSP water column picks",
 
 	/* notices for nonfatal error messages */
 	"MB_ERROR_TIME_GAP (ID=-1): Time gap in data",
@@ -420,13 +419,15 @@ static char *unknown_notice_msg[] =
 #define mb_beam_check_flag_gt_2x_iho(F)		((int)((F & MB_FLAG_GT_2X_IHO) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_footprint(F)		((int)((F & MB_FLAG_FOOTPRINT) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_sonar(F)		((int)((F & MB_FLAG_SONAR    ) && (F & MB_FLAG_FLAG)))
-#define mb_beam_set_flag_null(F)		(MB_FLAG_NULL)
+#define mb_beam_set_flag_null(F)		(0x01)
+#define mb_beam_set_flag_none(F)		(0x00)
 #define mb_beam_set_flag_manual(F)		(F | 0x05)
 #define mb_beam_set_flag_filter(F)		(F | 0x09)
 #define mb_beam_set_flag_filter2(F)		(F | 0x11)
 #define mb_beam_set_flag_gt_1x_iho(F)		(F | 0x11)
 #define mb_beam_set_flag_gt_2x_iho(F)		(F | 0x21)
 #define mb_beam_set_flag_footprint(F)		(F | 0x41)
+#define mb_beam_set_flag_sonar(F)		(F | 0x81)
 #define mb_beam_check_select(F)			((int)(F & MB_SELECT_SELECT))
 #define mb_beam_check_select_least(F)		((int)((F & MB_SELECT_LEAST  ) && (F & MB_SELECT_SELECT)))
 #define mb_beam_check_select_maximum(F)		((int)((F & MB_SELECT_MAXIMUM) && (F & MB_SELECT_SELECT)))
@@ -443,15 +444,19 @@ static char *unknown_notice_msg[] =
 #define mb_beam_set_select_spare_2(F)		(F | 0x82)
 
 /* Bottom detect flags */
+#define MB_DETECT_TYPE_NUM	4
 #define MB_DETECT_UNKNOWN	0
 #define MB_DETECT_AMPLITUDE	1
 #define MB_DETECT_PHASE		2
+#define MB_DETECT_LIDAR		3
 
 /* Source pulse type flags */
+#define MB_PULSE_TYPE_NUM	5
 #define MB_PULSE_UNKNOWN	0
 #define MB_PULSE_CW		1
 #define MB_PULSE_UPCHIRP	2
 #define MB_PULSE_DOWNCHIRP	3
+#define MB_PULSE_LIDAR  	4
 
 /* end conditional include */
 #endif

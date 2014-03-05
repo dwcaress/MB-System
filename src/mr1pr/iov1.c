@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /* This source code is part of the MR1PR library used to read and write
- * swath sonar data in the MR1PR format devised and used by the 
+ * swath sonar data in the MR1PR format devised and used by the
  * Hawaii Mapping Research Group of the University of Hawaii.
  * This source code was made available by Roger Davis of the
  * University of Hawaii under the GPL. Minor modifications have
@@ -72,9 +72,9 @@ mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
 		nan_init= 1;
 	}
 
-	if (!xdr_long(xdrs, (long *) &(png->png_tm.tv_sec)))
+	if (!xdr_long(xdrs, (MR1PR_LONG *) &(png->png_tm.tv_sec)))
 		return 0;
-	if (!xdr_long(xdrs, (long *) &(png->png_tm.tv_usec)))
+	if (!xdr_long(xdrs, (MR1PR_LONG *) &(png->png_tm.tv_usec)))
 		return 0;
 	png->png_period= nan_f;
 

@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_dsl120sf.c	8/6/96
  *	$Id$
  *
- *    Copyright (c) 1996-2012 by
+ *    Copyright (c) 1996-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_dsl120sf.c contains the functions for reading and writing
- * multibeam data in the DSL120SF format.  
+ * multibeam data in the DSL120SF format.
  * These functions include:
  *   mbr_alm_dsl120sf	- allocate read/write memory
  *   mbr_dem_dsl120sf	- deallocate read/write memory
@@ -85,35 +85,35 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_dsl.h"
-#include "../../include/mbf_dsl120sf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_dsl.h"
+#include "mbf_dsl120sf.h"
 
 /* essential function prototypes */
-int mbr_register_dsl120sf(int verbose, void *mbio_ptr, 
+int mbr_register_dsl120sf(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_dsl120sf(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_dsl120sf(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_dsl120sf(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_dsl120sf(int verbose, void *mbio_ptr, int *error);
@@ -154,54 +154,54 @@ int mbr_register_dsl120sf(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_dsl120sf(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_dsl120sf(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_dsl120sf;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_dsl120sf; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_dsl_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_dsl_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_dsl120sf; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_dsl120sf; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_dsl_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_dsl_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_dsl_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_dsl_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_dsl_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_dsl_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_dsl_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_dsl_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_dsl_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_dsl120sf;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_dsl_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_dsl_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_dsl120sf;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_dsl120sf;
+	mb_io_ptr->mb_io_dimensions = &mbsys_dsl_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_dsl_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_dsl_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_dsl_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_dsl_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_dsl_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_dsl_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_dsl_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_dsl_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -220,25 +220,25 @@ int mbr_register_dsl120sf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -249,25 +249,25 @@ int mbr_register_dsl120sf(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_dsl120sf(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_dsl120sf(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_dsl120sf";
@@ -308,7 +308,7 @@ int mbr_info_dsl120sf(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -341,7 +341,7 @@ int mbr_alm_dsl120sf(int verbose, void *mbio_ptr, int *error)
 	char	*function_name = "mbr_alm_dsl120sf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_dsl120sf_struct *data;	
+	struct mbf_dsl120sf_struct *data;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -350,7 +350,7 @@ int mbr_alm_dsl120sf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -401,7 +401,7 @@ int mbr_dem_dsl120sf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -441,7 +441,7 @@ int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       data_ptr:   %lu\n",(size_t)data_ptr);
+		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
 		}
 
 	/* get pointer to data descriptor */
@@ -480,7 +480,7 @@ int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error)
 		data->swapped = 3;
 		data->tv_sec = 0;
 		data->tv_usec = 0;
-		data->interface = 0;
+		data->digitalinterface = 0;
 		for (i=0;i<5;i++)
 			data->reserved[i] = 0;
 		data->bat_type = DSL_BATH;
@@ -550,8 +550,8 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -598,7 +598,7 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->swapped = data->swapped;
 		store->tv_sec = data->tv_sec;
 		store->tv_usec = data->tv_usec;
-		store->interface = data->interface;
+		store->digitalinterface = data->digitalinterface;
 		for (i=0;i<5;i++)
 			store->reserved[i] = data->reserved[i];
 		store->bat_type = data->bat_type;
@@ -630,7 +630,7 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->amp_port[i] = data->amp_port[i];
 			store->amp_stbd[i] = data->amp_stbd[i];
 			}
-		strncpy(store->comment, data->comment, 
+		strncpy(store->comment, data->comment,
 			MBSYS_DSL_COMMENT_LENGTH - 1);
 		}
 
@@ -665,8 +665,8 @@ int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -708,7 +708,7 @@ int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->swapped = store->swapped;
 		data->tv_sec = store->tv_sec;
 		data->tv_usec = store->tv_usec;
-		data->interface = store->interface;
+		data->digitalinterface = store->digitalinterface;
 		for (i=0;i<5;i++)
 			data->reserved[i] = store->reserved[i];
 		data->bat_type = store->bat_type;
@@ -740,7 +740,7 @@ int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->amp_port[i] = store->amp_port[i];
 			data->amp_stbd[i] = store->amp_stbd[i];
 			}
-		strncpy(data->comment, store->comment, 
+		strncpy(data->comment, store->comment,
 			MBF_DSL120SF_COMMENT_LENGTH - 1);
 		}
 
@@ -782,7 +782,7 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -791,7 +791,7 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error)
 	/* get pointer to raw data structure */
 	data = (struct mbf_dsl120sf_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
-	
+
 	/* read data */
 	if (mb_io_ptr->mbfp != NULL)
 		{
@@ -805,7 +805,7 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error)
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-			
+
 		/* if tag not found read single bytes until found
 			or end of file */
 		while (found == MB_NO && status == MB_SUCCESS)
@@ -829,12 +829,12 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error)
 					}
 				}
 			}
-			
+
 		/* now read the rest of the header */
 		if (status == MB_SUCCESS)
 			status = mbr_dsl120sf_rd_header(verbose,mbio_ptr,
 				mb_io_ptr->mbfp,error);
-				
+
 		/* now read each of the data records */
 		if (status == MB_SUCCESS)
 			for (i=0;i<data->num_data_types;i++)
@@ -843,8 +843,8 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error)
 					verbose,mbio_ptr,
 					mb_io_ptr->mbfp,
 					type,&len,&hdr_len,error);
-				
-				if (status == MB_SUCCESS 
+
+				if (status == MB_SUCCESS
 					&& strncmp(type, "BATH", 4) == 0)
 					{
 					data->bat_len = len;
@@ -855,7 +855,7 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error)
 					if (status == MB_SUCCESS)
 						data->kind = MB_DATA_DATA;
 					}
-				else if (status == MB_SUCCESS 
+				else if (status == MB_SUCCESS
 					&& strncmp(type, "AMP ", 4) == 0)
 					{
 					data->amp_len = len;
@@ -866,7 +866,7 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error)
 					if (status == MB_SUCCESS)
 						data->kind = MB_DATA_DATA;
 					}
-				else if (status == MB_SUCCESS 
+				else if (status == MB_SUCCESS
 					&& strncmp(type, "COMM", 4) == 0)
 					{
 					status = mbr_dsl120sf_rd_comment(
@@ -911,7 +911,7 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -920,7 +920,7 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	/* get pointer to raw data structure */
 	data = (struct mbf_dsl120sf_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
-	
+
 	/* read header */
 	status = fread(buffer, 1, 124, mbfp);
 	if (status == 124)
@@ -933,12 +933,12 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
-	
+
 	/* translate header */
 	if (status == MB_SUCCESS)
 		{
 		data->rec_type = DSL_HEADER;
-		
+
  		index = 0;
 		mb_get_binary_int(MB_NO, &buffer[index], (int *) &data->rec_len);
 		index += 4;
@@ -995,7 +995,7 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		index += 4;
 		mb_get_binary_int(MB_NO, &buffer[index], (int *) &data->tv_usec);
 		index += 4;
-		mb_get_binary_short(MB_NO,&buffer[index],&data->interface);
+		mb_get_binary_short(MB_NO,&buffer[index],&data->digitalinterface);
 		index += 2;
 		for (i=0;i<5;i++)
 			{
@@ -1015,7 +1015,7 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg5       num_data_types:   %d\n",data->num_data_types);
 		fprintf(stderr,"dbg5       ping:             %d\n",data->ping);
 		fprintf(stderr,"dbg5       sonar_cmd:        %c%c%c%c\n",
-			data->sonar_cmd[0], data->sonar_cmd[1], 
+			data->sonar_cmd[0], data->sonar_cmd[1],
 			data->sonar_cmd[2], data->sonar_cmd[3]);
 		fprintf(stderr,"dbg5       time_stamp:       ");
 		for (i=0;i<24;i++)
@@ -1038,7 +1038,7 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg5       swapped:          %c\n",data->swapped);
 		fprintf(stderr,"dbg5       tv_sec:           %d\n",data->tv_sec);
 		fprintf(stderr,"dbg5       tv_usec:          %d\n",data->tv_usec);
-		fprintf(stderr,"dbg5       interface:        %d\n",data->interface);
+		fprintf(stderr,"dbg5       digitalinterface: %d\n",data->digitalinterface);
 		for (i=0;i<5;i++)
 			fprintf(stderr,"dbg5       reserved:         %d\n", data->reserved[i]);
 		}
@@ -1072,10 +1072,10 @@ int mbr_dsl120sf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
 		}
-	
+
 	/* read header */
 	status = fread(buffer, 1, 12, mbfp);
 	if (status == 12)
@@ -1088,7 +1088,7 @@ int mbr_dsl120sf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp,
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
-	
+
 	/* translate header */
 	if (status == MB_SUCCESS)
 		{
@@ -1136,7 +1136,7 @@ int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1145,7 +1145,7 @@ int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	/* get pointer to raw data structure */
 	data = (struct mbf_dsl120sf_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
-	
+
 	/* read bath record */
 	read_bytes = data->bat_len - 12;
 	status = fread(buffer, 1, read_bytes, mbfp);
@@ -1159,7 +1159,7 @@ int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
-	
+
 	/* translate header and data */
 	if (status == MB_SUCCESS)
 		{
@@ -1203,7 +1203,7 @@ int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		for (i=0;i<9;i++)
 			fprintf(stderr,"dbg5       bat_future:       %d\n", data->bat_future[i]);
 		for (i=0;i<data->bat_num_bins;i++)
-			fprintf(stderr,"dbg5       bath[%d]:         %f\t%f\n", 
+			fprintf(stderr,"dbg5       bath[%d]:         %f\t%f\n",
 				i, data->bat_port[i], data->bat_stbd[i]);
 		}
 
@@ -1240,7 +1240,7 @@ int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1249,7 +1249,7 @@ int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	/* get pointer to raw data structure */
 	data = (struct mbf_dsl120sf_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
-	
+
 	/* read amp record */
 	read_bytes = data->amp_len - 12;
 	status = fread(buffer, 1, read_bytes, mbfp);
@@ -1263,7 +1263,7 @@ int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
-	
+
 	/* translate header and data */
 	if (status == MB_SUCCESS)
 		{
@@ -1310,7 +1310,7 @@ int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		for (i=0;i<8;i++)
 			fprintf(stderr,"dbg5       amp_future:       %d\n", data->amp_future[i]);
 		for (i=0;i<data->amp_num_samp;i++)
-			fprintf(stderr,"dbg5       amp[%d]:          %f\t%f\n", 
+			fprintf(stderr,"dbg5       amp[%d]:          %f\t%f\n",
 				i, data->amp_port[i], data->amp_stbd[i]);
 		}
 
@@ -1345,7 +1345,7 @@ int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1354,7 +1354,7 @@ int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	/* get pointer to raw data structure */
 	data = (struct mbf_dsl120sf_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
-	
+
 	/* read comment record */
 	read_bytes = 80;
 	status = fread(buffer, 1, read_bytes, mbfp);
@@ -1368,7 +1368,7 @@ int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
-	
+
 	/* copy comment */
 	if (status == MB_SUCCESS)
 		{
@@ -1411,8 +1411,8 @@ int mbr_dsl120sf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       data_ptr:   %lu\n",(size_t)data_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1475,8 +1475,8 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1497,7 +1497,7 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg5       num_data_types:   %d\n",data->num_data_types);
 		fprintf(stderr,"dbg5       ping:             %d\n",data->ping);
 		fprintf(stderr,"dbg5       sonar_cmd:        %c%c%c%c\n",
-			data->sonar_cmd[0], data->sonar_cmd[1], 
+			data->sonar_cmd[0], data->sonar_cmd[1],
 			data->sonar_cmd[2], data->sonar_cmd[3]);
 		fprintf(stderr,"dbg5       time_stamp:       ");
 		for (i=0;i<24;i++)
@@ -1520,7 +1520,7 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg5       swapped:          %c\n",data->swapped);
 		fprintf(stderr,"dbg5       tv_sec:           %d\n",data->tv_sec);
 		fprintf(stderr,"dbg5       tv_usec:          %d\n",data->tv_usec);
-		fprintf(stderr,"dbg5       interface:        %d\n",data->interface);
+		fprintf(stderr,"dbg5       digitalinterface: %d\n",data->digitalinterface);
 		for (i=0;i<5;i++)
 			fprintf(stderr,"dbg5       reserved:         %d\n", data->reserved[i]);
 		fprintf(stderr,"dbg5       bat_type:         %d\n",data->bat_type);
@@ -1533,7 +1533,7 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		for (i=0;i<9;i++)
 			fprintf(stderr,"dbg5       bat_future:       %d\n", data->bat_future[i]);
 		for (i=0;i<data->bat_num_bins;i++)
-			fprintf(stderr,"dbg5       bath[%d]:         %f\t%f\n", 
+			fprintf(stderr,"dbg5       bath[%d]:         %f\t%f\n",
 				i, data->bat_port[i], data->bat_stbd[i]);
 		fprintf(stderr,"dbg5       amp_type:         %d\n",data->amp_type);
 		fprintf(stderr,"dbg5       amp_len:          %d\n",data->amp_len);
@@ -1546,18 +1546,18 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		for (i=0;i<8;i++)
 			fprintf(stderr,"dbg5       amp_future:       %d\n", data->amp_future[i]);
 		for (i=0;i<data->amp_num_samp;i++)
-			fprintf(stderr,"dbg5       amp[%d]:          %f\t%f\n", 
+			fprintf(stderr,"dbg5       amp[%d]:          %f\t%f\n",
 				i, data->amp_port[i], data->amp_stbd[i]);
 		}
-		
+
 	/* make sure both bath and amp are included */
 	data->num_data_types = 2;
-	data->rec_len = data->rec_hdr_len 
+	data->rec_len = data->rec_hdr_len
 			+ data->bat_len
 			+ data->bat_hdr_len
 			+ data->amp_len
 			+ data->amp_hdr_len;
-			
+
 	/* construct header record */
 	index = 0;
 	mb_put_binary_int(MB_NO,DSL_HEADER,&buffer[index]);
@@ -1617,14 +1617,14 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	index += 4;
 	mb_put_binary_int(MB_NO,data->tv_usec,&buffer[index]);
 	index += 4;
-	mb_put_binary_short(MB_NO,data->interface,&buffer[index]);
+	mb_put_binary_short(MB_NO,data->digitalinterface,&buffer[index]);
 	index += 2;
 	for (i=0;i<5;i++)
 		{
 		mb_put_binary_short(MB_NO,data->reserved[i],&buffer[index]);
 		index += 2;
 		}
-		
+
 	/* construct bathymetry record */
 	mb_put_binary_int(MB_NO,data->bat_type,&buffer[index]);
 	index += 4;
@@ -1652,7 +1652,7 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		mb_put_binary_float(MB_NO,data->bat_stbd[i],&buffer[index]);
 		index += 4;
 		}
-		
+
 	/* construct amplitude record */
 	mb_put_binary_int(MB_NO,data->amp_type,&buffer[index]);
 	index += 4;
@@ -1725,8 +1725,8 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1742,12 +1742,12 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       comment:          %s\n",data->comment);
 		}
-		
+
 	/* set record and header sizes */
 	data->num_data_types = 1;
 	data->rec_len = 128 + 12 + 80;
 	data->rec_hdr_len = 128;
-	
+
 	index = 0;
 	mb_put_binary_int(MB_NO,DSL_HEADER,&buffer[index]);
 	index += 4;
@@ -1806,14 +1806,14 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	index += 4;
 	mb_put_binary_int(MB_NO,data->tv_usec,&buffer[index]);
 	index += 4;
-	mb_put_binary_short(MB_NO,data->interface,&buffer[index]);
+	mb_put_binary_short(MB_NO,data->digitalinterface,&buffer[index]);
 	index += 2;
 	for (i=0;i<5;i++)
 		{
 		mb_put_binary_short(MB_NO,data->reserved[i],&buffer[index]);
 		index += 2;
 		}
- 		
+
 	/* construct comment record */
 	mb_put_binary_int(MB_NO,DSL_COMMENT,&buffer[index]);
 	index += 4;

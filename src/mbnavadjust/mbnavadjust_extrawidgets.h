@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavedit_extrawidgets.h	8/7/95
  *    $Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -43,14 +43,14 @@
 #endif
 
 #ifdef MBNAVADJUST_DECLARE_GLOBALS
-#define EXTERNAL
+#define MBNAVADJUST_EXTERNAL
 #else
-#define EXTERNAL extern
+#define MBNAVADJUST_EXTERNAL extern
 #endif
 
 /* Global Widget Declarations Added By Hand */
 
-EXTERNAL Widget       fileSelectionBox_list;
-EXTERNAL Widget       fileSelectionBox_text;
+MBNAVADJUST_EXTERNAL Widget       fileSelectionBox_list;
+MBNAVADJUST_EXTERNAL Widget       fileSelectionBox_text;
 
 /*--------------------------------------------------------------------*/

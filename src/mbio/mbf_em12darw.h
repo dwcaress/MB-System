@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_em12darw.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_em12darw.h defines the data structure used by MBIO functions
- * to store multibeam data read from the  MBF_EM12DARW format (MBIO id 51).  
+ * to store multibeam data read from the  MBF_EM12DARW format (MBIO id 51).
  *
  * Authors:	D. W. Caress (L-DEO)
  *		R. B. Owens (University of Oxford)
@@ -71,15 +71,15 @@
  *   3. The 81 depth values are stored centered in 81 value arrays.  The
  *      center beam is in word 40 of the depth and distance arrays.
  *   4. The "range" is the two-way pulse travel time for each beam (81 values)
- *   5. The "reflectivity" is the mean backscattering strength (in dB) 
- *      over each beam, corrected for beam patterns, echo sounder 
- *      parameters and Lambert's law.  In the context of MB-System, the 
- *	backscatter values are considered to be amplitudes rather than 
+ *   5. The "reflectivity" is the mean backscattering strength (in dB)
+ *      over each beam, corrected for beam patterns, echo sounder
+ *      parameters and Lambert's law.  In the context of MB-System, the
+ *	backscatter values are considered to be amplitudes rather than
  *	sidescan because they are coincident with the bathymetry values.
  *   6. Comments can be embedded in the data as N-byte ascii strings,
  *	where "func" = 100. Comment lines are stored as 1-byte characters
  *      in the "depth" array. For data, "func" = 150.
- *   7. Mode; 1 = Shallow, 2 = Deep. Controls scaling factors, e.g. Depth is 
+ *   7. Mode; 1 = Shallow, 2 = Deep. Controls scaling factors, e.g. Depth is
  *      scaled 1/0.1 for mode 1 and scaled 1/0.2 for mode 2.
  *
  */
@@ -112,17 +112,16 @@ struct mbf_em12darw_struct {
 	float	pitch;		/* Ship's Pitch */
 	float	heave;		/* Ship's Heave */
 	float	sndval;		/* Sound Velocity */
-	short	depth[MBF_EM12DARW_BEAMS];	
+	short	depth[MBF_EM12DARW_BEAMS];
 				/* Beam Depth scaled (0.1/0.2) */
-	short	distacr[MBF_EM12DARW_BEAMS];	
+	short	distacr[MBF_EM12DARW_BEAMS];
 				/* Beam Across Distance, scaled (0.2/0.5) */
-	short	distalo[MBF_EM12DARW_BEAMS];	
+	short	distalo[MBF_EM12DARW_BEAMS];
 				/* Beam Along Distance, scaled (0.2/0.5) */
-	short	range[MBF_EM12DARW_BEAMS];	
+	short	range[MBF_EM12DARW_BEAMS];
 				/* Beam Range, scaled (0.2/0.8) */
-	short	refl[MBF_EM12DARW_BEAMS];	
+	short	refl[MBF_EM12DARW_BEAMS];
 				/* Beam Reflectivity, scaled 0.5 */
-	short	beamq[MBF_EM12DARW_BEAMS];	
+	short	beamq[MBF_EM12DARW_BEAMS];
 				/* Beam Quality, unscaled */
 };
-

@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_sb2000ss.c contains the functions for reading and writing
- * multibeam data in the SB2000SS format.  
+ * multibeam data in the SB2000SS format.
  * These functions include:
  *   mbr_alm_sb2000ss	- allocate read/write memory
  *   mbr_dem_sb2000ss	- deallocate read/write memory
@@ -102,7 +102,7 @@
  */
 /*--------------------------------------------------------------------
  * Notes on the MBF_SB2000SS data format:
- *   1. This data format is used to store sidescan data from 
+ *   1. This data format is used to store sidescan data from
  *      Sea Beam 2000 sonars.
  *      This format was created and used by the Scripps
  *      Institution of Oceanography; most data files in this format
@@ -110,61 +110,61 @@
  *      This format is one of the "swathbathy" formats created by
  *      Jim Charters of Scripps.
  *   2. The data records consist of three logical records: the header
- *      record, the sensor specific record and the data record.  
+ *      record, the sensor specific record and the data record.
  *   3. The header record consists of 36 bytes, including the sizes
  *      of the following sensor specific and data records.
- *   4. The sensor specific records are 32 bytes long.  
+ *   4. The sensor specific records are 32 bytes long.
  *   5. The data record lengths are variable.
  *   6. Comments are included in text records, which are of variable
  *      length.
  *   7. Information on this format was obtained from the Geological
- *      Data Center and the Shipboard Computer Group at the Scripps 
+ *      Data Center and the Shipboard Computer Group at the Scripps
  *      Institution of Oceanography
  *
  * The kind value in the mbf_sb2000ss_struct indicates whether the
  * mbf_sb2000ss_data_struct structure holds data (kind = 1) or an
  * ascii comment record (kind = 2).
  */
- 
+
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_sb2000.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_sb2000.h"
 
 /* include for byte swapping on little-endian machines */
 #ifdef BYTESWAPPED
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 #endif
 
 /* essential function prototypes */
-int mbr_register_sb2000ss(int verbose, void *mbio_ptr, 
+int mbr_register_sb2000ss(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_sb2000ss(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_sb2000ss(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_sb2000ss(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error);
@@ -193,54 +193,54 @@ int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_sb2000ss(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_sb2000ss(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_sb2000ss;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_sb2000ss; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_sb2000_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_sb2000_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2000ss; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2000ss; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_sb2000_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_sb2000_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_sb2000_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2000_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_sb2000_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb2000_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_sb2000_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_sb2000_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2000_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_sb2000ss;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_sb2000_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_sb2000_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2000ss;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2000ss;
+	mb_io_ptr->mb_io_dimensions = &mbsys_sb2000_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_sb2000_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_sb2000_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2000_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_sb2000_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb2000_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_sb2000_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_sb2000_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2000_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -259,25 +259,25 @@ int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -288,25 +288,25 @@ int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_sb2000ss(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_sb2000ss(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_sb2000ss";
@@ -347,7 +347,7 @@ int mbr_info_sb2000ss(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -388,7 +388,7 @@ int mbr_alm_sb2000ss(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -428,7 +428,7 @@ int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -471,8 +471,8 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -486,12 +486,12 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	skip = 0;
 	found = MB_NO;
 	if ((status = fread(buffer,1,MBSYS_SB2000_HEADER_SIZE,
-			mb_io_ptr->mbfp)) == MBSYS_SB2000_HEADER_SIZE) 
+			mb_io_ptr->mbfp)) == MBSYS_SB2000_HEADER_SIZE)
 		{
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
-		
+
 		/* check if header is ok */
 		if (strncmp(&buffer[34],"SR",2) == 0
 		    || strncmp(&buffer[34],"RS",2) == 0
@@ -525,12 +525,12 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* read next byte */
 		if ((read_status = fread(&buffer[MBSYS_SB2000_HEADER_SIZE-1],
-			1,1,mb_io_ptr->mbfp)) == 1) 
+			1,1,mb_io_ptr->mbfp)) == 1)
 			{
 			mb_io_ptr->file_bytes += read_status;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
-			
+
 			if (strncmp(&buffer[34],"SR",2) == 0
 			    || strncmp(&buffer[34],"RS",2) == 0
 			    || strncmp(&buffer[34],"SP",2) == 0
@@ -554,9 +554,9 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			*error = MB_ERROR_EOF;
 			}
 		}
-		
+
 	/* report data skips */
-	if (skip > 0 && verbose >= 2) 
+	if (skip > 0 && verbose >= 2)
 	    fprintf(stderr, "\ndgb2           DATA SKIPPED: %d bytes\n", skip);
 
 	/* get header values */
@@ -583,7 +583,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* check for unintelligible records */
 	if (status == MB_SUCCESS)
 		{
-		if ((strncmp(store->sensor_type,"SS",2) != 0 || 
+		if ((strncmp(store->sensor_type,"SS",2) != 0 ||
 			strncmp(store->data_type,"SC",2) != 0)
 			&& strncmp(store->data_type,"TR",2) != 0
 			&& strncmp(store->data_type,"SP",2) != 0)
@@ -595,7 +595,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    i++)
 			    {
 			    if ((read_status = fread(buffer,1,1,
-				mb_io_ptr->mbfp)) != 1) 
+				mb_io_ptr->mbfp)) != 1)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
@@ -606,7 +606,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				mb_io_ptr->file_bytes += read_status;
 				}
 			    }
-			    
+
 			/* if eof not reached set unintelligible error */
 			if (status == MB_SUCCESS)
 			    {
@@ -630,8 +630,8 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* fix incorrect header records */
-	if (status == MB_SUCCESS 
-		&& store->kind == MB_DATA_DATA 
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_DATA
 		&& store->data_size == 1000)
 		{
 		store->sensor_size = 32;
@@ -668,7 +668,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if (status == MB_SUCCESS && store->sensor_size > 0)
 		{
 		if ((status = fread(buffer,1,store->sensor_size,
-			mb_io_ptr->mbfp)) == store->sensor_size) 
+			mb_io_ptr->mbfp)) == store->sensor_size)
 			{
 			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
@@ -700,11 +700,11 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* read data record from file */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& store->data_size > 0)
 		{
 		if ((status = fread(buffer,1,store->data_size,
-			mb_io_ptr->mbfp)) == store->data_size) 
+			mb_io_ptr->mbfp)) == store->data_size)
 			{
 			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
@@ -719,7 +719,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* extract sidescan data */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA)
 		{
 
@@ -748,7 +748,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			buffer[0] = 'G';
 			}
-		    
+
 		/* deal with 1-byte data */
 		if (buffer[0] == 'G')
 		    {
@@ -758,18 +758,18 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->ss[i] = buffer[i+1];
 			}
 		    }
-		    
+
 		/* deal with 2-byte data */
 		else if (buffer[0] == 'R')
 		    {
 		    store->ss_type = 'R';
 		    for (i=0;i<store->pixels_ss;i++)
 			{
-			mb_get_binary_short(MB_NO, (short *)&(buffer[4+2*i]), 
+			mb_get_binary_short(MB_NO, (short *)&(buffer[4+2*i]),
 					    (short *)&(store->ss[2*i]));
 			}
 		    }
-	
+
 		/* print debug statements */
 		if (verbose >= 5)
 			{
@@ -817,7 +817,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* extract velocity profile record */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_VELOCITY_PROFILE)
 		{
 		/* extract the values */
@@ -837,7 +837,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_get_binary_short(MB_NO, &buffer[138], &store->vru2_port);
 		mb_get_binary_short(MB_NO, &buffer[140], &store->vru2_forward);
 		mb_get_binary_short(MB_NO, &buffer[142], &store->vru2_vert);
-	
+
 		/* print debug statements */
 		if (verbose >= 5)
 			{
@@ -882,9 +882,9 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* extract comment record */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_COMMENT)
 		{
-		strncpy(store->comment, buffer, 
+		strncpy(store->comment, buffer,
 			MIN(store->data_size, MBSYS_SB2000_COMMENT_LENGTH-1));
-		store->comment[MIN(store->data_size, 
+		store->comment[MIN(store->data_size,
 			MBSYS_SB2000_COMMENT_LENGTH-1)] = '\0';
 
 		/* print debug statements */
@@ -932,8 +932,8 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -979,7 +979,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5 
+	if (status == MB_SUCCESS && verbose >= 5
 		&& store->kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"\ndbg5  Sensor record to be written by MBIO function <%s>\n",function_name);
@@ -1009,7 +1009,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5 
+	if (status == MB_SUCCESS && verbose >= 5
 		&& store->kind == MB_DATA_VELOCITY_PROFILE)
 		{
 		fprintf(stderr,"\ndbg5  SVP record to be written by MBIO function <%s>\n",function_name);
@@ -1050,7 +1050,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5 
+	if (status == MB_SUCCESS && verbose >= 5
 		&& store->kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"\ndbg5  Data record to be written by MBIO function <%s>\n",function_name);
@@ -1075,7 +1075,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5 
+	if (status == MB_SUCCESS && verbose >= 5
 		&& store->kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"\ndbg5  Comment record to be written by MBIO function <%s>\n",function_name);
@@ -1110,7 +1110,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* write header record to file */
 		if ((status = fwrite(buffer,1,MBSYS_SB2000_HEADER_SIZE,
-			mb_io_ptr->mbfp)) == MBSYS_SB2000_HEADER_SIZE) 
+			mb_io_ptr->mbfp)) == MBSYS_SB2000_HEADER_SIZE)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1121,9 +1121,9 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			*error = MB_ERROR_WRITE_FAIL;
 			}
 		}
-			
+
 	/* put sensor data */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA
 		&& store->sensor_size > 0)
 		{
@@ -1142,7 +1142,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* write sensor record to file */
 		if ((status = fwrite(buffer,1,store->sensor_size,
-			mb_io_ptr->mbfp)) == store->sensor_size) 
+			mb_io_ptr->mbfp)) == store->sensor_size)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1154,7 +1154,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		}
 
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_VELOCITY_PROFILE
 		&& store->data_size > 0)
 		{
@@ -1178,7 +1178,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* write svp profile */
 		if ((status = fwrite(buffer,1,store->data_size,
-			mb_io_ptr->mbfp)) == store->data_size) 
+			mb_io_ptr->mbfp)) == store->data_size)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1190,12 +1190,12 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		}
 
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA
 		&& store->data_size > 0)
 		{
 		/* put the values */
-		    
+
 		/* deal with 1-byte data */
 		if (store->ss_type == 'G')
 		    {
@@ -1208,7 +1208,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    buffer[store->pixels_ss+2] = 'G';
 		    buffer[store->pixels_ss+3] = 'G';
 		    }
-		    
+
 		/* deal with 2-byte data */
 		else if (store->ss_type == 'R')
 		    {
@@ -1218,14 +1218,14 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    buffer[3] = 'R';
 		    for (i=0;i<store->pixels_ss;i++)
 			{
-			mb_get_binary_short(MB_NO, (short *)&(store->ss[2*i]), 
+			mb_get_binary_short(MB_NO, (short *)&(store->ss[2*i]),
 					    (short *)&(buffer[4+2*i]));
 			}
 		    }
 
 		/* write survey data */
 		if ((status = fwrite(buffer,1,store->data_size,
-			mb_io_ptr->mbfp)) == store->data_size) 
+			mb_io_ptr->mbfp)) == store->data_size)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1237,19 +1237,19 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		}
 
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_COMMENT
 		&& store->data_size > 0)
 		{
 		/* put the comment */
 		strncpy(buffer, store->comment,
 			MIN(store->data_size, MBSYS_SB2000_COMMENT_LENGTH-1));
-		buffer[MIN(store->data_size, 
+		buffer[MIN(store->data_size,
 			MBSYS_SB2000_COMMENT_LENGTH-1)] = '\0';
 
 		/* write comment */
 		if ((status = fwrite(buffer,1,store->data_size,
-			mb_io_ptr->mbfp)) == store->data_size) 
+			mb_io_ptr->mbfp)) == store->data_size)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;

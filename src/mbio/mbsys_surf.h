@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_surf.h	6/13/02
  *	$Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -81,12 +81,12 @@
 
 /* include mb_define.h */
 #ifndef MB_DEFINE_DEF
-#include "../../include/mb_define.h"
+#include "mb_define.h"
 #endif
 
 /* include SAPI header file */
 #ifndef _SAPI
-#include "sapi.h"
+#include "mb_sapi.h"
 #endif
 
 #define	MBSYS_SURF_MAXBEAMS		1440
@@ -155,7 +155,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_surf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_surf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
@@ -210,4 +210,3 @@ int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_surf_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

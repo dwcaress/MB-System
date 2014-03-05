@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hysweep1.c	12/23/2011
  *	$Id$
  *
- *    Copyright (c) 2011-2012 by
+ *    Copyright (c) 2011-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -34,17 +34,16 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_hysweep.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_hysweep.h"
 
 /* include for byte swapping */
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 
 /* local defines */
-#define	MBF_HYSWEEP1_MAXLINE	32768
 
 /* turn on debug statements here */
 /* #define MBR_HYSWEEP1_DEBUG 1 */
@@ -178,28 +177,28 @@ int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       extract_segytraceheader: %lu\n",(size_t)mb_io_ptr->mb_io_extract_segytraceheader);
-		fprintf(stderr,"dbg2       extract_segy:       %lu\n",(size_t)mb_io_ptr->mb_io_extract_segy);
-		fprintf(stderr,"dbg2       insert_segy:        %lu\n",(size_t)mb_io_ptr->mb_io_insert_segy);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       extract_segytraceheader: %p\n",(void *)mb_io_ptr->mb_io_extract_segytraceheader);
+		fprintf(stderr,"dbg2       extract_segy:       %p\n",(void *)mb_io_ptr->mb_io_extract_segy);
+		fprintf(stderr,"dbg2       insert_segy:        %p\n",(void *)mb_io_ptr->mb_io_insert_segy);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -249,7 +248,7 @@ int mbr_info_hysweep1(int verbose,
 	*system = MB_SYS_HYSWEEP;
 	*beams_bath_max = 512;
 	*beams_amp_max = 512;
-	*pixels_ss_max = 0;
+	*pixels_ss_max = MBSYS_HYSWEEP_MSS_NUM_PIXELS;
 	strncpy(format_name, "HYSWEEP1", MB_NAME_LENGTH);
 	strncpy(system_name, "HYSWEEP", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_HYSWEEP1\nInformal Description: HYSWEEP multibeam data format\nAttributes:           Many multibeam sonars, \n                      bathymetry, amplitude\n                      variable beams, ascii, HYPACK.\n", MB_DESCRIPTION_LENGTH);
@@ -304,6 +303,10 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	int	*file_header_read;
 	int	*file_header_written;
+	int	*line_saved;
+	int	*RMB_read;
+	double	*pixel_size;
+	double	*swath_width;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -312,7 +315,7 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -331,8 +334,17 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error)
 	/* set saved values */
 	file_header_read = (int *) &mb_io_ptr->save1;
 	file_header_written = (int *) &mb_io_ptr->save2;
+	line_saved = (int *) &mb_io_ptr->save3;
+	RMB_read = (int *) &mb_io_ptr->save4;
 	*file_header_read = MB_NO;
 	*file_header_written = MB_NO;
+	*line_saved = MB_NO;
+	*RMB_read = MB_NO;
+	pixel_size = (double *) &mb_io_ptr->saved1;
+	swath_width = (double *) &mb_io_ptr->saved2;
+
+	*pixel_size = 0.0;
+	*swath_width = 0.0;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -361,7 +373,7 @@ int mbr_dem_hysweep1(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -399,6 +411,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	speed;
 	double	alpha, beta, theta, phi;
 	double	rr, xx, zz;
+	double	*pixel_size, *swath_width;
 	int	i;
 
 	/* print input debug statements */
@@ -408,8 +421,8 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -420,6 +433,8 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointers to data structures */
 	store = (struct mbsys_hysweep_struct *) store_ptr;
+	pixel_size = (double *) &mb_io_ptr->saved1;
+	swath_width = (double *) &mb_io_ptr->saved2;
 
 	/* save position if primary data */
 	if (status == MB_SUCCESS
@@ -447,6 +462,9 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				}
 			mb_navint_add(verbose, mbio_ptr,
 					store->time_d, navlon, navlat, error);
+/* fprintf(stderr,"POS %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d   %f %f   %f %f\n",
+store->time_i[0],store->time_i[1],store->time_i[2],store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+store->POS_x,store->POS_y,navlon,navlat);*/
 			}
 		}
 
@@ -461,7 +479,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			/* add latest attitude */
 			mb_attint_add(verbose, mbio_ptr,
 					store->time_d, -store->HCP_heave,
-					-store->HCP_roll, -store->HCP_pitch, error);
+					-store->HCP_roll, store->HCP_pitch, error);
 			}
 		}
 
@@ -524,12 +542,11 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		/* ignore heading and sonar depth errors */
 		interp_error = MB_ERROR_NO_ERROR;
 
-		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, store->RMBint_heading, speed,
-				    &(store->RMBint_lon), &(store->RMBint_lat), &speed, &interp_error);
-		if (interp_status == MB_SUCCESS)
 		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d,
 				    &(store->RMBint_heave), &(store->RMBint_roll),
 				    &(store->RMBint_pitch), &interp_error);
+		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, store->RMBint_heading, speed,
+				    &(store->RMBint_lon), &(store->RMBint_lat), &speed, &interp_error);
 		if (interp_status == MB_SUCCESS)
 			{
 			if (mb_io_ptr->projection_initialized == MB_YES)
@@ -549,9 +566,14 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			}
 		else
 			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_MISSING_NAVATTITUDE;
+			store->RMBint_lon = 0.0;
+			store->RMBint_lat = 0.0;
+			store->RMBint_x = 0.0;
+			store->RMBint_y = 0.0;
 			}
+/* fprintf(stderr,"RMB %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d   %f %f   %f %f\n",
+store->time_i[0],store->time_i[1],store->time_i[2],store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+store->RMBint_x,store->RMBint_y,store->RMBint_lon,store->RMBint_lat);*/
 		}
 
 	/* if survey data then calculate angles and bathymetry as necessary */
@@ -564,25 +586,29 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		/* deal with case of multibeam sonar */
 		if (store->RMB_beam_data_available & 0x0001)
 			{
-			/* get beam roll angles if necessary */
-			if (!(store->RMB_beam_data_available & 0x0080))
+			/* handle data that starts with beam angles in roll and pitch coordinates */
+			if (store->RMB_sonar_type == 1 || store->RMB_sonar_type == 2)
 				{
-				for (i=0;i<store->RMB_num_beams;i++)
+				/* get beam roll angles if necessary */
+				if (!(store->RMB_beam_data_available & 0x0080))
 					{
-					store->RMB_sounding_rollangles[i]
-						= device->MBI_first_beam_angle + i * device->MBI_angle_increment;
+					for (i=0;i<store->RMB_num_beams;i++)
+						{
+						store->RMB_sounding_rollangles[i]
+							= device->MBI_first_beam_angle + i * device->MBI_angle_increment;
+						}
+					store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
 					}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
-				}
 
-			/* get beam pitch angles if necessary */
-			if (!(store->RMB_beam_data_available & 0x0040))
-				{
-				for (i=0;i<store->RMB_num_beams;i++)
+				/* get beam pitch angles if necessary */
+				if (!(store->RMB_beam_data_available & 0x0040))
 					{
-					store->RMB_sounding_pitchangles[i] = 0.0;
+					for (i=0;i<store->RMB_num_beams;i++)
+						{
+						store->RMB_sounding_pitchangles[i] = 0.0;
+						}
+					store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
 					}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
 				}
 
 			/* get beam takeoff and azimuthal angles if necessary */
@@ -608,7 +634,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 						&theta, &phi,
 						error);
 					store->RMB_sounding_takeoffangles[i] = theta;
-					store->RMB_sounding_azimuthalangles[i] = phi;
+					store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
 					}
 				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0300;
 				}
@@ -622,7 +648,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 					{
 					rr = store->RMB_beam_ranges[i];
 					theta = store->RMB_sounding_takeoffangles[i];
-					phi = store->RMB_sounding_azimuthalangles[i];
+					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
 					xx = rr * sin(DTR * theta);
 					zz = rr * cos(DTR * theta);
 					store->RMB_sounding_across[i] = xx * cos(DTR * phi);
@@ -640,6 +666,27 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 					store->RMB_sounding_flags[i] = MB_FLAG_NONE;
 					}
 				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x2000;
+
+				/* incorporate quality values */
+				if ((store->RMB_beam_data_available & 0x1000)
+					&& strncmp(device->DEV_device_name, "Reson Seabat 8", 14) == 0)
+					{
+					for (i=0;i<store->RMB_num_beams;i++)
+						{
+						if (store->RMB_sounding_quality[i] < 2)
+							store->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+						}
+					}
+
+				/* check for null ranges */
+				if ((store->RMB_beam_data_available & 0x0001))
+					{
+					for (i=0;i<store->RMB_num_beams;i++)
+						{
+						if (store->RMB_beam_ranges[i] <= 0.0)
+							store->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+						}
+					}
 				}
 			}
 
@@ -699,7 +746,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 						&theta, &phi,
 						error);
 					store->RMB_sounding_takeoffangles[i] = theta;
-					store->RMB_sounding_azimuthalangles[i] = phi;
+					store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
 					}
 				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0300;
 				}
@@ -714,7 +761,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 					{
 					rr = store->RMB_multi_ranges[i];
 					theta = store->RMB_sounding_takeoffangles[i];
-					phi = store->RMB_sounding_azimuthalangles[i];
+					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
 					xx = rr * sin(DTR * theta);
 					zz = rr * cos(DTR * theta);
 					store->RMB_sounding_across[i] = xx * cos(DTR * phi);
@@ -735,15 +782,26 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 				}
 			}
 
+		/* generate processed sidescan if needed */
+		if (store->MSS_ping_number != store->RSS_ping_number
+		    && (store->RSS_ping_number == store->RMB_ping_number
+			|| 10 * store->RSS_ping_number == store->RMB_ping_number))
+			{
+			status = mbsys_hysweep_makess(verbose, mbio_ptr, store_ptr,
+							MB_NO, pixel_size,
+							MB_NO, swath_width,
+							5, error);
+			}
+
 		/* print debug statements */
 		if (verbose >= 4)
 			{
 			fprintf(stderr,"\ndbg4  Multibeam bathymetry calculated by MBIO function <%s>\n",function_name);
 			fprintf(stderr,"dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
 			fprintf(stderr,"dbg4       RMB_time:                          %f\n", store->RMB_time);
-			fprintf(stderr,"dbg4       RMB_sonar_type:                    %d\n", store->RMB_sonar_type);
-			fprintf(stderr,"dbg4       RMB_sonar_flags:                   %d\n", store->RMB_sonar_flags);
-			fprintf(stderr,"dbg4       RMB_beam_data_available:           %d\n", store->RMB_beam_data_available);
+			fprintf(stderr,"dbg4       RMB_sonar_type:                    %x\n", store->RMB_sonar_type);
+			fprintf(stderr,"dbg4       RMB_sonar_flags:                   %x\n", store->RMB_sonar_flags);
+			fprintf(stderr,"dbg4       RMB_beam_data_available:           %x\n", store->RMB_beam_data_available);
 			fprintf(stderr,"dbg4       RMB_num_beams:                     %d\n", store->RMB_num_beams);
 			fprintf(stderr,"dbg4       RMB_num_beams_alloc:               %d\n", store->RMB_num_beams_alloc);
 			fprintf(stderr,"dbg4       RMB_sound_velocity:                %f\n", store->RMB_sound_velocity);
@@ -834,8 +892,8 @@ int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -871,8 +929,10 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mbsys_hysweep_device_offset_struct *offset;
 	int	*file_header_read;
 	int	*file_header_written;
+	int	*line_saved;
+	int	*RMB_read;
 	int	done;
-	char	line[MBF_HYSWEEP1_MAXLINE];
+	char	*line;
 	int	nscan, nread;
 	char	*token;
 	int	DEV_device_number;
@@ -904,6 +964,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	SSI_sonar_flags;
 	int	SSI_port_num_samples;
 	int	SSI_starboard_num_samples;
+	int	SNRok, RSSok;
 	int	i;
 
 	/* print input debug statements */
@@ -913,8 +974,8 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -922,10 +983,13 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_hysweep_struct *) store_ptr;
+	line = store->readline;
 
 	/* get saved values */
 	file_header_read = (int *) &mb_io_ptr->save1;
 	file_header_written = (int *) &mb_io_ptr->save2;
+	line_saved = (int *) &mb_io_ptr->save3;
+	RMB_read = (int *) &mb_io_ptr->save4;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -934,15 +998,35 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	done = MB_NO;
 	while (*error == MB_ERROR_NO_ERROR && done == MB_NO)
 		{
+/* if (*line_saved == MB_YES)
+fprintf(stderr,"SAVED:"); */
 		/* read the next line */
-		status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
+		if (*line_saved == MB_NO)
+			status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
+		else
+			*line_saved = MB_NO;
+/* fprintf(stderr,"line:%s",line); */
 
 		/* now make sense of the line */
 		if (status == MB_SUCCESS)
 			{
-			/* RMB multibeam data record */
-			if (strncmp(line, "RMB", 3) == 0)
+			/* check if a new record has been encountered before the last one
+				has been processed */
+			if (*RMB_read == MB_YES && strncmp(line, "RMB", 3) == 0)
 				{
+/* fprintf(stderr,"Saving line because *RMB_read:%d\n",*RMB_read); */
+				*line_saved = MB_YES;
+				done = MB_YES;
+				store->kind = MB_DATA_DATA;
+				store->time_d = store->TND_survey_time_d + store->RMB_time;
+				mb_get_date(verbose, store->time_d, store->time_i);
+				*RMB_read = MB_NO;
+				}
+
+			/* RMB multibeam data record */
+			else if (strncmp(line, "RMB", 3) == 0)
+				{
+/* fprintf(stderr,"Reading line because *RMB_read:%d\n",*RMB_read); */
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_RMB;
 
 				/* parse the first line */
@@ -1422,9 +1506,9 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					fprintf(stderr,"\ndbg4  RMB data record read by MBIO function <%s>\n",function_name);
 					fprintf(stderr,"dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
 					fprintf(stderr,"dbg4       RMB_time:                          %f\n", store->RMB_time);
-					fprintf(stderr,"dbg4       RMB_sonar_type:                    %d\n", store->RMB_sonar_type);
-					fprintf(stderr,"dbg4       RMB_sonar_flags:                   %d\n", store->RMB_sonar_flags);
-					fprintf(stderr,"dbg4       RMB_beam_data_available:           %d\n", store->RMB_beam_data_available);
+					fprintf(stderr,"dbg4       RMB_sonar_type:                    %x\n", store->RMB_sonar_type);
+					fprintf(stderr,"dbg4       RMB_sonar_flags:                   %x\n", store->RMB_sonar_flags);
+					fprintf(stderr,"dbg4       RMB_beam_data_available:           %x\n", store->RMB_beam_data_available);
 					fprintf(stderr,"dbg4       RMB_num_beams:                     %d\n", store->RMB_num_beams);
 					fprintf(stderr,"dbg4       RMB_num_beams_alloc:               %d\n", store->RMB_num_beams_alloc);
 					fprintf(stderr,"dbg4       RMB_sound_velocity:                %f\n", store->RMB_sound_velocity);
@@ -1481,6 +1565,45 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						fprintf(stderr,"\n");
 						}
 					}
+
+				/* check if this completes a survey ping */
+				if (status == MB_SUCCESS)
+					{
+					if (store->SNR_ping_number > 0)
+						{
+						if (store->SNR_ping_number == store->RMB_ping_number)
+							SNRok = MB_YES;
+						else if (10 * store->SNR_ping_number == store->RMB_ping_number)
+							SNRok = MB_YES;
+						else
+							SNRok = MB_NO;
+						}
+					else
+						SNRok = MB_YES;
+					if (store->RSS_ping_number > 0)
+						{
+						if (store->RSS_ping_number == store->RMB_ping_number)
+							RSSok = MB_YES;
+						else if (10 * store->RSS_ping_number == store->RMB_ping_number)
+							RSSok = MB_YES;
+						else
+							RSSok = MB_NO;
+						}
+					else
+						RSSok = MB_YES;
+					if (SNRok == MB_YES && RSSok == MB_YES)
+						{
+						done = MB_YES;
+						store->kind = MB_DATA_DATA;
+						store->time_d = store->TND_survey_time_d + store->RMB_time;
+						mb_get_date(verbose, store->time_d, store->time_i);
+						}
+/* fprintf(stderr,"RMB SNRok:%d RSSok:%d done:%d store->kind:%d\n",SNRok,RSSok,done,store->kind); */
+					}
+
+				/* set *RMB_read flag */
+				if (done == MB_NO)
+					*RMB_read = MB_YES;
 				}
 
 			/* RSS data record */
@@ -1503,22 +1626,30 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						&(store->RSS_maximum_amplitude),
 						&(store->RSS_bit_shift),
 						&(store->RSS_frequency));
-				if (nscan != 9)
+				if (nscan != 13)
 					{
 					status = MB_FAILURE;
 					*error = MB_ERROR_UNINTELLIGIBLE;
 					}
 
 				/* allocate space for sidescan data if required */
-				if (store->RSS_port_num_samples > store->RSS_port_num_samples_alloc)
+				if (status == MB_SUCCESS && store->RSS_port_num_samples > store->RSS_port_num_samples_alloc)
 					{
 					status = mb_reallocd(verbose, __FILE__, __LINE__, store->RSS_port_num_samples * sizeof(int),
-									(void **)&(store->RSS_starboard_num_samples), error);
+									(void **)&(store->RSS_port), error);
+					if (status == MB_SUCCESS)
+						store->RSS_port_num_samples_alloc = store->RSS_port_num_samples;
+					else
+						store->RSS_port_num_samples_alloc = 0;;
 					}
-				if (store->RSS_starboard_num_samples > store->RSS_starboard_num_samples_alloc)
+				if (status == MB_SUCCESS && store->RSS_starboard_num_samples > store->RSS_starboard_num_samples_alloc)
 					{
 					status = mb_reallocd(verbose, __FILE__, __LINE__, store->RSS_starboard_num_samples * sizeof(int),
-									(void **)&(store->RSS_starboard_num_samples), error);
+									(void **)&(store->RSS_starboard), error);
+					if (status == MB_SUCCESS)
+						store->RSS_starboard_num_samples_alloc = store->RSS_starboard_num_samples;
+					else
+						store->RSS_starboard_num_samples_alloc = 0;;
 					}
 
 				/* read and parse RSS_port */
@@ -1545,7 +1676,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 							*error = MB_ERROR_UNINTELLIGIBLE;
 							}
 						}
-
 					}
 
 				/* read and parse RSS_starboard */
@@ -1581,7 +1711,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					fprintf(stderr,"\ndbg4  RMB data record read by MBIO function <%s>\n",function_name);
 					fprintf(stderr,"dbg4       RSS_device_number:                 %d\n", store->RSS_device_number);
 					fprintf(stderr,"dbg4       RSS_time:                          %f\n", store->RSS_time);
-					fprintf(stderr,"dbg4       RSS_sonar_flags:                   %d\n", store->RSS_sonar_flags);
+					fprintf(stderr,"dbg4       RSS_sonar_flags:                   %x\n", store->RSS_sonar_flags);
 					fprintf(stderr,"dbg4       RSS_port_num_samples:              %d\n", store->RSS_port_num_samples);
 					fprintf(stderr,"dbg4       RSS_port_num_samples_alloc:        %d\n", store->RSS_port_num_samples_alloc);
 					fprintf(stderr,"dbg4       RSS_starboard_num_samples:         %d\n", store->RSS_starboard_num_samples);
@@ -1596,13 +1726,144 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					fprintf(stderr,"dbg4       RSS_frequency:                     %d\n", store->RSS_frequency);
 					for (i=0;i<store->RSS_port_num_samples;i++)
 						{
-						fprintf(stderr,"dbg4       port pixel:%5d ss:%d", i, store->RSS_port[i]);
+						fprintf(stderr,"dbg4       port pixel:%5d ss:%d\n", i, store->RSS_port[i]);
 						}
 					for (i=0;i<store->RSS_port_num_samples;i++)
 						{
-						fprintf(stderr,"dbg4       starboard pixel:%5d ss:%d", i, store->RSS_starboard[i]);
+						fprintf(stderr,"dbg4       starboard pixel:%5d ss:%d\n", i, store->RSS_starboard[i]);
 						}
 					}
+
+				/* check if this completes a survey ping */
+				if (status == MB_SUCCESS)
+					{
+					if (store->RSS_ping_number == store->RMB_ping_number)
+						RSSok = MB_YES;
+					else if (10 * store->RSS_ping_number == store->RMB_ping_number)
+						RSSok = MB_YES;
+					else
+						RSSok = MB_NO;
+					if (store->SNR_ping_number > 0)
+						{
+						if (store->SNR_ping_number == store->RMB_ping_number)
+							SNRok = MB_YES;
+						else if (10 * store->SNR_ping_number == store->RMB_ping_number)
+							SNRok = MB_YES;
+						else
+							SNRok = MB_NO;
+						}
+					else
+						SNRok = MB_YES;
+					if (SNRok == MB_YES && RSSok == MB_YES)
+						{
+						done = MB_YES;
+						store->kind = MB_DATA_DATA;
+						store->time_d = store->TND_survey_time_d + store->RMB_time;
+						mb_get_date(verbose, store->time_d, store->time_i);
+						}
+/* fprintf(stderr,"RSS SNRok:%d RSSok:%d done:%d store->kind:%d\n",SNRok,RSSok,done,store->kind); */
+					}
+
+				/* set *RMB_read flag */
+				if (done == MB_YES)
+					*RMB_read = MB_NO;
+				}
+
+			/* MSS data record */
+			else if (strncmp(line, "MSS", 3) == 0)
+				{
+				store->type = MBSYS_HYSWEEP_RECORDTYPE_MSS;
+
+				/* parse the first line */
+				nscan = sscanf(line+4, "%d %lf %lf %d %lf %d",
+						&(store->MSS_device_number),
+						&(store->MSS_time),
+						&(store->MSS_sound_velocity),
+						&(store->MSS_num_pixels),
+						&(store->MSS_pixel_size),
+						&(store->MSS_ping_number));
+				if (nscan != 6)
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_UNINTELLIGIBLE;
+					}
+
+				/* read and parse MSS_ss */
+				if (status == MB_SUCCESS)
+					{
+					/* read the next line */
+					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
+
+					/* parse the line */
+					if (status == MB_SUCCESS
+						&& (token = strtok(line+0, " ")) != NULL)
+						{
+						nread = 0;
+						for (i=0;i<store->MSS_num_pixels && token != NULL;i++)
+							{
+							nscan = sscanf(token, "%lf", &(store->MSS_ss[i]));
+							if (nscan == 1)
+								nread++;
+							token = strtok(NULL, " ");
+							}
+						if (nread != store->MSS_num_pixels)
+							{
+							status = MB_FAILURE;
+							*error = MB_ERROR_UNINTELLIGIBLE;
+							}
+						}
+					}
+
+				/* read and parse MSS_along */
+				if (status == MB_SUCCESS)
+					{
+					/* read the next line */
+					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
+
+					/* parse the line */
+					if (status == MB_SUCCESS
+						&& (token = strtok(line+0, " ")) != NULL)
+						{
+						nread = 0;
+						for (i=0;i<store->MSS_num_pixels && token != NULL;i++)
+							{
+							nscan = sscanf(token, "%lf", &(store->MSS_ss_along[i]));
+							if (nscan == 1)
+								nread++;
+							token = strtok(NULL, " ");
+							}
+						if (nread != store->MSS_num_pixels)
+							{
+							status = MB_FAILURE;
+							*error = MB_ERROR_UNINTELLIGIBLE;
+							}
+						}
+
+					/* calculate MSS_across */
+					for (i=0;i<store->MSS_num_pixels;i++)
+						{
+						store->MSS_ss_across[i] = store->MSS_pixel_size * (double)(i - (store->MSS_num_pixels / 2));;
+						}
+					}
+
+				/* print debug statements */
+				if (verbose >= 4)
+					{
+					fprintf(stderr,"\ndbg4  MSS data record read by MBIO function <%s>\n",function_name);
+					fprintf(stderr,"dbg4       MSS_device_number:                 %d\n", store->MSS_device_number);
+					fprintf(stderr,"dbg4       MSS_time:                          %f\n", store->MSS_time);
+					fprintf(stderr,"dbg4       MSS_sound_velocity:                %f\n", store->MSS_sound_velocity);
+					fprintf(stderr,"dbg4       MSS_num_pixels:                    %d\n", store->MSS_num_pixels);
+					fprintf(stderr,"dbg4       MSS_pixel_size:                    %f\n", store->MSS_pixel_size);
+					fprintf(stderr,"dbg4       MSS_ping_number:                   %d\n", store->MSS_ping_number);
+					for (i=0;i<store->MSS_num_pixels;i++)
+						{
+						fprintf(stderr,"dbg4       pixel:%5d ss:%f across:%f along:%f\n",
+							i, store->MSS_ss[i], store->MSS_ss_across[i], store->MSS_ss_along[i]);
+						}
+					}
+
+				/* the MSS record is always written before RMB and so never completes a survey ping */
 				}
 
 			/* SNR data record */
@@ -1658,14 +1919,38 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					fprintf(stderr,"dbg4       SNR_settings[11]:                  %f\n", store->SNR_settings[11]);
 					}
 
-				/* if successful this completes a survey ping */
+				/* check if this completes a survey ping */
 				if (status == MB_SUCCESS)
 					{
-					done = MB_YES;
-					store->kind = MB_DATA_DATA;
-					store->time_d = store->TND_survey_time_d + store->RMB_time;
-					mb_get_date(verbose, store->time_d, store->time_i);
+					if (store->SNR_ping_number == store->RMB_ping_number)
+						SNRok = MB_YES;
+					else if (10 * store->SNR_ping_number == store->RMB_ping_number)
+						SNRok = MB_YES;
+					else
+						SNRok = MB_NO;
+					if (store->RSS_ping_number > 0)
+						{
+						if (store->RSS_ping_number == store->RMB_ping_number)
+							RSSok = MB_YES;
+						else if (10 * store->RSS_ping_number == store->RMB_ping_number)
+							RSSok = MB_YES;
+						else
+							RSSok = MB_NO;
+						}
+					else
+						RSSok = MB_YES;
+					if (SNRok == MB_YES && RSSok == MB_YES)
+						{
+						done = MB_YES;
+						store->kind = MB_DATA_DATA;
+						store->time_d = store->TND_survey_time_d + store->RMB_time;
+						mb_get_date(verbose, store->time_d, store->time_i);
+						}
 					}
+
+				/* set *RMB_read flag */
+				if (done == MB_YES)
+					*RMB_read = MB_NO;
 				}
 
 			/* TID data record */
@@ -2158,35 +2443,71 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					store->INF_boat[0] = '\0';
 					store->INF_project[0] = '\0';
 					store->INF_area[0] = '\0';
-					nscan = sscanf(&(line[16]), "%lf %lf %lf",
+					nscan = 0;
+					if (strlen(line) > 16)
+						nscan = sscanf(&(line[16]), "%lf %lf %lf",
 							&(store->INF_tide_correction),
 							&(store->INF_draft_correction),
 							&(store->INF_sound_velocity));
+					if (nscan < 3)
+						store->INF_sound_velocity = 1500.0;
+					if (nscan < 2)
+						store->INF_draft_correction = 0.0;
+					if (nscan < 1)
+						store->INF_tide_correction = 0.0;
 					}
 				else
 					{
 					if ((token = strtok(line+3, "\"")) != NULL)
 						{
 						token = strtok(NULL, "\"");
-						strcpy(store->INF_surveyor, token);
+						if (token != NULL && token[0] != ' ')
+							{
+							strcpy(store->INF_surveyor, token);
+							token = strtok(NULL, "\"");
+							}
+						else
+							store->INF_surveyor[0] = '\0';
 
 						token = strtok(NULL, "\"");
-						token = strtok(NULL, "\"");
-						strcpy(store->INF_boat, token);
+						if (token != NULL && token[0] != ' ')
+							{
+							strcpy(store->INF_boat, token);
+							token = strtok(NULL, "\"");
+							}
+						else
+							store->INF_boat[0] = '\0';
 
 						token = strtok(NULL, "\"");
-						token = strtok(NULL, "\"");
-						strcpy(store->INF_project, token);
+						if (token != NULL && token[0] != ' ')
+							{
+							strcpy(store->INF_project, token);
+							token = strtok(NULL, "\"");
+							}
+						else
+							store->INF_project[0] = '\0';
 
 						token = strtok(NULL, "\"");
-						token = strtok(NULL, "\"");
-						strcpy(store->INF_area, token);
-						token = strtok(NULL, "\"");
+						if (token != NULL && token[0] != ' ')
+							{
+							strcpy(store->INF_area, token);
+							token = strtok(NULL, "\"");
+							}
+						else
+							store->INF_area[0] = '\0';
 						}
-					nscan = sscanf(token, "%lf %lf %lf",
+					nscan = 0;
+					if (token != NULL)
+						nscan = sscanf(token, "%lf %lf %lf",
 							&(store->INF_tide_correction),
 							&(store->INF_draft_correction),
 							&(store->INF_sound_velocity));
+					if (nscan < 3)
+						store->INF_sound_velocity = 1500.0;
+					if (nscan < 2)
+						store->INF_draft_correction = 0.0;
+					if (nscan < 1)
+						store->INF_tide_correction = 0.0;
 					}
 				if (nscan != 3)
 					{
@@ -2250,7 +2571,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_MBI;
 
 				/* parse the first line */
-				nscan = sscanf(line+4, "%d %d %d %d %d %d %lf %lf",
+				nscan = sscanf(line+4, "%d %x %x %x %d %d %lf %lf",
 						&(MBI_device_number),
 						&(MBI_sonar_type),
 						&(MBI_sonar_flags),
@@ -2283,9 +2604,9 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					fprintf(stderr,"dbg4       MBI_device_number:                 %d\n", MBI_device_number);
 					fprintf(stderr,"dbg4       MBI_sonar_id:                      %d\n", device->MBI_sonar_id);
 					fprintf(stderr,"dbg4       MBI_sonar_receive_shape:           %d\n", device->MBI_sonar_receive_shape);
-					fprintf(stderr,"dbg4       MBI_sonar_type:                    %d\n", device->MBI_sonar_type);
-					fprintf(stderr,"dbg4       MBI_sonar_flags:                   %d\n", device->MBI_sonar_flags);
-					fprintf(stderr,"dbg4       MBI_beam_data_available:           %d\n", device->MBI_beam_data_available);
+					fprintf(stderr,"dbg4       MBI_sonar_type:                    %x\n", device->MBI_sonar_type);
+					fprintf(stderr,"dbg4       MBI_sonar_flags:                   %x\n", device->MBI_sonar_flags);
+					fprintf(stderr,"dbg4       MBI_beam_data_available:           %x\n", device->MBI_beam_data_available);
 					fprintf(stderr,"dbg4       MBI_num_beams_1:                   %d\n", device->MBI_num_beams_1);
 					fprintf(stderr,"dbg4       MBI_num_beams_2:                   %d\n", device->MBI_num_beams_2);
 					fprintf(stderr,"dbg4       MBI_first_beam_angle:              %f\n", device->MBI_first_beam_angle);
@@ -2391,7 +2712,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_SSI;
 
 				/* parse the first line */
-				nscan = sscanf(line+4, "%d %d %d %d",
+				nscan = sscanf(line+4, "%d %x %d %d",
 						&(SSI_device_number),
 						&(SSI_sonar_flags),
 						&(SSI_port_num_samples),
@@ -2414,7 +2735,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					{
 					fprintf(stderr,"\ndbg4  SSI data record read by SSIO function <%s>\n",function_name);
 					fprintf(stderr,"dbg4       SSI_device_number:                 %d\n", SSI_device_number);
-					fprintf(stderr,"dbg4       SSI_sonar_flags:                   %d\n", device->SSI_sonar_flags);
+					fprintf(stderr,"dbg4       SSI_sonar_flags:                   %x\n", device->SSI_sonar_flags);
 					fprintf(stderr,"dbg4       SSI_port_num_samples:              %d\n", device->SSI_port_num_samples);
 					fprintf(stderr,"dbg4       SSI_starboard_num_samples:         %d\n", device->SSI_starboard_num_samples);
 					}
@@ -2636,8 +2957,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_NONE;
 				}
 
-
-
 			}
 		}
 #ifdef MBR_HYSWEEP1_DEBUG
@@ -2676,13 +2995,13 @@ int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
 		}
 
 	/* read the next line */
-	result = fgets(line,MBF_HYSWEEP1_MAXLINE,mbfp);
+	result = fgets(line,MBSYS_HYSWEEP_MAXLINE,mbfp);
 	if (result == line
-		&& strlen(line) < MBF_HYSWEEP1_MAXLINE)
+		&& strlen(line) < MBSYS_HYSWEEP_MAXLINE)
 	    {
 	    status = MB_SUCCESS;
 	    *error = MB_ERROR_NO_ERROR;
@@ -2726,7 +3045,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mbsys_hysweep_device_offset_struct *offset;
 	struct mbsys_hysweep_struct hysweeptmp;
 	FILE	*mbfp;
-	char	line[MBF_HYSWEEP1_MAXLINE];
+	char	*line;
 	int	*file_header_read;
 	int	*file_header_written;
 	int	kindex;
@@ -2738,7 +3057,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	*device_number_MB_HCP;
 	int	*device_number_MB_GYR;
 	int	*device_number_MB_DFT;
-	double	x,y;
 	int	i, j;
 
 	/* print input debug statements */
@@ -2748,16 +3066,17 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mbfp = mb_io_ptr->mbfp;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_hysweep_struct *) store_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	line = store->writeline;
 
 	/* get saved values */
 	file_header_read = (int *) &mb_io_ptr->save1;
@@ -3048,7 +3367,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 			if (device->DEV_device_capability & 16)
 				{
-				fprintf(mbfp, "MBI %d %d %d %d %d %d %.3f %.3f\r\n",
+				fprintf(mbfp, "MBI %d %x %x %x %d %d %.3f %.3f\r\n",
 					device->DEV_device_number,
 					device->MBI_sonar_type,
 					device->MBI_sonar_flags,
@@ -3057,7 +3376,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					device->MBI_num_beams_2,
 					device->MBI_first_beam_angle,
 					device->MBI_angle_increment);
-				fprintf(mbfp, "SSI %d %d %d %d\r\n",
+				fprintf(mbfp, "SSI %d %x %d %d\r\n",
 					device->DEV_device_number,
 					device->SSI_sonar_flags,
 					device->SSI_port_num_samples,
@@ -3095,9 +3414,9 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr,"\ndbg4  RMB data record read by MBIO function <%s>\n",function_name);
 			fprintf(stderr,"dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
 			fprintf(stderr,"dbg4       RMB_time:                          %f\n", store->RMB_time);
-			fprintf(stderr,"dbg4       RMB_sonar_type:                    %d\n", store->RMB_sonar_type);
-			fprintf(stderr,"dbg4       RMB_sonar_flags:                   %d\n", store->RMB_sonar_flags);
-			fprintf(stderr,"dbg4       RMB_beam_data_available:           %d\n", store->RMB_beam_data_available);
+			fprintf(stderr,"dbg4       RMB_sonar_type:                    %x\n", store->RMB_sonar_type);
+			fprintf(stderr,"dbg4       RMB_sonar_flags:                   %x\n", store->RMB_sonar_flags);
+			fprintf(stderr,"dbg4       RMB_beam_data_available:           %x\n", store->RMB_beam_data_available);
 			fprintf(stderr,"dbg4       RMB_num_beams:                     %d\n", store->RMB_num_beams);
 			fprintf(stderr,"dbg4       RMB_num_beams_alloc:               %d\n", store->RMB_num_beams_alloc);
 			fprintf(stderr,"dbg4       RMB_sound_velocity:                %f\n", store->RMB_sound_velocity);
@@ -3164,6 +3483,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->RMBint_x,
 				store->RMBint_y);
 			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 		if (*add_MB_GYR == MB_YES)
 			{
@@ -3172,16 +3492,18 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->RMB_time,
 				store->RMBint_heading);
 			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 		if (*add_MB_HCP == MB_YES)
 			{
 			sprintf(line, "HCP %d %.3f %.2f %.2f %.2f\r\n",
 				*device_number_MB_HCP,
 				store->RMB_time,
-				store->HCP_heave,
-				store->HCP_roll,
-				store->HCP_pitch);
+				(-store->RMBint_heave),
+				(-store->RMBint_roll),
+				store->RMBint_pitch);
 			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 		if (*add_MB_DFT == MB_YES)
 			{
@@ -3190,10 +3512,111 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->RMB_time,
 				store->RMBint_draft);
 			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
+			}
+
+		/* write raw sidescan if it exists */
+		if ((store->RSS_ping_number == store->RMB_ping_number
+			|| 10 * store->RSS_ping_number == store->RMB_ping_number)
+		    && store->RSS_port_num_samples + store->RSS_starboard_num_samples > 0)
+			{
+			/* write first line */
+			sprintf(line, "RSS %d %.3f %x %d %d %.2f %d %.2f %f %d %d %d %d\r\n",
+				store->RSS_device_number,
+				store->RSS_time,
+				store->RSS_sonar_flags,
+				store->RSS_port_num_samples,
+				store->RSS_starboard_num_samples,
+				store->RSS_sound_velocity,
+				store->RSS_ping_number,
+				store->RSS_altitude,
+				store->RSS_sample_rate,
+				store->RSS_minimum_amplitude,
+				store->RSS_maximum_amplitude,
+				store->RSS_bit_shift,
+				store->RSS_frequency);
+			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
+
+			/* write RSS_port */
+			for (i=0;i<store->RSS_port_num_samples;i++)
+				{
+				if (i != 0)
+					fprintf(mbfp, " ");
+				fprintf(mbfp, "%d",store->RSS_port[i]);
+				}
+			fprintf(mbfp,"\r\n");
+
+			/* write RSS_starboard */
+			for (i=0;i<store->RSS_starboard_num_samples;i++)
+				{
+				if (i != 0)
+					fprintf(mbfp, " ");
+				fprintf(mbfp, "%d",store->RSS_starboard[i]);
+				}
+			fprintf(mbfp,"\r\n");
+			}
+
+		/* write processed sidescan if it exists */
+/* fprintf(stderr,"store->MSS_num_pixels:%d store->MSS_ping_number:%d store->RMB_ping_number:%d\n",
+store->MSS_num_pixels,store->MSS_ping_number,store->RMB_ping_number); */
+		if ((store->MSS_ping_number == store->RMB_ping_number
+			|| 10 * store->MSS_ping_number == store->RMB_ping_number)
+		    && store->MSS_num_pixels > 0)
+			{
+			/* write first line */
+			sprintf(line, "MSS %d %.3f %.2f %d %.3f %d\r\n",
+				store->MSS_device_number,
+				store->MSS_time,
+				store->MSS_sound_velocity,
+				store->MSS_num_pixels,
+				store->MSS_pixel_size,
+				store->MSS_ping_number);
+			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
+
+			/* write MSS_ss */
+			for (i=0;i<store->MSS_num_pixels;i++)
+				{
+				if (i != 0)
+					fprintf(mbfp, " ");
+				fprintf(mbfp, "%.2f",store->MSS_ss[i]);
+				}
+			fprintf(mbfp,"\r\n");
+
+			/* write MSS_ss_along */
+			for (i=0;i<store->MSS_num_pixels;i++)
+				{
+				if (i != 0)
+					fprintf(mbfp, " ");
+				fprintf(mbfp, "%.2f",store->MSS_ss_along[i]);
+				}
+			fprintf(mbfp,"\r\n");
+			}
+
+		/* write SNR record if it exists */
+		if ((store->SNR_ping_number == store->RMB_ping_number
+			|| 10 * store->SNR_ping_number == store->RMB_ping_number))
+			{
+			sprintf(line, "SNR %d %.3f %d %d %d",
+				store->SNR_device_number,
+				store->SNR_time,
+				store->SNR_ping_number,
+				store->SNR_sonar_id,
+				store->SNR_num_settings);
+			for (i=0;i<store->SNR_num_settings;i++)
+				{
+				kindex = strlen(line);
+				sprintf(line+kindex, " %g", store->SNR_settings[i]);
+				}
+			kindex = strlen(line);
+			sprintf(line+kindex, "\r\n");
+			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 
 		/* write first line */
-		fprintf(mbfp, "RMB %d %.3f %d %d %x %d %.2f %d\r\n",
+		sprintf(line, "RMB %d %.3f %x %x %x %d %.2f %d\r\n",
 			store->RMB_device_number,
 			store->RMB_time,
 			store->RMB_sonar_type,
@@ -3202,6 +3625,8 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			store->RMB_num_beams,
 			store->RMB_sound_velocity,
 			store->RMB_ping_number);
+			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 
 		/* write RMB_beam_ranges if included */
 		if (store->RMB_beam_data_available & 0x0001)
@@ -3472,23 +3897,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			sprintf(line+kindex, "\r\n");
 			fputs(line, mbfp);
 			}
-
-		/* write SNR record */
-		sprintf(line, "SNR %d %.3f %d %d %d",
-			store->SNR_device_number,
-			store->SNR_time,
-			store->SNR_ping_number,
-			store->SNR_sonar_id,
-			store->SNR_num_settings);
-		for (i=0;i<store->SNR_num_settings;i++)
-			{
-			kindex = strlen(line);
-			sprintf(line+kindex, " %g", store->SNR_settings[i]);
-			}
-		kindex = strlen(line);
-		sprintf(line+kindex, "\r\n");
-		fputs(line, mbfp);
-
 		}
 
 	/* call appropriate writing routine for other records */
@@ -3504,6 +3912,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->HCP_roll,
 				store->HCP_pitch);
 			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 
 		/* write GYR record */
@@ -3514,6 +3923,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->GYR_time,
 				store->GYR_heading);
 			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 
 		/* write DFT record */
@@ -3524,6 +3934,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->DFT_time,
 				store->DFT_draft);
 			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 
 		/* write GPS and POS record */
@@ -3541,6 +3952,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					store->GPS_mode,
 					store->GPS_nsats);
 				fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 				}
 
 			sprintf(line, "POS %d %.3f %.2f %.2f\r\n",
@@ -3549,6 +3961,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->POS_x,
 				store->POS_y);
 			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 
 		/* write EC1 record */
@@ -3559,6 +3972,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->EC1_time,
 				store->EC1_rawdepth);
 			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 
 		/* write TID record */
@@ -3569,12 +3983,14 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->TID_time,
 				store->TID_tide);
 			fputs(line, mbfp);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 
 		/* write comment */
 		else if (store->kind == MB_DATA_COMMENT)
 			{
 			sprintf(line, "COM %s\r\n", store->COM_comment);
+/* fprintf(stderr,"writeline: %s",line); */
 			}
 		}
 

@@ -1,0 +1,316 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbcopy</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbcopy</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbcopy</B> - Copy swath sonar bathymetry data files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbcopy</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-C</B><I>commentfile</I> <B>-D</B>
+<B>-E</B><I>yr/mo/da/hr/mn/sc</I> <B>-F</B><I>informat[/outformat[/mergeformat]]</I> 
+<B>-H</B> <B>-I</B><I>infilename</I> 
+<B>-L</B><I>lonflip</I> <B>-M</B><I>mergefilename</I> <B>-N</B> <B>-O</B><I>outfilename</I> 
+<B>-P</B><I>pings</I> <B>-Q</B><I>sleep_factor</I> <B>-R</B><I>west/east/south/north</I> 
+<B>-S</B><I>speed</I> <B>-V</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbcopy</B> is a utility for copying swath sonar data files which
+may be used to change formats, average pings, or window
+in time and space. <B>mbcopy</B> can be used as a filter from
+stdin to stdout, or it may do i/o to and from files.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-B</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the starting time for data allowed in the input data.
+The <B>-E</B> option sets the ending time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
+<DT><B>-C</B>
+
+<DD>
+<I>commentfile</I>
+<BR>
+
+Text file containing comments which are inserted into the
+beginning of the output data stream.  This option is typically
+used to insert a data pedigree statement at the beginning of
+data processing.
+<DT><B>-D</B>
+
+<DD>
+This option only works when the output format is MBLDEOIH (format 71).
+When <B>-D</B> is invoked, <B>mbcopy</B> only outputs swath bathymetry
+data (any amplitude and sidescan data found in the input are ignored).
+The <B>MB-System</B> program <B>mbdatalist</B> uses this option to 
+generate &quot;fast bathymetry&quot; or &quot;fbt&quot; files. See the <B>MB-System</B>
+manual page for information on the use and utility of &quot;fbt&quot; files.
+<DT><B>-E</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the ending time for data allowed in the input data.
+The <B>-B</B> option sets the starting time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
+<DT><B>-F</B>
+
+<DD>
+<I>informat[/outformat[/mergeformat]]</I>
+<BR>
+
+Sets the format for the input and output swath sonar data using 
+<B>MBIO</B> integer format identifiers. If only <I>informat</I> is specified,
+then <I>outformat</I> is assumed to be the same. If bathymetry merging is
+specified with the <B>-M</B> option, then the optional <I>mergeformat</I> 
+specifies the format of the merge file.
+This program uses the <B>MBIO</B> library and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. When the <I>informat</I> and
+<I>outformat</I> values are both associated with the same swath sonar
+sonar system (e.g. the Atlas Hydrosweep DS system), then the complete
+data stream contained in the input file can be copied to the output
+file.  If the two formats are associated with two different swath sonar
+systems, then only the time stamp, navigation, and beam values will
+be copied.  The use of ping averaging also causes a partial data stream
+to be passed, even when compatible or identical input and output formats
+are specified (see the <B>-P</B> option).
+Default: <I>informat</I> = 11; <I>outformat</I> = 11.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infilename</I>
+<BR>
+
+Data file from which the input data will be read. If
+no input file is specified, the input will be read
+from stdin. Default: <I>infilename</I> = stdin.
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values returned.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0 
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1 
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <I>lonflip</I> = 0.
+<DT><B>-M</B>
+
+<DD>
+<I>mergefilename</I>
+<BR>
+
+If a merge file is specified then the bathymetry data and flags
+from the merge file will be written to the output file along with 
+the remaining data from the input file.
+This can be used to merge two processing streams, one for bathymetry
+data and the other for other data sets. The input file and merge file 
+must both be based on the same raw data.
+<DT><B>-N</B>
+
+<DD>
+Normally, <B>mbcopy</B> generates a set of comment records at
+the beginning of the output stream which record when, how,
+and by whom <B>mbcopy</B> was run.  If the
+<B>-N</B> flag is given, these comments are not included in 
+the output stream, and, in addition, any preexisting comment records
+in the input data stream are not passed to the output data stream.
+However, the <B>-N</B> option does not affect the insertion of
+comments from a text file if specified using the <B>-C</B> option.
+<DT><B>-O</B>
+
+<DD>
+<I>outfilename</I>
+<BR>
+
+Data file to which the output data will be written. If
+no output file is specified, the output will be written to
+stdout. Default: <I>outfilename</I> = stdout.
+<DT><B>-P</B>
+
+<DD>
+<I>pings</I>
+<BR>
+
+Sets the ping averaging of the input data. If <I>pings</I> = 1, then
+no ping averaging is performed. If <I>pings</I> &gt; 0, then
+that number of input pings will be averaged to produce one output
+ping.  If <I>pings</I> = 0, then the ping averaging will automatically
+be done so that the along-track ping spacing is equal to the across-track
+beam spacing. If ping averaging is used (<I>pings</I> != 1), then
+only a partial data stream can be copied (see the <B>-F</B> option).
+Default: <I>pings</I> = 1 (no ping averaging).
+<DT><B>-Q</B>
+
+<DD>
+<I>sleep_factor</I>
+<BR>
+
+Causes the program to sleep before writing each data record, thus simulating
+a simple data logger. The amount of time slept is the time between the
+previous and current pings times the value <I>sleep_factor</I>.
+Default: <I>sleep_factor</I> = 1.0
+<DT><B>-R</B>
+
+<DD>
+<I>west/east/south/north</I>
+<BR>
+
+Sets the longitude and latitude bounds within which swath sonar 
+data will be read. Only the data which lies within these bounds will
+be copied. 
+Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
+<DT><B>-S</B>
+
+<DD>
+<I>speed</I>
+<BR>
+
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+the input data; pings associated with a smaller ship speed will not be
+copied. Default: <I>speed</I> = 0.
+<DT><B>-T</B>
+
+<DD>
+<I>timegap</I>
+<BR>
+
+Sets the maximum time gap in minutes between adjacent pings allowed before
+the data is considered to have a gap. Default: <I>timegap</I> = 1.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbcopy</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbcopy</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used, all error status messages, 
+and the number of records input and output.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to copy a raw Hydrosweep file (format 21) called hs_raw into a
+L-DEO binary Hydrosweep file (format 24) called hs_binary while windowing the data
+into a region between 145W and 140W longitude and between 10S and 5S
+longitude. The following will suffice:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcopy&nbsp;-P1&nbsp;-F21/24&nbsp;-R-145/-140/-10/-5&nbsp;-Ihs_raw&nbsp;-Ohs_binary<BR>
+<P>
+Suppose one has a program called thrash_prog which requires Hydrosweep
+data to be input in the URI format (format 23) to stdin, but the existing
+data is in a raw Hydrosweep file (format 21).  The following will work:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcopy&nbsp;-P1&nbsp;-F21/23&nbsp;|&nbsp;thrash_prog<BR>
+<P>
+where a pipe (|) has been used to direct the stdout stream from <B>mbcopy</B>
+to the stdin stream of thrash_prog.
+<P>
+Suppose one has some raw data from a Simrad EM300 that has been cleaned and processed
+by a third party using other software and exported as a GSF file, but one wants to 
+access the original Simrad attitude and backscatter data with the corrected bathymetry 
+data.  The following will work:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcopy&nbsp;-F56/57/121&nbsp;-I0015_20040212_052714_raw.all&nbsp;-M20040212_052714.gsf&nbsp;-O20040212_052714.mb57<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbio.html">mbio</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Certainly.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

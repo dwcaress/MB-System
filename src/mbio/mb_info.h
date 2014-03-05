@@ -2,7 +2,7 @@
  *    The MB-system:	mb_info.h			8/21/2006
  *    $Id$
  *
- *    Copyright (c) 2006-2012 by
+ *    Copyright (c) 2006-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -29,17 +29,17 @@
  *
  *
  */
- 
+
 /* include this code only once */
 #ifndef MB_INFO_DEF
 #define MB_INFO_DEF
- 
+
  /* structure holding output of mbinfo -N -G */
 struct mb_info_struct
 	{
 	int	loaded;
 	char	file[MB_PATH_MAXLINE];
-	
+
 	int	nrecords;
 	int	nrecords_ss1;
 	int	nrecords_ss2;
@@ -59,11 +59,11 @@ struct mb_info_struct
 	int	npixels_ss_good;
 	int	npixels_ss_zero;
 	int	npixels_ss_flagged;
-	
+
 	double	time_total;
 	double	dist_total;
 	double	speed_avg;
-	
+
 	double	time_start;
 	double	lon_start;
 	double	lat_start;
@@ -72,7 +72,7 @@ struct mb_info_struct
 	double	speed_start;
 	double	sonardepth_start;
 	double	sonaraltitude_start;
-	
+
 	double	time_end;
 	double	lon_end;
 	double	lat_end;
@@ -81,7 +81,7 @@ struct mb_info_struct
 	double	speed_end;
 	double	sonardepth_end;
 	double	sonaraltitude_end;
-	
+
 	double	lon_min;
 	double	lon_max;
 	double	lat_min;
@@ -96,29 +96,28 @@ struct mb_info_struct
 	double	amp_max;
 	double	ss_min;
 	double	ss_max;
-	
+
 	int	problem_nodata;
 	int	problem_zeronav;
 	int	problem_toofast;
 	int	problem_avgtoofast;
 	int	problem_toodeep;
 	int	problem_baddatagram;
-	
+
 	int	mask_nx;
 	int	mask_ny;
 	double	mask_dx;
 	double	mask_dy;
 	int	mask_alloc;
 	int	*mask;
-	
+
 	};
-	
+
 /* MBIO mb_info function prototypes */
 int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error);
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip,
 		    int *error);
-int mb_get_info_datalist(int verbose, char *read_file, int *format, 
+int mb_get_info_datalist(int verbose, char *read_file, int *format,
 			struct mb_info_struct *mb_info, int lonflip, int *error);
 
 #endif
-

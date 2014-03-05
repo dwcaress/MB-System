@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_sbsioswb.h	9/18/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_sbsioswb.h defines the data structure used by MBIO functions
- * to store multibeam data read from the  MBF_SBSIOSWB format (MBIO id 16).  
+ * to store multibeam data read from the  MBF_SBSIOSWB format (MBIO id 16).
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
@@ -63,22 +63,22 @@
  *      This format is one of the "swathbathy" formats created by
  *      Jim Charters of Scripps.
  *   2. The data records consist of three logical records: the header
- *      record, the sensor specific record and the data record.  
+ *      record, the sensor specific record and the data record.
  *   3. The header record consists of 36 bytes, including the sizes
  *      of the following sensor specific and data records.
- *   4. The sensor specific records are 4 bytes long.  
+ *   4. The sensor specific records are 4 bytes long.
  *   5. The data record lengths are variable.
  *   6. Comments are included in text records, which are of variable
  *      length.
  *   7. Information on this format was obtained from the Geological
- *      Data Center and the Shipboard Computer Group at the Scripps 
+ *      Data Center and the Shipboard Computer Group at the Scripps
  *      Institution of Oceanography
  *
  * The kind value in the mbf_sbsioswb_struct indicates whether the
  * mbf_sbsioswb_data_struct structure holds data (kind = 1) or an
  * ascii comment record (kind = 2).
  *
- * The mbf_sbsioswb_data_struct structure is a direct representation 
+ * The mbf_sbsioswb_data_struct structure is a direct representation
  * of the binary data structure used in the MBF_SBSIOSWB format.
  */
 

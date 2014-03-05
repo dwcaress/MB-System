@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hypc8101.c	8/8/94
  *	$Id$
  *
- *    Copyright (c) 1998-2012 by
+ *    Copyright (c) 1998-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_hypc8101.c contains the functions for reading and writing
- * multibeam data in the HYPC8101 format.  
+ * multibeam data in the HYPC8101 format.
  * These functions include:
  *   mbr_alm_hypc8101	- allocate read/write memory
  *   mbr_dem_hypc8101	- deallocate read/write memory
@@ -79,35 +79,35 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_reson.h"
-#include "../../include/mbf_hypc8101.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_reson.h"
+#include "mbf_hypc8101.h"
 
 /* essential function prototypes */
-int mbr_register_hypc8101(int verbose, void *mbio_ptr, 
+int mbr_register_hypc8101(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_hypc8101(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_hypc8101(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_hypc8101(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_hypc8101(int verbose, void *mbio_ptr, int *error);
@@ -138,54 +138,54 @@ int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hypc8101(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_hypc8101(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_hypc8101;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_hypc8101; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_reson_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_reson_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_hypc8101; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_hypc8101; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_reson_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_reson_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_reson_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_reson_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_reson_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_reson_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_reson_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_reson_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_reson_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_reson_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_reson_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_hypc8101;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_reson_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_reson_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_hypc8101;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_hypc8101;
+	mb_io_ptr->mb_io_dimensions = &mbsys_reson_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_reson_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_reson_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_reson_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_reson_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_reson_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_reson_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_reson_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_reson_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_reson_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_reson_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -204,25 +204,25 @@ int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -233,25 +233,25 @@ int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_hypc8101(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_hypc8101(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_hypc8101";
@@ -292,7 +292,7 @@ int mbr_info_hypc8101(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -333,7 +333,7 @@ int mbr_alm_hypc8101(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -380,7 +380,7 @@ int mbr_dem_hypc8101(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -418,7 +418,7 @@ int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       data_ptr:   %lu\n",(size_t)data_ptr);
+		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
 		}
 
 	/* get pointer to data descriptor */
@@ -440,24 +440,24 @@ int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error)
 		data->roll_offset = 0;	/* roll offset (degrees) */
 		data->pitch_offset = 0;	/* pitch offset (degrees) */
 		data->heading_offset = 0;	/* heading offset (degrees) */
-		data->time_delay = 0;		/* positioning system 
+		data->time_delay = 0;		/* positioning system
 							delay (sec) */
 		data->transducer_depth = 0;	/* tranducer depth (meters) */
 		data->transducer_height = 0;	/* reference height (meters) */
-		data->transducer_x = 0;	/* reference athwartships 
+		data->transducer_x = 0;	/* reference athwartships
 							offset (meters) */
 		data->transducer_y = 0;	/* reference  fore-aft
 							offset (meters) */
-		data->antenna_x = 0;		/* antenna athwartships 
+		data->antenna_x = 0;		/* antenna athwartships
 							offset (meters) */
-		data->antenna_y = 0;		/* antenna fore-aft 
+		data->antenna_y = 0;		/* antenna fore-aft
 							offset (meters) */
 		data->antenna_z = 0;		/* antenna height (meters) */
 		data->motion_sensor_x = 0;	/* motion sensor athwartships
 							offset (meters) */
 		data->motion_sensor_y = 0;	/* motion sensor fore-aft
 							offset (meters) */
-		data->motion_sensor_z = 0;	/* motion sensor height 
+		data->motion_sensor_z = 0;	/* motion sensor height
 							offset (meters) */
 		data->spare = 0;
 		data->line_number = 0;
@@ -574,8 +574,8 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -591,9 +591,9 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr->new_kind = data->kind;
 
 	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_DATA
-		&& data->longitude == 0 
+		&& data->longitude == 0
 		&& data->latitude == 0
 		&& mb_io_ptr->nfix >= 1)
 		{
@@ -607,7 +607,7 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			+ 100*data->thousandth_sec;
 		mb_get_time(verbose,time_i, &time_d);
 		heading = 0.01 * data->heading;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0,
 				    &lon, &lat, &speed, error);
 		data->longitude = (int) (lon / 0.00000009);
 		data->latitude = (int) (lat / 0.00000009);
@@ -646,7 +646,7 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->spare = data->spare;
 		store->line_number = data->line_number;
 		store->start_or_stop = data->start_or_stop;
-		store->transducer_serial_number 
+		store->transducer_serial_number
 			= data->transducer_serial_number;
 		for (i=0;i<MBSYS_RESON_COMMENT_LENGTH;i++)
 			store->comment[i] = data->comment[i];
@@ -749,16 +749,16 @@ int mbr_wt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-		
+
 	/* set error as this is a read only format */
 	status = MB_FAILURE;
-	*error = MB_ERROR_WRITE_FAIL;	
+	*error = MB_ERROR_WRITE_FAIL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -819,7 +819,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -830,7 +830,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-		
+
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	done = MB_NO;
@@ -838,12 +838,12 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		{
 		/* read the next line */
 		result = fgets(line,MBF_HYPC8101_MAXLINE,mb_io_ptr->mbfp);
-		if (result == line 
+		if (result == line
 			&& strlen(line) < MBF_HYPC8101_MAXLINE)
 		    {
 		    status = MB_SUCCESS;
 		    *error = MB_ERROR_NO_ERROR;
-		    
+
 		    if (verbose >= 4)
 			{
 			fprintf(stderr,"\ndbg4  Raw line read by MBIO function <%s>\n",function_name);
@@ -856,24 +856,24 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		    *error = MB_ERROR_EOF;
 		    done = MB_YES;
 		    }
-			
+
 		/* now make sense of the line */
 		if (status == MB_SUCCESS)
 		    {
 		    /* deal with vru data */
 		    if (strncmp(line, "HCP", 3) == 0)
 			{
-			nscan = sscanf(line+6, "%lf %lf %lf %lf", 
-					&hcp_clock, 
-					&hcp_heave, 
-					&hcp_roll, 
+			nscan = sscanf(line+6, "%lf %lf %lf %lf",
+					&hcp_clock,
+					&hcp_heave,
+					&hcp_roll,
 					&hcp_pitch);
 			if (nscan == 4)
 			    {
 			    /* apply vru offsets */
 			    hcp_roll += 0.01 * data->roll_offset;
 			    hcp_pitch += 0.01 * data->pitch_offset;
-			    
+
 			    /* get time tag */
 			    time_d = data->start_time_d + hcp_clock;
 			    mb_get_date(verbose, time_d, time_i);
@@ -884,19 +884,19 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    data->minute = time_i[4];
 			    data->second = time_i[5];
 			    data->hundredth_sec = time_i[6]/10000;
-			    data->thousandth_sec = 
+			    data->thousandth_sec =
 				(time_i[6] - 10000 * data->hundredth_sec)/100;
-			
+
 		    	    /* add latest attitude to list */
-		    	    mb_attint_add(verbose, mbio_ptr, 
-				    time_d, hcp_heave, hcp_roll, hcp_pitch, 
+		    	    mb_attint_add(verbose, mbio_ptr,
+				    time_d, hcp_heave, hcp_roll, hcp_pitch,
 				    error);
-				
+
 			    /* get attitude data */
 			    data->heave = 1000 * hcp_heave;
 			    data->roll = 200 * hcp_roll;
 			    data->pitch = 200 * hcp_pitch;
-			    
+
 			    /* set done and kind */
 			    done = MB_YES;
 			    data->kind = MB_DATA_ATTITUDE;
@@ -935,12 +935,12 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 				}
 			    }
 			}
-			
+
 		    /* deal with gyro data */
 		    else if (strncmp(line, "GYR", 3) == 0)
 			{
-			nscan = sscanf(line+6, "%lf %lf", 
-					&gyr_clock, 
+			nscan = sscanf(line+6, "%lf %lf",
+					&gyr_clock,
 					&gyr_gyro);
 			if (nscan == 2)
 			    {
@@ -957,16 +957,16 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    data->minute = time_i[4];
 			    data->second = time_i[5];
 			    data->hundredth_sec = time_i[6]/10000;
-			    data->thousandth_sec = 
+			    data->thousandth_sec =
 				(time_i[6] - 10000 * data->hundredth_sec)/100;
 
 		    	    /* add latest attitude to list */
-		    	    mb_hedint_add(verbose, mbio_ptr, 
+		    	    mb_hedint_add(verbose, mbio_ptr,
 				    time_d, gyr_gyro, error);
-				
+
 			    /* get gyro data */
 			    data->heading = 100 * gyr_gyro;
-			    
+
 			    /* set done and kind */
 			    done = MB_YES;
 			    data->kind = MB_DATA_HEADING;
@@ -1001,19 +1001,19 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 				}
 			    }
 			}
-			
+
 		    /* deal with nav easting northing data */
 		    else if (strncmp(line, "POS", 3) == 0)
 			{
-			nscan = sscanf(line+6, "%lf %lf %lf", 
-					&pos_clock, 
-					&pos_easting, 
+			nscan = sscanf(line+6, "%lf %lf %lf",
+					&pos_clock,
+					&pos_easting,
 					&pos_northing);
 			if (nscan == 3)
 			    {
 			    /* apply time delay */
 			    pos_clock += 0.001 * data->time_delay;
-			    
+
 			    /* get time tag */
 			    time_d = data->start_time_d + pos_clock;
 			    mb_get_date(verbose, time_d, time_i);
@@ -1024,13 +1024,13 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    data->minute = time_i[4];
 			    data->second = time_i[5];
 			    data->hundredth_sec = time_i[6]/10000;
-			    data->thousandth_sec = 
+			    data->thousandth_sec =
 				(time_i[6] - 10000 * data->hundredth_sec)/100;
-				
+
 			    /* get position data */
 			    data->utm_northing = 100 * pos_northing;
 			    data->utm_easting = 100 * pos_easting;
-			    
+
 			    /* set done and kind */
 			    done = MB_NO;
 			    data->kind = MB_DATA_NAV;
@@ -1067,18 +1067,18 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 				}
 			    }
 			}
-			
+
 		    /* deal with nav lon lat data - sometimes followed
 		       by projected position data in POS lines - return MB_DATA_NAV
 		       after RAW lines */
 		    else if (strncmp(line, "RAW", 3) == 0)
 			{
-			nscan = sscanf(line+6, "%lf %d %lf %lf %lf %lf", 
-					&raw_clock, 
-					&idummy, 
-					&raw_lat, 
-					&raw_lon, 
-					&ddummy1, 
+			nscan = sscanf(line+6, "%lf %d %lf %lf %lf %lf",
+					&raw_clock,
+					&idummy,
+					&raw_lat,
+					&raw_lon,
+					&ddummy1,
 					&ddummy2);
 			if (nscan == 6)
 			    {
@@ -1087,8 +1087,8 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    raw_lon = 0.0001 * raw_lon;
 
 			    /* apply time delay */
-			    pos_clock += 0.001 * data->time_delay;			    
-			    
+			    pos_clock += 0.001 * data->time_delay;
+
 			    /* get time tag */
 			    time_d = data->start_time_d + raw_clock;
 			    mb_get_date(verbose, time_d, time_i);
@@ -1099,27 +1099,27 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    data->pos_minute = time_i[4];
 			    data->pos_second = time_i[5];
 			    data->pos_hundredth_sec = time_i[6]/10000;
-			    data->pos_thousandth_sec = 
+			    data->pos_thousandth_sec =
 				(time_i[6] - 10000 * data->pos_hundredth_sec)/100;
 
 		    	    /* add latest nav to list */
-		    	    mb_navint_add(verbose, mbio_ptr, 
+		    	    mb_navint_add(verbose, mbio_ptr,
 				    time_d, raw_lon, raw_lat, error);
-		
+
 			    /* interpolate attitude and heading if possible */
-			    mb_attint_interp(verbose, mbio_ptr, time_d,  
+			    mb_attint_interp(verbose, mbio_ptr, time_d,
 				&heave, &roll, &pitch, error);
 			    data->heave = 1000 * heave;
 			    data->roll = 200 * roll;
 			    data->pitch = 200 * pitch;
-			    mb_hedint_interp(verbose, mbio_ptr, time_d,  
+			    mb_hedint_interp(verbose, mbio_ptr, time_d,
 				&gyro, error);
 			    data->heading = 100 * gyro;
-			    
+
 			    /* get position */
 			    data->pos_latitude = raw_lat / 0.00000009;
 			    data->pos_longitude = raw_lon / 0.00000009;
-			    
+
 			    /* set done and kind */
 			    done = MB_YES;
 			    data->kind = MB_DATA_NAV;
@@ -1160,7 +1160,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 				}
 			    }
 			}
-			
+
 		    /* deal with multibeam data */
 		    else if (strncmp(line, "SB2", 3) == 0)
 			{
@@ -1206,7 +1206,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 				if (status == MB_SUCCESS
 				    && (token = strtok(NULL, " ")) != NULL)
 				    {
-				    if ((nscan = sscanf(token, "%lf",&sb2_range)) == 1);
+				    if ((nscan = sscanf(token, "%lf",&sb2_range)) == 1)
 					{
 					data->tt[sb2_nbeams_read] = 100 * sb2_range;
 					sb2_nbeams_read++;
@@ -1229,16 +1229,16 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 				if (status == MB_SUCCESS
 				    && (token = strtok(NULL, " ")) != NULL)
 				    {
-				    if ((nscan = sscanf(token, "%lf",&sb2_quality)) == 1);
+				    if ((nscan = sscanf(token, "%lf",&sb2_quality)) == 1)
 					{
 					iquality = sb2_quality;
-					data->quality[4 * sb2_nquality_read] 
+					data->quality[4 * sb2_nquality_read]
 						= (iquality >> 6) & 3;
-					data->quality[4 * sb2_nquality_read + 1] 
+					data->quality[4 * sb2_nquality_read + 1]
 						= (iquality >> 4) & 3;
-					data->quality[4 * sb2_nquality_read + 2] 
+					data->quality[4 * sb2_nquality_read + 2]
 						= (iquality >> 2) & 3;
-					data->quality[4 * sb2_nquality_read + 3] 
+					data->quality[4 * sb2_nquality_read + 3]
 						= iquality & 3;
 					sb2_nquality_read++;
 					}
@@ -1253,7 +1253,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 
 			/* calculate the rest of the data */
 			if (status == MB_SUCCESS)
-			    {			    
+			    {
 			    /* get time tag */
 			    time_d = data->start_time_d + sb2_clock;
 			    mb_get_date(verbose, time_d, time_i);
@@ -1264,19 +1264,19 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    data->minute = time_i[4];
 			    data->second = time_i[5];
 			    data->hundredth_sec = time_i[6]/10000;
-			    data->thousandth_sec = 
+			    data->thousandth_sec =
 				(time_i[6] - 10000 * data->hundredth_sec)/100;
-		
+
 			    /* interpolate attitude, heading and nav if possible */
-			    mb_attint_interp(verbose, mbio_ptr, time_d,  
+			    mb_attint_interp(verbose, mbio_ptr, time_d,
 				&heave, &roll, &pitch, error);
-			    mb_hedint_interp(verbose, mbio_ptr, time_d,  
+			    mb_hedint_interp(verbose, mbio_ptr, time_d,
 				&gyro, error);
-			    mb_navint_interp(verbose, mbio_ptr, time_d, 
+			    mb_navint_interp(verbose, mbio_ptr, time_d,
 			        gyro, 0.0, &lon, &lat, &speed, error);
-			    
+
 			    /* get lever arm correction for heave */
-			    mb_lever(verbose, 
+			    mb_lever(verbose,
 			    		(double) (0.01 * data->transducer_x),
 			    		(double) (0.01 * data->transducer_y),
 			    		(double) (0.01 * data->transducer_depth),
@@ -1291,8 +1291,8 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 					&lever_x,
 					&lever_y,
 					&lever_z,
-					error);	
-/*fprintf(stderr,"roll:%f pitch:%f    dz:%f\n", 
+					error);
+/*fprintf(stderr,"roll:%f pitch:%f    dz:%f\n",
 (double) (roll - 0.01 * data->roll_offset),
 (double) (0.01 * data->pitch_offset - pitch),
 lever_z);*/
@@ -1307,29 +1307,29 @@ lever_z);*/
 			    /* calculate bathymetry */
 			    for (i=0;i<data->beams_bath;i++)
 				{
-				angle = data->angle0 
+				angle = data->angle0
 					+ data->angle_inc * (i - 0) - roll;
 				data->angle[i] = 200 * angle;
 				angle = 90.0 - angle;
 				mb_rollpitch_to_takeoff(
-					verbose, 
-					pitch, angle, 
-					&theta, &phi, 
+					verbose,
+					pitch, angle,
+					&theta, &phi,
 					error);
 				rr = 0.0000005 * data->sound_vel * data->tt[i];
 				xx = rr * sin(DTR * theta);
 				zz = rr * cos(DTR * theta);
-				data->bath_acrosstrack[i] 
+				data->bath_acrosstrack[i]
 					= 100 * xx * cos(DTR * phi);
-				data->bath_alongtrack[i] 
+				data->bath_alongtrack[i]
 					= 100 * xx * sin(DTR * phi);
-				data->bath[i] = 100 * (zz + heave) 
+				data->bath[i] = 100 * (zz + heave)
 						+ data->transducer_depth;
-/*fprintf(stderr, "i:%d tt:%d angle:%f roll:%f pitch:%f heave:%f\n", 
+/*fprintf(stderr, "i:%d tt:%d angle:%f roll:%f pitch:%f heave:%f\n",
 i, data->tt[i], angle, roll, pitch, heave);
 fprintf(stderr, "theta:%f phi:%f\n", theta, phi);
 fprintf(stderr, "rr:%f xx:%f zz:%f\n", rr, xx, zz);
-fprintf(stderr, "bath: %d %d %d\n\n", 
+fprintf(stderr, "bath: %d %d %d\n\n",
 data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 
 				/* deal with Mesotech SM2000 quality values */
@@ -1384,21 +1384,21 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 				fprintf(stderr,"dbg4       cnt bath xtrk ltrk tt ang qual\n");
 				for (i=0;i<data->beams_bath;i++)
 				fprintf(stderr,"dbg4       %3d  %6d %6d %6d %6d %6d %d\n",
-					i, data->bath[i], 
-					data->bath_acrosstrack[i], 
-					data->bath_alongtrack[i], 
-					data->tt[i], 
-					data->angle[i], 
+					i, data->bath[i],
+					data->bath_acrosstrack[i],
+					data->bath_alongtrack[i],
+					data->tt[i],
+					data->angle[i],
 					data->quality[i]);
 				}
 			    }
 			}
-			
+
 		    /* deal with time data */
 		    else if (strncmp(line, "TND", 3) == 0)
 			{
-			nscan = sscanf(line+4, "%d:%d:%d %d/%d/%d", 
-					&shour, &smin, &ssec, 
+			nscan = sscanf(line+4, "%d:%d:%d %d/%d/%d",
+					&shour, &smin, &ssec,
 					&smon, &sday, &syr);
 			if (nscan == 6)
 			    {
@@ -1409,7 +1409,7 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 			    time_i[4] = smin;
 			    time_i[5] = ssec;
 			    time_i[6] = 0;
-			    mb_get_time(verbose, time_i, 
+			    mb_get_time(verbose, time_i,
 					&data->start_time_d);
 			    data->par_year = syr;
 			    data->par_month = time_i[1];
@@ -1421,11 +1421,11 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 			    data->par_thousandth_sec = 0;
 			    }
 			}
-			
+
 		    /* deal with device data */
 		    else if (strncmp(line, "DEV", 3) == 0)
 			{
-			nscan = sscanf(line+4, "%d %d %s", 
+			nscan = sscanf(line+4, "%d %d %s",
 					&ndevice, &device_type, device_name);
 			if (nscan == 3)
 			    {
@@ -1439,12 +1439,12 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 				device_sb2 = ndevice;
 			    }
 			}
-			
+
 		    /* deal with device offset data */
 		    else if (strncmp(line, "OFF", 3) == 0)
 			{
-			nscan = sscanf(line+4, "%d %lf %lf %lf %lf %lf %lf %lf", 
-					&ndevice, &off1, &off2, &off3, 
+			nscan = sscanf(line+4, "%d %lf %lf %lf %lf %lf %lf %lf",
+					&ndevice, &off1, &off2, &off3,
 					&off4, &off5, &off6, &off7);
 			if (nscan == 8)
 			    {
@@ -1475,13 +1475,13 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 				}
 			    }
 			}
-			
+
 		    /* deal with private device data */
 		    else if (strncmp(line, "PRD", 3) == 0)
 			{
-			nscan = sscanf(line+4, "%d %s %lf %lf %d", 
-					&ndevice, device_name, 
-					&angle0, &angle_inc, 
+			nscan = sscanf(line+4, "%d %s %lf %lf %d",
+					&ndevice, device_name,
+					&angle0, &angle_inc,
 					&sb2_nbeams);
 			if (nscan == 5)
 			    {
@@ -1497,7 +1497,7 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 				}
 			    }
 			}
-			
+
 		    /* deal with end of header */
 		    else if (strncmp(line, "EOH", 3) == 0)
 			{
@@ -1568,7 +1568,7 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 			}
 		    }
 		}
-		
+
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 

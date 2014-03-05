@@ -2,7 +2,7 @@
  *    The MB-system:	mb_format.h	1/19/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -284,9 +284,12 @@
 #define	MB_SYS_IMAGE83P		31
 #define	MB_SYS_HYSWEEP		32
 #define	MB_SYS_BENTHOS		33
+#define	MB_SYS_SWATHPLUS	34
+#define MB_SYS_3DATDEPTHLIDAR   35
+#define MB_SYS_WASSP            36
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	71
+#define	MB_FORMATS	74
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -522,6 +525,19 @@
                                         variable pixels, dual frequency sidescan and subbottom,
                                         xtf variant, single files,
                                         low frequency sidescan returned as survey data, Benthos. */
+#define MBF_SWPLSSXI	221	/* SEA intermediate format for SWATHplus interferometric sonar,
+                                        variable beams, bathymetry, amplitude,
+                                        binary, single files, SEA. */
+#define MBF_SWPLSSXP	222	/* SEA processed format for SWATHplus interferometric sonar,
+                                        variable beams, bathymetry, amplitude,
+                                        binary, single files, SEA. */
+#define MBF_3DDEPTHP    231     /* 3DatDepth processed format for 3DatDepth LIDAR,
+                                        variable beams, bathymetry, amplitude,
+                                        binary, single files, 3DatDepth. */
+#define MBF_WASSPENL    241     /* WASSP Multibeam Vendor Format,
+                                        WASSP multibeams,
+                                        bathymetry and amplitude,
+                                        122 or 244 beams, binary, Electronic Navigation Ltd. */
 
 /* format registration function prototypes */
 int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error);
@@ -568,7 +584,9 @@ int mbr_register_hsmdaraw(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error);
 int mbr_register_dsl120pf(int verbose, void *mbio_ptr, int *error);
 int mbr_register_dsl120sf(int verbose, void *mbio_ptr, int *error);
+#ifdef WITH_GSF
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error);
+#endif
 int mbr_register_mstiffss(int verbose, void *mbio_ptr, int *error);
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error);
 int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error);
@@ -597,6 +615,10 @@ int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hir2rnav(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error);
 int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error);
+int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error);
+int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error);
+int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error);
+int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error);
 int mbr_info_sbsiomrg(int verbose,
 			int *system,
 			int *beams_bath_max,
@@ -1497,6 +1519,7 @@ int mbr_info_dsl120sf(int verbose,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
 			int *error);
+#ifdef WITH_GSF
 int mbr_info_gsfgenmb(int verbose,
 			int *system,
 			int *beams_bath_max,
@@ -1517,6 +1540,7 @@ int mbr_info_gsfgenmb(int verbose,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
 			int *error);
+#endif
 int mbr_info_mstiffss(int verbose,
 			int *system,
 			int *beams_bath_max,
@@ -2077,6 +2101,85 @@ int mbr_info_xtfb1624(int verbose,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
 			int *error);
-
+int mbr_info_swplssxi(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
+int mbr_info_swplssxp(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
+int mbr_info_3ddepthp(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
+int mbr_info_wasspenl(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
 /* end conditional include */
 #endif

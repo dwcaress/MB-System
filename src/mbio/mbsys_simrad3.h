@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2012 by
+ *    Copyright (c) 2008-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -170,6 +170,7 @@
 /* sonar models */
 #define	MBSYS_SIMRAD3_UNKNOWN	0
 
+#define	MBSYS_SIMRAD3_EM2045	 2045
 #define	MBSYS_SIMRAD3_EM2040	 2040
 #define	MBSYS_SIMRAD3_EM710	 710
 #define	MBSYS_SIMRAD3_EM302	 302
@@ -342,6 +343,7 @@
 
 /* invalid value flags */
 #define	EM3_INVALID_AMP			0x7F
+#define	EM3_INVALID_SS			0x7FFF
 #define	EM3_INVALID_CHAR		0xFF
 #define	EM3_INVALID_SHORT		0xFFFF
 #define EM3_INVALID_U_INT		0xFFFFFFFF

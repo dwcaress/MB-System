@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavedit_prog.c	6/23/95
  *    $Id$
  *
- *    Copyright (c) 1995-2012 by
+ *    Copyright (c) 1995-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -191,13 +191,13 @@
 #include <X11/Intrinsic.h>
 
 /* MBIO include files */
-#include "../../include/mb_format.h"
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_aux.h"
-#include "../../include/mb_xgraphics.h"
+#include "mb_format.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_io.h"
+#include "mb_process.h"
+#include "mb_aux.h"
+#include "mb_xgraphics.h"
 
 /* define global control parameters */
 #include "mbnavedit.h"
@@ -644,7 +644,7 @@ int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %lu\n",(size_t)xgid);
+		fprintf(stderr,"dbg2       xgid:         %p\n",xgid);
 		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
 		for (i=0;i<ncol;i++)
 			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
@@ -770,6 +770,7 @@ int mbnavedit_open_file(int useprevious)
 	mb_path lock_cpu;
 	mb_path lock_user;
 	char	lock_date[25];
+        int     shellstatus;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -801,7 +802,7 @@ int mbnavedit_open_file(int useprevious)
 	strcat(nfile,".nve");
 
 	/* try to lock file */
-	if (uselockfiles == MB_YES)
+	if (output_mode == OUTPUT_MODE_OUTPUT && uselockfiles == MB_YES)
 		{
 		status = mb_pr_lockswathfile(verbose, ifile,
 				MBP_LOCK_EDITNAV, program_name, &error);
@@ -876,7 +877,7 @@ int mbnavedit_open_file(int useprevious)
 		    sprintf(command, "cp %s %s\n",
 			nfile, ifile_use);
 		    format_use = MBF_MBPRONAV;
-		    system(command);
+		    shellstatus = system(command);
 		    fstat = stat(ifile_use, &file_status);
 		    if (fstat != 0
 			|| (file_status.st_mode & S_IFMT) == S_IFDIR)
@@ -1046,6 +1047,7 @@ int mbnavedit_close_file()
 	char	*function_name = "mbnavedit_close_file";
 	int	status = MB_SUCCESS;
 	char	command[MB_PATH_MAXLINE];
+        int     shellstatus;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1065,45 +1067,46 @@ int mbnavedit_close_file()
 	    fclose(nfp);
 	    nfile_open = MB_NO;
 	    }
+            
+        /* if not in browse mode, deal with locking and processing */
+        if (output_mode == OUTPUT_MODE_OUTPUT)
+            {
 
-	/* unlock the raw swath file */
-	if (uselockfiles == MB_YES)
-		status = mb_pr_unlockswathfile(verbose, ifile,
-						MBP_LOCK_EDITNAV, program_name, &error);
+            /* unlock the raw swath file */
+            if (uselockfiles == MB_YES)
+                    status = mb_pr_unlockswathfile(verbose, ifile,
+                                                    MBP_LOCK_EDITNAV, program_name, &error);
+    
+            /* update mbprocess parameter file */
+            status = mb_pr_update_format(verbose, ifile,
+                        MB_YES, format,
+                        &error);
+            status = mb_pr_update_nav(verbose, ifile,
+                        MBP_NAV_ON, nfile, 9,
+                        MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON,
+                        MBP_NAV_LINEAR,
+                        (double) 0.0,
+                        &error);
+    
+            /* run mbprocess if desired */
+            if (run_mbprocess == MB_YES)
+                   {
+                   /* turn message on */
+                   do_message_on("Navigation edits being applied using mbprocess...");
 
-	    /* update mbprocess parameter file */
-	    status = mb_pr_update_format(verbose, ifile,
-			MB_YES, format,
-			&error);
-	    status = mb_pr_update_nav(verbose, ifile,
-			MBP_NAV_ON, nfile, 9,
-			MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON,
-			MBP_NAV_LINEAR,
-			(double) 0.0,
-			&error);
+                   /* run mbprocess */
+                   if (strip_comments == MB_YES)
+                       sprintf(command, "mbprocess -I %s -N\n",ifile);
+                   else
+                       sprintf(command, "mbprocess -I %s\n",ifile);
+                   if (verbose >= 1)
+                       fprintf(stderr,"\nExecuting command:\n%s\n",command);
+                   shellstatus = system(command);
 
-	/* set mbprocess parameters */
-	if (output_mode == OUTPUT_MODE_OUTPUT)
-	    {
-	    /* run mbprocess if desired */
-	    if (run_mbprocess == MB_YES)
-		    {
-		    /* turn message on */
-		    do_message_on("Navigation edits being applied using mbprocess...");
-
-		    /* run mbprocess */
-		    if (strip_comments == MB_YES)
-			sprintf(command, "mbprocess -I %s -N\n",ifile);
-		    else
-			sprintf(command, "mbprocess -I %s\n",ifile);
-		    if (verbose >= 1)
-			fprintf(stderr,"\nExecuting command:\n%s\n",command);
-		    system(command);
-
-		    /* turn message off */
-		    do_message_off();
-		    }
-	    }
+                   /* turn message off */
+                   do_message_off();
+                   }
+            }
 
 	/* check memory */
 	if (verbose >= 4)
@@ -1173,7 +1176,7 @@ int mbnavedit_dump_data(int hold)
 		for (iping=0;iping<nbuff-hold;iping++)
 			{
 			/* write the nav out */
-		    	fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+		    	fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.3f %.3f %.4f %.3f %.3f %.4f\r\n",
 				ping[iping].time_i[0],
 				ping[iping].time_i[1],
 				ping[iping].time_i[2],
@@ -1373,7 +1376,7 @@ int mbnavedit_load_data()
 				{
 				fprintf(stderr,"\ndbg5  Next good data found in function <%s>:\n",
 					function_name);
-				fprintf(stderr,"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %11.6f %11.6f %5.2f %5.1f %5.1f %5.2f %5.2f %5.2f\n",
+				fprintf(stderr,"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %15.10f %15.10f %6.3f %7.3f %8.4f %6.3f %6.3f %8.4f\n",
 					nbuff,ping[nbuff].id,ping[nbuff].record,
 					ping[nbuff].time_i[1],ping[nbuff].time_i[2],
 					ping[nbuff].time_i[0],ping[nbuff].time_i[3],

@@ -1,0 +1,300 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mblevitus</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mblevitus</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mblevitus</B> - Create a water velocity profile which is representative
+of the mean annual water column for a specified 1 degree by 1 degree
+region.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mblevitus</B> [<B>-R</B><I>lon/lat </I><B>-O</B><I>outfile </I><B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mblevitus</B> generates a mean water sound velocity profile for a 
+specified location using temperature and salinity data
+from the 1982 Climatological Atlas of the World Ocean [Levitus, 1982].
+The water velocity profile is representative of the mean annual
+water column structure for a specified 1 degree by 1 degree region.
+The profile is output to a specified file which can be read and
+used by programs (e.g. <B>mbbath</B> or <B>mbvelocitytool</B>) 
+which calculate swath sonar sonar
+bathymetry from travel times by raytracing through a water velocity
+model.  
+<P>
+The Levitus [1982] reference is:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Levitus,&nbsp;S,&nbsp;Climatological&nbsp;Atlas&nbsp;of&nbsp;the&nbsp;World&nbsp;Ocean,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOAA&nbsp;Professional&nbsp;Paper&nbsp;13,&nbsp;U.S.&nbsp;Government&nbsp;Printing&nbsp;Office,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Washington&nbsp;D.C.,&nbsp;173pp,&nbsp;1982.
+<BR>
+
+The water sound velocity values are calculated using
+the DelGrosso equations, following:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dusha,&nbsp;B.&nbsp;D.,&nbsp;P.&nbsp;F.&nbsp;Worcester,&nbsp;B.&nbsp;D.&nbsp;Cornuelle,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.&nbsp;M.&nbsp;Howe,&nbsp;&quot;On&nbsp;equations&nbsp;for&nbsp;the&nbsp;speed&nbsp;of&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sound&nbsp;in&nbsp;seawater&quot;,&nbsp;J.&nbsp;Acoust.&nbsp;Soc.&nbsp;Am.,&nbsp;93,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;255-275,&nbsp;1993
+<BR>
+
+The implementation of these equations follows code written
+at the Ocean Data Facility of the Scripps Institution of
+Oceanography.
+The depth to which the Levitus database defines the water
+column reflects regional water depths which may be exceeded in
+places.  <B>mblevitus</B> extends the water sound velocity profiles
+to a depth of 12000 meters using the deepest salinity and
+temperature values available in the database.
+If the specified location is
+subaerial, then no water velocity profile is calculated.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-O</B>
+
+<DD>
+<I>outfile</I>
+<BR>
+
+Sets the output file for the water velocity profile. 
+Default: <I>outfile</I> = &quot;velocity&quot;.
+<DT><B>-R</B>
+
+<DD>
+<I>lon/lat</I>
+<BR>
+
+Sets the longitude and latitude of the location of the water
+velocity profile.  Whole degrees should be used, as the database
+has a 1 degree by 1 degree resolution.
+Default: <I>lon</I>=0, <I>lat</I>=0.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mblevitus</B> outputs only a minor bit of information 
+to the stdout stream.  If the
+<B>-V</B> flag is given, then <B>mblevitus</B> works in a &quot;verbose&quot; mode and
+also outputs the program version being used and the complete
+water column structure used to calculate the water velocity profile.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that one wishes to obtain a mean annual water velocity profile
+for processing Hydrosweep DS bathymetry data collected on the 
+Cocos-Nazca spreading center at 95W longitude and 2N latitude.
+The following will suffice:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblevitus&nbsp;-R-95/2&nbsp;-Ovelocity_profile&nbsp;-V<BR>
+<BR>
+
+The output will be:
+<P>
+<BR>&nbsp;Program&nbsp;MBLEVITUS
+<BR>&nbsp;MB-system&nbsp;Version&nbsp;4.5
+<P>
+<BR>&nbsp;Location&nbsp;for&nbsp;mean&nbsp;annual&nbsp;water&nbsp;velocity&nbsp;profile:
+<BR>&nbsp;&nbsp;&nbsp;Requested:&nbsp;&nbsp;-95.0000&nbsp;longitude&nbsp;&nbsp;&nbsp;2.0000&nbsp;latitude
+<BR>&nbsp;&nbsp;&nbsp;Used:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;265.5000&nbsp;longitude&nbsp;&nbsp;&nbsp;2.5000&nbsp;latitude
+<BR>&nbsp;Values&nbsp;defined&nbsp;directly&nbsp;by&nbsp;Levitus&nbsp;database:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27
+<BR>&nbsp;Values&nbsp;assuming&nbsp;deepest&nbsp;salinity&nbsp;and&nbsp;temperature:&nbsp;19
+<BR>&nbsp;Velocity&nbsp;points&nbsp;written:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;46
+<BR>&nbsp;Output&nbsp;file:&nbsp;velocity_profile
+<P>
+<BR>&nbsp;Mean&nbsp;annual&nbsp;water&nbsp;column&nbsp;profile:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Depth&nbsp;Temperature&nbsp;Salinity&nbsp;&nbsp;&nbsp;Velocity
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;25.6560&nbsp;&nbsp;&nbsp;33.8830&nbsp;&nbsp;&nbsp;1534.6998
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;10.0000&nbsp;&nbsp;&nbsp;25.4080&nbsp;&nbsp;&nbsp;33.8230&nbsp;&nbsp;&nbsp;1534.2112
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;20.0000&nbsp;&nbsp;&nbsp;24.5410&nbsp;&nbsp;&nbsp;34.0190&nbsp;&nbsp;&nbsp;1532.5010
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;30.0000&nbsp;&nbsp;&nbsp;23.3290&nbsp;&nbsp;&nbsp;34.2400&nbsp;&nbsp;&nbsp;1529.9032
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;50.0000&nbsp;&nbsp;&nbsp;19.7940&nbsp;&nbsp;&nbsp;34.7450&nbsp;&nbsp;&nbsp;1521.4298
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;75.0000&nbsp;&nbsp;&nbsp;15.9700&nbsp;&nbsp;&nbsp;34.9210&nbsp;&nbsp;&nbsp;1510.8373
+<BR>&nbsp;&nbsp;&nbsp;100.0000&nbsp;&nbsp;&nbsp;14.5630&nbsp;&nbsp;&nbsp;34.9400&nbsp;&nbsp;&nbsp;1506.8495
+<BR>&nbsp;&nbsp;&nbsp;125.0000&nbsp;&nbsp;&nbsp;13.9500&nbsp;&nbsp;&nbsp;34.9320&nbsp;&nbsp;&nbsp;1505.2728
+<BR>&nbsp;&nbsp;&nbsp;150.0000&nbsp;&nbsp;&nbsp;13.5920&nbsp;&nbsp;&nbsp;34.9270&nbsp;&nbsp;&nbsp;1504.5077
+<BR>&nbsp;&nbsp;&nbsp;200.0000&nbsp;&nbsp;&nbsp;13.0430&nbsp;&nbsp;&nbsp;34.9100&nbsp;&nbsp;&nbsp;1503.4935
+<BR>&nbsp;&nbsp;&nbsp;250.0000&nbsp;&nbsp;&nbsp;12.4510&nbsp;&nbsp;&nbsp;34.8780&nbsp;&nbsp;&nbsp;1502.2893
+<BR>&nbsp;&nbsp;&nbsp;300.0000&nbsp;&nbsp;&nbsp;11.4720&nbsp;&nbsp;&nbsp;34.8190&nbsp;&nbsp;&nbsp;1499.6840
+<BR>&nbsp;&nbsp;&nbsp;400.0000&nbsp;&nbsp;&nbsp;&nbsp;9.4060&nbsp;&nbsp;&nbsp;34.6990&nbsp;&nbsp;&nbsp;1493.8119
+<BR>&nbsp;&nbsp;&nbsp;500.0000&nbsp;&nbsp;&nbsp;&nbsp;8.0400&nbsp;&nbsp;&nbsp;34.6390&nbsp;&nbsp;&nbsp;1490.2903
+<BR>&nbsp;&nbsp;&nbsp;600.0000&nbsp;&nbsp;&nbsp;&nbsp;7.0330&nbsp;&nbsp;&nbsp;34.5950&nbsp;&nbsp;&nbsp;1488.0126
+<BR>&nbsp;&nbsp;&nbsp;700.0000&nbsp;&nbsp;&nbsp;&nbsp;6.2200&nbsp;&nbsp;&nbsp;34.5740&nbsp;&nbsp;&nbsp;1486.4380
+<BR>&nbsp;&nbsp;&nbsp;800.0000&nbsp;&nbsp;&nbsp;&nbsp;5.5640&nbsp;&nbsp;&nbsp;34.5620&nbsp;&nbsp;&nbsp;1485.4464
+<BR>&nbsp;&nbsp;&nbsp;900.0000&nbsp;&nbsp;&nbsp;&nbsp;5.0280&nbsp;&nbsp;&nbsp;34.5620&nbsp;&nbsp;&nbsp;1484.9211
+<BR>&nbsp;&nbsp;1000.0000&nbsp;&nbsp;&nbsp;&nbsp;4.5840&nbsp;&nbsp;&nbsp;34.5650&nbsp;&nbsp;&nbsp;1484.7546
+<BR>&nbsp;&nbsp;1100.0000&nbsp;&nbsp;&nbsp;&nbsp;4.1950&nbsp;&nbsp;&nbsp;34.5730&nbsp;&nbsp;&nbsp;1484.8076
+<BR>&nbsp;&nbsp;1200.0000&nbsp;&nbsp;&nbsp;&nbsp;3.8570&nbsp;&nbsp;&nbsp;34.5820&nbsp;&nbsp;&nbsp;1485.0649
+<BR>&nbsp;&nbsp;1300.0000&nbsp;&nbsp;&nbsp;&nbsp;3.5860&nbsp;&nbsp;&nbsp;34.5970&nbsp;&nbsp;&nbsp;1485.6061
+<BR>&nbsp;&nbsp;1400.0000&nbsp;&nbsp;&nbsp;&nbsp;3.3320&nbsp;&nbsp;&nbsp;34.6090&nbsp;&nbsp;&nbsp;1486.2123
+<BR>&nbsp;&nbsp;1500.0000&nbsp;&nbsp;&nbsp;&nbsp;3.1020&nbsp;&nbsp;&nbsp;34.6140&nbsp;&nbsp;&nbsp;1486.9097
+<BR>&nbsp;&nbsp;1750.0000&nbsp;&nbsp;&nbsp;&nbsp;2.6290&nbsp;&nbsp;&nbsp;34.6280&nbsp;&nbsp;&nbsp;1489.0920
+<BR>&nbsp;&nbsp;2000.0000&nbsp;&nbsp;&nbsp;&nbsp;2.3010&nbsp;&nbsp;&nbsp;34.6440&nbsp;&nbsp;&nbsp;1491.9139
+<BR>&nbsp;&nbsp;2500.0000&nbsp;&nbsp;&nbsp;&nbsp;1.8770&nbsp;&nbsp;&nbsp;34.6670&nbsp;&nbsp;&nbsp;1498.6154
+<BR>&nbsp;&nbsp;3000.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1507.2345
+<BR>&nbsp;&nbsp;3500.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1515.9406
+<BR>&nbsp;&nbsp;4000.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1524.7273
+<BR>&nbsp;&nbsp;4500.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1533.5883
+<BR>&nbsp;&nbsp;5000.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1542.5173
+<BR>&nbsp;&nbsp;5500.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1551.5078
+<BR>&nbsp;&nbsp;6000.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1560.5533
+<BR>&nbsp;&nbsp;6500.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1569.6471
+<BR>&nbsp;&nbsp;7000.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1578.7823
+<BR>&nbsp;&nbsp;7500.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1587.9523
+<BR>&nbsp;&nbsp;8000.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1597.1499
+<BR>&nbsp;&nbsp;8500.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1606.3682
+<BR>&nbsp;&nbsp;9000.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1615.6001
+<BR>&nbsp;&nbsp;9500.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1624.8383
+<BR>&nbsp;10000.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1634.0754
+<BR>&nbsp;10500.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1643.3042
+<BR>&nbsp;11000.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1652.5171
+<BR>&nbsp;11500.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1661.7062
+<BR>&nbsp;12000.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;1670.8641
+<P>
+The contents of the output file velocity_profile are:
+<BR>&nbsp;#&nbsp;Water&nbsp;velocity&nbsp;profile&nbsp;created&nbsp;by&nbsp;program&nbsp;MBLEVITUS&nbsp;
+<BR>&nbsp;#&nbsp;MB-system&nbsp;Version&nbsp;4.5
+<BR>&nbsp;#&nbsp;Run&nbsp;by&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;menard&gt;&nbsp;at&nbsp;&lt;Wed&nbsp;Mar&nbsp;26&nbsp;15:43:53&nbsp;1997&gt;
+<BR>&nbsp;#&nbsp;Water&nbsp;velocity&nbsp;profile&nbsp;derived&nbsp;from&nbsp;Levitus
+<BR>&nbsp;#&nbsp;temperature&nbsp;and&nbsp;salinity&nbsp;database.&nbsp;&nbsp;This&nbsp;profile
+<BR>&nbsp;#&nbsp;represents&nbsp;the&nbsp;annual&nbsp;average&nbsp;water&nbsp;velocity
+<BR>&nbsp;#&nbsp;structure&nbsp;for&nbsp;a&nbsp;1&nbsp;degree&nbsp;X&nbsp;1&nbsp;degree&nbsp;area&nbsp;centered
+<BR>&nbsp;#&nbsp;at&nbsp;265.5000&nbsp;longitude&nbsp;and&nbsp;2.5000&nbsp;latitude.
+<BR>&nbsp;#&nbsp;This&nbsp;water&nbsp;velocity&nbsp;profile&nbsp;is&nbsp;in&nbsp;the&nbsp;form
+<BR>&nbsp;#&nbsp;of&nbsp;discrete&nbsp;(depth,&nbsp;velocity)&nbsp;points&nbsp;where
+<BR>&nbsp;#&nbsp;the&nbsp;depth&nbsp;is&nbsp;in&nbsp;meters&nbsp;and&nbsp;the&nbsp;velocity&nbsp;in
+<BR>&nbsp;#&nbsp;meters/second.
+<BR>&nbsp;#&nbsp;The&nbsp;first&nbsp;27&nbsp;velocity&nbsp;values&nbsp;are&nbsp;defined&nbsp;using&nbsp;the
+<BR>&nbsp;#&nbsp;salinity&nbsp;and&nbsp;temperature&nbsp;values&nbsp;available&nbsp;in&nbsp;the
+<BR>&nbsp;#&nbsp;Levitus&nbsp;database;&nbsp;the&nbsp;remaining&nbsp;19&nbsp;velocity&nbsp;values&nbsp;are
+<BR>&nbsp;#&nbsp;calculated&nbsp;using&nbsp;the&nbsp;deepest&nbsp;temperature
+<BR>&nbsp;#&nbsp;and&nbsp;salinity&nbsp;value&nbsp;available.
+<BR>&nbsp;0.000000&nbsp;1534.699829
+<BR>&nbsp;10.000000&nbsp;1534.211182
+<BR>&nbsp;20.000000&nbsp;1532.500977
+<BR>&nbsp;30.000000&nbsp;1529.903198
+<BR>&nbsp;50.000000&nbsp;1521.429810
+<BR>&nbsp;75.000000&nbsp;1510.837280
+<BR>&nbsp;100.000000&nbsp;1506.849487
+<BR>&nbsp;125.000000&nbsp;1505.272827
+<BR>&nbsp;150.000000&nbsp;1504.507690
+<BR>&nbsp;200.000000&nbsp;1503.493530
+<BR>&nbsp;250.000000&nbsp;1502.289307
+<BR>&nbsp;300.000000&nbsp;1499.683960
+<BR>&nbsp;400.000000&nbsp;1493.811890
+<BR>&nbsp;500.000000&nbsp;1490.290283
+<BR>&nbsp;600.000000&nbsp;1488.012573
+<BR>&nbsp;700.000000&nbsp;1486.437988
+<BR>&nbsp;800.000000&nbsp;1485.446411
+<BR>&nbsp;900.000000&nbsp;1484.921143
+<BR>&nbsp;1000.000000&nbsp;1484.754639
+<BR>&nbsp;1100.000000&nbsp;1484.807617
+<BR>&nbsp;1200.000000&nbsp;1485.064941
+<BR>&nbsp;1300.000000&nbsp;1485.606079
+<BR>&nbsp;1400.000000&nbsp;1486.212280
+<BR>&nbsp;1500.000000&nbsp;1486.909668
+<BR>&nbsp;1750.000000&nbsp;1489.092041
+<BR>&nbsp;2000.000000&nbsp;1491.913940
+<BR>&nbsp;2500.000000&nbsp;1498.615356
+<BR>&nbsp;3000.000000&nbsp;1507.234497
+<BR>&nbsp;3500.000000&nbsp;1515.940552
+<BR>&nbsp;4000.000000&nbsp;1524.727295
+<BR>&nbsp;4500.000000&nbsp;1533.588257
+<BR>&nbsp;5000.000000&nbsp;1542.517334
+<BR>&nbsp;5500.000000&nbsp;1551.507812
+<BR>&nbsp;6000.000000&nbsp;1560.553345
+<BR>&nbsp;6500.000000&nbsp;1569.647095
+<BR>&nbsp;7000.000000&nbsp;1578.782349
+<BR>&nbsp;7500.000000&nbsp;1587.952271
+<BR>&nbsp;8000.000000&nbsp;1597.149902
+<BR>&nbsp;8500.000000&nbsp;1606.368164
+<BR>&nbsp;9000.000000&nbsp;1615.600098
+<BR>&nbsp;9500.000000&nbsp;1624.838257
+<BR>&nbsp;10000.000000&nbsp;1634.075439
+<BR>&nbsp;10500.000000&nbsp;1643.304199
+<BR>&nbsp;11000.000000&nbsp;1652.517090
+<BR>&nbsp;11500.000000&nbsp;1661.706177
+<BR>&nbsp;12000.000000&nbsp;1670.864136
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbvelocitytool.html">mbvelocitytool</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbset.html">mbset</A></B>(1), 
+<B><A HREF="mbm_xbt.html">mbm_xbt</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+None known.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

@@ -1,0 +1,47 @@
+#     The MB-system:	Makefile.template  7/30/2003
+#	$Id$
+#
+#     Copyright (c) 2003-2011 by
+#     David W. Caress (caress@mbari.org)
+#       Monterey Bay Aquarium Research Institute
+#       Moss Landing, CA 95039
+#     and Dale N. Chayes (dale@ldeo.columbia.edu)
+#       Lamont-Doherty Earth Observatory
+#       Palisades, NY  10964
+#
+#     See README file for copying and redistribution conditions.
+#
+# Makefile template for MB-system at the src/mbaux directory level
+# Author:	D. W. Caress
+# Date:		July 30, 2003
+#
+# $Log: Makefile.template,v $
+# Revision 5.1  2009/03/13 07:05:58  caress
+# Release 5.1.2beta02
+#
+# Revision 5.0  2003/08/07 21:25:27  caress
+# Changed to reflect use of CVS instead of raw RCS and the placement of source manual pages in mbystem/man/manl instead of src/* directories.
+#
+
+### sets locations of vital objects
+HTMLDIR = ../../html
+
+# *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+#
+# 
+# Compilers 
+CC = cc 
+#
+# Compile and load flags:
+CFLAGS = -O2
+ARCHIVE = ar rcv
+#
+# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
+
+### make all makes the MB-System distribution web pages
+all:
+	make_mbhtml
+
+### make clean removes the object files
+clean:
+	rm -f man2html

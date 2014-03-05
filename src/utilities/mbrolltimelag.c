@@ -3,7 +3,7 @@
  *
  *    $Id$
  *
- *    Copyright (c) 2005-2012 by
+ *    Copyright (c) 2005-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -62,9 +62,9 @@
 #include <time.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
 
 #define	MBRTL_ALLOC_CHUNK	1000
 
@@ -120,14 +120,13 @@ int main (int argc, char **argv)
 	double	file_weight;
 
 	/* cross correlation parameters */
-	int	navchannel = MB_DATA_DATA;
-	int	kind = MB_DATA_NONE;
+	int	navchannel = 1;
+	int	kind = MB_DATA_DATA;
 	int	npings = 100;
 	double	rthreshold = 0.9;
 	int	nlag = 41;
 	double	lagstart = -2.0;
 	double	lagend = 2.0;
-	double	lagmax;
 	double	lagstep = 0.05;
 	double	*rr = NULL;
 
@@ -156,7 +155,11 @@ int main (int argc, char **argv)
 	double	slopeminusmean;
 	double	rollminusmean;
 	double	r;
-	double	sum_x, sum_y, sum_xy, sum_x2, sum_y2;
+	double	sum_x = 0.0;
+	double	sum_y = 0.0;
+	double	sum_xy = 0.0;
+	double	sum_x2 = 0.0;
+	double	sum_y2 = 0.0;
 	double	mmm, bbb;
 
 	int	nrollmean;
@@ -179,6 +182,7 @@ int main (int argc, char **argv)
 	int	found;
 	int	nscan;
 	int	j0, j1;
+	int	shellstatus;
 	int	i, j, k, l;
 
 	/* set default input */
@@ -235,7 +239,6 @@ int main (int argc, char **argv)
 		case 'T':
 		case 't':
 			sscanf (optarg,"%d/%lf/%lf", &nlag, &lagstart, &lagend);
-			lagmax = MAX(fabs(lagstart), fabs(lagend));
 			flag++;
 			break;
 		case '?':
@@ -276,7 +279,6 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       nlag:            %d\n",nlag);
 		fprintf(stderr,"dbg2       lagstart:        %f\n",lagstart);
 		fprintf(stderr,"dbg2       lagend:          %f\n",lagend);
-		fprintf(stderr,"dbg2       lagmax:          %f\n",lagmax);
 		fprintf(stderr,"dbg2       navchannel:      %d\n",navchannel);
 		fprintf(stderr,"dbg2       kind:            %d\n",kind);
 		}
@@ -301,7 +303,7 @@ int main (int argc, char **argv)
 		read_datalist = MB_YES;
 
 	/* get time lag step */
-	lagstep = 2 * lagmax / (nlag - 1);
+	lagstep = (lagend - lagstart) / (nlag - 1);
 	status = mb_reallocd(verbose,__FILE__,__LINE__, nlag * sizeof(double), (void **)&rr, &error);
 	status = mb_reallocd(verbose,__FILE__,__LINE__, nlag * sizeof(int), (void **)&timelaghistogram, &error);
 
@@ -315,7 +317,6 @@ int main (int argc, char **argv)
 		fprintf(stderr, "  Number of time lag calculations: %d\n", nlag);
 		fprintf(stderr, "  Start time lag reported:         %f\n", lagstart);
 		fprintf(stderr, "  End time lag reported:           %f\n", lagend);
-		fprintf(stderr, "  Maximum time lag:                %f\n", lagmax);
 		fprintf(stderr, "  Time lag step:                   %f\n", lagstep);
 		}
 
@@ -505,8 +506,8 @@ int main (int argc, char **argv)
 			nrollmean = 0;
 			for (j = 0; j < nroll; j++)
 				{
-				if ((roll_time_d[j] >= slope_time_d[j0] - lagmax)
-					&& (roll_time_d[j] <= slope_time_d[j1] + lagmax))
+				if ((roll_time_d[j] >= slope_time_d[j0] + lagstart)
+					&& (roll_time_d[j] <= slope_time_d[j1] + lagend))
 					{
 					rollmean += roll_roll[j];
 					nrollmean++;
@@ -525,7 +526,7 @@ int main (int argc, char **argv)
 					fprintf(fpt, ">\n");
 				for (k = 0; k < nlag; k++)
 					{
-					timelag = -lagmax + k * lagstep;
+					timelag = lagstart + k * lagstep;
 					sumsloperoll = 0.0;
 					sumslopesq = 0.0;
 					sumrollsq = 0.0;
@@ -583,7 +584,7 @@ int main (int argc, char **argv)
 				peaktimelag = 0.0;
 				for (k = 0; k < nlag; k++)
 					{
-					timelag = -lagmax + k * lagstep;
+					timelag = lagstart + k * lagstep;
 					if (timelag >= lagstart && timelag <= lagend)
 						{
 						if (rr[k] > maxr)
@@ -601,14 +602,15 @@ int main (int argc, char **argv)
 							&& rr[k] > 0.0
 							&& rr[k] > rr[k-1]
 							&& rr[k] > rr[k+1]
-							&& fabs(timelag) < fabs(peaktimelag))
+							&& (peaktimelag == lagstart
+								|| rr[k] > peakr))
 							{
 							peakk = k;
 							peakr = rr[k];
 							peaktimelag = timelag;
 							}
 						else if (k == nlag - 1
-							&& peaktimelag == -lagmax
+							&& peaktimelag == lagstart
 							&& rr[k] > peakr)
 							{
 							peakk = k;
@@ -654,13 +656,13 @@ int main (int argc, char **argv)
 		/* generate plot shellscript for cross correlation file */
 		sprintf(cmdfile, "mbm_xyplot -I%s -N", xcorfile);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
-		system(cmdfile);
+		shellstatus = system(cmdfile);
 
 		/* generate plot shellscript for time lag histogram */
 		sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"",
 				fhistfile, lagstep, swathfile);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
-		system(cmdfile);
+		shellstatus = system(cmdfile);
 
 		/* output peak time lag */
 		peakk = 0;
@@ -679,7 +681,7 @@ int main (int argc, char **argv)
 		if (nslope > 0 && peakksum > 0 && peakkmax > 1
 			&& peakkmax > peakksum / 5)
 			{
-			timelag = -lagmax + peakk * lagstep;
+			timelag = lagstart + peakk * lagstep;
 			fprintf(fpm, "%f %f\n", time_d_avg, timelag);
 			nmodel++;
 			fprintf(stderr,"Time lag model point: %f %f | nslope:%d peakksum:%d peakkmax:%d\n",
@@ -688,7 +690,7 @@ int main (int argc, char **argv)
 		else
 			{
 			if (peakkmax > 0)
-				timelag = -lagmax + peakk * lagstep;
+				timelag = lagstart + peakk * lagstep;
 			fprintf(stderr,"Time lag model point: %f %f | nslope:%d peakksum:%d peakkmax:%d | REJECTED\n",
 				time_d_avg, timelag, nslope, peakksum, peakkmax);
 			}
@@ -731,14 +733,14 @@ int main (int argc, char **argv)
 		{
 		sprintf(cmdfile, "mbm_xyplot -I%s -N", xcorfiletot);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
-		system(cmdfile);
+		shellstatus = system(cmdfile);
 		}
 
 	/* generate plot shellscript for time lag histogram */
 	sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"",
 			histfile, lagstep, swathdata);
 	fprintf(stderr, "Running: %s...\n", cmdfile);
-	system(cmdfile);
+	shellstatus = system(cmdfile);
 
 	/* generate plot shellscript for time lag model if it exists */
 	if (nmodel > 1 || nestimate > 1)
@@ -749,7 +751,7 @@ int main (int argc, char **argv)
 		sprintf(cmdfile, "mbm_xyplot -I%s -ISc0.05:%s -I%s -ISc0.1:%s -L\"Time lag model of %s:Time (sec):Time Lag (sec):\"",
 				modelfile, estimatefile, modelfile, modelfile, swathdata);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
-		system(cmdfile);
+		shellstatus = system(cmdfile);
 		}
 
 	/* deallocate memory for data arrays */

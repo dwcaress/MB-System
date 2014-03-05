@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbdumpesf</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbdumpesf</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbmask</B>, <B>mbdumpesf</B> - Output text version of beam edits from a binary edit save file.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbdumpesf</B> <B>-I</B>file [<B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+Swath bathymetry data is typically edited either with interactive
+tools such as <B>mbedit</B> or automatic filters such as <B>mbclean</B>.
+In <B>MB-System</B>, the beam flags are stored in binary &quot;edit save files&quot;
+(file suffix &quot;.esf&quot;). The program <B>mbdumpesf</B> reads esf files and
+outputs each of the edit events as a text line to stdout.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>MBDUMPESF OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>file</I>
+<BR>
+
+&quot;Edit save file&quot; from which the edit events will be read.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbdumpesf</B> outputs one line for each edit event in
+the input esf file.  If the
+<B>-V</B> flag is given, then <B>mbdumpesf</B> also outputs the
+total number of each type of edit event at the end of the listing.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one has edited a swath file 20080422_222636.mb88, resulting
+in an esf file named 20080422_222636.mb88.esf. To dump the edit events
+as a text stream, use <B>mbdumpesf</B>:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdumpesf&nbsp;-I&nbsp;20080422_222636.mb88.esf<BR>
+<BR>
+
+The output will look something like:
+<BR>
+
+<P>
+<BR>
+
+EDITS READ: i:0 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:21 action:1
+<BR>
+
+EDITS READ: i:1 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:22 action:1
+<BR>
+
+EDITS READ: i:2 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:23 action:1
+<BR>
+
+EDITS READ: i:3 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:24 action:1
+<BR>
+
+EDITS READ: i:4 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:25 action:1
+<BR>
+
+EDITS READ: i:5 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:26 action:1
+<BR>
+
+EDITS READ: i:6 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:27 action:1
+<BR>
+
+EDITS READ: i:7 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:28 action:1
+<BR>
+
+<P>
+<BR>
+
+Here the large time value is epoch seconds (seconds since 1/1/1970), and the
+edit event action values are:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>action=1:&nbsp;flag&nbsp;manually<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>action=2:&nbsp;unflag<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>action=3:&nbsp;zero&nbsp;-&nbsp;make&nbsp;beam&nbsp;null<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>action=4:&nbsp;flag&nbsp;by&nbsp;autofilter<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbedit.html">mbedit</A></B>(1), <B><A HREF="mbeditviz.html">mbeditviz</A></B>(1), fBmbclean(1), <B><A HREF="mbunclean.html">mbunclean</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Too simple to have any interesting problems.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">MBDUMPESF OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

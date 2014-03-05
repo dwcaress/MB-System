@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_elmk2unb.h	6/6/97
  *	$Id$
  *
- *    Copyright (c) 1997-2012 by
+ *    Copyright (c) 1997-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_elmk2unb.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_ELMK2UNB format (MBIO id 92).  
+ * to store multibeam data read from the MBF_ELMK2UNB format (MBIO id 92).
  *
  * Author:	D. W. Caress
  * Date:	June 6, 1997
@@ -64,7 +64,7 @@
  *         0x0253: Sound velocity profile                2016 data bytes
  *         0x0258: Mark II general bathymetry wrapper      24 data bytes
  *                 Mark II general bathymetry beam         28 data bytes
- *   6. Elac systems record navigation fixes using the position 
+ *   6. Elac systems record navigation fixes using the position
  *      telegram; navigation is not included in the per ping data.
  *      Since speed is not recorded, it is impossible to extrapolate
  *      position from the last navigation fix when processing the

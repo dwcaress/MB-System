@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_omghdcsj.h	3/10/99
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -136,8 +136,16 @@ static int mbf_omghdcsj_tooldefs1[MBSYS_HDCS_NUM_TOOLS][4] =
 		    /*  42:SeaBat 7125	      */  { 64,   512,  64, 0},
 		    /*  43:R2Sonic 2024       */  { 64,   256,  64, 0},
 		    /*  44:SeaBat 7150	      */  { 64,   880,  64, 0},
-		    /*  45:OMG GLORIA	      */  { 1,    1024, 1,  0}
-
+		    /*  45:OMG GLORIA	      */  { 1,    1024, 1,  0},
+		    /*  46:ODOM ES3           */  {64,    480,  64, 0},
+		    /*  47:EM2040             */  {64,    400,  64, 0},
+		    /*  48:HC5K               */  {64,   1000,  64, 0},
+		    /*  49:R2Sonic 2022       */  {64,    256,  64, 0},
+		    /*  50:SeaBat 7111        */  {64,    301,  64, 0},
+		    /*  51:EdgeTech 4600      */  {64,   1000,  64, 0},
+		    /*  52:ME70               */  {64,   1000,  64, 0},
+		    /*  53:SeaBat 7101        */  {64,    511,  64, 0},
+		    /*  54:EM2040D            */  {64,    800,  64, 0}
 		    };
 static int mbf_omghdcsj_tooldefs2[MBSYS_HDCS_NUM_TOOLS][4] =
 		    {/*                            PRS     no. DRS  IRS */
@@ -186,7 +194,16 @@ static int mbf_omghdcsj_tooldefs2[MBSYS_HDCS_NUM_TOOLS][4] =
                     /*  42:SeaBat 7125        */  { 64,   512,  64, 0},
                     /*  43:R2Sonic 2024        */ { 32,   256,  12, 0},
                     /*  44:SeaBat 7150        */  { 32,   880,  12, 0},
-                    /*  45:OMG GLORIA        */   {  1,   1024,  1, 0}
+                    /*  45:OMG GLORIA        */   {  1,   1024,  1, 0},
+                    /*  46:ODOM ES3           */  {64,    480, 64, 0},
+                    /*  47:EM2040             */  {32,    400, 20, 0},
+                    /*  48:HC5K               */  {32,   1000, 20, 0},
+                    /*  49:R2Sonic 2024       */  {32,    256, 12, 0},
+                    /*  50:SeaBat 7111        */  {32,    301, 12, 0},
+                    /*  51:EdgeTech 4600      */  {32,   1000, 20, 0},
+                    /*  52:ME70               */  {32,   1000, 20, 0},
+                    /*  53:SeaBat 7101        */  {32,    511, 12, 0},
+                    /*  54:EM2040D            */  {32,    800, 20, 0}
 		    };
 static int mbf_omghdcsj_tooldefs3[MBSYS_HDCS_NUM_TOOLS][4] =
 		    {/*                            PRS     no. DRS  IRS */
@@ -235,7 +252,16 @@ static int mbf_omghdcsj_tooldefs3[MBSYS_HDCS_NUM_TOOLS][4] =
                     /*  42:SeaBat 7125        */  { 272,  512,  28, 0}, /* Using 272 for now until v4 setup for it */
                     /*  43:R2Sonic 2024       */  { 272,  256,  28, 0},
                     /*  44:SeaBat 7150        */  { 272,  880,  28, 0},
-                    /*  45:OMG GLORIA         */  {   1, 1024,   1, 0}
+                    /*  45:OMG GLORIA         */  {   1, 1024,   1, 0},
+                    /*  46:ODOM ES3           */  { 32,   480,  32, 0},
+                    /*  47:EM2040             */  { 32,   400,  28, 0},
+                    /*  48:HC5K               */  { 32,  1000,  28, 0},
+                    /*  49:R2Sonic 2024       */  {272,   256,  28, 0},
+                    /*  50:SeaBat 7111        */  {272,   301,  28, 0},
+                    /*  51:EdgeTech 4600      */  { 32,  1000,  28, 0},
+                    /*  52:ME70               */  { 32,  1000,  28, 0},
+                    /*  53:SeaBat 7101        */  {272,   511,  28, 0},
+                    /*  54:EM2040D            */  { 32,   800,  28, 0}
 		    };
 
 /* define OMG-HDCS summary header structure */
@@ -475,6 +501,7 @@ struct mbf_omghdcsj_beam_struct {
 	signed short Rc_steer;
 
 	mb_u_char TxSector;
+	float Ifremer_qfactor;
 	unsigned int timestampOffset; /* really is a 64 bit integer, trying to compress */
 				/* would'nt even need if didn't have to relate wavefile
 			 	by this number */
@@ -580,6 +607,7 @@ struct mbf_omghdcsj_struct
 #define BEAM_ss_Tx_steer  				0x00000008
 #define BEAM_ss_Rc_steer  				0x00000010
 #define BEAM_uc_TxSector				0x00000020
+#define BEAM_f_Ifremer_qfactor				0x00000040 /* Add Sept. 2013 */
 
 /* ---------------------------------------------------------------------- */
 /* FOUR'TH LONG WORD */

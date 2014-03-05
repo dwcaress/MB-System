@@ -2,7 +2,7 @@
  *    The MB-system:	mb_proj.c	7/16/2002
  *    $Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -68,8 +68,8 @@
 #include <sys/stat.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 #include "proj_api.h"
 #include "projections.h"
 
@@ -136,7 +136,7 @@ int mb_proj_init(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       pjptr:           %lu\n",(size_t)*pjptr);
+		fprintf(stderr,"dbg2       pjptr:           %p\n",(void *)*pjptr);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
@@ -161,7 +161,7 @@ int mb_proj_free(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       pjptr:      %lu\n",(size_t)*pjptr);
+		fprintf(stderr,"dbg2       pjptr:      %p\n",(void *)*pjptr);
 		}
 
 	/* free the projection */
@@ -182,7 +182,7 @@ int mb_proj_free(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       pjptr:           %lu\n",(size_t)*pjptr);
+		fprintf(stderr,"dbg2       pjptr:           %p\n",(void *)*pjptr);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
@@ -211,7 +211,7 @@ int mb_proj_forward(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       pjptr:      %lu\n",(size_t)pjptr);
+		fprintf(stderr,"dbg2       pjptr:      %p\n",(void *)pjptr);
 		fprintf(stderr,"dbg2       lon:        %f\n",lon);
 		fprintf(stderr,"dbg2       lat:        %f\n",lat);
 		}
@@ -267,7 +267,7 @@ int mb_proj_inverse(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       pjptr:      %lu\n",(size_t)pjptr);
+		fprintf(stderr,"dbg2       pjptr:      %p\n",(void *)pjptr);
 		fprintf(stderr,"dbg2       easting:    %f\n",easting);
 		fprintf(stderr,"dbg2       northing:   %f\n",northing);
 		}
@@ -323,8 +323,8 @@ int mb_proj_transform(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       pjptr:      %lu\n",(size_t)pjsrcptr);
-		fprintf(stderr,"dbg2       pjptr:      %lu\n",(size_t)pjdstptr);
+		fprintf(stderr,"dbg2       pjptr:      %p\n",(void *)pjsrcptr);
+		fprintf(stderr,"dbg2       pjptr:      %p\n",(void *)pjdstptr);
 		fprintf(stderr,"dbg2       npoint:     %d\n",npoint);
 		for (i=0;i<npoint;i++)
 			fprintf(stderr,"dbg2       point[%d]:  x:%f y:%f z:%f\n", i, x[i], y[i], z[i]);

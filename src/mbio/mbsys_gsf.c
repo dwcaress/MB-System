@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -98,11 +98,11 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_gsf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_gsf.h"
 
 static char rcs_id[]="$Id$";
 
@@ -121,7 +121,7 @@ int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -137,7 +137,7 @@ int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -162,8 +162,8 @@ int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		}
 
 	/* deallocate memory for data structure */
@@ -206,8 +206,8 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -290,8 +290,8 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -420,8 +420,8 @@ int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -488,8 +488,8 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -514,14 +514,26 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_date(verbose,*time_d,time_i);
 
 		/* get navigation */
-		*navlon = mb_ping->longitude;
-		*navlat = mb_ping->latitude;
+		if (mb_ping->longitude != GSF_NULL_LONGITUDE)
+			*navlon = mb_ping->longitude;
+		else
+			*navlon = 0.0;
+		if (mb_ping->latitude != GSF_NULL_LATITUDE)
+			*navlat = mb_ping->latitude;
+		else
+			*navlat = 0.0;
 
 		/* get heading */
-		*heading = mb_ping->heading;
+		if (mb_ping->heading != GSF_NULL_HEADING)
+			*heading = mb_ping->heading;
+		else
+			*heading = 0.0;
 
 		/* get speed */
-		*speed = 1.852 * mb_ping->speed;
+		if (mb_ping->speed != GSF_NULL_SPEED)
+			*speed = 1.852 * mb_ping->speed;
+		else
+			*speed = 0.0;
 
 		/* set beamwidths in mb_io structure */
 		gsfstatus = gsfGetSwathBathyBeamWidths(records,
@@ -901,8 +913,8 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
@@ -963,14 +975,26 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_ping->ping_time.tv_nsec = (int) (1000000000 * (time_d - mb_ping->ping_time.tv_sec));
 
 		/* get navigation */
-		mb_ping->longitude = navlon;
-		mb_ping->latitude = navlat;
+		if (navlon != 0.0)
+			mb_ping->longitude = navlon;
+		else
+			mb_ping->longitude = GSF_NULL_LONGITUDE;
+		if (navlat != 0.0)
+			mb_ping->latitude = navlat;
+		else
+			mb_ping->longitude = GSF_NULL_LATITUDE;
 
 		/* get heading */
-		mb_ping->heading = heading;
+		if (heading != 0.0)
+			mb_ping->heading = heading;
+		else
+			mb_ping->heading = GSF_NULL_HEADING;
 
 		/* get speed */
-		mb_ping->speed = speed / 1.852;
+		if (speed != 0.0)
+			mb_ping->speed = speed / 1.852;
+		else
+			mb_ping->speed = speed;
 
 		/* get numbers of beams */
 		mb_ping->number_beams = nbath;
@@ -1130,14 +1154,14 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %lu\n",(size_t)ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%lu\n",(size_t)angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%lu\n",(size_t)angles_forward);
-		fprintf(stderr,"dbg2       angles_null:%lu\n",(size_t)angles_null);
-		fprintf(stderr,"dbg2       heave:      %lu\n",(size_t)heave);
-		fprintf(stderr,"dbg2       ltrk_off:   %lu\n",(size_t)alongtrack_offset);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %p\n",(void *)ttimes);
+		fprintf(stderr,"dbg2       angles_xtrk:%p\n",(void *)angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%p\n",(void *)angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%p\n",(void *)angles_null);
+		fprintf(stderr,"dbg2       heave:      %p\n",(void *)heave);
+		fprintf(stderr,"dbg2       ltrk_off:   %p\n",(void *)alongtrack_offset);
 		}
 
 	/* get mbio descriptor */
@@ -1449,9 +1473,9 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %p\n",(void *)detects);
 		}
 
 	/* get mbio descriptor */
@@ -1549,8 +1573,8 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1568,6 +1592,12 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 	    {
+	    /* reset depth_corrector to zero if necessary */
+	    if (mb_ping->depth_corrector == GSF_NULL_DEPTH_CORRECTOR)
+		{
+		mb_ping->depth_corrector = 0.0;
+		}
+	    /* get transducer_depth */
 	    *transducer_depth = mb_ping->depth_corrector + mb_ping->heave;
 
 	    /* get altitude if available */
@@ -1680,8 +1710,8 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:            %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:         %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:         %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       transducer_depth:  %f\n",transducer_depth);
 		fprintf(stderr,"dbg2       altitude:          %f\n",altitude);
 		}
@@ -1770,8 +1800,8 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1795,22 +1825,50 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_date(verbose,*time_d,time_i);
 
 		/* get navigation */
-		*navlon = mb_ping->longitude;
-		*navlat = mb_ping->latitude;
+		if (mb_ping->longitude != GSF_NULL_LONGITUDE)
+			*navlon = mb_ping->longitude;
+		else
+			*navlon = 0.0;
+		if (mb_ping->latitude != GSF_NULL_LATITUDE)
+			*navlat = mb_ping->latitude;
+		else
+			*navlat = 0.0;
 
 		/* get heading */
-		*heading = mb_ping->heading;
+		if (mb_ping->heading != GSF_NULL_HEADING)
+			*heading = mb_ping->heading;
+		else
+			*heading = 0.0;
 
 		/* get speed */
-		*speed = 1.852 * mb_ping->speed;
+		if (mb_ping->speed != GSF_NULL_SPEED)
+			*speed = 1.852 * mb_ping->speed;
+		else
+			*speed = 0.0;
 
 		/* get draft */
-		*draft = mb_ping->depth_corrector;
+		if (mb_ping->depth_corrector != GSF_NULL_DEPTH_CORRECTOR)
+			*draft = mb_ping->depth_corrector;
+		else
+			*draft = 0.0;
 
 		/* get roll pitch and heave */
 		*roll = mb_ping->roll;
 		*pitch = mb_ping->pitch;
 		*heave = mb_ping->heave;
+
+		if (mb_ping->roll != GSF_NULL_ROLL)
+			*roll = mb_ping->roll;
+		else
+			*roll = 0.0;
+		if (mb_ping->pitch != GSF_NULL_PITCH)
+			*pitch = mb_ping->pitch;
+		else
+			*pitch = 0.0;
+		if (mb_ping->heave != GSF_NULL_HEAVE)
+			*heave = mb_ping->heave;
+		else
+			*heave = 0.0;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1936,8 +1994,8 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -1977,22 +2035,46 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 				    - mb_ping->ping_time.tv_sec));
 
 		/* get navigation */
-		mb_ping->longitude = navlon;
-		mb_ping->latitude = navlat;
+		if (navlon != 0.0)
+			mb_ping->longitude = navlon;
+		else
+			mb_ping->longitude = GSF_NULL_LONGITUDE;
+		if (navlat != 0.0)
+			mb_ping->latitude = navlat;
+		else
+			mb_ping->longitude = GSF_NULL_LATITUDE;
 
 		/* get heading */
-		mb_ping->heading = heading;
+		if (heading != 0.0)
+			mb_ping->heading = heading;
+		else
+			mb_ping->heading = GSF_NULL_HEADING;
 
 		/* get speed */
-		mb_ping->speed = speed / 1.852;
+		if (speed != 0.0)
+			mb_ping->speed = speed / 1.852;
+		else
+			mb_ping->speed = speed;
 
 		/* get draft */
-		mb_ping->depth_corrector = draft;
+		if (draft != 0.0)
+			mb_ping->depth_corrector = draft;
+		else
+			mb_ping->depth_corrector = GSF_NULL_DEPTH_CORRECTOR;
 
 		/* get roll pitch and heave */
-		mb_ping->roll = roll;
-		mb_ping->pitch = pitch;
-		mb_ping->heave = heave;
+		if (roll != 0.0)
+			mb_ping->roll = heading;
+		else
+			mb_ping->roll = GSF_NULL_ROLL;
+		if (pitch != 0.0)
+			mb_ping->pitch = heading;
+		else
+			mb_ping->pitch = GSF_NULL_PITCH;
+		if (heave != 0.0)
+			mb_ping->heave = heading;
+		else
+			mb_ping->heave = GSF_NULL_HEAVE;
 
 		/* get scale factors */
 		gsfSetDefaultScaleFactor(mb_ping);
@@ -2033,8 +2115,8 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -2121,8 +2203,8 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       nsvp:       %d\n",nsvp);
 		for (i=0;i<nsvp;i++)
 		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
@@ -2191,9 +2273,9 @@ int mbsys_gsf_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %lu\n",(size_t)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %p\n",(void *)copy_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -2241,8 +2323,8 @@ int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
-		fprintf(stderr,"dbg2       data:        %lu\n",(size_t)data);
-		fprintf(stderr,"dbg2       flag:        %lu\n",(size_t)flag);
+		fprintf(stderr,"dbg2       data:        %p\n",(void *)data);
+		fprintf(stderr,"dbg2       flag:        %p\n",(void *)flag);
 		fprintf(stderr,"dbg2       ndata:       %d\n",ndata);
 		fprintf(stderr,"dbg2       nbits:       %d\n",nbits);
 		fprintf(stderr,"dbg2       signedvalue: %d\n",signedvalue);

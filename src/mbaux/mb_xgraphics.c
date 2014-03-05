@@ -2,7 +2,7 @@
  *    The MB-system:	xgraphics.c	8/3/94
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -15,7 +15,7 @@
 /*
  * The xgraphics library supports simple 8-bit X Window graphics for
  * interactive graphical tools.  This code is based on an earlier
- * library which explicitly controlled the colormap to allow 
+ * library which explicitly controlled the colormap to allow
  * double overlays.  This implementation uses only colors defined
  * by the calling program and allows line drawing in two styles:
  * solid and dashed.
@@ -84,13 +84,13 @@
 #include <X11/Xutil.h>
 
 /* mbaux includes */
-#include "../../include/mb_xgraphics.h"
+#include "mb_xgraphics.h"
 
 /**********************************************************************
  *	XG_INIT
  *	- initializes plotting variables, the colortable, and the GC
  **********************************************************************/
-void xg_init(Display *display, Window can_xid, 
+void xg_init(Display *display, Window can_xid,
 		int *can_bounds, char *fontname, void **xgid)
 {
 	/* local variables */
@@ -99,7 +99,7 @@ void xg_init(Display *display, Window can_xid,
 	int	i;
 
 	/* allocate memory for xg_graphic structure */
-	if ((graphic = (struct xg_graphic *) 
+	if ((graphic = (struct xg_graphic *)
 		calloc(1,sizeof(struct xg_graphic))) == NULL)
 		exit(1);
 
@@ -110,9 +110,9 @@ void xg_init(Display *display, Window can_xid,
 		graphic->bounds[i] = can_bounds[i];
 
 	/* check for the type of display and set the display_type */
-	graphic->display_depth = DisplayPlanes(graphic->dpy, 
+	graphic->display_depth = DisplayPlanes(graphic->dpy,
 			DefaultScreen(graphic->dpy));
-/*fprintf(stderr,"graphic->display_depth:%d Default Visual:%d\n", 
+/*fprintf(stderr,"graphic->display_depth:%d Default Visual:%d\n",
 graphic->display_depth,
 DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));*/
 	if (graphic->display_depth == 1 )
@@ -124,7 +124,7 @@ DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));*/
 			exit(-1);
 			}
 		graphic->display_type = StaticGray;
-		graphic->visual = graphic->visinfo.visual;  
+		graphic->visual = graphic->visinfo.visual;
 		}
 	else if (graphic->display_depth == 8)
 		{
@@ -135,7 +135,7 @@ DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));*/
 			exit(-1);
 			}
 		graphic->display_type = PseudoColor;
-		graphic->visual = graphic->visinfo.visual;  
+		graphic->visual = graphic->visinfo.visual;
 		}
 	else if (graphic->display_depth == 16)
 		{
@@ -143,13 +143,13 @@ DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));*/
 			16,TrueColor,&(graphic->visinfo)) != 0)
 			{
 			graphic->display_type = TrueColor;
-			graphic->visual = graphic->visinfo.visual;  
+			graphic->visual = graphic->visinfo.visual;
 			}
 		else if (XMatchVisualInfo(graphic->dpy, DefaultScreen(graphic->dpy),
 			16,PseudoColor,&(graphic->visinfo)) != 0)
 			{
 			graphic->display_type = PseudoColor;
-			graphic->visual = graphic->visinfo.visual;  
+			graphic->visual = graphic->visinfo.visual;
 			}
 		else
 			{
@@ -166,7 +166,7 @@ DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));*/
 			exit(-1);
 			}
 		graphic->display_type = TrueColor;
-		graphic->visual = graphic->visinfo.visual;  
+		graphic->visual = graphic->visinfo.visual;
 		}
 	else
 		{
@@ -175,13 +175,13 @@ DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));*/
 		}
 
 	/* set foreground and background colors */
-	if (graphic->display_type == StaticGray 
+	if (graphic->display_type == StaticGray
 		|| graphic->display_type == PseudoColor
 	        || graphic->display_type == TrueColor)
 		{
-		graphic->bg_pixel = WhitePixel(graphic->dpy, 
+		graphic->bg_pixel = WhitePixel(graphic->dpy,
 			DefaultScreen(graphic->dpy));
-		graphic->fg_pixel = BlackPixel(graphic->dpy, 
+		graphic->fg_pixel = BlackPixel(graphic->dpy,
 			DefaultScreen(graphic->dpy));
 		}
 	else
@@ -191,7 +191,7 @@ DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));*/
 		}
 
 	/* load font */
-	if ((graphic->font_info = XLoadQueryFont(graphic->dpy, fontname)) 
+	if ((graphic->font_info = XLoadQueryFont(graphic->dpy, fontname))
 		== NULL)
 		{
 		printf("X Error: Cannot load font: %s\n",fontname);
@@ -206,18 +206,18 @@ DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));*/
 	/* set gc with solid lines */
 	gc_val.plane_mask = AllPlanes;
 	gc_val.line_style = LineSolid;
-	graphic->gc_solid = XCreateGC(graphic->dpy, graphic->xid, 
-		(GCForeground | GCBackground | GCFont 
+	graphic->gc_solid = XCreateGC(graphic->dpy, graphic->xid,
+		(GCForeground | GCBackground | GCFont
 		| GCPlaneMask | GCLineStyle),
 		&(gc_val));
 
 	/* set gc with dash lines */
 	gc_val.line_style = LineOnOffDash;
-	graphic->gc_dash = XCreateGC(graphic->dpy, graphic->xid, 
-		(GCForeground | GCBackground | GCFont 
+	graphic->gc_dash = XCreateGC(graphic->dpy, graphic->xid,
+		(GCForeground | GCBackground | GCFont
 		| GCPlaneMask | GCLineStyle),
 		&(gc_val));
-		
+
 	/* return pointer to xg_graphic structure */
 	*xgid = (void *) graphic;
 
@@ -254,7 +254,7 @@ void xg_drawpoint(void *xgid, int x, int y, unsigned int pixel, int style)
  *	XG_DRAWLINE
  *	- draws a line
  **********************************************************************/
-void xg_drawline(void *xgid, int x1, int y1, int x2, int y2, 
+void xg_drawline(void *xgid, int x1, int y1, int x2, int y2,
 		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
@@ -272,7 +272,7 @@ void xg_drawline(void *xgid, int x1, int y1, int x2, int y2,
  *	XG_DRAWRECTANGLE
  *	- draws a rectangle outline
  **********************************************************************/
-void xg_drawrectangle(void *xgid, int x, int y, int width, int height, 
+void xg_drawrectangle(void *xgid, int x, int y, int width, int height,
 		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
@@ -284,15 +284,15 @@ void xg_drawrectangle(void *xgid, int x, int y, int width, int height,
 	else
 		gc = &graphic->gc_dash;
 	XSetForeground(graphic->dpy, *gc, pixel);
-	XDrawRectangle(graphic->dpy, graphic->xid, *gc, 
+	XDrawRectangle(graphic->dpy, graphic->xid, *gc,
 		x, y, width, height);
 }
 /**********************************************************************
  *	XG_DRAWTRIANGLE
  *	- draws a triangle outline
  **********************************************************************/
-void xg_drawtriangle(void *xgid, 
-		int x1, int y1, int x2, int y2, int x3, int y3, 
+void xg_drawtriangle(void *xgid,
+		int x1, int y1, int x2, int y2, int x3, int y3,
 		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
@@ -318,14 +318,14 @@ void xg_drawtriangle(void *xgid,
 	segments[2].x2 = (short) x1;
 	segments[2].y2 = (short) y1;
 	XSetForeground(graphic->dpy, *gc, pixel);
-	XDrawSegments(graphic->dpy, graphic->xid, *gc, 
+	XDrawSegments(graphic->dpy, graphic->xid, *gc,
 		segments, nsegments);
 }
 /**********************************************************************
  *	XG_FILLRECTANGLE
  *	- fills a rectangle
  **********************************************************************/
-void xg_fillrectangle(void *xgid, int x, int y, int width, int height, 
+void xg_fillrectangle(void *xgid, int x, int y, int width, int height,
 		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
@@ -337,15 +337,15 @@ void xg_fillrectangle(void *xgid, int x, int y, int width, int height,
 	else
 		gc = &graphic->gc_dash;
 	XSetForeground(graphic->dpy, *gc, pixel);
-	XFillRectangle(graphic->dpy, graphic->xid, *gc, 
+	XFillRectangle(graphic->dpy, graphic->xid, *gc,
 		x, y, width, height);
 }
 /**********************************************************************
  *	XG_FILLTRIANGLE
  *	- fills a triangle
  **********************************************************************/
-void xg_filltriangle(void *xgid, 
-		int x1, int y1, int x2, int y2, int x3, int y3, 
+void xg_filltriangle(void *xgid,
+		int x1, int y1, int x2, int y2, int x3, int y3,
 		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
@@ -367,14 +367,14 @@ void xg_filltriangle(void *xgid,
 	points[2].x = (short) x3;
 	points[2].y = (short) y3;
 	XSetForeground(graphic->dpy, *gc, pixel);
-	XFillPolygon(graphic->dpy, graphic->xid, *gc, 
+	XFillPolygon(graphic->dpy, graphic->xid, *gc,
 		points, npoints, shape, mode);
 }
 /**********************************************************************
  *	XG_DRAWSTRING
  *	- draws a string
  **********************************************************************/
-void xg_drawstring(void *xgid, int x, int y, char *string, 
+void xg_drawstring(void *xgid, int x, int y, char *string,
 		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
@@ -388,14 +388,14 @@ void xg_drawstring(void *xgid, int x, int y, char *string,
 		gc = &graphic->gc_dash;
 	XSetForeground(graphic->dpy, *gc, pixel);
 	string_length = strlen(string);
-	XDrawString(graphic->dpy, graphic->xid, *gc, 
+	XDrawString(graphic->dpy, graphic->xid, *gc,
 		x, y, string, string_length);
 }
 /**********************************************************************
  *	XG_JUSTIFY
  *	- figures out the dimensions of a string when drawn
  **********************************************************************/
-void xg_justify(void *xgid, char *string, 
+void xg_justify(void *xgid, char *string,
 		int *width, int *ascent, int *descent)
 {
 	struct xg_graphic *graphic;
@@ -407,7 +407,7 @@ void xg_justify(void *xgid, char *string,
 
 	graphic = (struct xg_graphic *) xgid;
 	string_length = strlen(string);
-	XTextExtents(graphic->font_info, string, string_length, 
+	XTextExtents(graphic->font_info, string, string_length,
 		&direction, &lascent, &ldescent, &string_info);
 	*width = string_info.width;
 	*ascent = string_info.ascent;
@@ -430,8 +430,8 @@ void xg_setclip(void *xgid, int x, int y, int width, int height)
 
 	/* set clip rectangle */
 	graphic = (struct xg_graphic *) xgid;
-	XSetClipRectangles(graphic->dpy, graphic->gc_solid, 0, 0, 
+	XSetClipRectangles(graphic->dpy, graphic->gc_solid, 0, 0,
 		rectangle, 1, Unsorted);
-	XSetClipRectangles(graphic->dpy, graphic->gc_dash, 0, 0, 
+	XSetClipRectangles(graphic->dpy, graphic->gc_dash, 0, 0,
 		rectangle, 1, Unsorted);
 }

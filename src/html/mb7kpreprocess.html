@@ -1,0 +1,345 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mb7kpreprocess</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mb7kpreprocess</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mb7kpreprocess</B> - performs preprocessing of Reson 7k multibeam data
+in the 7k format (<B>MBIO</B> format 88).
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mb7kpreprocess</B> [<B>-A</B> <B>-B</B> <B>-C</B><I>rollbias/pitchbias</I> <B>-D</B><I>offx/offy[/offdepth]</I> <B>-F</B><I>format</I>
+<B>-I</B><I>file </I><B>-K</B><I>klugemode</I> <B>-L</B> <B>-M</B><I>rockfile</I> <B>-N</B><I>insfile</I> <B>-O</B><I>outfile</I>
+<B>-P</B><I>sonardepthfile</I> <B>-PF</B><I>filterlength/filterdepth</I>
+<B>-T</B><I>timelag</I> <B>-W</B><I>dslfile</I> <B>-H -V</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mb7kpreprocess</B> reads a Reson 7k (format 88) file, interpolates the
+asynchronous navigation and attitude onto the multibeam data,
+and writes a new 7k file with that information correctly embedded
+in the multibeam data. This program can also fix various problems
+with 7k data (early generations of the 6046 datalogger failed to
+to meet the data format specification exactly).
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<BR>
+
+This option causes the program to output multibeam records occuring before the first
+available navigation and attitude data. Normally, these records are ignored.
+<DT><B>-B</B>
+
+<DD>
+<I>mode</I>
+<BR>
+
+This option is only relevant to MBARI Mapping AUV data that includes Edgetech sidescan
+and subbottom profiler data with multibeam data in a Reson 7k format file, and where the
+sonars are all synchronized to ping simulataneously. If <B>-B</B> is specified with
+<I>mode</I>=1, then the multibeam time stamps will be reset to the time stamp values of
+the Edgetech data records. If <B>-B</B> is given with <I>mode</I>=2, then the Edgetech
+data time stamps will be reset to the values of the multibeam data records. Although the
+sonar computer clocks are supposed to be synchronized, this clock discipline sometimes fails.
+<DT><B>-C</B>
+
+<DD>
+<I>rollbias/pitchbias</I>
+<BR>
+
+This option sets the roll and pitch bias of the sonar with respect to the attitude sensor
+in degrees. If specified, these parameters are applied to the sonar attitude data prior to
+the calculation of bathymetry from travel times and angles.
+<DT><B>-D</B>
+
+<DD>
+<I>offx/offz[/offdepth]</I>
+<BR>
+
+This option sets horizontal and vertical.distance offsets between the vehicle's
+depth sensor and the multibeam receive head. If specified, these values are used
+in a lever-arm calculation to determine the sonar depth change  associated with
+vehicle pitch. The <I>offdepth</I> value, if specified, is a static depth offset to be
+applied to the vehicle depth data.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format used if the input is read from stdin
+or from a file. If <I>format</I> &lt; 0, then the input file specified
+with the <B>-I</B> option will actually contain a list of input swath sonar
+data files. This program only reads Reson 7k format data files (<B>MBIO</B>
+format 88).
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Sets the input file path. If <I>format</I> &gt; 0 (set with the
+<B>-f</B> option or <B>mbdefaults</B>) then the swath sonar data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;88<BR>
+<BR>
+
+This program only reads Reson 7k format data files (<B>MBIO</B>
+format 88).
+<DT><B>-K</B>
+
+<DD>
+<I>klugemode</I>
+<BR>
+
+This option causes the program to implement one of the available
+processing &quot;kluge&quot; fixes. This are unusual steps required to fix
+data with particular, unusual problems. Kluge 1 forces <B>mb7kpreprocess</B>
+to replace the sonar depth value with values from vertical
+depth data records. Kuge 2 forces <B>mb7kpreprocess</B> to zero the initial
+beam alongtrack distance values.
+<DT><B>-L</B>
+
+<DD>
+<BR>
+
+This option causes the program to list the timetags of bathymetry,
+sidescan, subbottom, navigation, and attitude data records.
+<DT><B>-M</B>
+
+<DD>
+<I>rockfile</I>
+<BR>
+
+The program will read navigation and attitude from the Steve Rock navigation
+and attitude file <I>rockfile</I> and merge those data with the multibeam, sidescan,
+and subbtottom data in the 7k file.If a timelag model is specified using
+<B>-T</B><I>timelag</I>, the time lag will be applied to the navigation and
+attitude data before merging with the sonar data. The navigation and attitude
+data from <I>rockfile</I> will also be embedded in asynchronous data records
+in the output 7k format data. Any pre-existing navigation data records will
+be replaced. The similar <B>-N</B><I>insfile</I> and <B>-W</B><I>dslfile</I> options
+cause merging of data from MBARI AUV logfiles and WHOI DSL navigation files,
+respectively. The Steve Rock navigation and attitude file is a text file with
+seven space delimited columns:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>time_d&nbsp;longitude&nbsp;latitude&nbsp;sonardepth&nbsp;heading&nbsp;roll&nbsp;pitch<BR>
+<BR>
+
+where time_d is decimal seconds since the start of 1970, longitude, latitude,
+heading, roll, and pitch are in decimal degrees, and sonardepth is in meters.
+<DT><B>-N</B>
+
+<DD>
+<I>insfile</I>
+<BR>
+
+The program will read navigation and attitude from the MBARI AUV navigation
+log file <I>insfile</I> and merge those data with the multibeam, sidescan,
+and subbtottom data in the 7k file. If a timelag model is specified using
+<B>-T</B><I>timelag</I>, the time lag will be applied to the navigation and
+attitude data before merging with the sonar data. The navigation and attitude
+data from <I>insfile</I> will also be embedded in asynchronous data records
+in the output 7k format data. Any pre-existing navigation data records will
+be replaced. MBARI AUV navigation files are binary and specific to MBARI.
+<DT><B>-O</B>
+
+<DD>
+<I>outfile</I>
+<BR>
+
+This option causes <B>mb7kpreprocess</B> to output all data to a single file
+specified as <I>outfile</I>. By default, the program creates output files for
+each input file.
+<DT><B>-P</B>
+
+<DD>
+<I>sonardepthfile</I>
+<BR>
+
+The program will read sonar depth data from <I>sonardepthfile</I> and merge
+those data with the multibeam, sidescan, and subbtottom data in the 7k file.
+The <I>sonardepthfile</I> is a text data file containing two space delimited columns:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>time_d&nbsp;sonardepth<BR>
+<BR>
+
+where:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>time_d&nbsp;-&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(since&nbsp;start&nbsp;of&nbsp;1970)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sonardepth&nbsp;-&nbsp;sonar&nbsp;depth&nbsp;in&nbsp;meters,&nbsp;positive&nbsp;down<BR>
+<DT><B>-PF</B>
+
+<DD>
+<B>-PF</B><I>filterlength/filterdepth</I>
+This option specifies Gaussian tapered time domain filtering of the
+sonar depth data to be merged with the survey data, regardless of source.
+The <I>filterlength</I> value specifies
+the filter window length in seconds, and the <I>filterdepth</I> value controls
+the depths to which filtering is applied. The filtered sonar depth is used
+to depths up to twice the <I>filterdepth</I> value. Below that threshold, the
+value used transitions to unfiltered with an exponential taper. This filtering
+is used in two ways. First, one can apply short period smoothing of noisy
+sonar depth at all by specifying a small <I>filterlength</I> (e.g. 2 seconds)
+and a <I>filterdepth</I> value deeper than the vehicle's track. Second, when
+an AUV or ROV is operated at shallow depths, the pressure
+values used to determine depth are affected by waves at the sea surface. In this
+case, a longer period <I>filterlength</I> (e.g. 10 seconds) and a shallower
+<I>filterdepth</I> (e.g. 50 meters) may be used to lessen the artifacts due to
+surface swell.
+<DT><B>-S</B>
+
+<DD>
+<I>sidescansource</I>
+<BR>
+
+This option specifies the data record type source of the backscatter data
+used to generate pseudo-sidescan data from Reson multibeam sonars. If
+<I>sidescansource</I> = 'S' then the sidescan will be derived from &quot;snippet&quot;
+records. If <I>sidescansource</I> = 'B' then the sidescan will be derived from &quot;backscatter&quot;
+records. The difference is that the &quot;backscatter&quot; records contain port and
+starboard time series derived from beams formed with a large acrosstrack
+beamwidth, and the &quot;snippet&quot; records contain short sections of beamformed
+time series centered on the bottom return times in each of the valid bathymetry
+beams.
+<DT><B>-T</B>
+
+<DD>
+<I>timelag</I>
+<BR>
+
+This option specifies a <I>timelag</I> value in seconds to be applied
+to the navigation and attitude data prior to it being merged with the
+bathymetry. If <I>timelag</I> is a valid path to a file containing time
+stamp and time lag pairs, then these data will be read and the time lag
+applied to particular records will be interpolated by time.
+<DT><B>-W</B>
+
+<DD>
+<I>dslfile</I>
+<BR>
+
+The program will read navigation and attitude from the WHOI DSL navigation
+and attitude file <I>dslfile</I> and merge those data with the multibeam, sidescan,
+and subbtottom data in the 7k file.If a timelag model is specified using
+<B>-T</B><I>timelag</I>, the time lag will be applied to the navigation and
+attitude data before merging with the sonar data. Any pre-existing navigation data
+records will be replaced. The similar <B>-N</B><I>insfile</I> and <B>-W</B><I>dslfile</I>
+options cause merging of data from MBARI AUV logfiles and WHOI DSL navigation files,
+respectively. The WHOI DSL navigation and attitude file is a text file with
+eleven space delimited columns:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PPL&nbsp;date&nbsp;time&nbsp;vehicle&nbsp;latitude&nbsp;longitude&nbsp;depth&nbsp;heading&nbsp;pitch&nbsp;roll&nbsp;id<BR>
+<BR>
+
+where:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PPL&nbsp;-&nbsp;tag&nbsp;indicating&nbsp;processed&nbsp;navigation&nbsp;and&nbsp;attitude<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>date&nbsp;-&nbsp;yyyy/mm/dd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>time&nbsp;-&nbsp;hh:mm:ss.sss<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>vehicle&nbsp;-&nbsp;SEN&nbsp;for&nbsp;Sentry<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>latitude&nbsp;-&nbsp;decimal&nbsp;degrees<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>longitude&nbsp;-&nbsp;decimal&nbsp;degrees<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>depth&nbsp;-&nbsp;sonar&nbsp;depth&nbsp;in&nbsp;meters<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>pitch&nbsp;-&nbsp;decimal&nbsp;degrees<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>roll&nbsp;-&nbsp;decimal&nbsp;degrees<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>id&nbsp;-&nbsp;seems&nbsp;to&nbsp;be&nbsp;1.00<BR>
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that one has collected a Reson 7k datafile incorporating
+multibeam sonar data, sidescan data, and subbottom profiler data, and
+that the filename is:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20050418_150155.s7k<BR>
+<BR>
+
+<P>
+In order to preprocess the data in a 7k data file, one can use
+<B>mb7kpreprocess</B> with no special arguments:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mb7kpreprocess&nbsp;-I&nbsp;20040722_152111.s7k<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbformat.html">mbformat</A></B>(1), <B><A HREF="mbinfo.html">mbinfo</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Oh yeah.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

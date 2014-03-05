@@ -2,7 +2,7 @@
  *    The MB-system:	mbrollbias.c	5/16/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -15,19 +15,19 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBROLLBIAS is an utility used to assess roll bias of swath 
- * sonar systems using data from two swaths covering the same  
- * seafloor in opposite directions. The program takes two input  
- * files and calculates best fitting planes for each dataset.   
+ * MBROLLBIAS is an utility used to assess roll bias of swath
+ * sonar systems using data from two swaths covering the same
+ * seafloor in opposite directions. The program takes two input
+ * files and calculates best fitting planes for each dataset.
  * The roll bias is calculated by solving for a common roll bias
  * factor which explains the difference between the seafloor
- * slopes observed on the two swaths.  This approach assumes that 
+ * slopes observed on the two swaths.  This approach assumes that
  * pitch bias is not a factor; this assumption is most correct when
  * the heading of the two shiptracks are exactly opposite. The area is
- * divided into a number of rectangular regions and calculations are done  
- * in each region containing a sufficient number of data from both 
- * swaths.  A positive roll bias value means that the ship is rolled 
- * to port so that apparent depths are anomalously shallow to port 
+ * divided into a number of rectangular regions and calculations are done
+ * in each region containing a sufficient number of data from both
+ * swaths.  A positive roll bias value means that the ship is rolled
+ * to port so that apparent depths are anomalously shallow to port
  * and deep to starboard.
  *
  * Author:	D. W. Caress
@@ -115,9 +115,9 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
 
 /* define minimum number of data to fit plane */
 #define	MINIMUM_NUMBER_DATA	100
@@ -211,7 +211,7 @@ int main (int argc, char **argv)
 	struct bathptr	*idata = NULL;
 	struct bathptr	*jdata = NULL;
 	struct bath	*zone = NULL;
-	int	ndata, ndatafile;
+	int	ndatafile;
 	double	iaa, ibb, icc, ihh;
 	double	jaa, jbb, jcc, jhh;
 	double	hx, hy, dd;
@@ -271,7 +271,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhL:l:R:r:F:f:I:i:J:j:D:d:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -521,12 +521,12 @@ int main (int argc, char **argv)
 
 		if (error == MB_ERROR_NO_ERROR)
 			{
-			for (ib=0;ib<beams_bath;ib++) 
+			for (ib=0;ib<beams_bath;ib++)
 				if (mb_beam_ok(beamflag[ib]))
 				{
 				ix = (bathlon[ib] - bounds[0])/dx;
 				iy = (bathlat[ib] - bounds[2])/dy;
-				if (ix >= 0 && ix < xdim 
+				if (ix >= 0 && ix < xdim
 					&& iy >= 0 && iy < ydim)
 					{
 					indx = ix + iy*xdim;
@@ -537,17 +537,17 @@ int main (int argc, char **argv)
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error);
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
-	if (verbose >= 2) 
+	if (verbose >= 2)
 		fprintf(outfp,"\n");
 	fprintf(outfp,"%d depth points counted in %s\n",
 			ndatafile,ifile);
@@ -625,12 +625,12 @@ int main (int argc, char **argv)
 
 		if (error == MB_ERROR_NO_ERROR)
 			{
-			for (ib=0;ib<beams_bath;ib++) 
+			for (ib=0;ib<beams_bath;ib++)
 				if (mb_beam_ok(beamflag[ib]))
 				{
 				ix = (bathlon[ib] - bounds[0])/dx;
 				iy = (bathlat[ib] - bounds[2])/dy;
-				if (ix >= 0 && ix < xdim 
+				if (ix >= 0 && ix < xdim
 					&& iy >= 0 && iy < ydim)
 					{
 					indx = ix + iy*xdim;
@@ -641,17 +641,17 @@ int main (int argc, char **argv)
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error);
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
-	if (verbose >= 2) 
+	if (verbose >= 2)
 		fprintf(outfp,"\n");
 	fprintf(outfp,"%d depth points counted in %s\n",
 			ndatafile,jfile);
@@ -768,43 +768,42 @@ int main (int argc, char **argv)
 
 		if (error == MB_ERROR_NO_ERROR)
 			{
-			for (ib=0;ib<beams_bath;ib++) 
+			for (ib=0;ib<beams_bath;ib++)
 				if (mb_beam_ok(beamflag[ib]))
 				{
 				ix = (bathlon[ib] - bounds[0])/dx;
 				iy = (bathlat[ib] - bounds[2])/dy;
-				if (ix >= 0 && ix < xdim 
+				if (ix >= 0 && ix < xdim
 					&& iy >= 0 && iy < ydim)
 					{
 					indx = ix + iy*xdim;
 					zone = idata[indx].ptr;
-					zone[icount[indx]].x = 
+					zone[icount[indx]].x =
 						deglontokm*
 						(bathlon[ib] - bounds[0]);
-					zone[icount[indx]].y = 
+					zone[icount[indx]].y =
 						deglattokm*
 						(bathlat[ib] - bounds[2]);
 					zone[icount[indx]].d = 0.001*bath[ib];
 					zone[icount[indx]].h = heading;
 					icount[indx]++;
-					ndata++;
 					ndatafile++;
 					}
 				}
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error);
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
-	if (verbose >= 2) 
+	if (verbose >= 2)
 		fprintf(outfp,"\n");
 	fprintf(outfp,"%d depth points read from %s\n",
 			ndatafile,ifile);
@@ -882,43 +881,42 @@ int main (int argc, char **argv)
 
 		if (error == MB_ERROR_NO_ERROR)
 			{
-			for (ib=0;ib<beams_bath;ib++) 
+			for (ib=0;ib<beams_bath;ib++)
 				if (mb_beam_ok(beamflag[ib]))
 				{
 				ix = (bathlon[ib] - bounds[0])/dx;
 				iy = (bathlat[ib] - bounds[2])/dy;
-				if (ix >= 0 && ix < xdim 
+				if (ix >= 0 && ix < xdim
 					&& iy >= 0 && iy < ydim)
 					{
 					indx = ix + iy*xdim;
 					zone = jdata[indx].ptr;
-					zone[jcount[indx]].x = 
+					zone[jcount[indx]].x =
 						deglontokm*
 						(bathlon[ib] - bounds[0]);
-					zone[jcount[indx]].y = 
+					zone[jcount[indx]].y =
 						deglattokm*
 						(bathlat[ib] - bounds[2]);
 					zone[jcount[indx]].d = 0.001*bath[ib];
 					zone[jcount[indx]].h = heading;
 					jcount[indx]++;
-					ndata++;
 					ndatafile++;
 					}
 				}
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error);
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
-	if (verbose >= 2) 
+	if (verbose >= 2)
 		fprintf(outfp,"\n");
 	fprintf(outfp,"%d depth points read from %s\n",
 			ndatafile,jfile);
@@ -1128,14 +1126,14 @@ int main (int argc, char **argv)
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-void gauss(double *a, double *vec, 
-		int n, int nstore, double test, 
+void gauss(double *a, double *vec,
+		int n, int nstore, double test,
 		int *ierror, int itriag)
 {
- 
+
 /* subroutine gauss, by william menke */
 /* july 1978 (modified feb 1983, nov 85) */
- 
+
 /* a subroutine to solve a system of n linear equations in n unknowns*/
 /* where n doesn't exceed 10 */
 /* gaussian reduction with partial pivoting is used */
@@ -1150,7 +1148,7 @@ void gauss(double *a, double *vec,
         static int isub[10], l1;
         int line[10], iet, ieb, i, j, k, l, j2;
         double big, testa, b, sum;
-        
+
 
         iet=0;  /* initial error flags, one for triagularization*/
         ieb=0;  /* one for backsolving */
@@ -1160,13 +1158,13 @@ void gauss(double *a, double *vec,
 /* with the coefficients needed to transform the vector vec */
 
         if (itriag) {   /* triangularize matrix */
- 
+
                 for( j=0; j<n; j++ ) {      /*line is an array of flags*/
-                        line[j]=0; 
+                        line[j]=0;
                         /* elements of a are not moved during pivoting*/
                         /* line=0 flags unused lines */
                         }    /*end for j*/
-                        
+
                 for( j=0; j<n-1; j++ ) {
                         /*  triangularize matrix by partial pivoting */
                        big = 0.0; /* find biggest element in j-th column*/
@@ -1184,11 +1182,11 @@ void gauss(double *a, double *vec,
                        if( big<=test) {   /* test for div by 0 */
                                iet=1;
                                } /*end if*/
- 
+
                        line[i]=1;  /* selected unused line becomes used line */
                        isub[j]=i;  /* isub points to j-th row of tri. matrix */
- 
-                       sum=1.0/(*(a+i*nstore+j)); 
+
+                       sum=1.0/(*(a+i*nstore+j));
                                 /*reduce matrix towards triangle */
                        for( k=0; k<n; k++ ) {
                                 if( line[k]==0 ) {
@@ -1202,7 +1200,7 @@ void gauss(double *a, double *vec,
                                         } /*end if*/
                                 } /*end for k*/
                         } /*end for j*/
- 
+
                for( j=0; j<n; j++ ) {
                         /*find last unused row and set its pointer*/
                         /*  this row contians the apex of the triangle*/
@@ -1212,17 +1210,17 @@ void gauss(double *a, double *vec,
                                 break;
                                 } /*end if*/
                         } /*end for j*/
- 
+
                 } /*end if itriag true*/
-                
+
         /*start backsolving*/
-        
+
         for( i=0; i<n; i++ ) {  /* invert pointers. line(i) now gives*/
                                 /* row no in triang matrix of i-th row*/
                                 /* of actual matrix */
                 line[isub[i]] = i;
                 } /*end for i*/
- 
+
         for( j=0; j<n-1; j++) { /*transform the vector to match triang. matrix*/
                b=vec[isub[j]];
                for( k=0; k<n; k++ ) {
@@ -1231,14 +1229,14 @@ void gauss(double *a, double *vec,
                                 } /*end if*/
                         } /*end for k*/
                 } /*end for j*/
- 
+
       b = *(a+l1*nstore+(n-1));   /*apex of triangle*/
       if( ((double)fabs( (double) b))<=test) {
                 /*check for div by zero in backsolving*/
                 ieb=2;
                 } /*end if*/
       vec[isub[n-1]]=vec[isub[n-1]]/b;
- 
+
       for( j=n-2; j>=0; j-- ) { /* backsolve rest of triangle*/
                 sum=vec[isub[j]];
                 for( j2=j+1; j2<n; j2++ ) {
@@ -1266,7 +1264,7 @@ void gauss(double *a, double *vec,
                vec[i] = b;
                line[j] = line[i];
                 } /*end for i*/
- 
+
       *ierror = iet + ieb;   /* set final error flag*/
 }
 

@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hsmd.c	Aug 10, 1995
  *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 5.6 2005/11/05 00:48:03 caress Exp $
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -88,17 +88,17 @@
  * Revision 4.2  95/08/16  07:08:05  07:08:05  dale (Dale Chayes)
  * Appears to work for some things.
  *  - does not write data correctly yet
- *  - beams may not come out on the correct side/offset 
- * 
+ *  - beams may not come out on the correct side/offset
+ *
  * Revision 4.1  95/08/14  20:56:02  20:56:02  dale (Dale Chayes)
  * HSMD is sort of working.... needs work and testing.
- * 
+ *
  * Revision 4.0  95/08/10  15:58:00  15:58:00  dale (Dale Chayes)
  * Adjust the version number, 1.1 was an error
- * 
+ *
  * Revision 1.1  95/08/10  15:56:08  15:56:08  dale (Dale Chayes)
  * Initial revision
- * 
+ *
  *
  */
 
@@ -108,22 +108,22 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h" 
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_hsmd.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_hsmd.h"
 
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_hsmd_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-  
+
 	/* print input debug statements */
 	if (verbose >= 2)
     		{
@@ -131,12 +131,12 @@ int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
     		}
-  
+
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-  
+
 	/* allocate memory for data structure */
 	status = mb_malloc(verbose,sizeof(struct mbsys_hsmd_struct),
 		     store_ptr,error);
@@ -146,7 +146,7 @@ int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr,
     		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -156,7 +156,7 @@ int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hsmd_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_hsmd_deall";
@@ -169,8 +169,8 @@ int mbsys_hsmd_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		}
 
 	/* deallocate memory for data structure */
@@ -190,7 +190,7 @@ int mbsys_hsmd_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hsmd_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_hsmd_dimensions";
@@ -205,8 +205,8 @@ int mbsys_hsmd_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -252,12 +252,12 @@ int mbsys_hsmd_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -275,8 +275,8 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 
@@ -301,17 +301,17 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[5] = store->second;
 		time_i[6] = store->millisecond;
 		mb_get_time(verbose,time_i,time_d);
-      
+
 		/* get navigation */
 		*navlon = store->lon;
 		*navlat = store->lat;
-      
+
 		/* get heading */
 		*heading = store->heading_tx;
-      
+
 		/* set speed to zero */
 		*speed = store->speed;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 1.7;
 		mb_io_ptr->beamwidth_xtrack = 1.7;
@@ -335,9 +335,9 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*nbath = MBSYS_HSMD_BEAMS;
 
 		/* deal with a ping to port */
-		if (store->Port == -1) 
+		if (store->Port == -1)
 			{
-			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
+			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++)
 				{
 				j = MBSYS_HSMD_BEAMS_PING - i - 1;
 				if (store->depth[i] > 0.0)
@@ -347,7 +347,7 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				    }
 				else if (store->depth[i] < 0.0)
 				    {
-				    beamflag[j] = 
+				    beamflag[j] =
 					MB_FLAG_MANUAL + MB_FLAG_FLAG;
 				    bath[j] = -store->depth[i];
 				    }
@@ -356,15 +356,15 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				    beamflag[j] = MB_FLAG_NULL;
 				    bath[j] = store->depth[i];
 				    }
-				bathacrosstrack[j] = store->distance[i]; 
+				bathacrosstrack[j] = store->distance[i];
 	 			bathalongtrack[j] = 0.0;
      	 			}
     			}
 
 		/* deal with a ping to starboard */
-		else 
+		else
 			{
-			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
+			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++)
 				{
 				j = i + MBSYS_HSMD_BEAMS_PING - 1;
 				if (store->depth[i] > 0.0)
@@ -374,7 +374,7 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				    }
 				else if (store->depth[i] < 0.0)
 				    {
-				    beamflag[j] = 
+				    beamflag[j] =
 					MB_FLAG_MANUAL + MB_FLAG_FLAG;
 				    bath[j] = -store->depth[i];
 				    }
@@ -383,8 +383,8 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				    beamflag[j] = MB_FLAG_NULL;
 				    bath[j] = store->depth[i];
 				    }
-	 			bathacrosstrack[j] = 
-	    					store->distance[i]; 
+	 			bathacrosstrack[j] =
+	    					store->distance[i];
 	 			bathalongtrack[j] = 0.0;
       				}
     			}
@@ -393,28 +393,28 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*nss = MBSYS_HSMD_PIXELS;
 
 		/* deal with a ping to port */
-		if (store->Port == -1) 
+		if (store->Port == -1)
 			{
-			for (i=0;i<MBSYS_HSMD_PIXELS_PING;i++) 
+			for (i=0;i<MBSYS_HSMD_PIXELS_PING;i++)
 				{
 				j = MBSYS_HSMD_PIXELS_PING - i - 1;
 				ss[j] = store->ss[i];
-				ssacrosstrack[j] = 
-					-store->ss_range * i 
+				ssacrosstrack[j] =
+					-store->ss_range * i
 					/ ((double)(MBSYS_HSMD_PIXELS_PING - 1));
 	 			ssalongtrack[j] = 0.0;
       				}
     			}
 
 		/* deal with a ping to starboard */
-		else 
+		else
 			{
-			for (i=0;i<MBSYS_HSMD_PIXELS_PING;i++) 
+			for (i=0;i<MBSYS_HSMD_PIXELS_PING;i++)
 				{
 				j = i + MBSYS_HSMD_PIXELS_PING - 1;
 				ss[j] = store->ss[i];
-				ssacrosstrack[j] = 
-					store->ss_range * i 
+				ssacrosstrack[j] =
+					store->ss_range * i
 					/ ((double)(MBSYS_HSMD_PIXELS_PING - 1));
 	 			ssalongtrack[j] = 0.0;
       				}
@@ -497,13 +497,13 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -519,7 +519,7 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2         nbath:         %d\n",*nbath);
@@ -543,12 +543,12 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -567,8 +567,8 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
@@ -589,18 +589,18 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        amp[%d]: %f\n",
 			i,amp[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        ss[%d]: %f    ssdist[%d]: %f\n",
 			i,ss[i],i,ssacrosstrack[i]);
@@ -619,7 +619,7 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* set data kind */
 	store->kind = kind;
-  
+
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
     		{
@@ -635,13 +635,13 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		if (navlon < 0.0) navlon = navlon + 360.0;
 		store->lon = navlon;
 		store->lat = navlat;
-      
+
 		/* get heading */
 		store->heading_tx = heading;
 
 		/* figure out if port or starboard ping */
 		first = -1;
-		for (i=0;i<nbath;i++) 
+		for (i=0;i<nbath;i++)
 			{
 			if (first == -1 && bath[i] != 0.0)
 				first = i;
@@ -654,9 +654,9 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get bathymetry */
 
 		/* deal with a ping to port */
-		if (store->Port == -1) 
+		if (store->Port == -1)
 			{
-			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
+			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++)
 				{
 				j = MBSYS_HSMD_BEAMS_PING - i - 1;
 				if (mb_beam_check_flag_null(beamflag[j]))
@@ -665,15 +665,15 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				    store->depth[i] = -bath[j];
 				else
 				    store->depth[i] = bath[j];
-	 			store->distance[i] = 
-	    					bathacrosstrack[j]; 
+	 			store->distance[i] =
+	    					bathacrosstrack[j];
      	 			}
     			}
 
 		/* deal with a ping to starboard */
-		else 
+		else
 			{
-			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
+			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++)
 				{
 				j = i + MBSYS_HSMD_BEAMS_PING - 1;
 				if (mb_beam_check_flag_null(beamflag[j]))
@@ -682,18 +682,18 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				    store->depth[i] = -bath[j];
 				else
 				    store->depth[i] = bath[j];
-	 			store->distance[i] = 
-	    					bathacrosstrack[j]; 
+	 			store->distance[i] =
+	    					bathacrosstrack[j];
       				}
     			}
 
 		/* Deal with the sidescan */
 
 		/* deal with a ping to port */
-		if (store->Port == -1) 
+		if (store->Port == -1)
 			{
 			store->ss_range = fabs(ssacrosstrack[0]);
-			for (i=0;i<MBSYS_HSMD_PIXELS_PING;i++) 
+			for (i=0;i<MBSYS_HSMD_PIXELS_PING;i++)
 				{
 				j = MBSYS_HSMD_PIXELS_PING - i - 1;
 				store->ss[i] = ss[j];
@@ -701,18 +701,18 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
     			}
 
 		/* deal with a ping to starboard */
-		else 
+		else
 			{
-			store->ss_range = 
+			store->ss_range =
 				ssacrosstrack[MBSYS_HSMD_PIXELS_PING - 1];
-			for (i=0;i<MBSYS_HSMD_PIXELS_PING;i++) 
+			for (i=0;i<MBSYS_HSMD_PIXELS_PING;i++)
 				{
 				j = i + MBSYS_HSMD_PIXELS_PING - 1;
 				store->ss[i] = ss[j];
       				}
     			}
 		}
-  
+
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT)
 		{
@@ -736,9 +736,9 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_hsmd_ttimes";
@@ -755,14 +755,14 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %lu\n",(size_t)ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%lu\n",(size_t)angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%lu\n",(size_t)angles_forward);
-		fprintf(stderr,"dbg2       angles_null:%lu\n",(size_t)angles_null);
-		fprintf(stderr,"dbg2       heave:      %lu\n",(size_t)heave);
-		fprintf(stderr,"dbg2       ltrk_off:   %lu\n",(size_t)alongtrack_offset);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %p\n",(void *)ttimes);
+		fprintf(stderr,"dbg2       angles_xtrk:%p\n",(void *)angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%p\n",(void *)angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%p\n",(void *)angles_null);
+		fprintf(stderr,"dbg2       heave:      %p\n",(void *)heave);
+		fprintf(stderr,"dbg2       ltrk_off:   %p\n",(void *)alongtrack_offset);
 		}
 
 	/* get mbio descriptor */
@@ -798,13 +798,13 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			scale = 0.000015;
 
 		/* deal with a ping to port */
-		if (store->Port == -1) 
+		if (store->Port == -1)
 			{
-			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
+			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++)
 				{
 				j = MBSYS_HSMD_BEAMS_PING - i - 1;
 				ttimes[j] = fabs(scale * store->spfb[i]);
-				
+
 				/* angle convention in raw data
 				   is positive to port */
 				if (store->angle[i] < 0.0)
@@ -822,9 +822,9 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
     			}
 
 		/* deal with a ping to starboard */
-		else 
+		else
 			{
-			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
+			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++)
 				{
 				j = i + MBSYS_HSMD_BEAMS_PING - 1;
 				ttimes[j] = fabs(scale * store->spfb[i]);
@@ -907,9 +907,9 @@ int mbsys_hsmd_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %p\n",(void *)detects);
 		}
 
 	/* get mbio descriptor */
@@ -983,7 +983,7 @@ int mbsys_hsmd_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_hsmd_extract_altitude";
@@ -1003,8 +1003,8 @@ int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1033,7 +1033,7 @@ int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    xtrack_min = fabs(store->distance[i]);
 			    bath_best = store->depth[i];
 			    }
-			}		
+			}
 		    }
 		if (bath_best <= 0.0)
 		    {
@@ -1046,7 +1046,7 @@ int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    xtrack_min = fabs(store->distance[i]);
 			    bath_best = -store->depth[i];
 			    }
-			}		
+			}
 		    }
 		*transducer_depth = 0.0;
 		*altitude = bath_best - *transducer_depth;
@@ -1095,8 +1095,8 @@ int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_hsmd_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_hsmd_extract_nav";
@@ -1111,8 +1111,8 @@ int mbsys_hsmd_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1137,11 +1137,11 @@ int mbsys_hsmd_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[5] = store->second;
 		time_i[6] = store->millisecond;
 		mb_get_time(verbose,time_i,time_d);
-      
+
 		/* get navigation */
 		*navlon = store->lon;
 		*navlat = store->lat;
-      
+
 		/* get heading */
 		*heading = store->heading_tx;
 
@@ -1227,7 +1227,7 @@ int mbsys_hsmd_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& (*kind == MB_DATA_DATA
 		    || *kind == MB_DATA_NAV))
 		{
@@ -1262,7 +1262,7 @@ int mbsys_hsmd_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1278,8 +1278,8 @@ int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -1319,7 +1319,7 @@ int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		if (navlon < 0.0) navlon = navlon + 360.0;
 		store->lon = navlon;
 		store->lat = navlat;
-      
+
 		/* get heading */
 		store->heading_tx = heading;
 
@@ -1349,7 +1349,7 @@ int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_copy(int verbose, void *mbio_ptr, 
+int mbsys_hsmd_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -1366,9 +1366,9 @@ int mbsys_hsmd_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %lu\n",(size_t)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %p\n",(void *)copy_ptr);
 		}
 
 	/* get mbio descriptor */

@@ -2,7 +2,7 @@
  *    The MB-system:	mbbackangle.c	1/6/95
  *    $Id$
  *
- *    Copyright (c) 1995-2012 by
+ *    Copyright (c) 1995-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -147,15 +147,15 @@
 #include <sys/stat.h>
 #include <time.h>
 
-/* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_aux.h"
-
 /* GMT include files */
 #include "gmt.h"
+
+/* MBIO include files */
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_process.h"
+#include "mb_aux.h"
 
 /* get NaN detector */
 #if defined(isnanf)
@@ -241,7 +241,7 @@ average function for a user defined number of pings. The tables \n\t\
 are output to a \".aga\" and \".sga\" files that can be applied \n\t\
 by MBprocess.";
 	char usage_message[] = "mbbackangle -Ifile \
-[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/max/nx/ny -Ksmooth \
+[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/nx/ny -Ksmooth \
 -Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Xacross/along -Zaltitude -V -H]";
 	extern char *optarg;
 	int	errflg = 0;
@@ -282,7 +282,6 @@ by MBprocess.";
 
 	/* ESF File read */
 	char	esffile[MB_PATH_MAXLINE];
-	int     esffile_open = MB_NO;
 	struct  mb_esf_struct esf;
 
 	/* MBIO read values */
@@ -369,6 +368,7 @@ by MBprocess.";
 	/* amp vs angle grid variables */
 	int	gridamp = MB_NO;
 	double	gridampangle = 0.0;
+	double	gridampmin = 0.0;
 	double	gridampmax = 0.0;
 	int	gridampnx = 0;
 	int	gridampny = 0;
@@ -377,6 +377,7 @@ by MBprocess.";
 	float	*gridamphist = NULL;
 	int	gridss = MB_NO;
 	double	gridssangle = 0.0;
+	double	gridssmin = 0.0;
 	double	gridssmax = 0.0;
 	int	gridssnx = 0;
 	int	gridssny = 0;
@@ -403,6 +404,7 @@ by MBprocess.";
 	double	sonar_acrosstrack = 0.0;
 	double	sonar_alongtrack = 0.0;
 	double	angle;
+	double	ampmin;
 	double	ampmax;
 	double	norm;
 	int	nrec, namp, nss, ntable;
@@ -501,26 +503,34 @@ by MBprocess.";
 			break;
 		case 'G':
 		case 'g':
-			n = sscanf (optarg,"%d/%lf/%lf/%d/%d", &mode,&angle, &ampmax, &i, &j);
-			if (mode == MBBACKANGLE_AMP && n == 5)
+			n = sscanf (optarg,"%d/%lf/%lf/%lf/%d/%d", &mode,&angle, &ampmin, &ampmax, &i, &j);
+			if (n == 5)
+				{
+				n = sscanf (optarg,"%d/%lf/%lf/%d/%d", &mode,&angle, &ampmax, &i, &j);
+				ampmin = 0.0;
+				n = 6;
+				}
+			if (mode == MBBACKANGLE_AMP && n == 6)
 				{
 				gridamp = MB_YES;
 				gridampangle = angle;
+				gridampmin = ampmin;
 				gridampmax = ampmax;
 				gridampnx = i;
 				gridampny = j;
 				gridampdx = 2.0 * gridampangle / (gridampnx - 1);
-				gridampdy = gridampmax / (gridampny - 1);
+				gridampdy = (gridampmax - gridampmin) / (gridampny - 1);
 				}
-			else if (mode == MBBACKANGLE_SS && n == 5)
+			else if (mode == MBBACKANGLE_SS && n == 6)
 				{
 				gridss = MB_YES;
 				gridssangle = angle;
+				gridssmin = ampmin;
 				gridssmax = ampmax;
 				gridssnx = i;
 				gridssny = j;
 				gridssdx = 2.0 * gridssangle / (gridssnx - 1);
-				gridssdy = gridssmax / (gridssny - 1);
+				gridssdy = (gridssmax - gridssmin) / (gridssny - 1);
 				}
 			flag++;
 			break;
@@ -689,6 +699,7 @@ by MBprocess.";
 		fprintf(stderr,"dbg2       sonar_alongtrack: %f\n",sonar_alongtrack);
 		fprintf(stderr,"dbg2       gridamp:      %d\n",gridamp);
 		fprintf(stderr,"dbg2       gridampangle: %f\n",gridampangle);
+		fprintf(stderr,"dbg2       gridampmin:   %f\n",gridampmin);
 		fprintf(stderr,"dbg2       gridampmax:   %f\n",gridampmax);
 		fprintf(stderr,"dbg2       gridampnx:    %d\n",gridampnx);
 		fprintf(stderr,"dbg2       gridampny:    %d\n",gridampny);
@@ -696,6 +707,7 @@ by MBprocess.";
 		fprintf(stderr,"dbg2       gridampdy:    %f\n",gridampdy);
 		fprintf(stderr,"dbg2       gridss:       %d\n",gridss);
 		fprintf(stderr,"dbg2       gridssangle:  %f\n",gridssangle);
+		fprintf(stderr,"dbg2       gridssmin:    %f\n",gridssmin);
 		fprintf(stderr,"dbg2       gridssmax:    %f\n",gridssmax);
 		fprintf(stderr,"dbg2       gridssnx:     %d\n",gridssnx);
 		fprintf(stderr,"dbg2       gridssny:     %d\n",gridssny);
@@ -1710,7 +1722,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 				if (gridamp == MB_YES)
 				    {
 				    ix = (angle + gridampangle) / gridampdx;
-				    jy = amp[i] / gridampdy;
+				    jy = (amp[i] - gridampmin) / gridampdy;
 				    if (ix >= 0 && ix < gridampnx && jy >= 0 && jy < gridampny)
 					{
 					k = ix * gridampny + jy;
@@ -1870,7 +1882,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 				if (gridss == MB_YES)
 				    {
 				    ix = (angle + gridssangle) / gridssdx;
-				    jy = ss[i] / gridssdy;
+				    jy = (ss[i] - gridssmin) / gridssdy;
 				    if (ix >= 0 && ix < gridssnx && jy >= 0 && jy < gridssny)
 					{
 					k = ix * gridssny + jy;
@@ -1946,7 +1958,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 		write_cdfgrd(verbose, gridfile, gridamphist,
 				gridampnx, gridampny,
 				(double)(-gridampangle), gridampangle,
-				(double)0.0, gridampmax,
+				gridampmin, gridampmax,
 				(double)0.0, ampmax,
 				gridampdx, gridampdy,
 				xlabel, ylabel, zlabel, title, projection,
@@ -2000,7 +2012,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 		write_cdfgrd(verbose, gridfile, gridsshist,
 				gridssnx, gridssny,
 				(double)(-gridssangle), gridssangle,
-				(double)0.0, gridssmax,
+				gridssmin, gridssmax,
 				(double)0.0, ampmax,
 				gridssdx, gridssdy,
 				xlabel, ylabel, zlabel, title, projection,
@@ -2263,7 +2275,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr,"dbg2       tfp:             %lu\n", (size_t)tfp);
+		fprintf(stderr,"dbg2       tfp:             %p\n", (void *)tfp);
 		fprintf(stderr,"dbg2       ntable:          %d\n", ntable);
 		fprintf(stderr,"dbg2       nping:           %d\n", nping);
 		fprintf(stderr,"dbg2       time_d:          %f\n", time_d);
@@ -2365,7 +2377,7 @@ int output_model(int verbose, FILE *tfp,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr,"dbg2       tfp:             %lu\n", (size_t)tfp);
+		fprintf(stderr,"dbg2       tfp:             %p\n", (void *)tfp);
 		fprintf(stderr,"dbg2       beamwidth:       %f\n", beamwidth);
 		fprintf(stderr,"dbg2       depression:      %f\n", depression);
 		fprintf(stderr,"dbg2       ref_angle:       %f\n", ref_angle);
@@ -2404,7 +2416,7 @@ int output_model(int verbose, FILE *tfp,
 	if (sumn > 0.0)
 		{
 		ref_amp = sum /  sumn;
-		asigma = sqrt((sumsq / sumn) - amean * amean);
+		asigma = sqrt((sumsq / sumn) - ref_amp * ref_amp);
 		}
 
 	/* get model that combines gaussian with 1/r
@@ -2489,7 +2501,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %lu\n",(size_t)grid);
+		fprintf(stderr,"dbg2       grid:       %p\n",(void *)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -2505,7 +2517,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2       zlab:       %s\n",zlab);
 		fprintf(stderr,"dbg2       titl:       %s\n",titl);
 		fprintf(stderr,"dbg2       argc:       %d\n",argc);
-		fprintf(stderr,"dbg2       *argv:      %lu\n",(size_t)*argv);
+		fprintf(stderr,"dbg2       *argv:      %p\n",(void *)*argv);
 		}
 
 	/* inititialize grd header */

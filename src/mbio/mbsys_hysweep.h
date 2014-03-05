@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hysweep.h	12/23/2011
  *	$Id$
  *
- *    Copyright (c) 2011-2012 by
+ *    Copyright (c) 2011-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,8 +13,8 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * This header file mbsys_hysweep.h defines the data structures used by 
- * MBIO functions to store data multibeam sonar systems logged using 
+ * This header file mbsys_hysweep.h defines the data structures used by
+ * MBIO functions to store data multibeam sonar systems logged using
  * HYSWEEP software by HYPACK Inc.
  *
  * The data format associated with this representation is:
@@ -30,70 +30,73 @@
  * Notes on the MBSYS_HYSWEEP HYPACK and HYSWEEP data:
  *   1. The raw HYPACK and HYSWEEP data formats are associated with HYPACK software
  *      from Hypack Inc. of Middletown, CT, USA, formally known as Coastal
- *      Oceanographics. The raw format produced by the Hypack dataloggers 
- *      is constructed of pure ASCII text. 
+ *      Oceanographics. The raw format produced by the Hypack dataloggers
+ *      is constructed of pure ASCII text.
  *
- *      The following information is take more or less verbatim from the 
+ *      The following information is take more or less verbatim from the
  *	2010 HSX format specification.
- *	
+ *
  *	Coastal Oceanographics, Inc.
  *	Technical Note:
  *	HSX Format - Hysweep Text (ASCII) Logging
- *	Hysweep survey has a Text logging option (HSX format), allowing raw data 
- *	to be stored in a format that can be inspected and modified by most 
- *	editing program (Windows Wordpad for example). Easy inspection of files 
- *	is the advantage of text logging - the disadvantage is larger files and 
- *	slower load time. If file size and load time are important to you, it is 
+ *	Hysweep survey has a Text logging option (HSX format), allowing raw data
+ *	to be stored in a format that can be inspected and modified by most
+ *	editing program (Windows Wordpad for example). Easy inspection of files
+ *	is the advantage of text logging - the disadvantage is larger files and
+ *	slower load time. If file size and load time are important to you, it is
  *	best to choose the Hysweep binary format (HS2).
- *	
- *	HSX files are generally compatible with Hypack Survey raw format, allowing 
- *	Hypack programs (Hypack Max, Hyplot, etc.) to work with HSX files. The 
- *	differences involve logging and processing of multibeam data, which is 
+ *
+ *	HSX files are generally compatible with Hypack Survey raw format, allowing
+ *	Hypack programs (Hypack Max, Hyplot, etc.) to work with HSX files. The
+ *	differences involve logging and processing of multibeam data, which is
  *	by the Hysweep extensions to Hypack.
- *	
- *	Each file contains two sections; a header, which is written when data 
- *	logging starts, and a data section, which is written as data is collected. 
+ *
+ *	Each file contains two sections; a header, which is written when data
+ *	logging starts, and a data section, which is written as data is collected.
  *	Most records starts with a three character tag.
- *	
+ *
  *	Header Tags:
- *	DEV	Hypack Device Information 
- *	DV2	Hysweep Device Information 
- *	EOH	End of Header 
+ *	DEV	Hypack Device Information
+ *	DV2	Hysweep Device Information
+ *	EOH	End of Header
  *	EOL	End of Planned Line
- *	FTP	File Type (Hypack File Identifier) 
- *	HSP	Hysweep Survey Parameters 
- *	HSX	HSX File Identifier 
+ *	FTP	File Type (Hypack File Identifier)
+ *	HSP	Hysweep Survey Parameters
+ *	HSX	HSX File Identifier
  *	HVF	Hysweep View Filters
- *	INF	General Information 
- *	LBP	Planned Line Begin Point 
- *	LIN	Planned Line Data follows 
- *	LNN	Planned Line Name 
- *	MBI	Multibeam / Multiple Transducer Device information 
- *	0F2	Hysweep Device Offsets 
- *	PRI	Primary Navigation Device 
- *	PTS	Planned Line Waypoint 
- *	SSI	Sidescan Device Information 
- *	SVC	Sound Velocity Correction 
+ *	INF	General Information
+ *	LBP	Planned Line Begin Point
+ *	LIN	Planned Line Data follows
+ *	LNN	Planned Line Name
+ *	MBI	Multibeam / Multiple Transducer Device information
+ *	0F2	Hysweep Device Offsets
+ *	PRI	Primary Navigation Device
+ *	PTS	Planned Line Waypoint
+ *	SSI	Sidescan Device Information
+ *	SVC	Sound Velocity Correction
  *	TND	Survey Time and Date
  *	PRJ	Projected coordinate system - MB-System extension
- *	
+ *
  *	Data Tags:
- *	DFT	Dynamic Draft (Squat) Correction 
- *	FIX	Fix (Event) Mark 
- *	HCP	Heave Compensation 
- *	EC1	Echo Sounding (single frequency) 
+ *	DFT	Dynamic Draft (Squat) Correction
+ *	FIX	Fix (Event) Mark
+ *	HCP	Heave Compensation
+ *	EC1	Echo Sounding (single frequency)
  *	GPS	GPS Measurements
- *	GYR	Gyro Data (Heading) 
- *	POS	Position 
- *	PSA	Pitch Stabilization Angle. 
- *	RMB	Raw Multibeam data 
- *	RSS	Raw Sidescan data 
- *	SNR	Sonar Runtime Settings 
+ *	GYR	Gyro Data (Heading)
+ *	POS	Position
+ *	PSA	Pitch Stabilization Angle.
+ *	RMB	Raw Multibeam data
+ *	RSS	Raw Sidescan data
+ *	SNR	Sonar Runtime Settings
  *	TID	Tide Correction
  *	COM	Comment - MB-System extension
- *	
+ *	PRJ	Projected coordinate system definition for eastings and
+ *	            northings in file - MB-System extension
+ *	MSS	Sidescan laid out on seafloor - MB-System extension
+ *
  */
- 
+
 /* HYSWEEP record type */
 #define MBSYS_HYSWEEP_RECORDTYPE_NONE	0	/* No record */
 #define MBSYS_HYSWEEP_RECORDTYPE_DEV	1
@@ -130,6 +133,7 @@
 #define MBSYS_HYSWEEP_RECORDTYPE_VER	33
 #define MBSYS_HYSWEEP_RECORDTYPE_COM	101
 #define MBSYS_HYSWEEP_RECORDTYPE_PRJ	102
+#define MBSYS_HYSWEEP_RECORDTYPE_MSS	103
 
 /* sonar types */
 #define	MBSYS_HYSWEEP_SONAR_UNKNOWN			0	/* *Not Specified - 0 */
@@ -209,10 +213,13 @@
 #define	MBSYS_HYSWEEP_DEVICE_NUM_MAX	12
 #define	MBSYS_HYSWEEP_OFFSET_NUM_MAX	12
 
+#define MBSYS_HYSWEEP_MSS_NUM_PIXELS    1024
+#define	MBSYS_HYSWEEP_MAXLINE	        32768
+
 /* HYSWEEP device offset structure */
 struct mbsys_hysweep_device_offset_struct
 	{
-	/* OF2: Hysweep device offsets 
+	/* OF2: Hysweep device offsets
 		OF2 dn on n1 n2 n3 n4 n5 n6 n7 */
 	int	OF2_device_number;	/* device number */
 	int	OF2_offset_type;	/* offset type
@@ -231,7 +238,7 @@ struct mbsys_hysweep_device_offset_struct
 	double	OF2_offset_pitch;	/* pitch rotation angle, bow up is positive */
 	double	OF2_offset_time;	/* time latency in seconds */
 	};
-	
+
 /* HYSWEEP device structure */
 struct mbsys_hysweep_device_struct
 	{
@@ -255,7 +262,7 @@ struct mbsys_hysweep_device_struct
 						4096 - device accepts annotations strings
 						8192 - device accepts output from Hypack
 						16384 - xxx
-						32768 - device has extended capability 
+						32768 - device has extended capability
 					NOTE: an MB-System extension to allow */
 	mb_path	DEV_device_name;		/* e.g. "GPS" */
 
@@ -273,22 +280,22 @@ struct mbsys_hysweep_device_struct
 						0200 - MRU (heave, pitch, and roll compensation) */
 	int	DV2_towfish;		/* 1 if device is mountedc on a tow fish */
 	int	DV2_enabled;		/* 1 if device is enabled */
-	
+
 	/* OF2: Hysweep device offsets  */
 	int	num_offsets;		/* number of offsets identified for this device */
 	struct mbsys_hysweep_device_offset_struct offsets[MBSYS_HYSWEEP_OFFSET_NUM_MAX];
-	
+
 	/* PRI: device set as primary navigational device */
 	int	PRI_primary_nav_device;	/* 1 if device is primary navigational device */
-	
-	/* MBI: multibeam / multiple transducer device information 
+
+	/* MBI: multibeam / multiple transducer device information
 		MBI dn st sf db n1 n2 fa ai */
 	int	MBI_sonar_id;		/* sonar id from table above, not part of MBI record
 						but instead inferred from device name in the
 						corresponding DEV record */
 	int	MBI_sonar_receive_shape;/* sonar receive head shape, not part of MBI record
-						but instead inferred from device name in the 
-						corresponding DEV record 
+						but instead inferred from device name in the
+						corresponding DEV record
 						0 - flat
 						1 - circular */
 	int	MBI_sonar_type;		/* sonar type code:
@@ -302,9 +309,9 @@ struct mbsys_hysweep_device_struct
 						0x0002 - pitch corrected by sonar
 						0x0004 - dual head
 						0x0008 - heading corrected by sonar (ver 1)
-						0x0010 - medium depth: slant ranges recorded to 1 dm 
+						0x0010 - medium depth: slant ranges recorded to 1 dm
 								resolution (version 2)
-						0x0020 - deep water: slant ranges divided by 1 m 
+						0x0020 - deep water: slant ranges divided by 1 m
 								resolution (ver 2)
 						0x0040 - SVP corrected by sonar (ver 5)
 						0x0080 - topographic device, upgoing beams accepted (ver 6) */
@@ -328,34 +335,38 @@ struct mbsys_hysweep_device_struct
 	int	MBI_num_beams_1;	/* number of beams, head 1 (multibeam) or number of transducers
 						(multitransducer) */
 	int	MBI_num_beams_2;	/* number of beams, head 2 (multibeam) */
-	double	MBI_first_beam_angle;	/* first beam angle is for sonar type = fixed angle 
+	double	MBI_first_beam_angle;	/* first beam angle is for sonar type = fixed angle
 						(degrees, TSS convention) */
-	double	MBI_angle_increment;	/* angle increment is for sonare type = fixed angle 
+	double	MBI_angle_increment;	/* angle increment is for sonare type = fixed angle
 						(degrees, TSS convention) */
-	
+
 	/* SSI: sidescan device information */
 	int	SSI_sonar_flags;	/* sonar flags (bit coded hexadecimal)
 						0x0100 - amplitude is bit-shifted into byte storage */
 	int	SSI_port_num_samples;	/* number of samples per ping, port transducer */
 	int	SSI_starboard_num_samples;	/* number of samples per ping, starboard transducer */
-						
+
 	};
 
 /* internal data structure */
 struct mbsys_hysweep_struct
 	{
 	/* MBIO kind of current data record */
-	int	kind;			
-	
+	int	kind;
+
 	/* MBIO time stamp of current data record */
 	int	time_i[7];
 	double	time_d;
 
+        /* Char array used to read data */
+        char    readline[MBSYS_HYSWEEP_MAXLINE];
+        char    writeline[MBSYS_HYSWEEP_MAXLINE];
+
 	/* HYSWEEP type of current data record */
 	int	type;			/* HYSWEEP current data record type */
-	
+
 	/* HYSWEEP file header records */
-	
+
 	/* FTP - first record of header - file type identifier
 		Always:
 		FTP NEW 2 */
@@ -371,14 +382,14 @@ struct mbsys_hysweep_struct
 						1: HYPACK Max 0.5 11-Sep-2000
 						2: HYPACK Max 0.5b 18-Jun-2001
 						3: HYPACK Max 2.12A 05-Jun-2003 */
-						
+
 	/* VER - HYSWEEP version
 		VER vr
 			vr: version string
 		Example:
 		VER 10.0.7.0 */
 	mb_name	VER_version;		/* VER: HYSWEEP distribution version */
-	
+
 	/* TND - Survey time and date
 		TND t d
 			t: time string
@@ -388,7 +399,7 @@ struct mbsys_hysweep_struct
 	int	TND_survey_time_i[7];	/* TND: Survey time and date (system startup)
 						hh:mm:ss mm/dd/yy */
 	double	TND_survey_time_d;	/* TND: Survey time */
-						
+
 	/* INF - General information
 		INF "surveyor" "boat" "project" "area" tc dc sv
 			tc: initial tide correction
@@ -403,7 +414,7 @@ struct mbsys_hysweep_struct
 	double	INF_tide_correction;	/* INF: initial tide correction */
 	double	INF_draft_correction;	/* INF: initial draft correction */
 	double	INF_sound_velocity;	/* INF: initial sound velocity */
-	
+
 	/* PRJ - Projected coordinate system definition - MB-System extension
 		PRJ pr
 			pr: projection system definition string
@@ -416,11 +427,11 @@ struct mbsys_hysweep_struct
 		PRJ <epsg32610>
 		PRJ +proj=utm +zone=10 +ellps=WGS84 +datum=WGS84 +units=m +no_defs */
 	mb_path	PRJ_proj4_command;	/* PRJ: projection in use defined as either
-						a PROJ4 command string or as an 
+						a PROJ4 command string or as an
 						EPSG identifier */
-						
+
 	/* EOH - end file header records */
-	
+
 	/* HSP - Hysweep survey parameters
 		HSP p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12
 			p1: minimum depth in work units
@@ -433,11 +444,11 @@ struct mbsys_hysweep_struct
 			p8: low beam quality; codes < this are bad
 			p9: sonar range setting in work units
 			p10: towfish layback in work units
-			p11: work units: 
+			p11: work units:
 						0: = meters
 						1 = US foot
 						2 = international footin work units
-			p12: sonar id for advanced processing (see defines above) 
+			p12: sonar id for advanced processing (see defines above)
 		Example:
 		HSP 0.00 95.00 35.62 35.62 75 75 1 1 0.50 0.00 0 0 */
 	double	HSP_minimum_depth;	/* HSP: minimum depth in work units */
@@ -450,19 +461,19 @@ struct mbsys_hysweep_struct
 	int	HSP_low_beam_quality;	/* HSP: low beam quality; codes < this are bad */
 	double	HSP_sonar_range;	/* HSP: sonar range setting in work units */
 	double	HSP_towfish_layback;	/* HSP: towfish layback in work units */
-	int	HSP_units;		/* HSP: work units: 
+	int	HSP_units;		/* HSP: work units:
 						0: = meters
 						1 = US foot
 						2 = international foot */
 	int	HSP_sonar_id;		/* HSP: sonar id for advanced processing (see defines above) */
-	
+
 	/* HYSWEEP devices */
 	int	num_devices;		/* number of devices defined */
 	struct mbsys_hysweep_device_struct devices[MBSYS_HYSWEEP_DEVICE_NUM_MAX];
 	int	primary_nav_device;	/* device number of primary navigational device */
-	
+
 	/* HYSWEEP HVF - Hysweep view filters - always first record after end of file header
-		HVF dn tt p1 p2 p3 p4 p5 p6 
+		HVF dn tt p1 p2 p3 p4 p5 p6
 			dn: dummy device number, always = 99
 			tt: time tag this filter set became active (in seconds past midnight)
 			p1: minimum depth in work units
@@ -487,33 +498,9 @@ struct mbsys_hysweep_struct
 	int	FIX_device_number;		/* device number */
 	double	FIX_time_after_midnight;	/* time in seconds after midnight */
 	int	FIX_event_number;		/* FIX event number */
-	
-	/* Interpolated position and attitude data for multibeam ping
-		In the case of data previously handled by MB-System this
-		will derive from HCP, GYR, POS, DFT records with the same time
-		stamp as the multibeam RMB record that will be placed 
-		immediately before the RMB record in the file. 
-		In the case of data not previously handled by MB-System these
-		values will be extracted by interpolation at the time the
-		RMB record is read. Subsequent data writing will have the
-		interpolated records placed before the RMB records, and will
-		have the interpolated HCP, GYR, POS, and DFT records set
-		as "enabled". Any original asynchronous HCP, GYR, POS, and
-		DFT records will have the "enabled" flag unset. Four new
-		devices will be declared as well. */
-	double	RMBint_heave;		/* heave (meters) */
-	double	RMBint_roll;		/* roll (+ port side up) */
-	double	RMBint_pitch;		/* pitch (+ bow up) */
-	double	RMBint_heading;		/* heading (degrees) */
-	double	RMBint_x;		/* easting */
-	double	RMBint_y;		/* northing */
-	double	RMBint_lon;		/* longitude (degrees) */
-	double	RMBint_lat;		/* latitude (degrees) */
-	double	RMBint_draft;		/* draft correction */
-	double	RMBint_tide;		/* tide correction */
-	
-	/* HYSWEEP RMB - raw multibeam data 
-		RMB dn t st sf bd n sv pn psa 
+
+	/* HYSWEEP RMB - raw multibeam data
+		RMB dn t st sf bd n sv pn psa
 			dn: device number 
 			t: time tag (seconds past midnight) 
 			st: sonar type code (see MBI above) 
@@ -556,9 +543,9 @@ struct mbsys_hysweep_struct
 						0x0002 - pitch corrected by sonar
 						0x0004 - dual head
 						0x0008 - heading corrected by sonar (ver 1)
-						0x0010 - medium depth: slant ranges recorded to 1 dm 
+						0x0010 - medium depth: slant ranges recorded to 1 dm
 								resolution (version 2)
-						0x0020 - deep water: slant ranges divided by 1 m 
+						0x0020 - deep water: slant ranges divided by 1 m
 								resolution (ver 2)
 						0x0040 - SVP corrected by sonar (ver 5)
 						0x0080 - topographic device, upgoing beams accepted (ver 6) */
@@ -599,39 +586,63 @@ struct mbsys_hysweep_struct
 	int	*RMB_sounding_quality;		/* beam quality codes (from sonar unit) */
 	int	*RMB_sounding_flags;		/* beam edit flags */
 
-	/* RSS - Raw Sidescan 
+	/* Interpolated position and attitude data for multibeam ping
+		In the case of data previously handled by MB-System this
+		will derive from HCP, GYR, POS, DFT records with the same time
+		stamp as the multibeam RMB record that will be placed
+		immediately before the RMB record in the file.
+		In the case of data not previously handled by MB-System these
+		values will be extracted by interpolation at the time the
+		RMB record is read. Subsequent data writing will have the
+		interpolated records placed before the RMB records, and will
+		have the interpolated HCP, GYR, POS, and DFT records set
+		as "enabled". Any original asynchronous HCP, GYR, POS, and
+		DFT records will have the "enabled" flag unset. Four new
+		devices will be declared as well. */
+	double	RMBint_heave;		/* heave (meters) */
+	double	RMBint_roll;		/* roll (+ port side up) */
+	double	RMBint_pitch;		/* pitch (+ bow up) */
+	double	RMBint_heading;		/* heading (degrees) */
+	double	RMBint_x;		/* easting */
+	double	RMBint_y;		/* northing */
+	double	RMBint_lon;		/* longitude (degrees) */
+	double	RMBint_lat;		/* latitude (degrees) */
+	double	RMBint_draft;		/* draft correction */
+	double	RMBint_tide;		/* tide correction */
+
+	/* RSS - Raw Sidescan
 		RSS dn t sf np ns sv pn alt sr amin amax bs freq
-			dn: device number 
-			t: time tag (seconds past midnight) 
+			dn: device number
+			t: time tag (seconds past midnight)
 			sf: sonar flags (bit coded hexadecimal)
 				0100 - amplitude is bit-shifted into byte storage
-			np: number of samples, port transducer (down-sampled to 4096 max) 
-			ns: number of samples, starboard transducer (down-sampled to 4096 max) 
-			sv: sound velocity in m/sec 
+			np: number of samples, port transducer (down-sampled to 4096 max)
+			ns: number of samples, starboard transducer (down-sampled to 4096 max)
+			sv: sound velocity in m/sec
 			pn: ping number (or 0 if not tracked)
-			alt: altitude in work units 
-			sr: sample rate (samples per second after down-sample) 
-			amin: amplitude minimum 
-			amax: amplitude maximum 
-			bs: bit shift for byte recording 
+			alt: altitude in work units
+			sr: sample rate (samples per second after down-sample)
+			amin: amplitude minimum
+			amax: amplitude maximum
+			bs: bit shift for byte recording
 			freq: frequency 0 or 1 for simultaneous dual frequency operation
-			
-		Immediately following the RSS record are two records containing port and 
+
+		Immediately following the RSS record are two records containing port and
 		starboard amplitude samples.
 
-		Example: 
-		RSS 3 61323.082 100 341 341 1460.00 0 10.75 4983.47 0 4096 4 0 
-		109 97 84 95 120 111 ... (341 port samples) 
+		Example:
+		RSS 3 61323.082 100 341 341 1460.00 0 10.75 4983.47 0 4096 4 0
+		109 97 84 95 120 111 ... (341 port samples)
 		106 93 163 106 114 127 ... (341 starboard samples) */
 	int	RSS_device_number;	/* device number */
 	double	RSS_time;		/* time tag (seconds past midnight) */
 	int	RSS_sonar_flags;	/* sonar flags:
-						0100 - amplitude is bit-shifted into byte storage */			
+						0100 - amplitude is bit-shifted into byte storage */
 	int	RSS_port_num_samples; 	/* number of samples, port transducer (down-sampled to 4096 max) */
 	int	RSS_port_num_samples_alloc; 	/* number of samples, port transducer (down-sampled to 4096 max) */
-	int	RSS_starboard_num_samples; 	/* number of samples, starboard transducer 
+	int	RSS_starboard_num_samples; 	/* number of samples, starboard transducer
 						(down-sampled to 4096 max) */
-	int	RSS_starboard_num_samples_alloc; 	/* number of samples, starboard transducer 
+	int	RSS_starboard_num_samples_alloc; 	/* number of samples, starboard transducer
 						(down-sampled to 4096 max) */
 	double	RSS_sound_velocity;	/* sound velocity in m/sec  */
 	int	RSS_ping_number;	/* ping number (or 0 if not tracked) */
@@ -644,7 +655,38 @@ struct mbsys_hysweep_struct
 	int	*RSS_port;		/* port sidescan amplitude samples */
 	int	*RSS_starboard;		/* starboard sidescan amplitude samples */
 
-	/* SNR - dynamic sonar settings 
+        /* MSS - MB-System Sidescan
+                MSS dn t pn n ps
+			dn: device number
+			t: time tag (seconds past midnight)
+			pn: ping number (or 0 if not tracked)
+			n: number of pixels
+			ps: pixel size in meters
+
+		Immediately following the MSS record is one record containing
+		the amplitude samples. Zero samples are null values
+		indicating no data.
+
+		Example:
+		MSS 3 61323.082 1500.00 1024 0.340 27535
+		0.00 0.00 109.25 97.13 .... 95.34 120.76 111.26 0.00 (1024 samples) */
+	int	MSS_device_number;	/* device number */
+	double	MSS_time;		/* time tag (seconds past midnight) */
+	double	MSS_sound_velocity;	/* sound velocity in m/sec  */
+	int	MSS_num_pixels;	        /* number of pixels (typically 1024) */
+	double	MSS_pixel_size;	        /* pixel size (meters) */
+	int	MSS_ping_number;	/* ping number (or 0 if not tracked) */
+        double  MSS_ss[MBSYS_HYSWEEP_MSS_NUM_PIXELS];           /* processed sidescan */
+        int     MSS_ss_cnt[MBSYS_HYSWEEP_MSS_NUM_PIXELS];           /* processed sidescan */
+        double  MSS_ss_across[MBSYS_HYSWEEP_MSS_NUM_PIXELS];    /* processed sidescan acrosstrack (meters) */
+        double  MSS_ss_along[MBSYS_HYSWEEP_MSS_NUM_PIXELS];     /* processed sidescan alongtrack (meters) */
+        int     MSS_table_num_alloc;        /* sidescan working array allocated dimensions */
+        double  *MSS_table_altitude_sort;   /* sidescan working array - altitude = depth - draft + heave */
+        double  *MSS_table_range;           /* sidescan working array - range twtt (seconds) */
+        double  *MSS_table_acrosstrack;     /* sidescan working array - acrosstrack (meters) */
+        double  *MSS_table_alongtrack;      /* sidescan working array - alongtrack (meters) */
+
+	/* SNR - dynamic sonar settings
 		up to 12 fields depending on sonar type
 		SNR dn t pn sonar ns s0 --- s11
 			dn: device number 
@@ -652,33 +694,33 @@ struct mbsys_hysweep_struct
 			pn: ping number (or 0 if not tracked)
 			sonar: sonar ID code (see defines above) 
 			ns: number of settings to follow
-			s: up to 12 settings 
-	 
-		Up to 12 fields are included in SNR records, providing sonar runtime settings. 
-		Not available for all systems. Defined differently depending on sonar model 
+			s: up to 12 settings
+
+		Up to 12 fields are included in SNR records, providing sonar runtime settings.
+		Not available for all systems. Defined differently depending on sonar model
 		and manufacturer.
-			
-		For Seabat 81XX Serial and 81XX Network Drivers: 
-			Sonar id: 1, 23, 24, 25, 39 
-			P0: Sonar range setting in meters. 
+
+		For Seabat 81XX Serial and 81XX Network Drivers:
+			Sonar id: 1, 23, 24, 25, 39
+			P0: Sonar range setting in meters.
 			P1: power setting, 0 - 8
-			P2: gain setting, 1 Ð 45 
+			P2: gain setting, 1 Ð 45
 			P3: gain modes: bit 0 = TVG on/off, bit 1 = auto gain on/off.
-	 
-		For Seabat 7K drivers (7125, 7101, 7150, 7111) 
-			Sonar id: 22, 53, 60, 62 
-			P0: Sonar range selection in meters. 
-			P1: Transmit power selection in dBs relative to 1 uPa. 
+
+		For Seabat 7K drivers (7125, 7101, 7150, 7111)
+			Sonar id: 22, 53, 60, 62
+			P0: Sonar range selection in meters.
+			P1: Transmit power selection in dBs relative to 1 uPa.
 			P2: Receiver gain selection in 0.1 dBs.
-			P3: Transmitter frequency in KHz. 
+			P3: Transmitter frequency in KHz.
 			P4: Transmit pulse width in microseconds.
-	 
-		For EdgeTech 4200 Driver 
-			Sonar id: 7-10 
-			P0: Pulse power setting, 0 to 100 percent. 
-			P1: ADC Gain factor. 
-			P2: Start Frequency in 10 * Hz. 
-			P3: End Frequency in 10 * Hz. 
+
+		For EdgeTech 4200 Driver
+			Sonar id: 7-10
+			P0: Pulse power setting, 0 to 100 percent.
+			P1: ADC Gain factor.
+			P2: Start Frequency in 10 * Hz.
+			P3: End Frequency in 10 * Hz.
 			P4: Sweep length in milliseconds. */
 	int	SNR_device_number;	/* device number */
 	double	SNR_time;		/* time tag (seconds past midnight) */
@@ -687,14 +729,14 @@ struct mbsys_hysweep_struct
 	int	SNR_num_settings;	/* number of settings to follow */
 	double	SNR_settings[12];	/* sonar settings */
 
-	/* PSA - pitch stabilization angle 
+	/* PSA - pitch stabilization angle
 		PSA dn t pn a0 a1
 			dn: device number 
 			t: time tag (seconds past midnight) 
 			pn: ping number (or 0 if not tracked)
 			a0: projector (head 0) pitch angle
-			a1: projector (head 1) pitch angle 
-	 
+			a1: projector (head 1) pitch angle
+
 		Note: PSA records are recorded only when pitch stabilization
 		is active. They immediately proceed corresponding RMB records. */
 	int	PSA_device_number;	/* device number */
@@ -702,7 +744,7 @@ struct mbsys_hysweep_struct
 	int	PSA_ping_number;	/* ping number (or 0 if not tracked) */
 	double	PSA_a0;			/* projector (head 0) pitch angle */
 	double	PSA_a1;			/* projector (head 1) pitch angle */
-	
+
 	/* HCP - heave compensation
 		HCP dn t h r p
 			dn: device number
@@ -717,18 +759,18 @@ struct mbsys_hysweep_struct
 	double	HCP_heave;		/* heave (meters) */
 	double	HCP_roll;		/* roll (+ port side up) */
 	double	HCP_pitch;		/* pitch (+ bow up) */
-	
+
 	/* EC1 - echo sounding (single frequency)
 		EC1 dn t rd
 			dn: device number
 			t: time tag (seconds past midnight)
-			rd: raw depth			
+			rd: raw depth
 		Example:
 		EC1 1 80491.897 99.02 */
 	int	EC1_device_number;	/* device number */
 	double	EC1_time;		/* time tag (seconds past midnight) */
 	double	EC1_rawdepth;		/* raw depth */
-	
+
 	/* GPS - GPS measurements
 		GPS dn t cog sog hdop mode nsats
 			dn: device number
@@ -740,8 +782,8 @@ struct mbsys_hysweep_struct
 				0 - unknown
 				1 - stand alone
 				2 - differential
-				3 - rtk	
-			nsats: number of satellites		
+				3 - rtk
+			nsats: number of satellites
 		Example:
 		GPS 1 80491.897 178.16 0.23 1.2 2 8 */
 	int	GPS_device_number;	/* device number */
@@ -749,59 +791,59 @@ struct mbsys_hysweep_struct
 	double	GPS_cog;		/* course over ground (degrees) */
 	double	GPS_sog;		/* speed over ground (knots) */
 	double	GPS_hdop;		/* GPS hdop */
-	int	GPS_mode;		/* GPS mode 
+	int	GPS_mode;		/* GPS mode
 						0 - unknown
 						1 - stand alone
 						2 - differential
 						3 - rtk */
 	int	GPS_nsats;		/* number of satellites */
-	
+
 	/* GYR - gyro data (heading)
 		GYR dn t h
 			dn: device number
 			t: time tag (seconds past midnight)
-			h: heading (degrees)		
+			h: heading (degrees)
 		Example:
 		GYR 1 80491.897 178.16 */
 	int	GYR_device_number;	/* device number */
 	double	GYR_time;		/* time tag (seconds past midnight) */
 	double	GYR_heading;		/* heading (degrees) */
-	
+
 	/* POS - position
 		POS dn t x y
 			dn: device number
 			t: time tag (seconds past midnight)
 			x: easting
-			y: northing		
+			y: northing
 		Example:
 		POS 1 80491.897 308214.82 1414714.97 */
 	int	POS_device_number;	/* device number */
 	double	POS_time;		/* time tag (seconds past midnight) */
 	double	POS_x;			/* easting */
 	double	POS_y;			/* northing */
-	
+
 	/* DFT - dynamic draft (squat) correction
 		DFT dn t dc
 			dn: device number
 			t: time tag (seconds past midnight)
-			dc: draft correction		
+			dc: draft correction
 		Example:
 		DFT 1 80491.897 1453.44 */
 	int	DFT_device_number;	/* device number */
 	double	DFT_time;		/* time tag (seconds past midnight) */
 	double	DFT_draft;		/* draft correction */
-	
+
 	/* TID - tide correction
 		TID dn t tc
 			dn: device number
 			t: time tag (seconds past midnight)
-			tc: tide correction		
+			tc: tide correction
 		Example:
 		TID 1 80491.897 0.00 */
 	int	TID_device_number;	/* device number */
 	double	TID_time;		/* time tag (seconds past midnight) */
 	double	TID_tide;		/* tide correction */
-	
+
 	/* COM - comment record - MB-System extension
 		COM c
 			c: comment string
@@ -809,61 +851,64 @@ struct mbsys_hysweep_struct
 		COM everything after the first four characters is part of the comment */
 	char	COM_comment[MB_COMMENT_MAXLINE];	/* comment string */
 	};
-	
+
 /* system specific function prototypes */
-int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr, 
+int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr,
 		int *pingnumber, int *error);
-int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transmit_gain, double *pulse_length, 
+			int *kind, double *transmit_gain, double *pulse_length,
 			double *receive_gain, int *error);
 int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_hysweep_copy(int verbose, void *mbio_ptr, 
+int mbsys_hysweep_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-
+int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr,
+                        int pixel_size_set, double *pixel_size,
+                        int swath_width_set, double *swath_width,
+                        int pixel_int, int *error);

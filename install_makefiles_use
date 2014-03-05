@@ -1,0 +1,1015 @@
+eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
+                    & eval 'exec perl -S $0 $argv:q'
+                         if 0;
+#--------------------------------------------------------------------
+#    The MB-system:	install_makefiles	5/20/94
+#    $Id$
+#
+#    Copyright (c) 1993-2013 by
+#    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#    Lamont-Doherty Earth Observatory
+#    Palisades, NY  10964
+#
+#    See README file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Command:
+#   install_makefiles [-Ppreset]
+#
+# Author:
+#   David W. Caress
+#   Lamont-Doherty Earth Observatory
+#   Palisades, NY  10964
+#   May 20, 1994
+#
+# Purpose:
+#   Perl shellscript to create makefiles appropriate to a particular
+#   MB-System installation.  Before running this script, the
+#   installer should edit the variable declarations below (where
+#   indicated) so that these values are appropriate for the system
+#   on which MB-System is being installed.  At execution the script
+#   will read template makefiles in the MB-System source directories
+#   and create makefiles with the correct attributes.
+#   This enables users to install MB-System without having to edit
+#   the makefiles.  Instead of editing the makefiles directly, the
+#   installer should edit this script so that the locations of
+#   important libraries and include files are accurate and so that
+#   the compile and link flags are correct.
+#
+#   The required and optional installation parameters are:
+#
+#   REQUIRED:
+#	MBSYSTEM_HOME	Absolute path to the directory containing this file.
+#	OS		Operating system (Recognized options are:
+#				DARWIN, LINUX, CYGWIN, SUN, IRIX, IRIX64,
+#				SOLARIS, HPUX, LYNX, CYGWIN or OTHER).
+#	CFLAGS		Compile flags for C source files. These vary with
+#				different operating systems and installations.
+#	LFLAGS		Load flags for all object files.
+#	NETCDFLIBDIR	Location of NetCDF library libnetcdf.a
+#	NETCDFINCDIR	Location of NetCDF include file netcdf.h
+#	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
+#	GMTINCDIR	Location of GMT include files gmt.h, grd.h, and pslib.h
+#	LEVITUS		Path of Levitus global water properties data file. This is usually
+#                               $MBSYSTEM_HOME/share/annual.
+#	PROJECTIONS	Path of PROJ4 projections database. This is usually
+#                               $MBSYSTEM_HOME/share/mbsystem/Projections.dat.
+#   REQUIRED for spectrogram tool mbsegypsd..
+#	FFTWLIBDIR	Location of FFTW library libfftw.a
+#	FFTWINCDIR	Location of FFTW include file fftw.h
+#			If these parameters are not both set, mbsegypsd will
+#			not be built.
+#   REQUIRED for openGL tools mbgrdviz and mbeditviz:
+#       OPENGLLIBS	OpenGL libraries required for new graphical tools,
+#.                              including mbgrdviz and mbeditviz. If this
+#                               parameter is not set, mbgrdviz and mbeditviz
+#                               will not be built
+#   REQUIRED for tidal prediction program mbotps:
+#       OTPSDIR		Location of OTPSnc package, including executable
+#.                              predict_tide and batch files used by
+#                               predict_tide. If this is not specified
+#				correction mbotps will build but not run
+#				correctly
+#   OPTIONAL - use non-default C compiler:
+#	CC		C compiler to be used (optional).
+#   OPTIONAL - use independent installation of the PROJ4 library:
+#       PROJLIB         Path to PROJ4 library (usually libproj.a)
+#       PROJINCDIR      Location of PROJ4 include file proj_api.h
+#   OPTIONAL - use independent installation of the GSF library:
+#       GSFLIB          Path to GSF library (usually libgsf.a)
+#       GSFINCDIR       Location of GSF include file gsf.h
+#
+#   A few preset variable configurations are defined and can be
+#   specified using the -P option. These include:
+#	macosxfink 	-install on MacOs X using fink
+#				- assumes installation in /sw
+#				- assumes use of Apple's X11
+#				- assumes netCDF, GMT, and OpenMotif installe
+#					using fink
+#       macosxusrlocal - install manually on MacOs X 10.5 (Leopard)
+#				- assumes installation in /usr/local/mbsystem
+#				- assumes use of Apple's X11
+#				- assumes netCDF, GMT, and OpenMotif installe
+#					using fink
+#       irixusrlocal - install manually on SGI IRIX
+#				- assumes installation in /usr/local/mbsystem
+#				- assumes netCDF and GMT installs in /usr/local
+#
+#--------------------------------------------------------------------
+# EDIT THE PARAMETERS HERE IF NO APPROPRIATE PRESET CONFIGURATION IS DEFINED
+# Set the configuration parameters manually:
+#--------------------------------------------------------------------
+#
+# Required parameters:
+$MBSYSTEM_HOME = "/Users/caress/sandbox/mbsystem";
+$OS = "DARWIN";
+$CFLAGS = "-Wall -g -O0 -I/opt/X11/include ";
+$LFLAGS = "-Wall -g -O0 -lm -L/sw/lib -lgdal";
+$NETCDFLIBDIR = "/sw/lib";
+$NETCDFINCDIR = "/sw/include";
+$GMTLIBDIR = "/sw/lib";
+$GMTINCDIR = "/sw/include";
+$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#
+# Required parameters for spectrogram program mbsegypsd
+#   - mbsegypsd will not be built if these are commented out
+$FFTWLIBDIR = "/sw/lib";
+$FFTWINCDIR = "/sw/include";
+#
+# Required parameters for graphical tools
+#   - graphical tools will not be built if these
+#     are commented out
+$MOTIFINCDIR = "/sw/include";
+$MOTIFLIBS = "-L/sw/lib -L/opt/X11/lib -lXm -lXt -lX11";
+#
+# Required parameter for visualization tools
+#   - visualization tools will not be built if this
+#     is commented out
+$OPENGLLIBS = "-lGLU -lGL";
+#
+# Required parameter for mblevitus program
+$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+#
+# Required parameter for mbotps program
+$OTPSDIR = "/usr/local/OTPSnc";
+#
+# Optional parameter for use of non-default C compiler
+#$CC = "cc";
+#
+# Optional parameters for use of independent GSF library installation
+#   - GSF library included with MB-System will be used
+#     if these are commented out
+#$GSFLIB = "/usr/local/gsf/lib/libgsf.a";
+#$GSFINCDIR = "/usr/local/gsf/include/";
+#
+# Optional parameters for use of independent PROJ4 library installation
+#   - PROJ4 library included with MB-System will be used
+#     if these are commented out
+#$PROJLIB = "/usr/local/proj/lib/libproj.a";
+#$PROJINCDIR = "/usr/local/proj/include/";
+#
+#--------------------------------------------------------------------
+# END OF PARAMETER EDITING SECTION
+#--------------------------------------------------------------------
+#
+# Version:
+#   $Id$
+#
+# Revisions:
+#   $Log: install_makefiles,v $
+#
+#--------------------------------------------------------------------
+
+# Deal with command line arguments
+$command_line = "@ARGV";
+&MBGetopts('P:p:');
+$preset = 	($opt_P || $opt_p);
+
+
+#--------------------------------------------------------------------
+# USE PARAMETERS SET ABOVE IF NO APPROPRIATE PRESET CONFIGURATION IS DEFINED
+#--------------------------------------------------------------------
+if (!$preset)
+	{
+	print "\nUsing manually defined configuration...\n";
+	}
+#--------------------------------------------------------------------
+# ELSE RESET PARAMETERS USING SPECIFIED PRESET CONFIGURATION
+#--------------------------------------------------------------------
+#
+# Preset configuration for MacOs X when building through fink
+elsif ($preset eq "macosxfink")
+	{
+	print "\nUsing preset configuration for MacOs X by fink in /sw...\n";
+	$FINKPREFIX = "\@FINKPREFIX@";
+	$MBSYSTEM_HOME = "$FINKPREFIX";
+	$OS = "DARWIN";
+	$CC = "cc";
+	$MOTIFINCDIR = "$FINKPREFIX/include";
+	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/opt/X11/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLU -lGL";
+	$GMTLIBDIR = "$FINKPREFIX/lib";
+	$GMTINCDIR = "$FINKPREFIX/include";
+	$NETCDFLIBDIR = "$FINKPREFIX/lib";
+	$NETCDFINCDIR = "$FINKPREFIX/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+	$FFTWLIBDIR = "$FINKPREFIX/lib";
+	$FFTWINCDIR = "$FINKPREFIX/include";
+	$CFLAGS = "-O3 -funroll-loops -fexpensive-optimizations -I/opt/X11/include -Wall -Wimplicit -pedantic -W -Wstrict-prototypes -Wredundant-decls  -Wimplicit-int -Wimplicit-function-declaration -Wnested-externs";
+	$LFLAGS = "-Wl -lm -bind_at_load";
+	}
+#
+# Preset configuration for MacOs X 10.6 (Snow Leopard) when building in /usr/local
+#       assumes that GMT, netCDF, and OpenMotif are installed using fink in 32 bit mode
+elsif ($preset eq "macosxusrlocal")
+	{
+	print "\nUsing preset configuration for MacOs X in /usr/local/...\n";
+	$FINKPREFIX = "/sw";
+	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+	$OS = "DARWIN";
+	$CC = "cc";
+	$MOTIFINCDIR = "$FINKPREFIX/include";
+	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLU -lGL";
+	$GMTLIBDIR = "$FINKPREFIX/lib";
+	$GMTINCDIR = "$FINKPREFIX/include";
+	$NETCDFLIBDIR = "$FINKPREFIX/lib";
+	$NETCDFINCDIR = "$FINKPREFIX/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+	$FFTWLIBDIR = "$FINKPREFIX/lib";
+	$FFTWINCDIR = "$FINKPREFIX/include";
+	$CFLAGS = "-m32 -g -I/usr/X11R6/include";
+	$LFLAGS = "-m32 -Wl -lm";
+	}
+#
+# Preset configuration for MacOs X 10.5 (Leopard) when building in /usr/local
+#       assumes that GMT, netCDF, and OpenMotif are installed using fink
+elsif ($preset eq "macosx10.5usrlocal")
+	{
+	print "\nUsing preset configuration for MacOs X in /usr/local/...\n";
+	$FINKPREFIX = "/sw";
+	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+	$OS = "DARWIN";
+	$CC = "cc";
+	$MOTIFINCDIR = "$FINKPREFIX/include";
+	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLU -lGL";
+	$GMTLIBDIR = "$FINKPREFIX/lib";
+	$GMTINCDIR = "$FINKPREFIX/include";
+	$NETCDFLIBDIR = "$FINKPREFIX/lib";
+	$NETCDFINCDIR = "$FINKPREFIX/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+	$FFTWLIBDIR = "$FINKPREFIX/lib";
+	$FFTWINCDIR = "$FINKPREFIX/include";
+	$CFLAGS = "-g -I/usr/X11R6/include";
+	$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
+	}
+#
+# Preset configuration for Cygwin on Windows when building in /usr/local
+#       assumes that GMT and netCDF are also installed in /usr/local
+elsif ($preset eq "CYGWIN")
+	{
+	print "\nUsing preset configuration for Cygwin on Windows in /usr/local...\n";
+	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+	$OS = "CYGWIN";
+	$CC = "gcc";
+	$MOTIFINCDIR = "/usr/X11R6/include/Xm";
+	$MOTIFLIBS = "-L/usr/X11R6/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLU -lGL";
+	$GMTLIBDIR = "/usr/local/gmt/lib";
+	$GMTINCDIR = "/usr/local/gmt/include";
+	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+	$NETCDFINCDIR = "/usr/local/netcdf/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+	$FFTWLIBDIR = "/usr/local/fftw/lib";
+	$FFTWINCDIR = "/usr/local/fftw/include";
+	$CFLAGS = "-g -fdata-sections -I/usr/X11R6/include";
+	$LFLAGS = "-lrpc -lrpclib -lm -Wl,--enable-runtime-pseudo-reloc";
+	}
+#
+# Preset configuration for SGI Irix when building in /usr/local
+#       assumes that GMT and netCDF are installed in /usr/local
+elsif ($preset eq "irixusrlocal")
+	{
+	print "\nUsing preset configuration for SGI Irix in /usr/local/...\n";
+	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+	$OS = "IRIX64";
+	$CC = "cc";
+	$MOTIFINCDIR = "/usr/include/Xm";
+	$MOTIFLIBS = "-lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLU -lGL";
+	$GMTLIBDIR = "/usr/local/gmt/src";
+	$GMTINCDIR = "/usr/local/gmt/src";
+	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+	$NETCDFINCDIR = "/usr/local/netcdf/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+	$FFTWLIBDIR = "/usr/local/fftw/lib";
+	$FFTWINCDIR = "/usr/local/fftw/include";
+	$CFLAGS = "-O2";
+	$LFLAGS = "-lm -lsun";
+	}
+
+# Quit because preset not recognized:
+else
+	{
+	print "\nUnrecognized preset $preset specified...\n";
+	print "The currently supported preset configurations include:\n\tmacosfink\n\tmacosusrlocal\n";
+	die "Exiting without creating new Makefiles...\n";
+	}
+
+#--------------------------------------------------------------------
+# HERE ARE SOME EXAMPLE CONFIGURATION SETTINGS FOR VARIOUS SYSTEMS
+#--------------------------------------------------------------------
+#
+# Example for installing on Apple Macintosh Computers
+# running MacOS X version 10.2 to 10.4. Here I am using the
+# Apple X11 distribution and the OpenMotif (www.openmotif.org)
+# port provided by Fink (www.fink.org). GMT and netCDF have
+# also been installed using fink (note: current versions of
+# GMT are only available through the "unstable" fink tree).
+# The "-force_flat_namespace" linker flag was
+# required in $LFLAGS prior to 10.2.6
+#	$MBSYSTEM_HOME = "mbsystem";
+#	$OS = "DARWIN";
+#	$CC = "cc";
+#	$MOTIFINCDIR = "/sw/include";
+#	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+#	$GMTLIBDIR = "/sw/lib";
+#	$GMTINCDIR = "/sw/include";
+#	$NETCDFLIBDIR = "/sw/lib";
+#	$NETCDFINCDIR = "/sw/include";
+#	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#	$CFLAGS = "-g -I/usr/X11R6/include";
+#	$LFLAGS = "-Wl -lm -bind_at_load";
+#
+# Example for installing on Apple Macintosh Computers
+# running MacOS X version 10.5 ("Leopard"). Here I am using the
+# Apple X11 distribution and the OpenMotif (www.openmotif.org)
+# port provided by Fink (www.fink.org). GMT and netCDF have
+# also been installed using fink (note: current versions of
+# GMT are only available through the "unstable" fink tree).
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "DARWIN";
+#	$CC = "cc";
+#	$MOTIFINCDIR = "/sw/include";
+#	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+#	$GMTLIBDIR = "/sw/lib";
+#	$GMTINCDIR = "/sw/include";
+#	$NETCDFLIBDIR = "/sw/lib";
+#	$NETCDFINCDIR = "/sw/include";
+#	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#	$CFLAGS = "-g -I/usr/X11R6/include";
+#	$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
+#
+# Example for installing on L-DEO Sun workstations running SunOs 4.1.x:
+#	$MBSYSTEM_HOME = "/home/hs/caress/dev/mbsystem";
+#	$OS = "SUN";
+#	$CFLAGS = "-O2";
+#	$LFLAGS = "-lm";
+#	$MOTIFINCDIR = "/usr/include/Xm";
+#	$MOTIFLIBS = "-lXm -lXt -lX11";
+#	$GMTLIBDIR = "/ocean/mgg/gmt2/sun4/lib";
+#	$GMTINCDIR = "/ocean/mgg/gmt2/src";
+#	$NETCDFLIBDIR = "/ocean/mgg/netcdf/sun4/lib";
+#	$NETCDFINCDIR = "/ocean/mgg/netcdf/include";
+#	$LEVITUS = "/ocean/mgg/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#	$CFLAGS = "-O2";
+#	$LFLAGS = "-lm";
+#
+# Example for installing on R/V Ewing Sun workstations:
+#	$MBSYSTEM_HOME = "/net/heezen/packages/mbsystem";
+#	$OS = "SUN";
+#	$CFLAGS = "-O2";
+#	$LFLAGS = "-lm";
+#	$MOTIFINCDIR = "/usr/include/Xm";
+#	$MOTIFLIBS = "-lXm -lXt -lX11";
+#	$GMTLIBDIR = "/net/heezen/packages/gmt2/bin";
+#	$GMTINCDIR = "/net/heezen/packages/gmt2/src";
+#	$NETCDFLIBDIR = "/net/heezen/packages/netcdf/lib";
+#	$NETCDFINCDIR = "/net/heezen/packages/netcdf/include";
+#	$LEVITUS = "/net/heezen/packages/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#
+# Example for installing on Sun workstations running Solaris 2.4:
+#
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "SOLARIS";
+#	$CFLAGS = "-O -I/usr/openwin/include -I/usr/ucbinclude";
+#	$LFLAGS = "-lnsl -lm";
+#	$MOTIFINCDIR = "/usr/dt/include";
+#	$MOTIFLIBS = "-L/usr/openwin/lib -L/usr/dt/lib -lXm -lXt -lX11";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#
+# Example for installing on Sun workstations running Solaris 2.6
+#   with GMT built to utilize sincos() - add -lsunmath to $LFLAGS:
+#
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "SOLARIS";
+#	$CC = "cc";
+#	$MOTIFINCDIR = "/usr/dt/include";
+#	$MOTIFLIBS = "-L/usr/openwin/lib -L/usr/dt/lib -lXm -lXt -lX11";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#	$CFLAGS = "-O -I/usr/openwin/include -I/usr/ucbinclude";
+#	$LFLAGS = "-lnsl -lm -lsunmath";
+#
+# Example for installing on Sun workstations running Solaris 2.7
+#
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "SOLARIS";
+#	$CC = "gcc";
+#	$MOTIFINCDIR = "/usr/dt/include/Xm";
+#	$MOTIFLIBS = "-L/usr/dt/lib -lXm -lXt -lX11";
+#	$OPENGLLIBS = "-lGLU -lGL";
+#	$GMTLIBDIR = "/usr/local/GMT4.1/lib";
+#	$GMTINCDIR = "/usr/local/GMT4.1/include";
+#	$NETCDFLIBDIR = "/usr/local/netcdf-3.4/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf-3.4/include";
+#	$LEVITUS = "/usr/local/mbsystem/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#	$CFLAGS = "-O -I/usr/openwin/share/include";
+#	$LFLAGS = "-lnsl -lm";
+#
+# Example for installing on SeaBeam Instruments SGI IRIX workstations:
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "IRIX";
+#	$CFLAGS = "-O2";
+#	$LFLAGS = "-lm -lsun";
+#	$MOTIFINCDIR = "/usr/include/Xm";
+#	$MOTIFLIBS = "-lXm -lXt -lX11";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#
+# Example for installing on SeaBeam Instruments SGI IRIX 6.4 workstations:
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "IRIX64";
+#	$CFLAGS = "-O2";
+#	$LFLAGS = "-lm -lsun";
+#	$MOTIFINCDIR = "/usr/include/Xm";
+#	$MOTIFLIBS = "-lXm -lXt -lX11";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#
+# Example for installing on PC running LINUX:
+#       $MBSYSTEM_HOME = "/usr/local/mbsystem";
+#       $OS = "LINUX";
+#       $CC = "cc";
+#       $CFLAGS = "-g -w";
+#       $LFLAGS = "-L$NETCDFLIBDIR -lm -lnetcdf";
+#       $GRAPHICAL = "YES";
+#       $MOTIFINCDIR = "/usr/X11R6/LessTif/Motif1.2/include";
+#       $MOTIFLIBS = "-L/usr/X11R6/LessTif/Motif1.2/lib -lXm -L/usr/X11R6/lib -lXt -lX11";
+#       $GMTLIBDIR = "/usr/local/GMT4.1/lib";
+#       $GMTINCDIR = "/usr/local/GMT4.1/include";
+#       $NETCDFLIBDIR = "/usr/local/netcdf-3.5.0/lib";
+#       $NETCDFINCDIR = "/usr/local/netcdf-3.5.0/include";
+#       $LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#
+# Example for installing on Hewlett Packard workstations
+# running HPUX version 9.0X or later:
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "HPUX";
+#	$CFLAGS = "-Ae +O3 -I/usr/include/X11R5 -I/usr/include/Motif1.2";
+#	$LFLAGS = "-lm ";
+#	$MOTIFINCDIR = "/usr/lib/Motif1.2/Xm";
+#	$MOTIFLIBS = "-Wl,-L/usr/lib/Motif1.2 -Wl, -Wl,-lXm -Wl,-L/usr/lib/X11R5 -Wl,-lX11 -Wl,-lXt";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFLIBDIR = "/usr/local/gmt/lib";
+#	$NETCDFINCDIR = "/usr/local/gmt/include";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
+#	$OTPSDIR = "/usr/local/OTPSnc";
+#
+#--------------------------------------------------------------------
+#
+# **** LEAVE EVERYTHING ELSE BELOW ALONE ****
+
+# Program Name:
+$program_name = "install_makefiles";
+
+# check for recognized operating system
+if (!$OS)
+	{
+	$OS = "OTHER";
+	}
+elsif ($OS ne "IRIX"
+	&& $OS ne "IRIX64"
+	&& $OS ne "SOLARIS"
+	&& $OS ne "LINUX"
+	&& $OS ne "LYNX"
+	&& $OS ne "SUN"
+	&& $OS ne "HPUX"
+	&& $OS ne "DARWIN"
+	&& $OS ne "CYGWIN"
+	&& $OS ne "OTHER")
+	{
+	$OS = "OTHER";
+	}
+
+# add operating system to CFLAGS
+$CFLAGS = "$CFLAGS -D$OS";
+
+# add netcdf libraries to LFLAGS
+$LFLAGS = "$LFLAGS -L$NETCDFLIBDIR -lnetcdf";
+
+# add byte swapping to CFLAGS if necessary
+$BYTESWAPTESTSTRING = join(" ", map { sprintf "%#02x", $_ } unpack("C*",pack("L",0x12345678))), "\n";
+if ($BYTESWAPTESTSTRING eq "0x78 0x56 0x34 0x12")
+	{
+	$BYTESWAPPED = "YES";
+	$CFLAGS = "$CFLAGS -DBYTESWAPPED";
+	}
+
+# add __APPLE__ flag to CFLAGS to allow GSF code to build under OSX
+if ($OS eq "DARWIN" || $OS eq "CYGWIN")
+	{
+	$CFLAGS = "$CFLAGS -D__APPLE__";
+	}
+
+# set archiver
+if ($OS eq "LYNX")
+	{
+	$ARCHIVE = "libr rcv";
+	}
+else
+	{
+	$ARCHIVE = "ar rcv";
+	}
+
+# set $GRAPHICAL according to Motif settings
+if ($MOTIFINCDIR && $MOTIFLIBS)
+	{
+	$GRAPHICAL = "YES";
+	}
+else
+	{
+	$GRAPHICAL = "NO";
+	}
+
+# set $BIGFLAG for compiling mbgrid.c under IRIX
+if ($OS eq "IRIX")
+	{
+	$BIGFLAG = "-Olimit 2000";
+	}
+elsif ($OS eq "IRIX64")
+	{
+	$BIGFLAG = "-OPT:Olimit=5000";
+	$OS = "IRIX";
+	}
+else
+	{
+	$BIGFLAG = "";
+	}
+
+# outputting attributes:
+print "\nParameters defined for Makefiles:\n";
+print "Mb-System Home:            $MBSYSTEM_HOME\n";
+print "Operating System:          $OS\n";
+print join(" ", map { sprintf "%#02x", $_ } unpack("C*",pack("L",0x12345678))), "\n";
+if ($BYTESWAPPED eq "YES")
+	{
+	print "Byte swapping:             enabled\n";
+	}
+else
+	{
+	print "Byte swapping:             disabled\n";
+	}
+if ($CC)
+	{
+	print "C Compiler:                $CC\n";
+	}
+print "C Compile Flags:           $CFLAGS\n";
+print "Load Flags:                $LFLAGS\n";
+print "Library Archiver:          $ARCHIVE\n";
+if ($GRAPHICAL eq "YES")
+	{
+	print "Graphical Utilities:       enabled\n";
+	}
+else
+	{
+	print "Graphical Utilities:       disabled\n";
+	}
+print "Motif Include Location:    $MOTIFINCDIR\n";
+print "Motif Libraries:           $MOTIFLIBS\n";
+print "OpenGL Libraries:          $OPENGLLIBS\n";
+print "GMT Library Location:      $GMTLIBDIR\n";
+print "GMT Include Location:      $GMTINCDIR\n";
+print "NetCDF Library Location:   $NETCDFLIBDIR\n";
+print "NetCDF Include Location:   $NETCDFINCDIR\n";
+if ($FFTWLIBDIR)
+	{
+	print "FFTW Library Location:     $FFTWLIBDIR\n";
+	}
+else
+	{
+	print "FFTW Library Location:     Undefined - mbsegypsd will not be built!\n";
+	}
+if ($FFTWINCDIR)
+	{
+	print "FFTW Include Location:     $FFTWINCDIR\n";
+	}
+else
+	{
+	print "FFTW Include Location:     Undefined - mbsegypsd will not be built!\n";
+	}
+if ($OTPSDIR)
+	{
+	print "OTPSnc Installation:       $OTPSDIR\n";
+	}
+else
+	{
+	print "OTPSnc Installation:       Undefined - mbotps will not work!\n";
+	}
+print "Levitus Data Location:     $LEVITUS\n";
+print "Projections Data Location: $PROJECTIONS\n";
+
+# make sure that that the following directories exist:
+#      mbsystem/bin mbsystem/lib mbsystem/include
+#      mbsystem/man mbsystem/man/man1 mbsystem/man/man3
+#      mbsystem/share mbsystem/share/doc mbsystem/share/doc/mbsystem
+#      mbsystem/share/doc/mbsystem/html mbsystem/share/doc/mbsystem/ps
+if (! -d "bin")
+	{
+	`mkdir bin`;
+	print "Created directory: $MBSYSTEM_HOME/bin\n";
+	}
+if (! -d "lib")
+	{
+	`mkdir lib`;
+	print "Created directory: $MBSYSTEM_HOME/lib\n";
+	}
+if (! -d "include")
+	{
+	`mkdir include`;
+	print "Created directory: $MBSYSTEM_HOME/include\n";
+	}
+if (! -d "man")
+	{
+	`mkdir man`;
+	print "Created directory: $MBSYSTEM_HOME/man\n";
+	}
+if (! -d "man/man1")
+	{
+	`mkdir man/man1`;
+	print "Created directory: $MBSYSTEM_HOME/man/man1\n";
+	}
+if (! -d "man/man3")
+	{
+	`mkdir man/man3`;
+	print "Created directory: $MBSYSTEM_HOME/man/man3\n";
+	}
+if (! -d "share")
+	{
+	`mkdir share`;
+	print "Created directory: $MBSYSTEM_HOME/share\n";
+	}
+if (! -d "share/mbsystem")
+	{
+	`mkdir share/mbsystem`;
+	print "Created directory: $MBSYSTEM_HOME/share/mbsystem\n";
+	}
+if (! -d "share/doc")
+	{
+	`mkdir share/doc`;
+	print "Created directory: $MBSYSTEM_HOME/share/doc\n";
+	}
+if (! -d "share/doc/mbsystem")
+	{
+	`mkdir share/doc/mbsystem`;
+	print "Created directory: $MBSYSTEM_HOME/share/doc/mbsystem\n";
+	}
+if (! -d "share/doc/mbsystem/html")
+	{
+	`mkdir share/doc/mbsystem/html`;
+	print "Created directory: $MBSYSTEM_HOME/share/doc/mbsystem/html\n";
+	}
+if (! -d "share/doc/mbsystem/ps")
+	{
+	`mkdir share/doc/mbsystem/ps`;
+	print "Created directory: $MBSYSTEM_HOME/share/doc/mbsystem/ps\n";
+	}
+
+# get filenames
+@files = `ls Makefile.template src/Makefile.template src/*/Makefile.template`;
+while (@files)
+	{
+	# get files
+	$template = shift @files;
+	chop($template);
+	print "\nMakefile Template: $template\n";
+	$pos = 0;
+	while (($tpos = index($template,"/",$pos)) >= 0)
+		{
+		$pos = $tpos + 1;
+		}
+	$path = substr($template,0,$pos);
+	chop($path);
+	if (length($path) == 0)
+		{
+		$path = ".";
+		}
+	$makefile = "$path/Makefile";
+	print "Output Makefile:   $makefile\n";
+
+	# open files
+	open(TMP,"<$template") || die "Cannot open template Makefile $template\nMacro $program_name aborted.\n";
+	open(MAK,">$makefile") || die "Cannot open output Makefile $makefile\nMacro $program_name aborted.\n";
+
+	# loop through the file
+	while (<TMP>)
+		{
+		if (index($_,"MBSYSTEM_HOME",0) == 0)
+			{
+			print MAK "MBSYSTEM_HOME = $MBSYSTEM_HOME\n";
+			}
+		elsif (index($_,"OS",0) == 0)
+			{
+			print MAK "OS = $OS\n";
+			}
+		elsif (index($_,"CC",0) == 0)
+			{
+			if ($CC)
+				{
+				print MAK "CC = $CC\n";
+				}
+			else
+				{
+				print MAK "# C compiler left as default\n";
+				}
+			}
+		elsif (index($_,"CFLAGS",0) == 0)
+			{
+			print MAK "CFLAGS = $CFLAGS\n";
+			}
+		elsif (index($_,"LFLAGS",0) == 0)
+			{
+			print MAK "LFLAGS = $LFLAGS\n";
+			}
+		elsif (index($_,"MOTIFINCDIR",0) == 0)
+			{
+			print MAK "MOTIFINCDIR = $MOTIFINCDIR\n";
+			}
+		elsif (index($_,"MOTIFLIBS",0) == 0)
+			{
+			print MAK "MOTIFLIBS = $MOTIFLIBS\n";
+			}
+		elsif (index($_,"OPENGLLIBS",0) == 0)
+			{
+			print MAK "OPENGLLIBS = $OPENGLLIBS\n";
+			}
+		elsif (index($_,"GMTLIBDIR",0) == 0)
+			{
+			print MAK "GMTLIBDIR = $GMTLIBDIR\n";
+			}
+		elsif (index($_,"GMTINCDIR",0) == 0)
+			{
+			print MAK "GMTINCDIR = $GMTINCDIR\n";
+			}
+		elsif (index($_,"NETCDFLIBDIR",0) == 0)
+			{
+			print MAK "NETCDFLIBDIR = $NETCDFLIBDIR\n";
+			}
+		elsif (index($_,"NETCDFINCDIR",0) == 0)
+			{
+			print MAK "NETCDFINCDIR = $NETCDFINCDIR\n";
+			}
+		elsif (index($_,"FFTWLIBDIR",0) == 0)
+			{
+			if ($FFTWLIBDIR)
+				{
+				print MAK "FFTWLIBDIR = $FFTWLIBDIR\n";
+				}
+			}
+		elsif (index($_,"FFTWINCDIR",0) == 0)
+			{
+			if ($FFTWINCDIR)
+				{
+				print MAK "FFTWINCDIR = $FFTWINCDIR\n";
+				}
+			}
+		elsif (index($_,"OTPSDIR",0) == 0)
+			{
+			if ($OTPSDIR)
+				{
+				print MAK "OTPSDIR = $OTPSDIR\n";
+				}
+			}
+		elsif ($GSFINCDIR && index($_,"GSFINCDIR",0) == 0)
+			{
+			print MAK "GSFINCDIR = $GSFINCDIR\n";
+			}
+		elsif ($GSFLIB && index($_,"GSFLIB",0) == 0)
+			{
+			print MAK "GSFLIB = $GSFLIB\n";
+			}
+		elsif ($PROJINCDIR && index($_,"PROJINCDIR",0) == 0)
+			{
+			print MAK "PROJINCDIR = $PROJINCDIR\n";
+			}
+		elsif ($PROJLIB && index($_,"PROJLIB",0) == 0)
+			{
+			print MAK "PROJLIB = $PROJLIB\n";
+			}
+		elsif (index($_,"LEVITUS",0) == 0)
+			{
+			print MAK "LEVITUS = $LEVITUS\n";
+			}
+		elsif (index($_,"PROJECTIONS",0) == 0)
+			{
+			print MAK "PROJECTIONS = $PROJECTIONS\n";
+			}
+		elsif (index($_,"ARCHIVE",0) == 0)
+			{
+			print MAK "ARCHIVE = $ARCHIVE\n";
+			}
+		elsif (index($_,"BIGFLAG",0) == 0)
+			{
+			print MAK "BIGFLAG = $BIGFLAG\n";
+			}
+		elsif (index($_,"mbsegypsd",0) >= 0 && (!$FFTWLIBDIR || !$FFTWINCDIR))
+			{
+			}
+		elsif (index($_,"fftw",0) >= 0 && (!$FFTWLIBDIR || !$FFTWINCDIR))
+			{
+			}
+		elsif (index($_,"ranlib",0) >= 0 && $OS ne "SUN" && $OS ne "DARWIN")
+			{
+			}
+		elsif (index($_,"catman",0) >= 0 && $OS ne "SUN")
+			{
+			}
+		elsif (index($_,"cd gsf",0) >= 0 && $GSFLIB && $GSFINCDIR)
+			{
+			}
+		elsif (index($_,"cd proj",0) >= 0 && $PROJLIB && $PROJINCDIR)
+			{
+			}
+		elsif (index($_,"cd mbedit",0) >= 0 && $GRAPHICAL ne "YES")
+			{
+			}
+		elsif (index($_,"cd mbeditold",0) >= 0 && $GRAPHICAL ne "YES")
+			{
+			}
+		elsif (index($_,"cd mbvelocitytool",0) >= 0 && $GRAPHICAL ne "YES")
+			{
+			}
+		elsif (index($_,"cd mbnavedit",0) >= 0 && $GRAPHICAL ne "YES")
+			{
+			}
+		elsif (index($_,"cd mbnaveditold",0) >= 0 && $GRAPHICAL ne "YES")
+			{
+			}
+		elsif (index($_,"cd mbnavadjust",0) >= 0 && $GRAPHICAL ne "YES")
+			{
+			}
+		elsif (index($_,"cd mbview",0) >= 0
+					&& ($GRAPHICAL ne "YES"
+						|| !$OPENGLLIBS
+						|| ! -e "src/mbview"))
+			{
+			}
+		else
+			{
+			print MAK "$_";
+			}
+		}
+
+	# close files
+	close TMP;
+	close MAK;
+
+	}
+
+
+print "\nAll done!\n";
+exit 0;
+
+#-----------------------------------------------------------------------
+# This version of Getopts has been augmented to support multiple
+# calls to the same option. If an arg in argumentative is followed
+# by "+" rather than ":",  then the corresponding scalar will
+# be concatenated rather than overwritten by multiple calls to
+# the same arg.
+#
+# Usage:
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
+#			    # -c does not take arg. Sets opt_* as a
+#                           # side effect.
+
+sub MBGetopts {
+    local($argumentative) = @_;
+    local(@args,$_,$first,$rest);
+    local($errs) = 0;
+    local($[) = 0;
+
+    @args = split( / */, $argumentative );
+    while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
+	($first,$rest) = ($1,$2);
+	$pos = index($argumentative,$first);
+	if($pos >= $[) {
+	    if($args[$pos+1] eq ':') {
+		shift(@ARGV);
+		if($rest eq '') {
+		    ++$errs unless @ARGV;
+		    $rest = shift(@ARGV);
+		}
+		eval "\$opt_$first = \$rest;";
+		eval "\$flg_$first = 1;";
+	    }
+	    elsif($args[$pos+1] eq '+') {
+		shift(@ARGV);
+		if($rest eq '') {
+		    ++$errs unless @ARGV;
+		    $rest = shift(@ARGV);
+		}
+		if (eval "\$opt_$first") {
+		    eval "\$opt_$first = \$opt_$first
+				. \":\" . \$rest;";
+		}
+		else {
+		    eval "\$opt_$first = \$rest;";
+		}
+		eval "\$flg_$first = 1;";
+	    }
+	    elsif($args[$pos+1] eq '%') {
+		shift(@ARGV);
+		if($rest ne '') {
+		    eval "\$opt_$first = \$rest;";
+		}
+		else {
+		    $rest = $ARGV[0];
+		    ($one) = $rest =~ /^-(.).*/;
+		    $pos = index($argumentative,$one);
+		    if(!$one || $pos < $[) {
+			eval "\$opt_$first = \$rest;";
+			shift(@ARGV);
+		    }
+		}
+		eval "\$flg_$first = 1;";
+	    }
+	    else {
+		eval "\$opt_$first = 1";
+		eval "\$flg_$first = 1;";
+		if($rest eq '') {
+		    shift(@ARGV);
+		}
+		else {
+		    $ARGV[0] = "-$rest";
+		}
+	    }
+	}
+	else {
+	    print STDERR "Unknown option: $first\n";
+	    ++$errs;
+	    if($rest ne '') {
+		$ARGV[0] = "-$rest";
+	    }
+	    else {
+		shift(@ARGV);
+	    }
+	}
+    }
+    $errs == 0;
+}
+#-----------------------------------------------------------------------

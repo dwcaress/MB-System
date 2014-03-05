@@ -2,7 +2,7 @@
  *    The MB-system:	mb_process.c	9/11/00
  *    $Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -168,11 +168,11 @@
 #include <sys/stat.h>
 
 /* mbio include files */
-#include "../../include/mb_io.h"
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_process.h"
+#include "mb_io.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_process.h"
 
 static char rcs_id[]="$Id$";
 
@@ -343,6 +343,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	int	status = MB_SUCCESS;
 	int	len;
 	int	explicit;
+	char	*bufptr;
 	int	i;
 	int	pfile;
 	double	x;
@@ -357,7 +358,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       file:         %s\n",file);
 		fprintf(stderr,"dbg2       lookforfiles: %d\n",lookforfiles);
-		fprintf(stderr,"dbg2       process:      %lu\n",(size_t)process);
+		fprintf(stderr,"dbg2       process:      %p\n",(void *)process);
 		}
 
 	/* get expected process parameter file name */
@@ -1362,7 +1363,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_ifile_specified = MB_YES;
 	if (file[0] != '/')
 	    {
-	    getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
+	    bufptr = getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
 	    strcat(process->mbp_ifile, "/");
 	    strcat(process->mbp_ifile, file);
 	    }
@@ -1914,6 +1915,7 @@ int mb_pr_writepar(int verbose, char *file,
 	int	status = MB_SUCCESS;
 	time_t	right_now;
 	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	char	*bufptr;
 	int	i;
 
 	/* print input debug statements */
@@ -1924,7 +1926,7 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                %d\n",verbose);
 		fprintf(stderr,"dbg2       file:                   %s\n",file);
-		fprintf(stderr,"dbg2       process:                %lu\n",(size_t)process);
+		fprintf(stderr,"dbg2       process:                %p\n",(void *)process);
 		fprintf(stderr,"dbg2       mbp_ifile_specified:    %d\n",process->mbp_ifile_specified);
 		fprintf(stderr,"dbg2       mbp_ifile:              %s\n",process->mbp_ifile);
 		fprintf(stderr,"dbg2       mbp_ofile_specified:    %d\n",process->mbp_ofile_specified);
@@ -2064,7 +2066,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    }
 	else
 	    {
-	    getcwd(pwd, MB_PATH_MAXLINE);
+	    bufptr = getcwd(pwd, MB_PATH_MAXLINE);
 	    if (lastslash != NULL)
 		{
 		strcat(pwd, "/");
@@ -2453,7 +2455,7 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
-		fprintf(stderr,"dbg2       process:   %lu\n",(size_t)process);
+		fprintf(stderr,"dbg2       process:   %p\n",(void *)process);
 		}
 
 	/* figure out bathymetry recalculation mode */
@@ -2504,7 +2506,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
-		fprintf(stderr,"dbg2       process:             %lu\n",(size_t)process);
+		fprintf(stderr,"dbg2       process:             %p\n",(void *)process);
 		fprintf(stderr,"dbg2       mbp_ifile_specified: %d\n",process->mbp_ifile_specified);
 		fprintf(stderr,"dbg2       mbp_ifile:           %s\n",process->mbp_ifile);
 		fprintf(stderr,"dbg2       mbp_format_specified:%d\n",process->mbp_format_specified);
@@ -5818,17 +5820,17 @@ int mb_pr_set_bathyslopenew(int verbose,
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nsmooth:         %d\n",nsmooth);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       beamflag:        %lu\n",(size_t)beamflag);
-		fprintf(stderr,"dbg2       bath:            %lu\n",(size_t)bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %lu\n",(size_t)bathacrosstrack);
+		fprintf(stderr,"dbg2       beamflag:        %p\n",(void *)beamflag);
+		fprintf(stderr,"dbg2       bath:            %p\n",(void *)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %p\n",(void *)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d  %d  %f %f\n",
 				i, beamflag[i], bath[i], bathacrosstrack[i]);
-		fprintf(stderr,"dbg2       depths:           %lu\n",(size_t)depths);
-		fprintf(stderr,"dbg2       depthacrosstrack: %lu\n",(size_t)depthacrosstrack);
-		fprintf(stderr,"dbg2       slopes:           %lu\n",(size_t)slopes);
-		fprintf(stderr,"dbg2       slopeacrosstrack: %lu\n",(size_t)slopeacrosstrack);
+		fprintf(stderr,"dbg2       depths:           %p\n",(void *)depths);
+		fprintf(stderr,"dbg2       depthacrosstrack: %p\n",(void *)depthacrosstrack);
+		fprintf(stderr,"dbg2       slopes:           %p\n",(void *)slopes);
+		fprintf(stderr,"dbg2       slopeacrosstrack: %p\n",(void *)slopeacrosstrack);
 		}
 
 	/* initialize depths */
@@ -5938,17 +5940,17 @@ int mb_pr_set_bathyslope(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       beamflag:        %lu\n",(size_t)beamflag);
-		fprintf(stderr,"dbg2       bath:            %lu\n",(size_t)bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %lu\n",(size_t)bathacrosstrack);
+		fprintf(stderr,"dbg2       beamflag:        %p\n",(void *)beamflag);
+		fprintf(stderr,"dbg2       bath:            %p\n",(void *)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %p\n",(void *)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d  %d  %f %f\n",
 				i, beamflag[i], bath[i], bathacrosstrack[i]);
-		fprintf(stderr,"dbg2       depths:           %lu\n",(size_t)depths);
-		fprintf(stderr,"dbg2       depthacrosstrack: %lu\n",(size_t)depthacrosstrack);
-		fprintf(stderr,"dbg2       slopes:           %lu\n",(size_t)slopes);
-		fprintf(stderr,"dbg2       slopeacrosstrack: %lu\n",(size_t)slopeacrosstrack);
+		fprintf(stderr,"dbg2       depths:           %p\n",(void *)depths);
+		fprintf(stderr,"dbg2       depthacrosstrack: %p\n",(void *)depthacrosstrack);
+		fprintf(stderr,"dbg2       slopes:           %p\n",(void *)slopes);
+		fprintf(stderr,"dbg2       slopeacrosstrack: %p\n",(void *)slopeacrosstrack);
 		}
 
 	/* initialize depths */
@@ -6337,7 +6339,7 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 	if ((fstat = stat(lockfile, &file_status)) == -1)
 		{
 		/* proceed only if we create the lockfile */
-	    	if ((fp = fopen(lockfile, "w")) != NULL)
+	    	if ((fp = fopen(lockfile, "wx")) != NULL)
 			{
 			right_now = time((time_t *)0);
 			strncpy(date,ctime(&right_now),24);
@@ -6511,6 +6513,7 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose,
 	mb_path	lock_date;
 	int	lock_purpose;
 	mb_path	command;
+	int	shellstatus;
 
 	/* user, host variables */
 	char	user[MBP_FILENAMESIZE], *user_ptr;
@@ -6554,7 +6557,7 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose,
 			&& purpose == lock_purpose)
 			{
 			sprintf(command, "/bin/rm -f %s", lockfile);
-			system(command);
+			shellstatus = system(command);
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			}

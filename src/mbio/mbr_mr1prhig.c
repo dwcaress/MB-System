@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_mr1prhig.c contains the functions for reading and writing
- * multibeam data in the MR1PRHIG format.  
+ * multibeam data in the MR1PRHIG format.
  * These functions include:
  *   mbr_alm_mr1prhig	- allocate read/write memory
  *   mbr_dem_mr1prhig	- deallocate read/write memory
@@ -117,39 +117,37 @@
 #include <math.h>
 #include <string.h>
 #include <time.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_mr1.h"
-#include "../../include/mbf_mr1prhig.h"
+#include "mb_define.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mbsys_mr1.h"
+#include "mbf_mr1prhig.h"
 
 /* essential function prototypes */
 
 int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error);
-int mbr_info_mr1prhig(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_mr1prhig(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_mr1prhig(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_mr1prhig(int verbose, void *mbio_ptr, int *error);
@@ -157,13 +155,13 @@ int mbr_zero_mr1prhig(int verbose, struct mbf_mr1prhig_struct *data, int *error)
 int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_mr1prhig_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs, 
+int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs,
 		struct mbf_mr1prhig_struct *data, char **hdr_comment,
 		int *error);
-int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, 
+int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs,
 		struct mbf_mr1prhig_struct *data, int *error);
 int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct *data, int *error);
-int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs, 
+int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs,
 		struct mbf_mr1prhig_struct *data, char **hdr_comment, int *error);
 int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data, int *error);
 
@@ -189,54 +187,54 @@ int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mr1prhig(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_mr1prhig(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_mr1prhig;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_mr1prhig; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_mr1_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_mr1_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_mr1prhig; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_mr1prhig; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_mr1_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_mr1_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_mr1_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_mr1_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_mr1_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_mr1_extract_altitude; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_mr1prhig;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_mr1_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_mr1_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_mr1prhig;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_mr1prhig;
+	mb_io_ptr->mb_io_dimensions = &mbsys_mr1_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_mr1_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_mr1_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_mr1_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_mr1_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_mr1_extract_altitude;
 	mb_io_ptr->mb_io_insert_altitude = NULL;
-	mb_io_ptr->mb_io_extract_svp = NULL; 
+	mb_io_ptr->mb_io_extract_svp = NULL;
 	mb_io_ptr->mb_io_insert_svp = NULL;
-	mb_io_ptr->mb_io_ttimes = &mbsys_mr1_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_mr1_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_mr1_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_ttimes = &mbsys_mr1_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_mr1_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_mr1_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -255,25 +253,25 @@ int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -284,25 +282,25 @@ int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_mr1prhig(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_mr1prhig(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_mr1prhig";
@@ -343,7 +341,7 @@ int mbr_info_mr1prhig(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -385,7 +383,7 @@ int mbr_alm_mr1prhig(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -439,7 +437,7 @@ int mbr_dem_mr1prhig(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -476,7 +474,7 @@ int mbr_zero_mr1prhig(int verbose, struct mbf_mr1prhig_struct *data, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
 		}
 
 	/* initialize everything to zeros */
@@ -582,8 +580,8 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -648,18 +646,18 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* bathymetry */
 		for (i=0;i<store->port_btycount;i++)
 			{
-			store->bath_acrosstrack_port[i] 
+			store->bath_acrosstrack_port[i]
 				= data->bath_acrosstrack_port[i];
 			store->bath_port[i] = data->bath_port[i];
 			}
 		for (i=0;i<store->stbd_btycount;i++)
 			{
-			store->bath_acrosstrack_stbd[i] 
+			store->bath_acrosstrack_stbd[i]
 				= data->bath_acrosstrack_stbd[i];
 			store->bath_stbd[i] = data->bath_stbd[i];
 			}
 
-		/* get travel times and angles assuming 
+		/* get travel times and angles assuming
 		   bathymetry calculated using simple
 		   1500 m/s water velocity */
 		for (i=0;i<store->port_btycount;i++)
@@ -668,10 +666,10 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			xtrack = -store->bath_acrosstrack_port[i];
 			if (fabs(depth) > 0.0)
 				{
-				store->tt_port[i] 
-					= sqrt(depth*depth 
+				store->tt_port[i]
+					= sqrt(depth*depth
 					    + xtrack*xtrack)/750.0;
-				store->angle_port[i] 
+				store->angle_port[i]
 					= RTD*atan(xtrack/fabs(depth));
 				}
 			else
@@ -687,10 +685,10 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			xtrack = store->bath_acrosstrack_stbd[i];
 			if (fabs(depth) > 0.0)
 				{
-				store->tt_stbd[i] 
-					= sqrt(depth*depth 
+				store->tt_stbd[i]
+					= sqrt(depth*depth
 					    + xtrack*xtrack)/750.0;
-				store->angle_stbd[i] 
+				store->angle_stbd[i]
 					= RTD*atan(xtrack/fabs(depth));
 				}
 			else
@@ -745,8 +743,8 @@ int mbr_wt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -805,13 +803,13 @@ int mbr_wt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* bathymetry */
 		for (i=0;i<data->port_btycount;i++)
 			{
-			data->bath_acrosstrack_port[i] 
+			data->bath_acrosstrack_port[i]
 				= store->bath_acrosstrack_port[i];
 			data->bath_port[i] = store->bath_port[i];
 			}
 		for (i=0;i<data->stbd_btycount;i++)
 			{
-			data->bath_acrosstrack_stbd[i] 
+			data->bath_acrosstrack_stbd[i]
 				= store->bath_acrosstrack_stbd[i];
 			data->bath_stbd[i] = store->bath_stbd[i];
 			}
@@ -863,7 +861,7 @@ int mbr_mr1prhig_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -887,7 +885,7 @@ int mbr_mr1prhig_rd_data(int verbose, void *mbio_ptr, int *error)
 			if (mb_io_ptr->hdr_comment == NULL)
 				mb_io_ptr->hdr_comment_size = 0;
 			else
-				mb_io_ptr->hdr_comment_size 
+				mb_io_ptr->hdr_comment_size
 					= strlen(mb_io_ptr->hdr_comment);
 			mb_io_ptr->hdr_comment_loc = 0;
 			if (mb_io_ptr->hdr_comment_size > 80)
@@ -904,11 +902,11 @@ int mbr_mr1prhig_rd_data(int verbose, void *mbio_ptr, int *error)
 		extract comment and return */
 	else if (mb_io_ptr->hdr_comment_size > mb_io_ptr->hdr_comment_loc)
 		{
-		if (mb_io_ptr->hdr_comment_size - mb_io_ptr->hdr_comment_loc 
+		if (mb_io_ptr->hdr_comment_size - mb_io_ptr->hdr_comment_loc
 			> 80)
 			read_size = 80;
 		else
-			read_size = mb_io_ptr->hdr_comment_size 
+			read_size = mb_io_ptr->hdr_comment_size
 				- mb_io_ptr->hdr_comment_loc;
 		strncpy(data->comment,
 			&mb_io_ptr->hdr_comment[mb_io_ptr->hdr_comment_loc],
@@ -941,7 +939,7 @@ int mbr_mr1prhig_rd_data(int verbose, void *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs, 
+int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs,
 		struct mbf_mr1prhig_struct *data, char **hdr_comment,
 		int *error)
 {
@@ -957,9 +955,9 @@ int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       xdrs:       %lu\n",(size_t)xdrs);
-		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
-		fprintf(stderr,"dbg2       hdr_comment:%lu\n",(size_t)*hdr_comment);
+		fprintf(stderr,"dbg2       xdrs:       %p\n",(void *)xdrs);
+		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
+		fprintf(stderr,"dbg2       hdr_comment:%p\n",(void *)*hdr_comment);
 		}
 
 	/* set status and error */
@@ -968,7 +966,7 @@ int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs,
 
 	/* read magic number */
 	status = xdr_int(xdrs, &data->mf_magic);
-		
+
 	/* read ping count */
 	if (status == MB_SUCCESS)
 		status = xdr_int(xdrs, &data->mf_count);
@@ -1019,7 +1017,7 @@ int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, 
+int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs,
 		struct mbf_mr1prhig_struct *data, int *error)
 {
 	char	*function_name = "mbr_mr1prhig_rd_ping";
@@ -1035,13 +1033,13 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       xdrs:       %lu\n",(size_t)xdrs);
-		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       xdrs:       %p\n",(void *)xdrs);
+		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
 		}
 
 	/* read ping header */
-	status = xdr_long(xdrs, &data->sec);
-	status = xdr_long(xdrs, &data->usec);
+	status = xdr_int(xdrs, &data->sec);
+	status = xdr_int(xdrs, &data->usec);
 	status = xdr_double(xdrs, &data->png_lon);
 	status = xdr_double(xdrs, &data->png_lat);
 	status = xdr_float(xdrs, &data->png_course);
@@ -1070,8 +1068,8 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs,
 	status = xdr_int(xdrs, &data->stbd_btycount);
 	status = xdr_float(xdrs, &data->stbd_ssoffset);
 	status = xdr_int(xdrs, &data->stbd_sscount);
-	
-	/* read bathymetry and sidescan data 
+
+	/* read bathymetry and sidescan data
 		- handle more data than allowed by MBIO by
 		  throwing away the excess */
 
@@ -1081,10 +1079,10 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs,
 		/* output debug messages */
 		if (verbose > 0)
 			{
-			fprintf(stderr, "Port bathymetry count exceeds MBIO maximum: %d %d\n", 
+			fprintf(stderr, "Port bathymetry count exceeds MBIO maximum: %d %d\n",
 				data->port_btycount, MBF_MR1PRHIG_BEAMS_SIDE);
 			}
-		dummy_count = data->port_btycount 
+		dummy_count = data->port_btycount
 			- MBF_MR1PRHIG_BEAMS_SIDE;
 		data->port_btycount = MBF_MR1PRHIG_BEAMS_SIDE;
 		}
@@ -1107,10 +1105,10 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs,
 		/* output debug messages */
 		if (verbose > 0)
 			{
-			fprintf(stderr, "Port sidescan count exceeds MBIO maximum: %d %d\n", 
+			fprintf(stderr, "Port sidescan count exceeds MBIO maximum: %d %d\n",
 				data->port_sscount, MBF_MR1PRHIG_PIXELS_SIDE);
 			}
-		dummy_count = data->port_sscount 
+		dummy_count = data->port_sscount
 			- MBF_MR1PRHIG_PIXELS_SIDE;
 		data->port_sscount = MBF_MR1PRHIG_PIXELS_SIDE;
 		}
@@ -1131,10 +1129,10 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs,
 		/* output debug messages */
 		if (verbose > 0)
 			{
-			fprintf(stderr, "Starboard bathymetry count exceeds MBIO maximum: %d %d\n", 
+			fprintf(stderr, "Starboard bathymetry count exceeds MBIO maximum: %d %d\n",
 				data->stbd_btycount, MBF_MR1PRHIG_BEAMS_SIDE);
 			}
-		dummy_count = data->stbd_btycount 
+		dummy_count = data->stbd_btycount
 			- MBF_MR1PRHIG_BEAMS_SIDE;
 		data->stbd_btycount = MBF_MR1PRHIG_BEAMS_SIDE;
 		}
@@ -1157,10 +1155,10 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs,
 		/* output debug messages */
 		if (verbose > 0)
 			{
-			fprintf(stderr, "Starboard sidescan count exceeds MBIO maximum: %d %d\n", 
+			fprintf(stderr, "Starboard sidescan count exceeds MBIO maximum: %d %d\n",
 				data->stbd_sscount, MBF_MR1PRHIG_PIXELS_SIDE);
 			}
-		dummy_count = data->stbd_sscount 
+		dummy_count = data->stbd_sscount
 			- MBF_MR1PRHIG_PIXELS_SIDE;
 		data->stbd_sscount = MBF_MR1PRHIG_PIXELS_SIDE;
 		}
@@ -1298,8 +1296,8 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1328,7 +1326,7 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 		}
 
 	/* if data and file header not written */
-	else if (mb_io_ptr->fileheader == MB_NO 
+	else if (mb_io_ptr->fileheader == MB_NO
 		&& data->kind != MB_DATA_COMMENT)
 		{
 		/* write file header */
@@ -1341,7 +1339,7 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 		}
 
 	/* if data and file header written */
-	else if (mb_io_ptr->fileheader == MB_YES 
+	else if (mb_io_ptr->fileheader == MB_YES
 		&& data->kind == MB_DATA_DATA)
 		{
 		/* write data */
@@ -1349,7 +1347,7 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 		}
 
 	/* if not data and file header written */
-	else if (mb_io_ptr->fileheader == MB_YES 
+	else if (mb_io_ptr->fileheader == MB_YES
 		&& data->kind != MB_DATA_DATA)
 		{
 		status = MB_FAILURE;
@@ -1377,7 +1375,7 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs, 
+int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs,
 		struct mbf_mr1prhig_struct *data, char **hdr_comment, int *error)
 {
 	char	*function_name = "mbr_mr1prhig_wr_hdr";
@@ -1392,9 +1390,9 @@ int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       xdrs:       %lu\n",(size_t)xdrs);
-		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
-		fprintf(stderr,"dbg2       hdr_comment:%lu\n",(size_t)*hdr_comment);
+		fprintf(stderr,"dbg2       xdrs:       %p\n",(void *)xdrs);
+		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
+		fprintf(stderr,"dbg2       hdr_comment:%p\n",(void *)*hdr_comment);
 		}
 
 	/* print debug statements */
@@ -1412,7 +1410,7 @@ int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs,
 
 	/* write magic number */
 	status = xdr_int(xdrs, &data->mf_magic);
-		
+
 	/* write ping count */
 	if (status == MB_SUCCESS)
 		{
@@ -1466,8 +1464,8 @@ int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       xdrs:       %lu\n",(size_t)xdrs);
-		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       xdrs:       %p\n",(void *)xdrs);
+		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
 		}
 
 	/* print debug statements */
@@ -1556,8 +1554,8 @@ int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 		}
 
 	/* write ping header */
-	status = xdr_long(xdrs, &data->sec);
-	status = xdr_long(xdrs, &data->usec);
+	status = xdr_int(xdrs, &data->sec);
+	status = xdr_int(xdrs, &data->usec);
 	status = xdr_double(xdrs, &data->png_lon);
 	status = xdr_double(xdrs, &data->png_lat);
 	status = xdr_float(xdrs, &data->png_course);

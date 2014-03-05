@@ -2,7 +2,7 @@
  *    The MB-system:    mbstripNaN.c        8/8/02
  *    $Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    Mike McCann (mccann@mbari.org)
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -15,7 +15,7 @@
  *--------------------------------------------------------------------*/
 
 /* mbstripnan.c
- * Little program to filter output from GMT's grd2xyz removing any nodes 
+ * Little program to filter output from GMT's grd2xyz removing any nodes
  * that have NaN elevations.  Output meant to feed into GMT's surface
  * in support of the mbm_grd2geovrml macro.
  *
@@ -41,6 +41,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#if defined(_WIN32) && !defined(isnan)
+#	define isnan(x) _isnan(x)
+#endif
+
 /*--------------------------------------------------------------------*/
 /*
  * Read double x,y,z on stdin and send to stdout all but NaNs
@@ -56,4 +60,3 @@ int main () {
 exit(0);
 }
 /*--------------------------------------------------------------------*/
-

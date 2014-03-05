@@ -2,7 +2,7 @@
  *    The MB-system:	mb_zgrid.c	    4/25/95
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -157,9 +157,9 @@
 #include <string.h>
 
 /* MBIO include files */
-#include "../../include/mb_define.h"
-#include "../../include/mb_status.h"
-#include "../../include/mb_aux.h"
+#include "mb_define.h"
+#include "mb_status.h"
+#include "mb_aux.h"
 
 #define ITERMIN 100
 #define ITERMAX 1000
@@ -296,6 +296,7 @@ int mb_zgrid(float *z, int *nx, int *ny,
     int nmax;
     int	nconvtestincrease;
     float eps, zim, zjm;
+    float dzcriteria;
     int npt;
     float wgt, zip, zjp, tpy, zxy;
     int ii,jj, kkk;
@@ -312,11 +313,16 @@ int mb_zgrid(float *z, int *nx, int *ny,
     	nmax = *nx;
     else
         nmax = *ny;
-    if (*nrng < nmax)
-    	nmax = *nrng;
+    /* if (*nrng < nmax)
+    	nmax = *nrng; */
     eps = ((float) nmax) * 0.000016;
     if (eps < 0.02)
     	eps = 0.02;
+
+    /* trying dzmax > eps as a simple convergence criterea */
+    dzcriteria = 0.001;
+    convtestlast = 0.0;
+
     big = (float)9e29;
     nconvtestincrease = 0;
 
@@ -991,7 +997,8 @@ L3720:
 	    goto L3730;
 	}
 L3730:
-	convtest = dzmaxf / ((float)1. - root) - eps;
+	/* convtest = dzmaxf / ((float)1. - root) - eps; */
+	convtest = dzmaxf - dzcriteria;
 	if (iter > ITERTRANSITION && convtest > convtestlast)
 	    nconvtestincrease++;
 	fprintf(stderr,"Zgrid iteration %d convergence test: %f last:%f\n",iter,convtest,convtestlast);

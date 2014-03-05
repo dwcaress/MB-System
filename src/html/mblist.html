@@ -1,0 +1,840 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mblist</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mblist</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mblist</B> - List data in swath data files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mblist</B> [<B>-A</B> <B>-B</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-C</B>
+<B>-D</B><I>dumpmode</I>
+<B>-E</B><I>yr/mo/da/hr/mn/sc</I> <B>-F</B><I>format</I> <B>-G</B><I>delimiter</I>
+<B>-H</B> <B>-I</B><I>infilename</I> <B>-K</B><I>decimate</I>
+<B>-L</B><I>lonflip</I> <B>-M</B>[<I>start_beam/end_beam</I> | <B>A</B> | <B>X</B><I>percentage</I>]
+<B>-N</B><I>start_pixel/end_pixel</I>
+<B>-O</B><I>output_format</I> <B>-P</B><I>pings</I> <B>-Q</B>
+<B>-R</B><I>west/east/south/north</I>
+<B>-S</B><I>speed</I> <B>-T</B><I>timegap</I>
+<B>-U</B><I>check</I> <B>-V</B> <B>-W</B>
+<B>-X</B><I>outfile</I>
+<B>-Z</B><I>segment</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mblist</B> is a utility to list the contents of a swath
+data file or files to stdout. By default, <B>mblist</B>
+produces ASCII files in
+spreadsheet style, with data columns separated by tabs. Alternatively,
+other column delimiters can be used (<B>-G</B> option), or
+the output can be binary, with each field represented
+as a double precision float (<B>-A</B> option).
+Output can also be in netCDF CDL (<B>-C</B> option) format,
+or as a binary netCDF file (<B>-C -A</B>).
+The output of
+<B>mblist</B> can be piped to plotting and data analysis programs. The
+option <B>-O</B><I>output_format</I> can be
+used to control the data types that
+are sent to stdout. The default is to output a single record for
+each survey ping, and for any output navigation values to reflect
+the sonar or ship navigation. In this mode, any output depth,
+amplitude, or sidescan values are derived from the beam and pixel
+located closest to the navigation (the most vertical position under
+the sonar). If the <B>-M</B> or <B>-N</B> options
+are used to set specific ranges of beams or pixels to be used,
+then records are output for each of the specified beams or
+pixels and any navigation, depth or sidescan values output reflect
+the positions and values of the specified beams or pixels.
+The data input may be averaged or windowed in time
+and space before it is listed.  Complete dumps of bathymetry,
+amplitude, or sidescan data are possible as well.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>
+
+Alberto Malinverno
+<BR>
+
+<BR>&nbsp;&nbsp;Schlumberger-Doll
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<BR>
+
+Causes the output to be binary (native double precision floating
+point) rather than ASCII. Some
+output options cannot be represented as single binary floats (e.g.
+time strings and longitude or latitude broken into degrees
+and minutes. These values are output as multiple fields as
+appropriate.
+Default: ASCII output with fields separated by tabs, or by another
+delimiter specified with the <B>-G</B> option.
+<DT><B>-B</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the starting time for data allowed in the input data.
+The <B>-E</B> option sets the ending time for data. If the
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
+<DT><B>-C</B>
+
+<DD>
+<BR>
+
+Causes netCDF CDL format output to be generated (see <B>ncgen</B>).
+When the <B>-A</B> (binary) option is also set <B>mblist</B> will call <B>ncgen</B> to
+convert the CDL file to a binary netCDF file (default name is <I>mblist.nc</I>),
+if successful the CDL file will be removed.
+<DT><B>-D</B>
+
+<DD>
+<I>dumpmode</I>
+<BR>
+
+Normally, the output format is controlled by the <B>-O</B> option and
+the number of beams or pixels which are output is controlled by
+the <B>-M</B> and <B>-N</B> options.  The <B>-D</B> option provides
+a short cut for producing complete dumps of the longtitude and
+latitude locations of all beams or pixels along with the
+associated bathymetry, topography, amplitude, or sidescan values.
+The &quot;lon lat value&quot; triples are often useful for input into
+gridding programs (e.g. the <B>GMT</B> program <B>surface</B>) or
+other utilities. All valid (positive) values will be output, unless
+the <B>-Q</B> option is used to disable value checking.
+The <I>dumpmode</I> options are:
+<DT><DD>
+<I>dumpmode</I> = 1:  format controlled by <B>-O</B> option
+<DT><DD>
+<I>dumpmode</I> = 2:  longitude latitude depth
+<DT><DD>
+<I>dumpmode</I> = 3:  longitude latitude topography
+<DT><DD>
+<I>dumpmode</I> = 4:  longitude latitude amplitude
+<DT><DD>
+<I>dumpmode</I> = 5:  longitude latitude sidescan
+<BR>
+
+Use of the <B>-D</B> option supercedes the <B>-O</B>, <B>-M</B>,
+and <B>-N</B> options.
+Default: <I>mode</I> = 1.
+<DT><B>-E</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the ending time for data allowed in the input data.
+The <B>-B</B> option sets the starting time for data. If the
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the format for the input swath data using
+<B>MBIO</B> integer format identifiers.
+This program uses the <B>MBIO</B> library and will read any swath
+format supported by <B>MBIO</B>. A list of the swath data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
+<DT><B>-G</B>
+
+<DD>
+<I>delimiter</I>
+<BR>
+
+Sets the character(s) used to separate output fields when ascii
+columns are output. Default: tabs are used as delimiters.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>filename</I>
+<BR>
+
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-F</B> option) then the swath data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will read any swath
+format supported by <B>MBIO</B>. A list of the swath data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page.
+Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-K</B>
+
+<DD>
+<I>decimate</I>
+<BR>
+
+Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1),
+every available data record is output. If <I>decimate</I>&gt;1, then only
+every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate</I>=1.
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values returned.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <I>lonflip</I> = 0.
+<DT><B>-M</B>
+
+<DD>
+<I>start_beam/end_beam</I> or <B>A</B> or <B>X</B><I>excludepercent</I>
+<BR>
+
+Determines the range of bathymetry beams for which records will be output.
+If this option is used, then any longitude and latitude values output
+will reflect the positions of individual beams on the seafloor.
+If <B>-MA</B> is given, then a record
+will be output for each valid beam. If <I>start_beam/end_beam</I>
+is specified, then records will be output only for beams in this
+range. Beam numbers start with zero on the port side.
+If <B>-MX</B><I>excludepercent</I> is given, then records will be output
+for each valid, non-excluded beam where the outer <I>excludepercent</I>
+percentage of beams are excluded.
+The default is to output a single record for each ping
+in which longitude and latitude values reflect
+the sonar navigation, the depth,
+topography, and amplitude values reflect the valid beam
+nearest to vertical, and the sidescan value reflects the pixel
+nearest to vertical.
+<DT><B>-N</B>
+
+<DD>
+<I>start_pixel/end_pixel</I> or <I>A</I>
+<BR>
+
+Determines the range of sidescan pixels for which records will be output.
+If <I>start_pixel/end_pixel</I>
+is specified, then records will be output only for pixels in this
+range. Pixel numbers start with zero on the port side. The default is
+to not output records associated with sidescan pixels. Instead,
+the default is to output a single record for each ping
+in which longitude and latitude values reflect
+the sonar navigation, the depth,
+topography, and amplitude values reflect the valid beam
+nearest to vertical, and the sidescan value reflects the pixel
+nearest to vertical. If <B>-N</B><I>A</I> is given, then a record
+will be output for all sidescan pixels.
+<DT><B>-O</B>
+
+<DD>
+<I>output_format</I>
+<BR>
+
+Determines the form of the output. <I>Output_format</I> is a string composed
+of one or more of the following characters:
+<DT><DD>
+<B>/</B>
+special character: this causes the value
+indicated by the next character to be  inverted. This applies only to simple
+numeric values such as depth and
+heading and not to values like time
+strings or positions with hemisphere
+characters.
+<DT><DD>
+<B>-</B>
+special character: this causes the value
+indicated by the next character to be
+multiplied by -1. This applies only
+to simple numeric values such as
+depth and heading and not to values
+like time strings or positions with
+hemisphere characters.
+<DT><DD>
+<B>=</B>
+special character: this causes the value
+indicated by the next character to
+derive from the port-most non-null
+beam or pixel. This applies only
+to numeric values associated with
+beams or pixels such as depth, longitude,
+or latitude.
+<DT><DD>
+<B>+</B>
+special character: this causes the value
+indicated by the next character to
+derive from the starboard-most non-null
+beam or pixel. This applies only
+to numeric values associated with
+beams or pixels such as depth, longitude,
+or latitude.
+<DT><DD>
+<B>A</B>
+for apparent seafloor crosstrack slope
+(degrees from horizontal with positive
+slopes dipping toward port.) Calculated
+by fitting a line to the the
+bathymetry data of each ping.
+<DT><DD>
+<B>a</B>
+for apparent seafloor crosstrack slope
+(degrees from horizontal with positive
+slopes dipping toward port.) Calculated
+by interpolation for each beam or pixel.
+<DT><DD>
+<B>B</B>
+for amplitude
+<DT><DD>
+<B>b</B>
+for sidescan
+<DT><DD>
+<B>C</B>
+for sonar altitude above the bottom (m)
+<DT><DD>
+<B>c</B>
+for sonar tranducer depth (m)
+<DT><DD>
+<B>D</B>
+for bathymetry acrosstrack distance (m)
+<DT><DD>
+<B>d</B>
+for sidescan acrosstrack distance (m)
+<DT><DD>
+<B>E</B>
+for bathymetry alongtrack distance (m)
+<DT><DD>
+<B>e</B>
+for sidescan alongtrack distance (m)
+<DT><DD>
+<B>G</B>
+for flat bottom grazing angle (degrees)
+<DT><DD>
+<B>g</B>
+for grazing angle using seafloor slope (degrees)
+<DT><DD>
+<B>H</B>
+for heading (degrees)
+<DT><DD>
+<B>h</B>
+for course made good (degrees)
+<DT><DD>
+<B>J</B>
+for a time string (yyyy jd hh mm ss.ssssss)
+where jd is the day of the year
+<DT><DD>
+<B>j</B>
+for a time string (yyyy jd dm ss.ssssss)
+where jd is the day of the year
+and dm is the minute of the day
+<DT><DD>
+<B>L</B>
+for cumulative along-track distance (km)
+<DT><DD>
+<B>l</B>
+for cumulative along-track distance (m)
+<DT><DD>
+<B>M</B>
+for unix (epoch) time in decimal seconds since 1/1/70 00:00:00
+<DT><DD>
+<B>m</B>
+for time in decimal seconds since first record
+<DT><DD>
+<B>N</B>
+for ping count
+<DT><DD>
+<B>P</B>  for pitch in degrees
+<DT><DD>
+<B>p</B>  for draft in meters
+<DT><DD>
+<B>Q</B>  for bottom detection type as letter (A=amplitude, P=phase, U=unknown)
+<DT><DD>
+<B>q</B>  for bottom detection type as number (1=amplitude, 2=phase, 0=unknown)
+<DT><DD>
+<B>R</B>  for roll in degrees
+<DT><DD>
+<B>r</B>  for heave in meters
+<DT><DD>
+<B>S</B>  for speed (km/hr)
+<DT><DD>
+<B>s</B>  for speed made good (km/hr)
+<DT><DD>
+<B>T</B>  for a time string (yyyy/mm/dd/hh/mm/ss)
+<DT><DD>
+<B>t</B>  for a time string (yyyy mm dd hh mm ss)
+<DT><DD>
+<B>U</B>  for unix time in integer seconds since 1/1/70 00:00:00
+<DT><DD>
+<B>u</B>  for time in integer seconds since first record
+<DT><DD>
+<B>V</B>  for ping interval (decimal seconds)
+<DT><DD>
+<B>X</B>  for longitude (decimal degrees)
+<DT><DD>
+<B>x</B>  for longitude (degrees + decimal minutes + E/W)
+<DT><DD>
+<B>Y</B>  for latitude (decimal degrees)
+<DT><DD>
+<B>y</B>  for latitude (degrees + decimal minutes + N/S)
+<DT><DD>
+<B>Z</B>  for topography (positive upwards) (m)
+<DT><DD>
+<B>z</B>  for depth (positive downwards) (m)
+<DT><DD>
+<B>#</B>  for beam or pixel number
+<DT><DD>
+<B> .</B>
+special character: this causes the next character to be
+interpretted from the following list rather than the above list.
+These allow access to raw values in format specific form and may
+not be supported by all formats.
+<DT><DD>
+<B> .A</B>  Amplitude (backscatter) in dB (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .a</B>  Mean absorption coefficient in dB/km (formats 56 &amp; 67 - Simrad multibeam some versions only)
+<DT><DD>
+<B> .B</B>  Normal incidence backscatter in dB (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .b</B>  Oblique backscatter in dB (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .c</B>  Mean backscatter, one value per ping (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .d</B>  Beam depression angle (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .F</B>  Filename
+<DT><DD>
+<B> .f</B>  File format
+<DT><DD>
+<B> .G</B>  Start of TVG ramp in samples (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .g</B>  Stop of TVG ramp in samples (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .L</B>  Transmit pulse length (usec) (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .l</B>  Transmit pulse length (sec)
+<DT><DD>
+<B> .M</B>  Sounder mode (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .N</B>  Ping number according to sounder (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .p</B>  Raw sidescan pixels in dB (formats 56 &amp; 67 - Simrad multibeam only).
+May be preceded by a number to give the first n pixels (NaN padded) of the beam,
+for example<B> .30p</B> will give the first 30 sidescan pixels of each beam.
+<DT><DD>
+<B> .R</B>  Range in samples (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .r</B>  Sampling rate in Hz (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .S</B>  Number of raw sidescan pixels per ping (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .s</B>  Number of raw sidescan pixels per beam (formats 56 &amp; 67 - Simrad multibeam only)
+<DT><DD>
+<B> .T</B>  Transmit gain (dB)
+<DT><DD>
+<B> .t</B>  Receive gain (dB)
+<P>
+<BR>
+
+Default <I>output_format</I> = <B>YXLZ</B> (latitude, longitude, cumulative
+along-track distance, and depth).
+<DT><B>-P</B>
+
+<DD>
+<I>pings</I>
+<BR>
+
+Sets the ping averaging of the input data. If <I>pings</I> = 1, then
+no ping averaging is performed. If <I>pings</I> &gt; 0, then
+that number of input pings will be averaged to produce one output
+ping.  If <I>pings</I> = 0, then the ping averaging will automatically
+be done so that the along-track ping spacing is equal to the across-track
+beam spacing.
+Default: <I>pings</I> = 1 (no ping averaging).
+<DT><B>-Q</B>
+
+<DD>
+Disables value checking for validity (only positive bathymetry,
+amplitude, and sidescan values are valid).  This allows dumps
+of all of the data, including null or flagged beams and pixels.
+The flagged values are output without change. Null values are
+output as zero. This option is equivalent to <B>-U</B><I>2</I>.
+<DT><B>-R</B>
+
+<DD>
+<I>west/east/south/north</I>
+<BR>
+
+Sets the longitude and latitude bounds within which swath
+data will be read. Only the data which lies within these bounds will
+be read.
+Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
+<DT><B>-S</B>
+
+<DD>
+<I>speed</I>
+<BR>
+
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
+the input data; pings associated with a smaller ship speed will not be
+copied. Default: <I>speed</I> = 0.
+<DT><B>-T</B>
+
+<DD>
+<I>timegap</I>
+<BR>
+
+Sets the maximum time gap in minutes between adjacent pings allowed before
+the data is considered to have a gap. Default: <I>timegap</I> = 1.
+<DT><B>-U</B>
+
+<DD>
+<I>check</I>
+<BR>
+
+Sets the manner in which <B>mblist</B> handles flagged and null
+bathymetry, amplitude, and sidescan values. By default, <B>mblist</B>
+omits lines of output if they contain flagged or null values. This
+default corresponds to <I>check</I> = 0.
+If <I>check</I> = 1, then flagged values will be output
+unchanged and null values will be ignored.
+If <I>check</I> = 2,
+then flagged values will be output unchanged and null values
+will be output as zero (This corresponds to the <B>-Q</B> option).
+If <I>check</I> = 3, then flagged values will be output unchanged
+and null values will be output as &quot;NaN&quot;.
+If <I>check</I> = 4, then flagged values and null values
+will be output as &quot;NaN&quot;.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mblist</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mblist</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used and all error status messages.
+<DT><B>-W</B>
+
+<DD>
+Normally, <B>mblist</B> outputs bathymetry and across and along
+track distances in meters.  If the
+<B>-W</B> flag is given, then <B>mblist</B> outputs these values
+in feet.
+<DT><B>-X</B>
+
+<DD>
+<I>outfile</I>
+<BR>
+
+Normally, <B>mblist</B> outputs to stdout.
+If the <B>-X</B> flag is given, then <B>mblist</B> creates a new file
+<I>outfile</I> and outputs to it.
+An output file must be specified if a netCDF file (<B>-C -A</B>) is required.
+<DT><B>-Z</B>
+
+<DD>
+<I>segment</I>
+<BR>
+
+Causes the ascii output of different input swath files
+(e.g. when a datalist is specified with the <B>-I</B> option)
+to be separated by lines with <I>segment</I>. If <I>segment</I>
+is a single character, then the output is a multiple segment
+file of the sort accepted by the <B>GMT</B> program <B>psxy</B>.
+This option only works with ascii output, and is thus disabled
+when the <B>-A</B> option is specified. The most common usage
+is <B>-Z</B>I&gt;.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to obtain a centerbeam profile
+from a raw Hydrosweep file
+(format 21) in a region between 105W and 103W
+longitude and between 10S and 8S latitude. The following will suffice:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist -Iinfile.mb21 -F21 -R-105/-103/-10/-8 -OLz<BR>
+<P>
+The output will be as follows:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.000&nbsp;&nbsp;4378<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.085&nbsp;&nbsp;4370<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.166&nbsp;&nbsp;4370<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.247&nbsp;&nbsp;4351<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.330&nbsp;&nbsp;4353<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.407&nbsp;&nbsp;4337<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.492&nbsp;&nbsp;4334<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.571&nbsp;&nbsp;4323<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.651&nbsp;&nbsp;4316<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.737&nbsp;&nbsp;4307<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.....<BR>
+<P>
+Here the depth values will correspond to the beam in each
+ping which is located closest to vertical under the ship.
+<P>
+Suppose one wishes instead to obtain time, heading and speed data
+in the same file from 8AM to 9AM on August 10 1991. The following
+is appropriate:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist&nbsp;-Iinfile.mb21&nbsp;-F21&nbsp;-B1991/8/10/8/0/0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-E1991/8/10/9/0/0&nbsp;-OTHS<BR>
+<P>
+The output will be as follows:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1991/08/10/08/00/05&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;283.9&nbsp;&nbsp;&nbsp;41.29<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1991/08/10/08/00/19&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;283.4&nbsp;&nbsp;&nbsp;20.36<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1991/08/10/08/00/33&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;285.1&nbsp;&nbsp;&nbsp;20.36<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1991/08/10/08/00/48&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;286.7&nbsp;&nbsp;&nbsp;20.09<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1991/08/10/08/01/02&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;284.9&nbsp;&nbsp;&nbsp;20.08<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1991/08/10/08/01/16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;285.2&nbsp;&nbsp;&nbsp;20.02<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1991/08/10/08/01/44&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;284.2&nbsp;&nbsp;&nbsp;20.20<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1991/08/10/08/02/12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;283.7&nbsp;&nbsp;&nbsp;20.50<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1991/08/10/08/02/41&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;283.6&nbsp;&nbsp;&nbsp;20.75<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1991/08/10/08/03/09&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;285.1&nbsp;&nbsp;&nbsp;21.19<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.....<BR>
+<P>
+Suppose one wishes a data series with along-track distance,
+topography and across-track distance of beam number 15 for the same file
+and time limits as above:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist&nbsp;-Iinfile.mb21&nbsp;-F21&nbsp;-B1991/8/10/7/0/0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-E1991/8/10/9/0/0&nbsp;-OLZD&nbsp;-M15/15<BR>
+<P>
+The output will be as follows:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;0.000&nbsp;&nbsp;4510&nbsp;&nbsp;&nbsp;-1704<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;0.172&nbsp;&nbsp;4494&nbsp;&nbsp;&nbsp;-1692<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;0.260&nbsp;&nbsp;4486&nbsp;&nbsp;&nbsp;-1689<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;0.343&nbsp;&nbsp;4471&nbsp;&nbsp;&nbsp;-1683<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;0.427&nbsp;&nbsp;4491&nbsp;&nbsp;&nbsp;-1691<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;0.506&nbsp;&nbsp;4490&nbsp;&nbsp;&nbsp;-1690<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;0.591&nbsp;&nbsp;4478&nbsp;&nbsp;&nbsp;-1686<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;0.676&nbsp;&nbsp;4505&nbsp;&nbsp;&nbsp;-1697<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;0.763&nbsp;&nbsp;4488&nbsp;&nbsp;&nbsp;-1695<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;0.849&nbsp;&nbsp;4495&nbsp;&nbsp;&nbsp;-1699<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;.....<BR>
+<P>
+Supppose one wishes to obtain longitude, latitude, and
+depth at the centerbeam as x-y-z data for the same region as in the
+first example:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist&nbsp;-Iinfile.mb21&nbsp;-F21&nbsp;-R-105/-103/-10/-8&nbsp;-OXYz<BR>
+<P>
+The output will be as follows:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-103.000236&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.577439&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4378<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-103.000943&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.577229&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4370<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-103.001651&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.577020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4370<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-103.002372&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.576794&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4351<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-103.003041&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.576584&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4353<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-103.003771&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.576338&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4337<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-103.004456&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.576105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4334<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-103.005153&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.575895&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4323<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-103.005903&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.575679&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4316<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-103.006586&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.575449&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4307<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.....<BR>
+<P>
+Suppose one wishes to obtain a dump of longitude, latitude, and
+depth for all good beams in a Hydrosweep data file. There are two ways to
+obtain this output. One can explicitly specify the output format as
+<B>-O</B><I>XYz</I> and the output beams as <B>-M</B><I>0/58</I>:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist&nbsp;-Iinfile.mb21&nbsp;-F21&nbsp;-OXYz&nbsp;-M0/58<BR>
+<P>
+or one can use the equivalent <B>-D</B><I>2</I> shortcut:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist -Iinfile.mb21 -F21 -D2<BR>
+<P>
+Either way, the output is as follows:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.296454<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.180552<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4866<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.296695<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.178668<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4858<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.296923<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.176893<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4855<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297123<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.175341<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4877<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297319<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.173808<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4895<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297536<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.172122<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4879<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297744<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.170498<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4865<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297909<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.169216<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4904<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298100<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.167727<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4899<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298299<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.166175<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4871<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298476<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.164803<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4873<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298639<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.163530<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4891<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.....<BR>
+<P>
+Suppose one wishes to obtain a dump of longitude, latitude, and
+depth for all beams, valid or not, in a Hydrosweep data file.
+The approach is the same as the preceding example, except that
+the <B>-Q</B> option is used to disable validity checking of
+beam values. One can explicitly specify the output format as
+<B>-O</B><I>XYz</I> and the output beams as <B>-M</B><I>0/58</I>:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist&nbsp;-Iinfile.mb21&nbsp;-F21&nbsp;-OXYz&nbsp;-M0/58&nbsp;-Q<BR>
+<P>
+or one can use the equivalent <B>-D</B><I>2</I> shortcut:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist -Iinfile.mb21 -F21 -D2 -Q<BR>
+<P>
+Either way, the output includes both zero beams (no data) and
+beams with negative depths (flagged as bad data):
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.301094<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.144409<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.301094<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.144409<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.296454<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.180552<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4866<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.296695<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.178668<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4858<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.296923<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.176893<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4855<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297123<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.175341<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4877<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297319<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.173808<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4895<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297536<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.172122<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4879<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297744<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.170498<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4865<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297909<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.169216<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4904<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298100<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.167727<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4899<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298100<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.167727<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;-4144<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298299<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.166175<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4871<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298476<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.164803<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4873<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298639<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.163530<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;4891<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.....<BR>
+<P>
+Finally, suppose one wishes to obtain a dump of longitude, latitude, and
+amplitude for all good beams in a Hydrosweep data file. There are two ways to
+obtain this output. One can explicitly specify the output format as
+<B>-O</B><I>XYB</I> and the output beams as <B>-M</B><I>0/58</I>:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist&nbsp;-Iinfile.mb21&nbsp;-F21&nbsp;-OXYB&nbsp;-M0/58<BR>
+<P>
+or one can use the equivalent <B>-D</B><I>4</I> shortcut:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist -Iinfile.mb21 -F21 -D4<BR>
+<P>
+Either way, the output is as follows:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.296454<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.180552<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;13<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.296695<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.178668<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;17<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.296923<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.176893<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;16<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297123<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.175341<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;14<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297319<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.173808<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;17<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297536<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.172122<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297744<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.170498<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;14<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.297909<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.169216<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;15<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298100<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.167727<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;12<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298299<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.166175<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;12<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298476<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.164803<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;28<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-49.298639<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;12.163530<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;14<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.....<BR>
+<P>
+Suppose one wishes to examine the number of raw sidescan pixels in Simrad EM1002 data file
+and the first 5 pixels of each beam:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mblist -i 0044_20000425_093808.mb57 -MA -ON#.S.s.5p<BR>
+<P>
+The output will be as follows:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;286&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-31.5&nbsp;&nbsp;&nbsp;-32.0&nbsp;&nbsp;&nbsp;-32.0&nbsp;&nbsp;&nbsp;-32.5&nbsp;&nbsp;&nbsp;-33.0
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;133&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-34.5&nbsp;&nbsp;&nbsp;-34.5&nbsp;&nbsp;&nbsp;-34.5&nbsp;&nbsp;&nbsp;-34.5&nbsp;&nbsp;&nbsp;-33.5
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;142&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-40.0&nbsp;&nbsp;&nbsp;-40.0&nbsp;&nbsp;&nbsp;-40.0&nbsp;&nbsp;&nbsp;-40.0&nbsp;&nbsp;&nbsp;-40.0
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;139&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-40.0&nbsp;&nbsp;&nbsp;-40.5&nbsp;&nbsp;&nbsp;-40.5&nbsp;&nbsp;&nbsp;-40.5&nbsp;&nbsp;&nbsp;-40.5
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;159&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-39.5&nbsp;&nbsp;&nbsp;-38.5&nbsp;&nbsp;&nbsp;-38.5&nbsp;&nbsp;&nbsp;-39.0&nbsp;&nbsp;&nbsp;-38.5
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;54&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-27.00&nbsp;&nbsp;NaN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NaN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NaN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NaN
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.....
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbinfo.html">mbinfo</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+<B>mblist</B> is not able to list all of the information available in some
+swath data formats.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

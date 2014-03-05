@@ -2,7 +2,7 @@
  *    The MB-system:	mb_intersectgrid.c	10/20/2012
  *    $Id:  $
  *
- *    Copyright (c) 2012-2012 by
+ *    Copyright (c) 2012-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -34,9 +34,9 @@
 #include <time.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_aux.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_aux.h"
 
 static char rcs_id[] = "$Id: mb_intersectgrid.c 1917 2012-01-10 19:25:33Z caress $";
 
@@ -57,7 +57,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       topogridfile:              %s\n", topogridfile);
 		fprintf(stderr,"dbg2       lonflip:                   %d\n", *lonflip);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)topogrid);
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", *topogrid_ptr);
 		}
 
 	/* allocate memory for topogrid structure */
@@ -134,7 +134,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       lonflip:                   %d\n", *lonflip);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)topogrid);
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", topogrid);
 		fprintf(stderr,"dbg2       topogrid->file:            %s\n", topogrid->file);
 		fprintf(stderr,"dbg2       topogrid->projection_mode: %d\n", topogrid->projection_mode);
 		fprintf(stderr,"dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
@@ -150,7 +150,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 		fprintf(stderr,"dbg2       topogrid->ymax:            %f\n", topogrid->ymax);
 		fprintf(stderr,"dbg2       topogrid->dx:              %f\n", topogrid->dx);
 		fprintf(stderr,"dbg2       topogrid->dy               %f\n", topogrid->dy);
-		fprintf(stderr,"dbg2       topogrid->data:            %lu\n", (size_t)topogrid->data);
+		fprintf(stderr,"dbg2       topogrid->data:            %p\n", topogrid->data);
 		fprintf(stderr,"dbg2       error:                     %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n",status);
@@ -162,7 +162,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 /*--------------------------------------------------------------------*/
 int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error)
 {
-	char	*function_name = "mb_intersecttopogrid";
+	char	*function_name = "mb_topogrid_deall";
 	int	status = MB_SUCCESS;
 	struct mb_topogrid_struct *topogrid;
 
@@ -173,8 +173,8 @@ int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       topogrid_ptr:              %lu\n", (size_t)topogrid_ptr);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)(*topogrid_ptr));
+		fprintf(stderr,"dbg2       topogrid_ptr:              %p\n", topogrid_ptr);
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", *topogrid_ptr);
 		}
 
 	/* deallocate the topogrid structure */
@@ -206,7 +206,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr,
 			double *lon, double *lat, double *topo, double *range,
 			int *error)
 {
-	char	*function_name = "mb_intersecttopogrid";
+	char	*function_name = "mb_topogrid_intersect";
 	int	status = MB_SUCCESS;
 	struct mb_topogrid_struct *topogrid;
 	int	done;
@@ -238,7 +238,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr,
 		fprintf(stderr,"dbg2       vx:                        %f\n", vx);
 		fprintf(stderr,"dbg2       vy:                        %f\n", vy);
 		fprintf(stderr,"dbg2       vz:                        %f\n", vz);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)topogrid);
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", topogrid);
 		fprintf(stderr,"dbg2       topogrid->projection_mode: %d\n", topogrid->projection_mode);
 		fprintf(stderr,"dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
 		fprintf(stderr,"dbg2       topogrid->nodatavalue:     %f\n", topogrid->nodatavalue);
@@ -253,19 +253,62 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr,
 		fprintf(stderr,"dbg2       topogrid->ymax:            %f\n", topogrid->ymax);
 		fprintf(stderr,"dbg2       topogrid->dx:              %f\n", topogrid->dx);
 		fprintf(stderr,"dbg2       topogrid->dy               %f\n", topogrid->dy);
-		fprintf(stderr,"dbg2       topogrid->data:            %lu\n", (size_t)topogrid->data);
+		fprintf(stderr,"dbg2       topogrid->data:            %p\n", topogrid->data);
 		}
 
-	/* test different ranges along the vector until the grid is intersected */
+	/* initialize search for intersection */
 	done = MB_NO;
 	iteration = 0;
-	dr = altitude / 20;
-	r = altitude / vz - dr;
-	topog = 0.0;
 	topotest = 0.0;
 	dtopo = 0.0;
 	rmin = 0.0;
-	rmax = 4 * altitude / vz;
+	
+	/* if altitude specified use it for initial guess */
+	if (altitude > 0.0)
+		{
+		dr = altitude / 20;
+		r = altitude / vz - dr;
+		rmax = 4 * altitude / vz;
+		}
+		
+	/* if altitude not specified use altitude at location */
+	else
+		{
+		nfound = 0;
+		topog = 0.0;
+		i = (int)((navlon - topogrid->xmin) / topogrid->dx);
+		j = (int)((navlat - topogrid->ymin) / topogrid->dy);
+		if (i >= 0 && i < topogrid->nx - 1
+		    && j >= 0 && j < topogrid->ny - 1)
+			{
+			for (ii=i;ii<=i+1;ii++)
+			for (jj=j;jj<=j+1;jj++)
+			    {
+			    k = ii * topogrid->ny + jj;
+			    if (topogrid->data[k] != topogrid->nodatavalue)
+				{
+				nfound++;
+				topog += topogrid->data[k];
+				}
+			    }
+			}
+		if (nfound > 0)
+			{
+			topog /= (double)nfound;
+			altitude = -sonardepth - topog;
+			dr = altitude / 20;
+			r = altitude / vz - dr;
+			rmax = 4 * altitude / vz;
+			}
+		else
+			{
+			done = MB_YES;
+			status = MB_FAILURE;
+			*error = MB_ERROR_NOT_ENOUGH_DATA;
+			}
+		}
+
+	/* test different ranges along the vector until the grid is intersected */
 	while (done == MB_NO && iteration < iteration_max)
 		{
 		/* update the range to be tested */
@@ -405,7 +448,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr,
 		fprintf(stderr,"dbg2       altitude:                  %f\n", altitude);
 		fprintf(stderr,"dbg2       sonardepth:                %f\n", sonardepth);
 		fprintf(stderr,"dbg2       pitch:                     %f\n", pitch);
-		fprintf(stderr,"dbg2       topogrid:                  %lu\n", (size_t)topogrid);
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", topogrid);
 		fprintf(stderr,"dbg2       topogrid->projection_mode: %d\n", topogrid->projection_mode);
 		fprintf(stderr,"dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
 		fprintf(stderr,"dbg2       topogrid->nodatavalue:     %f\n", topogrid->nodatavalue);
@@ -420,7 +463,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr,
 		fprintf(stderr,"dbg2       topogrid->ymax:            %f\n", topogrid->ymax);
 		fprintf(stderr,"dbg2       topogrid->dx:              %f\n", topogrid->dx);
 		fprintf(stderr,"dbg2       topogrid->dy               %f\n", topogrid->dy);
-		fprintf(stderr,"dbg2       topogrid->data:            %lu\n", (size_t)topogrid->data);
+		fprintf(stderr,"dbg2       topogrid->data:            %p\n", topogrid->data);
 		}
 
 	/* loop over all of the angles */
@@ -489,44 +532,44 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr,
 					last = MAX(i,last);
 					}
 				}
-			}
 
-		/* apply flat bottom calculation to unset entries */
-		for (i=0;i<nangle;i++)
-			{
-			if (table_range[i] <= 0.0)
+			/* apply flat bottom calculation to unset entries */
+			for (i=0;i<nangle;i++)
 				{
-				/* get angles in takeoff coordinates */
-				table_angle[i] = angle_min + dangle * i;
-				beta = 90.0 - table_angle[i];
-				mb_rollpitch_to_takeoff(
-					verbose,
-					alpha, beta,
-					&theta, &phi,
-					error);
+				if (table_range[i] <= 0.0)
+					{
+					/* get angles in takeoff coordinates */
+					table_angle[i] = angle_min + dangle * i;
+					beta = 90.0 - table_angle[i];
+					mb_rollpitch_to_takeoff(
+						verbose,
+						alpha, beta,
+						&theta, &phi,
+						error);
 
-				if (nset == 0)
-					{
-					table_altitude[i] = altitude;
-					}
-				else if (i < first)
-					{
-					table_altitude[i] = table_altitude[first];
-					}
-				else if (i > last)
-					{
-					table_altitude[i] = table_altitude[last];
-					}
-				else
-					{
-					table_altitude[i] = 0.5 * (table_altitude[first] + table_altitude[last]);
-					}
+					if (nset == 0)
+						{
+						table_altitude[i] = altitude;
+						}
+					else if (i < first)
+						{
+						table_altitude[i] = table_altitude[first];
+						}
+					else if (i > last)
+						{
+						table_altitude[i] = table_altitude[last];
+						}
+					else
+						{
+						table_altitude[i] = 0.5 * (table_altitude[first] + table_altitude[last]);
+						}
 
-				table_range[i]  = table_altitude[first] / cos(DTR * theta);
-				xx = table_range[i] * sin(DTR * theta);
-				table_xtrack[i] = xx * cos(DTR * phi);
-				table_ltrack[i] = xx * sin(DTR * phi);
-				nset++;
+					table_range[i]  = table_altitude[first] / cos(DTR * theta);
+					xx = table_range[i] * sin(DTR * theta);
+					table_xtrack[i] = xx * cos(DTR * phi);
+					table_ltrack[i] = xx * sin(DTR * phi);
+					nset++;
+					}
 				}
 			}
 		}

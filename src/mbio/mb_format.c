@@ -2,7 +2,7 @@
  *    The MB-system:	mb_format.c	2/18/94
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -262,16 +262,16 @@
 #include <sys/stat.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_swap.h"
-#include "../../include/mb_format.h"
-#include "../../include/mbsys_simrad.h"
-#include "../../include/mbsys_simrad2.h"
-#include "../../include/mbsys_simrad3.h"
-#include "../../include/mbsys_jstar.h"
+#include "mb_define.h"
+#include "mb_status.h"
+#include "mb_process.h"
+#include "mb_io.h"
+#include "mb_swap.h"
+#include "mb_format.h"
+#include "mbsys_simrad.h"
+#include "mbsys_simrad2.h"
+#include "mbsys_simrad3.h"
+#include "mbsys_jstar.h"
 
 /* Alias table for old (pre-version 4.0) format id's */
 static int format_alias_table[] =
@@ -309,7 +309,7 @@ int mb_format_register(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:    %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:  %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:  %p\n",(void *)mbio_ptr);
 		fprintf(stderr,"dbg2       format:    %d\n",*format);
 		}
 
@@ -332,7 +332,10 @@ int mb_format_register(int verbose,
 	    /* handle old Simrad EM12 and EM121 formats */
 	    else if (*format == 52 || *format == 55)
 		i = MBF_EMOLDRAW;
-
+		
+	    else
+	        i = 0;
+		
 	    /* print output debug statements */
 	    if (verbose >= 2)
 		    {
@@ -528,10 +531,12 @@ int mb_format_register(int verbose,
 		{
 		status = mbr_register_dsl120sf(verbose, mbio_ptr, error);
 		}
+#ifdef WITH_GSF
 	else if (*format == MBF_GSFGENMB)
 		{
 		status = mbr_register_gsfgenmb(verbose, mbio_ptr, error);
 		}
+#endif
 	else if (*format == MBF_MSTIFFSS)
 		{
 		status = mbr_register_mstiffss(verbose, mbio_ptr, error);
@@ -644,6 +649,22 @@ int mb_format_register(int verbose,
 		{
 		status = mbr_register_xtfb1624(verbose, mbio_ptr, error);
 		}
+	else if (*format == MBF_SWPLSSXI)
+		{
+		status = mbr_register_swplssxi(verbose, mbio_ptr, error);
+		}
+	else if (*format == MBF_SWPLSSXP)
+		{
+		status = mbr_register_swplssxp(verbose, mbio_ptr, error);
+		}
+ 	else if (*format == MBF_3DDEPTHP)
+		{
+		status = mbr_register_3ddepthp(verbose, mbio_ptr, error);
+		}
+ 	else if (*format == MBF_WASSPENL)
+		{
+		status = mbr_register_wasspenl(verbose, mbio_ptr, error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -675,23 +696,23 @@ int mb_format_register(int verbose,
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:             %d\n",status);
@@ -754,6 +775,9 @@ int mb_format_info(int verbose,
 	    /* handle old Simrad EM12 and EM121 formats */
 	    else if (*format == 52 || *format == 55)
 		i = MBF_EMOLDRAW;
+		
+	    else
+	        i = 0;
 
 	    /* print output debug statements */
 	    if (verbose >= 2)
@@ -1255,6 +1279,7 @@ int mb_format_info(int verbose,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
+#ifdef WITH_GSF
 	else if (*format == MBF_GSFGENMB)
 		{
 		status = mbr_info_gsfgenmb(verbose, system,
@@ -1266,6 +1291,7 @@ int mb_format_info(int verbose,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
+#endif
 	else if (*format == MBF_MSTIFFSS)
 		{
 		status = mbr_info_mstiffss(verbose, system,
@@ -1562,6 +1588,50 @@ int mb_format_info(int verbose,
 			nav_source, heading_source, vru_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
+		}
+	else if (*format == MBF_SWPLSSXI)
+		{
+		status = mbr_info_swplssxi(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error);
+		}
+	else if (*format == MBF_SWPLSSXP)
+		{
+		status = mbr_info_swplssxp(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error);
+		}
+ 	else if (*format == MBF_3DDEPTHP)
+		{
+		status = mbr_info_3ddepthp(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error); 
+		}
+ 	else if (*format == MBF_WASSPENL)
+		{
+		status = mbr_info_wasspenl(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error); 
 		}
 	else if (*format == MBF_DATALIST)
 		{
@@ -2466,7 +2536,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 			    if (sonar2 == MBSYS_SIMRAD3_EM710 || sonar2swap == MBSYS_SIMRAD3_EM710
 			    	|| sonar2 == MBSYS_SIMRAD3_EM302 || sonar2swap == MBSYS_SIMRAD3_EM302
 			    	|| sonar2 == MBSYS_SIMRAD3_EM122 || sonar2swap == MBSYS_SIMRAD3_EM122
-			    	|| sonar2 == MBSYS_SIMRAD3_EM2040 || sonar2swap == MBSYS_SIMRAD3_EM2040)
+			    	|| sonar2 == MBSYS_SIMRAD3_EM2040 || sonar2swap == MBSYS_SIMRAD3_EM2040
+			    	|| sonar2 == MBSYS_SIMRAD3_EM2045 || sonar2swap == MBSYS_SIMRAD3_EM2045)
 				*format = MBF_EM710RAW;
 			    else if (type2 == EM_START
 				|| type2 == EM_STOP
@@ -2564,7 +2635,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 			    if (sonar2 == MBSYS_SIMRAD3_EM710 || sonar2swap == MBSYS_SIMRAD3_EM710
 			    	|| sonar2 == MBSYS_SIMRAD3_EM302 || sonar2swap == MBSYS_SIMRAD3_EM302
 			    	|| sonar2 == MBSYS_SIMRAD3_EM122 || sonar2swap == MBSYS_SIMRAD3_EM122
-			    	|| sonar2 == MBSYS_SIMRAD3_EM2040 || sonar2swap == MBSYS_SIMRAD3_EM2040)
+			    	|| sonar2 == MBSYS_SIMRAD3_EM2040 || sonar2swap == MBSYS_SIMRAD3_EM2040
+			    	|| sonar2 == MBSYS_SIMRAD3_EM2045 || sonar2swap == MBSYS_SIMRAD3_EM2045)
 				*format = MBF_EM710RAW;
 			    else if (type2 == EM_START
 				|| type2 == EM_STOP
@@ -3250,6 +3322,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
+#ifdef WITH_GSF
 	/* look for a CARIS GSF export *.gsf format convention */
 	if (found == MB_NO)
 	    {
@@ -3274,7 +3347,9 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		found = MB_YES;
 		}
 	    }
+#endif
 
+#ifdef WITH_GSF
 	/* look for a SAIC GSF *.d0X format convention */
 	if (found == MB_NO)
 	    {
@@ -3297,6 +3372,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		found = MB_YES;
 		}
 	    }
+#endif
 
 	/* look for a Reson 7K multibeam *.s7k format convention */
 	if (found == MB_NO)
@@ -3398,6 +3474,104 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
 		*format = MBF_HYSWEEP1;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for a SEA SWATHplus *.sxi file format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".sxi")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".SXI")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_SWPLSSXI;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for a SEA SWATHplus *.sxp file format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".sxp")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".SXP")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_SWPLSSXP;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for a 3DatDepth *.raa file format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".raa")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".RAA")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_3DDEPTHP;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for a WASSP *.000 file format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".000")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_WASSPENL;
 		found = MB_YES;
 		}
 	    }
@@ -3515,7 +3689,7 @@ int mb_datalist_open(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       datalist:      %lu\n",(size_t)*datalist);
+		fprintf(stderr,"dbg2       datalist:      %p\n",(void *)*datalist);
 		fprintf(stderr,"dbg2       path:          %s\n",path);
 		fprintf(stderr,"dbg2       look_processed:%d\n",look_processed);
 		}
@@ -3553,14 +3727,14 @@ int mb_datalist_open(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       datalist:      %lu\n",(size_t)*datalist);
+		fprintf(stderr,"dbg2       datalist:      %p\n",(void *)*datalist);
 		if (*datalist != NULL)
 			{
 			fprintf(stderr,"dbg2       datalist->open:       %d\n",datalist_ptr->open);
-			fprintf(stderr,"dbg2       datalist->fp:         %lu\n",(size_t)datalist_ptr->fp);
+			fprintf(stderr,"dbg2       datalist->fp:         %p\n",(void *)datalist_ptr->fp);
 			fprintf(stderr,"dbg2       datalist->recursion:  %d\n",datalist_ptr->recursion);
 			fprintf(stderr,"dbg2       datalist->path:       %s\n",datalist_ptr->path);
-			fprintf(stderr,"dbg2       datalist->datalist:   %lu\n",(size_t)datalist_ptr->datalist);
+			fprintf(stderr,"dbg2       datalist->datalist:   %p\n",(void *)datalist_ptr->datalist);
 			}
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3587,7 +3761,7 @@ int mb_datalist_close(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       datalist:      %lu\n",(size_t)*datalist);
+		fprintf(stderr,"dbg2       datalist:      %p\n",(void *)*datalist);
 		}
 
 	/* close file */
@@ -3615,7 +3789,7 @@ int mb_datalist_close(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       datalist:      %lu\n",(size_t)*datalist);
+		fprintf(stderr,"dbg2       datalist:      %p\n",(void *)*datalist);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:        %d\n",status);
@@ -3645,7 +3819,7 @@ int mb_datalist_read(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       datalist:      %lu\n",(size_t)datalist);
+		fprintf(stderr,"dbg2       datalist:      %p\n",(void *)datalist);
 		}
 
 	/* get datalist pointer */
@@ -3655,10 +3829,10 @@ int mb_datalist_read(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"dbg2       datalist_ptr->open:       %d\n",datalist_ptr->open);
-		fprintf(stderr,"dbg2       datalist_ptr->fp:         %lu\n",(size_t)datalist_ptr->fp);
+		fprintf(stderr,"dbg2       datalist_ptr->fp:         %p\n",(void *)datalist_ptr->fp);
 		fprintf(stderr,"dbg2       datalist_ptr->recursion:  %d\n",datalist_ptr->recursion);
 		fprintf(stderr,"dbg2       datalist_ptr->path:       %s\n",datalist_ptr->path);
-		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %lu\n",(size_t)datalist_ptr->datalist);
+		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %p\n",(void *)datalist_ptr->datalist);
 		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
 		}
 
@@ -3722,7 +3896,7 @@ int mb_datalist_readorg(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       datalist:      %lu\n",(size_t)datalist);
+		fprintf(stderr,"dbg2       datalist:      %p\n",(void *)datalist);
 		}
 
 	/* get datalist pointer */
@@ -3732,10 +3906,10 @@ int mb_datalist_readorg(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"dbg2       datalist_ptr->open:       %d\n",datalist_ptr->open);
-		fprintf(stderr,"dbg2       datalist_ptr->fp:         %lu\n",(size_t)datalist_ptr->fp);
+		fprintf(stderr,"dbg2       datalist_ptr->fp:         %p\n",(void *)datalist_ptr->fp);
 		fprintf(stderr,"dbg2       datalist_ptr->recursion:  %d\n",datalist_ptr->recursion);
 		fprintf(stderr,"dbg2       datalist_ptr->path:       %s\n",datalist_ptr->path);
-		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %lu\n",(size_t)datalist_ptr->datalist);
+		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %p\n",(void *)datalist_ptr->datalist);
 		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
 		}
 
@@ -4018,7 +4192,7 @@ int mb_datalist_read2(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       datalist:      %lu\n",(size_t)datalist);
+		fprintf(stderr,"dbg2       datalist:      %p\n",(void *)datalist);
 		}
 
 	/* get datalist pointer */
@@ -4028,10 +4202,10 @@ int mb_datalist_read2(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"dbg2       datalist_ptr->open:             %d\n",datalist_ptr->open);
-		fprintf(stderr,"dbg2       datalist_ptr->fp:               %lu\n",(size_t)datalist_ptr->fp);
+		fprintf(stderr,"dbg2       datalist_ptr->fp:               %p\n",(void *)datalist_ptr->fp);
 		fprintf(stderr,"dbg2       datalist_ptr->recursion:        %d\n",datalist_ptr->recursion);
 		fprintf(stderr,"dbg2       datalist_ptr->path:             %s\n",datalist_ptr->path);
-		fprintf(stderr,"dbg2       datalist_ptr->datalist:         %lu\n",(size_t)datalist_ptr->datalist);
+		fprintf(stderr,"dbg2       datalist_ptr->datalist:         %p\n",(void *)datalist_ptr->datalist);
 		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
 		}
 
@@ -4338,6 +4512,7 @@ int mb_get_relative_path(int verbose,
 	int	pathlen;
 	int	pwdlen;
 	int	same, isame, ndiff;
+	char	*bufptr;
 	int	i;
 
 	/* print input debug statements */
@@ -4360,8 +4535,8 @@ int mb_get_relative_path(int verbose,
 	if (pathlen > 0 && path[0] != '/' )
 	    {
 	    strncpy(relativepath,path,MB_PATH_MAXLINE);
-	    getcwd(path, MB_PATH_MAXLINE);
-	    if (strlen(path) + pathlen + 1 >= MB_PATH_MAXLINE)
+	    bufptr = getcwd(path, MB_PATH_MAXLINE);
+	    if (bufptr == NULL || strlen(path) + pathlen + 1 >= MB_PATH_MAXLINE)
 	        {
 	        strcpy(path,relativepath);
 		status = MB_FAILURE;
@@ -4381,8 +4556,8 @@ int mb_get_relative_path(int verbose,
 	     strncpy(pwd,ipwd,MB_PATH_MAXLINE);
 	else
 	    {
-	    getcwd(pwd, MB_PATH_MAXLINE);
-	    if (strlen(pwd) + pwdlen + 1 >= MB_PATH_MAXLINE)
+	    bufptr = getcwd(pwd, MB_PATH_MAXLINE);
+	    if (bufptr == NULL || strlen(pwd) + pwdlen + 1 >= MB_PATH_MAXLINE)
 	        {
 	        strncpy(pwd,ipwd,MB_PATH_MAXLINE);
 		status = MB_FAILURE;

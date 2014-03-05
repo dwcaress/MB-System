@@ -1,0 +1,1290 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbset</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbset</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  17 September 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbset</B> - Sets values in <B>mbprocess</B> parameter files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbset</B> <B>-I</B><I>infile</I>
+[<B>-E -L</B> <B>-P</B><I>PARAMETER:value</I> -V -H]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbset</B> is a utility for creating and
+modifying <B>mbprocess</B> parameter files.
+<P>
+The program <B>mbprocess</B>
+can perform a variety of swath data processing functions in
+a single step (producing a single output swath data file),
+including:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Merge&nbsp;edited&nbsp;navigation&nbsp;generated&nbsp;by&nbsp;<B>mbnavedit</B>.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Apply&nbsp;bathymetry&nbsp;edit&nbsp;flags&nbsp;from&nbsp;<B>mbedit</B>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;<B>mbclean</B>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Recalculate&nbsp;bathymetry&nbsp;from&nbsp;raw&nbsp;travel&nbsp;time&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;angle&nbsp;data&nbsp;by&nbsp;raytracing&nbsp;through&nbsp;water&nbsp;sound&nbsp;speed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;models&nbsp;from&nbsp;<B>mbvelocitytool</B>&nbsp;or&nbsp;<B>mbsvplist</B>.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Apply&nbsp;changes&nbsp;to&nbsp;roll&nbsp;bias,&nbsp;pitch&nbsp;bias,&nbsp;heading
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bias,&nbsp;and&nbsp;draft&nbsp;values.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Recalculate&nbsp;sidescan&nbsp;from&nbsp;raw&nbsp;backscatter&nbsp;samples
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Simrad&nbsp;multibeam&nbsp;data&nbsp;only).
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Apply&nbsp;tides&nbsp;to&nbsp;bathymetry.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Insert&nbsp;metadata.
+<P>
+The actions of <B>mbprocess</B> are controlled by text
+parameter files. Each <B>mbprocess</B> parameter file
+contains single line commands that set
+processing modes and parameters. The <B>-P</B> option of
+<B>mbset</B> is used to modify a single <B>mbprocess</B> parameter
+command. This option can be invoked as many times as desired
+on the command line, allowing <B>mbset</B> to set multiple
+<B>mbprocess</B> processing parameters and modes.
+If the swath data file
+specified by the <B>-I</B><I>infile</I> option of
+<B>mbset</B> has an existing <B>mbprocess</B> parameter file,
+then that parameter file will be read and the existing
+parameter values will be modified. If no <B>mbprocess</B>
+parameter file exists, then <B>mbset</B> starts with
+default processing parameters, modifies those, and then
+generates a new parameter file.
+<P>
+If the input file specified by the <B>-I</B> option is
+a single swath data file, <B>mbset</B> will act on that
+file and it's parameter file only. If the input file is
+a datalist, then <B>mbset</B> will act on all swath files
+extracted from the datalist (and any recursively parsed
+datalist files). This function allows users to easily
+set uniform processing parameters for large numbers of
+data files. The default input file is &quot;datalist.mb-1&quot;.
+<P>
+The processing parameter file used by <B>mbprocess</B> has
+an &quot;.par&quot; suffix. In addition to <B>mbset</B>,
+these files are generated or modified by
+<B>mbedit</B>, <B>mbnavedit</B>,
+<B>mbvelocitytool</B>, <B>mbnavadjust</B>, and <B>mbclean</B>.
+<P>
+The processed output swath files produced by <B>mbprocess</B>
+are named using a convention based on the data format id.
+<B>MB-System</B> data formats are specified
+using two-digit or three-digit numbers (see the <B>MBIO</B> manual page).
+If an input swath data file is named &quot;root.mbXX&quot;, where XX is the format
+id, then the default processed output file will be &quot;rootp.mbXX&quot;
+(e.g. mydata.mb71 -&gt; mydatap.mb71).
+The &quot;p&quot; inserted before the &quot;.mbXX&quot; suffix indicates the output
+file has been created by <B>mbprocess</B>.
+If the input file does not follow the *.mbXX naming convention,
+then the output filename will just consist of the input name
+with &quot;p.mbXX&quot; added as a suffix (e.g. mydata -&gt; mydatap.mb71)
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MBPROCESS PARAMETER FILE COMMANDS</H2>
+
+<P>
+The <B>mbprocess</B> parameter file commands modified by <B>mbset</B> are:
+<P>
+<BR>&nbsp;GENERAL&nbsp;PARAMETERS:
+<BR>&nbsp;&nbsp;&nbsp;EXPLICIT
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;causes&nbsp;mbprocess&nbsp;to&nbsp;set&nbsp;modes&nbsp;implicitely
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;e.g.&nbsp;the&nbsp;SVPFILE&nbsp;command&nbsp;will&nbsp;also&nbsp;set
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raytracing&nbsp;on&nbsp;even&nbsp;if&nbsp;the&nbsp;RAYTRACE&nbsp;command
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;not&nbsp;given&nbsp;[explicit&nbsp;mode&nbsp;commands&nbsp;required]
+<BR>&nbsp;&nbsp;&nbsp;FORMAT&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;format&nbsp;id&nbsp;[no&nbsp;default]
+<BR>&nbsp;&nbsp;&nbsp;INFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;input&nbsp;file&nbsp;path&nbsp;[no&nbsp;default]
+<BR>&nbsp;&nbsp;&nbsp;OUTFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;output&nbsp;file&nbsp;path&nbsp;[no&nbsp;default]
+<P>
+<BR>&nbsp;NAVIGATION&nbsp;MERGING:
+<BR>&nbsp;&nbsp;&nbsp;NAVMODE&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;merging&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;navigation&nbsp;merge&nbsp;off
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;navigation&nbsp;merge&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;NAVFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;file&nbsp;path&nbsp;[no&nbsp;default]
+<BR>&nbsp;&nbsp;&nbsp;NAVFORMAT&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;file&nbsp;format&nbsp;[9]
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>see&nbsp;the&nbsp;<B>mbprocess</B>&nbsp;man&nbsp;page&nbsp;for<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>documentation&nbsp;of&nbsp;the&nbsp;supported<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>navigation&nbsp;formats.<BR>
+<BR>&nbsp;&nbsp;&nbsp;NAVHEADING&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;heading&nbsp;to&nbsp;be&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;heading&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;before
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heading&nbsp;correction&nbsp;applied
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;heading&nbsp;not&nbsp;changed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;heading&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;NAVSPEED&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;speed&nbsp;to&nbsp;be&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;speed&nbsp;not&nbsp;changed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;speed&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;NAVDRAFT&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;draft&nbsp;to&nbsp;be&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;draft&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;before
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;draft&nbsp;correction&nbsp;applied
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;draft&nbsp;not&nbsp;changed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;draft&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;NAVATTITUDE&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;roll,&nbsp;pitch&nbsp;and&nbsp;heave&nbsp;to&nbsp;be&nbsp;merged&nbsp;from
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;navigation&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;roll,&nbsp;pitch,&nbsp;and&nbsp;heave&nbsp;merged&nbsp;from
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;navigation&nbsp;before&nbsp;roll&nbsp;bias&nbsp;and&nbsp;pitch&nbsp;bias
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;corrections&nbsp;applied
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;roll,&nbsp;pitch,&nbsp;and&nbsp;heave&nbsp;not&nbsp;changed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;roll,&nbsp;pitch,&nbsp;and&nbsp;heave&nbsp;merged&nbsp;from
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;navigation&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;NAVINTERP&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;interpolation&nbsp;algorithm&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;linear&nbsp;interpolation&nbsp;(recommended)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;spline&nbsp;interpolation
+<BR>&nbsp;&nbsp;&nbsp;NAVTIMESHIFT&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;time&nbsp;shift&nbsp;(seconds)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;time&nbsp;shift&nbsp;added&nbsp;to&nbsp;timestamps&nbsp;of
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;navigation&nbsp;fixes&nbsp;read&nbsp;in&nbsp;from&nbsp;NAVFILE
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prior&nbsp;to&nbsp;merging
+<P>
+<BR>&nbsp;NAVIGATION&nbsp;OFFSETS&nbsp;AND&nbsp;SHIFTS:
+<BR>&nbsp;&nbsp;&nbsp;NAVSHIFT&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;offset&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;offsets&nbsp;and&nbsp;shifts&nbsp;are&nbsp;applied&nbsp;to&nbsp;navigation
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;values&nbsp;from&nbsp;both&nbsp;survey&nbsp;and&nbsp;navigation&nbsp;records,&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;are&nbsp;applied&nbsp;to&nbsp;navigation&nbsp;read&nbsp;in&nbsp;from
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NAVFILE&nbsp;prior&nbsp;to&nbsp;merging
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;offsets&nbsp;and&nbsp;shifts&nbsp;are&nbsp;NOT&nbsp;applied&nbsp;to&nbsp;adjusted
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;navigation&nbsp;values&nbsp;from&nbsp;NAVADJFILE
+<BR>&nbsp;&nbsp;&nbsp;NAVOFFSETX&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;athwartship&nbsp;offset&nbsp;(meters)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;the&nbsp;effective&nbsp;navigation&nbsp;shift&nbsp;is
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(NAVOFFSETX&nbsp;-&nbsp;SONAROFFSETX),&nbsp;and&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;navigation&nbsp;is&nbsp;corrected&nbsp;by&nbsp;subtracting
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;effective&nbsp;shift.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;athwartship&nbsp;shift&nbsp;is&nbsp;positive&nbsp;to
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;starboard.
+<BR>&nbsp;&nbsp;&nbsp;NAVOFFSETY&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;fore-aft&nbsp;offset&nbsp;(meters)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;the&nbsp;effective&nbsp;navigation&nbsp;shift&nbsp;is
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(NAVOFFSETY&nbsp;-&nbsp;SONAROFFSETY),&nbsp;and&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;navigation&nbsp;is&nbsp;corrected&nbsp;by&nbsp;subtracting
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;effective&nbsp;shift.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;fore-aft&nbsp;shift&nbsp;is&nbsp;positive&nbsp;forward.
+<BR>&nbsp;&nbsp;&nbsp;NAVOFFSETZ&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;vertical&nbsp;offset&nbsp;(meters)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;this&nbsp;value&nbsp;is&nbsp;not&nbsp;yet&nbsp;used&nbsp;for
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;anything.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;vertical&nbsp;shift&nbsp;is&nbsp;positive&nbsp;down.
+<BR>&nbsp;&nbsp;&nbsp;NAVSHIFTLON&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;longitude&nbsp;shift&nbsp;(degrees)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;NAVSHIFTLAT&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;latitude&nbsp;shift&nbsp;(degrees)&nbsp;[0.0]
+<P>
+<BR>&nbsp;ADJUSTED&nbsp;NAVIGATION&nbsp;MERGING:
+<BR>&nbsp;&nbsp;&nbsp;NAVADJMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;merging&nbsp;from&nbsp;mbnavadjust&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;can&nbsp;apply&nbsp;to&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;only
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  or longitude, latitude, and depth offset<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;adjusted&nbsp;navigation&nbsp;merge&nbsp;off
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;adjusted&nbsp;navigation&nbsp;merge&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;adjusted&nbsp;navigation&nbsp;and&nbsp;depth&nbsp;offset&nbsp;merge&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;NAVADJFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;adjusted&nbsp;navigation&nbsp;file&nbsp;path
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;this&nbsp;file&nbsp;supercedes&nbsp;navigation&nbsp;file&nbsp;for
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lon&nbsp;and&nbsp;lat&nbsp;only
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;uses&nbsp;mbnavadjust&nbsp;output
+<BR>&nbsp;&nbsp;&nbsp;NAVADJINTERP&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;adjusted&nbsp;navigation&nbsp;interpolation&nbsp;algorithm&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;linear&nbsp;interpolation&nbsp;(recommended)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;spline&nbsp;interpolation
+<P>
+<BR>&nbsp;&nbsp;ATTITUDE&nbsp;MERGING:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;ATTITUDEMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;attitude&nbsp;(roll,&nbsp;pitch,&nbsp;and&nbsp;heave)&nbsp;merging&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;roll,&nbsp;pitch,&nbsp;and&nbsp;heave&nbsp;merged&nbsp;before
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roll&nbsp;bias&nbsp;and&nbsp;pitch&nbsp;bias&nbsp;corrections&nbsp;applied
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;attitude&nbsp;merging&nbsp;from&nbsp;a&nbsp;separate&nbsp;file&nbsp;supersedes
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attitude&nbsp;merging&nbsp;from&nbsp;a&nbsp;navigation&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;attitude&nbsp;merging&nbsp;off
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;attitude&nbsp;merging&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;ATTITUDEFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;attitude&nbsp;file&nbsp;path
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;ATTITUDEFORMAT&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;attitude&nbsp;file&nbsp;format&nbsp;[1]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;attitude&nbsp;files&nbsp;can&nbsp;be&nbsp;in&nbsp;one&nbsp;of&nbsp;four&nbsp;ASCII
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;table&nbsp;formats
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;format&nbsp;is&nbsp;&lt;time_d&nbsp;roll&nbsp;pitch&nbsp;heave&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;roll&nbsp;pitch&nbsp;heave&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;jday&nbsp;hour&nbsp;min&nbsp;sec&nbsp;roll&nbsp;pitch&nbsp;heave&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;jday&nbsp;daymin&nbsp;sec&nbsp;roll&nbsp;pitch&nbsp;heave&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;time_d&nbsp;=&nbsp;decimal&nbsp;seconds&nbsp;since&nbsp;1/1/1970
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;daymin&nbsp;=&nbsp;decimal&nbsp;minutes&nbsp;start&nbsp;of&nbsp;day
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;roll&nbsp;=&nbsp;positive&nbsp;starboard&nbsp;up,&nbsp;degrees
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;pitch&nbsp;=&nbsp;positive&nbsp;forward&nbsp;up,&nbsp;degrees
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;heave&nbsp;=&nbsp;positive&nbsp;up,&nbsp;meters
+<P>
+<BR>&nbsp;&nbsp;SONARDEPTH&nbsp;MERGING:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;SONARDEPTHMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;sonardepth&nbsp;merging&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;sonardepth&nbsp;merged&nbsp;before
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;draft&nbsp;corrections&nbsp;applied
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;sonardepth&nbsp;merging&nbsp;from&nbsp;a&nbsp;separate&nbsp;file&nbsp;supersedes
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;draft&nbsp;merging&nbsp;from&nbsp;a&nbsp;navigation&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;sonardepth&nbsp;merging&nbsp;off
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;sonardepth&nbsp;merging&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;SONARDEPTHFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;sonardepth&nbsp;file&nbsp;path
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;SONARDEPTHFORMAT&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;sonardepth&nbsp;file&nbsp;format&nbsp;[1]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;sonardepth&nbsp;files&nbsp;can&nbsp;be&nbsp;in&nbsp;one&nbsp;of&nbsp;four&nbsp;ASCII
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;table&nbsp;formats
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;format&nbsp;is&nbsp;&lt;time_d&nbsp;sonardepth&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;sonardepth&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;jday&nbsp;hour&nbsp;min&nbsp;sec&nbsp;sonardepth&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;jday&nbsp;daymin&nbsp;sec&nbsp;sonardepth&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;time_d&nbsp;=&nbsp;decimal&nbsp;seconds&nbsp;since&nbsp;1/1/1970
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;daymin&nbsp;=&nbsp;decimal&nbsp;minutes&nbsp;start&nbsp;of&nbsp;day
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;sonardepth&nbsp;=&nbsp;sonar&nbsp;depth&nbsp;positive&nbsp;down,&nbsp;meters
+<P>
+<BR>&nbsp;DATA&nbsp;CUTTING:
+<BR>&nbsp;&nbsp;&nbsp;DATACUTCLEAR
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;removes&nbsp;all&nbsp;existing&nbsp;data&nbsp;cutting&nbsp;commands
+<BR>&nbsp;&nbsp;&nbsp;DATACUT&nbsp;kind&nbsp;mode&nbsp;min&nbsp;max
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adds&nbsp;new&nbsp;data&nbsp;cutting&nbsp;command,&nbsp;where:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kind&nbsp;=&nbsp;0&nbsp;:&nbsp;cut&nbsp;applied&nbsp;to&nbsp;bathymetry&nbsp;data
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kind&nbsp;=&nbsp;1&nbsp;:&nbsp;cut&nbsp;applied&nbsp;to&nbsp;amplitude&nbsp;data
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kind&nbsp;=&nbsp;2&nbsp;:&nbsp;cut&nbsp;applied&nbsp;to&nbsp;sidescan&nbsp;data
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mode&nbsp;=&nbsp;0&nbsp;:&nbsp;min&nbsp;and&nbsp;max&nbsp;indicate&nbsp;start&nbsp;and&nbsp;end
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beam/pixel&nbsp;numbers&nbsp;between&nbsp;which&nbsp;data
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;are&nbsp;flagged&nbsp;or&nbsp;zeroed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mode&nbsp;=&nbsp;1&nbsp;:&nbsp;min&nbsp;and&nbsp;max&nbsp;indicate&nbsp;start&nbsp;and&nbsp;end
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;acrosstrack&nbsp;distance&nbsp;(m)&nbsp;between&nbsp;which
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;are&nbsp;flagged&nbsp;or&nbsp;zeroed
+<BR>&nbsp;&nbsp;&nbsp;BATHCUTNUMBER&nbsp;min&nbsp;max
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adds&nbsp;new&nbsp;bathymetry&nbsp;data&nbsp;cutting&nbsp;command&nbsp;where
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min&nbsp;and&nbsp;max&nbsp;are&nbsp;the&nbsp;start&nbsp;and&nbsp;end&nbsp;beam&nbsp;numbers
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;between&nbsp;which&nbsp;data&nbsp;are&nbsp;flagged&nbsp;(note&nbsp;that
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flagging&nbsp;bathymetry&nbsp;also&nbsp;flags&nbsp;amplitude&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;BATHCUTDISTANCE&nbsp;min&nbsp;max
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adds&nbsp;new&nbsp;bathymetry&nbsp;data&nbsp;cutting&nbsp;command&nbsp;where
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min&nbsp;and&nbsp;max&nbsp;are&nbsp;the&nbsp;start&nbsp;and&nbsp;end&nbsp;acrosstrack
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;distance&nbsp;(m)&nbsp;between&nbsp;which&nbsp;data&nbsp;are&nbsp;flagged
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(note&nbsp;that&nbsp;flagging&nbsp;bathymetry&nbsp;also&nbsp;flags
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amplitude&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;BATHCUTSPEED&nbsp;min&nbsp;max
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adds&nbsp;new&nbsp;bathymetry&nbsp;data&nbsp;cutting&nbsp;command&nbsp;where
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;beams&nbsp;are&nbsp;flagged&nbsp;for&nbsp;pings&nbsp;with&nbsp;a&nbsp;ship
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;vehicle&nbsp;speed&nbsp;less&nbsp;than&nbsp;min&nbsp;or&nbsp;greater&nbsp;than
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max&nbsp;(note&nbsp;that&nbsp;flagging&nbsp;bathymetry&nbsp;also&nbsp;flags
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amplitude&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;AMPCUTNUMBER&nbsp;min&nbsp;max
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adds&nbsp;new&nbsp;amplitude&nbsp;data&nbsp;cutting&nbsp;command&nbsp;where
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min&nbsp;and&nbsp;max&nbsp;are&nbsp;the&nbsp;start&nbsp;and&nbsp;end&nbsp;beam&nbsp;numbers
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;between&nbsp;which&nbsp;amplitude&nbsp;data&nbsp;are&nbsp;zeroed&nbsp;(note
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;zeroing&nbsp;amplitude&nbsp;data&nbsp;has&nbsp;no&nbsp;impact&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bathymetry&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;AMPCUTDISTANCE&nbsp;min&nbsp;max
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adds&nbsp;new&nbsp;amplitude&nbsp;data&nbsp;cutting&nbsp;command&nbsp;where
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min&nbsp;and&nbsp;max&nbsp;are&nbsp;the&nbsp;start&nbsp;and&nbsp;end&nbsp;acrosstrack
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;distance&nbsp;(m)&nbsp;between&nbsp;which&nbsp;amplitude&nbsp;data&nbsp;are
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zeroed&nbsp;(note&nbsp;that&nbsp;zeroing&nbsp;amplitude&nbsp;data&nbsp;has
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no&nbsp;impact&nbsp;on&nbsp;bathymetry&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;AMPCUTSPEED&nbsp;min&nbsp;max
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adds&nbsp;new&nbsp;amplitude&nbsp;data&nbsp;cutting&nbsp;command&nbsp;where
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;amplitude&nbsp;values&nbsp;are&nbsp;zeroed&nbsp;for&nbsp;pings&nbsp;with
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;ship&nbsp;or&nbsp;vehicle&nbsp;speed&nbsp;less&nbsp;than&nbsp;min&nbsp;or&nbsp;greater
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;than&nbsp;max&nbsp;(note&nbsp;that&nbsp;zeroing&nbsp;amplitude&nbsp;data&nbsp;has
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no&nbsp;impact&nbsp;on&nbsp;bathymetry&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;SSCUTNUMBER&nbsp;min&nbsp;max
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adds&nbsp;new&nbsp;sidescan&nbsp;data&nbsp;cutting&nbsp;command&nbsp;where
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min&nbsp;and&nbsp;max&nbsp;are&nbsp;the&nbsp;start&nbsp;and&nbsp;end&nbsp;pixel&nbsp;numbers
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;between&nbsp;which&nbsp;sidescan&nbsp;data&nbsp;are&nbsp;zeroed&nbsp;&nbsp;(note
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;zeroing&nbsp;sidescan&nbsp;data&nbsp;has&nbsp;no&nbsp;impact&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bathymetry&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;SSCUTDISTANCE&nbsp;min&nbsp;max
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adds&nbsp;new&nbsp;sidescan&nbsp;data&nbsp;cutting&nbsp;command&nbsp;where
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min&nbsp;and&nbsp;max&nbsp;are&nbsp;the&nbsp;start&nbsp;and&nbsp;end&nbsp;acrosstrack
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;distance&nbsp;(m)&nbsp;between&nbsp;which&nbsp;sidescan&nbsp;data&nbsp;are
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zeroed&nbsp;&nbsp;(note&nbsp;that&nbsp;zeroing&nbsp;sidescan&nbsp;data&nbsp;has
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no&nbsp;impact&nbsp;on&nbsp;bathymetry&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;SSCUTSPEED&nbsp;min&nbsp;max
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adds&nbsp;new&nbsp;sidescan&nbsp;data&nbsp;cutting&nbsp;command&nbsp;where
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;sidescan&nbsp;values&nbsp;are&nbsp;zeroed&nbsp;for&nbsp;pings&nbsp;with
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;ship&nbsp;or&nbsp;vehicle&nbsp;speed&nbsp;less&nbsp;than&nbsp;min&nbsp;or&nbsp;greater
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;than&nbsp;max&nbsp;(note&nbsp;that&nbsp;zeroing&nbsp;sidescan&nbsp;data&nbsp;has
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;no&nbsp;impact&nbsp;on&nbsp;bathymetry&nbsp;data)
+<P>
+<BR>&nbsp;BATHYMETRY&nbsp;EDITING:
+<BR>&nbsp;&nbsp;&nbsp;EDITSAVEMODE&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;turns&nbsp;on&nbsp;reading&nbsp;edit&nbsp;save&nbsp;file&nbsp;(from&nbsp;mbedit)&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;EDITSAVEFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;edit&nbsp;save&nbsp;file&nbsp;path&nbsp;(from&nbsp;mbedit)&nbsp;[none]
+<P>
+<BR>&nbsp;BATHYMETRY&nbsp;RECALCULATION:
+<BR>&nbsp;&nbsp;&nbsp;SVPMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;usage&nbsp;of&nbsp;a&nbsp;water&nbsp;sound&nbsp;speed&nbsp;model&nbsp;(sound
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;velocity&nbsp;profile,&nbsp;or&nbsp;SVP)&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;bathymetry&nbsp;recalculation&nbsp;by&nbsp;raytracing&nbsp;off
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;bathymetry&nbsp;recalculation&nbsp;by&nbsp;raytracing&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;translate&nbsp;depths&nbsp;from&nbsp;corrected&nbsp;to&nbsp;uncorrected
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;vice&nbsp;versa&nbsp;depending&nbsp;on&nbsp;SOUNDSPEEDREF
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command
+<BR>&nbsp;&nbsp;&nbsp;SVPFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;SVP&nbsp;file&nbsp;path&nbsp;[no&nbsp;default]
+<BR>&nbsp;&nbsp;&nbsp;SSVMODE&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;surface&nbsp;sound&nbsp;velocity&nbsp;(SSV)&nbsp;mode&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;use&nbsp;SSV&nbsp;from&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;offset&nbsp;SSV&nbsp;from&nbsp;file&nbsp;(set&nbsp;by&nbsp;SSV&nbsp;command)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;use&nbsp;constant&nbsp;SSV&nbsp;(set&nbsp;by&nbsp;SSV&nbsp;command)
+<BR>&nbsp;&nbsp;&nbsp;SSV&nbsp;constant/offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;SSV&nbsp;value&nbsp;or&nbsp;offset&nbsp;(m/s)&nbsp;[1500.0]
+<BR>&nbsp;&nbsp;&nbsp;ANGLEMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;handling&nbsp;of&nbsp;beam&nbsp;angles&nbsp;during
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raytracing&nbsp;[1]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;angles&nbsp;not&nbsp;changed&nbsp;before&nbsp;raytracing
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;angles&nbsp;adjusted&nbsp;using&nbsp;Snell's&nbsp;Law&nbsp;for
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;difference&nbsp;between&nbsp;the&nbsp;surface&nbsp;sound
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;velocity&nbsp;(SSV)&nbsp;and&nbsp;the&nbsp;sound&nbsp;speed&nbsp;at
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;sonar&nbsp;depth&nbsp;in&nbsp;the&nbsp;SVP.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;angles&nbsp;adjusted&nbsp;using&nbsp;Snell's&nbsp;Law&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;sonar&nbsp;array&nbsp;geometry&nbsp;for&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;difference&nbsp;between&nbsp;the&nbsp;surface&nbsp;sound
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;velocity&nbsp;(SSV)&nbsp;and&nbsp;the&nbsp;sound&nbsp;speed&nbsp;at
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;sonar&nbsp;depth&nbsp;in&nbsp;the&nbsp;SVP.
+<BR>&nbsp;&nbsp;&nbsp;TTMULTIPLY&nbsp;multiplier
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;value&nbsp;multiplied&nbsp;by&nbsp;travel&nbsp;times&nbsp;[1.0]
+<BR>&nbsp;&nbsp;&nbsp;SOUNDSPEEDREF&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;determines&nbsp;the&nbsp;handling&nbsp;of&nbsp;the&nbsp;sound
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;speed&nbsp;reference&nbsp;for&nbsp;bathymetry&nbsp;[1]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;if&nbsp;raytracing&nbsp;is&nbsp;turned&nbsp;off&nbsp;then
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;command&nbsp;implies&nbsp;correcting&nbsp;or
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uncorrecting&nbsp;using&nbsp;the&nbsp;SVP&nbsp;specified
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;the&nbsp;SVPFILE&nbsp;command
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;produce&nbsp;&quot;uncorrected&quot;&nbsp;bathymetry
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;referenced&nbsp;to&nbsp;a&nbsp;uniform&nbsp;1500&nbsp;m/s
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;water&nbsp;sound&nbsp;speed&nbsp;model.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;produce&nbsp;&quot;corrected&quot;&nbsp;bathymetry
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;referenced&nbsp;to&nbsp;a&nbsp;realistic&nbsp;water
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sound&nbsp;speed&nbsp;model.
+<P>
+<BR>&nbsp;STATIC&nbsp;BEAM&nbsp;BATHYMETRY&nbsp;OFFSETS:
+<BR>&nbsp;&nbsp;&nbsp;STATICMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;offsetting&nbsp;of&nbsp;bathymetry&nbsp;by
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;per-beam&nbsp;statics&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;static&nbsp;correction&nbsp;off
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;static&nbsp;correction&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;STATICFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;static&nbsp;per-beam&nbsp;file&nbsp;path&nbsp;[no&nbsp;default]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;static&nbsp;files&nbsp;are&nbsp;two-column&nbsp;ascii&nbsp;tables
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;the&nbsp;beam&nbsp;#&nbsp;in&nbsp;column&nbsp;1&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;depth&nbsp;offset&nbsp;in&nbsp;m&nbsp;in&nbsp;column&nbsp;2
+<P>
+<BR>&nbsp;DRAFT&nbsp;CORRECTION:
+<BR>&nbsp;&nbsp;&nbsp;DRAFTMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;draft&nbsp;correction&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;draft&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;before
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;draft&nbsp;correction&nbsp;applied
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;no&nbsp;draft&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;draft&nbsp;correction&nbsp;by&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;draft&nbsp;correction&nbsp;by&nbsp;multiply
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3:&nbsp;draft&nbsp;correction&nbsp;by&nbsp;offset&nbsp;and&nbsp;multiply
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4:&nbsp;draft&nbsp;set&nbsp;to&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;DRAFT&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;draft&nbsp;value&nbsp;(m)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;DRAFTOFFSET&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;value&nbsp;added&nbsp;to&nbsp;draft&nbsp;(m)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;DRAFTMULTIPLY&nbsp;multiplier
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;value&nbsp;multiplied&nbsp;by&nbsp;draft&nbsp;[1.0]
+<P>
+<BR>&nbsp;HEAVE&nbsp;CORRECTION:
+<BR>&nbsp;&nbsp;&nbsp;HEAVEMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;heave&nbsp;correction&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;heave&nbsp;correction&nbsp;by&nbsp;offset&nbsp;and/or
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;multiplication&nbsp;is&nbsp;added&nbsp;to&nbsp;any&nbsp;lever
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heave&nbsp;correction,&nbsp;and&nbsp;then&nbsp;either&nbsp;used&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bathymetry&nbsp;recalculation&nbsp;or&nbsp;added&nbsp;to
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;existing&nbsp;bathymetry
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;no&nbsp;heave&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;heave&nbsp;correction&nbsp;by&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;heave&nbsp;correction&nbsp;by&nbsp;multiply
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3:&nbsp;heave&nbsp;correction&nbsp;by&nbsp;offset&nbsp;and&nbsp;multiply
+<BR>&nbsp;&nbsp;&nbsp;HEAVEOFFSET&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;value&nbsp;added&nbsp;to&nbsp;heave&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;HEAVEMULTIPLY&nbsp;multiplier
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;value&nbsp;multiplied&nbsp;by&nbsp;heave
+<P>
+<BR>&nbsp;LEVER&nbsp;CORRECTION:
+<BR>&nbsp;&nbsp;&nbsp;LEVERMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;heave&nbsp;correction&nbsp;by&nbsp;lever&nbsp;calculation&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;lever&nbsp;heave&nbsp;correction&nbsp;is&nbsp;added&nbsp;to
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;any&nbsp;heave&nbsp;correction&nbsp;by&nbsp;offset&nbsp;and/or
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;multiplication,&nbsp;and&nbsp;then&nbsp;either&nbsp;used&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bathymetry&nbsp;recalculation&nbsp;or&nbsp;added&nbsp;to
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;existing&nbsp;bathymetry
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;no&nbsp;lever&nbsp;calculation
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;heave&nbsp;correction&nbsp;by&nbsp;lever&nbsp;calculation
+<BR>&nbsp;&nbsp;&nbsp;VRUOFFSETX&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;athwartships&nbsp;offset&nbsp;of&nbsp;attitude&nbsp;sensor&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;positive&nbsp;to&nbsp;starboard
+<BR>&nbsp;&nbsp;&nbsp;VRUOFFSETY&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;fore-aft&nbsp;offset&nbsp;of&nbsp;attitude&nbsp;sensor&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;positive&nbsp;forward
+<BR>&nbsp;&nbsp;&nbsp;VRUOFFSETZ&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;vertical&nbsp;offset&nbsp;of&nbsp;attitude&nbsp;sensor&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;positive&nbsp;down
+<BR>&nbsp;&nbsp;&nbsp;SONAROFFSETX&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;athwartships&nbsp;offset&nbsp;of&nbsp;sonar&nbsp;receive&nbsp;array&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;positive&nbsp;to&nbsp;starboard
+<BR>&nbsp;&nbsp;&nbsp;SONAROFFSETY&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;fore-aft&nbsp;offset&nbsp;of&nbsp;sonar&nbsp;receive&nbsp;array&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;positive&nbsp;forward
+<BR>&nbsp;&nbsp;&nbsp;SONAROFFSETZ&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;vertical&nbsp;offset&nbsp;of&nbsp;sonar&nbsp;receive&nbsp;array&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;positive&nbsp;down
+<P>
+<BR>&nbsp;ROLL&nbsp;CORRECTION:
+<BR>&nbsp;&nbsp;&nbsp;ROLLBIASMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;roll&nbsp;correction&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;no&nbsp;roll&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;roll&nbsp;correction&nbsp;by&nbsp;single&nbsp;roll&nbsp;bias
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;roll&nbsp;correction&nbsp;by&nbsp;separate&nbsp;port&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;starboard&nbsp;roll&nbsp;bias
+<BR>&nbsp;&nbsp;&nbsp;ROLLBIAS&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;roll&nbsp;bias&nbsp;(degrees)
+<BR>&nbsp;&nbsp;&nbsp;ROLLBIASPORT&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;port&nbsp;roll&nbsp;bias&nbsp;(degrees)
+<BR>&nbsp;&nbsp;&nbsp;ROLLBIASSTBD&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;starboard&nbsp;roll&nbsp;bias&nbsp;(degrees)
+<P>
+<BR>&nbsp;PITCH&nbsp;CORRECTION:
+<BR>&nbsp;&nbsp;&nbsp;PITCHBIASMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;pitch&nbsp;correction&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;no&nbsp;pitch&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;pitch&nbsp;correction&nbsp;by&nbsp;pitch&nbsp;bias
+<BR>&nbsp;&nbsp;&nbsp;PITCHBIAS&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;pitch&nbsp;bias&nbsp;(degrees)
+<P>
+<BR>&nbsp;HEADING&nbsp;CORRECTION:
+<BR>&nbsp;&nbsp;&nbsp;HEADINGMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;heading&nbsp;correction&nbsp;[no&nbsp;heading&nbsp;correction]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;heading&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;before
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heading&nbsp;correction&nbsp;applied
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;no&nbsp;heading&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;heading&nbsp;correction&nbsp;using&nbsp;course
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;made&nbsp;good
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;heading&nbsp;correction&nbsp;by&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3:&nbsp;heading&nbsp;correction&nbsp;using&nbsp;course
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;made&nbsp;good&nbsp;and&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;HEADINGOFFSET&nbsp;offset
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;value&nbsp;added&nbsp;to&nbsp;heading&nbsp;(degrees)
+<P>
+<BR>&nbsp;TIDE&nbsp;CORRECTION:
+<BR>&nbsp;&nbsp;&nbsp;TIDEMODE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;tide&nbsp;correction&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;note:&nbsp;tide&nbsp;added&nbsp;to&nbsp;bathymetry&nbsp;after
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;other&nbsp;calculations&nbsp;and&nbsp;corrections
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;tide&nbsp;correction&nbsp;off
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;tide&nbsp;correction&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;TIDEFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;tide&nbsp;file&nbsp;path
+<BR>&nbsp;&nbsp;&nbsp;TIDEFORMAT&nbsp;constan
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;tide&nbsp;file&nbsp;format&nbsp;[1]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;tide&nbsp;files&nbsp;can&nbsp;be&nbsp;in&nbsp;one&nbsp;of&nbsp;four&nbsp;ASCII
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;table&nbsp;formats
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;format&nbsp;is&nbsp;&lt;time_d&nbsp;tide&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;tide&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;jday&nbsp;hour&nbsp;min&nbsp;sec&nbsp;tide&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;jday&nbsp;daymin&nbsp;sec&nbsp;tide&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;time_d&nbsp;=&nbsp;decimal&nbsp;seconds&nbsp;since&nbsp;1/1/1970
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;daymin&nbsp;=&nbsp;decimal&nbsp;minutes&nbsp;start&nbsp;of&nbsp;day
+<P>
+<BR>&nbsp;AMPLITUDE&nbsp;CORRECTION:
+<BR>&nbsp;&nbsp;&nbsp;AMPCORRMODE&nbsp;&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;correction&nbsp;of&nbsp;amplitude&nbsp;for
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amplitude&nbsp;vs&nbsp;grazing&nbsp;angle&nbsp;function
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;amplitude&nbsp;correction&nbsp;off
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;amplitude&nbsp;correction&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;AMPCORRFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;amplitude&nbsp;correction&nbsp;file&nbsp;path
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[no&nbsp;default]
+<BR>&nbsp;&nbsp;&nbsp;AMPCORRTYPE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;sidescan&nbsp;correction&nbsp;type&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;correction&nbsp;by&nbsp;subtraction&nbsp;(dB&nbsp;scale)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;correction&nbsp;by&nbsp;division&nbsp;(linear&nbsp;scale)
+<BR>&nbsp;&nbsp;&nbsp;AMPCORRSYMMETRY&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;forces&nbsp;correction&nbsp;function&nbsp;to&nbsp;be&nbsp;symmetric&nbsp;[1]
+<BR>&nbsp;&nbsp;&nbsp;AMPCORRANGLE&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;amplitude&nbsp;correction&nbsp;reference&nbsp;angle
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(deg)&nbsp;[30.0]
+<BR>&nbsp;&nbsp;&nbsp;AMPCORRSLOPE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;amplitude&nbsp;correction&nbsp;slope&nbsp;mode&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;local&nbsp;slope&nbsp;ignored&nbsp;in&nbsp;calculating&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;local&nbsp;slope&nbsp;used&nbsp;in&nbsp;calculating&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;topography&nbsp;grid&nbsp;used&nbsp;in&nbsp;calculating&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;slope&nbsp;ignored
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3:&nbsp;local&nbsp;slope&nbsp;from&nbsp;topography&nbsp;grid&nbsp;used&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;calculating&nbsp;correction
+<P>
+<BR>&nbsp;SIDESCAN&nbsp;CORRECTION:
+<BR>&nbsp;&nbsp;&nbsp;SSCORRMODE&nbsp;&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;correction&nbsp;of&nbsp;sidescan&nbsp;for
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amplitude&nbsp;vs&nbsp;grazing&nbsp;angle&nbsp;function
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;sidescan&nbsp;correction&nbsp;off
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;sidescan&nbsp;correction&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;SSCORRFILE&nbsp;filename
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;sidescan&nbsp;correction&nbsp;file&nbsp;path
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[no&nbsp;default]
+<BR>&nbsp;&nbsp;&nbsp;SSCORRTYPE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;sidescan&nbsp;correction&nbsp;type&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;correction&nbsp;by&nbsp;subtraction&nbsp;(dB&nbsp;scale)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;correction&nbsp;by&nbsp;division&nbsp;(linear&nbsp;scale)
+<BR>&nbsp;&nbsp;&nbsp;SSCORRSYMMETRY&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;forces&nbsp;correction&nbsp;function&nbsp;to&nbsp;be&nbsp;symmetric&nbsp;[1]
+<BR>&nbsp;&nbsp;&nbsp;SSCORRANGLE&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;sidescan&nbsp;correction&nbsp;reference&nbsp;angle
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(deg)&nbsp;[30.0]
+<BR>&nbsp;&nbsp;&nbsp;SSCORRSLOPE&nbsp;mode
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;sidescan&nbsp;correction&nbsp;slope&nbsp;mode&nbsp;[0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;local&nbsp;slope&nbsp;ignored&nbsp;in&nbsp;calculating&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;local&nbsp;slope&nbsp;used&nbsp;in&nbsp;calculating&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;topography&nbsp;grid&nbsp;used&nbsp;in&nbsp;calculating&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;slope&nbsp;ignored
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3:&nbsp;local&nbsp;slope&nbsp;from&nbsp;topography&nbsp;grid&nbsp;used&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;calculating&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;AMPSSCORRTOPOFILE
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sets&nbsp;topography&nbsp;grid&nbsp;used&nbsp;for&nbsp;correcting&nbsp;amplitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;sidescan
+<P>
+<BR>&nbsp;SIDESCAN&nbsp;RECALCULATION:
+<BR>&nbsp;&nbsp;&nbsp;SSRECALCMODE&nbsp;&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;recalculation&nbsp;of&nbsp;sidescan&nbsp;for
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Simrad&nbsp;multibeam&nbsp;data
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;sidescan&nbsp;recalculation&nbsp;off
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;sidescan&nbsp;recalculation&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;SSPIXELSIZE&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;recalculated&nbsp;sidescan&nbsp;pixel&nbsp;size&nbsp;(m)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;a&nbsp;zero&nbsp;value&nbsp;causes&nbsp;the&nbsp;pixel&nbsp;size&nbsp;to
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;recalculated&nbsp;for&nbsp;every&nbsp;data&nbsp;record
+<BR>&nbsp;&nbsp;&nbsp;SSSWATHWIDTH&nbsp;&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;sidescan&nbsp;swath&nbsp;width&nbsp;(degrees)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;a&nbsp;zero&nbsp;value&nbsp;causes&nbsp;the&nbsp;swath&nbsp;width
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;be&nbsp;recalculated&nbsp;for&nbsp;every&nbsp;data&nbsp;record
+<BR>&nbsp;&nbsp;&nbsp;SSINTERPOLATE&nbsp;&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;sidescan&nbsp;interpolation&nbsp;distance
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(number&nbsp;of&nbsp;pixels)
+<P>
+<BR>&nbsp;METADATA&nbsp;INSERTION:
+<BR>&nbsp;&nbsp;&nbsp;METAVESSEL&nbsp;string
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;string&nbsp;for&nbsp;vessel
+<BR>&nbsp;&nbsp;&nbsp;METAINSTITUTION&nbsp;string
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;string&nbsp;for&nbsp;vessel
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;operator&nbsp;institution&nbsp;or&nbsp;company
+<BR>&nbsp;&nbsp;&nbsp;METAPLATFORM&nbsp;string
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;string&nbsp;for&nbsp;sonar
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;platform&nbsp;(ship&nbsp;or&nbsp;vehicle)
+<BR>&nbsp;&nbsp;&nbsp;METASONAR&nbsp;string
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;string&nbsp;for&nbsp;sonar
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model&nbsp;name
+<BR>&nbsp;&nbsp;&nbsp;METASONARVERSION&nbsp;string
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;string&nbsp;for&nbsp;sonar
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;version&nbsp;(usually&nbsp;software&nbsp;version)
+<BR>&nbsp;&nbsp;&nbsp;METACRUISEID&nbsp;string
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;string&nbsp;for&nbsp;institutional
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cruise&nbsp;id
+<BR>&nbsp;&nbsp;&nbsp;METACRUISENAME&nbsp;string
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;string&nbsp;for&nbsp;descriptive
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cruise&nbsp;name
+<BR>&nbsp;&nbsp;&nbsp;METAPI&nbsp;string
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;string&nbsp;for&nbsp;principal
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;investigator
+<BR>&nbsp;&nbsp;&nbsp;METAPIINSTITUTION&nbsp;string
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;string&nbsp;for&nbsp;principal
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;investigator
+<BR>&nbsp;&nbsp;&nbsp;METACLIENT&nbsp;string
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;string&nbsp;fo&nbsp;data&nbsp;owner
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(usually&nbsp;PI&nbsp;institution)
+<BR>&nbsp;&nbsp;&nbsp;METASVCORRECTED&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;boolean&nbsp;for&nbsp;sound
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;velocity&nbsp;corrected&nbsp;depths
+<BR>&nbsp;&nbsp;&nbsp;METATIDECORRECTED&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;boolean&nbsp;for&nbsp;tide
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;corrected&nbsp;bathymetry
+<BR>&nbsp;&nbsp;&nbsp;METABATHEDITMANUAL&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;boolean&nbsp;for&nbsp;manually
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;edited&nbsp;bathymetry
+<BR>&nbsp;&nbsp;&nbsp;METABATHEDITAUTO&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;boolean&nbsp;for&nbsp;automatically
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;edited&nbsp;bathymetry
+<BR>&nbsp;&nbsp;&nbsp;METAROLLBIAS&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;constant&nbsp;for&nbsp;roll&nbsp;bias
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(degrees&nbsp;+&nbsp;to&nbsp;starboard)
+<BR>&nbsp;&nbsp;&nbsp;METAPITCHBIAS&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;constant&nbsp;for&nbsp;pitch&nbsp;bias
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(degrees&nbsp;+&nbsp;forward)
+<BR>&nbsp;&nbsp;&nbsp;METAHEADINGBIAS&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;constant&nbsp;for&nbsp;heading&nbsp;bias
+<BR>&nbsp;&nbsp;&nbsp;METADRAFT&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;mbinfo&nbsp;metadata&nbsp;constant&nbsp;for&nbsp;vessel&nbsp;draft&nbsp;(m)
+<P>
+<BR>&nbsp;PROCESSING&nbsp;KLUGES:
+<BR>&nbsp;&nbsp;&nbsp;KLUGE001&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enables&nbsp;correction&nbsp;of&nbsp;travel&nbsp;times&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hydrosweep&nbsp;DS2&nbsp;data&nbsp;from&nbsp;the&nbsp;R/V&nbsp;Maurice
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ewing&nbsp;in&nbsp;2001&nbsp;and&nbsp;2002.
+<BR>&nbsp;&nbsp;&nbsp;KLUGE002&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enables&nbsp;correction&nbsp;of&nbsp;draft&nbsp;values&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Simrad&nbsp;data
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;some&nbsp;Simrad&nbsp;multibeam&nbsp;data&nbsp;has&nbsp;had&nbsp;an
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;error&nbsp;in&nbsp;which&nbsp;the&nbsp;heave&nbsp;has&nbsp;bee&nbsp;added
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;the&nbsp;sonar&nbsp;depth&nbsp;(draft&nbsp;for&nbsp;hull
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mounted&nbsp;sonars)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;this&nbsp;correction&nbsp;subtracts&nbsp;the&nbsp;heave
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;from&nbsp;the&nbsp;sonar&nbsp;depth
+<BR>&nbsp;&nbsp;&nbsp;KLUGE003&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enables&nbsp;correction&nbsp;of&nbsp;beam&nbsp;angles&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SeaBeam&nbsp;2112&nbsp;data
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;a&nbsp;data&nbsp;sample&nbsp;from&nbsp;the&nbsp;SeaBeam&nbsp;2112&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;USCG&nbsp;Icebreaker&nbsp;Healy&nbsp;(collected&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;23&nbsp;July&nbsp;2003)&nbsp;was&nbsp;found&nbsp;to&nbsp;have&nbsp;an&nbsp;error
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;which&nbsp;the&nbsp;beam&nbsp;angles&nbsp;had&nbsp;0.25&nbsp;times
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;roll&nbsp;added
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;this&nbsp;correction&nbsp;subtracts&nbsp;0.25&nbsp;*&nbsp;roll
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;the&nbsp;beam&nbsp;angles&nbsp;before&nbsp;the&nbsp;bathymetry
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;recalculated&nbsp;by&nbsp;raytracing&nbsp;through&nbsp;a
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;water&nbsp;sound&nbsp;velocity&nbsp;profile
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;the&nbsp;mbprocess&nbsp;parameter&nbsp;files&nbsp;must&nbsp;be
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;to&nbsp;enable&nbsp;bathymetry&nbsp;recalculation
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;by&nbsp;raytracing&nbsp;in&nbsp;order&nbsp;to&nbsp;apply&nbsp;this
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;correction
+<BR>&nbsp;&nbsp;&nbsp;KLUGE004&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deletes&nbsp;survey&nbsp;data&nbsp;associated&nbsp;with&nbsp;duplicate
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;reversed&nbsp;time&nbsp;tags
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;if&nbsp;survey&nbsp;data&nbsp;records&nbsp;are&nbsp;encountered
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;time&nbsp;tags&nbsp;less&nbsp;than&nbsp;or&nbsp;equal&nbsp;to&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;last&nbsp;good&nbsp;time&nbsp;tag,&nbsp;an&nbsp;error&nbsp;is&nbsp;set&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;data&nbsp;record&nbsp;is&nbsp;not&nbsp;output&nbsp;to&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;processed&nbsp;data&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;KLUGE005&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;replaces&nbsp;survey&nbsp;record&nbsp;timestamps&nbsp;with
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamps&nbsp;of&nbsp;corresponding&nbsp;merged&nbsp;navigation
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;records
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;this&nbsp;feature&nbsp;allows&nbsp;users&nbsp;to&nbsp;fix
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp&nbsp;errors&nbsp;using&nbsp;MBnavedit&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;insert&nbsp;the&nbsp;corrected&nbsp;timestamps
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;into&nbsp;processed&nbsp;data
+<BR>&nbsp;&nbsp;&nbsp;KLUGE006&nbsp;boolean
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>changes&nbsp;sonar&nbsp;depth&nbsp;/&nbsp;draft&nbsp;values&nbsp;without<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;changing&nbsp;bathymetry&nbsp;values
+<BR>&nbsp;&nbsp;&nbsp;KLUGE007&nbsp;boolean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;processing&nbsp;kluge&nbsp;007&nbsp;(not&nbsp;yet&nbsp;defined)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;occasionaly&nbsp;odd&nbsp;processing&nbsp;problems&nbsp;will
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;occur&nbsp;that&nbsp;are&nbsp;specific&nbsp;to&nbsp;a&nbsp;particular
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;survey&nbsp;or&nbsp;sonar&nbsp;version
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;mbprocess&nbsp;will&nbsp;allow&nbsp;one-time&nbsp;fixes&nbsp;to
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;defined&nbsp;as&nbsp;&quot;kluges&quot;&nbsp;that&nbsp;can&nbsp;be&nbsp;turned
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;on&nbsp;through&nbsp;the&nbsp;parameter&nbsp;files.
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>ANCILLARY DATA FILES</H2>
+
+<P>
+<B>MB-System</B> also uses a number of ancillary data files, most
+of which relate to <B>mbprocess</B> in some way. By default,
+these ancillary data files are named by adding a short suffix
+to the primary data file name (e.g. &quot;.par&quot;, &quot;.svp&quot;, &quot;.esf&quot;, &quot;.nve&quot;)
+<P>
+The common ancillary files are listed below. The example names
+given here follow from an input swath data file name of mydata.mb71.
+<P>
+The processing parameter file used by <B>mbprocess</B> has
+an &quot;.par&quot; suffix. These files are generated
+or modified by <B>mbset</B>, <B>mbedit</B>, <B>mbnavedit</B>,
+<B>mbvelocitytool</B>, <B>mbnavadjust</B>, and <B>mbclean</B>.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.par
+<P>
+The most prominent ancillary files are metadata or
+&quot;inf&quot; files (created from the output of <B>mbinfo</B>).
+Programs such as <B>mbgrid</B> and <B>mbm_plot</B> try to check &quot;inf&quot;
+files to see if the corresponding data files include data within
+desired areas. The program <B>mbprocess</B> automatically generates
+an &quot;inf&quot; file for any processed output swath file.
+Also, the program <B>mbdatalist</B> is often used to
+create or update &quot;inf&quot; files for large groups of swath data files.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.inf
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.inf
+<P>
+The &quot;fast bath&quot; or &quot;fbt&quot; files
+are generated by copying the swath bathymetry to a sparse,
+quickly read format (format 71). Programs such as <B>mbgrid</B>,
+<B>mbswath</B>, and <B>mbcontour</B> will try to read &quot;fbt&quot; files
+instead of the full data files whenever only bathymetry
+information are required. The program <B>mbprocess</B>
+automatically generates
+an &quot;fbt&quot; file for any processed output swath file.
+Also, the program <B>mbdatalist</B> is often used to
+create or update &quot;fbt&quot; files for large groups of swath data files.
+These files are not generated or used
+when the original swath data is already
+in a compact bathymetry-only data format.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.fbt
+<P>
+The &quot;fast nav&quot; or &quot;fnv&quot; files
+are just ASCII lists of navigation generated using <B>mblist</B>
+with a <B>-O</B><I>tMXYHSc</I> option. Programs such as <B>mbgrid</B>,
+<B>mbswath</B>, and <B>mbcontour</B> will try to read &quot;fnv&quot; files
+instead of the full data files whenever only
+navigation information are required. These files are not generated or used
+when the original data is already
+in a single-beam or navigation data format.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.fnv
+<P>
+The bathymetry edit save file generated by <B>mbedit</B> and
+<B>mbclean</B> has an &quot;.esf&quot; suffix.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.esf
+<P>
+A water sound velocity profile (SVP) file generated
+by <B>mbvelocitytool</B> has an &quot;.svp&quot; suffix unless
+the user specifies otherwise.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.svp
+<P>
+Water sound velocity profile (SVP) files generated
+by <B>mbsvplist</B> also use the &quot;.svp&quot; suffix.
+However, multiple SVP files may be
+extracted from each input swath file, so the files are
+numbered using a &quot;_YYY.svp&quot; suffix, where YYY increments
+from 001.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71_001.svp
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71_002.svp
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71_003.svp
+<P>
+Edited navigation files generated by <B>mbnavedit</B> have
+an &quot;.nve&quot; suffix:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.nve
+<BR>
+
+These navigation files can be read independently using format 166.
+<P>
+Adjusted navigation files generated by <B>mbnavadjust</B>
+have an &quot;.naY&quot; suffix, where &quot;Y&quot; is a number between 0-9.
+The <B>mbnavadjust</B> package may be used multiple times
+for a survey; the adjustments are numbered sequentially from
+&quot;0&quot;:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.na0
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.na1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mydata.mb71.na2
+<BR>
+
+and so on. These navigation files can be read independently using format 166.
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-E</B>
+
+<DD>
+<BR>
+
+This option causes <B>mbset</B> to require all
+processing modes to be explicitly set by <B>-P</B>
+calls. Normally, <B>mbset</B> will implicitly set
+some modes based on the parameters applied. For example,
+if a user applies <B>-P</B><I>SVPFILE:best.svp</I>, <B>mbset</B>
+would normally set the bathymetry recalculation mode
+on so that the SVP file specified actually gets used.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Swath data file for which an <B>mbprocess</B> parameter file
+will be created or updated, or
+a datalist file containing a list of input swath data files
+and/or other datalist files. If <I>infile</I> is a
+datalist file, then <B>mbset</B> will attempt to
+update or create the parameter files for all swath data
+files identified by recursively reading <I>infile</I>.
+Default <I>infile</I>: datalist.mb-1
+<DT><B>-L</B>
+
+<DD>
+<BR>
+
+If given once, this option causes <B>mbset</B> to look for any edit save
+files and navigation files with expected names
+and set the <B>mbprocess</B> parameters so that these files
+are used. If multiple navigation files are available
+(reflecting use of <B>mbnavedit</B> and one or more
+uses of <B>mbnavadjust</B>), then the latest (highest numbered)
+<B>mbnavadjust</B> solution is used.
+If <B>-L</B> is given twice, <B>mbset</B> will also look
+for any SVP files with expected names
+and set the <B>mbprocess</B> parameters so that these files
+are used for recalculating bathymetry by raytracing.
+If multiple SVP files are available
+(reflecting use of <B>mbsvplist</B> and <B>mbvelocitytool</B>),
+then the file derived from <B>mbvelocitytool</B>
+is used.
+If <B>-L</B> is given three times or more, then <B>mbset</B> will
+not look for any ancillary files, but instead reset
+the paths to all output files to be &quot;local&quot;, meaning located
+in the same directory as the input file. This special option
+allows users to fix parameter files containing full paths for
+output files (as generated by early versions of this program).
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-P</B>
+
+<DD>
+<I>PARAMETER:value</I>
+The <B>-P</B> option of <B>mbset</B> is used to modify a single
+<B>mbprocess</B> parameter command. Here <I>PARAMETER</I> may be
+any of the processing parameter names listed above, and <I>value</I>
+is the corresponding value to be set. This option can be invoked
+as many times as desired on the command line, allowing <B>mbset</B>
+to set multiple <B>mbprocess</B> processing parameters and modes.
+The separater between <I>PARAMETER</I> and <I>value</I> can be
+either ':' or '='. Only the first ':' or '=' acts as a separater;
+later instances of these characters are taken as part of <I>value</I>.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbset</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbset</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used and lists the processing
+parameters output to the <B>mbprocess</B> parameter file.
+<P>
+</DL>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose the user has a Simrad EM120 data file called
+&quot;0051_20010829_223755.mb57&quot; that requires processing.
+<P>
+Editing the bathymetry data in this file with mbedit will generate
+an edit save file &quot;0051_20010829_223755.mb57.esf&quot; and
+an mbprocess parameter file &quot;0051_20010829_223755.mb57.par&quot;.
+The contents of the parameter file are:
+<P>
+<BR>&nbsp;##&nbsp;MB-System&nbsp;processing&nbsp;parameter&nbsp;file
+<BR>&nbsp;##&nbsp;Written&nbsp;by&nbsp;mb_pr_writepar&nbsp;version&nbsp;$Id:&nbsp;mbset.1&nbsp;2153&nbsp;2013-09-22&nbsp;07:05:09Z&nbsp;caress&nbsp;$
+<BR>&nbsp;##&nbsp;MB-system&nbsp;Version&nbsp;5.0.beta22
+<BR>&nbsp;##&nbsp;Generated&nbsp;by&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;menard&gt;&nbsp;at&nbsp;&lt;Fri&nbsp;Sep&nbsp;&nbsp;6&nbsp;21:27:41&nbsp;2002&gt;
+<BR>&nbsp;##
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Forces&nbsp;explicit&nbsp;reading&nbsp;of&nbsp;parameter&nbsp;modes.
+<BR>&nbsp;EXPLICIT
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;General&nbsp;Parameters:
+<BR>&nbsp;FORMAT&nbsp;57
+<BR>&nbsp;INFILE&nbsp;/data/0051_20010829_223755.mb57
+<BR>&nbsp;OUTFILE&nbsp;/data/0051_20010829_223755p.mb57
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Navigation&nbsp;Merging:
+<BR>&nbsp;NAVMODE&nbsp;0
+<BR>&nbsp;NAVFILE&nbsp;/data/0051_20010829_223755.mb57.nve
+<BR>&nbsp;NAVFORMAT&nbsp;0
+<BR>&nbsp;NAVHEADING&nbsp;0
+<BR>&nbsp;NAVSPEED&nbsp;0
+<BR>&nbsp;NAVDRAFT&nbsp;0
+<BR>&nbsp;NAVATTITUDE&nbsp;0
+<BR>&nbsp;NAVINTERP&nbsp;0
+<BR>&nbsp;NAVTIMESHIFT&nbsp;0.000000
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Navigation&nbsp;Offsets&nbsp;and&nbsp;Shifts:
+<BR>&nbsp;NAVSHIFT&nbsp;0
+<BR>&nbsp;NAVOFFSETX&nbsp;0.000000
+<BR>&nbsp;NAVOFFSETY&nbsp;0.000000
+<BR>&nbsp;NAVOFFSETZ&nbsp;0.000000
+<BR>&nbsp;NAVSHIFTLON&nbsp;0.000000
+<BR>&nbsp;NAVSHIFTLAT&nbsp;0.000000
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Adjusted&nbsp;Navigation&nbsp;Merging:
+<BR>&nbsp;NAVADJMODE&nbsp;0
+<BR>&nbsp;NAVADJFILE
+<BR>&nbsp;NAVADJINTERP&nbsp;0
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Attitude&nbsp;Merging:
+<BR>&nbsp;ATTITUDEMODE&nbsp;0
+<BR>&nbsp;ATTITUDEFILE
+<BR>&nbsp;ATTITUDEFORMAT&nbsp;1
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Sonardepth&nbsp;Merging:
+<BR>&nbsp;SONARDEPTHMODE&nbsp;0
+<BR>&nbsp;SONARDEPTHFILE
+<BR>&nbsp;SONARDEPTHFORMAT&nbsp;1
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Data&nbsp;cutting:
+<BR>&nbsp;DATACUTCLEAR
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Bathymetry&nbsp;Flagging:
+<BR>&nbsp;EDITSAVEMODE&nbsp;1
+<BR>&nbsp;EDITSAVEFILE&nbsp;/data/0051_20010829_223755.mb57.esf
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Bathymetry&nbsp;Recalculation:
+<BR>&nbsp;SVPMODE&nbsp;0
+<BR>&nbsp;SVPFILE
+<BR>&nbsp;SSVMODE&nbsp;0
+<BR>&nbsp;SSV&nbsp;0.000000
+<BR>&nbsp;TTMODE&nbsp;0
+<BR>&nbsp;TTMULTIPLY&nbsp;1.000000
+<BR>&nbsp;ANGLEMODE&nbsp;0
+<BR>&nbsp;SOUNDSPEEDREF&nbsp;1
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Draft&nbsp;Correction:
+<BR>&nbsp;DRAFTMODE&nbsp;0
+<BR>&nbsp;DRAFT&nbsp;0.000000
+<BR>&nbsp;DRAFTOFFSET&nbsp;0.000000
+<BR>&nbsp;DRAFTMULTIPLY&nbsp;1.000000
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Heave&nbsp;Correction:
+<BR>&nbsp;HEAVEMODE&nbsp;0
+<BR>&nbsp;HEAVEOFFSET&nbsp;0.000000
+<BR>&nbsp;HEAVEMULTIPLY&nbsp;1.000000
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Lever&nbsp;Correction:
+<BR>&nbsp;LEVERMODE&nbsp;0
+<BR>&nbsp;VRUOFFSETX&nbsp;0.000000
+<BR>&nbsp;VRUOFFSETY&nbsp;0.000000
+<BR>&nbsp;VRUOFFSETZ&nbsp;0.000000
+<BR>&nbsp;SONAROFFSETX&nbsp;0.000000
+<BR>&nbsp;SONAROFFSETY&nbsp;0.000000
+<BR>&nbsp;SONAROFFSETZ&nbsp;0.000000
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Roll&nbsp;Correction:
+<BR>&nbsp;ROLLBIASMODE&nbsp;0
+<BR>&nbsp;ROLLBIAS&nbsp;0.000000
+<BR>&nbsp;ROLLBIASPORT&nbsp;0.000000
+<BR>&nbsp;ROLLBIASSTBD&nbsp;0.000000
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Pitch&nbsp;Correction:
+<BR>&nbsp;PITCHBIASMODE&nbsp;0
+<BR>&nbsp;PITCHBIAS&nbsp;0.000000
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Heading&nbsp;Correction:
+<BR>&nbsp;HEADINGMODE&nbsp;0
+<BR>&nbsp;HEADINGOFFSET&nbsp;0.000000
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Tide&nbsp;Correction:
+<BR>&nbsp;TIDEMODE&nbsp;0
+<BR>&nbsp;TIDEFILE
+<BR>&nbsp;TIDEFORMAT&nbsp;1
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Amplitude&nbsp;Correction:
+<BR>&nbsp;AMPCORRMODE&nbsp;0
+<BR>&nbsp;AMPCORRFILE
+<BR>&nbsp;AMPCORRTYPE&nbsp;0
+<BR>&nbsp;AMPCORRSYMMETRY&nbsp;1
+<BR>&nbsp;AMPCORRANGLE&nbsp;30.000000
+<BR>&nbsp;AMPCORRSLOPE&nbsp;0
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Sidescan&nbsp;Correction:
+<BR>&nbsp;SSCORRMODE&nbsp;0
+<BR>&nbsp;SSCORRFILE
+<BR>&nbsp;SSCORRTYPE&nbsp;0
+<BR>&nbsp;SSCORRSYMMETRY&nbsp;1
+<BR>&nbsp;SSCORRANGLE&nbsp;30.000000
+<BR>&nbsp;SSCORRSLOPE&nbsp;0
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Sidescan&nbsp;Recalculation:
+<BR>&nbsp;SSRECALCMODE&nbsp;0
+<BR>&nbsp;SSPIXELSIZE&nbsp;0.000000
+<BR>&nbsp;SSSWATHWIDTH&nbsp;0.000000
+<BR>&nbsp;SSINTERPOLATE&nbsp;0
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Metadata&nbsp;Insertion:
+<BR>&nbsp;METAVESSEL
+<BR>&nbsp;METAINSTITUTION
+<BR>&nbsp;METAPLATFORM
+<BR>&nbsp;METASONAR
+<BR>&nbsp;METASONARVERSION
+<BR>&nbsp;METACRUISEID
+<BR>&nbsp;METACRUISENAME
+<BR>&nbsp;METAPI
+<BR>&nbsp;METAPIINSTITUTION
+<BR>&nbsp;METACLIENT
+<BR>&nbsp;METASVCORRECTED&nbsp;-1
+<BR>&nbsp;METATIDECORRECTED&nbsp;-1
+<BR>&nbsp;METABATHEDITMANUAL&nbsp;-1
+<BR>&nbsp;METABATHEDITAUTO&nbsp;-1
+<BR>&nbsp;METAROLLBIAS&nbsp;0.000000
+<BR>&nbsp;METAPITCHBIAS&nbsp;0.000000
+<BR>&nbsp;METAHEADINGBIAS&nbsp;0.000000
+<BR>&nbsp;METADRAFT&nbsp;0.000000
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Processing&nbsp;Kluges:
+<P>
+Editing the navigation with mbnavedit will generate
+a navigation file named &quot;0051_20010829_223755.mb57.nve&quot;
+and will modify the parameter file. The changed lines
+in &quot;0051_20010829_223755.mb57.par&quot; are:
+<P>
+<BR>&nbsp;##&nbsp;Navigation&nbsp;Merging:
+<BR>&nbsp;NAVMODE&nbsp;1
+<BR>&nbsp;NAVFILE&nbsp;/data/0051_20010829_223755.mb57.nve
+<BR>&nbsp;NAVFORMAT&nbsp;9
+<BR>&nbsp;NAVHEADING&nbsp;1
+<BR>&nbsp;NAVSPEED&nbsp;1
+<BR>&nbsp;NAVDRAFT&nbsp;1
+<BR>&nbsp;NAVATTITUDE&nbsp;1
+<P>
+At this point, running <B>mbprocess</B> on
+&quot;0051_20010829_223755.mb57&quot; will apply the bathymetry
+flags from <B>mbedit</B> and merge the navigation from
+<B>mbnavedit</B>, but will not modify the data in any
+other way.
+<P>
+If the user wants to recalculate the bathymetry using
+an SVP file &quot;0051_20010829_223755.mb57.svp&quot;
+and a roll bias correction
+of +0.5 degrees, the following will suffice:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbset&nbsp;-I&nbsp;0051_20010829_223755.mb57&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-PSVPFILE:0051_20010829_223755.mb57.svp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-PROLLBIAS:0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-PDRAFT:1.95&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-V
+<P>
+The affected lines in &quot;0051_20010829_223755.mb57.par&quot; are:
+<P>
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Bathymetry&nbsp;Recalculation:
+<BR>&nbsp;SVPMODE&nbsp;1
+<BR>&nbsp;SVPFILE&nbsp;0051_20010829_223755.mb57.svp
+<BR>&nbsp;SSVMODE&nbsp;0
+<BR>&nbsp;SSV&nbsp;0.000000
+<BR>&nbsp;TTMODE&nbsp;0
+<BR>&nbsp;TTMULTIPLY&nbsp;1.000000
+<BR>&nbsp;ANGLEMODE&nbsp;0
+<BR>&nbsp;SOUNDSPEEDREF&nbsp;1
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Draft&nbsp;Correction:
+<BR>&nbsp;DRAFTMODE&nbsp;4
+<BR>&nbsp;DRAFT&nbsp;1.950000
+<BR>&nbsp;DRAFTOFFSET&nbsp;0.000000
+<BR>&nbsp;DRAFTMULTIPLY&nbsp;1.000000
+<BR>&nbsp;##
+<BR>&nbsp;##&nbsp;Roll&nbsp;Correction:
+<BR>&nbsp;ROLLBIASMODE&nbsp;1
+<BR>&nbsp;ROLLBIAS&nbsp;0.500000
+<BR>&nbsp;ROLLBIASPORT&nbsp;0.000000
+<BR>&nbsp;ROLLBIASSTBD&nbsp;0.000000
+<P>
+To process the data, run mbprocess:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbprocess&nbsp;-I0051_20010829_223755.mb57&nbsp;-V
+<P>
+<BR>&nbsp;The&nbsp;output&nbsp;to&nbsp;the&nbsp;terminal&nbsp;is:
+<BR>&nbsp;Program&nbsp;mbprocess
+<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbset.1&nbsp;2153&nbsp;2013-09-22&nbsp;07:05:09Z&nbsp;caress&nbsp;$
+<BR>&nbsp;MB-System&nbsp;Version&nbsp;5.0.beta07
+<P>
+<BR>&nbsp;Program&nbsp;&lt;mbprocess&gt;
+<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbset.1&nbsp;2153&nbsp;2013-09-22&nbsp;07:05:09Z&nbsp;caress&nbsp;$
+<BR>&nbsp;MB-system&nbsp;Version&nbsp;5.0.beta07
+<P>
+<BR>&nbsp;Program&nbsp;Operation:
+<BR>&nbsp;&nbsp;&nbsp;Input&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0051_20010829_223755.mb57
+<BR>&nbsp;&nbsp;&nbsp;Format:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;57
+<BR>&nbsp;&nbsp;&nbsp;Files&nbsp;processed&nbsp;only&nbsp;if&nbsp;out&nbsp;of&nbsp;date.
+<BR>&nbsp;&nbsp;&nbsp;Comments&nbsp;embedded&nbsp;in&nbsp;output.
+<P>
+<BR>&nbsp;Data&nbsp;processed&nbsp;-&nbsp;out&nbsp;of&nbsp;date:
+<BR>&nbsp;&nbsp;Input:&nbsp;&nbsp;0051_20010829_223755.mb57
+<BR>&nbsp;&nbsp;Output:&nbsp;0051_20010829_223755p.mb57
+<P>
+<BR>&nbsp;Input&nbsp;and&nbsp;Output&nbsp;Files:
+<BR>&nbsp;&nbsp;&nbsp;Format:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;57
+<BR>&nbsp;&nbsp;&nbsp;Input&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0051_20010829_223755.mb57
+<BR>&nbsp;&nbsp;&nbsp;Output&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0051_20010829_223755p.mb57
+<BR>&nbsp;&nbsp;&nbsp;Comments&nbsp;in&nbsp;output:&nbsp;ON
+<P>
+<BR>&nbsp;Navigation&nbsp;Merging:
+<BR>&nbsp;&nbsp;&nbsp;Navigation&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;Heading&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;Speed&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;Draft&nbsp;merged&nbsp;from&nbsp;navigation&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;Navigation&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0051_20010829_223755.mb57.nve
+<BR>&nbsp;&nbsp;&nbsp;Navigation&nbsp;algorithm:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;linear&nbsp;interpolation
+<BR>&nbsp;&nbsp;&nbsp;Navigation&nbsp;time&nbsp;shift:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000
+<P>
+<BR>&nbsp;Navigation&nbsp;Offsets&nbsp;and&nbsp;Shifts:
+<BR>&nbsp;&nbsp;&nbsp;Navigation&nbsp;positions&nbsp;not&nbsp;shifted.
+<P>
+<BR>&nbsp;Adjusted&nbsp;Navigation&nbsp;Merging:
+<BR>&nbsp;&nbsp;&nbsp;Navigation&nbsp;not&nbsp;merged&nbsp;from&nbsp;adjusted&nbsp;navigation&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;Adjusted&nbsp;navigation&nbsp;file:
+<BR>&nbsp;&nbsp;&nbsp;Adjusted&nbsp;navigation&nbsp;algorithm:&nbsp;linear&nbsp;interpolation
+<P>
+<BR>&nbsp;Data&nbsp;Cutting:
+<BR>&nbsp;&nbsp;&nbsp;Data&nbsp;cutting&nbsp;disabled.
+<P>
+<BR>&nbsp;Bathymetry&nbsp;Editing:
+<BR>&nbsp;&nbsp;&nbsp;Bathymetry&nbsp;edits&nbsp;applied&nbsp;from&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;Bathymetry&nbsp;edit&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0051_20010829_223755.mb57.esf
+<P>
+<BR>&nbsp;Bathymetry&nbsp;Recalculation:
+<BR>&nbsp;&nbsp;&nbsp;Bathymetry&nbsp;recalculated&nbsp;by&nbsp;raytracing.
+<BR>&nbsp;&nbsp;&nbsp;SVP&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0051_20010829_223755.mb57.svp
+<BR>&nbsp;&nbsp;&nbsp;SSV&nbsp;not&nbsp;modified.
+<BR>&nbsp;&nbsp;&nbsp;SSV&nbsp;offset/constant:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;m/s
+<BR>&nbsp;&nbsp;&nbsp;Travel&nbsp;time&nbsp;multiplier:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.000000&nbsp;m
+<P>
+<BR>&nbsp;Bathymetry&nbsp;Water&nbsp;Sound&nbsp;Speed&nbsp;Reference:
+<BR>&nbsp;&nbsp;&nbsp;Output&nbsp;bathymetry&nbsp;reference:&nbsp;&nbsp;&nbsp;CORRECTED
+<BR>&nbsp;&nbsp;&nbsp;Depths&nbsp;recalculated&nbsp;as&nbsp;corrected
+<P>
+<BR>&nbsp;Draft&nbsp;Correction:
+<BR>&nbsp;&nbsp;&nbsp;Draft&nbsp;set&nbsp;to&nbsp;constant.
+<BR>&nbsp;&nbsp;&nbsp;Draft&nbsp;constant:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.950000&nbsp;m
+<BR>&nbsp;&nbsp;&nbsp;Draft&nbsp;offset:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;m
+<BR>&nbsp;&nbsp;&nbsp;Draft&nbsp;multiplier:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.000000&nbsp;m
+<P>
+<BR>&nbsp;Heave&nbsp;Correction:
+<BR>&nbsp;&nbsp;&nbsp;Heave&nbsp;not&nbsp;modified.
+<BR>&nbsp;&nbsp;&nbsp;Heave&nbsp;offset:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;m
+<BR>&nbsp;&nbsp;&nbsp;Heave&nbsp;multiplier:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.000000&nbsp;m
+<P>
+<BR>&nbsp;Lever&nbsp;Correction:
+<BR>&nbsp;&nbsp;&nbsp;Lever&nbsp;calculation&nbsp;off.
+<P>
+<BR>&nbsp;Tide&nbsp;Correction:
+<BR>&nbsp;&nbsp;&nbsp;Tide&nbsp;calculation&nbsp;off.
+<P>
+<BR>&nbsp;Roll&nbsp;Correction:
+<BR>&nbsp;&nbsp;&nbsp;Roll&nbsp;offset&nbsp;by&nbsp;bias.
+<BR>&nbsp;&nbsp;&nbsp;Roll&nbsp;bias:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.500000&nbsp;deg
+<BR>&nbsp;&nbsp;&nbsp;Port&nbsp;roll&nbsp;bias:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;deg
+<BR>&nbsp;&nbsp;&nbsp;Starboard&nbsp;roll&nbsp;bias:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;deg
+<P>
+<BR>&nbsp;Pitch&nbsp;Correction:
+<BR>&nbsp;&nbsp;&nbsp;Pitch&nbsp;not&nbsp;modified.
+<BR>&nbsp;&nbsp;&nbsp;Pitch&nbsp;bias:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;deg
+<P>
+<BR>&nbsp;Heading&nbsp;Correction:
+<BR>&nbsp;&nbsp;&nbsp;Heading&nbsp;not&nbsp;modified.
+<BR>&nbsp;&nbsp;&nbsp;Heading&nbsp;offset:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;deg
+<P>
+<BR>&nbsp;Amplitude&nbsp;Corrections:
+<BR>&nbsp;&nbsp;&nbsp;Amplitude&nbsp;correction&nbsp;off.
+<P>
+<BR>&nbsp;Sidescan&nbsp;Corrections:
+<BR>&nbsp;&nbsp;&nbsp;Sidescan&nbsp;correction&nbsp;off.
+<P>
+<BR>&nbsp;Sidescan&nbsp;Recalculation:
+<BR>&nbsp;&nbsp;&nbsp;Sidescan&nbsp;not&nbsp;recalculated.
+<BR>&nbsp;&nbsp;&nbsp;Sidescan&nbsp;pixel&nbsp;size:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000
+<BR>&nbsp;&nbsp;&nbsp;Sidescan&nbsp;swath&nbsp;width:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000
+<BR>&nbsp;&nbsp;&nbsp;Sidescan&nbsp;interpolation:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0
+<P>
+<BR>&nbsp;Metadata&nbsp;Insertion:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;vessel:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;institution:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;platform:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;sonar:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;sonarversion:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;cruiseid:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;cruisename:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;pi:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;piinstitution:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;client:
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;svcorrected:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-1
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;tidecorrected&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-1
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;batheditmanual&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-1
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;batheditauto:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-1
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;rollbias:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;pitchbias:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;headingbias:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000
+<BR>&nbsp;&nbsp;&nbsp;Metadata&nbsp;draft:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000
+<P>
+<BR>&nbsp;236&nbsp;navigation&nbsp;records&nbsp;read
+<BR>&nbsp;Nav&nbsp;start&nbsp;time:&nbsp;2001&nbsp;08&nbsp;29&nbsp;22:38:02.082999
+<BR>&nbsp;Nav&nbsp;end&nbsp;time:&nbsp;&nbsp;&nbsp;2001&nbsp;08&nbsp;29&nbsp;23:37:22.322000
+<P>
+<BR>&nbsp;47&nbsp;bathymetry&nbsp;edits&nbsp;read
+<P>
+<BR>&nbsp;236&nbsp;input&nbsp;data&nbsp;records
+<BR>&nbsp;3587&nbsp;input&nbsp;nav&nbsp;records
+<BR>&nbsp;17&nbsp;input&nbsp;comment&nbsp;records
+<BR>&nbsp;6617&nbsp;input&nbsp;other&nbsp;records
+<BR>&nbsp;236&nbsp;output&nbsp;data&nbsp;records
+<BR>&nbsp;3587&nbsp;output&nbsp;nav&nbsp;records
+<BR>&nbsp;64&nbsp;output&nbsp;comment&nbsp;records
+<BR>&nbsp;6617&nbsp;output&nbsp;other&nbsp;records
+<P>
+<BR>&nbsp;Generating&nbsp;inf&nbsp;file&nbsp;for&nbsp;0051_20010829_223755p.mb57
+<P>
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1),
+<B><A HREF="mbedit.html">mbedit</A></B>(1), <B><A HREF="mbnavedit.html">mbnavedit</A></B>(1), <B><A HREF="mbvelocitytool.html">mbvelocitytool</A></B>(1)
+<P>
+<A NAME="lbAL">&nbsp;</A>
+<H2>BUGS</H2>
+
+Oh yeah...
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MBPROCESS PARAMETER FILE COMMANDS</A><DD>
+<DT><A HREF="#lbAG">ANCILLARY DATA FILES</A><DD>
+<DT><A HREF="#lbAH">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAI">OPTIONS</A><DD>
+<DT><A HREF="#lbAJ">EXAMPLES</A><DD>
+<DT><A HREF="#lbAK">SEE ALSO</A><DD>
+<DT><A HREF="#lbAL">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 17 September 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

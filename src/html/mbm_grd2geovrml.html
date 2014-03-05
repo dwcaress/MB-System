@@ -1,0 +1,529 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_grd2geovrml</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_grd2geovrml</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_grd2geovrml</B> - Create and execute commands which generate
+a TerraVision tileset and GeoVRML terrain set that can be combined
+with other geospatial data for viewing in a web browser.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_grd2geovrml</B> <I>bath_file</I>
+<B>-tvdir</B> <I>tvparent</I>
+<B>-vrmldir</B> <I>vrmlparent</I>
+<B>-olat</B> <I>lat</I>
+<B>-olon</B> <I>lon</I>
+<B>-vrmlurl</B> <I>url</I>
+<P>
+<P>
+Additional Options:
+<P>
+<B>-elevscale</B> <I>vert_exag</I>
+<B>-nowrz</B>
+<B>-noview</B>
+<B>-pallette</B> <I>pal</I>
+<B>-newimage</B> <I>type|file</I>
+<B>-white</B>
+<B>-zmax</B> <I>maxclip</I>
+<B>-zmin</B> <I>minclip</I>
+<B>-basename</B> <I>basename</I>
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_grd2geovrml</B> is a macro that takes as input a GMT
+geographic-coordinate bathymetry grid file (<I>bath_file</I>) and
+produces a terrain tile set that may be viewed in a web browser
+with an appropriate plugin.  The bathymetry (geometry) is paired with
+imagery (texture) to produce artificially illuminated terrain or slope
+shaded terrain. Alternatively, a co-registered image may be provided
+as a substitute to the latter imagery which is generated from the
+bathymetry data.  This may be used to, for instance, draping a side
+scan sonar image over the bathymetry.
+<P>
+Before the geoVRML files can be created an intermediate TerraVision
+tile set must be created from the input GMT bathymetry file and a
+TIFF image that is either generated from the bathymetry or specified
+from an existing file with the <I>-newimage</I> option.
+<P>
+This tileset is then used to
+generate a GeoVRML quadtree multi-resolution set of files.  The resulting
+set of files will be created in <I>vrmlparent</I>/&lt;basename&gt;, where
+&lt;basename&gt; is the same as <I>bath_file</I> without the usual '.grd' extension.
+This behavior may be overridded with the <B>-basename</B> option.  This
+is useful if an existing image file is specified with the <B>-newimage</B>
+<I>file</I> option, in which case the image file base name should be used with
+<B>-basename</B> (see second example below).
+<P>
+The index.html file produced in this directory can be
+loaded into Netscape 4.7 on a PC (properly configured with CosmoPlayer
+and GeoVRML 1.1) for interactive visualization. The resulting
+terrain can be used as a 3D basemap for use in visualizing
+other georeferenced data that has also been placed in GeoVRML
+using the same <B>-olat</B> and <B>-olon</B> settings.
+<P>
+GeoVRML (and TerraVision) expects rectangular gridded elevation data
+and browsers render all terrain data within the rectangle.  This presents a
+problem for ocean bathymetric data which often have irregular (not rectangular)
+boundaries.  Before converting a grid file to TerraVision format
+<B>mbm_grd2geovrml</B> replaces all no-data elevation values with a coarse
+resolution spline-filled extrapolation from the data in the irregular
+area. This results in a rectangular grid
+with smooth transitions from areas of elevation data to areas of no data.
+In the resulting GeoVRML the no data areas are colored black
+(or white if <B>-white</B> is specified).  If <B>-newimage</B>
+<I>file</I> is specified then the outer boundaries will stay the same
+color as in the image.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+Mike McCann (<A HREF="mailto:mccann@mbari.org">mccann@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>SIMPLE DESCRIPTION OF BASIC OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B></B><I>bath_file</I>
+
+<DD>
+<BR>
+
+A GMT gridded bathymetry file in geographic (lat/lon) coordinates.
+The file can be expressed with just the base name without the .grd
+extension, in which case the macro will append '.grd.gz' to <I>bath_file</I>
+and uncompress the data upon input. If the compressed data file does not
+exist then '.grd' will be appended to <I>bath_file</I> and it will be
+used, if it exists.
+<P>
+<DT><B>-tvdir</B>
+
+<DD>
+<I>tvparent</I>
+<P>
+The TerraVision tileset destination directory.
+A subdirectory named <I>bath_file</I> (without the .grd extension)
+will be created here.
+<DT><B>-vrmldir</B>
+
+<DD>
+<I>vrmlparent</I>
+<BR>
+
+The GeoVRML tileset destination directory.
+A subdirectory named <I>bath_file</I> (without the .grd extension)
+will be created here.
+<P>
+<DT><B>-olat</B>
+
+<DD>
+<I>lat</I>
+<DT><B>-olon</B>
+
+<DD>
+<I>lon</I>
+<P>
+<BR>
+
+The geoOrigin latitude and longitude in decimal degrees. Because of single
+precision arithmetic in VRML97 it is necessary to define
+a geoOrigin from which offsets are computed before coordinates
+are passed into the visualization pipeline.  The geoOrigin should
+be within 5 degrees of the extent of the grid file in order to
+have submeter precision in the location of objects within the
+resulting GeoVRML output.  See the GeoVRML spec for more details.
+<BR>
+
+<P>
+<BR>
+
+The GeoOrigin of the terrain must be the same as the GeoOrigin
+of any other GeoVRML content (e.g. navigation tracks, sample
+locations) that you wish to combine with the terrain.
+<P>
+<DT><B>-vrmlurl</B>
+
+<DD>
+<I>url</I>
+<BR>
+
+All default URLs that are placed in the VRML files will be relative.
+However, you should use the <B>-vrmlurl</B> option to specify an absolute URL
+for the set of tiles.
+Then all of the URLs that are used in the VRML files (image
+texture links and childUrls in the GeoLOD node) will use this as
+their base URL.
+This is generally not desirable because hardcoding absolute URLs
+into your datasets means that the dataset is nonportable to another
+server, or
+different location on the same server. However, it may be necessary
+to write absolute URLs in your tile files, especially if you have
+many levels because
+some VRML browsers have problems with relative links, resulting
+in tiles and images that will not load.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>DESCRIPTION OF OPTIONAL OPTIONS</H2>
+
+<P>
+<DL COMPACT>
+<DT><B>-elevscale</B>
+
+<DD>
+<I>vert_exag</I>
+<BR>
+
+Factor with which to multiply elevations resulting in a vertical
+exaggeration of the terrain.  The default value is 1.0. Factors
+greater than 1.0 increase vertical exaggeration.
+<P>
+<DT><B>-nowrz</B>
+
+<DD>
+<BR>
+
+By default vrml output files are gzipped and saved with the .wrz
+extension.  Specify -nowrz to override this and save the files
+uncompressed with the .wrl extension.
+<P>
+<DT><B>-noview</B>
+
+<DD>
+<BR>
+
+By default a GeoViewpoint node with description 'home' is included
+with each GeoVRML tile file.  These viewpoints are helpful for
+creating terrain-only visualizations, but they also quickly fill up
+the viewpoint list when many tiles are loaded.  If you are
+creating GeoVRML tilesets
+to combine with other GeoVRML content that contain viewpoints
+then you may want to not have these 'home' viewpoints.
+Specify -noview to not include a GeoViewpoint with each tile.
+<P>
+<DT><B>-newimage</B>
+
+<DD>
+<I>type|file</I>
+<BR>
+
+By default an orthorectified image for the bathymetry is created by running
+<A HREF="mbm_grdtiff.html">mbm_grdtiff</A>(1) and then quadrupling the image size using ImageMagick
+mogrify(1). (The quadrupling together with the '-numpixels 16'
+argument in the make_geovrml(1) command results in identical resolution
+of the highest level GeoVRML tiles and the original bathymetric
+data.)  Making this image can be a time consuming process.  By default,
+if a file with '.tif' appended to <I>bath_file</I> (without the .grd
+extension) or appended to <I>basename</I> (if <I>-basename</I> option
+is specified) exists in $TMPDIR then
+a new image is not created.  To override this either remove the .tif
+file or specify the -newimage option.
+<P>
+<BR>
+
+<I>type|file</I> is the type used in the -G option of <A HREF="mbm_grdtiff.html">mbm_grdtiff</A>(1)
+or the name of a TIFF file that you wish draped over the bathymetry.
+<P>
+The default type value is 2 for synthetic illumination with Haxby color
+map (this may be modified with the <B>-pallette</B> option). Use 5 to shade
+the image by slope value.
+If &lt;type|file&gt; is an image file name then that file is assumed to be
+orthorectified TIFF image (ending in .tif) that is co-registered
+with the bathymetry file.
+This can be used to for example drape a side-scan sonar image
+over the elevation data.
+It is up to the user to confirm the co-registration between the terrain
+data and the image data.
+<P>
+<DT><B>-white</B>
+
+<DD>
+<BR>
+
+By default a black background is generated for the orthorectified
+image.  If a white background is desired (for example, for printing purposes)
+then use this option.  Typically, for computer visual display a black
+background works best.
+<P>
+<DT><B>-zmax</B>
+
+<DD>
+<I>maxclip</I>
+<DT><B>-zmin</B>
+
+<DD>
+<I>minclip</I>
+<P>
+Maxclip and minclip may be used clip the elevation data at set
+values.  For instance, to clip the elevation data at sealevel
+and tile only bathymetry use <B>-zmax 0</B>.  To force a color map
+of the standard Haxby colors between 4000 and 3000 meters
+depth use <B>-zmin -4000 -zmax -3000</B>.
+<P>
+<DT><B>-pallette</B>
+
+<DD>
+<I>pal</I>
+<P>
+The number of Color Lookup Table
+that is passed on to the -W1/ option of <A HREF="mbm_grdtiff.html">mbm_grdtiff</A>(1).
+The default value is 1 - the Haxby color map.  For reference, the
+color tables values are:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>pallette</I>&nbsp;=&nbsp;1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haxby&nbsp;colors&nbsp;[default]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>pallette</I>&nbsp;=&nbsp;2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;high&nbsp;Intensity&nbsp;colors
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>pallette</I>&nbsp;=&nbsp;3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;low&nbsp;Intensity&nbsp;colors
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>pallette</I>&nbsp;=&nbsp;4:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grayscale
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>pallette</I>&nbsp;=&nbsp;5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uniform&nbsp;grayscale
+<BR>
+
+<P>
+<P>
+</DL>
+<A NAME="lbAI">&nbsp;</A>
+<H2>ENVIRONMENT VARIABLE AND LOG FILE</H2>
+
+<P>
+The environment variable TMPDIR must be defined.  It specifies the
+directory in which <B>mbm_grd2geovrml</B> does its work.  $TMPDIR should
+have sufficient space to hold the temporary grid and image
+files that get created.  The resulting 4 times magnified tiff
+images are left in $TMPDIR.  These large image files are reused unless
+the <B>-newimage</B> option is specified.
+<P>
+A log file is saved at the end of processing in the <I>vrmlparent</I>
+directory.  It includes all the commands and their output.  This
+file may be edited and executed again in order to produce customized
+output.
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+This example creates a GeoVRML set of terrain tiles from the bathymetry
+data in file PapauA_bath.grd.  The geometry
+files will not be compressed and viewpoints will be included with each
+tile.
+<BR>
+
+<P>
+<BR>
+
+<BR>&nbsp;&nbsp;mbm_grd2geovrml&nbsp;PapauA_bath&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-olat&nbsp;21&nbsp;-olon&nbsp;-157&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-tvdir&nbsp;~/TileSets/Pyramids/hawaii&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-vrmldir&nbsp;~/TileSets/geoVRML/hawaii&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-nowrz&nbsp;-vrmlurl&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://menard/vrml/terrain/hawaii/PapauA_bath">http://menard/vrml/terrain/hawaii/PapauA_bath</A>
+<BR>
+
+<P>
+<BR>
+
+<P>
+<BR>
+
+This example creates a grid file of the Northeast Pacific
+at one minute resolution and creates the GeoVRML tiles of it
+with the elevations clipped at sea level.  A new synthetic
+illuminated Haxby-colored image is generated from the elevation data.
+<BR>
+
+<P>
+<BR>
+
+<BR>&nbsp;&nbsp;#&nbsp;Extract&nbsp;1&nbsp;minute&nbsp;data&nbsp;for&nbsp;Northeastern&nbsp;Pacific&nbsp;Ocean
+<BR>&nbsp;&nbsp;#&nbsp;and&nbsp;convert&nbsp;it&nbsp;to&nbsp;GeoVRML&nbsp;terrain
+<BR>&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;grdraster&nbsp;4&nbsp;-R-165/-105/15/50\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-GNEPacific.grd&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-I1m&nbsp;-V
+<P>
+<BR>&nbsp;&nbsp;mbm_grd2geovrml&nbsp;NEPacific.grd&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-tvdir&nbsp;~/TileSets/Pyramids/pacific&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-vrmldir&nbsp;~/TileSets/geoVRML/pacific&nbsp;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-vrmlurl&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://menard/vrml/terrain/hawaii/NEPacific">http://menard/vrml/terrain/hawaii/NEPacific</A>&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-zmax&nbsp;0&nbsp;-olat&nbsp;35&nbsp;-olon&nbsp;-135&nbsp;-newimage
+<BR>
+
+<P>
+<BR>
+
+<P>
+<BR>
+
+This example generates a slope-shaded image from the bathymetry
+data in PapauA_bath.grd and saves the geoVRML file in the directory
+~/TileSets/geoVRML/hawaii/PapauA_slope.  No viewpoints are specified.
+<BR>
+
+<P>
+<BR>
+
+<P>
+<BR>&nbsp;&nbsp;mbm_grd2geovrml&nbsp;PapauA_bath&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-olat&nbsp;21&nbsp;-olon&nbsp;-157&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-tvdir&nbsp;~/TileSets/Pyramids/hawaii&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-vrmldir&nbsp;~/TileSets/geoVRML/hawaii&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-vrmlurl&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://menard/vrml/terrain/hawaii/PapauA_slope">http://menard/vrml/terrain/hawaii/PapauA_slope</A>&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-noview&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-newimage&nbsp;5&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-basename&nbsp;PapauA_slope
+<P>
+<BR>
+
+<P>
+<BR>
+
+<P>
+<BR>
+
+This example uses a pre-generated side-scan sonar TIFF image and drapes
+it over the bathymetry data in PapauA_bath.grd.  Viewpoints are excluded.
+Ouptut is written to ~/TileSets/geoVRML/hawaii/PapauA_ssdtl.
+<BR>
+
+<P>
+<BR>
+
+<P>
+<BR>&nbsp;&nbsp;mbm_grd2geovrml&nbsp;PapauA_bath&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-olat&nbsp;21&nbsp;-olon&nbsp;-157&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-tvdir&nbsp;~/TileSets/Pyramids/hawaii&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-vrmldir&nbsp;~/TileSets/geoVRML/hawaii&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-vrmlurl&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://menard/vrml/terrain/hawaii/PapauA_ssdtl">http://menard/vrml/terrain/hawaii/PapauA_ssdtl</A>&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-noview&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-newimage&nbsp;PapauA_ssdtl.tif&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-basename&nbsp;PapauA_ssdtl
+<P>
+<P>
+<P>
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<P>
+This macro is built upon some pretty strong shoulders.  It uses
+all of these programs which must be installed on your system.
+<P>
+GMT programs:
+<B>grdclip</B>(1),
+<B>grdsample</B>(1),
+<B>grd2xyz</B>(1),
+<B>blockmean</B>(1),
+<B>surface</B>(1),
+<B>grdedit</B>(1),
+<B>grdmath</B>(1),
+<B>grdclip</B>(1),
+<P>
+mb-system macro:
+<B><A HREF="mbm_grdtiff.html">mbm_grdtiff</A></B>(1)
+<P>
+mb-system utility:
+<B><A HREF="mbstripNaN.html">mbstripNaN</A></B>(1)
+<P>
+tsmApi-2.3 (<A HREF="http://www.tsmapi.com)">http://www.tsmapi.com)</A> programs:
+<B>make_dem</B>(1),
+<B>make_oi</B>(1)
+<B>make_geovrml</B>(1)
+<P>
+Note that after you've created the TerraVision tile sets with this
+macro you may rerun make_geovrml(1) with different options, for
+instance to make files for a different server or with a different
+vertical exaggeration or background color.  This can save a lot
+of processing time if you don't need to generate a new image
+from the bathymetric data.
+<P>
+ImageMagick (<A HREF="http://www.imagemagick.org)">http://www.imagemagick.org)</A> program:
+<B>mogrify</B>(1)
+<P>
+<BR>
+
+Please see <A HREF="http://www.mbari.org/~mccann/vrml/ROVDataVis">http://www.mbari.org/~mccann/vrml/ROVDataVis</A>
+for example content and more information on the project that developed this
+macro.
+<A NAME="lbAL">&nbsp;</A>
+<H2>BUGS</H2>
+
+<P>
+You need to manually clean up the leftover files that get created in $TMPDIR.
+<BR>
+
+<P>
+<BR>
+
+The <B>-vrmlurl</B> option must be specified.  As of 19 March 2003 there is a
+bug in <B>make_geovrml</B>(1) where if the <B>-vrmlurl</B> option  is not
+specified invalid VRML is
+generated.  This is generally not a problem.  Because of bugs in VRML browsers
+all URLs must be absolute anyway.
+<BR>
+
+<P>
+<BR>
+
+The GeoVRML content produced by this macro may be
+viewed using Internet Explorer
+with the Cortona 4.0 VRML plugin or in Netscape 4.7 with the CosmoPlayer
+plugin.  Both browsers have problems with loading a second world after
+you have viewed one.  Netscape 4.7 often must be closed by killing it
+with Windows Task Manager.  Sometimes the CosmoPlayer plugin will refuse
+to load at all.  If this happens try removing all cp* files in %TEMP% or
+logging in with another Windows account so that a different profile is used.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">SIMPLE DESCRIPTION OF BASIC OPTIONS</A><DD>
+<DT><A HREF="#lbAH">DESCRIPTION OF OPTIONAL OPTIONS</A><DD>
+<DT><A HREF="#lbAI">ENVIRONMENT VARIABLE AND LOG FILE</A><DD>
+<DT><A HREF="#lbAJ">EXAMPLES</A><DD>
+<DT><A HREF="#lbAK">SEE ALSO</A><DD>
+<DT><A HREF="#lbAL">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

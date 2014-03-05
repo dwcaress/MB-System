@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  7/16/2002
 #	$Id$
 #
-#     Copyright (c) 2002-2009 by
+#     Copyright (c) 2002-2013 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,37 +16,6 @@
 # Date:		July 16, 2002
 #
 # $Log: Makefile.template,v $
-# Revision 5.9  2009/03/13 07:05:58  caress
-# Release 5.1.2beta02
-#
-# Revision 5.8  2008/09/29 04:56:21  caress
-# Proj 4.6.1
-#
-# Revision 5.7  2008/01/14 18:21:58  caress
-# Upgraded to Proj 4.6.0 release.
-#
-# Revision 5.6  2007/10/07 20:05:48  caress
-# New proj version 4.5.0
-#
-# Revision 5.5  2006/03/06 21:49:27  caress
-# Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
-#
-# Revision 5.4  2004/02/25 21:39:36  caress
-# Release 5.0.3
-#
-# Revision 5.3  2003/07/27 20:50:22  caress
-# Release 5.0.0
-#
-# Revision 5.2  2002/10/02 23:55:08  caress
-# Release 5.0.beta24
-#
-# Revision 5.1  2002/09/19 00:33:55  caress
-# More recent version of PROJ4
-#
-# Revision 5.0  2002/07/20 20:47:57  caress
-# Initial Revision
-#
-#
 #
 ### sets locations of vital objects
 BINDIR = ../../bin
@@ -68,7 +37,7 @@ ARCHIVE = ar rcv
 
 ### make all makes the proj library, executables, man pages,
 ### and associated include files
-all:	$(LIBDIR)/libmbproj.a \
+all:	$(LIBDIR)/libproj.a \
 	$(INCDIR)/proj_api.h \
 	$(BINDIR)/proj \
 	$(BINDIR)/geod \
@@ -82,18 +51,18 @@ clean:
 
 ### link or copy the executables
 $(BINDIR)/geod: geod.o \
-		$(LIBDIR)/libmbproj.a
+		$(LIBDIR)/libproj.a
 	$(CC) $(CFLAGS) geod.o \
-		$(LIBDIR)/libmbproj.a \
+		$(LIBDIR)/libproj.a \
 		$(LFLAGS) -o $(BINDIR)/geod
 $(BINDIR)/proj: proj.o \
-		$(LIBDIR)/libmbproj.a
+		$(LIBDIR)/libproj.a
 	$(CC) $(CFLAGS) proj.o \
-		$(LIBDIR)/libmbproj.a \
+		$(LIBDIR)/libproj.a \
 		$(LFLAGS) -o $(BINDIR)/proj
 
 ### put together the library
-$(LIBDIR)/libmbproj.a: \
+$(LIBDIR)/libproj.a: \
 		PJ_aea.o \
 		PJ_aeqd.o \
 		PJ_airy.o \
@@ -247,7 +216,7 @@ $(LIBDIR)/libmbproj.a: \
 		proj_rouss.o \
 		rtodms.o \
 		vector1.o
-	$(ARCHIVE) $(LIBDIR)/libmbproj.a \
+	$(ARCHIVE) $(LIBDIR)/libproj.a \
 		PJ_aea.o \
 		PJ_aeqd.o \
 		PJ_airy.o \
@@ -401,7 +370,7 @@ $(LIBDIR)/libmbproj.a: \
 		proj_rouss.o \
 		rtodms.o \
 		vector1.o
-	ranlib $(LIBDIR)/libmbproj.a
+	ranlib $(LIBDIR)/libproj.a
 
 ### compile the source files
 PJ_aea.o:	PJ_aea.c \
@@ -1042,12 +1011,18 @@ $(INCDIR)/proj_api.h:	proj_api.h
 	chmod 664 $(INCDIR)/proj_api.h
 
 ### copy the man pages to the man directory
-$(MANDIR)/man1/geod.1:	geod.1
+$(MANDIR)/man1/geod.1:	geod.1 $(MANDIR)/man1
 	cp geod.1 $(MANDIR)/man1/geod.1
 	chmod 664 $(MANDIR)/man1/geod.1
-$(MANDIR)/man1/proj.1:	proj.1
+$(MANDIR)/man1/proj.1:	proj.1 $(MANDIR)/man1
 	cp proj.1 $(MANDIR)/man1/proj.1
 	chmod 664 $(MANDIR)/man1/proj.1
-$(MANDIR)/man3/pj_init.3:	pj_init.3
+$(MANDIR)/man3/pj_init.3:	pj_init.3 $(MANDIR)/man3
 	cp pj_init.3 $(MANDIR)/man3/pj_init.3
 	chmod 664 $(MANDIR)/man3/pj_init.3
+$(MANDIR)/man1:	$(MANDIR)
+	mkdir $(MANDIR)/man1
+$(MANDIR)/man3:	$(MANDIR)
+	mkdir $(MANDIR)/man3
+$(MANDIR):
+	mkdir $(MANDIR)

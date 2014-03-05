@@ -2,7 +2,7 @@
  *    The MB-system:	mbinfo.c	2/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -226,9 +226,9 @@
 #include <string.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_io.h"
 
 #define MBINFO_MAXPINGS 50
 struct ping
@@ -496,7 +496,8 @@ int main (int argc, char **argv)
 	char    string[500];
 
 	int	read_data;
-	double	speed_apparent, time_d_last;
+	double	speed_apparent;
+	double	time_d_last = 0.0;
 	int	val_int;
 	double	val_double;
 	int	ix, iy;
@@ -767,6 +768,7 @@ int main (int argc, char **argv)
 			break;
 		case XML:
 			fprintf(output,"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+			fprintf(output,"<mbinfo>\n");
 			break;
 		case '?':
 			break;
@@ -1464,7 +1466,7 @@ int main (int argc, char **argv)
 							else if (strncmp(comment, "METASONARVERSION:", 17) == 0)
 								{
 								if (meta_sonarversion == 0)
-					    			fprintf(output,"\t\t<sonar_version>%s<sonar_version>\n", &comment[17]);
+					    			fprintf(output,"\t\t<sonar_version>%s</sonar_version>\n", &comment[17]);
 								meta_sonarversion++;
 								}
 							else if (strncmp(comment, "METASONAR:", 10) == 0)
@@ -2182,7 +2184,6 @@ int main (int argc, char **argv)
 						(void **)&bathvartot,&error);
 			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_bath_max*sizeof(int),
 						(void **)&nbathvartot,&error);
-			nbathtot_alloc = beams_bath_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
@@ -2210,7 +2211,6 @@ int main (int argc, char **argv)
 						(void **)&ampvartot,&error);
 			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_amp_max*sizeof(int),
 						(void **)&nampvartot,&error);
-			namptot_alloc = beams_amp_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
@@ -2238,7 +2238,6 @@ int main (int argc, char **argv)
 						(void **)&ssvartot,&error);
 			status = mb_reallocd(verbose,__FILE__,__LINE__,pixels_ss_max*sizeof(int),
 						(void **)&nssvartot,&error);
-			nsstot_alloc = pixels_ss_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
@@ -3026,6 +3025,21 @@ int main (int argc, char **argv)
 					break;
 			}
 		}
+
+	/* close root element for XML export */
+	switch (output_format)
+	{
+		case FREE_TEXT:
+			break;
+		case JSON:
+			break;
+		case XML:
+			fprintf(output,"</mbinfo>\n");
+			break;
+		case '?':
+			break;
+	}
+
 	/* close output file */
 	if (output_usefile == MB_YES
 	    && output != NULL)

@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_oicgeoda.c	2/16/99
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_oicmbari.c contains the functions for reading and writing
- * multibeam data in the MBF_OICMBARI format.  
+ * multibeam data in the MBF_OICMBARI format.
  * These functions include:
  *   mbr_alm_oicmbari	- allocate read/write memory
  *   mbr_dem_oicmbari	- deallocate read/write memory
@@ -83,40 +83,40 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbf_oicmbari.h"
-#include "../../include/mbsys_oic.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbf_oicmbari.h"
+#include "mbsys_oic.h"
 
 /* include for byte swapping on little-endian machines */
 #ifdef BYTESWAPPED
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 #endif
 
 /* essential function prototypes */
-int mbr_register_oicmbari(int verbose, void *mbio_ptr, 
+int mbr_register_oicmbari(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_oicmbari(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_oicmbari(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_oicmbari(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_oicmbari(int verbose, void *mbio_ptr, int *error);
@@ -145,54 +145,54 @@ int mbr_register_oicmbari(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_oicmbari(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_oicmbari(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_oicmbari;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_oicmbari; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_oic_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_oic_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_oicmbari; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_oicmbari; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_oic_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_oic_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_oic_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_oic_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_oic_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_oic_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = &mbsys_oic_insert_altitude; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_oic_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_oic_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_oic_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_oicmbari;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_oic_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_oic_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_oicmbari;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_oicmbari;
+	mb_io_ptr->mb_io_dimensions = &mbsys_oic_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_oic_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_oic_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_oic_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_oic_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_oic_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = &mbsys_oic_insert_altitude;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_oic_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_oic_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_oic_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -211,25 +211,25 @@ int mbr_register_oicmbari(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -240,25 +240,25 @@ int mbr_register_oicmbari(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_oicmbari(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_oicmbari(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_oicmbari";
@@ -299,7 +299,7 @@ int mbr_info_oicmbari(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -344,7 +344,7 @@ int mbr_alm_oicmbari(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -422,7 +422,7 @@ int mbr_dem_oicmbari(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -502,8 +502,8 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor and data structure */
@@ -515,7 +515,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	header = &(dataplus->header);
 	data = &(dataplus->data);
 	comment = dataplus->client;
-	
+
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
@@ -523,9 +523,9 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if ((read_size = fread(buffer,1,4,mb_io_ptr->mbfp)) != 4)
 	    {
 	    status = MB_FAILURE;
-	    *error = MB_ERROR_EOF;		    
+	    *error = MB_ERROR_EOF;
 	    }
-	    
+
 	/* read another byted at a time until header found */
 	while (status == MB_SUCCESS
 	    && (buffer[0] != 'G'
@@ -537,10 +537,10 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(&buffer[3],1,1,mb_io_ptr->mbfp)) != 1)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
-	    
+
 	/* now read the rest of the header */
 	if (status == MB_SUCCESS)
 	    {
@@ -550,10 +550,10 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		!= MBF_OICMBARI_HEADER_SIZE-4)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
-	    
+
 	/* now parse the header */
 	if (status == MB_SUCCESS)
 	    {
@@ -563,13 +563,13 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    index += 4;
  	    mb_get_binary_int(MB_NO,&buffer[index],&header->data_size);
 	    index += 4;
-	    header->client_size = buffer[index]; 
+	    header->client_size = buffer[index];
 	    index += 1;
-	    header->fish_status = buffer[index]; 
+	    header->fish_status = buffer[index];
 	    index += 1;
-	    header->nav_used = buffer[index]; 
+	    header->nav_used = buffer[index];
 	    index += 1;
-	    header->nav_type = buffer[index]; 
+	    header->nav_type = buffer[index];
 	    index += 1;
  	    mb_get_binary_int(MB_NO,&buffer[index],&header->utm_zone);
 	    index += 4;
@@ -630,13 +630,13 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	    for (i=0;i<MBF_OICMBARI_MAX_CHANNELS;i++)
 		{
-		header->channel[i].type = buffer[index]; 
+		header->channel[i].type = buffer[index];
 		index += 1;
-		header->channel[i].side = buffer[index]; 
+		header->channel[i].side = buffer[index];
 		index += 1;
-		header->channel[i].size = buffer[index]; 
+		header->channel[i].size = buffer[index];
 		index += 1;
-		header->channel[i].empty = buffer[index]; 
+		header->channel[i].empty = buffer[index];
 		index += 1;
  		mb_get_binary_int(MB_NO,&buffer[index],&header->channel[i].frequency);
 		index += 4;
@@ -658,7 +658,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
  	    mb_get_binary_int(MB_NO,&buffer[index],&header->ss_chan_stbd);
 	    index += 4;
 	    }
-	
+
 	/* read client specific data */
 	if (status == MB_SUCCESS && header->client_size > 0)
 	    {
@@ -672,7 +672,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    else
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
 
@@ -698,7 +698,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* set kind and error in mb_io_ptr */
 	mb_io_ptr->new_kind = dataplus->kind;
 	mb_io_ptr->new_error = *error;
-	    
+
 	/* loop over each data channel and read data */
 	if (status == MB_SUCCESS && header->num_chan > 0)
 	    {
@@ -715,9 +715,9 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    data_size = sizeof(float) * header->channel[i].num_samples;
 		else if (header->channel[i].size == OIC_SIZE_3FLOAT)
 		    data_size = 3 * sizeof(float) * header->channel[i].num_samples;
-		
+
 		/* allocate data if needed */
-		if (data_size > data->rawsize[i] 
+		if (data_size > data->rawsize[i]
 		    || data->raw[i] == NULL)
 		    {
 		    if (data->raw[i] != NULL)
@@ -725,14 +725,14 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_mallocd(verbose,__FILE__,__LINE__, data_size, (void **)&(data->raw[i]),error);
 		    data->rawsize[i] = data_size;
 		    }
-		    
+
 		/* read the data */
 		if (status == MB_SUCCESS)
 		    {
 		    if ((read_size = fread(data->raw[i],1,data_size,mb_io_ptr->mbfp)) != data_size)
 			{
 			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;		    
+			*error = MB_ERROR_EOF;
 			}
 		    }
 
@@ -825,17 +825,17 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		fprintf(stderr,"dbg5       offset[%1d]:      %d\n",
 			     i, header->channel[i].offset);
-		fprintf(stderr,"dbg5       type[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       type[%1d]:        %d\n",
 			     i, header->channel[i].type);
-		fprintf(stderr,"dbg5       side[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       side[%1d]:        %d\n",
 			     i, header->channel[i].side);
-		fprintf(stderr,"dbg5       size[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       size[%1d]:        %d\n",
 			     i, header->channel[i].size);
-		fprintf(stderr,"dbg5       empty[%1d]:       %d\n", 
+		fprintf(stderr,"dbg5       empty[%1d]:       %d\n",
 			     i, header->channel[i].empty);
-		fprintf(stderr,"dbg5       frequency[%1d]:   %d\n", 
+		fprintf(stderr,"dbg5       frequency[%1d]:   %d\n",
 			     i, header->channel[i].frequency);
-		fprintf(stderr,"dbg5       num_samples[%1d]: %d\n", 
+		fprintf(stderr,"dbg5       num_samples[%1d]: %d\n",
 			     i, header->channel[i].num_samples);
 		}
 	    for (i=0;i<header->num_chan;i++)
@@ -900,7 +900,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    float_ptr = (float *) data->raw[i];
 		    for (j=0;j<header->channel[i].num_samples;j++)
 			{
-			fprintf(stderr, "dbg5      %5d  %10f %10f %10f\n", 
+			fprintf(stderr, "dbg5      %5d  %10f %10f %10f\n",
 				j, float_ptr[3*j], float_ptr[3*j+1], float_ptr[3*j+2]);
 			}
 		    }
@@ -912,7 +912,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    }
 
 	/* allocate memory for processed bathymetry and sidescan data */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && dataplus->kind == MB_DATA_DATA)
 	    {
 	    /* allocate arrays if needed */
@@ -932,17 +932,17 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->tt), error);
 		if (data->angle != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->angle), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(char), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(char),
 				    (void **)&(data->beamflag), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float),
 				    (void **)&(data->bath), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float),
 				    (void **)&(data->bathacrosstrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float),
 				    (void **)&(data->bathalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float),
 				    (void **)&(data->tt), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_bath * sizeof(float),
 				    (void **)&(data->angle), error);
 		}
 	    if (header->beams_amp > data->beams_amp_alloc
@@ -951,7 +951,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->beams_amp_alloc = header->beams_amp;
 		if (data->amp != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->amp), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_amp * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->beams_amp * sizeof(float),
 				    (void **)&(data->amp), error);
 		}
 	    if (header->pixels_ss > data->pixels_ss_alloc
@@ -964,17 +964,17 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->ssacrosstrack), error);
 		if (data->ssalongtrack != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->ssalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float),
 				    (void **)&(data->ss), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float),
 				    (void **)&(data->ssacrosstrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, header->pixels_ss * sizeof(float),
 				   (void **) &(data->ssalongtrack), error);
 		}
 	    }
 
 	/* read processed bathymetry */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && dataplus->kind == MB_DATA_DATA
 	    && header->beams_bath > 0)
 	    {
@@ -983,7 +983,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(data->beamflag,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get bath array */
@@ -991,7 +991,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(data->bath,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get bathacrosstrack array */
@@ -999,7 +999,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(data->bathacrosstrack,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get bathalongtrack array */
@@ -1007,7 +1007,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(data->bathalongtrack,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get tt array */
@@ -1015,7 +1015,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(data->tt,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get angle array */
@@ -1023,12 +1023,12 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(data->angle,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
 
 	/* read processed amplitude */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && dataplus->kind == MB_DATA_DATA
 	    && header->beams_amp > 0)
 	    {
@@ -1037,12 +1037,12 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(data->amp,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
 
 	/* read processed sidescan */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && dataplus->kind == MB_DATA_DATA
 	    && header->pixels_ss > 0)
 	    {
@@ -1051,7 +1051,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(data->ss,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get ssacrosstrack array */
@@ -1059,7 +1059,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(data->ssacrosstrack,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get ssalongtrack array */
@@ -1067,7 +1067,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((read_size = fread(data->ssalongtrack,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
 
@@ -1105,25 +1105,25 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    fprintf(stderr,"dbg5       beam   bath  xtrack ltrack   tt   angle\n");
 	    for (i=0;i<header->beams_bath;i++)
 		{
-		fprintf(stderr,"dbg5       %4d %10f %10f %10f %10f %10f\n", 
-			i, data->bath[i], data->bathacrosstrack[i], 
-			data->bathalongtrack[i], 
+		fprintf(stderr,"dbg5       %4d %10f %10f %10f %10f %10f\n",
+			i, data->bath[i], data->bathacrosstrack[i],
+			data->bathalongtrack[i],
 			data->tt[i], data->angle[i]);
 		}
 	    fprintf(stderr,"dbg5       beams_amp:       %d\n",header->beams_amp);
 	    fprintf(stderr,"dbg5       beam   amp  xtrack ltrack\n");
 	    for (i=0;i<header->beams_amp;i++)
 		{
-		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n", 
-			i, data->amp[i], data->bathacrosstrack[i], 
+		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n",
+			i, data->amp[i], data->bathacrosstrack[i],
 			data->bathalongtrack[i]);
 		}
 	    fprintf(stderr,"dbg5       pixels_ss:       %d\n",header->pixels_ss);
 	    fprintf(stderr,"dbg5       beam   ss  xtrack ltrack\n");
 	    for (i=0;i<header->beams_amp;i++)
 		{
-		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n", 
-			i, data->ss[i], data->ssacrosstrack[i], 
+		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n",
+			i, data->ss[i], data->ssacrosstrack[i],
 			data->ssalongtrack[i]);
 		}
 	    }
@@ -1184,7 +1184,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    store->pixels_ss = header->pixels_ss;
 	    store->ss_chan_port = header->ss_chan_port;
 	    store->ss_chan_stbd = header->ss_chan_stbd;
-	    
+
 	    /* raw data */
 	    for (i=0;i<store->num_chan;i++)
 		{
@@ -1196,9 +1196,9 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->channel[i].empty = header->channel[i].empty;
 		store->channel[i].frequency = header->channel[i].frequency;
 		store->channel[i].num_samples = header->channel[i].num_samples;
-		
+
 		/* allocate data if needed */
-		if (data->rawsize[i] > store->rawsize[i] 
+		if (data->rawsize[i] > store->rawsize[i]
 		    || store->raw[i] == NULL)
 		    {
 		    if (store->raw[i] != NULL)
@@ -1206,13 +1206,13 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    store->rawsize[i] = data->rawsize[i];
 		    status = mb_mallocd(verbose,__FILE__,__LINE__,store->rawsize[i], (void **)&(store->raw[i]),error);
 		    }
-		    
+
 		/* copy the data */
 		if (status == MB_SUCCESS)
 		    {
 		    for (j=0;j<store->rawsize[i];j++)
 			{
-			store->raw[i][j] = data->raw[i][j];	    
+			store->raw[i][j] = data->raw[i][j];
 			}
 		    }
 		}
@@ -1239,17 +1239,17 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->tt), error);
 		if (store->angle != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->angle), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(char), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(char),
 				    (void **)&(store->beamflag),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->bath),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->bathacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->bathalongtrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->tt),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->angle),error);
 		}
 	    if (header->beams_amp > store->beams_amp_alloc
@@ -1258,7 +1258,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->beams_amp_alloc = header->beams_amp;
 		if (store->amp != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->amp), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_amp_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_amp_alloc * sizeof(float),
 				    (void **)&(store->amp),error);
 		}
 	    if (header->pixels_ss > store->pixels_ss_alloc
@@ -1273,11 +1273,11 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->ssacrosstrack), error);
 		if (store->ssalongtrack != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->ssalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float),
 				    (void **)&(store->ss),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float),
 				    (void **)&(store->ssacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float),
 				    (void **)&(store->ssalongtrack),error);
 		}
 	    for (i=0;i<store->beams_bath;i++)
@@ -1299,7 +1299,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->ssacrosstrack[i] = data->ssacrosstrack[i];
 		store->ssalongtrack[i] = data->ssalongtrack[i];
 		}
-		    
+
 	    /* client */
 	    for (i=0;i<header->client_size;i++)
 		store->client[i] = dataplus->client[i];
@@ -1347,8 +1347,8 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor and data storage */
@@ -1416,7 +1416,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    header->pixels_ss = store->pixels_ss;
 	    header->ss_chan_port = store->ss_chan_port;
 	    header->ss_chan_stbd = store->ss_chan_stbd;
-	    
+
 	    /* raw data */
 	    for (i=0;i<header->num_chan;i++)
 		{
@@ -1428,9 +1428,9 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		header->channel[i].empty = store->channel[i].empty;
 		header->channel[i].frequency = store->channel[i].frequency;
 		header->channel[i].num_samples = store->channel[i].num_samples;
-		
+
 		/* allocate data if needed */
-		if (store->rawsize[i] > data->rawsize[i] 
+		if (store->rawsize[i] > data->rawsize[i]
 		    || data->raw[i] == NULL)
 		    {
 		    if (data->raw[i] != NULL)
@@ -1438,13 +1438,13 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    data->rawsize[i] = store->rawsize[i];
 		    status = mb_mallocd(verbose,__FILE__,__LINE__, data->rawsize[i], (void **)&(data->raw[i]),error);
 		    }
-		    
+
 		/* copy the data */
 		if (status == MB_SUCCESS)
 		    {
 		    for (j=0;j<data->rawsize[i];j++)
 			{
-			data->raw[i][j] = store->raw[i][j];		    
+			data->raw[i][j] = store->raw[i][j];
 			}
 		    }
 		}
@@ -1471,17 +1471,17 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->tt), error);
 		if (data->angle != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->angle), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(char), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(char),
 				    (void **)&(data->beamflag),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float),
 				    (void **)&(data->bath),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float),
 				    (void **)&(data->bathacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float),
 				    (void **)&(data->bathalongtrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float),
 				    (void **)&(data->tt),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_bath_alloc * sizeof(float),
 				    (void **)&(data->angle),error);
 		}
 	    if (header->beams_amp > data->beams_amp_alloc
@@ -1490,7 +1490,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->beams_amp_alloc = header->beams_amp;
 		if (data->amp != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->amp), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_amp_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->beams_amp_alloc * sizeof(float),
 				    (void **)&(data->amp),error);
 		}
 	    if (header->pixels_ss > data->pixels_ss_alloc
@@ -1505,11 +1505,11 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->ssacrosstrack), error);
 		if (data->ssalongtrack != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(data->ssalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float),
 				    (void **)&(data->ss),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float),
 				    (void **)&(data->ssacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->pixels_ss_alloc * sizeof(float),
 				    (void **)&(data->ssalongtrack),error);
 		}
 	    for (i=0;i<header->beams_bath;i++)
@@ -1531,7 +1531,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->ssacrosstrack[i] = store->ssacrosstrack[i];
 		data->ssalongtrack[i] = store->ssalongtrack[i];
 		}
-		    
+
 	    /* client */
 	    for (i=0;i<header->client_size;i++)
 		dataplus->client[i] = store->client[i];
@@ -1585,17 +1585,17 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		fprintf(stderr,"dbg5       offset[%1d]:      %d\n",
 			     i, header->channel[i].offset);
-		fprintf(stderr,"dbg5       type[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       type[%1d]:        %d\n",
 			     i, header->channel[i].type);
-		fprintf(stderr,"dbg5       side[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       side[%1d]:        %d\n",
 			     i, header->channel[i].side);
-		fprintf(stderr,"dbg5       size[%1d]:        %d\n", 
+		fprintf(stderr,"dbg5       size[%1d]:        %d\n",
 			     i, header->channel[i].size);
-		fprintf(stderr,"dbg5       empty[%1d]:       %d\n", 
+		fprintf(stderr,"dbg5       empty[%1d]:       %d\n",
 			     i, header->channel[i].empty);
-		fprintf(stderr,"dbg5       frequency[%1d]:   %d\n", 
+		fprintf(stderr,"dbg5       frequency[%1d]:   %d\n",
 			     i, header->channel[i].frequency);
-		fprintf(stderr,"dbg5       num_samples[%1d]: %d\n", 
+		fprintf(stderr,"dbg5       num_samples[%1d]: %d\n",
 			     i, header->channel[i].num_samples);
 		}
 	    fprintf(stderr,"dbg5       status:     %d\n",status);
@@ -1667,7 +1667,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    float_ptr = (float *) data->raw[i];
 		    for (j=0;j<header->channel[i].num_samples;j++)
 			{
-			fprintf(stderr, "dbg5      %5d  %10f %10f %10f\n", 
+			fprintf(stderr, "dbg5      %5d  %10f %10f %10f\n",
 				j, float_ptr[3*j], float_ptr[3*j+1], float_ptr[3*j+2]);
 			}
 		    }
@@ -1685,40 +1685,40 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    fprintf(stderr,"dbg5       beam   bath  xtrack ltrack   tt   angle\n");
 	    for (i=0;i<header->beams_bath;i++)
 		{
-		fprintf(stderr,"dbg5       %4d %10f %10f %10f %10f %10f\n", 
-			i, data->bath[i], data->bathacrosstrack[i], 
-			data->bathalongtrack[i], 
+		fprintf(stderr,"dbg5       %4d %10f %10f %10f %10f %10f\n",
+			i, data->bath[i], data->bathacrosstrack[i],
+			data->bathalongtrack[i],
 			data->tt[i], data->angle[i]);
 		}
 	    fprintf(stderr,"dbg5       beams_amp:       %d\n",header->beams_amp);
 	    fprintf(stderr,"dbg5       beam   amp  xtrack ltrack\n");
 	    for (i=0;i<header->beams_amp;i++)
 		{
-		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n", 
-			i, data->amp[i], data->bathacrosstrack[i], 
+		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n",
+			i, data->amp[i], data->bathacrosstrack[i],
 			data->bathalongtrack[i]);
 		}
 	    fprintf(stderr,"dbg5       pixels_ss:       %d\n",header->pixels_ss);
 	    fprintf(stderr,"dbg5       beam   ss  xtrack ltrack\n");
 	    for (i=0;i<header->pixels_ss;i++)
 		{
-		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n", 
-			i, data->ss[i], data->ssacrosstrack[i], 
+		fprintf(stderr,"dbg5       %4d %10f %10f %10f\n",
+			i, data->ss[i], data->ssacrosstrack[i],
 			data->ssalongtrack[i]);
 		}
 	    }
-	    
+
 	/* now reverse parse the header */
 	if (status == MB_SUCCESS)
 	    {
 	    index = 0;
-	    buffer[index] = 'G'; 
+	    buffer[index] = 'G';
 	    index += 1;
-	    buffer[index] = 'E'; 
+	    buffer[index] = 'E';
 	    index += 1;
-	    buffer[index] = '2'; 
+	    buffer[index] = '2';
 	    index += 1;
-	    buffer[index] = header->type; 
+	    buffer[index] = header->type;
 	    index += 1;
  	    mb_put_binary_int(MB_NO,header->proc_status,&buffer[index]);
 	    index += 4;
@@ -1814,7 +1814,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* write next header to file */
 	if ((write_size = fwrite(buffer,1,MBF_OICMBARI_HEADER_SIZE,
-			mb_io_ptr->mbfp)) == MBF_OICMBARI_HEADER_SIZE) 
+			mb_io_ptr->mbfp)) == MBF_OICMBARI_HEADER_SIZE)
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
@@ -1824,7 +1824,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
 		}
-	
+
 	/* write client specific data */
 	if (status == MB_SUCCESS && header->client_size > 0)
 	    {
@@ -1833,10 +1833,10 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		!= (int)(header->client_size))
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;		    
+		*error = MB_ERROR_WRITE_FAIL;
 		}
 	    }
-	    
+
 	/* loop over each data channel and write data */
 	if (status == MB_SUCCESS && header->num_chan > 0)
 	    {
@@ -1892,14 +1892,14 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		    }
 #endif
-		    
+
 		/* write the data */
 		if (status == MB_SUCCESS)
 		    {
 		    if ((write_size = fwrite(data->raw[i],1,data_size,mb_io_ptr->mbfp)) != data_size)
 			{
 			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;		    
+			*error = MB_ERROR_WRITE_FAIL;
 			}
 		    }
 		}
@@ -1931,7 +1931,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 #endif
 
 	/* write processed bathymetry */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && dataplus->kind == MB_DATA_DATA
 	    && header->beams_bath > 0)
 	    {
@@ -1940,7 +1940,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((write_size = fwrite(data->beamflag,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get bath array */
@@ -1948,7 +1948,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((write_size = fwrite(data->bath,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get bathacrosstrack array */
@@ -1956,7 +1956,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((write_size = fwrite(data->bathacrosstrack,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get bathalongtrack array */
@@ -1964,7 +1964,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((write_size = fwrite(data->bathalongtrack,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get tt array */
@@ -1972,7 +1972,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((write_size = fwrite(data->tt,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get angle array */
@@ -1980,12 +1980,12 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((write_size = fwrite(data->angle,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
 
 	/* write processed amplitude */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && dataplus->kind == MB_DATA_DATA
 	    && header->beams_amp > 0)
 	    {
@@ -1994,12 +1994,12 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((write_size = fwrite(data->amp,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
 
 	/* write processed sidescan */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && dataplus->kind == MB_DATA_DATA
 	    && header->pixels_ss > 0)
 	    {
@@ -2008,7 +2008,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((write_size = fwrite(data->ss,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get ssacrosstrack array */
@@ -2016,7 +2016,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((write_size = fwrite(data->ssacrosstrack,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 
 	    /* get ssalongtrack array */
@@ -2024,7 +2024,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((write_size = fwrite(data->ssalongtrack,1,data_size,mb_io_ptr->mbfp)) != data_size)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    }
 

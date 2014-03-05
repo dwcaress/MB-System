@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbauvnavusbl</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbauvnavusbl</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbauvnavusbl</B> - Adjusts inertial navigation of a submerged platform/vehicle
+to be consistent with more accurate but less precise surface tracking (USBL) navigation. 
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbauvnavusbl</B> <B>-I</B><I>inavfile</I> [<B>-L</B>
+<B>-O</B><I>onavfile</I>  <B>-U</B><I>usblfile</I><B>-V -H</B> ]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+MBauvnavusbl reads a primary navigation file (usually from a submerged platform
+swath survey) and also reads secondary navigation (e.g. USBL fixes). 
+The program calculates position offsets between the raw survey navigation
+and the secondary navigation every 3600 seconds (10 minutes), and then 
+linearly interpolates and applies this adjustment vector for each 
+primary navigation position. 
+<P>
+The inertial navigation is read in format 166 and the USBL navigation is 
+read from format 165 files. The adjusted navigation is output in format 166.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>inavfile</I>
+<BR>
+
+Sets the input navigation filename. The navigation data must be
+in format 166.
+<B>-L</B>
+
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values used.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0 
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1 
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <B>mbauvnavusbl</B> uses the user default <I>lonflip</I> set using
+<B>mbdefaults</B>.
+<DT><B>-O</B>
+
+<DD>
+<I>onavfile</I>
+<BR>
+
+Sets the output navigation filename. The navigation data will be
+in format 166.
+<DT><B>-U</B>
+
+<DD>
+<I>usblfile</I>
+<BR>
+
+Sets the input usbl navigation filename. The usbl navigation data must be
+in format 165.
+<DT><B>-V</B>
+
+<DD>
+The <B>-V</B> option causes the program to be verbose.
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLE</H2>
+
+Coming...
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Da.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLE</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

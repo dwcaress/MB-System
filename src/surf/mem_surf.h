@@ -49,9 +49,9 @@ enum _SurfThreadFlag {
                      };
 typedef enum _SurfThreadFlag SurfThreadFlag;
 
-                                                                      
 
-      
+
+
 typedef struct
             {
               SurfSoundingData*              sounding       ;
@@ -60,7 +60,7 @@ typedef struct
             } SurfSdaThreadElement;
 
 
-      
+
 typedef struct
             {
               SurfSdaThreadElement           thread[1]      ;
@@ -93,18 +93,18 @@ typedef struct
               SurfAmplitudes*                toAmplitudes          ;
               SurfExtendedAmplitudes*        toExtendedAmpl        ;
               SurfSidescanData*              toSsData              ;
-              
-              u_long                         indexCenterPosition   ;
-              u_long                         indexMultiBeam        ;
-              u_long                         indexAmplitudes       ;
-              u_long                         nrCenterPosition      ;
-              u_long                         nrBeam                ;
-              u_long                         nrAmplitudes          ;
-              u_long                         nrSsData              ;
-              u_long                         nrRxParams            ;
-              u_long                         nrTxParams            ;
-              u_long                         nrOfSndgAttachedData  ;
-              u_long                         nrOfBeamAttachedData  ;
+
+              SURF_U_LONG                    indexCenterPosition   ;
+              SURF_U_LONG                    indexMultiBeam        ;
+              SURF_U_LONG                    indexAmplitudes       ;
+              SURF_U_LONG                    nrCenterPosition      ;
+              SURF_U_LONG                    nrBeam                ;
+              SURF_U_LONG                    nrAmplitudes          ;
+              SURF_U_LONG                    nrSsData              ;
+              SURF_U_LONG                    nrRxParams            ;
+              SURF_U_LONG                    nrTxParams            ;
+              SURF_U_LONG                    nrOfSndgAttachedData  ;
+              SURF_U_LONG                    nrOfBeamAttachedData  ;
               size_t                         soundingS             ;
               size_t                         sndgAttDataS          ;
               size_t                         centerPS              ;
@@ -136,61 +136,61 @@ typedef struct
               SurfDescriptor*                toDescriptor        ;
               SurfGlobalData*                toGlobalData        ;
               SurfStatistics*                toStatistics        ;
-              u_long                         nrStatistics        ;
+              SURF_U_LONG                         nrStatistics        ;
               SurfPositionSensorArray*       toPosiSensors       ;
-              u_long                         nrPosiSensors       ;
+              SURF_U_LONG                         nrPosiSensors       ;
               SurfMultiBeamAngleTable*       toAngleTables       ;
-              u_long                         nrAngleTables       ;
-              u_long                         nrBeams             ;
+              SURF_U_LONG                         nrAngleTables       ;
+              SURF_U_LONG                         nrBeams             ;
               SurfTransducerParameterTable*  toTransducers       ;
-              u_long                         nrTransducers       ;
+              SURF_U_LONG                         nrTransducers       ;
               SurfCProfileTable*             toCProfiles         ;
-              u_long                         nrCProfiles         ;
-              u_long                         nrCPElements        ;
+              SURF_U_LONG                         nrCProfiles         ;
+              SURF_U_LONG                         nrCPElements        ;
               SurfCProfileTpeTable*          toCProfileTpes      ;
-              u_long                         nrCprofTpes         ;
+              SURF_U_LONG                         nrCprofTpes         ;
               SurfPolygons*                  toPolygons          ;
-              u_long                         nrPolyElements      ;
+              SURF_U_LONG                         nrPolyElements      ;
               SurfEvents*                    toEvents            ;
-              u_long                         nrEvents            ;
+              SURF_U_LONG                         nrEvents            ;
               SurfFreeText*                  toFreeText          ;
-              u_long                         nrFreeTextUnits     ;
+              SURF_U_LONG                         nrFreeTextUnits     ;
               SurfAddStatistics*             toAddStatistics     ;
-              u_long                         nrAddStatistics     ;
+              SURF_U_LONG                         nrAddStatistics     ;
               SurfTpeStatics*                toTpeStatics        ;
-              u_long                         nrTpeStatics        ;
+              SURF_U_LONG                         nrTpeStatics        ;
               SurfFreeSixDataDescr*          toFreeSixDataDescr  ;
-              u_long                         nrOfSixAttachedData ;
+              SURF_U_LONG                         nrOfSixAttachedData ;
               SurfFreeSndgDataDescr*         toFreeSndgDataDescr ;
-              u_long                         nrOfSndgAttachedData;
+              SURF_U_LONG                         nrOfSndgAttachedData;
               SurfFreeBeamDataDescr*         toFreeBeamDataDescr ;
-              u_long                         nrOfBeamAttachedData;
+              SURF_U_LONG                         nrOfBeamAttachedData;
               SurfFreeSixAttachedData*       toFreeSixData       ;
               SurfVendorText*                toVendorText        ;
-              u_long                         nrOfVendorText      ;
+              SURF_U_LONG                         nrOfVendorText      ;
 
               SurfSdaThread*                 toSdaThread         ;
-              u_long                         activeThreadIndex   ;
+              SURF_U_LONG                         activeThreadIndex   ;
               SdaInfo*                       toSdaInfo           ;
               /* Data of SDA-blocks */
-              u_long                         nrOfSoundings       ;
-              u_long                         nrOfCenterPositions ;
-              u_long                         nrOfCeps            ;
-              u_long                         nrOfSingleBeamDepth ;
-              u_long                         nrOfMultiBeamDepth  ;
-              u_long                         nrOfMultiBeamTT     ;
-              u_long                         nrOfMultiBeamRec    ;
-              u_long                         nrOfSignalParams    ;
-              u_long                         nrOfTxParams        ;
-              u_long                         nrOfRxSets          ;
-              u_long                         nrOfTxSets          ;
-              u_long                         nrOfSignalAmplitudes;
-              u_long                         nrOfSsData          ;
-              u_long                         maxNrSsData         ;
-              u_long                         nrOfAmplitudes      ;
-              u_long                         nrOfExtAmplitudes   ;
-              u_long                         nrOfMultiTPEs       ;
-              u_long                         nrOfSingleTPEs      ;
+              SURF_U_LONG                         nrOfSoundings       ;
+              SURF_U_LONG                         nrOfCenterPositions ;
+              SURF_U_LONG                         nrOfCeps            ;
+              SURF_U_LONG                         nrOfSingleBeamDepth ;
+              SURF_U_LONG                         nrOfMultiBeamDepth  ;
+              SURF_U_LONG                         nrOfMultiBeamTT     ;
+              SURF_U_LONG                         nrOfMultiBeamRec    ;
+              SURF_U_LONG                         nrOfSignalParams    ;
+              SURF_U_LONG                         nrOfTxParams        ;
+              SURF_U_LONG                         nrOfRxSets          ;
+              SURF_U_LONG                         nrOfTxSets          ;
+              SURF_U_LONG                         nrOfSignalAmplitudes;
+              SURF_U_LONG                         nrOfSsData          ;
+              SURF_U_LONG                         maxNrSsData         ;
+              SURF_U_LONG                         nrOfAmplitudes      ;
+              SURF_U_LONG                         nrOfExtAmplitudes   ;
+              SURF_U_LONG                         nrOfMultiTPEs       ;
+              SURF_U_LONG                         nrOfSingleTPEs      ;
               short                          sourceVersionLess2  ;
             } SurfDataInfo;
 
@@ -199,7 +199,7 @@ typedef struct
 
 
 
-#ifdef _MEM_SURF 
+#ifdef _MEM_SURF
 
 
 
@@ -229,46 +229,46 @@ SurfMultiBeamAngleTable* getSurfAngleTable(SurfMultiBeamAngleTable*
                                 toAngleTable,short nrBeams,long index);
 SurfCProfileTable* getSurfCProfileTable(SurfCProfileTable*
                                 toCProf,short nrCPElements,long index);
-SurfCProfileTpeTable* getSurfCProfileTpeTable(SurfCProfileTpeTable* 
+SurfCProfileTpeTable* getSurfCProfileTpeTable(SurfCProfileTpeTable*
                                 toCProfTpe,short nrCPElements,long index);
 #else
 
-/********************************************/ 
-/*                                          */ 
+/********************************************/
+/*                                          */
 /*        general LIBRARY-functions         */
-/*                                          */ 
-/********************************************/ 
+/*                                          */
+/********************************************/
 
 
 
 extern XdrSurf mem_ReadSixStructure(char* filename,
-                                    SurfDataInfo* toSurfDataInfo);  
-                                    
+                                    SurfDataInfo* toSurfDataInfo);
+
 /* This function doesn't destroy the internal data-structures */
 
 extern XdrSurf mem_WriteSixStructure(char* filename,
                                     SurfDataInfo* toSurfDataInfo);
-                                    
+
 extern XdrSurf mem_ReadSdaStructure(char* filename,
                                     SurfDataInfo* toSurfDataInfo);
-                                    
+
 /* This function doesn't destroy the internal data-structures */
 
 extern XdrSurf mem_WriteSdaStructure(char* filename,
                                     SurfDataInfo* toSurfDataInfo);
-                                    
+
 extern XdrSurf mem_destroyAWholeSurfStructure(SurfDataInfo* toSurfDataInfo);
 
 extern XdrSurf mem_buildSurfSdaStructure(SurfDataInfo* toSurfDataInfo);
 
 
-/*****************************************************/ 
-/*                                                   */ 
+/*****************************************************/
+/*                                                   */
 /* some internal functios,that might be useful       */
 /* useful (to use them , it is necessary to under-   */
 /*         stand the internal architecture)          */
-/*                                                   */ 
-/*****************************************************/ 
+/*                                                   */
+/*****************************************************/
 
 
 
@@ -288,7 +288,7 @@ extern SurfMultiBeamAngleTable* getSurfAngleTable(SurfMultiBeamAngleTable*
                                 toAngleTable,short nrBeams,long index);
 extern SurfCProfileTable* getSurfCProfileTable(SurfCProfileTable*
                                 toCProf,short nrCPElements,long index);
-extern SurfCProfileTpeTable* getSurfCProfileTpeTable(SurfCProfileTpeTable* 
+extern SurfCProfileTpeTable* getSurfCProfileTpeTable(SurfCProfileTpeTable*
                                 toCProfTpe,short nrCPElements,long index);
 
 #endif

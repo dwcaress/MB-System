@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_jstar.c	10/4/94
  *	$Id$
  *
- *    Copyright (c) 2005-2012 by
+ *    Copyright (c) 2005-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -54,12 +54,12 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_segy.h"
-#include "../../include/mbsys_jstar.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mb_segy.h"
+#include "mbsys_jstar.h"
 
 static char rcs_id[]="$Id$";
 
@@ -79,7 +79,7 @@ int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -105,7 +105,7 @@ int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -129,8 +129,8 @@ int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		}
 
 	/* deallocate memory for data structure */
@@ -190,8 +190,8 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -268,7 +268,7 @@ int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -345,8 +345,8 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -394,14 +394,14 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*nss = 0;
 
 		/* get nadir depth */
-		if (ssport->depth > 0)
+		if (sbp->depth > 0)
 			{
-			bath[0] = 0.001 * ssport->depth;
+			bath[0] = 0.001 * sbp->depth;
 			beamflag[0] = MB_FLAG_NONE;
 			}
-		else if (ssport->depth < 0)
+		else if (sbp->depth < 0)
 			{
-			bath[0] = -0.001 * ssport->depth;
+			bath[0] = -0.001 * sbp->depth;
 			beamflag[0] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
 			}
 		else
@@ -740,8 +740,8 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_NAV))
@@ -1074,14 +1074,14 @@ int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %lu\n",(size_t)ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%lu\n",(size_t)angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%lu\n",(size_t)angles_forward);
-		fprintf(stderr,"dbg2       angles_null:%lu\n",(size_t)angles_null);
-		fprintf(stderr,"dbg2       heave:      %lu\n",(size_t)heave);
-		fprintf(stderr,"dbg2       ltrk_off:   %lu\n",(size_t)alongtrack_offset);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %p\n",(void *)ttimes);
+		fprintf(stderr,"dbg2       angles_xtrk:%p\n",(void *)angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%p\n",(void *)angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%p\n",(void *)angles_null);
+		fprintf(stderr,"dbg2       heave:      %p\n",(void *)heave);
+		fprintf(stderr,"dbg2       ltrk_off:   %p\n",(void *)alongtrack_offset);
 		}
 
 	/* get mbio descriptor */
@@ -1164,9 +1164,9 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %p\n",(void *)detects);
 		}
 
 	/* get mbio descriptor */
@@ -1251,8 +1251,8 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1358,8 +1358,8 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1615,7 +1615,6 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ssport;
 	struct mbsys_jstar_channel_struct *ssstbd;
-	int	kind;
 	int	time_j[5];
 
 	/* print input debug statements */
@@ -1625,8 +1624,8 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -1652,7 +1651,7 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	store = (struct mbsys_jstar_struct *) store_ptr;
 
 	/* insert subbottom data into structure */
-	if (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 		{
 		/* get channel */
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
@@ -1823,10 +1822,10 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:         %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:      %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:      %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       kind:           %d\n",*kind);
-		fprintf(stderr,"dbg2       segytraceheader_ptr: %lu\n",(size_t)segytraceheader_ptr);
+		fprintf(stderr,"dbg2       segytraceheader_ptr: %p\n",(void *)segytraceheader_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -2065,12 +2064,12 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:            %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:         %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:         %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       sampleformat:      %d\n",*sampleformat);
 		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
-		fprintf(stderr,"dbg2       segyheader_ptr:    %lu\n",(size_t)segyheader_ptr);
-		fprintf(stderr,"dbg2       segydata:          %lu\n",(size_t)segydata);
+		fprintf(stderr,"dbg2       segyheader_ptr:    %p\n",(void *)segyheader_ptr);
+		fprintf(stderr,"dbg2       segydata:          %p\n",(void *)segydata);
 		}
 
 	/* get mbio descriptor */
@@ -2081,6 +2080,9 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data kind */
 	*kind = store->kind;
+
+	/* get segy traceheader */
+	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segyheader_ptr;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
@@ -2297,10 +2299,10 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:         %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:      %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:      %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       kind:           %d\n",kind);
-		fprintf(stderr,"dbg2       segyheader_ptr: %lu\n",(size_t)segyheader_ptr);
+		fprintf(stderr,"dbg2       segyheader_ptr: %p\n",(void *)segyheader_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -2311,6 +2313,9 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data kind */
 	store->kind = kind;
+
+	/* get segy traceheader */
+	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segyheader_ptr;
 
 	/* insert data to structure */
 	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
@@ -2544,9 +2549,9 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %lu\n",(size_t)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %p\n",(void *)copy_ptr);
 		}
 
 	/* get mbio descriptor */

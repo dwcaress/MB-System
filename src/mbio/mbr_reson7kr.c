@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
  *	$Id$
  *
- *    Copyright (c) 2004-2012 by
+ *    Copyright (c) 2004-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -101,14 +101,14 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_reson7k.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_reson7k.h"
 
 /* include for byte swapping */
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 
 /* turn on debug statements here */
 /* #define MBR_RESON7KR_DEBUG 1 */
@@ -366,28 +366,28 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       extract_segytraceheader: %lu\n",(size_t)mb_io_ptr->mb_io_extract_segytraceheader);
-		fprintf(stderr,"dbg2       extract_segy:       %lu\n",(size_t)mb_io_ptr->mb_io_extract_segy);
-		fprintf(stderr,"dbg2       insert_segy:        %lu\n",(size_t)mb_io_ptr->mb_io_insert_segy);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       extract_segytraceheader: %p\n",(void *)mb_io_ptr->mb_io_extract_segytraceheader);
+		fprintf(stderr,"dbg2       extract_segy:       %p\n",(void *)mb_io_ptr->mb_io_extract_segy);
+		fprintf(stderr,"dbg2       insert_segy:        %p\n",(void *)mb_io_ptr->mb_io_insert_segy);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -515,7 +515,7 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -608,7 +608,7 @@ int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -688,8 +688,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -891,7 +891,7 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		/* get attitude structure */
 		altitude = &(store->altitude);
 
-		/* add latest heading sample */
+		/* add latest altitude sample */
 		mb_altint_add(verbose, mbio_ptr,
 				(double)(store->time_d),
 				(double)(altitude->altitude),
@@ -1011,13 +1011,17 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		{
 		/* get navigation */
 		speed = 0.0;
+		longitude = 0.0;
+		latitude = 0.0;
+		heading = 0.0;
+		sonar_depth = 0.0;
 		interp_status = mb_hedint_interp(verbose, mbio_ptr, store->time_d,
 				    &heading, &interp_error);
 		if (interp_status == MB_SUCCESS)
-		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed,
+			interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed,
 				    &longitude, &latitude, &speed, &interp_error);
 		if (interp_status == MB_SUCCESS)
-		interp_status = mb_depint_interp(verbose, mbio_ptr, store->time_d,
+			interp_status = mb_depint_interp(verbose, mbio_ptr, store->time_d,
 				    &sonar_depth, &interp_error);
 
 		/* if the optional data are not all available, this ping
@@ -1152,8 +1156,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 		else if (store->read_v2detection == MB_YES)
 			{
 			/* now loop over the detects */
-			for (i=0;i<v2detection->number_beams;i++)
+			for (j=0;j<v2detection->number_beams;j++)
 				{
+				i = j;
+
 				bathymetry->range[i] = v2detection->range[j];
 				alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch);
 				beta = 90.0 - RTD * (v2detection->angle_x[j] - bathymetry->roll);
@@ -1280,8 +1286,8 @@ int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1363,8 +1369,8 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1441,7 +1447,7 @@ description to the MB-System team \n\
 (caress@mbari.org and dale@ldeo.columbia.edu)\n\
 Have a nice day...\n");
 				fprintf(stderr,
-						"MBF_RESON7KR skipped %d bytes between records %4.4hX:%d and %4.4hX:%d\n",
+						"MBF_RESON7KR skipped %d bytes between records %4.4X:%d and %4.4X:%d\n",
 						skip, *recordidlast, *recordidlast, *recordid, *recordid);
 				(*nbadrec)++;
 			    }
@@ -1691,7 +1697,7 @@ ping_record,*last_ping,*new_ping,*current_ping,done,status,*error); */
 #ifdef MBR_RESON7KR_DEBUG
 if (status == MB_SUCCESS && done == MB_NO && *save_flag == MB_NO)
 {
-fprintf(stderr, "Reading record id: %4.4hX  %4.4d | %4.4hX  %4.4d | %4.4hX  %4.4d |",
+fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |",
 *recordid, *recordid, *deviceid, *deviceid, *enumerator, *enumerator);
 if (*recordid == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferencePoint %d\n",*recordid);
 if (*recordid == R7KRECID_UncalibratedSensorOffset) fprintf(stderr," R7KRECID_UncalibratedSensorOffset %d\n",*recordid);
@@ -2498,7 +2504,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:      %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:      %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -2517,10 +2523,10 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	fprintf(stderr, "\nChecking header in mbr_reson7kr_chk_header:\n");
 	fprintf(stderr, "Version:      %4.4hX | %d\n", version, version);
 	fprintf(stderr, "Offset:       %4.4hX | %d\n", offset, offset);
-	fprintf(stderr, "Sync:         %4.4hX | %d\n", sync, sync);
-	fprintf(stderr, "Size:         %4.4hX | %d\n", *size, *size);
-	fprintf(stderr, "Record id:    %4.4hX | %d\n", *recordid, *recordid);
-	fprintf(stderr, "Device id:    %4.4hX | %d\n", *deviceid, *deviceid);
+	fprintf(stderr, "Sync:         %4.4X | %d\n", sync, sync);
+	fprintf(stderr, "Size:         %4.4X | %d\n", *size, *size);
+	fprintf(stderr, "Record id:    %4.4X | %d\n", *recordid, *recordid);
+	fprintf(stderr, "Device id:    %4.4X | %d\n", *deviceid, *deviceid);
 	fprintf(stderr, "Reserved:     %4.4hX | %d\n", reserved, reserved);
 	fprintf(stderr, "Enumerator:   %4.4hX | %d\n", *enumerator, *enumerator);
 #endif
@@ -2607,7 +2613,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 #ifdef MBR_RESON7KR_DEBUG
 		if (verbose > 0)
 			{
-			fprintf(stderr, "Good record id: %4.4hX | %d", *recordid, *recordid);
+			fprintf(stderr, "Good record id: %4.4X | %d", *recordid, *recordid);
 			if (*recordid == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferencePoint\n");
 			if (*recordid == R7KRECID_UncalibratedSensorOffset) fprintf(stderr," R7KRECID_UncalibratedSensorOffset\n");
 			if (*recordid == R7KRECID_CalibratedSensorOffset) fprintf(stderr," R7KRECID_CalibratedSensorOffset\n");
@@ -2706,7 +2712,7 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       recordid:      %d\n",recordid);
-		fprintf(stderr,"dbg2       buffer:        %lu\n",(size_t)buffer);
+		fprintf(stderr,"dbg2       buffer:        %p\n",(void *)buffer);
 		}
 
 	/* get offset to data section */
@@ -2837,9 +2843,9 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
-		fprintf(stderr,"dbg2       header:     %lu\n",(size_t)header);
+		fprintf(stderr,"dbg2       header:     %p\n",(void *)header);
 		}
 
 	/* extract the header */
@@ -2919,8 +2925,8 @@ int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *e
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3005,8 +3011,8 @@ int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int 
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3093,8 +3099,8 @@ int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *e
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3181,8 +3187,8 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3274,8 +3280,8 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3431,8 +3437,8 @@ int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3524,8 +3530,8 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3609,8 +3615,8 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3752,8 +3758,8 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3840,8 +3846,8 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3954,8 +3960,8 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4082,8 +4088,8 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4207,8 +4213,8 @@ int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, i
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4292,8 +4298,8 @@ int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *err
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4377,8 +4383,8 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4490,8 +4496,8 @@ int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4583,8 +4589,8 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4701,8 +4707,8 @@ int mbr_reson7kr_rd_rec1022(int verbose, char *buffer, void *store_ptr, int *err
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4787,9 +4793,9 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       data_format:%d\n",data_format);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwchannel:%lu\n",(size_t)fsdwchannel);
+		fprintf(stderr,"dbg2       fsdwchannel:%p\n",(void *)fsdwchannel);
 		}
 
 	/* extract the channel header */
@@ -4906,9 +4912,9 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:         %lu\n",(size_t)buffer);
+		fprintf(stderr,"dbg2       buffer:         %p\n",(void *)buffer);
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwssheader:   %lu\n",(size_t)fsdwssheader);
+		fprintf(stderr,"dbg2       fsdwssheader:   %p\n",(void *)fsdwssheader);
 		}
 
 	/* extract the Edgetech sidescan header */
@@ -4978,9 +4984,9 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:         %lu\n",(size_t)buffer);
+		fprintf(stderr,"dbg2       buffer:         %p\n",(void *)buffer);
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwsegyheader: %lu\n",(size_t)fsdwsegyheader);
+		fprintf(stderr,"dbg2       fsdwsegyheader: %p\n",(void *)fsdwsegyheader);
 		}
 
 	/* extract the Edgetech segy header */
@@ -5111,8 +5117,8 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -5422,8 +5428,8 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -5597,8 +5603,8 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -5765,8 +5771,8 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6136,8 +6142,8 @@ int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6238,8 +6244,8 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6362,8 +6368,8 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6480,8 +6486,8 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6569,8 +6575,8 @@ int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, v
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6675,8 +6681,8 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6778,8 +6784,8 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6874,8 +6880,8 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7092,8 +7098,8 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7285,8 +7291,8 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7489,8 +7495,8 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7585,8 +7591,8 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7718,8 +7724,8 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7884,8 +7890,8 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8009,8 +8015,8 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8140,8 +8146,8 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8296,8 +8302,8 @@ int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8383,8 +8389,8 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8470,8 +8476,8 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8581,8 +8587,8 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8705,8 +8711,8 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8741,13 +8747,6 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 		mb_get_binary_int(MB_YES, &buffer[index], &(snippettimeseries->begin_sample)); index += 4;
 		mb_get_binary_int(MB_YES, &buffer[index], &(snippettimeseries->detect_sample)); index += 4;
 		mb_get_binary_int(MB_YES, &buffer[index], &(snippettimeseries->end_sample)); index += 4;
-
-		if (snippettimeseries->begin_sample > snippettimeseries->end_sample
-		    || snippettimeseries->detect_sample > snippettimeseries->end_sample)
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 
 		/* allocate memory for snippettimeseries if needed */
 		if (status == MB_SUCCESS
@@ -8843,8 +8842,8 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8972,8 +8971,8 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9092,8 +9091,8 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9195,8 +9194,8 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9336,8 +9335,8 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9422,8 +9421,8 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9499,8 +9498,8 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9576,8 +9575,8 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9653,8 +9652,8 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9730,8 +9729,8 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9811,8 +9810,8 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -9833,7 +9832,7 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		&& (store->type == R7KRECID_7kFileHeader || *fileheaders == 0))
 		{
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kFileHeader, R7KRECID_7kFileHeader);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kFileHeader, R7KRECID_7kFileHeader);
 fprintf(stderr," R7KRECID_7kFileHeader\n");
 #endif
 		status = mbr_reson7kr_wr_fileheader(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9856,7 +9855,7 @@ fprintf(stderr," R7KRECID_7kFileHeader\n");
 			{
 			store->type = R7KRECID_7kVolatileSonarSettings;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kVolatileSonarSettings, R7KRECID_7kVolatileSonarSettings);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kVolatileSonarSettings, R7KRECID_7kVolatileSonarSettings);
 fprintf(stderr," R7KRECID_7kVolatileSonarSettings\n");
 #endif
 			status = mbr_reson7kr_wr_volatilesonarsettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9869,7 +9868,7 @@ fprintf(stderr," R7KRECID_7kVolatileSonarSettings\n");
 			{
 			store->type = R7KRECID_7kMatchFilter;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kMatchFilter, R7KRECID_7kMatchFilter);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kMatchFilter, R7KRECID_7kMatchFilter);
 fprintf(stderr," R7KRECID_7kMatchFilter\n");
 #endif
 			status = mbr_reson7kr_wr_matchfilter(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9883,7 +9882,7 @@ fprintf(stderr," R7KRECID_7kMatchFilter\n");
 			{
 			store->type = R7KRECID_7kBeamGeometry;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBeamGeometry, R7KRECID_7kBeamGeometry);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBeamGeometry, R7KRECID_7kBeamGeometry);
 fprintf(stderr," R7KRECID_7kBeamGeometry\n");
 #endif
 			status = mbr_reson7kr_wr_beamgeometry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9897,7 +9896,7 @@ fprintf(stderr," R7KRECID_7kBeamGeometry\n");
 			{
 			store->type = R7KRECID_7kRemoteControlSonarSettings;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kRemoteControlSonarSettings, R7KRECID_7kRemoteControlSonarSettings);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kRemoteControlSonarSettings, R7KRECID_7kRemoteControlSonarSettings);
 fprintf(stderr," R7KRECID_7kRemoteControlSonarSettings\n");
 #endif
 			status = mbr_reson7kr_wr_remotecontrolsettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9911,7 +9910,7 @@ fprintf(stderr," R7KRECID_7kRemoteControlSonarSettings\n");
 			{
 				store->type = R7KRECID_7kBathymetricData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBathymetricData, R7KRECID_7kBathymetricData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBathymetricData, R7KRECID_7kBathymetricData);
 fprintf(stderr," R7KRECID_7kBathymetricData\n");
 #endif
 
@@ -9928,7 +9927,7 @@ fprintf(stderr," R7KRECID_7kBathymetricData\n");
 			{
 				store->type = R7KRECID_ProcessedSidescan;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_ProcessedSidescan, R7KRECID_ProcessedSidescan);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_ProcessedSidescan, R7KRECID_ProcessedSidescan);
 fprintf(stderr," R7KRECID_ProcessedSidescan\n");
 #endif
 
@@ -9945,7 +9944,7 @@ fprintf(stderr," R7KRECID_ProcessedSidescan\n");
 			{
 			store->type = R7KRECID_7kBackscatterImageData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBackscatterImageData, R7KRECID_7kBackscatterImageData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBackscatterImageData, R7KRECID_7kBackscatterImageData);
 fprintf(stderr," R7KRECID_7kBackscatterImageData\n");
 #endif
 			status = mbr_reson7kr_wr_backscatter(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9959,7 +9958,7 @@ fprintf(stderr," R7KRECID_7kBackscatterImageData\n");
 			{
 			store->type = R7KRECID_7kBeamData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBeamData, R7KRECID_7kBeamData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBeamData, R7KRECID_7kBeamData);
 fprintf(stderr," R7KRECID_7kBeamData\n");
 #endif
 			status = mbr_reson7kr_wr_beam(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9973,7 +9972,7 @@ fprintf(stderr," R7KRECID_7kBeamData\n");
 			{
 			store->type = R7KRECID_7kVerticalDepth;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kVerticalDepth, R7KRECID_7kVerticalDepth);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kVerticalDepth, R7KRECID_7kVerticalDepth);
 fprintf(stderr," R7KRECID_7kVerticalDepth\n");
 #endif
 			status = mbr_reson7kr_wr_verticaldepth(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9987,7 +9986,7 @@ fprintf(stderr," R7KRECID_7kVerticalDepth\n");
 			{
 			store->type = R7KRECID_7kImageData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kImageData, R7KRECID_7kImageData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kImageData, R7KRECID_7kImageData);
 fprintf(stderr," R7KRECID_7kImageData\n");
 #endif
 			status = mbr_reson7kr_wr_image(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10001,7 +10000,7 @@ fprintf(stderr," R7KRECID_7kImageData\n");
 			{
 			store->type = R7KRECID_7kV2PingMotion;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2PingMotion, R7KRECID_7kV2PingMotion);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2PingMotion, R7KRECID_7kV2PingMotion);
 fprintf(stderr," R7KRECID_7kV2PingMotion\n");
 #endif
 			status = mbr_reson7kr_wr_v2pingmotion(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10015,7 +10014,7 @@ fprintf(stderr," R7KRECID_7kV2PingMotion\n");
 			{
 			store->type = R7KRECID_7kV2DetectionSetup;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2DetectionSetup, R7KRECID_7kV2DetectionSetup);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2DetectionSetup, R7KRECID_7kV2DetectionSetup);
 fprintf(stderr," R7KRECID_7kV2DetectionSetup\n");
 #endif
 			status = mbr_reson7kr_wr_v2detectionsetup(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10029,7 +10028,7 @@ fprintf(stderr," R7KRECID_7kV2DetectionSetup\n");
 			{
 			store->type = R7KRECID_7kV2BeamformedData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2BeamformedData, R7KRECID_7kV2BeamformedData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2BeamformedData, R7KRECID_7kV2BeamformedData);
 fprintf(stderr," R7KRECID_7kV2BeamformedData\n");
 #endif
 			status = mbr_reson7kr_wr_v2beamformed(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10043,7 +10042,7 @@ fprintf(stderr," R7KRECID_7kV2BeamformedData\n");
 			{
 			store->type = R7KRECID_7kV2Detection;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2Detection, R7KRECID_7kV2Detection);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2Detection, R7KRECID_7kV2Detection);
 fprintf(stderr," R7KRECID_7kV2Detection\n");
 #endif
 			status = mbr_reson7kr_wr_v2detection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10057,7 +10056,7 @@ fprintf(stderr," R7KRECID_7kV2Detection\n");
 			{
 			store->type = R7KRECID_7kV2RawDetection;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2RawDetection, R7KRECID_7kV2RawDetection);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2RawDetection, R7KRECID_7kV2RawDetection);
 fprintf(stderr," R7KRECID_7kV2RawDetection\n");
 #endif
 			status = mbr_reson7kr_wr_v2rawdetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10071,7 +10070,7 @@ fprintf(stderr," R7KRECID_7kV2RawDetection\n");
 			{
 			store->type = R7KRECID_7kV2SnippetData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2SnippetData, R7KRECID_7kV2SnippetData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2SnippetData, R7KRECID_7kV2SnippetData);
 fprintf(stderr," R7KRECID_7kV2SnippetData\n");
 #endif
 			status = mbr_reson7kr_wr_v2snippet(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10085,7 +10084,7 @@ fprintf(stderr," R7KRECID_7kV2SnippetData\n");
 	else if (status == MB_SUCCESS && store->type != R7KRECID_7kFileHeader)
 		{
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", store->type, store->type);
+fprintf(stderr, "Writing record id: %4.4X | %d", store->type, store->type);
 if (store->type == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferencePoint\n");
 if (store->type == R7KRECID_UncalibratedSensorOffset) fprintf(stderr," R7KRECID_UncalibratedSensorOffset\n");
 if (store->type == R7KRECID_CalibratedSensorOffset) fprintf(stderr," R7KRECID_CalibratedSensorOffset\n");
@@ -10360,9 +10359,9 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %lu\n",(size_t)buffer);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
-		fprintf(stderr,"dbg2       header:     %lu\n",(size_t)header);
+		fprintf(stderr,"dbg2       header:     %p\n",(void *)header);
 		}
 
 	/* set some important values */
@@ -10442,8 +10441,8 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -10549,8 +10548,8 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -10659,8 +10658,8 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -10769,8 +10768,8 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -10882,8 +10881,8 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11047,8 +11046,8 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11162,8 +11161,8 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11267,8 +11266,8 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11410,8 +11409,8 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11518,8 +11517,8 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11635,8 +11634,8 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11761,8 +11760,8 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11906,8 +11905,8 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12011,8 +12010,8 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12114,8 +12113,8 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12229,8 +12228,8 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12340,8 +12339,8 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12452,8 +12451,8 @@ int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, voi
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12555,7 +12554,7 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       data_format:%d\n",data_format);
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwchannel:%lu\n",(size_t)fsdwchannel);
+		fprintf(stderr,"dbg2       fsdwchannel:%p\n",(void *)fsdwchannel);
 		}
 
 	/* print out the data to be output */
@@ -12661,9 +12660,9 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:         %lu\n",(size_t)buffer);
+		fprintf(stderr,"dbg2       buffer:         %p\n",(void *)buffer);
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwssheader:   %lu\n",(size_t)fsdwssheader);
+		fprintf(stderr,"dbg2       fsdwssheader:   %p\n",(void *)fsdwssheader);
 		}
 
 	/* print out the data to be output */
@@ -12733,9 +12732,9 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:         %lu\n",(size_t)buffer);
+		fprintf(stderr,"dbg2       buffer:         %p\n",(void *)buffer);
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwsegyheader: %lu\n",(size_t)fsdwsegyheader);
+		fprintf(stderr,"dbg2       fsdwsegyheader: %p\n",(void *)fsdwsegyheader);
 		}
 
 	/* print out the data to be output */
@@ -12867,8 +12866,8 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13016,8 +13015,8 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13163,8 +13162,8 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13304,8 +13303,8 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13498,8 +13497,8 @@ int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **buff
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13625,8 +13624,8 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13769,8 +13768,8 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13899,8 +13898,8 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -14008,8 +14007,8 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -14121,8 +14120,8 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -14246,8 +14245,8 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -14363,8 +14362,8 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -14537,8 +14536,8 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -14755,8 +14754,8 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -14961,8 +14960,8 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -15078,8 +15077,8 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -15233,8 +15232,8 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -15375,8 +15374,8 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -15514,8 +15513,8 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -15640,8 +15639,8 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -15804,8 +15803,8 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -15910,8 +15909,8 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -16016,8 +16015,8 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -16151,8 +16150,8 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -16288,8 +16287,8 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -16433,8 +16432,8 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -16583,8 +16582,8 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -16757,8 +16756,8 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -16872,8 +16871,8 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -17030,8 +17029,8 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -17138,8 +17137,8 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -17243,8 +17242,8 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -17348,8 +17347,8 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -17453,8 +17452,8 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -17558,8 +17557,8 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %lu\n",(size_t)bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to raw data structure */

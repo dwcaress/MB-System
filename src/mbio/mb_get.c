@@ -2,7 +2,7 @@
  *    The MB-system:	mb_get.c	1/26/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -123,18 +123,18 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
 
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, 
+int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
-		double *speed, double *heading, 
+		double *navlon, double *navlat,
+		double *speed, double *heading,
 		double *distance, double *altitude, double *sonardepth,
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
@@ -162,7 +162,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -225,11 +225,11 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			{
 			status = mb_read_ping(verbose,mbio_ptr,store_ptr,
 						&mb_io_ptr->new_kind,error);
-			
+
 			/* log errors */
 			if (*error < MB_ERROR_NO_ERROR)
 				mb_notice_log_error(verbose, mbio_ptr, *error);
-				
+
 			/* if io arrays have been reallocated, update the
 				pointers of arrays passed into this function,
 				as these pointers may have changed */
@@ -257,43 +257,43 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 					mb_io_ptr->ss_arrays_reallocated = MB_NO;
 					}
 				}
-			
+
 			/* if survey data read into storage array */
 			if (status == MB_SUCCESS
 				&& (mb_io_ptr->new_kind == MB_DATA_DATA
 				    || mb_io_ptr->new_kind == MB_DATA_COMMENT))
 				{
-				status = mb_extract(verbose, 
-					mbio_ptr, store_ptr, 
+				status = mb_extract(verbose,
+					mbio_ptr, store_ptr,
 					&mb_io_ptr->new_kind,
-					mb_io_ptr->new_time_i, 
+					mb_io_ptr->new_time_i,
 					&mb_io_ptr->new_time_d,
-					&mb_io_ptr->new_lon, 
+					&mb_io_ptr->new_lon,
 					&mb_io_ptr->new_lat,
-					&mb_io_ptr->new_speed, 
+					&mb_io_ptr->new_speed,
 					&mb_io_ptr->new_heading,
-					&mb_io_ptr->new_beams_bath, 
-					&mb_io_ptr->new_beams_amp, 
-					&mb_io_ptr->new_pixels_ss, 
-					mb_io_ptr->new_beamflag, 
-					mb_io_ptr->new_bath, 
-					mb_io_ptr->new_amp, 
-					mb_io_ptr->new_bath_acrosstrack, 
-					mb_io_ptr->new_bath_alongtrack, 
-					mb_io_ptr->new_ss, 
-					mb_io_ptr->new_ss_acrosstrack, 
-					mb_io_ptr->new_ss_alongtrack, 
-					mb_io_ptr->new_comment, 
+					&mb_io_ptr->new_beams_bath,
+					&mb_io_ptr->new_beams_amp,
+					&mb_io_ptr->new_pixels_ss,
+					mb_io_ptr->new_beamflag,
+					mb_io_ptr->new_bath,
+					mb_io_ptr->new_amp,
+					mb_io_ptr->new_bath_acrosstrack,
+					mb_io_ptr->new_bath_alongtrack,
+					mb_io_ptr->new_ss,
+					mb_io_ptr->new_ss_acrosstrack,
+					mb_io_ptr->new_ss_alongtrack,
+					mb_io_ptr->new_comment,
 					error);
 				}
 			if (status == MB_SUCCESS
 				&& mb_io_ptr->new_kind == MB_DATA_DATA)
 				{
-				status = mb_extract_altitude(verbose, 
-					mbio_ptr, store_ptr, 
+				status = mb_extract_altitude(verbose,
+					mbio_ptr, store_ptr,
 					&mb_io_ptr->new_kind,
-					sonardepth, 
-					altitude, 
+					sonardepth,
+					altitude,
 					error);
 				}
 
@@ -339,12 +339,12 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			}
 
 		/* if not a fatal error, increment ping counter */
-		if (status == MB_SUCCESS 
+		if (status == MB_SUCCESS
 			&& mb_io_ptr->new_kind == MB_DATA_DATA)
 			mb_io_ptr->pings_read++;
 
 		/* if first ping read set "old" navigation values */
-		if (status == MB_SUCCESS 
+		if (status == MB_SUCCESS
 			&& mb_io_ptr->new_kind == MB_DATA_DATA
 			&& mb_io_ptr->ping_count == 1)
 			{
@@ -375,12 +375,12 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			}
 
 		/* check for out of location or time bounds */
-		if (status == MB_SUCCESS 
+		if (status == MB_SUCCESS
 			&& mb_io_ptr->new_kind == MB_DATA_DATA)
 		{
-		if (mb_io_ptr->new_lon < mb_io_ptr->bounds[0] 
-			|| mb_io_ptr->new_lon > mb_io_ptr->bounds[1] 
-			|| mb_io_ptr->new_lat < mb_io_ptr->bounds[2] 
+		if (mb_io_ptr->new_lon < mb_io_ptr->bounds[0]
+			|| mb_io_ptr->new_lon > mb_io_ptr->bounds[1]
+			|| mb_io_ptr->new_lat < mb_io_ptr->bounds[2]
 			|| mb_io_ptr->new_lat > mb_io_ptr->bounds[3])
 			{
 			status = MB_FAILURE;
@@ -388,8 +388,8 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			mb_notice_log_error(verbose, mbio_ptr, *error);
 			}
 		else if (mb_io_ptr->etime_d > mb_io_ptr->btime_d
-			&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN 
-			&& (mb_io_ptr->new_time_d > mb_io_ptr->etime_d 
+			&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN
+			&& (mb_io_ptr->new_time_d > mb_io_ptr->etime_d
 				|| mb_io_ptr->new_time_d < mb_io_ptr->btime_d))
 			{
 			status = MB_FAILURE;
@@ -397,8 +397,8 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			mb_notice_log_error(verbose, mbio_ptr, *error);
 			}
 		else if (mb_io_ptr->etime_d < mb_io_ptr->btime_d
-			&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN 
-			&& (mb_io_ptr->new_time_d > mb_io_ptr->etime_d 
+			&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN
+			&& (mb_io_ptr->new_time_d > mb_io_ptr->etime_d
 				&& mb_io_ptr->new_time_d < mb_io_ptr->btime_d))
 			{
 			status = MB_FAILURE;
@@ -408,12 +408,12 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 		}
 
 		/* check for time gap */
-		if (status == MB_SUCCESS 
-			&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN 
+		if (status == MB_SUCCESS
+			&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN
 			&& mb_io_ptr->new_kind == MB_DATA_DATA
 			&& mb_io_ptr->ping_count > 1)
 		{
-		if ((mb_io_ptr->new_time_d - mb_io_ptr->last_time_d) 
+		if ((mb_io_ptr->new_time_d - mb_io_ptr->last_time_d)
 			> 60*mb_io_ptr->timegap)
 			{
 			status = MB_FAILURE;
@@ -421,7 +421,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			mb_notice_log_error(verbose, mbio_ptr, *error);
 			}
 		}
-			
+
 		/* log errors */
 		if (*error < MB_ERROR_NO_ERROR)
 			mb_notice_log_error(verbose, mbio_ptr, *error);
@@ -445,13 +445,13 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			fprintf(stderr,"dbg4       status:        %d\n",
 				status);
 			}
-		if (verbose >= 4 
+		if (verbose >= 4
 			&& mb_io_ptr->new_kind == MB_DATA_COMMENT)
 			{
 			fprintf(stderr,"dbg4       comment:     \ndbg4       %s\n",
 				mb_io_ptr->new_comment);
 			}
-		else if (verbose >= 4 
+		else if (verbose >= 4
 			&& mb_io_ptr->new_kind == MB_DATA_DATA
 			&& *error <= MB_ERROR_NO_ERROR
 			&& *error > MB_ERROR_COMMENT)
@@ -521,9 +521,9 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			/* if data is ok */
 			(status == MB_SUCCESS
 
-			/* or if nonfatal error and only one ping read, 
+			/* or if nonfatal error and only one ping read,
 				bin the ping */
-			|| (*error < MB_ERROR_NO_ERROR 
+			|| (*error < MB_ERROR_NO_ERROR
 			&& *error > MB_ERROR_COMMENT
 			&& mb_io_ptr->pings_read == 1))
 			)
@@ -531,15 +531,15 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			{
 			/* bin the values */
 			mb_io_ptr->pings_binned++;
-			mb_io_ptr->time_d = mb_io_ptr->time_d 
+			mb_io_ptr->time_d = mb_io_ptr->time_d
 				+ mb_io_ptr->new_time_d;
-			mb_io_ptr->lon = mb_io_ptr->lon 
+			mb_io_ptr->lon = mb_io_ptr->lon
 				+ mb_io_ptr->new_lon;
-			mb_io_ptr->lat = mb_io_ptr->lat 
+			mb_io_ptr->lat = mb_io_ptr->lat
 				+ mb_io_ptr->new_lat;
-			mb_io_ptr->speed = mb_io_ptr->speed 
+			mb_io_ptr->speed = mb_io_ptr->speed
 				+ mb_io_ptr->new_speed;
-			mb_io_ptr->heading = mb_io_ptr->heading 
+			mb_io_ptr->heading = mb_io_ptr->heading
 				+ mb_io_ptr->new_heading;
 			headingx = headingx + sin(DTR*mb_io_ptr->new_heading);
 			headingy = headingy + cos(DTR*mb_io_ptr->new_heading);
@@ -573,11 +573,11 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			    if (!mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
 			      {
 			      mb_io_ptr->beamflag[i] = MB_FLAG_NONE;
-			      mb_io_ptr->bath[i] = mb_io_ptr->bath[i] 
+			      mb_io_ptr->bath[i] = mb_io_ptr->bath[i]
 			                         + mb_io_ptr->new_bath[i];
-			      mb_io_ptr->bath_acrosstrack[i] = mb_io_ptr->bath_acrosstrack[i] 
+			      mb_io_ptr->bath_acrosstrack[i] = mb_io_ptr->bath_acrosstrack[i]
 			                         + mb_io_ptr->new_bath_acrosstrack[i];
-			      mb_io_ptr->bath_alongtrack[i] = mb_io_ptr->bath_alongtrack[i] 
+			      mb_io_ptr->bath_alongtrack[i] = mb_io_ptr->bath_alongtrack[i]
 			                         + mb_io_ptr->new_bath_alongtrack[i];
 			      mb_io_ptr->bath_num[i]++;
 			      }
@@ -586,7 +586,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			    {
 			    if (!mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
 			      {
-			      mb_io_ptr->amp[i] = mb_io_ptr->amp[i] 
+			      mb_io_ptr->amp[i] = mb_io_ptr->amp[i]
 						 + mb_io_ptr->new_amp[i];
 			      mb_io_ptr->amp_num[i]++;
 			      }
@@ -595,11 +595,11 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			    {
 			    if (mb_io_ptr->new_ss[i] != 0.0)
 			      {
-			      mb_io_ptr->ss[i] = mb_io_ptr->ss[i] 
+			      mb_io_ptr->ss[i] = mb_io_ptr->ss[i]
 			                         + mb_io_ptr->new_ss[i];
-			      mb_io_ptr->ss_acrosstrack[i] = mb_io_ptr->ss_acrosstrack[i] 
+			      mb_io_ptr->ss_acrosstrack[i] = mb_io_ptr->ss_acrosstrack[i]
 			                         + mb_io_ptr->new_ss_acrosstrack[i];
-			      mb_io_ptr->ss_alongtrack[i] = mb_io_ptr->ss_alongtrack[i] 
+			      mb_io_ptr->ss_alongtrack[i] = mb_io_ptr->ss_alongtrack[i]
 			                         + mb_io_ptr->new_ss_alongtrack[i];
 			      mb_io_ptr->ss_num[i]++;
 			      }
@@ -608,10 +608,10 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			}
 
 		/* print debug statements */
-		if (verbose >= 4 
-			&& mb_io_ptr->new_kind == MB_DATA_DATA 
+		if (verbose >= 4
+			&& mb_io_ptr->new_kind == MB_DATA_DATA
 			&& (status == MB_SUCCESS
-			|| (*error < MB_ERROR_NO_ERROR 
+			|| (*error < MB_ERROR_NO_ERROR
 			&& *error > MB_ERROR_COMMENT
 			&& mb_io_ptr->pings_read == 1)))
 			{
@@ -666,8 +666,8 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			}
 
 		/* if data is ok but more pings needed keep reading */
-		if (status == MB_SUCCESS 
-			&& mb_io_ptr->new_kind == MB_DATA_DATA 
+		if (status == MB_SUCCESS
+			&& mb_io_ptr->new_kind == MB_DATA_DATA
 			&& mb_io_ptr->pings_binned < mb_io_ptr->pings_avg)
 			{
 			done = MB_NO;
@@ -676,8 +676,8 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			}
 
 		/* if data is ok and enough pings binned then done */
-		else if (status == MB_SUCCESS 
-			&& mb_io_ptr->new_kind == MB_DATA_DATA 
+		else if (status == MB_SUCCESS
+			&& mb_io_ptr->new_kind == MB_DATA_DATA
 			&& mb_io_ptr->pings_binned >= mb_io_ptr->pings_avg)
 			{
 			done = MB_YES;
@@ -688,7 +688,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 		/* if data gap and only one ping read and more
 			pings needed set error save flag and keep reading */
 		else if (*error == MB_ERROR_TIME_GAP
-			&& mb_io_ptr->new_kind == MB_DATA_DATA 
+			&& mb_io_ptr->new_kind == MB_DATA_DATA
 			&& mb_io_ptr->pings_read == 1
 			&& mb_io_ptr->pings_avg > 1)
 			{
@@ -726,7 +726,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 				reset_last = MB_NO;
 			}
 
-		/* if error and more than one ping read, 
+		/* if error and more than one ping read,
 			then done but save the ping */
 		else if (*error != MB_ERROR_NO_ERROR)
 			{
@@ -772,7 +772,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 		*kind = mb_io_ptr->new_kind;
 
 	/* get output time */
-	if (*error <= MB_ERROR_NO_ERROR 
+	if (*error <= MB_ERROR_NO_ERROR
 		&& *error > MB_ERROR_COMMENT)
 		{
 		if (mb_io_ptr->pings_binned == 1)
@@ -794,7 +794,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 		}
 
 	/* get other output values */
-	if (*error <= MB_ERROR_NO_ERROR 
+	if (*error <= MB_ERROR_NO_ERROR
 		&& *error > MB_ERROR_COMMENT)
 		{
 		/* get navigation values */
@@ -846,11 +846,11 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 			*speed = 0.0;
 
 		/* check for less than minimum speed */
-		if (*error == MB_ERROR_NO_ERROR 
-			|| *error == MB_ERROR_TIME_GAP) 
+		if (*error == MB_ERROR_NO_ERROR
+			|| *error == MB_ERROR_TIME_GAP)
 		{
-		if (mb_io_ptr->ping_count > 1 
-			&& *time_d > MB_TIME_D_UNKNOWN 
+		if (mb_io_ptr->ping_count > 1
+			&& *time_d > MB_TIME_D_UNKNOWN
 			&& *speed < mb_io_ptr->speedmin)
 			{
 			status = MB_FAILURE;
@@ -969,7 +969,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 		}
 
 	/* reset "old" navigation values */
-	if (*error <= MB_ERROR_NO_ERROR 
+	if (*error <= MB_ERROR_NO_ERROR
 		&& *error > MB_ERROR_COMMENT)
 		{
 		mb_io_ptr->old_time_d = *time_d;
@@ -978,7 +978,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 		}
 
 	/* get saved error flag if needed */
-	if (*error == MB_ERROR_NO_ERROR 
+	if (*error == MB_ERROR_NO_ERROR
 		&& mb_io_ptr->error_save != MB_ERROR_NO_ERROR)
 		{
 		*error = mb_io_ptr->error_save;

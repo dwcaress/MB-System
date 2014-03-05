@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hs10jams.h	12/4/00
  *	$Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,8 +14,8 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_hs10jams.h defines the data structures used by MBIO functions
- * to store Furuno HS-10 multibeam sonar data read from the 
- * MBF_HS10JAMS format.  
+ * to store Furuno HS-10 multibeam sonar data read from the
+ * MBF_HS10JAMS format.
  *
  * Author:	D. W. Caress
  * Date:	December 4, 2000
@@ -45,11 +45,11 @@
  *      consists of 800 byte binary records in which only the
  *      lower 4 bits of each byte are used.
  *   4. The actual data files provided to WHOI seem to be simple
- *      716 byte ASCII records with time, lat, lon, heading, 
- *      center beam depth, 45 depths, 45 acrosstrack distances, 
+ *      716 byte ASCII records with time, lat, lon, heading,
+ *      center beam depth, 45 depths, 45 acrosstrack distances,
  *      45 beam amplitudes. Format 171 supports the actual data
  *      received.
- *   5. The data received use 5 characters each for depth, 
+ *   5. The data received use 5 characters each for depth,
  *      acrosstrack, and amplitude values. Null beams have
  *      depth values of 29999 and acrosstrack values of 99999.
  *      MB-System supports beam flagging by setting flagged
@@ -62,25 +62,25 @@
  *      where the first two bytes of the 716 byte ASCII records
  *      are "##"
  *   8. The raw data format specification is as follows:
- * 
+ *
  *      ----------------------------------------------------------
  *      HS-10 MNBES Data Format - JAMSTEC
- *      
+ *
  *      800 bytes/record, 10 records/block
- *      
+ *
  *      Note: 4 bits from LSB is effective in each byte.
  *           zB. 30 30 35 39 ---> 0 0 5 9 (HEX) = 89 (DEC)
  *               30 30 32 3D ---> 0 0 2 D (HEX) = 45 (DEC)
  *      The HS-10 processor calculates the water depth by use of
- *      average sound velocity and by correcting the difference 
- *      between the true angle of the sound path (obtained by the 
- *      true sound velocity profile) and the nominal angle of each 
- *      beam (every 2 degrees). The horizontal distance of the n-th 
+ *      average sound velocity and by correcting the difference
+ *      between the true angle of the sound path (obtained by the
+ *      true sound velocity profile) and the nominal angle of each
+ *      beam (every 2 degrees). The horizontal distance of the n-th
  *      beam is
  *              Distance(n) = Depth(n) * tan[T(n)],
- *      where T(n) is the nominal angle of the n-th beam: 
+ *      where T(n) is the nominal angle of the n-th beam:
  *              ( T(n) = 2 * (n-23) degrees, n=1,45 ).
- *      
+ *
  *      No.  Bytes  Data
  *       1.    4    Year
  *       2.    4    Month
@@ -142,9 +142,9 @@
  *      49.    4    Sonar mode [0]
  *      50.         not used
  *      ----------------------------------------------------------
- * 
+ *
  */
- *   
+ *
  */
- 
+
 #define	MBF_HS10JAMS_MAXLINE	716

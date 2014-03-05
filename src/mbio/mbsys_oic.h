@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_oic.h	3/1/99
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -60,30 +60,30 @@
  *      the Woods Hole Oceanographic Institution (WHOI) now
  *      uses an OIC GeoDAS-SV1 package as the front end for
  *      their deep towed 120 kHz interferometry sonar (AMS-120).
- *   2. Two data formats are supported. The first, MBF_OICGEODA, 
+ *   2. Two data formats are supported. The first, MBF_OICGEODA,
  *      is the vendor format containing unflaggable bathymetry
  *      and raw sidescan. The MBIO i/o module for this format
  *      generates complete bathymetry and sidescan out of the
  *      raw information, but does not support flagging of bad
- *      bathymetry or the storage of corrected sidescan. 
+ *      bathymetry or the storage of corrected sidescan.
  *      The second,  MBF_OICMBARI, is intended as a processing
  *      and archiving format as it allows the storage of both
  *      the unaltered raw values and editable and correctable
  *      bathymetry and sidescan.
- *   3. In both formats the  data consist of variable length 
+ *   3. In both formats the  data consist of variable length
  *      binary records.
  *   4. Each data record has three parts.  First there is a 248-byte
- *      header section containing the time stamp, navigation, a 
+ *      header section containing the time stamp, navigation, a
  *      variety of other values, the numbers and sizes of sonar
  *      data included in the record.  The second, optional, part of
- *      the record is "client specific information" of arbitrary 
+ *      the record is "client specific information" of arbitrary
  *      length. The third part contains up to eight arrays of
- *      "raw" sonar data followed by, in the MBF_OICMBARI format, 
+ *      "raw" sonar data followed by, in the MBF_OICMBARI format,
  *      arrays of processing bathymetry and sidescan.
  *   5. The header begins with a four byte magic number. For the
- *      MBF_OICGEODA format the first three bytes are 'G', 'E', 
- *      and 'O'. For the MBF_OICMBARI format the first three bytes 
- *      are 'G', 'E', and '2'.The fourth byte is the id number for 
+ *      MBF_OICGEODA format the first three bytes are 'G', 'E',
+ *      and 'O'. For the MBF_OICMBARI format the first three bytes
+ *      are 'G', 'E', and '2'.The fourth byte is the id number for
  *      the data source.
  *   6. The maximum numbers of beams and pixels defined below are
  *      limitations specific to MBIO - the formats themselves
@@ -156,7 +156,7 @@ struct mbsys_oic_channel_struct
 	mb_u_char	empty;		/* spare */
 	int		frequency;	/* Hz */
 	int		num_samples;	/* number of samples stored for
-					    sidescan and angle sonar types, 
+					    sidescan and angle sonar types,
 					    number of beams for multibeam */
 	};
 
@@ -198,7 +198,7 @@ struct mbsys_oic_struct
 						5:  OutputModeProcRaw
 						6:  ShadowMask
 						7:  QualityBit */
-	mb_s_char	nav_used;	
+	mb_s_char	nav_used;
 	mb_s_char	nav_type;	/*  0 = UTM coordinates in m
 					    1 = Local coordinates in m
 					    2 = Latitude and longitude */
@@ -253,59 +253,58 @@ struct mbsys_oic_struct
 	float		*ssacrosstrack;
 	float		*ssalongtrack;
 	};
-	
+
 /* system specific function prototypes */
-int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_oic_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_oic_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_oic_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			double transducer_depth, double altitude, 
+			double transducer_depth, double altitude,
 			int *error);
 int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_oic_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_oic_copy(int verbose, void *mbio_ptr, 
+int mbsys_oic_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

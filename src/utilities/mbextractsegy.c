@@ -2,7 +2,7 @@
  *    The MB-system:	mbextractsegy.c	4/18/2004
  *    $Id$
  *
- *    Copyright (c) 2004-2012 by
+ *    Copyright (c) 2004-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -95,10 +95,10 @@
 #include <string.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_segy.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_segy.h"
 
 /* defines */
 #define MBES_ALLOC_NUM			128
@@ -274,6 +274,7 @@ int main (int argc, char **argv)
 	double	tracemin, tracemax, tracerms;
 	double	linetracemin, linetracemax;
 	double	draft, roll, pitch, heave;
+	int	shellstatus;
 	int	i, j;
 
 	/* get current default values */
@@ -904,7 +905,7 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				    /* use mbsegyinfo to generate a sinf file */
 				    sprintf(command, "mbsegyinfo -I %s -O", output_file);
 		   		    fprintf(stderr, "Executing: %s\n", command);
-				    system(command);
+				    shellstatus = system(command);
 
 				    /* get bearing and plot scale */
 				    dx = (endlon - startlon) / mtodeglon;
@@ -1079,6 +1080,8 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 		    /* set nav and heading using most recent survey data */
 		    segytraceheader.src_long = (int)(lastlon * 360000.0);
 		    segytraceheader.src_lat = (int)(lastlat * 360000.0);
+		    segytraceheader.grp_long = (int)(lastlon * 360000.0);
+		    segytraceheader.grp_lat = (int)(lastlat * 360000.0);
 		    segytraceheader.heading = lastheading;
 		    segytraceheader.roll = roll;
 		    segytraceheader.pitch = pitch;
@@ -1467,7 +1470,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		    /* use mbsegyinfo to generate a sinf file */
 		    sprintf(command, "mbsegyinfo -I %s -O", output_file);
 		    fprintf(stderr, "Executing: %s\n", command);
-		    system(command);
+		    shellstatus = system(command);
 
 		    /* get bearing and plot scale */
 		    dx = (endlon - startlon) / mtodeglon;
@@ -1563,7 +1566,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 	/* close plotting script file */
 	fclose(sfp);
 	sprintf(command, "chmod +x %s", scriptfile);
-	system(command);
+	shellstatus = system(command);
 
 	/* deallocate route arrays */
 	if (route_file_set == MB_YES)

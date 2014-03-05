@@ -1,0 +1,85 @@
+.TH mbdumpesf 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbmask\fP, \fBmbdumpesf\fP \- Output text version of beam edits from a binary edit save file.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbdumpesf\fP \fB\-I\fPfile [\fB\-V \-H\fP]
+
+.SH DESCRIPTION
+Swath bathymetry data is typically edited either with interactive
+tools such as \fBmbedit\fP or automatic filters such as \fBmbclean\fP.
+In \fBMB-System\fP, the beam flags are stored in binary "edit save files"
+(file suffix ".esf"). The program \fBmbdumpesf\fP reads esf files and
+outputs each of the edit events as a text line to stdout.
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH MBDUMPESF OPTIONS
+.TP
+.B \-H
+This "help" flag causes the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-I
+\fIfile\fP
+.br
+"Edit save file" from which the edit events will be read.
+.TP
+.B \-V
+Normally, \fBmbdumpesf\fP outputs one line for each edit event in
+the input esf file.  If the
+\fB\-V\fP flag is given, then \fBmbdumpesf\fP also outputs the
+total number of each type of edit event at the end of the listing.
+
+.SH EXAMPLES
+Suppose one has edited a swath file 20080422_222636.mb88, resulting
+in an esf file named 20080422_222636.mb88.esf. To dump the edit events
+as a text stream, use \fBmbdumpesf\fP:
+.br
+ 	mbdumpesf \-I 20080422_222636.mb88.esf
+.br
+The output will look something like:
+.br
+
+.br
+EDITS READ: i:0 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:21 action:1
+.br
+EDITS READ: i:1 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:22 action:1
+.br
+EDITS READ: i:2 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:23 action:1
+.br
+EDITS READ: i:3 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:24 action:1
+.br
+EDITS READ: i:4 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:25 action:1
+.br
+EDITS READ: i:5 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:26 action:1
+.br
+EDITS READ: i:6 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:27 action:1
+.br
+EDITS READ: i:7 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:28 action:1
+.br
+
+.br
+Here the large time value is epoch seconds (seconds since 1/1/1970), and the
+edit event action values are:
+.br
+ 	action=1: flag manually
+ 	action=2: unflag
+ 	action=3: zero \- make beam null
+ 	action=4: flag by autofilter
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbedit\fP(1), \fBmbeditviz\fP(1), fBmbclean\fP(1), \fBmbunclean\fP(1)
+
+.SH BUGS
+Too simple to have any interesting problems.

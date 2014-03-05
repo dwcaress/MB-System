@@ -2,7 +2,7 @@
  *    The MB-system:	mbgetesf.c	6/15/93
  *    $Id$
  *
- *    Copyright (c) 2001-2012 by
+ *    Copyright (c) 2001-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,7 +22,7 @@
  *
  * Author:	D. W. Caress
  * Date:	January 24, 2001
- * 
+ *
  * $Log: mbgetesf.c,v $
  * Revision 5.7  2008/05/16 22:44:37  caress
  * Release 5.1.1beta18
@@ -60,11 +60,11 @@
 #include <time.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_swap.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_process.h"
+#include "mb_swap.h"
 
 #define MBGETESF_FLAGONLY   1
 #define MBGETESF_FLAGNULL   2
@@ -188,7 +188,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhB:b:E:F:f:I:i:K:k:M:m:O:o:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -343,13 +343,13 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
@@ -361,7 +361,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-		
+
 	/* now deal with new edit save file */
 	if (status == MB_SUCCESS)
 	    {
@@ -370,7 +370,7 @@ int main (int argc, char **argv)
 		{
 		sofp = stdout;
 		}
-		
+
 	    /* open the edit save file */
 	    else if ((sofp = fopen(sofile,"w")) == NULL)
 		{
@@ -399,7 +399,7 @@ int main (int argc, char **argv)
 			comment,&error);
 
 		/* increment counter */
-		if (error <= MB_ERROR_NO_ERROR 
+		if (error <= MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA)
 			idata = idata + pings;
 
@@ -442,7 +442,7 @@ int main (int argc, char **argv)
 			fprintf(stderr,"\nNonfatal MBIO Error:\n%s\n",message);
 			fprintf(stderr,"Number of good records so far: %d\n",idata);
 			}
-		else if (verbose >= 1 && error != MB_ERROR_NO_ERROR 
+		else if (verbose >= 1 && error != MB_ERROR_NO_ERROR
 			&& error != MB_ERROR_EOF)
 			{
 			mb_error(verbose,error,&message);
@@ -451,7 +451,7 @@ int main (int argc, char **argv)
 				time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5],time_i[6]);
 			}
-			
+
 		/* fix a problem with EM300/EM3000 data in HDCS format */
 		if (format == 151 && kluge == 1)
 		    {
@@ -459,7 +459,7 @@ int main (int argc, char **argv)
 			beamflag[i] = beamflag[i+1];
 		    beamflag[nbath-1] = MB_FLAG_FLAG;
 		    }
-		    
+
 		/* count and write the flags */
 		for (i=0;i<nbath;i++)
 		    {
@@ -468,7 +468,7 @@ int main (int argc, char **argv)
 			beam_ok++;
 			if (mode == MBGETESF_ALL)
 			    {
-			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
+			    mbgetesf_save_edit(verbose, sofp, time_d, i,
 						MBP_EDIT_UNFLAG, &error);
 			    beam_ok_write++;
 			    }
@@ -478,7 +478,7 @@ int main (int argc, char **argv)
 			beam_null++;
 			if (mode == MBGETESF_FLAGNULL || mode == MBGETESF_ALL)
 			    {
-			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
+			    mbgetesf_save_edit(verbose, sofp, time_d, i,
 						MBP_EDIT_ZERO, &error);
 			    beam_null_write++;
 			    }
@@ -489,19 +489,19 @@ int main (int argc, char **argv)
 			if (mb_beam_check_flag_manual(beamflag[i]))
 			    {
 			    beam_flag_manual++;
-			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
+			    mbgetesf_save_edit(verbose, sofp, time_d, i,
 						MBP_EDIT_FLAG, &error);
 			    }
 			if (mb_beam_check_flag_filter(beamflag[i]))
 			    {
 			    beam_flag_filter++;
-			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
+			    mbgetesf_save_edit(verbose, sofp, time_d, i,
 						MBP_EDIT_FILTER, &error);
 			    }
 			if (mb_beam_check_flag_sonar(beamflag[i]))
 			    {
 			    beam_flag_sonar++;
-			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
+			    mbgetesf_save_edit(verbose, sofp, time_d, i,
 						MBP_EDIT_FLAG, &error);
 			    }
 			}
@@ -555,16 +555,16 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-	
-		fprintf(stderr,"dbg2       sofp:            %lu\n",(size_t)sofp);
+
+		fprintf(stderr,"dbg2       sofp:            %p\n",(void *)sofp);
 		fprintf(stderr,"dbg2       time_d:          %f\n",time_d);
 		fprintf(stderr,"dbg2       beam:            %d\n",beam);
 		fprintf(stderr,"dbg2       action:          %d\n",action);
 		}
-		
+
 	/* write out the edit */
 	if (sofp != NULL)
-	    {		
+	    {
 #ifdef BYTESWAPPED
 	    mb_swap_double(&time_d);
 	    beam = mb_swap_int(beam);

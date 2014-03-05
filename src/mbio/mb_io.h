@@ -2,7 +2,7 @@
  *    The MB-system:	mb_io.h	1/19/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -187,13 +187,9 @@
 #ifndef MB_IO_DEF
 #define MB_IO_DEF
 
-#ifndef MB_DEFINE_DEF
+#include "mb_config.h"
 #include "mb_define.h"
-#endif
-
-#ifndef MB_STATUS_DEF
 #include "mb_status.h"
-#endif
 
 struct mb_io_ping_struct
 	{
@@ -267,7 +263,7 @@ struct mb_io_struct
 
 	/* file descriptor, file name, and usage flag */
 	FILE	*mbfp;		/* file descriptor */
-	char	file[MB_PATH_MAXLINE];	/* file name */
+	mb_path	file;	        /* file name */
 	long	file_pos;	/* file position at start of
 				    last record read */
 	long	file_bytes;	/* number of bytes read from file */
@@ -374,6 +370,7 @@ struct mb_io_struct
 
 	/* variables for projections to and from projected coordinates */
 	int	projection_initialized;
+        char	projection_id[MB_NAME_LENGTH];
 	void 	*pjptr;
 
 	/* variables for interpolating/extrapolating navigation
@@ -427,7 +424,7 @@ struct mb_io_struct
 	void	**regarray_ptr;
 	void	**regarray_oldptr;
 	int	*regarray_type;
-	int	*regarray_size;
+	size_t	*regarray_size;
 
 	/* variables for saving information */
 	char	save_label[12];
@@ -481,6 +478,11 @@ struct mb_io_struct
 		int *sonartype, int *error);
 	int (*mb_io_sidescantype)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
+        int (*mb_io_preprocess)(int verbose, void *mbio_ptr, void *store_ptr,
+		double time_d, double navlon, double navlat,
+		double speed, double heading, double sonardepth,
+		double roll, double pitch, double heave,
+		int *error);
 	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,

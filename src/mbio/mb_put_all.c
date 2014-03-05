@@ -2,7 +2,7 @@
  *    The MB-system:	mb_put_all.c	2/4/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -15,9 +15,9 @@
 /*
  * mb_put_all.c writes multibeam data to a file
  * which has been initialized by mb_write_init(). Crosstrack distances
- * are used rather than lon and lat for the beams. Values are also read 
+ * are used rather than lon and lat for the beams. Values are also read
  * from a storage data structure including
- * all possible values output by the particular multibeam system 
+ * all possible values output by the particular multibeam system
  * associated with the specified format.
  *
  * Author:	D. W. Caress
@@ -111,19 +111,19 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
 
 /*--------------------------------------------------------------------*/
 int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr,
-		int usevalues, int kind, 
+		int usevalues, int kind,
 		int time_i[7], double time_d,
-		double navlon, double navlat, 
+		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -141,8 +141,8 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       usevalues:  %d\n",usevalues);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_pslibface.c	5/15/94
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -106,14 +106,14 @@
 #include <string.h>
 #include <time.h>
 
-/* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_aux.h"
-
 /* GMT include files */
 #include "gmt.h"
 #include "pslib.h"
+
+/* MBIO include files */
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_aux.h"
 
 /* global variables */
 int	argc_save;
@@ -129,7 +129,7 @@ static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------------*/
 /* 	function plot_init initializes the GMT plotting. */
-int plot_init(	int	verbose,
+int mb_plot_init(	int	verbose,
 		int	argc,
 		char	**argv,
 		double	*bounds_use,
@@ -137,7 +137,7 @@ int plot_init(	int	verbose,
 		double	*inch2lon,
 		int	*error)
 {
-	char	*function_name = "plot_init";
+	char	*function_name = "mb_plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
 	double	bounds[4];
@@ -152,7 +152,7 @@ int plot_init(	int	verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       argc:             %d\n",argc);
-		fprintf(stderr,"dbg2       argv:             %lu\n",(size_t)argv);
+		fprintf(stderr,"dbg2       argv:             %p\n",(void *)argv);
 		fprintf(stderr,"dbg2       bounds_use[0]:    %f\n",bounds_use[0]);
 		fprintf(stderr,"dbg2       bounds_use[1]:    %f\n",bounds_use[1]);
 		fprintf(stderr,"dbg2       bounds_use[2]:    %f\n",bounds_use[2]);
@@ -270,9 +270,9 @@ int plot_init(	int	verbose,
 }
 /*--------------------------------------------------------------------------*/
 /* 	function plot_end ends the GMT plotting. */
-int plot_end(int verbose, int *error)
+int mb_plot_end(int verbose, int *error)
 {
-	char	*function_name = "plot_end";
+	char	*function_name = "mb_plot_end";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
@@ -314,7 +314,7 @@ int plot_end(int verbose, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int plot_exit(int argc, char **argv)
+int mb_plot_exit(int argc, char **argv)
 {
 	int	status = MB_SUCCESS;
 
@@ -324,7 +324,7 @@ int plot_exit(int argc, char **argv)
 }
 
 /*--------------------------------------------------------------------*/
-void set_colors(int ncol, int *rd, int *gn, int *bl)
+void mb_set_colors(int ncol, int *rd, int *gn, int *bl)
 {
 	ncolor = ncol;
 	red = rd;
@@ -334,7 +334,7 @@ void set_colors(int ncol, int *rd, int *gn, int *bl)
 }
 
 /*--------------------------------------------------------------------*/
-void plot(double x, double y, int ipen)
+void mb_plot(double x, double y, int ipen)
 {
 	double	xx, yy;
 	GMT_geo_to_xy(x,y,&xx,&yy);
@@ -342,13 +342,13 @@ void plot(double x, double y, int ipen)
 	return;
 }
 /*--------------------------------------------------------------------*/
-void setline(int linewidth)
+void mb_setline(int linewidth)
 {
         ps_setline(linewidth);
         return;
 }
 /*--------------------------------------------------------------------*/
-void newpen(int ipen)
+void mb_newpen(int ipen)
 {
 	if (ipen > -1 && ipen < ncolor)
 		{
@@ -360,7 +360,7 @@ void newpen(int ipen)
 	return;
 }
 /*--------------------------------------------------------------------*/
-void justify_string(double height, char *string, double *s)
+void mb_justify_string(double height, char *string, double *s)
 {
 	int	len;
 
@@ -373,7 +373,7 @@ void justify_string(double height, char *string, double *s)
 	return;
 }
 /*--------------------------------------------------------------------*/
-void plot_string(double x, double y, double hgt, double angle, char *label)
+void mb_plot_string(double x, double y, double hgt, double angle, char *label)
 {
 	double	point;
 	double	height;

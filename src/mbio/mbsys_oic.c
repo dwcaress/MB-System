@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_oic.c	3/1/99
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_oic.c contains the functions for handling the data structure
- * used by MBIO functions to store swath sonar data derived 
+ * used by MBIO functions to store swath sonar data derived
  * from OIC systems:
  *      MBF_OICGEODA : MBIO ID 141
  *      MBF_OICMBARI : MBIO ID 142
@@ -71,16 +71,16 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_oic.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_oic.h"
 
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_oic_alloc";
@@ -96,7 +96,7 @@ int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -196,7 +196,7 @@ int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -206,7 +206,7 @@ int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_oic_deall";
@@ -221,8 +221,8 @@ int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		}
 
 	/* get pointer to data structure */
@@ -259,7 +259,7 @@ int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_oic_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_oic_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_oic_dimensions";
@@ -274,8 +274,8 @@ int mbsys_oic_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -321,12 +321,12 @@ int mbsys_oic_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -344,8 +344,8 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		    function_name);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+	    fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 	    }
 
 	/* get mbio descriptor */
@@ -381,12 +381,12 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 	    /* get speed */
 	    *speed = 3.6 * store->ship_speed;
-			
+
 	    /* set beamwidths in mb_io structure */
 	    mb_io_ptr->beamwidth_ltrack = 2.0;
 	    mb_io_ptr->beamwidth_xtrack = 0.2;
 
-	    /* read distance, depth, and backscatter 
+	    /* read distance, depth, and backscatter
 		    values into storage arrays */
 	    *nbath = store->beams_bath;
 	    *namp = store->beams_amp;
@@ -491,13 +491,13 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	    fprintf(stderr,"dbg2  Return values:\n");
 	    fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 	    }
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 	    && *kind == MB_DATA_COMMENT)
 	    {
 	    fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 		    comment);
 	    }
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 	    && *kind != MB_DATA_COMMENT)
 	    {
 	    fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -513,7 +513,7 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	    fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 	    fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 	    }
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 	    && *kind == MB_DATA_DATA)
 	    {
 	    fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -544,12 +544,12 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -567,8 +567,8 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    function_name);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+	    fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 	    fprintf(stderr,"dbg2       kind:       %d\n",kind);
 	    }
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
@@ -590,18 +590,18 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	    {
 	    fprintf(stderr,"dbg2       nbath:      %d\n",
 		    nbath);
-	    if (verbose >= 3) 
+	    if (verbose >= 3)
 	     for (i=0;i<nbath;i++)
 	      fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 		    i,beamflag[i],bath[i],
 		    bathacrosstrack[i],bathalongtrack[i]);
 	    fprintf(stderr,"dbg2       namp:       %d\n",namp);
-	    if (verbose >= 3) 
+	    if (verbose >= 3)
 	     for (i=0;i<namp;i++)
 	      fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 		    i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 	    fprintf(stderr,"dbg2        nss:       %d\n",nss);
-	    if (verbose >= 3) 
+	    if (verbose >= 3)
 	     for (i=0;i<nss;i++)
 	      fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 		    i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -667,17 +667,17 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->bathalongtrack), error);
 		if (store->angle != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->bathalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(char), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(char),
 				    (void **)&(store->beamflag),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->bath),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->bathacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->bathalongtrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->tt),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(float),
 				    (void **)&(store->angle),error);
 		}
 	    if (store->beams_amp > store->beams_amp_alloc
@@ -686,7 +686,7 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->beams_amp_alloc = store->beams_amp;
 		if (store->amp != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->amp), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(char), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->beams_bath_alloc * sizeof(char),
 				    (void **)&(store->amp),error);
 		}
 	    if (store->pixels_ss > store->pixels_ss_alloc
@@ -701,11 +701,11 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->ssacrosstrack), error);
 		if (store->ssalongtrack != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(store->ssalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float),
 				    (void **)&(store->ss),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float),
 				    (void **)&(store->ssacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,store->pixels_ss_alloc * sizeof(float),
 				    (void **)&(store->ssalongtrack),error);
 		}
 	    for (i=0;i<store->beams_bath;i++)
@@ -751,9 +751,9 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_oic_ttimes";
@@ -770,14 +770,14 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    function_name);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-	    fprintf(stderr,"dbg2       ttimes:     %lu\n",(size_t)ttimes);
-	    fprintf(stderr,"dbg2       angles_xtrk:%lu\n",(size_t)angles);
-	    fprintf(stderr,"dbg2       angles_ltrk:%lu\n",(size_t)angles_forward);
-	    fprintf(stderr,"dbg2       angles_null:%lu\n",(size_t)angles_null);
-	    fprintf(stderr,"dbg2       heave:      %lu\n",(size_t)heave);
-	    fprintf(stderr,"dbg2       ltrk_off:   %lu\n",(size_t)alongtrack_offset);
+	    fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+	    fprintf(stderr,"dbg2       ttimes:     %p\n",(void *)ttimes);
+	    fprintf(stderr,"dbg2       angles_xtrk:%p\n",(void *)angles);
+	    fprintf(stderr,"dbg2       angles_ltrk:%p\n",(void *)angles_forward);
+	    fprintf(stderr,"dbg2       angles_null:%p\n",(void *)angles_null);
+	    fprintf(stderr,"dbg2       heave:      %p\n",(void *)heave);
+	    fprintf(stderr,"dbg2       ltrk_off:   %p\n",(void *)alongtrack_offset);
 	    }
 
 	/* get mbio descriptor */
@@ -812,7 +812,7 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 
 	    /* get ssv */
 	    *ssv = store->sound_velocity;
-	    
+
 	    /* get draft */
 	    *draft = store->fish_depth;
 
@@ -887,9 +887,9 @@ int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %p\n",(void *)detects);
 		}
 
 	/* get mbio descriptor */
@@ -963,7 +963,7 @@ int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_oic_extract_altitude";
@@ -978,8 +978,8 @@ int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		    function_name);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+	    fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 	    }
 
 	/* get mbio descriptor */
@@ -1033,7 +1033,7 @@ int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_oic_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	double transducer_depth, double altitude, 
+	double transducer_depth, double altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_oic_insert_altitude";
@@ -1048,8 +1048,8 @@ int mbsys_oic_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		    function_name);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-	    fprintf(stderr,"dbg2       mb_ptr:            %lu\n",(size_t)mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:         %lu\n",(size_t)store_ptr);
+	    fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:         %p\n",(void *)store_ptr);
 	    fprintf(stderr,"dbg2       transducer_depth:  %f\n",transducer_depth);
 	    fprintf(stderr,"dbg2       altitude:          %f\n",altitude);
 	    }
@@ -1101,8 +1101,8 @@ int mbsys_oic_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_oic_extract_nav";
@@ -1117,8 +1117,8 @@ int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		    function_name);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+	    fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 	    }
 
 	/* get mbio descriptor */
@@ -1154,10 +1154,10 @@ int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 	    /* get speed */
 	    *speed = 3.6 * store->ship_speed;
-	    
+
 	    /* get draft */
 	    *draft = store->fish_depth;
-	    
+
 	    /* get roll pitch and heave */
 	    *roll = store->fish_roll;
 	    *pitch = store->fish_pitch;
@@ -1235,7 +1235,7 @@ int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	    fprintf(stderr,"dbg2  Return values:\n");
 	    fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 	    }
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 	    {
 	    fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1269,7 +1269,7 @@ int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_oic_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1285,8 +1285,8 @@ int mbsys_oic_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		    function_name);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+	    fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 	    fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 	    fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 	    fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -1353,7 +1353,7 @@ int mbsys_oic_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_oic_copy(int verbose, void *mbio_ptr, 
+int mbsys_oic_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -1371,9 +1371,9 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %lu\n",(size_t)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %p\n",(void *)copy_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1382,7 +1382,7 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr,
 	/* get data structure pointers */
 	store = (struct mbsys_oic_struct *) store_ptr;
 	copy = (struct mbsys_oic_struct *) copy_ptr;
-	
+
 	/* copy the basic header data */
 	if (store != NULL && copy != NULL)
 	    {
@@ -1442,7 +1442,7 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr,
 	    copy->ss_chan_port = store->ss_chan_port;
 	    copy->ss_chan_stbd = store->ss_chan_stbd;
 	    }
-	
+
 	/* allocate the raw data */
 	if (store != NULL && copy != NULL)
 	    {
@@ -1458,7 +1458,7 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr,
 		copy->channel[i].num_samples = store->channel[i].num_samples;
 
 		/* allocate data if needed */
-		if (store->rawsize[i] > copy->rawsize[i] 
+		if (store->rawsize[i] > copy->rawsize[i]
 		    || copy->raw[i] == NULL)
 		    {
 		    if (copy->raw[i] != NULL)
@@ -1470,13 +1470,13 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr,
 		/* copy the raw data */
 		for (j=0;j<copy->rawsize[i];j++)
 		    {
-		    copy->raw[i][j] = store->raw[i][j];		    
+		    copy->raw[i][j] = store->raw[i][j];
 		    }
 		}
 	    }
-	
+
 	/* allocate the depths and sidescan */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && store != NULL && copy != NULL)
 	    {
 	    if (store->beams_bath > copy->beams_bath_alloc
@@ -1500,17 +1500,17 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr,
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(copy->tt), error);
 		if (copy->angle != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(copy->angle), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(char), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(char),
 				    (void **)&(copy->beamflag),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(float),
 				    (void **)&(copy->bath),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(float),
 				   (void **) &(copy->bathacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(float),
 				    (void **)&(copy->bathalongtrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(float),
 				    (void **)&(copy->tt),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(float),
 				    (void **)&(copy->angle),error);
 		}
 	    if (store->beams_amp > copy->beams_amp_alloc
@@ -1519,7 +1519,7 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr,
 		copy->beams_amp_alloc = store->beams_amp;
 		if (copy->amp != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(copy->amp), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(char), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->beams_bath_alloc * sizeof(char),
 				    (void **)&(copy->amp),error);
 		}
 	    if (store->pixels_ss > copy->pixels_ss_alloc
@@ -1534,17 +1534,17 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr,
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(copy->ssacrosstrack), error);
 		if (copy->ssalongtrack != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &(copy->ssalongtrack), error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->pixels_ss_alloc * sizeof(float),
 				    (void **)&(copy->ss),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->pixels_ss_alloc * sizeof(float),
 				    (void **)&(copy->ssacrosstrack),error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->pixels_ss_alloc * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,copy->pixels_ss_alloc * sizeof(float),
 				    (void **)&(copy->ssalongtrack),error);
 		}
 	    }
-	
+
 	/* copy the depths and sidescan */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 	    && store != NULL && copy != NULL)
 	    {
 	    for (i=0;i<copy->beams_bath;i++)
@@ -1566,7 +1566,7 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr,
 		copy->ssacrosstrack[i] = store->ssacrosstrack[i];
 		copy->ssalongtrack[i] = store->ssalongtrack[i];
 		}
-		    
+
 	    /* client */
 	    for (i=0;i<store->client_size;i++)
 		copy->client[i] = store->client[i];

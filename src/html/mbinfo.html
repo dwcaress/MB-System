@@ -1,0 +1,564 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbinfo</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbinfo</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbinfo</B> - Output some basic statistics of swath sonar data files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbinfo</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-C -E</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-F</B><I>format</I> <B>-G</B> <B>-I</B><I>filename</I>
+<B>-L</B><I>lonflip</I> <B>-M</B><I>londim/latdim</I>
+<B>-N</B> <B>-O</B> <B>-P</B><I>ping</I>
+<B>-R</B><I>west/east/south/north</I> <B>-S</B><I>speed</I> <B>-W</B>
+<B>-X</B><I>outputformat</I> <B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MBinfo</B> is a utility for reading a swath sonar data file
+or files and outputting some basic statistics.  The table generated
+shows the filename, the data format id, a brief description of
+the format, any metadata that have been inserted into the data,
+data counts, navigation totals, time and navigation
+of the first and last data records, minimum and maximum
+data values, and the geographic bounding box of the data.
+The data counts include the total number of bathymetry,
+amplitude, and sidescan values read. These totals may be less
+than the maximum possible (number of data records times the
+maximum number of data supported for the particular data format)
+for formats supporting variable numbers of beams or pixels.
+Also reported are the numbers and percentages of good, zero,
+and flagged data values (good values are those which are neither
+zero nor flagged as bad).
+<P>
+An important function  of <B>mbinfo</B> is to generate &quot;.inf&quot;
+files that may be parsed by other <B>MB-System</B> programs
+and macros. Programs such as <B>mbgrid</B> and <B>mbmosaic</B>,
+read &quot;.inf&quot; files, when available, to
+determine whether input swath data files actually contain
+any data in the area of interest. The efficiency of these
+programs is enhanced by their ability to avoid reading files
+with no data in the area to be gridded or mosaiced. Programs
+such as <B>mbm_plot</B> and <B>mbm_grid</B> run <B>mbinfo</B> on
+input files to determine the data bounds. The availability
+of &quot;.inf&quot; files allows this information to be determined without
+having to read through each swath file.To create an &quot;.inf&quot; file, simply direct the
+output of <B>mbinfo</B> to a file named by adding the
+suffix &quot;.inf&quot; to the input swath
+data filename. This can also be accomplished using the <B>-O</B>
+option of <B>mbinfo</B>, or the <B>-N</B> and <B>-O</B> options of
+<B>mbdatalist</B>.
+<P>
+Data archives use metadata harvesting tools that often work better with
+information structured for machine parsing rather than for easy
+reading by humans. To output a variant of &quot;*.inf&quot; files in the JSON
+format (with &quot;_inf.json&quot; suffixes), use the <B>-X</B><I>1</I> option.
+Similarly, specifying the <B>-X</B><I>2</I> option will result in XML
+output in files with &quot;_xml.inf&quot; suffixes.
+<P>
+The program <B>mbprocess</B> can insert metadata recognized
+and printed by <B>mbinfo</B>. These metadata include items
+such as the sonar model, the vessel name, and bias parameters.
+See the <B>mbprocess</B> and
+<B>mbset</B> manual pages for details.
+<P>
+The data input may be averaged over several pings
+and/or windowed in time and space.  Comments in the data
+stream may also be printed out.
+The results are dumped to stdout.
+<P>
+If pings are averaged (<I>pings</I> &gt; 2)
+<B>mbinfo</B> estimates the variance for each of the bathymetry beams
+and sidescan pixels
+by reading a set number of pings and then finding the
+variance of the values for each beam.  The bathymetry values are
+detrended before variances are calculated.
+<P>
+The program output can also be extended to include a coarse
+mask representing where data lies within the file's bounding
+box. This mask is shown as a table of 0's and 1's, where
+the 1's indicate bins with data. The dimensions of the mask
+are specified with the <B>-M</B><I>londim/latdim</I> option.
+For instance, if the user specifies <B>-M</B><I>10/10</I>, then
+<B>mbinfo</B> will read through the data once to establish the
+usual statistics, including the data bounding box. Then, the
+program will initialize a 10 X 10 grid with the minimum and
+maximum longitude and latitude of the bounding box, and
+read the data a second time. Each bin in which a sounding or
+pixel falls will be set to 1. After the second reading pass,
+the data location mask will be output at the end of the
+<B>mbinfo</B> output.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-B</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the starting time for data allowed in the input data.
+The <B>-E</B> option sets the ending time for data. If the
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
+<DT><B>-C</B>
+
+<DD>
+Normally, <B>mbinfo</B> ignores comments encountered in the
+data file.  If the <B>-C</B> flag is given, all of the comments will be
+printed out.
+<DT><B>-E</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the ending time for data allowed in the input data.
+The <B>-B</B> option sets the starting time for data. If the
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format used if the input is read from stdin
+or from a file. If <I>format</I> &lt; 0, then the input file specified
+with the <B>-I</B> option will actually contain a list of input swath sonar
+data files. This program uses the <B>MBIO</B> library
+and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. The default format is
+set using <B>mbdefaults</B>.
+<DT><B>-G</B>
+
+<DD>
+Enables checking for reasonable navigation to be used in
+calculating the minimum and maximum longitude and latitude values.
+This mode excludes longitude and latitude values of 0.0 or
+those values associated with very large apparent speeds
+between pings (calculated using distance and time differences
+between adjacent pings). This option is particularly useful
+when one is trying to obtain reasonable bounds for a plot.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>filename</I>
+<BR>
+
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-f</B> option) then the swath sonar data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;stdin&quot;.
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values returned.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <B>mbinfo</B> selects the bext longitude range based
+on the first data.
+<DT><B>-M</B>
+
+<DD>
+<I>londim/latdim</I>
+<BR>
+
+The program output can be extended to include a coarse
+mask representing where data lies within the file's bounding
+box. This mask is shown as a table of 0's and 1's, where
+the 1's indicate bins with data. The dimensions of the mask
+are specified with the <B>-M</B><I>londim/latdim</I> option.
+<DT><B>-N</B>
+
+<DD>
+<BR>
+
+Extends the program output to include notices. These notices
+include three sections. The first is a list of all of the
+data record types (e.g. survey, comment, navigation, parameter)
+encountered while reading the file. Some formats are quite simple
+and only include survey records and comments. Other formats
+are complex and may contain many different sorts of data
+records, including some that only derive from a particular
+sonar model. The second section lists any nonfatal error messages
+(e.g. unintelligible record) generated while reading the
+file. Finally, the third section of notices lists any
+particular problems with the data that have been identified
+(e.g. some navigation is zero or some depths are too large
+to be correct).
+<DT><B>-O</B>
+
+<DD>
+<BR>
+
+This option causes the program output to be directed to
+&quot;inf&quot; files rather than to stdout. Each &quot;inf&quot; file is named
+using the original data file path with an &quot;.inf&quot; suffix appended.
+<DT><B>-P</B>
+
+<DD>
+<I>pings</I>
+<BR>
+
+Turns on variance calculations for the bathymetry, amplitude,
+and sidescan data (as available in the data stream).  If
+<I>pings</I> = 1, then no variance calculations are made.  If
+<I>pings</I> &gt; 1, then variances are calculated for each beam
+and pixel using groups of <I>pings</I> values.  The bathymetry
+values are detrended before the variances are calculated;
+the amplitude and sidescan values are not detrended.  The
+variance calculations can provide crude measures of noise
+and/or signal as a function of beam and pixel number.
+Default: <I>pings</I> = 1 (no variance calculations).
+<DT><B>-R</B>
+
+<DD>
+<I>west/east/south/north</I>
+<BR>
+
+Sets the longitude and latitude bounds within which swath sonar
+data will be read. Only the data which lies within these bounds will
+be read.
+Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
+<DT><B>-S</B>
+
+<DD>
+<I>speed</I>
+<BR>
+
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
+the input data; pings associated with a smaller ship speed will not be
+copied. Default: <I>speed</I> = 0.
+<DT><B>-T</B>
+
+<DD>
+<I>timegap</I>
+<BR>
+
+Sets the maximum time gap in minutes between adjacent pings allowed before
+the data is considered to have a gap. Default: <I>timegap</I> = 1.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbinfo</B> only prints out the statistics obtained
+by reading all of the data.  If the
+<B>-V</B> flag is given, then <B>mbinfo</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used and all read error status messages.
+<DT><B>-W</B>
+
+<DD>
+Normally, <B>mbinfo</B> reports depth values in meters. If the
+<B>-W</B> flag is given, then <B>mbinfo</B> reports these values
+in feet.
+<DT><B>-X</B>
+
+<DD>
+<I>outputformat</I>
+<BR>
+
+Normally, <B>mbinfo</B> reports information as text formatted for easy
+reading. If this option is given with <I>outputformat</I>=1, then the
+output will be in the JSON format. If the <B>-O</B> option is used to
+explicitly make &quot;*.inf&quot; files, then the output will be JSON and the output
+filenames will be named using the original data file path with an &quot;_inf.json&quot;
+suffix appended. If this option is given with <I>outputformat</I>=2, then the
+output will be in the XML format. If the <B>-O</B> option is used to
+explicitly make &quot;*.inf&quot; files, then the output will be XML and the output
+filenames will be named using the original data file path with an &quot;_inf.xml&quot;
+suffix appended.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to know something about the contents of
+a Hydrosweep file (format 24) called example_hs.mb24.
+The following will suffice:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbinfo&nbsp;-F24&nbsp;-Iexample_hs.mb24<BR>
+<P>
+The following output is produced:
+<P>
+<P>
+<BR>&nbsp;Swath&nbsp;Data&nbsp;File:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;example_hs.mb24
+<BR>&nbsp;MBIO&nbsp;Data&nbsp;Format&nbsp;ID:&nbsp;&nbsp;24
+<BR>&nbsp;Format&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MBF_HSLDEOIH
+<BR>&nbsp;Informal&nbsp;Description:&nbsp;L-DEO&nbsp;in-house&nbsp;binary&nbsp;Hydrosweep
+<BR>&nbsp;Attributes:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hydrosweep&nbsp;DS,&nbsp;59&nbsp;beams,&nbsp;bathymetry&nbsp;and&nbsp;amplitude,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;binary,&nbsp;centered,&nbsp;L-DEO.
+<P>
+<BR>&nbsp;Data&nbsp;Totals:
+<BR>&nbsp;Number&nbsp;of&nbsp;Records:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;263
+<BR>&nbsp;Bathymetry&nbsp;Data&nbsp;(59&nbsp;beams):
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15517
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Good&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13661&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;88.04%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Zero&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;868&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.59%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Flagged&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;988&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.37%
+<BR>&nbsp;Amplitude&nbsp;Data&nbsp;(59&nbsp;beams):
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15517
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Good&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13661&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;88.04%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Zero&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;868&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.59%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Flagged&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;988&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.37%
+<BR>&nbsp;Sidescan&nbsp;Data&nbsp;(0&nbsp;pixels):
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Good&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Zero&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Flagged&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00%
+<P>
+<BR>&nbsp;Navigation&nbsp;Totals:
+<BR>&nbsp;Total&nbsp;Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2425&nbsp;hours
+<BR>&nbsp;Total&nbsp;Track&nbsp;Length:&nbsp;&nbsp;&nbsp;&nbsp;20.9421&nbsp;km
+<BR>&nbsp;Average&nbsp;Speed:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;16.8548&nbsp;km/hr&nbsp;(&nbsp;9.1107&nbsp;knots)
+<P>
+<BR>&nbsp;Start&nbsp;of&nbsp;Data:
+<BR>&nbsp;Time:&nbsp;&nbsp;08&nbsp;14&nbsp;1993&nbsp;18:00:25.000000&nbsp;&nbsp;JD226
+<BR>&nbsp;Lon:&nbsp;&nbsp;-49.3011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lat:&nbsp;&nbsp;&nbsp;12.1444&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Depth:&nbsp;&nbsp;4920.0000&nbsp;meters
+<BR>&nbsp;Speed:&nbsp;18.3600&nbsp;km/hr&nbsp;(&nbsp;9.9243&nbsp;knots)&nbsp;&nbsp;Heading:&nbsp;&nbsp;97.2000&nbsp;degrees
+<BR>&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;m&nbsp;&nbsp;Sonar&nbsp;Altitude:&nbsp;4920.0000&nbsp;m
+<P>
+<BR>&nbsp;End&nbsp;of&nbsp;Data:
+<BR>&nbsp;Time:&nbsp;&nbsp;08&nbsp;14&nbsp;1993&nbsp;19:14:58.000000&nbsp;&nbsp;JD226
+<BR>&nbsp;Lon:&nbsp;&nbsp;-49.1111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lat:&nbsp;&nbsp;&nbsp;12.1149&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Depth:&nbsp;&nbsp;5021.0000&nbsp;meters
+<BR>&nbsp;Speed:&nbsp;17.2800&nbsp;km/hr&nbsp;(&nbsp;9.3405&nbsp;knots)&nbsp;&nbsp;Heading:&nbsp;&nbsp;97.0000&nbsp;degrees
+<BR>&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;m&nbsp;&nbsp;Sonar&nbsp;Altitude:&nbsp;5021.0000&nbsp;m
+<P>
+<BR>&nbsp;Limits:
+<BR>&nbsp;Minimum&nbsp;Longitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-49.3061&nbsp;&nbsp;&nbsp;Maximum&nbsp;Longitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-49.1064
+<BR>&nbsp;Minimum&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.0750&nbsp;&nbsp;&nbsp;Maximum&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.1806
+<BR>&nbsp;Minimum&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;Maximum&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000
+<BR>&nbsp;Minimum&nbsp;Altitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4087.0000&nbsp;&nbsp;&nbsp;Maximum&nbsp;Altitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5034.0000
+<BR>&nbsp;Minimum&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3726.0000&nbsp;&nbsp;&nbsp;Maximum&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5190.0000
+<BR>&nbsp;Minimum&nbsp;Amplitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100.0000&nbsp;&nbsp;&nbsp;Maximum&nbsp;Amplitude:&nbsp;&nbsp;&nbsp;&nbsp;6380.0000
+<P>
+<P>
+Suppose we wanted to know how noisy the outer beams are relative
+to the inner beams.  We might try:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbinfo&nbsp;-F24&nbsp;-P5&nbsp;-Iexample_hs.mb24<BR>
+<P>
+obtaining:
+<P>
+<BR>&nbsp;Swath&nbsp;Data&nbsp;File:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;example_hs.mb24
+<BR>&nbsp;MBIO&nbsp;Data&nbsp;Format&nbsp;ID:&nbsp;&nbsp;24
+<BR>&nbsp;Format&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MBF_HSLDEOIH
+<BR>&nbsp;Informal&nbsp;Description:&nbsp;L-DEO&nbsp;in-house&nbsp;binary&nbsp;Hydrosweep
+<BR>&nbsp;Attributes:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hydrosweep&nbsp;DS,&nbsp;59&nbsp;beams,&nbsp;bathymetry&nbsp;and&nbsp;amplitude,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;binary,&nbsp;centered,&nbsp;L-DEO.
+<P>
+<BR>&nbsp;Data&nbsp;Totals:
+<BR>&nbsp;Number&nbsp;of&nbsp;Records:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;263
+<BR>&nbsp;Bathymetry&nbsp;Data&nbsp;(59&nbsp;beams):
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15517
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Good&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13661&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;88.04%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Zero&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;868&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.59%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Flagged&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;988&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.37%
+<BR>&nbsp;Amplitude&nbsp;Data&nbsp;(59&nbsp;beams):
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15517
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Good&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13661&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;88.04%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Zero&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;868&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.59%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Flagged&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;988&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.37%
+<BR>&nbsp;Sidescan&nbsp;Data&nbsp;(0&nbsp;pixels):
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Good&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Zero&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00%
+<BR>&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Flagged&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00%
+<P>
+<BR>&nbsp;Navigation&nbsp;Totals:
+<BR>&nbsp;Total&nbsp;Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2425&nbsp;hours
+<BR>&nbsp;Total&nbsp;Track&nbsp;Length:&nbsp;&nbsp;&nbsp;&nbsp;20.9421&nbsp;km
+<BR>&nbsp;Average&nbsp;Speed:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;16.8548&nbsp;km/hr&nbsp;(&nbsp;9.1107&nbsp;knots)
+<P>
+<BR>&nbsp;Start&nbsp;of&nbsp;Data:
+<BR>&nbsp;Time:&nbsp;&nbsp;08&nbsp;14&nbsp;1993&nbsp;18:00:25.000000&nbsp;&nbsp;JD226
+<BR>&nbsp;Lon:&nbsp;&nbsp;-49.3011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lat:&nbsp;&nbsp;&nbsp;12.1444&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Depth:&nbsp;&nbsp;4920.0000&nbsp;meters
+<BR>&nbsp;Speed:&nbsp;18.3600&nbsp;km/hr&nbsp;(&nbsp;9.9243&nbsp;knots)&nbsp;&nbsp;Heading:&nbsp;&nbsp;97.2000&nbsp;degrees
+<BR>&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;m&nbsp;&nbsp;Sonar&nbsp;Altitude:&nbsp;4920.0000&nbsp;m
+<P>
+<BR>&nbsp;End&nbsp;of&nbsp;Data:
+<BR>&nbsp;Time:&nbsp;&nbsp;08&nbsp;14&nbsp;1993&nbsp;19:14:58.000000&nbsp;&nbsp;JD226
+<BR>&nbsp;Lon:&nbsp;&nbsp;-49.1111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lat:&nbsp;&nbsp;&nbsp;12.1149&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Depth:&nbsp;&nbsp;5021.0000&nbsp;meters
+<BR>&nbsp;Speed:&nbsp;17.2800&nbsp;km/hr&nbsp;(&nbsp;9.3405&nbsp;knots)&nbsp;&nbsp;Heading:&nbsp;&nbsp;97.0000&nbsp;degrees
+<BR>&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;m&nbsp;&nbsp;Sonar&nbsp;Altitude:&nbsp;5021.0000&nbsp;m
+<P>
+<BR>&nbsp;Limits:
+<BR>&nbsp;Minimum&nbsp;Longitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-49.3061&nbsp;&nbsp;&nbsp;Maximum&nbsp;Longitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-49.1064
+<BR>&nbsp;Minimum&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.0750&nbsp;&nbsp;&nbsp;Maximum&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.1806
+<BR>&nbsp;Minimum&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;Maximum&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000
+<BR>&nbsp;Minimum&nbsp;Altitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4087.0000&nbsp;&nbsp;&nbsp;Maximum&nbsp;Altitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5034.0000
+<BR>&nbsp;Minimum&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3726.0000&nbsp;&nbsp;&nbsp;Maximum&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5190.0000
+<BR>&nbsp;Minimum&nbsp;Amplitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100.0000&nbsp;&nbsp;&nbsp;Maximum&nbsp;Amplitude:&nbsp;&nbsp;&nbsp;&nbsp;6380.0000
+<P>
+<BR>&nbsp;Beam&nbsp;Bathymetry&nbsp;Variances:
+<BR>&nbsp;Pings&nbsp;Averaged:&nbsp;5
+<BR>&nbsp;&nbsp;Beam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mean&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Variance&nbsp;&nbsp;&nbsp;&nbsp;Sigma
+<BR>&nbsp;&nbsp;----&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--------&nbsp;&nbsp;&nbsp;&nbsp;-----
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;110&nbsp;&nbsp;&nbsp;&nbsp;4719.59&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;342.69&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;18.51
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;105&nbsp;&nbsp;&nbsp;&nbsp;4779.49&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;399.15&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;19.98
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;155&nbsp;&nbsp;&nbsp;&nbsp;4748.81&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;280.18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;16.74
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;155&nbsp;&nbsp;&nbsp;&nbsp;4817.12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;194.62&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13.95
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;150&nbsp;&nbsp;&nbsp;&nbsp;4826.44&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;197.76&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14.06
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;160&nbsp;&nbsp;&nbsp;&nbsp;4863.82&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;155.50&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.47
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;&nbsp;215&nbsp;&nbsp;&nbsp;&nbsp;4806.08&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;229.11&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15.14
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;&nbsp;235&nbsp;&nbsp;&nbsp;&nbsp;4807.09&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;220.23&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14.84
+<BR>&nbsp;&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp;240&nbsp;&nbsp;&nbsp;&nbsp;4766.29&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;158.83&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.60
+<BR>&nbsp;&nbsp;&nbsp;11&nbsp;&nbsp;&nbsp;&nbsp;250&nbsp;&nbsp;&nbsp;&nbsp;4764.34&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;221.09&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14.87
+<BR>&nbsp;&nbsp;&nbsp;12&nbsp;&nbsp;&nbsp;&nbsp;245&nbsp;&nbsp;&nbsp;&nbsp;4765.35&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;146.24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.09
+<BR>&nbsp;&nbsp;&nbsp;13&nbsp;&nbsp;&nbsp;&nbsp;250&nbsp;&nbsp;&nbsp;&nbsp;4782.02&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;167.34&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.94
+<BR>&nbsp;&nbsp;&nbsp;14&nbsp;&nbsp;&nbsp;&nbsp;240&nbsp;&nbsp;&nbsp;&nbsp;4798.38&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;92.98&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.64
+<BR>&nbsp;&nbsp;&nbsp;15&nbsp;&nbsp;&nbsp;&nbsp;245&nbsp;&nbsp;&nbsp;&nbsp;4775.16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;98.27&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.91
+<BR>&nbsp;&nbsp;&nbsp;16&nbsp;&nbsp;&nbsp;&nbsp;225&nbsp;&nbsp;&nbsp;&nbsp;4782.35&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;136.30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11.67
+<BR>&nbsp;&nbsp;&nbsp;17&nbsp;&nbsp;&nbsp;&nbsp;210&nbsp;&nbsp;&nbsp;&nbsp;4820.37&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80.70&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.98
+<BR>&nbsp;&nbsp;&nbsp;18&nbsp;&nbsp;&nbsp;&nbsp;215&nbsp;&nbsp;&nbsp;&nbsp;4821.15&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80.97&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.00
+<BR>&nbsp;&nbsp;&nbsp;19&nbsp;&nbsp;&nbsp;&nbsp;215&nbsp;&nbsp;&nbsp;&nbsp;4827.71&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;76.20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.73
+<BR>&nbsp;&nbsp;&nbsp;20&nbsp;&nbsp;&nbsp;&nbsp;195&nbsp;&nbsp;&nbsp;&nbsp;4842.65&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;84.22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.18
+<BR>&nbsp;&nbsp;&nbsp;21&nbsp;&nbsp;&nbsp;&nbsp;190&nbsp;&nbsp;&nbsp;&nbsp;4843.02&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;155.87&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.48
+<BR>&nbsp;&nbsp;&nbsp;22&nbsp;&nbsp;&nbsp;&nbsp;185&nbsp;&nbsp;&nbsp;&nbsp;4884.28&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;73.69&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.58
+<BR>&nbsp;&nbsp;&nbsp;23&nbsp;&nbsp;&nbsp;&nbsp;175&nbsp;&nbsp;&nbsp;&nbsp;4885.21&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;69.88&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.36
+<BR>&nbsp;&nbsp;&nbsp;24&nbsp;&nbsp;&nbsp;&nbsp;175&nbsp;&nbsp;&nbsp;&nbsp;4871.47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;52.01&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.21
+<BR>&nbsp;&nbsp;&nbsp;25&nbsp;&nbsp;&nbsp;&nbsp;180&nbsp;&nbsp;&nbsp;&nbsp;4871.92&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;34.71&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.89
+<BR>&nbsp;&nbsp;&nbsp;26&nbsp;&nbsp;&nbsp;&nbsp;200&nbsp;&nbsp;&nbsp;&nbsp;4830.80&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.83&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.07
+<BR>&nbsp;&nbsp;&nbsp;27&nbsp;&nbsp;&nbsp;&nbsp;205&nbsp;&nbsp;&nbsp;&nbsp;4835.16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;33.47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.79
+<BR>&nbsp;&nbsp;&nbsp;28&nbsp;&nbsp;&nbsp;&nbsp;210&nbsp;&nbsp;&nbsp;&nbsp;4809.96&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;43.07&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.56
+<BR>&nbsp;&nbsp;&nbsp;29&nbsp;&nbsp;&nbsp;&nbsp;190&nbsp;&nbsp;&nbsp;&nbsp;4850.77&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;40.97&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.40
+<BR>&nbsp;&nbsp;&nbsp;30&nbsp;&nbsp;&nbsp;&nbsp;240&nbsp;&nbsp;&nbsp;&nbsp;4768.69&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;64.23&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.01
+<BR>&nbsp;&nbsp;&nbsp;31&nbsp;&nbsp;&nbsp;&nbsp;240&nbsp;&nbsp;&nbsp;&nbsp;4772.90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;74.44&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.63
+<BR>&nbsp;&nbsp;&nbsp;32&nbsp;&nbsp;&nbsp;&nbsp;245&nbsp;&nbsp;&nbsp;&nbsp;4760.11&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;57.97&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.61
+<BR>&nbsp;&nbsp;&nbsp;33&nbsp;&nbsp;&nbsp;&nbsp;255&nbsp;&nbsp;&nbsp;&nbsp;4734.01&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;81.72&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.04
+<BR>&nbsp;&nbsp;&nbsp;34&nbsp;&nbsp;&nbsp;&nbsp;255&nbsp;&nbsp;&nbsp;&nbsp;4728.19&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;82.21&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.07
+<BR>&nbsp;&nbsp;&nbsp;35&nbsp;&nbsp;&nbsp;&nbsp;260&nbsp;&nbsp;&nbsp;&nbsp;4722.94&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;83.45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.14
+<BR>&nbsp;&nbsp;&nbsp;36&nbsp;&nbsp;&nbsp;&nbsp;260&nbsp;&nbsp;&nbsp;&nbsp;4721.95&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;102.02&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.10
+<BR>&nbsp;&nbsp;&nbsp;37&nbsp;&nbsp;&nbsp;&nbsp;260&nbsp;&nbsp;&nbsp;&nbsp;4713.48&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;83.85&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.16
+<BR>&nbsp;&nbsp;&nbsp;38&nbsp;&nbsp;&nbsp;&nbsp;250&nbsp;&nbsp;&nbsp;&nbsp;4715.40&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;101.33&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.07
+<BR>&nbsp;&nbsp;&nbsp;39&nbsp;&nbsp;&nbsp;&nbsp;255&nbsp;&nbsp;&nbsp;&nbsp;4722.56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;118.20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.87
+<BR>&nbsp;&nbsp;&nbsp;40&nbsp;&nbsp;&nbsp;&nbsp;250&nbsp;&nbsp;&nbsp;&nbsp;4727.48&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;109.13&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.45
+<BR>&nbsp;&nbsp;&nbsp;41&nbsp;&nbsp;&nbsp;&nbsp;255&nbsp;&nbsp;&nbsp;&nbsp;4734.96&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;127.97&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11.31
+<BR>&nbsp;&nbsp;&nbsp;42&nbsp;&nbsp;&nbsp;&nbsp;255&nbsp;&nbsp;&nbsp;&nbsp;4724.53&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;124.06&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11.14
+<BR>&nbsp;&nbsp;&nbsp;43&nbsp;&nbsp;&nbsp;&nbsp;230&nbsp;&nbsp;&nbsp;&nbsp;4744.74&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;122.96&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11.09
+<BR>&nbsp;&nbsp;&nbsp;44&nbsp;&nbsp;&nbsp;&nbsp;225&nbsp;&nbsp;&nbsp;&nbsp;4752.16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;98.22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.91
+<BR>&nbsp;&nbsp;&nbsp;45&nbsp;&nbsp;&nbsp;&nbsp;230&nbsp;&nbsp;&nbsp;&nbsp;4692.27&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;107.96&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.39
+<BR>&nbsp;&nbsp;&nbsp;46&nbsp;&nbsp;&nbsp;&nbsp;240&nbsp;&nbsp;&nbsp;&nbsp;4696.93&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;95.93&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.79
+<BR>&nbsp;&nbsp;&nbsp;47&nbsp;&nbsp;&nbsp;&nbsp;230&nbsp;&nbsp;&nbsp;&nbsp;4699.80&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;129.08&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11.36
+<BR>&nbsp;&nbsp;&nbsp;48&nbsp;&nbsp;&nbsp;&nbsp;225&nbsp;&nbsp;&nbsp;&nbsp;4696.32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;145.20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.05
+<BR>&nbsp;&nbsp;&nbsp;49&nbsp;&nbsp;&nbsp;&nbsp;220&nbsp;&nbsp;&nbsp;&nbsp;4681.50&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;140.29&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11.84
+<BR>&nbsp;&nbsp;&nbsp;50&nbsp;&nbsp;&nbsp;&nbsp;210&nbsp;&nbsp;&nbsp;&nbsp;4676.16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;103.35&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.17
+<BR>&nbsp;&nbsp;&nbsp;51&nbsp;&nbsp;&nbsp;&nbsp;180&nbsp;&nbsp;&nbsp;&nbsp;4627.31&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;105.22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.26
+<BR>&nbsp;&nbsp;&nbsp;52&nbsp;&nbsp;&nbsp;&nbsp;200&nbsp;&nbsp;&nbsp;&nbsp;4654.55&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;207.85&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14.42
+<BR>&nbsp;&nbsp;&nbsp;53&nbsp;&nbsp;&nbsp;&nbsp;130&nbsp;&nbsp;&nbsp;&nbsp;4665.82&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;250.97&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15.84
+<BR>&nbsp;&nbsp;&nbsp;54&nbsp;&nbsp;&nbsp;&nbsp;185&nbsp;&nbsp;&nbsp;&nbsp;4704.29&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;300.80&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;17.34
+<BR>&nbsp;&nbsp;&nbsp;55&nbsp;&nbsp;&nbsp;&nbsp;135&nbsp;&nbsp;&nbsp;&nbsp;4731.13&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;218.16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14.77
+<BR>&nbsp;&nbsp;&nbsp;56&nbsp;&nbsp;&nbsp;&nbsp;150&nbsp;&nbsp;&nbsp;&nbsp;4736.29&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;178.16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13.35
+<BR>&nbsp;&nbsp;&nbsp;57&nbsp;&nbsp;&nbsp;&nbsp;115&nbsp;&nbsp;&nbsp;&nbsp;4691.45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;217.31&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14.74
+<BR>&nbsp;&nbsp;&nbsp;58&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+No bugs, only features. Maybe too many features...
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

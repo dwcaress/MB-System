@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_mstiffss.h	10/14/94
  *	$Id$
  *
- *    Copyright (c) 1998-2012 by
+ *    Copyright (c) 1998-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_mstiffss.h defines the data structure used by MBIO functions
- * to store sidescan data read from the MBF_MSTIFFSS format (MBIO id 131).  
+ * to store sidescan data read from the MBF_MSTIFFSS format (MBIO id 131).
  *
  * Author:	D. W. Caress
  * Date:	April 7,  1998
@@ -49,7 +49,7 @@
  */
 /*
  * Notes on the MBF_MSTIFFSS data format:
- *   1. The MSTIFF data format is used to store raw sidescan data from 
+ *   1. The MSTIFF data format is used to store raw sidescan data from
  *      Sea Scan sidescan sonars. This format is a variant of
  *      the TIFF image format with navigation and other information
  *      embedded within the file.
@@ -63,7 +63,7 @@
  *   4. The raw sidescan data in the file consists of 1000 pings.
  *      Each ping produces two 512 sample arrays - one for
  *      each side (port and starboard).
- *   5. The sidescan data is not slant range corrected - the 
+ *   5. The sidescan data is not slant range corrected - the
  *      bottom detect and slant range correction is done on
  *      input by MBIO. The data stored internally by MBIO
  *      is slant range corrected.
@@ -71,7 +71,7 @@
  *      MBIO,  including images of the data derived from a
  *      realtime display.
  *   7. Comments are not supported in this format.
- *   8. Each of the possible data fields is identified by a 
+ *   8. Each of the possible data fields is identified by a
  *      unique tag:
  *          Tag        Field Type                Default
  *          ---        ----------                -------
@@ -85,51 +85,51 @@
  *          258        BitsPerBin#                8 bits per sample (2 MSB = 0)
  *          254        Compression               1 (no compression)
  *          255        CondensedImage
- *          301        CreatorVersion        
- *          256        Description        
- *          287        Fathometer        
- *          296        Fathometer2        
- *          286        FathometerCount        
- *          257        History        
- *          263        LeftChannel#        
- *          299        LeftChannel2#        
- *          289        Magnetometer        
- *          288        MagnetometerCount        
- *          291        MagnetometerParms        
- *          303        MagnetometerParms2        
- *          269        Marker        
- *          268        MarkerCount        
- *          277        Marker2        
- *          276        Marker2Count        
- *          284        Marker3        
- *          283        Marker3Count        
- *          295        Marker4        
- *          294        Marker4Count        
- *          307        Marker5        
- *          306        Marker5Count        
- *          267        NavInfo#        
- *          275        NavInfo2#        
- *          282        NavInfo3#        
- *          293        NavInfo4#        
- *          297        NavInfo5#        
- *          308        NavInfo6#        
- *          266        NavInfoCount       
- *          304        NavInterpolationTimeout        
- *          274        PingNavInfo        
- *          264        RightChannel#        
- *          300        RightChannel2#        
- *          261        ScrollDirection        
- *          265        SonarDataInfo#        
- *          292        SonarDataInfo2#        
- *          298        SonarDataInfo3#        
- *          259        SonarLines#        
- *          271        SurveyPlotterImage        
- *          270        SurveyPlotterParms        
- *          290        SurveyPlotterParms2        
- *          302        SurveyPlotterParms3        
- *          305        SurveyPlotterParms4        
- *          262        TimeCorrelation#        
- *          285        Y2KTimeCorrelation#        
+ *          301        CreatorVersion
+ *          256        Description
+ *          287        Fathometer
+ *          296        Fathometer2
+ *          286        FathometerCount
+ *          257        History
+ *          263        LeftChannel#
+ *          299        LeftChannel2#
+ *          289        Magnetometer
+ *          288        MagnetometerCount
+ *          291        MagnetometerParms
+ *          303        MagnetometerParms2
+ *          269        Marker
+ *          268        MarkerCount
+ *          277        Marker2
+ *          276        Marker2Count
+ *          284        Marker3
+ *          283        Marker3Count
+ *          295        Marker4
+ *          294        Marker4Count
+ *          307        Marker5
+ *          306        Marker5Count
+ *          267        NavInfo#
+ *          275        NavInfo2#
+ *          282        NavInfo3#
+ *          293        NavInfo4#
+ *          297        NavInfo5#
+ *          308        NavInfo6#
+ *          266        NavInfoCount
+ *          304        NavInterpolationTimeout
+ *          274        PingNavInfo
+ *          264        RightChannel#
+ *          300        RightChannel2#
+ *          261        ScrollDirection
+ *          265        SonarDataInfo#
+ *          292        SonarDataInfo2#
+ *          298        SonarDataInfo3#
+ *          259        SonarLines#
+ *          271        SurveyPlotterImage
+ *          270        SurveyPlotterParms
+ *          290        SurveyPlotterParms2
+ *          302        SurveyPlotterParms3
+ *          305        SurveyPlotterParms4
+ *          262        TimeCorrelation#
+ *          285        Y2KTimeCorrelation#
  */
 
 /* size of MSTIFFSS reading buffer */

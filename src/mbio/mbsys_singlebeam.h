@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_singlebeam.h	4/13/93
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -76,7 +76,7 @@
  *      in some cases support magnetics and gravity data.
  *   2. With MB-System 5.1, the mbf_mbpronav format has been
  *      extended to include min and max acrosstrack distances
- *      of non-null data for both bathymetry beams and 
+ *      of non-null data for both bathymetry beams and
  *      sidescan pixels. This allows these values to be included
  *      in the *.fnv files and supports mbgrdviz and mbproject.
  *      These values are accessed by a special function
@@ -90,10 +90,10 @@ struct mbsys_singlebeam_struct
 	{
 	/* type of data record */
 	int	kind;
-	
+
 	/* survey id */
 	char	survey_id[8];
-			    /* Identifier supplied by the contributing       
+			    /* Identifier supplied by the contributing
 				 organization, else given by NGDC in
 				 a manner which represents the data. */
 
@@ -101,9 +101,9 @@ struct mbsys_singlebeam_struct
 	double	time_d;
 	int	time_i[7];
 	int	timezone;   /* Corrects time (in characters 13-27)
-				 to GMT when added: equals zero when 
+				 to GMT when added: equals zero when
 				 time is GMT.  Timezone normally falls
-				 between -13 and +12 inclusively. */	
+				 between -13 and +12 inclusively. */
 	/* navigation */
 	double	longitude;
 	double	latitude;
@@ -124,29 +124,29 @@ struct mbsys_singlebeam_struct
                              9 - No identifiable problem
                                  found */
 	int	gps_quality;	/* R2Rnav GPS quality using NMEA-0183 definition:
-					The National Marine Electronics Association 
+					The National Marine Electronics Association
 					has defined the following indicator:
-						0 = fix not available or invalid 
-						1 = GPS Standard Positioning Service (SPS) mode, fix valid 
-						2 = differential GPS, SPS mode, fix valid 
+						0 = fix not available or invalid
+						1 = GPS Standard Positioning Service (SPS) mode, fix valid
+						2 = differential GPS, SPS mode, fix valid
 						3 = GPS Precise Positioning Service (PPS) mode, fix valid
 							values for the GPS quality
-						4 = Real Time Kinematic (RTK). Satellite system used in 
-							RTK mode with fixed integers 
-						5 = Float RTK. Satellite system used in RTK mode with 
-							floating integers 
-						6 = Estimated (dead reckoning) mode 
+						4 = Real Time Kinematic (RTK). Satellite system used in
+							RTK mode with fixed integers
+						5 = Float RTK. Satellite system used in RTK mode with
+							floating integers
+						6 = Estimated (dead reckoning) mode
 						7 = Manual input mode
 						8 = Simulator mode */
 	int	gps_nsat;	/* R2Rnav GPS height (m) */
 	double	gps_dilution;	/* R2Rnav GPS height (m) */
 	int	gps_height;	/* R2Rnav GPS height (m) */
-				
+
 	/* motion sensor data */
 	double	roll;
 	double	pitch;
 	double	heave;		/* heave or rov depth in m */
-	
+
 	/* submersible/ROV data */
 	double	sonar_depth;	/* platform depth in m */
 	double	rov_pressure;	/* platform pressure in decibar */
@@ -173,16 +173,16 @@ struct mbsys_singlebeam_struct
 				 Indicates how the data record's
 				 bathymetric value was obtained:
 				 1 =    Observed
-				 3 =    Interpolated 
+				 3 =    Interpolated
 				 9 =    Unspecified */
 
 	/* magnetics */
 	double	mag_tot_1;  /* MAGNETICS TOTAL FIELD, 1ST SENSOR
-				In tenths of nanoteslas (gammas). 
+				In tenths of nanoteslas (gammas).
 				For leading sensor.  Use this field
 				for single sensor. */
 	double	mag_tot_2;  /* MAGNETICS TOTAL FIELD, 2ND SENSOR
-				In tenths of nanoteslas (gammas). 
+				In tenths of nanoteslas (gammas).
 				For trailing sensor. */
 	double	mag_res;    /* MAGNETICS RESIDUAL FIELD
 				In tenths of nanoteslas (gammas). */
@@ -193,7 +193,7 @@ struct mbsys_singlebeam_struct
 				9 = Unspecified */
 	double	mag_diurnal;
 			    /* MAGNETICS DIURNAL CORRECTION -
-				In tenths of nanoteslas (gammas). 
+				In tenths of nanoteslas (gammas).
 				(In nanoteslas) if 9-filled
 				(i.e., set to "+9999"), total
 				and residual fields are assumed
@@ -205,7 +205,7 @@ struct mbsys_singlebeam_struct
 				In meters.
 				+ = Below sealevel
 				- = Above sealevel */
-				
+
 	/* gravity */
 	double	gravity;    /* OBSERVED GRAVITY
                              In milligals.
@@ -213,13 +213,13 @@ struct mbsys_singlebeam_struct
                              tares */
 	double	eotvos;	    /* EOTVOS CORRECTION
                              In milligals.
-                             E = 7.5 V cos phi sin alpha + 
+                             E = 7.5 V cos phi sin alpha +
                              0.0042 V*V */
 	double	free_air;   /* FREE-AIR ANOMALY
                              In milligals.
                              Free-air Anomaly = G(observed) -
                              G(theoretical) */
-	
+
 	/* seismic */
 	int	seismic_line;
 			    /* SEISMIC LINE NUMBER
@@ -234,7 +234,7 @@ struct mbsys_singlebeam_struct
 	double	ship_longitude;	/* degrees */
 	double	ship_latitude;	/* degrees */
 	double	ship_heading;	/* degrees */
-	
+
 	/* flags */
 	int	position_flag;
 	int	pressure_flag;
@@ -242,79 +242,78 @@ struct mbsys_singlebeam_struct
 	int	altitude_flag;
 	int	attitude_flag;
 	int	qc_flag;
-	
+
 	/* swathbounds */
 	double	portlon;
 	double	portlat;
 	double	stbdlon;
 	double	stbdlat;
- 
+
 	/* comment */
 	char	comment[MBSYS_SINGLEBEAM_MAXLINE];
-	};	
+	};
 
-	
+
 /* system specific function prototypes */
-int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_singlebeam_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_singlebeam_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_singlebeam_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_singlebeam_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr, 
+int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr,
 			int *pingnumber, int *error);
-int mbsys_singlebeam_segynumber(int verbose, void *mbio_ptr, 
+int mbsys_singlebeam_segynumber(int verbose, void *mbio_ptr,
 			int *line, int *shot, int *cdp, int *error);
-int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_singlebeam_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_singlebeam_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
 int mbsys_singlebeam_swathbounds(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *portlon, double *portlat,
 			double *stbdlon, double *stbdlat,
 			int *error);
-int mbsys_singlebeam_copy(int verbose, void *mbio_ptr, 
+int mbsys_singlebeam_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-int mbsys_singlebeam_pressuredepth(int verbose, 
+int mbsys_singlebeam_pressuredepth(int verbose,
 			double pressure, double latitude,
 			double *depth,
 			int *error);
-

@@ -2,7 +2,7 @@
  *    The MB-system:	mbcontour.c	6/4/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -203,10 +203,10 @@
 #include <time.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_aux.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_aux.h"
 
 /* GMT argument handling define */
 #define MBCONTOUR_GMT_ARG_MAX 128
@@ -654,7 +654,7 @@ int main (int argc, char **argv)
 		}
 
 	/* initialize plotting */
-	status = plot_init(verbose,argc_gmt,argv_gmt,bounds,&scale,&inchtolon,&error);
+	status = mb_plot_init(verbose,argc_gmt,argv_gmt,bounds,&scale,&inchtolon,&error);
 
 	/* if error flagged then print it and exit */
 	if (status == MB_FAILURE)
@@ -843,7 +843,7 @@ int main (int argc, char **argv)
 		}
 
 	/* set colors */
-	set_colors(ncolor,red,green,blue);
+	mb_set_colors(ncolor,red,green,blue);
 
 	/* set bounds for multibeam reading larger than
 		map borders */
@@ -989,6 +989,11 @@ int main (int argc, char **argv)
 				    date_annot_int,time_tick_len_map,name_hgt_map,
 				    pingnumber_tick_int,pingnumber_annot_int,
 				    pingnumber_tick_len_map,
+                                    &mb_plot,
+                                    &mb_newpen,
+                                    &mb_setline,
+                                    &mb_justify_string,
+                                    &mb_plot_string,
 				    &error);
 		swath_plot->beams_bath = beams_bath;
 
@@ -1246,7 +1251,7 @@ int main (int argc, char **argv)
 		mb_datalist_close(verbose,&datalist,&error);
 
 	/* end plot */
-	plot_end(verbose,&error);
+	mb_plot_end(verbose,&error);
 
 	/* deallocate memory for data arrays */
 	mb_freed(verbose,__FILE__, __LINE__, (void **)&level,&error);
@@ -1275,7 +1280,7 @@ int main (int argc, char **argv)
 		}
 
 	/* end it all */
-	plot_exit(argc,argv);
+	mb_plot_exit(argc,argv);
 	exit(status);
 }
 /*--------------------------------------------------------------------*/

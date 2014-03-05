@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_navnetcdf.c	4/11/2002
  *	$Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -52,22 +52,23 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_navnetcdf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_navnetcdf.h"
 
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_navnetcdf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
+	char	c;
 	int	i;
 
 	/* print input debug statements */
@@ -77,7 +78,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -89,16 +90,16 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *) *store_ptr;
-	
+
 	/* now initialize everything */
 	if (status == MB_SUCCESS)
-	    {	
+	    {
 	    /* dimensions */
 	    store->mbHistoryRecNbr = 0 ;
 	    store->mbNameLength = MBSYS_NAVNETCDF_NAMELEN ;
 	    store->mbCommentLength = MBSYS_NAVNETCDF_COMMENTLEN ;
 	    store->mbPositionNbr = 0 ;
-    
+
 	    /* global attributes */
 	    store->mbVersion = 108;
 	    strcpy(store->mbName, " ");
@@ -115,22 +116,36 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbEastLongitude = 0.;
 	    store->mbWestLongitude = 0.;
 	    strcpy(store->mbMeridian180, " ");
-	    strcpy(store->mbGeoDictionnary, "                    ");
-	    strcpy(store->mbGeoRepresentation, "                    ");
-	    strcpy(store->mbGeodesicSystem, "                    ");
-	    strcpy(store->mbEllipsoidName, "                                                                                                                                                                                                                                                                ");
+	    for (i=0;i<MBSYS_NAVNETCDF_ATTRIBUTELEN;i++)
+		{
+		if (i < MBSYS_NAVNETCDF_ATTRIBUTELEN-1)
+			c = ' ';
+		else
+			c = '\0';
+		store->mbGeoDictionnary[i] = c;
+		store->mbGeoRepresentation[i] = c;
+		store->mbGeodesicSystem[i] = c;
+		}
 	    store->mbEllipsoidA = 0.;
 	    store->mbEllipsoidInvF = 0.;
 	    store->mbEllipsoidE2 = 0.;
 	    store->mbProjType = -1;
 	    for (i=0;i<10;i++)
 		store->mbProjParameterValue[i] = 0.;
-	    strcpy(store->mbProjParameterCode, "                                                                                                                                                                                                                                                                ");
-	    strcpy(store->mbShip, "                                                                                                                                                                                                                                                                ");
-	    strcpy(store->mbSurvey, "                                                                                                                                                                                                                                                                ");
-	    strcpy(store->mbReference, "                                                                                                                                                                                                                                                                ");
 	    store->mbPointCounter = 0;
-	    
+	    for (i=0;i<MBSYS_NAVNETCDF_COMMENTLEN-1;i++)
+		{
+		if (i < MBSYS_NAVNETCDF_COMMENTLEN-1)
+			c = ' ';
+		else
+			c = '\0';
+		store->mbEllipsoidName[i] = c;
+		store->mbProjParameterCode[i] = c;
+		store->mbShip[i] = c;
+		store->mbSurvey[i] = c;
+		store->mbReference[i] = c;
+		}
+
 	    /* variable attributes */
 	    strcpy(store->mbHistDate_type, "integer");
 	    strcpy(store->mbHistDate_long_name, "History date");
@@ -337,7 +352,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbPFlag_missing_value = -128 ;
 	    strcpy(store->mbPFlag_format_C, "%d");
 	    strcpy(store->mbPFlag_orientation, "direct");
-    
+
 	    /* variable ids */
 	    store->mbHistDate_id = -1;
 	    store->mbHistTime_id = -1;
@@ -356,7 +371,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbPType_id = -1;
 	    store->mbPQuality_id = -1;
 	    store->mbPFlag_id = -1;
-    
+
 	    /* variable pointers */
 	    store->mbHistDate = NULL;
 	    store->mbHistTime = NULL;
@@ -381,7 +396,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_navnetcdf_deall";
@@ -396,7 +411,7 @@ int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",*error);
 		}
 
@@ -437,7 +452,7 @@ int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_navnetcdf_dimensions";
@@ -452,8 +467,8 @@ int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -501,12 +516,12 @@ int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -516,7 +531,7 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 	int	i;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -524,8 +539,8 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -536,7 +551,7 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data kind */
 	*kind = store->kind;
-	
+
 	/* reset error and status */
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
@@ -558,12 +573,12 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		*speed = store->mbSpeed * store->mbSpeed_scale_factor;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 2.0;
 		mb_io_ptr->beamwidth_xtrack = 2.0;
 
-		/* read distance, depth, and backscatter 
+		/* read distance, depth, and backscatter
 			values into storage arrays */
 		*nbath = 0;
 		*namp = 0;
@@ -658,13 +673,13 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -691,12 +706,12 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -713,8 +728,8 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA))
@@ -746,7 +761,7 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* set data kind */
 	store->kind = kind;
-	
+
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
 		{
@@ -754,11 +769,11 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get time */
 		store->mbDate = (int)(time_d / SECINDAY);
 		store->mbTime = (int)(1000 * (time_d - store->mbDate * SECINDAY));
-    
+
 		/* get navigation */
 		store->mbAbscissa = (int)(navlon / store->mbAbscissa_scale_factor);
 		store->mbOrdinate = (int)(navlat / store->mbOrdinate_scale_factor);
-    
+
 		/* get heading */
 		store->mbHeading = heading / store->mbHeading_scale_factor;
 		}
@@ -786,9 +801,9 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_navnetcdf_ttimes";
@@ -804,14 +819,14 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %lu\n",(size_t)ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%lu\n",(size_t)angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%lu\n",(size_t)angles_forward);
-		fprintf(stderr,"dbg2       angles_null:%lu\n",(size_t)angles_null);
-		fprintf(stderr,"dbg2       heave:      %lu\n",(size_t)heave);
-		fprintf(stderr,"dbg2       ltrk_off:   %lu\n",(size_t)alongtrack_offset);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %p\n",(void *)ttimes);
+		fprintf(stderr,"dbg2       angles_xtrk:%p\n",(void *)angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%p\n",(void *)angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%p\n",(void *)angles_null);
+		fprintf(stderr,"dbg2       heave:      %p\n",(void *)heave);
+		fprintf(stderr,"dbg2       ltrk_off:   %p\n",(void *)alongtrack_offset);
 		}
 
 	/* get mbio descriptor */
@@ -897,9 +912,9 @@ int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %p\n",(void *)detects);
 		}
 
 	/* get mbio descriptor */
@@ -967,7 +982,7 @@ int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_navnetcdf_extract_altitude";
@@ -982,8 +997,8 @@ int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -994,7 +1009,7 @@ int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 
 	/* get data kind */
 	*kind = store->kind;
-	
+
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
@@ -1041,7 +1056,7 @@ int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 }
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	double transducer_depth, double altitude, 
+	double transducer_depth, double altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_navnetcdf_insert_altitude";
@@ -1056,8 +1071,8 @@ int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:            %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:         %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:         %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       transducer_depth:  %f\n",transducer_depth);
 		fprintf(stderr,"dbg2       altitude:          %f\n",altitude);
 		}
@@ -1113,8 +1128,8 @@ int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_navnetcdf_extract_nav";
@@ -1129,8 +1144,8 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1242,7 +1257,7 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1276,7 +1291,7 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1292,8 +1307,8 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -1334,7 +1349,7 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		store->mbSpeed = speed / store->mbSpeed_scale_factor;
-		
+
 		/* get draft */
 		store->mbImmersion = draft / store->mbImmersion_scale_factor;
 
@@ -1355,7 +1370,7 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, 
+int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -1373,9 +1388,9 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %lu\n",(size_t)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %p\n",(void *)copy_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1384,8 +1399,8 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 	/* get data structure pointers */
 	store = (struct mbsys_navnetcdf_struct *) store_ptr;
 	copy = (struct mbsys_navnetcdf_struct *) copy_ptr;
-	
-	
+
+
 	/* deallocate memory if required */
 	if (store->mbHistoryRecNbr > copy->mbHistoryRecNbr)
 	    {
@@ -1396,7 +1411,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistModule, error);
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistComment, error);
 	    }
-	
+
 	/* allocate the memory in copy */
 	if (status == MB_SUCCESS)
 	    {
@@ -1404,22 +1419,22 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 	    copy->mbNameLength = store->mbNameLength;
 	    copy->mbCommentLength = store->mbCommentLength;
 	    copy->mbPositionNbr = store->mbPositionNbr;
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * sizeof(int),
 			(void **)&copy->mbHistDate,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * sizeof(int),
 			(void **)&copy->mbHistTime,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * sizeof(char),
 			(void **)&copy->mbHistCode,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * copy->mbNameLength * sizeof(char),
 			(void **)&copy->mbHistAutor,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * copy->mbNameLength * sizeof(char),
 			(void **)&copy->mbHistModule,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * copy->mbCommentLength * sizeof(char),
 			(void **)&copy->mbHistComment,error);
 	    }
@@ -1451,7 +1466,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 	if (status == MB_SUCCESS)
 	    {
 	    copy->kind = store->kind;
-    
+
 	    /* global attributes */
 	    copy->mbVersion = store->mbVersion;
 	    for (i=0;i<MBSYS_NAVNETCDF_ATTRIBUTELEN;i++)
@@ -1489,7 +1504,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 	    for (i=0;i<10;i++)
 		copy->mbProjParameterValue[i] = store->mbProjParameterValue[i];
 	    copy->mbPointCounter = store->mbPointCounter;
-	    
+
 	    /* variable ids */
 	    copy->mbHistDate_id = store->mbHistDate_id;
 	    copy->mbHistTime_id = store->mbHistTime_id;
@@ -1508,7 +1523,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 	    copy->mbPType_id = store->mbPType_id;
 	    copy->mbPQuality_id = store->mbPQuality_id;
 	    copy->mbPFlag_id = store->mbPFlag_id;
-    
+
 	    /* variable pointers */
 	    for (i=0;i<copy->mbHistoryRecNbr;i++)
 	        {
@@ -1530,7 +1545,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 	    copy->mbPType = store->mbPType;
 	    copy->mbPQuality = store->mbPQuality;
 	    copy->mbPFlag = store->mbPFlag;
-	    
+
 	    /* variable attributes */
 	    for (i=0;i<MBSYS_NAVNETCDF_ATTRIBUTELEN;i++)
 		{
@@ -1740,10 +1755,10 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 	    copy->mbPFlag_valid_minimum = store->mbPFlag_valid_minimum;
 	    copy->mbPFlag_valid_maximum = store->mbPFlag_valid_maximum;
 	    copy->mbPFlag_missing_value = store->mbPFlag_missing_value;
-	
+
 	    /* storage comment string */
 	    for (i=0;i<MBSYS_NAVNETCDF_COMMENTLEN;i++)
-	        copy->comment[i] = store->comment[i];	    
+	        copy->comment[i] = store->comment[i];
 	    }
 
 	/* print output debug statements */
