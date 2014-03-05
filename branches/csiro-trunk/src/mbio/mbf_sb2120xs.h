@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_sb2120xs.h	3/20/2000
  *	$Id$
  *
- *    Copyright (c) 2000-2012 by 
+ *    Copyright (c) 2000-2013 by
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_sb2120xs.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_SB2120XSE format (MBIO id 44).  
+ * to store multibeam data read from the MBF_SB2120XSE format (MBIO id 44).
  *
  * Author:	P. A. Cohen
  * Date:	March 20, 2000
@@ -36,7 +36,7 @@
  *      data format for both ELAC Bottomchart Compact MK II sonars
  *      (50 kHz and/or 180 kHz) and SeaBeam 2100 series sonars
  *      (12 kHz, 20 kHz, 36 kHz). This follows the purchase of
- *      SeaBeam Instruments by L3 Communications, the parent 
+ *      SeaBeam Instruments by L3 Communications, the parent
  *      company of ELAC Nautik.
  *   2. The XSE format implements a well defined binary format
  *      structure in which each data record is represented as
@@ -69,25 +69,25 @@
  *   2. The valid frames include:
  *        Frame Name    Id   Groups w/ group id's in ()
  *        ---------------------------------------------------------
- *        Navigation    1    General(1), Position(2), 
- *                           MotionGroundTruth(4), MotionThroughWater(5), 
- *                           CurrentTrack(6), HeaveRollPitch (7), Heave(8), 
+ *        Navigation    1    General(1), Position(2),
+ *                           MotionGroundTruth(4), MotionThroughWater(5),
+ *                           CurrentTrack(6), HeaveRollPitch (7), Heave(8),
  *			     Roll(9), Pitch(10), Heading(11), Log(12)
  *        Sidescan      5    General(1), Amplitude(4), Phase(5)
- *        Multibeam     6    General(1), Traveltime(3), Quality(4), 
- *                           Amplitude(5), Delay(6), Lateral(7), 
+ *        Multibeam     6    General(1), Traveltime(3), Quality(4),
+ *                           Amplitude(5), Delay(6), Lateral(7),
  *                           Along(8), Depth(9), Angle(10), Beam(1)
  *        Comment       99   General(1) **MB-System ONLY!!!!**
- *   3. An additional set of SeaBeam 2100 specific frames are defined, 
+ *   3. An additional set of SeaBeam 2100 specific frames are defined,
  *      but are not supported in this i/o module. Many other frames
  *      are defined, but not supported here. These are read and passed
  *      through MB-System as MB_DATA_OTHER type data records.
  *   4. SeaBeam Instruments 2120 20KHz sonar systems output both bathymetry
  *      and amplitude information for up to 151 beams per multibeam frame.
  *      Each ping produces a variable number of beams.
- *   5. The XSE format uses asynchronous navigation only; navigation 
+ *   5. The XSE format uses asynchronous navigation only; navigation
  *      is not included in the multibeam or sidescan pings.
- *      MB-System interpolates or extrapolates the available 
+ *      MB-System interpolates or extrapolates the available
  *      navigation as necessary.
  *
  */
@@ -195,7 +195,7 @@ struct mbf_sb2120xs_struct
 	{
 	/* type of data record */
 	int	kind;			/* Survey, nav, Comment */
-	
+
 	/* parameter (ship frames) */
 	int	par_source;		/* sensor id */
 	unsigned int	par_sec;	/* sec since 1/1/1901 00:00 */
@@ -218,7 +218,7 @@ struct mbf_sb2120xs_struct
 	float	par_hrp_x;		/* motion sensor x position, meters */
 	float	par_hrp_y;		/* motion sensor y position, meters */
 	float	par_hrp_z;		/* motion sensor z position, meters */
-	
+
 	/* svp (sound velocity frames) */
 	int	svp_source;		/* sensor id */
 	unsigned int	svp_sec;	/* sec since 1/1/1901 00:00 */
@@ -241,17 +241,17 @@ struct mbf_sb2120xs_struct
 	int	nav_status;
 	int	nav_description_len;
 	char	nav_description[MBF_SB2120XS_DESCRIPTION_LENGTH];
-	double	nav_x;			/* eastings (m) or 
+	double	nav_x;			/* eastings (m) or
 					    longitude (radians) */
-	double	nav_y;			/* northings (m) or 
+	double	nav_y;			/* northings (m) or
 					    latitude (radians) */
-	double	nav_z;			/* height (m) or 
+	double	nav_z;			/* height (m) or
 					    ellipsoidal height (m) */
 	double	nav_speed_ground;	/* m/s */
 	double	nav_course_ground;	/* radians */
 	double	nav_speed_water;	/* m/s */
 	double	nav_course_water;	/* radians */
-	
+
 	/* survey depth (multibeam frames) */
 	int	mul_frame;		/* boolean flag - multibeam frame read */
 	int	mul_group_beam;		/* boolean flag - beam group read */
@@ -280,7 +280,7 @@ struct mbf_sb2120xs_struct
 	double	mul_x;			/* longitude in degrees */
 	double	mul_y;			/* latitude in degrees */
 	struct mbf_sb2120xs_beam_struct beams[MBF_SB2120XS_MAXBEAMS];
-	
+
 	/* survey sidescan (sidescan frames) */
 	int	sid_frame;		/* boolean flag - sidescan frame read */
 	int	sid_source;		/* sensor id */
@@ -300,9 +300,9 @@ struct mbf_sb2120xs_struct
 	/* comment */
 	int	com_source;		/* sensor id */
 	unsigned int	com_sec;	/* sec since 1/1/1901 00:00 */
-	unsigned int	com_usec;	/* microseconds */	
+	unsigned int	com_usec;	/* microseconds */
 	char	comment[MBF_SB2120XS_COMMENT_LENGTH];
-	
+
 	/* unsupported frames */
 	int	rawsize;		/* size of unknown frame in bytes */
 	char	raw[MBF_SB2120XS_BUFFER_SIZE];

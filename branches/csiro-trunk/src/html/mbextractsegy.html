@@ -1,0 +1,440 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbextractsegy</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbextractsegy</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbextractsegy</B> - extracts subbottom profiler, center beam reflection,
+or seismic reflection data from swath data supported by MB-System and
+rewrites it as a SEGY file.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbextractsegy</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-E</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-F</B><I>format</I> <B>-I</B><I>file</I> <B>-J</B><I>xscale/yscale/maxwidth</I>
+<B>-L</B><I>startline/lineroot</I> <B>-M -O</B><I>segyfile</I> <B>-Q</B><I>routetimefile</I>
+<B>-R</B><I>routefile</I> <B>-S</B><I>sampleformat</I>
+<B>-T</B><I>timeshift</I> <B>-U</B><I>rangethreshold</I> <B>-Z</B><I>plotmax</I> <B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MBextractsegy</B> is a utility for reading a swath sonar data file
+or files, extracting subbottom profiler, center beam reflection,
+or seismic reflection data, and outputting that selected data
+as a SEGY file. Parameters such as sonar depth, seafloor depth, and
+position are embedded into the SEGY data. The SEGY files are
+output in a form used by the seismic reflection processing package
+<B>SIOSEIS</B>. A &quot;sinf&quot; file containing statistics about the content
+of the SEGY file is created automatically by <B>MBextractsegy</B>; this
+file is named by adding a &quot;.sinf&quot; suffix to the SEGY filename.
+<P>
+At present, the only swath data formats from which subbottom data
+can be extracted are format 88 (Reson 7k format), format 132
+(Edgetech Jstar format), and format 133 (Edgetech Jstar format).
+<P>
+The extracted segy data file(s) can be organized three ways. If the <B>-O</B>
+option is used to specify a single segy output file, then all of the
+segy data will be output to that single file. If either the <B>-Q</B> or
+<B>-R</B> options are used to specify a survey route file that includes
+the waypoints covered while collecting the data file(s) referenced by
+<B>-I</B><I>file</I>, then the output segy data will be broken up by the
+sequential lines defined by the waypoints. The <B>-Q</B> option specifies a
+route file that includes the time at which each waypoint is reached in the
+data, and the <B>-R</B> option specifies a route file of the form exported by
+<B>MBgrdviz</B>. In the waypoint-driven case each output segy file will be named
+using the line root name specified by <B>-L</B><I>startline/lineroot</I> with a
+sequential line number starting from <I>startline</I>. If neither the <B>-O</B> or
+<B>-L</B> options are used, each input swath file will have a corresponding
+segy output file with the &quot;.segy&quot; suffix added to the original filename.
+<P>
+<B>MBextractsegy</B> also generates a &quot;first cut plot&quot; script that will generate
+grayscale section plots in Postscript of each segy file using the programs
+<B>MBsegygrid</B> and <B>mbm_grdplot</B>. The <B>-Z</B> sets the trace value
+corresponding to the maximum grayscale (black) in the section plots.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-B</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the starting time for data allowed in the input data.
+The <B>-E</B> option sets the ending time for data. If the
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
+<B>-E</B>
+
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the ending time for data allowed in the input data.
+The <B>-B</B> option sets the starting time for data. If the
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format used if the input is read from stdin
+or from a file. If <I>format</I> &lt; 0, then the input file specified
+with the <B>-I</B> option will actually contain a list of input swath sonar
+data files. This program uses the <B>MBIO</B> library
+and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. The default format is set
+using the program <B>mbdefaults</B>..
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Sets the input file path. If <I>format</I> &gt; 0 (set with the
+<B>-f</B> option or <B>mbdefaults</B>) then the swath sonar data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;stdin&quot;.
+<DT><B>-J</B>
+
+<DD>
+<I>xscale/yscale/maxwidth</I>
+<BR>
+
+Sets the scale of the default section plots. The <I>xscale</I> value is
+in inches per shot, and the <I>yscale</I> value is in inches per second.
+The <I>maxwidth</I> value sets the maximum plot width in inches. If
+<I>xscale</I> and the shot range imply a width greater than <I>maxwidth</I>,
+then the section will be broken up into multiple plots.
+Default: <I>xscale</I> = 0.01; <I>yscale</I> = 75; <I>maxwidth</I> = 45.0
+<DT><B>-L</B>
+
+<DD>
+<I>startline/lineroot</I>
+<BR>
+
+This option sets the starting line number and the output filename root
+used when <B>-R</B> is specified so that data are output according
+to planned survey lines. Default: <I>startline</I> = 1; <I>lineroot</I> = &quot;sbp&quot;.
+<DT><B>-M</B>
+
+<DD>
+<BR>
+
+This option causes <B>mbextractsegy</B> to omit data during turns when
+extracting into line files according to a specified set of waypoints
+(<B>-R</B> option). The traces will not be output until the heading is
+within 15 degrees of the next survey line's bearing.
+<DT><B>-O</B>
+
+<DD>
+<BR>
+
+This option sets the output SEGY file path. If neither <B>-O</B> nore <B>-R</B> are invoked,
+the output SEGY filename (or files if a datalist is being processed) will
+be the input swath filename with &quot;.segy&quot; appended.
+<DT><B>-Q</B>
+
+<DD>
+<I>routetimefile</I>
+<BR>
+
+This option specifies route file containing the times that the survey reached
+the intended waypoints. This text file consists of lines of the form:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>count&nbsp;waypoint&nbsp;longitude&nbsp;latitude&nbsp;heading&nbsp;time_d<BR>
+<BR>
+
+where count is just an integer counter starting at 0, waypoint is the waypoint
+number starting at 0, longitude and latitude are the waypoint position in
+decimal degrees, heading is the heading in decimal degrees, and time_d is
+the unix or epoch time (time since 00:00:00 January 1, 1970) in decimal
+seconds that the survey reached this waypoint. This file can be generated from
+an <B>mbgrdviz</B> route file and survey data using the program <B>mbroutetime</B>.
+If <I>routetimefile</I> is specified, <B>mbextractsegy</B>
+will output SEGY data in files corresponding to the planned survey lines.
+The output SEGY file names will be based on <I>lineroot</I> and will include
+the line number starting with <I>starline</I>, both of which are specified
+using the <B>-L</B> options.  If neither <B>-O</B> nore <B>-R</B> are invoked,
+the output SEGY filename (or files if a datalist is being processed) will
+be the input swath filename with &quot;.segy&quot; appended.
+<DT><B>-R</B>
+
+<DD>
+<I>routefile</I>
+<BR>
+
+This option specifies an <B>mbgrdviz</B> route file containing the intended
+waypoints of the survey. If <I>routefile</I> is specified, <B>mbextractsegy</B>
+will output SEGY data in files corresponding to the planned survey lines.
+The output SEGY file names will be based on <I>lineroot</I> and will include
+the line number starting with <I>starline</I>, both of which are specified
+using the <B>-L</B> options.  If neither <B>-O</B> nore <B>-R</B> are invoked,
+the output SEGY filename (or files if a datalist is being processed) will
+be the input swath filename with &quot;.segy&quot; appended.
+<DT><B>-S</B>
+
+<DD>
+<I>sampleformat</I>
+<BR>
+
+Sets the sample format desired for use in the output SEGY file. Options include:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SEGY_SAMPLEFORMAT_NONE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SEGY_SAMPLEFORMAT_TRACE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SEGY_SAMPLEFORMAT_ENVELOPE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB_SEGY_SAMPLEFORMAT_ANALYTIC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4<BR>
+<BR>
+
+MB_SEGY_SAMPLEFORMAT_TRACE implies that the seismic trace is in the original,
+most raw form with both positive and negative values.
+MB_SEGY_SAMPLEFORMAT_ANALYTIC implies that the trace has been
+been transformed from the original time series to an analytic signal containing
+both real and imaginary parts. Both the real and imaginary signals
+are stored in the SEGY file. MB_SEGY_SAMPLEFORMAT_ENVELOPE implies that the
+analytic signal has been reduced back to a single real, positive-only envelope
+signal by taking the magnitude of the real and imaginary parts at every sample.
+It is important to note that this option only sets the desired sample format, and
+the program may find it necessary to store the data in an alternate form. For
+instance, if the user specifies MB_SEGY_SAMPLEFORMAT_TRACE or
+MB_SEGY_SAMPLEFORMAT_ANALYTIC but the swath file only contains envelope data,
+the data will be written in the envelope form. The default value of
+MB_SEGY_SAMPLEFORMAT_NONE allows the program to choose the most appropriate
+sample format.
+<DT><B>-U</B>
+
+<DD>
+<I>rangethreshold</I>
+<BR>
+
+If the <B>-R</B> option is specified, <B>mbextractsegy</B> breaks up the
+output into files corresponding to survey lines specified in a route file.
+This option sets the threshold distance in meters used to determine when
+a waypoint along the route has been reached; the program considers the
+next waypoint reached when the range to the waypoint becomes smaller
+than <I>rangethreshold</I> and then ceases to decrease.
+Default: <I>rangethreshold</I> = 25 m.
+<DT><B>-Z</B>
+
+<DD>
+<I>plotmax</I>
+<BR>
+
+Specifies the trace value corresponding to the maximum grayscale (black)
+in the section plots. Default: <I>plotmax</I> = 50.
+<DT><B>-V</B>
+
+<DD>
+This option increases the verbosity of <B>mbextractsegy</B>, causing it
+to print out messages regarding its progress to stdout.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that one has collected a set of Reson 7k datafiles incorporating
+multibeam sonar data, sidescan data, and subbottom profiler data, and
+that the filenames are:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20040722_152111.s7k<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20040722_154429.s7k<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20040722_160809.s7k<BR>
+<BR>
+
+<P>
+In order to extract the subbottom data into segy files, one can use
+<B>mbextractsegy</B> on each file in turn, for example:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbextractsegy&nbsp;-I&nbsp;20040722_152111.s7k<BR>
+<BR>
+
+which yields the following output:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2527&nbsp;records&nbsp;output&nbsp;to&nbsp;segy&nbsp;file&nbsp;20040722_154429.s7k.segy<BR>
+<BR>
+
+In this command the 7k file format id of 88 is inferred from the
+&quot;.7k&quot; filename suffix.
+<P>
+One may also input a datalist file referencing all of the 7k files. The
+contents of a datalist file (typically named datalist.mb-1) would look like:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20040722_152111.s7k&nbsp;88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20040722_154429.s7k&nbsp;88<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20040722_160809.s7k&nbsp;88<BR>
+<BR>
+
+where the second column is the data format id (see the <B>mbsystem</B> man page
+for a discussion of datalist files). To operate on all the files in
+a single command, use:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbextractsegy&nbsp;-I&nbsp;datalist.mb-1<BR>
+<BR>&nbsp;which&nbsp;yields&nbsp;the&nbsp;following&nbsp;output:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2527&nbsp;records&nbsp;output&nbsp;to&nbsp;segy&nbsp;file&nbsp;20040722_154429.s7k.segy<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2568&nbsp;records&nbsp;output&nbsp;to&nbsp;segy&nbsp;file&nbsp;20040722_160809.s7k.segy<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2569&nbsp;records&nbsp;output&nbsp;to&nbsp;segy&nbsp;file&nbsp;20040722_163148.s7k.segy<BR>
+<BR>
+
+In this command the datalist format id of -1 is inferred from the
+&quot;.mb-1&quot; filename suffix.
+<P>
+Use of the <B>-V</B> option causes <B>mbextractsegy</B> to output information
+about every tenth record written to a segy file. So:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbextractsegy&nbsp;-I&nbsp;20040722_152111.s7k&nbsp;-V<BR>
+<BR>
+
+which yields the following output:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2527&nbsp;records&nbsp;output&nbsp;to&nbsp;segy&nbsp;file&nbsp;20040722_154429.s7k.segy<BR>
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Outputting&nbsp;subbottom&nbsp;data&nbsp;to&nbsp;segy&nbsp;file&nbsp;20040722_152111.s7k.segy<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>file:20040722_152111.s7k&nbsp;record:10&nbsp;shot:65&nbsp;&nbsp;2004/204&nbsp;15:20:42.083&nbsp;samples:8330&nbsp;interval:64&nbsp;usec&nbsp;&nbsp;minmax:&nbsp;0.000000&nbsp;17487.244141<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>file:20040722_152111.s7k&nbsp;record:20&nbsp;shot:75&nbsp;&nbsp;2004/204&nbsp;15:20:47.698&nbsp;samples:8330&nbsp;interval:64&nbsp;usec&nbsp;&nbsp;minmax:&nbsp;0.000000&nbsp;16525.875000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.........&nbsp;lines&nbsp;omitted&nbsp;..........<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>file:20040722_152111.s7k&nbsp;record:2510&nbsp;shot:2565&nbsp;&nbsp;2004/204&nbsp;15:44:05.893&nbsp;samples:8330&nbsp;interval:64&nbsp;usec&nbsp;&nbsp;minmax:&nbsp;0.000000&nbsp;17616.189453<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>file:20040722_152111.s7k&nbsp;record:2520&nbsp;shot:2575&nbsp;&nbsp;2004/204&nbsp;15:44:11.507&nbsp;samples:8330&nbsp;interval:64&nbsp;usec&nbsp;&nbsp;minmax:&nbsp;0.000000&nbsp;31888.093750<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2527&nbsp;records&nbsp;output&nbsp;to&nbsp;segy&nbsp;file&nbsp;20040722_152111.s7k.segy<BR>
+<BR>
+
+<B>MBextractsegy</B> also generates a &quot;sinf&quot; file containing statistics about the data in the segy
+file 20040722_152111.s7k.segy. The contents of the sinf file 20040722_152111.s7k.segy.sinf are:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SEGY&nbsp;Data&nbsp;File:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20040722_152111.s7k.segy<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>File&nbsp;Header&nbsp;Info:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Channels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Auxiliary&nbsp;Channels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Sample&nbsp;Interval&nbsp;(usec):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;64<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Number&nbsp;of&nbsp;Samples&nbsp;in&nbsp;Trace:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8330<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Trace&nbsp;length&nbsp;(sec):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.533120<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Data&nbsp;Format:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IEEE&nbsp;32&nbsp;bit&nbsp;integer<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;CDP&nbsp;Fold:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;Totals:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Number&nbsp;of&nbsp;Traces:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2527<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Min&nbsp;Max&nbsp;Delta:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Shot&nbsp;number:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2582&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2527<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Shot&nbsp;trace:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;RP&nbsp;number:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2582&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2527<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;RP&nbsp;trace:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Delay&nbsp;(sec):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;0.000000&nbsp;0.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Range&nbsp;(m):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;0.000000&nbsp;0.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Receiver&nbsp;Elevation&nbsp;(m):&nbsp;&nbsp;&nbsp;-224.030000&nbsp;-2.860000&nbsp;-221.170000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Source&nbsp;Elevation&nbsp;(m):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-224.030000&nbsp;-2.860000&nbsp;-221.170000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Source&nbsp;Depth&nbsp;(m):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.860000&nbsp;224.030000&nbsp;-221.170000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Receiver&nbsp;Water&nbsp;Depth&nbsp;(m):&nbsp;51.510000&nbsp;487.670000&nbsp;-436.160000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Source&nbsp;Water&nbsp;Depth&nbsp;(m):&nbsp;&nbsp;&nbsp;51.510000&nbsp;487.670000&nbsp;-436.160000<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Navigation&nbsp;Totals:<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Start&nbsp;of&nbsp;Data:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Time:&nbsp;&nbsp;07&nbsp;22&nbsp;2004&nbsp;15:20:37.029000&nbsp;&nbsp;JD204<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Lon:&nbsp;-121.8573&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lat:&nbsp;&nbsp;&nbsp;36.7755<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;End&nbsp;of&nbsp;Data:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Time:&nbsp;&nbsp;07&nbsp;22&nbsp;2004&nbsp;15:44:15.438000&nbsp;&nbsp;JD204<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Lon:&nbsp;-121.8572&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lat:&nbsp;&nbsp;&nbsp;36.7952<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Limits:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Minimum&nbsp;Longitude:&nbsp;&nbsp;&nbsp;&nbsp;-121.8574&nbsp;&nbsp;&nbsp;Maximum&nbsp;Longitude:&nbsp;&nbsp;&nbsp;&nbsp;-121.8572<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Minimum&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.7755&nbsp;&nbsp;&nbsp;Maximum&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.7952<BR>
+<P>
+<P>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbsegyinfo.html">mbsegyinfo</A></B>(1), <B><A HREF="mbsegylist.html">mbsegylist</A></B>(1), <B><A HREF="mbsegygrid.html">mbsegygrid</A></B>(1),
+<B>SIOSEIS</B>(<A HREF="http://sioseis.ucsd.edu/">http://sioseis.ucsd.edu/</A> )
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Doesn't support all of the data formats containing subbottom or center beam
+reflection data..
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

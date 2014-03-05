@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavedit.h	6/24/95
  *    $Id$
  *
- *    Copyright (c) 1995-2012 by
+ *    Copyright (c) 1995-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -86,66 +86,66 @@
 #endif
 
 #ifdef MBNAVEDIT_DECLARE_GLOBALS
-#define EXTERNAL
+#define MBNAVEDIT_EXTERNAL
 #else
-#define EXTERNAL extern
+#define MBNAVEDIT_EXTERNAL extern
 #endif
 
 /* mbnavedit global control parameters */
-EXTERNAL int	output_mode;
-EXTERNAL int	run_mbprocess;
-EXTERNAL int	gui_mode;
-EXTERNAL int	data_show_max;
-EXTERNAL int	data_show_size;
-EXTERNAL int	data_step_max;
-EXTERNAL int	data_step_size;
-EXTERNAL int	mode_pick;
-EXTERNAL int	mode_set_interval;
-EXTERNAL int	plot_tint;
-EXTERNAL int	plot_tint_org;
-EXTERNAL int	plot_lon;
-EXTERNAL int	plot_lon_org;
-EXTERNAL int	plot_lon_dr;
-EXTERNAL int	plot_lat;
-EXTERNAL int	plot_lat_org;
-EXTERNAL int	plot_lat_dr;
-EXTERNAL int	plot_speed;
-EXTERNAL int	plot_speed_org;
-EXTERNAL int	plot_smg;
-EXTERNAL int	plot_heading;
-EXTERNAL int	plot_heading_org;
-EXTERNAL int	plot_cmg;
-EXTERNAL int	plot_draft;
-EXTERNAL int	plot_draft_org;
-EXTERNAL int	plot_draft_dr;
-EXTERNAL int	plot_roll;
-EXTERNAL int	plot_pitch;
-EXTERNAL int	plot_heave;
-EXTERNAL int	mean_time_window;
-EXTERNAL int	drift_lon;
-EXTERNAL int	drift_lat;
-EXTERNAL int	timestamp_problem;
-EXTERNAL int	use_ping_data;
-EXTERNAL int	strip_comments;
-EXTERNAL int	format;
-EXTERNAL char	ifile[MB_PATH_MAXLINE];
-EXTERNAL char	nfile[MB_PATH_MAXLINE];
-EXTERNAL int	nfile_defined;
-EXTERNAL int	model_mode;
-EXTERNAL double	weight_speed;
-EXTERNAL double	weight_acceleration;
-EXTERNAL int	scrollcount;
-EXTERNAL double	offset_lon;
-EXTERNAL double	offset_lat;
-EXTERNAL double	offset_lon_applied;
-EXTERNAL double	offset_lat_applied;
+MBNAVEDIT_EXTERNAL int	output_mode;
+MBNAVEDIT_EXTERNAL int	run_mbprocess;
+MBNAVEDIT_EXTERNAL int	gui_mode;
+MBNAVEDIT_EXTERNAL int	data_show_max;
+MBNAVEDIT_EXTERNAL int	data_show_size;
+MBNAVEDIT_EXTERNAL int	data_step_max;
+MBNAVEDIT_EXTERNAL int	data_step_size;
+MBNAVEDIT_EXTERNAL int	mode_pick;
+MBNAVEDIT_EXTERNAL int	mode_set_interval;
+MBNAVEDIT_EXTERNAL int	plot_tint;
+MBNAVEDIT_EXTERNAL int	plot_tint_org;
+MBNAVEDIT_EXTERNAL int	plot_lon;
+MBNAVEDIT_EXTERNAL int	plot_lon_org;
+MBNAVEDIT_EXTERNAL int	plot_lon_dr;
+MBNAVEDIT_EXTERNAL int	plot_lat;
+MBNAVEDIT_EXTERNAL int	plot_lat_org;
+MBNAVEDIT_EXTERNAL int	plot_lat_dr;
+MBNAVEDIT_EXTERNAL int	plot_speed;
+MBNAVEDIT_EXTERNAL int	plot_speed_org;
+MBNAVEDIT_EXTERNAL int	plot_smg;
+MBNAVEDIT_EXTERNAL int	plot_heading;
+MBNAVEDIT_EXTERNAL int	plot_heading_org;
+MBNAVEDIT_EXTERNAL int	plot_cmg;
+MBNAVEDIT_EXTERNAL int	plot_draft;
+MBNAVEDIT_EXTERNAL int	plot_draft_org;
+MBNAVEDIT_EXTERNAL int	plot_draft_dr;
+MBNAVEDIT_EXTERNAL int	plot_roll;
+MBNAVEDIT_EXTERNAL int	plot_pitch;
+MBNAVEDIT_EXTERNAL int	plot_heave;
+MBNAVEDIT_EXTERNAL int	mean_time_window;
+MBNAVEDIT_EXTERNAL int	drift_lon;
+MBNAVEDIT_EXTERNAL int	drift_lat;
+MBNAVEDIT_EXTERNAL int	timestamp_problem;
+MBNAVEDIT_EXTERNAL int	use_ping_data;
+MBNAVEDIT_EXTERNAL int	strip_comments;
+MBNAVEDIT_EXTERNAL int	format;
+MBNAVEDIT_EXTERNAL char	ifile[MB_PATH_MAXLINE];
+MBNAVEDIT_EXTERNAL char	nfile[MB_PATH_MAXLINE];
+MBNAVEDIT_EXTERNAL int	nfile_defined;
+MBNAVEDIT_EXTERNAL int	model_mode;
+MBNAVEDIT_EXTERNAL double	weight_speed;
+MBNAVEDIT_EXTERNAL double	weight_acceleration;
+MBNAVEDIT_EXTERNAL int	scrollcount;
+MBNAVEDIT_EXTERNAL double	offset_lon;
+MBNAVEDIT_EXTERNAL double	offset_lat;
+MBNAVEDIT_EXTERNAL double	offset_lon_applied;
+MBNAVEDIT_EXTERNAL double	offset_lat_applied;
 
 /* mbnavedit plot size parameters */
-EXTERNAL int	plot_width;
-EXTERNAL int	plot_height;
-EXTERNAL int	number_plots;
-EXTERNAL int	window_width;
-EXTERNAL int	window_height;
+MBNAVEDIT_EXTERNAL int	plot_width;
+MBNAVEDIT_EXTERNAL int	plot_height;
+MBNAVEDIT_EXTERNAL int	number_plots;
+MBNAVEDIT_EXTERNAL int	window_width;
+MBNAVEDIT_EXTERNAL int	window_height;
 
 /* Mode value defines */
 #define	PICK_MODE_PICK		0
@@ -324,4 +324,3 @@ int mbnavedit_plot_draft_value(int iplot, int iping);
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
 
 /*--------------------------------------------------------------------*/
-

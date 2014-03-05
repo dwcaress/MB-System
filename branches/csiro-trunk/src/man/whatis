@@ -1,0 +1,82 @@
+MBeditviz(1)             - 3D visualization-based editing of swath bathymetry soundings
+MBgrdviz(1)              - Simple interactive 2D/3D visualization of GMT grids
+geod(1)                  - direct geodesic computations invgeod - inverse geodesic computations
+hsdump(1)                - hsdump lists the information contained in Hydrosweep DS data files
+mb7k2jstar(1)            - extracts subbottom profiler and/or sidescan sonar data from Reson 7k format data files into Edgetech Jstar format data files
+mb7k2ss(1)               - extracts sidescan sonar data from Reson 7k format data, bins and lays the sidescan onto the seafloor, and outputs files in the MBF_MBLDEOIH formst (MBIO format id 71)
+mb7kpreprocess(1)        - performs preprocessing of Reson 7k multibeam data in the 7k format (MBIO format 88)
+mbabsorption(1)          - calculates the absorption of sound in sea water in dB/km as a function of frequency, temperature, salinity, sound speed, and depth
+mbareaclean(1)           - Tool to automatically flag bad beams in swath sonar bathymetry data within a specified area
+mbauvloglist(1)          - Lists table data from an MBARI AUV mission log file
+mbauvnavusbl(1)          - Adjusts inertial navigation of a submerged platform/vehicle to be consistent with more accurate but less precise surface tracking (USBL) navigation
+mbbackangle(1)           - Generates tables of the average amplitude or sidescan values in swath sonar data as a function of the grazing angle with the seafloor
+mbclean(1)               - Tool to automatically flag bad beams in swath sonar bathymetry data
+mbcontour(1)             - GMT compatible utility for color fill or color shaded relief swath plots of swath sonar data using Postscript
+mbcopy(1)                - Copy swath sonar bathymetry data files
+mbctdlist(1)             - List CTD data in swath sonar data files
+mbdatalist(1)            - parses recursive datalist files and outputs the complete list of data files, formats, and file weights
+mbdefaults(1)            - Set or list default mbio parameters for reading and writing swath sonar data
+mbedit(1)                - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data
+mbextractsegy(1)         - extracts subbottom profiler, center beam reflection, or seismic reflection data from swath data supported by MB-System and rewrites it as a SEGY file
+mbfilter(1)              - Apply some simple filter functions to sidescan or beam amplitude data from swath sonar data files
+mbformat(1)              - List information about swath sonar data formats supported by the MBIO library
+mbgetesf(1)              - Extract swath bathymetry data flags into an edit save file
+mbgrdtiff(1)             - generates a geographically located TIFF image from a GMT grid file
+mbgrid(1)                - Grid bathymetry, amplitude, or sidescan data from swath sonar data files
+mbhistogram(1)           - Generate a histogram of bathymetry, amplitude, or sidescan values from swath sonar data files
+mbhysweeppreprocess(1)   - performs preprocessing of multibeam data in the Hysweep HSX format (MBIO format 201)
+mbinfo(1)                - Output some basic statistics of swath sonar data files
+mbio(3)                  - Format independent input/output library for swath mapping sonar data
+mbkongsbergpreprocess(1) - performs preprocessing of data from third generation Kongsberg multibeam sonars (e.g. EM122, EM302, EM710)
+mblevitus(1)             - Create a water velocity profile which is representative of the mean annual water column for a specified 1 degree by 1 degree region
+mblist(1)                - List data in swath data files
+mbm_arc2grd(1)           - Macro to convert an ArcView ASCII grid to a GMT  grid file in the GMT NetCDF grid format
+mbm_bpr(1)               - MB-System macro to process data from a Seabird SBE53 pressure sensor into a tidal model for use by mbprocess
+mbm_copy(1)              - Apply mbcopy to all files referenced through a datalist, using the MB-System file suffix convention to name the output files
+mbm_dslnavfix(1)         - Translate WHOI DSL AMS-120 navigation from UTM eastings and northings to longitude and latitude
+mbm_fmtvel(1)            - Extract sound velocity info from Hydrosweep data files and create output in tabular format
+mbm_grd2arc(1)           - Macro to convert a GMT grid file in the GMT NetCDF grid format to an ArcView ASCII grid
+mbm_grd2geovrml(1)       - Create and execute commands which generate a TerraVision tileset and GeoVRML terrain set that can be combined with other geospatial data for viewing in a web browser
+mbm_grd3dplot(1)         - Create an executable shellscript which will generate a GMT 3D perspective plot of gridded data in a GMT grd file
+mbm_grdcut(1)            - Macro to extract a specified subarea of a GMT GRD grid file as another GRD file
+mbm_grdinfo(1)           - Macro to get information regarding a GMT grd file when the region of interest is a subset of the area covered in the input file
+mbm_grdplot(1)           - Create an executable shellscript which will generate a GMT map of gridded data in a GMT grd file
+mbm_grdtiff(1)           - Create an executable shellscript which will generate a TIFF image of gridded data in a GMT grd file
+mbm_grid(1)              - Create an executable shellscript which will generate a grid (bathymetry or topography) or mosaic (amplitude or sidescan) of swath sonar swath data
+mbm_histplot(1)          - Create an executable shellscript which will generate a GMT histogram plot of a dataset
+mbm_makedatalist(1)      - Macro to generate a datalist of the swath files in a specified directory
+mbm_multicopy(1)         - Apply mbcopy to all files referenced through a datalist using parallel processes. As with mbm_copy, the MB-System file suffix convention is used to name the output files
+mbm_multidatalist(1)     - Macro to use mbdatalist with the -O option to generate standard  ancilliary files, using parallel processes
+mbm_multiprocess(1)      - Macro to run mbprocess on the swath files referenced by a datalist using parallel processes
+mbm_plot(1)              - Create an executable shellscript which will generate a GMT plot of swath sonar swath data
+mbm_route2mission(1)     - Macro to convert an mbgrdviz route file into an MBARI AUV mission script
+mbm_stat(1)              - Extract beam statistics from output generated by mbinfo
+mbm_utm(1)               - Macro to perform forward and inverse UTM projections of ASCII data triples
+mbm_vrefcheck(1)         - Macro to generate plot of crosstrack seafloor slope from a swath sonar file.  The noise in this time series largely reflects noise in the vertical reference used by the sonar
+mbm_xbt(1)               - Calculate sound speed from XBT data
+mbm_xyplot(1)            - Create an executable shellscript which will generate a GMT plot of xy data
+mbmask(1), mbdumpesf(1)  - Output text version of beam edits from a binary edit save file
+mbmosaic(1)              - Mosaic amplitude or sidescan data from swath mapping sonar data files
+mbnavadjust(1)           - Package that solves for optimal navigation by matching bathymetry of overlapping swaths
+mbnavedit(1)             - Interactive navigation editor for swath sonar data
+mbnavlist(1)             - List navigation data in swath sonar data files
+mbneptune2esf(1)         - Tool to import beam flags from Simrad's Neptune system
+mbotps(1)                - Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution
+mbprocess(1)             - this program performs a variety of swath data processing functions in a single step (producing a single output swath data file), including merging navigation, recalculating bathymetry from travel time and angle data by raytracing through a layered water sound velocity model, applying changes to ship draft, roll bias and pitch bias, applying tides, and applying bathymetry edits from edit save files
+mbps(1)                  - Generates a PostScript perspective plot of a piece of swath sonar data
+mbrollbias(1)            - Assess roll bias of swath sonar sonar systems
+mbrolltimelag(1)         - Calculates cross correlation between the apparent bottom slope in swath bathymetry data and the roll time series used by the sonar in order to assess attitude time lag problems
+mbroutetime(1)           - Program to output a list of the times when a survey passes the waypoints of a planned survey route
+mbsegygrid(1)            - Generate time vs. trace number grids of seismic data from segy files
+mbsegyinfo(1)            - Output some basic statistics of segy format seismic data files
+mbsegylist(1)            - List selected header values in segy format seismic data files
+mbsegypsd(1)             - Calculates the power spectral densisty function (PSD) of each trace in a segy file, outputting the PSD estimates as a GMT grid file with trace number along the x axis and frequency along the y axis
+mbset(1)                 - Sets values in mbprocess parameter files
+mbstripNaN(1)            - filter to remove NaN nodes
+mbsvplist(1)             - List water sound velocity profiles in swath sonar data files
+mbswath(1)               - GMT compatible utility for color fill or color shaded relief swath plots of swath sonar data using Postscript
+mbsystem(1)              - A set of utilities for manipulating and processing swath sonar bathymetry, amplitude, and sidescan data
+mbtime(1)                - Translate between calendar time values and unix time
+mbvelocitytool(1)        - Interactive water sound velocity profile editor
+pj_init(3)               - initialize cartographic projection pj_init_plus - initialize cartographic projection pj_fwd - forward cartographic projection pj_inv - inverse cartographic projection pj_transform - transform between coordinate systems pj_free - de-initialize projection
+proj(1)                  - forward cartographic projection filter invproj - inverse cartographic projection filter

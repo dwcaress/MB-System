@@ -1,29 +1,29 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id$ 
+ *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
  *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
  *      Palisades, NY 10964
- * 
+ *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBVELOCITYTOOL is an interactive water velocity profile editor 
- * used to examine multiple water velocity profiles and to create 
- * new water velocity profiles which can be used for the processing 
- * of multibeam sonar data.  In general, this tool is used to examine 
- * water velocity profiles obtained from XBTs, CTDs, or databases, 
- * and to construct new profiles consistent with these various 
- * sources of information.  
- * 
- * Author:      D. W. Caress 
- * Date:        June 6, 1993 
- * 
+ * MBVELOCITYTOOL is an interactive water velocity profile editor
+ * used to examine multiple water velocity profiles and to create
+ * new water velocity profiles which can be used for the processing
+ * of multibeam sonar data.  In general, this tool is used to examine
+ * water velocity profiles obtained from XBTs, CTDs, or databases,
+ * and to construct new profiles consistent with these various
+ * sources of information.
+ *
+ * Author:      D. W. Caress
+ * Date:        June 6, 1993
+ *
  * $Log: mbvelocity_prog.c,v $
  * Revision 5.19  2009/03/02 18:59:05  caress
  * Moving towards 5.1.2beta1.
@@ -115,81 +115,81 @@
  *
  * Revision 4.15  1996/08/26  17:34:23  caress
  * Release 4.4 revision.
- * 
- * Revision 4.14  1996/04/22 13:22:47  caress 
- * Now have DTR and MIN/MAX defines in mb_define.h 
- * 
- * Revision 4.13  1996/02/16  18:27:11  caress 
- * Changed labels from Water Velocity to Water Sound Velocity.  
- * 
- * Revision 4.12 1996/02/12  18:09:25  caress 
- * Added command line arguments to specify input files at startup time.  
- * 
- * Revision 4.11  1996/01/26  21:25:34 caress 
- * Version 4.3 distribution.  
- * 
- * Revision 4.10  1995/10/02 22:25:20  caress 
- * Added -D option.  
- * 
- * Revision 4.9  1995/09/28 18:03:58  caress 
- * Improved handling of .mbxxx file suffix convention.  
- * 
- * Revision 4.8  1995/06/06  12:57:17  caress 
- * Fixed mb_close() call.  
- * 
- * Revision 4.7  1995/05/12  17:27:40  caress 
- * Made exit status values consistent with Unix convention.  
- * 0: ok nonzero: error 
- * 
- * Revision 4.6  1995/03/17  15:23:00  caress 
- * Changed size of new editable profiles to 
- * 30 nodes.  
- * 
- * Revision 4.5  1995/03/06  19:41:22  caress 
- * Changed include strings.h to string.h for POSIX compliance.  
- * 
- * Revision 4.4  1995/02/14 18:26:46  caress 
- * Moved the widgets around, made the format defaults work, and made 
- * the program recognize the MB-System file suffix convention.  
- * 
- * Revision 4.3  1994/11/24  01:54:08  caress 
- * Some fixes related to gradient raytracing version.  
- * 
- * Revision 4.2 1994/11/18  18:58:19  caress 
- * First gradient raytracing version.  
- * 
- * Revision 4.1  1994/11/10  01:16:07  caress 
- * Set program to do raytracing for every ping rather than once at beginning.  
- * 
- * Revision 4.0  1994/10/21  12:43:44  caress 
- * Release V4.0 
- * 
- * Revision 4.2 1994/04/12  01:13:24  caress 
- * First cut at translation from hsvelocitytool. The new program 
- * mbvelocitytool will deal with all supported multibeam data 
- * including travel time observations.  
- * 
- * Revision 4.1  1994/03/12  01:50:30  caress 
- * Added declarations of ctime and/or getenv for compatability 
- * with SGI compilers.  
- * 
- * Revision 4.0  1994/03/05  23:49:05  caress 
- * First cut at version 4.0 
- * 
- * Revision 4.1  1994/03/03  03:53:26  caress 
- * Fixed copyright message.  
- * 
- * Revision 4.0  1994/02/27  00:17:23  caress 
- * First cut at new version.  
- * 
- * Revision 1.2  1993/11/05  16:21:57  caress 
- * The graphical representation of the editable velocity profile 
- * now shows the layered model actually used for the raytracing.  
- * 
- * Revision 1.1 1993/08/16  23:28:30  caress 
- * Initial revision 
- * 
- * 
+ *
+ * Revision 4.14  1996/04/22 13:22:47  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
+ * Revision 4.13  1996/02/16  18:27:11  caress
+ * Changed labels from Water Velocity to Water Sound Velocity.
+ *
+ * Revision 4.12 1996/02/12  18:09:25  caress
+ * Added command line arguments to specify input files at startup time.
+ *
+ * Revision 4.11  1996/01/26  21:25:34 caress
+ * Version 4.3 distribution.
+ *
+ * Revision 4.10  1995/10/02 22:25:20  caress
+ * Added -D option.
+ *
+ * Revision 4.9  1995/09/28 18:03:58  caress
+ * Improved handling of .mbxxx file suffix convention.
+ *
+ * Revision 4.8  1995/06/06  12:57:17  caress
+ * Fixed mb_close() call.
+ *
+ * Revision 4.7  1995/05/12  17:27:40  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok nonzero: error
+ *
+ * Revision 4.6  1995/03/17  15:23:00  caress
+ * Changed size of new editable profiles to
+ * 30 nodes.
+ *
+ * Revision 4.5  1995/03/06  19:41:22  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
+ * Revision 4.4  1995/02/14 18:26:46  caress
+ * Moved the widgets around, made the format defaults work, and made
+ * the program recognize the MB-System file suffix convention.
+ *
+ * Revision 4.3  1994/11/24  01:54:08  caress
+ * Some fixes related to gradient raytracing version.
+ *
+ * Revision 4.2 1994/11/18  18:58:19  caress
+ * First gradient raytracing version.
+ *
+ * Revision 4.1  1994/11/10  01:16:07  caress
+ * Set program to do raytracing for every ping rather than once at beginning.
+ *
+ * Revision 4.0  1994/10/21  12:43:44  caress
+ * Release V4.0
+ *
+ * Revision 4.2 1994/04/12  01:13:24  caress
+ * First cut at translation from hsvelocitytool. The new program
+ * mbvelocitytool will deal with all supported multibeam data
+ * including travel time observations.
+ *
+ * Revision 4.1  1994/03/12  01:50:30  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
+ * Revision 4.0  1994/03/05  23:49:05  caress
+ * First cut at version 4.0
+ *
+ * Revision 4.1  1994/03/03  03:53:26  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/27  00:17:23  caress
+ * First cut at new version.
+ *
+ * Revision 1.2  1993/11/05  16:21:57  caress
+ * The graphical representation of the editable velocity profile
+ * now shows the layered model actually used for the raytracing.
+ *
+ * Revision 1.1 1993/08/16  23:28:30  caress
+ * Initial revision
+ *
+ *
  */
 
 /*--------------------------------------------------------------------*/
@@ -205,14 +205,14 @@
 #include <X11/Intrinsic.h>
 
 /* MBIO include files */
-#include "../../include/mb_format.h"
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_swap.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_aux.h"
-#include "../../include/mb_xgraphics.h"
+#include "mb_format.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_io.h"
+#include "mb_swap.h"
+#include "mb_process.h"
+#include "mb_aux.h"
+#include "mb_xgraphics.h"
 #include "mbvelocity.h"
 
 /* id variables */
@@ -256,9 +256,9 @@ double	xpscale, ypscale;
 int	active = -1;
 
 /* default edit profile */
-int	depthedit[NUM_EDIT_START] 
+int	depthedit[NUM_EDIT_START]
 		    = { 0, 300, 1000,  3000, 7000, 12000 };
-int	veledit[NUM_EDIT_START] 
+int	veledit[NUM_EDIT_START]
 		    = { 1500, 1500, 1500, 1500, 1500, 1500 };
 
 /* MBIO control parameters */
@@ -305,9 +305,9 @@ double	*ssalongtrack = NULL;
 char	comment[MB_COMMENT_MAXLINE];
 double	*p = NULL;
 int	nraypathmax;
-int	*nraypath;
-double	**raypathx;
-double	**raypathy;
+int	*nraypath = NULL;
+double	**raypathx = NULL;
+double	**raypathy = NULL;
 double	*depth = NULL;
 double	*acrosstrack = NULL;
 double	rayxmax;
@@ -320,18 +320,18 @@ double	bath_min = 0.0;
 double	bath_max = 0.0;
 
 /* residual variables */
-double	*angle;
-double	*residual;
-double	*res_sd;
-int	*nresidual;
+double	*angle = NULL;
+double	*residual = NULL;
+double	*res_sd = NULL;
+int	*nresidual = NULL;
 
 /* beam range variables */
 int	beam_first = 0;
 int	beam_last = 100;
 
 /* color control values */
-#define	WHITE	0	
-#define	BLACK	1	
+#define	WHITE	0
+#define	BLACK	1
 #define RED	2
 #define GREEN	3
 #define BLUE	4
@@ -399,7 +399,7 @@ int mbvt_init(int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "B:b:E:e:F:f:I:i:S:s:W:w:VvHh")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -596,7 +596,7 @@ int mbvt_set_graphics(void *xgid, int *brdr, int ncol, unsigned int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %lu\n",(size_t)xgid);
+		fprintf(stderr,"dbg2       xgid:         %p\n",xgid);
 		for (i=0;i<4;i++)
 			fprintf(stderr,"dbg2       borders[%d]:   %d\n",
 				i,brdr[i]);
@@ -641,7 +641,7 @@ int mbvt_set_graphics(void *xgid, int *brdr, int ncol, unsigned int *pixels)
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
 int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
-	double *s_velrange, double *s_velcenter, double *s_resrange, 
+	double *s_velrange, double *s_velcenter, double *s_resrange,
 	int *s_anglemode, int *s_format)
 {
 	/* local variables */
@@ -698,8 +698,8 @@ int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_set_values(int s_edit, int s_ndisplay, 
-		double s_maxdepth, double s_velrange, double s_velcenter, 
+int mbvt_set_values(int s_edit, int s_ndisplay,
+		double s_maxdepth, double s_velrange, double s_velcenter,
 		double s_resrange, int s_anglemode)
 {
 	/* local variables */
@@ -790,12 +790,12 @@ int mbvt_open_edit_profile(char *file)
 
 	/* open the file if possible and count the velocity points */
 	profile->n = 0;
-	if ((fp = fopen(file, "r")) == NULL) 
+	if ((fp = fopen(file, "r")) == NULL)
 		{
 		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",file);
-		do_error_dialog("Unable to open input SVP file.", 
-				"File may not exist or you may not have", 
+		do_error_dialog("Unable to open input SVP file.",
+				"File may not exist or you may not have",
 				"read permission in this directory!");
 		return(status);
 		}
@@ -826,7 +826,7 @@ int mbvt_open_edit_profile(char *file)
 	/* open the file if possible and read the velocity points */
 	profile->n = 0;
 	strcpy(profile->name,file);
-	if ((fp = fopen(file, "r")) == NULL) 
+	if ((fp = fopen(file, "r")) == NULL)
 		{
 		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",file);
@@ -950,9 +950,9 @@ int mbvt_new_edit_profile()
 			profile->depth[i] = i * dz;
 			profile->velocity[i] = veledit[i];
 			}
-		profile->depth[profile->n-1] 
+		profile->depth[profile->n-1]
 			= depthedit[profile->n-1];
-		profile->velocity[profile->n-1] 
+		profile->velocity[profile->n-1]
 			= veledit[profile->n-1];
 		}
 	else
@@ -1017,19 +1017,19 @@ int mbvt_save_edit_profile(char *file)
 	profile = &profile_edit;
 
 	/* open the file if possible */
-	if ((fp = fopen(file, "w")) == NULL) 
+	if ((fp = fopen(file, "w")) == NULL)
 		{
 		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to Open Output Velocity Profile File <%s> for writing\n",file);
-		do_error_dialog("Unable to open output file.", 
-				"You may not have write", 
+		do_error_dialog("Unable to open output file.",
+				"You may not have write",
 				"permission in this directory!");
 		return(status);
 		}
 
 	/* write the svp */
 	fprintf(fp, "## Water Sound Velocity Profile (SVP)\n");
-	fprintf(fp, "## Output by Program %s\n",program_name); 
+	fprintf(fp, "## Output by Program %s\n",program_name);
 	fprintf(fp, "## Program Version %s\n",rcs_id);
 	fprintf(fp, "## MB-System Version %s\n",MB_VERSION);
 	strncpy(date,"\0",25);
@@ -1044,7 +1044,7 @@ int mbvt_save_edit_profile(char *file)
 	gethostname(host,MB_PATH_MAXLINE);
 	fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n",
 		user,host,date);
-	fprintf(fp, "## Number of SVP Points: %d\n",profile->n); 
+	fprintf(fp, "## Number of SVP Points: %d\n",profile->n);
 	for (i=0;i<profile->n;i++)
 		fprintf(fp,"%f %f\n",profile->depth[i],
 			profile->velocity[i]);
@@ -1105,26 +1105,26 @@ int mbvt_save_swath_profile(char *file)
 
 	/* get profile pointer */
 	profile = &profile_edit;
-	
+
 	/* do this if edit profile exists and swath data read */
 	if (profile->n > 2 && nbuffer > 0)
 	    {
 
 	    /* open the file if possible */
 	    sprintf(file, "%s.svp", swathfile);
-	    if ((fp = fopen(file, "w")) == NULL) 
+	    if ((fp = fopen(file, "w")) == NULL)
 		{
 		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to Open Output Velocity Profile File <%s> for writing\n",file);
-		do_error_dialog("Unable to open output file.", 
-				"You may not have write", 
+		do_error_dialog("Unable to open output file.",
+				"You may not have write",
 				"permission in this directory!");
 		return(status);
 		}
 
 	    /* write the svp */
 	    fprintf(fp, "## Water Sound Velocity Profile (SVP)\n");
-	    fprintf(fp, "## Output by Program %s\n", program_name); 
+	    fprintf(fp, "## Output by Program %s\n", program_name);
 	    fprintf(fp, "## Program Version %s\n", rcs_id);
 	    fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
 	    strncpy(date,"\0",25);
@@ -1139,22 +1139,22 @@ int mbvt_save_swath_profile(char *file)
 	    gethostname(host,MB_PATH_MAXLINE);
 	    fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n",
 		    user, host, date);
-	    fprintf(fp, "## Swath File: %s\n", swathfile); 
-	    fprintf(fp, "## Number of SVP Points: %d\n", profile->n); 
+	    fprintf(fp, "## Swath File: %s\n", swathfile);
+	    fprintf(fp, "## Number of SVP Points: %d\n", profile->n);
 	    for (i=0;i<profile->n;i++)
 		    fprintf(fp,"%f %f\n", profile->depth[i],
 			    profile->velocity[i]);
-    
+
 	    /* close the file */
 	    fclose(fp);
-	    
+
 	    /* set par file for use with mbprocess */
-	    status = mb_pr_get_svp(verbose, swathfile, 
-			&oldmode, oldfile, 
+	    status = mb_pr_get_svp(verbose, swathfile,
+			&oldmode, oldfile,
 			&oldanglemode, &corrected, &error);
-	    status = mb_pr_update_svp(verbose, swathfile, 
+	    status = mb_pr_update_svp(verbose, swathfile,
 			MB_YES, file, anglemode, corrected, &error);
-    
+
 	    /* check success */
 	    if (status == MB_SUCCESS)
 		edit = MB_YES;
@@ -1211,19 +1211,19 @@ int mbvt_save_residuals(char *file)
 
 	    /* open the file if possible */
 	    sprintf(file, "%s.sbo", swathfile);
-	    if ((fp = fopen(file, "w")) == NULL) 
+	    if ((fp = fopen(file, "w")) == NULL)
 		{
 		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to Open Output Static Beam Offset File <%s> for writing\n",file);
-		do_error_dialog("Unable to open output file.", 
-				"You may not have write", 
+		do_error_dialog("Unable to open output file.",
+				"You may not have write",
 				"permission in this directory!");
 		return(status);
 		}
 
 	    /* write the sbo file */
 	    fprintf(fp, "## Static Beam Offset (SBO)\n");
-	    fprintf(fp, "## Output by Program %s\n", program_name); 
+	    fprintf(fp, "## Output by Program %s\n", program_name);
 	    fprintf(fp, "## Program Version %s\n", rcs_id);
 	    fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
 	    strncpy(date,"\0",25);
@@ -1238,21 +1238,21 @@ int mbvt_save_residuals(char *file)
 	    gethostname(host,MB_PATH_MAXLINE);
 	    fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n",
 		    user, host, date);
-	    fprintf(fp, "## Swath File: %s\n", swathfile); 
-	    fprintf(fp, "## Number of Static Beam Offset Points: %d\n", nbeams); 
+	    fprintf(fp, "## Swath File: %s\n", swathfile);
+	    fprintf(fp, "## Number of Static Beam Offset Points: %d\n", nbeams);
 	    for (i=0;i<nbeams;i++)
 		    fprintf(fp," %4d  %9.3f  %9.3f\n",
 				i, residual[i], res_sd[i]);
-    
+
 	    /* close the file */
 	    fclose(fp);
-	    
+
 	    /* set par file for use with mbprocess */
-	    status = mb_pr_get_static(verbose, swathfile, 
+	    status = mb_pr_get_static(verbose, swathfile,
 			&oldmode, oldfile, &error);
-	    status = mb_pr_update_static(verbose, swathfile, 
+	    status = mb_pr_update_static(verbose, swathfile,
 			MB_YES, file, &error);
-    
+
 	    /* check success */
 	    if (status == MB_SUCCESS)
 		edit = MB_YES;
@@ -1302,8 +1302,8 @@ int mbvt_open_display_profile(char *file)
 		{
 		status = MB_FAILURE;
 		fprintf(stderr,"\nNo room for another display velocity profile\n");
-		do_error_dialog("Unable to open input SVP file.", 
-				"There is no room for another", 
+		do_error_dialog("Unable to open input SVP file.",
+				"There is no room for another",
 				"display SVP!");
 		return(status);
 		}
@@ -1313,12 +1313,12 @@ int mbvt_open_display_profile(char *file)
 
 	/* open the file if possible and count the velocity points */
 	profile->n = 0;
-	if ((fp = fopen(file, "r")) == NULL) 
+	if ((fp = fopen(file, "r")) == NULL)
 		{
 		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",file);
-		do_error_dialog("Unable to open input SVP file.", 
-				"File may not exist or you may not have", 
+		do_error_dialog("Unable to open input SVP file.",
+				"File may not exist or you may not have",
 				"read permission in this directory!");
 		return(status);
 		}
@@ -1349,7 +1349,7 @@ int mbvt_open_display_profile(char *file)
 	/* open the file if possible and read the velocity points */
 	profile->n = 0;
 	strcpy(profile->name,file);
-	if ((fp = fopen(file, "r")) == NULL) 
+	if ((fp = fopen(file, "r")) == NULL)
 		{
 		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",file);
@@ -1420,7 +1420,7 @@ int mbvt_get_display_names(int *nlist, char *list[MAX_PROFILES])
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input values:\n");
-		fprintf(stderr,"dbg2       list:        %lu\n",(size_t)list);
+		fprintf(stderr,"dbg2       list:        %p\n",list);
 		}
 
 	/* set values */
@@ -1489,9 +1489,9 @@ int mbvt_delete_display_profile(int select)
 				profile_display[i].name);
 			for (j=0;j<profile_display[i-1].n;j++)
 				{
-				profile_display[i-1].depth[j] 
+				profile_display[i-1].depth[j]
 					= profile_display[i].depth[j];
-				profile_display[i-1].velocity[j] 
+				profile_display[i-1].velocity[j]
 					= profile_display[i].velocity[j];
 				}
 			}
@@ -1576,7 +1576,7 @@ int mbvt_plot()
 		fprintf(stderr," borders[1] = %d\n", borders[1]);
 		fprintf(stderr," borders[2] = %d\n", borders[2]);
 		fprintf(stderr," borders[3] = %d\n", borders[3]);
-		fprintf(stderr," mbvt_xgid  = %lu\n", (size_t)mbvt_xgid);
+		fprintf(stderr," mbvt_xgid  = %p\n", mbvt_xgid);
 		}
 
 	/* turn clipp mask back to whole canvas */
@@ -1607,7 +1607,7 @@ int mbvt_plot()
 	yminimum = 0.0;
 	ymaximum = maxdepth;
 	deltay = 0.1*(ymaximum - yminimum);
-	yscale = (ymax - ymin)/(ymaximum - yminimum);	
+	yscale = (ymax - ymin)/(ymaximum - yminimum);
 	y_int = deltay*yscale;
 	ny_int = (ymaximum - yminimum)/deltay + 1;
 
@@ -1702,7 +1702,7 @@ int mbvt_plot()
 		yy = ymin + (profile_edit.depth[j] - yminimum)*yscale;
 		xx = MIN(xx, 32000);
 		yy = MIN(yy, 32000);
-		xg_fillrectangle(mbvt_xgid, xx-2, yy-2, 4, 4, 
+		xg_fillrectangle(mbvt_xgid, xx-2, yy-2, 4, 4,
 			pixel_values[BLACK],XG_SOLIDLINE);
 		if (j > 0)
 			{
@@ -1738,7 +1738,7 @@ int mbvt_plot()
 	yrminimum = -resrange;
 	yrmaximum = resrange;
 	deltayr = 0.1*(yrmaximum - yrminimum);
-	yrscale = (yrmax - yrmin)/(yrmaximum - yrminimum);	
+	yrscale = (yrmax - yrmin)/(yrmaximum - yrminimum);
 	yr_int = deltayr*yrscale;
 	nyr_int = (yrmaximum - yrminimum)/deltayr/2 + 1;
 
@@ -1840,9 +1840,9 @@ int mbvt_plot()
 		yy = yrmin + (residual[i] - yrminimum) * yrscale;
 		xx = MIN(xx, 32000);
 		yy = MIN(yy, 32000);
-		yyl = yrmin + (residual[i] - res_sd[i] - yrminimum) 
+		yyl = yrmin + (residual[i] - res_sd[i] - yrminimum)
 				* yrscale;
-		yyu = yrmin + (residual[i] + res_sd[i] - yrminimum) 
+		yyu = yrmin + (residual[i] + res_sd[i] - yrminimum)
 				* yrscale;
 		xg_fillrectangle(mbvt_xgid, xx-2, yy-2, 4, 4,
 			pixel_values[BLACK],XG_SOLIDLINE);
@@ -1869,16 +1869,16 @@ int mbvt_plot()
 	ypmax = ypmin + (xpmax - xpmin)/5.0;
 	xpcen = xpmin + (xpmax - xpmin)/2;
 	ypcen = ypmin + (ypmax - ypmin)/2;
-	
+
 	if (nbuffer == 0 || nraypath == NULL)
 		{
 		raydepthmin = 0.0;
 		raydepthmax = maxdepth;
 		}
-	
+
 	ypminimum = raydepthmin - 0.02 * (raydepthmax - raydepthmin);
 	ypmaximum = raydepthmax + 0.02 * (raydepthmax - raydepthmin);
-	ypscale = (ypmax - ypmin)/(ypmaximum - ypminimum);	
+	ypscale = (ypmax - ypmin)/(ypmaximum - ypminimum);
 	xpscale = ypscale;
 	xpmaximum = (xpmax - xpmin)/(2*xpscale);
 	xpminimum = -xpmaximum;
@@ -1890,8 +1890,8 @@ int mbvt_plot()
 		ypscale = xpscale;
 		ypmaximum = ypminimum + (ypmax - ypmin) / ypscale;
 		}
-	
-	deltaxp = 0.4 * (raydepthmax - raydepthmin);	
+
+	deltaxp = 0.4 * (raydepthmax - raydepthmin);
 	xp_int = deltaxp*xpscale;
 	nxp_int = (xpmaximum - xpminimum)/deltaxp/2 + 1;
 	deltayp = 0.2*(ypmaximum - ypminimum);
@@ -2045,7 +2045,7 @@ int mbvt_action_select_node(int x, int y)
 		active = -1;
 		for (i=0;i<profile_edit.n;i++)
 			{
-			distance = (edit_x[i] - x)*(edit_x[i] - x) 
+			distance = (edit_x[i] - x)*(edit_x[i] - x)
 				+ (edit_y[i] - y)*(edit_y[i] - y);
 			if (distance < distance_min)
 				{
@@ -2139,7 +2139,7 @@ int mbvt_action_drag_node(int x, int y)
 		}
 
 	/* relocate node if selected */
-	if (active > -1 && 
+	if (active > -1 &&
 		x >= xmin && x <= xmax && y >= ymin && y <= ymax)
 		{
 		/* find upper and lower bounds for current node */
@@ -2165,7 +2165,7 @@ int mbvt_action_drag_node(int x, int y)
 			y = ymin;
 
 		/* unplot the current ping */
-		xg_fillrectangle(mbvt_xgid, edit_x[active]-2, 
+		xg_fillrectangle(mbvt_xgid, edit_x[active]-2,
 			edit_y[active]-2, 4, 4,
 			pixel_values[WHITE],XG_SOLIDLINE);
 		if (active > 0)
@@ -2205,15 +2205,15 @@ int mbvt_action_drag_node(int x, int y)
 				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 		if (active > 0)
-			xg_fillrectangle(mbvt_xgid, edit_x[active-1]-2, 
-				edit_y[active-1]-2, 4, 4, 
+			xg_fillrectangle(mbvt_xgid, edit_x[active-1]-2,
+				edit_y[active-1]-2, 4, 4,
 				pixel_values[BLACK],XG_SOLIDLINE);
-		xg_fillrectangle(mbvt_xgid, edit_x[active]-2, 
-			edit_y[active]-2, 4, 4, 
+		xg_fillrectangle(mbvt_xgid, edit_x[active]-2,
+			edit_y[active]-2, 4, 4,
 			pixel_values[BLACK],XG_SOLIDLINE);
 		if (active < profile_edit.n - 1)
-			xg_fillrectangle(mbvt_xgid, edit_x[active+1]-2, 
-				edit_y[active+1]-2, 4, 4, 
+			xg_fillrectangle(mbvt_xgid, edit_x[active+1]-2,
+				edit_y[active+1]-2, 4, 4,
 				pixel_values[BLACK],XG_SOLIDLINE);
 		}
 	else
@@ -2279,12 +2279,12 @@ int mbvt_action_add_node(int x, int y)
 			    {
 			    add_i = i;
 			    add_x = x;
-			    add_y = y - 1;			    
+			    add_y = y - 1;
 			    }
 			}
-			
+
 		/* add in the node */
-		if (add_i > -1 
+		if (add_i > -1
 			&& profile_edit.n < profile_edit.nalloc)
 			{
 			for (i=profile_edit.n-1;i>=add_i;i--)
@@ -2301,7 +2301,7 @@ int mbvt_action_add_node(int x, int y)
 			profile_edit.depth[add_i] = (add_y - ymin)/yscale + yminimum;
 
 			status = MB_SUCCESS;
-			
+
 			mbvt_plot();
 			}
 		}
@@ -2357,7 +2357,7 @@ int mbvt_action_delete_node(int x, int y)
 		delete = -1;
 		for (i=0;i<profile_edit.n;i++)
 			{
-			distance = (edit_x[i] - x)*(edit_x[i] - x) 
+			distance = (edit_x[i] - x)*(edit_x[i] - x)
 				+ (edit_y[i] - y)*(edit_y[i] - y);
 			if (distance < distance_min)
 				{
@@ -2365,9 +2365,9 @@ int mbvt_action_delete_node(int x, int y)
 				delete = i;
 				}
 			}
-			
+
 		/* delete the node */
-		if (delete > -1 
+		if (delete > -1
 			&& profile_edit.n > 2)
 			{
 			for (i=delete;i<profile_edit.n;i++)
@@ -2417,12 +2417,12 @@ int mbvt_get_format(char *file, int *form)
 
 	/* get filenames */
 	/* look for MB suffix convention */
-	if ((status = mb_get_format(verbose, file, tmp, 
+	if ((status = mb_get_format(verbose, file, tmp,
 				    &tform, &error))
 				    == MB_SUCCESS)
 	    {
 	    *form = tform;
-	    }		
+	    }
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2473,7 +2473,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	double	sonardepth;
 	int	variable_beams;
 	int	traveltime;
-	int	beam_flagging; 
+	int	beam_flagging;
 	char	command[64];
 	char	string[MB_PATH_MAXLINE];
 	char	svp_file[MB_PATH_MAXLINE];
@@ -2481,6 +2481,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	struct stat file_status;
 	int	fstat;
 	double	rr, zz;
+        int     shellstatus;
 	int	i, k;
 
 	/* print input debug statements */
@@ -2497,16 +2498,16 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	format = form;
 	if (format == 0)
 	    mb_get_format(verbose, file, NULL, &format, &error);
-	status = mb_format_flags(verbose, &format, 
-			&variable_beams, &traveltime, &beam_flagging, 
+	status = mb_format_flags(verbose, &format,
+			&variable_beams, &traveltime, &beam_flagging,
 			&error);
 	if (status == MB_FAILURE)
 		{
 		fprintf(stderr,"\nFormat id %d does not correspond to a supported format.\n",format);
 		fprintf(stderr,"\nSwath Sonar File <%s> not initialized for reading\n",file);
 		status = MB_FAILURE;
-		do_error_dialog("Data loading aborted.", 
-				"The specified swath data", 
+		do_error_dialog("Data loading aborted.",
+				"The specified swath data",
 				"format is incorrect!");
 		return(status);
 		}
@@ -2517,8 +2518,8 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		fprintf(stderr,"Travel times and angles are being estimated\n");
 		fprintf(stderr,"assuming a 1500 m/s half-space\n");
 		status = MB_FAILURE;
-		do_error_dialog("Data doesn't include travel times!", 
-				"Travel times and angles estimated", 
+		do_error_dialog("Data doesn't include travel times!",
+				"Travel times and angles estimated",
 				"assuming 1500 m/s sound speed.");
 		}
 	/* if (traveltime == MB_NO)
@@ -2527,8 +2528,8 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		fprintf(stderr,"Format %d is unacceptable because it does not include travel time data.\n",format);
 		fprintf(stderr,"\nSwath Sonar File <%s> not initialized for reading\n",file);
 		status = MB_FAILURE;
-		do_error_dialog("Data loading aborted.", 
-				"The specified swath data format does", 
+		do_error_dialog("Data loading aborted.",
+				"The specified swath data format does",
 				"not include travel time data!");
 		return(status);
 		}*/
@@ -2548,12 +2549,12 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
 		fprintf(stderr,"\nSwath Sonar File <%s> not initialized for reading\n",swathfile);
 		status = MB_FAILURE;
-		do_error_dialog("Unable to open input swath file.", 
-				"File may not exist or you may not have", 
+		do_error_dialog("Unable to open input swath file.",
+				"File may not exist or you may not have",
 				"read permission in this directory!");
 		return(status);
 		}
-		
+
 	/* turn message on */
 	do_message_on("MBvelocitytool is loading data...");
 
@@ -2578,13 +2579,13 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
@@ -2602,7 +2603,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	ssv_start = 0.0;
 	navlon_levitus = 0.0;
 	navlat_levitus = 0.0;
-		
+
 	/* turn message on */
 	*numload = 0;
 	sprintf(string, "MBvelocitytool: %d records loaded so far...", *numload);
@@ -2620,7 +2621,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 				&ping[nbuffer].heading,
 				&distance,&altitude,&sonardepth,
 				&ping[nbuffer].beams_bath,&namp,&nss,
-				beamflag,bath,amp, 
+				beamflag,bath,amp,
 				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
@@ -2718,14 +2719,14 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 				if (mb_beam_ok(ping[nbuffer].beamflag[i]))
 				    {
 				    zz = bath[i] - sonardepth;
-				    rr = sqrt(zz * zz 
+				    rr = sqrt(zz * zz
 					+ bathacrosstrack[i] * bathacrosstrack[i]
 					+ bathalongtrack[i] * bathalongtrack[i]);
 				    ping[nbuffer].ttimes[i] = rr / 750.0;
-				    mb_xyz_to_takeoff(verbose, 
-						bathacrosstrack[i], 
-						bathalongtrack[i], 
-						(bath[i] - sonardepth), 
+				    mb_xyz_to_takeoff(verbose,
+						bathacrosstrack[i],
+						bathalongtrack[i],
+						(bath[i] - sonardepth),
 						&ping[nbuffer].angles[i],
 						&ping[nbuffer].angles_forward[i],
 						&error);
@@ -2735,15 +2736,15 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 				    }
 				}
 			    }
-			    
+
 			/* get first nav */
-			if (navlon_levitus == 0.0 
+			if (navlon_levitus == 0.0
 			    && navlat_levitus == 0.0)
 			    {
 			    navlon_levitus = ping[nbuffer].navlon;
 			    navlat_levitus = ping[nbuffer].navlat;
 			    }
-			
+
 			/* check for first nonzero ssv */
 			if (ping[nbuffer].ssv > 0.0 && ssv_start == 0.0)
 				ssv_start = ping[nbuffer].ssv;
@@ -2752,7 +2753,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 			{
 			nbuffer++;
 			(*numload)++;
-			
+
 			/* update message every 250 records */
 			if ((*numload) % 250 == 0)
 			    {
@@ -2762,7 +2763,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 			}
 		}
 	while (error <= MB_ERROR_NO_ERROR && nbuffer < MBVT_BUFFER_SIZE);
-	
+
 	/* close input file */
 	status = mb_close(verbose,&mbio_ptr,&error);
 
@@ -2783,11 +2784,11 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&res_sd,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),(void **)&nresidual,&error);
 		}
-	
+
 	/* set error message */
 	if (nbuffer <= 0)
-		do_error_dialog("No data were read from the input", 
-				"swath file. You may have specified an", 
+		do_error_dialog("No data were read from the input",
+				"swath file. You may have specified an",
 				"incorrect MB-System format id!");
 
 	if (ssv_start <= 0.0)
@@ -2803,8 +2804,8 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		    {
 		    if (mb_beam_ok(ping[k].beamflag[i]))
 			{
-			depth[i] = 750 * ping[k].ttimes[i] 
-				* cos(DTR * ping[k].angles[i]) 
+			depth[i] = 750 * ping[k].ttimes[i]
+				* cos(DTR * ping[k].angles[i])
 				+ ping[k].sonardepth + ping[k].heave[i];
 
 			/* get min max depths */
@@ -2815,7 +2816,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 			}
 		     }
 		}
-		
+
 	/* set maxdepth and apply */
 	if (bath_max > 0.0 && bath_max < 13000.0)
 		{
@@ -2839,25 +2840,25 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		fprintf(stderr,"Records loaded into buffer: %d\n",*numload);
 		fprintf(stderr,"Records in buffer:          %d\n",nbuffer);
 		}
-		
+
 	/* turn message off */
 	do_message_off();
-	
+
 	/* get editable svp if needed */
 	if (edit != MB_YES)
 	    mbvt_new_edit_profile();
-	    
+
 	/* add Levitus display profile if nav available */
 	if (navlon_levitus != 0.0 || navlat_levitus != 0.0)
 		{
-		sprintf(command, 
-			"mblevitus -R%f/%f -Ombvt_levitus_tmp.svp\n", 
+		sprintf(command,
+			"mblevitus -R%f/%f -Ombvt_levitus_tmp.svp\n",
 			navlon_levitus, navlat_levitus);
-		system(command);
+		shellstatus = system(command);
 		mbvt_open_display_profile("mbvt_levitus_tmp.svp");
-		system("rm -f mbvt_levitus_tmp.svp");
+		shellstatus = system("rm -f mbvt_levitus_tmp.svp");
 		}
-		
+
 	/* load svp files generated by mbsvplist if available */
 	done = MB_NO;
 	count = 0;
@@ -2963,6 +2964,16 @@ int mbvt_deallocate_swath()
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&residual,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&res_sd,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&nresidual,&error);
+                nraypath = NULL;
+                raypathx = NULL;
+                raypathy = NULL;
+                depth = NULL;
+                acrosstrack = NULL;
+                angle = NULL;
+                residual = NULL;
+                res_sd = NULL;
+                nresidual = NULL;
+
 		for (i=0;i<MBVT_BUFFER_SIZE;i++)
 			{
 			if (ping[i].allocated > 0 && ping[i].allocated != 60)
@@ -3015,7 +3026,7 @@ int mbvt_process_multibeam()
 	double	*dep;
 	double	*vel;
 	int	nvel;
-	char	*rt_svp = NULL;
+	void	*rt_svp = NULL;
 	int	first;
 	double	ttime;
 	int	ray_stat;
@@ -3024,9 +3035,10 @@ int mbvt_process_multibeam()
 	double	delta, a, b;
 	int	ns;
 	double	depth_predict, res;
-	double	sonardepth, sonardepthshift;
+	double	sonardepth, sonardepthshift, heave_use;
+        int     found;
 	int	i, j, k;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -3047,7 +3059,7 @@ int mbvt_process_multibeam()
 		status = MB_FAILURE;
 		return(status);
 		}
-		
+
 	/* turn message on */
 	do_message_on("MBvelocitytool is processing data...");
 
@@ -3069,7 +3081,7 @@ int mbvt_process_multibeam()
 	nvel = profile_edit.n;
 	vel = profile_edit.velocity;
 	dep = profile_edit.depth;
-	status = mb_rt_init(verbose, nvel, dep, vel, &rt_svp, &error);
+	status = mb_rt_init(verbose, nvel, dep, vel, (void **)&rt_svp, &error);
 	first = MB_YES;
 	nbeams = 0;
 	rayxmax = 0.0;
@@ -3094,8 +3106,18 @@ int mbvt_process_multibeam()
 		else
 			ssv_start = ping[k].ssv;
 
-		/* get depth of sonar - apply shift is sonar is above water */
-		sonardepth = ping[k].heave[i] + ping[k].sonardepth;
+		/* find a good heave value */
+                found = MB_NO;
+		for (i = 0; i < ping[k].beams_bath && found == MB_NO; i++)
+		    {
+		    if (mb_beam_ok(ping[k].beamflag[i]))
+			{
+			heave_use = ping[k].heave[i];
+                        found = MB_YES;
+                        }
+                    }
+
+		sonardepth = heave_use + ping[k].sonardepth;
 		sonardepthshift = 0.0;
 		if (first == MB_YES)
 			raydepthmin = MIN(raydepthmin, sonardepth);
@@ -3113,7 +3135,7 @@ int mbvt_process_multibeam()
 			{
 			/* get max beam id */
 			nbeams = MAX(nbeams, i + 1);
-			
+
 			/* get factor relating lateral distance to
 			    acrosstrack distance */
 			factor = cos(DTR*ping[k].angles_forward[i]);
@@ -3123,32 +3145,32 @@ int mbvt_process_multibeam()
 			    {
 			    /* call raytracing without keeping
 				plotting list */
-			    status = mb_rt(verbose, 
-				    rt_svp, sonardepth, 
+			    status = mb_rt(verbose,
+				    rt_svp, sonardepth,
 				    ping[k].angles[i], 0.5*ping[k].ttimes[i],
-				    anglemode, ping[k].ssv, ping[k].angles_null[i], 
-				    0, NULL, NULL, NULL, 
-				    &acrosstrack[i], &depth[i], 
+				    anglemode, ping[k].ssv, ping[k].angles_null[i],
+				    0, NULL, NULL, NULL,
+				    &acrosstrack[i], &depth[i],
 				    &ttime, &ray_stat, &error);
 			    }
 			else
 			    {
 			    /* call raytracing keeping
 				plotting list */
-			    status = mb_rt(verbose, 
-				    rt_svp, sonardepth, 
+			    status = mb_rt(verbose,
+				    rt_svp, sonardepth,
 				    ping[k].angles[i], 0.5*ping[k].ttimes[i],
-				    anglemode, ping[k].ssv, ping[k].angles_null[i], 
-				    nraypathmax, &nraypath[i], 
-				    raypathx[i], raypathy[i], 
-				    &acrosstrack[i], &depth[i], 
+				    anglemode, ping[k].ssv, ping[k].angles_null[i],
+				    nraypathmax, &nraypath[i],
+				    raypathx[i], raypathy[i],
+				    &acrosstrack[i], &depth[i],
 				    &ttime, &ray_stat, &error);
 
 			    /* reset acrosstrack distances */
 			    for (j=0;j<nraypath[i];j++)
 				raypathx[i][j] = factor * raypathx[i][j];
 			    }
-				    
+
 			/* get acrosstrack distance */
 			acrosstrack[i] = factor * acrosstrack[i];
 
@@ -3169,7 +3191,7 @@ int mbvt_process_multibeam()
 			/* output some debug values */
 			if (verbose >= 5)
 			    fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %8.2f %8.2f %8.2f %8.2f\n",
-				k, i, 0.5*ping[k].ttimes[i], ping[k].angles[i], acrosstrack[i], 
+				k, i, 0.5*ping[k].ttimes[i], ping[k].angles[i], acrosstrack[i],
 				ping[k].heave[i],ping[k].sonardepth,depth[i]);
 
 			/* get sums for linear fit */
@@ -3215,12 +3237,13 @@ int mbvt_process_multibeam()
 		    		fprintf(stderr,"dbg5       %4d %10f %10f %10f %10f\n",
 					i,acrosstrack[i],depth[i],
 					depth_predict,res);
+
 			}
 		  }
 		}
 
 	/* end raytracing */
-	status = mb_rt_deall(verbose, &rt_svp, &error);
+	status = mb_rt_deall(verbose, (void **)&rt_svp, &error);
 
 	/* calculate final residuals */
 	beam_first = nbeams;

@@ -1,0 +1,455 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbvelocitytool</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbvelocitytool</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbvelocitytool</B> - Interactive water sound velocity profile editor.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbvelocitytool</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-E</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-F</B><I>format </I><B>-I</B><I>file </I><B>-S</B><I>svpfile </I><B>-W</B><I>svpfile </I><B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MBvelocitytool</B> is an interactive water sound velocity profile
+(SVP) editor used to examine multiple SVPs, to create
+new SVPs, and to model the impact of SVP modification on swath bathymetry
+data. SVPs created using <B>MBvelocitytool</B> can be used by the program
+<B>mbprocess</B> to recalculate swath bathymetry from raw travel time
+and angle data.
+<P>
+In general, <B>MBvelocitytool</B> is used to examine SVPs obtained from
+swath data files (see <B>mbsvplist</B> manual page), XBTs, CTDs, or
+databases, and to construct new profiles consistent with these various
+sources of information. The SVPs are represented by a set of paired
+depth and velocity values which are connected by linear interpolation.
+Users may load a number of SVPs for display. Users may load or create
+a single editable SVP and then interactively modify this profile.
+<P>
+When users load swath bathymetry data containing raw travel time and
+angle data (many but not all swath data format include this information),
+<B>MBvelocitytool</B>  recalculates the bathymetry by raytracing through
+the current SVP model. The bathymetry of each ping is fit with a line,
+and bathymetry residuals are calculated for each good beam relative
+to the linear fit.  The average of the bathymetry residuals is displayed
+along with &quot;error bars&quot; indicating the standard deviations of the
+residuals. Anomalously shallow  bathymetry maps into negative residuals
+and deep bathymetry into positive residuals; the residuals are displayed
+so that shallow is up and deep is down. If the seafloor is reasonably
+smooth so that a linear fit is appropriate, then the residuals will
+accurately reflect any problems with the water velocity profile.  If
+the water velocity profile is correct, then the residual plot will be
+roughly flat.  If the water velocity profile is significantly in error,
+then the outer beam depths may anomalously shallow (edge curl up) or
+deep (edge curl down).  In practice, the editable velocity profile is
+altered interactively until a reasonably residual pattern is achieved.
+<P>
+In order to calculate bathymetry values from travel time observations,
+geometrical raypaths are traced through the SVP for each beam. Because
+the sound velocity gradients are uniform between the depth-velocity
+nodes (linear interpolation), the raypaths are be calculated
+analytically as pieces of circular arcs. This raytracing algorithm
+is the same used in the program <B>mbprocess</B>.
+<P>
+One important aspect of the raytracing is the handling of the initial
+takeoff angles associated with each beam or sounding. In general, the
+raytracing will begin at a point in the sound speed model that has a
+sound velocity different than the surface sound velocity (SSV) used by
+the mapping sonar for the original beamforming. The usual approach is to
+use Snell's law to adjust the starting angle for this change in sound
+velocity. This amounts to an assumption that the original SSV was correct
+and that  the rays pass through an insignificantly thick layer in which the
+sound speed equals the SSV before transitioning to the sound speed implied
+by the SVP. This is the default setting for raytracing in <B>MB-System</B>.
+Alternatively, one can proceed with raytracing using the original angle
+but this is rarely useful or correct. Finally, if the SSV used by the sonar is
+judged to have been incorrect, then the takeoff angle must be corrected for
+the erroneous beamforming as well as for the difference between the SSV
+and the initial raytracing sound velocity. This correction must take the
+sonar geometry into account because the impact of changing the SSV on a beam
+angle from a flat receive array is very different from a V-shaped or curved
+array. All three of these angle correction modes are available in <B>mbvelocitytool</B>.
+<P>
+<B>MBvelocitytool</B> can be used in conjunction with <B>mbprocess</B>.
+If the user uses the <B>Save swath svp file</B> option to save an SVP model
+developed through the analysis of a particular swath data file,
+<B>MBvelocitytool</B> also sets the associated <B>mbprocess</B> parameter file
+so that <B>mbprocess</B> recalculates the bathymetry using the new SVP model.
+The program <B>mbset</B> may be used to set the SVP file in the parameter
+file for any swath data file. Users may also save SVP models without setting
+any <B>mbprocess</B> parameters by using the <B>Save editable profile</B>
+option.
+<P>
+Sometimes the bathymetry residuals show structure indicative of
+persistent artifacts in the bathymetry (e.g. certain parts of
+the swath may be persistently shallower or deeper than the
+rest of the swath). In this situation, it is possible to export
+the residuals and to then apply them in <B>mbprocess</B>
+as static corrections to the bathymetry. This is accomplished by
+using the <B>Save residuals as offsets</B> option under the <B>File</B>
+menu.
+<P>
+If a user attempts to read in swath bathymetry that does not
+contain the travel time and beam angle data required for bathymetry
+recalculation, <B>MBvelocitytool</B> will estimate the travel times
+and angles from the bathymetry by assuming a 1500 m/s half-space
+(and then post a warning dialog). Although the user can proceed
+to model bathymetry recalculation by modifying the active SVP just
+as with proper data, the travel times and angles are not in general
+correct and so the modeling and any results it gives are, well, bogus.
+A more useful approach is to leave the SVP alone and simply export
+the residuals to be applied as static corrections in mbprocess.
+This approach allows users a practical means of correcting
+older multibeam bathymetry that was originally calculated with
+an incorrect SVP but which contains no travel time or angle data.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-B</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+Sets the starting time for data allowed in the input data; pings
+with times before the starting time will be ignored.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
+<DT><B>-E</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+Sets the ending time for data allowed in the input data; pings
+with times after the ending time will be ignored.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the format at startup for the input and output swath sonar data using
+<B>MBIO</B> integer format identifiers. This value can also be set
+interactively when specifying the input file.
+This program uses the <B>MBIO</B> library and will read any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page.
+Default: <I>format</I> = 11.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>file</I>
+<BR>
+
+Sets the data file from which the input swath data will be read at startup.
+This value can also be set interactively. See below.
+<DT><B>-S</B>
+
+<DD>
+<I>svpfile</I>
+<BR>
+
+Sets the data file from which an input display sound velocity
+profile will be read at startup. See below.
+This value can also be set interactively.
+<DT><B>-W</B>
+
+<DD>
+<I>svpfile</I>
+<BR>
+
+Sets the data file from which an input editable sound velocity
+profile will be read at startup.
+This value can also be set interactively. See below.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbvelocitytool</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbvelocitytool</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used, all error status messages,
+and a large amount of other information.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>INTERACTIVE CONTROLS</H2>
+
+<DL COMPACT>
+<DT><B>File</B>
+
+<DD>
+This button brings up a menu containing the commands listed below:
+<DT><B>File-&gt;Open Display Profile</B>
+
+<DD>
+Selecting this menu item brings up a popup window which allows the
+user to select an input water velocity profile file. The profile
+will be displayed in a depth vs velocity plot along with other
+display profiles and the edit velocity profile, if one has been
+opened.  Up to ten display velocity profiles may be loaded; the
+color of the display profiles cycles through red, green, blue, and
+black in the order that they are loaded.
+<DT><B>File-&gt;Open Editable Profile</B>
+
+<DD>
+Selecting this menu item brings up a popup window which allows the
+user to select an input water velocity profile file to be edited.
+The profile
+will be displayed in a depth vs velocity plot along with any
+display profiles that have been opened.  This profile will be plotted
+as black lines with small black squares at the velocity depth points.
+The velocity depth points may be selected and dragged using the mouse
+to change the editable velocity profile.
+<DT><B>File-&gt;New Editable Profile</B>
+
+<DD>
+Selecting this menu item creates a default editable velocity profile
+consisting of 14 velocity-depth points with a velocity of 1500 m/s.
+Any previously defined editable velocity profile will disappear. The profile
+will be displayed in a depth vs velocity plot along with any
+display profiles that have been opened.  This profile will be plotted
+as black lines with small black squares at the velocity depth points.
+The velocity depth points may be selected and dragged using the left mouse button
+to change the editable velocity profile. The center mouse button adds new
+velocity-depth points, and the right mouse button removes velocity-depth
+points.
+<DT><B>File-&gt;Save Editable Profile</B>
+
+<DD>
+Selecting this menu item brings up a popup window which allows the
+user to save the current editable velocity profile as a file.
+<DT><B>File-&gt;Open Swath Sonar Data</B>
+
+<DD>
+Selecting this menu item brings up a popup window which allows the
+user to select an input swath sonar data file to be processed
+in conjunction with the current editable velocity profile.
+The format id for the data file must be set appropriately
+in the editable text widget labeled &quot;MBIO Format ID:&quot;; this
+program uses the <B>MBIO</B> library and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data
+formats currently supported by <B>MBIO</B> and their
+identifier values is given in the <B>MBIO</B> manual page.
+If the swath sonar data file is named using the <B>MB-System</B>
+suffix convention (format 11 files end with &quot;.mb11&quot;, format
+41 files end with &quot;.mb41&quot;, etc.), then the program will
+automatically use the appropriate format id.
+The swath sonar data file must be in one of the formats which store
+travel time data for each beam. Up to 25000 data records
+will be read into a buffer for processing.
+If there is no current editable velocity profile, then a
+default profile consisting of 14 velocity-depth points
+with a velocity of 1500 m/s will be created. A display profile
+generated by the <B>mblevitus</B> program will also be
+automatically generated and loaded into <B>mbvelocitytool</B>;
+this Levitus profile will serve as an average reference for
+the water sound velocity structure at the location of the
+swath data being analyzed. The travel time
+data will then be processed and displayed in the manner described
+below for the <B>Reprocess</B> button.
+<DT><B>File-&gt;Save Swath SVP File</B>
+
+<DD>
+Selecting this menu item saves the current editable velocity
+profile as a file. The SVP filename is that of the current
+swath data input file with a &quot;.svp&quot; suffix added. <B>MBvelocitytool</B>
+also sets the swath data file's <B>mbprocess</B> parameter file
+to recalculate bathymetry using the new SVP file and using the same
+angle mode setting applied in the interactive modeling (see the Angle
+Mode dialog description below).
+<DT><B>File-&gt;Save Residuals As Offsets</B>
+
+<DD>
+Selecting this menu item saves the current bathymetry residuals
+as a &quot;static bathymetry offset&quot; file.
+The filename is that of the current
+swath data input file with a &quot;.sbo&quot; suffix added. <B>MBvelocitytool</B>
+also sets the swath data file's <B>mbprocess</B> parameter file
+to apply these residuals as static corrections to the bathymetry.
+<DT><B>Plot Scaling</B>
+
+<DD>
+This button brings up a dialog containing the three controls
+discussed immediately below.
+<DT><B>Plot Scaling-&gt;Maximum Depth</B>
+
+<DD>
+This slider sets the maximum depth in meters of both the velocity profile
+display and the raypath display. The minimum depths of these
+displays are always zero. The acrosstrack distance axis of the raypath
+display automatically adjusts so that the rays are plotted with
+no vertical exageration.
+<DT><B>Plot Scaling-&gt;Velocity Range</B>
+
+<DD>
+This slider sets the minimum and maximum velocity values of the velocity
+profile display.  The minimum value is the velocity center minus the velocity range;
+the maximum value is the velocity center plus the velocity range.
+<DT><B>Plot Scaling-&gt;Velocity Center</B>
+
+<DD>
+This slider sets the center velocity value of the velocity
+profile display.  The minimum value is the velocity center minus the velocity range;
+the maximum value is the velocity center plus the velocity range.
+<DT><B>Plot Scaling-&gt;Residual Range</B>
+
+<DD>
+This slider sets the minimum and maximum bathymetry residual values
+of the bathymetry residual display.  The residual plot has a minimum
+value of -range and a maximum value of +range.
+<DT><B>Angle Mode</B>
+
+<DD>
+This button brings up a dialog containing three choices for how the starting
+beam angles are corrected during raytracing. The selected angle mode is
+used by <B>mbvelocitytool</B> in the interactive modeling, and is also passed
+on to the <B>mbprocess</B> parameter file created or modified when an SVP
+file is saved.
+<DT><B>Angle Mode-&gt;Do Not Change Beam Angles</B>
+
+<DD>
+This button sets the angle mode so that the starting beam angles are not
+corrected before raytracing for the difference between the surface sound
+velocity (SSV) and the sound velocity of the starting depth in the SVP.
+<DT><B>Angle Mode-&gt;Adjust Angles Using Snell's Law</B>
+
+<DD>
+This button sets the angle mode so that the starting beam angles are
+corrected before raytracing, using Snell's Law, for the difference between the
+surface sound velocity (SSV) and the sound velocity of the starting depth in
+the SVP. This amounts to an assumption that the original SSV was correct
+and that  the rays pass through an insignificantly thick layer in which the
+sound speed equals the SSV before transitioning to the sound speed implied
+by the SVP. This is the default setting for raytracing in <B>mbvelocitytool</B>
+and in <B>MB-System</B> in general.
+<DT><B>Angle Mode-&gt;Adjust Angles Using Sonar Geometry</B>
+
+<DD>
+This button sets the angle mode so that the starting beam angles are
+corrected before raytracing, using Snell's Law and the sonar geometry, for
+the difference between the surface sound velocity (SSV) and the sound velocity
+of the starting depth in the SVP. This option is relevant to situations where
+the SSV used by the sonar for beamforming was incorrect, and so the initial
+angles themselves must be adjusted. This mode is indistinguishable from
+that of &quot;Adjust Angles Using Snell's Law&quot; for multibeam sonars with flat,
+horizontal receive arrays, but deviates strongly for sonars with tilted,
+V-shaped, or curved receive arrays.
+<DT><B>Reprocess</B>
+
+<DD>
+Selecting this button causes the swath sonar travel time data to be processed
+into bathymetry using the current editable velocity profile. The processing
+involves full raytracing through the water velocity model. The bathymetry of
+each ping is fit with a line, and bathymetry residuals are calculated for each
+good beam relative to the linear fit.  The average of the bathymetry residuals
+is displayed in the upper right part of the window as a function of beam number,
+along with &quot;error bars&quot; indicating the standard deviations of the residuals.
+Raypaths are displayed without vertical exageration in the lower part of the
+window; these represent the first raypath calculated for each beam while
+processing the current data (most will be from the first ping). Anomalously
+shallow bathymetry maps into negative residuals and deep bathymetry into positive
+residuals; the residuals are displayed so that shallow is up and deep is down.
+If the seafloor is reasonably smooth so that a linear fit is appropriate, then
+the residuals will accurately reflect any problems with the water velocity profile.
+If the water velocity profile is correct, then the residual plot will be roughly
+flat.  If the water velocity profile is significantly in error, then the outer
+beam depths may anomalously shallow (edge curl up) or deep (edge curl down).
+In practice, the editable velocity profile is altered interactively until a
+reasonably residual pattern is achieved; reference velocity profiles obtained from
+CTD casts, XBT's, or data bases (see manual page for program <B>mblevitus</B>)
+may be read in as display profiles to guide the editing process.
+<DT><B>Quit</B>
+
+<DD>
+This button causes the program to exit gracefully, but without asking
+any questions.  If you haven't already saved your edited velocity profile
+it will be lost when you quit.
+<P>
+</DL>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B>mbset</B>, <B>mbsvplist</B>,
+<B>mbbath</B>, <B><A HREF="mblevitus.html">mblevitus</A></B>(1),
+<B><A HREF="mbm_xbt.html">mbm_xbt</A></B>(1), <B><A HREF="mbm_xbt.html">mbm_xbt</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Users cannot remove display sound velocity profiles from the screen
+once they are read in. The main window for mbvelocitytool
+is too large for use on screens smaller than 1024 X 768 pixels.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">INTERACTIVE CONTROLS</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

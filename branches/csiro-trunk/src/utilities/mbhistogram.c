@@ -2,7 +2,7 @@
  *    The MB-system:	mbhistogram.c	12/28/94
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * MBHISTOGRAM reads a swath sonar data file and generates a histogram
- * of the bathymetry,  amplitude,  or sidescan values. Alternatively, 
+ * of the bathymetry,  amplitude,  or sidescan values. Alternatively,
  * mbhistogram can output a list of values which break up the
  * distribution into equal sized regions.
  * The results are dumped to stdout.
@@ -103,8 +103,8 @@
 #include <string.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* mode defines */
 #define	MBHISTOGRAM_BATH	0
@@ -220,7 +220,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:GgHhI:i:L:l:M:m:N:n:P:p:R:r:S:s:T:t:Vv")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'A':
 		case 'a':
@@ -468,7 +468,7 @@ int main (int argc, char **argv)
 	while (read_data == MB_YES)
 	{
 
-	/* obtain format array location - format id will 
+	/* obtain format array location - format id will
 		be aliased to current id if old format id given */
 	status = mb_format(verbose,&format,&error);
 
@@ -504,13 +504,13 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
@@ -549,7 +549,7 @@ int main (int argc, char **argv)
 				comment,&error);
 
 		/* process the pings */
-		if (error == MB_ERROR_NO_ERROR 
+		if (error == MB_ERROR_NO_ERROR
 			|| error == MB_ERROR_TIME_GAP)
 			{
 			/* increment record counter */
@@ -641,7 +641,7 @@ int main (int argc, char **argv)
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0)
 	    {
-	    fprintf(stderr, "%d records processed\n%d data processed\n", 
+	    fprintf(stderr, "%d records processed\n%d data processed\n",
 		    nrec, nvalue);
 	    }
 
@@ -712,7 +712,7 @@ int main (int argc, char **argv)
 					/(histogram[ibin] - histogram[ibin-1]);
 			else
 				bin_fraction = 0.0;
-			intervals[j] = value_bin_min 
+			intervals[j] = value_bin_min
 					+ dvalue_bin*ibin
 					+ bin_fraction*dvalue_bin;
 			}
@@ -745,7 +745,7 @@ int main (int argc, char **argv)
 						+ dvalue_bin*ibin;
 				}
 			bin_fraction = 1.0 - (total - target)/histogram[ibin];
-			intervals[j] = value_bin_min 
+			intervals[j] = value_bin_min
 					+ dvalue_bin*ibin
 					+ bin_fraction*dvalue_bin;
 			}
@@ -805,7 +805,7 @@ int main (int argc, char **argv)
  *
  * Function to invert the cumulative normal probability
  * function.  If z is a standardized normal random deviate,
- * and Q(z) = p is the cumulative Gaussian probability 
+ * and Q(z) = p is the cumulative Gaussian probability
  * function, then z = qsnorm(p).
  *
  * Note that 0.0 < p < 1.0.  Data values outside this range
@@ -828,7 +828,7 @@ int main (int argc, char **argv)
 double	qsnorm(double p)
 {
 	double	t, z;
-	
+
 	if (p <= 0.0) {
 		return(-1.0e6);
 	}

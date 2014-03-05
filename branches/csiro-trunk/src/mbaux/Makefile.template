@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  9/8/00
 #	$Id$
 #
-#     Copyright (c) 2000-2012 by
+#     Copyright (c) 2000-2013 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,38 +16,6 @@
 # Date:		September 8, 2000
 #
 # $Log: Makefile.template,v $
-# Revision 5.7  2009/03/13 07:05:58  caress
-# Release 5.1.2beta02
-#
-# Revision 5.6  2007/10/08 06:09:51  caress
-# Added mb_readgrd.c
-#
-# Revision 5.5  2003/07/27 20:49:13  caress
-# Release 5.0.0
-#
-# Revision 5.4  2003/03/22 03:09:45  caress
-# Added mb_surface.c
-#
-# Revision 5.3  2002/02/22 09:06:20  caress
-# Release 5.0.beta13
-#
-# Revision 5.2  2001/06/30 17:39:13  caress
-# Release 5.0.beta02
-#
-# Revision 5.1  2001/03/22  21:06:19  caress
-# Trying to make release 5.0.beta0
-#
-# Revision 5.0  2001/01/22  07:38:58  caress
-# Version 5.0.0beta01
-#
-# Revision 4.0  2000/09/08  17:19:14  caress
-# Initial version.
-#
-# Revision 4.0  2000/09/08  17:19:14  caress
-# Initial version.
-#
-#
-#
 #
 
 ### sets locations of vital objects
@@ -115,28 +83,28 @@ $(LIBDIR)/libmbxgr.a:	\
 	ranlib $(LIBDIR)/libmbxgr.a
 
 ### compile the source files
-mb_spline.o:	mb_spline.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) mb_spline.c
-mb_zgrid.o:	mb_zgrid.c $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) mb_zgrid.c
-mb_surface.o:	mb_surface.c $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) mb_surface.c
-mb_cheb.o:	mb_cheb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) mb_cheb.c
-mb_delaun.o:	mb_delaun.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) mb_delaun.c
-mb_pslibface.o:	mb_pslibface.c  $(INCDIR)/mb_status.h  $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_pslibface.c
-mb_track.o:	mb_track.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) mb_track.c
-mb_truecont.o:	mb_truecont.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) mb_truecont.c
-mb_readgrd.o:	mb_readgrd.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_readgrd.c
-mb_xgraphics.o:	mb_xgraphics.c $(INCDIR)/mb_status.h $(INCDIR)/mb_xgraphics.h
-	$(CC) -c $(CFLAGS) mb_xgraphics.c
-mb_intersectgrid.o:	mb_intersectgrid.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) mb_intersectgrid.c
+mb_spline.o:	mb_spline.c ../mbio/mb_status.h ../mbio/mb_define.h mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio mb_spline.c
+mb_zgrid.o:	mb_zgrid.c ../mbio/mb_define.h mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio mb_zgrid.c
+mb_surface.o:	mb_surface.c mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio mb_surface.c
+mb_cheb.o:	mb_cheb.c ../mbio/mb_status.h mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio mb_cheb.c
+mb_delaun.o:	mb_delaun.c ../mbio/mb_status.h mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio mb_delaun.c
+mb_pslibface.o:	mb_pslibface.c  ../mbio/mb_status.h  ../mbio/mb_define.h mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_pslibface.c
+mb_track.o:	mb_track.c ../mbio/mb_status.h mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio mb_track.c
+mb_truecont.o:	mb_truecont.c ../mbio/mb_status.h mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio mb_truecont.c
+mb_readgrd.o:	mb_readgrd.c ../mbio/mb_status.h ../mbio/mb_define.h mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_readgrd.c
+mb_xgraphics.o:	mb_xgraphics.c ../mbio/mb_status.h mb_xgraphics.h
+	$(CC) -c $(CFLAGS) -I../mbio mb_xgraphics.c
+mb_intersectgrid.o:	mb_intersectgrid.c ../mbio/mb_status.h mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio mb_intersectgrid.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_aux.h:	mb_aux.h

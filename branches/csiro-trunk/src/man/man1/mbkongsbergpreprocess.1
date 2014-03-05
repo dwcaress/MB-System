@@ -1,0 +1,269 @@
+.TH mbkongsbergpreprocess 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbkongsbergpreprocess\fP \- performs preprocessing of data from third generation Kongsberg multibeam sonars (e.g. EM122, EM302, EM710).
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbkongsbergpreprocess\fP [\fB\-A\fP \fB\-C\fP \fB\-D\fP\fIoutputdirectory\fP \fB\-F\fP\fIformat\fP
+\fB\-I\fIfile \fB\-O\fP\fIoutfile\fP \fB\-SF\fP\fIdatatype/source\fP
+\fB\-T\fP\fItimelag\fP \fB\-H \-V\fP]
+
+.SH DESCRIPTION
+\fBmbkongsbergpreprocess\fP reads data from a third generation
+Kongsberg multibeam sonar (e.g. EM122, EM302, EM710), interpolates the
+asynchronous navigation, heading, and attitude onto the multibeam data,
+and writes a new file with that information correctly embedded
+in the multibeam survey data. The input files may be in the vendor format
+MBF_EM710RAW (format id 58) or the \fBMB-System\fP extended format
+MBF_EM710MBA (format id 59); the output files will always be in
+the \fBMB-System\fP extended format MBF_EM710MBA (format id 59).
+
+Like most modern swath survey data streams, Kongsberg multibeam data
+includes navigation, attitude, and heading data logged in separate
+data records as output by the respective sensors. Since each of these
+values is time stamped according to its origin rather than synced with
+multibeam pings, these values are asynchronous relative to the survey
+ping data. When multiple sources
+of navigation, heading, and/or attitude have been recorded in
+a data stream, \fBmbkongsbergpreprocess\fP allows the user to specify
+which asynchronous data are extracted and interpolated onto the
+survey data using the \fB\-S\fP option.
+
+This program allows the correction of a time latency
+(or time lag)  error between the sonar data and the attitude and
+navigation data using the \fB\-T\fP option.
+
+The format 58 files This program also creates four ancilliary files containing the full
+asynchronous attitude, sonar depth, and heading data and the synchronous
+attitude data in parallel with each output format 59 file.
+These files are used,
+when present, by \fBmbeditviz\fP to facillitate interactive analysis
+of time lag issues. Each of these are
+text files with white-space delimited columns; the first column
+is always time in decimal unix seconds. These have the following
+suffixes:
+    asynchronous attitude (roll and pitch):	*.ata
+    asynchronous heading:			*.ath
+    asynchronous sonar depth:			*.ats
+    synchronous attitude (roll and pitch):	*.sta
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH OPTIONS
+.TP
+.B \-A
+.br
+This option causes the program to attempt to calculate reliable beam angles
+through iterative raytracing to match the original bathymetry. This process
+is very time consuming. At present, the simple calculation of beam angles
+produces noisy values that in turn produce noisy bathymetry when the
+soundings are recalculated by raytracing. Thus, if one needs to recalculate
+bathymetry with a new model for the sound speed structure of the water
+column (often called a sound velocity profile or SVP), the data should first
+be preprocessed using the \fB\-A\fP option.
+.TP
+.B \-C
+.br
+This option causes \fBmbkongsbergpreprocess\fP to print counts of the many
+different data record types compising a Kongsberg data stream. The data record
+counts are output for each file and as totals from all files processed.
+.TP
+.B \-D
+\fIoutputdirectory\fP
+.br
+This option causes all format 59 output files to be placed in the specified directory
+\fIoutputdirectory\fP rather than parallel to the original "raw" files.
+.TP
+.B \-F
+\fIformat\fP
+.br
+Sets the data format used if the input is read from stdin
+or from a file. If \fIformat\fP < 0, then the input file specified
+with the \fB\-I\fP option will actually contain a list of input swath sonar
+data files. This program only reads third generation Kongsberg multibeam
+format data files (\fBMBIO\fP formats 58 and 59).
+.TP
+.B \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-I
+\fIinfile\fP
+.br
+Sets the input file path. If \fIformat\fP > 0 (set with the
+\fB\-f\fP option or \fBmbdefaults\fP) then the swath sonar data contained in \fIinfile\fP
+is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the \fIinfile\fP file, each
+data file should be followed by a data format identifier, e.g.:
+ 	datafile.all 58
+ 	datafile.all 58
+.br
+This program only reads third generation Kongsberg multibeam
+format data files (\fBMBIO\fP formats 58 and 59).
+.TP
+.B \-O
+\fIoutfile\fP
+.br
+This option causes \fBmbkongsbergpreprocess\fP to output all data to a single file
+specified as \fIoutfile\fP. By default, the program creates output files for
+each input file. If the \fB\-D\fP\fIoutputdirectory\fP option is also used, then
+the output file \fIoutfile\fP will be in \fIoutputdirectory\fP.
+.TP
+.B \-S
+\fIdatatype/source\fP
+.br
+This option specifies which data records should be the source of the
+navigation (\fIdatatype\fP = 1), heading (\fIdatatype\fP = 2), and
+attitude (\fIdatatype\fP = 3) data that are interpolated onto the
+survey ping times. In each case the \fIsource\fP value specifies
+a data record type. The possibilities for Kongsberg data include:
+     MB_DATA_NAV			12	/* Simrad, Reson 7k */
+     MB_DATA_HEADING		17	/* Simrad, Hypack */
+     MB_DATA_ATTITUDE		18	/* Simrad, Hypack, Reson 7k */
+     MB_DATA_NAV1			28	/* ancillary nav system 1 */
+     MB_DATA_NAV2			29	/* ancillary nav system 2 */
+     MB_DATA_NAV3			30	/* ancillary nav system 3 */
+     MB_DATA_ATTITUDE1		55	/* ancillary attitude system 1 */
+     MB_DATA_ATTITUDE2		56      /* ancillary attitude system 2 */
+     MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
+.br
+.TP
+.B \-T
+\fItimelag\fP
+.br
+This option specifies a \fItimelag\fP value in seconds to be applied
+to the navigation and attitude data prior to it being merged with the
+bathymetry. If \fItimelag\fP is a valid path to a file containing time
+stamp and time lag pairs, then these data will be read and the time lag
+applied to particular records will be interpolated by time.
+
+.SH EXAMPLES
+Suppose that one has collected a set of three Kongsberg EM122 data files named:
+    0000_20111219_154640_METEOR_EM122.all
+    0001_20111219_163703_METEOR_EM122.all
+    0002_20111219_175708_METEOR_EM122.all
+.br
+First, we want to generate a "datalist" file referencing the raw survey files. The
+following will suffice:
+    /bin/ls \-1 *all | awk '{print $1" 58"}' > datalist_raw.mb-1
+.br
+We want to use \fBmbkongsbergpreprocess\fP to gracefully interpolate the
+asynchronous navigation, heading and attitude data onto the survey data and
+to generate data files in the extended format (MBF_EM710MBA = 59). To learn
+which potential sources of navigation, heading and attitude are available, use
+\fBmbinfo\fP with the \fB\-N\fP option:
+    $ mbinfo \-I 0000_20111219_154640_METEOR_EM122.all \-N
+
+The \fB\-N\fP option causes \fBmbinfo\fP to generate a list of the data record
+types read in the file at the end of the file statistics:
+.br
+    Swath Data File:      0000_20111219_154640_METEOR_EM122.all
+    MBIO Data Format ID:  58
+    Format name:          MBF_EM710RAW
+    Informal Description: Kongsberg current multibeam vendor format
+    Attributes:           Kongsberg EM122, EM302, EM710,
+ 			  bathymetry, amplitude, and sidescan,
+ 			  up to 400 beams, variable pixels, binary, Kongsberg.
+
+    Data Totals:
+    Number of Records:                         334
+    Bathymetry Data (432 beams):
+      Number of Beams:           144288
+      Number of Good Beams:      129951     90.06%
+      Number of Zero Beams:           0      0.00%
+      Number of Flagged Beams:    14337      9.94%
+    Amplitude Data (432 beams):
+      Number of Beams:           144288
+      Number of Good Beams:      129951     90.06%
+      Number of Zero Beams:           0      0.00%
+      Number of Flagged Beams:    14337      9.94%
+    Sidescan Data (1024 pixels):
+      Number of Pixels:          342016
+      Number of Good Pixels:     289910     84.77%
+      Number of Zero Pixels:          0      0.00%
+      Number of Flagged Pixels:   52106     15.23%
+
+    Navigation Totals:
+    Total Time:             0.8327 hours
+    Total Track Length:    13.6418 km
+    Average Speed:         16.3823 km/hr ( 8.8553 knots)
+
+    Start of Data:
+    Time:  12 19 2011 15:46:27.537000  JD353 (2011-12-19T15:46:27.537000)
+    Lon:   \-11.562232000     Lat:    36.848179850     Depth:  4931.4829 meters
+    Speed: 17.6040 km/hr ( 9.5157 knots)  Heading: 129.1900 degrees
+    Sonar Depth:    5.6975 m  Sonar Altitude: 5025.2964 m
+
+    End of Data:
+    Time:  12 19 2011 16:36:25.308000  JD353 (2011-12-19T16:36:25.308000)
+    Lon:   \-11.489473500     Lat:    36.771997400     Depth:  3242.5244 meters
+    Speed: 12.7800 km/hr ( 6.9081 knots)  Heading: 274.9200 degrees
+    Sonar Depth:    6.4334 m  Sonar Altitude: 3236.0911 m
+
+    Limits:
+    Minimum Longitude:     \-11.635798757   Maximum Longitude:     \-11.391532562
+    Minimum Latitude:       36.723994163   Maximum Latitude:       36.919907119
+    Minimum Sonar Depth:     5.0135   Maximum Sonar Depth:     6.9798
+    Minimum Altitude:     3175.1121   Maximum Altitude:     5027.8770
+    Minimum Depth:        2391.9229   Maximum Depth:        5121.0713
+    Minimum Amplitude:     \-59.2000   Maximum Amplitude:      \-9.1000
+    Minimum Sidescan:      \-90.1300   Maximum Sidescan:       \-0.4700
+
+    Data Record Type Notices:
+    DN: 334 MB_DATA_DATA (ID=1): survey data
+    DN: 1 MB_DATA_VELOCITY_PROFILE (ID=6): SVP
+    DN: 1 MB_DATA_START (ID=10): Simrad start datagram
+    DN: 1 MB_DATA_STOP (ID=11): Simrad stop datagram
+    DN: 3023 MB_DATA_NAV (ID=12): Navigation record
+    DN: 287 MB_DATA_RUN_PARAMETER (ID=13): Simrad runtime parameter datagram
+    DN: 3022 MB_DATA_CLOCK (ID=14): Simrad clock datagram
+    DN: 2964 MB_DATA_ATTITUDE (ID=18): Attitude record
+    DN: 731 MB_DATA_SSV (ID=19): Surface sound speed record
+    DN: 3022 MB_DATA_NAV3 (ID=30): Auxiliary nav system 3
+    DN: 3023 MB_DATA_STATUS (ID=46): Status record
+    DN: 2964 MB_DATA_ATTITUDE1 (55): ancillary attitude system 1
+    DN: 1512 MB_DATA_ATTITUDE2 (56): ancillary attitude system 2
+
+    Nonfatal Error Notices:
+    EN: 20551 MB_ERROR_NO_DATA_REQUESTED (ID=\-11): No data requested for buffer load
+
+    Problem Notices:
+
+This listing shows that the format 58 file includes
+MB_DATA_NAV (\fIsource\fP = 12) and MB_DATA_NAV3 (\fIsource\fP = 30) records,
+both of which include both position and heading data. Also included are three
+sources of attitude data: MB_DATA_ATTITUDE (\fIsource\fP = 18),
+MB_DATA_ATTITUDE1 (\fIsource\fP = 55), and MB_DATA_ATTITUDE2 (\fIsource\fP = 56).
+
+To extract and use the default navigation, heading, and attitude data, the
+following will suffice:
+    mbkongsbergpreprocess \-I datalist_raw.mb-1 \-V
+
+An equivalent command that explicitly specifies the default asynchronous data
+sources using \fB\-S\fP\fI1/source\fP for navigation, \fB\-S\fP\fI2/source\fP for
+heading, and \fB\-S\fP\fI3/source\fP for attitude is:
+    mbkongsbergpreprocess \-I datalist_raw.mb-1 \-V \fB\-S\fP\fI1/12\fP \fB\-S\fP\fI2/12\fP \fB\-S\fP\fI3/18\fP
+
+To interpolate navigation and heading from the secondary navigation source, use
+    \fB\-S\fP\fI1/30\fP \fB\-S\fP\fI2/30\fP
+
+To interpolate attitude from ancillary attitude system 2, use:
+    \fB\-S\fP\fI3/56\fP
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbformat\fP(1), \fBmbinfo\fP(1)
+
+.SH BUGS
+Not true bugs. More like arachnids.

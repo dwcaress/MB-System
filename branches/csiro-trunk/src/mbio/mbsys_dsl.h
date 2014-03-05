@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_dsl.h	8/5/94
  *	$Id$
  *
- *    Copyright (c) 1996-2012 by
+ *    Copyright (c) 1996-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,9 +14,9 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_dsl.h defines the data structures used by MBIO functions
- * to store data from the DSL AMS-120 sonar system. This is a 120 khz 
+ * to store data from the DSL AMS-120 sonar system. This is a 120 khz
  * deep-towed sonar which produces both sidescan and bathymetry.
- * The data formats used to store the DSL AMS-120 data are: 
+ * The data formats used to store the DSL AMS-120 data are:
  *      MBF_DSL120PF : MBIO ID 111
  *      MBF_DSL120SF : MBIO ID 112
  *
@@ -79,7 +79,7 @@
  *         DSL120.940630_1100.nav	- navigation
  *   2. The DSL parallel file scheme is supported under MB-System
  *      data format 111 (MBF_DSL120PF); a single file scheme is
- *      supported under data format 112 (MBF_DSL120SF). The 
+ *      supported under data format 112 (MBF_DSL120SF). The
  *      single file scheme is within the DSL format specification.
  *   3. The bathymetry and sidescan data are stored in binary
  *      data structures; the navigation is stored in ASCII.
@@ -87,7 +87,7 @@
  *      and sidescan values. The MB-System implementation has
  *      maximum numbers of values hardwired in the #defines
  *      below.
- *   5. The bathymetry and sidescan data have navigation 
+ *   5. The bathymetry and sidescan data have navigation
  *      fields,  but these navigation values typically repeat
  *      for many pings, often being the same for entire files.
  *      The separate navigation files contain the post-processed
@@ -110,7 +110,7 @@
  *      in the MB-System world where programs expect a single
  *      input and a single output file name. Handling the two
  *      files (bat.dat and amp.dat) will be handled in low level
- *      i/o routines. If the input file name has a "bat" in it, 
+ *      i/o routines. If the input file name has a "bat" in it,
  *      the code will attempt to open a second file with the
  *      same name except that "amp" is substituted for "bat".
  *      If the specified input file has "amp" in it,  then the
@@ -163,7 +163,7 @@ struct mbsys_dsl_struct
    	float	alt;			/* altitude - meters */
    	float	ang_offset;	 	/* pointing ang relative to nose - deg*/
    	int	transmit_pwr;  		/* transmit power decibels */
-   	int	gain_port;		/* db - not sure if belongs here */ 
+   	int	gain_port;		/* db - not sure if belongs here */
    	int	gain_starbd;		/* db - not sure if belongs here */
    	float	pulse_width;		/* pulse width */
    	int	swath_width;		/* meters */
@@ -171,27 +171,27 @@ struct mbsys_dsl_struct
    	char	swapped;		/* data,header: 00-PC 01-SunHdr 11-Sun*/
 	int	tv_sec;			/* seconds */
 	int	tv_usec;		/* and microseconds */
-   	short	interface;	        /* digital interface: 0,1,or 2 -
+   	short	digitalinterface;       /* digital interface: 0,1,or 2 -
 					 * must be specified in config file */
     	short reserved[5];
-	
+
 	/* bathymetry record */
 	int	bat_type;		/* always "BATH" */
 	int	bat_len;
 	int	bat_hdr_len;
-	int	bat_num_bins;      
+	int	bat_num_bins;
 	float	bat_sampleSize;
 	unsigned int bat_p_flags;
 	float	bat_max_range; /* meters */
 	int	bat_future[9];
 	float	bat_port[MBSYS_DSL_MAXBEAMS_SIDE];
 	float	bat_stbd[MBSYS_DSL_MAXBEAMS_SIDE];
-	
+
 	/* amplitude record */
 	int	amp_type;		/* always "AMP " */
 	int	amp_len;
 	int	amp_hdr_len;
-	int	amp_num_samp;      
+	int	amp_num_samp;
 	float	amp_sampleSize;
 	unsigned int amp_p_flags; /* offset/slr, ... */
 	float	amp_max_range; /* meters */
@@ -199,60 +199,59 @@ struct mbsys_dsl_struct
 	int	amp_future[8];
 	float	amp_port[MBSYS_DSL_MAXPIXELS];
 	float	amp_stbd[MBSYS_DSL_MAXPIXELS_SIDE];
-	
+
 	/* comment */
 	char	comment[MBSYS_DSL_COMMENT_LENGTH];
 	};
-	
+
 /* system specific function prototypes */
-int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_dsl_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_dsl_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_dsl_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_dsl_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_dsl_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_dsl_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_dsl_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_dsl_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_dsl_copy(int verbose, void *mbio_ptr, 
+int mbsys_dsl_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_read_init.c	1/25/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -203,49 +203,16 @@
 #include <string.h>
 #include <sys/stat.h>
 
-/* XDR i/o include file */
-#ifdef IRIX
-#include <rpc/rpc.h>
-#endif
-#ifdef IRIX64
-#include <rpc/rpc.h>
-#endif
-#ifdef SOLARIS
-#include <rpc/rpc.h>
-#endif
-#ifdef LINUX
-#include <rpc/rpc.h>
-#endif
-#ifdef LYNX
-#include <rpc/rpc.h>
-#endif
-#ifdef SUN
-#include <rpc/xdr.h>
-#endif
-#ifdef HPUX
-#include <rpc/rpc.h>
-#endif
-#ifdef DARWIN
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-#ifdef CYGWIN
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-#ifdef OTHER
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/sapi.h"
-#include "../../include/mb_segy.h"
-#include "gsf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "../surf/mb_sapi.h"
+#include "mb_segy.h"
+#ifdef WITH_GSF
+#  include "gsf.h"
+#endif
 #include "netcdf.h"
 
 static char rcs_id[]="$Id$";
@@ -273,6 +240,7 @@ int mb_read_init(int verbose, char *file,
 	FILE	*pfp;
 	struct stat file_status;
 	int	fstat;
+	int	nscan;
 	int	i;
 	char	*stdin_string = "stdin";
 
@@ -372,7 +340,11 @@ int mb_read_init(int verbose, char *file,
 	mb_io_ptr->file3_pos = 0;
 	mb_io_ptr->file3_bytes = 0;
 	mb_io_ptr->ncid = 0;
+#ifdef WITH_GSF
 	mb_io_ptr->gsfid = 0;
+#else
+        /* TODO: possibly set to -666 */
+#endif
 	mb_io_ptr->xdrs = NULL;
 	mb_io_ptr->xdrs2 = NULL;
 	mb_io_ptr->xdrs3 = NULL;
@@ -441,6 +413,7 @@ int mb_read_init(int verbose, char *file,
 
 	/* initialize projection parameters */
 	mb_io_ptr->projection_initialized = MB_NO;
+	mb_io_ptr->projection_id[0] = '\0';
 	mb_io_ptr->pjptr = NULL;
 
 	/* initialize ancillary variables used
@@ -679,6 +652,7 @@ int mb_read_init(int verbose, char *file,
 	    status = mb_fileio_open(verbose, *mbio_ptr, error);
 	    }
 
+#ifdef WITH_GSF
 	/* else handle gsf files to be opened with gsflib */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF)
 	    {
@@ -696,6 +670,9 @@ int mb_read_init(int verbose, char *file,
 		*error = MB_ERROR_OPEN_FAIL;
 		}
 	    }
+#else
+        /* TODO: should issue an error */
+#endif
 
 	/* else handle netcdf files to be opened with libnetcdf */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF)
@@ -910,12 +887,13 @@ int mb_read_init(int verbose, char *file,
 	sprintf(prjfile, "%s.prj", file);
 	if ((pfp = fopen(prjfile, "r")) != NULL)
 		{
-		fscanf(pfp,"%s", projection_id);
+		nscan = fscanf(pfp,"%s", projection_id);
 		proj_status = mb_proj_init(verbose,projection_id,
 			&(mb_io_ptr->pjptr), error);
 		if (proj_status == MB_SUCCESS)
 			{
 			mb_io_ptr->projection_initialized = MB_YES;
+			strcpy(mb_io_ptr->projection_id, projection_id);
 			}
 		else
 			{
@@ -940,18 +918,18 @@ int mb_read_init(int verbose, char *file,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)*mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)*mbio_ptr);
 		fprintf(stderr,"dbg2       ->numfile:  %d\n",mb_io_ptr->numfile);
 		fprintf(stderr,"dbg2       ->file:     %s\n",mb_io_ptr->file);
 		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
 		    fprintf(stderr,"dbg2       ->file2:    %s\n",mb_io_ptr->file2);
 		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3)
 		    fprintf(stderr,"dbg2       ->file3:    %s\n",mb_io_ptr->file3);
-		fprintf(stderr,"dbg2       ->mbfp:     %lu\n",(size_t)mb_io_ptr->mbfp);
+		fprintf(stderr,"dbg2       ->mbfp:     %p\n",(void *)mb_io_ptr->mbfp);
 		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
-		    fprintf(stderr,"dbg2       ->mbfp2:    %lu\n",(size_t)mb_io_ptr->mbfp2);
+		    fprintf(stderr,"dbg2       ->mbfp2:    %p\n",(void *)mb_io_ptr->mbfp2);
 		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3)
-		    fprintf(stderr,"dbg2       ->mbfp3:    %lu\n",(size_t)mb_io_ptr->mbfp3);
+		    fprintf(stderr,"dbg2       ->mbfp3:    %p\n",(void *)mb_io_ptr->mbfp3);
 		fprintf(stderr,"dbg2       btime_d:    %f\n",*btime_d);
 		fprintf(stderr,"dbg2       etime_d:    %f\n",*etime_d);
 		fprintf(stderr,"dbg2       beams_bath: %d\n",*beams_bath);

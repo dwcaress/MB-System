@@ -2,7 +2,7 @@
  *    The MB-system:	mb_write_init.c	1/25/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -178,49 +178,17 @@
 #include <math.h>
 #include <string.h>
 
-/* XDR i/o include file */
-#ifdef IRIX
-#include <rpc/rpc.h>
-#endif
-#ifdef IRIX64
-#include <rpc/rpc.h>
-#endif
-#ifdef SOLARIS
-#include <rpc/rpc.h>
-#endif
-#ifdef LYNX
-#include <rpc/rpc.h>
-#endif
-#ifdef LINUX
-#include <rpc/rpc.h>
-#endif
-#ifdef SUN
-#include <rpc/xdr.h>
-#endif
-#ifdef HPUX
-#include <rpc/rpc.h>
-#endif
-#ifdef DARWIN
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-#ifdef CYGWIN
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-#ifdef OTHER
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_segy.h"
-#include "../../include/sapi.h"
-#include "gsf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mb_segy.h"
+#include "../surf/mb_sapi.h"
+#ifdef WITH_GSF
+#  include "gsf.h"
+#endif
+/* #include "../gsf/gsf.h" */
 #include "netcdf.h"
 
 static char rcs_id[]="$Id$";
@@ -316,7 +284,9 @@ int mb_write_init(int verbose,
 	mb_io_ptr->file3_pos = 0;
 	mb_io_ptr->file3_bytes = 0;
 	mb_io_ptr->ncid = 0;
+#ifdef WITH_GSF
 	mb_io_ptr->gsfid = 0;
+#endif
 	mb_io_ptr->xdrs = NULL;
 	mb_io_ptr->xdrs2 = NULL;
 	mb_io_ptr->xdrs3 = NULL;
@@ -608,6 +578,7 @@ int mb_write_init(int verbose,
 	    status = mb_fileio_open(verbose, *mbio_ptr, error);
 	    }
 
+#ifdef WITH_GSF
 	/* else handle gsf files to be opened with gsflib */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF)
 	    {
@@ -625,7 +596,9 @@ int mb_write_init(int verbose,
 		*error = MB_ERROR_OPEN_FAIL;
 		}
 	    }
-
+#else
+        /* TODO: issue an error with gsf files? */
+#endif
 	/* else handle netcdf files to be opened with libnetcdf */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF)
 	    {
@@ -851,7 +824,7 @@ int mb_write_init(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)*mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)*mbio_ptr);
 		fprintf(stderr,"dbg2       beams_bath: %d\n",*beams_bath);
 		fprintf(stderr,"dbg2       beams_amp:  %d\n",*beams_amp);
 		fprintf(stderr,"dbg2       pixels_ss:  %d\n",*pixels_ss);

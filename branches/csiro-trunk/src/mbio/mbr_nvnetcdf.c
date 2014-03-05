@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_nvnetcdf.c	5/4/02
  *	$Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_nvnetcdf.c contains the functions for reading and writing
- * multibeam data in the MBF_MBNETCDF format.  
+ * multibeam data in the MBF_MBNETCDF format.
  * These functions include:
  *   mbr_alm_nvnetcdf	- allocate read/write memory
  *   mbr_dem_nvnetcdf	- deallocate read/write memory
@@ -23,7 +23,7 @@
  *
  * Author:	D. W. Caress
  * Date:	May 4, 2002
- * 
+ *
  * $Log: mbr_nvnetcdf.c,v $
  * Revision 5.6  2008/07/10 06:43:41  caress
  * Preparing for 5.1.1beta20
@@ -60,34 +60,34 @@
 #include <netcdf.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_navnetcdf.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_navnetcdf.h"
 
 /* essential function prototypes */
-int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, 
+int mbr_register_nvnetcdf(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_nvnetcdf(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_nvnetcdf(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error);
@@ -116,54 +116,54 @@ int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_nvnetcdf(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_nvnetcdf(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_nvnetcdf;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_nvnetcdf; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_navnetcdf_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_navnetcdf_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_nvnetcdf; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_nvnetcdf; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_navnetcdf_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_navnetcdf_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_navnetcdf_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_navnetcdf_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_navnetcdf_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_navnetcdf_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = &mbsys_navnetcdf_insert_altitude; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_navnetcdf_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_navnetcdf_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_navnetcdf_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_nvnetcdf;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_navnetcdf_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_navnetcdf_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_nvnetcdf;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_nvnetcdf;
+	mb_io_ptr->mb_io_dimensions = &mbsys_navnetcdf_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_navnetcdf_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_navnetcdf_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_navnetcdf_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_navnetcdf_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_navnetcdf_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = &mbsys_navnetcdf_insert_altitude;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_navnetcdf_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_navnetcdf_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_navnetcdf_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -182,25 +182,25 @@ int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -211,25 +211,25 @@ int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_nvnetcdf(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_nvnetcdf(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_nvnetcdf";
@@ -270,7 +270,7 @@ int mbr_info_nvnetcdf(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -315,7 +315,7 @@ int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -366,7 +366,7 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -416,8 +416,8 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor and data structure */
@@ -426,7 +426,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	dataread = (int *) &mb_io_ptr->save1;
 	commentread = (int *) &mb_io_ptr->save2;
 	recread = (int *) &mb_io_ptr->save4;
-	
+
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
@@ -456,8 +456,8 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
-		}		
-		
+		}
+
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
@@ -466,12 +466,12 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
 		fprintf(stderr,"dbg2       nc_status:               %d\n", nc_status);
-		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %lu\n", store->mbHistoryRecNbr);
-		fprintf(stderr,"dbg2       mbNameLength:            %lu\n", store->mbNameLength);
-		fprintf(stderr,"dbg2       mbCommentLength:         %lu\n", store->mbCommentLength);
-		fprintf(stderr,"dbg2       mbPositionNbr:           %lu\n", store->mbPositionNbr);
+		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %zu\n", store->mbHistoryRecNbr);
+		fprintf(stderr,"dbg2       mbNameLength:            %zu\n", store->mbNameLength);
+		fprintf(stderr,"dbg2       mbCommentLength:         %zu\n", store->mbCommentLength);
+		fprintf(stderr,"dbg2       mbPositionNbr:           %zu\n", store->mbPositionNbr);
 		}
-		
+
 	    /* get global attributes */
 	    if (status == MB_SUCCESS)
 		{
@@ -537,8 +537,8 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
-		    }		
-		
+		    }
+
 		/* print input debug statements */
 		if (verbose >= 2)
 		    {
@@ -622,8 +622,8 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
-		    }		
-		
+		    }
+
 		/* print input debug statements */
 		if (verbose >= 2)
 		    {
@@ -652,26 +652,26 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    fprintf(stderr,"dbg2       mbPFlag_id:              %d\n", store->mbPFlag_id);
 		    }
 		}
-		
+
 	    /* allocate memory for variables */
 	    if (status == MB_SUCCESS)
 		{
-		status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,
 			    store->mbHistoryRecNbr * sizeof(int),
 			    (void **)&store->mbHistDate,error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,
 			    store->mbHistoryRecNbr * sizeof(int),
 			    (void **)&store->mbHistTime,error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,
 			    store->mbHistoryRecNbr * sizeof(char),
 			    (void **)&store->mbHistCode,error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,
 			    store->mbHistoryRecNbr * store->mbNameLength * sizeof(char),
 			    (void **)&store->mbHistAutor,error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,
 			    store->mbHistoryRecNbr * store->mbNameLength * sizeof(char),
 			    (void **)&store->mbHistModule,error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,
 			    store->mbHistoryRecNbr * store->mbCommentLength * sizeof(char),
 			    (void **)&store->mbHistComment,error);
 
@@ -1166,8 +1166,8 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
-		    }		
-		
+		    }
+
 		/* print input debug statements */
 		if (verbose >= 2)
 		    {
@@ -1411,8 +1411,8 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
-		    }		
-		
+		    }
+
 		/* print input debug statements */
 		if (verbose >= 2)
 		    {
@@ -1441,16 +1441,16 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if (status == MB_SUCCESS && store->mbNbrHistoryRec > *commentread)
 	    {
 	    store->kind = MB_DATA_COMMENT;
-	    
+
 	    /* get next comment */
-	    strncpy(store->comment, 
-		    &(store->mbHistComment[(*commentread) *store->mbCommentLength]), 
+	    strncpy(store->comment,
+		    &(store->mbHistComment[(*commentread) *store->mbCommentLength]),
 		    MBSYS_NAVNETCDF_COMMENTLEN);
-	    
+
 	    /* set counters */
 	    (*commentread)++;
 	    (*dataread)++;
-	    
+
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
@@ -1461,7 +1461,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       comment:                 %s\n", store->comment);
 		}
 	    }
-	
+
 	/* next run through all survey records */
 	else if (status == MB_SUCCESS && store->mbPositionNbr > *recread)
 	    {
@@ -1551,12 +1551,12 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
-		}		
-	    
+		}
+
 	    /* set counters */
 	    (*recread)++;
 	    (*dataread)++;
-		
+
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
@@ -1578,13 +1578,13 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       mbPFlag:                 %d\n", store->mbPFlag);
 		}
 	    }
-	
+
 	/* else end of file */
 	else
 	    {
 	    /* set kind */
 	    store->kind = MB_DATA_NONE;
-	    
+
 	    /* set flags */
 	    *error = MB_ERROR_EOF;
 	    status = MB_FAILURE;
@@ -1623,7 +1623,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	mbNameLength_id;
 	int	mbCommentLength_id;
 	int	mbPositionNbr_id;
-	int	dims[1];
+	int	dims[2];
 	size_t	index[2], count[2];
 	char	*user_ptr;
 	double	time_d;
@@ -1642,8 +1642,8 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor and data storage */
@@ -1666,19 +1666,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		status = mb_reallocd(verbose, __FILE__, __LINE__,
 			    storelocal->mbHistoryRecNbr * sizeof(int),
 			    (void **)&storelocal->mbHistDate,error);
-		status = mb_reallocd(verbose, __FILE__, __LINE__, 
+		status = mb_reallocd(verbose, __FILE__, __LINE__,
 			    storelocal->mbHistoryRecNbr * sizeof(int),
 			    (void **)&storelocal->mbHistTime,error);
-		status = mb_reallocd(verbose, __FILE__, __LINE__, 
+		status = mb_reallocd(verbose, __FILE__, __LINE__,
 			    storelocal->mbHistoryRecNbr * sizeof(char),
 			    (void **)&storelocal->mbHistCode,error);
-		status = mb_reallocd(verbose, __FILE__, __LINE__, 
+		status = mb_reallocd(verbose, __FILE__, __LINE__,
 			    storelocal->mbHistoryRecNbr * storelocal->mbNameLength * sizeof(char),
 			    (void **)&storelocal->mbHistAutor,error);
-		status = mb_reallocd(verbose, __FILE__, __LINE__, 
+		status = mb_reallocd(verbose, __FILE__, __LINE__,
 			    storelocal->mbHistoryRecNbr * storelocal->mbNameLength * sizeof(char),
 			    (void **)&storelocal->mbHistModule,error);
-		status = mb_reallocd(verbose, __FILE__, __LINE__, 
+		status = mb_reallocd(verbose, __FILE__, __LINE__,
 			    storelocal->mbHistoryRecNbr * storelocal->mbCommentLength * sizeof(char),
 			    (void **)&storelocal->mbHistComment,error);
 		for (i=storelocal->mbNbrHistoryRec;i<storelocal->mbHistoryRecNbr;i++)
@@ -1688,7 +1688,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    storelocal->mbHistCode[i] = 0;
 			    }
 		}
-		
+
 	    /* save old comment (from pre-existing netcdf file) */
 	    if (store != storelocal)
 		{
@@ -1696,8 +1696,8 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		icomment = -1;
 		for (i=0;i<store->mbNbrHistoryRec;i++)
 		    {
-		    if (strncmp(store->comment, 
-				&store->mbHistComment[i * store->mbCommentLength], 
+		    if (strncmp(store->comment,
+				&store->mbHistComment[i * store->mbCommentLength],
 				MBSYS_NAVNETCDF_COMMENTLEN) == 0)
 			{
 			icomment = i;
@@ -1705,14 +1705,14 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    }
 		if (icomment > -1 && icomment < store->mbNbrHistoryRec)
 		    {
-		    strncpy(&(storelocal->mbHistAutor[(*commentwrite) * storelocal->mbNameLength]), 
-			    &(store->mbHistAutor[icomment * store->mbNameLength]), 
+		    strncpy(&(storelocal->mbHistAutor[(*commentwrite) * storelocal->mbNameLength]),
+			    &(store->mbHistAutor[icomment * store->mbNameLength]),
 			    MBSYS_NAVNETCDF_NAMELEN);
-		    strncpy(&(storelocal->mbHistModule[(*commentwrite) * storelocal->mbNameLength]), 
-			    &(store->mbHistModule[icomment * store->mbNameLength]), 
+		    strncpy(&(storelocal->mbHistModule[(*commentwrite) * storelocal->mbNameLength]),
+			    &(store->mbHistModule[icomment * store->mbNameLength]),
 			    MBSYS_NAVNETCDF_NAMELEN);
-		    strncpy(&(storelocal->mbHistComment[(*commentwrite) * storelocal->mbCommentLength]), 
-			    &(store->mbHistComment[icomment * store->mbCommentLength]), 
+		    strncpy(&(storelocal->mbHistComment[(*commentwrite) * storelocal->mbCommentLength]),
+			    &(store->mbHistComment[icomment * store->mbCommentLength]),
 			    MBSYS_NAVNETCDF_COMMENTLEN);
 		    storelocal->mbHistDate[*commentwrite] = store->mbHistDate[icomment];
 		    storelocal->mbHistTime[*commentwrite] = store->mbHistTime[icomment];
@@ -1720,21 +1720,21 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    storelocal->mbNbrHistoryRec++;
 		    }
 		}
-		
+
 	    /* save new comment */
 	    else
 		{
 		if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
 		if (user_ptr != NULL)
-		    strncpy(&(storelocal->mbHistAutor[(*commentwrite) *storelocal->mbNameLength]), 
+		    strncpy(&(storelocal->mbHistAutor[(*commentwrite) *storelocal->mbNameLength]),
 			user_ptr, MBSYS_NAVNETCDF_NAMELEN);
 		else
-		    strncpy(&(storelocal->mbHistAutor[(*commentwrite) *storelocal->mbNameLength]), 
+		    strncpy(&(storelocal->mbHistAutor[(*commentwrite) *storelocal->mbNameLength]),
 			"Unknown", MBSYS_NAVNETCDF_NAMELEN);
-		strncpy(&(storelocal->mbHistModule[(*commentwrite) *storelocal->mbNameLength]), 
+		strncpy(&(storelocal->mbHistModule[(*commentwrite) *storelocal->mbNameLength]),
 			"MB-System", MBSYS_NAVNETCDF_NAMELEN);
-		strncpy(&(storelocal->mbHistComment[(*commentwrite) *storelocal->mbCommentLength]), 
+		strncpy(&(storelocal->mbHistComment[(*commentwrite) *storelocal->mbCommentLength]),
 			store->comment, MBSYS_NAVNETCDF_COMMENTLEN);
 		time_d = (double)time((time_t *)0);
 		storelocal->mbHistDate[*commentwrite] = (int)(time_d / SECINDAY);
@@ -1742,11 +1742,11 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		storelocal->mbHistCode[*commentwrite] = 1;
 		storelocal->mbNbrHistoryRec++;
 		}
-	    
+
 	    /* set counters */
 	    (*commentwrite)++;
 	    (*datawrite)++;
-	    
+
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
@@ -1757,7 +1757,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       comment:                 %s\n", store->comment);
 		}
 	    }
-	
+
 	/* if data and nothing written yet start it off */
 	if (store->kind == MB_DATA_DATA
 	    && *recwrite == 0
@@ -1765,7 +1765,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    {
 	    /* copy over noncomment dimensions */
 	    storelocal->mbPositionNbr = 0;
-		
+
 	    /* define the dimensions */
    	    nc_status = nc_def_dim(mb_io_ptr->ncid, "mbHistoryRecNbr", storelocal->mbHistoryRecNbr, &mbHistoryRecNbr_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_dim mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
@@ -1775,7 +1775,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_dim mbCommentLength error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_def_dim(mb_io_ptr->ncid, "mbPositionNbr", NC_UNLIMITED, &mbPositionNbr_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_dim mbPositionNbr error: %s\n", nc_strerror(nc_status));
-		
+
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
@@ -1784,12 +1784,12 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
 		fprintf(stderr,"dbg2       nc_status:               %d\n", nc_status);
-		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %lu\n", storelocal->mbHistoryRecNbr);
-		fprintf(stderr,"dbg2       mbNameLength:            %lu\n", storelocal->mbNameLength);
-		fprintf(stderr,"dbg2       mbCommentLength:         %lu\n", storelocal->mbCommentLength);
-		fprintf(stderr,"dbg2       mbPositionNbr:           %lu\n", storelocal->mbPositionNbr);
+		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %zu\n", storelocal->mbHistoryRecNbr);
+		fprintf(stderr,"dbg2       mbNameLength:            %zu\n", storelocal->mbNameLength);
+		fprintf(stderr,"dbg2       mbCommentLength:         %zu\n", storelocal->mbCommentLength);
+		fprintf(stderr,"dbg2       mbPositionNbr:           %zu\n", storelocal->mbPositionNbr);
 		}
-	    
+
 	    /* define the variables */
 	    dims[0] = mbHistoryRecNbr_id;
 	    nc_status = nc_def_var(mb_io_ptr->ncid, "mbHistDate", NC_INT, 1, dims, &storelocal->mbHistDate_id);
@@ -1972,17 +1972,17 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       mbReference:           %s\n", store->mbReference);
 		fprintf(stderr,"dbg2       mbPointCounter:        %d\n", store->mbPointCounter);
 		}
-	    
+
 	    /* save the variable attributes */
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistDate_id, "add_offset", NC_INT, 1, &storelocal->mbHistDate_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHistDate_add_offset error: %s\n", nc_strerror(nc_status));
@@ -1998,19 +1998,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHistDate_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistDate_id, "missing_value", NC_INT, 1, &storelocal->mbHistDate_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHistDate_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistDate_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, "add_offset", NC_INT, 1, &storelocal->mbHistTime_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHistTime_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2026,19 +2026,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHistTime_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, "missing_value", NC_INT, 1, &storelocal->mbHistTime_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHistTime_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistTime_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistCode_id, "add_offset", NC_INT, 1, &storelocal->mbHistCode_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHistCode_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2054,37 +2054,37 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHistCode_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistCode_id, "missing_value", NC_INT, 1, &storelocal->mbHistCode_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHistCode_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistCode_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistAutor_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistAutor_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistAutor_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistAutor_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistAutor_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistAutor_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistModule_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistModule_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistModule_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistModule_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistModule_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistModule_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistComment_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistComment_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistComment_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistComment_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistComment_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistComment_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistComment_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistComment_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistComment_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistComment_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistComment_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHistComment_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDate_id, "add_offset", NC_INT, 1, &storelocal->mbDate_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbDate_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2100,19 +2100,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbDate_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDate_id, "missing_value", NC_INT, 1, &storelocal->mbDate_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbDate_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbDate_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTime_id, "add_offset", NC_INT, 1, &storelocal->mbTime_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbTime_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2128,19 +2128,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbTime_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTime_id, "missing_value", NC_INT, 1, &storelocal->mbTime_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbTime_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbTime_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "add_offset", NC_DOUBLE, 1, &storelocal->mbOrdinate_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbOrdinate_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2156,19 +2156,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbOrdinate_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "missing_value", NC_INT, 1, &storelocal->mbOrdinate_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbOrdinate_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbOrdinate_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "add_offset", NC_DOUBLE, 1, &storelocal->mbAbscissa_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbAbscissa_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2184,19 +2184,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbAbscissa_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "missing_value", NC_INT, 1, &storelocal->mbAbscissa_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbAbscissa_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAbscissa_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAltitude_id, "add_offset", NC_DOUBLE, 1, &storelocal->mbAltitude_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbAltitude_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2212,19 +2212,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbAltitude_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAltitude_id, "missing_value", NC_INT, 1, &storelocal->mbAltitude_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbAltitude_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAltitude_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbAltitude_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbImmersion_id, "add_offset", NC_DOUBLE, 1, &storelocal->mbImmersion_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbImmersion_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2240,19 +2240,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbImmersion_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbImmersion_id, "missing_value", NC_INT, 1, &storelocal->mbImmersion_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbImmersion_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbImmersion_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbImmersion_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbHeading_id, "add_offset", NC_DOUBLE, 1, &storelocal->mbHeading_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHeading_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2268,19 +2268,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHeading_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHeading_id, "missing_value", NC_INT, 1, &storelocal->mbHeading_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbHeading_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbHeading_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSpeed_id, "add_offset", NC_DOUBLE, 1, &storelocal->mbSpeed_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbSpeed_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2296,19 +2296,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbSpeed_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSpeed_id, "missing_value", NC_INT, 1, &storelocal->mbSpeed_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbSpeed_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSpeed_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbSpeed_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbPType_id, "add_offset", NC_INT, 1, &storelocal->mbPType_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbPType_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2324,19 +2324,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbPType_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbPType_id, "missing_value", NC_INT, 1, &storelocal->mbPType_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbPType_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPType_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPType_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbPQuality_id, "add_offset", NC_INT, 1, &storelocal->mbPQuality_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbPQuality_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2352,19 +2352,19 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbPQuality_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbPQuality_id, "missing_value", NC_INT, 1, &storelocal->mbPQuality_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbPQuality_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPQuality_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPQuality_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_type); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "type", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_type);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_long_name); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "long_name", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_long_name);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_name_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "name_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_name_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_units); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "units", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_units);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_unit_code); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "unit_code", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_unit_code);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbPFlag_id, "add_offset", NC_INT, 1, &storelocal->mbPFlag_add_offset);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbPFlag_add_offset error: %s\n", nc_strerror(nc_status));
@@ -2380,11 +2380,11 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbPFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbPFlag_id, "missing_value", NC_INT, 1, &storelocal->mbPFlag_missing_value);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att mbPFlag_missing_value error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_format_C); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "format_C", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_format_C);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_orientation); 
+	    nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, "orientation", MBSYS_NAVNETCDF_ATTRIBUTELEN, storelocal->mbPFlag_orientation);
 	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-		
+
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
@@ -2575,9 +2575,9 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    nc_status = nc_enddef(mb_io_ptr->ncid);
 
 	    /* save the comments */
-	    
+
 	    /* save the beam arrays */
-	    
+
 	    /* save the soundvel arrays */
 
 	    /* write global variables */
@@ -2592,26 +2592,26 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		count[0] = storelocal->mbHistoryRecNbr;
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, index, count, storelocal->mbHistTime);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHistTime error: %s\n", nc_strerror(nc_status));
-		
+
 		index[0] = 0;
 		count[0] = storelocal->mbHistoryRecNbr;
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, index, count, storelocal->mbHistCode);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHistCode error: %s\n", nc_strerror(nc_status));
-		
+
 		index[0] = 0;
 		index[1] = 0;
 		count[0] = storelocal->mbHistoryRecNbr;
 		count[1] = storelocal->mbNameLength;
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, index, count, storelocal->mbHistAutor);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHistAutor error: %s\n", nc_strerror(nc_status));
-		
+
 		index[0] = 0;
 		index[1] = 0;
 		count[0] = storelocal->mbHistoryRecNbr;
 		count[1] = storelocal->mbNameLength;
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, index, count, storelocal->mbHistModule);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHistModule error: %s\n", nc_strerror(nc_status));
-		
+
 		index[0] = 0;
 		index[1] = 0;
 		count[0] = storelocal->mbHistoryRecNbr;
@@ -2623,10 +2623,10 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
-		    }		
+		    }
 		}
 	    }
-	
+
 	/* now write the data */
 	if (store->kind == MB_DATA_DATA
 	    && status == MB_SUCCESS)
@@ -2676,14 +2676,14 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    count[0] = 1;
 	    nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbPFlag_id, index, count, &store->mbPFlag);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbPFlag error: %s\n", nc_strerror(nc_status));
-	    
+
 	    /* check status */
 	    if (nc_status != NC_NOERR)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
-		}		
-		
+		}
+
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
@@ -2704,11 +2704,11 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       mbPQuality:              %d\n", store->mbPQuality);
 		fprintf(stderr,"dbg2       mbPFlag:                 %d\n", store->mbPFlag);
 		}
-	    
+
 	    /* set counters */
 	    (*recwrite)++;
 	    (*datawrite)++;
-	    
+
 	    }
 
 	/* print output debug statements */

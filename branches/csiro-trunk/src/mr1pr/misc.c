@@ -47,6 +47,10 @@
 
 #include "mr1pr_defines.h"
 #include "mem.h"
+#ifdef WIN32
+#include <float.h>
+#define isnan _isnan
+#endif
 
 unsigned int
 mr1_pngdatabufsz(Ping *png)
@@ -374,12 +378,15 @@ mr1_nanf()
 	unsigned int ui;
 	float f;
 
-	if (sizeof(float) != sizeof(unsigned int))
+	/* test removed at suggestion of Joaquim Luis */
+	/* if (sizeof(float) != sizeof(unsigned int))
 		f= 0./0.;
 	else {
 		ui= 0xffc00000;
 		MemCopy(&ui, &f, sizeof(float));
-	}
+	} */
+	ui= 0xffc00000;
+	MemCopy(&ui, &f, sizeof(float));
 
 	return f;
 }

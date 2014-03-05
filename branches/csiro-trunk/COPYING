@@ -1,0 +1,81 @@
+-------------------------------------------------------------------------------
+MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
+-------------------------------------------------------------------------------
+Version: $Id$
+-------------------------------------------------------------------------------
+
+This file contains the copyright and licensing terms for the MB-System open
+source software package for the processing and display of swath sonar data.
+This file is located at the top of the MB-System source code distribution
+directory structure.
+
+-------------------------------------------------------------------------------
+
+MB-System Copyright (C) 1993-2013 by
+David W. Caress (caress@mbari.org)
+  Monterey Bay Aquarium Research Institute
+  Moss Landing, CA 95039
+Dale N. Chayes (dale@ldeo.columbia.edu)
+  Lamont-Doherty Earth Observatory
+  Palisades, NY 10964mbbackangle.manl
+All Rights Reserved
+All Wrongs Remembered
+
+-------------------------------------------------------------------------------
+
+The MB-System source code is distributed under the GNU General Public License,
+version 3, as formulated by the GNU Project. Early MB-System distributions
+were described as "public domain", which meant there was no restriction
+whatsoever on the use of the code. For over a decade we have adopted the
+more restrictive GNU GPL license in order to insure that anyone who distributes
+software based in whole or in part on MB-System also distributes their
+modified MB-System source code and any additional source code.
+
+The file "GPL", also located at the top of the MB-System source code
+distribution directory structure, contains the text of the GNU GPL version 3.
+
+The GNU GPL also prohibits the distribution of proprietary executables linked
+with MB-System libraries unless the source code is also distributed. We waive
+this restriction on distributing proprietary compiled programs for specific
+software products if and only if those software products meet the following
+two conditions:
+   1) The software product was created, sold, and delivered to customers using
+      source code derived from MB-System release 4.6 distributions.
+   2) The software product was sold and delivered to customers prior to
+      January 1, 2001.
+
+The MB-System distribution includes some source code derived from packages that
+are distributed separately and have been authored by programmers other than the
+MB-System team. This includes:
+   - The Generic Sensor Format (GSF) library source located in
+     mbsystem/src/gsf. The GSF package is distributed by the
+     Science Applications International Corporation under contract
+     to the Naval Oceanographic Office.
+   - The SURF API (SAPI) library source located in mbsystem/src/surf.
+     The SAPI package has been released under the GNU General Public
+     License by Atlas Hydrographic.
+   - The MR1PR library source located in mbsystem/src/mr1pr. This
+     package has been openly released by the Hawaii Mapping
+     Research Group.
+   - The PROJ.4 library source located in mbsystem/src/proj.
+     This package was originally developed by Gerald Evenden
+     of the United States Geological Survey, and is now maintained
+     and distributed under an MIT license (that is very close to
+     public domain) by Frank Warmerdam in association with the Open
+     Source Geospational Foundation
+   - The mb_mergesort() function found in mbsystem/src/mbio/mb_esf.c
+     derives from the GNU-Darwin Distribution. This code is released
+     under both the Apple Public Source License Version 1.1 and the
+     BSD license, with original copyright by the Regents of the
+     University of California.
+
+The MB-System does not come with any warranties, nor is it guaranteed to work
+on your computer or to do anything useful. The user assumes full responsibility
+for the use of this system. In particular, David W. Caress, Dale N. Chayes,
+the Monterey Bay Aquarium Research Institute, the Lamont-Doherty Earth
+Observatory of Columbia University, or any other individuals or organizations
+involved in the design and maintenance of the MB-System software package are
+NOT responsible for any damage that may follow from correct or incorrect use
+of these programs.
+
+-------------------------------------------------------------------------------

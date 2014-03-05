@@ -2,7 +2,7 @@
  *    The MB-system:	mbgrdtiff.c	5/30/93
  *    $Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,10 +13,10 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- *    mbgrdtiff generates a TIFF image from a GMT grid. The 
- *    image generation is similar to that of the GMT program 
- *    grdimage. In particular, the color map is applied from 
- *    a GMT CPT file, and shading overlay grids may be applied. 
+ *    mbgrdtiff generates a TIFF image from a GMT grid. The
+ *    image generation is similar to that of the GMT program
+ *    grdimage. In particular, the color map is applied from
+ *    a GMT CPT file, and shading overlay grids may be applied.
  *    The output TIFF file contains information allowing
  *    the ArcView and ArcInfo GIS packages to import the image
  *    as a geographically located coverage. The image is 8 bits
@@ -42,22 +42,22 @@
  *           ------- IFD -----------
  *
  *      8    2      18       Number of entries in IFD
- *     
+ *
  *     10    2      254      Tag:   NewSubfileType
  *     12    2      4        Type:  long (4 byte unsigned int)
  *     14    4      1        Count: one value
  *     18    4      0        Value: basic image, nothing fancy
- *     
+ *
  *     22    2      256      Tag:   ImageWidth
  *     24    2      4        Type:  long (4 byte unsigned int)
  *     26    4      1        Count: one value
  *     30    4      nx       Value: image width in pixels
- *     
+ *
  *     34    2      257      Tag:   ImageLength
  *     36    2      4        Type:  long (4 byte unsigned int)
  *     38    4      1        Count: one value
  *     42    4      ny       Value: image length (height) in pixels
- *     
+ *
  *     46    2      258      Tag:   BitsPerSample
  *     48    2      3        Type:  short (2 byte unsigned int)
  *                           Color case:
@@ -66,32 +66,32 @@
  *                           Grayscale case:
  *     50    4      1          Count: one value for grayscale
  *     54    4      8          Value: one byte per sample
- *     
+ *
  *     58    2      259      Tag:   Compression
  *     60    2      3        Type:  short (2 byte unsigned int)
  *     62    4      1        Count: one value
  *     66    4      1        Value: no compression
- *     
+ *
  *     70    2      262      Tag:   PhotometricInterpretation
  *     72    2      3        Type:  short (2 byte unsigned int)
  *     74    4      1        Count: one value
  *     78    4      2        Value: RGB image
- *     
+ *
  *     82    2      273      Tag:   StripOffsets
  *     84    2      4        Type:  long (4 byte unsigned int)
  *     86    4      1        Count: entire image is one strip
  *     90    4      512      Value: offset to image data
- *     
+ *
  *     94    2      277      Tag:   SamplesPerPixel
  *     96    2      3        Type:  short (2 byte unsigned int)
  *     98    4      1        Count: one value
  *    102    4      3        Value: 3 samples per pixel for RGB
- *     
+ *
  *    106    2      278      Tag:   RowsPerStrip
  *    108    2      4        Type:  long (4 byte unsigned int)
  *    110    4      1        Count: one value
  *    114    4      ny       Value: ImageLength value (all rows in image)
- *     
+ *
  *    118    2      279      Tag:   StripByteCounts
  *    120    2      4        Type:  long (4 byte unsigned int)
  *    122    4      1        Count: one value
@@ -99,42 +99,42 @@
  *    126    4      3*nx*ny    Value: 3 * ImageWidth * ImageLength
  *                           Grayscale case:
  *    126    4      nx*ny      Value: ImageWidth * ImageLength
- *     
+ *
  *    130    2      282      Tag:   XResolution
  *    132    2      5        Type:  rational (2 ints: numerator, denominator)
  *    134    4      1        Count: one value
  *    138    4      264      Value: offset to fraction representing dpi
- *     
+ *
  *    142    2      283      Tag:   YResolution
  *    144    2      4        Type:  rational (2 ints: numerator, denominator)
  *    146    4      1        Count: one value
  *    150    4      272      Value: offset to fraction representing dpi
- *     
+ *
  *    154    2      296      Tag:   ResolutionUnit
  *    156    2      3        Type:  short (2 byte unsigned int)
  *    158    4      1        Count: one value
  *    162    4      2        Value: Inches
- *     
+ *
  *    166    2      33550    Tag:   ModelPixelScaleTag
  *    168    2      12       Type:  double (IEEE double precision)
  *    170    4      3        Count: 3 for scalex,scaley,scalez where scalez=0
  *    174    4      280      Value: offset to values
- *     
+ *
  *    178    2      33922    Tag:   ModelTiepointTag
  *    180    2      12       Type:  double (IEEE double precision)
  *    182    4      6        Count: 6 for i,j,k,x,y,z where k=z=0
  *    186    4      304      Value: offset to values
- *     
+ *
  *    190    2      34735    Tag:   GeoKeyDirectoryTag
  *    192    2      3        Type:  short (2 byte unsigned int)
  *    194    4      20       Count: 20
  *    198    4      352      Value: offset to values
- *     
+ *
  *    190    2      34736    Tag:   GeoDoubleParamsTag
  *    192    2      3        Type:  double (IEEE double precision)
  *    194    4      ndouble  Count: ndouble
  *    198    4      400      Value: offset to values
- *     
+ *
  *    190    2      34737    Tag:   GeoAsciiParamsTag
  *    192    2      2        Type:  ASCII
  *    194    4      nascii   Count: nascii
@@ -163,7 +163,7 @@
  *        328    8      minlon   ModelTiePointTag minimum longitude
  *        336    8      maxlat   ModelTiePointTag minimum latitude
  *        344    8      0        ModelTiePointTag minimum z
- * 
+ *
  *    ------- Else if GTModelTypeGeoKey = ModelTypeProjected then:
  *        304    8      0        ModelTiePointTag i
  *        312    8      0        ModelTiePointTag j
@@ -176,28 +176,28 @@
  *    354    2      0        GeoKeyDirectoryTag KeyRevision
  *    356    2      2        GeoKeyDirectoryTag MinorRevision
  *    358    2      4        GeoKeyDirectoryTag NumberOfKeys
- * 
+ *
  *    360    2      1024     GeoKeyDirectoryTag KeyId: GTModelTypeGeoKey
  *    362    2      0        GeoKeyDirectoryTag TiffTagLocation
  *    364    2      1        GeoKeyDirectoryTag Count
  *    366    2      1        GeoKeyDirectoryTag ModelType Value (ModelTypeProjected=1, ModelTypeGeographic=2)
- * 
+ *
  *    368    2      1025     GeoKeyDirectoryTag KeyId: GTRasterTypeGeoKey
  *    370    2      0        GeoKeyDirectoryTag TiffTagLocation
  *    372    2      1        GeoKeyDirectoryTag Count
  *    374    2      2        GeoKeyDirectoryTag RasterType Value (RasterPixelIsArea=1, RasterPixelIsPoint=2)
- * 
+ *
  *    368    2      1026     GeoKeyDirectoryTag KeyId: GTCitationGeoKey
  *    370    2      34737    GeoKeyDirectoryTag TiffTagLocation
  *    372    2      nascii   GeoKeyDirectoryTag Count
  *    374    2      0        GeoKeyDirectoryTag Value_Offset
- * 
+ *
  *    ------- If GTModelTypeGeoKey = ModelTypeGeographic then:
  *        376    2      2048     GeoKeyDirectoryTag KeyId: GeographicTypeGeoKey
  *        378    2      0        GeoKeyDirectoryTag TiffTagLocation
  *        380    2      1        GeoKeyDirectoryTag Count
  *        382    2      4030     GeoKeyDirectoryTag GeographicType Value (GCSE_WGS84=4030)
- * 
+ *
  *    ------- Else if GTModelTypeGeoKey = ModelTypeProjected then:
  *        376    2      3072     GeoKeyDirectoryTag KeyId: ProjectedCSTypeGeoKey
  *        378    2      0        GeoKeyDirectoryTag TiffTagLocation
@@ -210,7 +210,7 @@
  *
  *           ------- Image ---------
  *
- *    512    3*nx*ny         Image in RGB bytes      
+ *    512    3*nx*ny         Image in RGB bytes
  *
  *
  *
@@ -287,13 +287,13 @@
 #include <string.h>
 #include <time.h>
 
-/* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-
 /* GMT include files */
 #include "gmt.h"
+
+/* MBIO include files */
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
 
 /* TIFF 6.0 and geoTIFF tag array */
 #define TIFF_HEADER_SIZE 1024
@@ -330,7 +330,7 @@
 #define ModelTypeGeographic	     2
 #define GCS_WGS_84		  4326
 
-unsigned short   tiff_tag[] = 
+unsigned short   tiff_tag[] =
                       { NewSubfileType,
 			ImageWidth,
 			ImageLength,
@@ -350,7 +350,7 @@ unsigned short   tiff_tag[] =
 			GeoDoubleParamsTag,
 			GeoAsciiParamsTag
 		      };
-unsigned short   tiff_type[] = 
+unsigned short   tiff_type[] =
                       {   4,      /* NewSubfileType */
 			  4,      /* ImageWidth */
 			  4,      /* ImageLength */
@@ -370,7 +370,7 @@ unsigned short   tiff_type[] =
 			 12,      /* GeoDoubleParamsTag */
 			  2       /* GeoAsciiParamsTag */
 		      };
-int              tiff_offset[] = 
+int              tiff_offset[] =
                       {   0,      /* NewSubfileType */
 			  0,      /* ImageWidth */
 			  0,      /* ImageLength */
@@ -418,6 +418,7 @@ int main (int argc, char **argv)
 	char    cptfile[MB_PATH_MAXLINE];
         char    intensfile[MB_PATH_MAXLINE];
         char    tiff_file[MB_PATH_MAXLINE];
+        char    world_file[MB_PATH_MAXLINE];
 	int	intensity;
         double  bounds[4];
 #ifdef GMT_MINOR_VERSION
@@ -440,7 +441,7 @@ int main (int argc, char **argv)
 	char    *tiff_image = NULL;
 	char	tiff_comment[TIFF_COMMENT_MAXLINE];
 	char	NorS;
-	
+
 	/* other variables */
 	FILE    *tfp;
 	int     rgb[3];
@@ -453,6 +454,7 @@ int main (int argc, char **argv)
         int     value_int;
 	double  value_double;
 	char	*projection = "-Jx1.0";
+        int     make_worldfile = MB_NO;
 
 	/* get current mb default values */
 	status = mb_lonflip(verbose,&lonflip);
@@ -470,34 +472,34 @@ int main (int argc, char **argv)
 
 	/* deal with gmt options */
 	GMT_begin (1, argv);
-	errflg += GMT_get_common_args (projection, 
-				&bounds[0], &bounds[1], 
+	errflg += GMT_get_common_args (projection,
+				&bounds[0], &bounds[1],
 				&bounds[2], &bounds[3]);
-	for (i = 1; i < argc; i++) 
+	for (i = 1; i < argc; i++)
 		{
-		if (argv[i][0] == '-') 
+		if (argv[i][0] == '-')
 			{
-			switch (argv[i][1]) 
+			switch (argv[i][1])
 				{
 				/* Common parameters */
 
 				case 'r':
 					argv[i][1] = 'R';
 				case 'R':
-					errflg += GMT_get_common_args (argv[i], 
-						&bounds[0], &bounds[1], 
+					errflg += GMT_get_common_args (argv[i],
+						&bounds[0], &bounds[1],
 						&bounds[2], &bounds[3]);
 					break;
-				
+
 				/* Supplemental parameters */
-			
+
  			}
 			}
 		}
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhC:c:I:i:K:k:L:l:O:o:R:r:")) != -1)
-	  switch (c) 
+	while ((c = getopt(argc, argv, "VvHhC:c:I:i:K:k:L:l:O:o:R:r:Ww")) != -1)
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -533,6 +535,11 @@ int main (int argc, char **argv)
 		case 'v':
 			verbose++;
 			break;
+                case 'W':
+                case 'w':
+                        make_worldfile = MB_YES;
+                        flag++;
+                        break;
 		case '?':
 			errflg++;
 		}
@@ -547,7 +554,7 @@ int main (int argc, char **argv)
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
 		}
-	
+
 	GMT_grd_init (&header, argc, argv, FALSE);
 	GMT_grd_init (&iheader, argc, argv, FALSE);
 
@@ -566,12 +573,13 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       help:       %d\n",help);
-		fprintf(stderr,"dbg2       cptfile:    %s\n",cptfile);
-		fprintf(stderr,"dbg2       grdfile:    %s\n",grdfile);
-		fprintf(stderr,"dbg2       intensfile: %s\n",intensfile);
-		fprintf(stderr,"dbg2       tiff_file:  %s\n",tiff_file);
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       help:            %d\n",help);
+		fprintf(stderr,"dbg2       cptfile:         %s\n",cptfile);
+		fprintf(stderr,"dbg2       grdfile:         %s\n",grdfile);
+		fprintf(stderr,"dbg2       intensfile:      %s\n",intensfile);
+		fprintf(stderr,"dbg2       tiff_file:       %s\n",tiff_file);
+		fprintf(stderr,"dbg2       make_worldfile:  %d\n",make_worldfile);
 		}
 
 	/* if help desired then print it and exit */
@@ -586,15 +594,15 @@ int main (int argc, char **argv)
 	GMT_read_cpt(cptfile);
 	if (GMT_n_colors <= 0)
 	  {
-	    fprintf(stderr,"\nColor pallette table not properly specified:\n");
+	    fprintf(stderr,"\nColor palette table not properly specified:\n");
 	    fprintf(stderr,"\nProgram <%s> Terminated\n",
 		    program_name);
 	    error = MB_ERROR_BAD_PARAMETER;
 	    exit(error);
 	  }
-	
+
 	/* read input grd file header */
-	if (GMT_read_grd_info (grdfile, &header)) 
+	if (GMT_read_grd_info (grdfile, &header))
 	    {
 	    error = MB_ERROR_OPEN_FAIL;
 	    fprintf(stderr,"\nUnable to open grd file: %s\n",
@@ -605,7 +613,7 @@ int main (int argc, char **argv)
 	    }
 	if (intensity == MB_YES)
 	    {
-	    if (GMT_read_grd_info (intensfile, &iheader)) 
+	    if (GMT_read_grd_info (intensfile, &iheader))
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open intensity grd file: %s\n",
@@ -631,7 +639,7 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 	    }
-	    
+
 	/* try to get projection from the grd file remark */
 	if (strncmp(&(header.remark[2]), "Projection: ", 12) == 0)
 		{
@@ -647,21 +655,21 @@ int main (int argc, char **argv)
 				}
 				modeltype = ModelTypeProjected;
 			sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
-			
+
 			project_info.degree[0] = FALSE;
 			}
 		else if ((nscan = sscanf(&(header.remark[2]), "Projection: epsg%d", &projectionid)) == 1)
 			{
 			sprintf(projectionname, "epsg%d", projectionid);
 			modeltype = ModelTypeProjected;
-			
+
 			project_info.degree[0] = FALSE;
 			}
 		else if (strncmp(&(header.remark[2]), "Projection: SeismicProfile", 26) == 0)
 			{
 			sprintf(projectionname, "SeismicProfile");
 			modeltype = ModelTypeProjected;
-			
+
 			project_info.degree[0] = FALSE;
 			}
 		else
@@ -669,7 +677,7 @@ int main (int argc, char **argv)
 			strcpy(projectionname, "Geographic WGS84");
 			modeltype = ModelTypeGeographic;
 			projectionid = GCS_WGS_84;
-			
+
 			project_info.degree[0] = TRUE;
 			}
 		}
@@ -678,10 +686,10 @@ int main (int argc, char **argv)
 		strcpy(projectionname, "Geographic WGS84");
 		modeltype = ModelTypeGeographic;
 		projectionid = GCS_WGS_84;
-			
+
 		project_info.degree[0] = TRUE;
-		}	
-	    
+		}
+
 	/* set bounds from grd file if not set on command line */
 	if (bounds[1] <= bounds[0] || bounds[3] <= bounds[2])
 	    {
@@ -728,8 +736,8 @@ int main (int argc, char **argv)
 	pad[1] = 0;
 	pad[2] = 0;
 	pad[3] = 0;
-	if (GMT_read_grd (grdfile, &header, grid, 
-			    bounds[0],  bounds[1],  bounds[2],  bounds[3], 
+	if (GMT_read_grd (grdfile, &header, grid,
+			    bounds[0],  bounds[1],  bounds[2],  bounds[3],
 			    pad, FALSE))
 	    {
 	    error = MB_ERROR_OPEN_FAIL;
@@ -741,8 +749,8 @@ int main (int argc, char **argv)
 	    }
 	if (intensity == MB_YES)
 	    {
-	    if (GMT_read_grd (intensfile, &iheader, igrid, 
-				bounds[0],  bounds[1],  bounds[2],  bounds[3], 
+	    if (GMT_read_grd (intensfile, &iheader, igrid,
+				bounds[0],  bounds[1],  bounds[2],  bounds[3],
 				pad, FALSE))
 		{
 		error = MB_ERROR_OPEN_FAIL;
@@ -753,7 +761,7 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 	    }
-	    
+
 	/* apply lonflip */
 	if (modeltype != ModelTypeProjected)
 		{
@@ -805,7 +813,7 @@ int main (int argc, char **argv)
 		  program_name);
 	    exit(error);
 	    }
-	    
+
 	/* set the TIFF comment */
 	sprintf(tiff_comment, "Image generated by %s|", program_name);
 
@@ -1019,11 +1027,11 @@ int main (int argc, char **argv)
 		value_int = tiff_offset[i];
 	        mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
 		index += 4;
-		
+
 		/* index to geotiff geokey directory */
 		keyindex = tiff_offset[i];
 
-		/* geokey directory header 
+		/* geokey directory header
 			(KeyDirectoryVersion, KeyRevision, MinorRevision, NumberOfKeys) */
 		value_short = 1;
 		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
@@ -1037,7 +1045,7 @@ int main (int argc, char **argv)
 		value_short = 4;
 		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
 		keyindex += 2;
-		
+
 		/* GTModelTypeGeoKey */
 		value_short = GTModelTypeGeoKey;
 		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
@@ -1051,7 +1059,7 @@ int main (int argc, char **argv)
 		value_short = modeltype;
 		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
 		keyindex += 2;
-		
+
 		/* GTRasterTypeGeoKey */
 		value_short = GTRasterTypeGeoKey;
 		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
@@ -1065,7 +1073,7 @@ int main (int argc, char **argv)
 		value_short = RasterPixelIsPoint;
 		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
 		keyindex += 2;
-		
+
 		/* GTCitationGeoKey */
 		value_short = GTCitationGeoKey;
 		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
@@ -1079,7 +1087,7 @@ int main (int argc, char **argv)
 		value_short = 0;
 		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
 		keyindex += 2;
-		
+
 		if (modeltype == ModelTypeGeographic)
 			{
 			/* GeographicTypeGeoKey */
@@ -1096,7 +1104,7 @@ int main (int argc, char **argv)
 			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			}
-		
+
 		else if (modeltype == ModelTypeProjected)
 			{
 			/* ProjectedCSTypeGeoKey */
@@ -1129,7 +1137,7 @@ int main (int argc, char **argv)
 		value_int = tiff_offset[i];
 	        mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
 		index += 4;
-		
+
 		/* put in the string */
 		strncpy(&tiff_header[tiff_offset[i]], tiff_comment, 64);
 		break;
@@ -1158,16 +1166,16 @@ int main (int argc, char **argv)
 	    }
 
 	/* write the header */
-	if ((status = fwrite(tiff_header,1,TIFF_HEADER_SIZE,tfp)) 
-			!= TIFF_HEADER_SIZE) 
+	if ((status = fwrite(tiff_header,1,TIFF_HEADER_SIZE,tfp))
+			!= TIFF_HEADER_SIZE)
 	  {
 	    status = MB_FAILURE;
 	    error = MB_ERROR_WRITE_FAIL;
 	  }
 
 	/* write the image */
-	if ((status = fwrite(tiff_image,1,image_size,tfp)) 
-			!= image_size) 
+	if ((status = fwrite(tiff_image,1,image_size,tfp))
+			!= image_size)
 	  {
 	    status = MB_FAILURE;
 	    error = MB_ERROR_WRITE_FAIL;
@@ -1175,6 +1183,32 @@ int main (int argc, char **argv)
 
 	/* close the tiff file */
 	fclose(tfp);
+
+	/* open world file */
+        if (make_worldfile == MB_YES)
+            {
+            strcpy(world_file, tiff_file);
+            world_file[strlen(tiff_file)-4] = '\0';
+            strcat(world_file,".tfw");
+            if ((tfp = fopen(world_file,"w")) == NULL)
+                {
+                error = MB_ERROR_OPEN_FAIL;
+                fprintf(stderr,"\nUnable to open output world file: %s\n",
+                      world_file);
+                fprintf(stderr,"\nProgram <%s> Terminated\n",
+                      program_name);
+                exit(error);
+                }
+
+            /* write out world file contents */
+            fprintf(tfp, "%f\r\n0.0\r\n0.0\r\n%f\r\n%f\r\n%f\r\n",
+                    header.x_inc, -header.y_inc,
+                    header.x_min - 0.5 * header.x_inc,
+                    header.y_max + 0.5 * header.y_inc);
+
+            /* close the world file */
+            fclose(tfp);
+            }
 
 	/* deallocate arrays */
 	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&grid, &error);
@@ -1197,7 +1231,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Ending status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
-		
+
 	/* clean up GMT memory usage and file locking */
 	fprintf(stderr,"\n");
 	GMT_end(1, argv);
@@ -1207,20 +1241,3 @@ int main (int argc, char **argv)
 }
 
 /*--------------------------------------------------------------------*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

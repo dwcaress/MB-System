@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
  *	$Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_em12ifrm.c contains the functions for reading and writing
- * multibeam data in the EM12IFRM format.  
+ * multibeam data in the EM12IFRM format.
  * These functions include:
  *   mbr_alm_em12ifrm	- allocate read/write memory
  *   mbr_dem_em12ifrm	- deallocate read/write memory
@@ -83,16 +83,16 @@
 #include <sys/stat.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_simrad.h"
-#include "../../include/mbf_em12ifrm.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_simrad.h"
+#include "mbf_em12ifrm.h"
 
 /* include for byte swapping on little-endian machines */
 #ifdef BYTESWAPPED
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 #endif
 
 /* define IFREMER EM12 Archive format record size */
@@ -101,27 +101,27 @@
 #define MBF_EM12IFRM_SSBEAMHEADER_SIZE   6
 
 /* essential function prototypes */
-int mbr_register_em12ifrm(int verbose, void *mbio_ptr, 
+int mbr_register_em12ifrm(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_em12ifrm(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_em12ifrm(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_em12ifrm(int verbose, void *mbio_ptr, int *error);
@@ -152,55 +152,55 @@ int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_em12ifrm(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_em12ifrm(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_em12ifrm;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_em12ifrm; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_simrad_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_simrad_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_em12ifrm; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_em12ifrm; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_simrad_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_simrad_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_simrad_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_simrad_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_simrad_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_simrad_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_simrad_detects; 
-	mb_io_ptr->mb_io_gains = &mbsys_simrad_gains; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_em12ifrm;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_simrad_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_simrad_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_em12ifrm;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_em12ifrm;
+	mb_io_ptr->mb_io_dimensions = &mbsys_simrad_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_simrad_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_simrad_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_simrad_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_simrad_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_simrad_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_simrad_detects;
+	mb_io_ptr->mb_io_gains = &mbsys_simrad_gains;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -219,25 +219,25 @@ int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -248,25 +248,25 @@ int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_em12ifrm(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_em12ifrm(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_em12ifrm";
@@ -307,7 +307,7 @@ int mbr_info_em12ifrm(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -357,7 +357,7 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -382,12 +382,12 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 	swath_width = &mb_io_ptr->saved2;
 	*pixel_size = 0.0;
 	*swath_width = 0.0;
-	
-	/* now handle parallel files 
+
+	/* now handle parallel files
 	   - works only if main input is *.SO
 	   - nav file is then *.NA
 	   - imagery file is then *.IM */
-	   
+
 	/* first look for imagery file */
 	if ((tag_ptr = strstr(mb_io_ptr->file, ".SO")) != NULL)
 		{
@@ -397,10 +397,10 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 		tag_ptr[0] = '.';
 		tag_ptr[1] = 'I';
 		tag_ptr[2] = 'M';
-		
+
 		/* check if imagery files are in same directory */
 		imgfile_stat = stat(imgtest, &imgfile_status);
-		if (imgfile_stat == 0 
+		if (imgfile_stat == 0
 		    && (imgfile_status.st_mode & S_IFMT) != S_IFDIR)
 		    {
 		    strcpy(mb_io_ptr->file2, imgtest);
@@ -424,7 +424,7 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 		    tag_ptr[0] = '.';
 		    tag_ptr[1] = 'I';
 		    tag_ptr[2] = 'M';
-		    
+
 		    /* check if files exist */
 		    imgfile_stat = stat(imgtest, &imgfile_status);
 		    if (imgfile_stat == 0
@@ -434,7 +434,7 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 			}
 		    }
 		}
-	   
+
 	/* now look for nav file */
 	if ((tag_ptr = strstr(mb_io_ptr->file, ".SO")) != NULL)
 		{
@@ -444,7 +444,7 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 		tag_ptr[0] = '.';
 		tag_ptr[1] = 'N';
 		tag_ptr[2] = 'A';
-		
+
 		/* check if nav files are in same directory */
 		navfile_stat = stat(navtest, &navfile_status);
 		if (navfile_stat == 0
@@ -471,7 +471,7 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 		    tag_ptr[0] = '.';
 		    tag_ptr[1] = 'N';
 		    tag_ptr[2] = 'A';
-		    
+
 		    /* check if files exist */
 		    navfile_stat = stat(navtest, &navfile_status);
 		    if (navfile_stat == 0
@@ -509,7 +509,7 @@ int mbr_dem_em12ifrm(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -549,7 +549,7 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       data_ptr:   %lu\n",(size_t)data_ptr);
+		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
 		}
 
 	/* get pointer to data descriptor */
@@ -575,19 +575,19 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error)
 		data->pitch_offset = 0.0;	/* pitch offset (degrees) */
 		data->heading_offset = 0.0;	/* heading offset (degrees) */
 		data->em100_td = 0.0;	/* EM-100 tranducer depth (meters) */
-		data->em100_tx = 0.0;	/* EM-100 tranducer fore-aft 
+		data->em100_tx = 0.0;	/* EM-100 tranducer fore-aft
 						offset (meters) */
-		data->em100_ty = 0.0;	/* EM-100 tranducer athwartships 
+		data->em100_ty = 0.0;	/* EM-100 tranducer athwartships
 						offset (meters) */
 		data->em12_td = 0.0;	/* EM-12 tranducer depth (meters) */
-		data->em12_tx = 0.0;	/* EM-12 tranducer fore-aft 
+		data->em12_tx = 0.0;	/* EM-12 tranducer fore-aft
 						offset (meters) */
-		data->em12_ty = 0.0;	/* EM-12 tranducer athwartships 
+		data->em12_ty = 0.0;	/* EM-12 tranducer athwartships
 						offset (meters) */
 		data->em1000_td = 0.0;	/* EM-1000 tranducer depth (meters) */
-		data->em1000_tx = 0.0;	/* EM-1000 tranducer fore-aft 
+		data->em1000_tx = 0.0;	/* EM-1000 tranducer fore-aft
 						offset (meters) */
-		data->em1000_ty = 0.0;	/* EM-1000 tranducer athwartships 
+		data->em1000_ty = 0.0;	/* EM-1000 tranducer athwartships
 						offset (meters) */
 		for (i=0;i<128;i++)
 			data->spare_parameter[i] = '\0';
@@ -672,7 +672,7 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error)
 			data->ssp[i] = 0;
 			}
 		data->pixel_size = 0.0;
-		data->pixels_ss = 0;			
+		data->pixels_ss = 0;
 		for (i=0;i<MBF_EM12IFRM_MAXPIXELS;i++)
 			{
 			data->ss[i] = 0.0;
@@ -722,8 +722,8 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);  
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -731,8 +731,8 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_em12ifrm_struct *) mb_io_ptr->raw_data;
-	store = (struct mbsys_simrad_struct *) store_ptr;	
-	save_ss = (int *) &mb_io_ptr->save4;	
+	store = (struct mbsys_simrad_struct *) store_ptr;
+	save_ss = (int *) &mb_io_ptr->save4;
 	pixel_size = (double *) &mb_io_ptr->saved1;
 	swath_width = (double *) &mb_io_ptr->saved2;
 
@@ -746,9 +746,9 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* save fix if nav data */
 	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_NAV)
-		{				
+		{
 		/* get nav time */
-		mb_fix_y2k(verbose, data->pos_year, 
+		mb_fix_y2k(verbose, data->pos_year,
 			    &ntime_i[0]);
 		ntime_i[1] = data->pos_month;
 		ntime_i[2] = data->pos_day;
@@ -757,21 +757,21 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		ntime_i[5] = data->pos_second;
 		ntime_i[6] = 10000 * data->pos_centisecond;
 		mb_get_time(verbose, ntime_i, &ntime_d);
-		
+
 		/* add latest fix */
-		mb_navint_add(verbose, mbio_ptr, 
-				ntime_d, 
-				(double)(data->longitude), 
-				(double)(data->latitude), 
+		mb_navint_add(verbose, mbio_ptr,
+				ntime_d,
+				(double)(data->longitude),
+				(double)(data->latitude),
 				error);
 		}
 
 	/* handle navigation interpolation */
 	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_DATA)
-		{			
+		{
 		/* get ping time */
-		mb_fix_y2k(verbose, data->year, 
+		mb_fix_y2k(verbose, data->year,
 			    &ptime_i[0]);
 		ptime_i[1] = data->month;
 		ptime_i[2] = data->day;
@@ -782,8 +782,8 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_get_time(verbose, ptime_i, &ptime_d);
 
 		/* interpolate from saved nav */
-		mb_navint_interp(verbose, mbio_ptr, ptime_d, 
-				    (double)data->line_heading, 0.0, 
+		mb_navint_interp(verbose, mbio_ptr, ptime_d,
+				    (double)data->line_heading, 0.0,
 				    &plon, &plat, &pspeed, error);
 		data->speed = pspeed / 3.6;
 \
@@ -874,7 +874,7 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->minute = data->minute;
 		store->second = data->second;
 		store->centisecond = data->centisecond;
-		
+
 		/* allocate secondary data structure for
 			survey data if needed */
 		if (data->kind == MB_DATA_DATA
@@ -884,14 +884,14 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 					verbose,mbio_ptr,
 					store_ptr,error);
 			}
-		
+
 		/* deal with putting survey data into
 		secondary data structure */
-		if (status == MB_SUCCESS 
+		if (status == MB_SUCCESS
 			&& data->kind == MB_DATA_DATA)
 			{
 			/* get data structure pointer */
-			ping = (struct mbsys_simrad_survey_struct *) 
+			ping = (struct mbsys_simrad_survey_struct *)
 				store->ping;
 
 			/* copy data */
@@ -948,9 +948,9 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 					{
 					ping->beam_frequency[i] = data->beam_frequency[i];
 					ping->beam_samples[i] = data->beam_samples[i];
-					ping->beam_center_sample[i] 
+					ping->beam_center_sample[i]
 						= data->beam_center_sample[i];
-					ping->beam_start_sample[i] 
+					ping->beam_start_sample[i]
 						= data->beam_start_sample[i];
 					}
 				for (i=0;i<ping->pixels_ssraw;i++)
@@ -962,12 +962,12 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 			/* generate sidescan */
 			ping->pixel_size = 0.0;
-			ping->pixels_ss = 0;			
+			ping->pixels_ss = 0;
 			status = mbsys_simrad_makess(verbose,
 					mbio_ptr, store_ptr,
-					MB_NO, pixel_size, 
-					MB_NO, swath_width, 
-					0, 
+					MB_NO, pixel_size,
+					MB_NO, swath_width,
+					0,
 					error);
 			}
 		}
@@ -1004,8 +1004,8 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1092,13 +1092,13 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->minute = store->minute;
 		data->second = store->second;
 		data->centisecond = store->centisecond;
-		
-		/* deal with survey data 
+
+		/* deal with survey data
 			in secondary data structure */
 		if (store->ping != NULL)
 			{
 			/* get data structure pointer */
-			ping = (struct mbsys_simrad_survey_struct *) 
+			ping = (struct mbsys_simrad_survey_struct *)
 				store->ping;
 
 			/* copy survey data */
@@ -1133,9 +1133,9 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				data->heave[i] = ping->heave[i];
 				data->beam_frequency[i] = ping->beam_frequency[i];
 				data->beam_samples[i] = ping->beam_samples[i];
-				data->beam_center_sample[i] 
+				data->beam_center_sample[i]
 					= ping->beam_center_sample[i];
-				data->beam_start_sample[i] 
+				data->beam_start_sample[i]
 					= ping->beam_start_sample[i];
 				}
 			for (i=0;i<data->pixels_ssraw;i++)
@@ -1145,10 +1145,10 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				}
 			}
 		}
-		
+
 	/* set error as this is a read only format */
 	status = MB_FAILURE;
-	*error = MB_ERROR_WRITE_FAIL;	
+	*error = MB_ERROR_WRITE_FAIL;
 
 	/* write next data to file */
 	/*status = mbr_em12ifrm_wr_data(verbose,mbio_ptr,data_ptr,error);*/
@@ -1212,7 +1212,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1220,16 +1220,16 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_em12ifrm_struct *) mb_io_ptr->raw_data;
-	
+
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-	
+
 	/* check if any data is required */
 	done = MB_NO;
-	save_data = (int *) &mb_io_ptr->save1;	
-	nav_available = (int *) &mb_io_ptr->save2;	
-	ss_available = (int *) &mb_io_ptr->save3;	
-	save_ss = (int *) &mb_io_ptr->save4;	
+	save_data = (int *) &mb_io_ptr->save1;
+	nav_available = (int *) &mb_io_ptr->save2;
+	ss_available = (int *) &mb_io_ptr->save3;
+	save_ss = (int *) &mb_io_ptr->save4;
 	ss_swath_id = (int *) &mb_io_ptr->save5;
 	ss_day = (int *) &mb_io_ptr->save6;
 	ss_month = (int *) &mb_io_ptr->save7;
@@ -1251,17 +1251,17 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 	else if (*save_data == MB_DATA_NAV)
 		{
 		data->kind = MB_DATA_NAV;
-		*save_data = MB_DATA_NONE;		
+		*save_data = MB_DATA_NONE;
 		done = MB_YES;
 		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;		
+		*error = MB_ERROR_NO_ERROR;
 		}
 
 	/* if not done and no data saved then read next primary record */
 	if (done == MB_NO && *save_data == MB_DATA_NONE)
 		{
 		if ((read_status = fread(line,1,MBF_EM12IFRM_RECORD_SIZE,
-				mb_io_ptr->mbfp)) == MBF_EM12IFRM_RECORD_SIZE) 
+				mb_io_ptr->mbfp)) == MBF_EM12IFRM_RECORD_SIZE)
 			{
 			mb_io_ptr->file_bytes += read_status;
 			status = MB_SUCCESS;
@@ -1273,7 +1273,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-	
+
 		/* translate values to em12 data storage structure */
 		if (status == MB_SUCCESS)
 			{
@@ -1304,11 +1304,11 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 				status = MB_FAILURE;
 				}
 			}
-			
+
 		/* deal with data record */
 		if (status == MB_SUCCESS
 			&& data->kind == MB_DATA_DATA)
-			{		
+			{
 			/* get kind of ping */
 			shift = 5;
 			if (line[shift] == 'C')
@@ -1318,7 +1318,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 			else if (line[shift] == 'T')
 				data->swath_id = EM_SWATH_STARBOARD;
 			shift += 2;
-	
+
 			/* get time */
 			mb_get_int(&data->day, &line[shift], 2); shift += 3;
 			mb_get_int(&data->month, &line[shift], 2); shift += 3;
@@ -1327,11 +1327,11 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 			mb_get_int(&data->minute, &line[shift], 2); shift += 3;
 			mb_get_int(&data->second, &line[shift], 2); shift += 3;
 			mb_get_int(&data->centisecond, &line[shift], 2); shift += 11;
-			
+
 			/* no navigation in this format - imagine that!!!! */
 			data->longitude = 0.0;
 			data->latitude = 0.0;
-	
+
 			/* get binary header */
 			mb_get_binary_short(MB_NO, &line[shift], &short_value);
 			data->ping_number = (int) short_value; shift += 2;
@@ -1351,7 +1351,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 			mb_get_binary_short(MB_NO, &line[shift], &short_value);
 			data->sound_vel = (int) short_value; shift += 2;
 			data->bath_mode = (int) line[shift]; shift += 2;
-			
+
 			/* get bathymetry */
 			data->beams_bath = MBF_EM12IFRM_MAXBEAMS;
 			for (i=0;i<MBF_EM12IFRM_MAXBEAMS;i++)
@@ -1368,7 +1368,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 				data->quality[i] = (int) line[shift]; shift += 1;
 				data->heave[i] = (int) line[shift]; shift += 2;
 				}
-			
+
 			/* use sidescan if saved */
 			if (*save_ss == MB_YES
 				&& *ss_ping_number == data->ping_number
@@ -1376,7 +1376,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 				{
 				done = MB_YES;
 				}
-			
+
 			/* initialize sidescan if none saved */
 			else if (*save_ss == MB_NO)
 				{
@@ -1396,14 +1396,14 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 					}
 				}
 			}
-	
+
 		/* deal with comment */
 		else if (status == MB_SUCCESS
 			&& data->kind == MB_DATA_COMMENT)
 			{
 			shift = 6;
 			mb_get_int(&len, &line[shift], 3); shift += 4;
-			strncpy(data->comment, &line[shift], 
+			strncpy(data->comment, &line[shift],
 				MIN(len, MBSYS_SIMRAD_COMMENT_LENGTH-1));
 			data->comment[MIN(len+1, MBSYS_SIMRAD_COMMENT_LENGTH)] = '\0';
 			done = MB_YES;
@@ -1412,13 +1412,13 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 
 	/* if not done and no data saved and good bathy record read
 	    then read next sidescan record if available */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& mb_io_ptr->mbfp2 != NULL
 		&& done == MB_NO && *save_data == MB_DATA_NONE)
 		{
 		/* read sidescan until it matches ping number and side */
 		*ss_ping_number = 0;
-		while (done == MB_NO 
+		while (done == MB_NO
 		    && *ss_available == MB_YES
 		    && *ss_ping_number <= data->ping_number)
 		    {
@@ -1436,7 +1436,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-			
+
 		    /* deal with data record */
 		    if (status == MB_SUCCESS)
 			{
@@ -1449,7 +1449,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 			else if (line[shift] == 'T')
 				*ss_swath_id = EM_SWATH_STARBOARD;
 			shift += 2;
-	
+
 			/* get time */
 			mb_get_int(ss_day, &line[shift], 2); shift += 3;
 			mb_get_int(ss_month, &line[shift], 2); shift += 3;
@@ -1458,7 +1458,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 			mb_get_int(ss_minute, &line[shift], 2); shift += 3;
 			mb_get_int(ss_second, &line[shift], 2); shift += 3;
 			mb_get_int(ss_centisecond, &line[shift], 2); shift += 11;
-			
+
 			/* get binary header */
 			mb_get_binary_short(MB_NO, &line[shift], &short_value);
 			*ss_ping_number = (int) short_value; shift += 2;
@@ -1484,7 +1484,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 				mb_get_binary_short(MB_NO, &line[shift], &short_value);
 				data->beam_center_sample[beamlist[i]] = (int) short_value; shift += 2;
 				}
-			    
+
 			/* load up the sidescan for each beam */
 			for (i=0;i<*ss_num_beams;i++)
 				{
@@ -1495,12 +1495,12 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 					*error = MB_ERROR_EOF;
 					}
 				mb_io_ptr->file2_bytes += read_status;
-					
+
 				/* do not ever load more data than we can store */
 				if (data->pixels_ssraw + data->beam_samples[beamlist[i]]
 					> MBF_EM12IFRM_MAXRAWPIXELS)
 					data->beam_samples[beamlist[i]] = 0;
-				
+
 				/* get the sidescan */
 				data->beam_start_sample[beamlist[i]] = data->pixels_ssraw;
 				shift = 0;
@@ -1511,7 +1511,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 					data->pixels_ssraw++;
 					}
 				}
-			
+
 			/* read last few bytes of record */
 			line[0] = 0;
 			while (status == MB_SUCCESS && line[0] != '\n')
@@ -1524,16 +1524,16 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 					}
 				}
 			}
-			
+
 		    /* now check status */
-		    if (status == MB_SUCCESS 
+		    if (status == MB_SUCCESS
 			&& *ss_ping_number == data->ping_number
 			&& *ss_swath_id == data->swath_id)
 			{
 			done = MB_YES;
 			*save_ss = MB_NO;
 			}
-		    else if (status == MB_SUCCESS 
+		    else if (status == MB_SUCCESS
 			&& *ss_ping_number > data->ping_number)
 			{
 			done = MB_YES;
@@ -1553,15 +1553,15 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 			}
 		    }
 		}
-		
+
 	/* now check if nav needed */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_DATA
 		&& (mb_io_ptr->mbfp2 == NULL || done == MB_YES)
 		&& mb_io_ptr->mbfp3 != NULL)
 		{
 		/* get ping time */
-		mb_fix_y2k(verbose, data->year, 
+		mb_fix_y2k(verbose, data->year,
 			    &ptime_i[0]);
 		ptime_i[1] = data->month;
 		ptime_i[2] = data->day;
@@ -1591,7 +1591,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 				mb_io_ptr->file3_bytes += strlen(line);
 				shift = 29;
 				if (strncmp(&line[shift], "NACOU", 5) == 0)
-				    {	
+				    {
 				    /* get time */
 				    shift = 7;
 				    mb_get_int(&data->pos_day, &line[shift], 2); shift += 3;
@@ -1601,7 +1601,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 				    mb_get_int(&data->pos_minute, &line[shift], 2); shift += 3;
 				    mb_get_int(&data->pos_second, &line[shift], 2); shift += 3;
 				    mb_get_int(&data->pos_centisecond, &line[shift], 2); shift += 10;
-				    
+
 				    /* get navigation */
 				    NorS = line[shift]; shift += 2;
 				    mb_get_int(&latdeg, &line[shift], 2); shift += 3;
@@ -1611,17 +1611,17 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 				    mb_get_double(&lonmin, &line[shift], 8); shift += 42;
 				    mb_get_double(&data->line_heading, &line[shift], 6); shift += 6;
 				    data->latitude = latdeg + latmin / 60.0;
-				    if (NorS == 'S') 
+				    if (NorS == 'S')
 					data->latitude = -data->latitude;
 				    data->longitude = londeg + lonmin / 60.0;
-				    if (EorW == 'W') 
+				    if (EorW == 'W')
 					data->longitude = -data->longitude;
 				    data->speed = 0.0;
 /*fprintf(stderr, "time: %2.2d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%2.2d lat: %c %2d %8.5f  lon: %c %3d %9.5f\n",
-data->pos_day, data->pos_month, data->pos_year, 
-data->pos_hour, data->pos_minute, data->pos_second, data->pos_centisecond, 
+data->pos_day, data->pos_month, data->pos_year,
+data->pos_hour, data->pos_minute, data->pos_second, data->pos_centisecond,
 NorS, latdeg, latmin, EorW, londeg, lonmin);*/
-					
+
 				    navdone = MB_YES;
 				    data->kind = MB_DATA_NAV;
 				    *save_data = MB_DATA_DATA;
@@ -1632,7 +1632,7 @@ NorS, latdeg, latmin, EorW, londeg, lonmin);*/
 				}
 			    }
 			}
-		}	
+		}
 
 	/* print debug statements */
 	if (verbose >= 5
@@ -1739,8 +1739,8 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       data_ptr:   %lu\n",(size_t)data_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1788,7 +1788,7 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 				data->bath_alongtrack[i],data->tt[i],
 				data->amp[i],data->quality[i],data->heave[i]);
 		}
-		
+
 	/* handle survey ping record */
 	if (data->kind == MB_DATA_DATA)
 		{
@@ -1800,9 +1800,11 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			char_value = 'B';
 		else if (data->swath_id == EM_SWATH_STARBOARD)
 			char_value = 'T';
-		sprintf(&line[shift], "$12SO%c,%2.2d/%2.2d/%2.2d,%2.2d:%2.2d:%2.2d.%2.2d0,VOIE%c,", 
-				char_value, data->day, data->month, data->year, 
-				data->hour, data->minute, data->second, 
+		else
+			char_value = 'C';
+		sprintf(&line[shift], "$12SO%c,%2.2d/%2.2d/%2.2d,%2.2d:%2.2d:%2.2d.%2.2d0,VOIE%c,",
+				char_value, data->day, data->month, data->year,
+				data->hour, data->minute, data->second,
 				data->centisecond, char_value); shift += 35;
 
 		/* set binary header */
@@ -1825,7 +1827,7 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		mb_put_binary_short(MB_NO, short_value, &line[shift]); shift += 2;
 		line[shift] = (char) data->bath_mode; shift += 1;
 		line[shift] = ','; shift += 1;
-		
+
 		/* set bathymetry */
 		data->beams_bath = MBF_EM12IFRM_MAXBEAMS;
 		for (i=0;i<data->beams_bath;i++)
@@ -1850,7 +1852,7 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		line[shift] = '\r'; shift += 1;
 		line[shift] = '\n'; shift += 1;
 		}
-		
+
 	/* handle comment record */
 	else if (data->kind == MB_DATA_COMMENT)
 		{
@@ -1868,15 +1870,15 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		line[shift] = (char) 0; shift += 1;
 		line[shift] = ','; shift += 1;
 		line[shift] = '\r'; shift += 1;
-		line[shift] = '\n'; shift += 1;		
+		line[shift] = '\n'; shift += 1;
 		}
 
 	/* write next record to file */
 	if (status == MB_SUCCESS)
 		{
 		if ((status = fwrite(line,1,MBF_EM12IFRM_RECORD_SIZE,
-				mb_io_ptr->mbfp)) 
-				== MBF_EM12IFRM_RECORD_SIZE) 
+				mb_io_ptr->mbfp))
+				== MBF_EM12IFRM_RECORD_SIZE)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;

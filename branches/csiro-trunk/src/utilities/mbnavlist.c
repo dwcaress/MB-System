@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavlist.c	2/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -95,9 +95,9 @@
 #include <time.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
 
 /* local options */
 #define	MAX_OPTIONS	25
@@ -480,7 +480,7 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 
-	/* set auxilliary nav source if requested
+	/* set auxiliary nav source if requested
 		- note this is superceded by data_kind if the -K option is used */
 	if (aux_nav_channel > 0)
 		{
@@ -578,41 +578,45 @@ int main (int argc, char **argv)
 
 		/* if the -K option is used look for a particular
 			sort of data record */
-		if (error <= MB_ERROR_NO_ERROR
-			&& data_kind > 0)
+		if (error <= MB_ERROR_NO_ERROR)
 			{
-			if (error <= MB_ERROR_NO_ERROR
-				&& kind == data_kind)
+			if (data_kind > 0)
 				{
-				error = MB_ERROR_NO_ERROR;
-				status = MB_SUCCESS;
+				if (kind == data_kind)
+					{
+					error = MB_ERROR_NO_ERROR;
+					status = MB_SUCCESS;
+					}
+				else
+					{
+					error = MB_ERROR_IGNORE;
+					status = MB_FAILURE;
+					}
 				}
 			else
 				{
-				error = MB_ERROR_IGNORE;
-				status = MB_FAILURE;
+				if (kind == nav_source)
+					{
+					error = MB_ERROR_NO_ERROR;
+					status = MB_SUCCESS;
+					}
+				else
+					{
+					error = MB_ERROR_IGNORE;
+					status = MB_FAILURE;
+					}
 				}
-			}
-		else if (error <= MB_ERROR_NO_ERROR
-			&& kind != nav_source)
-			{
-			error = MB_ERROR_IGNORE;
-			status = MB_FAILURE;
-			}
-		else if (error <= MB_ERROR_NO_ERROR
-			&& kind == nav_source)
-			{
-			error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
 			}
 
 		/* extract additional nav info */
 		if (error == MB_ERROR_NO_ERROR)
+			{
 		   	status = mb_extract_nnav(verbose,mbio_ptr,store_ptr,
 					MB_ASYNCH_SAVE_MAX, &kind, &n,
 				    	atime_i,atime_d,anavlon,anavlat,
 				    	aspeed,aheading,adraft,
 					aroll,apitch,aheave,&error);
+			}
 
 		/* increment counter */
 		if (error == MB_ERROR_NO_ERROR)
@@ -647,6 +651,7 @@ int main (int argc, char **argv)
 				roll = aroll[inav];
 				pitch = apitch[inav];
 				heave = aheave[inav];
+				sonardepth = draft - heave;
 
 /*fprintf(stdout, "kind:%d error:%d %d of %d: time:%4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n",
 kind, error, i, n,

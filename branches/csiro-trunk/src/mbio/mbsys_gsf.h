@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_gsf.h	6/10/97
  *	$Id$
  *
- *    Copyright (c) 1998-2012 by
+ *    Copyright (c) 1998-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -81,15 +81,9 @@
  *
  */
 
-#ifndef __GSF_H__
 #include "gsf.h"
-#endif
-#ifndef _GSF_FT_H_
 #include "gsf_ft.h"
-#endif
-#ifndef _GSF_ENC_H_
 #include "gsf_enc.h"
-#endif
 
 /* internal data structure */
 struct mbsys_gsf_struct

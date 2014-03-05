@@ -2,7 +2,7 @@
  *    The MB-system:	mr1pr_defines.h	3/7/2003
  *	$Id$
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /* This source code is part of the MR1PR library used to read and write
- * swath sonar data in the MR1PR format devised and used by the 
+ * swath sonar data in the MR1PR format devised and used by the
  * Hawaii Mapping Research Group of the University of Hawaii.
  * This source code was made available by Roger Davis of the
  * University of Hawaii under the GPL. Minor modifications have
@@ -43,9 +43,22 @@
  *	mr1pr_defines.h --
  *	Hawaii MR1 post-processing software definitions.
  */
-
 #ifndef __MR1PR_DEFINES__
 #define __MR1PR_DEFINES__
+
+#ifdef HAVE_CONFIG_H
+#include <mb_config.h>
+
+/* XDR i/o include file */
+#ifdef HAVE_RPC_RPC_H
+# include <rpc/rpc.h>
+#endif
+#ifdef HAVE_RPC_TYPES_H
+# include <rpc/types.h>
+# include <rpc/xdr.h>
+#endif
+
+#else /* no HAVE_CONFIG_H */
 
 /* XDR i/o include file */
 #ifdef IRIX
@@ -82,6 +95,8 @@
 #include <rpc/xdr.h>
 #endif
 
+#endif /* HAVE_CONFIG_H */
+
 /* Various system dependent defines */
 #ifdef SUN
 #define Free			(void) free
@@ -96,6 +111,14 @@
 #define MemCopy(m0, m1, n)	(void) memmove((void *) (m1), (void *) (m0), (size_t) (n))
 #define MemZero(m, n)		(void) memset((void *) (m), (int) 0, (size_t) (n))
 #endif
+
+/* Handle XDR weirdness with respect to int and long */
+#ifdef __LP64__
+#define MR1PR_LONG int
+#else
+#define MR1PR_LONG long
+#endif
+
 
 /* MR1 channel defines */
 #define ACP_NSIDES		(2)
@@ -151,7 +174,7 @@ typedef struct ps_struct {
 
 /* MR1Timeval --
    This structure is defined for the MB-System version
-   of this code because MB-System explicitely avoids 
+   of this code because MB-System explicitly avoids
    using standard time structures and functions, thereby
    avoiding the wide variability in time handling amongst
    Unix-like operating systems. */

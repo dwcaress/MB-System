@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_atlas.c	3.00	6/25/01
  *	$Id$
  *
- *    Copyright (c) 2001-2012 by
+ *    Copyright (c) 2001-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,10 +13,10 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_atlas.c contains the MBIO functions for handling data from 
+ * mbsys_atlas.c contains the MBIO functions for handling data from
  * STN Atlas Marine Electronics multibeam sonars.
  * The relevant sonars include Hydrosweep DS2 and Fansweep sonars.
- * The older  Hydrosweep DS and MD sonars produce data in different 
+ * The older  Hydrosweep DS and MD sonars produce data in different
  * formats (e.g. 21-24 and 101-102).
  * The data formats associated with (newer) STN Atlas sonars
  * include:
@@ -75,17 +75,17 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
 #define MBSYS_ATLAS_C
-#include "../../include/mbsys_atlas.h"
+#include "mbsys_atlas.h"
 
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_atlas_alloc";
@@ -101,7 +101,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -116,7 +116,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* initialize everything */
 	store->kind = MB_DATA_NONE;
-	
+
 	/* start telegram */
 	store->start_ping_no = 0;		/* ping number */
 	store->start_transmit_time_d = 0.0;	/* ping timestamp */
@@ -212,7 +212,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->start_cmean = 0.0;		/* mean water sound speed (m/s) */
 	store->start_depth_min = 0.0;	/* minimum depth from GUI (m) */
 	store->start_depth_max = 0.0;	/* maximum depth from GUI (m) */
-	
+
 	/* travel times telegrams */
 	store->tt_ping_no = 0;		/* ping number */
 	store->tt_transmit_time_d = 0.0;/* ping timestamp */
@@ -251,7 +251,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 						/*		1 = valid	    */
 						/*	    bits 3-7 unused	    */
 	    }
-	    
+
 	/* processed bathymetry */
 	store->pr_navlon = 0.0;			/* longitude (degrees) */
 	store->pr_navlat = 0.0;			/* latitude (degrees) */
@@ -263,7 +263,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->pr_bathalongtrack[i] = 0.0;		/* alongtrack distance (m) */
 	    store->pr_beamflag[i] = MB_FLAG_NULL;	/* beam edit/status flags */
 	    }
-	
+
 	/* sidescan telegrams */
 	store->ss_ping_no = 0;		/* ping number */
 	store->ss_transmit_time_d = 0.0;	/* ping timestamp */
@@ -289,8 +289,8 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->tr_start[i] = 0.0;		/* start time (s) - two way	    */
 	    store->tr_stop[i] = 0.0;		/* stop time (s) - two way	    */
 	    }
-	
-	/* backscatter telegram */	
+
+	/* backscatter telegram */
 	store->bs_transmit_time_d = 0.0;	/* ping timestamp */
 	store->bs_ping_no = 0;		/* ping number */
 	store->bs_nrActualGainSets = 0;	/* 10 to 20 gain sets */
@@ -318,7 +318,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->bs_eff_ampli[i] = 0;		/* effective amplitude */
 	    store->bs_nis[i] = 0;		/* noise isotropic */
 	    }
-	    
+
 	/* comment */
 	for (i=0;i<MBSYS_ATLAS_COMMENT_LENGTH;i++)
 	    {
@@ -330,7 +330,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -340,7 +340,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_atlas_deall";
@@ -354,8 +354,8 @@ int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		}
 
 	/* get data structure pointer */
@@ -378,7 +378,7 @@ int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_atlas_dimensions";
@@ -393,8 +393,8 @@ int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -412,7 +412,7 @@ int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get beam and pixel numbers */
 		*nbath = store->tt_beam_cnt;
 		*namp = *nbath;
-		*nss = store->ss_max_side_bb_cnt 
+		*nss = store->ss_max_side_bb_cnt
 			+ store->ss_max_side_sb_cnt;
 		}
 	else
@@ -441,12 +441,12 @@ int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -466,8 +466,8 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -481,7 +481,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
-		{		
+		{
 		/* get time */
 		*time_d = store->start_transmit_time_d;
 		mb_get_date(verbose, *time_d, time_i);
@@ -495,7 +495,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed = 3.6 * store->pr_speed;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 2.3;
 		mb_io_ptr->beamwidth_xtrack = 2.3;
@@ -523,7 +523,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				ttmin = store->tt_lruntime[i];
 			}
 		*namp = *nbath;
-		*nss = store->ss_max_side_bb_cnt 
+		*nss = store->ss_max_side_bb_cnt
 			+ store->ss_max_side_sb_cnt;
 		pixel_size = store->start_cmean * store->ss_timespacing;
 		ssdepth = store->start_cmean * ttmin / 2.0;
@@ -538,7 +538,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			j = store->ss_max_side_bb_cnt - i;
 			tt = store->ss_timedelay + store->ss_timespacing * (i - 1);
 			if (tt > ttmin)
-				{ 
+				{
 				ss[j] = store->ss_sidescan[i];
 				range = store->start_cmean * tt / 2.0;
 				ssacrosstrack[j] = -sqrt(range * range - ssdepth * ssdepth);
@@ -549,7 +549,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			tt = store->ss_timedelay + store->ss_timespacing * (i - store->ss_max_side_bb_cnt);
 			if (tt > ttmin)
-				{ 
+				{
 				ss[i] = store->ss_sidescan[i];
 				range = store->start_cmean * tt / 2.0;
 				ssacrosstrack[i] = sqrt(range * range - ssdepth * ssdepth);
@@ -640,13 +640,13 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -662,7 +662,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -693,12 +693,12 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -718,8 +718,8 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && kind == MB_DATA_DATA)
@@ -737,18 +737,18 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -770,7 +770,7 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
-		{		
+		{
 		/* get time */
 		store->start_transmit_time_d = time_d;
 
@@ -850,9 +850,9 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_atlas_ttimes";
@@ -869,14 +869,14 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %lu\n",(size_t)ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%lu\n",(size_t)angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%lu\n",(size_t)angles_forward);
-		fprintf(stderr,"dbg2       angles_null:%lu\n",(size_t)angles_null);
-		fprintf(stderr,"dbg2       heave:      %lu\n",(size_t)heave);
-		fprintf(stderr,"dbg2       ltrk_off:   %lu\n",(size_t)alongtrack_offset);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %p\n",(void *)ttimes);
+		fprintf(stderr,"dbg2       angles_xtrk:%p\n",(void *)angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%p\n",(void *)angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%p\n",(void *)angles_null);
+		fprintf(stderr,"dbg2       heave:      %p\n",(void *)heave);
+		fprintf(stderr,"dbg2       ltrk_off:   %p\n",(void *)alongtrack_offset);
 		}
 
 	/* get mbio descriptor */
@@ -1004,9 +1004,9 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %p\n",(void *)detects);
 		}
 
 	/* get mbio descriptor */
@@ -1026,7 +1026,7 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			detect = MB_DETECT_PHASE;
 		else
 			detect = MB_DETECT_AMPLITUDE;
-			
+
 		/* get detects */
 		*nbeams = store->tt_beam_cnt;
 		for (i=0;i<store->tt_beam_cnt;i++)
@@ -1081,7 +1081,7 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_atlas_extract_altitude";
@@ -1100,8 +1100,8 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1130,7 +1130,7 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			bath_best = store->pr_bath[i];
 			found = MB_YES;
 			}
-		    }		
+		    }
 		if (found == MB_NO)
 		    {
 		    xtrack_min = 99999999.9;
@@ -1143,7 +1143,7 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    bath_best = store->pr_bath[i];
 			    found = MB_YES;
 			    }
-			}		
+			}
 		    }
 		if (found == MB_YES)
 		    *altitude = bath_best - *transducer_depth;
@@ -1194,8 +1194,8 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_atlas_extract_nav";
@@ -1210,8 +1210,8 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1319,7 +1319,7 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1353,7 +1353,7 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1369,8 +1369,8 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -1397,7 +1397,7 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
-		{		
+		{
 		/* get time */
 		store->start_transmit_time_d = time_d;
 
@@ -1434,7 +1434,7 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_atlas_copy(int verbose, void *mbio_ptr, 
+int mbsys_atlas_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -1451,9 +1451,9 @@ int mbsys_atlas_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %lu\n",(size_t)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %p\n",(void *)copy_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1480,7 +1480,7 @@ int mbsys_atlas_copy(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, 
+int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr,
 			void *store_ptr,
 			int *error)
 {
@@ -1497,8 +1497,8 @@ int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */

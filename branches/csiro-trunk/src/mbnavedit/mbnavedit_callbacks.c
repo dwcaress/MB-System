@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
  *    $Id$
  *
- *    Copyright (c) 1995-2012 by
+ *    Copyright (c) 1995-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -143,11 +143,11 @@
 #include <Xm/List.h>
 
 #define MBNAVEDIT_DECLARE_GLOBALS
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_xgraphics.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_io.h"
+#include "mb_process.h"
+#include "mb_xgraphics.h"
 #include "mbnavedit_extrawidgets.h"
 #include "mbnavedit.h"
 
@@ -263,7 +263,7 @@ GRAU( XtPointer, call)
     /* finish with the current file */
     status = mbnavedit_action_quit();
     if (status == 0) mbnavedit_bell(100);
-    
+
     exit(exitValue);
 }
 /*--------------------------------------------------------------------*/
@@ -405,7 +405,7 @@ GRAU( XtPointer, call)
         count++;
         if ( count == CHUNK )
         {
-            valueList = 
+            valueList =
 		(String *)XtRealloc((char *)valueList,
 				    (count + CHUNK) * sizeof(String));
         }
@@ -415,7 +415,7 @@ GRAU( XtPointer, call)
     for ( i = 0; i < count; i++ )
     {
 	/*
-	 * First, extract the widget name and generate a string to 
+	 * First, extract the widget name and generate a string to
 	 * pass to BxWidgetIdsFromNames().
 	 */
 	cptr = strrchr(valueList[i], '.');
@@ -461,7 +461,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 	    XtFree((char *)(valueList[i]));
 	    return;
 	}
-	
+
 	/*
 	 * Next, get the resource name to set.
 	 */
@@ -483,7 +483,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
         {
             rsc++;
         }
-	
+
         ptr = rsc + strlen(rsc) - 1;
         while( ptr && *ptr )
         {
@@ -501,7 +501,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
         {
             *ptr = '\0';
         }
-	
+
 	/*
 	 * Lastly, get the string value to which to set the resource.
 	 */
@@ -519,7 +519,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 	    XtFree((char *)(valueList[i]));
 	    return;
 	}
-	
+
         ptr = start + strlen(start) - 1;
         while( ptr && *ptr )
         {
@@ -537,7 +537,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
         {
             *ptr = '\0';
         }
-	
+
 	/*
 	 * Now convert the widget name to a Widget ID
 	 */
@@ -547,7 +547,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 	    XtFree((char *)(valueList[i]));
 	    continue;
         }
-	
+
 	/*
 	 * If the widget name conversion succeeded, we now need to get the
 	 * resource list for the widget so that we can do a resource conversion
@@ -568,73 +568,73 @@ void
 do_mbnavedit_init(int argc, char **argv)
 {
     int	    i;
-    
+
     /* get additional widgets */
-    fileSelectionBox_list = (Widget) 
-	XmFileSelectionBoxGetChild(fileSelectionBox, 
+    fileSelectionBox_list = (Widget)
+	XmFileSelectionBoxGetChild(fileSelectionBox,
 				    XmDIALOG_LIST);
-    fileSelectionBox_text = (Widget) 
-	XmFileSelectionBoxGetChild(fileSelectionBox, 
+    fileSelectionBox_text = (Widget)
+	XmFileSelectionBoxGetChild(fileSelectionBox,
 				    XmDIALOG_TEXT);
-    XtAddCallback(fileSelectionBox_list, 
-	    XmNbrowseSelectionCallback, 
+    XtAddCallback(fileSelectionBox_list,
+	    XmNbrowseSelectionCallback,
 	    do_fileselection_list, NULL);
-	    
+
     XtUnmanageChild(
 	    (Widget) XmFileSelectionBoxGetChild(
-				    fileSelectionBox, 
+				    fileSelectionBox,
 				    XmDIALOG_HELP_BUTTON));
 
-    XtVaGetValues(scrolledWindow, 
-			XmNhorizontalScrollBar, 
-			&scrolledWindow_hscrollbar, 
+    XtVaGetValues(scrolledWindow,
+			XmNhorizontalScrollBar,
+			&scrolledWindow_hscrollbar,
 			NULL);
-    XtVaGetValues(scrolledWindow, 
-			XmNverticalScrollBar, 
-			&scrolledWindow_vscrollbar, 
+    XtVaGetValues(scrolledWindow,
+			XmNverticalScrollBar,
+			&scrolledWindow_vscrollbar,
 			NULL);
-    XtVaSetValues(scrolledWindow_hscrollbar, 
+    XtVaSetValues(scrolledWindow_hscrollbar,
 		XmCIncrement, 5, NULL);
-    XtVaSetValues(scrolledWindow_vscrollbar, 
+    XtVaSetValues(scrolledWindow_vscrollbar,
 		XmCIncrement, 5, NULL);
-    XtAddCallback(scrolledWindow_hscrollbar, 
-		XmNvalueChangedCallback, 
+    XtAddCallback(scrolledWindow_hscrollbar,
+		XmNvalueChangedCallback,
 		do_scroll, NULL);
-    XtAddCallback(scrolledWindow_vscrollbar, 
-		XmNvalueChangedCallback, 
+    XtAddCallback(scrolledWindow_vscrollbar,
+		XmNvalueChangedCallback,
 		do_scroll, NULL);
-    XtAddCallback(scrolledWindow_hscrollbar, 
-		XmNdragCallback, 
+    XtAddCallback(scrolledWindow_hscrollbar,
+		XmNdragCallback,
 		do_scroll, NULL);
-    XtAddCallback(scrolledWindow_vscrollbar, 
-		XmNdragCallback, 
+    XtAddCallback(scrolledWindow_vscrollbar,
+		XmNdragCallback,
 		do_scroll, NULL);
 
     /* Setup the entire screen. */
     display = XtDisplay(drawingArea);
     colormap = DefaultColormap(display,XDefaultScreen(display));
-    
+
     /* Setup just the "canvas" part of the screen. */
     can_xid = XtWindow(drawingArea);
-    
+
     /* Setup the "graphics Context" for just the "canvas" */
     xgcv.background = WhitePixelOfScreen(DefaultScreenOfDisplay(display));
     xgcv.foreground = BlackPixelOfScreen(DefaultScreenOfDisplay(display));
     xgcv.line_width = 2;
-    gc = XCreateGC(display,can_xid,GCBackground | GCForeground 
+    gc = XCreateGC(display,can_xid,GCBackground | GCForeground
 	     | GCLineWidth, &xgcv);
-    
+
     /* Setup the font for just the "canvas" screen. */
     fontStruct = XLoadQueryFont(display, xgfont);
     XSetFont(display,gc,fontStruct->fid);
-    
+
     XSelectInput(display, can_xid, EV_MASK );
 
     /* get resize events - add an event handler */
-    XtAddEventHandler(XtParent(bulletinBoard), 
-			    StructureNotifyMask, 
-			    False, 
-			    (XtEventHandler) do_resize, 
+    XtAddEventHandler(XtParent(bulletinBoard),
+			    StructureNotifyMask,
+			    False,
+			    (XtEventHandler) do_resize,
 			    (XtPointer)NULL);
 
     /* Load the colors that will be used in this program. */
@@ -669,14 +669,14 @@ do_mbnavedit_init(int argc, char **argv)
 	    {
 	    mpixel_values[i] = colors[i].pixel;
 	    }
-    
+
     /* Setup initial cursor. This will be changed when changing "MODE". */
     myCursor = XCreateFontCursor(display, XC_target);
     XAllocNamedColor(display,colormap,"red",&closest[0],&exact[0]);
     XAllocNamedColor(display,colormap,"coral",&closest[1],&exact[1]);
     XRecolorCursor(display,myCursor,&closest[0],&closest[1]);
     XDefineCursor(display,can_xid,myCursor);
-    
+
     /* initialize graphics */
     status = mbnavedit_init_globals();
     mb_borders[0] = 0;
@@ -684,17 +684,17 @@ do_mbnavedit_init(int argc, char **argv)
     mb_borders[2] = 0;
     mb_borders[3] = number_plots*plot_height;
     xg_init(display, can_xid, mb_borders, xgfont, &can_xgid);
-    status = mbnavedit_set_graphics(can_xgid, 
+    status = mbnavedit_set_graphics(can_xgid,
 		    NCOLORS, mpixel_values);
 
     /* initialize mbnavedit proper */
     status = mbnavedit_init(argc, argv, &startup_file);
-    
+
     do_set_controls();
-		
+
     /* set timer for function to keep updating the filelist */
     do_mbnavedit_settimer();
-        
+
     /* if startup indicated by num_files > 0 try to open first file */
     if (startup_file == MB_YES && numfiles > 0)
 	{
@@ -703,7 +703,7 @@ do_mbnavedit_init(int argc, char **argv)
 }
 /*--------------------------------------------------------------------*/
 
-void 
+void
 do_parse_datalist( char *file, int form)
 {
 	void    *datalist;
@@ -718,12 +718,12 @@ do_parse_datalist( char *file, int form)
 	int	format;
 	int     verbose = 0;
 	int	i;
-    
+
 fprintf(stderr,"Called do_parse_datalist:%s %d\n",file,form);
     	/* try to resolve format if necessary */
 	format = form;
 	mb_get_format(verbose, file, NULL, &format, &error);
-    
+
 	/* read in a single file */
 	if (format > 0 && numfiles < NUM_FILES_MAX)
 		{
@@ -733,7 +733,7 @@ fprintf(stderr,"Called do_parse_datalist:%s %d\n",file,form);
 		filenves[numfiles] = -1;
 		numfiles++;
 		}
-	
+
 	/* read in datalist if forma = -1 */
 	else if (format == -1)
 		{
@@ -784,7 +784,7 @@ do_editlistselection( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* turn off expose plots */
 	expose_plot_ok = False;
-	
+
 	/* get the current selection, if any, from the list */
 	ac = 0;
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
@@ -794,7 +794,7 @@ do_editlistselection( Widget w, XtPointer client_data, XtPointer call_data)
 fprintf(stderr,"position_count:%d\n",position_count);
 for(i=0;i<position_count;i++)
 fprintf(stderr,"  %d %d\n",i,position_list[i]);
-	
+
 
 	/* if the selected file is different than what's already loaded, unload the old file and load the new one */
 	if (position_count > 0 && currentfile != position_list[0] - 1)
@@ -814,7 +814,7 @@ fprintf(stderr,"  %d %d\n",i,position_list[i]);
 
 	/* turn on expose plots */
 	expose_plot_ok = True;
-			
+
 	/* update controls */
 	do_set_controls();
 }
@@ -832,7 +832,7 @@ do_filelist_remove( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* turn off expose plots */
 	expose_plot_ok = False;
-	
+
 	/* get the current selection, if any, from the list */
 	ac = 0;
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
@@ -856,7 +856,7 @@ do_filelist_remove( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* turn on expose plots */
 	expose_plot_ok = True;
-			
+
 	/* update controls */
 	do_set_controls();
 
@@ -872,7 +872,7 @@ do_load_specific_file(int i_file)
 {
 	struct stat file_status;
 	int	fstat;
-	int	save_mode;
+	int	save_mode = MB_NO;;
 	char    save_file[MB_PATH_MAXLINE];
 
 fprintf(stderr,"Called do_load_specific_file:%d\n",i_file);
@@ -887,7 +887,7 @@ fprintf(stderr,"Called do_load_specific_file:%d\n",i_file);
 		fstat = stat(save_file, &file_status);
 
 		/* if nve file exists deal with it */
-		if (fstat == 0 
+		if (fstat == 0
 		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
 			{
 			/* if save_mode set load data using nve */
@@ -913,9 +913,9 @@ fprintf(stderr,"Called do_load_specific_file:%d\n",i_file);
 void do_set_controls()
 {
 	char	value_text[MB_PATH_MAXLINE];
-				
+
 	/* set about version label */
-	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", 
+	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"",
 		MB_VERSION, MB_BUILD_DATE);
 	set_label_multiline_string(label_about_version, value_text);
 
@@ -926,7 +926,7 @@ void do_set_controls()
 	/* set the output mode */
 	if (output_mode == OUTPUT_MODE_OUTPUT)
 	    {
-	    XmToggleButtonSetState(toggleButton_output_on, 
+	    XmToggleButtonSetState(toggleButton_output_on,
 			TRUE, TRUE);
 	    }
 	else
@@ -936,78 +936,78 @@ void do_set_controls()
 	    }
 
 	/* set values of number of data shown slider */
-	XtVaSetValues(scale_timespan, 
-			XmNminimum, 1, 
-			XmNmaximum, data_show_max, 
-			XmNvalue, MAX(data_show_size, 1), 
+	XtVaSetValues(scale_timespan,
+			XmNminimum, 1,
+			XmNmaximum, data_show_max,
+			XmNvalue, MAX(data_show_size, 1),
 			NULL);
 	sprintf(string, "%d", data_show_max);
-	XtVaSetValues(label_timespan_2, 
-			XtVaTypedArg, XmNlabelString, 
-			    XmRString, string, (strlen(string) + 1), 
-			NULL);	
+	XtVaSetValues(label_timespan_2,
+			XtVaTypedArg, XmNlabelString,
+			    XmRString, string, (strlen(string) + 1),
+			NULL);
 
 	/* set values of number of data to step slider */
-	XtVaSetValues(scale_timestep, 
-			XmNminimum, 1, 
-			XmNmaximum, data_step_max, 
-			XmNvalue, data_step_size, 
+	XtVaSetValues(scale_timestep,
+			XmNminimum, 1,
+			XmNmaximum, data_step_max,
+			XmNvalue, data_step_size,
 			NULL);
 	sprintf(string, "%d", data_step_max);
-	XtVaSetValues(label_timestep_2, 
-			XtVaTypedArg, XmNlabelString, 
-			    XmRString, string, (strlen(string) + 1), 
-			NULL);	
+	XtVaSetValues(label_timestep_2,
+			XtVaTypedArg, XmNlabelString,
+			    XmRString, string, (strlen(string) + 1),
+			NULL);
 
 	/* set the pick mode */
 	if (mode_pick == PICK_MODE_PICK)
-	    XmToggleButtonSetState(toggleButton_pick, 
+	    XmToggleButtonSetState(toggleButton_pick,
 			TRUE, TRUE);
 	else if (mode_pick == PICK_MODE_SELECT)
-	    XmToggleButtonSetState(toggleButton_select, 
+	    XmToggleButtonSetState(toggleButton_select,
 			TRUE, TRUE);
 	else if (mode_pick == PICK_MODE_DESELECT)
-	    XmToggleButtonSetState(toggleButton_deselect, 
+	    XmToggleButtonSetState(toggleButton_deselect,
 			TRUE, TRUE);
 	else if (mode_pick == PICK_MODE_SELECTALL)
-	    XmToggleButtonSetState(toggleButton_selectall, 
+	    XmToggleButtonSetState(toggleButton_selectall,
 			TRUE, TRUE);
 	else if (mode_pick == PICK_MODE_DESELECTALL)
-	    XmToggleButtonSetState(toggleButton_deselectall, 
+	    XmToggleButtonSetState(toggleButton_deselectall,
 			TRUE, TRUE);
-			
+
 	/* set the lon, lat, speed and heading plot toggles */
-	XmToggleButtonSetState(toggleButton_time, 
+	XmToggleButtonSetState(toggleButton_time,
 			plot_tint, TRUE);
-	XmToggleButtonSetState(toggleButton_org_time, 
+	XmToggleButtonSetState(toggleButton_org_time,
 			plot_tint_org, TRUE);
-	XmToggleButtonSetState(toggleButton_lon, 
+	XmToggleButtonSetState(toggleButton_lon,
 			plot_lon, TRUE);
-	XmToggleButtonSetState(toggleButton_org_lon, 
+	XmToggleButtonSetState(toggleButton_org_lon,
 			plot_lon_org, TRUE);
-	XmToggleButtonSetState(toggleButton_dr_lon, 
+	XmToggleButtonSetState(toggleButton_dr_lon,
 			plot_lon_dr, TRUE);
-	XmToggleButtonSetState(toggleButton_lat, 
+	XmToggleButtonSetState(toggleButton_lat,
 			plot_lat, TRUE);
-	XmToggleButtonSetState(toggleButton_org_lat, 
+	XmToggleButtonSetState(toggleButton_org_lat,
 			plot_lat_org, TRUE);
-	XmToggleButtonSetState(toggleButton_dr_lat, 
+	XmToggleButtonSetState(toggleButton_dr_lat,
 			plot_lat_dr, TRUE);
-	XmToggleButtonSetState(toggleButton_speed, 
+	XmToggleButtonSetState(toggleButton_speed,
 			plot_speed, TRUE);
-	XmToggleButtonSetState(toggleButton_org_speed, 
+	XmToggleButtonSetState(toggleButton_org_speed,
 			plot_speed_org, TRUE);
-	XmToggleButtonSetState(toggleButton_show_smg, 
+	XmToggleButtonSetState(toggleButton_show_smg,
 			plot_smg, TRUE);
-	XmToggleButtonSetState(toggleButton_heading, 
+	XmToggleButtonSetState(toggleButton_heading,
 			plot_heading, TRUE);
-	XmToggleButtonSetState(toggleButton_org_heading, 
+	XmToggleButtonSetState(toggleButton_org_heading,
 			plot_heading_org, TRUE);
-	XmToggleButtonSetState(toggleButton_show_cmg, 
+	XmToggleButtonSetState(toggleButton_show_cmg,
 			plot_cmg, TRUE);
-	XmToggleButtonSetState(toggleButton_sonardepth, 
+	XmToggleButtonSetState(toggleButton_sonardepth,
 			plot_draft, TRUE);
-	XmToggleButtonSetState(toggleButton_org_sonardepth, 
+	XmToggleButtonSetState(toggleButton_org_sonardepth,
 			plot_draft_org, TRUE);
 
 	/* hide or display items according to toggle states */
@@ -1025,17 +1025,17 @@ void do_set_controls()
 		else if (model_mode == MODEL_MODE_MEAN)
 		    {
 		    set_label_string(toggleButton_dr_lon, "Show Gaussian Mean");
-		    XtManageChild(toggleButton_dr_lon);		    
+		    XtManageChild(toggleButton_dr_lon);
 		    }
 		else if (model_mode == MODEL_MODE_DR)
 		    {
 		    set_label_string(toggleButton_dr_lon, "Show Dead Reckoning");
-		    XtManageChild(toggleButton_dr_lon);		    
+		    XtManageChild(toggleButton_dr_lon);
 		    }
 		else if (model_mode == MODEL_MODE_INVERT)
 		    {
 		    set_label_string(toggleButton_dr_lon, "Show Smooth Inversion");
-		    XtManageChild(toggleButton_dr_lon);		    
+		    XtManageChild(toggleButton_dr_lon);
 		    }
 		}
 	else
@@ -1053,17 +1053,17 @@ void do_set_controls()
 		else if (model_mode == MODEL_MODE_MEAN)
 		    {
 		    set_label_string(toggleButton_dr_lat, "Show Gaussian Mean");
-		    XtManageChild(toggleButton_dr_lat);		    
+		    XtManageChild(toggleButton_dr_lat);
 		    }
 		else if (model_mode == MODEL_MODE_DR)
 		    {
 		    set_label_string(toggleButton_dr_lat, "Show Dead Reckoning");
-		    XtManageChild(toggleButton_dr_lat);		    
+		    XtManageChild(toggleButton_dr_lat);
 		    }
 		else if (model_mode == MODEL_MODE_INVERT)
 		    {
 		    set_label_string(toggleButton_dr_lat, "Show Smooth Inversion");
-		    XtManageChild(toggleButton_dr_lat);		    
+		    XtManageChild(toggleButton_dr_lat);
 		    }
 		}
 	else
@@ -1124,15 +1124,15 @@ void do_set_controls()
 		number_plots++;
 	if (plot_heave == MB_YES)
 		number_plots++;
-	XtVaSetValues(drawingArea, 
-			XmNwidth, plot_width, 
-			XmNheight, number_plots*plot_height, 
-			NULL);	
-			
+	XtVaSetValues(drawingArea,
+			XmNwidth, plot_width,
+			XmNheight, number_plots*plot_height,
+			NULL);
+
 	/* set modeling controls and hide or display buttons */
 	if (model_mode == MODEL_MODE_OFF)
 		{
-		XmToggleButtonSetState(toggleButton_modeling_off, 
+		XmToggleButtonSetState(toggleButton_modeling_off,
 			TRUE, FALSE);
 		XtUnmanageChild(pushButton_solution);
 		XtUnmanageChild(pushButton_flag);
@@ -1141,7 +1141,7 @@ void do_set_controls()
 		}
 	else if (model_mode == MODEL_MODE_MEAN)
 		{
-		XmToggleButtonSetState(toggleButton_modeling_meanfilter, 
+		XmToggleButtonSetState(toggleButton_modeling_meanfilter,
 			TRUE, FALSE);
 		XtManageChild(pushButton_solution);
 		XtManageChild(pushButton_flag);
@@ -1149,7 +1149,7 @@ void do_set_controls()
 		}
 	else if (model_mode == MODEL_MODE_DR)
 		{
-		XmToggleButtonSetState(toggleButton_modeling_dr, 
+		XmToggleButtonSetState(toggleButton_modeling_dr,
 			TRUE, FALSE);
 		XtManageChild(pushButton_solution);
 		XtUnmanageChild(pushButton_flag);
@@ -1157,62 +1157,62 @@ void do_set_controls()
 		}
 	else if (model_mode == MODEL_MODE_INVERT)
 		{
-		XmToggleButtonSetState(toggleButton_modeling_inversion, 
+		XmToggleButtonSetState(toggleButton_modeling_inversion,
 			TRUE, FALSE);
 		XtManageChild(pushButton_solution);
 		XtManageChild(pushButton_flag);
 		XtManageChild(pushButton_unflag);
 		}
-	XtVaSetValues(scale_meantimewindow, 
-			XmNvalue, mean_time_window, 
+	XtVaSetValues(scale_meantimewindow,
+			XmNvalue, mean_time_window,
 			NULL);
-	XtVaSetValues(scale_driftlon, 
-			XmNvalue, drift_lon, 
+	XtVaSetValues(scale_driftlon,
+			XmNvalue, drift_lon,
 			NULL);
-	XtVaSetValues(scale_driftlat, 
-			XmNvalue, drift_lat, 
+	XtVaSetValues(scale_driftlat,
+			XmNvalue, drift_lat,
 			NULL);
 	sprintf(value_text,"%.2f",weight_speed);
 	XmTextFieldSetString(
-	    textField_modeling_speed, 
+	    textField_modeling_speed,
 	    value_text);
 	sprintf(value_text,"%.2f",weight_acceleration);
 	XmTextFieldSetString(
-	    textField_modeling_acceleration, 
+	    textField_modeling_acceleration,
 	    value_text);
-	    
+
 	/* enable or disable time interpolation */
 	if (timestamp_problem == MB_YES)
 		{
-		XtVaSetValues(pushButton_controls_timeinterpolation, 
-			XmNsensitive, True, 
+		XtVaSetValues(pushButton_controls_timeinterpolation,
+			XmNsensitive, True,
 			NULL);
-		XtVaSetValues(pushButton_controls_deletebadtimetag, 
-			XmNsensitive, True, 
+		XtVaSetValues(pushButton_controls_deletebadtimetag,
+			XmNsensitive, True,
 			NULL);
 		}
 	else
 		{
-		XtVaSetValues(pushButton_controls_timeinterpolation, 
-			XmNsensitive, False, 
+		XtVaSetValues(pushButton_controls_timeinterpolation,
+			XmNsensitive, False,
 			NULL);
-		XtVaSetValues(pushButton_controls_deletebadtimetag, 
-			XmNsensitive, False, 
+		XtVaSetValues(pushButton_controls_deletebadtimetag,
+			XmNsensitive, False,
 			NULL);
 		XtUnmanageChild(bulletinBoard_deletebadtimetag);
 		XtUnmanageChild(bulletinBoard_timeinterpolation);
 		}
-		
+
 	/* set offset values */
 	sprintf(value_text,"%.5f",offset_lon);
 	XmTextFieldSetString(
-	    textField_lon_offset, 
+	    textField_lon_offset,
 	    value_text);
 	sprintf(value_text,"%.5f",offset_lat);
 	XmTextFieldSetString(
-	    textField_lat_offset, 
+	    textField_lat_offset,
 	    value_text);
-	    
+
 }
 /*--------------------------------------------------------------------*/
 
@@ -1237,7 +1237,7 @@ do_build_filelist()
 	char	*nvenostr    = "     ";
 	int     verbose = 0;
 	int	i;
-	
+
 	/* swath file locking variables */
 	int	lock_status;
 	int	lock_error = MB_ERROR_NO_ERROR;
@@ -1247,7 +1247,7 @@ do_build_filelist()
 	mb_path lock_cpu;
 	mb_path lock_user;
 	char	lock_date[25];
-	
+
 	/* nve file checking variables */
 	int	nve_exists;
 	struct stat file_status;
@@ -1256,7 +1256,7 @@ do_build_filelist()
 
 	/* check to see if anything has changed */
 	update_filelist = MB_NO;
-	
+
 	/* check for change in number of files */
 	ac = 0;
 	XtSetArg(args[ac], XmNitemCount, (XtPointer) &item_count); ac++;
@@ -1270,13 +1270,13 @@ do_build_filelist()
 		currentfile_shown = currentfile;
 		update_filelist = MB_YES;
 		}
-	
+
 	/* check for change in lock status or nve status */
 	for (i=0;i<numfiles;i++)
 		{
 		/* check for locks */
 		lock_status = mb_pr_lockinfo(verbose, filepaths[i], &locked,
-				&lock_purpose, lock_program, lock_user, lock_cpu, 
+				&lock_purpose, lock_program, lock_user, lock_cpu,
 				lock_date, &lock_error);
 		if (locked != filelocks[i])
 			{
@@ -1287,7 +1287,7 @@ do_build_filelist()
 		/* check for edit save file */
 		sprintf(save_file, "%s.nve", filepaths[i]);
 		fstat = stat(save_file, &file_status);
-		if (fstat == 0 
+		if (fstat == 0
 		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
 			nve_exists = MB_YES;
 		else
@@ -1314,7 +1314,7 @@ do_build_filelist()
 		/* build available file list */
 		XmListDeleteAllItems(list_filelist);
 		if (numfiles > 0)
-			{	
+			{
 
 			/* allocate array of x strings */
 			xstr = (XmString *) malloc(numfiles * sizeof(XmString));
@@ -1335,10 +1335,10 @@ do_build_filelist()
 					nvestrptr = nvenostr;
 
 				/* build x string item */
-				sprintf(value_text,"%s %s %s %3d", 
-					lockstrptr, 
+				sprintf(value_text,"%s %s %s %3d",
+					lockstrptr,
 					nvestrptr,
-					filepaths[i], 
+					filepaths[i],
 					fileformats[i]);
    				xstr[i] = XmStringCreateLocalized(value_text);
 
@@ -1371,10 +1371,10 @@ do_nextbuffer( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	status;
 	int	quit;
-	
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
-	    
+
 	/* turn off expose plots */
 	expose_plot_ok = False;
 
@@ -1382,10 +1382,10 @@ do_nextbuffer( Widget w, XtPointer client_data, XtPointer call_data)
 	status = mbnavedit_action_next_buffer(&quit);
 	if (status == 0) mbnavedit_bell(100);
 	do_unset_interval();
-	    
+
 	/* turn on expose plots */
 	expose_plot_ok = True;
-    
+
 	/* quit if in GUI mode */
 	if (quit)
 		exit(0);
@@ -1398,10 +1398,10 @@ do_done( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	quit;
 	int	status;
-	
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
-	    
+
 	/* turn off expose plots */
 	expose_plot_ok = False;
 
@@ -1409,7 +1409,7 @@ do_done( Widget w, XtPointer client_data, XtPointer call_data)
 	status = mbnavedit_action_done(&quit);
 	if (status == 0) mbnavedit_bell(100);
 	do_unset_interval();
-    
+
 	/* if there is another file in the list open it */
 	if (currentfile >= 0 && currentfile < numfiles - 1)
 		{
@@ -1421,10 +1421,10 @@ do_done( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		currentfile = -1;
 		}
-	    
+
 	/* turn on expose plots */
 	expose_plot_ok = True;
-	
+
 	/* quit if required */
 	if (quit)
 		(void) BxExitCB(w, client_data, call_data);
@@ -1436,7 +1436,7 @@ void
 do_start( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	status;
-	
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
 
@@ -1451,7 +1451,7 @@ void
 do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	status;
-	
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
 
@@ -1467,7 +1467,7 @@ void
 do_forward( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	status;
-	
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
 
@@ -1483,7 +1483,7 @@ void
 do_end( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	status;
-	
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
 
@@ -1502,9 +1502,9 @@ do_timespan( Widget w, XtPointer client_data, XtPointer call_data)
 	acs = (XmAnyCallbackStruct*)call_data;
 
 	/* get values */
-	XtVaGetValues(scale_timespan, 
-			XmNmaximum, &data_show_max, 
-			XmNvalue, &data_show_size, 
+	XtVaGetValues(scale_timespan,
+			XmNmaximum, &data_show_max,
+			XmNvalue, &data_show_size,
 			NULL);
 
 	/* reset maximum if necessary */
@@ -1517,8 +1517,8 @@ do_timespan( Widget w, XtPointer client_data, XtPointer call_data)
 			data_show_max = data_show_max/2;
 		if (data_show_max < 10)
 			data_show_max = 10;
-		XtVaSetValues(scale_timespan, 
-			XmNmaximum, data_show_max, 
+		XtVaSetValues(scale_timespan,
+			XmNmaximum, data_show_max,
 			NULL);
 		sprintf(string, "%d", data_show_max);
 		set_label_string(label_timespan_2, string);
@@ -1538,9 +1538,9 @@ do_timestep( Widget w, XtPointer client_data, XtPointer call_data)
 	acs = (XmAnyCallbackStruct*)call_data;
 
 	/* get values */
-	XtVaGetValues(scale_timestep, 
-			XmNmaximum, &data_step_max, 
-			XmNvalue, &data_step_size, 
+	XtVaGetValues(scale_timestep,
+			XmNmaximum, &data_step_max,
+			XmNvalue, &data_step_size,
 			NULL);
 
 	/* reset maximum if necessary */
@@ -1553,8 +1553,8 @@ do_timestep( Widget w, XtPointer client_data, XtPointer call_data)
 			data_step_max = data_step_max/2;
 		if (data_step_max < 10)
 			data_step_max = 10;
-		XtVaSetValues(scale_timestep, 
-			XmNmaximum, data_step_max, 
+		XtVaSetValues(scale_timestep,
+			XmNmaximum, data_step_max,
 			NULL);
 		sprintf(string, "%d", data_step_max);
 		set_label_string(label_timestep_2, string);
@@ -1605,7 +1605,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	  if(event->xany.type == KeyPress)
 	  {
 	  /* Get key pressed - buffer[0] */
-	  actual = XLookupString((XKeyEvent *)event, 
+	  actual = XLookupString((XKeyEvent *)event,
 			buffer, 1, &keysym, NULL);
 
 	  /* process events */
@@ -1618,7 +1618,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 				{
 				mode_pick = PICK_MODE_PICK;
 				do_unset_interval();
-				XmToggleButtonSetState(toggleButton_pick, 
+				XmToggleButtonSetState(toggleButton_pick,
 					TRUE, TRUE);
 				mbnavedit_pickcursor();
 				}
@@ -1630,7 +1630,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 				{
 				mode_pick = PICK_MODE_SELECT;
 				do_unset_interval();
-				XmToggleButtonSetState(toggleButton_select, 
+				XmToggleButtonSetState(toggleButton_select,
 					TRUE, TRUE);
 				mbnavedit_selectcursor();
 				}
@@ -1642,7 +1642,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 				{
 				mode_pick = PICK_MODE_DESELECT;
 				do_unset_interval();
-				XmToggleButtonSetState(toggleButton_deselect, 
+				XmToggleButtonSetState(toggleButton_deselect,
 					TRUE, TRUE);
 				mbnavedit_deselectcursor();
 				}
@@ -1654,7 +1654,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 				{
 				mode_pick = PICK_MODE_SELECTALL;
 				do_unset_interval();
-				XmToggleButtonSetState(toggleButton_selectall, 
+				XmToggleButtonSetState(toggleButton_selectall,
 					TRUE, TRUE);
 				mbnavedit_selectallcursor();
 				}
@@ -1666,7 +1666,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 				{
 				mode_pick = PICK_MODE_DESELECTALL;
 				do_unset_interval();
-				XmToggleButtonSetState(toggleButton_deselectall, 
+				XmToggleButtonSetState(toggleButton_deselectall,
 					TRUE, TRUE);
 				mbnavedit_deselectallcursor();
 				}
@@ -1681,7 +1681,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	  if(event->xany.type == KeyRelease)
 	  {
 	  /* Get key pressed - buffer[0] */
-	  actual = XLookupString((XKeyEvent *)event, 
+	  actual = XLookupString((XKeyEvent *)event,
 			buffer, 1, &keysym, NULL);
 
 	  /* process events */
@@ -1696,7 +1696,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	  /* Check for mouse pressed and not pressed and released. */
 	  if(event->xany.type == ButtonPress)
 	  {
-	      /* If left mouse button is pushed then 
+	      /* If left mouse button is pushed then
 		    pick, erase, restore or set time interval. */
 	      if(event->xbutton.button == 1)
 	      {
@@ -1715,16 +1715,16 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	            else if (mode_pick == PICK_MODE_PICK)
 			status = mbnavedit_action_mouse_pick(
 				x_loc, y_loc);
-		    else if (mode_pick == PICK_MODE_SELECT) 
+		    else if (mode_pick == PICK_MODE_SELECT)
 			status = mbnavedit_action_mouse_select(
 				x_loc, y_loc);
-		    else if (mode_pick == PICK_MODE_DESELECT) 
+		    else if (mode_pick == PICK_MODE_DESELECT)
 			status = mbnavedit_action_mouse_deselect(
 				x_loc, y_loc);
-		    else if (mode_pick == PICK_MODE_SELECTALL) 
+		    else if (mode_pick == PICK_MODE_SELECTALL)
 			status = mbnavedit_action_mouse_selectall(
 				x_loc, y_loc);
-		    else if (mode_pick == PICK_MODE_DESELECTALL) 
+		    else if (mode_pick == PICK_MODE_DESELECTALL)
 			status = mbnavedit_action_mouse_deselectall(
 				x_loc, y_loc);
 
@@ -1783,25 +1783,25 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			do_unset_interval();
 
 			/* set values of number of data shown slider */
-			XtVaSetValues(scale_timespan, 
-				XmNminimum, 1, 
-				XmNmaximum, data_show_max, 
-				XmNvalue, MAX(data_show_size, 1), 
+			XtVaSetValues(scale_timespan,
+				XmNminimum, 1,
+				XmNmaximum, data_show_max,
+				XmNvalue, MAX(data_show_size, 1),
 				NULL);
 			sprintf(string, "%d", data_show_max);
 			set_label_string(label_timespan_2, string);
 
 			/* set values of number of data to step slider */
-			XtVaSetValues(scale_timestep, 
-					XmNminimum, 1, 
-					XmNmaximum, data_step_max, 
-					XmNvalue, data_step_size, 
+			XtVaSetValues(scale_timestep,
+					XmNminimum, 1,
+					XmNmaximum, data_step_max,
+					XmNvalue, data_step_size,
 					NULL);
 			sprintf(string, "%d", data_step_max);
-			XtVaSetValues(label_timestep_2, 
-					XtVaTypedArg, XmNlabelString, 
-					    XmRString, string, (strlen(string) + 1), 
-					NULL);	
+			XtVaSetValues(label_timestep_2,
+					XtVaTypedArg, XmNlabelString,
+					    XmRString, string, (strlen(string) + 1),
+					NULL);
 			}
 
 		    /* scroll forward */
@@ -1810,10 +1810,10 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			status = mbnavedit_action_step(data_step_size);
 			if (status == 0) mbnavedit_bell(100);
 			}
-		} /* end of right button events */	
-	  } /* end of button pressed events */	  
+		} /* end of right button events */
+	  } /* end of button pressed events */
 	} /* end of inputs from window */
-	
+
 }
 
 /*--------------------------------------------------------------------*/
@@ -1823,19 +1823,19 @@ do_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
 {
 	XConfigureEvent *cevent = (XConfigureEvent *) event;
 	Dimension   width, height;
-	
+
 	/* do this only if a resize event happens */
 	if (cevent->type == ConfigureNotify)
 		{
-		XtVaGetValues(bulletinBoard, 
-			XmNwidth, &width, 
-			XmNheight, &height, 
+		XtVaGetValues(bulletinBoard,
+			XmNwidth, &width,
+			XmNheight, &height,
 			NULL);
-		window_width = (int)width - 220;	
-		window_height = (int)height - 90;	
-		XtVaSetValues(scrolledWindow, 
-			XmNwidth, (Dimension)window_width, 
-			XmNheight, (Dimension)window_height, 
+		window_width = (int)width - 220;
+		window_height = (int)height - 90;
+		XtVaSetValues(scrolledWindow,
+			XmNwidth, (Dimension)window_width,
+			XmNheight, (Dimension)window_height,
 			NULL);
 		}
 }
@@ -1882,10 +1882,10 @@ do_toggle_time( Widget w, XtPointer client_data, XtPointer call_data)
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
 		screen_height = plot_height;
-	XtVaSetValues(drawingArea, 
-			XmNwidth, plot_width, 
-			XmNheight, screen_height, 
-			NULL);	
+	XtVaSetValues(drawingArea,
+			XmNwidth, plot_width,
+			XmNheight, screen_height,
+			NULL);
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -1937,10 +1937,10 @@ do_toggle_lon( Widget w, XtPointer client_data, XtPointer call_data)
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
 		screen_height = plot_height;
-	XtVaSetValues(drawingArea, 
-			XmNwidth, plot_width, 
-			XmNheight, screen_height, 
-			NULL);	
+	XtVaSetValues(drawingArea,
+			XmNwidth, plot_width,
+			XmNheight, screen_height,
+			NULL);
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -1992,10 +1992,10 @@ do_toggle_lat( Widget w, XtPointer client_data, XtPointer call_data)
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
 		screen_height = plot_height;
-	XtVaSetValues(drawingArea, 
-			XmNwidth, plot_width, 
-			XmNheight, screen_height, 
-			NULL);	
+	XtVaSetValues(drawingArea,
+			XmNwidth, plot_width,
+			XmNheight, screen_height,
+			NULL);
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -2049,10 +2049,10 @@ do_toggle_heading( Widget w, XtPointer client_data, XtPointer call_data)
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
 		screen_height = plot_height;
-	XtVaSetValues(drawingArea, 
-			XmNwidth, plot_width, 
-			XmNheight, screen_height, 
-			NULL);	
+	XtVaSetValues(drawingArea,
+			XmNwidth, plot_width,
+			XmNheight, screen_height,
+			NULL);
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -2107,10 +2107,10 @@ do_toggle_speed( Widget w, XtPointer client_data, XtPointer call_data)
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
 		screen_height = plot_height;
-	XtVaSetValues(drawingArea, 
-			XmNwidth, plot_width, 
-			XmNheight, screen_height, 
-			NULL);	
+	XtVaSetValues(drawingArea,
+			XmNwidth, plot_width,
+			XmNheight, screen_height,
+			NULL);
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -2161,10 +2161,10 @@ do_toggle_sonardepth( Widget w, XtPointer client_data, XtPointer call_data)
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
 		screen_height = plot_height;
-	XtVaSetValues(drawingArea, 
-			XmNwidth, plot_width, 
-			XmNheight, screen_height, 
-			NULL);	
+	XtVaSetValues(drawingArea,
+			XmNwidth, plot_width,
+			XmNheight, screen_height,
+			NULL);
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -2259,13 +2259,13 @@ do_flag( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
-	
+
 	/* interpolate time stamps */
 	mbnavedit_action_flag();
-	
+
 	/* replot */
 	mbnavedit_plot_all();
-		
+
 	/* update controls */
 	do_set_controls();
 }
@@ -2277,13 +2277,13 @@ do_unflag( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
-	
+
 	/* interpolate time stamps */
 	mbnavedit_action_unflag();
-	
+
 	/* replot */
 	mbnavedit_plot_all();
-		
+
 	/* update controls */
 	do_set_controls();
 }
@@ -2304,9 +2304,9 @@ do_modeling_apply( Widget w, XtPointer client_data, XtPointer call_data)
 	get_text_string(textField_modeling_acceleration, string);
 	if (sscanf(string, "%lf", &dvalue) == 1)
 		weight_acceleration = dvalue;
-	
+
 	do_set_controls();
-	
+
 	/* recalculate model */
 	mbnavedit_get_model();
 
@@ -2336,9 +2336,9 @@ do_model_mode( Widget w, XtPointer client_data, XtPointer call_data)
 	    plot_lon_dr = TRUE;
 	    plot_lat_dr = TRUE;
 	    }
-	
+
 	do_set_controls();
-	
+
 	/* recalculate model */
 	mbnavedit_get_model();
 
@@ -2354,16 +2354,16 @@ do_timeinterpolation_apply( Widget w, XtPointer client_data, XtPointer call_data
 {
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
-	
+
 	/* interpolate time stamps */
 	mbnavedit_action_fixtime();
-	
+
 	/* reset timestamp problem flag */
 	timestamp_problem = MB_NO;
-	
+
 	/* replot */
 	mbnavedit_plot_all();
-		
+
 	/* update controls */
 	do_set_controls();
 
@@ -2376,16 +2376,16 @@ do_deletebadtimetag_apply( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
-	
+
 	/* interpolate time stamps */
 	mbnavedit_action_deletebadtime();
-	
+
 	/* reset timestamp problem flag */
 	timestamp_problem = MB_NO;
-	
+
 	/* replot */
 	mbnavedit_plot_all();
-		
+
 	/* update controls */
 	do_set_controls();
 }
@@ -2399,13 +2399,13 @@ do_meantimewindow( Widget w, XtPointer client_data, XtPointer call_data)
     	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
 
-	XtVaGetValues(scale_meantimewindow, 
-			XmNvalue, &mean_time_window, 
+	XtVaGetValues(scale_meantimewindow,
+			XmNvalue, &mean_time_window,
 			NULL);
-	
+
 	/* recalculate model */
 	mbnavedit_get_model();
-	
+
 	/* replot */
 	mbnavedit_plot_all();
 }
@@ -2418,10 +2418,10 @@ do_driftlon( Widget w, XtPointer client_data, XtPointer call_data)
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
 
-	XtVaGetValues(scale_driftlon, 
-			XmNvalue, &drift_lon, 
+	XtVaGetValues(scale_driftlon,
+			XmNvalue, &drift_lon,
 			NULL);
-	
+
 	/* recalculate model */
 	mbnavedit_get_model();
 
@@ -2436,13 +2436,13 @@ do_driftlat( Widget w, XtPointer client_data, XtPointer call_data)
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
 
-	XtVaGetValues(scale_driftlat, 
-			XmNvalue, &drift_lat, 
+	XtVaGetValues(scale_driftlat,
+			XmNvalue, &drift_lat,
 			NULL);
-	
+
 	/* recalculate model */
 	mbnavedit_get_model();
-	
+
 	/* replot */
 	mbnavedit_plot_all();
 }
@@ -2463,20 +2463,20 @@ do_offset_apply( Widget w, XtPointer client_data, XtPointer call_data)
 	get_text_string(textField_lat_offset, string);
 	if (sscanf(string, "%lf", &dvalue) == 1)
 		offset_lat = dvalue;
-		
+
 	/* reset widgets so user sees what got applied */
 	sprintf(value_text,"%.5f",offset_lon);
 	XmTextFieldSetString(
-	    textField_lon_offset, 
+	    textField_lon_offset,
 	    value_text);
 	sprintf(value_text,"%.5f",offset_lat);
 	XmTextFieldSetString(
-	    textField_lat_offset, 
+	    textField_lat_offset,
 	    value_text);
-	
+
 	/* apply offsets */
 	mbnavedit_action_offset();
-	
+
 	/* replot */
 	mbnavedit_plot_all();
 }
@@ -2703,30 +2703,30 @@ do_filebutton_on()
 	Boolean  argok = False;
         XmString    tmp0;
 
-	XtVaSetValues(pushButton_file, 
-		XmNsensitive, True, 
+	XtVaSetValues(pushButton_file,
+		XmNsensitive, True,
 		NULL);
-	XtVaSetValues(pushButton_done, 
-		XmNsensitive, False, 
+	XtVaSetValues(pushButton_done,
+		XmNsensitive, False,
 		NULL);
-        tmp0 = (XmString) BX_CONVERT(pushButton_done, (char *)"Done", 
+        tmp0 = (XmString) BX_CONVERT(pushButton_done, (char *)"Done",
                 			XmRXmString, 0, &argok);
-	XtVaSetValues(pushButton_done, 
+	XtVaSetValues(pushButton_done,
 		XmNlabelString, tmp0,
 		NULL);
         XmStringFree((XmString)tmp0);
 
-	XtVaSetValues(pushButton_forward, 
-		XmNsensitive, False, 
+	XtVaSetValues(pushButton_forward,
+		XmNsensitive, False,
 		NULL);
-	XtVaSetValues(pushButton_reverse, 
-		XmNsensitive, False, 
+	XtVaSetValues(pushButton_reverse,
+		XmNsensitive, False,
 		NULL);
-	XtVaSetValues(pushButton_start, 
-		XmNsensitive, False, 
+	XtVaSetValues(pushButton_start,
+		XmNsensitive, False,
 		NULL);
-	XtVaSetValues(pushButton_end, 
-		XmNsensitive, False, 
+	XtVaSetValues(pushButton_end,
+		XmNsensitive, False,
 		NULL);
 }
 
@@ -2738,41 +2738,41 @@ do_filebutton_off()
 	Boolean  argok = False;
         XmString    tmp0;
 
-	XtVaSetValues(pushButton_file, 
-		XmNsensitive, True, 
+	XtVaSetValues(pushButton_file,
+		XmNsensitive, True,
 		NULL);
-	XtVaSetValues(pushButton_done, 
-		XmNsensitive, True, 
+	XtVaSetValues(pushButton_done,
+		XmNsensitive, True,
 		NULL);
 	if (numfiles > 0 && currentfile >= 0 && currentfile < numfiles - 1)
 		{
-        	tmp0 = (XmString) BX_CONVERT(pushButton_done, (char *)"Next File", 
+        	tmp0 = (XmString) BX_CONVERT(pushButton_done, (char *)"Next File",
                 				XmRXmString, 0, &argok);
-		XtVaSetValues(pushButton_done, 
+		XtVaSetValues(pushButton_done,
 			XmNlabelString, tmp0,
 			NULL);
         	XmStringFree((XmString)tmp0);
 		}
 	else
 		{
-        	tmp0 = (XmString) BX_CONVERT(pushButton_done, (char *)"Done", 
+        	tmp0 = (XmString) BX_CONVERT(pushButton_done, (char *)"Done",
                 				XmRXmString, 0, &argok);
-		XtVaSetValues(pushButton_done, 
+		XtVaSetValues(pushButton_done,
 			XmNlabelString, tmp0,
 			NULL);
         	XmStringFree((XmString)tmp0);
 		}
-	XtVaSetValues(pushButton_forward, 
-		XmNsensitive, True, 
+	XtVaSetValues(pushButton_forward,
+		XmNsensitive, True,
 		NULL);
-	XtVaSetValues(pushButton_reverse, 
-		XmNsensitive, True, 
+	XtVaSetValues(pushButton_reverse,
+		XmNsensitive, True,
 		NULL);
-	XtVaSetValues(pushButton_start, 
-		XmNsensitive, True, 
+	XtVaSetValues(pushButton_start,
+		XmNsensitive, True,
 		NULL);
-	XtVaSetValues(pushButton_end, 
-		XmNsensitive, True, 
+	XtVaSetValues(pushButton_end,
+		XmNsensitive, True,
 		NULL);
 }
 
@@ -2791,7 +2791,7 @@ do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data)
 
     /* read the input file name */
     if(!XmStringGetLtoR(acs->value,
-	XmSTRING_DEFAULT_CHARSET, 
+	XmSTRING_DEFAULT_CHARSET,
 	&input_file_ptr))
 	{
 	fprintf(stderr,"\nno input multibeam file selected\n");
@@ -2872,17 +2872,17 @@ fprintf(stderr,"Called do_load:%d\n",useprevious);
 	strcpy(ifile,filepaths[currentfile]);
 	format = fileformats[currentfile];
 	status = mbnavedit_action_open(useprevious);
-	
-	if (status == MB_FAILURE) 
+
+	if (status == MB_FAILURE)
 		mbnavedit_bell(100);
-	
+
 	do_unset_interval();
 
 	/* set values of number of data shown slider */
-	XtVaSetValues(scale_timespan, 
-			XmNminimum, 1, 
-			XmNmaximum, data_show_max, 
-			XmNvalue, MAX(data_show_size, 1), 
+	XtVaSetValues(scale_timespan,
+			XmNminimum, 1,
+			XmNmaximum, data_show_max,
+			XmNvalue, MAX(data_show_size, 1),
 			NULL);
 	sprintf(string, "%d", data_show_max);
 	set_label_string(label_timespan_2, string);
@@ -2893,10 +2893,10 @@ fprintf(stderr,"Called do_load:%d\n",useprevious);
 	/* replot */
 	if (status == MB_SUCCESS)
 		mbnavedit_plot_all();
-	    
+
 	/* turn on expose plots */
 	expose_plot_ok = True;
-	
+
 	do_set_controls();
 }
 
@@ -2931,17 +2931,17 @@ do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 	if((int)strlen(string) > 0)
 		{
 		/* get the file format and set the widget */
-		if (mb_get_format(0, string, fileroot, 
-				    &form, &format_error) 
+		if (mb_get_format(0, string, fileroot,
+				    &form, &format_error)
 			== MB_SUCCESS)
 		    {
 		    format = form;
 		    sprintf(value_text,"%d",format);
 		    XmTextFieldSetString(
-			textField_format, 
+			textField_format,
 			value_text);
 		    }
-    
+
 		/* get the output filename */
 		strcpy(nfile,string);
 		strcat(nfile,".nve");
@@ -3098,10 +3098,10 @@ do_showall( Widget w, XtPointer client_data, XtPointer call_data)
 	do_unset_interval();
 
 	/* set values of number of data shown slider */
-	XtVaSetValues(scale_timespan, 
-			XmNminimum, 1, 
-			XmNmaximum, data_show_max, 
-			XmNvalue, MAX(data_show_size, 1), 
+	XtVaSetValues(scale_timespan,
+			XmNminimum, 1,
+			XmNmaximum, data_show_max,
+			XmNvalue, MAX(data_show_size, 1),
 			NULL);
 	sprintf(string, "%d", data_show_max);
 	set_label_string(label_timespan_2, string);
@@ -3139,7 +3139,7 @@ do_unset_interval()
 		else if (mode_pick == PICK_MODE_DESELECTALL)
 			mbnavedit_deselectallcursor();
 		}
-		
+
 	return(MB_SUCCESS);
 }
 /*--------------------------------------------------------------------*/
@@ -3179,10 +3179,10 @@ do_toggle_vru( Widget w, XtPointer client_data, XtPointer call_data)
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
 		screen_height = plot_height;
-	XtVaSetValues(drawingArea, 
-			XmNwidth, plot_width, 
-			XmNheight, screen_height, 
-			NULL);	
+	XtVaSetValues(drawingArea,
+			XmNwidth, plot_width,
+			XmNheight, screen_height,
+			NULL);
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -3203,7 +3203,7 @@ mbnavedit_get_position(int *win_x, int *win_y, unsigned int *mask_return)
 
 	status = XQueryPointer(display, can_xid,
 		&root_return, &child_return,
-		&root_x_return, &root_y_return, 
+		&root_x_return, &root_y_return,
 		win_x, win_y, mask_return);
 }
 /*--------------------------------------------------------------------*/
@@ -3276,24 +3276,24 @@ do_wait_until_viewed(XtAppContext app)
     Window  topwindow;
     XWindowAttributes	xwa;
     XEvent  event;
-    
+
     /* set app_context */
     app_context = app;
-    
+
     /* find the top level shell */
-    for (topshell = drawingArea; 
+    for (topshell = drawingArea;
 	    !XtIsTopLevelShell(topshell);
 	    topshell = XtParent(topshell))
 	;
-	
+
     /* keep processing events until it is viewed */
     if (XtIsRealized(topshell))
 	{
 	topwindow = XtWindow(topshell);
-	
+
 	/* wait for the window to be mapped */
 	while (XGetWindowAttributes(
-			XtDisplay(drawingArea), 
+			XtDisplay(drawingArea),
 			topwindow, &xwa)
 		&& xwa.map_state != IsViewable)
 	    {
@@ -3301,9 +3301,9 @@ do_wait_until_viewed(XtAppContext app)
 	    XtDispatchEvent(&event);
 	    }
 	}
-	
+
     XmUpdateDisplay(topshell);
-		
+
     return(MB_SUCCESS);
 }
 
@@ -3314,13 +3314,13 @@ int do_mbnavedit_settimer()
 	int	status = MB_SUCCESS;
 	int	timer_timeout_time = 1000;
 	int	id;
-	    
+
 	/* set timer function if none set for this instance */
 	if (timer_function_set == MB_NO)
 		{
-		id =  XtAppAddTimeOut(app_context, 
+		id =  XtAppAddTimeOut(app_context,
 				(unsigned long) timer_timeout_time,
-				(XtTimerCallbackProc)do_mbnavedit_workfunction, 
+				(XtTimerCallbackProc)do_mbnavedit_workfunction,
 				(XtPointer) -1);
 		if (id > 0)
 			timer_function_set = MB_YES;
@@ -3341,16 +3341,16 @@ int do_mbnavedit_workfunction(XtPointer client_data)
 	int	status = MB_SUCCESS;
 
 	timer_function_set = MB_NO;
-	    
+
 	/* reset filelist */
 	if (numfiles > 0 && expose_plot_ok == True)
 		{
 		do_build_filelist();
 		}
-		
+
 	/* reset the timer function */
 	do_mbnavedit_settimer();
-		
+
 	return(status);
 }
 
@@ -3365,16 +3365,16 @@ do_message_on(char *message)
     Window  diawindow, topwindow;
     XWindowAttributes	xwa;
     XEvent  event;
-    
+
     set_label_string(label_message, message);
     XtManageChild(bulletinBoard_message);
-    
+
     /* force the label to be visible */
-    for (diashell = label_message; 
-	    !XtIsShell(diashell); 
+    for (diashell = label_message;
+	    !XtIsShell(diashell);
 	    diashell = XtParent(diashell))
 	;
-    for (topshell = diashell; 
+    for (topshell = diashell;
 	    !XtIsTopLevelShell(topshell);
 	    topshell = XtParent(topshell))
 	;
@@ -3382,7 +3382,7 @@ do_message_on(char *message)
 	{
 	diawindow = XtWindow(diashell);
 	topwindow = XtWindow(topshell);
-	
+
 	/* wait for the dialog to be mapped */
 	while (XGetWindowAttributes(display, diawindow, &xwa)
 		&& xwa.map_state != IsViewable)
@@ -3390,14 +3390,14 @@ do_message_on(char *message)
 	    if (XGetWindowAttributes(display, topwindow, &xwa)
 		    && xwa.map_state != IsViewable)
 		break;
-		
+
 	    XtAppNextEvent(app_context, &event);
 	    XtDispatchEvent(&event);
 	    }
 	}
-	
+
     XmUpdateDisplay(topshell);
-		
+
     return(MB_SUCCESS);
 }
 
@@ -3409,7 +3409,7 @@ do_message_off()
     XtUnmanageChild(bulletinBoard_message);
     XSync(XtDisplay(bulletinBoard_message), 0);
     XmUpdateDisplay(drawingArea);
-		
+
     return(MB_SUCCESS);
 }
 
@@ -3423,7 +3423,7 @@ do_error_dialog(char *s1, char *s2, char *s3)
     set_label_string(label_error_three, s3);
     XtManageChild(bulletinBoard_error);
     XBell(display,100);
-		
+
     return(MB_SUCCESS);
 }
 
@@ -3434,13 +3434,13 @@ do_error_dialog(char *s1, char *s2, char *s3)
 void set_label_string(Widget w, String str)
 {
     XmString xstr;
-    
+
     xstr = XmStringCreateLocalized( str );
-    if ( xstr != NULL ) 
-	XtVaSetValues(w, 
-	    XmNlabelString, xstr, 
+    if ( xstr != NULL )
+	XtVaSetValues(w,
+	    XmNlabelString, xstr,
 	    NULL);
-    else 
+    else
 	XtWarning("Failed to update labelString");
 
     XmStringFree( xstr );
@@ -3471,7 +3471,7 @@ void set_label_multiline_string(Widget w, String str)
 void get_text_string(Widget w, String str)
 {
     char	*str_tmp;
-    
+
     str_tmp = (char *) XmTextGetString(w);
     strcpy(str, str_tmp);
     XtFree(str_tmp);

@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,9 +14,9 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_elac.c contains the functions for handling the data structure
- * used by MBIO functions to store data 
+ * used by MBIO functions to store data
  * from Elac BottomChart Mark II multibeam sonar systems.
- * The data formats which are commonly used to store Elac 
+ * The data formats which are commonly used to store Elac
  * data in files include
  *      MBF_ELMK2UNB : MBIO ID 92
  *
@@ -125,16 +125,16 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_elacmk2.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_elacmk2.h"
 
  static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_elacmk2_alloc";
@@ -150,7 +150,7 @@ int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -282,7 +282,7 @@ int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -292,7 +292,7 @@ int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elacmk2_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_elacmk2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_elacmk2_deall";
@@ -305,8 +305,8 @@ int mbsys_elacmk2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		}
 
 	/* deallocate memory for data structure */
@@ -326,7 +326,7 @@ int mbsys_elacmk2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elacmk2_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_elacmk2_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_elacmk2_dimensions";
@@ -341,8 +341,8 @@ int mbsys_elacmk2_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -388,12 +388,12 @@ int mbsys_elacmk2_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -412,8 +412,8 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -435,7 +435,7 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[3] = store->hour;
 		time_i[4] = store->minute;
 		time_i[5] = store->second;
-		time_i[6] = 10000*store->hundredth_sec 
+		time_i[6] = 10000*store->hundredth_sec
 			+ 100*store->thousandth_sec;
 		mb_get_time(verbose,time_i,time_d);
 
@@ -448,7 +448,7 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed = 3.6 * store->speed;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 2.8;
 		mb_io_ptr->beamwidth_xtrack = 1.5;
@@ -465,22 +465,22 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			j = store->beams_bath - i - 1;
 			if (store->beams[j].quality == 1)
-			    beamflag[i] 
+			    beamflag[i]
 				= MB_FLAG_NONE;
 			else if (store->beams[j].quality < 8)
-			    beamflag[i] 
+			    beamflag[i]
 				= MB_FLAG_SONAR + MB_FLAG_FLAG;
 			else if (store->beams[j].quality == 8)
-			    beamflag[i] 
+			    beamflag[i]
 				= MB_FLAG_NULL;
 			else if (store->beams[j].quality == 10)
-			    beamflag[i] 
+			    beamflag[i]
 				= MB_FLAG_MANUAL + MB_FLAG_FLAG;
 			else if (store->beams[j].quality == 20)
-			    beamflag[i] 
+			    beamflag[i]
 				= MB_FLAG_FILTER + MB_FLAG_FLAG;
 			else
-			    beamflag[i] 
+			    beamflag[i]
 				= MB_FLAG_NULL;
 			bath[i] = depthscale * store->beams[j].bath;
 			bathacrosstrack[i] = dacrscale
@@ -551,7 +551,7 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[3] = store->pos_hour;
 		time_i[4] = store->pos_minute;
 		time_i[5] = store->pos_second;
-		time_i[6] = 10000*store->pos_hundredth_sec 
+		time_i[6] = 10000*store->pos_hundredth_sec
 			+ 100*store->pos_thousandth_sec;
 		mb_get_time(verbose,time_i,time_d);
 
@@ -635,13 +635,13 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -657,7 +657,7 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -685,12 +685,12 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -709,8 +709,8 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
@@ -731,13 +731,13 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
@@ -768,8 +768,8 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->minute = time_i[4];
 		store->second = time_i[5];
 		store->hundredth_sec = time_i[6]/10000;
-		store->thousandth_sec 
-			= (time_i[6] 
+		store->thousandth_sec
+			= (time_i[6]
 			- 10000*store->hundredth_sec)/100;
 
 		/*get navigation */
@@ -803,16 +803,16 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				    else if (store->beams[j].quality == 1)
 					store->beams[j].quality = 7;
 				    }
-				else 
+				else
 				    store->beams[j].quality = 1;
-				store->beams[j].bath 
+				store->beams[j].bath
 					= (unsigned int)
 					    fabs(bath[i] / depthscale);
-				store->beams[j].bath_acrosstrack 
-					= (int) (bathacrosstrack[i] 
+				store->beams[j].bath_acrosstrack
+					= (int) (bathacrosstrack[i]
 						/ dacrscale);
-				store->beams[j].bath_alongtrack 
-					= (int) (bathalongtrack[i] 
+				store->beams[j].bath_alongtrack
+					= (int) (bathalongtrack[i]
 						/ daloscale);
 				store->beams[j].amplitude
 					= (int) (amp[i] / reflscale);
@@ -832,8 +832,8 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_minute = time_i[4];
 		store->pos_second = time_i[5];
 		store->pos_hundredth_sec = time_i[6]/10000;
-		store->pos_thousandth_sec 
-			= (time_i[6] 
+		store->pos_thousandth_sec
+			= (time_i[6]
 			- 10000*store->hundredth_sec)/100;
 
 		/*get navigation */
@@ -866,9 +866,9 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_elacmk2_ttimes";
@@ -886,14 +886,14 @@ int mbsys_elacmk2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %lu\n",(size_t)ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%lu\n",(size_t)angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%lu\n",(size_t)angles_forward);
-		fprintf(stderr,"dbg2       angles_null:%lu\n",(size_t)angles_null);
-		fprintf(stderr,"dbg2       heave:      %lu\n",(size_t)heave);
-		fprintf(stderr,"dbg2       ltrk_off:   %lu\n",(size_t)alongtrack_offset);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %p\n",(void *)ttimes);
+		fprintf(stderr,"dbg2       angles_xtrk:%p\n",(void *)angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%p\n",(void *)angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%p\n",(void *)angles_null);
+		fprintf(stderr,"dbg2       heave:      %p\n",(void *)heave);
+		fprintf(stderr,"dbg2       ltrk_off:   %p\n",(void *)alongtrack_offset);
 		}
 
 	/* get mbio descriptor */
@@ -929,19 +929,19 @@ int mbsys_elacmk2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			angle = 90.0 + angscale * store->beams[j].angle;
 			pitch = angscale * store->beams[j].pitch;
 			mb_rollpitch_to_takeoff(
-				verbose, pitch, angle, 
-				&angles[i], 
+				verbose, pitch, angle,
+				&angles[i],
 				&angles_forward[i], error);
 			if (store->beams[j].angle < 0)
 				{
-				angles_null[i] = 37.5 
-					+ angscale 
+				angles_null[i] = 37.5
+					+ angscale
 					* store->transducer_port_error;
 				}
 			else
 				{
-				angles_null[i] = 37.5 
-					+ angscale 
+				angles_null[i] = 37.5
+					+ angscale
 					* store->transducer_starboard_error;
 				}
 			heave[i] = 0.001 * store->beams[j].heave;
@@ -1019,9 +1019,9 @@ int mbsys_elacmk2_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %p\n",(void *)detects);
 		}
 
 	/* get mbio descriptor */
@@ -1095,7 +1095,7 @@ int mbsys_elacmk2_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_elacmk2_extract_altitude";
@@ -1115,8 +1115,8 @@ int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1132,7 +1132,7 @@ int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get draft */
-		*transducer_depth = 0.005 
+		*transducer_depth = 0.005
 				    * (store->transducer_starboard_depth
 					+ store->transducer_port_depth);
 		depthscale = 0.01;
@@ -1146,15 +1146,15 @@ int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<store->beams_bath;i++)
 			{
 			if (store->beams[i].quality == 1
-			    && fabs(dacrscale 
-				    * store->beams[i].bath_acrosstrack) 
+			    && fabs(dacrscale
+				    * store->beams[i].bath_acrosstrack)
 				< xtrack_min)
 			    {
-			    xtrack_min = fabs(dacrscale 
+			    xtrack_min = fabs(dacrscale
 				* store->beams[i].bath_acrosstrack);
 			    bath_best = depthscale * store->beams[i].bath;
 			    }
-			}		
+			}
 		    }
 		if (bath_best <= 0.0)
 		    {
@@ -1162,15 +1162,15 @@ int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<store->beams_bath;i++)
 			{
 			if (store->beams[i].quality < 8
-			    && fabs(dacrscale 
-				    * store->beams[i].bath_acrosstrack) 
+			    && fabs(dacrscale
+				    * store->beams[i].bath_acrosstrack)
 				< xtrack_min)
 			    {
-			    xtrack_min = fabs(dacrscale 
+			    xtrack_min = fabs(dacrscale
 				* store->beams[i].bath_acrosstrack);
 			    bath_best = depthscale * store->beams[i].bath;
 			    }
-			}		
+			}
 		    }
 		*altitude = bath_best - *transducer_depth;
 
@@ -1218,8 +1218,8 @@ int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_elacmk2_extract_nav";
@@ -1234,8 +1234,8 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1257,7 +1257,7 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[3] = store->hour;
 		time_i[4] = store->minute;
 		time_i[5] = store->second;
-		time_i[6] = 10000*store->hundredth_sec 
+		time_i[6] = 10000*store->hundredth_sec
 			+ 100*store->thousandth_sec;
 		mb_get_time(verbose,time_i,time_d);
 
@@ -1347,7 +1347,7 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[3] = store->pos_hour;
 		time_i[4] = store->pos_minute;
 		time_i[5] = store->pos_second;
-		time_i[6] = 10000*store->pos_hundredth_sec 
+		time_i[6] = 10000*store->pos_hundredth_sec
 			+ 100*store->pos_thousandth_sec;
 		mb_get_time(verbose,time_i,time_d);
 
@@ -1450,7 +1450,7 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1484,7 +1484,7 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1500,8 +1500,8 @@ int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -1537,8 +1537,8 @@ int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->minute = time_i[4];
 		store->second = time_i[5];
 		store->hundredth_sec = time_i[6]/10000;
-		store->thousandth_sec 
-			= (time_i[6] 
+		store->thousandth_sec
+			= (time_i[6]
 			- 10000*store->hundredth_sec)/100;
 
 		/*get navigation */
@@ -1569,8 +1569,8 @@ int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_minute = time_i[4];
 		store->pos_second = time_i[5];
 		store->pos_hundredth_sec = time_i[6]/10000;
-		store->pos_thousandth_sec 
-			= (time_i[6] 
+		store->pos_thousandth_sec
+			= (time_i[6]
 			- 10000*store->hundredth_sec)/100;
 
 		/*get navigation */
@@ -1619,8 +1619,8 @@ int mbsys_elacmk2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1637,7 +1637,7 @@ int mbsys_elacmk2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		*nsvp = store->svp_num;
-		
+
 		/* get profile */
 		for (i=0;i<*nsvp;i++)
 			{
@@ -1701,8 +1701,8 @@ int mbsys_elacmk2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       nsvp:       %d\n",nsvp);
 		for (i=0;i<nsvp;i++)
 		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
@@ -1719,7 +1719,7 @@ int mbsys_elacmk2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		store->svp_num = MIN(nsvp, MBSYS_ELACMK2_MAXSVP);
-		
+
 		/* get profile */
 		for (i=0;i<store->svp_num;i++)
 			{
@@ -1742,7 +1742,7 @@ int mbsys_elacmk2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elacmk2_copy(int verbose, void *mbio_ptr, 
+int mbsys_elacmk2_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -1759,9 +1759,9 @@ int mbsys_elacmk2_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %lu\n",(size_t)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %p\n",(void *)copy_ptr);
 		}
 
 	/* get mbio descriptor */

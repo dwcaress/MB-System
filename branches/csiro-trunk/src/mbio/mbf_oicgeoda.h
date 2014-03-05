@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_oicgeoda.h	1/8/99
  *	$Id$
  *
- *    Copyright (c) 1999-2012 by
+ *    Copyright (c) 1999-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_oicgeoda.h defines the data structures used by MBIO functions
- * to store multibeam data read from the  MBF_OICGEODA format (MBIO id 141).  
+ * to store multibeam data read from the  MBF_OICGEODA format (MBIO id 141).
  *
  * Author:	D. W. Caress
  * Date:	January 8, 1999
@@ -52,10 +52,10 @@
  *      their deep towed 120 kHz interferometry sonar (AMS-120).
  *   2. The data consist of variable length binary records.
  *   3. Each data record has three parts.  First there is a 248-byte
- *      header section containing the time stamp, navigation, a 
+ *      header section containing the time stamp, navigation, a
  *      variety of other values, the numbers and sizes of sonar
  *      data included in the record.  The second, optional, part of
- *      the record is "client specific information" of arbitrary 
+ *      the record is "client specific information" of arbitrary
  *      length. The third part contains up to eight arrays of
  *      sonar data.
  *   4. The header begins with a four byte magic number. The first
@@ -100,7 +100,7 @@ struct mbf_oicgeoda_channel_struct
 	mb_u_char	empty;		/* spare */
 	int		frequency;	/* Hz */
 	int		num_samples;	/* number of samples stored for
-					    sidescan and angle sonar types, 
+					    sidescan and angle sonar types,
 					    number of beams for multibeam */
 	};
 
@@ -121,7 +121,7 @@ struct mbf_oicgeoda_data_struct
 	float		*ssacrosstrack;
 	float		*ssalongtrack;
 	};
-	
+
 struct mbf_oicgeoda_seaview_struct
 	{
 	double		longitude;	/* longitude in degrees */
@@ -159,7 +159,7 @@ struct mbf_oicgeoda_header_struct
 						5:  OutputModeProcRaw
 						6:  ShadowMask
 						7:  QualityBit */
-	mb_s_char	nav_used;	
+	mb_s_char	nav_used;
 	mb_s_char	nav_type;	/*  0 = UTM coordinates in m
 					    1 = Local coordinates in m
 					    2 = Latitude and longitude */

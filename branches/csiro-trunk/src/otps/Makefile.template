@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
 #	$Id$
 #
-#     Copyright (c) 2009-2011 by 
+#     Copyright (c) 2009-2013 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -40,12 +40,12 @@ LFLAGS = -lm
 GSFLIB  = $(LIBDIR)/libmbgsf.a
 
 ### set projlib - could be version supplied with MB-System or other installation
-PROJLIB  = $(LIBDIR)/libmbproj.a
+PROJLIB  = $(LIBDIR)/libproj.a
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
 ### make all makes the MB-system macros and man pages
-all:	$(BINDIR)/mbotps 
+all:	$(BINDIR)/mbotps
 
 ### make clean removes the object files
 clean:
@@ -69,7 +69,8 @@ $(BINDIR)/mbotps: mbotps.o \
 		$(LFLAGS) -o $(BINDIR)/mbotps
 
 ### compile the source files
-mbotps.o:	mbotps.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
-	echo "	char *otps_location = "'"$(OTPSDIR)"'";" > otps.h
-	$(CC) -c $(CFLAGS) mbotps.c
+mbotps.o:	mbotps.c ../mbio/mb_status.h ../mbio/mb_define.h otps.h
+	$(CC) -c $(CFLAGS) -I../mbio mbotps.c
 
+otps.h:	Makefile
+	echo "	char *otps_location = "'"$(OTPSDIR)"'";" > otps.h

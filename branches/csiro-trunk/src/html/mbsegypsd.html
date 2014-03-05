@@ -1,0 +1,316 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbsegypsd</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbsegypsd</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbsegypsd</B> - Calculates the power spectral densisty function (PSD) of each trace in a
+segy file, outputting the PSD estimates as a GMT grid file with trace number along
+the x axis and frequency along the y axis.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbsegypsd</B> <B>-I</B><I>file</I> <B>-O</B><I>root
+[</I><B>-A</B><I>shotscale</I> <B>-D</B><I>decimatex</I> <B>-R</B>
+<B>-S</B><I>mode[/start/end[/schan/echan]]</I> <B>-T</B><I>sweep[/delay]</I>
+<B>-W</B><I>mode/start/end</I> <B>-H</B> <B>-V</B>]&quot;;
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbsegypsd</B> calculates the power spectral densisty function (PSD) of each
+trace in a segy file, outputting the PSD estimates as a grid with
+trace number along the x axis and frequency along the y axis.
+The output files are <B>GMT</B> netCDF format grid files.
+<P>
+The x-dimension of the grid is determined by the number of traces specified
+by the <B>-S</B> option and any decimation specified with option <B>-D</B>.
+If the <B>-S</B> option is not specified, then all of the traces in the segy file
+will be processed. If the time sweep and delay (if any) are not specified using
+the <B>-T</B> option, then the sweep and delay will be set so that all trace samples
+are incorporated into the grid.
+<P>
+The y-dimension of the grid is determined by the sample interval in the time series
+data. The frequency range runs from zero Hz to a maximum frequency given
+in Hz by 1/(2*sampleinterval), where the sampleinterval is in seconds. So,
+for instance, hydrophone data sampled at 26 kHz (26000 samples/second) will
+have a sample interval of (1/26000 = 0.00003846 seconds). In this case, the
+PSD will be calculated for frequencies ranging from 0 Hz to 13000 Hz (13 kHz).
+<P>
+For each trace, the PSD will be calculated by ensemble averaging, which means that
+the trace will be broken up into a number of segments of length <I>nfft</I> (specified
+with the <B>-N</B> option, default = 1024), a fast-Fourier-transform (FFT) will be
+calculated for each segment, and the PSD estimate will be the average of
+the FFT magnitudes over all segments. Before the FFT is calculated, each segment
+is multiplied by a Hanning (cosine) taper; the PSD estimates are normalized to
+account for the loss of signal due to the taper application.
+<P>
+The output grid can be either in linear units (Intensity/Hz) or in log-scaled dB/Hz
+calculated as 20 * log10 (raw-PSD-value). The default is the former, and the
+<B>-L</B> option causes output in the dB/Hz form.
+<P>
+A shellscript invoking <B>GMT</B> programs to plot the PSD grid is automatically
+generated.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>shotscale</I>
+<BR>
+
+This option causes the x-axis to be rescaled from shot number to distance in meters.
+The <I>shotscale</I> value represents the shot spacing in meters.
+<DT><B>-D</B>
+
+<DD>
+<I>decimatex</I>
+<BR>
+
+Sets the decimation of traces (<I>decimatex</I>) used in generating the output grid.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>segyfile</I>
+<BR>
+
+Sets the filename of the input segy seismic data file to be gridded.
+<DT><B>-L</B>
+
+<DD>
+<BR>
+
+Sets the PSD grid output to be in dB/Hz.
+<DT><B>-O</B>
+
+<DD>
+<I>root</I>
+<BR>
+
+Sets the filename root for the output GMT netCDF format grid.
+<DT><B>-S</B>
+
+<DD>
+<I>mode[/start/end[/schan/echan]]</I>
+<BR>
+
+This option sets the range of traces that are gridded, and thus determines
+the x-dimension of the output grid (also impacted by any decimation
+specified with <B>-D</B>). If <I>mode</I> = 0, then <I>start</I> and <I>end</I>
+refer to shot numbers. This typically is useful for subbottom data or seismic
+data in shot gather form. If <I>mode</I> = 1, then <I>start</I> and <I>end</I>
+refer to CMP (or RP or CDP) numbers. This typically is useful for seismic
+reflection data in stacked or CMP gather forms. If the data are multichannel
+seismic reflection or seismic refraction in either shot or CMP gathers, the
+start and end of the channels selected for gridding is set using the optional <I>schan</I>
+and <I>echan</I>, respectively. The x-dimension of the output grid is determined by
+(<I>end</I> - <I>start</I> + 1) * (<I>echan</I> - <I>schan</I> + 1) / <I>decimatex</I>.
+<DT><B>-T</B>
+
+<DD>
+<I>sweep[/delay]</I>
+<BR>
+
+The <I>sweep</I> value sets the time range of seismic data to be processed in seconds.
+The optional <I>delay</I> value sets the sweep start time, again in seconds.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbsegypsd</B> prints out information regarding its
+controlling parameters during execution; the
+<B>-V</B> option causes the program to also print out statements
+indicating its progress.
+<DT><B>-W</B>
+
+<DD>
+<I>mode/start/end</I>
+<BR>
+
+This option can be used to limit the data being processed to a particular time
+window in various ways. This option does not impact the definition of the overall
+grid bounds, but does restrict the data processed to samples within particular times
+of interest. If <I>mode</I> = 1, then <I>start</I> and <I>end</I> are simply start and end
+times of good data in seconds. If <I>mode</I> = 2, then <I>start</I> and <I>end</I> are relative to
+the time of the bottom return. In this case <I>start</I> is often negative so that the
+grid shows data above the seafloor, and then down into the subsurface. Finally, if <I>mode</I> = 3,
+then <I>start</I> and <I>end</I> are relative to the time corresponding to the sonar
+depth.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that one has a segy file of hydrophone data sampled at a
+37 microsecond interval, corresponding to a 27027 Hz sampling rate.
+Each of 1610 traces consists of 64865 samples. In order to create a
+sonogram displaying the power spectral density as a function of
+time, execute mbsegypsd as follows:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbsegypsd&nbsp;-I&nbsp;20090922_1833_V3422_S7_CH025ms.segy&nbsp;-N1024&nbsp;-L&nbsp;-O&nbsp;testpsd&nbsp;-V<BR>
+<BR>
+
+Here the <B>-N</B> option sets the FFT dimension used to be 1024 samples, which
+means that the PSD estimate for each trace is the average of 64865 / 1024 = 63
+calculations. The shell output of the program is:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbsegypsd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbsegypsd.1&nbsp;2096&nbsp;2013-06-04&nbsp;08:17:22Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.1.2beta12<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MBsegypsd&nbsp;Parameters:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;segy&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20090922_1833_V3422_S7_CH025ms.segy<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;fileroot:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;testpsd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;Parameters:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trace&nbsp;mode:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trace&nbsp;start:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trace&nbsp;end:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1609<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;channel&nbsp;start:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;channel&nbsp;end:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trace&nbsp;decimation:&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time&nbsp;sweep:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.399968&nbsp;seconds<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time&nbsp;delay:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;seconds<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sample&nbsp;interval:&nbsp;&nbsp;&nbsp;&nbsp;0.000037&nbsp;seconds<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window&nbsp;mode:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window&nbsp;start:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;seconds<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window&nbsp;end:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;seconds<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;Parameters:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;filename:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;testpsd.grd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;psd&nbsp;filename:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;testpsd_psd.txt<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;grid&nbsp;dimension:&nbsp;&nbsp;&nbsp;1610<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;grid&nbsp;dimension:&nbsp;&nbsp;&nbsp;513<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;xmin:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-0.500000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;xmax:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1609.500000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;ymin:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-13.171066<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;ymax:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13500.342448<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NaN&nbsp;values&nbsp;used&nbsp;to&nbsp;flag&nbsp;regions&nbsp;with&nbsp;no&nbsp;data<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shotscale:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequencyscale:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.000000<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:0&nbsp;position:0&nbsp;shot:0&nbsp;channel:1&nbsp;2009/265&nbsp;18:32:59.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-102498.789062&nbsp;-187.008667<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:25&nbsp;position:25&nbsp;shot:25&nbsp;channel:1&nbsp;2009/265&nbsp;18:34:14.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-201902.890625&nbsp;9166.462891<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:50&nbsp;position:50&nbsp;shot:50&nbsp;channel:1&nbsp;2009/265&nbsp;18:35:29.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-203695.765625&nbsp;28316.906250<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:75&nbsp;position:75&nbsp;shot:75&nbsp;channel:1&nbsp;2009/265&nbsp;18:36:44.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-201434.375000&nbsp;24819.115234<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:100&nbsp;position:100&nbsp;shot:100&nbsp;channel:1&nbsp;2009/265&nbsp;18:37:59.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-16544.123047&nbsp;37.462040<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>............................<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:1500&nbsp;position:1500&nbsp;shot:1500&nbsp;channel:1&nbsp;2009/265&nbsp;19:47:59.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-8367.179688&nbsp;-876.420044<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:1525&nbsp;position:1525&nbsp;shot:1525&nbsp;channel:1&nbsp;2009/265&nbsp;19:49:14.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-9163.580078&nbsp;201.037201<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:1550&nbsp;position:1550&nbsp;shot:1550&nbsp;channel:1&nbsp;2009/265&nbsp;19:50:29.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-12128.291016&nbsp;-993.766357<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:1575&nbsp;position:1575&nbsp;shot:1575&nbsp;channel:1&nbsp;2009/265&nbsp;19:51:44.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-67764.585938&nbsp;2457.883789<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:1600&nbsp;position:1600&nbsp;shot:1600&nbsp;channel:1&nbsp;2009/265&nbsp;19:52:59.000&nbsp;samples:64864&nbsp;interval:37&nbsp;usec&nbsp;minmax:&nbsp;-190216.031250&nbsp;-14304.720703<BR>
+<BR>&nbsp;.br
+<BR>&nbsp;.br
+The output PSD grid file is named testpsd.grd. A shellscript named
+testpsd.grd.cmd is also created that, when executed, will generate a plot of the
+sonogram. <B>MBsegypsd</B> also outputs an ascii file containing the average PSD for the
+entire segy file in the form of frequency PSD pairs. In this case, the average PSD file
+is named testpsd_psd.txt, and has contents like:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0.000000&nbsp;193.762464<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>26.342132&nbsp;99.114274<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>52.684263&nbsp;93.781880<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>79.026395&nbsp;86.775795<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>105.368526&nbsp;80.297280<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>131.710658&nbsp;74.908340<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>158.052790&nbsp;71.366137<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>184.394921&nbsp;70.319082<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>210.737053&nbsp;69.840534<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>237.079184&nbsp;70.794517<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>263.421316&nbsp;72.002905<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>289.763448&nbsp;71.979001<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>316.105579&nbsp;70.637717<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>342.447711&nbsp;69.652364<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>..............<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>13329.118592&nbsp;-13.659568<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>13355.460724&nbsp;-13.722928<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>13381.802855&nbsp;-12.981740<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>13408.144987&nbsp;-12.626286<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>13434.487119&nbsp;-12.533222<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>13460.829250&nbsp;-13.659002<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>13487.171382&nbsp;-24.474310<BR>
+<BR>
+
+A shellscript named testpsd_psd.txt.cmd is created that will, when executed, generate
+a plot of the average PSD.
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbm_grdplot.html">mbm_grdplot</A></B>(1), <B><A HREF="mbmosaic.html">mbmosaic</A></B>(1), <B><A HREF="mbm_grid.html">mbm_grid</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Probably...
+The plots could be better...
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

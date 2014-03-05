@@ -1,0 +1,621 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbswath</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbswath</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbswath</B> - GMT compatible utility for color fill or color shaded relief
+swath plots of swath sonar data using Postscript.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbswath</B> <B>-C</B><I>cptfile</I> <B>-J</B><I>parameters</I>
+<B>-R</B><I>west/east/south/north</I> [<B>-A</B><I>factor/mode/depth</I>
+<B>-B</B><I>tickinfo</I> <B>-b</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-c</B><I>copies</I> <B>-D</B><I>mode/scale/min/max</I>
+<B>-E</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-f</B><I>format</I> <B>-F</B><I>red/green/blue</I>
+<B>-G</B><I>magnitude/azimuth</I> <B>-I</B><I>datalist</I> <B>-K</B>
+<B>-N</B><I>cptfile</I> <B>-O</B> <B>-P</B> <B>-p</B><I>pings </I><B>-Q</B><I>dpi</I> <B>-S</B><I>speed</I>
+<B>-T</B><I>timegap</I> <B>-U</B> <B>-W</B> <B>-X</B><I>x-shift</I> <B>-Y</B><I>y-shift</I> <B>-Z</B><I>mode[F]</I>
+<B>-0 -1 -2</B>
+<B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbswath</B> is a utility for plotting swath sonar data in color fill
+or color shaded relief using Postscript.  Like <B>mbcontour</B>, <B>mbswath</B>
+is fully compatible with the GMT package version 3, including the use
+of GMT style color pallete (cpt) files to control the color table.
+A 24-bit true color <I>PostScript</I> file is output using one of
+three methods. Unless individual polygon fills are used (<B>-1</B> option),
+only one call to <B>mbswath</B> can be made for each plot because the
+color image produced covers the entire plot space.
+The program can read data from stdin (the default) or from one
+or more swath sonar files.
+<P>
+Before opening an input swath data file, <B>mbmbswath</B> checks for
+an ascii file in the same directory having the same name except
+that &quot;.inf&quot; is appended to the end. The program assumes that this
+ascii file contains the output of the program <B>mbinfo</B> run on
+the input data file. If the &quot;.inf&quot; file exists, <B>mbswath</B> reads
+the minimum and maximum longitude and latitude bounds from the
+<B>mbinfo</B> output and compares those to the bounds
+for the plot. If the &quot;.inf&quot; file indicates that none of the data
+in the input file lies inside the plot bounds, that input
+file is skipped. This allows users to maintain a single master list
+of data files for use in all plotting without the performance penalty
+of <B>mbswath</B> reading through all the data files, even those
+with no relevent data. We recommend that users maintain a &quot;.inf&quot;
+file for each swath data file used for gridding or plotting. The
+programs <B>mbcontour</B> and <B>mbgrid</B> also use &quot;.inf&quot; files
+in the same fashion.
+<P>
+If <B>mbfilter</B> has been used to filter amplitude and/or sidescan
+data in the desired input, then the <B>-Z</B> option can be used
+to specify plotting the filtered rather than unfiltered data.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>factor/mode/depth</I>
+<BR>
+
+This option determines how the along-track dimension of the
+beam or pixel footprints is calculated. If <I>mode</I> = 1,
+then the fore-aft beam angle width of the sonar is used so that
+the width increases towards the outer parts of the swath.
+The fore-aft beam angle width (<B>MB-System</B> internally stores
+a value for each format/sonar) is multiplied by the <I>factor</I>
+value; a <I>factor</I> &lt; 1.0 can be useful if the data highly
+oversamples the seafloor and a <I>factor</I> &gt; 1.0 can fill in
+plots of data which undersample the seafloor. If the data
+stream does not include depth values (e.g. one is plotting
+pure sidescan data), then the <I>depth</I> value sets the
+depth value in meters used in the footprint calculations.
+If <I>mode</I> = 2, then the along-track dimension of the beam
+or pixel footprints is just the along-track distance between
+pings multiplied by the <I>factor</I> value.
+If <I>mode</I> = 3, then each data point is plotted as a point,
+and the <I>factor</I> and <I>depth</I> parameters are ignored.
+Default: <I>factor</I> = 1.0, <I>mode</I> = 1, <I>depth</I> = 3000.0.
+<DT><B>-B</B>
+
+<DD>
+<I>tickinfo</I>
+<BR>
+
+Sets map boundary tickmark intervals. See the <B>psbasemap</B>
+manual page for details.
+<DT><B>-b</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+Sets the starting time for data allowed in the input data; pings
+with times before the starting time will be ignored.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
+<DT><B>-C</B>
+
+<DD>
+Sets the color palette file which controls the color of the plot.
+See documentation of the GMT package for a complete description
+of cpt files.
+<DT><B>-c</B>
+
+<DD>
+<I>copies</I>
+<BR>
+
+Specifies the number of plot copies (the default is 1).
+<DT><B>-D</B>
+
+<DD>
+<I>mode/scale/min/max</I>
+<BR>
+
+Sets scaling of beam amplitude or sidescan pixel values which
+can be applied before plotting. If <I>mode</I> = 1 or 2, then
+a linear scaling of the form:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>scaled_value&nbsp;=&nbsp;scale&nbsp;*&nbsp;(value&nbsp;-&nbsp;min)&nbsp;/&nbsp;(max&nbsp;-&nbsp;min)<BR>
+<BR>
+
+is applied.  If <I>mode</I> = 3 or 4, then a log10 scaling of
+the form:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>scaled_value&nbsp;=&nbsp;scale&nbsp;*&nbsp;(20&nbsp;*&nbsp;log10(value)&nbsp;-&nbsp;min)&nbsp;/&nbsp;(max&nbsp;-&nbsp;min)<BR>
+<BR>
+
+is applied.  If <I>mode</I> = 2 or 4, then the value (or 20*log10(value))
+will be clipped to <I>min</I> if it is smaller than <I>min</I> or <I>max</I>
+if it is greater than <I>max</I>; this clipping happens prior to the
+multiplication by <I>scale</I>. Default: <I>mode</I> = 1, <I>scale</I> = 1.0,
+<I>min</I> = 0.0, <I>max</I> = 1.0.
+<DT><B>-E</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+Sets the ending time for data allowed in the input data; pings
+with times after the ending time will be ignored.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
+<DT><B>-F</B>
+
+<DD>
+<I>red/green/blue</I>
+<BR>
+
+Sets the color used for Frame and annotation. [Default is black]
+<DT><B>-f</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format used if the input is read from stdin
+or from a file. If <I>format</I> &lt; 0, then the input file specified
+with the <B>-I</B> option will actually contain a list of input swath sonar
+data files. This program uses the <B>MBIO</B> library
+and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>format</I> = -1.
+<DT><B>-G</B>
+
+<DD>
+<I>magnitude/azimuth</I> or <I>magnitude/median</I>
+<BR>
+
+Sets the parameters which control how <B>mbswath</B> generates
+simulated illumination of bathymetry, which can be either
+shaded relief bathymetry or bathymetry draped with amplitude data.
+If <I>mode</I> is set to 2 (shaded relief bathymetry) using the
+<B>-Z</B> option, then the value <I>magnitude</I>
+is an effective vertical exageration which modulates the intensity of
+the shading; typical values are in the 1-5 range.  The value <I>azimuth</I>
+is the azimuth from which the bathymetry is illuminated.
+If <I>mode</I> is set to 3 (bathymetry shaded using amplitudes) using the
+<B>-Z</B> option, then the value <I>magnitude</I>
+modulates the intensity of the shading; the value <I>median</I> sets the
+amplitude value which serves as the zero or neutral level.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-f</B> option) then the swath sonar data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+and plot the data in each one of these files.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will read any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page.
+<BR>
+
+An input datafile may be accompanied by a &quot;fast bathymetry&quot; or &quot;fbt&quot; file.
+The &quot;fbt&quot; fine naming
+convention is to add the
+&quot;.fbt&quot; suffix to the original swath
+data filename.
+An &quot;fbt&quot; file contains only swath bathymetry information
+in a compact format (format 71),
+and is thus quick to read. If <B>mbswath</B> is
+generating a plot containing only bathymetry
+(<B>-Z</B><I>1</I> and <B>-Z</B><I>2</I>).
+the program
+will attempt to read an &quot;fbt&quot; file in lieu of the original data.
+<BR>
+
+Default: <I>infile</I> = &quot;stdin&quot;.
+<DT><B>-J</B>
+
+<DD>
+Selects the map projection. Scale is inch/degree, 1:xxxxx.
+or width in inches (upper case modifier).
+<BR>
+
+<P>
+<B>CYLINDRICAL PROJECTIONS:</B>
+<BR>
+
+<P>
+<B>-Jc</B><I>lon0/lat0/scale</I> (Cassini)
+<BR>
+
+<B>-Jm</B><I>scale</I> (Mercator)
+<BR>
+
+<B>-Joa</B><I>lon0/lat0/azimuth/scale</I> (Oblique Mercator - point and azimuth)
+<BR>
+
+<B>-Job</B><I>lon0/lat0/lon1/lat1/scale</I> (Oblique Mercator - two points)
+<BR>
+
+<B>-Joc</B><I>lon0/lat0/lonp/latp/scale</I> (Oblique Mercator - point and pole)
+<BR>
+
+<B>-Jq</B><I>lon0/scale</I> (Equidistant Cylindrical Projection (Plate Carree))
+<BR>
+
+<B>-Jt</B><I>lon0/scale</I> (TM - Transverse Mercator)
+<BR>
+
+<B>-Ju</B><I>zone/scale</I> (UTM - Universal Transverse Mercator)
+<BR>
+
+<B>-Jy</B><I>lon0/lats/scale</I> (Basic Cylindrical Projection)
+<BR>
+
+<P>
+<B>AZIMUTHAL PROJECTIONS:</B>
+<BR>
+
+<P>
+<B>-Ja</B><I>lon0/lat0/scale</I> (Lambert).
+<BR>
+
+<B>-Je</B><I>lon0/lat0/scale</I> (Equidistant).
+<BR>
+
+<B>-Jg</B><I>lon0/lat0/scale</I> (Orthographic).
+<BR>
+
+<B>-Js</B><I>lon0/lat0/scale</I> (General Stereographic)
+<BR>
+
+<P>
+<B>CONIC PROJECTIONS:</B>
+<BR>
+
+<P>
+<B>-Jb</B><I>lon0/lat0/lat1/lat2/scale</I> (Albers)
+<BR>
+
+<B>-Jl</B><I>lon0/lat0/lat1/lat2/scale</I> (Lambert)
+<BR>
+
+<P>
+<B>MISCELLANEOUS PROJECTIONS:</B>
+<BR>
+
+<P>
+<B>-Jh</B><I>lon0/scale</I> (Hammer)
+<BR>
+
+<B>-Ji</B><I>lon0/scale</I> (Sinusoidal)
+<BR>
+
+<B>-Jk</B><I>lon0/scale</I> (Eckert VI)
+<BR>
+
+<B>-Jn</B><I>lon0/scale</I> (Robinson)
+<BR>
+
+<B>-Jr</B><I>lon0/scale</I> (Winkel Tripel)
+<BR>
+
+<B>-Jw</B><I>lon0/scale</I> (Mollweide)
+<BR>
+
+<P>
+<B>NON-GEOGRAPHICAL PROJECTIONS:</B>
+<BR>
+
+<P>
+<B>-Jp</B><I>scale</I> (Linear projection for polar (theta,r) coordinates)
+<BR>
+
+<B>-Jx</B><I>x-scale</I>[<B>l|p</B><I>pow</I>][<I>/y-scale</I>[<B>l|p</B><I>pow</I>]] (Linear, log, and power scaling)
+<BR>
+
+More details can be found in the <B>psbasemap</B> manpages.
+<DT><B>-K</B>
+
+<DD>
+More <I>PostScript</I> code will be appended later [Default terminates the plot system].
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values returned by the swath sonar i/o routines.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <I>lonflip</I> = 0.
+<DT><B>-N</B>
+
+<DD>
+<I>cptfile</I>
+<BR>
+
+Normally, shading of bathymetry with amplitudes (<I>mode</I> = 3
+as set with the <B>-Z</B> option) is accomplished
+by linearly mapping the amplitudes to shade values. This option
+specifies a grayscale cpt file used to map amplitude values
+to grayscale shade values.
+<DT><B>-O</B>
+
+<DD>
+Selects Overlay plot mode [Default initializes a new plot system].
+<DT><B>-P</B>
+
+<DD>
+Selects Portrait plotting mode [GMT Default is Landscape, see gmtdefaults to change this].
+<DT><B>-p</B>
+
+<DD>
+<I>pings</I>
+<BR>
+
+Sets the ping averaging of the input data. If <I>pings</I> = 1, then
+no ping averaging is performed. If <I>pings</I> &gt; 0, then
+that number of input pings will be averaged to produce one output
+ping.  If <I>pings</I> = 0, then the ping averaging will automatically
+be done so that the along-track ping spacing is equal to the across-track
+beam spacing.
+Default: <I>pings</I> = 1 (no ping averaging).
+<DT><B>-Q</B>
+
+<DD>
+<I>dpi</I>
+<BR>
+
+Sets the resolution of the color image output by <B>mbswath</B>
+in pixels per inch (except when the <B>-1</B> option is used to force individual
+polygon color fills). Default: <I>dpi</I> = 100.
+<DT><B>-R</B>
+
+<DD>
+<I>west/east/south/north</I>
+<BR>
+
+Sets the longitude and latitude bounds within which swath sonar
+data will be read and plotted. Only the data which lies within
+these bounds will be read.
+Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
+<DT><B>-S</B>
+
+<DD>
+<I>speed</I>
+<BR>
+
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
+the input data; pings associated with a smaller ship speed will not be
+processed. Default: <I>speed</I> = 0.
+<DT><B>-T</B>
+
+<DD>
+<I>timegap</I>
+<BR>
+
+Sets the maximum time gap in minutes between adjacent pings allowed before
+the data is considered to have a gap. Default: <I>timegap</I> = 1.
+<DT><B>-U</B>
+
+<DD>
+Draw Unix System time stamp on plot.  Optionally, append a label, or 'c' which will plot
+the command string.
+<DT><B>-V</B>
+
+<DD>
+Selects verbose mode, which will send progress reports to stderr [Default runs &quot;silently&quot;].
+<DT><B>-W</B>
+
+<DD>
+Normally, <B>mbswath</B> works with bathymetry values in meters.  If the
+<B>-W</B> flag is given, then <B>mbswath</B> will work with bathymetry
+values in feet. The color palette file used must conform to the
+range of bathymetry values in feet.
+<DT><B>-X -Y</B>
+
+<DD>
+Shift origin of plot by (<I>x-shift,y-shift</I>) inches  [Default is (1,1) for new plots, (0,0) for overlays].
+<DT><B>-Z</B>
+
+<DD>
+<I>mode[F]</I>
+<BR>
+
+Sets the style of the plot.
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Color&nbsp;fill&nbsp;of&nbsp;bathymetry&nbsp;data.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Color&nbsp;shaded&nbsp;relief&nbsp;bathymetry.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;3:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bathymetry&nbsp;shaded&nbsp;using&nbsp;amplitude&nbsp;data.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;4:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Color&nbsp;fill&nbsp;of&nbsp;amplitude&nbsp;data.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;5:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Color&nbsp;fill&nbsp;of&nbsp;sidescan&nbsp;data.<BR>
+<BR>
+
+If &quot;F&quot; is appended to <I>mode</I>, then <B>mbswath</B> will attempt
+to plot amplitude or sidescan data that have been filtered with <B>mbfilter</B>.
+If the desired filtered data files do not exist, plotting will fail and
+<B>mbswath</B> will exit with an error message. Filtered amplitude
+data are stored in ancilliary files ending with &quot;.ffa&quot;, and filtered
+sidescan files end in &quot;.ffs&quot;. Filtering of bathymetry data is not supported,
+and so appending &quot;F&quot; to <I>mode</I> values of 1 or 2 will have no effect.
+Default: <I>mode</I> = 1;
+<DT><B>-0</B>
+
+<DD>
+Create the image using the Adobe <I>PostScript</I> colorimage operator.
+This is the default.
+<DT><B>-1</B>
+
+<DD>
+Create the image by plotting individual color polygons.
+<DT><B>-2</B>
+
+<DD>
+Create the image by color separation using three calls to image for later
+processing by <B>psto24</B>.
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose the user has a Hydrosweep data file in the L-DEO in-house
+binary format (<B>MBIO</B> format id 24) called hs_ew9302_157_mn.mb24
+which lies in the region w/s/e/n = -32.1874/-26.6236/54.6349/56.7536.
+The following will suffice to generate a color fill plot:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbswath&nbsp;-Idatalist&nbsp;-Jm1.46578&nbsp;-R-32.1874/-26.6236/54.6349/56.7536<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-B1/1&nbsp;-Ccolor.cpt&nbsp;-p1&nbsp;-A1&nbsp;-Q100&nbsp;-Z2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-X1&nbsp;-Y1.75&nbsp;-V&nbsp;&gt;&nbsp;mbswath.ps<BR>
+<BR>
+
+where the file datalist contains:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>hs_ew9302_157_mn.mb24&nbsp;24<BR>
+<BR>
+
+A more complicated plot including a navigation track and a color scale
+can be created using <B>mbswath</B> in conjunction with other GMT
+and GMT-compatible utilities.  The following is an example of a shellscript
+which generates such a plot and then displays it on the screen (assuming
+you have a Sun workstation):
+<P>
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Shellscript&nbsp;to&nbsp;create&nbsp;Postscript&nbsp;plot&nbsp;of&nbsp;swath&nbsp;sonar&nbsp;data
+<BR>&nbsp;#&nbsp;Created&nbsp;by&nbsp;macro&nbsp;mbm_plot
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Make&nbsp;datalist&nbsp;file
+<BR>&nbsp;echo&nbsp;Making&nbsp;datalist&nbsp;file...
+<BR>&nbsp;echo&nbsp;hs_ew9302_157_bmn.mb24&nbsp;24&nbsp;&gt;&nbsp;datalist
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Make&nbsp;color&nbsp;palette&nbsp;table&nbsp;file
+<BR>&nbsp;echo&nbsp;Making&nbsp;color&nbsp;palette&nbsp;table&nbsp;file...
+<BR>&nbsp;echo&nbsp;2235&nbsp;255&nbsp;255&nbsp;255&nbsp;2372&nbsp;255&nbsp;221&nbsp;171&nbsp;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;2372&nbsp;255&nbsp;221&nbsp;171&nbsp;2509&nbsp;255&nbsp;186&nbsp;133&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;2509&nbsp;255&nbsp;186&nbsp;133&nbsp;2646&nbsp;255&nbsp;161&nbsp;68&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;2646&nbsp;255&nbsp;161&nbsp;68&nbsp;2783&nbsp;255&nbsp;189&nbsp;87&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;2783&nbsp;255&nbsp;189&nbsp;87&nbsp;2920&nbsp;240&nbsp;236&nbsp;121&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;2920&nbsp;240&nbsp;236&nbsp;121&nbsp;3057&nbsp;205&nbsp;255&nbsp;162&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;3057&nbsp;205&nbsp;255&nbsp;162&nbsp;3193&nbsp;138&nbsp;236&nbsp;174&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;3193&nbsp;138&nbsp;236&nbsp;174&nbsp;3330&nbsp;106&nbsp;235&nbsp;255&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;3330&nbsp;106&nbsp;235&nbsp;255&nbsp;3467&nbsp;87&nbsp;215&nbsp;255&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;3467&nbsp;87&nbsp;215&nbsp;255&nbsp;3604&nbsp;50&nbsp;190&nbsp;255&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;3604&nbsp;50&nbsp;190&nbsp;255&nbsp;3741&nbsp;0&nbsp;160&nbsp;255&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;3741&nbsp;0&nbsp;160&nbsp;255&nbsp;3878&nbsp;40&nbsp;127&nbsp;251&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;3878&nbsp;40&nbsp;127&nbsp;251&nbsp;4015&nbsp;21&nbsp;92&nbsp;236&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;echo&nbsp;4015&nbsp;21&nbsp;92&nbsp;236&nbsp;4152&nbsp;37&nbsp;57&nbsp;175&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.cpt
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Run&nbsp;mbswath
+<BR>&nbsp;echo&nbsp;Running&nbsp;mbswath...
+<BR>&nbsp;mbswath&nbsp;-Idatalist&nbsp;-Jm1.46578&nbsp;-R-32.1874/-26.6236/54.6349/56.7536&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>-B1.1128/1.1128&quot;:.Data&nbsp;File&nbsp;hs_ew9302_157_bmn.mb24:&quot;&nbsp;&nbsp;-Chs_ew9302_157_bmn.mb24.cpt&nbsp;-p1&nbsp;-A1&nbsp;-Q100&nbsp;-G5/0&nbsp;-Z2&nbsp;-X1&nbsp;&nbsp;-Y1.75&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;hs_ew9302_157_bmn.mb24.ps<BR>
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Run&nbsp;mblist
+<BR>&nbsp;echo&nbsp;Running&nbsp;mblist...
+<BR>&nbsp;mblist&nbsp;-F24&nbsp;-Ihs_ew9302_157_bmn.mb24&nbsp;-OXYU&nbsp;&gt;&nbsp;hs_ew9302_157_bmn.mb24.nav
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Run&nbsp;pstrack
+<BR>&nbsp;echo&nbsp;Running&nbsp;pstrack...
+<BR>&nbsp;pstrack&nbsp;hs_ew9302_157_bmn.mb24.nav&nbsp;-Jm1.46578&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-32.1874/-26.6236/54.6349/56.7536&nbsp;-B1.1128/1.1128&quot;:.Data&nbsp;File&nbsp;&nbsp;hs_ew9302_157_bmn.mb24:&quot;&nbsp;-W1p&nbsp;-Mt15ma1h&nbsp;-O&nbsp;-K&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.ps<BR>
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Run&nbsp;psscale
+<BR>&nbsp;echo&nbsp;Running&nbsp;psscale...
+<BR>&nbsp;psscale&nbsp;&nbsp;-Chs_ew9302_157_bmn.mb24.cpt&nbsp;-D4.0777/-0.5000/6.5242/0.1500h
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-B&quot;:.Depth&nbsp;(meters):&quot;&nbsp;-O&nbsp;-V&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.ps<BR>
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Delete&nbsp;surplus&nbsp;files
+<BR>&nbsp;echo&nbsp;Deleting&nbsp;surplus&nbsp;files...
+<BR>&nbsp;rm&nbsp;-f&nbsp;hs_ew9302_157_bmn.mb24.cpt&nbsp;datalist&nbsp;hs_ew9302_157_bmn.mb24.nav
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Run&nbsp;pageview
+<BR>&nbsp;echo&nbsp;Running&nbsp;pageview&nbsp;in&nbsp;background...
+<BR>&nbsp;pageview&nbsp;hs_ew9302_157_bmn.mb24.ps&nbsp;&amp;
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;All&nbsp;done!
+<BR>&nbsp;echo&nbsp;All&nbsp;done!
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbm_plot.html">mbm_plot</A></B>(1), <B><A HREF="mbcontour.html">mbcontour</A></B>(1),  <B><A HREF="mbfilter.html">mbfilter</A></B>(1),
+<B>gmtsystem</B>(1), <B>psbasemap</B>(1), <B>psto24</B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Let us know.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

@@ -2,7 +2,7 @@
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_sb2100rw.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_SB2100RW format (MBIO id 41).  
+ * to store multibeam data read from the MBF_SB2100RW format (MBIO id 41).
  *
  * Author:	D. W. Caress
  * Date:	March 3, 1994
@@ -78,8 +78,8 @@
  *   1. SeaBeam 1000/2100 multibeam systems output raw data in an
  *      ascii format.  The data consists of a number of different
  *      multi-line ascii records.
- *   2. The 2100/2100 systems output up to 151 beams of bathymetry 
- *      and 2000 pixels of sidescan measurements, along with a plethora 
+ *   2. The 2100/2100 systems output up to 151 beams of bathymetry
+ *      and 2000 pixels of sidescan measurements, along with a plethora
  *      of other information.
  *   3. The records all include navigation and time stamp information.
  *      The record types are:
@@ -93,7 +93,7 @@
  *   5. The kind value in the mbsys_sb2k_struct indicates whether the
  *      mbsys_sb2k_data_struct structure holds data from a ping or
  *      data from some other record:
- *        kind = 1 : data from a ping 
+ *        kind = 1 : data from a ping
  *                   (DR + SS)
  *        kind = 2 : comment (TR)
  *        kind = 8 : sonar parameter (PR)
@@ -134,7 +134,7 @@
 #define	MBF_SB2100RW_DR		4
 #define	MBF_SB2100RW_SS		5
 char *mbf_sb2100rw_labels[] = {
-	"NONE    ", "RAW_LINE", "SB2100PR", 
+	"NONE    ", "RAW_LINE", "SB2100PR",
 	"SB2100TR", "SB2100DR", "SB2100SS"};
 
 struct mbf_sb2100rw_struct
@@ -165,20 +165,20 @@ struct mbf_sb2100rw_struct
 	int	heave; 			/* 0.001 m; + up */
 	char	range_scale; 		/* D = m; I = 0.1 m; S = 0.01 m */
 	int	surface_sound_velocity;	/* 0.01 m/sec */
-	char	ssv_source;		/* V=Velocimeter, M=Manual, 
+	char	ssv_source;		/* V=Velocimeter, M=Manual,
 						T=Temperature */
 	char	depth_gate_mode;	/* A=Auto, M=Manual */
 
 	/* DR header info */
 	int	num_beams;		/* number of formed beams recorded */
-	char	svp_corr_beams;		/* 0=None; A=True Xtrack 
+	char	svp_corr_beams;		/* 0=None; A=True Xtrack
 						and Apparent Depth;
 						T=True Xtrack and True Depth */
 	char	spare_dr[2];
-	int	num_algorithms;		/* If 1 then only "best" algorithm 
-						recorded, else multiple 
+	int	num_algorithms;		/* If 1 then only "best" algorithm
+						recorded, else multiple
 						algorithm results recorded */
-	char	algorithm_order[4];	/* blank if num_algorithms=1; 
+	char	algorithm_order[4];	/* blank if num_algorithms=1;
 						W=WMT and B=BDI */
 
 	/* SS header info */
@@ -196,7 +196,7 @@ struct mbf_sb2100rw_struct
 
 	/* transmit parameters and navigation (DR and SS) */
 	char	frequency[2];		/* LL=12kHz; HH=36kHz; number=36kHz
-						until this angle 
+						until this angle
 						in degrees then 12kHz */
 	int	ping_gain_12khz;			/* dB */
 	int	ping_pulse_width_12khz;			/* msec */
@@ -222,8 +222,8 @@ struct mbf_sb2100rw_struct
 	int	amplitude_beam[MBF_SB2100RW_BEAMS];	/* 0.25 dB */
 	int	signal_to_noise[MBF_SB2100RW_BEAMS];	/* dB */
 	int	echo_length[MBF_SB2100RW_BEAMS];	/* samples */
-	char	quality[MBF_SB2100RW_BEAMS];		/* 0=no data, 
-							Q=poor quality, 
+	char	quality[MBF_SB2100RW_BEAMS];		/* 0=no data,
+							Q=poor quality,
 							blank otherwise */
 
 	/* sidescan data (SS) */

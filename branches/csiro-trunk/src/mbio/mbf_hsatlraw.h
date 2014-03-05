@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hsatlraw.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_hsatlraw.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_HSATLRAW format (MBIO id 21).  
+ * to store multibeam data read from the MBF_HSATLRAW format (MBIO id 21).
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
@@ -77,10 +77,10 @@
  *        ERGNPOSI:  navigation source
  *        ERGNMESS:  across-track "survey" bathymetry
  *        ERGNEICH:  along-track "calibration" bathymetry
- *        ERGNLSZT:  travel times associated with 
+ *        ERGNLSZT:  travel times associated with
  *                   ERGNMESS or ERGNEICH records
  *        ERGNCTDS:  water sound velocity profile
- *        ERGNAMPL:  amplitudes associated with 
+ *        ERGNAMPL:  amplitudes associated with
  *                   ERGNMESS or ERGNEICH records
  *        LDEOCOMM:  comment records (an L-DEO extension)
  *   4. A single ping usually results in the following series of
@@ -94,10 +94,10 @@
  *   5. The kind value in the mbf_hsatlraw_struct indicates whether the
  *      mbf_hsatlraw_data_struct structure holds data from a ping or
  *      data from some other record:
- *        kind = 1 : data from a survey ping 
+ *        kind = 1 : data from a survey ping
  *                   (ERGNMESS + ERGNSLZT + ERGNAMPL)
  *        kind = 2 : comment (LDEOCOMM)
- *        kind = 3 : data from a calibrate ping 
+ *        kind = 3 : data from a calibrate ping
  *                   (ERGNEICH + ERGNSLZT + ERGNAMPL)
  *        kind = 4 : mean and keel velocity (ERGNHYDI)
  *        kind = 5 : water velocity profile (ERGNCTDS)
@@ -130,7 +130,7 @@
 #define	MBF_HSATLRAW_ERGNAMPL	9
 #define	MBF_HSATLRAW_LDEOCMNT	10
 char *mbf_hsatlraw_labels[] = {
-	"NONE    ", "RAW_LINE", "ERGNHYDI", "ERGNPARA", "ERGNPOSI", 
+	"NONE    ", "RAW_LINE", "ERGNHYDI", "ERGNPARA", "ERGNPOSI",
 	"ERGNEICH", "ERGNMESS", "ERGNSLZT", "ERGNCTDS", "ERGNAMPL",
 	"LDEOCMNT"};
 
@@ -220,4 +220,4 @@ struct mbf_hsatlraw_struct
 
 	/* comment (LDEOCMNT) */
 	char	comment[MBF_HSATLRAW_MAXLINE];
-	};	
+	};

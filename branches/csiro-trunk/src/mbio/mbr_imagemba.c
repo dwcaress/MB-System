@@ -1,8 +1,8 @@
-/*--------------------------------------------------------------------
+   /*--------------------------------------------------------------------
  *    The MB-system:	mbr_imagemba.c	7/18/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2012 by
+ *    Copyright (c) 2008-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_imagemba.c contains the functions for reading and writing
- * multibeam data in the IMAGEMBA format.  
+ * multibeam data in the IMAGEMBA format.
  * These functions include:
  *   mbr_alm_imagemba	- allocate read/write memory
  *   mbr_dem_imagemba	- deallocate read/write memory
@@ -32,12 +32,12 @@
  * Added format 192 to support Imagenex Delta T multibeam data.
  *
  *
- * 
+ *
  */
 /*
  * Notes on the MBF_IMAGEMBA data format:
- *   1. This data format is used to store Imagenex DeltaT multibeam 
- *      bathymetry data. 
+ *   1. This data format is used to store Imagenex DeltaT multibeam
+ *      bathymetry data.
  *   2. This data format is extended from the vendor format mbf_imagemba (191)
  *      in order to allow storage of calculated bathymetry and beam flags
  *      for processing.
@@ -50,11 +50,11 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_image83p.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_image83p.h"
 
 /* time conversion constants */
 #define MININYEAR 525600.0
@@ -65,31 +65,31 @@
 
 /* include for byte swapping */
 #ifdef BYTESWAPPED
-#include "../../include/mb_swap.h"
+#include "mb_swap.h"
 #endif
 
 /* essential function prototypes */
-int mbr_register_imagemba(int verbose, void *mbio_ptr, 
+int mbr_register_imagemba(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_imagemba(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_imagemba(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_imagemba(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_imagemba(int verbose, void *mbio_ptr, int *error);
@@ -118,54 +118,54 @@ int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_imagemba(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_imagemba(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_imagemba;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_imagemba; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_image83p_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_image83p_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_imagemba; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_imagemba; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_image83p_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_image83p_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_image83p_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_image83p_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_image83p_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_image83p_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_image83p_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_image83p_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_image83p_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_imagemba;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_image83p_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_image83p_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_imagemba;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_imagemba;
+	mb_io_ptr->mb_io_dimensions = &mbsys_image83p_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_image83p_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_image83p_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_image83p_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_image83p_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_image83p_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_image83p_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_image83p_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_image83p_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -184,25 +184,25 @@ int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -213,25 +213,25 @@ int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_imagemba(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_imagemba(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_imagemba";
@@ -272,7 +272,7 @@ int mbr_info_imagemba(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -313,7 +313,7 @@ int mbr_alm_imagemba(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -353,7 +353,7 @@ int mbr_dem_imagemba(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -399,8 +399,8 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -453,14 +453,14 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
-    
+
 	/* read rest of record from file */
 	if (status == MB_SUCCESS)
 		{
 		index = 3;
 		store->version = (int) buffer[index]; index++;
 
-		mb_get_binary_short(swap, &buffer[index], &short_val); 
+		mb_get_binary_short(swap, &buffer[index], &short_val);
 		numberbytes = (int) ((unsigned short) short_val);
 
 		if ((status = fread(&buffer[6],1,numberbytes-6,mb_io_ptr->mbfp)) != numberbytes-6)
@@ -476,7 +476,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_io_ptr->file_bytes += status;
 			}
 		}
-	
+
 	/* if success then parse the buffer */
 	if (status == MB_SUCCESS && buffer[6] =='#')
 		{
@@ -487,7 +487,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		index = 8;
 		strncpy(store->comment, &buffer[index], MBSYS_IMAGE83P_COMMENTLEN);
 		}
-	
+
 	/* if success then parse the buffer */
 	else if (status == MB_SUCCESS)
 		{
@@ -497,7 +497,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* parse year */
 		index = 8;
 		mb_get_int(&store->time_i[0], &buffer[index + 7], 4);
-				
+
 		/* parse month */
 		if(buffer[index + 3] == 'J')
 			{
@@ -509,7 +509,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				{
 				store->time_i[1] = 6;
 				}
-			else 
+			else
 				{
 				store->time_i[1] = 7;
 				}
@@ -524,7 +524,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				{
 				store->time_i[1] = 3;
 				}
-			else 
+			else
 				{
 				store->time_i[1] = 5;
 				}
@@ -535,10 +535,10 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				{
 				store->time_i[1] = 4;
 				}
-			else 
+			else
 				{
 				store->time_i[1] = 8;
-				}			
+				}
 			}
 		else if(buffer[index + 3] == 'S')
 			{
@@ -556,10 +556,10 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			store->time_i[1] = 12;
 			}
-	
+
 		mb_get_int(&store->time_i[2], &buffer[index + 0], 2);
 		index +=12; /*to time*/
-		
+
 		/* parse time */
 		mb_get_int(&store->time_i[3], &buffer[index], 2);
 		mb_get_int(&store->time_i[4], &buffer[index+3], 2);
@@ -570,11 +570,11 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<7;i++)
 			{
 			mb_io_ptr->new_time_i[i] = store->time_i[i];
-			
+
 			}
 		mb_io_ptr->new_time_d = store->time_d;
 		index += 13; /*to navigation latitude*/
-		
+
 		/* parse gps navigation string latitude */
 		mb_get_double(&degrees, &buffer[index + 1], 2);
 		mb_get_double(&minutes, &buffer[index + 4], 2);
@@ -587,7 +587,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->nav_lat = -store->nav_lat;
 			}
 		index += 14; /*to navigation longtitude*/
-	
+
 		/* parse gps navigation string longtitude */
 		mb_get_double(&degrees, &buffer[index], 3);
 		mb_get_double(&minutes, &buffer[index + 4], 2);
@@ -598,12 +598,12 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->nav_long = -store->nav_long;
 			}
 		index += 14;
-		
+
 		/* parse gps speed and heading */
 		store->nav_speed = (int) ((mb_u_char)buffer[index]); index += 1;
 		mb_get_binary_short(swap, &buffer[index], &short_val); index += 2;
 		    store->nav_heading = (int) ((unsigned short) short_val);
-		
+
 		/* parse dvl attitude and heading */
 /*		if (buffer[index] >> 7)
 			{
@@ -635,7 +635,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}*/
 		store->heading = ((((mb_u_char)buffer[index]) & 0x7F) << 8) + ((mb_u_char)buffer[index+1]);
 		index += 2;
-		
+
 		/* parse beam info */
 		mb_get_binary_short(swap, &buffer[index], &short_val); index += 2;
 		    store->num_beams = (int) ((unsigned short) short_val);
@@ -675,7 +675,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* get sonar_depth and heave */
 		mb_get_binary_float(swap, &buffer[index], &(store->sonar_depth)); index += 4;
 		mb_get_binary_float(swap, &buffer[index], &(store->heave)); index += 4;
-		    
+
 		/* get beams */
 		store->num_proc_beams = store->num_beams;
 		for (i=0;i<store->num_beams;i++)
@@ -688,7 +688,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->beamflag[i] = buffer[index]; index++;
 			}
 		}
-	mb_io_ptr->new_kind = store->kind;	
+	mb_io_ptr->new_kind = store->kind;
 	mb_io_ptr->new_error = *error;
 
 	/* print output debug statements */
@@ -774,10 +774,10 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
-	
+
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
@@ -861,10 +861,10 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_put_binary_short(swap, (unsigned short)write_len, (void *) &buffer[index]); index +=2;
 			buffer[index] = 0; index++;
 			buffer[index] = 0; index++; /* index = 8 */
-			
+
 			/* date */
 			sprintf(&buffer[index], "%2.2d-", store->time_i[2]); index += 3;
-			switch(store->time_i[1]) 
+			switch(store->time_i[1])
 				{
 				case (1)  : sprintf(&buffer[index], "%s", "JAN-");
 							break;
@@ -894,17 +894,17 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			index += 4;
 			sprintf(&buffer[index], "%4.4d", store->time_i[0]); index += 4;
 			buffer[index] = 0; index++; /* index = 20 */
-			
+
 			/* time */
-			sprintf(&buffer[index], "%2.2d:%2.2d:%2.2d", 
+			sprintf(&buffer[index], "%2.2d:%2.2d:%2.2d",
 				store->time_i[3], store->time_i[4], store->time_i[5]); index += 8;
 			buffer[index] = 0; index++; /* index = 29 */
-			
+
 			/* hundredths of seconds */
 			seconds_hundredths = store->time_i[6] / 10000;
 			sprintf(&buffer[index], ".%2.2d", seconds_hundredths); index += 3;
 			buffer[index] = 0; index++; /* index = 33 */
-			
+
 			/* latitude*/
 			if (store->nav_lat > 0.0)
 				NorS = 'N';
@@ -913,7 +913,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			degrees = (int) fabs(store->nav_lat);
 			minutes = (fabs(store->nav_lat) - (double)degrees) * 60.0;
 			sprintf(&buffer[index], "_%2.2d.%8.5f_%c", degrees, minutes, NorS); index += 14; /* index = 47 */
-			
+
 			/* longitude*/
 			if (store->nav_long > 0.0)
 				NorS = 'E';
@@ -921,22 +921,22 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				NorS = 'W';
 			degrees = (int) fabs(store->nav_long);
 			minutes = (fabs(store->nav_long) - (double)degrees) * 60.0;
-			sprintf(&buffer[index], "%3.3d.%8.5f_%c", degrees, minutes, NorS); 
+			sprintf(&buffer[index], "%3.3d.%8.5f_%c", degrees, minutes, NorS);
 			index += 14; /* index = 61 */
 
 			/* speed */
 			buffer[index] = store->nav_speed; index++; /* index = 62 */
-			
+
 			/* heading*/
-			mb_put_binary_short(swap, (unsigned short)store->nav_heading, (void *) &buffer[index]); 
+			mb_put_binary_short(swap, (unsigned short)store->nav_heading, (void *) &buffer[index]);
 			index += 2; /* index = 64 */
-			
+
 			/* pitch */
 			mb_put_binary_short(swap, (unsigned short)store->pitch, (void *)&buffer[index]);
 			if (store->pitch != 0)
 				buffer[index] = buffer[index] | 0x80;
 			index += 2; /* index = 66 */
-			
+
 			/* roll */
 			mb_put_binary_short(swap, (unsigned short)store->roll, (void *)&buffer[index]);
 			if(store->roll != 0)
@@ -958,7 +958,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			index += 2; /* index = 76 */
 			mb_put_binary_short(swap, (unsigned short)store->start_angle, (void *)&buffer[index]);
 			index += 2; /* index = 78 */
-			buffer[index] = store->angle_increment; 
+			buffer[index] = store->angle_increment;
 			index+=1; /* index = 79 */
 			mb_put_binary_short(swap, (unsigned short)store->acoustic_range, (void *)&buffer[index]);
 			index += 2; /* index = 81 */
@@ -978,10 +978,10 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			index += 2; /* index = 93 */
 			mb_put_binary_int(swap, store->ping_number, (void *)&buffer[index]);
 			index += 4; /* index = 97 */
-			
+
 			/* blank part of header */
 			for (i=index;i<248;i++)
-				buffer[i] = 0; 
+				buffer[i] = 0;
 			index += 151; /* index 248 */
 
 			/* put sonar_depth and heave */
@@ -989,7 +989,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			index += 4; /* index = 252 */
 			mb_put_binary_float(swap, (float)store->heave, (void *)&buffer[index]);
 			index += 4; /* index = 256 */
-			
+
 			/* put beams */
 			for (i=0;i<store->num_beams;i++)
 				{
@@ -1000,7 +1000,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				buffer[index] = (char) store->beamflag[i]; index++;
 				}
 			}
-			
+
 		else if (store->kind == MB_DATA_COMMENT)
 			{
 			/* header */
@@ -1013,7 +1013,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_put_binary_short(swap, (unsigned short)write_len, (void *) &buffer[index]); index +=2;
 			buffer[index] = '#'; index++;
 			buffer[index] = '#'; index++; /* index = 8 */
-			
+
 			/* write comment */
 			strncpy(&buffer[index], store->comment, MBSYS_IMAGE83P_COMMENTLEN);
 			for (i=8+strlen(store->comment);i<8+MBSYS_IMAGE83P_COMMENTLEN;i++)
@@ -1025,8 +1025,8 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			|| store->kind == MB_DATA_COMMENT)
 			{
 			if ((status = fwrite(buffer,1,write_len,
-				mb_io_ptr->mbfp)) 
-				== write_len) 
+				mb_io_ptr->mbfp))
+				== write_len)
 				{
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;

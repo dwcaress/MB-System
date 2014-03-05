@@ -2,7 +2,7 @@
  *    The MB-system:	mb_cheb.c			3/23/00
  *    $Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,17 +13,17 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * The mb_cheb library is a least squares matrix solver using 
- * Richardson's algorithm with chebyshev acceleration. The step size is 
- * varied to obtain uniform convergence over a prescribed 
+ * The mb_cheb library is a least squares matrix solver using
+ * Richardson's algorithm with chebyshev acceleration. The step size is
+ * varied to obtain uniform convergence over a prescribed
  * range of eigenvalues. This code is a C translation of Fortran 77
  * code distributed by Dr. Allen H. Olson in 1987 following the
- * publication of 
- *   Olson, A. H., A Chebyshev condition for accelerating 
- *   convergance of iterative tomographic methods - Solving 
- *   large least squares problems, Phys. Earth Planet. Inter., 
+ * publication of
+ *   Olson, A. H., A Chebyshev condition for accelerating
+ *   convergance of iterative tomographic methods - Solving
+ *   large least squares problems, Phys. Earth Planet. Inter.,
  *   47, 333-345, 1987.
- * This algorithm is both time and memory efficient for large, 
+ * This algorithm is both time and memory efficient for large,
  * sparse least squares problems. The instructions for use are
  * given in comments below.
  *
@@ -58,7 +58,7 @@
 #include <math.h>
 
 /* mbio include files */
-#include "../../include/mb_define.h"
+#include "mb_define.h"
 
 void lsqup(
     double  *a,
@@ -119,7 +119,7 @@ void lspeig(
  *     uniform convergence over a prescribed range of eigenvalues.
  *
  *                             ..... allen h. olson 6-29-85.
- *                                   university of california, san diego  
+ *                                   university of california, san diego
  *
  *     Altered to allow particular values to be fixed.
  *                             ..... David W. Caress 4-14-88
@@ -153,17 +153,17 @@ void lsqup(
  * -------
  *     a(j,i)  -------  - packed matrix defined above dimensioned at least
  *                        (nnz,nr) note  that the first index is the column
- *                        index! i.e. the matrix is stored in row order. 
+ *                        index! i.e. the matrix is stored in row order.
  *     ia(j,i)  ------  - indices of values in packed matrix a
  *                        i.e. a(j,i) packed = a(j,ia(i,j)) unpacked
  *     nia(i)  -------  - number of nonzero values in each row
  *     nnz   ---------  - number of values in packed rows of a and ia
- *     nc,nr  --------  - number of columns and number of rows of unpacked 
+ *     nc,nr  --------  - number of columns and number of rows of unpacked
  *                        matrix as defined above.
  *     x(1...nc) -----  - initial guess solution; can be set to zero
  *                        or values returned form previous calls to lsquc.
  *     dx(1...nc) ----  - temporary storage array
- *     d(1...nr) -----  - data as defined above    
+ *     d(1...nr) -----  - data as defined above
  *     nfix  ---------  - number of solution values to be fixed
  *     ifix  ---------  - idices of fixed values
  *     fix  ----------  - fixed values:  x(ifix(j)) = fix(j)
@@ -198,7 +198,7 @@ for (i=0;i<nr;i++)
 	/* initialize dx */
 	for (j=0;j<nc;j++)
 	    dx[j] = 0.0;
-	    
+
 	/* loop over each row */
 	for (i=0;i<nr;i++)
 	    {
@@ -215,15 +215,15 @@ for (i=0;i<nr;i++)
 		dx[ia[k]] += res * a[k];
 		}
 	    }
-	    
+
 	/* update x */
  	for (j=0;j<nc;j++)
 	    x[j] += dx[j] / sigma[icyc];
-	    
+
 	/* apply fixed values */
 	for (j=0;j<nfix;j++)
 	    x[ifix[j]] = fix[j];
-	    
+
 	/* output info */
 	/*fprintf(stderr, "lsqup cycle %d completed...\n", icyc);*/
 	}
@@ -268,7 +268,7 @@ void chebyu(
  *----------------------------------------------------------------------*/
  {
     int	    i, len, is, i0, nsort;
-    
+
     /* set up the chebyshev weights in increasing order */
     for (i=0;i<ncycle;i++)
 	{
@@ -297,7 +297,7 @@ void splits(
     int	    n)
 {
     int	    i, l, nb2, nb2m1;
-    
+
     l = 0;
     for (i=0;i<n;i+=2)
 	{
@@ -309,7 +309,7 @@ void splits(
 	t[l] = x[i];
 	l++;
 	}
-	
+
     nb2 = n / 2;
     nb2m1 = nb2 - 1;
     if (nb2 >= 2)
@@ -341,7 +341,7 @@ double errlim(
     double  errlim;
     double  delta;
     int	    i;
-    
+
     errlim = 1.0;
     delta = 0.25 * (shi - slo);
     for (i=0;i<ncycle;i++)
@@ -363,7 +363,7 @@ double errrat(
     double  errrat;
     double  rat;
     int	    k;
-    
+
     errrat = 1.0;
     rat = x1 / x2;
     for (k=0;k<ncycle;k++)
@@ -390,7 +390,7 @@ double errrat(
  *    upper-bound on the largest eigenvalue is also made.
  *
  *                            ..... allen h. olson 10-4-85.
- *                                  university of california, san diego 
+ *                                  university of california, san diego
  *----------------------------------------------------------------------*/
 void lspeig(
 	double	*a,
@@ -413,12 +413,12 @@ void lspeig(
  *-------
  *    a(j,i)  -------  - packed matrix defined above dimensioned at least
  *                       (nnz,nr) note  that the first index is the column
- *                       index! i.e. the matrix is stored in row order. 
+ *                       index! i.e. the matrix is stored in row order.
  *    ia(j,i)  ------  - indices of values in packed matrix a
  *                       i.e. a(j,i) packed = a(j,ia(i,j)) unpacked
  *    nia(i)  -------  - number of nonzero values in each row
  *    nnz   ---------  - number of values in packed rows of a and ia
- *    nc,nr  --------  - number of columns and number of rows of unpacked 
+ *    nc,nr  --------  - number of columns and number of rows of unpacked
  *                       matrix as defined above.
  *    ncyc  ---------  - number of chebyshev iterations to perform.
  *                         must be a power of two.
@@ -489,7 +489,7 @@ void lspeig(
     double  eps = 1.0e-6;
     double  res = 0.0;
     double  slo, smp, errsmp;
-    
+
     if (ncyc == 0)
 	{
 	i = 0;
@@ -527,13 +527,13 @@ void lspeig(
 	    x[j] = x[j] * res;
 	    }
 	}
-	
+
     else
 	{
 	slo = 0.0;
 	chebyu(&sigma[*nsig], ncyc, *smax, slo, w);
 	}
-	
+
     nsig1 = *nsig + 1;
     *nsig = nsig1 + ncyc;
     sigma[*nsig-1] = 0.0;
@@ -567,7 +567,7 @@ void lspeig(
 	    *smax += dx[j] * dx[j];
 	    }
 	*smax = sqrt(*smax);
-	
+
 	if (icyc == *nsig - 1)
 	    {
 	    *err = 0.0;
@@ -578,13 +578,13 @@ void lspeig(
 		}
 	    *err = sqrt(*err);
 	    }
-	    
+
 	for (j=0;j<nc;j++)
 	    {
 	    x[j] = dx[j] / *smax;
 	    }
 	}
-	
+
     slo = *smax;
     *sup = (1.0 + eps) * (*smax)
 	    * pow(eps, -1.0 / *nsig);

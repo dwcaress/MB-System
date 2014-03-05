@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_route.c	9/25/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2012 by
+ *    Copyright (c) 2003-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -122,8 +122,8 @@
 #include "mb_glwdrawa.h"
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* mbview include */
 #include "mbview.h"
@@ -156,7 +156,7 @@ int mbview_getroutecount(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* get view */
@@ -165,7 +165,7 @@ int mbview_getroutecount(int verbose, size_t instance,
 
 	/* get number of routes */
 	*nroute = shared.shareddata.nroute;
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -205,7 +205,7 @@ int mbview_getroutepointcount(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr,"dbg2       route:                     %d\n", route);
 		}
 
@@ -225,7 +225,7 @@ int mbview_getroutepointcount(int verbose, size_t instance,
 				*nintpoint += shared.shareddata.routes[route].segments[i].nls - 2;
 			}
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -264,7 +264,7 @@ int mbview_getrouteselected(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr,"dbg2       route:                     %d\n", route);
 		}
 
@@ -278,7 +278,7 @@ int mbview_getrouteselected(int verbose, size_t instance,
 		*selected = MB_YES;
 	else
 		*selected = MB_NO;
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -297,14 +297,14 @@ int mbview_getrouteselected(int verbose, size_t instance,
 }
 /*------------------------------------------------------------------------------*/
 int mbview_getrouteinfo(int verbose, size_t instance,
-			int working_route, 
-			int *nroutewaypoint, 
-			int *nroutpoint, 
-			char *routename, 
-			int *routecolor, 
-			int *routesize, 
-			double *routedistancelateral, 
-			double *routedistancetopo, 
+			int working_route,
+			int *nroutewaypoint,
+			int *nroutpoint,
+			char *routename,
+			int *routecolor,
+			int *routesize,
+			double *routedistancelateral,
+			double *routedistancetopo,
 			int *error)
 {
 	/* local variables */
@@ -323,7 +323,7 @@ int mbview_getrouteinfo(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr,"dbg2       working_route:             %d\n", working_route);
 		}
 
@@ -344,10 +344,10 @@ int mbview_getrouteinfo(int verbose, size_t instance,
 		status = MB_FAILURE;
 		*error = MB_ERROR_DATA_NOT_INSERTED;
 		}
-	
+
 	/* otherwise go get the route data */
 	else
-		{	
+		{
 		/* get basic info */
 		route = &(shared.shareddata.routes[working_route]);
 		*nroutewaypoint = route->npoints;
@@ -358,7 +358,7 @@ int mbview_getrouteinfo(int verbose, size_t instance,
 		*routedistancelateral = route->distancelateral;
 		*routedistancetopo = route->distancetopo;
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -383,7 +383,7 @@ int mbview_getrouteinfo(int verbose, size_t instance,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_allocroutearrays(int verbose, 
+int mbview_allocroutearrays(int verbose,
 			int	npointtotal,
 			double	**routelon,
 			double	**routelat,
@@ -409,20 +409,20 @@ int mbview_allocroutearrays(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       npointtotal:               %d\n", npointtotal);
-		fprintf(stderr,"dbg2       routelon:                  %lu\n", (size_t)*routelon);
-		fprintf(stderr,"dbg2       routelat:                  %lu\n", (size_t)*routelat);
+		fprintf(stderr,"dbg2       routelon:                  %p\n", *routelon);
+		fprintf(stderr,"dbg2       routelat:                  %p\n", *routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %lu\n", (size_t)*waypoint);
+		fprintf(stderr,"dbg2       waypoint:                  %p\n", *waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %lu\n", (size_t)*routetopo);
+		fprintf(stderr,"dbg2       routetopo:                 %p\n", *routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %lu\n", (size_t)*routebearing);
+		fprintf(stderr,"dbg2       routebearing:              %p\n", *routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %lu\n", (size_t)*distlateral);
+		fprintf(stderr,"dbg2       distlateral:               %p\n", *distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %lu\n", (size_t)*distovertopo);
+		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %lu\n", (size_t)*slope);
+		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		}
 
 	/* allocate the arrays using mb_realloc */
@@ -448,20 +448,20 @@ int mbview_allocroutearrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       routelon:                  %lu\n", (size_t)*routelon);
-		fprintf(stderr,"dbg2       routelat:                  %lu\n", (size_t)*routelat);
+		fprintf(stderr,"dbg2       routelon:                  %p\n", *routelon);
+		fprintf(stderr,"dbg2       routelat:                  %p\n", *routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %lu\n", (size_t)*waypoint);
+		fprintf(stderr,"dbg2       waypoint:                  %p\n", *waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %lu\n", (size_t)*routetopo);
+		fprintf(stderr,"dbg2       routetopo:                 %p\n", *routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %lu\n", (size_t)*routebearing);
+		fprintf(stderr,"dbg2       routebearing:              %p\n", *routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %lu\n", (size_t)*distlateral);
+		fprintf(stderr,"dbg2       distlateral:               %p\n", *distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %lu\n", (size_t)*distovertopo);
+		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %lu\n", (size_t)*slope);
+		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -497,20 +497,20 @@ int mbview_freeroutearrays(int verbose,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       routelon:                  %lu\n", (size_t)*routelon);
-		fprintf(stderr,"dbg2       routelat:                  %lu\n", (size_t)*routelat);
+		fprintf(stderr,"dbg2       routelon:                  %p\n", *routelon);
+		fprintf(stderr,"dbg2       routelat:                  %p\n", *routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %lu\n", (size_t)*waypoint);
+		fprintf(stderr,"dbg2       waypoint:                  %p\n", *waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %lu\n", (size_t)*routetopo);
+		fprintf(stderr,"dbg2       routetopo:                 %p\n", *routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %lu\n", (size_t)*routebearing);
+		fprintf(stderr,"dbg2       routebearing:              %p\n", *routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %lu\n", (size_t)*distlateral);
+		fprintf(stderr,"dbg2       distlateral:               %p\n", *distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %lu\n", (size_t)*distovertopo);
+		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %lu\n", (size_t)*slope);
+		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		}
 
 	/* free the arrays using mb_free */
@@ -535,20 +535,20 @@ int mbview_freeroutearrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       routelon:                  %lu\n", (size_t)*routelon);
-		fprintf(stderr,"dbg2       routelat:                  %lu\n", (size_t)*routelat);
+		fprintf(stderr,"dbg2       routelon:                  %p\n", *routelon);
+		fprintf(stderr,"dbg2       routelat:                  %p\n", *routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %lu\n", (size_t)*waypoint);
+		fprintf(stderr,"dbg2       waypoint:                  %p\n", *waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %lu\n", (size_t)*routetopo);
+		fprintf(stderr,"dbg2       routetopo:                 %p\n", *routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %lu\n", (size_t)*routebearing);
+		fprintf(stderr,"dbg2       routebearing:              %p\n", *routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %lu\n", (size_t)*distlateral);
+		fprintf(stderr,"dbg2       distlateral:               %p\n", *distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %lu\n", (size_t)*distovertopo);
+		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %lu\n", (size_t)*slope);
+		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -589,14 +589,14 @@ int mbview_addroute(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr,"dbg2       npoint:                    %d\n", npoint);
-		fprintf(stderr,"dbg2       routelon:                  %lu\n", (size_t)routelon);
-		fprintf(stderr,"dbg2       routelat:                  %lu\n", (size_t)routelat);
-		fprintf(stderr,"dbg2       waypoint:                  %lu\n", (size_t)waypoint);
+		fprintf(stderr,"dbg2       routelon:                  %p\n", routelon);
+		fprintf(stderr,"dbg2       routelat:                  %p\n", routelat);
+		fprintf(stderr,"dbg2       waypoint:                  %p\n", waypoint);
 		for (i=0;i<npoint;i++)
 			{
-			fprintf(stderr,"dbg2       point:%d lon:%f lat:%f waypoint:%d\n", 
+			fprintf(stderr,"dbg2       point:%d lon:%f lat:%f waypoint:%d\n",
 					i, routelon[i], routelat[i], waypoint[i]);
 			}
 		fprintf(stderr,"dbg2       routecolor:                %d\n", routecolor);
@@ -611,10 +611,10 @@ int mbview_addroute(int verbose, size_t instance,
 	/* make sure no route is selected */
 	shared.shareddata.route_selected = MBV_SELECT_NONE;
 	shared.shareddata.route_point_selected = MBV_SELECT_NONE;
-	
+
 	/* set route id so that new route is created */
 	*iroute = shared.shareddata.nroute;
-	
+
 	/* loop over the points in the new route */
 	for (i=0;i<npoint;i++)
 		{
@@ -622,28 +622,28 @@ int mbview_addroute(int verbose, size_t instance,
 		if (waypoint[i] <= MBV_ROUTE_WAYPOINT_NONE
 			|| waypoint[i] > MBV_ROUTE_WAYPOINT_ENDLINE4)
 			waypoint[i] = MBV_ROUTE_WAYPOINT_SIMPLE;
-		
+
 		/* get route positions in grid coordinates */
 		status = mbview_projectll2xyzgrid(instance,
-				routelon[i], routelat[i], 
+				routelon[i], routelat[i],
 				&xgrid, &ygrid, &zdata);
 
 		/* get route positions in display coordinates */
 		status = mbview_projectll2display(instance,
 				routelon[i], routelat[i], zdata,
 				&xdisplay, &ydisplay, &zdisplay);
-				
+
 		/* check for reasonable coordinates */
 		if (fabs(xdisplay) < 1000.0 && fabs(ydisplay) < 1000.0 && fabs(zdisplay) < 1000.0)
 			{
-			
+
 			/* add the route point */
 			mbview_route_add(instance, *iroute, i, waypoint[i],
 				xgrid, ygrid,
 				routelon[i], routelat[i], zdata,
 				xdisplay, ydisplay, zdisplay);
 			}
-			
+
 		/* report failure due to unreasonable coordinates */
 		else
 			{
@@ -660,17 +660,17 @@ routelon[i],routelat[i],xdisplay,ydisplay,zdisplay);
 
 	/* set distance values */
 	mbview_route_setdistance(instance, *iroute);
-	
+
 	/* make routes viewable */
 	if (data->route_view_mode != MBV_VIEW_ON)
 		{
 		data->route_view_mode = MBV_VIEW_ON;
 		set_mbview_route_view_mode(instance, MBV_VIEW_ON);
 		}
-	
+
 	/* update route list */
 	mbview_updateroutelist();
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -709,27 +709,27 @@ int mbview_deleteroute(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr,"dbg2       iroute:                    %d\n", iroute);
 		}
 
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* delete the points in the route backwards */
 	for (jpoint=shared.shareddata.routes[iroute].npoints-1;jpoint>=0;jpoint--)
 		{
 		/* delete the route point */
 		mbview_route_delete(instance, iroute, jpoint);
 		}
-		
+
 	/* set pick annotation */
 	mbview_pick_text(instance);
-	
+
 	/* update route list */
 	mbview_updateroutelist();
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -781,20 +781,20 @@ int mbview_getroute(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr,"dbg2       route:                     %d\n", route);
-		fprintf(stderr,"dbg2       npointtotal:               %lu\n", (size_t)npointtotal);
-		fprintf(stderr,"dbg2       routelon:                  %lu\n", (size_t)routelon);
-		fprintf(stderr,"dbg2       routelat:                  %lu\n", (size_t)routelat);
-		fprintf(stderr,"dbg2       waypoint:                  %lu\n", (size_t)waypoint);
-		fprintf(stderr,"dbg2       routetopo:                 %lu\n", (size_t)routetopo);
-		fprintf(stderr,"dbg2       routebearing:              %lu\n", (size_t)routebearing);
-		fprintf(stderr,"dbg2       distlateral:               %lu\n", (size_t)distlateral);
-		fprintf(stderr,"dbg2       distovertopo:              %lu\n", (size_t)distovertopo);
-		fprintf(stderr,"dbg2       slope:                     %lu\n", (size_t)slope);
-		fprintf(stderr,"dbg2       routecolor:                %lu\n", (size_t)routecolor);
-		fprintf(stderr,"dbg2       routesize:                 %lu\n", (size_t)routesize);
-		fprintf(stderr,"dbg2       routename:                 %lu\n", (size_t)routename);
+		fprintf(stderr,"dbg2       npointtotal:               %p\n", npointtotal);
+		fprintf(stderr,"dbg2       routelon:                  %p\n", routelon);
+		fprintf(stderr,"dbg2       routelat:                  %p\n", routelat);
+		fprintf(stderr,"dbg2       waypoint:                  %p\n", waypoint);
+		fprintf(stderr,"dbg2       routetopo:                 %p\n", routetopo);
+		fprintf(stderr,"dbg2       routebearing:              %p\n", routebearing);
+		fprintf(stderr,"dbg2       distlateral:               %p\n", distlateral);
+		fprintf(stderr,"dbg2       distovertopo:              %p\n", distovertopo);
+		fprintf(stderr,"dbg2       slope:                     %p\n", slope);
+		fprintf(stderr,"dbg2       routecolor:                %p\n", routecolor);
+		fprintf(stderr,"dbg2       routesize:                 %p\n", routesize);
+		fprintf(stderr,"dbg2       routename:                 %p\n", routename);
 		}
 
 	/* get view */
@@ -803,18 +803,18 @@ int mbview_getroute(int verbose, size_t instance,
 
 	/* zero the points returned */
 	*npointtotal = 0;
-	
+
 	/* check that the array pointers are not NULL */
-	if (routelon == NULL || routelat == NULL || waypoint == NULL || routetopo == NULL 
+	if (routelon == NULL || routelat == NULL || waypoint == NULL || routetopo == NULL
 		|| distlateral == NULL || distovertopo == NULL || slope == NULL)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_DATA_NOT_INSERTED;
 		}
-	
+
 	/* otherwise go get the route data */
 	else
-		{	
+		{
 		/* loop over the route segments */
 		for (i=0;i<shared.shareddata.routes[route].npoints-1;i++)
 			{
@@ -836,11 +836,11 @@ int mbview_getroute(int verbose, size_t instance,
 				}
 			else
 				{
-				mbview_greatcircle_distbearing(instance, 
-					shared.shareddata.routes[route].points[i].xlon, 
-					shared.shareddata.routes[route].points[i].ylat, 
-					shared.shareddata.routes[route].points[i+1].xlon, 
-					shared.shareddata.routes[route].points[i+1].ylat, 
+				mbview_greatcircle_distbearing(instance,
+					shared.shareddata.routes[route].points[i].xlon,
+					shared.shareddata.routes[route].points[i].ylat,
+					shared.shareddata.routes[route].points[i+1].xlon,
+					shared.shareddata.routes[route].points[i+1].ylat,
 					&bearing, &range);
 				}
 			if (bearing < 0.0)
@@ -874,7 +874,7 @@ int mbview_getroute(int verbose, size_t instance,
 				distovertopo[*npointtotal] += distovertopo[*npointtotal-1];
 				}
 			(*npointtotal)++;
-			
+
 			/* loop over interior of segment */
 			for (j=1;j<shared.shareddata.routes[route].segments[i].nls-1;j++)
 				{
@@ -898,7 +898,7 @@ int mbview_getroute(int verbose, size_t instance,
 				(*npointtotal)++;
 				}
 			}
-			
+
 		/* add last point */
 		j = shared.shareddata.routes[route].npoints - 1;
 		routelon[*npointtotal] = shared.shareddata.routes[route].points[j].xlon;
@@ -919,12 +919,12 @@ int mbview_getroute(int verbose, size_t instance,
 		distlateral[*npointtotal] += distlateral[*npointtotal-1];
 		distovertopo[*npointtotal] += distovertopo[*npointtotal-1];
 		(*npointtotal)++;
-		
+
 		/* get color size and name */
 		*routecolor = shared.shareddata.routes[route].color;
 		*routesize = shared.shareddata.routes[route].size;
 		strcpy(routename, shared.shareddata.routes[route].name);
-		
+
 		/* recalculate slope */
 		for (j=0;j<*npointtotal;j++)
 			{
@@ -942,7 +942,7 @@ int mbview_getroute(int verbose, size_t instance,
 			else if (j == *npointtotal - 1)
 				{
 				if ((distlateral[j] - distlateral[j-1]) > 0.0)
-					slope[j] = (routetopo[j] - routetopo[j-1]) 
+					slope[j] = (routetopo[j] - routetopo[j-1])
 							/ (distlateral[j] - distlateral[j-1]);
 				else
 					slope[j] = 0.0;
@@ -950,14 +950,14 @@ int mbview_getroute(int verbose, size_t instance,
 			else
 				{
 				if ((distlateral[j+1] - distlateral[j-1]) > 0.0)
-					slope[j] = (routetopo[j+1] - routetopo[j-1]) 
+					slope[j] = (routetopo[j+1] - routetopo[j-1])
 							/ (distlateral[j+1] - distlateral[j-1]);
 				else
 					slope[j] = 0.0;
 				}
 			}
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -970,9 +970,9 @@ int mbview_getroute(int verbose, size_t instance,
 		fprintf(stderr,"dbg2       routename:                 %s\n", routename);
 		for (i=0;i<*npointtotal;i++)
 			{
-			fprintf(stderr,"dbg2       route:%d lon:%f lat:%f waypoint:%d topo:%f bearing:%f dist:%f distbot:%f color:%d size:%d name:%s\n", 
-					i, routelon[i], routelat[i], waypoint[i], routetopo[i], 
-					routebearing[i], distlateral[i], distovertopo[i], 
+			fprintf(stderr,"dbg2       route:%d lon:%f lat:%f waypoint:%d topo:%f bearing:%f dist:%f distbot:%f color:%d size:%d name:%s\n",
+					i, routelon[i], routelat[i], waypoint[i], routetopo[i],
+					routebearing[i], distlateral[i], distovertopo[i],
 					*routecolor, *routesize, routename);
 			}
 		fprintf(stderr,"dbg2       error:                     %d\n",*error);
@@ -1005,24 +1005,24 @@ int mbview_enableviewroutes(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* set values */
         shared.shareddata.route_mode = MBV_ROUTE_VIEW;
-		
+
 	/* set widget sensitivity on all active instances */
 	for (instance=0;instance<MBV_MAX_WINDOWS;instance++)
 		{
 		/* get view */
 		view = &(mbviews[instance]);
 		data = &(view->data);
-		
+
 		/* if instance active reset action sensitivity */
 		if (data->active == MB_YES)
 			mbview_update_sensitivity(verbose, instance, error);
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -1058,20 +1058,20 @@ int mbview_enableeditroutes(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		}
 
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* set values */
         shared.shareddata.route_mode = MBV_ROUTE_EDIT;
-		
+
 	/* set widget sensitivity */
 	if (data->active == MB_YES)
 		mbview_update_sensitivity(verbose, instance, error);
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -1112,16 +1112,16 @@ int mbview_pick_route_select(size_t instance, int which, int xpixel, int ypixel)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       which:            %d\n",which);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only select route points if enabled and not in move mode */
 	if (shared.shareddata.route_mode != MBV_ROUTE_OFF
 		&& shared.shareddata.nroute > 0
@@ -1129,8 +1129,8 @@ int mbview_pick_route_select(size_t instance, int which, int xpixel, int ypixel)
 			|| shared.shareddata.route_selected == MBV_SELECT_NONE))
 		{
 		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
+		mbview_findpoint(instance, xpixel, ypixel,
+				&found,
 				&xgrid, &ygrid,
 				&xlon, &ylat, &zdata,
 				&xdisplay, &ydisplay, &zdisplay);
@@ -1161,7 +1161,7 @@ int mbview_pick_route_select(size_t instance, int which, int xpixel, int ypixel)
 			XBell(view->dpy,100);
 			}
 		}
-	
+
 	/* only move selected route points if enabled */
 	else if (shared.shareddata.route_mode != MBV_ROUTE_OFF
 		&& shared.shareddata.nroute > 0
@@ -1169,12 +1169,12 @@ int mbview_pick_route_select(size_t instance, int which, int xpixel, int ypixel)
 			&& shared.shareddata.route_selected != MBV_SELECT_NONE))
 		{
 		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
+		mbview_findpoint(instance, xpixel, ypixel,
+				&found,
 				&xgrid, &ygrid,
 				&xlon, &ylat, &zdata,
 				&xdisplay, &ydisplay, &zdisplay);
-				
+
 		/* reset selected route position */
 		if (found)
 			{
@@ -1191,14 +1191,14 @@ int mbview_pick_route_select(size_t instance, int which, int xpixel, int ypixel)
 			mbview_updatepointw(instance, &(shared.shareddata.routes[iroute].points[jpoint]));
 fprintf(stderr,"mbview_pick_route_select: Point Select Move: iroute:%d jpoint:%d of %d\n",
 iroute,jpoint,shared.shareddata.routes[iroute].npoints);
-			
+
 			/* drape the affected segments */
 			if (jpoint > 0)
 				{
 				/* drape the segment */
 				shared.shareddata.routes[iroute].segments[jpoint-1].endpoints[1] = shared.shareddata.routes[iroute].points[jpoint];
 				mbview_drapesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint-1]));
-			
+
 				/* update the segment for all active instances */
 				mbview_updatesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint-1]));
 				}
@@ -1207,7 +1207,7 @@ iroute,jpoint,shared.shareddata.routes[iroute].npoints);
 				/* drape the segment */
 				shared.shareddata.routes[iroute].segments[jpoint].endpoints[0] = shared.shareddata.routes[iroute].points[jpoint];
 				mbview_drapesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint]));
-			
+
 				/* update the segment for all active instances */
 				mbview_updatesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint]));
 				}
@@ -1223,7 +1223,7 @@ iroute,jpoint,shared.shareddata.routes[iroute].npoints);
 		shared.shareddata.route_selected = MBV_SELECT_NONE;
 		XBell(view->dpy,100);
 		}
-		
+
 	/* set what kind of pick to annotate */
 	if (shared.shareddata.route_selected != MBV_SELECT_NONE)
 		{
@@ -1233,20 +1233,20 @@ iroute,jpoint,shared.shareddata.routes[iroute].npoints);
 		{
 		data->pickinfo_mode = data->pick_type;
 		}
-		
+
 	/* set pick annotation */
 	mbview_pick_text(instance);
-	
+
 	/* update route list */
 	mbview_updateroutelist();
-	
+
 	/* call pick notify if defined */
 	if (which == MBV_PICK_UP && shared.shareddata.route_selected != MBV_SELECT_NONE
 		&& data->mbview_pickroute_notify != NULL)
 		{
 		(data->mbview_pickroute_notify)(instance);
 		}
-	
+
 	/* print route debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1282,12 +1282,12 @@ iroute,jpoint,shared.shareddata.routes[iroute].npoints);
 				{
 				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,shared.shareddata.routes[i].segments[j].nls);
 				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,shared.shareddata.routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %lu\n",i,j,(size_t)&shared.shareddata.routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %lu\n",i,j,(size_t)&shared.shareddata.routes[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %p\n",i,j,&shared.shareddata.routes[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %p\n",i,j,&shared.shareddata.routes[i].segments[j].endpoints[1]);
 				}
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1324,13 +1324,13 @@ int mbview_extract_route_profile(size_t instance)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-		
+
 	/* if a route is selected, extract the profile */
 	if (shared.shareddata.route_selected != MBV_SELECT_NONE
 		&& shared.shareddata.routes[shared.shareddata.route_selected].npoints > 1)
@@ -1339,7 +1339,7 @@ int mbview_extract_route_profile(size_t instance)
 		strcpy(data->profile.source_name, "Route");
 		data->profile.length = 0.0;
 		iroute = shared.shareddata.route_selected;
-		
+
 		/* make sure enough memory is allocated for the profile */
 		nprpoints = 0;
 		for (i=0;i<shared.shareddata.routes[iroute].npoints-1;i++)
@@ -1348,7 +1348,7 @@ int mbview_extract_route_profile(size_t instance)
 			}
 		if (data->profile.npoints_alloc < nprpoints)
 			{
-			status = mbview_allocprofilepoints(mbv_verbose, 
+			status = mbview_allocprofilepoints(mbv_verbose,
 					nprpoints, &(data->profile.points), &error);
 			if (status == MB_SUCCESS)
 				{
@@ -1359,7 +1359,7 @@ int mbview_extract_route_profile(size_t instance)
 				data->profile.npoints_alloc = 0;
 				}
 			}
-			
+
 		/* extract the profile */
 		if (nprpoints > 2 && data->profile.npoints_alloc >= nprpoints)
 			{
@@ -1401,31 +1401,31 @@ int mbview_extract_route_profile(size_t instance)
 									- data->profile.points[data->profile.npoints-1].xdisplay;
 							dy = data->profile.points[data->profile.npoints].ydisplay
 									- data->profile.points[data->profile.npoints-1].ydisplay;
-							data->profile.points[data->profile.npoints].distance = sqrt(dx * dx + dy * dy) / view->scale 
+							data->profile.points[data->profile.npoints].distance = sqrt(dx * dx + dy * dy) / view->scale
 								+ data->profile.points[data->profile.npoints-1].distance;
 							data->profile.points[data->profile.npoints].bearing = RTD * atan2(dx, dy);
 							}
 						else
 							{
-							mbview_greatcircle_distbearing(instance, 
-								data->profile.points[data->profile.npoints-1].xlon, 
-								data->profile.points[data->profile.npoints-1].ylat, 
-								data->profile.points[data->profile.npoints].xlon, 
-								data->profile.points[data->profile.npoints].ylat, 
-								&(data->profile.points[data->profile.npoints].bearing), 
+							mbview_greatcircle_distbearing(instance,
+								data->profile.points[data->profile.npoints-1].xlon,
+								data->profile.points[data->profile.npoints-1].ylat,
+								data->profile.points[data->profile.npoints].xlon,
+								data->profile.points[data->profile.npoints].ylat,
+								&(data->profile.points[data->profile.npoints].bearing),
 								&(data->profile.points[data->profile.npoints].distance));
-							mbview_greatcircle_dist(instance, 
-								data->profile.points[0].xlon, 
-								data->profile.points[0].ylat, 
-								data->profile.points[data->profile.npoints].xlon, 
-								data->profile.points[data->profile.npoints].ylat, 
+							mbview_greatcircle_dist(instance,
+								data->profile.points[0].xlon,
+								data->profile.points[0].ylat,
+								data->profile.points[data->profile.npoints].xlon,
+								data->profile.points[data->profile.npoints].ylat,
 								&(data->profile.points[data->profile.npoints].distance));
 							}
 						dy = (data->profile.points[data->profile.npoints].zdata
 							- data->profile.points[data->profile.npoints-1].zdata);
 						dx = (data->profile.points[data->profile.npoints].distance
 							- data->profile.points[data->profile.npoints-1].distance);
-						data->profile.points[data->profile.npoints].distovertopo 
+						data->profile.points[data->profile.npoints].distovertopo
 							= data->profile.points[data->profile.npoints-1].distovertopo
 											+ sqrt(dy * dy + dx * dx);
 						if (dx > 0.0)
@@ -1456,7 +1456,7 @@ int mbview_extract_route_profile(size_t instance)
 			data->profile.length = data->profile.points[data->profile.npoints-1].distance;
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1494,25 +1494,25 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       which:            %d\n",which);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only add route points if enabled and not in move mode */
 	if (shared.shareddata.route_mode == MBV_ROUTE_EDIT
-		&& (which == MBV_PICK_DOWN 
+		&& (which == MBV_PICK_DOWN
 			|| (which == MBV_PICK_MOVE
 				&& shared.shareddata.route_selected == MBV_SELECT_NONE)))
 		{
 		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
+		mbview_findpoint(instance, xpixel, ypixel,
+				&found,
 				&xgrid, &ygrid,
 				&xlon, &ylat, &zdata,
 				&xdisplay, &ydisplay, &zdisplay);
@@ -1523,13 +1523,13 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 			/* add route point after currently selected route point if any */
 			inew = shared.shareddata.nroute;
 			jnew = 0;
-			
+
 			/* add the route point */
 			mbview_route_add(instance, inew, jnew, MBV_ROUTE_WAYPOINT_SIMPLE,
 				xgrid, ygrid,
 				xlon, ylat, zdata,
 				xdisplay, ydisplay, zdisplay);
-			
+
 			/* select the new route */
 			shared.shareddata.route_selected = inew;
 			shared.shareddata.route_point_selected = jnew;
@@ -1541,14 +1541,14 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 			/* add route point after currently selected route point if any */
 			inew = shared.shareddata.route_selected;
 			jnew = shared.shareddata.route_point_selected + 1;
-			
+
 			/* add the route point */
 			mbview_route_add(instance, inew, jnew, MBV_ROUTE_WAYPOINT_SIMPLE,
 				xgrid, ygrid,
 				xlon, ylat, zdata,
 				xdisplay, ydisplay, zdisplay);
-			
-			
+
+
 			/* select the new route */
 			shared.shareddata.route_selected = inew;
 			shared.shareddata.route_point_selected = jnew;
@@ -1562,7 +1562,7 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 			XBell(view->dpy,100);
 			}
 		}
-	
+
 	/* only move selected routes if enabled */
 	else if (shared.shareddata.route_mode != MBV_ROUTE_OFF
 		&& shared.shareddata.nroute > 0
@@ -1570,12 +1570,12 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 			&& shared.shareddata.route_selected != MBV_SELECT_NONE))
 		{
 		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
+		mbview_findpoint(instance, xpixel, ypixel,
+				&found,
 				&xgrid, &ygrid,
 				&xlon, &ylat, &zdata,
 				&xdisplay, &ydisplay, &zdisplay);
-				
+
 		/* reset selected route position */
 		if (found)
 			{
@@ -1589,27 +1589,27 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].ydisplay[instance] = ydisplay;
 			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].zdisplay[instance] = zdisplay;
 			mbview_updatepointw(instance, &(shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected]));
-			
+
 			/* drape the affected segments */
 			if (shared.shareddata.route_point_selected > 0)
 				{
 				/* drape the segment */
-				shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected-1].endpoints[1] 
+				shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected-1].endpoints[1]
 					= shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected];
-				mbview_drapesegmentw(instance, 
+				mbview_drapesegmentw(instance,
 					&(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected-1]));
-			
+
 				/* update the segment for all active instances */
 				mbview_updatesegmentw(instance, &(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected-1]));
 				}
 			if (shared.shareddata.route_point_selected < shared.shareddata.routes[shared.shareddata.route_selected].npoints - 1)
 				{
 				/* drape the segment */
-				shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected].endpoints[0] 
+				shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected].endpoints[0]
 					= shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected];
-				mbview_drapesegmentw(instance, 
+				mbview_drapesegmentw(instance,
 					&(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected]));
-			
+
 				/* update the segment for all active instances */
 				mbview_updatesegmentw(instance, &(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected]));
 				}
@@ -1626,7 +1626,7 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 		shared.shareddata.route_point_selected = MBV_SELECT_NONE;
 		XBell(view->dpy,100);
 		}
-		
+
 	/* set what kind of pick to annotate */
 	if (shared.shareddata.route_selected != MBV_SELECT_NONE)
 		{
@@ -1636,13 +1636,13 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 		{
 		data->pickinfo_mode = data->pick_type;
 		}
-		
+
 	/* set pick annotation */
 	mbview_pick_text(instance);
-	
+
 	/* update route list */
 	mbview_updateroutelist();
-	
+
 	/* print route debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1677,12 +1677,12 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 				{
 				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,shared.shareddata.routes[i].segments[j].nls);
 				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,shared.shareddata.routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %lu\n",i,j,(size_t)&shared.shareddata.routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %lu\n",i,j,(size_t)&shared.shareddata.routes[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %p\n",i,j,&shared.shareddata.routes[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %p\n",i,j,&shared.shareddata.routes[i].segments[j].endpoints[1]);
 				}
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1721,22 +1721,22 @@ int mbview_pick_route_delete(size_t instance, int xpixel, int ypixel)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only delete a selected route if enabled */
 	if (shared.shareddata.route_mode == MBV_ROUTE_EDIT
 		&& shared.shareddata.route_selected != MBV_SELECT_NONE)
 		{
 		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
+		mbview_findpoint(instance, xpixel, ypixel,
+				&found,
 				&xgrid, &ygrid,
 				&xlon, &ylat, &zdata,
 				&xdisplay, &ydisplay, &zdisplay);
@@ -1783,13 +1783,13 @@ int mbview_pick_route_delete(size_t instance, int xpixel, int ypixel)
 		{
 		XBell(view->dpy,100);
 		}
-		
+
 	/* set pick annotation */
 	mbview_pick_text(instance);
-	
+
 	/* update route list */
 	mbview_updateroutelist();
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1826,7 +1826,7 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       inew:             %d\n",inew);
 		fprintf(stderr,"dbg2       jnew:             %d\n",jnew);
 		fprintf(stderr,"dbg2       waypoint:         %d\n",waypoint);
@@ -1839,11 +1839,11 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 		fprintf(stderr,"dbg2       ydisplay:         %f\n",ydisplay);
 		fprintf(stderr,"dbg2       zdisplay:         %f\n",zdisplay);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* add route if required */
 	if (inew == shared.shareddata.nroute)
 		{
@@ -1898,7 +1898,7 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 					}
 				}
 			}
-			
+
 		/* set nroute */
 		shared.shareddata.nroute++;
 
@@ -1913,19 +1913,19 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 		&& shared.shareddata.routes[inew].npoints_alloc < shared.shareddata.routes[inew].npoints + 1)
 		{
 		shared.shareddata.routes[inew].npoints_alloc += MBV_ALLOC_NUM;
-		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
+		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
 			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(int),
 			    	(void **)&(shared.shareddata.routes[inew].waypoint), &error);
-		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
+		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
 			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(double),
 			    	(void **)&(shared.shareddata.routes[inew].distlateral), &error);
-		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
+		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
 			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(double),
 			    	(void **)&(shared.shareddata.routes[inew].disttopo), &error);
-		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
+		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
 			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(struct mbview_pointw_struct),
 			    	(void **)&(shared.shareddata.routes[inew].points), &error);
-		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
+		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
 			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
 			    	(void **)&(shared.shareddata.routes[inew].segments), &error);
 		if (status == MB_FAILURE)
@@ -1952,7 +1952,7 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 			shared.shareddata.routes[inew].segments[j].endpoints[0] = shared.shareddata.routes[inew].points[j];
 			shared.shareddata.routes[inew].segments[j].endpoints[1] = shared.shareddata.routes[inew].points[j+1];
 			}
-		
+
 		/* add the new point */
 		shared.shareddata.routes[inew].waypoint[jnew] = waypoint;
 		shared.shareddata.routes[inew].points[jnew].xgrid[instance] = xgrid;
@@ -1964,7 +1964,7 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 		shared.shareddata.routes[inew].points[jnew].ydisplay[instance] = ydisplay;
 		shared.shareddata.routes[inew].points[jnew].zdisplay[instance] = zdisplay;
 		mbview_updatepointw(instance, &(shared.shareddata.routes[inew].points[jnew]));
-		
+
 		/* initialize the new segment */
 		shared.shareddata.routes[inew].segments[jnew].nls = 0;
 		shared.shareddata.routes[inew].segments[jnew].nls_alloc = 0;
@@ -1990,15 +1990,15 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 
 				/* drape the segment */
 				mbview_drapesegmentw(instance, &(shared.shareddata.routes[inew].segments[j]));
-			
+
 				/* update the segment for all active instances */
 				mbview_updatesegmentw(instance, &(shared.shareddata.routes[inew].segments[j]));
 				}
 			}
-			
+
 		/* set distance values */
 		mbview_route_setdistance(instance, inew);
-	
+
 		/* make routes viewable */
 		if (data->route_view_mode != MBV_VIEW_ON)
 			{
@@ -2007,7 +2007,7 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 			}
 		}
 
-	
+
 	/* print route debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -2067,19 +2067,19 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 				for (k=0;k<seg->nls;k++)
 					{
 					fprintf(stderr,"dbg2         %d %f %f %f  %f %f  %f %f %f\n",
-						k, seg->lspoints[k].xgrid[instance], 
-						seg->lspoints[k].ygrid[instance],  
-						seg->lspoints[k].zdata, 
-						seg->lspoints[k].xlon, 
-						seg->lspoints[k].ylat, 
-						seg->lspoints[k].xdisplay[instance], 
+						k, seg->lspoints[k].xgrid[instance],
+						seg->lspoints[k].ygrid[instance],
+						seg->lspoints[k].zdata,
+						seg->lspoints[k].xlon,
+						seg->lspoints[k].ylat,
+						seg->lspoints[k].xdisplay[instance],
 						seg->lspoints[k].ydisplay[instance],
 						seg->lspoints[k].zdisplay[instance]);
 					}
 				}
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -2113,11 +2113,11 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       iroute:          %d\n",iroute);
 		fprintf(stderr,"dbg2       ipoint:          %d\n",ipoint);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -2163,12 +2163,12 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint)
 
 				/* drape the segment */
 				mbview_drapesegmentw(instance, &(shared.shareddata.routes[iroute].segments[j]));
-			
+
 				/* update the segment for all active instances */
 				mbview_updatesegmentw(instance, &(shared.shareddata.routes[iroute].segments[j]));
 				}
 			}
-			
+
 		/* if route still has points then reset distance values */
 		if (shared.shareddata.routes[iroute].npoints > 0)
 			{
@@ -2202,7 +2202,7 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint)
 		{
 		XBell(view->dpy,100);
 		}
-	
+
 	/* print route debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -2237,12 +2237,12 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint)
 				{
 				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,shared.shareddata.routes[i].segments[j].nls);
 				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,shared.shareddata.routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %lu\n",i,j,(size_t)&shared.shareddata.routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %lu\n",i,j,(size_t)&shared.shareddata.routes[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %p\n",i,j,&shared.shareddata.routes[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %p\n",i,j,&shared.shareddata.routes[i].segments[j].endpoints[1]);
 				}
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -2282,7 +2282,7 @@ int mbview_route_setdistance(size_t instance, int working_route)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", mbv_verbose);
-		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr,"dbg2       working_route:             %d\n", working_route);
 		}
 
@@ -2295,7 +2295,7 @@ int mbview_route_setdistance(size_t instance, int working_route)
 		{
 		/* get route pointer */
 		route = &(shared.shareddata.routes[working_route]);
-		
+
 		/* loop over the route segments */
 		route->distancelateral = 0.0;
 		route->distancetopo = 0.0;
@@ -2330,11 +2330,11 @@ int mbview_route_setdistance(size_t instance, int working_route)
 			routelat0 = routelat1;
 			routetopo0 = routetopo1;
 			route->nroutepoint++;
-				
+
 			/* set distances for route waypoint */
 			route->distlateral[i] = route->distancelateral;
 			route->disttopo[i] = route->distancetopo;
-			
+
 			/* loop over interior of segment */
 			for (j=1;j<route->segments[i].nls-1;j++)
 				{
@@ -2359,7 +2359,7 @@ int mbview_route_setdistance(size_t instance, int working_route)
 				route->nroutepoint++;
 				}
 			}
-			
+
 		/* do last point */
 		j = route->npoints - 1;
 		routelon1 = route->points[j].xlon;
@@ -2381,12 +2381,12 @@ int mbview_route_setdistance(size_t instance, int working_route)
 		routelat0 = routelat1;
 		routetopo0 = routetopo1;
 		route->nroutepoint++;
-				
+
 		/* set distances for route waypoint */
 		route->distlateral[j] = route->distancelateral;
 		route->disttopo[j] = route->distancetopo;
 		}
-		
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -2427,14 +2427,14 @@ int mbview_drawroute(size_t instance, int rez)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* Generate GL lists to be plotted */
 	if (shared.shareddata.route_mode != MBV_ROUTE_OFF
 		&& data->route_view_mode == MBV_VIEW_ON
@@ -2447,7 +2447,7 @@ int mbview_drawroute(size_t instance, int rez)
 		yy = data->primary_y[k1] - data->primary_y[k0];
 		routesizesmall = 0.004 * sqrt(xx * xx + yy * yy);
 		routesizelarge = 1.4 * routesizesmall;
-		
+
 		/* Use disks for 2D plotting */
 		if (data->display_mode == MBV_DISPLAY_2D)
 			{
@@ -2457,8 +2457,8 @@ int mbview_drawroute(size_t instance, int rez)
 			gluDisk(globj, 0.0, routesizesmall, 4, 1);
 			gluDeleteQuadric(globj);
 			icolor = MBV_COLOR_BLACK;
-			glColor3f(colortable_object_red[icolor], 
-				colortable_object_green[icolor], 
+			glColor3f(colortable_object_red[icolor],
+				colortable_object_green[icolor],
 				colortable_object_blue[icolor]);
 			globj = gluNewQuadric();
 			gluDisk(globj, 0.8 * routesizesmall, routesizesmall, 10, 1);
@@ -2471,15 +2471,15 @@ int mbview_drawroute(size_t instance, int rez)
 			gluDisk(globj, 0.0, routesizelarge, 4, 1);
 			gluDeleteQuadric(globj);
 			icolor = MBV_COLOR_BLACK;
-			glColor3f(colortable_object_red[icolor], 
-				colortable_object_green[icolor], 
+			glColor3f(colortable_object_red[icolor],
+				colortable_object_green[icolor],
 				colortable_object_blue[icolor]);
 			globj = gluNewQuadric();
 			gluDisk(globj, 0.8 * routesizelarge, routesizelarge, 10, 1);
 			gluDeleteQuadric(globj);
 			glEndList();
 			}
-		
+
 		/* Use spheres for 3D plotting */
 		else if (data->display_mode == MBV_DISPLAY_3D)
 			{
@@ -2495,9 +2495,9 @@ int mbview_drawroute(size_t instance, int rez)
 			globj = gluNewQuadric();
 			gluSphere(globj, routesizelarge, 4, 3);
 			gluDeleteQuadric(globj);
-			glEndList();	
+			glEndList();
 			}
-		
+
 		/* loop over the route points */
 		for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
 			{
@@ -2510,8 +2510,8 @@ int mbview_drawroute(size_t instance, int rez)
 					icolor = MBV_COLOR_RED;
 				else
 					icolor = shared.shareddata.routes[iroute].color;
-				glColor3f(colortable_object_red[icolor], 
-					colortable_object_green[icolor], 
+				glColor3f(colortable_object_red[icolor],
+					colortable_object_green[icolor],
 					colortable_object_blue[icolor]);
 
 				/* draw the route point as a disk or sphere using GLUT */
@@ -2549,16 +2549,16 @@ int mbview_drawroute(size_t instance, int rez)
 					{
 					icolor = shared.shareddata.routes[iroute].color;
 					}
-				glColor3f(colortable_object_red[icolor], 
-					colortable_object_green[icolor], 
+				glColor3f(colortable_object_red[icolor],
+					colortable_object_green[icolor],
 					colortable_object_blue[icolor]);
-					
+
 				/* draw draped segment */
 				for (k=0;k<shared.shareddata.routes[iroute].segments[jpoint].nls;k++)
 					{
 					/* draw points */
-					glVertex3f((float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].xdisplay[instance]), 
-							(float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].ydisplay[instance]), 
+					glVertex3f((float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].xdisplay[instance]),
+							(float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].ydisplay[instance]),
 							(float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].zdisplay[instance]));
 					}
 				}
@@ -2606,13 +2606,13 @@ int mbview_updateroutelist()
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		}
-		
+
 	/* update route list */
 	if (shared.init_routelist == MBV_WINDOW_VISIBLE)
 		{
 		/* remove all existing items */
 		XmListDeleteAllItems(shared.mb3d_routelist.mbview_list_routelist);
-		
+
 		if (shared.shareddata.nroute > 0)
 			{
 			/* get number of items */
@@ -2621,7 +2621,7 @@ int mbview_updateroutelist()
 				{
 				nitems += 1 + shared.shareddata.routes[iroute].npoints;
 				}
-			
+
 			/* allocate array of label XmStrings */
 			xstr = (XmString *) malloc(nitems * sizeof(XmString));
 
@@ -2629,7 +2629,7 @@ int mbview_updateroutelist()
 			nitems = 0;
 			for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
 				{
-				sprintf(value_string,"Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", 
+				sprintf(value_string,"Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s",
 					iroute, shared.shareddata.routes[iroute].npoints,
 					shared.shareddata.routes[iroute].distancelateral,
 					shared.shareddata.routes[iroute].distancetopo,
@@ -2642,11 +2642,11 @@ int mbview_updateroutelist()
 				for (jpoint=0;jpoint<shared.shareddata.routes[iroute].npoints;jpoint++)
 					{
 					/* add list item for each route */
-					mbview_setlonlatstrings(shared.lonlatstyle, 
+					mbview_setlonlatstrings(shared.lonlatstyle,
 								shared.shareddata.routes[iroute].points[jpoint].xlon,
 								shared.shareddata.routes[iroute].points[jpoint].ylat,
 								lonstr0, latstr0);
-				
+
 					if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_SIMPLE)
 						strcpy(waypointstr, "---------");
 					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_TRANSIT)
@@ -2669,7 +2669,7 @@ int mbview_updateroutelist()
 						strcpy(waypointstr, "---END4--");
 					else
 						strcpy(waypointstr, "-------");
-					sprintf(value_string,"%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", 
+					sprintf(value_string,"%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s",
 						iroute, jpoint, lonstr0, latstr0,
 						shared.shareddata.routes[iroute].points[jpoint].zdata,
 						shared.shareddata.routes[iroute].distlateral[jpoint],
@@ -2734,4 +2734,3 @@ int mbview_updateroutelist()
 }
 
 /*------------------------------------------------------------------------------*/
-

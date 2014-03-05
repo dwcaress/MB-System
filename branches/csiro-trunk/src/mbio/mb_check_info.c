@@ -2,7 +2,7 @@
  *    The MB-system:	mb_check_info.c	1/25/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -125,10 +125,10 @@
 #include <sys/stat.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_info.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_info.h"
 
 static char rcs_id[]="$Id$";
 
@@ -390,7 +390,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       file:       %s\n",file);
-		fprintf(stderr,"dbg2       info:       %lu\n",(size_t)mb_info);
+		fprintf(stderr,"dbg2       info:       %p\n",(void *)mb_info);
 		fprintf(stderr,"dbg2       lonflip:    %d\n",lonflip);
 		}
 
@@ -785,6 +785,7 @@ int mb_make_info(int verbose, int force,
 	int	fnvmodtime = 0;
 	struct stat file_status;
 	int	fstat;
+	int	shellstatus;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -836,7 +837,7 @@ int mb_make_info(int verbose, int force,
 			format, file);
 		if (verbose >= 2)
 			fprintf(stderr,"\t%s\n",command);
-		system(command);
+		shellstatus = system(command);
 		}
 
 	/* make new fbt file if not there or out of date */
@@ -871,7 +872,7 @@ int mb_make_info(int verbose, int force,
 			fprintf(stderr,"Generating fbt file for %s\n",file);
 		sprintf(command, "mbcopy -F %d/71 -I %s -D -O %s.fbt",
 			format, file, file);
-		system(command);
+		shellstatus = system(command);
 		}
 
 	/* make new fnv file if not there or out of date */
@@ -894,7 +895,7 @@ int mb_make_info(int verbose, int force,
 			fprintf(stderr,"Generating fnv file for %s\n",file);
 		sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN > %s.fnv",
 			format, file, file);
-		system(command);
+		shellstatus = system(command);
 		}
 
 	/* print output debug statements */
@@ -1227,7 +1228,7 @@ int mb_swathbounds(int verbose, int checkgood,
 	found = MB_NO;
 	for (i=0;i<nbath;i++)
 		{
-		if ((checkgood && mb_beam_ok(beamflag[i])) || beamflag[i] != MB_FLAG_NULL)
+		if ((checkgood && mb_beam_ok(beamflag[i])) || !mb_beam_check_flag_null(beamflag[i]))
 			{
 			if (found == MB_NO)
 				{
@@ -1334,7 +1335,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_info:    %lu\n",(size_t)mb_info);
+		fprintf(stderr,"dbg2       mb_info:    %p\n",(void *)mb_info);
 		}
 
 	/* initialize mb_info_struct */

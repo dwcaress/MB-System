@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_io.h	4/21/96
+ *    The MB-system:	mb_define.h	4/21/96
  *    $Id$
  *
- *    Copyright (c) 1996-2012 by
+ *    Copyright (c) 1996-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -166,6 +166,69 @@
 #ifndef MB_DEFINE_DEF
 #define MB_DEFINE_DEF
 
+#ifdef HAVE_CONFIG_H
+#include "mb_config.h"
+#else
+#include "mb_config2.h"
+#endif
+
+/* include for mb_s_char types */
+#if HAVE_STDINT_H
+# include <stdint.h>
+#endif
+
+/* For XDR/RPC */
+#ifdef HAVE_RPC_RPC_H
+# include <rpc/rpc.h>
+#endif
+#ifdef HAVE_RPC_TYPES_H
+# include <rpc/types.h>
+# include <rpc/xdr.h>
+#endif
+
+/* for Windows */
+#if defined(_WIN32) && (_MSC_VER < 1800)
+#	if !defined(copysign)
+#		define copysign(x,y) _copysign(x,y)
+#	endif
+#	if !defined(log2)
+#		define log2(x) (log(x) / log(2))
+#	endif
+#	if !defined(rint)
+#		define rint(x) (floor((x)+0.5))
+#	endif
+#endif
+
+#ifdef _WIN32
+#define sleep Sleep
+#define popen _popen
+#define pclose _pclose
+#define ftello ftell
+#define fseeko fseek
+#	ifndef isnan
+#		define isnan(x) _isnan(x)
+#	endif
+#endif
+
+/* MB-system version id */
+#define	MB_VERSION	VERSION
+#define	MB_BUILD_DATE	VERSION_DATE
+#define	MB_SVN		"$Id$"
+
+/* type definitions of signed and unsigned char */
+typedef unsigned char	mb_u_char;
+
+/* From stdint.h if available */
+#if defined INT8_MAX || defined int8_t
+typedef int8_t mb_s_char;
+#else
+typedef signed char	mb_s_char;
+#endif
+
+/* type definitions of signed and unsigned long int (64 bit integer) */
+typedef unsigned long long	mb_u_long;
+typedef long long	mb_s_long;
+
 /* declare buffer maximum */
 #define	MB_BUFFER_MAX	5000
 
@@ -179,6 +242,10 @@
 #define MB_NAME_LENGTH		32
 #define MB_DESCRIPTION_LENGTH	2048
 
+/* typedef for path string */
+typedef char mb_path[MB_PATH_MAXLINE];
+typedef char mb_name[MB_NAME_LENGTH];
+
 /* maximum number of asynchronous data saved */
 #define MB_ASYNCH_SAVE_MAX 10000
 
@@ -187,6 +254,9 @@
 
 /* maximum number of CTD samples per record */
 #define MB_CTD_MAX 256
+
+/* maximum number of asynchronous nav samples per record */
+#define MB_NAV_MAX 256
 
 /* file mode (read or write) */
 #define	MB_FILEMODE_READ	0
@@ -212,47 +282,6 @@
 #define MB_MEM_TYPE_AMPLITUDE		2
 #define MB_MEM_TYPE_SIDESCAN		3
 
-/* type definitions of signed and unsigned char */
-typedef unsigned char	mb_u_char;
-#ifdef IRIX
-typedef signed char	mb_s_char;
-#endif
-#ifdef IRIX64
-typedef signed char	mb_s_char;
-#endif
-#ifdef SOLARIS
-typedef signed char	mb_s_char;
-#endif
-#ifdef LINUX
-typedef signed char	mb_s_char;
-#endif
-#ifdef LYNX
-typedef signed char	mb_s_char;
-#endif
-#ifdef SUN
-typedef char	mb_s_char;
-#endif
-#ifdef HPUX
-typedef signed char	mb_s_char;
-#endif
-#ifdef DARWIN
-typedef char	mb_s_char;
-#endif
-#ifdef CYGWIN
-typedef char	mb_s_char;
-#endif
-#ifdef OTHER
-typedef signed char	mb_s_char;
-#endif
-
-/* type definitions of signed and unsigned long int (64 bit integer) */
-typedef unsigned long long	mb_u_long;
-typedef long long	mb_s_long;
-
-/* typedef for path string */
-typedef char mb_path[MB_PATH_MAXLINE];
-typedef char mb_name[MB_NAME_LENGTH];
-
 /* declare PI if needed */
 #ifndef M_PI
 #define	M_PI	3.14159265358979323846
@@ -277,6 +306,9 @@ typedef char mb_name[MB_NAME_LENGTH];
 #ifndef ROUND
 #define	ROUND(X)	X < 0.0 ? ceil(X - 0.5) : floor(X + 0.5)
 #endif
+
+/* safe square root define - sets argument to zero if negative */
+#define SAFESQRT(X) sqrt(MAX(0.0, X))
 
 /* position projection flag (0 = longitude latitude, 1 = projected eastings northings) */
 #define	MB_PROJECTION_GEOGRAPHIC	0
@@ -448,6 +480,11 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sonartype, int *error);
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
+int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+		double time_d, double navlon, double navlat,
+		double speed, double heading, double sonardepth,
+		double roll, double pitch, double heave,
+		int *error);
 int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -664,6 +701,27 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 int mb_altint_interp(int verbose, void *mbio_ptr,
 		double time_d, double *altitude,
 		int *error);
+int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int merge_nav_lonflip,
+                int *merge_nav_num, int *merge_nav_alloc,
+                double **merge_nav_time_d, double **merge_nav_lon,
+                double **merge_nav_lat, double **merge_nav_speed, int *error);
+int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_sensordepth_format,
+                int *merge_sensordepth_num, int *merge_sensordepth_alloc,
+                double **merge_sensordepth_time_d, double **merge_sensordepth_sensordepth,
+                int *error);
+int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_format,
+                int *merge_heading_num, int *merge_heading_alloc,
+                double **merge_heading_time_d, double **merge_heading_heading,
+                int *error);
+int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitude_format,
+                int *merge_attitude_num, int *merge_attitude_alloc,
+                double **merge_attitude_time_d, double **merge_attitude_roll,
+                double **merge_attitude_pitch, double **merge_attitude_heave,
+                int *error);
+int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_timeshift_format,
+                int *merge_timeshift_num, int *merge_timeshift_alloc,
+                double **merge_timeshift_time_d, double **merge_timeshift_timeshift,
+                int *error);
 
 int mb_swap_check();
 int mb_get_double(double *, char *, int);
@@ -725,9 +783,9 @@ int mb_mem_debug_off(int verbose, int *error);
 int mb_malloc(int verbose, size_t size, void **ptr, int *error);
 int mb_realloc(int verbose, size_t size, void **ptr, int *error);
 int mb_free(int verbose, void **ptr, int *error);
-int mb_mallocd(int verbose, char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
-int mb_reallocd(int verbose, char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
-int mb_freed(int verbose, char *sourcefile, int sourceline, void **ptr, int *error);
+int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
+int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
+int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, int *error);
 int mb_memory_clear(int verbose, int *error);
 int mb_memory_status(int verbose, int *nalloc, int *nallocmax,
 			int *overflow, size_t *allocsize, int *error);

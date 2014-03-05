@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_jstar.h	2/21/2005
  *	$Id$
  *
- *    Copyright (c) 2005-2012 by
+ *    Copyright (c) 2005-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_jstar.h  defines the data structure used by MBIO functions
- * to store sidescan data read from the MBF_EDGJSTAR format (MBIO id 132).  
+ * to store sidescan data read from the MBF_EDGJSTAR format (MBIO id 132).
  *
  * Author:	D. W. Caress
  * Date:	February 21, 2005
@@ -32,18 +32,18 @@
  */
 /*
  * Notes on the MBSYS_JSTAR data structure:
- *   1. The J-star data format is used to store raw sidescan data from 
- *      Edgetech sidescan and subbottom profiler sonars. This format 
+ *   1. The J-star data format is used to store raw sidescan data from
+ *      Edgetech sidescan and subbottom profiler sonars. This format
  *      is a variant of the SEGY format.
- *   2. The J-Star variant eliminates the SEGY EGCDIC and binary reel headers, 
- *      and adds a message header to the beginning of each trace header. 
+ *   2. The J-Star variant eliminates the SEGY EGCDIC and binary reel headers,
+ *      and adds a message header to the beginning of each trace header.
  *      A J-Star stander format (JSF) file consists of a collection of trace
  *      records with the following components:
  *            1. A 16-byte message header.
  *            2. A 240 byte trace header.
  *            3. Trace data (2 bytes per sample)
  */
- 
+
 /* specify the maximum number of sidescan pixels that can be returned
 	by mbsys_jstar_extract() */
 #define	MBSYS_JSTAR_MESSAGE_SIZE	16
@@ -74,7 +74,7 @@
 #define	MBSYS_JSTAR_TRACEFORMAT_REALANALYTIC	3 	/* 2 bytes/sample (signed) */
 #define	MBSYS_JSTAR_TRACEFORMAT_PIXEL		4 	/* 2 bytes/sample (signed) */
 
-struct mbsys_jstar_message_struct 
+struct mbsys_jstar_message_struct
 	{
 	/* Message Header */
 	unsigned short	start_marker;	/* bytes 0-1,    Marker for the start of header (0x1601) */
@@ -93,8 +93,8 @@ struct mbsys_jstar_message_struct
 	unsigned short	reserved;	/* bytes 10-11,  Reserved */
 	unsigned int	size;		/* bytes 12-15,  Size of following message in bytes */
 	};
-	
-struct mbsys_jstar_comment_struct 
+
+struct mbsys_jstar_comment_struct
 	{
 	/* Message Header */
 	struct mbsys_jstar_message_struct message;
@@ -102,12 +102,12 @@ struct mbsys_jstar_comment_struct
 	/* Comment */
 	char	comment[MB_COMMENT_MAXLINE];
 	};
-	
-struct mbsys_jstar_nmea_struct 
+
+struct mbsys_jstar_nmea_struct
 	{
 	/* Message Header */
 	struct mbsys_jstar_message_struct message;
-	
+
 	/* Time and source */
 	int	seconds;		/* seconds since start of time */
 	int	msec;			/* milliseconds since start of time */
@@ -117,12 +117,12 @@ struct mbsys_jstar_nmea_struct
 	/* NMEA string */
 	char	nmea[MB_COMMENT_MAXLINE];
 	};
-	
-struct mbsys_jstar_pressure_struct 
+
+struct mbsys_jstar_pressure_struct
 	{
 	/* Message Header */
 	struct mbsys_jstar_message_struct message;
-	
+
 	/* Time and source */
 	int	seconds;	/* seconds since start of time */
 	int	msec;		/* milliseconds since start of time */
@@ -139,12 +139,12 @@ struct mbsys_jstar_pressure_struct
 	int	soundspeed;	/* 0.001 m/sec */
 	int	reserve2[10];
 	};
-	
-struct mbsys_jstar_pitchroll_struct 
+
+struct mbsys_jstar_pitchroll_struct
 	{
 	/* Message Header */
 	struct mbsys_jstar_message_struct message;
-	
+
 	/* Time and source */
 	int	seconds;	/* seconds since start of time */
 	int	msec;		/* milliseconds since start of time */
@@ -177,11 +177,11 @@ struct mbsys_jstar_pitchroll_struct
 	int	reserve2;
 	};
 
-struct mbsys_jstar_dvl_struct 
+struct mbsys_jstar_dvl_struct
 	{
 	/* Message Header */
 	struct mbsys_jstar_message_struct message;
-	
+
 	/* Time and source */
 	int	seconds;	/* seconds since start of time */
 	int	msec;		/* milliseconds since start of time */
@@ -222,12 +222,12 @@ struct mbsys_jstar_dvl_struct
 	short	soundspeed;	/* sound speed (m/sec) */
 	short	reserve2[7];
 	};
-		
-struct mbsys_jstar_channel_struct 
+
+struct mbsys_jstar_channel_struct
 	{
 	/* Message Header */
 	struct mbsys_jstar_message_struct message;
-	
+
 	/* Trace Header */
 	int sequenceNumber; 			/* 0-3 : Trace Sequence Number (always 0) ** */
 	unsigned int startDepth;          	/* 4-7 : Starting depth (window offset) in samples. */
@@ -293,7 +293,7 @@ struct mbsys_jstar_channel_struct
 	/* User defined area from 180-239                                       */
 	/* -------------------------------------------------------------------- */
 	short heaveCompensation;		/* 180-181 : Heave compensation offset (samples) */
-	short trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */    
+	short trigSource;   			/* 182-183 : TriggerSource (0 = internal, 1 = external) */
 	unsigned short markNumber;		/* 184-185 : Mark Number (0 = no mark) */
 	short NMEAHour;				/* 186-187 : Hour */
 	short NMEAMinutes;			/* 188-189 : Minutes */
@@ -314,31 +314,31 @@ struct mbsys_jstar_channel_struct
 	short ADCDecimation;			/* 222-223 : A/D decimation before FFT */
 	short decimation;			/* 224-225 : Decimation factor after FFT */
 	short unuseda;				/* 226-227 */
-	
+
 	/* -------------------------------------------------------------------- */
 	/* MB-System-only parameters from 236-239                               */
 	/* -------------------------------------------------------------------- */
 	int depth;				/* 227-231 : Seafloor depth in 0.001 m */
 	int sonardepth;				/* 236-235 : Sonar depth in 0.001 m */
 	int sonaraltitude;			/* 236-239 : Sonar altitude in 0.001 m */
-	
+
 	/* trace data stored as shorts */
 	unsigned int	trace_alloc;
 	unsigned short	*trace;
 	};
-	
-struct mbsys_jstar_ss_struct 
+
+struct mbsys_jstar_ss_struct
 	{
 	/* Message Header */
 	struct mbsys_jstar_message_struct message;
-	
+
 	/* Trace Header */
 	unsigned short subsystem;		/*   0 -   1 : Subsystem (0 .. n) */
 	unsigned short channelNum;		/*   2 -   3 : Channel Number (0 .. n) */
 	unsigned int pingNum;			/*   4 -   7 : Ping number (increments with ping) */
 	unsigned short packetNum;		/*   8 -   9 : Packet number (1..n) Each ping starts with packet 1 */
 	unsigned short trigSource;		/*  10 -  11 : TriggerSource (0 = internal, 1 = external) */
-	unsigned int samples;			/*  12 -  15 : Samples in this packet */   
+	unsigned int samples;			/*  12 -  15 : Samples in this packet */
 	unsigned int sampleInterval;		/*  16 -  19 : Sample interval in ns of stored data */
 	unsigned int startDepth;		/*  20 -  23 : starting Depth (window offset) in samples */
 	short weightingFactor;			/*  24 -  25 : -- defined as 2 -N volts for lsb */
@@ -366,7 +366,7 @@ struct mbsys_jstar_ss_struct
 	unsigned short second;			/*  52 -  53 : Second (0 - 59) */
 	/* -------------------------------------------------------------------- */
 	/* Auxillary sensor information */
-	/* -------------------------------------------------------------------- */    
+	/* -------------------------------------------------------------------- */
 	short heading;				/*  54 -  55 : Compass heading (minutes) */
 	short pitch;				/*  56 -  57 : Pitch (minutes) */
 	short roll;				/*  58 -  59 : Roll (minutes) */
@@ -375,16 +375,16 @@ struct mbsys_jstar_ss_struct
 	unsigned int depth;			/*  64 -  67 : Vehicle depth (centimeters) */
 	short temperature;			/*  68 -  69 : Temperature (degrees Celsius X 10) */
 	char reserved2[10];			/*  70 -  79 : Reserved for future use */
-	
+
 	/* trace data stored as shorts */
 	unsigned int	trace_alloc;
 	unsigned short	*trace;
 	};
-  
+
 struct mbsys_jstar_struct
 	{
 	int	kind;			/* MBIO data kind */
-	
+
 	/* Ping type */
 	mb_u_char	subsystem;	/* bytes 7,      Subsystem:
 								 0 - subbottom
@@ -393,93 +393,92 @@ struct mbsys_jstar_struct
 
 	/* SBP data */
 	struct mbsys_jstar_channel_struct sbp;
-	
+
 	/* Sidescan data */
 	struct mbsys_jstar_channel_struct ssport;
 	struct mbsys_jstar_channel_struct ssstbd;
-	
+
 	/* Pitch Roll data */
 	struct mbsys_jstar_pitchroll_struct pitchroll;
-	
+
 	/* NMEA */
 	struct mbsys_jstar_nmea_struct nmea;
-	
+
 	/* DVL data */
 	struct mbsys_jstar_dvl_struct dvl;
-	
+
 	/* Pressure data */
 	struct mbsys_jstar_pressure_struct pressure;
-	
+
 	/* Comment */
 	struct mbsys_jstar_comment_struct comment;
 	};
-	
+
 /* system specific function prototypes */
-int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, 
+int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr,
 			int *pingnumber, int *error);
-int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
 int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind,
-			void *segyheader_ptr, 
+			void *segyheader_ptr,
 			int *error);
 int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			int *sampleformat,
 			int *kind,
-			void *segyheader_ptr, 
-			float *segydata, 
+			void *segyheader_ptr,
+			float *segydata,
 			int *error);
 int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind,
-			void *segyheader_ptr, 
-			float *segydata, 
+			void *segyheader_ptr,
+			float *segydata,
 			int *error);
-int mbsys_jstar_copy(int verbose, void *mbio_ptr, 
+int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

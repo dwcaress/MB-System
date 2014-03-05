@@ -2,7 +2,7 @@
  *    The MB-system:	mb_get_value.c	2/15/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -102,9 +102,9 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_swap.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_swap.h"
+#include "mb_define.h"
 
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
@@ -138,7 +138,7 @@ int mb_get_int(int *value, char *str, int nchar)
 int mb_get_binary_short(int swapped, void *buffer, void *ptr)
 {
 	short *value;
-	
+
 	value = (short *) ptr;
 	memcpy(value, buffer, sizeof(short));
 #ifdef BYTESWAPPED
@@ -157,7 +157,7 @@ int mb_get_binary_short(int swapped, void *buffer, void *ptr)
 int mb_get_binary_int(int swapped, void *buffer, void *ptr)
 {
 	int *value;
-	
+
 	value = (int *) ptr;
 	memcpy(value, buffer, sizeof(int));
 #ifdef BYTESWAPPED
@@ -176,7 +176,7 @@ int mb_get_binary_int(int swapped, void *buffer, void *ptr)
 int mb_get_binary_float(int swapped, void *buffer, void *ptr)
 {
 	float *value;
-	
+
 	value = (float *) ptr;
 	memcpy(value, buffer, sizeof(float));
 #ifdef BYTESWAPPED
@@ -195,7 +195,7 @@ int mb_get_binary_float(int swapped, void *buffer, void *ptr)
 int mb_get_binary_double(int swapped, void *buffer, void *ptr)
 {
 	double *value;
-	
+
 	value = (double *) ptr;
 	memcpy(value, buffer, sizeof(double));
 #ifdef BYTESWAPPED
@@ -214,7 +214,7 @@ int mb_get_binary_double(int swapped, void *buffer, void *ptr)
 int mb_get_binary_long(int swapped, void *buffer, void *ptr)
 {
 	mb_s_long *value;
-	
+
 	value = (mb_s_long *) ptr;
 	memcpy(value, buffer, sizeof(mb_s_long));
 #ifdef BYTESWAPPED

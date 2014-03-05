@@ -1,0 +1,301 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbsegylist</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbsegylist</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbsegylist</B> - List selected header values in segy format seismic data files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbsegylist</B> [<B>-A</B> <B>-D</B><I>decimate</I>
+<B>-H</B> <B>-G</B><I>delimeter</I> <B>-I</B><I>infilename</I>
+<B>-L</B><I>lonflip</I> <B>-O</B><I>output_format</I>
+<B>-U</B><I>check</I> <B>-V</B> <B>-Z</B><I>segment</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MBsegylist</B> is a utility to output specified header values
+from segy seismic data files to stdout. The
+option <B>-O</B><I>output_format</I> is
+used to control the type and order of values output.
+By default, <B>mbsegylist</B>  produces ASCII files in
+spreadsheet style, with data columns separated by tabs. Alternatively,
+the output can be binary, with each field represented
+as a double precision float (<B>-A</B> option).
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<BR>
+
+Causes the output to be binary (native double precision floating
+point) rather than ASCII. Some
+output options cannot be represented as single binary floats (e.g.
+time strings and longitude or latitude broken into degrees
+and minutes. These values are output as multiple fields as
+appropriate.
+Default: ASCII output with fields separated by tabs.
+<DT><B>-D</B>
+
+<DD>
+<I>decimate</I>
+<BR>
+
+Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1),
+every available data record is output. If <I>decimate</I>&gt;1, then only
+every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate</I>=1.
+<DT><B>-G</B>
+
+<DD>
+<I>delimiter</I>
+<BR>
+
+Sets the character(s) used to separate output fields when ascii
+columns are output. Default: tabs are used as delimiters.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>filename</I>
+<BR>
+
+Sets the filename of the input segy seismic data file.
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values returned.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <I>lonflip</I> = 0.
+<DT><B>-O</B>
+
+<DD>
+<I>output_format</I>
+<BR>
+
+Determines the form of the output; <I>output_format</I> is a string composed
+of one or more of the following characters:
+<DT><DD>
+<B>/</B>
+special character: this causes the value
+indicated by the next character to be  inverted. This applies only to simple
+numeric values such as depth and
+heading and not to values like time
+strings orpositions with hemisphere
+characters.
+<DT><DD>
+<B>-</B>
+special character: this causes the value
+indicated by the next character to be
+multiplied by -1. This applies only
+to simple numeric values such as
+depth and heading and not to values
+like time strings or positions with
+hemisphere characters.
+<DT><DD>
+<B>C</B>
+for CMP (or RP or CDP) gather number of a trace
+<DT><DD>
+<B>c</B>
+for trace number within a CMP (or RP or CDP) gather
+<DT><DD>
+<B>D</B>
+for trace start delay (seconds)
+<DT><DD>
+<B>I</B>
+for sample length (seconds)
+<DT><DD>
+<B>i</B>
+for time interval since last trace (seconds)
+<DT><DD>
+<B>J</B>
+for a time string (yyyy jd hh mm ss.ssssss)
+where jd is the day of the year
+<DT><DD>
+<B>j</B>
+for a time string (yyyy jd dm ss.ssssss)
+where jd is the day of the year
+and dm is the minute of the day
+<DT><DD>
+<B>L</B>
+for trace length (seconds)
+<DT><DD>
+<B>M</B>
+for unix (epoch) time in decimal seconds since 1/1/70 00:00:00
+<DT><DD>
+<B>m</B>
+for time in decimal seconds since first record
+<DT><DD>
+<B>N</B>
+for number of samples in the trace
+<DT><DD>
+<B>n</B>
+for trace counter (starts from 0)
+<DT><DD>
+<B>R</B>  for range from source to receiver (m)
+<DT><DD>
+<B>S</B>  for shot number
+<DT><DD>
+<B>s</B>  for trace number within a shot gather
+<DT><DD>
+<B>T</B>  for a time string (yyyy/mm/dd/hh/mm/ss)
+<DT><DD>
+<B>t</B>  for a time string (yyyy mm dd hh mm ss)
+<DT><DD>
+<B>U</B>  for unix time in integer seconds since 1/1/70 00:00:00
+<DT><DD>
+<B>u</B>  for time in integer seconds since first record
+<DT><DD>
+<B>V</B>  for shot or ping interval (decimal seconds)
+<DT><DD>
+<B>X</B>  for longitude (decimal degrees)
+<DT><DD>
+<B>x</B>  for longitude (degrees + decimal minutes + E/W)
+<DT><DD>
+<B>Y</B>  for latitude (decimal degrees)
+<DT><DD>
+<B>y</B>  for latitude (degrees + decimal minutes + N/S)
+<DT><DD>
+<B>Z</B>  for source or sonar depth (positive downwards) (m)
+<DT><DD>
+<B>z</B>  for depth (positive downwards) (m)
+<BR>
+
+<P>
+Default <I>output_format</I> = <B>TiXYSsCcDINL</B>
+(time, time interval, lon, lat, shot, shot trace #, cmp, cmp trace #,
+delay, sample length, number samples, trace length)
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbsegylist</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbsegylist</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used and all error status messages.
+<DT><B>-Z</B>
+
+<DD>
+<I>segment</I>
+<BR>
+
+Causes the ascii output of different input segy files
+(e.g. when a datalist is specified with the <B>-I</B> option)
+to be separated by lines with <I>segment</I>. If <I>segment</I>
+is a single character, then the output is a multiple segment
+file of the sort accepted by the <B>GMT</B> program <B>psxy</B>.
+This option only works with ascii output, and is thus disabled
+when the <B>-A</B> option is specified. The most common usage
+is <B>-Z</B>I&gt;.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one has a subbottom profiler segy data file called
+20040722_152111.s7k.segy.
+<P>
+In order to obtain a listing of the shot number, time tag, and position
+of the traces in the file, use <B>mbsegylist</B> as follows:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbsegylist&nbsp;-I&nbsp;20040722_152111.s7k.segy&nbsp;-OSTXY<BR>
+<P>
+The output will be as follows:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;56&nbsp;&nbsp;2004/07/22/15/20/37.029000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-121.857289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.775508
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;57&nbsp;&nbsp;2004/07/22/15/20/37.590000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-121.857289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.775514
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;58&nbsp;&nbsp;2004/07/22/15/20/38.152000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-121.857289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.775519
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;59&nbsp;&nbsp;2004/07/22/15/20/38.713000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-121.857289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.775525
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;60&nbsp;&nbsp;2004/07/22/15/20/39.275000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-121.857289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.775531
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;61&nbsp;&nbsp;2004/07/22/15/20/39.837000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-121.857289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.775536
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;62&nbsp;&nbsp;2004/07/22/15/20/40.398000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-121.857289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.775542
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;63&nbsp;&nbsp;2004/07/22/15/20/40.960000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-121.857289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.775547
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;64&nbsp;&nbsp;2004/07/22/15/20/41.521000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-121.857289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.775553
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.....<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbextractsegy.html">mbextractsegy</A></B>(1), <B><A HREF="mbsegyinfo.html">mbsegyinfo</A></B>(1), <B><A HREF="mbsegygrid.html">mbsegygrid</A></B>(1),
+<B>SIOSEIS</B>(<A HREF="http://sioseis.ucsd.edu/">http://sioseis.ucsd.edu/</A> )
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Si. Oui. Ya. Da. Yes. Mess.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

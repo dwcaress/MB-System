@@ -2,7 +2,7 @@
  *    The MB-system:	mbareaclean.c	2/27/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2012 by
+ *    Copyright (c) 2003-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbareaclean identifies and flags artifacts in swath sonar bathymetry data.  
+ * mbareaclean identifies and flags artifacts in swath sonar bathymetry data.
  * The edit events are output to edit save files which can be applied
  * to the data by the program mbprocess. These are the same edit save
  * files created and/or modified by mbclean and mbedit.
@@ -31,7 +31,7 @@
  * to the edit save file of the swath file containing that sounding. This
  * program will create edit save files if necessary, or append to those that
  * already exist.
- * 
+ *
  * Author:	D. W. Caress
  * Date:	February 27, 2003
  *		Amsterdam Airport
@@ -89,13 +89,13 @@
 #include <time.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_swap.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_info.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_io.h"
+#include "mb_swap.h"
+#include "mb_process.h"
+#include "mb_info.h"
 
 /* allocation */
 #define FILEALLOCNUM	16
@@ -133,7 +133,7 @@ struct mbareaclean_sndg_struct {
 	char	sndg_beamflag;
 	char	sndg_edit;
 	};
-	
+
 /* sounding atorage values and arrays */
 int	nfile = 0;
 int	nfile_alloc = 0;
@@ -147,8 +147,8 @@ int	*gsndgnum_alloc = NULL;
 struct mbareaclean_sndg_struct *sndg = NULL;
 
 /* sounding pointer resolving function */
-int getsoundingptr(int verbose, int soundingid, 
-		struct mbareaclean_sndg_struct **sndgptr, 
+int getsoundingptr(int verbose, int soundingid,
+		struct mbareaclean_sndg_struct **sndgptr,
 		int *error);
 int flag_sounding(int verbose, int flag, int output_bad, int output_good,
 		  struct mbareaclean_sndg_struct *sndg, int *error);
@@ -190,7 +190,7 @@ int main (int argc, char **argv)
 	int	formatread;
 	int	variable_beams;
 	int	traveltime;
-	int	beam_flagging; 
+	int	beam_flagging;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -201,7 +201,7 @@ int main (int argc, char **argv)
 	double	speedmin;
 	double	timegap;
 	struct mb_info_struct mb_info;
-	
+
 	int	time_i[7];
 	double	time_d;
 	int	pingsread;
@@ -260,14 +260,14 @@ int main (int argc, char **argv)
 	double	std_dev;
 	int	detect_status;
 	int 	detect_error;
-	
+
 	/* median filter parameters */
 	int	binnum;
 	int	binnummax;
 	double	*bindepths;
 	double	threshold;
 	double	median_depth;
-	
+
 	/* counting parameters */
 	int	files_tot = 0;
 	int	pings_tot = 0;
@@ -328,7 +328,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhBbGgD:d:F:f:I:i:M:m:N:n:P:p:S:sT:t::R:r:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -346,7 +346,7 @@ int main (int argc, char **argv)
 		case 'D':
 		case 'd':
 		  	std_dev_filter = MB_YES;
-			sscanf (optarg,"%lf/%d", 
+			sscanf (optarg,"%lf/%d",
 				&std_dev_threshold,&std_dev_nmin);
 			flag++;
 			break;
@@ -368,11 +368,11 @@ int main (int argc, char **argv)
 		case 'M':
 		case 'm':
 			median_filter = MB_YES;
-			n = sscanf (optarg,"%lf/%d/%d", 
+			n = sscanf (optarg,"%lf/%d/%d",
 					&d1,&i1,&i2);
 			if (n > 0) median_filter_threshold = d1;
 			if (n > 1) median_filter_nmin = i1;
-			if (n > 2) 
+			if (n > 2)
 				{
 				density_filter = MB_YES;
 				density_filter_nmax = i2;
@@ -382,7 +382,7 @@ int main (int argc, char **argv)
 		case 'N':
 		case 'n':
 			limit_beams = MB_YES;
-			sscanf (optarg,"%d/%d", 
+			sscanf (optarg,"%d/%d",
 					&min_beam,&max_beam_no);
 			if (optarg[0] == '-')
 			  {
@@ -400,7 +400,7 @@ int main (int argc, char **argv)
 		case 'p':
 			plane_fit = MB_YES;
 			sscanf (optarg,"%lf", &plane_fit_threshold);
-			n = sscanf (optarg,"%lf/%d/%lf", 
+			n = sscanf (optarg,"%lf/%d/%lf",
 					&d1,&i1,&d2);
 			if (n > 0) plane_fit_threshold = d1;
 			if (n > 1) plane_fit_nmin = i1;
@@ -525,19 +525,19 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
-		
+
 	/* if bounds not set get bounds of input data */
 	if (areaboundsset == MB_NO)
 		{
 		formatread = format;
-		status = mb_get_info_datalist(verbose, read_file, &formatread, 
+		status = mb_get_info_datalist(verbose, read_file, &formatread,
 				&mb_info, lonflip, &error);
-				
+
 		areabounds[0] = mb_info.lon_min;
 		areabounds[1] = mb_info.lon_max;
 		areabounds[2] = mb_info.lat_min;
 		areabounds[3] = mb_info.lat_max;
-		
+
 		if (binsizeset == MB_NO)
 			binsize = 0.2 * mb_info.altitude_max;
 		}
@@ -555,7 +555,7 @@ int main (int argc, char **argv)
 		dx = (areabounds[1] - areabounds[0]) / (nx - 1);
 		dy = (areabounds[3] - areabounds[2]) / (ny - 1);
 		}
-	
+
 	/* allocate grid arrays */
 	nsndg = 0;
 	nsndg_alloc = 0;
@@ -636,7 +636,7 @@ int main (int argc, char **argv)
 		else
 			fprintf(stderr,"     Standard deviation filter: OFF\n");
 		fprintf(stderr,"Restrictions:\n");
-		if (use_detect) 
+		if (use_detect)
 			{
 			fprintf(stderr,"     Only flag if bottom detection algorithn is: ");
 			if (flag_detect == MB_DETECT_UNKNOWN)
@@ -711,8 +711,8 @@ int main (int argc, char **argv)
 
 	/* check format and get format flags */
 	if ((status = mb_format_flags(verbose,&format,
-			&variable_beams, &traveltime, &beam_flagging, 
-			&error)) 
+			&variable_beams, &traveltime, &beam_flagging,
+			&error))
 		!= MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
@@ -742,7 +742,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-		
+
 	/* initialize and increment counting variables */
 	pings_file = 0;
 	beams_file = 0;
@@ -754,6 +754,16 @@ int main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
+	beamflag = NULL;
+	beamflagorg = NULL;
+	detect = NULL;
+	bath = NULL;
+	amp = NULL;
+	bathlon = NULL;
+	bathlat = NULL;
+	ss = NULL;
+	sslon = NULL;
+	sslat = NULL;
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(char), (void **)&beamflag, &error);
@@ -773,13 +783,13 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathlat, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&sslon, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&sslat, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -794,7 +804,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	
+
 	/* update memory for files */
 	if (nfile >= nfile_alloc)
 		{
@@ -811,9 +821,9 @@ int main (int argc, char **argv)
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);
 			exit(error);
-			}	
+			}
 		}
-		
+
 	/* initialize current file */
 	strcpy(files[nfile].filelist, swathfile);
 	files[nfile].file_format = format;
@@ -861,7 +871,7 @@ int main (int argc, char **argv)
 	if (status == MB_SUCCESS)
 	    {
 	    /* handle esf edits */
-	    status = mb_esf_load(verbose, swathfile, 
+	    status = mb_esf_load(verbose, swathfile,
 			    MB_YES, MB_NO, esffile, &esf, &error);
 	    }
 
@@ -898,17 +908,17 @@ int main (int argc, char **argv)
 		{
 		for (i=0;i<beams_bath;i++)
 			beamflagorg[i] = beamflag[i];
-		status = mb_esf_apply(verbose, &esf, 
-		    		time_d, 1, beams_bath, 
+		status = mb_esf_apply(verbose, &esf,
+		    		time_d, 1, beams_bath,
 				beamflagorg, &error);
-		
+
 		/* get detection */
-		if (use_detect == MB_YES) 
+		if (use_detect == MB_YES)
 		  	{
 			status = mb_get_store(verbose,mbio_ptr,&store_ptr,&error);
 			detect_status = mb_detects(verbose,mbio_ptr,store_ptr,
 						&kind,&beams_bath,detect,&detect_error);
-		    
+
 			if (detect_status != MB_SUCCESS)
 				{
 				status = MB_SUCCESS;
@@ -918,7 +928,7 @@ int main (int argc, char **argv)
 					}
 				}
 		    	}
-		
+
 		/* update counters */
 		pings_tot++;
 		pings_file++;
@@ -947,7 +957,7 @@ int main (int argc, char **argv)
 				files[nfile-1].nflag++;
 				}
 			}
-			
+
 		/* allocate memory if necessary */
 		if (files[nfile-1].nping >= files[nfile-1].nping_alloc)
 			{
@@ -972,14 +982,14 @@ int main (int argc, char **argv)
 				exit(error);
 				}
 			}
-			
+
 		/* store the ping data */
 		files[nfile-1].ping_time_d[files[nfile-1].nping] = time_d;
-		if (files[nfile-1].nping > 0 
-			&& files[nfile-1].ping_time_d[files[nfile-1].nping] 
+		if (files[nfile-1].nping > 0
+			&& files[nfile-1].ping_time_d[files[nfile-1].nping]
 				== files[nfile-1].ping_time_d[files[nfile-1].nping - 1])
 			{
-			files[nfile-1].pingmultiplicity[files[nfile-1].nping] 
+			files[nfile-1].pingmultiplicity[files[nfile-1].nping]
 				= files[nfile-1].pingmultiplicity[files[nfile-1].nping - 1] + 1;
 			}
 		else
@@ -988,11 +998,11 @@ int main (int argc, char **argv)
 			}
 		files[nfile-1].ping_altitude[files[nfile-1].nping] = altitude;
 		files[nfile-1].nping++;
-		
+
 		/* check beam range */
 		if (limit_beams == MB_YES && max_beam_no == 0)
 		  max_beam = beams_bath - min_beam;
-		
+
 		/* now loop over the beams and store the soundings in the grid bins */
 		for (ib=0;ib<beams_bath;ib++)
 			{
@@ -1002,9 +1012,9 @@ int main (int argc, char **argv)
 				ix = (bathlon[ib] - areabounds[0] - 0.5 * dx) / dx;
 				iy = (bathlat[ib] - areabounds[2] - 0.5 * dy) / dy;
 				kgrid = ix*ny + iy;
-				
+
 				/* add sounding */
-				if (ix >= 0 && ix < nx 
+				if (ix >= 0 && ix < nx
 					&& iy >= 0 && iy < ny)
 			        	{
 					if (files[nfile-1].nsndg >= files[nfile-1].nsndg_alloc)
@@ -1022,8 +1032,8 @@ int main (int argc, char **argv)
 							exit(error);
 							}
 						}
-					
-					
+
+
 					/* allocate space for sounding if needed */
 					if (gsndgnum[kgrid] >= gsndgnum_alloc[kgrid])
 						{
@@ -1040,7 +1050,7 @@ int main (int argc, char **argv)
 							exit(error);
 							}
 						}
-					
+
 					/* store sounding data */
 					sndg = &(files[nfile-1].sndg[files[nfile-1].nsndg]);
 					sndg->sndg_file = nfile - 1;
@@ -1071,8 +1081,8 @@ int main (int argc, char **argv)
 /* fprintf(stderr,"beam: %d  edit: %d\n", ib, sndg->sndg_edit);*/
 					files[nfile-1].nsndg++;
 					nsndg++;
-					gsndg[kgrid][gsndgnum[kgrid]] 
-						= files[nfile-1].sndg_countstart 
+					gsndg[kgrid][gsndgnum[kgrid]]
+						= files[nfile-1].sndg_countstart
 							+ files[nfile-1].nsndg - 1;
 					gsndgnum[kgrid]++;
 /*fprintf(stderr,"NEW sounding:%d:%d file:%d time_d:%f depth:%f\n",
@@ -1081,14 +1091,14 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 					}
 				}
 			}
-		
-		
+
+
 		}
 	    else if (error > MB_ERROR_NO_ERROR)
 		{
 		done = MB_YES;
 		}
-		    
+
 	    /* process a record */
 
 	    /* reset counters and data */
@@ -1129,7 +1139,7 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 	}
         if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
-		
+
 	/* loop over grid cells to find maximum number of soundings */
 	binnummax = 0;
 	for (ix=0;ix<nx;ix++)
@@ -1164,7 +1174,7 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 		kgrid = ix*ny + iy;
 		xx = areabounds[0] + 0.5 * dx + ix * dx;
 		yy = areabounds[3] + 0.5 * dy + iy * dy;
-		
+
 		/* load up array */
 		binnum = 0;
 		for (i=0;i<gsndgnum[kgrid];i++)
@@ -1178,7 +1188,7 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 /*fprintf(stderr,"ix:%d iy:%d kgrid:%d soundingid:%d beamflag:%d   binnum:%d\n",
 ix,iy,kgrid,gsndg[kgrid][i],sndg->sndg_beamflag,binnum);*/
 			}
-			
+
 		/* apply median filter only if there are enough soundings */
 		if (binnum >= median_filter_nmin)
 			{
@@ -1204,7 +1214,7 @@ ix,iy,kgrid,xx,yy,binnum,median_depth);*/
 			for (i=0;i<gsndgnum[kgrid];i++)
 				{
 				getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
-				threshold = fabs(median_filter_threshold 
+				threshold = fabs(median_filter_threshold
 						* files[sndg->sndg_file].ping_altitude[sndg->sndg_ping]);
 				flagsounding = MB_NO;
 				if (fabs(sndg->sndg_depth - median_depth) > threshold)
@@ -1277,9 +1287,9 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 		      for (i=0;i<gsndgnum[kgrid];i++)
 			{
 			  getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
-			  flag_sounding(verbose, 
+			  flag_sounding(verbose,
 					fabs(sndg->sndg_depth - mean) > threshold,
-					output_bad, output_good, 
+					output_bad, output_good,
 					sndg, &error);
 			}
 
@@ -1291,19 +1301,19 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 	for (i=0; i < nfile; i++)
 		{
 		/* open esf file */
-	    	status = mb_esf_load(verbose, files[i].filelist, 
+	    	status = mb_esf_load(verbose, files[i].filelist,
 			    MB_NO, MB_YES, esffile, &esf, &error);
 	    	if (status == MB_SUCCESS
 		    	&& esf.esffp != NULL)
 		    	esffile_open = MB_YES;
-	    	if (status == MB_FAILURE 
+	    	if (status == MB_FAILURE
 		    	&& error == MB_ERROR_OPEN_FAIL)
 		    	{
 		    	esffile_open = MB_NO;
-		    	fprintf(stderr, "\nUnable to open new edit save file %s\n", 
+		    	fprintf(stderr, "\nUnable to open new edit save file %s\n",
 					esf.esffile);
 		    }
-		
+
 		/* loop over all of the soundings */
 		for (j=0;j<files[i].nsndg;j++)
 			{
@@ -1323,15 +1333,15 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 					{
 					action = MBP_EDIT_FILTER;
 					}
-				mb_esf_save(verbose, &esf, 
-						files[i].ping_time_d[sndg->sndg_ping], 
-						sndg->sndg_beam 
-							+ files[i].pingmultiplicity[sndg->sndg_ping] 
-								* MB_ESF_MULTIPLICITY_FACTOR, 
+				mb_esf_save(verbose, &esf,
+						files[i].ping_time_d[sndg->sndg_ping],
+						sndg->sndg_beam
+							+ files[i].pingmultiplicity[sndg->sndg_ping]
+								* MB_ESF_MULTIPLICITY_FACTOR,
 						action, &error);
 				}
 			}
-			
+
 		/* close esf file */
 		mb_esf_close(verbose, &esf, &error);
 
@@ -1339,11 +1349,11 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 		if (esffile_open == MB_YES)
 		    {
 		    /* update mbprocess parameter file */
-		    status = mb_pr_update_format(verbose, files[i].filelist, 
-				MB_YES, files[i].file_format, 
+		    status = mb_pr_update_format(verbose, files[i].filelist,
+				MB_YES, files[i].file_format,
 				&error);
-		    status = mb_pr_update_edit(verbose, files[i].filelist, 
-				MBP_EDIT_ON, esffile, 
+		    status = mb_pr_update_edit(verbose, files[i].filelist,
+				MBP_EDIT_ON, esffile,
 				&error);
 		    }
 		}
@@ -1402,8 +1412,8 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int getsoundingptr(int verbose, int soundingid, 
-		struct mbareaclean_sndg_struct **sndgptr, 
+int getsoundingptr(int verbose, int soundingid,
+		struct mbareaclean_sndg_struct **sndgptr,
 		int *error)
 {
 	/* local variables */
@@ -1419,14 +1429,14 @@ int getsoundingptr(int verbose, int soundingid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       soundingid:      %d\n",soundingid);
-		fprintf(stderr,"dbg2       sndgptr:         %lu\n",(size_t)sndgptr);
+		fprintf(stderr,"dbg2       sndgptr:         %p\n",(void *)sndgptr);
 		}
 
 	/* loop over the files until the sounding is found */
 	*sndgptr = NULL;
 	for (i=0; i < nfile && *sndgptr == NULL; i++)
 		{
-		if (soundingid >= files[i].sndg_countstart 
+		if (soundingid >= files[i].sndg_countstart
 			&& soundingid < files[i].sndg_countstart + files[i].nsndg)
 			{
 			j = soundingid - files[i].sndg_countstart;
@@ -1440,7 +1450,7 @@ int getsoundingptr(int verbose, int soundingid,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       *sndgptr:        %lu\n",(size_t)sndgptr);
+		fprintf(stderr,"dbg2       *sndgptr:        %p\n",(void *)sndgptr);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
@@ -1472,8 +1482,8 @@ int flag_sounding(int verbose, int flag, int output_bad, int output_good,
 		fprintf(stderr,"dbg2       sndg->sndg_beam:     %d\n",sndg->sndg_beam);
 		fprintf(stderr,"dbg2       sndg->sndg_beamflag: %d\n",sndg->sndg_beamflag);
 		}
-	
-	if (sndg->sndg_edit == MB_YES) 
+
+	if (sndg->sndg_edit == MB_YES)
 	  {
 	    if (output_bad == MB_YES
 		&& mb_beam_ok(sndg->sndg_beamflag)
@@ -1481,7 +1491,7 @@ int flag_sounding(int verbose, int flag, int output_bad, int output_good,
 	      {
 		sndg->sndg_beamflag = MB_FLAG_FLAG + MB_FLAG_FILTER;
 		files[sndg->sndg_file].nflagged++;
-	      } 
+	      }
 
 	    else if (output_good == MB_YES
 		     && !mb_beam_ok(sndg->sndg_beamflag)
@@ -1520,4 +1530,3 @@ int flag_sounding(int verbose, int flag, int output_bad, int output_good,
 }
 
 /*--------------------------------------------------------------------*/
-

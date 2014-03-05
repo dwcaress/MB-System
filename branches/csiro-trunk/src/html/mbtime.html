@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbtime</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbtime</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbtime</B> - Translate between calendar time values and unix time.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbtime</B> [<B>-M</B><I>time_d</I> <B>-T</B><I>year/month/day/hour/minute/second</I> <B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The program <B>mbtime</B> converts time values between unix time (seconds since
+1970/01/01 00:00:00.000000) and calendar time (e.g. 2008/006/05/17/24/32.000000).
+Unix time is also known as POSIX time or epoch time, and are typically represented
+in <B>MB-System</B> documentation (and source code) as &quot;time_d&quot; values.
+The input time is set using the command line arguments <B>-M</B><I>time_d</I> for
+epoch seconds and <B>-T</B><I>year/month/day/hour/minute/second</I> for
+calendar time. The output time (in the form not specified as input) is
+written to stdout.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-M</B>
+
+<DD>
+<I>time_d</I>
+<BR>
+
+Sets the input time to be <I>time_d</I> in unix time, which
+is defined as seconds since 00:00:00.000000 01 January 1970. If <B>-M</B> is
+specified, this time will be converted to calendar time and output
+to stdout in the form
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>yyyy/mm/dd/hh/mm/ss.ssssss<BR>
+<DT><B>-T</B>
+
+<DD>
+<I>year/month/day/hour/minute/second</I>
+<BR>
+
+Sets the input time to be <I>year/month/day/hour/minute/second</I>.
+If <B>-T</B> is specified, this time will be converted to
+<I>time_d</I> in epoch (Unix) seconds, which
+are seconds since 00:00:00.000000 01 January 1970.
+The <I>time_d</I> value will be output to stdout.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbtime</B> only prints out the converted time.  If the
+<B>-V</B> flag is given, then <B>mbtime</B> works in a &quot;verbose&quot; mode and
+also outputs the program version being used.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to convert the current time (06 June 2008 18:37:14.000000)
+to unix seconds. The following command:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbtime&nbsp;-T2008/06/06/18/37/14.0<BR>
+<BR>
+
+yields the following result:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1212777434.000000<BR>
+<P>
+Suppose on wishes to convert the unix time 1212777434.0 to calendar time.
+The following command:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbtime&nbsp;-M1212777434.0<BR>
+<BR>
+
+yields the following result:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2008/06/06/18/37/14.000000<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbio.html">mbio</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Never bugs, but perhaps our good friends, the terrestrial isopods.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

@@ -1,0 +1,1681 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbsystem</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbsystem</H1>
+Section:  MB-System 5.3  (1)<BR>Updated:  7 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbsystem</B> - A set of utilities for manipulating and
+processing swath sonar bathymetry, amplitude, and sidescan data.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.3
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>INTRODUCTION</H2>
+
+<B>MB-System</B> is a software package consisting of programs which manipulate, process, list, or
+display swath sonar bathymetry, amplitude, and sidescan data. This software is distributed freely
+(and for free) in the form of source code for Unix platforms. The heart of the system is an
+input/output library called <B>MBIO</B> which allows programs to work transparently with any of a
+number of supported swath sonar data formats. This approach has allowed the creation of
+&quot;generic&quot; utilities which can be applied in a uniform manner to sonar data from a variety of
+sources. Most of the programs are command-line tools, but the package does include graphical
+tools for editing swath bathymetry, editing navigation, modeling bathymetry calculation, and
+adjusting survey navigation.
+<P>
+The acronym MB stands for MultiBeam; this reflects the fact that the early development of
+<B>MB-System</B> focused on processing deep sea bathymetry data from ship-mounted multibeam
+sonars. However, <B>MB-System</B> now supports several data formats from sidescan and interferometric
+sonars and works with sonar data that map the seafloor at scales from centimeters to kilometers.
+<P>
+The original National Science Foundation (NSF) mandate in 1993 was to create a set of generic tools
+that would work with all of the sonar data collected on U.S. academic research vessels in NSF-supported
+projects. Not surprisingly, the early core of the <B>MB-System</B> user community consisted of
+NSF-supported researchers at U.S. institutions such as the Lamont-Doherty Earth Observatory, the Scripps
+Institution of Oceanography, and the Woods Hole Oceanographic Institution. However, in recent years
+<B>MB-System</B> has also come to be used widely in the international oceanographic community and in the
+marine technology industry.
+<P>
+The <B>MB-System</B> source code is distributed under the GNU General Public License as formulated
+by the GNU Project. <B>MB-System</B> installation depends on some other software packages (e.g.
+GMT and netCDF), all of which are freely available as source code.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>COPYRIGHT AND LICENSING</H2>
+
+<B>MB-System</B> Copyright (C) 1993-2012 by
+<BR>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Moss&nbsp;Landing,&nbsp;CA&nbsp;95039
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory&nbsp;of&nbsp;Columbia&nbsp;University
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Palisades,&nbsp;NY&nbsp;10964
+<BR>
+
+All Rights Reserved
+<BR>
+
+All Wrongs Remembered
+<P>
+The <B>MB-System</B> source code is distributed under the GNU General Public License as formulated
+by the GNU Project. Early <B>MB-System</B> distributions were described as &quot;public domain&quot;,
+which meant there was no restrictions whatsoever on the use of the code. We adopted
+the more restrictive GNU GPL license in order to insure that anyone who distributes software
+based in whole or in part on <B>MB-System</B> also distributes the modified <B>MB-System</B> source code
+and any additional source code.
+<P>
+The GNU GPL also prohibits the distribution of proprietary executables linked with
+<B>MB-System</B> libraries unless the source code is also distributed. We waive this restriction on
+distributing proprietary compiled programs for specific software products if and only if those
+software products meet the following two conditions:
+<DL COMPACT><DT><DD>
+<DL COMPACT><DT>
+
+<DD>1) The software product was created, sold, and delivered to customers using source code
+derived from <B>MB-System</B> release 4.6 distributions.
+<BR>
+
+<DT>
+
+<DD>2) The software product was sold and delivered to customers prior to January 1, 2001.
+</DL></DL>
+
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>HISTORY</H2>
+
+The development of <B>MB-System</B> began in 1990 as part of David Caress' research at
+the Lamont-Doherty Earth Observatory (LDEO), which involved swath bathymetry data collected
+with SeaBeam multibeam sonars. Development was accelerated in 1991 as part of an effort to
+support the new STN-Atlas Hydrosweep DS multibeam sonar on LDEO's ship, the R/V Maurice Ewing.
+Dale Chayes, a Lamont-Doherty engineer, was responsible for the maintenance and operation
+of the Ewing's Hydrosweep. As part of a grant in 1993 and 1994 to Chayes and Caress to upgrade
+the Hydrosweep operations on the Ewing, the National Science Foundation provided support
+to improve and extend <B>MB-System</B>. The intent of this initial grant was to provide a
+standard &quot;generic&quot; set of tools for processing and display of swath sonar data that could
+be used by the U.S. academic community. The first generally released version of <B>MB-System</B>
+(3.0) was made available in the Spring of 1993. This was followed by versions 3.1 and 3.2 in
+July, 1993, version 3.3 in November, 1993, and version 3.4 in December 1993. All of these
+early releases supported only SeaBeam and Hydrosweep data.
+<P>
+SeaBeam Instruments and Antarctic Support Associates provided additional support in
+1994 for the development of <B>MB-System</B>, with particular emphasis on capabilities related
+to the new SeaBeam 2100 series of sonars. A considerably enhanced <B>MB-System</B> version
+4.0 was released on October 22, 1994; this release followed an almost complete rewrite of
+the underlying source code. The new capabilities included support for sidescan as well as
+bathymetry data and support for data from a number of very different sonars.
+<P>
+The National Science Foundation funded a five year effort begun in 1995 to maintain and
+further develop <B>MB-System</B>. From 1994 to 1997, SeaBeam Instruments (a major
+multibeam sonar manufacturer and, at the time, the principal employer of David W.
+Caress) provided significant support for <B>MB-System</B> development and maintenance.
+Similarly, the Newport, RI office of the Science Applications International Corporation
+(SAIC) supported some <B>MB-System</B> development during 1997-1998, when David W.
+Caress worked there. Version 4.1 was released in November, 1994, followed by 4.2 in
+February 1995, 4.3 on March 12, 1996, 4.4 on August 27, 1996, and 4.5 on September 23,
+1997.
+<P>
+David Caress joined the Monterey Bay Aquarium Research Institute (MBARI) in
+September, 1998. Version 4.6 was released on April 16, 1999. The final update to version
+4.6 (4.6.10) was announced on March 8, 2000. The primary innovations during this period
+included support for the new generation of Simrad multibeam sonars and tools for
+generating data products that could be imported directly into GIS software packages.
+<P>
+The National Science Foundation has continued to support <B>MB-System</B> development through
+additional five year grants (2001-2006 &amp; 2006-2011) to MBARI and
+L-DEO. The Packard Foundation matches the NSF support to Caress at MBARI. The version 5.0 release
+incorporated another substantial rewrite of the underlying code as well as providing
+significant new capabilities. Thirty one 5.0 &quot;beta&quot; distributions were released during
+2001-2003, with the full 5.0.0 version released on December 5, 2003. Active development
+continued with 5.1.0 released on November 26, 2006, 5.1.1 on December 31, 2008.
+and 5.1.2 on December 31, 2009. Since the advent of 5.0, over sixty &quot;beta&quot; and &quot;official&quot;
+distributions of <B>MB-System</B> have been released. Beginning with 5.2.1880 on December 30, 2010,
+<B>MB-System</B> distributions are tied to the revisions in the source code archive (the third number
+corresponds to the revision id in the archive).
+<P>
+Since 2004 a major theme of <B>MB-System</B> development has been the processing of multibeam, sidescan,
+and subbottom profiler data collected on submerged platforms, particularly autonomous
+underwater vehicles (AUVs).
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<H2>WHAT'S NEW ABOUT VERSION 5</H2>
+
+The version 5.0 release of <B>MB-System</B> included a number of changes and improvements relative
+to the version 4 releases. The most significant changes included:
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H3>A new approach to managing data processing.</H3>
+
+<DL COMPACT>
+<DT>*<DD>
+Many tools - one output file. In previous versions of <B>MB-System</B>, each processing
+program read an input swath data file and produced an output swath data file. This
+&quot;serial&quot; processing scheme generally produced a large number of intermediate data
+files. <B>MB-System</B> version 5.0 features the integration of the editing and analysis
+tools with a single program, mbprocess, that outputs processed data files. The new
+&quot;parallel&quot; processing scheme covers bathymetry data processing, but does not yet
+incorporate the sidescan processing capabilities. All of the old tools and capabilities
+are still part of the distribution.
+<DT>*<DD>
+Recursive datalists. The lists of data files used by gridding and plotting programs can
+now be recursive, making it simpler to manage data from many different surveys.
+<DT>*<DD>
+Automatic format identification. <B>MB-System</B> programs will now attempt to
+automatically identify the swath data format based on the filename suffix.
+<DT>*<DD>
+Ancillary data files. Many common <B>MB-System</B> tasks (e.g. swath plotting
+and gridding) can be accomplished more rapidly using ancillary data files containing
+file statistics (&quot;.inf&quot; files), quickly read bathymetry (&quot;.fbt&quot; files), and
+(&quot;.fnv&quot;) files. Each of these files is named by adding the indicated four character
+suffix to the original swath data filename. The &quot;.inf&quot; files are created by directing
+the output of <B>mbinfo</B> to a file. The &quot;.fbt&quot; files are creating by using
+<B>mbcopy</B> to extract the bathymetry into a format 71 file. The &quot;.fnv&quot; files
+are created using <B>mblist</B> to create a text navigation list.
+These ancillary files are automatically created together using the
+program <B>mbdatalist</B>.
+<P>
+</DL>
+<A NAME="lbAJ">&nbsp;</A>
+<H3>New tools.</H3>
+
+<DL COMPACT>
+<DT>*<DD>
+<B>mbnavadjust</B>. This new tool allows users to adjust poorly navigated surveys by
+matching features in overlapping swathes. It is particularly useful for processing
+surveys conducted from submerged platforms.
+<DT>*<DD>
+<B>mbprocess</B>. This new tool performs a variety of processing tasks and produces a
+single output processed swath data file. The program mbprocess can apply
+bathymetry edits from mbedit and mbclean, navigation edits from mbnavedit, sound
+velocity profile changes from mbvelocitytool, and a variety of other corrections.
+<DT>*<DD>
+<B>mbset</B>. This new tool allows users to create and modify the parameter files used to
+control the operation of mbprocess.
+<DT>*<DD>
+<B>mbdatalist</B>. This new tool allows users to list the files referenced by
+a recursive datalist structure. It can also be used to create the ancillary &quot;.inf&quot;,
+&quot;.fbt&quot;, and &quot;.fnv&quot; files for all of the data files referenced in a recursive datalist
+structure.
+<DT>*<DD>
+<B>mbsvplist</B>. This new tool lists water sound velocity profiles embedded
+in swath data files, creating secondary files that
+can be read into MBvelocitytool.
+<DT>*<DD>
+<B>mbareaclean</B>. This new tool identifies and flags artifacts in swath sonar
+bathymetry data within a specified area of interest. The
+area is divided into a grid with square cells or bins, and the
+data are grouped according to these bins. Once all
+of  data  are read, statistical tests are applied
+to the soundings within each bin.
+<P>
+</DL>
+<A NAME="lbAK">&nbsp;</A>
+<H3>Support for Projected Coordinate Systems.</H3>
+
+<DL COMPACT>
+<DT>*<DD>
+<B>MB-System</B> now incorporates the source code for the PROJ.4 Cartographic Projections library,
+providing support for (apparently) all commonly used geodetic coordinate systems.
+<B>PROJ.4</B> was developed by Gerald Evenden (then of the USGS), and was obtained from
+the <A HREF="http://www.remotesensing.org">www.remotesensing.org</A> website.
+<DT>*<DD>
+A large number of commonly used projected coordinate systems (e.g. UTM) are defined
+in a file (mbsystem/share/projections.dat) distributed with <B>MB-System</B>. These include
+all of the standard UTM zones, all of the standard state plate coordinate systems, and
+most of the European Petroleum Survey Group (EPSG) coordinate systems (also including UTM).
+<DT>*<DD>
+<B>MB-System</B> can now handle swath data that is navigated in a supported projected
+coordinate system. In particular, data files that are navigated with UTM eastings and
+northings instead of longitude and latitude can now be plotted and processed with
+<B>MB-System</B>.
+<DT>*<DD>
+The programs <B>mbgrid</B> and <B>mbmosaic</B> can now output grids and mosaics in any of
+the projected coordinate systems specified in mbsystem/share/projections.dat.
+<DT>*<DD>
+The TIFF images generated with <B>mbm_grdtiff</B> and <B>mbgrdtiff</B> now fully conform
+to the GeoTIFF standard, providing that the source grids or mosaics were generated
+using <B>mbgrid</B> or <B>mbmosaic</B> in either Geographic coordinates, UTM coordinates,
+or any of the EPSG coordinate systems specified in the projections.dat file. This means,
+for instance, that GeoTIFF images generated with <B>mbgrdtiff</B> will be properly
+georeferenced when they are imported into ESRI <B>ArcGIS</B> or other GIS packages.
+<P>
+</DL>
+<A NAME="lbAL">&nbsp;</A>
+<H3>Restructuring the code.</H3>
+
+<DL COMPACT>
+<DT>*<DD>
+All of the C code now conforms to the ANSI C standard.
+<DT>*<DD>
+The underlying input/output library (<B>MBIO</B>) has been substantially rewritten. The
+structure has been streamlined, simplifying both future development and support of
+the existing code. The <B>MBIO</B> API has been greatly modified.
+<P>
+</DL>
+<A NAME="lbAM">&nbsp;</A>
+<H3>Handling of old Simrad multibeam data.</H3>
+
+<DL COMPACT>
+<DT>*<DD>
+Vendor format data from the old Simrad multibeams (pre-1997 sonars) are now
+supported by a single format id (51) rather than a separate format id for each sonar
+model. The old format id's are automatically aliased to 51, so existing shellscripts
+will continue to work.
+<DT>*<DD>
+<B>MB-System</B> no longer supports beam flagging in format 51 data. The use of mbedit and mbclean on format 51
+data will cause the flagged beams to be irrevocably nulled. Previous versions of <B>MB-System</B> used the highest bit
+in the depth values to represent beam flags because no Simrad data seemed to use that bit. We have not obtained
+data with depth values using the full bit-range, conflicting with the old beam flagging scheme. We recommend
+that old Simrad data be translated to the extended processing format (57) which contains proper beam flags and
+supports all processing functions. Format 57 is also used for processing data from the current Simrad multibeam
+sonars.
+<DT>*<DD>
+Sidescan data from old Simrad multibeams (pre-1997 sonars) are now handled in the same manner as data from
+the newer sonars (e.g. EM3000, EM3000, EM120). The raw samples in the vendor data format are binned,
+averaged, and interpolated into a 1024 pixel sidescan swath. This binned sidescan is not saved in the vendor
+format, so (as above) it is recommended that the data be translated to an extended format (57) that stores both
+bathymetry beam flags and processed sidescan.
+<P>
+</DL>
+<A NAME="lbAN">&nbsp;</A>
+<H3>Streamlining of MB-System Default Parameters.</H3>
+
+<DL COMPACT>
+<DT>*<DD>
+Prior to version 5.0, the <B>MB-System</B> defaults
+set by <B>mbdefaults</B> included the format id, a control for
+ping averaging, longitude and latitude bounds for windowing
+by area, and begin and end times for windowing in time. These
+values are no longer set in the .mbio_defaults file or controlled
+by <B>mbdefaults</B>. As noted above, the format id is automatically
+identified from the filename when possible. When filenames do not
+match one of the recognized structures, users must specify the
+format using the relevant programs <B>-F</B><I>format</I> option.
+The controls for ping averaging and windowing in time and space
+are rarely used, and must now be explicitly set in command
+line arguments.
+<P>
+</DL>
+<A NAME="lbAO">&nbsp;</A>
+<H3>New Data Formats.</H3>
+
+<DL COMPACT>
+<DT>*<DD>
+Furuno HS10 multibeam bathymetry is supported as format 171.
+<DT>*<DD>
+SeaBeam 2120 multibeam data in the L3 Communications XSE format are supported as format 94 (already used
+to support Elac Bottomchart MkII XSE data).
+<DT>*<DD>
+Raw STN Atlas multibeam data generated by the upgraded Hydrosweep DS2 multibeam on the R/V Ewing are
+supported by read-only format 182. Processing is supported using the augmented read-write format 183.
+<DT>*<DD>
+The IFREMER netCDF multibeam archiving data format is supported as format 75. Similarly, the IFREMER
+netCDF navigation archiving data format is supported as format 167.
+<DT>*<DD>
+The STN Atlas processing data format SURF is supported as format 181. At
+present, SURF is supported as a read-only format. This allows plotting and gridding
+of the SURF data, but not processing. Writing or translating the SURF data to
+allow processing will be supported in a later version.
+<DT>*<DD>
+The Hawaii Mapping Research Group's new MR1 format is supported as format 64.
+This format is used to disseminate data from both the HMRG
+interferometric sonars (e.g. MR1) and the WHOI DSL 120
+deep-towed inteferometric sonar. This format has been
+supported by including the code for the HMRG library libmr1pr
+in the <B>MB-System MBIO</B> library. Thanks to Roger Davis and HMRG for
+making the code available under the GPL.
+<DT>*<DD>
+The Edgetech Jstar format for sidescan and subbottom data is
+now supported as formats 132 and 133.
+<P>
+</DL>
+<A NAME="lbAP">&nbsp;</A>
+<H2>THE NEW VERSION 5 DATA PROCESSING STRUCTURE</H2>
+
+Previous versions of <B>MB-System</B> have emphasized
+processing utilities that operate serially, that is, that
+read in an input swath data file, modify it, and then
+output a second swath data file. Serial processing utilities do allow
+for great flexibility in processing because one uses only
+the programs required and, in general, the order in which
+the programs are used does matter. However, one consequence of serial
+processing has been that processing data frequently results in a large
+number of intermediate data files. For instance, if
+an EM300 data file called &quot;mbari_1998_524.mb57&quot; has
+spikes in the bathymetry, outliers in the navigation, and
+the bathymetry has been calculated using an incorrect model
+for the water sound speed structure, users of <B>MB-System</B>
+would previously have processed it with a sequence
+something like this:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1)&nbsp;Run&nbsp;<B>mbclean</B>&nbsp;to&nbsp;automatically&nbsp;flag
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;obvious&nbsp;bathymetric&nbsp;artifacts.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524_c.mb57
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2)&nbsp;Run&nbsp;<B>mbedit</B>&nbsp;to&nbsp;interactively&nbsp;flag
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bathymetric&nbsp;artifacts.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524_c.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524_ce.mb57
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3)&nbsp;Run&nbsp;<B>mbnavedit</B>&nbsp;to&nbsp;interactively&nbsp;clean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;navigation.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524_ce.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524_cen.mb57
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4)&nbsp;Run&nbsp;<B>mbvelocitytool</B>&nbsp;to&nbsp;generate&nbsp;an
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;appropriate&nbsp;sound&nbsp;velocity&nbsp;profile&nbsp;(SVP)&nbsp;for
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recalculating&nbsp;the&nbsp;bathymetry.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524_cen.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;good.svp
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5)&nbsp;Run&nbsp;<B>mbbath</B>&nbsp;to&nbsp;recalculate&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bathymetry&nbsp;using&nbsp;the&nbsp;SVP&nbsp;file&nbsp;generated
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;<B>mbvelocitytool</B>.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524_cen.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;good.svp
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524_cenb.mb57
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6)&nbsp;Run&nbsp;<B>mbsimradmakess</B>&nbsp;to&nbsp;recalculate&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sidescan&nbsp;while&nbsp;ignoring&nbsp;sidescan&nbsp;samples
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;beams&nbsp;now&nbsp;flagged&nbsp;as&nbsp;bad.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524_cenb.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524_cenbs.mb57
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7)&nbsp;Run&nbsp;<B>mbbackangle</B>&nbsp;to&nbsp;calculate&nbsp;an&nbsp;amplitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vs&nbsp;grazing&nbsp;angle&nbsp;table&nbsp;for&nbsp;correcting
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sidescan.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524_cenbs.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;ampvsga.dat
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8)&nbsp;Run&nbsp;<B>mbanglecorrect</B>&nbsp;to&nbsp;correct&nbsp;the&nbsp;sidescan.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524_cenbs.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;ampvsga.dat
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524_cenbsc.mb57
+<P>
+The result of this processing includes the input swath
+data file, the final swath data file, and five
+intermediate swath data files. The impact of this approach
+on data storage requirements is obvious (though some users
+have ameliorated the issue by working with scripts that
+automatically delete unneeded data files or by piping
+data from one non-graphical process to
+another to avoid making intermediate files).
+The serial processing approach
+also presents data management problems because data files
+frequently have different processing requirements, even
+within a single survey. We have found that working with
+very large datasets can be awkward when only a minority
+of data files require navigation editing or bathymetric
+recalculation, or when some data files require multiple
+episodes of bathymetry and navigation editing.
+<P>
+<B>MB-System</B> version 5 includes new utilities implementing
+a parallel processing scheme that simplifies the processing
+of most swath data. This scheme is centered around the program
+<B>mbprocess</B>, which can accomplish the following
+processing tasks in a single step:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>*<DD>
+Merge edited navigation generated by <B>mbnavedit</B>.
+<DT>*<DD>
+Apply bathymetry edit flags from <B>mbedit</B>
+and <B>mbclean</B>
+<DT>*<DD>
+Recalculate bathymetry from raw travel time and
+angle data by raytracing through water sound speed
+models from <B>mbvelocitytool</B> or <B>mbsvplist</B>.
+<DT>*<DD>
+Apply changes to roll bias, pitch bias, heading
+bias, and draft values.
+<DT>*<DD>
+Recalculate sidescan from raw backscatter samples
+(Simrad multibeam data only).
+<DT>*<DD>
+Recalculate sidescan from raw backscatter samples
+(Simrad multibeam data only).
+<DT>*<DD>
+Correct sidescan for amplitude vs grazing angle
+patterns.
+<DT>*<DD>
+Apply tides to bathymetry.
+<BR>
+
+</DL></DL>
+
+The actions of <B>mbprocess</B> are controlled by text
+parameter files. Each <B>mbprocess</B> parameter file is
+named by adding a &quot;.par&quot; suffix to the associated input
+swath data file and contains single line commands that set
+processing modes and parameters. Tools such as <B>mbedit</B>,
+<B>mbnavedit</B>, and <B>mbclean</B> all generate and/or modify
+parameter files in addition to generating parallel files
+used by <B>mbprocess</B>. The program <B>mbset</B>
+can also be used to create and modify <B>mbprocess</B>
+parameter files.
+<P>
+The same processing steps described above as a serial
+processing scheme can be accomplished with the new parallel
+processing scheme as follows:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1)&nbsp;Run&nbsp;<B>mbdatalist</B>&nbsp;to&nbsp;create&nbsp;ancillary
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;files&nbsp;containing&nbsp;statistics
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&quot;.inf&quot;),&nbsp;quickly&nbsp;read&nbsp;bathymetry
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&quot;.fbt&quot;),&nbsp;and&nbsp;quickly&nbsp;read&nbsp;navigation
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&quot;.fnv&quot;).&nbsp;These&nbsp;files&nbsp;are&nbsp;used&nbsp;to
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;speed&nbsp;common&nbsp;operations&nbsp;such&nbsp;as&nbsp;swath
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plotting&nbsp;and&nbsp;gridding.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524.mb57.inf
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.fbt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.fnv
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2)&nbsp;Run&nbsp;<B>mbclean</B>&nbsp;to&nbsp;identify
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;obvious&nbsp;bathymetric&nbsp;artifacts
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;output&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;edit&nbsp;events.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;parameter&nbsp;file&nbsp;is&nbsp;created&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;to&nbsp;apply&nbsp;bathymetry&nbsp;flags&nbsp;from
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;&quot;.esf&quot;&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524.mb57.esf
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3)&nbsp;Run&nbsp;<B>mbedit</B>&nbsp;to&nbsp;interactively
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;identify&nbsp;bathymetric&nbsp;artifacts
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;output&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;edit&nbsp;events.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;existing&nbsp;edits&nbsp;from&nbsp;<B>mbclean</B>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;are&nbsp;loaded&nbsp;and&nbsp;applied&nbsp;prior&nbsp;to&nbsp;editing.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;parameter&nbsp;file&nbsp;is&nbsp;updated&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;to&nbsp;apply&nbsp;bathymetry&nbsp;flags&nbsp;from
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;&quot;.esf&quot;&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.esf
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524.mb57.esf
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4)&nbsp;Run&nbsp;<B>mbnavedit</B>&nbsp;to&nbsp;interactively
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clean&nbsp;the&nbsp;navigation.&nbsp;The&nbsp;edited
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;navigation&nbsp;is&nbsp;output&nbsp;to&nbsp;the&nbsp;&quot;.nve&quot;&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;parameter&nbsp;file&nbsp;is&nbsp;updated&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;to&nbsp;merge&nbsp;the&nbsp;navigation&nbsp;from
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;&quot;.nve&quot;&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524.mb57.nve
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5)&nbsp;Run&nbsp;<B>mbvelocitytool</B>&nbsp;to&nbsp;generate&nbsp;an
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;appropriate&nbsp;sound&nbsp;velocity&nbsp;profile
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(SVP)&nbsp;for&nbsp;recalculating&nbsp;the&nbsp;bathymetry.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;SVP&nbsp;is&nbsp;output&nbsp;to&nbsp;the&nbsp;&quot;.svp&quot;&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;parameter&nbsp;file&nbsp;is&nbsp;updated&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;to&nbsp;recalculate&nbsp;the&nbsp;bathymetry&nbsp;by
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raytracing&nbsp;through&nbsp;the&nbsp;SVP&nbsp;model&nbsp;from
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;&quot;.svp&quot;&nbsp;file.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524.mb57.svp
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6)&nbsp;Run&nbsp;<B>mbbackangle</B>&nbsp;to&nbsp;generate&nbsp;an
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;set&nbsp;of&nbsp;amplitude&nbsp;vs&nbsp;grazing&nbsp;angle
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tables&nbsp;at&nbsp;regular&nbsp;intervals&nbsp;in&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data.&nbsp;These&nbsp;tables&nbsp;are&nbsp;placed&nbsp;into
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;&quot;.sga&quot;&nbsp;file.&nbsp;The&nbsp;parameter
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;is&nbsp;updated&nbsp;and&nbsp;set&nbsp;to&nbsp;correct
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;sidescan&nbsp;by&nbsp;interpolating&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amplitude&nbsp;vs&nbsp;grazing&nbsp;angle&nbsp;table&nbsp;for
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;ping.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524.mb57.sga
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7)&nbsp;Run&nbsp;<B>mbset</B>&nbsp;to&nbsp;set&nbsp;the&nbsp;parameter&nbsp;file
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;so&nbsp;that&nbsp;mbprocess&nbsp;will&nbsp;recalculate
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;sidescan&nbsp;(this&nbsp;is&nbsp;for&nbsp;Simrad
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;multibeam&nbsp;data&nbsp;only)&nbsp;while&nbsp;ignoring
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sidescan&nbsp;samples&nbsp;from&nbsp;beams&nbsp;now&nbsp;flagged
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;as&nbsp;bad.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524.mb57.par
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524.mb57.par
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8)&nbsp;Run&nbsp;<B>mbprocess</B>&nbsp;to&nbsp;apply&nbsp;the&nbsp;bathymetric
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;edits,&nbsp;merge&nbsp;the&nbsp;cleaned&nbsp;navigation,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recalculate&nbsp;the&nbsp;bathymetry,&nbsp;recalculate
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;sidescan,&nbsp;and&nbsp;correct&nbsp;the&nbsp;sidescan.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;processed&nbsp;swath&nbsp;data&nbsp;is&nbsp;written&nbsp;to
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;output&nbsp;swath&nbsp;data&nbsp;file.&nbsp;The&nbsp;usual
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ancillary&nbsp;data&nbsp;files&nbsp;containing&nbsp;statistics,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quickly&nbsp;read&nbsp;bathymetry,&nbsp;and&nbsp;quickly
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;read&nbsp;navigation&nbsp;are&nbsp;also&nbsp;created.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input:&nbsp;&nbsp;mbari_1998_524.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.esf
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.nve
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.svp
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.aga
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524.mb57.par
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output:&nbsp;mbari_1998_524p.mb57
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524p.mb57.inf
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524p.mb57.fbt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_524p.mb57.fnv
+<P>
+The result of this processing is a single output swath
+data file. Moreover, the processed output can be easily
+updated if, for example, additional bathymetry editing
+is required. If the <B>mbedit</B> program is used again,
+it will load the existing edit events from the &quot;.esf&quot;
+file and then update the &quot;.esf&quot; file. To incorporate the
+updated bathymetry edits, one just runs <B>mbprocess</B>
+again. One can similarly change the SVP file without
+impacting on the bathymetry editing or navigation editing
+components of the processing.
+<P>
+All of the old, serial processing utilities are still
+distributed with <B>MB-System</B>. However, some of the serial
+tools have been replaced by new versions of the same name
+(e.g. <B>mbedit</B>, <B>mbclean</B>, <B>mbbackangle</B>, and <B>mbnavedit</B>).
+In these cases, the old versions are preserved as programs
+with &quot;old&quot; added to their names (e.g. <B>mbeditold</B>,
+<B>mbcleanold</B>, <B>mbbackangleold</B>, and <B>mbnaveditold</B>).
+<P>
+<A NAME="lbAQ">&nbsp;</A>
+<H2>THE NEW VERSION 5 DATALIST FILES</H2>
+
+Previous versions of <B>MB-System</B> have used lists of
+data files, or datalists, as input to several programs
+(e.g. <B>mbgrid</B>, <B>mbmosaic</B>, <B>mbinfo</B>,
+<B>mblist</B>, and <B>mbm_plot</B>). The basic datalist
+entry has consisted of a swath data name (often including
+the entire path) followed by a space and then the <B>MB-System</B> format
+id for that file. Datalist entry lines starting with
+the character '#' are considered comments. Version 5 extends
+the definition and usage of datalists in several
+significant ways. First, datalists may now be recursive.
+A datalist entry may be another datalist file, as indicated
+by a format id of -1. Second, datalists entries may contain
+a third column which is interpreted as a gridding weight
+value by <B>mbgird</B>. This third value may be used to
+weight some data higher than other data. For example, one might
+weight SeaBeam 2112 data with a value of 1.0 and lower
+quality SeaBeam classic data with a value of 0.001. The result
+would be that the newer 2112 data effectively overlies the less good
+data wherever overlap occurs. The third new feature of datalists
+works with data processed using the new parallel processing scheme.
+In the parallel processing scheme the raw data files are often,
+but not always,
+accompanied by processed files produced by <B>mbprocess</B>.
+It is awkward to maintain datalists that directly refer to the
+current best datafiles. If one inserts the text $PROCESSED
+into the first line of a datalist containing raw files,
+then programs like <B>mbgrid</B> will read the processed file
+if it exists, but otherwise will read the raw file. Similarly,
+a first line of $RAW will force the programs to only
+read the raw files directly referenced in the datalist. These
+options also work recursively. The first instance of
+a $PROCESSED or $RAW tag will prevail over all
+others encountered through a hierarchy of recursive datalists.
+The gridding weight values will also be applied recursively,
+so one can specify the gridding weight for a large number of
+data files by applying to a datalist entry which is itself
+a datalist referencing those files. However, gridding weights
+are by default overridden by any values applied to the file
+entries themselves (this behavior can be reversed using the
+datalist tag $NOLOCALWEIGHT).
+<P>
+<A NAME="lbAR">&nbsp;</A>
+<H2>VERSION 5 FILE NAMING CONVENTIONS</H2>
+
+The version 5 <B>MB-System</B> programs make extensive use
+of standardized filename suffixes. These suffixes allow
+<B>MB-System</B> programs to know what kinds of files it is working
+with, and in particular to determine swath data formats without
+the user having to specify them. Although the processing will
+generally work even if a user does not use the standard
+filenaming convention, we can guarentee that the user's work
+will be much easier if the convention is followed. Quite
+simply, the convention is for swath files to end with a
+suffix of the format &quot;.mbXX&quot; or &quot;.mbXXX&quot;, where XX or XXX
+is the two digit or three digit <B>MB-System</B> format id,
+respectively. For instance, a Simrad EM3000 file in the
+processing format 57 might have a name like:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0053_20020518_205816.mb57<BR>
+<BR>
+
+and a Reson 8101 file in the GSF format 121 might have
+a name like:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>039_2106.mb121<BR>
+<BR>
+
+<B>MB-System</B> programs are able to recognize many standard
+filename conventions used by sonar vendors or data logging
+package vendors. For instance, filenames with a &quot;_raw.all&quot;
+suffix, like:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0053_20020518_205816_raw.all<BR>
+<BR>
+
+are recognized as either old (format 51) or new (format 56)
+Simrad multibeam data (and the programs also determine which
+of the two formats apply). Filenames ending with &quot;.rec&quot; are
+recognized as SeaBeam 2100 multibeam data. Filenames ending
+with &quot;.xse&quot; are known to be Elac Bottomchart or SeaBeam
+2100 multibeam data in the XSE format 94. In these instances
+the program <B>mbprocess</B> will automatically replace the
+vendor suffix with the <B>MB-System</B> convention suffix when
+it creates a processed output file.
+<P>
+<A NAME="lbAS">&nbsp;</A>
+<H2>LIST OF MB-SYSTEM PROGRAMS AND MACROS</H2>
+
+See the individual manual pages for detailed information about
+specific programs.
+See the manual page for <B>MBIO</B> for information about the
+i/o library and the swath sonar data formats supported by <B>MBIO</B>.
+<P>
+These are the MB-system programs which are used in the
+version 5 parallel processing scheme. Those programs that
+are also relevant to the serial processing scheme are
+marked with an *:
+<BR>&nbsp;<B>mb7k2jstar</B>:&nbsp;Extract&nbsp;Jstar&nbsp;format&nbsp;(format&nbsp;132)&nbsp;sidescan
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>and&nbsp;subbottom&nbsp;data&nbsp;from&nbsp;Reson&nbsp;7k&nbsp;(format&nbsp;88)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>data&nbsp;files.<BR>
+<BR>&nbsp;<B>mb7k2ss</B>:&nbsp;Extract&nbsp;sidescan&nbsp;sonar&nbsp;data&nbsp;from&nbsp;Reson&nbsp;7k&nbsp;format
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>data,&nbsp;bins&nbsp;and&nbsp;lays&nbsp;the&nbsp;sidescan&nbsp;onto&nbsp;the<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>seafloor,&nbsp;and&nbsp;outputs&nbsp;files&nbsp;in&nbsp;the&nbsp;MBF_MBLDEOIH<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>formst&nbsp;(MBIO&nbsp;format&nbsp;71).<BR>
+<BR>&nbsp;<B>mb7kpreprocess</B>:&nbsp;Preprocess&nbsp;Reson&nbsp;7k&nbsp;data&nbsp;(MBIO&nbsp;format&nbsp;88),
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>including&nbsp;applying&nbsp;time&nbsp;lag&nbsp;and&nbsp;biases&nbsp;to<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>attitude&nbsp;and&nbsp;navigation&nbsp;data.<BR>
+<BR>&nbsp;<B>mbhysweeppreprocess</B>:&nbsp;Preprocess&nbsp;multibeam&nbsp;data&nbsp;in&nbsp;the
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Hysweep&nbsp;HSX&nbsp;format&nbsp;(MBIO&nbsp;format&nbsp;201).<BR>
+<BR>&nbsp;<B>mbkongsbergpreprocess</B>:&nbsp;Preprocess&nbsp;data&nbsp;from&nbsp;third&nbsp;generation
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Kongsberg&nbsp;multibeam&nbsp;sonars&nbsp;(MBIO&nbsp;formats&nbsp;58&nbsp;and&nbsp;59).<BR>
+<BR>&nbsp;<B>mbbackangle</B>:&nbsp;&nbsp;Generates&nbsp;tables&nbsp;of&nbsp;the&nbsp;average
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>amplitude&nbsp;or&nbsp;sidescan&nbsp;values&nbsp;as&nbsp;a<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>function&nbsp;of&nbsp;the&nbsp;grazing&nbsp;angle&nbsp;with<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>the&nbsp;seafloor&nbsp;at&nbsp;regular&nbsp;intervals&nbsp;in<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>the data.<BR>
+<BR>&nbsp;<B>mbclean</B>:&nbsp;&nbsp;Automatically&nbsp;identifies&nbsp;and
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>flags&nbsp;bad&nbsp;beams&nbsp;in&nbsp;swath&nbsp;sonar<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>bathymetry&nbsp;data.<BR>
+<BR>&nbsp;<B>mbcontour</B>*:&nbsp;&nbsp;Generate&nbsp;GMT&nbsp;compatible&nbsp;Postscript
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>color&nbsp;swath&nbsp;contour&nbsp;plots.<BR>
+<BR>&nbsp;<B>mbcopy</B>*:&nbsp;&nbsp;Copy&nbsp;swath&nbsp;sonar&nbsp;data&nbsp;files.
+<BR>&nbsp;<B>mbdatalist</B>:&nbsp;&nbsp;Parses&nbsp;recursive&nbsp;datalist&nbsp;files
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>and&nbsp;outputs&nbsp;the&nbsp;&nbsp;complete&nbsp;&nbsp;list&nbsp;&nbsp;of<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>data&nbsp;&nbsp;files,&nbsp;&nbsp;formats,&nbsp;&nbsp;and&nbsp;&nbsp;file&nbsp;weights.<BR>
+<BR>&nbsp;<B>mbdefaults</B>*:&nbsp;&nbsp;Set&nbsp;or&nbsp;list&nbsp;default&nbsp;mbio&nbsp;parameters
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>for&nbsp;reading&nbsp;and&nbsp;writing&nbsp;swath&nbsp;sonar&nbsp;data<BR>
+<BR>&nbsp;<B>mbedit</B>:&nbsp;&nbsp;Interactive&nbsp;editor&nbsp;used&nbsp;to&nbsp;flag&nbsp;bad
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>beams&nbsp;in&nbsp;swath&nbsp;sonar&nbsp;bathymetry&nbsp;data.<BR>
+<BR>&nbsp;<B>mbextractsegy</B>:&nbsp;Extract&nbsp;subbottom&nbsp;profiler&nbsp;or
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>center&nbsp;beam&nbsp;reflection&nbsp;data&nbsp;to&nbsp;segy&nbsp;files.<BR>
+<BR>&nbsp;<B>mbformat</B>*:&nbsp;&nbsp;&nbsp;List&nbsp;information&nbsp;about&nbsp;swath&nbsp;sonar
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>data&nbsp;formats&nbsp;supported&nbsp;by&nbsp;the&nbsp;<B>MBIO</B>&nbsp;library.<BR>
+<BR>&nbsp;<B>mbgetesf</B>*:&nbsp;&nbsp;Extract&nbsp;list&nbsp;of&nbsp;flagging&nbsp;or&nbsp;unflagging
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>beam&nbsp;edit&nbsp;events&nbsp;from&nbsp;a&nbsp;swath&nbsp;sonar&nbsp;data<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>file&nbsp;in&nbsp;the&nbsp;edit&nbsp;save&nbsp;file&nbsp;(&quot;.esf&quot;)&nbsp;format<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>used&nbsp;by&nbsp;<B>mbedit</B>,&nbsp;<B>mbclean</B>,&nbsp;and<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>mbprocess</B>.<BR>
+<BR>&nbsp;<B>mbgrdtiff</B>:&nbsp;Generate&nbsp;TIFF&nbsp;image&nbsp;from&nbsp;gridded&nbsp;data
+<BR>&nbsp;<B>mbgrdviz</B>:&nbsp;Vizualize&nbsp;GMT&nbsp;grids.
+<BR>&nbsp;<B>mbgrid</B>*:&nbsp;&nbsp;Grid&nbsp;bathymetry,&nbsp;amplitude,&nbsp;and&nbsp;sidescan
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>data&nbsp;from&nbsp;swath&nbsp;sonar&nbsp;data&nbsp;files.<BR>
+<BR>&nbsp;<B>mbhistogram</B>*:&nbsp;&nbsp;Obtain&nbsp;histogram&nbsp;of&nbsp;bathymetry,
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>amplitude,&nbsp;or&nbsp;sidescan&nbsp;data&nbsp;from<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>swath&nbsp;sonar&nbsp;data&nbsp;files.<BR>
+<BR>&nbsp;<B>mbinfo</B>*:&nbsp;&nbsp;Output&nbsp;some&nbsp;basic&nbsp;statistics&nbsp;of
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>swath&nbsp;sonar&nbsp;data&nbsp;files.<BR>
+<BR>&nbsp;<B>mblevitus</B>*:&nbsp;&nbsp;Create&nbsp;a&nbsp;water&nbsp;velocity&nbsp;profile
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>which&nbsp;is&nbsp;representative&nbsp;of&nbsp;the&nbsp;mean<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>annual&nbsp;water&nbsp;column&nbsp;for&nbsp;a&nbsp;specified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1&nbsp;degree&nbsp;by&nbsp;1&nbsp;degree&nbsp;region.<BR>
+<BR>&nbsp;<B>mblist</B>*:&nbsp;&nbsp;List&nbsp;data&nbsp;in&nbsp;swath&nbsp;sonar&nbsp;data&nbsp;files.
+<BR>&nbsp;<B>mbmosaic</B>*:&nbsp;&nbsp;Mosaic&nbsp;sidescan&nbsp;and&nbsp;amplitude&nbsp;data.
+<BR>&nbsp;<B>mbnavadjust</B>:&nbsp;&nbsp;Interactive&nbsp;navigation&nbsp;adjustment
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>package&nbsp;that&nbsp;adjusts&nbsp;navigation&nbsp;so<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>that&nbsp;swath&nbsp;bathymetry&nbsp;matches&nbsp;where<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>swathes&nbsp;overlap&nbsp;or&nbsp;cross.<BR>
+<BR>&nbsp;<B>mbnavedit</B>:&nbsp;&nbsp;Interactive&nbsp;editor&nbsp;used&nbsp;to&nbsp;fix
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>problems&nbsp;with&nbsp;navigation&nbsp;in<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>swath&nbsp;sonar&nbsp;data&nbsp;files.<BR>
+<BR>&nbsp;<B>mbnavlist</B>*:&nbsp;&nbsp;List&nbsp;navigation&nbsp;data&nbsp;in&nbsp;swath
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sonar&nbsp;data&nbsp;files.<BR>
+<BR>&nbsp;<B>mbneptune2esf</B>:&nbsp;Extract&nbsp;bathymetry&nbsp;edits&nbsp;from
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad&nbsp;Neptune&nbsp;software&nbsp;into&nbsp;edit&nbsp;save<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>file format.<BR>
+<BR>&nbsp;<B>mbprocess</B>:&nbsp;Performs&nbsp;a&nbsp;variety&nbsp;of&nbsp;processing
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>tasks&nbsp;in&nbsp;a&nbsp;single&nbsp;step,&nbsp;including<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>merging&nbsp;navigation,&nbsp;applying<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>bathymetry&nbsp;edits,&nbsp;recalculating<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>bathymetry,&nbsp;and&nbsp;recalculating<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sidescan.<BR>
+<BR>&nbsp;<B>mbps</B>*:&nbsp;&nbsp;&nbsp;&nbsp;Simple&nbsp;perspective&nbsp;views&nbsp;of&nbsp;swath
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>bathymetry&nbsp;in&nbsp;Postscript.<BR>
+<BR>&nbsp;<B>mbrolltimelag</B>:&nbsp;&nbsp;Estimate&nbsp;attitude&nbsp;time&nbsp;lag&nbsp;by&nbsp;cross
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>correlation&nbsp;of&nbsp;apparent&nbsp;bottom&nbsp;slope&nbsp;with&nbsp;the<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>roll&nbsp;time&nbsp;series:<BR>
+<BR>&nbsp;<B>mbsegygrid</B>:&nbsp;Generate&nbsp;time&nbsp;vs.&nbsp;trace&nbsp;number
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grids&nbsp;of&nbsp;seismic&nbsp;data&nbsp;from&nbsp;segy&nbsp;files.<BR>
+<BR>&nbsp;<B>mbsegyinfo</B>:&nbsp;Output&nbsp;some&nbsp;basic&nbsp;statistics&nbsp;of
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>segy&nbsp;seismic&nbsp;data&nbsp;files.<BR>
+<BR>&nbsp;<B>mbsegylist</B>:&nbsp;List&nbsp;selected&nbsp;header&nbsp;values&nbsp;in
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>segy&nbsp;seismic&nbsp;data&nbsp;files.<BR>
+<BR>&nbsp;<B>mbset</B>:&nbsp;&nbsp;Create&nbsp;and&nbsp;modify&nbsp;<B>mbprocess</B>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>parameter&nbsp;files.<BR>
+<BR>&nbsp;<B>mbsvplist</B>*:&nbsp;&nbsp;List&nbsp;water&nbsp;sound&nbsp;velocity&nbsp;profiles&nbsp;in&nbsp;swath
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sonar&nbsp;data&nbsp;files.<BR>
+<BR>&nbsp;<B>mbswath</B>*:&nbsp;&nbsp;Generate&nbsp;GMT&nbsp;compatible&nbsp;Postscript
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>color&nbsp;and&nbsp;color&nbsp;shaded&nbsp;relief&nbsp;swath&nbsp;plots.<BR>
+<BR>&nbsp;<B>mbvelocitytool</B>*:&nbsp;&nbsp;Interactive&nbsp;program&nbsp;for
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>modeling&nbsp;the&nbsp;affect&nbsp;of&nbsp;the&nbsp;water<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>velocity&nbsp;profile&nbsp;on&nbsp;swath&nbsp;sonar<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>bathymetry&nbsp;calculations.<BR>
+<P>
+The following are MB-system programs which are not used in the
+version 5 parallel processing scheme. These programs are
+included in the version 5 releases for backward compatibility
+with the old serial processing scheme:
+<BR>&nbsp;<B>mbhsdump</B>:&nbsp;&nbsp;Lists&nbsp;contents&nbsp;of&nbsp;the&nbsp;various&nbsp;sorts&nbsp;of
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>data&nbsp;records&nbsp;in&nbsp;Hydrosweep&nbsp;DS&nbsp;data.<BR>
+<BR>&nbsp;<B>mbanglecorrect</B>:&nbsp;&nbsp;Apply&nbsp;a&nbsp;grazing&nbsp;angle&nbsp;correction
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>to&nbsp;beam&nbsp;amplitude&nbsp;or&nbsp;sidescan&nbsp;data.<BR>
+<BR>&nbsp;<B>mbbackangle</B>:&nbsp;&nbsp;Generates&nbsp;a&nbsp;table&nbsp;of&nbsp;the&nbsp;average
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>amplitude&nbsp;or&nbsp;sidescan&nbsp;values&nbsp;as&nbsp;a<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>function&nbsp;of&nbsp;the&nbsp;grazing&nbsp;angle&nbsp;with<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>the&nbsp;seafloor.<BR>
+<BR>&nbsp;<B>mbbath</B>:&nbsp;&nbsp;Generates&nbsp;bathymetry&nbsp;from&nbsp;travel&nbsp;times
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>in&nbsp;swath&nbsp;sonar&nbsp;data.<BR>
+<BR>&nbsp;<B>mbcleanold</B>:&nbsp;&nbsp;Old&nbsp;tool&nbsp;that&nbsp;utomatically
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>identifies&nbsp;and&nbsp;flags&nbsp;bad&nbsp;beams<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>in&nbsp;swath&nbsp;sonar&nbsp;bathymetry&nbsp;data.<BR>
+<BR>&nbsp;<B>mbcut</B>:&nbsp;&nbsp;Removes&nbsp;data&nbsp;from&nbsp;portions&nbsp;of&nbsp;swath
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>as&nbsp;specified&nbsp;by&nbsp;the&nbsp;user.<BR>
+<BR>&nbsp;<B>mbeditold</B>:&nbsp;&nbsp;Old&nbsp;interactive&nbsp;editor&nbsp;used&nbsp;to&nbsp;flag&nbsp;bad
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>beams&nbsp;in&nbsp;swath&nbsp;sonar&nbsp;bathymetry&nbsp;data.<BR>
+<BR>&nbsp;<B>mbfilter</B>:&nbsp;&nbsp;&nbsp;Apply&nbsp;some&nbsp;simple&nbsp;filter&nbsp;functions
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>to&nbsp;sidescan,&nbsp;beam&nbsp;amplitude,&nbsp;or<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>bathymetry&nbsp;data.<BR>
+<BR>&nbsp;<B>mbgetmask</B>:&nbsp;&nbsp;Extract&nbsp;list&nbsp;of&nbsp;flagged&nbsp;or&nbsp;edited
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>beams&nbsp;from&nbsp;a&nbsp;swath&nbsp;sonar&nbsp;data&nbsp;file.<BR>
+<BR>&nbsp;<B>mbmask</B>:&nbsp;&nbsp;Apply&nbsp;editing&nbsp;information&nbsp;obtained
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>from&nbsp;one&nbsp;file&nbsp;with&nbsp;<B>mbgetmask</B><BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>to&nbsp;another&nbsp;file.<BR>
+<BR>&nbsp;<B>mbmerge</B>:&nbsp;&nbsp;Merge&nbsp;swath&nbsp;sonar&nbsp;data&nbsp;with&nbsp;new
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>navigation.<BR>
+<BR>&nbsp;<B>mbnaveditold</B>:&nbsp;&nbsp;Old&nbsp;interactive&nbsp;editor&nbsp;used&nbsp;to&nbsp;fix
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>problems&nbsp;with&nbsp;navigation&nbsp;in<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>swath&nbsp;sonar&nbsp;data&nbsp;files.<BR>
+<BR>&nbsp;<B>mbrollbias</B>:&nbsp;&nbsp;Evaluate&nbsp;the&nbsp;roll&nbsp;bias&nbsp;of&nbsp;a
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>swath&nbsp;sonar&nbsp;system&nbsp;using&nbsp;two&nbsp;pieces<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>of&nbsp;coincident&nbsp;bathymetry&nbsp;data<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>collected&nbsp;with&nbsp;opposing&nbsp;ship&nbsp;headings.<BR>
+<BR>&nbsp;<B>mbsimradmakess</B>:&nbsp;&nbsp;Regenerate&nbsp;sidescan&nbsp;imagery
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>from&nbsp;the&nbsp;raw&nbsp;amplitude&nbsp;samples&nbsp;contained<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>in&nbsp;data&nbsp;from&nbsp;Simrad&nbsp;EM300&nbsp;and&nbsp;EM3000&nbsp;sonars.<BR>
+<BR>&nbsp;<B>mbtide</B>:&nbsp;&nbsp;Corrects&nbsp;swath&nbsp;sonar&nbsp;bathymetry
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>for&nbsp;tide&nbsp;data.<BR>
+<BR>&nbsp;<B>mbunclean</B>:&nbsp;&nbsp;Unflags&nbsp;edited&nbsp;beams&nbsp;in&nbsp;swath&nbsp;sonar
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>bathymetry&nbsp;data.<BR>
+<P>
+Macros are programs or shellscripts which make use of programs
+from the MB-system and other software packages to accomplish common
+tasks easily.  These are the current MB-system macros:
+<BR>&nbsp;<B>mbm_arc2grd</B>:&nbsp;&nbsp;Convert&nbsp;an&nbsp;ESRI&nbsp;ArcView&nbsp;ASCII&nbsp;grid&nbsp;file
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>to&nbsp;a&nbsp;GMT&nbsp;grid&nbsp;file.<BR>
+<BR>&nbsp;<B>mbm_copy</B>:&nbsp;&nbsp;Translate&nbsp;groups&nbsp;of&nbsp;swath&nbsp;data&nbsp;files
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>between&nbsp;formats<BR>
+<BR>&nbsp;<B>mbm_dslnavfix</B>:&nbsp;&nbsp;Reads&nbsp;a&nbsp;WHOI&nbsp;DSL&nbsp;AMS-120&nbsp;processed
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>navigation&nbsp;file&nbsp;containing&nbsp;UTM&nbsp;northings<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>and&nbsp;eastings&nbsp;and&nbsp;outputs&nbsp;a&nbsp;navigation&nbsp;file<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>containing&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;which&nbsp;is<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>suitable&nbsp;for&nbsp;use&nbsp;with&nbsp;<B>mbmerge</B>.<BR>
+<BR>&nbsp;<B>mbm_fmtvel</B>:&nbsp;&nbsp;Scans&nbsp;a&nbsp;Hydrosweep&nbsp;DS&nbsp;data&nbsp;file
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>and&nbsp;outputs&nbsp;a&nbsp;formatted&nbsp;table&nbsp;of<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>the&nbsp;mean&nbsp;water&nbsp;velocity&nbsp;and&nbsp;surface<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>water&nbsp;velocity&nbsp;values&nbsp;used&nbsp;in<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>processing&nbsp;that&nbsp;data.<BR>
+<BR>&nbsp;<B>mbm_grd2arc</B>:&nbsp;&nbsp;Converts&nbsp;a&nbsp;GMT&nbsp;grid&nbsp;file&nbsp;to&nbsp;an&nbsp;ESRI&nbsp;ArcView
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ASCII&nbsp;grid&nbsp;file.<BR>
+<BR>&nbsp;<B>mbm_grd2geovrml</B>:&nbsp;&nbsp;Create&nbsp;and&nbsp;execute&nbsp;commands&nbsp;which
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>generate&nbsp;a&nbsp;TerraVision&nbsp;tileset&nbsp;and&nbsp;GeoVRML<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>set&nbsp;&nbsp;of&nbsp;&nbsp;files&nbsp;&nbsp;that&nbsp;can&nbsp;&nbsp;be&nbsp;combined&nbsp;with<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>other&nbsp;data&nbsp;and&nbsp;viewed&nbsp;in&nbsp;a&nbsp;web&nbsp;browser.<BR>
+<BR>&nbsp;<B>mbm_grd3dplot</B>:&nbsp;&nbsp;Reads&nbsp;a&nbsp;GMT&nbsp;GRD&nbsp;grid&nbsp;file&nbsp;and
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>writes&nbsp;a&nbsp;shellscript&nbsp;which&nbsp;will<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>generate&nbsp;a&nbsp;GMT&nbsp;3D&nbsp;perspective&nbsp;view<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>of&nbsp;the&nbsp;data.<BR>
+<BR>&nbsp;<B>mbm_grdcut</B>:&nbsp;&nbsp;Extracts&nbsp;a&nbsp;subarea&nbsp;of&nbsp;a&nbsp;GMT&nbsp;grid&nbsp;file.
+<BR>&nbsp;<B>mbm_grdplot</B>:&nbsp;&nbsp;Reads&nbsp;a&nbsp;GMT&nbsp;GRD&nbsp;grid&nbsp;file&nbsp;and
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>writes&nbsp;a&nbsp;shellscript&nbsp;which&nbsp;will<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>generate&nbsp;a&nbsp;GMT&nbsp;map&nbsp;of&nbsp;the&nbsp;data.<BR>
+<BR>&nbsp;<B>mbm_grdtiff</B>:&nbsp;&nbsp;Reads&nbsp;a&nbsp;GMT&nbsp;GRD&nbsp;grid&nbsp;file&nbsp;and&nbsp;writes&nbsp;a
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>shellscript&nbsp;which&nbsp;will&nbsp;generate&nbsp;a&nbsp;TIFF&nbsp;image<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>of&nbsp;the&nbsp;data.<BR>
+<BR>&nbsp;<B>mbm_grid</B>:&nbsp;&nbsp;Reads&nbsp;a&nbsp;swath&nbsp;sonar&nbsp;data&nbsp;file&nbsp;and&nbsp;writes&nbsp;a
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>shellscript&nbsp;which&nbsp;will&nbsp;grid&nbsp;bathymetry&nbsp;data&nbsp;or<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mosaic&nbsp;sidescan&nbsp;(or&nbsp;amplitude)&nbsp;data&nbsp;using<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>reasonable&nbsp;guesses&nbsp;at&nbsp;the&nbsp;appropriate&nbsp;grid<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>bounds&nbsp;and&nbsp;bin&nbsp;size.<BR>
+<BR>&nbsp;<B>mbm_makedatalist</B>:&nbsp;Generates&nbsp;an&nbsp;MB-System&nbsp;datalist
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>file&nbsp;referencing&nbsp;&nbsp;all&nbsp;identifiable&nbsp;swath<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>files&nbsp;in&nbsp;the&nbsp;specified&nbsp;target&nbsp;directory.<BR>
+<BR>&nbsp;<B>mbm_plot</B>:&nbsp;&nbsp;Reads&nbsp;a&nbsp;swath&nbsp;sonar&nbsp;data&nbsp;file&nbsp;and
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>writes&nbsp;a&nbsp;shellscript&nbsp;which&nbsp;will<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>generate&nbsp;a&nbsp;swath&nbsp;and/or&nbsp;contour<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>plot&nbsp;of&nbsp;the&nbsp;data.<BR>
+<BR>&nbsp;<B>mbm_rollerror</B>:&nbsp;&nbsp;Reads&nbsp;a&nbsp;swath&nbsp;sonar&nbsp;data&nbsp;file,
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>calculates&nbsp;the&nbsp;noise&nbsp;in&nbsp;the&nbsp;vertical&nbsp;reference<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>used&nbsp;by&nbsp;the&nbsp;sonar,&nbsp;and&nbsp;generates&nbsp;a&nbsp;file<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>containing&nbsp;roll&nbsp;corrections&nbsp;which<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>can&nbsp;be&nbsp;applied&nbsp;to&nbsp;the&nbsp;data.<BR>
+<BR>&nbsp;<B>mbm_route2mission</B>:&nbsp;&nbsp;Translate&nbsp;an&nbsp;mbgrdviz&nbsp;survey&nbsp;route
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>file&nbsp;into&nbsp;an&nbsp;MBARI&nbsp;AUV&nbsp;mission&nbsp;script.<BR>
+<BR>&nbsp;<B>mbm_stat</B>:&nbsp;&nbsp;Runs&nbsp;<B>mbinfo</B>&nbsp;on&nbsp;a&nbsp;swath&nbsp;sonar&nbsp;data
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>file&nbsp;and&nbsp;extracts&nbsp;beam&nbsp;statistics&nbsp;from<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>the&nbsp;output&nbsp;of&nbsp;<B>mbinfo</B>.<BR>
+<BR>&nbsp;<B>mbm_utm</B>:&nbsp;Performs&nbsp;forward&nbsp;and&nbsp;inverse&nbsp;UTM&nbsp;projections
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>of&nbsp;ASCII&nbsp;data&nbsp;triples.<BR>
+<BR>&nbsp;<B>mbm_vrefcheck</B>:&nbsp;&nbsp;Generates&nbsp;a&nbsp;plot&nbsp;of&nbsp;high&nbsp;pass
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>filtered&nbsp;apparent&nbsp;crosstrack&nbsp;seafloor&nbsp;slope.<BR>
+<BR>&nbsp;<B>mbm_xbt</B>:&nbsp;&nbsp;Processes&nbsp;a&nbsp;Sparton&nbsp;XBT&nbsp;data&nbsp;file
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>and&nbsp;outputs&nbsp;a&nbsp;sound&nbsp;velocity&nbsp;profile<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>file&nbsp;which&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;process<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>swath&nbsp;sonar&nbsp;data.<BR>
+<BR>&nbsp;<B>mbm_xyplot</B>:&nbsp;&nbsp;Reads&nbsp;one&nbsp;or&nbsp;more&nbsp;ASCII&nbsp;&quot;X-Y&quot;
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>data&nbsp;files&nbsp;and&nbsp;writes&nbsp;a&nbsp;shellscript<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>which&nbsp;will&nbsp;generate&nbsp;an&nbsp;XY&nbsp;plot&nbsp;of&nbsp;the&nbsp;data.<BR>
+<P>
+<A NAME="lbAT">&nbsp;</A>
+<H2>EXAMPLE PROCESSING APPROACH</H2>
+
+<P>
+An example processing stream for swath sonar data
+which uses the new, parallel processing
+scheme is provided here. Note that a '' character at
+the end of a line indicates
+that the command line should actually continue with the
+text on the next line. Refer to individual program manual
+pages for detailed information on the command arguments and
+functionality of the various programs.
+<P>
+<A NAME="lbAU">&nbsp;</A>
+<H2>PROCESSING SEABEAM 2100 DATA</H2>
+
+<P>
+The following data processing stream is recommended for
+data obtained with SeaBeam 2100 series multibeam sonars.
+A number of SeaBeam 2112 sonars were installed on academic
+research vessels during the 1990's, including the R/V Knorr
+and R/V Atlantis operated by the Woods Hole Oceanographic
+Institution, the R/V Revelle operated by the Scripps Institution
+of Oceanography, the R/V Ronald Brown operated by NOAA,
+R/V Mirai and R/V Kairai operated by JAMSTEC and other vessels.
+This same approach is appropriate for data from all other
+multibeam sonars, with small variations. The issues and
+differences associated with data from certain other types
+of sonars are discussed in the following sections.
+<P>
+Consider a data file &quot;sb199411211212.rec&quot;
+containing one hour's worth of
+SeaBeam 2112 data in the vendor format (format 41).
+This file contains bathymetry, beam amplitude, and
+sidescan data. The following commands
+are typical for processing such data and generating
+preliminary maps.
+<P>
+<B>Step 1</B>: What's in the data file?
+<P>
+First we run <B>mbinfo</B> to obtain statistics about the contents
+of the data file:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbinfo&nbsp;-I&nbsp;sb199411211212.mb41<BR>
+<BR>
+
+Seeing reasonable output assures us that we in fact know what
+kind of data we are processing.
+<P>
+<B>Step 2</B>: Generate ancillary files.
+<P>
+Next, we run <B>mbdatalist</B> to generate the statistics (&quot;.inf&quot;),
+quickly read bathymetry (&quot;.fbt&quot;), and quickly read navigation
+(&quot;.fnv&quot;) files that make many tasks run faster:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;sb199411211212.mb41&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-N&nbsp;-V<BR>
+<P>
+Running this program generates three output files, which we
+call ancillary files:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb199411211212.mb41.inf<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb199411211212.mb41.fbt<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb199411211212.mb41.fnv<BR>
+<P>
+<B>Step 3</B>: Generate first cut plota.
+<P>
+We are now set up to process the data. However, first
+we visually check the data by generating a swath plot
+of color filled bathymetry overlaid with contours and
+navigation. This is easily accomplished with <B>mbm_plot</B>:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_plot&nbsp;-I&nbsp;sb199411211212.mb41&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G1&nbsp;-C&nbsp;-N&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;ZSwathBathCont<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZSwathBathCont.cmd<BR>
+<BR>
+
+Here the ZSwathBathCont represents the plot name, and multiple
+files will be generated with names constructed by adding
+different suffixes to this name. The <B>mbm_plot</B> command
+generates a shellscript called ZSwathBathCont.cmd. Running
+this shellscript in turn generates a Postscript plot called
+ZSwathBathCont.ps, and then displays the plot to the screen
+using the Postscript viewer previously specified by the user with
+<B>mbdefaults</B>. The name ZSwathBathCont is descriptive but
+arbitrary. Users may specify any name they wish.
+<P>
+The types of swath plots produced by <B>mbm_plot</B> include:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;color&nbsp;fill&nbsp;bathymetry&nbsp;with&nbsp;contours
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;shaded&nbsp;relief&nbsp;color&nbsp;fill&nbsp;bathymetry
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;color&nbsp;fill&nbsp;bathymetry&nbsp;overlaid&nbsp;with&nbsp;amplitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;grayscale&nbsp;amplitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;grayscale&nbsp;sidescan
+<P>
+We have already generated the first type of plot. We now
+generate the other four as well:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_plot&nbsp;-I&nbsp;sb199411211212.mb41&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G2&nbsp;-N&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;ZSwathBathShade<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZSwathBathShade.cmd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_plot&nbsp;-I&nbsp;sb199411211212.mb41&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G3&nbsp;-S0/1&nbsp;-N&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;ZSwathBathAmp<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZSwathBathAmp.cmd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_plot&nbsp;-I&nbsp;sb199411211212.mb41&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G4&nbsp;-S&nbsp;-N&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;ZSwathAmp<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZSwathAmp.cmd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_plot&nbsp;-I&nbsp;sb199411211212.mb41&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G5&nbsp;-S&nbsp;-N&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;ZSwathSS<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZSwathSS.cmd<BR>
+<BR>
+
+We use the -S option to apply histogram equalization to
+sidescan and amplitude data; note that for the bathymetry
+overlaid with amplitude map we use -S0/1 so that the
+the amplitude data used for shading is histogram
+equalized but the bathymetry is not.
+<P>
+<B>Step 3</B>: Apply Analysis Tools
+<P>
+We now have a reasonable idea of the data quality.
+There are several data analysis and editing tools that
+may be used to fix problems (or just to further investigate
+the data). These may be used in any order, at any time.
+<P>
+<B>Analysis Option A</B>: Automatic Bathymetry Editing.
+<P>
+The program <B>mbclean</B> applies some simple artifact
+detection algorithms to the bathymetry, effectively
+providing a means of automatically editing the bathymetry.
+We generally recommend that users edit the bathymetry
+interactively (see option B below) because
+no automated filter yet approaches
+(in our opinion) the ability of the human eye and brain
+to discern the difference between interesting seafloor
+morphology and sonar artifact. In particular, none of the
+filters available in <B>mbclean</B> come remotely close to
+performing satisfactorily in general. However, many users do
+find it useful to preprocess the data with <B>mbclean</B>
+before editing in the hope that many or most of the artifacts can flagged
+automatically. Again, we emphasize the importance of not
+depending solely on automatic filters. <B>If you care about
+your data, look at it.</B>
+<P>
+When we apply <B>mbclean</B>, we usually use a filter that flags all
+soundings that deviate more than a specified fraction of
+the local median depth from that median depth (the <B>-G</B>
+option). The choice of the filter or filters and the
+filter parameters used depends very much on the nature of the
+bathymetry data being processed:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbclean&nbsp;-I&nbsp;sb199411211212.mb41&nbsp;-G0.9/1.1&nbsp;-V<BR>
+<BR>
+
+If an &quot;edit save file&quot; named sb199411211212.mb41.esf already
+exists, <B>mbclean</B> reads this file and applies the
+pre-existing edits prior to beginning its filtering.
+All pre-existing edit events and all newly generated flags
+by <B>mbclean</B> are output to a new
+&quot;edit save file&quot;, again called sb199411211212.mb41.esf.
+Since this is the first
+of the analyis programs to be run on this data file, <B>mbclean</B>
+also creates an <B>mbprocess</B> parameter file called
+sb199411211212.mb41.par which contains all of the parameters
+and settings to be used by <B>mbprocess</B> in generating a
+processed swath file. If the parameter file already existed,
+<B>mbclean</B> would modify it so that the bathymetry edits
+would be applied when <B>mbprocess</B> is run.
+<P>
+<B>Analysis Option B</B>: Interactive Bathymetry Editing.
+<P>
+We use the interactive graphical tool <B>mbedit</B> to check
+the quality of the bathymetry
+and to flag artifacts as necessary. We can start <B>mbedit</B> with
+the simple command:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbedit<BR>
+<BR>
+
+and then open a swath file using the pull down menus and dialogs.
+Alternatively, we can specify the swath file on the command
+line:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbedit&nbsp;-I&nbsp;sb199411211212.mb41<BR>
+<BR>
+
+While we are editing the bathymetry, all edit
+events, both flag and unflag, are
+written to an &quot;edit save file&quot; called sb199411211212.mb41.esf. This
+file is closed when the &lt;Done&gt; or &lt;Quit&gt; button is clicked.
+In turn, this file of edit events will be read and these events
+applied if we run <B>mbclean</B>, or <B>mbprocess</B>, or if
+we choose to run <B>mbedit</B> again. If this is the first
+of the analyis programs to be run on this data file, <B>mbedit</B>
+also creates an <B>mbprocess</B> parameter file called
+sb199411211212.mb41.par which contains all of the parameters
+and settings to be used by <B>mbprocess</B> in generating a
+processed swath file. If the parameter file already existed,
+<B>mbedit</B> would modify it so that the bathymetry edits
+would be applied when <B>mbprocess</B> is run.
+<P>
+<B>Analysis Option C</B>: Editing the navigation.
+<P>
+We use the interactive graphical tool <B>mbnavedit</B> to check
+the quality of the navigation
+and to fix problems as necessary. We can start <B>mbnavedit</B> with
+the simple command:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbnavedit<BR>
+<BR>
+
+and then open a swath file using the pull down menus and dialogs.
+Alternatively, we can specify the swath file on the command
+line:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbnavedit&nbsp;-I&nbsp;sb199411211212.mb41<BR>
+<BR>
+
+When we have completed editing the navigation, we click the
+&lt;Done&gt; or &lt;Quit&gt; button. The program then writes the final
+navigation to an &quot;edited navigation&quot; file called sb199411211212.mb41.nve.
+The program <B>mbnavedit</B>
+also modifies (or creates if needed) an <B>mbprocess</B> parameter file
+and sets it so that the edited navigation is read and merged with the
+swath data when <B>mbprocess</B> is run.
+<P>
+<B>Analysis Option D</B>: Modeling sound velocity profiles.
+<P>
+We use the interactive graphical tool <B>mbvelocitytool</B> to model
+the effect of altering the sound velocity profile (SVP) used to
+calculate bathymetry from the raw travel times and angles stored
+in the swath data. We can start <B>mbvelocitytool</B> with
+the simple command:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbvelocitytool<BR>
+<BR>
+
+and then open a swath file using the pull down menus and dialogs.
+Alternatively, we can specify the swath file on the command
+line:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbvelocitytool&nbsp;-I&nbsp;sb199411211212.mb41<BR>
+<BR>
+
+If the <B>Levitus</B> database has been installed, <B>mbvelocitytool</B>
+will attempt to run <B>mblevitus</B> to extract a reference sound velocity
+profile for the approximate location of the swath data file. This SVP
+will be displayed along with the editable SVP used for modeling. See
+the <B>mbvelocitytool</B> manual page for details on its operation.
+If we conclude that the bathymetry data include artifacts associated with
+having been calculated using an incorrect SVP, and we arrive through
+modeling at an SVP which is more likely correct, we save this SVP
+using the &lt;File-&gt;Save swath svp file&gt; menu button. Then <B>mbvelocitytool</B>
+saves the edited SVP in a file named sb199411211212.mb41.svp, and
+also sets (or creates if needed)  the parameter file sb199411211212.mb41.par
+so that <B>mbprocess</B> will recalculate
+the bathymetry by raytracing through this SVP.
+<P>
+<B>Analysis Option E</B>: Correcting sidescan data.
+<P>
+We often find that sidescan imagery, despite the best efforts
+of sonar manufacturers, is dominated by a systematic variation
+in amplitude across the swath. Most commonly, the center or nadir
+region of the swath is characterized by high amplitudes, and the
+outer swath exhibits much lower amplitudes. This effect can be
+corrected by <B>mbprocess</B> provided that an appropriate model
+for the variation in amplitude with grazing angle is available.
+Since the amplitude vs grazing angle function varies with the
+type of seafloor, we need to construct separate amplitude vs grazing angle
+correction tables at regular intervals through each swath data file.
+We use the program <B>mbbackangle</B> to construct the amplitude vs.
+grazing angle tables:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbbackangle&nbsp;-I&nbsp;sb199411211212.mb41&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-P25&nbsp;-N161/80&nbsp;-V<BR>
+<BR>
+
+Here a new table is constructed every 25 pings, and the tables
+will consist of 161 angle bins ranging from -80 degrees to +80 degress
+grazing angles. The tables are written by <B>mbbackangle</B> to an
+amplitude vs. grazing angle file called sb199411211212.mb41.sga.
+Of course, the program also sets (or creates if needed)
+the parameter file sb199411211212.mb41.par
+so that <B>mbprocess</B> will correct the sidescan.
+<P>
+<B>Step 4</B>: Process the data.
+<P>
+The program that actually takes the input, raw swath data
+and produces processed swath data is <B>mbprocess</B>. This
+program operates using the parameters listed in the
+parameter file sb199411211212.mb41.par. To process the
+data, we run
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbprocess&nbsp;-I&nbsp;sb199411211212.mb41<BR>
+<BR>
+
+The program produces an output processed swath file called
+sb199411211212p.mb41 (a 'p' character is inserted in the
+filename just before the <B>MB-System</B> suffix. The program
+<B>mbprocess</B> also automatically generates the three basic
+ancillary data
+files for the processed swath file:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb199411211212.mb41.inf<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb199411211212.mb41.fbt<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb199411211212.mb41.fnv<BR>
+<P>
+<B>Step 5</B>: Grid the bathymetry.
+<P>
+Now use <B>mbgrid</B> to grid the bathymetry. The greatest
+depth in the file is 4502 meters (from the mbinfo output).
+The 120 degree swath is 3.4 times the water depth wide, or
+15.3 km wide. This translates to an average acrosstrack
+spacing of 15300 m / 120 = 127.5 m. If a region of a grid
+has more than one data point in each grid cell or bin, we
+say that this region is &quot;oversampled&quot;. If some bins in a
+region have no data points, we say that this region is
+&quot;undersampled&quot;. We choose a grid cell spacing of 150 m,
+which will cause the grid to be oversampled towards
+the center of the swath, but undersampled towards the
+edges of the swath.
+<P>
+The program <B>mbgrid</B> takes a datalist as input, so we first
+construct that file:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>echo&nbsp;sb199411211212p.mb41&nbsp;41&nbsp;&gt;&nbsp;datalist_grid<BR>
+<P>
+Now run <B>mbgrid</B> using the gaussian weighted mean algorithm
+(-F1) and longitude and latitude grid cell spacings of
+150 m (-E150/150/m) to grid bathymetry (-A1). We use
+spline interpolation to fill in small gaps in the data
+no larger than two grid cells (-C2), and we set regions
+with no data to Nan values for compatibility with
+GMT programs (-N). We also specify -M so that grids of
+data density and data standard deviation will be
+generated:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbgrid&nbsp;-Idatalist_grid&nbsp;-E150/150/m&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R114.2208/114.4209/-31.9001/-31.6377&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-OZGridBath&nbsp;-A1&nbsp;-N&nbsp;-C2&nbsp;-M&nbsp;-V<BR>
+<P>
+The program <B>mbgrid</B> creates a shellscript which, when
+executed, will generate a color fill plot overlaid with
+contours of the gridded bathymetry. Now run that shellscript:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZGridBath.cmd<BR>
+<P>
+Shellscripts have also been created to generate plots of
+the data density and standard deviation grids:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZGridBath_bath_num.cmd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZGridBath_bath_sd.cmd<BR>
+<P>
+<B>Step 6</B>: Mosaic the corrected sidescan data.
+<P>
+The program <B>mbmosaic</B> operates in a fashion similar to
+<B>mbgrid</B>, but has special capabilities allowing users
+to prioritize which parts of the swath are used in the
+mosaic that are useful for sidescan data. In particular,
+it is possible to create mosaics which do not use the
+nadir region of the swath except where no other data is
+available, or to create mosaics of sidescan data with
+particular look azimuths. The sidescan data has a higher
+resolution than the bathymetry so a smaller grid size
+can be appropriate. However, we wish to overlay the
+sidescan on the bathymetry, so we use the same grid
+cell spacing of 150 m.
+<P>
+In order to give the nadir region a lower priority than
+the outer parts of the sidescan swath, create a file
+of data priorities (priorities range from 0 to 1) as
+a function of apparent grazing angle (negative angles
+are on the port side of the swath, zero is at nadir,
+and positive angles are on the starboard side of the
+swath):
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-60.0&nbsp;0.2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-45.0&nbsp;1.0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-15.0&nbsp;0.8<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-14.9&nbsp;0.1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>14.9&nbsp;0.1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>15.0&nbsp;0.8<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>45.0&nbsp;1.0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>60.0&nbsp;0.2<BR>
+<P>
+Here the nadir region has been set to a low priority and
+the highest priority has been given to data from an
+apparent grazing angle of 45 degrees.
+<P>
+Now run <B>mbmosaic</B> to mosaic the bathymetry corrected sidescan
+data (-A4):
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbmosaic&nbsp;-Idatalist_grid&nbsp;-E150/150/m&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R114.2208/114.4209/-31.9001/-31.6377&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Wangle_priority.dat&nbsp;-F0.10&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-OZMosaicSS&nbsp;-A4&nbsp;-N&nbsp;-C2&nbsp;-M&nbsp;-V<BR>
+<P>
+Now run the plot shellscripts to view the gridded sidescan
+data in grayscale and the ancillary data density and
+standard deviation plots:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZMosaicSS.cmd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZMosaicSS_num.cmd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZMosaicSS_sd.cmd<BR>
+<P>
+<B>Step 7</B>: Generate additional maps of the gridded data.
+<P>
+First, we use <B>mbm_grdplot</B> to generate a color shaded
+relief view of the bathymetry. We choose to illuminate
+the bathymetry from the northeast (azimuth of 45 degrees)
+and to use a shading magnitude of 0.4 (-A0.4/45).
+Because the data has been gridded as bathymetry (positive
+down) rather than as topography (positive up), the default
+plot will have &quot;hot&quot; colors for deep regions and &quot;cold&quot;
+colors for shallow regions; this is the opposite of the
+convention we usually use. In order to fix the colors, we have
+to either rescale the data by multiplying the bathymetry
+by -1 (accomplished with -MGS-1), or flip the color
+palette (accomplished with -D). We use the latter approach.
+Finally, because this grid is so small, the default shaded
+relief image is likely to be grainy. To fix this problem, we
+specify a dots per inch resolution of 72 (-MGQ72); this
+will take longer and generate a larger plotfile, but the
+plot will look better. We also use the -L option to specify
+the title and color scale label for the plot. Here is the
+command:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grdplot&nbsp;-IZGridBath.grd&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G2&nbsp;-A0.4/45&nbsp;-D&nbsp;-MGQ72&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-L&quot;Shaded&nbsp;Relief&nbsp;Bathymetry&quot;:&quot;Depth&nbsp;(meters)&quot;&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Osb199411211212_bathshade<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZGridBathShade.cmd<BR>
+<P>
+Second, we use <B>mbm_grdplot</B> to generate a color fill
+view of the bathymetry overlaid with the gridded sidescan.
+The sidescan overlay is specified using the -K option.
+We want the colors for the bathymetry to be chosen without
+histogram equalization, but we also want histogram
+equalization to be applied to the sidescan data used for
+shading. To do this, we use -S0/1, where the first number
+(0) specifies no histogram equalization of the color
+scale and the second number (1) causes histogram
+equalization of the shading sidescan data to be
+implemented. In order to maintain the convention that
+high sidescan amplitudes are black, we flip both the
+color palette (as in the previous example) and the
+shading scale with -D1/1. We could also flip the shading
+by specifying a negative shading magnitude (-A-0.4).
+In this case, we forgo specifying the image resolution,
+resulting in a grainy plot:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grdplot&nbsp;-IZGridBath.grd&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G3&nbsp;-KZMosaicSS.grd&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-S0/1&nbsp;-D1/1&nbsp;-A0.4&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-L&quot;Bathymetry&nbsp;Overlaid&nbsp;With&nbsp;Sidescan&quot;:&quot;Depth&nbsp;(meters)&quot;&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-OZGridBathSS<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZGridBathSS.cmd<BR>
+<P>
+<B>Step 8</B>: Generate 3D perspective views of the gridded data.
+<P>
+Now, generate a 3D perspective view of the gridded
+bathymetry with shading through synthetic illumination (-G2)
+using the macro <B>mbm_grd3dplot</B>. The grid file is in
+bathymetry (positive down) rather in topography (positive
+up), so the bathymetry needs to be rescaled by multiplying
+by -1 (-MGS-1). We choose an illumination magnitude of 0.4
+and an illumination azimuth of 45 degrees (-A0.4/45). We
+also choose a perspective azimuth of 250 degrees and an
+elevation of 30 degrees (-E240/30):
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grd3dplot&nbsp;-IZGridBath.grd&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G2&nbsp;-A0.4/45&nbsp;-E250/30&nbsp;-MGS-1&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-OZGridBath3D<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZGridBath3D.cmd<BR>
+<P>
+Now, generate a 3D perspective view of the gridded
+bathymetry shaded using the gridded sidescan data
+(-KZMosaicSS.grd). We want the sidescan data to
+be histogram equalized, so we use -S0/1. We also want
+the shading to be more prominent than the default
+shading magnitude of 0.2 would produce, so we use -A0.5:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grd3dplot&nbsp;-IZGridBath.grd&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-KZMosaicSS.grd&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G3&nbsp;-A0.5&nbsp;-E250/30&nbsp;-D0/1&nbsp;-S0/1&nbsp;-MGS-1&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Osb199411211212_bathss3d<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ZGridBathSS3D.cmd<BR>
+<P>
+<A NAME="lbAV">&nbsp;</A>
+<H2>PROCESSING THIRD GENERATION KONGSBERG MULTIBEAM DATA</H2>
+
+<P>
+The current generation of Kongsberg multibeam sonars (EM122, EM302, EM710)
+record data in files typically named with a *.all suffix. These binary
+files consist of many different data records, most of which are
+similarly structure but distinct from the records output by the
+earlier generations of Kongsberg (formerly Simrad) multibeams described
+in a later section. The raw Kongsberg format is supported in <B>MB-System</B>
+as format 58. However, format 58 lacks places to store some information
+that is important to processing. In particular, the raw Kongsberg format
+does not store beam flags, so the only to apply bathymetry edits is
+to null the flagged beams. This is not recommended, as it precludes
+unflagging flagged beams later determined to be good.
+<P>
+Also, the raw Kongsberg format stores the initial sidescan samples derived from subsampling
+the bottom returns in each of the formed beams. The locations of these
+samples on the seafloor are irregular, and the number of samples varies
+greatly from ping to ping. This raw sidescan is not well suited for
+mapmaking or processing because of the irregular locations. <B>MB-System</B>
+automatically bins and averages the available sidescan samples into
+a regularly spaced 1024 pixels with pixel sizes that vary only slightly
+from ping to ping. This resampled sidescan is what appears in swath plots
+and in the statistics reported by <B>mbinfo</B>. The raw format has no
+space to store the rebinned sidescan, so any corrections or other
+processing applied to the sidescan in formats 58 is lost.
+<P>
+We have defined a processing format (59) for Kongsberg multibeam that stores
+beam flags and rebinned sidescan in addition to all of the information
+in the raw file format 58. We strongly recommend that third generation
+Kongsberg multibeam data be translated into format 59 before processing. This can
+be accomplished, albeit unsatisfactorily, with mbcopy. For example, given a raw EM122 file called
+0006_20111219_201329_METEOR_EM122.all, we can translate it to format 59 using:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcopy&nbsp;-F58/59&nbsp;-I&nbsp;0006_20111219_201329_METEOR_EM122.all&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;0006_20111219_201329_METEOR_EM122.mb59<BR>
+<BR>
+
+If we have a number of EM122 files referenced through a datalist file called
+datalist_raw.mb-1, we can translate all of them using the macro <B>mbm_copy</B>:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_copy&nbsp;-F59&nbsp;-I&nbsp;datalist_raw.mb-1<BR>
+<BR>
+
+This macro simply executes <B>mbcopy</B> for each of the data referenced in
+the input datalist structure.
+<P>
+The problem with using <B>mbcopy</B> for translation
+between formats 58 and 59 is that the navigation, heading, and attitude
+contained in format 58 files are purely asynchronous, which means these values
+are defined according to their own time stamps and not the time stamps
+of the multibeam sonar pings. When format 58 data are read, the navigation,
+heading and attitude values must be read from their own data records and
+interpolated (or extrapolated) onto the time stamps of the multibeam pings
+for each survey record. This works fine if the relevant asynchronous navigation
+and attitude data are always found in the data files before the survey data
+from the same time, but that advantageious timing is neither assured nor common.
+A better approach is to use the tool <B>mbkongsbergpreprocess</B> to preprocess
+the Kongsberg multibeam data. This program makes two passes through reading
+each input file, the first to read and store the navigation and attitude data,
+and the second to properly interpolate the navigation and attitude values onto the
+multibeam survey pings. The usage is of the form:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbkongsbergpreprocess&nbsp;-I&nbsp;datalist_raw.mb-1&nbsp;-V<BR>
+<P>
+One further feature of Simrad multibeam data processing should be noted.
+Given that the raw sidescan samples are derived directly from the
+bottom returns identified by the sonar for each beam, it follows that
+whenever a bottom return pick is erroneous, the sidescan samples
+associated with that beam are also erroneous. Consequently, the binned
+sidescan shoulde be reprocessed following the application of beam flags
+to exclude the incorrect sidescan samples from the final imagery.
+Recalculating the Simrad sidescan is an <B>mbprocess</B> option which
+can set using <B>mbset</B>. To turn on sidescan calculation, we use:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbset&nbsp;-I&nbsp;0006_20111219_201329_METEOR_EM122.mb59&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>=PSSRECALCMOD:1&nbsp;-V<BR>
+<BR>
+
+We can also turn off sidescan recalculation using:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbset&nbsp;-I&nbsp;0006_20111219_201329_METEOR_EM122.mb59&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>=PSSRECALCMOD:0&nbsp;-V<BR>
+<P>
+In practice, <B>mbedit</B>, <B>mbeditviz</B> and <B>mbclean</B> automatically set the
+parameter file to turn on sidescan recalculation when writing an
+&quot;edit save file&quot; for format 59 data, so users should not have
+to set this parameter manually.
+<P>
+<A NAME="lbAW">&nbsp;</A>
+<H2>PROCESSING OLDER KONGSBERG (FORMERLY SIMRAD) MULTIBEAM DATA</H2>
+
+<P>
+The older series of Simrad multibeam sonars (EM100, EM950, EM1000, EM12,
+EM12D, EM121A) recorded raw data
+in files typically named with an &quot;_raw.all&quot; suffix. These older data
+are supported in <B>MB-System</B> using format 51. The data
+from the second generation Simrad (Kongsberg) multibeams (EM3000, EM2000, EM1002, EM300,
+EM120) also come in files with the &quot;_raw.all&quot; suffix, but the
+format is different, and is supported by <B>MB-System</B> as format
+56. <B>MB-System</B> programs can automatically discern the difference
+between the two formats, and so the initial identification of the
+data type is easy with <B>mbinfo</B>.
+<P>
+However, both formats 51 and 56 lack places to store some information
+that is important to processing. In particular, the raw Simrad formats
+do not store beam flags, so the only to apply bathymetry edits is
+to null the flagged beams. This is not recommended, as it precludes
+unflagging flagged beams later determined to be good.
+<P>
+Also, the raw
+Simrad formats store the initial sidescan samples derived from subsampling
+the bottom returns in each of the formed beams. The locations of these
+samples on the seafloor are irregular, and the number of samples varies
+greatly from ping to ping. This raw sidescan is not well suited for
+mapmaking or processing because of the irregular locations. <B>MB-System</B>
+automatically bins and averages the available sidescan samples into
+a regularly spaced 1024 pixels with pixel sizes that vary only slightly
+from ping to ping. This resampled sidescan is what appears in swath plots
+and in the statistics reported by <B>mbinfo</B>. The raw formats have no
+space to store the rebinned sidescan, so any corrections or other
+processing applied to the sidescan in formats 51 and 56 is lost.
+<P>
+We have defined a processing format (57) for Simrad multibeam that stores
+beam flags and rebinned sidescan in addition to all of the information
+in either of the raw file formats (51 and 56).
+We strongly recommend that Simrad multibeam data from both old and
+newer sonars be translated into format 57 before processing. This is
+accomplished with mbcopy. For example, given a raw EM1000 file called
+0021_19960714_123418_raw.all, we translate it to format 57 using:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcopy&nbsp;-F51/57&nbsp;-I&nbsp;0021_19960714_123418_raw.all&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;0021_19960714_123418_raw.mb57<BR>
+<BR>
+
+Similarly, given a raw EM300 file called
+0005_20020425_034057_raw.all, we translate it to format 57 using:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcopy&nbsp;-F56/57&nbsp;-I&nbsp;0005_20020425_034057_raw.all&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;0005_20020425_034057.mb57<BR>
+<P>
+One further feature of Simrad multibeam data processing should be noted.
+Given that the raw sidescan samples are derived directly from the
+bottom returns identified by the sonar for each beam, it follows that
+whenever a bottom return pick is erroneous, the sidescan samples
+associated with that beam are also erroneous. Consequently, the binned
+sidescan shoulde be reprocessed following the application of beam flags
+to exclude the incorrect sidescan samples from the final imagery.
+Recalculating the Simrad sidescan is an <B>mbprocess</B> option which
+can set using <B>mbset</B>. To turn on sidescan calculation, we use:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbset&nbsp;-I&nbsp;0005_20020425_034057.mb57&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>=PSSRECALCMOD:1&nbsp;-V<BR>
+<BR>
+
+We can also turn off sidescan recalculation using:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbset&nbsp;-I&nbsp;0005_20020425_034057.mb57&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>=PSSRECALCMOD:0&nbsp;-V<BR>
+<P>
+In practice, <B>mbedit</B> and <B>mbclean</B> automatically set the
+parameter file to turn on sidescan recalculation when writing an
+&quot;edit save file&quot; for format 57 data, so users should not have
+to set this parameter manually.
+<P>
+<A NAME="lbAX">&nbsp;</A>
+<H2>PROCESSING HYDROSWEEP DS DATA</H2>
+
+<P>
+Hydrosweep DS sonars were used on the R/V Maurice
+Ewing (operated by the Lamont-Doherty Earth Observatory
+and the R/V Thomas Thompson (operated by the University of
+Washington) from the early 1990's until 2001. The raw data
+was logged in a text format (21) that is slow to read and write.
+We recommend that users confronted with format 21 data translate
+it to format 24 before processing. Format 24 is a binary data
+format that contains all of the information in the raw file,
+but is on the order of 15 times faster to read and write.
+We accomplish the translation using <B>mbcopy</B>:
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcopy&nbsp;-F21/24&nbsp;-Ihs_ew9204_134.mb21&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Ohsih_ew9204_134.mb24<BR>
+<BR>
+
+We also strongly recommend that users of Hydrosweep DS data
+recalculate the bathymetry using raytracing through an
+appropriate SVP, whether obtained using <B>mblevitus</B>,
+<B>mbvelocitytool</B>, or from other sources. The sonar
+calculates the raw bathymetry using a homogeneous water
+velocity model, and the results are almost always inferior
+to those obtained by doing the full raytracing calculations
+with a correct SVP.
+<P>
+Hydrosweep DS data do not contain sidescan, but they do
+contain per beam amplitude data. The amplitude data may
+be corrected in the same fashion as the sidescan. We
+run <B>mbbackangle</B> with the <B>-A</B><I>1</I> option
+to operate on the amplitude data:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbbackangle&nbsp;-I&nbsp;sb199411211212.mb41&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-A1&nbsp;-P25&nbsp;-N161/80&nbsp;-V<BR>
+<BR>
+
+and then run <B>mbprocess</B> as usual.
+<P>
+<A NAME="lbAY">&nbsp;</A>
+<H2>PROCESSING HYDROSWEEP MD DATA</H2>
+
+<P>
+Processing Hydrosweep MD data is similar to processing
+Hydrosweep DS data. In particular, recalculating
+bathymetry from the travel times is necessary because
+the sonar uses a homogeneous water velocity model.
+The difference is simply in the data formats used.
+The raw Hydrosweep MD data files (typically named
+with a &quot;.R&quot; suffix) contain only the travel times; the
+sonar calculated bathymetry is contained in parallel
+files (typically named with a &quot;.P&quot; suffix). The
+&quot;.R&quot; files are supported as format 101. Format 102
+data files contain bathymetry in addition to the travel
+times. To translate the data from format 101 to 102 we
+use:
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcopy&nbsp;-F101/102&nbsp;-Iys9409040607.R&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Oys9409040607.mb102<BR>
+<BR>
+
+Bathymetry equivalent to that generated by the sonar
+will automatically be calculated in the copy process
+(the data stream includes the mean water velocity used
+by the sonar).
+<P>
+Hydrosweep MD data do not contain sidescan, but they do
+contain per beam amplitude data. The amplitude data may
+be corrected in the same fashion as the sidescan. We
+run <B>mbbackangle</B> with the <B>-A</B><I>1</I> option
+to operate on the amplitude data:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbbackangle&nbsp;-I&nbsp;sb199411211212.mb41&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-A1&nbsp;-P25&nbsp;-N161/80&nbsp;-V<BR>
+<BR>
+
+and then run <B>mbprocess</B> as usual.
+<P>
+<A NAME="lbAZ">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbio.html">mbio</A></B>(1)
+<P>
+<A NAME="lbBA">&nbsp;</A>
+<H2>BUGS</H2>
+
+It doesn't do everything we want it to yet, it doesn't work with
+every kind of swath data ever collected, and sometimes it
+breaks.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAE">INTRODUCTION</A><DD>
+<DT><A HREF="#lbAF">COPYRIGHT AND LICENSING</A><DD>
+<DT><A HREF="#lbAG">HISTORY</A><DD>
+<DT><A HREF="#lbAH">WHAT'S NEW ABOUT VERSION 5</A><DD>
+<DL>
+<DT><A HREF="#lbAI">A new approach to managing data processing.</A><DD>
+<DT><A HREF="#lbAJ">New tools.</A><DD>
+<DT><A HREF="#lbAK">Support for Projected Coordinate Systems.</A><DD>
+<DT><A HREF="#lbAL">Restructuring the code.</A><DD>
+<DT><A HREF="#lbAM">Handling of old Simrad multibeam data.</A><DD>
+<DT><A HREF="#lbAN">Streamlining of MB-System Default Parameters.</A><DD>
+<DT><A HREF="#lbAO">New Data Formats.</A><DD>
+</DL>
+<DT><A HREF="#lbAP">THE NEW VERSION 5 DATA PROCESSING STRUCTURE</A><DD>
+<DT><A HREF="#lbAQ">THE NEW VERSION 5 DATALIST FILES</A><DD>
+<DT><A HREF="#lbAR">VERSION 5 FILE NAMING CONVENTIONS</A><DD>
+<DT><A HREF="#lbAS">LIST OF MB-SYSTEM PROGRAMS AND MACROS</A><DD>
+<DT><A HREF="#lbAT">EXAMPLE PROCESSING APPROACH</A><DD>
+<DT><A HREF="#lbAU">PROCESSING SEABEAM 2100 DATA</A><DD>
+<DT><A HREF="#lbAV">PROCESSING THIRD GENERATION KONGSBERG MULTIBEAM DATA</A><DD>
+<DT><A HREF="#lbAW">PROCESSING OLDER KONGSBERG (FORMERLY SIMRAD) MULTIBEAM DATA</A><DD>
+<DT><A HREF="#lbAX">PROCESSING HYDROSWEEP DS DATA</A><DD>
+<DT><A HREF="#lbAY">PROCESSING HYDROSWEEP MD DATA</A><DD>
+<DT><A HREF="#lbAZ">SEE ALSO</A><DD>
+<DT><A HREF="#lbBA">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

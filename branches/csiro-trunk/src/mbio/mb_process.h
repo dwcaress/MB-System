@@ -2,7 +2,7 @@
  *    The MB-system:	mb_process.h	9/11/00
  *    $Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,14 +13,14 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBprocess is a tool for processing swath sonar bathymetry data.  
+ * MBprocess is a tool for processing swath sonar bathymetry data.
  * This program performs a number of functions, including:
  *   - merging navigation
  *   - recalculating bathymetry from travel time and angle data
  *     by raytracing through a layered water sound velocity model.
  *   - applying changes to ship draft, roll bias and pitch bias
  *   - applying bathymetry edits from edit save files.
- * This file defines processing parameters and structures 
+ * This file defines processing parameters and structures
  * saved in mbprocess parameter files. The reading, writing, and
  * updating of the mbprocess control parameter values are done
  * using functions in mb_process.c
@@ -29,14 +29,14 @@
  * parameter file. The parameter files consist of single line
  * commands and comment lines beginning with '#'. The commands
  * are given by a keyword and a corresponding value (separated by
- * spaces or tabs). A list of the keywords and values follows, 
+ * spaces or tabs). A list of the keywords and values follows,
  * with default values in square brackets:
  *
  * GENERAL PARAMETERS:
  *   EXPLICIT			    # causes mbprocess to set modes implicitely
- *                                  # - e.g. the SVPFILE command will also set 
- *                                  #   raytracing on even if the RAYTRACE command 
- *                                  #   is not given [explicit mode commands required] 
+ *                                  # - e.g. the SVPFILE command will also set
+ *                                  #   raytracing on even if the RAYTRACE command
+ *                                  #   is not given [explicit mode commands required]
  *   FORMAT constant                # sets format id [no default]
  *   INFILE filename                # sets input file path [no default]
  *   OUTFILE filename               # sets output file path [no default]
@@ -48,7 +48,7 @@
  *   NAVFILE filename               # sets navigation file path [no default]
  *   NAVFORMAT constant             # sets navigation file format [9]
  *   NAVHEADING boolean             # sets heading to be merged from navigation file
- *                                  # - note: heading merged from navigation before 
+ *                                  # - note: heading merged from navigation before
  *                                  #   heading correction applied
  *                                  #   0: heading not changed
  *                                  #   1: heading merged from navigation file
@@ -56,12 +56,12 @@
  *                                  #   0: speed not changed
  *                                  #   1: speed merged from navigation file
  *   NAVDRAFT boolean               # sets draft to be merged from navigation file
- *                                  # - note: draft merged from navigation before 
+ *                                  # - note: draft merged from navigation before
  *                                  #   draft correction applied
  *                                  #   0: draft not changed
  *                                  #   1: draft merged from navigation file
  *   NAVATTITUDE boolean            # sets roll, pitch and heave to be merged from navigation file
- *                                  # - note: roll, pitch, and heave merged from navigation before 
+ *                                  # - note: roll, pitch, and heave merged from navigation before
  *                                  #   roll bias and pitch bias corrections applied
  *                                  #   0: roll, pitch, and heave not changed
  *                                  #   1: roll, pitch, and heave merged from navigation file
@@ -69,29 +69,29 @@
  *                                  #   0: linear interpolation (recommended)
  *                                  #   1: spline interpolation
  *   NAVTIMESHIFT constant          # sets navigation time shift (seconds) [0.0]
- *                                  # - note: time shift added to timestamps of 
- *                                  #   navigation fixes read in from NAVFILE 
+ *                                  # - note: time shift added to timestamps of
+ *                                  #   navigation fixes read in from NAVFILE
  *                                  #   prior to merging
  *
  * NAVIGATION OFFSETS AND SHIFTS:
  *   NAVSHIFT boolean               # sets navigation offset [0]
  *                                  # - note: offsets and shifts are applied to navigation
  *                                  #   values from both survey and navigation records, and
- *                                  #   are applied to navigation read in from 
+ *                                  #   are applied to navigation read in from
  *                                  #   NAVFILE prior to merging
  *                                  # - note: offsets and shifts are NOT applied to adjusted
  *                                  #   navigation values from NAVADJFILE
  *   NAVOFFSETX constant            # sets navigation athwartship offset (meters) [0.0]
  *                                  # - note: the effective navigation shift is
- *                                  #   (NAVOFFSETX - SONAROFFSETX), and the 
- *                                  #   navigation is corrected by subtracting 
+ *                                  #   (NAVOFFSETX - SONAROFFSETX), and the
+ *                                  #   navigation is corrected by subtracting
  *                                  #   this effective shift.
- *                                  # - note: athwartship shift is positive to 
+ *                                  # - note: athwartship shift is positive to
  *                                  #   starboard.
  *   NAVOFFSETY constant            # sets navigation fore-aft offset (meters) [0.0]
  *                                  # - note: the effective navigation shift is
- *                                  #   (NAVOFFSETY - SONAROFFSETY), and the 
- *                                  #   navigation is corrected by subtracting 
+ *                                  #   (NAVOFFSETY - SONAROFFSETY), and the
+ *                                  #   navigation is corrected by subtracting
  *                                  #   this effective shift.
  *                                  # - note: fore-aft shift is positive forward.
  *   NAVOFFSETZ constant            # sets navigation vertical offset (meters) [0.0]
@@ -116,7 +116,7 @@
  *
  * ATTITUDE MERGING:
  *   ATTITUDEMODE mode              # sets atttitude (roll, pitch, and heave) merging [0]
- *                                  # - note: roll, pitch, and heave merged before 
+ *                                  # - note: roll, pitch, and heave merged before
  *                                  #   roll bias and pitch bias corrections applied
  *                                  # - note: attitude merging from a separate file
  *                                  #   supersedes attitude merging from a navigation file
@@ -138,7 +138,7 @@
  *
  * SONARDEPTH MERGING:
  *   SONARDEPTHMODE mode            # sets sonardepth merging [0]
- *                                  # - note: sonardepth merged before 
+ *                                  # - note: sonardepth merged before
  *                                  #   draft corrections applied
  *                                  # - note: sonardepth merging from a separate file
  *                                  #   supersedes draft merging from a navigation file
@@ -160,13 +160,13 @@
  *   DATACUTCLEAR                   # clears all data cutting commands
  *   DATACUT kind mode min max      # adds data cutting command that flags
  *                                  # specified bathymetery and amplitude
- *                                  # beams and zeroes specified sidescan 
+ *                                  # beams and zeroes specified sidescan
  *                                  # pixels. Note that cutting bathymetry
  *                                  # means flagging beams, which affects
  *                                  # both bathymetry and amplitude data.
  *                                  # In contrast, cutting amplitude data
  *                                  # means zeroing the values without
- *                                  # affecting the bathymetry, and 
+ *                                  # affecting the bathymetry, and
  *                                  # cutting sidescan also means zeroing
  *                                  # the values.
  *                                  # - kind:
@@ -189,33 +189,33 @@
  *                                  #   beam min to beam max.
  *   BATHCUTDISTANCE min max        # adds data cutting command to cut
  *                                  #   bathymetry by beam number from
- *                                  #   acrosstrack distance  min to 
+ *                                  #   acrosstrack distance  min to
  *                                  #   distance max.
  *   BATHCUTSPEED min max           # adds data cutting command to cut
  *                                  #   all bathymetry in pings with
- *                                  #   speed less than min or more 
+ *                                  #   speed less than min or more
  *                                  #   than max
  *   AMPCUTNUMBER min max           # adds data cutting command to cut
  *                                  #   amplitude by beam number from
  *                                  #   beam min to beam max.
  *   AMPCUTDISTANCE min max         # adds data cutting command to cut
  *                                  #   amplitude by beam number from
- *                                  #   acrosstrack distance  min to 
+ *                                  #   acrosstrack distance  min to
  *                                  #   distance max.
  *   AMPCUTSPEED min max            # adds data cutting command to cut
  *                                  #   all amplitude in pings with
- *                                  #   speed less than min or more 
+ *                                  #   speed less than min or more
  *                                  #   than max
  *   SSCUTNUMBER min max            # adds data cutting command to cut
  *                                  #   sidescan by beam number from
  *                                  #   beam min to beam max.
  *   SSCUTDISTANCE min max          # adds data cutting command to cut
  *                                  #   sidescan by beam number from
- *                                  #   acrosstrack distance  min to 
+ *                                  #   acrosstrack distance  min to
  *                                  #   distance max.
  *   SSCUTSPEED min max             # adds data cutting command to cut
  *                                  #   all sidescan in pings with
- *                                  #   speed less than min or more 
+ *                                  #   speed less than min or more
  *                                  #   than max
  *
  * BATHYMETRY EDITING:
@@ -259,10 +259,10 @@
  *
  * DRAFT CORRECTION:
  *   DRAFTMODE mode                 # sets draft correction [0]
- *                                  # - note: draft merged from navigation before 
+ *                                  # - note: draft merged from navigation before
  *                                  #   draft correction applied
  *                                  #   0: no draft correction
- *                                  #   1: draft correction by offset 
+ *                                  #   1: draft correction by offset
  *                                  #   2: draft correction by multiply
  *                                  #   3: draft correction by offset and multiply
  *                                  #   4: draft set to constant
@@ -276,7 +276,7 @@
  *                                  #   1: heave correction by offset
  *                                  #   2: heave correction by multiply
  *                                  #   3: heave correction by offset and multiply
- *   HEAVEOFFSET offset             # sets value added to heave (m) 
+ *   HEAVEOFFSET offset             # sets value added to heave (m)
  *   HEAVEMULTIPLY multiplier       # sets value multiplied by heave
  *
  * LEVER CORRECTION:
@@ -289,37 +289,37 @@
  *                                  #   from the vru location.
  *   VRUOFFSETX constant            # sets vru athwartship offset (meters) [0.0]
  *                                  # - note: the effective athwartship distance
- *                                  #   between the vru and the sonar head is  
- *                                  #   (VRUOFFSETX - SONAROFFSETX), and the 
- *                                  #   lever calculation is made using this 
+ *                                  #   between the vru and the sonar head is
+ *                                  #   (VRUOFFSETX - SONAROFFSETX), and the
+ *                                  #   lever calculation is made using this
  *                                  #   effective distance.
- *                                  # - note: athwartship distance is positive to 
+ *                                  # - note: athwartship distance is positive to
  *                                  #   starboard.
  *   VRUOFFSETY constant            # sets vru fore-aft offset (meters) [0.0]
  *                                  # - note: the effective fore-aft distance
- *                                  #   between the vru and the sonar head is  
- *                                  #   (VRUOFFSETY - SONAROFFSETY), and the 
- *                                  #   lever calculation is made using this 
+ *                                  #   between the vru and the sonar head is
+ *                                  #   (VRUOFFSETY - SONAROFFSETY), and the
+ *                                  #   lever calculation is made using this
  *                                  #   effective distance.
  *                                  # - note: fore-aft distance is positive forward.
  *   VRUOFFSETZ constant            # sets vru vertical offset (meters) [0.0]
  *                                  # - note: the effective vertical distance
- *                                  #   between the vru and the sonar head is  
- *                                  #   (VRUOFFSETZ - SONAROFFSETZ), and the 
- *                                  #   lever calculation is made using this 
+ *                                  #   between the vru and the sonar head is
+ *                                  #   (VRUOFFSETZ - SONAROFFSETZ), and the
+ *                                  #   lever calculation is made using this
  *                                  #   effective distance.
  *                                  # - note: vertical distance is positive down.
  *   SONAROFFSETX constant          # sets sonar athwartship offset (meters) [0.0]
- *                                  # - note: this value is used for both 
+ *                                  # - note: this value is used for both
  *                                  #   navigation shifts and lever calculations.
- *                                  # - note: athwartship distance is positive to 
+ *                                  # - note: athwartship distance is positive to
  *                                  #   starboard.
  *   SONAROFFSETY constant          # sets vru fore-aft offset (meters) [0.0]
- *                                  # - note: this value is used for both 
+ *                                  # - note: this value is used for both
  *                                  #   navigation shifts and lever calculations.
  *                                  # - note: fore-aft distance is positive forward.
  *   SONAROFFSETZ constant          # sets vru vertical offset (meters) [0.0]
- *                                  # - note: this value is used for lever 
+ *                                  # - note: this value is used for lever
  *                                  #   calculations.
  *                                  # - note: vertical distance is positive down.
  *
@@ -340,7 +340,7 @@
  *
  * HEADING CORRECTION:
  *   HEADINGMODE mode               # sets heading correction [no heading correction]
- *                                  # - note: heading merged from navigation before 
+ *                                  # - note: heading merged from navigation before
  *                                  #   heading correction applied
  *                                  #   0: no heading correction
  *                                  #   1: heading correction using course made good
@@ -366,7 +366,7 @@
  *                                  # - daymin = decimal minutes start of day
  *
  * AMPLITUDE CORRECTION:
- *   AMPCORRMODE  boolean           # sets correction of amplitude by amplitude vs grazing 
+ *   AMPCORRMODE  boolean           # sets correction of amplitude by amplitude vs grazing
  *                                  # angle function
  *                                  #   0: amplitude correction off
  *                                  #   1: amplitude correction on
@@ -383,7 +383,7 @@
  *                                  #   1: local slope used in calculating correction
  *                                  #   2: topography grid used in calculating correction
  *                                  #      but slope ignored
- *                                  #   3: local slope from topography grid used in 
+ *                                  #   3: local slope from topography grid used in
  *                                  #      calculating correction
  *   AMPCORRSTD mode		    # sets amplitude correction standard deviation mode [0]
  *   	                            #   0: don't apply standard deviation correction
@@ -392,7 +392,7 @@
  *   AMPCORRREFFILE filename        # sets reference grazing table (only used when AMPCORRANGLE is not in AMPCORRFILE)
  *
  * SIDESCAN CORRECTION:
- *   SSCORRMODE  boolean            # sets correction of sidescan by amplitude vs grazing 
+ *   SSCORRMODE  boolean            # sets correction of sidescan by amplitude vs grazing
  *                                  # angle function
  *                                  #   0: sidescan correction off
  *                                  #   1: sidescan correction on
@@ -409,7 +409,7 @@
  *                                  #   1: local slope used in calculating correction
  *                                  #   2: topography grid used in calculating correction
  *                                  #      but slope ignored
- *                                  #   3: local slope from topography grid used in 
+ *                                  #   3: local slope from topography grid used in
  *                                  #      calculating correction
  *   SSCORRSTD mode		    # sets sidescan correction standard deviation mode [0]
  *   	                            #   0: don't apply standard deviation correction
@@ -497,7 +497,7 @@
  *				    #     then insert the corrected timestamps
  *				    #     into processed data
  *   KLUGE006                       # processing kluge 006
- *                                  #   changes sonar depth / draft values without 
+ *                                  #   changes sonar depth / draft values without
  *                                  #   changing bathymetry values
  *   KLUGE007                       # processing kluge 007
  *				    #   zeros alongtrack values greater than half
@@ -555,12 +555,12 @@
  * fileroot can be anything and xxx corresponds to the MB-System
  * format id number. Given this kind of filename, we then have:
  *	fileroot.mbxxx.par	    : parameter file
- *	fileroot.mbxxx.nve	    : edited navigation from 
+ *	fileroot.mbxxx.nve	    : edited navigation from
  *					mbnavedit
  *	fileroot.mbxxx.nvX	    : adjusted navigation from
- *					mbnavadjust, with 
+ *					mbnavadjust, with
  *					X={0,1,2,3,4,5,6,7,8,9}
- *	fileroot.mbxxx.esf	    : bathymetry edit save file 
+ *	fileroot.mbxxx.esf	    : bathymetry edit save file
  *					from mbedit
  *
  * MBprocess and its associated programs utilize a simple file locking
@@ -568,15 +568,15 @@
  * the same swath file simultaneously. This mechanism is instituted
  * using two functions: mbp_lockswathfile() and mbp_unlockswathfile().
  * The mbp_lockfile() function creates a *.lck file parallel to a
- * raw swathfile listing the program, purpose, and user locking the 
+ * raw swathfile listing the program, purpose, and user locking the
  * file. While this file exists, other MB-System processing programs
  * (e.g. mbprocess, mbedit, mbeditviz, mbnavedit) will not open the
- * file (except in browse mode). The mbp_unlockfile() removes the 
- * *.lck file, provided the program, purpose, and user match that 
- * contained in the file. MBdatalist includes a capability to remove 
- * locks from single files or entire datalist structures, allowing 
+ * file (except in browse mode). The mbp_unlockfile() removes the
+ * *.lck file, provided the program, purpose, and user match that
+ * contained in the file. MBdatalist includes a capability to remove
+ * locks from single files or entire datalist structures, allowing
  * the resetting of files left locked by crashed programs.
- * 
+ *
  *
  * Author:	D. W. Caress
  * Date:	September 11, 2000
@@ -824,7 +824,7 @@
 
 
 
-struct mb_process_struct 
+struct mb_process_struct
 	{
 	/* general parameters */
 	int	mbp_ifile_specified;
@@ -833,7 +833,7 @@ struct mb_process_struct
 	char	mbp_ofile[MBP_FILENAMESIZE];
 	int	mbp_format_specified;
 	int	mbp_format;
-	
+
 	/* navigation merging */
 	int	mbp_nav_mode;
 	char	mbp_navfile[MBP_FILENAMESIZE];
@@ -850,17 +850,17 @@ struct mb_process_struct
 	double	mbp_nav_offsetz;
 	double	mbp_nav_shiftlon;
 	double	mbp_nav_shiftlat;
-	
+
 	/* adjusted navigation merging */
 	int	mbp_navadj_mode;
 	char	mbp_navadjfile[MBP_FILENAMESIZE];
 	int	mbp_navadj_algorithm;
-	
+
 	/* attitude merging */
 	int	mbp_attitude_mode;
 	char	mbp_attitudefile[MBP_FILENAMESIZE];
 	int	mbp_attitude_format;
-	
+
 	/* sonardepth merging */
 	int	mbp_sonardepth_mode;
 	char	mbp_sonardepthfile[MBP_FILENAMESIZE];
@@ -872,11 +872,11 @@ struct mb_process_struct
 	int	mbp_cut_mode[MBP_CUT_NUM_MAX];
 	double	mbp_cut_min[MBP_CUT_NUM_MAX];
 	double	mbp_cut_max[MBP_CUT_NUM_MAX];
-	
+
 	/* bathymetry editing */
 	int	mbp_edit_mode;
 	char	mbp_editfile[MBP_FILENAMESIZE];
-	
+
 	/* bathymetry recalculation */
 	int	mbp_bathrecalc_mode;
 	int	mbp_svp_mode;
@@ -889,18 +889,18 @@ struct mb_process_struct
 	int	mbp_corrected;
 	int	mbp_static_mode;
 	char	mbp_staticfile[MBP_FILENAMESIZE];
-	
+
 	/* draft correction */
 	int	mbp_draft_mode;
 	double	mbp_draft;
 	double	mbp_draft_offset;
 	double	mbp_draft_mult;
-	
+
 	/* heave correction */
 	int	mbp_heave_mode;
 	double	mbp_heave;
 	double	mbp_heave_mult;
-	
+
 	/* lever correction */
 	int	mbp_lever_mode;
 	double	mbp_vru_offsetx;
@@ -909,26 +909,26 @@ struct mb_process_struct
 	double	mbp_sonar_offsetx;
 	double	mbp_sonar_offsety;
 	double	mbp_sonar_offsetz;
-	
+
 	/* roll correction */
 	int	mbp_rollbias_mode;
 	double	mbp_rollbias;
 	double	mbp_rollbias_port;
 	double	mbp_rollbias_stbd;
-	
+
 	/* pitch correction */
 	int	mbp_pitchbias_mode;
 	double	mbp_pitchbias;
-	
+
 	/* heading correction */
 	int	mbp_heading_mode;
 	double	mbp_headingbias;
-	
+
 	/* tide correction */
 	int	mbp_tide_mode;
 	char	mbp_tidefile[MBP_FILENAMESIZE];
 	int	mbp_tide_format;
-	
+
 	/* amplitude correction */
 	int	mbp_ampcorr_mode;
 	char	mbp_ampcorrfile[MBP_FILENAMESIZE];
@@ -949,10 +949,10 @@ struct mb_process_struct
 	int	mbp_sscorr_slope;
 	int	mbp_sscorr_area;
 	int	mbp_sscorr_stddev;
-	
+
 	/* amplitude and sidescan correction */
 	char	mbp_ampsscorr_topofile[MBP_FILENAMESIZE];
-	
+
 	/* sidescan recalculation */
 	int	mbp_ssrecalc_mode;
 	double	mbp_ssrecalc_pixelsize;
@@ -1010,7 +1010,7 @@ struct mb_process_struct
 	char    mbp_unknown_str_param[MBP_MAX_UNKNOWN_STR][MBP_PARAM_SIZE];
 	char    mbp_unknown_str_value[MBP_MAX_UNKNOWN_STR][MBP_FILENAMESIZE];
 	};
-	
+
 /* edit save file definitions */
 #define MB_ESF_MAXTIMEDIFF 0.0011
 #define MB_ESF_MULTIPLICITY_FACTOR	1000000
@@ -1021,7 +1021,7 @@ struct mb_edit_struct
 	int	action;
 	int	use;
 	};
-struct mb_esf_struct 
+struct mb_esf_struct
 	{
 	char	esffile[MB_PATH_MAXLINE];
 	char	esstream[MB_PATH_MAXLINE];
@@ -1031,137 +1031,137 @@ struct mb_esf_struct
 	FILE	*esffp;
 	FILE	*essfp;
 	};
-	
-int mb_pr_checkstatus(int verbose, char *file, 
+
+int mb_pr_checkstatus(int verbose, char *file,
 			int *prstatus, int *error);
-int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
-			struct mb_process_struct *process, 
+int mb_pr_readpar(int verbose, char *file, int lookforfiles,
+			struct mb_process_struct *process,
 			int *error);
-int mb_pr_writepar(int verbose, char *file, 
-			struct mb_process_struct *process, 
+int mb_pr_writepar(int verbose, char *file,
+			struct mb_process_struct *process,
 			int *error);
-int mb_pr_bathmode(int verbose, struct mb_process_struct *process, 
+int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 			int *error);
-int mb_pr_default_output(int verbose, struct mb_process_struct *process, 
+int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 			int *error);
-int mb_pr_get_output(int verbose, int *format, 
-			char *ifile, char *ofile, 
+int mb_pr_get_output(int verbose, int *format,
+			char *ifile, char *ofile,
 			int *error);
-int mb_pr_check(int verbose, char *ifile, 
-			int *nparproblem, 	
-			int *ndataproblem, 	
+int mb_pr_check(int verbose, char *ifile,
+			int *nparproblem,
+			int *ndataproblem,
 			int *error);
-int mb_pr_update_ofile(int verbose, char *file, 
-			int	mbp_ofile_specified, 
-			char	*mbp_ofile, 
+int mb_pr_update_ofile(int verbose, char *file,
+			int	mbp_ofile_specified,
+			char	*mbp_ofile,
 			int	*error);
-int mb_pr_update_format(int verbose, char *file, 
-			int mbp_format_specified, 
-			int mbp_format, 
+int mb_pr_update_format(int verbose, char *file,
+			int mbp_format_specified,
+			int mbp_format,
 			int *error);
-int mb_pr_update_rollbias(int verbose, char *file, 
-			int	mbp_rollbias_mode, 
-			double	mbp_rollbias, 
-			double	mbp_rollbias_port, 
-			double	mbp_rollbias_stbd, 
+int mb_pr_update_rollbias(int verbose, char *file,
+			int	mbp_rollbias_mode,
+			double	mbp_rollbias,
+			double	mbp_rollbias_port,
+			double	mbp_rollbias_stbd,
 			int *error);
-int mb_pr_update_pitchbias(int verbose, char *file, 
-			int	mbp_pitchbias_mode, 
-			double	mbp_pitchbias, 
+int mb_pr_update_pitchbias(int verbose, char *file,
+			int	mbp_pitchbias_mode,
+			double	mbp_pitchbias,
 			int *error);
-int mb_pr_update_draft(int verbose, char *file, 
-			int	mbp_draft_mode, 
-			double	mbp_draft, 
-			double	mbp_draft_offset, 
-			double	mbp_draft_mult, 
+int mb_pr_update_draft(int verbose, char *file,
+			int	mbp_draft_mode,
+			double	mbp_draft,
+			double	mbp_draft_offset,
+			double	mbp_draft_mult,
 			int *error);
-int mb_pr_update_heave(int verbose, char *file, 
-			int	mbp_heave_mode, 
-			double	mbp_heave, 
-			double	mbp_heave_mult, 
+int mb_pr_update_heave(int verbose, char *file,
+			int	mbp_heave_mode,
+			double	mbp_heave,
+			double	mbp_heave_mult,
 			int *error);
-int mb_pr_update_lever(int verbose, char *file, 
-			int	mbp_lever_mode, 
-			double	mbp_vru_offsetx, 
-			double	mbp_vru_offsety, 
-			double	mbp_vru_offsetz, 
-			double	mbp_sonar_offsetx, 
-			double	mbp_sonar_offsety, 
-			double	mbp_sonar_offsetz, 
+int mb_pr_update_lever(int verbose, char *file,
+			int	mbp_lever_mode,
+			double	mbp_vru_offsetx,
+			double	mbp_vru_offsety,
+			double	mbp_vru_offsetz,
+			double	mbp_sonar_offsetx,
+			double	mbp_sonar_offsety,
+			double	mbp_sonar_offsetz,
 			int *error);
-int mb_pr_update_tide(int verbose, char *file, 
-			int	mbp_tide_mode, 
-			char *mbp_tidefile, 
-			int	mbp_tide_format, 
+int mb_pr_update_tide(int verbose, char *file,
+			int	mbp_tide_mode,
+			char *mbp_tidefile,
+			int	mbp_tide_format,
 			int *error);
-int mb_pr_update_tt(int verbose, char *file, 
-			int	mbp_tt_mode, 
-			double	mbp_tt_mult, 
+int mb_pr_update_tt(int verbose, char *file,
+			int	mbp_tt_mode,
+			double	mbp_tt_mult,
 			int *error);
-int mb_pr_update_ssv(int verbose, char *file, 
-			int	mbp_ssv_mode, 
-			double	mbp_ssv, 
+int mb_pr_update_ssv(int verbose, char *file,
+			int	mbp_ssv_mode,
+			double	mbp_ssv,
 			int *error);
-int mb_pr_update_svp(int verbose, char *file, 
-			int	mbp_svp_mode, 
-			char	*mbp_svpfile, 
-			int	mbp_angle_mode, 
-			int	mbp_corrected, 
+int mb_pr_update_svp(int verbose, char *file,
+			int	mbp_svp_mode,
+			char	*mbp_svpfile,
+			int	mbp_angle_mode,
+			int	mbp_corrected,
 			int *error);
-int mb_pr_update_static(int verbose, char *file, 
-			int	mbp_static_mode, 
-			char	*mbp_staticfile, 
+int mb_pr_update_static(int verbose, char *file,
+			int	mbp_static_mode,
+			char	*mbp_staticfile,
 			int *error);
-int mb_pr_update_navadj(int verbose, char *file, 
-			int	mbp_navadj_mode, 
-			char	*mbp_navadjfile, 
-			int	mbp_navadj_algorithm, 
+int mb_pr_update_navadj(int verbose, char *file,
+			int	mbp_navadj_mode,
+			char	*mbp_navadjfile,
+			int	mbp_navadj_algorithm,
 			int *error);
-int mb_pr_update_nav(int verbose, char *file, 
-			int	mbp_nav_mode, 
-			char	*mbp_navfile, 
-			int	mbp_nav_format, 
-			int	mbp_nav_heading, 
-			int	mbp_nav_speed, 
-			int	mbp_nav_draft, 
-			int	mbp_nav_attitude, 
-			int	mbp_nav_algorithm, 
+int mb_pr_update_nav(int verbose, char *file,
+			int	mbp_nav_mode,
+			char	*mbp_navfile,
+			int	mbp_nav_format,
+			int	mbp_nav_heading,
+			int	mbp_nav_speed,
+			int	mbp_nav_draft,
+			int	mbp_nav_attitude,
+			int	mbp_nav_algorithm,
 			double mbp_nav_timeshift,
 			int *error);
-int mb_pr_update_attitude(int verbose, char *file, 
-			int	mbp_attitude_mode, 
-			char	*mbp_attitudefile, 
-			int	mbp_attitude_format, 
+int mb_pr_update_attitude(int verbose, char *file,
+			int	mbp_attitude_mode,
+			char	*mbp_attitudefile,
+			int	mbp_attitude_format,
 			int *error);
-int mb_pr_update_sonardepth(int verbose, char *file, 
-			int	mbp_sonardepth_mode, 
-			char	*mbp_sonardepthfile, 
-			int	mbp_sonardepth_format, 
+int mb_pr_update_sonardepth(int verbose, char *file,
+			int	mbp_sonardepth_mode,
+			char	*mbp_sonardepthfile,
+			int	mbp_sonardepth_format,
 			int *error);
-int mb_pr_update_navshift(int verbose, char *file, 
-			int	mbp_nav_shift, 
-			double	mbp_nav_offsetx, 
-			double	mbp_nav_offsety, 
-			double	mbp_nav_offsetz, 
-			double	mbp_nav_shiftlon, 
-			double	mbp_nav_shiftlat, 
+int mb_pr_update_navshift(int verbose, char *file,
+			int	mbp_nav_shift,
+			double	mbp_nav_offsetx,
+			double	mbp_nav_offsety,
+			double	mbp_nav_offsetz,
+			double	mbp_nav_shiftlon,
+			double	mbp_nav_shiftlat,
 			int *error);
-int mb_pr_update_heading(int verbose, char *file, 
-			int	mbp_heading_mode, 
-			double	mbp_headingbias, 
+int mb_pr_update_heading(int verbose, char *file,
+			int	mbp_heading_mode,
+			double	mbp_headingbias,
 			int *error);
-int mb_pr_update_datacut(int verbose, char *file, 
+int mb_pr_update_datacut(int verbose, char *file,
 			int	mbp_cut_num,
 			int	*mbp_cut_kind,
 			int	*mbp_cut_mode,
 			double	*mbp_cut_min,
 			double	*mbp_cut_max,
 			int *error);
-int mb_pr_update_edit(int verbose, char *file, 
-			int	mbp_edit_mode, 
-			char	*mbp_editfile, 
+int mb_pr_update_edit(int verbose, char *file,
+			int	mbp_edit_mode,
+			char	*mbp_editfile,
 			int *error);
-int mb_pr_update_ampcorr(int verbose, char *file, 
+int mb_pr_update_ampcorr(int verbose, char *file,
 			int	mbp_ampcorr_mode,
 			char	*mbp_ampcorrfile,
 			int	mbp_ampcorr_type,
@@ -1171,7 +1171,7 @@ int mb_pr_update_ampcorr(int verbose, char *file,
 			int	mbp_ampcorr_area,
 			char	*mbp_ampcorr_topofile,
 			int *error);
-int mb_pr_update_sscorr(int verbose, char *file, 
+int mb_pr_update_sscorr(int verbose, char *file,
 			int	mbp_sscorr_mode,
 			char	*mbp_sscorrfile,
 			int	mbp_sscorr_type,
@@ -1181,13 +1181,13 @@ int mb_pr_update_sscorr(int verbose, char *file,
 			int	mbp_sscorr_area,
 			char	*mbp_sscorr_topofile,
 			int *error);
-int mb_pr_update_ssrecalc(int verbose, char *file, 
+int mb_pr_update_ssrecalc(int verbose, char *file,
 			int	mbp_ssrecalc_mode,
 			double	mbp_ssrecalc_pixelsize,
 			double	mbp_ssrecalc_swathwidth,
 			int	mbp_ssrecalc_interpolate,
 			int *error);
-int mb_pr_update_metadata(int verbose, char *file, 
+int mb_pr_update_metadata(int verbose, char *file,
 			char	*mbp_meta_vessel,
 			char	*mbp_meta_institution,
 			char	*mbp_meta_platform,
@@ -1219,117 +1219,117 @@ int mb_pr_update_kluges(int verbose, char *file,
 			int	mbp_kluge009,
 			int	mbp_kluge010,
 			int *error);
-int mb_pr_get_ofile(int verbose, char *file, 
-			int	*mbp_ofile_specified, 
-			char	*mbp_ofile, 
+int mb_pr_get_ofile(int verbose, char *file,
+			int	*mbp_ofile_specified,
+			char	*mbp_ofile,
 			int	*error);
-int mb_pr_get_format(int verbose, char *file, 
-			int *mbp_format_specified, 
-			int *mbp_format, 
+int mb_pr_get_format(int verbose, char *file,
+			int *mbp_format_specified,
+			int *mbp_format,
 			int *error);
-int mb_pr_get_rollbias(int verbose, char *file, 
-			int	*mbp_rollbias_mode, 
-			double	*mbp_rollbias, 
-			double	*mbp_rollbias_port, 
-			double	*mbp_rollbias_stbd, 
+int mb_pr_get_rollbias(int verbose, char *file,
+			int	*mbp_rollbias_mode,
+			double	*mbp_rollbias,
+			double	*mbp_rollbias_port,
+			double	*mbp_rollbias_stbd,
 			int *error);
-int mb_pr_get_pitchbias(int verbose, char *file, 
-			int	*mbp_pitchbias_mode, 
-			double	*mbp_pitchbias, 
+int mb_pr_get_pitchbias(int verbose, char *file,
+			int	*mbp_pitchbias_mode,
+			double	*mbp_pitchbias,
 			int *error);
-int mb_pr_get_draft(int verbose, char *file, 
-			int	*mbp_draft_mode, 
-			double	*mbp_draft, 
-			double	*mbp_draft_offset, 
-			double	*mbp_draft_mult, 
+int mb_pr_get_draft(int verbose, char *file,
+			int	*mbp_draft_mode,
+			double	*mbp_draft,
+			double	*mbp_draft_offset,
+			double	*mbp_draft_mult,
 			int *error);
-int mb_pr_get_heave(int verbose, char *file, 
-			int	*mbp_heave_mode, 
-			double	*mbp_heave, 
-			double	*mbp_heave_mult, 
+int mb_pr_get_heave(int verbose, char *file,
+			int	*mbp_heave_mode,
+			double	*mbp_heave,
+			double	*mbp_heave_mult,
 			int *error);
-int mb_pr_get_lever(int verbose, char *file, 
-			int	*mbp_lever_mode, 
-			double	*mbp_vru_offsetx, 
-			double	*mbp_vru_offsety, 
-			double	*mbp_vru_offsetz, 
-			double	*mbp_sonar_offsetx, 
-			double	*mbp_sonar_offsety, 
-			double	*mbp_sonar_offsetz, 
+int mb_pr_get_lever(int verbose, char *file,
+			int	*mbp_lever_mode,
+			double	*mbp_vru_offsetx,
+			double	*mbp_vru_offsety,
+			double	*mbp_vru_offsetz,
+			double	*mbp_sonar_offsetx,
+			double	*mbp_sonar_offsety,
+			double	*mbp_sonar_offsetz,
 			int *error);
-int mb_pr_get_tide(int verbose, char *file, 
-			int	*mbp_tide_mode, 
-			char *mbp_tidefile, 
-			int	*mbp_tide_format, 
+int mb_pr_get_tide(int verbose, char *file,
+			int	*mbp_tide_mode,
+			char *mbp_tidefile,
+			int	*mbp_tide_format,
 			int *error);
-int mb_pr_get_tt(int verbose, char *file, 
-			int	*mbp_tt_mode, 
-			double	*mbp_tt_mult, 
+int mb_pr_get_tt(int verbose, char *file,
+			int	*mbp_tt_mode,
+			double	*mbp_tt_mult,
 			int *error);
-int mb_pr_get_ssv(int verbose, char *file, 
-			int	*mbp_ssv_mode, 
-			double	*mbp_ssv, 
+int mb_pr_get_ssv(int verbose, char *file,
+			int	*mbp_ssv_mode,
+			double	*mbp_ssv,
 			int *error);
-int mb_pr_get_svp(int verbose, char *file, 
-			int	*mbp_svp_mode, 
-			char	*mbp_svpfile, 
-			int	*mbp_angle_mode, 
-			int	*mbp_corrected, 
+int mb_pr_get_svp(int verbose, char *file,
+			int	*mbp_svp_mode,
+			char	*mbp_svpfile,
+			int	*mbp_angle_mode,
+			int	*mbp_corrected,
 			int *error);
-int mb_pr_get_static(int verbose, char *file, 
-			int	*mbp_static_mode, 
-			char	*mbp_staticfile, 
+int mb_pr_get_static(int verbose, char *file,
+			int	*mbp_static_mode,
+			char	*mbp_staticfile,
 			int *error);
-int mb_pr_get_navadj(int verbose, char *file, 
-			int	*mbp_navadj_mode, 
-			char	*mbp_navadjfile, 
-			int	*mbp_navadj_algorithm, 
+int mb_pr_get_navadj(int verbose, char *file,
+			int	*mbp_navadj_mode,
+			char	*mbp_navadjfile,
+			int	*mbp_navadj_algorithm,
 			int *error);
-int mb_pr_get_nav(int verbose, char *file, 
-			int	*mbp_nav_mode, 
-			char	*mbp_navfile, 
-			int	*mbp_nav_format, 
-			int	*mbp_nav_heading, 
-			int	*mbp_nav_speed, 
-			int	*mbp_nav_draft, 
-			int	*mbp_nav_attitude, 
-			int	*mbp_nav_algorithm, 
+int mb_pr_get_nav(int verbose, char *file,
+			int	*mbp_nav_mode,
+			char	*mbp_navfile,
+			int	*mbp_nav_format,
+			int	*mbp_nav_heading,
+			int	*mbp_nav_speed,
+			int	*mbp_nav_draft,
+			int	*mbp_nav_attitude,
+			int	*mbp_nav_algorithm,
 			double *mbp_nav_timeshift,
 			int *error);
-int mb_pr_get_attitude(int verbose, char *file, 
-			int	*mbp_attitude_mode, 
-			char	*mbp_attitudefile, 
-			int	*mbp_attitude_format, 
+int mb_pr_get_attitude(int verbose, char *file,
+			int	*mbp_attitude_mode,
+			char	*mbp_attitudefile,
+			int	*mbp_attitude_format,
 			int *error);
-int mb_pr_get_sonardepth(int verbose, char *file, 
-			int	*mbp_sonardepth_mode, 
-			char	*mbp_sonardepthfile, 
-			int	*mbp_sonardepth_format, 
+int mb_pr_get_sonardepth(int verbose, char *file,
+			int	*mbp_sonardepth_mode,
+			char	*mbp_sonardepthfile,
+			int	*mbp_sonardepth_format,
 			int *error);
-int mb_pr_get_navshift(int verbose, char *file, 
-			int	*mbp_nav_shift, 
-			double	*mbp_nav_offsetx, 
-			double	*mbp_nav_offsety, 
-			double	*mbp_nav_offsetz, 
-			double	*mbp_nav_shiftlon, 
-			double	*mbp_nav_shiftlat, 
+int mb_pr_get_navshift(int verbose, char *file,
+			int	*mbp_nav_shift,
+			double	*mbp_nav_offsetx,
+			double	*mbp_nav_offsety,
+			double	*mbp_nav_offsetz,
+			double	*mbp_nav_shiftlon,
+			double	*mbp_nav_shiftlat,
 			int *error);
-int mb_pr_get_heading(int verbose, char *file, 
-			int	*mbp_heading_mode, 
-			double	*mbp_headingbias, 
+int mb_pr_get_heading(int verbose, char *file,
+			int	*mbp_heading_mode,
+			double	*mbp_headingbias,
 			int *error);
-int mb_pr_get_datacut(int verbose, char *file, 
+int mb_pr_get_datacut(int verbose, char *file,
 			int	*mbp_cut_num,
 			int	*mbp_cut_kind,
 			int	*mbp_cut_mode,
 			double	*mbp_cut_min,
 			double	*mbp_cut_max,
 			int *error);
-int mb_pr_get_edit(int verbose, char *file, 
-			int	*mbp_edit_mode, 
-			char	*mbp_editfile, 
+int mb_pr_get_edit(int verbose, char *file,
+			int	*mbp_edit_mode,
+			char	*mbp_editfile,
 			int *error);
-int mb_pr_get_ampcorr(int verbose, char *file, 
+int mb_pr_get_ampcorr(int verbose, char *file,
 			int	*mbp_ampcorr_mode,
 			char	*mbp_ampcorrfile,
 			int	*mbp_ampcorr_type,
@@ -1339,7 +1339,7 @@ int mb_pr_get_ampcorr(int verbose, char *file,
 			int	*mbp_ampcorr_area,
 			char	*mbp_ampcorr_topofile,
 			int *error);
-int mb_pr_get_sscorr(int verbose, char *file, 
+int mb_pr_get_sscorr(int verbose, char *file,
 			int	*mbp_sscorr_mode,
 			char	*mbp_sscorrfile,
 			int	*mbp_sscorr_type,
@@ -1349,13 +1349,13 @@ int mb_pr_get_sscorr(int verbose, char *file,
 			int	*mbp_sscorr_area,
 			char	*mbp_sscorr_topofile,
 			int *error);
-int mb_pr_get_ssrecalc(int verbose, char *file, 
+int mb_pr_get_ssrecalc(int verbose, char *file,
 			int	*mbp_ssrecalc_mode,
 			double	*mbp_ssrecalc_pixelsize,
 			double	*mbp_ssrecalc_swathwidth,
 			int	*mbp_ssrecalc_interpolate,
 			int *error);
-int mb_pr_get_metadata(int verbose, char *file, 
+int mb_pr_get_metadata(int verbose, char *file,
 			char	*mbp_meta_vessel,
 			char	*mbp_meta_institution,
 			char	*mbp_meta_platform,
@@ -1388,48 +1388,48 @@ int mb_pr_get_kluges(int verbose, char *file,
 			int	*mbp_kluge010,
 			int *error);
 int mb_pr_set_bathyslope(int verbose,
-			int nsmooth, 
+			int nsmooth,
 			int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-			int *ndepths, double *depths, double *depthacrosstrack, 
-			int *nslopes, double *slopes, double *slopeacrosstrack, 
-			double *depthsmooth, 
+			int *ndepths, double *depths, double *depthacrosstrack,
+			int *nslopes, double *slopes, double *slopeacrosstrack,
+			double *depthsmooth,
 			int *error);
 int mb_pr_get_bathyslope(int verbose,
 			int ndepths, double *depths, double *depthacrosstrack,
-			int nslopes, double *slopes, double *slopeacrosstrack, 
+			int nslopes, double *slopes, double *slopeacrosstrack,
 			double acrosstrack, double *depth, double *slope,
 			int *error);
-int mb_pr_point_in_quad(int verbose, double px, double py, 
+int mb_pr_point_in_quad(int verbose, double px, double py,
 			double *x, double *y, int *error);
-int mb_esf_check(int verbose, char *swathfile, char *esffile, 
+int mb_esf_check(int verbose, char *swathfile, char *esffile,
 			int *found, int *error);
 int mb_esf_load(int verbose, char *swathfile,
 			int load, int output,
-			char *esffile, 
+			char *esffile,
 			struct mb_esf_struct *esf,
 			int *error);
-int mb_esf_open(int verbose, char *esffile, 
+int mb_esf_open(int verbose, char *esffile,
 			int load, int output,
 			struct mb_esf_struct *esf,
 			int *error);
+int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf,
+			double time_d, double tolerance, int *error);
 int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
-			double time_d, int pingmultiplicity, int nbath, char *beamflag, 
+			double time_d, int pingmultiplicity, int nbath, char *beamflag,
 			int *error);
-int mb_esf_save(int verbose, struct mb_esf_struct *esf, 
+int mb_esf_save(int verbose, struct mb_esf_struct *esf,
 			double time_d, int beam, int action, int *error);
-int mb_ess_save(int verbose, struct mb_esf_struct *esf, 
+int mb_ess_save(int verbose, struct mb_esf_struct *esf,
 		double time_d, int beam, int action, int *error);
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
-	
-int mb_pr_lockswathfile(int verbose, char *file, int purpose, 
+
+int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 			char *program, int *error);
-int mb_pr_unlockswathfile(int verbose, char *file, int purpose, 
+int mb_pr_unlockswathfile(int verbose, char *file, int purpose,
 			char *program, int *error);
 int mb_pr_lockinfo(int verbose, char *file, int *locked,
-			int *purpose, char *program, char *user, char *cpu, 
+			int *purpose, char *program, char *user, char *cpu,
 			char *date, int *error);
 
 /* end this include */
 #endif
-
-

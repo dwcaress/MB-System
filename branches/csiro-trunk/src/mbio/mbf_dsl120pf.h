@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_dsl120pf.h	8/5/96
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -15,9 +15,9 @@
 /*
  * mbf_dsl120pf.h defines the data structures used by MBIO functions
  * to store data in the MBF_DSL120PF format (MBIO id 111).
- * These data are collected using the WHOI DSL AMS-120, a 120 khz 
+ * These data are collected using the WHOI DSL AMS-120, a 120 khz
  * deep-towed sonar which produces both sidescan and bathymetry.
- * The data formats used to store the DSL AMS-120 data are: 
+ * The data formats used to store the DSL AMS-120 data are:
  *      MBF_DSL120PF : MBIO ID 111
  *      MBF_DSL120SF : MBIO ID 112
  *
@@ -71,7 +71,7 @@
  *         DSL120.940630_1100.nav	- navigation
  *   2. The DSL parallel file scheme is supported under MB-System
  *      data format 111 (MBF_DSL120PF); a single file scheme is
- *      supported under data format 112 (MBF_DSL120SF). The 
+ *      supported under data format 112 (MBF_DSL120SF). The
  *      single file scheme is within the DSL format specification.
  *   3. The bathymetry and sidescan data are stored in binary
  *      data structures; the navigation is stored in ASCII.
@@ -79,7 +79,7 @@
  *      and sidescan values. The MB-System implementation has
  *      maximum numbers of values hardwired in the #defines
  *      below.
- *   5. The bathymetry and sidescan data have navigation 
+ *   5. The bathymetry and sidescan data have navigation
  *      fields,  but these navigation values typically repeat
  *      for many pings, often being the same for entire files.
  *      The separate navigation files contain the post-processed
@@ -102,7 +102,7 @@
  *      in the MB-System world where programs expect a single
  *      input and a single output file name. Handling the two
  *      files (bat.dat and amp.dat) will be handled in low level
- *      i/o routines. If the input file name has a "bat" in it, 
+ *      i/o routines. If the input file name has a "bat" in it,
  *      the code will attempt to open a second file with the
  *      same name except that "amp" is substituted for "bat".
  *      If the specified input file has "amp" in it,  then the
@@ -148,7 +148,7 @@ struct mbf_dsl120pf_struct
    	float	alt;			/* altitude - meters */
    	float	ang_offset;	 	/* pointing ang relative to nose - deg*/
    	int	transmit_pwr;  		/* transmit power decibels */
-   	int	gain_port;		/* db - not sure if belongs here */ 
+   	int	gain_port;		/* db - not sure if belongs here */
    	int	gain_starbd;		/* db - not sure if belongs here */
    	float	pulse_width;		/* pulse width */
    	int	swath_width;		/* meters */
@@ -156,27 +156,27 @@ struct mbf_dsl120pf_struct
    	char	swapped;		/* data,header: 00-PC 01-SunHdr 11-Sun*/
 	int	tv_sec;			/* seconds */
 	int	tv_usec;		/* and microseconds */
-   	short	interface;	        /* digital interface: 0,1,or 2 -
+   	short	digitalinterface;	/* digital interface: 0,1,or 2 -
 					 * must be specified in config file */
     	short reserved[5];
-	
+
 	/* bathymetry record */
 	int	bat_type;		/* always "BATH" */
 	int	bat_len;
 	int	bat_hdr_len;
-	int	bat_num_bins;      
+	int	bat_num_bins;
 	float	bat_sampleSize;
 	unsigned int bat_p_flags;
 	float	bat_max_range; /* meters */
 	int	bat_future[9];
 	float	bat_port[MBF_DSL120PF_MAXBEAMS_SIDE];
 	float	bat_stbd[MBF_DSL120PF_MAXBEAMS_SIDE];
-	
+
 	/* amplitude record */
 	int	amp_type;		/* always "AMP " */
 	int	amp_len;
 	int	amp_hdr_len;
-	int	amp_num_samp;      
+	int	amp_num_samp;
 	float	amp_sampleSize;
 	unsigned int amp_p_flags; /* offset/slr, ... */
 	float	amp_max_range; /* meters */
@@ -184,7 +184,7 @@ struct mbf_dsl120pf_struct
 	int	amp_future[8];
 	float	amp_port[MBF_DSL120PF_MAXPIXELS];
 	float	amp_stbd[MBF_DSL120PF_MAXPIXELS_SIDE];
-	
+
 	/* comment */
 	char	comment[MBF_DSL120PF_COMMENT_LENGTH];
 	};

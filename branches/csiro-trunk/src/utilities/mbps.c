@@ -2,7 +2,7 @@
  *    The MB-system:	mbps.c	11/4/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -133,13 +133,13 @@
 #include <math.h>
 #include <string.h>
 
-/* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-
 /* GMT include files */
 #include "gmt.h"
 #include "pslib.h"
+
+/* MBIO include files */
+#include "mb_status.h"
+#include "mb_define.h"
 
 /*--------------------------------------------------------------------*/
 
@@ -165,7 +165,7 @@ struct ping
 	double	*xp;
 	double	*yp;
 	};
-	
+
 int rgb_black[] = {0, 0, 0};
 int rgb_white[] = {255, 255, 255};
 
@@ -266,7 +266,7 @@ int main (int argc, char **argv)
 	double	xx, yy, zz;
 	double	heading_start, dheading, dheadingx, dheadingy;
 	int	i, j, jj, k;
-	
+
 	void Polygon_Fill();
 	void Good_Polygon();
 
@@ -286,7 +286,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhF:f:B:b:E:e:S:s:T:t:I:i:A:a:X:x:K:k:D:d:N:n:P:p:W:w:G:g:YyZz")) != -1)
-	    switch (c) 
+	    switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -346,7 +346,7 @@ int main (int argc, char **argv)
 		case 'n':
 			sscanf (optarg, "%d", &num_pings_max);
 			if (num_pings_max < 2
-			    || num_pings_max > MBPS_MAXPINGS) 
+			    || num_pings_max > MBPS_MAXPINGS)
 			num_pings_max = MBPS_MAXPINGS;
 			flag++;
 			break;
@@ -390,9 +390,9 @@ int main (int argc, char **argv)
 			break;
 		} /* switch */
 
-		
+
 	/* Process the title of the plot */
-	for (i = 1; i < argc; i++) 
+	for (i = 1; i < argc; i++)
 		{
 		if (argv[i][0] == '-'&& ((argv[i][1]=='T')||(argv[i][1]=='t')) ) {
 			strcpy(title,argv[i]);
@@ -402,7 +402,7 @@ int main (int argc, char **argv)
 		}
 
 	/* check that otions are allowed */
-	if ((viewdir!='P') && (viewdir!='S') && (viewdir!='B') && 
+	if ((viewdir!='P') && (viewdir!='S') && (viewdir!='B') &&
             (viewdir!='p') && (viewdir!='s') && (viewdir!='b'))
 		{
 		fprintf(stderr,"viewdir must be either P/p (port) S/s (stbd) or B/b (back)\n");
@@ -410,7 +410,7 @@ int main (int argc, char **argv)
 		}
 
 	/* if error flagged then print it and exit */
-	if (errflg) 
+	if (errflg)
 		{
 		fprintf(stderr,"usage: %s\n", usage_message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
@@ -420,7 +420,7 @@ int main (int argc, char **argv)
 		}
 
 	/* print starting message */
-	if (verbose == 1 || help) 
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -428,7 +428,7 @@ int main (int argc, char **argv)
 		}
 
 	/* print starting debug statements */
-	if (verbose >= 2) 
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  Program <%s>\n",program_name);
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
@@ -456,7 +456,7 @@ int main (int argc, char **argv)
 		}
 
 	/* if help desired then print it and exit */
-	if (help) 
+	if (help)
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
@@ -472,7 +472,7 @@ int main (int argc, char **argv)
 		verbose,file,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS) 
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -515,15 +515,15 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
 						sizeof(double), (void **)&amp, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
-	for (i=0;i<num_pings_max+3;i++) 
+	for (i=0;i<num_pings_max+3;i++)
 		{
 		data[i].beams_bath = 0;
 		data[i].beamflag = NULL;
@@ -532,7 +532,7 @@ int main (int argc, char **argv)
 		data[i].bathalongtrack = NULL;
 		data[i].xp = NULL;
 		data[i].yp = NULL;
-		}  
+		}
 
 
 	/* if error initializing memory then quit */
@@ -565,7 +565,7 @@ int main (int argc, char **argv)
 			ssacrosstrack,
 			ssalongtrack,
 			comment,&error);
-			
+
 		/* only work with survey data */
 		if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
 			{
@@ -620,7 +620,7 @@ int main (int argc, char **argv)
 					message);
 				fprintf(stderr,"Number of good records so far: %d\n",nread);
 				}
-			else if (verbose >= 1 && error > MB_ERROR_NO_ERROR 
+			else if (verbose >= 1 && error > MB_ERROR_NO_ERROR
 				&& error != MB_ERROR_EOF)
 				{
 				mb_error(verbose,error,&message);
@@ -633,7 +633,7 @@ int main (int argc, char **argv)
 				}
 
 			/* calculate raw x,y locations for each beam */
-			if (status == MB_SUCCESS) 
+			if (status == MB_SUCCESS)
 				{
 				/* set initial heading */
 				if (nread == 0)
@@ -652,7 +652,7 @@ int main (int argc, char **argv)
 				distot += distance * 1000.0;	/* distance in meters */
 
 				/* loop over the beams */
-				for (j=0; j<beams_bath; j++) 
+				for (j=0; j<beams_bath; j++)
 					{
 					if (j >= data[nread].beams_bath)
 						{
@@ -660,7 +660,7 @@ int main (int argc, char **argv)
 						data[nread].xp[j] = BAD;
 						data[nread].yp[j] = BAD;
 						}
-					else if (mb_beam_ok(beamflag[j])) 
+					else if (mb_beam_ok(beamflag[j]))
 						{
 						xx = dheadingy * bathacrosstrack[j]
 						    + dheadingx * bathalongtrack[j];
@@ -668,21 +668,21 @@ int main (int argc, char **argv)
 						    - dheadingx * bathacrosstrack[j]
 						    + dheadingy * bathalongtrack[j];
 						zz = -bath[j];
-						if (viewdir=='S' || viewdir=='s') 
+						if (viewdir=='S' || viewdir=='s')
 							{
-							data[nread].xp[j] = yy 
+							data[nread].xp[j] = yy
 							    + xx * sin_eta * cos_alpha;
 							data[nread].yp[j] = zz * cos_eta * ve
 							    - xx * sin_eta * sin_alpha;
 							}
-						else if (viewdir=='P' || viewdir=='p') 
+						else if (viewdir=='P' || viewdir=='p')
 							{
-							data[nread].xp[j]= -yy 
+							data[nread].xp[j]= -yy
 							    - xx * sin_eta * cos_alpha;
 							data[nread].yp[j]= zz * cos_eta * ve
 							    + xx * sin_eta * sin_alpha;
 							}
-						else if (viewdir=='B' || viewdir=='b') 
+						else if (viewdir=='B' || viewdir=='b')
 							{
 							data[nread].xp[j] = xx
 							    + yy * sin_eta * cos_alpha;
@@ -696,12 +696,12 @@ int main (int argc, char **argv)
 						mean_yp += data[nread].yp[j];
 						mean_knt++;
 
-						if (-data[nread].bath[j] < min_z) 
+						if (-data[nread].bath[j] < min_z)
 						    min_z= -data[nread].bath[j];
-						if (-data[nread].bath[j] > max_z) 
+						if (-data[nread].bath[j] > max_z)
 						    max_z= -data[nread].bath[j];
 						}
-					else 
+					else
 						{
 						data[nread].xp[j] = BAD;
 						data[nread].yp[j] = BAD;
@@ -728,7 +728,7 @@ int main (int argc, char **argv)
 			}
 
 		/* print debug statements */
-		if (verbose >= 2) 
+		if (verbose >= 2)
 			{
 			fprintf(stderr,"\ndbg2  Reading loop finished in program <%s>\n",
 			program_name);
@@ -740,13 +740,13 @@ int main (int argc, char **argv)
 
 		/* test if done */
 		if (nread >= num_pings_max
-			&& verbose >= 1) 
+			&& verbose >= 1)
 			{
 			fprintf(stderr, "%s: Maximum number of pings [%d] read before end of file reached...\n",
 			    program_name, num_pings_max);
 			done = MB_YES;
 			}
-		if (nread >= num_pings_max || error > MB_ERROR_NO_ERROR) 
+		if (nread >= num_pings_max || error > MB_ERROR_NO_ERROR)
 			{
 			done = MB_YES;
 			}
@@ -757,7 +757,7 @@ int main (int argc, char **argv)
 	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* print debug statements */
-	if (verbose >= 2) 
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  Reading loop finished in program <%s>\n",
 				program_name);
@@ -768,7 +768,7 @@ int main (int argc, char **argv)
 		}
 
 	/* total track length in m */
-	track_length = distot;	
+	track_length = distot;
 	mean_lat /= mean_knt;
 	mean_latmin = fabs(mean_lat - (int) mean_lat) * 60.0;
 	mean_lon /= mean_knt;
@@ -779,14 +779,14 @@ int main (int argc, char **argv)
 
 	/* rescale xp[],yp[] to zero mean; get min and max */
 	max_yp = min_yp = max_xp = min_xp = 0.0;
-	for (i=0; i<nread; i++) 
+	for (i=0; i<nread; i++)
 		{
 		beamflag = data[i].beamflag;
 		xp = data[i].xp;
 		yp = data[i].yp;
-		for (j=0; j<data[i].beams_bath; j++) 
+		for (j=0; j<data[i].beams_bath; j++)
 			{
-			if (mb_beam_ok(beamflag[j])) 
+			if (mb_beam_ok(beamflag[j]))
 				{
 				yp[j] -= mean_yp;
 				xp[j] -= mean_xp;
@@ -799,37 +799,37 @@ int main (int argc, char **argv)
 		} 		  /* for i */
 
 	/* get page orientation, scaling(in/m) factor and startup plot */
-	if ((viewdir=='P') || (viewdir=='S') || (viewdir=='p') || (viewdir=='s')) 
+	if ((viewdir=='P') || (viewdir=='S') || (viewdir=='p') || (viewdir=='s'))
 		{
-		/* Landscape */		
+		/* Landscape */
 		orient = 0;
-		if (meters_per_inch > 0.0) 
+		if (meters_per_inch > 0.0)
 			{
 			scaling = 1.0 / meters_per_inch;
 			x_off = 11. / 2;
 			y_off = 8.5 / 2.;
-			} 
-		else 
+			}
+		else
 			{
 			if ( (5.2 / (max_yp - min_yp)) < (8.5 / (max_xp - min_xp)) )
 				scaling = (5.2 / (max_yp - min_yp));
 			else
-				scaling = (8.5 / (max_xp - min_xp));			
+				scaling = (8.5 / (max_xp - min_xp));
 			x_off=(-(max_xp + min_xp) * scaling / 2.0) + (11. / 2);
 			y_off=(-(max_yp + min_yp) * scaling / 2.0) + (8.5 / 2) - .2;
 			}
-		} 
-	else 
+		}
+	else
 		{
-		/* Portrait */		
+		/* Portrait */
 		orient = 1;
-		if (meters_per_inch > 0.0) 
+		if (meters_per_inch > 0.0)
 			{
 			scaling = 1.0 / meters_per_inch;
 			x_off = 8.5 / 2.0;
 			y_off = 11. / 2.0;
-			} 
-		else 
+			}
+		else
 			{
 			if ( (8./(max_yp-min_yp))<(6.5/(max_xp-min_xp)) )
 				scaling = (8./(max_yp-min_yp));
@@ -843,30 +843,30 @@ int main (int argc, char **argv)
        /* initialize the Postscript plotting */
 #ifdef GMT_MINOR_VERSION
        ps_plotinit_hires(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
-               gmtdefs.paper_width, gmtdefs.page_rgb, 
-               gmtdefs.encoding.name, 
-               GMT_epsinfo (argv[0]));
+               gmtdefs.paper_width, gmtdefs.page_rgb,
+               gmtdefs.encoding.name,
+               (struct EPS *)GMT_epsinfo (argv[0]));
 #else
        ps_plotinit(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
-               gmtdefs.paper_width, gmtdefs.page_rgb, 
-               gmtdefs.encoding.name, 
-               GMT_epsinfo (argv[0]));
+               gmtdefs.paper_width, gmtdefs.page_rgb,
+               gmtdefs.encoding.name,
+               (struct EPS *)GMT_epsinfo (argv[0]));
 #endif
        GMT_echo_command (argc, argv);
 
 	/* now loop over the data in the appropriate order
 	    laying down white filled boxes with black outlines
 	    wherever the data is good */
-	
-	if ((viewdir=='S') || (viewdir=='s')) 
+
+	if ((viewdir=='S') || (viewdir=='s'))
 		forward = MB_YES;
-	else if ((viewdir=='P') || (viewdir=='p')) 
+	else if ((viewdir=='P') || (viewdir=='p'))
 		forward = MB_NO;
-	else if ((viewdir=='B') || (viewdir=='b')) 
+	else if ((viewdir=='B') || (viewdir=='b'))
 		{
-		if (alpha < 90.0) 
+		if (alpha < 90.0)
 			forward = MB_YES;
-		else 
+		else
 			forward = MB_NO;
 		}
 	for (j=0;j<beams_bath-1;j++)
@@ -877,7 +877,7 @@ int main (int argc, char **argv)
 				jj = j;
 			else
 				jj = beams_bath - 2 - j;
-				
+
 			/* make box */
 			if (mb_beam_ok(data[i].beamflag[jj])
 			    && mb_beam_ok(data[i+1].beamflag[jj])
@@ -900,15 +900,15 @@ int main (int argc, char **argv)
 	/* titles and such */
 	ps_setline(2);	/* set line width */
 
-	if (display_stats == MB_NO) 
+	if (display_stats == MB_NO)
 		{
 		/* plot a title */
 		xl[0]=0;
 		yl[0]=max_yp*scaling+.6;
 		sprintf(label,"%s",title);
 		ps_text(xl[0],yl[0],20.,label,0.,6,0);
-		} 
-	else 
+		}
+	else
 		{
 		/* plot a title */
 		xl[0]=0;
@@ -935,7 +935,7 @@ int main (int argc, char **argv)
 		} /* else after if display_stats */
 
 
-	if (display_scales == MB_YES) 
+	if (display_scales == MB_YES)
 		{
 		/* plot the x-scale */
 		xscale=10000;		/* x scale in m */
@@ -947,7 +947,7 @@ int main (int argc, char **argv)
 		xl[0]+=2.;xl[1]+=2.;xl[2]+=2.;xl[3]+=2.;
 		yl[1]=yl[2]= min_yp*scaling-1.;
 		yl[0]=yl[3]= yl[1]+0.1;
-	
+
 #ifdef GMT_MINOR_VERSION
 		ps_line(xl,yl,4,3,0);
 #else
@@ -956,7 +956,7 @@ int main (int argc, char **argv)
 		sprintf(label,"%.0f km",xscale/1000.0);
 		ps_text(xl[0]+.5,yl[0]+.05,15.,label,0.,6,0);
 
-	
+
 		/* plot the z-scale */
 		range_z=(max_z-min_z);
 		zscale=2000;		/* z scale in m */
@@ -992,7 +992,7 @@ int main (int argc, char **argv)
 		yl[1] = data[a].yp[b];
 		xl[1] = ((xl[1]-xl[0])/distot/2)+.6;
 		yl[1] = ((yl[1]-yl[0])/distot/2) + min_yp*scaling-1.;
-		xl[0] = 0.+.6; 
+		xl[0] = 0.+.6;
 		yl[0] = 0.+min_yp*scaling-0.85;
 		ps_vector(xl[0],yl[0],xl[1],yl[1],
 		    0.01,0.25,0.1,1.0,rgb_black,0);
@@ -1001,51 +1001,51 @@ int main (int argc, char **argv)
 
 
 		/* plot the three axes */
-		for (i=0;i<3;i++) 
+		for (i=0;i<3;i++)
 			{
 			xl[0]=0.;	/* point in center of page */
 			yl[0]=0.;
 			rotate=0;	/* set to 1 if arrow is rotated below */
-			if (i==0) 
-				{	
+			if (i==0)
+				{
 				/* x-axis */
 				x=1.;
-				y=0;	
+				y=0;
 				z=0;
-				} 
-			else if (i==1) 
+				}
+			else if (i==1)
 				{
 				/* y-axis */
-				x=0;	
-				y=1.;	
+				x=0;
+				y=1.;
 				z=0;
-				} 
-			else if (i==2) 
-				{	
+				}
+			else if (i==2)
+				{
 				/* z-axis */
 				x=0;
-				y=0;	
+				y=0;
 				z=-1.;
 				}
 
-			if (viewdir=='P' || viewdir=='p') 
+			if (viewdir=='P' || viewdir=='p')
 				{
 				xl[1]=-y-x*sin_eta*cos_alpha+xl[0];
 				yl[1]= -z*cos_eta+x*sin_eta*sin_alpha+yl[0];
-				} 
-			else if (viewdir=='B' || viewdir=='b') 
+				}
+			else if (viewdir=='B' || viewdir=='b')
 				{
 				xl[1]=(x+y*sin_eta*cos_alpha)+xl[0];
 				yl[1]=-z*cos_eta+y*sin_eta*sin_alpha+yl[0];
-				} 
-			else if (viewdir=='S' || viewdir=='s') 
+				}
+			else if (viewdir=='S' || viewdir=='s')
 				{
 				xl[1]=y+x*sin_eta*cos_alpha+xl[0];
 				yl[1]=z*cos_eta-x*sin_eta*sin_alpha+yl[0];
 				}
 
-			if (yl[1]<yl[0]) 
-				{	
+			if (yl[1]<yl[0])
+				{
 				/* rotate arrows 180 if facing downward */
 				xl[1]=-xl[1];
 				yl[1]=-yl[1];
@@ -1078,7 +1078,7 @@ int main (int argc, char **argv)
 
 	/* end the postscript file */
 	ps_plotend(1);
-	
+
 	/* deallocate arrays */
 	for (i=0;i<nread;i++)
 		{

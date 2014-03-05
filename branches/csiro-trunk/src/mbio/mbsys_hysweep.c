@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hysweep.c	3.00	12/23/2011
  *	$Id$
  *
- *    Copyright (c) 2011-2012 by
+ *    Copyright (c) 2011-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -32,11 +32,11 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_hysweep.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_hysweep.h"
 
 /* turn on debug statements here */
 /* #define MSYS_HYSWEEP_DEBUG 1 */
@@ -62,7 +62,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -415,6 +415,39 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->RSS_port = NULL;		/* port sidescan amplitude samples */
 	store->RSS_starboard = NULL;		/* starboard sidescan amplitude samples */
 
+        /* MSS - MB-System Sidescan
+                MSS dn t pn n ps
+			dn: device number
+			t: time tag (seconds past midnight)
+			pn: ping number (or 0 if not tracked)
+			n: number of pixels
+			ps: pixel size in meters
+
+		Immediately following the MSS record is one record containing
+		the amplitude samples. Zero samples are null values
+		indicating no data.
+
+		Example:
+		MSS 3 61323.082 1500.00 1024 0.340 27535
+		0.00 0.00 109.25 97.13 .... 95.34 120.76 111.26 0.00 (1024 samples) */
+	store->MSS_device_number = 0;	/* device number */
+	store->MSS_time = 0.0;		/* time tag (seconds past midnight) */
+	store->MSS_sound_velocity = 0.0;	/* sound velocity in m/sec  */
+	store->MSS_num_pixels = 0;	        /* number of pixels (typically 1024) */
+	store->MSS_pixel_size = 0.0;	        /* pixel size (meters) */
+	store->MSS_ping_number = 0;	/* ping number (or 0 if not tracked) */
+	for (i=0;i<MBSYS_HYSWEEP_MSS_NUM_PIXELS;i++)
+		{
+		store->MSS_ss[i] = 0.0;
+		store->MSS_ss_across[i] = 0.0;
+		store->MSS_ss_along[i] = 0.0;
+		}
+        store->MSS_table_num_alloc = 0;          /* sidescan working array allocated dimensions */
+        store->MSS_table_altitude_sort = NULL;   /* sidescan working array - altitude = depth - draft + heave */
+        store->MSS_table_range = NULL;           /* sidescan working array - range */
+        store->MSS_table_acrosstrack = NULL;     /* sidescan working array - acrosstrack */
+        store->MSS_table_alongtrack = NULL;      /* sidescan working array - alongtrack */
+
 	/* SNR - dynamic sonar settings
 		up to 12 fields depending on sonar type
 		SNR dn t pn sonar ns s0 --- s11
@@ -587,7 +620,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -611,8 +644,8 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
 		}
 
 	/* get data structure pointer */
@@ -621,34 +654,46 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	/* deallocate arrays */
 	if (store->RMB_beam_ranges != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_beam_ranges), error);	/* beam ranges (survey units) */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_multi_ranges != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_multi_ranges), error);	/* sounding point casting (survey units) (multi-transducer rangers) */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_eastings != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_eastings), error);	/* easting positions of soundings */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_northings != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_northings), error);/* northing positions of soundings */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_depths != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_depths), error);	/* corrected depths of soundings */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_across != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_across), error);	/* acrosstrack positions of soundings */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_along != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_along), error);	/* alongtrack positions of soundings */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_pitchangles != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_pitchangles), error);	/* beam pitch angles of soundings (degrees, TSS convention) */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_rollangles != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_rollangles), error);	/* beam roll angles of soundings (degrees, TSS convention) */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_takeoffangles != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_takeoffangles), error);	/* beam takeoff angles of soundings (degrees from vertical) */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_azimuthalangles != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_azimuthalangles), error);	/* beam azimuthal angles of soundings (degrees from forward) */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_timedelays != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_timedelays), error);	/* beam delay times (milliseconds) */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_intensities != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_intensities), error);	/* beam intensities */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_quality != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_quality), error);		/* beam quality codes (from sonar unit) */
-	if (store->RMB_beam_ranges != NULL)
+	if (store->RMB_sounding_flags != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_sounding_flags), error);		/* beam edit flags */
+	if (store->RSS_port != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RSS_port), error);		/* port sidescan amplitude samples */
+	if (store->RSS_starboard != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RSS_starboard), error);		/* starboard sidescan amplitude samples */
+        if (store->MSS_table_altitude_sort != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->MSS_table_altitude_sort), error);   /* sidescan working array - altitude = depth - draft + heave */
+        if (store->MSS_table_range != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->MSS_table_range), error);           /* sidescan working array - range */
+        if (store->MSS_table_acrosstrack != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->MSS_table_acrosstrack), error);     /* sidescan working array - acrosstrack */
+        if (store->MSS_table_alongtrack != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->MSS_table_alongtrack), error);      /* sidescan working array - alongtrack */
 
 	/* deallocate memory for data structure */
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)store_ptr,error);
@@ -683,8 +728,8 @@ int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -748,7 +793,7 @@ int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -790,8 +835,8 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -920,8 +965,8 @@ int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -978,8 +1023,8 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1056,7 +1101,20 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 
 		/* initialize sidescan */
-		*nss = 0;
+		if (store->MSS_num_pixels > 0
+			&& (store->MSS_ping_number == store->RMB_ping_number
+				|| 10 * store->MSS_ping_number == store->RMB_ping_number))
+			{
+			*nss = store->MSS_num_pixels;
+			for (i=0;i<*nss;i++)
+				{
+				ss[i] =store->MSS_ss[i];
+				ssacrosstrack[i] =store->MSS_ss_across[i];
+				ssalongtrack[i] = store->MSS_ss_along[i];
+				}
+			}
+		else
+			*nss = 0;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1353,8 +1411,8 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV1 || kind == MB_DATA_NAV2))
@@ -1466,7 +1524,20 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			}
 
-		/* do nothing for sidescan now */
+		/* only insert sidescan if the number of pixels matches */
+
+		/* initialize sidescan */
+		if (nss == store->MSS_num_pixels
+			&& (store->MSS_ping_number == store->RMB_ping_number
+				|| 10 * store->MSS_ping_number == store->RMB_ping_number))
+			{
+			for (i=0;i<nss;i++)
+				{
+				store->MSS_ss[i] = ss[i];
+				store->MSS_ss_across[i] = ssacrosstrack[i];
+				store->MSS_ss_along[i] = ssalongtrack[i];
+				}
+			}
 		}
 
 	/* insert data in nav structure */
@@ -1536,14 +1607,14 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %lu\n",(size_t)ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%lu\n",(size_t)angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%lu\n",(size_t)angles_forward);
-		fprintf(stderr,"dbg2       angles_null:%lu\n",(size_t)angles_null);
-		fprintf(stderr,"dbg2       heave:      %lu\n",(size_t)heave);
-		fprintf(stderr,"dbg2       ltrk_off:   %lu\n",(size_t)alongtrack_offset);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %p\n",(void *)ttimes);
+		fprintf(stderr,"dbg2       angles_xtrk:%p\n",(void *)angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%p\n",(void *)angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%p\n",(void *)angles_null);
+		fprintf(stderr,"dbg2       heave:      %p\n",(void *)heave);
+		fprintf(stderr,"dbg2       ltrk_off:   %p\n",(void *)alongtrack_offset);
 		}
 
 	/* get mbio descriptor */
@@ -1573,7 +1644,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			if (store->RMB_sounding_takeoffangles != NULL && store->RMB_sounding_azimuthalangles != NULL)
 				{
 				angles[i] = store->RMB_sounding_takeoffangles[i];
-				angles_forward[i] = store->RMB_sounding_azimuthalangles[i];
+				angles_forward[i] = store->RMB_sounding_azimuthalangles[i] + 90.0;
 				}
 			else if (store->RMB_sounding_pitchangles != NULL && store->RMB_sounding_rollangles != NULL)
 				{
@@ -1676,9 +1747,9 @@ int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %p\n",(void *)detects);
 		}
 
 	/* get mbio descriptor */
@@ -1765,8 +1836,8 @@ int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1857,8 +1928,8 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1965,8 +2036,8 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -2143,8 +2214,8 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -2257,9 +2328,9 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %lu\n",(size_t)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %p\n",(void *)copy_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -2343,6 +2414,329 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr,
+		int pixel_size_set, double *pixel_size,
+		int swath_width_set, double *swath_width,
+		int pixel_int, int *error)
+{
+	char	*function_name = "mbsys_hysweep_makess";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_hysweep_struct *store;
+	int	nbathsort;
+	double  pixel_size_calc;
+	double	ss_spacing;
+	int	iminxtrack;
+	double	minxtrack;
+	double	maxxtrack;
+	int	nrangetable;
+	double	acrosstracktablemin;
+	int	irangenadir, irange;
+	int	found;
+	int	pixel_int_use;
+	int	sample_start, sample_end;
+	double	xtrackss, ltrackss, factor;
+	double	range;
+	int	first, last, k1, k2;
+	int	i, j, k, kk;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:        %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:       %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       pixel_size_set:  %d\n",pixel_size_set);
+		fprintf(stderr,"dbg2       pixel_size:      %f\n",*pixel_size);
+		fprintf(stderr,"dbg2       swath_width_set: %d\n",swath_width_set);
+		fprintf(stderr,"dbg2       swath_width:     %f\n",*swath_width);
+		fprintf(stderr,"dbg2       pixel_int:       %d\n",pixel_int);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_hysweep_struct *) store_ptr;
+
+	/* generate processed sidescan if multibeam and sidescan records both exist */
+	if (store->RMB_ping_number > 0
+		&& (store->RMB_ping_number == store->RSS_ping_number
+			|| store->RMB_ping_number == 10 * store->RSS_ping_number))
+		{
+		/* allocate working arrays as needed */
+		if (store->MSS_table_num_alloc < store->RMB_num_beams)
+			{
+			status = mb_reallocd(verbose, __FILE__, __LINE__, store->RMB_num_beams * sizeof(double),
+						(void **)&(store->MSS_table_altitude_sort), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, store->RMB_num_beams * sizeof(double),
+						(void **)&(store->MSS_table_range), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, store->RMB_num_beams * sizeof(double),
+						(void **)&(store->MSS_table_acrosstrack), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, store->RMB_num_beams * sizeof(double),
+						(void **)&(store->MSS_table_alongtrack), error);
+			if (status == MB_SUCCESS)
+				store->MSS_table_num_alloc = store->RMB_num_beams;
+			}
+
+		/* set basic parameters */
+		store->MSS_device_number = store->RSS_device_number;
+		store->MSS_time = store->RSS_time;
+		store->MSS_sound_velocity = store->RSS_sound_velocity;
+		store->MSS_ping_number = store->RSS_ping_number;
+
+		/* get raw pixel size */
+		ss_spacing = 0.5 * store->RSS_sound_velocity / store->RSS_sample_rate;
+
+		/* get median depth relative to the sonar and check for min max xtrack */
+		nbathsort = 0;
+		minxtrack = 0.0;
+		maxxtrack = 0.0;
+		iminxtrack = store->RMB_num_beams / 2;
+		found = MB_NO;
+		for (i=0;i<store->RMB_num_beams;i++)
+			{
+			if (mb_beam_ok(store->RMB_sounding_flags[i]))
+				{
+				store->MSS_table_altitude_sort[nbathsort] = store->RMB_sounding_depths[i]
+										- store->RMBint_draft
+										+ store->RMBint_heave;
+				nbathsort++;
+
+				if (found == MB_NO || fabs(store->RMB_sounding_across[i] < minxtrack))
+					{
+					minxtrack = fabs(store->RMB_sounding_across[i]);
+					iminxtrack = i;
+					found = MB_YES;
+					}
+
+				maxxtrack = MAX(fabs(store->RMB_sounding_across[i]), maxxtrack);
+				}
+			}
+		if (nbathsort > 0)
+			qsort((char *)store->MSS_table_altitude_sort, nbathsort, sizeof(double),(void *)mb_double_compare);
+
+		/* set number of pixels */
+		store->MSS_num_pixels = MBSYS_HYSWEEP_MSS_NUM_PIXELS;
+
+		/* get sidescan swath width and pixel size */
+		if (swath_width_set == MB_NO && store->RMB_num_beams > 0)
+			{
+			(*swath_width) = MAX(fabs(store->RMB_sounding_rollangles[0]),
+					fabs(store->RMB_sounding_rollangles[store->RMB_num_beams-1]));
+			}
+		if (pixel_size_set == MB_NO
+		    && nbathsort > 0)
+			{
+			/* calculate pixel size implied using swath width and nadir altitude */
+			pixel_size_calc = 2.1 * tan(DTR * (*swath_width)) * store->MSS_table_altitude_sort[nbathsort/2]
+										/ store->MSS_num_pixels;
+
+			/* use pixel size based on actual swath width if that is larger than the first value */
+			pixel_size_calc = MAX(pixel_size_calc, 2.1 * maxxtrack / store->MSS_num_pixels);
+
+			/* make sure the pixel size is at least equivalent to a 0.1 degree nadir beamwidth */
+			pixel_size_calc = MAX(pixel_size_calc, store->MSS_table_altitude_sort[nbathsort/2] * sin(DTR * 0.1));
+
+			/* if the pixel size appears to be changing in size, moderate the change */
+			if ((*pixel_size) <= 0.0)
+				(*pixel_size) = pixel_size_calc;
+			else if (0.95 * (*pixel_size) > pixel_size_calc)
+				(*pixel_size) = 0.95 * (*pixel_size);
+			else if (1.05 * (*pixel_size) < pixel_size_calc)
+				(*pixel_size) = 1.05 * (*pixel_size);
+			else
+				(*pixel_size) = pixel_size_calc;
+			}
+		store->MSS_pixel_size = *pixel_size;
+
+		/* get pixel interpolation */
+		pixel_int_use = pixel_int + 1;
+
+		/* zero the sidescan */
+		for (i=0;i<store->MSS_num_pixels;i++)
+			{
+			store->MSS_ss[i] = 0.0;
+			store->MSS_ss_across[i] = 0.0;
+			store->MSS_ss_along[i] = 0.0;
+			store->MSS_ss_cnt[i] = 0;
+			}
+		for (i=0;i<store->MSS_num_pixels;i++)
+			{
+			store->MSS_ss_across[i] = (*pixel_size) * (double)(i - (store->MSS_num_pixels / 2));;
+			}
+
+/* fprintf(stderr,"pixel_size:%f swath_width:%f altitude:%f\n",*pixel_size,*swath_width,
+store->MSS_table_altitude_sort[nbathsort/2]); */
+
+		/* loop over raw sidescan putting each raw sample into the binning arrays */
+		/* get acrosstrack distance versus range table from bathymetry */
+		nrangetable = 0;
+		irangenadir = 0;
+		acrosstracktablemin = 99999.99;
+		for (i=0;i<store->RMB_num_beams;i++)
+			{
+			if (mb_beam_ok(store->RMB_sounding_flags[i]))
+				{
+				store->MSS_table_range[nrangetable] = 2.0 * store->RMB_beam_ranges[i]
+									/ store->RSS_sound_velocity;
+				store->MSS_table_acrosstrack[nrangetable] = store->RMB_sounding_across[i];
+				store->MSS_table_alongtrack[nrangetable] = store->RMB_sounding_along[i];
+				if (nrangetable == 0
+					|| fabs(store->MSS_table_acrosstrack[nrangetable])
+						< acrosstracktablemin)
+					{
+					irangenadir = nrangetable;
+					acrosstracktablemin = fabs(store->MSS_table_acrosstrack[nrangetable]);
+					}
+				nrangetable++;
+				}
+			}
+
+		/* lay out port side */
+		sample_start = store->MSS_table_range[irangenadir] * store->RSS_sample_rate;
+		sample_end = MIN(store->MSS_table_range[0] * store->RSS_sample_rate,
+					store->RSS_port_num_samples - 1);
+		irange = irangenadir;
+/* fprintf(stderr,"Port: irangenadir:%d sample_start:%d sample_end:%d\n",irangenadir,sample_start, sample_end); */
+		for (i=sample_start;i<sample_end;i++)
+			{
+			range = ((double)i) / ((double)store->RSS_sample_rate);
+			found = MB_NO;
+			for (j=irange;j>0 && found == MB_NO;j--)
+				{
+				if (range >= store->MSS_table_range[j] && range < store->MSS_table_range[j-1])
+					{
+					irange = j;
+					found = MB_YES;
+					}
+				}
+			factor = (range - store->MSS_table_range[irange])
+						/ (store->MSS_table_range[irange-1] - store->MSS_table_range[irange]);
+			xtrackss = store->MSS_table_acrosstrack[irange]
+					+ factor * (store->MSS_table_acrosstrack[irange-1] - store->MSS_table_acrosstrack[irange]);
+			ltrackss = store->MSS_table_alongtrack[irange]
+					+ factor * (store->MSS_table_alongtrack[irange-1] - store->MSS_table_alongtrack[irange]);
+			kk = store->MSS_num_pixels / 2 + (int)(xtrackss / (*pixel_size));
+			if (kk >= 0 && kk < store->MSS_num_pixels)
+				{
+				store->MSS_ss[kk]  += (double) store->RSS_port[i];
+				store->MSS_ss_along[kk] += ltrackss;
+				store->MSS_ss_cnt[kk]++;
+				}
+			}
+
+		/* lay out starboard side */
+		sample_start = store->MSS_table_range[irangenadir] * store->RSS_sample_rate;
+		sample_end = MIN(store->MSS_table_range[nrangetable-1] * store->RSS_sample_rate,
+					store->RSS_starboard_num_samples - 1);
+		irange = irangenadir;
+/* fprintf(stderr,"Starboard: irangenadir:%d sample_start:%d sample_end:%d\n",irangenadir,sample_start, sample_end); */
+		for (i=sample_start;i<sample_end;i++)
+			{
+			range = ((double)i) / ((double)store->RSS_sample_rate);
+			found = MB_NO;
+			for (j=irange;j<nrangetable-1 && found == MB_NO;j++)
+				{
+				if (range >= store->MSS_table_range[j] && range < store->MSS_table_range[j+1])
+					{
+					irange = j;
+					found = MB_YES;
+					}
+				}
+			factor = (range - store->MSS_table_range[irange])
+						/ (store->MSS_table_range[irange+1] - store->MSS_table_range[irange]);
+			xtrackss = store->MSS_table_acrosstrack[irange]
+					+ factor * (store->MSS_table_acrosstrack[irange+1] - store->MSS_table_acrosstrack[irange]);
+			ltrackss = store->MSS_table_alongtrack[irange]
+					+ factor * (store->MSS_table_alongtrack[irange+1] - store->MSS_table_alongtrack[irange]);
+			kk = store->MSS_num_pixels / 2 + (int)(xtrackss / (*pixel_size));
+			if (kk >= 0 && kk < store->MSS_num_pixels)
+				{
+				store->MSS_ss[kk]  += (double) store->RSS_starboard[i];
+				store->MSS_ss_along[kk] += ltrackss;
+				store->MSS_ss_cnt[kk]++;
+				}
+			}
+
+		/* average the sidescan */
+		first = store->MSS_num_pixels;
+		last = -1;
+		for (k=0;k<store->MSS_num_pixels;k++)
+			{
+			if (store->MSS_ss_cnt[k] > 0)
+				{
+				store->MSS_ss[k] /= store->MSS_ss_cnt[k];
+				store->MSS_ss_along[k] /= store->MSS_ss_cnt[k];
+				first = MIN(first, k);
+				last = k;
+				}
+			else
+				store->MSS_ss[k] = MB_SIDESCAN_NULL;
+			}
+
+		/* interpolate the sidescan */
+		k1 = first;
+		k2 = first;
+		for (k=first+1;k<last;k++)
+			{
+			if (store->MSS_ss_cnt[k] <= 0)
+				{
+				if (k2 <= k)
+					{
+					k2 = k+1;
+					while (store->MSS_ss_cnt[k2] <= 0 && k2 < last)
+					    k2++;
+					}
+				if (k2 - k1 <= pixel_int_use)
+					{
+					store->MSS_ss[k] = store->MSS_ss[k1] + (store->MSS_ss[k2] - store->MSS_ss[k1])
+						* ((double)(k - k1)) / ((double)(k2 - k1));
+					store->MSS_ss_across[k] = (k - store->MSS_num_pixels / 2) * (*pixel_size);
+					store->MSS_ss_along[k] = store->MSS_ss_along[k1]
+								+ (store->MSS_ss_along[k2] - store->MSS_ss_along[k1])
+									* ((double)(k - k1)) / ((double)(k2 - k1));
+					}
+				}
+			else
+				{
+				k1 = k;
+				 }
+			}
+
+		/* print debug statements */
+		if (verbose >= 2)
+			{
+			fprintf(stderr,"\ndbg2  Sidescan regenerated in <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg2       pixels_ss:  %d\n", store->MSS_num_pixels);
+			for (i=0;i<store->MSS_num_pixels;i++)
+			  fprintf(stderr,"dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n",
+				i,store->MSS_ss_cnt[i],store->MSS_ss[i],
+				store->MSS_ss_across[i],
+				store->MSS_ss_along[i]);
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       pixel_size:      %f\n",*pixel_size);
+		fprintf(stderr,"dbg2       swath_width:     %f\n",*swath_width);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
 		}
 
 	/* return status */

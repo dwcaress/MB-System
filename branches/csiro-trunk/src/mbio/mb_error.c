@@ -2,7 +2,7 @@
  *    The MB-system:	mb_error.c	2/2/93
  *    $Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -96,9 +96,9 @@
 
 /* mbio include files */
 #define DEFINE_MB_MESSAGES 1
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_io.h"
 
 static char rcs_id[]="$Id$";
 
@@ -117,7 +117,7 @@ int mb_error(int verbose, int error, char **message)
 		fprintf(stderr,"dbg2       rcs_id:  %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
 		fprintf(stderr,"dbg2       error:   %d\n",error);
-		fprintf(stderr,"dbg2       message: %lu\n",(size_t)message);
+		fprintf(stderr,"dbg2       message: %p\n",(void *)message);
 		fprintf(stderr,"dbg2       MB_ERROR_MIN: %d\n",MB_ERROR_MIN);
 		fprintf(stderr,"dbg2       MB_ERROR_MAX: %d\n",MB_ERROR_MAX);
 		}
@@ -169,7 +169,7 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		fprintf(stderr,"dbg2       data_id:    %d\n",data_id);
 		}
 
@@ -214,7 +214,7 @@ int mb_notice_log_error(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		fprintf(stderr,"dbg2       error_id:   %d\n",error_id);
 		}
 
@@ -259,7 +259,7 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		fprintf(stderr,"dbg2       problem_id: %d\n",problem_id);
 		}
 
@@ -305,8 +305,8 @@ int mb_notice_get_list(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:         %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:       %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       notice_list:    %lu\n",(size_t)notice_list);
+		fprintf(stderr,"dbg2       mbio_ptr:       %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       notice_list:    %p\n",(void *)notice_list);
 		}
 
 	/* get pointer to mbio descriptor */

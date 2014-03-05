@@ -2,7 +2,7 @@
  *    The MB-system:	mbvelocity.h	10/15/2009
  *    $Id$
  *
- *    Copyright (c); 2009-2012 by
+ *    Copyright (c); 2009-2013 by
  *    David W. Caress (caress@mbari.org);
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,12 +13,12 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBVELOCITYTOOL is an interactive water velocity profile editor 
- * used to examine multiple water velocity profiles and to create 
- * new water velocity profiles which can be used for the processing 
- * of multibeam sonar data.  In general, this tool is used to examine 
- * water velocity profiles obtained from XBTs, CTDs, or databases, 
- * and to construct new profiles consistent with these various 
+ * MBVELOCITYTOOL is an interactive water velocity profile editor
+ * used to examine multiple water velocity profiles and to create
+ * new water velocity profiles which can be used for the processing
+ * of multibeam sonar data.  In general, this tool is used to examine
+ * water velocity profiles obtained from XBTs, CTDs, or databases,
+ * and to construct new profiles consistent with these various
  * sources of information. This file contains
  * contains function prototypes and was added in 2009.
  *
@@ -48,7 +48,7 @@ struct profile
 	};
 
 /* ping structure definition */
-struct mbvt_ping_struct 
+struct mbvt_ping_struct
 	{
 	int	allocated;
 	int	time_i[7];
@@ -106,10 +106,10 @@ int mbvt_init(int argc, char **argv);
 int mbvt_quit();
 int mbvt_set_graphics(void *xgid, int *brdr, int ncol, unsigned int *pixels);
 int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
-	double *s_velrange, double *s_velcenter, double *s_resrange, 
+	double *s_velrange, double *s_velcenter, double *s_resrange,
 	int *s_anglemode, int *s_format);
-int mbvt_set_values(int s_edit, int s_ndisplay, 
-		double s_maxdepth, double s_velrange, double s_velcenter, 
+int mbvt_set_values(int s_edit, int s_ndisplay,
+		double s_maxdepth, double s_velrange, double s_velcenter,
 		double s_resrange, int s_anglemode);
 int mbvt_open_edit_profile(char *file);
 int mbvt_new_edit_profile();
@@ -133,4 +133,3 @@ int mbvt_process_multibeam();
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
 
 /*--------------------------------------------------------------------*/
-

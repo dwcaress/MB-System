@@ -2,7 +2,7 @@
  *    The MB-system:	mbhysweeppreprocess.c	1/1/2012
  *    $Id$
  *
- *    Copyright (c) 2012 by
+ *    Copyright (c) 2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -36,12 +36,12 @@
 #include <sys/stat.h>
 
 /* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_aux.h"
-#include "../../include/mbsys_hysweep.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_io.h"
+#include "mb_aux.h"
+#include "mbsys_hysweep.h"
 
 #define MBHYSWEEPPREPROCESS_ALLOC_CHUNK 1000
 #define MBHYSWEEPPREPROCESS_PROCESS		1
@@ -517,8 +517,8 @@ int main (int argc, char **argv)
 			exit(error);
 			}
 
-		/* count the binary data records described by the header
-			then rewind the file to the start of the binary data */
+		/* count the data records
+			then rewind the file to the start */
 		nnav = 0;
 		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != NULL)
 			{
@@ -1028,7 +1028,7 @@ int main (int argc, char **argv)
 					{
 					dat_rph_time_d[ndat_rph] = istore->time_d;
 					dat_rph_roll[ndat_rph] = -istore->HCP_roll;
-					dat_rph_pitch[ndat_rph] = -istore->HCP_pitch;
+					dat_rph_pitch[ndat_rph] = istore->HCP_pitch;
 					dat_rph_heave[ndat_rph] = -istore->HCP_heave;
 					ndat_rph++;
 					}
@@ -1396,6 +1396,18 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		for (i=0;i<ndat_heading;i++)
 			{
 			dat_heading_heading[i] += offset_sonar_heading;
+			if (dat_heading_heading[i] >= 360.0)
+				dat_heading_heading[i] -= 360.0;
+			else if (dat_heading_heading[i] < 0.0)
+				dat_heading_heading[i] += 360.0;
+			}
+		for (i=0;i<nnav;i++)
+			{
+			nav_heading[i] += offset_sonar_heading;
+			if (nav_heading[i] >= 360.0)
+				nav_heading[i] -= 360.0;
+			else if (nav_heading[i] < 0.0)
+				nav_heading[i] += 360.0;
 			}
 		}
 
@@ -1659,27 +1671,93 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			{
 			nrec_RMB++;
 
+			/* print debug statements */
+			if (verbose >= 4)
+				{
+				fprintf(stderr,"\ndbg4  Multibeam bathymetry read in by MB-System program <%s>\n",program_name);
+				fprintf(stderr,"dbg4       RMB_device_number:                 %d\n", istore->RMB_device_number);
+				fprintf(stderr,"dbg4       RMB_time:                          %f\n", istore->RMB_time);
+				fprintf(stderr,"dbg4       RMB_sonar_type:                    %x\n", istore->RMB_sonar_type);
+				fprintf(stderr,"dbg4       RMB_sonar_flags:                   %x\n", istore->RMB_sonar_flags);
+				fprintf(stderr,"dbg4       RMB_beam_data_available:           %x\n", istore->RMB_beam_data_available);
+				fprintf(stderr,"dbg4       RMB_num_beams:                     %d\n", istore->RMB_num_beams);
+				fprintf(stderr,"dbg4       RMB_num_beams_alloc:               %d\n", istore->RMB_num_beams_alloc);
+				fprintf(stderr,"dbg4       RMB_sound_velocity:                %f\n", istore->RMB_sound_velocity);
+				fprintf(stderr,"dbg4       RMB_ping_number:                   %d\n", istore->RMB_ping_number);
+				for (i=0;i<istore->RMB_num_beams;i++)
+					{
+					fprintf(stderr,"dbg4       beam:%4d", i);
+
+					if (istore->RMB_beam_data_available & 0x0001)
+					fprintf(stderr," mbrng:%f", istore->RMB_beam_ranges[i]);
+
+					if (istore->RMB_beam_data_available & 0x0002)
+					fprintf(stderr," mtrng:%f", istore->RMB_multi_ranges[i]);
+
+					if (istore->RMB_beam_data_available & 0x0004)
+					fprintf(stderr," est:%f", istore->RMB_sounding_eastings[i]);
+
+					if (istore->RMB_beam_data_available & 0x0004)
+					fprintf(stderr," nor:%f", istore->RMB_sounding_northings[i]);
+
+					if (istore->RMB_beam_data_available & 0x0008)
+					fprintf(stderr," dep:%f", istore->RMB_sounding_depths[i]);
+
+					if (istore->RMB_beam_data_available & 0x0010)
+					fprintf(stderr," ltr:%f", istore->RMB_sounding_along[i]);
+
+					if (istore->RMB_beam_data_available & 0x0020)
+					fprintf(stderr," atr:%f", istore->RMB_sounding_across[i]);
+
+					if (istore->RMB_beam_data_available & 0x0040)
+					fprintf(stderr," pth:%f", istore->RMB_sounding_pitchangles[i]);
+
+					if (istore->RMB_beam_data_available & 0x0080)
+					fprintf(stderr," rll:%f", istore->RMB_sounding_rollangles[i]);
+
+					if (istore->RMB_beam_data_available & 0x0100)
+					fprintf(stderr," toa:%f", istore->RMB_sounding_takeoffangles[i]);
+
+					if (istore->RMB_beam_data_available & 0x0200)
+					fprintf(stderr," azi:%f", istore->RMB_sounding_azimuthalangles[i]);
+
+					if (istore->RMB_beam_data_available & 0x0400)
+					fprintf(stderr," tim:%d", istore->RMB_sounding_timedelays[i]);
+
+					if (istore->RMB_beam_data_available & 0x0800)
+					fprintf(stderr," int:%d", istore->RMB_sounding_intensities[i]);
+
+					if (istore->RMB_beam_data_available & 0x1000)
+					fprintf(stderr," qua:%d", istore->RMB_sounding_quality[i]);
+
+					if (istore->RMB_beam_data_available & 0x2000)
+					fprintf(stderr," flg:%d", istore->RMB_sounding_flags[i]);
+
+					fprintf(stderr,"\n");
+					}
+				}
+
 			/* merge navigation from best available source */
 			if (nnav > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_longitude(verbose,
 							nav_time_d-1, nav_lon-1,
 							nnav, time_d, &navlon, &j,
 							&error);
 				if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_latitude(verbose,
 							nav_time_d-1, nav_lat-1,
 							nnav, time_d, &navlat, &j,
 							&error);
 				}
 			else if (ndat_nav > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_longitude(verbose,
 							dat_nav_time_d-1, dat_nav_lon-1,
 							ndat_nav, time_d, &navlon, &j,
 							&error);
 				if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_latitude(verbose,
 							dat_nav_time_d-1, dat_nav_lat-1,
 							ndat_nav, time_d, &navlat, &j,
 							&error);
@@ -1694,14 +1772,14 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			/* merge heading from best available source */
 			if (nnav > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_heading(verbose,
 							nav_time_d-1, nav_heading-1,
 							nnav, time_d, &heading, &j,
 							&error);
 				}
 			else if (ndat_heading > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose,
+				interp_status = mb_linear_interp_heading(verbose,
 							dat_heading_time_d-1, dat_heading_heading-1,
 							ndat_heading, time_d, &heading, &j,
 							&error);
@@ -1710,6 +1788,10 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 				{
 				heading = 0.0;
 				}
+			if (heading < 0.0)
+				heading += 360.0;
+			else if (heading >= 360.0)
+				heading -= 360.0;
 
 			/* merge sonardepth from best available source */
 			if (nsonardepth > 0)
@@ -1810,71 +1892,105 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			/* get mapping sonar device pointer */
 			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->RMB_device_number]);
 
-			/* deal with case of multibeam sonar */
+			/* deal with case of multibeam sonar - recalculate bathymetry if possible */
 			if (istore->RMB_beam_data_available & 0x0001)
 				{
-				/* get beam roll angles if necessary */
-				if (!(istore->RMB_beam_data_available & 0x0080))
+				/* handle data that starts with beam angles in roll and pitch coordinates */
+				if (istore->RMB_sonar_type == 1 || istore->RMB_sonar_type == 2)
+					{
+					/* get beam roll angles from sonar parameters if necessary */
+					if (!(istore->RMB_beam_data_available & 0x0080))
+						{
+						for (i=0;i<istore->RMB_num_beams;i++)
+							{
+							istore->RMB_sounding_rollangles[i]
+								= device->MBI_first_beam_angle + i * device->MBI_angle_increment;
+							}
+						istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0080;
+						}
+
+					/* set zero beam pitch angles if necessary */
+					if (!(istore->RMB_beam_data_available & 0x0040))
+						{
+						for (i=0;i<istore->RMB_num_beams;i++)
+							{
+							istore->RMB_sounding_pitchangles[i] = 0.0;
+							}
+						istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0040;
+						}
+
+					/* get beam takeoff and azimuthal angles */
+					for (i=0;i<istore->RMB_num_beams;i++)
+						{
+						alpha = istore->RMB_sounding_pitchangles[i];
+						beta = 90.0 + istore->RMB_sounding_rollangles[i];
+
+						/* correct alpha for pitch if necessary */
+						if (!(device->MBI_sonar_flags & 0x0002))
+							alpha += istore->RMBint_pitch;
+
+						/* correct beta for roll if necessary */
+						if (!(device->MBI_sonar_flags & 0x0001))
+							beta -= istore->RMBint_roll;
+
+						mb_rollpitch_to_takeoff(
+							verbose,
+							alpha, beta,
+							&theta, &phi,
+							&error);
+						istore->RMB_sounding_takeoffangles[i] = theta;
+						istore->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
+						}
+					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0300;
+					}
+
+				/* recalculate beam bathymetry if beam takeoff and azimuthal angles are available */
+				if ((istore->RMB_beam_data_available & 0x0300))
 					{
 					for (i=0;i<istore->RMB_num_beams;i++)
 						{
-						istore->RMB_sounding_rollangles[i]
-							= device->MBI_first_beam_angle + i * device->MBI_angle_increment;
+						rr = istore->RMB_beam_ranges[i];
+						theta = istore->RMB_sounding_takeoffangles[i];
+						phi = 90.0 - istore->RMB_sounding_azimuthalangles[i];
+						xx = rr * sin(DTR * theta);
+						zz = rr * cos(DTR * theta);
+						istore->RMB_sounding_across[i] = xx * cos(DTR * phi);
+						istore->RMB_sounding_along[i] = xx * sin(DTR * phi);
+						istore->RMB_sounding_depths[i] = zz + istore->RMBint_draft - istore->RMBint_heave;
 						}
-					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0080;
+					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0038;
 					}
 
-				/* get beam pitch angles */
-				for (i=0;i<istore->RMB_num_beams;i++)
+				/* get beam flags if necessary */
+				if (!(istore->RMB_beam_data_available & 0x2000))
 					{
-					istore->RMB_sounding_pitchangles[i] = 0.0;
+					for (i=0;i<istore->RMB_num_beams;i++)
+						{
+						istore->RMB_sounding_flags[i] = MB_FLAG_NONE;
+						}
+					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x2000;
+
+					/* incorporate quality values */
+					if ((istore->RMB_beam_data_available & 0x1000)
+						&& strncmp(device->DEV_device_name, "Reson Seabat 8", 14) == 0)
+						{
+						for (i=0;i<istore->RMB_num_beams;i++)
+							{
+							if (istore->RMB_sounding_quality[i] < 2)
+								istore->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+							}
+						}
+
+					/* check for null ranges */
+					if ((istore->RMB_beam_data_available & 0x0001))
+						{
+						for (i=0;i<istore->RMB_num_beams;i++)
+							{
+							if (istore->RMB_beam_ranges[i] <= 0.0)
+								istore->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+							}
+						}
 					}
-				istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0040;
-
-				/* get beam takeoff and azimuthal angles */
-				for (i=0;i<istore->RMB_num_beams;i++)
-					{
-					alpha = istore->RMB_sounding_pitchangles[i];
-					beta = 90.0 + istore->RMB_sounding_rollangles[i];
-
-					/* correct alpha for pitch if necessary */
-					if (!(device->MBI_sonar_flags & 0x0002))
-						alpha += istore->RMBint_pitch;
-
-					/* correct beta for roll if necessary */
-					if (!(device->MBI_sonar_flags & 0x0001))
-						beta -= istore->RMBint_roll;
-
-					mb_rollpitch_to_takeoff(
-						verbose,
-						alpha, beta,
-						&theta, &phi,
-						&error);
-					istore->RMB_sounding_takeoffangles[i] = theta;
-					istore->RMB_sounding_azimuthalangles[i] = phi;
-					}
-				istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0300;
-
-				/* get beam bathymetry */
-				for (i=0;i<istore->RMB_num_beams;i++)
-					{
-					rr = istore->RMB_beam_ranges[i];
-					theta = istore->RMB_sounding_takeoffangles[i];
-					phi = istore->RMB_sounding_azimuthalangles[i];
-					xx = rr * sin(DTR * theta);
-					zz = rr * cos(DTR * theta);
-					istore->RMB_sounding_across[i] = xx * cos(DTR * phi);
-					istore->RMB_sounding_along[i] = xx * sin(DTR * phi);
-					istore->RMB_sounding_depths[i] = zz + istore->RMBint_draft - istore->RMBint_heave;
-					}
-				istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0038;
-
-				/* get beam flags */
-				for (i=0;i<istore->RMB_num_beams;i++)
-					{
-					istore->RMB_sounding_flags[i] = MB_FLAG_NONE;
-					}
-				istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x2000;
 				}
 
 			/* deal with case of multiple transducer sonar */
@@ -1933,7 +2049,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 							&theta, &phi,
 							&error);
 						istore->RMB_sounding_takeoffangles[i] = theta;
-						istore->RMB_sounding_azimuthalangles[i] = phi;
+						istore->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
 						}
 					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0300;
 					}
@@ -1948,7 +2064,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 						{
 						rr = istore->RMB_multi_ranges[i];
 						theta = istore->RMB_sounding_takeoffangles[i];
-						phi = istore->RMB_sounding_azimuthalangles[i];
+						phi = 90.0 - istore->RMB_sounding_azimuthalangles[i];
 						xx = rr * sin(DTR * theta);
 						zz = rr * cos(DTR * theta);
 						istore->RMB_sounding_across[i] = xx * cos(DTR * phi);
@@ -1966,6 +2082,72 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 						istore->RMB_sounding_flags[i] = MB_FLAG_NONE;
 						}
 					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x2000;
+					}
+				}
+
+			/* print debug statements */
+			if (verbose >= 4)
+				{
+				fprintf(stderr,"\ndbg4  Multibeam bathymetry calculated by MB-System program <%s>\n",program_name);
+				fprintf(stderr,"dbg4       RMB_device_number:                 %d\n", istore->RMB_device_number);
+				fprintf(stderr,"dbg4       RMB_time:                          %f\n", istore->RMB_time);
+				fprintf(stderr,"dbg4       RMB_sonar_type:                    %x\n", istore->RMB_sonar_type);
+				fprintf(stderr,"dbg4       RMB_sonar_flags:                   %x\n", istore->RMB_sonar_flags);
+				fprintf(stderr,"dbg4       RMB_beam_data_available:           %x\n", istore->RMB_beam_data_available);
+				fprintf(stderr,"dbg4       RMB_num_beams:                     %d\n", istore->RMB_num_beams);
+				fprintf(stderr,"dbg4       RMB_num_beams_alloc:               %d\n", istore->RMB_num_beams_alloc);
+				fprintf(stderr,"dbg4       RMB_sound_velocity:                %f\n", istore->RMB_sound_velocity);
+				fprintf(stderr,"dbg4       RMB_ping_number:                   %d\n", istore->RMB_ping_number);
+				for (i=0;i<istore->RMB_num_beams;i++)
+					{
+					fprintf(stderr,"dbg4       beam:%4d", i);
+
+					if (istore->RMB_beam_data_available & 0x0001)
+					fprintf(stderr," mbrng:%f", istore->RMB_beam_ranges[i]);
+
+					if (istore->RMB_beam_data_available & 0x0002)
+					fprintf(stderr," mtrng:%f", istore->RMB_multi_ranges[i]);
+
+					if (istore->RMB_beam_data_available & 0x0004)
+					fprintf(stderr," est:%f", istore->RMB_sounding_eastings[i]);
+
+					if (istore->RMB_beam_data_available & 0x0004)
+					fprintf(stderr," nor:%f", istore->RMB_sounding_northings[i]);
+
+					if (istore->RMB_beam_data_available & 0x0008)
+					fprintf(stderr," dep:%f", istore->RMB_sounding_depths[i]);
+
+					if (istore->RMB_beam_data_available & 0x0010)
+					fprintf(stderr," ltr:%f", istore->RMB_sounding_along[i]);
+
+					if (istore->RMB_beam_data_available & 0x0020)
+					fprintf(stderr," atr:%f", istore->RMB_sounding_across[i]);
+
+					if (istore->RMB_beam_data_available & 0x0040)
+					fprintf(stderr," pth:%f", istore->RMB_sounding_pitchangles[i]);
+
+					if (istore->RMB_beam_data_available & 0x0080)
+					fprintf(stderr," rll:%f", istore->RMB_sounding_rollangles[i]);
+
+					if (istore->RMB_beam_data_available & 0x0100)
+					fprintf(stderr," toa:%f", istore->RMB_sounding_takeoffangles[i]);
+
+					if (istore->RMB_beam_data_available & 0x0200)
+					fprintf(stderr," azi:%f", istore->RMB_sounding_azimuthalangles[i]);
+
+					if (istore->RMB_beam_data_available & 0x0400)
+					fprintf(stderr," tim:%d", istore->RMB_sounding_timedelays[i]);
+
+					if (istore->RMB_beam_data_available & 0x0800)
+					fprintf(stderr," int:%d", istore->RMB_sounding_intensities[i]);
+
+					if (istore->RMB_beam_data_available & 0x1000)
+					fprintf(stderr," qua:%d", istore->RMB_sounding_quality[i]);
+
+					if (istore->RMB_beam_data_available & 0x2000)
+					fprintf(stderr," flg:%d", istore->RMB_sounding_flags[i]);
+
+					fprintf(stderr,"\n");
 					}
 				}
 			}

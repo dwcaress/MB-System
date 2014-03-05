@@ -1,0 +1,312 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_bpr</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_bpr</H1>
+Section:  MB\-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_bpr</B> - MB-System macro to process data from a Seabird SBE53 pressure
+sensor into a tidal model for use by mbprocess.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_bpr</B> <B>-I</B><I>bprfile</I> <B>-O</B><I>tidefile</I> [<B>-D</B><I>offset </I><B>R</B><I>lon/lat</I> <B>-T -H -V</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_bpr</B> is a perl shellscript used to translate pressure data from a Seabird SBE53 pressure
+sensor used as a Bottom Pressure Recorder (BPR) into tidal data that can be used to correct
+swath bathymetry data. The user specifies an input BPR data file in the *.tid format produced
+by Seabird software and the output path for the resulting tidefile.
+<P>
+By default, the output
+tidefile will be in the form of a text file with two columns:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;tide.
+<BR>
+
+Here time_d are time values in decimal epoch seconds (seconds since 1970 Jan 1 00:00:00) and the tide values
+are in meters. In this case, the tidefile is in format 1 as supported by <B>mbprocess</B>, so to make use of this
+tide data to correct swath bathymetry, use <B>mbset</B> as follows:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbset&nbsp;-Idatalist.mb-1&nbsp;-PTIDEFILE:tidefilename&nbsp;-PTIDEFORMAT:1
+<BR>
+
+where datalist.mb-1 is the datalist referring to the data files to be processed. After using <B>mbset</B> to
+turn on tide correction, run <B>mbprocess</B>:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbprocess&nbsp;-Idatalist.mb-1
+<BR>
+
+<P>
+If the <B>-T</B> option is specified, then the output file will have the form of:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;tide
+<BR>
+
+In this case, the tidefile is in format 2 as supported by <B>mbprocess</B>, so to make use of this
+tide data to correct swath bathymetry, use <B>mbset</B> as follows:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbset&nbsp;-Idatalist.mb-1&nbsp;-PTIDEFILE:tidefilename&nbsp;-PTIDEFORMAT:2
+<BR>
+
+where datalist.mb-1 is the datalist referring to the data files to be processed. After using <B>mbset</B> to
+turn on tide correction, run <B>mbprocess</B>.
+<P>
+The macro <B>mbm_bpr</B> calculates depth from pressure and latitude using the empirical formula for seawater in:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N.&nbsp;P.&nbsp;Fofonoff&nbsp;and&nbsp;R.&nbsp;C.&nbsp;Millard,&nbsp;Jr.,&nbsp;Algorithms&nbsp;for&nbsp;computation&nbsp;of&nbsp;fundamental
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;properties&nbsp;of&nbsp;seawater,&nbsp;Unesco&nbsp;Tech.&nbsp;Papers&nbsp;in&nbsp;Mar.&nbsp;Sci.,&nbsp;No.&nbsp;44&nbsp;1983.
+<BR>
+
+and then calculates tidal data as the difference between the observed depth and a vertical
+reference depth. If a location is supplied using the <B>-R</B> option,
+<B>mbm_bpr</B> uses the latitude in the depth calculation and also extracts a tidal model
+corresponding the to BPR deployment site and timespan using the program <B>mbotps</B>. The vertical
+reference is then the average difference between the tidal model and the observed depths.
+If the user does not supply a location using the <B>-R</B> option,
+a location on the equator is assumed for the depth calculation and the vertical reference is
+the mean depth of the middle half of the depth time series (i.e. depths from 1/4 to 3/4 of the total time span).
+The user can specify an additional offset to apply to the tide data using the <B>-D</B><I>offset</I> option.
+<P>
+If the <B>-T</B> option is not used, then <B>mbm_bpr</B> will also output a shellscript that will, if
+executed, generate a GMT postscript plot of the tide data output. If a location has been specified so that
+a tidal model was also generated, the model will be plotted with the tide data.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>
+
+Suzanne H. O'Hara (<A HREF="mailto:sohara@ldeo.columbia.edu">sohara@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-D</B>
+
+<DD>
+<I>offset</I>
+<BR>
+
+An offset to be added to the calculated tidal data, in meters. Default: <I>offset</I>=0.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>bprfile</I>
+<BR>
+
+Input pressure data from the SBE53 pressure sensor in the Sea-Bird *.tid format.
+<DT><B>-O</B>
+
+<DD>
+<I>tidefile</I>
+<BR>
+
+Output tide data file path. The format of the tide data controlled by the use (or not) of the <B>-T</B> option.
+<DT><B>-R</B>
+
+<DD>
+<I>longitude/latitude</I>
+<BR>
+
+Sets the location of the BPR deployment. Here <I>longitude</I> and <I>latitude</I> are in decimal
+degrees.
+<DT><B>-T</B>
+
+<DD>
+Changes the tide data format output. The format of the tide data are normally
+in the form of a text file with two columns:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;tide
+<BR>
+
+where time_d are time values in decimal epoch seconds (seconds since 1970 Jan 1 00:00:00) and the tide values
+are in meters.
+If the <B>-T</B> option is specified, then the output file will instead have the form of:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;tide
+<DT><B>-V</B>
+
+<DD>
+Causes <B>mbm_bpr</B> to operate in &quot;verbose&quot; mode so that it outputs
+more information than usual.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>Examples</H2>
+
+Suppose one has deployed an SBE53 at 110 deg 40.92220'W 26deg 27.18960'N at about 1200 m depth.
+The Sea-Bird processing software outputs data in *.tid files with output something like:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:27:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.2731
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:28:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.2696
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:29:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.2589
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:30:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.2537
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:31:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.2448
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:32:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.2322
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:33:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.2188
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:34:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.2656
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:35:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.3567
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:36:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.4316
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;11&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:37:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.4929
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;12&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:38:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.5661
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;13&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:39:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.6242
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;14&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:40:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.6891
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;15&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:41:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;20.7590
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;16&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:42:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;19.8901
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;17&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:43:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;18.1037
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;18&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:44:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;17.2487
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;19&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:45:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;15.9275
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;20&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:46:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;14.7406
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;21&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:47:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;13.7798
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;22&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:48:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;13.0540
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;23&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:49:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;12.3869
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;24&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:50:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;11.8464
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;25&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:51:21&nbsp;99999.9999&nbsp;&nbsp;&nbsp;&nbsp;11.1999
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;26&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:52:21&nbsp;&nbsp;&nbsp;528.8065&nbsp;&nbsp;&nbsp;&nbsp;10.5061
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;27&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:53:21&nbsp;&nbsp;&nbsp;583.2633&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.9686
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;28&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:54:21&nbsp;&nbsp;&nbsp;637.7951&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.3547
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;29&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:55:21&nbsp;&nbsp;&nbsp;693.5947&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.8287
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;30&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:56:21&nbsp;&nbsp;&nbsp;748.5921&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.3998
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;31&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:57:21&nbsp;&nbsp;&nbsp;804.0302&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.0251
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;32&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:58:21&nbsp;&nbsp;&nbsp;859.5471&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.6560
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;33&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;16:59:21&nbsp;&nbsp;&nbsp;914.8043&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.3006
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;34&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:00:21&nbsp;&nbsp;&nbsp;969.7692&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.0322
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;35&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:01:21&nbsp;&nbsp;1023.0636&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.6673
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;36&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:02:21&nbsp;&nbsp;1077.7238&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.3327
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;37&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:03:21&nbsp;&nbsp;1132.0991&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.0528
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;38&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:04:21&nbsp;&nbsp;1186.9391&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.8203
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;39&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:05:21&nbsp;&nbsp;1241.4040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.6089
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;40&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:06:21&nbsp;&nbsp;1295.6002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.4167
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;41&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:07:21&nbsp;&nbsp;1350.1353&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.2188
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;42&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:08:21&nbsp;&nbsp;1404.8882&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0195
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;43&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:09:21&nbsp;&nbsp;1460.2095&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9215
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;44&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:10:21&nbsp;&nbsp;1514.6683&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.7630
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;45&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:11:21&nbsp;&nbsp;1568.9270&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5651
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;46&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:12:21&nbsp;&nbsp;1623.3903&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.4452
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;47&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:13:21&nbsp;&nbsp;1678.6771&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.3075
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;48&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:14:21&nbsp;&nbsp;1733.7411&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1910
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;49&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:15:21&nbsp;&nbsp;1789.1549&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.0284
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;50&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:16:21&nbsp;&nbsp;1844.5557&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.8760
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;51&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:17:21&nbsp;&nbsp;1869.8892&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.7976
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;52&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:18:21&nbsp;&nbsp;1869.8176&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.7534
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;53&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:19:21&nbsp;&nbsp;1869.8197&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.7088
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;54&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:20:21&nbsp;&nbsp;1869.8224&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.6828
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;55&nbsp;&nbsp;&nbsp;03/14/2012&nbsp;17:21:21&nbsp;&nbsp;1869.8241&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.6682
+<BR>
+
+where the third column is the pressure in dbar and the fourth column is temperature in degrees C.
+The pressure increases and the temperature decreases as the sensor sinks to the seafloor following
+deployment off a ship. Once the sensor is on the seafloor, pressure variations reflect the tides.
+<P>
+To extract a tidal model, use <B>mbm_bpr</B> as follows:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbm_bpr&nbsp;-I&nbsp;BPR.tid&nbsp;-OBPR.tde&nbsp;-R-110.682037/27.453160&nbsp;-V
+<BR>
+
+The output to the shell looks like:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;&nbsp;Status:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1771&nbsp;pressure&nbsp;values&nbsp;read&nbsp;from&nbsp;BPR.tid
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vertical&nbsp;reference&nbsp;to&nbsp;tidal&nbsp;model&nbsp;for&nbsp;position&nbsp;-110.682037&nbsp;27.453160
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tide&nbsp;will&nbsp;be&nbsp;output&nbsp;as&nbsp;&lt;time_d&nbsp;tide&gt;&nbsp;values
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;plot&nbsp;will&nbsp;be&nbsp;generated
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Executing:&nbsp;mbotps&nbsp;-A1&nbsp;-D1200&nbsp;-R-110.682037/27.453160&nbsp;-B2012/03/14/16/52/21&nbsp;-E2012/03/15/22/22/21&nbsp;-OBPR.tid_tidemodel.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Results&nbsp;are&nbsp;really&nbsp;in&nbsp;BPR.tid_tidemodel.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1690&nbsp;pressure&nbsp;values&nbsp;output&nbsp;to&nbsp;BPR.tde
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vertical&nbsp;reference:&nbsp;1267.31678290355&nbsp;m
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Executing&nbsp;mbm_xyplot&nbsp;-R1331743941.000000/1331850141.000000/-0.5071/0.5071&nbsp;-IW0/0/0:BPR.tde&nbsp;-IW255/0/0:BPR.tid_tidemodel.txt&nbsp;-OBPR.tde_tideplot&nbsp;-L&quot;Tide&nbsp;Data&nbsp;from&nbsp;BPR&nbsp;&lt;BPR.tde&gt;&nbsp;(black)&nbsp;&amp;&nbsp;Tide&nbsp;Model&nbsp;(red):Seconds:Tide&nbsp;(meters)&quot;&nbsp;-V
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Executing&nbsp;&lt;BPR.tde_tideplot.cmd&gt;&nbsp;also&nbsp;invokes&nbsp;gv&nbsp;to&nbsp;view&nbsp;the&nbsp;plot&nbsp;on&nbsp;the&nbsp;screen.
+<BR>
+
+The output tidal data file BPR.tde has the form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1331745441.000000&nbsp;-0.0803109226781089
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1331745501.000000&nbsp;-0.129052283649798
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1331745561.000000&nbsp;-0.127622718432121
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1331745621.000000&nbsp;-0.125784706023751
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1331745681.000000&nbsp;-0.124627438960488
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1331745741.000000&nbsp;-0.123334022838208
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1331745801.000000&nbsp;-0.12285750111073
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1331745861.000000&nbsp;-0.121768308595847
+<BR>
+
+where the first column is time in seconds since January 1, 1970 (epoch seconds, aka unix
+seconds, aka time_d values within <B>MB-System</B>), and the second column is the tidal signal
+in meters. In this case the reference tidal model is provided by <B>mbotps</B>, and the
+plot created by running the output shellscript BPR.tde_tideplot.cmd plots both the tidal data
+calculated by <B>mbm_bpr</B> and the tidal model extracted using <B>mbotps</B>.
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbset.html">mbset</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>REFERENCES</H2>
+
+N. P. Fofonoff and R. C. Millard, Jr., Algorithms for computation of fundamental
+properties of seawater, Unesco Tech. Papers in Mar. Sci., No. 44 1983.
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>BUGS</H2>
+
+Lobsters, really.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">Examples</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">REFERENCES</A><DD>
+<DT><A HREF="#lbAK">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

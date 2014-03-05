@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_edgjstar.c	5/2/2005
  *	$Id$
  *
- *    Copyright (c) 2005-2012 by
+ *    Copyright (c) 2005-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_edgjstar.c contains the functions for reading
- * sidescan data in the EDGJSTAR format.  
+ * sidescan data in the EDGJSTAR format.
  * These functions include:
  *   mbr_alm_edgjstar	- allocate read/write memory
  *   mbr_dem_edgjstar	- deallocate read/write memory
@@ -42,7 +42,7 @@
  *
  *
  */
- 
+
 /* Debug flag */
 /* #define MBF_EDGJSTAR_DEBUG 1 */
 
@@ -53,57 +53,57 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_swap.h"
-#include "../../include/mbsys_jstar.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mb_swap.h"
+#include "mbsys_jstar.h"
 
 /* essential function prototypes */
-int mbr_register_edgjstar(int verbose, void *mbio_ptr, 
+int mbr_register_edgjstar(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_edgjstar(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_edgjstar(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
-int mbr_register_edgjstr2(int verbose, void *mbio_ptr, 
+int mbr_register_edgjstr2(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_edgjstr2(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_edgjstr2(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error);
@@ -132,58 +132,58 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_edgjstar(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_edgjstar(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_edgjstar;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_edgjstar; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_jstar_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_jstar_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_edgjstar; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_edgjstar; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_jstar_dimensions; 
-	mb_io_ptr->mb_io_pingnumber = &mbsys_jstar_pingnumber; 
-	mb_io_ptr->mb_io_extract = &mbsys_jstar_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_jstar_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_jstar_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_jstar_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_jstar_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_jstar_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_jstar_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
-	mb_io_ptr->mb_io_extract_segytraceheader = &mbsys_jstar_extract_segytraceheader; 
-	mb_io_ptr->mb_io_extract_segy = &mbsys_jstar_extract_segy; 
-	mb_io_ptr->mb_io_insert_segy = &mbsys_jstar_insert_segy; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_edgjstar;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_jstar_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_jstar_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_edgjstar;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_edgjstar;
+	mb_io_ptr->mb_io_dimensions = &mbsys_jstar_dimensions;
+	mb_io_ptr->mb_io_pingnumber = &mbsys_jstar_pingnumber;
+	mb_io_ptr->mb_io_extract = &mbsys_jstar_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_jstar_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_jstar_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_jstar_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_jstar_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_jstar_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_jstar_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
+	mb_io_ptr->mb_io_extract_segytraceheader = &mbsys_jstar_extract_segytraceheader;
+	mb_io_ptr->mb_io_extract_segy = &mbsys_jstar_extract_segy;
+	mb_io_ptr->mb_io_insert_segy = &mbsys_jstar_insert_segy;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -202,28 +202,28 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       extract_segytraceheader: %lu\n",(size_t)mb_io_ptr->mb_io_extract_segytraceheader);
-		fprintf(stderr,"dbg2       extract_segy:       %lu\n",(size_t)mb_io_ptr->mb_io_extract_segy);
-		fprintf(stderr,"dbg2       insert_segy:        %lu\n",(size_t)mb_io_ptr->mb_io_insert_segy);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       extract_segytraceheader: %p\n",(void *)mb_io_ptr->mb_io_extract_segytraceheader);
+		fprintf(stderr,"dbg2       extract_segy:       %p\n",(void *)mb_io_ptr->mb_io_extract_segy);
+		fprintf(stderr,"dbg2       insert_segy:        %p\n",(void *)mb_io_ptr->mb_io_insert_segy);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -234,25 +234,25 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_edgjstar(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_edgjstar(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_edgjstar";
@@ -293,7 +293,7 @@ int mbr_info_edgjstar(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -340,56 +340,56 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_edgjstr2(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_edgjstr2(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_edgjstar;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_edgjstar; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_jstar_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_jstar_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_edgjstar; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_edgjstar; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_jstar_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_jstar_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_jstar_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_jstar_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_jstar_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_jstar_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_jstar_ttimes; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
-	mb_io_ptr->mb_io_extract_segytraceheader = &mbsys_jstar_extract_segytraceheader; 
-	mb_io_ptr->mb_io_extract_segy = &mbsys_jstar_extract_segy; 
-	mb_io_ptr->mb_io_insert_segy = &mbsys_jstar_insert_segy; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_edgjstar;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_jstar_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_jstar_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_edgjstar;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_edgjstar;
+	mb_io_ptr->mb_io_dimensions = &mbsys_jstar_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_jstar_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_jstar_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_jstar_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_jstar_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_jstar_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_jstar_ttimes;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
+	mb_io_ptr->mb_io_extract_segytraceheader = &mbsys_jstar_extract_segytraceheader;
+	mb_io_ptr->mb_io_extract_segy = &mbsys_jstar_extract_segy;
+	mb_io_ptr->mb_io_insert_segy = &mbsys_jstar_insert_segy;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -408,27 +408,27 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       extract_segytraceheader: %lu\n",(size_t)mb_io_ptr->mb_io_extract_segytraceheader);
-		fprintf(stderr,"dbg2       extract_segy:       %lu\n",(size_t)mb_io_ptr->mb_io_extract_segy);
-		fprintf(stderr,"dbg2       insert_segy:        %lu\n",(size_t)mb_io_ptr->mb_io_insert_segy);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       extract_segytraceheader: %p\n",(void *)mb_io_ptr->mb_io_extract_segytraceheader);
+		fprintf(stderr,"dbg2       extract_segy:       %p\n",(void *)mb_io_ptr->mb_io_extract_segy);
+		fprintf(stderr,"dbg2       insert_segy:        %p\n",(void *)mb_io_ptr->mb_io_insert_segy);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -439,25 +439,25 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_edgjstr2(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_edgjstr2(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_edgjstr2";
@@ -498,7 +498,7 @@ int mbr_info_edgjstr2(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -539,7 +539,7 @@ int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -579,7 +579,7 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -642,8 +642,8 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -651,13 +651,13 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_jstar_struct *) store_ptr;
-	
+
 	/* loop over reading data until a full record of some sort is read */
 	done = MB_NO;
 	while (done == MB_NO)
 		{
 		/* read message header */
-		if ((read_status = fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 
+		if ((read_status = fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE,
 				    1, mb_io_ptr->mbfp)) == 1)
 			{
 			/* extract the message header values */
@@ -672,7 +672,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			message.sequence = (mb_u_char) buffer[index]; index++;
 			mb_get_binary_short(MB_YES, &buffer[index], &(message.reserved)); index += 2;
 			mb_get_binary_int(MB_YES, &buffer[index], &(message.size)); index += 4;
-			
+
 			store->subsystem = message.subsystem;
 			}
 
@@ -681,7 +681,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
-			done = MB_YES;	    
+			done = MB_YES;
 			store->kind = MB_DATA_NONE;
 			}
 
@@ -692,26 +692,26 @@ status,message.type,message.subsystem,message.channel,message.size);
 #endif
 		if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_COMMENT
 			&& message.size < MB_COMMENT_MAXLINE)
-			{			
+			{
 			/* comment channel */
 			comment = (struct mbsys_jstar_comment_struct *) &(store->comment);
 			comment->message = message;
-			
+
 			/* read the comment */
-			if ((read_status = fread(comment->comment, message.size, 
+			if ((read_status = fread(comment->comment, message.size,
 			    		1, mb_io_ptr->mbfp)) == 1)
-				{				
+				{
 				comment->comment[message.size] = 0;
 				done = MB_YES;
 				store->kind = MB_DATA_COMMENT;
 				}
-				
+
 			/* end of file */
 			else
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;	    
+				done = MB_YES;
 				store->kind = MB_DATA_NONE;
 				}
 			}
@@ -723,11 +723,11 @@ status,message.type,message.subsystem,message.channel,message.size);
 			/* sbp channel */
 			sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
 			sbp->message = message;
-			
+
 			/* read the 240 byte trace header */
-			if ((read_status = fread(buffer, MBSYS_JSTAR_SBPHEADER_SIZE, 
+			if ((read_status = fread(buffer, MBSYS_JSTAR_SBPHEADER_SIZE,
 			    		1, mb_io_ptr->mbfp)) == 1)
-				{				
+				{
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(sbp->sequenceNumber)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(sbp->startDepth)); index += 4;
@@ -814,7 +814,7 @@ status,message.type,message.subsystem,message.channel,message.size);
 				mb_get_binary_int(MB_YES, &buffer[index], &(sbp->depth)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(sbp->sonardepth)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(sbp->sonaraltitude)); index += 4;
-					
+
 				/* allocate memory for the trace */
 				if (sbp->dataFormat == 1)
 					shortspersample = 2;
@@ -830,10 +830,10 @@ status,message.type,message.subsystem,message.channel,message.size);
 						sbp->trace_alloc = trace_size;
 						}
 					}
-					
+
 				/* read the trace */
-				if (status == MB_SUCCESS 
-					&& (read_status = fread(sbp->trace, trace_size, 
+				if (status == MB_SUCCESS
+					&& (read_status = fread(sbp->trace, trace_size,
 			    			1, mb_io_ptr->mbfp)) == 1)
 					{
 #ifndef BYTESWAPPED
@@ -847,20 +847,20 @@ status,message.type,message.subsystem,message.channel,message.size);
 					{
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;	    
+					done = MB_YES;
 					store->kind = MB_DATA_NONE;
 					}
-					
+
 				/* get time */
 				time_j[0] = sbp->year;
 				time_j[1] = sbp->day;
 				time_j[2] = 60 * sbp->hour + sbp->minute;
 				time_j[3] = sbp->second;
-				time_j[4] = (int)1000 * (sbp->millisecondsToday 
+				time_j[4] = (int)1000 * (sbp->millisecondsToday
 						- 1000 * floor(0.001 * ((double)sbp->millisecondsToday)));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
-				
+
 				/* set navigation and attitude if needed and available */
 				if (sbp->heading == 0 && mb_io_ptr->nheading > 0)
 					{
@@ -881,33 +881,33 @@ status,message.type,message.subsystem,message.channel,message.size);
 					&& mb_io_ptr->nattitude > 0)
 					{
 					mb_attint_interp(verbose, mbio_ptr, time_d, &heave, &roll, &pitch, error);
-					sbp->roll = 32768 * roll / 180.0; 
-					sbp->pitch = 32768 * pitch / 180.0; 
+					sbp->roll = 32768 * roll / 180.0;
+					sbp->pitch = 32768 * pitch / 180.0;
 					sbp->heaveCompensation = heave /
-							sbp->sampleInterval / 0.00000075; 
+							sbp->sampleInterval / 0.00000075;
 					}
 				if (sbp->sonaraltitude == 0 && mb_io_ptr->naltitude > 0)
 					{
 					mb_altint_interp(verbose, mbio_ptr, time_d, &altitude, error);
-					sbp->sonaraltitude = altitude / 1000.0; 
+					sbp->sonaraltitude = altitude / 1000.0;
 					}
 				if (sbp->sonardepth == 0 && mb_io_ptr->nsonardepth > 0)
 					{
 					mb_depint_interp(verbose, mbio_ptr, time_d, &sonardepth, error);
-					sbp->sonardepth = sonardepth / 1000.0; 
+					sbp->sonardepth = sonardepth / 1000.0;
 					}
-					
+
 				/* set kind */
 				store->kind = MB_DATA_SUBBOTTOM_SUBBOTTOM;
-				done = MB_YES;	    
+				done = MB_YES;
 				}
-				
+
 			/* end of file */
 			else
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;	    
+				done = MB_YES;
 				store->kind = MB_DATA_NONE;
 				}
 			}
@@ -922,11 +922,11 @@ status,message.type,message.subsystem,message.channel,message.size);
 			else
 				ss = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
 			ss->message = message;
-			
+
 			/* read the 240 byte trace header */
-			if ((read_status = fread(buffer, MBSYS_JSTAR_SBPHEADER_SIZE, 
+			if ((read_status = fread(buffer, MBSYS_JSTAR_SBPHEADER_SIZE,
 			    		1, mb_io_ptr->mbfp)) == 1)
-				{				
+				{
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->sequenceNumber)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->startDepth)); index += 4;
@@ -1013,7 +1013,7 @@ status,message.type,message.subsystem,message.channel,message.size);
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->depth)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->sonardepth)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->sonaraltitude)); index += 4;
-					
+
 				/* allocate memory for the trace */
 				if (ss->dataFormat == 1)
 					shortspersample = 2;
@@ -1029,10 +1029,10 @@ status,message.type,message.subsystem,message.channel,message.size);
 						ss->trace_alloc = trace_size;
 						}
 					}
-					
+
 				/* read the trace */
-				if (status == MB_SUCCESS 
-					&& (read_status = fread(ss->trace, trace_size, 
+				if (status == MB_SUCCESS
+					&& (read_status = fread(ss->trace, trace_size,
 			    			1, mb_io_ptr->mbfp)) == 1)
 					{
 #ifndef BYTESWAPPED
@@ -1046,20 +1046,20 @@ status,message.type,message.subsystem,message.channel,message.size);
 					{
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;	    
+					done = MB_YES;
 					store->kind = MB_DATA_NONE;
 					}
-					
+
 				/* get time */
 				time_j[0] = ss->year;
 				time_j[1] = ss->day;
 				time_j[2] = 60 * ss->hour + ss->minute;
 				time_j[3] = ss->second;
-				time_j[4] = (int)1000 * (ss->millisecondsToday 
+				time_j[4] = (int)1000 * (ss->millisecondsToday
 						- 1000 * floor(0.001 * ((double)ss->millisecondsToday)));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
-				
+
 				/* set navigation and attitude if needed and available */
 				if (ss->heading == 0 && mb_io_ptr->nheading > 0)
 					{
@@ -1080,22 +1080,22 @@ status,message.type,message.subsystem,message.channel,message.size);
 					&& mb_io_ptr->nattitude > 0)
 					{
 					mb_attint_interp(verbose, mbio_ptr, time_d, &heave, &roll, &pitch, error);
-					ss->roll = 32768 * roll / 180.0; 
-					ss->pitch = 32768 * pitch / 180.0; 
+					ss->roll = 32768 * roll / 180.0;
+					ss->pitch = 32768 * pitch / 180.0;
 					ss->heaveCompensation = heave /
-							ss->sampleInterval / 0.00000075; 
+							ss->sampleInterval / 0.00000075;
 					}
 				if (ss->sonaraltitude == 0 && mb_io_ptr->naltitude > 0)
 					{
 					mb_altint_interp(verbose, mbio_ptr, time_d, &altitude, error);
-					ss->sonaraltitude = 1000 * altitude; 
+					ss->sonaraltitude = 1000 * altitude;
 					}
 				if (ss->sonardepth == 0 && mb_io_ptr->nsonardepth > 0)
 					{
 					mb_depint_interp(verbose, mbio_ptr, time_d, &sonardepth, error);
-					ss->sonardepth = 1000 * sonardepth; 
+					ss->sonardepth = 1000 * sonardepth;
 					}
-					
+
 				/* set kind */
 				if (mb_io_ptr->format == MBF_EDGJSTAR)
 					{
@@ -1112,7 +1112,7 @@ status,message.type,message.subsystem,message.channel,message.size);
 						store->kind = MB_DATA_SIDESCAN2;
 					}
 				if (store->ssport.pingNum == store->ssstbd.pingNum
-							&& store->ssport.message.subsystem 
+							&& store->ssport.message.subsystem
 								== store->ssstbd.message.subsystem)
 					{
 					done = MB_YES;
@@ -1129,11 +1129,11 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;	    
+				done = MB_YES;
 				store->kind = MB_DATA_NONE;
 				}
 			}
-	
+
 		/* if pitchroll data read it */
 		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_PITCHROLL
 			&& message.size < MB_COMMENT_MAXLINE)
@@ -1141,11 +1141,11 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);
 			/* nmea channel */
 			pitchroll = (struct mbsys_jstar_pitchroll_struct *) &(store->pitchroll);
 			pitchroll->message = message;
-			
+
 			/* read the pitchroll record */
-			if ((read_status = fread(buffer, message.size, 
+			if ((read_status = fread(buffer, message.size,
 			    		1, mb_io_ptr->mbfp)) == 1)
-				{				
+				{
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->seconds)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->msec)); index += 4;
@@ -1172,7 +1172,7 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);
 				store->kind = MB_DATA_ATTITUDE;
 				}
 			}
-	
+
 		/* if dvl data read it */
 		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_DVL
 			&& message.size < MB_COMMENT_MAXLINE)
@@ -1180,11 +1180,11 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);
 			/* nmea channel */
 			dvl = (struct mbsys_jstar_dvl_struct *) &(store->dvl);
 			dvl->message = message;
-			
+
 			/* read the dvl record */
-			if ((read_status = fread(buffer, message.size, 
+			if ((read_status = fread(buffer, message.size,
 			    		1, mb_io_ptr->mbfp)) == 1)
-				{				
+				{
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->seconds)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->msec)); index += 4;
@@ -1226,7 +1226,7 @@ dvl->depth,dvl->pitch,dvl->roll,dvl->heading,dvl->soundspeed);
 #endif
 				}
 			}
-			
+
 		/* if nmea data read it, parse it, and and store values for interpolation */
 		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_NMEA
 			&& message.size < MB_COMMENT_MAXLINE)
@@ -1234,11 +1234,11 @@ dvl->depth,dvl->pitch,dvl->roll,dvl->heading,dvl->soundspeed);
 			/* nmea channel */
 			nmea = (struct mbsys_jstar_nmea_struct *) &(store->nmea);
 			nmea->message = message;
-			
+
 			/* read the NMEA string */
-			if ((read_status = fread(buffer, message.size, 
+			if ((read_status = fread(buffer, message.size,
 			    		1, mb_io_ptr->mbfp)) == 1)
-				{				
+				{
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(nmea->seconds)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(nmea->msec)); index += 4;
@@ -1252,16 +1252,16 @@ dvl->depth,dvl->pitch,dvl->roll,dvl->heading,dvl->soundspeed);
 					}
 				nmea->nmea[message.size-12] = 0;
 				strcpy(nmeastring,nmea->nmea);
-				
+
 				time_d = ((double)nmea->seconds) + 0.001 * ((double)nmea->msec);
 				mb_get_date(verbose, time_d, time_i);
-				
+
 				/* break up NMEA string into arguments */
 				nargc = 0;
 				string = (char *) nmeastring;
 				for (nap = nargv; (*nap = strtok(string, ",*")) != NULL;)
 					{
-					if (++nap >= &nargv[25]) 
+					if (++nap >= &nargv[25])
 						break;
 					else
 						nargc++;
@@ -1271,12 +1271,12 @@ dvl->depth,dvl->pitch,dvl->roll,dvl->heading,dvl->soundspeed);
 				if (strncmp(&(nargv[0][3]), "RMC", 3) == 0)
 					{
 					rawvalue = atof(nargv[3]);
-					navlat = floor(0.01 * rawvalue) 
+					navlat = floor(0.01 * rawvalue)
 						+ (rawvalue - 100.0 * floor(0.01 * rawvalue)) / 60.0;
 					if (nargv[4][0] == 'S')
 						navlat *= -1.0;
 					rawvalue = atof(nargv[5]);
-					navlon = floor(0.01 * rawvalue) 
+					navlon = floor(0.01 * rawvalue)
 						+ (rawvalue - 100.0 * floor(0.01 * rawvalue)) / 60.0;
 					if (nargv[6][0] == 'W')
 						navlon *= -1.0;
@@ -1285,7 +1285,7 @@ dvl->depth,dvl->pitch,dvl->roll,dvl->heading,dvl->soundspeed);
 fprintf(stderr,"RMC: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d navlon:%f navlat:%f heading:%f    %s\n",
 time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],navlon,navlat,heading,nmea->nmea);
 #endif
-					
+
 					mb_navint_add(verbose, mbio_ptr, time_d, navlon, navlat, error);
 					mb_hedint_add(verbose, mbio_ptr, time_d, heading, error);
 
@@ -1323,7 +1323,7 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],depthofsen
 				done = MB_YES;
 				}
 			}
-	
+
 		/* if pressure data read it */
 		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_PRESSURE
 			&& message.size < MB_COMMENT_MAXLINE)
@@ -1331,11 +1331,11 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],depthofsen
 			/* nmea channel */
 			pressure = (struct mbsys_jstar_pressure_struct *) &(store->pressure);
 			pressure->message = message;
-			
+
 			/* read the pressure record */
-			if ((read_status = fread(buffer, message.size, 
+			if ((read_status = fread(buffer, message.size,
 			    		1, mb_io_ptr->mbfp)) == 1)
-				{				
+				{
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(pressure->seconds)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(pressure->msec)); index += 4;
@@ -1360,17 +1360,17 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],pressure->
 				done = MB_YES;
 				store->kind = MB_DATA_HEIGHT;
 				}
-				
+
 			/* end of file */
 			else
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;	    
+				done = MB_YES;
 				store->kind = MB_DATA_NONE;
 				}
 			}
-			
+
 		/* if not supported data read it and throw it away */
 		else if (status == MB_SUCCESS)
 			{
@@ -1381,19 +1381,19 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],pressure->
 			done = MB_YES;
 			store->kind = MB_DATA_NONE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}				    
-				
+			}
+
 		/* end of file */
 		else
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
-			done = MB_YES;	    
+			done = MB_YES;
 			store->kind = MB_DATA_NONE;
 			}
 
 		}
-				
+
 	/* set kind and error in mb_io_ptr */
 	mb_io_ptr->new_kind = store->kind;
 	mb_io_ptr->new_error = *error;
@@ -1413,7 +1413,7 @@ fprintf(stderr,"kind:%d error:%d status:%d\n",store->kind,*error,status);
 			fprintf(stderr,"(75 or 120 kHz sidescan)\n");
 		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
 			fprintf(stderr,"(410 kHz sidescan)\n");
-			
+
 		fprintf(stderr,"\ndbg5  Comment:\n");
 		comment = (struct mbsys_jstar_comment_struct *) &(store->comment);
 		fprintf(stderr,"dbg5     start_marker:                %d\n",comment->message.start_marker);
@@ -1527,7 +1527,7 @@ fprintf(stderr,"kind:%d error:%d status:%d\n",store->kind,*error,status);
 				fprintf(stderr,"dbg5     Channel[%d]: %10d\n",i,sbp->trace[i]);
 			}
 		}
-	else if (status == MB_SUCCESS && verbose >= 5 
+	else if (status == MB_SUCCESS && verbose >= 5
 	&& (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2))
 		{
 		fprintf(stderr,"\ndbg5  New sidescan data record read by MBIO function <%s>\n",function_name);
@@ -1537,7 +1537,7 @@ fprintf(stderr,"kind:%d error:%d status:%d\n",store->kind,*error,status);
 			fprintf(stderr,"(75 or 120 kHz sidescan)\n");
 		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
 			fprintf(stderr,"(410 kHz sidescan)\n");
-			
+
 		ss = (struct mbsys_jstar_channel_struct *) &(store->ssport);
 		fprintf(stderr,"\ndbg5  Channel 0 (Port):\n");
 		fprintf(stderr,"dbg5     start_marker:                %d\n",ss->message.start_marker);
@@ -1630,7 +1630,7 @@ fprintf(stderr,"kind:%d error:%d status:%d\n",store->kind,*error,status);
 			for (i=0;i<ss->samples;i++)
 				fprintf(stderr,"dbg5     Channel 0[%d]: %10d\n",i,ss->trace[i]);
 			}
-			
+
 		ss = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
 		fprintf(stderr,"\ndbg5  Channel 1 (Starboard):\n");
 		fprintf(stderr,"dbg5     start_marker:                %d\n",ss->message.start_marker);
@@ -1733,7 +1733,7 @@ fprintf(stderr,"kind:%d error:%d status:%d\n",store->kind,*error,status);
 			fprintf(stderr,"(75 or 120 kHz sidescan)\n");
 		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
 			fprintf(stderr,"(410 kHz sidescan)\n");
-			
+
 		pitchroll = (struct mbsys_jstar_pitchroll_struct *) &(store->pitchroll);
 		fprintf(stderr,"\ndbg5  Roll and Pitch:\n");
 		fprintf(stderr,"dbg5     start_marker:                %d\n",pitchroll->message.start_marker);
@@ -1777,7 +1777,7 @@ fprintf(stderr,"kind:%d error:%d status:%d\n",store->kind,*error,status);
 			fprintf(stderr,"(75 or 120 kHz sidescan)\n");
 		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
 			fprintf(stderr,"(410 kHz sidescan)\n");
-			
+
 		dvl = (struct mbsys_jstar_dvl_struct *) &(store->dvl);
 		fprintf(stderr,"\ndbg5  Roll and Pitch:\n");
 		fprintf(stderr,"dbg5     start_marker:                %d\n",dvl->message.start_marker);
@@ -1847,7 +1847,7 @@ fprintf(stderr,"kind:%d error:%d status:%d\n",store->kind,*error,status);
 		for(i=0;i<10;i++)
 			fprintf(stderr,"dbg5     reserve2[%2d]:                 %d\n",i,pitchroll->reserve2);
 		}
-	else if (status == MB_SUCCESS && verbose >= 5 && 
+	else if (status == MB_SUCCESS && verbose >= 5 &&
 		(store->kind == MB_DATA_NMEA_RMC || store->kind == MB_DATA_NMEA_DBT || store->kind == MB_DATA_NMEA_DPT))
 		{
 		nmea = (struct mbsys_jstar_nmea_struct *) &(store->nmea);
@@ -1913,8 +1913,8 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1935,7 +1935,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"(75 or 120 kHz sidescan)\n");
 		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
 			fprintf(stderr,"(410 kHz sidescan)\n");
-			
+
 		fprintf(stderr,"\ndbg5  Comment:\n");
 		comment = (struct mbsys_jstar_comment_struct *) &(store->comment);
 		fprintf(stderr,"dbg5     start_marker:                %d\n",comment->message.start_marker);
@@ -2049,7 +2049,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				fprintf(stderr,"dbg5     Channel[%d]: %10d\n",i,sbp->trace[i]);
 			}
 		}
-	else if (status == MB_SUCCESS && verbose >= 5 
+	else if (status == MB_SUCCESS && verbose >= 5
 	&& (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2))
 		{
 		fprintf(stderr,"\ndbg5  New sidescan data record read by MBIO function <%s>\n",function_name);
@@ -2059,7 +2059,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"(75 or 120 kHz sidescan)\n");
 		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
 			fprintf(stderr,"(410 kHz sidescan)\n");
-			
+
 		ss = (struct mbsys_jstar_channel_struct *) &(store->ssport);
 		fprintf(stderr,"\ndbg5  Channel 0 (Port):\n");
 		fprintf(stderr,"dbg5     start_marker:                %d\n",ss->message.start_marker);
@@ -2152,7 +2152,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			for (i=0;i<ss->samples;i++)
 				fprintf(stderr,"dbg5     Channel 0[%d]: %10d\n",i,ss->trace[i]);
 			}
-			
+
 		ss = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
 		fprintf(stderr,"\ndbg5  Channel 1 (Starboard):\n");
 		fprintf(stderr,"dbg5     start_marker:                %d\n",ss->message.start_marker);
@@ -2255,7 +2255,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"(75 or 120 kHz sidescan)\n");
 		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
 			fprintf(stderr,"(410 kHz sidescan)\n");
-			
+
 		pitchroll = (struct mbsys_jstar_pitchroll_struct *) &(store->pitchroll);
 		fprintf(stderr,"\ndbg5  Roll and Pitch:\n");
 		fprintf(stderr,"dbg5     start_marker:                %d\n",pitchroll->message.start_marker);
@@ -2299,7 +2299,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"(75 or 120 kHz sidescan)\n");
 		else if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
 			fprintf(stderr,"(410 kHz sidescan)\n");
-			
+
 		dvl = (struct mbsys_jstar_dvl_struct *) &(store->dvl);
 		fprintf(stderr,"\ndbg5  Roll and Pitch:\n");
 		fprintf(stderr,"dbg5     start_marker:                %d\n",dvl->message.start_marker);
@@ -2338,7 +2338,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5     temperature:                 %d\n",dvl->temperature);
 		fprintf(stderr,"dbg5     soundspeed:                  %d\n",dvl->soundspeed);
 		for (i=0;i<7;i++)
-		fprintf(stderr,"dbg5     reserve2[%d]:                %d\n",i,dvl->reserve2[i]);
+			fprintf(stderr,"dbg5     reserve2[%d]:                %d\n",i,dvl->reserve2[i]);
 		}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_HEIGHT)
 		{
@@ -2367,9 +2367,9 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5     conductivity:                %d\n",pressure->conductivity);
 		fprintf(stderr,"dbg5     soundspeed:                  %d\n",pressure->soundspeed);
 		for(i=0;i<10;i++)
-			fprintf(stderr,"dbg5     reserve2[%2d]:                 %d\n",i,pitchroll->reserve2);
+			fprintf(stderr,"dbg5     reserve2[%2d]:                 %d\n",i,pressure->reserve2[i]);
 		}
-	else if (status == MB_SUCCESS && verbose >= 5 && 
+	else if (status == MB_SUCCESS && verbose >= 5 &&
 		(store->kind == MB_DATA_NMEA_RMC || store->kind == MB_DATA_NMEA_DBT || store->kind == MB_DATA_NMEA_DPT))
 		{
 		nmea = (struct mbsys_jstar_nmea_struct *) &(store->nmea);
@@ -2393,7 +2393,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5     reserve[2]:                  %d\n",nmea->reserve[2]);
 		fprintf(stderr,"dbg5     nmea:                        %s\n",nmea->nmea);
 		}
-		
+
 	/* write out comment */
 	if (store->kind == MB_DATA_COMMENT)
 		{
@@ -2419,7 +2419,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		buffer[index] = comment->message.sequence; index++;
 		mb_put_binary_short(MB_YES, comment->message.reserved, &buffer[index]); index += 2;
 		mb_put_binary_int(MB_YES, comment->message.size, &buffer[index]); index += 4;
-		
+
 		/* write the message header */
 		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_MESSAGE_SIZE)
@@ -2427,7 +2427,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
 			}
-		
+
 		/* write the comment */
 		if ((write_len = fwrite(comment->comment,1,comment->message.size,mb_io_ptr->mbfp))
 			!= comment->message.size)
@@ -2436,7 +2436,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			status = MB_FAILURE;
 			}
 		}
-		
+
 	/* write out subbottom data */
 	else if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 		{
@@ -2556,7 +2556,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_int(MB_YES, sbp->depth, &buffer[index]); index += 4;
 		mb_put_binary_int(MB_YES, sbp->sonardepth, &buffer[index]); index += 4;
 		mb_put_binary_int(MB_YES, sbp->sonaraltitude, &buffer[index]); index += 4;
-		
+
 		/* write the trace header */
 		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_SBPHEADER_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_SBPHEADER_SIZE)
@@ -2586,7 +2586,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			status = MB_FAILURE;
 			}
 		}
-		
+
 	/* write out sidescan data */
 	else if (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2)
 		{
@@ -2735,7 +2735,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
 			}
-			
+
 		/* get the starboard ss structure */
 		ss = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
 
@@ -2899,7 +2899,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		buffer[index] = pitchroll->message.sequence; index++;
 		mb_put_binary_short(MB_YES, pitchroll->message.reserved, &buffer[index]); index += 2;
 		mb_put_binary_int(MB_YES, pitchroll->message.size, &buffer[index]); index += 4;
-				
+
 		/* write the message header */
 		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_MESSAGE_SIZE)
@@ -2929,7 +2929,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_short(MB_YES, pitchroll->heading, &buffer[index]); index += 2;
 		mb_put_binary_int(MB_YES, pitchroll->datavalidflags, &buffer[index]); index += 4;
 		mb_put_binary_int(MB_YES, pitchroll->reserve2, &buffer[index]); index += 4;
-		
+
 		/* write the pitchroll data */
 		if ((write_len = fwrite(buffer,1,pitchroll->message.size,mb_io_ptr->mbfp))
 			!= pitchroll->message.size)
@@ -2955,7 +2955,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		buffer[index] = dvl->message.sequence; index++;
 		mb_put_binary_short(MB_YES, dvl->message.reserved, &buffer[index]); index += 2;
 		mb_put_binary_int(MB_YES, dvl->message.size, &buffer[index]); index += 4;
-				
+
 		/* write the message header */
 		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_MESSAGE_SIZE)
@@ -2993,7 +2993,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			mb_put_binary_short(MB_YES, dvl->reserve2[i], &buffer[index]); index += 2;
 			}
-		
+
 		/* write the dvl data */
 		if ((write_len = fwrite(buffer,1,dvl->message.size,mb_io_ptr->mbfp))
 			!= dvl->message.size)
@@ -3019,7 +3019,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		buffer[index] = nmea->message.sequence; index++;
 		mb_put_binary_short(MB_YES, nmea->message.reserved, &buffer[index]); index += 2;
 		mb_put_binary_int(MB_YES, nmea->message.size, &buffer[index]); index += 4;
-				
+
 		/* write the message header */
 		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_MESSAGE_SIZE)
@@ -3039,7 +3039,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			buffer[index] = nmea->nmea[i]; index++;
 			}
-		
+
 		/* write the NMEA data */
 		if ((write_len = fwrite(buffer,1,nmea->message.size,mb_io_ptr->mbfp))
 			!= nmea->message.size)
@@ -3065,7 +3065,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		buffer[index] = pressure->message.sequence; index++;
 		mb_put_binary_short(MB_YES, pressure->message.reserved, &buffer[index]); index += 2;
 		mb_put_binary_int(MB_YES, pressure->message.size, &buffer[index]); index += 4;
-				
+
 		/* write the message header */
 		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_MESSAGE_SIZE)
@@ -3090,7 +3090,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			mb_put_binary_int(MB_YES, pressure->reserve2[i], &buffer[index]); index += 4;
 			}
-		
+
 		/* write the pressure data */
 		if ((write_len = fwrite(buffer,1,pressure->message.size,mb_io_ptr->mbfp))
 			!= pressure->message.size)

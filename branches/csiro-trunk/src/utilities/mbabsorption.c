@@ -2,7 +2,7 @@
  *    The MB-system:	mbabsorption.c	2/10/2008
  *    $Id$
  *
- *    Copyright (c) 2008-2012 by
+ *    Copyright (c) 2008-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -15,15 +15,15 @@
 /*
  * MBabsorption calculates the absorption of sound in sea water in dB/km
  * as a function of frequency, temperature, salinity, sound speed, and depth.
- * 
+ *
  * We use the Francois and Garrison equations from:
  *     Francois, R.E., Garrison, G.R., "Sound absorption based
  *       on ocean measurements: Part I: Pure water and magnesium
- *       sulfate contributions", J. Acoust. Soc. Am., 72(3), 
+ *       sulfate contributions", J. Acoust. Soc. Am., 72(3),
  *       896-907, 1982.
  *     Francois, R.E., Garrison, G.R., "Sound absorption based
  *       on ocean measurements: Part II: Boric acid contribution
- *       and equation for total absorption", J. Acoust. Soc. Am., 
+ *       and equation for total absorption", J. Acoust. Soc. Am.,
  *       72(6), 1879-1890, 1982.
  *
  * Francois and Garrison [1982] model the sound absorption in
@@ -34,44 +34,44 @@
  * absorption = Boric Acid Contribution
  * 		+ MbSO4 Contribution
  * 		+ Pure Water Contribution
- * 
+ *
  * **************************
- * 		
+ *
  * Boric Acid Contribution
  * AlphaB = Ab * Pb * Fb * f**2
  *          -------------------
  *             f**2 + Fb**2
- * 	    
+ *
  * Ab = 8.86 / c * 10**(0.78 * pH - 5) (dB/km/kHz)
  * Pb = 1
  * Fb = 2.8 * (S / 35)**0.5 * 10**(4 - 1245 / Tk) (kHz)
- * 
+ *
  * **************************
- * 		
+ *
  * MgSO4 Contribution
  * AlphaM = Am * Pm * Fm * f**2
  *          -------------------
  *             f**2 + Fm**2
- * 		
+ *
  * Am = 21.44 * S * (1 + 0.025 * T) / c (dB/km/kHZ)
  * Pm = 1 - 0.000137 * D + 0.0000000062 * D**2
  * Fm = (8.17 * 10**(8 - 1990 / Tk)) / (1 + 0.0018 * (S - 35))  (kHz)
- * 
+ *
  * **************************
- * 
+ *
  * Pure Water Contribution
  * AlphaW = Aw * Pw * f**2
- *  
+ *
  * For T <= 20 deg C
  *   Aw = 0.0004397 - 0.0000259 * T
- *           + 0.000000911 * T**2 - 0.000000015 * T**3 (dB/km/kHz) 
+ *           + 0.000000911 * T**2 - 0.000000015 * T**3 (dB/km/kHz)
  * For T > 20 deg C
  *   Aw = 0.0003964 - 0.00001146 * T
- *           + 0.000000145 * T**2 - 0.00000000049 * T**3 (dB/km/kHz) 
- * Pw = 1 - 0.0000383 * D + 0.00000000049 * D**2 
- * 
+ *           + 0.000000145 * T**2 - 0.00000000049 * T**3 (dB/km/kHz)
+ * Pw = 1 - 0.0000383 * D + 0.00000000049 * D**2
+ *
  * **************************
- * 
+ *
  * f = sound frequency (kHz)
  * c = speed of sound (m/s)
  *   =~ 1412 + 3.21 * T + 1.19 * S + 0.0167 * D
@@ -79,15 +79,15 @@
  * Tk = temperature (deg K) = T + 273 (deg K)
  * S = salinity (per mil)
  * D = depth (m)
- * 
+ *
  * **************************
- *  
+ *
  * Author:	D. W. Caress
  * Date:	February 10, 2008
  *              R/V Zephyr
  *              Hanging out at the channel entrance to La Paz, BCS, MX
  *              helping out as MBARI tries to save the grounded
- *              R/V Western Flyer. 
+ *              R/V Western Flyer.
  *              Note: as I was writing this code the Flyer was refloated
  *              and successfully backed off the reef.
  *
@@ -105,8 +105,8 @@
 #include <math.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
+#include "mb_status.h"
+#include "mb_define.h"
 
 static char rcs_id[] = "$Id$";
 
@@ -135,7 +135,7 @@ int main (int argc, char **argv)
 	double	soundspeed; 		/* speed of sound (m/sec) */
 	double	depth; 			/* depth (m) */
 	double	ph; 			/* pH */
-	
+
 	/* set defaults */
 	frequency = 200.0;
 	temperature = 10.0;
@@ -146,7 +146,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhC:c:D:d:F:f:P:p:S:s:T:t:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -236,9 +236,9 @@ int main (int argc, char **argv)
 		fprintf(outfp,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
-		
+
 	/* call function to calculate absorption */
-	status = mb_absorption(verbose, frequency, temperature, 
+	status = mb_absorption(verbose, frequency, temperature,
 				salinity, depth, ph, soundspeed,
 				&absorption, &error);
 

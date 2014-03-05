@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_netcdf.h	4/8/2002
  *	$Id$
  *
- *    Copyright (c) 2002-2012 by
+ *    Copyright (c) 2002-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1106,4 +1106,3 @@ int mbsys_netcdf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_sb2100bi.c	12/23/2004
  *	$Id$
  *
- *    Copyright (c) 1997-2012 by
+ *    Copyright (c) 1997-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_sb2100bi.c contains the functions for reading and writing
- * multibeam data in the SB2100B2 format.  
+ * multibeam data in the SB2100B2 format.
  * These functions include:
  *   mbr_alm_sb2100bi	- allocate read/write memory
  *   mbr_dem_sb2100bi	- deallocate read/write memory
@@ -22,14 +22,14 @@
  *   mbr_wt_sb2100bi	- translate and write data
  *
  * Author:	D. W. Caress
- * Date:	March 3, 1994 
+ * Date:	March 3, 1994
  *              (Original files:
- *                 mbr_sb2100b1.c 
+ *                 mbr_sb2100b1.c
  *                 mbf_sb2100b1.h
  *                 mbr_sb2100b2.c
  *                 mbf_sb2100b2.h)
  *
- * 
+ *
  * Date:	December 23, 2003
  *              (New file:
  *                 mbr_sb2100bi.c)
@@ -114,11 +114,11 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
-#include "../../include/mbsys_sb2100.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_define.h"
+#include "mbsys_sb2100.h"
 
 /* define id's for the different types of raw records */
 #define	MBF_SB2100BI_RECORDS	6
@@ -130,9 +130,9 @@
 #define	MBF_SB2100BI_BR		5
 #define	MBF_SB2100BI_SR		6
 char *mbf_sb2100bi_labels[] = {
-	"NONE    ", "SB21BIFH", "SB21BITR", "SB21BIPR", 
+	"NONE    ", "SB21BIFH", "SB21BITR", "SB21BIPR",
 	"SB21BIDH", "SB21BIBR", "SB21BISR"};
-	
+
 #define MBF_SB2100BI_PR_WRITE_LEN   284
 #define MBF_SB2100BI_DH_WRITE_LEN   80
 #define MBF_SB2100BI_BR_WRITE_LEN   32
@@ -143,49 +143,49 @@ char *mbf_sb2100bi_labels[] = {
 char	mbf_sb2100bi_eor[2] = {'\r', '\n'};
 
 /* essential function prototypes */
-int mbr_register_sb2100b1(int verbose, void *mbio_ptr, 
+int mbr_register_sb2100b1(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_sb2100b1(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_sb2100b1(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
-int mbr_register_sb2100b2(int verbose, void *mbio_ptr, 
+int mbr_register_sb2100b2(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_sb2100b2(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_sb2100b2(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_sb2100bi(int verbose, void *mbio_ptr, int *error);
@@ -208,7 +208,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
 
 /* text for ascii file header */
-char	*mbf_sb2100bi_file_header_text_1 = 
+char	*mbf_sb2100bi_file_header_text_1 =
 {"\
 \nSeaBeam 2100 multibeam sonar binary data format\n\
 MB-System formats 42 and 43\n\
@@ -241,7 +241,7 @@ The data records are:\n\
 All data files will begin with the ascii File Header Record.\n\
 \n\
 All data files created by a sonar should include a Sonar\n\
-Paramater Record before any ping data. Data files originating\n\
+Parameter Record before any ping data. Data files originating\n\
 in the original SeaBeam 2100 format may not have a Sonar\n\
 Parameter Record. Sonar Text Records may occur between the \n\
 File Header Record and any other data records.\n\
@@ -356,7 +356,7 @@ Record End                      03338           2       298     unsigned short\n
 \n\
 "};
 
-char	*mbf_sb2100bi_file_header_text_2 = 
+char	*mbf_sb2100bi_file_header_text_2 =
 {"\
 Sonar Data Header Record (96 bytes - navigation and sonar parameters):\n\
 ----------------------------------------------------------------------------\n\
@@ -530,54 +530,54 @@ int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_sb2100b1(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_sb2100b1(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_sb2100bi;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_sb2100bi; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_sb2100_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_sb2100_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2100bi; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2100bi; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_sb2100_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_sb2100_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_sb2100_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2100_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_sb2100_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb2100_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_sb2100_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_sb2100_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_sb2100_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_sb2100_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2100_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_sb2100bi;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_sb2100_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_sb2100_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2100bi;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2100bi;
+	mb_io_ptr->mb_io_dimensions = &mbsys_sb2100_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_sb2100_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_sb2100_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2100_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_sb2100_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb2100_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_sb2100_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_sb2100_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_sb2100_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_sb2100_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2100_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -596,25 +596,25 @@ int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -625,25 +625,25 @@ int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_sb2100b1(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_sb2100b1(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_sb2100b1";
@@ -684,7 +684,7 @@ int mbr_info_sb2100b1(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -731,55 +731,55 @@ int mbr_register_sb2100b2(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_sb2100b2(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_sb2100b2(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_sb2100bi;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_sb2100bi; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_sb2100_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_sb2100_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2100bi; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2100bi; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_sb2100_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_sb2100_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_sb2100_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2100_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_sb2100_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb2100_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_sb2100_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_sb2100_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_sb2100_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_sb2100_detects; 
-	mb_io_ptr->mb_io_gains = &mbsys_sb2100_gains; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2100_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_sb2100bi;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_sb2100_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_sb2100_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2100bi;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2100bi;
+	mb_io_ptr->mb_io_dimensions = &mbsys_sb2100_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_sb2100_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_sb2100_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2100_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_sb2100_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb2100_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_sb2100_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_sb2100_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_sb2100_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_sb2100_detects;
+	mb_io_ptr->mb_io_gains = &mbsys_sb2100_gains;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2100_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -798,25 +798,25 @@ int mbr_register_sb2100b2(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -827,25 +827,25 @@ int mbr_register_sb2100b2(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_sb2100b2(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_sb2100b2(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_sb2100b2";
@@ -886,7 +886,7 @@ int mbr_info_sb2100b2(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -929,7 +929,7 @@ int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -946,7 +946,7 @@ int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error)
 
 	/* get store structure pointer */
 	store = (struct mbsys_sb2100_struct *) mb_io_ptr->store_data;
-				
+
 	/* set comment pointer */
 	store->comment = (char *) &(store->roll_bias_port);
 
@@ -980,7 +980,7 @@ int mbr_dem_sb2100bi(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1017,7 +1017,7 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       store_ptr: %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       store_ptr: %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to data descriptor */
@@ -1028,10 +1028,10 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error)
 		{
 		/* type of data record */
 		store->kind = MB_DATA_NONE;
-	
+
 		/* set comment pointer */
 		store->comment = (char *) &store->roll_bias_port;
-	
+
 		/* sonar parameters (SB21BIPR) */
 		store->roll_bias_port = 0.0;		/* deg */
 		store->roll_bias_starboard = 0.0;	/* deg */
@@ -1046,7 +1046,7 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error)
 		    store->svp[i].depth = 0.0;
 		    store->svp[i].velocity = 0.0;
 		    }
-		
+
 		/* sonar data header (SB21BIDH) */
 		store->year = 0;
 		store->jday = 0;
@@ -1069,9 +1069,9 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error)
 		store->ping_gain = 0;			/* dB */
 		store->ping_pulse_width = 0;		/* msec */
 		store->transmitter_attenuation = 0;	/* dB */
-		store->ssv_source = 'M';			/* V=Velocimeter, M=Manual, 
+		store->ssv_source = 'M';			/* V=Velocimeter, M=Manual,
 							    T=Temperature */
-		store->svp_correction = 'T';		/* 0=None; A=True Xtrack 
+		store->svp_correction = 'T';		/* 0=None; A=True Xtrack
 							    and Apparent Depth;
 							    T=True Xtrack and True Depth */
 		store->pixel_algorithm = 'L';		/* pixel intensity algorithm
@@ -1083,7 +1083,7 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error)
 		store->spare4 = 0;
 		store->spare5 = 0;
 		store->spare6 = 0;
-	
+
 		/* bathymetry record (SB21BIBR) */
 		for (i=0;i<MBSYS_SB2100_BEAMS;i++)
 			{
@@ -1096,19 +1096,19 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error)
 			store->beams[i].amplitude = 0;	/* 0.25 dB */
 			store->beams[i].signal_to_noise = 0;	/* dB */
 			store->beams[i].echo_length = 0;		/* samples */
-			store->beams[i].quality = '0';		/* 0=no data, 
-							    Q=poor quality, 
+			store->beams[i].quality = '0';		/* 0=no data,
+							    Q=poor quality,
 							    blank otherwise */
 			store->beams[i].source = 'W';		/* B=BDI, W=WMT */
 			}
-	
+
 		/* sidescan record (SB21BISR) */
 		for (i=0;i<MBSYS_SB2100_PIXELS;i++)
 			{
 			store->pixels[i].amplitude = 0;
 			store->pixels[i].alongtrack = 0;		/* 0.1 m */
 			}
-	
+
 		}
 
 	/* assume success */
@@ -1144,8 +1144,8 @@ int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -1158,7 +1158,7 @@ int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = store->kind;
-	
+
 	/* zero sidescan for format MBF_SB2100B2 (43) */
 	if (status == MB_SUCCESS
 		&& store != NULL
@@ -1170,7 +1170,7 @@ int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if (status == MB_SUCCESS
 		&& store != NULL
 		&& store->kind != MB_DATA_COMMENT)
-		{		    		    
+		{
 		/* parameters for MBF_SB2100RW format */
 		store->range_scale = ' ';
 		store->spare_dr[0] = ' ';
@@ -1212,8 +1212,8 @@ int mbr_wt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1221,7 +1221,7 @@ int mbr_wt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_sb2100_struct *) store_ptr;
-	
+
 	/* make sure no sidescan is written for format MBF_SB2100B2 (43) */
 	if (status == MB_SUCCESS
 		&& store != NULL
@@ -1271,7 +1271,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1280,7 +1280,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	/* get pointer to raw data structure */
 	store = (struct mbsys_sb2100_struct *) store_ptr;
 	mbfp = mb_io_ptr->mbfp;
-	
+
 	/* get saved values */
 	label = (char *) mb_io_ptr->save_label;
 	label_save_flag = (int *) &mb_io_ptr->save_label_flag;
@@ -1300,14 +1300,14 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			{
 			/* get next 10 bytes */
 			if ((status = fread(&label[0],
-				10, 
+				10,
 				1, mbfp)) != 1)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
 
-			/* if not a format 42 label read individual 
+			/* if not a format 42 label read individual
 			    bytes until label found or eof */
 			while (status == MB_SUCCESS
 			    && strncmp(label, "SB21BI", 6) != 0)
@@ -1322,11 +1322,11 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 				}
 			    }
 			}
-		
+
 		/* else use saved label */
 		else
 			*label_save_flag = MB_NO;
-			
+
 		/* get the label type */
 		if (status == MB_SUCCESS)
 			{
@@ -1335,7 +1335,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			for (i=1;i<=MBF_SB2100BI_RECORDS;i++)
 				if (strncmp(label, mbf_sb2100bi_labels[i], 8) == 0)
 				    type = i;
-			
+
 			/* get the record length */
 			if (type != MBF_SB2100BI_FH)
 			    {
@@ -1422,7 +1422,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			{
 			status = mbr_sb2100bi_rd_br(
 				verbose,mbfp,store,record_length,error);
-			if (status == MB_SUCCESS 
+			if (status == MB_SUCCESS
 				&& expect == MBF_SB2100BI_BR)
 				{
 				done = MB_NO;
@@ -1446,7 +1446,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			{
 			status = mbr_sb2100bi_rd_sr(
 				verbose,mbfp,store,record_length,error);
-			if (status == MB_SUCCESS 
+			if (status == MB_SUCCESS
 				&& expect == MBF_SB2100BI_SR)
 				{
 				done = MB_YES;
@@ -1500,7 +1500,7 @@ int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
 		fprintf(stderr,"dbg2       record_len: %d\n",record_length);
 		}
 
@@ -1517,20 +1517,20 @@ int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error)
 		/* read data into buffer */
 		nread = record_length / 100;
 		nlast = record_length % 100;
-		for (i=0;i<nread;i++)		    
+		for (i=0;i<nread;i++)
 		    if ((status = fread(buffer,
 			    100, 1, mbfp)) != 1)
 			    {
 			    status = MB_FAILURE;
 			    *error = MB_ERROR_EOF;
 			    }
-		if (nlast > 0)		    
+		if (nlast > 0)
 		    if ((status = fread(buffer,
 			    nlast, 1, mbfp)) != 1)
 			    {
 			    status = MB_FAILURE;
 			    *error = MB_ERROR_EOF;
-			    }			
+			    }
 		}
 
 	/* print output debug statements */
@@ -1547,7 +1547,7 @@ int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, 
+int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp,
 		struct mbsys_sb2100_struct *store, short record_length,
 		int *error)
 {
@@ -1567,8 +1567,8 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
-		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		fprintf(stderr,"dbg2       record_len: %d\n",record_length);
 		}
 
@@ -1584,8 +1584,8 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp,
 		{
 		/* read data into structure */
 		read_length = MBF_SB2100BI_PR_WRITE_LEN;
-		if ((status = fread(buffer, 1, 
-			MBF_SB2100BI_PR_WRITE_LEN, mbfp)) 
+		if ((status = fread(buffer, 1,
+			MBF_SB2100BI_PR_WRITE_LEN, mbfp))
 			!= MBF_SB2100BI_PR_WRITE_LEN)
 			{
 			status = MB_FAILURE;
@@ -1619,7 +1619,7 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp,
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-		mb_get_binary_int(MB_NO, &eor_read[0], (int *) &checksum_read); 
+		mb_get_binary_int(MB_NO, &eor_read[0], (int *) &checksum_read);
 
 
 		/* do checksum */
@@ -1628,7 +1628,7 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp,
 		    checksum = 0;
 		    for (i=0;i<read_length;i++)
 			    checksum += (unsigned int) buffer[i];
-    
+
 		    /* check checksum and report */
 		    fprintf(stderr,"\ndbg5  Checksum test done in MBIO function <%s>\n",function_name);
 		    fprintf(stderr,"dbg5       checksum read:       %d\n",checksum_read);
@@ -1682,7 +1682,7 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, 
+int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp,
 		struct mbsys_sb2100_struct *store, short record_length,
 		int *error)
 {
@@ -1701,8 +1701,8 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
-		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		fprintf(stderr,"dbg2       record_len: %d\n",record_length);
 		}
 
@@ -1732,7 +1732,7 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp,
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-		mb_get_binary_int(MB_NO, &eor_read[0], (int *) &checksum_read); 
+		mb_get_binary_int(MB_NO, &eor_read[0], (int *) &checksum_read);
 
 
 		/* do checksum */
@@ -1741,7 +1741,7 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp,
 		    checksum = 0;
 		    for (i=0;i<read_length;i++)
 			    checksum += (unsigned int) buffer[i];
-    
+
 		    /* check checksum and report */
 		    fprintf(stderr,"\ndbg5  Checksum test done in MBIO function <%s>\n",function_name);
 		    fprintf(stderr,"dbg5       checksum read:       %d\n",checksum_read);
@@ -1779,7 +1779,7 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, 
+int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp,
 		struct mbsys_sb2100_struct *store, short record_length,
 		int *error)
 {
@@ -1799,8 +1799,8 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
-		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		fprintf(stderr,"dbg2       record_len: %d\n",record_length);
 		}
 
@@ -1862,7 +1862,7 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp,
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-		mb_get_binary_int(MB_NO, &eor_read[0], (int *) &checksum_read); 
+		mb_get_binary_int(MB_NO, &eor_read[0], (int *) &checksum_read);
 
 		/* do checksum */
 		if (verbose >= 2)
@@ -1870,7 +1870,7 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp,
 		    checksum = 0;
 		    for (i=0;i<read_length;i++)
 			    checksum += (unsigned int) buffer[i];
-    
+
 		    /* check checksum and report */
 		    fprintf(stderr,"\ndbg5  Checksum test done in MBIO function <%s>\n",function_name);
 		    fprintf(stderr,"dbg5       checksum read:       %d\n",checksum_read);
@@ -1937,7 +1937,7 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, 
+int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp,
 		struct mbsys_sb2100_struct *store, short record_length,
 		int *error)
 {
@@ -1957,8 +1957,8 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
-		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		fprintf(stderr,"dbg2       record_len: %d\n",record_length);
 		}
 
@@ -1995,7 +1995,7 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp,
 			mb_get_binary_short(MB_NO, &buffer[index], &store->beams[i].signal_to_noise); index += 2;
 			mb_get_binary_short(MB_NO, &buffer[index], &store->beams[i].echo_length); index += 2;
 			store->beams[i].quality = buffer[index]; index++;
-			store->beams[i].source = buffer[index]; index++;			
+			store->beams[i].source = buffer[index]; index++;
 			}
 
 		/* read checksum and eor */
@@ -2005,7 +2005,7 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp,
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-		mb_get_binary_int(MB_NO, &eor_read[0], (int *) &checksum_read); 
+		mb_get_binary_int(MB_NO, &eor_read[0], (int *) &checksum_read);
 
 
 		/* do checksum */
@@ -2014,7 +2014,7 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp,
 		    checksum = 0;
 		    for (i=0;i<read_length;i++)
 			    checksum += (unsigned int) buffer[i];
-    
+
 		    /* check checksum and report */
 		    fprintf(stderr,"\ndbg5  Checksum test done in MBIO function <%s>\n",function_name);
 		    fprintf(stderr,"dbg5       checksum read:       %d\n",checksum_read);
@@ -2067,7 +2067,7 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, 
+int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp,
 		struct mbsys_sb2100_struct *store, short record_length,
 		int *error)
 {
@@ -2089,8 +2089,8 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
-		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		fprintf(stderr,"dbg2       record_len: %d\n",record_length);
 		}
 
@@ -2130,7 +2130,7 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp,
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-		mb_get_binary_int(MB_NO, &eor_read[0], (int *) &checksum_read); 
+		mb_get_binary_int(MB_NO, &eor_read[0], (int *) &checksum_read);
 
 
 		/* do checksum */
@@ -2139,7 +2139,7 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp,
 		    checksum = 0;
 		    for (i=0;i<read_length;i++)
 			    checksum += (unsigned int) buffer[i];
-    
+
 		    /* check checksum and report */
 		    fprintf(stderr,"\ndbg5  Checksum test done in MBIO function <%s>\n",function_name);
 		    fprintf(stderr,"dbg5       checksum read:       %d\n",checksum_read);
@@ -2154,7 +2154,7 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp,
 			    }
 		    }
 		}
-		
+
 	/* print debug statements */
 	if (verbose >= 5)
 		{
@@ -2198,8 +2198,8 @@ int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -2208,7 +2208,7 @@ int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	/* get pointer to raw data structure */
 	store = (struct mbsys_sb2100_struct *) store_ptr;
 	mbfp = mb_io_ptr->mbfp;
-	
+
 	/* write file header if not written yet */
 	if (mb_io_ptr->save_flag == MB_NO)
 		{
@@ -2271,15 +2271,15 @@ int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
 		}
 
 	/* print debug statements */
 	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       file_header_text: \n%s%s\n", 
-			mbf_sb2100bi_file_header_text_1, 
+		fprintf(stderr,"dbg5       file_header_text: \n%s%s\n",
+			mbf_sb2100bi_file_header_text_1,
 			mbf_sb2100bi_file_header_text_2);
 		}
 
@@ -2316,10 +2316,10 @@ int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error)
 
 	/* write out the store */
 	if (status == MB_SUCCESS)
-		{			
+		{
 		/* write the data */
-		if (fwrite(mbf_sb2100bi_file_header_text_1, 
-			strlen(mbf_sb2100bi_file_header_text_1), 
+		if (fwrite(mbf_sb2100bi_file_header_text_1,
+			strlen(mbf_sb2100bi_file_header_text_1),
 			1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2330,8 +2330,8 @@ int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error)
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
-		if (fwrite(mbf_sb2100bi_file_header_text_2, 
-			strlen(mbf_sb2100bi_file_header_text_2), 
+		if (fwrite(mbf_sb2100bi_file_header_text_2,
+			strlen(mbf_sb2100bi_file_header_text_2),
 			1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2375,8 +2375,8 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
-		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 
 	/* print debug statements */
@@ -2420,7 +2420,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	if (status == MB_SUCCESS)
 		{
 		record_length = MBF_SB2100BI_PR_WRITE_LEN + 6;
-		mb_put_binary_short(MB_NO, record_length, &buffer[0]);		
+		mb_put_binary_short(MB_NO, record_length, &buffer[0]);
 		if (fwrite(buffer, 2, 1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2435,7 +2435,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 
 	/* write out the data */
 	if (status == MB_SUCCESS)
-		{			
+		{
 		index = 0;
 		mb_put_binary_short(MB_NO, store->year, &buffer[index]); index += 2;
 		mb_put_binary_short(MB_NO, store->jday, &buffer[index]); index += 2;
@@ -2466,9 +2466,9 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		buffer[index] = mbf_sb2100bi_eor[0]; index++;
 		buffer[index] = mbf_sb2100bi_eor[1]; index++;
 		write_length += 6;
-		
+
 		/* write the data */
-		if (fwrite(buffer, write_length, 
+		if (fwrite(buffer, write_length,
 			1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2512,8 +2512,8 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
-		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 
 	/* print debug statements */
@@ -2547,7 +2547,7 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 			record_length = MBSYS_SB2100_MAXLINE;
 			}
 		record_length += 6;
-		mb_put_binary_short(MB_NO, record_length, &buffer[0]);		
+		mb_put_binary_short(MB_NO, record_length, &buffer[0]);
 		if (fwrite(buffer, 2, 1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2576,7 +2576,7 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		write_length += 6;
 
 		/* write the data */
-		if (fwrite(buffer, write_length, 
+		if (fwrite(buffer, write_length,
 			1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2620,8 +2620,8 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
-		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 
 	/* print debug statements */
@@ -2678,7 +2678,7 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	if (status == MB_SUCCESS)
 		{
 		record_length = MBF_SB2100BI_DH_WRITE_LEN + 6;
-		mb_put_binary_short(MB_NO, record_length, &buffer[0]);		
+		mb_put_binary_short(MB_NO, record_length, &buffer[0]);
 		if (fwrite(buffer, 2, 1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2693,7 +2693,7 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 
 	/* write out the data */
 	if (status == MB_SUCCESS)
-		{			
+		{
 		index = 0;
 		mb_put_binary_short(MB_NO, store->year, &buffer[index]); index += 2;
 		mb_put_binary_short(MB_NO, store->jday, &buffer[index]); index += 2;
@@ -2736,9 +2736,9 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		buffer[index] = mbf_sb2100bi_eor[0]; index++;
 		buffer[index] = mbf_sb2100bi_eor[1]; index++;
 		write_length += 6;
-		
+
 		/* write the store */
-		if (fwrite(buffer, write_length, 
+		if (fwrite(buffer, write_length,
 			1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2782,8 +2782,8 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
-		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 
 	/* print debug statements */
@@ -2826,7 +2826,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	if (status == MB_SUCCESS)
 		{
 		record_length = store->nbeams * MBF_SB2100BI_BR_WRITE_LEN + 6;
-		mb_put_binary_short(MB_NO, record_length, &buffer[0]);		
+		mb_put_binary_short(MB_NO, record_length, &buffer[0]);
 		if (fwrite(buffer, 2, 1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2841,7 +2841,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 
 	/* write out the data */
 	if (status == MB_SUCCESS)
-		{		
+		{
 		index = 0;
 		for (i=0;i<store->nbeams;i++)
 			{
@@ -2855,7 +2855,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 			mb_put_binary_short(MB_NO, store->beams[i].signal_to_noise, &buffer[index]); index += 2;
 			mb_put_binary_short(MB_NO, store->beams[i].echo_length, &buffer[index]); index += 2;
 			buffer[index] = store->beams[i].quality; index++;
-			buffer[index] = store->beams[i].source; index++;			
+			buffer[index] = store->beams[i].source; index++;
 			}
 
 		/* do checksum */
@@ -2867,9 +2867,9 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		buffer[index] = mbf_sb2100bi_eor[0]; index++;
 		buffer[index] = mbf_sb2100bi_eor[1]; index++;
 		write_length += 6;
-		
+
 		/* write the data */
-		if (fwrite(buffer, write_length, 
+		if (fwrite(buffer, write_length,
 			1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2915,8 +2915,8 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
-		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 
 	/* print debug statements */
@@ -2950,7 +2950,7 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	if (status == MB_SUCCESS)
 		{
 		record_length = store->npixels * MBF_SB2100BI_SR_WRITE_LEN + 6;
-		mb_put_binary_short(MB_NO, record_length, &buffer[0]);		
+		mb_put_binary_short(MB_NO, record_length, &buffer[0]);
 		if (fwrite(buffer, 2, 1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2965,7 +2965,7 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 
 	/* write out the data */
 	if (status == MB_SUCCESS)
-		{			
+		{
 		index = 0;
 		for (i=0;i<store->npixels;i++)
 			{
@@ -2984,9 +2984,9 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		buffer[index] = mbf_sb2100bi_eor[0]; index++;
 		buffer[index] = mbf_sb2100bi_eor[1]; index++;
 		write_length += 6;
-		
+
 		/* write the data */
-		if (fwrite(buffer, write_length, 
+		if (fwrite(buffer, write_length,
 			1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;

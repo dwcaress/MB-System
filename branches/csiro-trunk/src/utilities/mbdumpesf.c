@@ -2,7 +2,7 @@
  *    The MB-system:	mbdumpesf.c	3/20/2008
  *    $Id$
  *
- *    Copyright (c) 2008-2012 by
+ *    Copyright (c) 2008-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,7 +19,7 @@
  *
  * Author:	D. W. Caress
  * Date:	March 20, 2008
- * 
+ *
  * $Log: mbdumpesf.c,v $
  * Revision 5.0  2008/05/26 03:27:31  caress
  * Program for dumping edit events from edit save files.
@@ -38,11 +38,11 @@
 #include <sys/stat.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_process.h"
-#include "../../include/mb_swap.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_process.h"
+#include "mb_swap.h"
 
 static char rcs_id[] = "$Id$";
 
@@ -90,7 +90,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhI:i:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -146,16 +146,16 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       help:           %d\n",help);
 		fprintf(stderr,"dbg2       esf file:       %s\n",esffile);
 		}
-		
+
 	/* check that esf file exists */
 	fstat = stat(esffile, &file_status);
 	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
 	    	{
 		/* get number of edits */
 		nedit = file_status.st_size / (sizeof(double) + 2 * sizeof(int));
-		
+
 		/* open the esf file */
-		if ((esffp = fopen(esffile, "r")) == NULL) 
+		if ((esffp = fopen(esffile, "r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr,"\nUnable to edit save file <%s> for reading\n",esffile);
@@ -163,7 +163,7 @@ int main (int argc, char **argv)
 			    program_name);
 			exit(error);
 			}
-			
+
 		/* loop over reading edit events and printing them out */
 		for (i=0;i<nedit && error == MB_ERROR_NO_ERROR;i++)
 			{
@@ -196,18 +196,18 @@ int main (int argc, char **argv)
 				{
 				beam_filter++;
 				}
-				
+
 			mb_get_date(verbose,time_d,time_i);
 			fprintf(stdout,"EDITS READ: i:%d time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d action:%d\n",
 				i,time_d,time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5],time_i[6],
 				beam,action);
 			}
-		    	
+
 		/* close the edit save file */
 		fclose(esffp);
 		}
-	
+
 
 	/* give the statistics */
 	if (verbose >= 1)

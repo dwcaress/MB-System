@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_mr1bldeo.h	3/3/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_mr1bldeo.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_MR1BLDEO format (MBIO id 61).  
+ * to store multibeam data read from the MBF_MR1BLDEO format (MBIO id 61).
  *
  * Author:	D. W. Caress
  * Date:	October 23, 1995
@@ -94,7 +94,7 @@ struct mbf_mr1bldeo_struct
 	double png_lon;		/* longitude (deg) */
 	double png_lat;		/* latitude (deg) */
 	float png_course;	/* course determined from nav (deg) */
-	float png_compass;	/* compass heading of vehicle 
+	float png_compass;	/* compass heading of vehicle
 					0=N,90=E, etc. (deg) */
 	float png_prdepth;	/* pressure depth (m) */
 	float png_alt;		/* altitude of vehicle (m) */
@@ -110,7 +110,7 @@ struct mbf_mr1bldeo_struct
 	float port_pulse;	/* pulse length (units?) */
 	int port_btycount;	/* number of valid bathymetry samples */
 	int port_btypad;	/* number of invalid trailing pad samples */
-	float port_ssoffset;	/* across-track distance to 
+	float port_ssoffset;	/* across-track distance to
 					first sidescan sample */
 	int port_sscount;	/* number of valid sidescan samples */
 	int port_sspad;		/* number of invalid trailing pad samples */
@@ -121,7 +121,7 @@ struct mbf_mr1bldeo_struct
 	float stbd_pulse;	/* pulse length (units?) */
 	int stbd_btycount;	/* number of valid bathymetry samples */
 	int stbd_btypad;	/* number of invalid trailing pad samples */
-	float stbd_ssoffset;	/* across-track distance to 
+	float stbd_ssoffset;	/* across-track distance to
 					first sidescan sample */
 	int stbd_sscount;	/* number of valid sidescan samples */
 	int stbd_sspad;		/* number of invalid trailing pad samples */
@@ -143,4 +143,3 @@ struct mbf_mr1bldeo_struct
 	/* comment */
 	char	comment[MBF_MR1BLDEO_MAXLINE];
 };
-

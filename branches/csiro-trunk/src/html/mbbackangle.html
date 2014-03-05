@@ -1,0 +1,476 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbbackangle</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbbackangle</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbbackangle</B> - Generates tables of the average amplitude or
+sidescan values in swath sonar data as a function of
+the grazing angle with the seafloor.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbbackangle</B> [<B>-A</B><I>kind</I>
+<B>-C</B> <B>-D</B> <B>-F</B><I>format</I>
+<B>-G</B><I>kind/angle/max/nx/ny</I>
+<B>-I</B><I>file</I>
+<B>-N</B><I>nangle/anglemax</I> <B>-P</B><I>pings</I> <B>-Q</B>
+<B>-R</B><I>refangle</I> <B>-T</B><I>topogridfile</I> <B>-Z</B><I>altitude</I> <B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The program <B>mbbackangle</B> reads a swath sonar data file
+containing beam amplitude and/or sidescan data and generates tables
+of the average amplitude and/or sidescan values as a function of
+the grazing angle with the seafloor. These tables can be used
+by the program <B>mbprocess</B> to correct the sidescan or
+amplitude data for the variation with grazing angle. No assumption
+is made about the nature of the data or the sonar used to
+collect it.
+<P>
+The user specifies the angular width
+of the swath considered and the number of angular bins in that
+swath; the average amplitude or sidescan value within each bin
+form the output data. By default, the grazing angle is calculated simply using the
+acrosstrack distance and depth at the beam or pixel location.
+If bathymetry is not available, the seafloor is assumed to be flat
+with a sonar altitude specified by the <B>-Z</B> option.
+If the <B>-Q</B> option is used, then the acrosstrack bottom slope
+at the beam or pixel location is factored into the grazing angle
+values. For bins outside the nadir region (angles &gt; 15.0 degrees
+from vertical), the averaging extends over the neighboring bins (three bins
+averaged for each value). The user also specifies the number of pings
+to be read to generate each table; the default is 50 pings.
+<P>
+The results are written to a file named by
+adding a &quot;.sga&quot; suffix to the swath filename for sidescan and
+&quot;.aga&quot; for amplitude. These files contain a series of amplitude vs.
+grazing angle tables, each time tagged according to the average time
+of the pings used to generate that table. The swath file's
+<B>mbprocess</B> parameter file is also modified (or created if necessary)
+so that sidescan or amplitude correction is enabled.
+<P>
+The correction tables are read and interpolated according to ping time
+by <B>mbprocess</B>. The correction value for each amplitude or sidescan
+sample is also interpolated using the samples apparent grazing angle.
+The grazing angle is calculated using a flat bottom assumption
+by default but, if the <B>-Q</B> option is used, will instead be
+calculated using the acrosstrack slope in the bathymetry (if available) .
+If the <B>-T</B> option is used to specify a topography grid of the area
+of interest, then the grazing angle is calculated using that grid rather
+than any bathymetry data within the file being processed.
+<P>
+If the values are in dB, and therefore log scaled, then the corrections
+are subtracted from the raw values and then the value of the correction
+table at the reference angle (specified with the <B>-R</B> option) is
+added back in. In the case of linear data, the correction operation is
+to divide by the correction value and then multiply by the reference
+value. At present, only SeaBeam 2100 sidescan values are linear; all
+other amplitude and sidescan data supported by <B>MB-System</B> are
+in dB.
+<P>
+If the <B>-G</B> option is used, then <B>mbbackangle</B> also generates
+gridded histograms of the amplitude versus grazing angle values for
+each swath data file processed. The user specifies the bounds and dimensions
+of the grids; the <B>-G</B> option must be given twice to produce grids
+of both amplitude and sidescan histograms. In addition to outputting the
+grids, <B>mbbackangle</B> uses <B>mbm_grdplot</B> to generate <B>GMT</B>
+shellscripts that, when executed, will generate plots of the gridded
+histograms overlain with the amplitude versus grazing angle tables in
+the &quot;.aga&quot; and &quot;.sga&quot; files.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>kind</I>
+<BR>
+
+Determines if beam amplitude (<I>kind</I> = 1)
+and/or sidescan (<I>kind</I> = 2) data will be processed.
+Default: both amplitude and sidescan data are processed.
+<DT><B>-C</B>
+
+<DD>
+Normally, <B>mbbackangle</B> produces a table of amplitude vs
+grazing angle values which is asymmetric about the vertical
+(zero angle) axis. If <B>-C</B> is specified, the amplitude
+vs grazing angle function will be forced to be symmetric.
+Generally, it is better to not use this option in <B>mbbackangle</B>,
+and to instead use <B>mbset</B> to set symmetric or asymmetric
+sidescan correction in the <B>mbprocess</B> parameter file.
+<DT><B>-D</B>
+
+<DD>
+This option causes <B>mbbackangle</B> to dump the output to
+stdout rather than to &quot;.sga&quot; or &quot;.aga&quot; files..
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the <B>MBIO</B> integer format identifier
+for the input file specified with the
+<B>-I</B> option. By default, <B>mbbackangle</B>
+infers the format from the &quot;*.mbXX&quot; <B>MB-System</B> suffix
+convention.
+<DT><B>-G</B>
+
+<DD>
+<I>kind/angle/max/nx/ny</I>
+<BR>
+
+This option causes <B>mbbackangle</B> to output gridded histograms
+of the amplitude versus grazing angle data for each swath file
+processed. The program also generates a shellscript to produce a
+first-cut <B>GMT</B> postscript plot of the histogram overlain by
+the amplitude versus grazing angle tables used by <B>mbprocess</B>.
+The <I>kind</I> parameter indicates whether an amplitude (<I>kind</I> = 1)
+or sidescan (<I>kind</I> = 2) histogram is desired; the <B>-G</B> command
+must be given twice (once with <I>kind</I> = 1 and once with <I>kind</I> = 2)
+to generate both amplitude and sidescan histograms. The histogram grid
+consists of <I>nx</I> bins extending from -<I>angle</I> to +<I>angle</I> degrees in the
+x-dimension, and <I>ny</I> bins extending from 0.0 to <I>max</I> in the
+y-dimension. The values of the histogram are normalized so that they sum
+to 1000.0 within each angle bin.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>filename</I>
+<BR>
+
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-F</B> option) then the swath sonar data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+and process the data in each one of these files. Each input file will
+have an associated output file with either the &quot;.sga&quot; or &quot;.aga&quot; suffix.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will read any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-N</B>
+
+<DD>
+<I>nangle/angle</I>
+<BR>
+
+The amplitude vs grazing angle table is calculated by binning the
+amplitude values according to their grazing angles and averaging
+the amplitudes within each bin. This option sets the number of
+grazing angle bins (<I>nangle</I>) and the maximum angle considered
+(<I>angle</I>). The grazing angle function will be defined at
+<I>nangle</I> points spaced equally from -<I>angle</I> to
++<I>angle</I>. The <I>nangle</I> value should be an odd integer
+so that the middle bin is centered on the angle 0.0.
+Default: <I>nangle</I> = 81, <I>angle</I> = 80.0.
+<DT><B>-P</B>
+
+<DD>
+<I>pings</I>
+<BR>
+
+Sets the number of pings to be read and averaged for each
+amplitude vs grazing angle table. The output &quot;*.sga&quot; or &quot;.aga&quot; files
+will generally contain many tables, each with a timestamp
+corresponding to the average of the ping times used for
+each table. A table may be output averaged over a lesser number
+of beams if a time gap is encountered in the data, and also at
+the end of the file. Default: <I>pings</I> = 50.
+<DT><B>-Q</B>
+
+<DD>
+By default, <B>mbbackangle</B> does not use seafloor slopes in
+calculating the grazing angles for each amplitude beam and sidescan
+pixel. This option causes the program to calculate acrosstrack slopes
+from swath bathymetry, if available, and to factor these slopes
+into the grazing angle calculation for each data point.
+<DT><B>-R</B>
+
+<DD>
+<I>refangle</I>
+Sets the reference angle that will be used by <B>mbprocess</B> in
+applying the amplitude and/or sidescan correction tables generated
+by <B>mbbackangle</B>. Default: <I>refangle</I> = 30.0 degrees.
+<DT><B>-T</B>
+
+<DD>
+<I>topogridfile</I>
+By default, <B>mbbackangle</B> does not use seafloor slopes in
+calculating the grazing angles for each amplitude beam and sidescan
+pixel. This option causes the program to calculate acrosstrack slopes
+using the topography grid <I>topogridfile</I>, and to factor these slopes
+into the grazing angle calculation for each data point.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbbackangle</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbmask</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used and all error status messages.
+<DT><B>-Z</B>
+
+<DD>
+<I>depth</I>
+<BR>
+
+This option specifies a default sonar altitude value in meters to be
+used whenever bathymetry values are unavailable. A flat seafloor
+(zero slope) will be assumed wherever the default depth needs
+to be used (e.g. data files with sidescan but no bathymetry, or
+the outer parts of swaths where the sidescan may extend further
+than the bathymetry). If this option is not specified, any
+amplitude or sidescan values without associated bathymetry
+information will not be used in calculating the amplitude
+vs grazing angle table.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLE</H2>
+
+Suppose one has a Simrad EM300 data file called
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0003_20020425_022926.mb57
+which contains 131 pings. In order to correct the beam amplitude and sidescan
+with mbprocess, first use <B>mbbackangle</B> to generate the
+amplitude vs grazing angle tables:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbbackangle&nbsp;-I&nbsp;mbari_1998_988_msn.mb57&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-N81/80.0&nbsp;-P50&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G1/80/60/81/121&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G2/80/60/81/121&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-V<BR>
+<BR>
+
+Here the angle bins will be 2.0 degree wide, the table
+will extend from -80.0 degees (port) to +80.0 (starboard),
+and each table will represent the averages over up to 50
+pings. The output looks like:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbbackangle<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbbackangle.1&nbsp;2096&nbsp;2013-06-04&nbsp;08:17:22Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.0.4<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Pings&nbsp;to&nbsp;average:&nbsp;&nbsp;&nbsp;&nbsp;50<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Number&nbsp;of&nbsp;angle&nbsp;bins:&nbsp;81<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Maximum&nbsp;angle:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Default&nbsp;altitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Working&nbsp;on&nbsp;beam&nbsp;amplitude&nbsp;data...<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Working&nbsp;on&nbsp;sidescan&nbsp;data...<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Using&nbsp;flat&nbsp;bottom&nbsp;assumption&nbsp;in&nbsp;calculating&nbsp;correction&nbsp;tables...<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Outputting&nbsp;gridded&nbsp;histograms&nbsp;of&nbsp;beam&nbsp;amplitude&nbsp;vs&nbsp;grazing&nbsp;angle...<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Outputting&nbsp;gridded&nbsp;histograms&nbsp;of&nbsp;sidescan&nbsp;amplitude&nbsp;vs&nbsp;grazing&nbsp;angle...<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>processing&nbsp;swath&nbsp;file:&nbsp;mbari_1998_988_msn.mb57&nbsp;57<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7274&nbsp;records&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>805564&nbsp;amplitude&nbsp;data&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>146&nbsp;tables&nbsp;written&nbsp;to&nbsp;mbari_1998_988_msn.mb57.aga<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5371412&nbsp;sidescan&nbsp;data&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>146&nbsp;tables&nbsp;written&nbsp;to&nbsp;mbari_1998_988_msn.mb57.sga<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Plot&nbsp;generation&nbsp;shellscript&nbsp;&lt;mbari_1998_988_msn.mb57_aga.grd.cmd&gt;&nbsp;created.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Plot&nbsp;generation&nbsp;shellscript&nbsp;&lt;mbari_1998_988_msn.mb57_sga.grd.cmd&gt;&nbsp;created.<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7274&nbsp;total&nbsp;records&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>805564&nbsp;total&nbsp;amplitude&nbsp;data&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>146&nbsp;total&nbsp;aga&nbsp;tables&nbsp;written<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5371412&nbsp;total&nbsp;sidescan&nbsp;data&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>146&nbsp;total&nbsp;sga&nbsp;tables&nbsp;written<BR>
+<P>
+The output files include the amplitude versus grazing angle tables in
+mbari_1998_988_msn.mb57.aga and mbari_1998_988_msn.mb57.sga, the
+gridded histogram files mbari_1998_988_msn.mb57_aga.grd and
+mbari_1998_988_msn.mb57_sga.grd, and the plotting shellscripts
+mbari_1998_988_msn.mb57_aga.grd.cmd and
+mbari_1998_988_msn.mb57_sga.grd.cmd. The <B>mbprocess</B> parameter file
+mbari_1998_988_msn.mb57.par has also been either
+created (if necessary) or modified to enable sidescan
+correction using the &quot;.sga&quot; tables. The first of the six tables
+in mbari_1998_988_msn.mb57.sga looks like:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Sidescan&nbsp;correction&nbsp;table&nbsp;files&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbbackangle<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Version&nbsp;$Id:&nbsp;mbbackangle.1&nbsp;2096&nbsp;2013-06-04&nbsp;08:17:22Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;MB-system&nbsp;Version&nbsp;5.0.4<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Table&nbsp;file&nbsp;format:&nbsp;1.0.0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Run&nbsp;by&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;hess&gt;&nbsp;at&nbsp;&lt;Fri&nbsp;Oct&nbsp;&nbsp;1&nbsp;11:18:30&nbsp;2004&gt;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Input&nbsp;swath&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_988_msn.mb57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Input&nbsp;swath&nbsp;format:&nbsp;&nbsp;&nbsp;&nbsp;57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Output&nbsp;table&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbari_1998_988_msn.mb57.sga<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Pings&nbsp;to&nbsp;average:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Number&nbsp;of&nbsp;angle&nbsp;bins:&nbsp;&nbsp;81<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Maximum&nbsp;angle:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;80.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Default&nbsp;altitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>##&nbsp;Data&nbsp;type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sidescan<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;table:&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;nping:&nbsp;50<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;time:&nbsp;&nbsp;1998/06/10&nbsp;14:55:24.979779&nbsp;&nbsp;&nbsp;&nbsp;897490524.979780<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;nangles:&nbsp;81<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-80.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-78.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-76.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-74.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-72.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-70.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-68.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-66.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-64.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;33.4828&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.5915<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-62.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32.4068&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.4016<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-60.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31.9667&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.3320<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-58.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31.7880&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1880<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-56.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31.6249&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0681<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-54.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31.6362&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9521<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-52.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31.5590&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0482<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-50.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31.3955&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1242<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-48.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31.0372&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.2364<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-46.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.9569&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1092<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-44.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.8126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9848<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-42.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.3497&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9611<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-40.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29.7660&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9479<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-38.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29.2746&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9727<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-36.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29.1929&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9734<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-34.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29.1729&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9893<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-32.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.7375&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0295<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-30.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.6560&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0031<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-28.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.0609&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1757<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-26.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.3652&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.2692<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-24.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;26.2536&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1193<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-22.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25.2113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.8437<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-20.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24.9033&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5717<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-18.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24.4118&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5952<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-16.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24.4341&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5824<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-14.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24.3251&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.7864<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-12.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;23.6965&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1409<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-10.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24.1326&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.7653<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-8.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;26.1912&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2246<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-6.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.9516&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5724<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-4.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31.1992&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.6401<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-2.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29.2624&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.8076<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.4466&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.3310<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;2.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24.9780&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1345<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;4.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24.2328&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.0980<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;6.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;23.3917&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.6856<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;8.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24.0867&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5882<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>10.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;23.2293&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.6383<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>12.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24.1375&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5005<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>14.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25.1402&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.6843<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>16.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25.1948&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9131<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>18.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25.0986&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0503<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25.0798&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0769<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>22.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25.0582&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1801<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>24.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25.6108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1108<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>26.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25.8393&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0068<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>28.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;26.3232&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9469<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>30.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;26.4346&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0686<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>32.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;26.6474&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1690<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>34.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.0092&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.2098<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>36.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.1987&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1664<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>38.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.3710&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.2504<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>40.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.1160&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1788<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>42.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.0691&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1418<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>44.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.2547&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.8907<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>46.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.7406&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9654<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>48.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.1568&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9277<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>50.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.4015&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9687<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>52.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.4042&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9034<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>54.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.3741&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9500<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>56.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.5195&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9799<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>58.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.6455&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0142<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>60.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.9284&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.9876<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>62.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28.9028&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0380<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>64.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>66.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>68.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>70.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>72.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>74.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>76.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>78.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>80.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbset.html">mbset</A></B>(1), <B><A HREF="mbfilter.html">mbfilter</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+None worth bragging about.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLE</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

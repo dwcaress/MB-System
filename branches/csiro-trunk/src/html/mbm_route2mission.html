@@ -1,0 +1,517 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_route2mission</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_route2mission</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_route2mission</B> - Macro to convert an <B>mbgrdviz</B> route file into an
+MBARI AUV mission script.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_route2mission</B> <B>-I</B><I>routefile</I>
+[<B>-A</B><I>altmin/altabort[/altdesired[/altdesired2[/altdesired3]]]</I>
+<B>-B</B><I>behavior</I> <B>-C</B><I>missiontime</I>
+<B>-D</B><I>depthconstant[/depthconstant2]</I>
+<B>-F</B><I>forwarddistance</I> <B>-G</B><I>gpsmode</I>
+<B>-J</B><I>depthprofilefile</I> <B>-L</B><I>approachdepth</I>
+<B>-M</B><I>[sensorlist]</I> <B>-N</B>[<I>spiraldescentaltitude</I>] <B>-O</B><I>missionfile</I>
+<B>-P</B><I>[startlon/startlat | startdistance]</I>
+<B>-R</B><I>transmitpower/receivegain[/rangeminfraction[/pulsewidth]]</I>
+<B>-S</B><I>speed</I> <B>-T</B><I>starttime</I>
+<B>-W</B><I>waypointspacing</I> <B>-V</B> <B>-H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_route2mission</B> - Macro to convert an <B>mbgrdviz</B> route file into an
+MBARI AUV mission script.
+<P>
+MBARI Autonomous Underwater Vehicles, or AUVs, are controlled using a layered
+behavior system that is specified using a mission script. This macro generates
+an MBARI AUV mission script from an <B>MB-System</B> route file such as those
+generated interactively using <B>MBgrdviz</B>. The output MBARI AUV mission script
+is named using a &quot;.cfg&quot; suffix. A Winfrog waypoint file (ending in &quot;.pts&quot;) is also
+output which mirrors the waypoints in the input route file.
+<P>
+The output AUV mission script includes safety behaviors that operate throughout
+a mission (e.g. missionTimer sets a mission timeout duration, and depthEnvelope
+sets depth and altitude limits). The script also includes the sequential behaviors
+required to take a vehicle from the start of a mission at the surface, obtaining
+the initial position from GPS, descent to depth, flying to the starting waypoint,
+running the desired survey lines with a desired depth or altitude profile,
+ascent to the surface, and reacquiring positioning from GPS. For seafloor mapping
+surveys, sonar settings and data logging are also controlled through the
+mission script.
+<P>
+The input route file specifies a survey mission as a set of sequential waypoints,
+and also includes the depth profile between those waypoints. Waypoints may be
+ordinary, the start of a survey line, or the end of a survey line (the start and
+end line waypoints are generated using the survey route planning feature of
+<B>MBgrdviz</B>). The spacing  of the depth profile points between the waypoints
+derives from the bathymetric grid used to generate the route.
+<P>
+The output mission specifies a larger number of waypoints than the input route file.
+The mission waypoints are generated every <I>waypointspacing</I> meters (specified
+with the <B>-W</B> option), and the AUV is commanded to fly at particular depths (or
+depth profiles) between each waypoint. By default, the AUV will be flown using a control
+behavior called WaypointDepth in which the commanded vehicle depth follows a linearly
+interpolated profile between the depth at the starting waypoint and the depth
+at the ending waypoint. The simpler alternative waypoint behavior specifies a
+single vehicle depth while flying to the next mission; as it begins each segment
+the vehicle will ascend or descend sharply to the desired depth and then fly
+level until the next waypoint is reached.
+<P>
+The <B>-A</B> option allows the user to set the basic vehicle
+altitude control. The vehicle's vertical position will be simulatneously controlled
+in terms of both altitude above the bottom and depth below the sea surface. The commanded
+depth between each waypoint is calculated by <B>mbm_route2mission</B> (using the bathymetry
+profiles in the input route file) to produce a vehicle altitude that is <I>altdesired</I>
+meters above the shallowest depth looking <I>forwarddistance</I> meters ahead. The
+forward looking feature allows the vehicle to be commanded to ascend prior to reaching
+large scarps. As the mission commences, the AUV attempts to fly at the commanded depth
+unless that would result in an altitude less than <I>altmin</I> meters. In that
+circumstance, the vehicle flies in an altitude-following mode. Thus, for consistent
+bottom-following, a common approach is to set <I>altmin</I> to the desired
+altitude and to set <I>altdesired</I> to a value slightly smaller than <I>altmin</I>.
+This strategy allows the look-ahead feature to bring the vehicle safely over steep rises
+while otherwise maintaining a constant altitude.
+<P>
+The <B>-G</B> option allows the user to specify that the vehicle ascend to the surface
+and reset positioning  with GPS at the beginning and/or end of survey lines.
+<P>
+The <B>-N</B> option allows the user to specify that the vehicle first move to the
+initial survey waypoint, and then follow a spiral descent to the desired survey depth.
+The <B>-L</B><I>approachdepth</I> option sets the vehicle depth as it approaches the
+first waypoint before the spiral descent. The optional <I>spiraldescentaltitude</I>
+parameter sets the altitude at which the spiral descent is terminated; if <B>-N</B>
+is given alone then <I>altdesired</I> from the <B>-A</B> option is used.
+These options are used for deepwater missions
+in which the vehicle navigation is updated by acoustic modem during the free
+inertial descents.
+<P>
+The mission script must also allow sufficient time for the vehicle to transit from its
+starting point to the first waypoint in the survey mission. The <B>-T</B> and <B>-P</B>
+options allow the user specify the AUV starting position, the distance to the first
+waypoint, or the time required to reach the first waypoint.
+<P>
+The MBARI Mapping AUV is equipped with a 200 kHz multibeam sonar, a 2-16 kHz chirp subbottom
+profiler, a 110 kHz chirp sidescan, and a 410 kHz chirp sidescan. The <B>-M</B> option is
+used to enable these mapping sonars in the AUV mission script. If the route file contains
+waypoints identified as line start and line end points, the subbottom profiler (if enabled) will be
+turned on and off at these points. The waypoint type value can be set interactively within
+<B>mbgrdviz</B>.
+<P>
+The MBARI Benthic Imaging AUV is equipped with dual strobes and a downward pointed camera.
+The <B>-MC</B> option is used to enable control of the camera in the AUV mission script. If the route file contains
+waypoints identified as line start and line end points, the camera (if enabled) will be
+turned on and off at these points. The waypoint type value can be set interactively within
+<B>mbgrdviz</B>.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>altmin/altabort[/altdesired[/altdesired2[/altdesired3]]]</I>
+<BR>
+
+Sets the AUV altitude control parameters. The missions generated by this
+script directly command the AUV's depth. However, the commanded depth
+will be overridden by the minimum altitude, or <I>altmin</I> value;
+the vehicle will adjust it's depth so that it does not fly any closer
+to the bottom than <I>altmin</I> meters. If the vehicle reaches an
+altitude equal to or less than <I>altabort</I> meters, then the
+mission will be aborted. The user may specify a desired altitude
+(<I>altdesired</I>) that is different than <I>altmin</I>, so that
+the commanded depths do not directly correspond to the minimum altitude.
+The user can also specify second or third desired altitude
+values <I>altdesired2</I> <I>altdesired3</I>
+that are used between waypoints of type START2 and END2, or START3
+and END3, respectively, as defined in
+<B>MBgrdviz</B> routes.
+<DT><B>-B</B>
+
+<DD>
+<I>behavior</I>
+<BR>
+
+Sets the AUV behavior used to fly the mission. If <I>behavior</I> = 0, then
+the AUV uses the WayPoint behavior in which a single vehicle depth is specified
+for the approach to each waypoint. If <I>behavior</I> = 1, then the AUV uses
+the WayPointDepth behavior in which each mission segment has both a starting
+and an ending depth specified, and the vehicle is commanded to fly a depth
+profile that is a linear ramp between the two depths. Default: <I>behavior</I> = 1;
+<DT><B>-C</B>
+
+<DD>
+<I>missiontime</I>
+<BR>
+
+Sets the maximum time allowed for the AUV mission. If the <I>missiontime</I> is
+exceeded, the AUV will transition to it's internal abort plan.
+Default: mission abort time calculated from mission parameters.
+<DT><B>-D</B>
+
+<DD>
+<I>depthconstant[/depthconstant2]</I>
+<BR>
+
+Sets constant depth values that will be used between waypoints of
+typ START4 and END4 for <I>depthconstant</I> and START5 and END5 for
+<I>depthconstant2</I>. These are the waypoint types defined in
+<B>MBgrdviz</B> routes. While these waypoint types are active, the
+AUV is commanded to the specified constant depth value.
+<DT><B>-F</B>
+
+<DD>
+<I>forwarddistance</I>
+<BR>
+
+The program looks <I>forwarddistance</I> m ahead for the shallowest bottom
+depth along the survey route, and then commands the vehicle to
+fly at least <I>altmin</I> above that depth.
+<DT><B>-G</B>
+
+<DD>
+<I>gpsmode</I>
+<BR>
+
+Sets the frequency with which the AUV will surface between survey lines to
+get GPS fixes. By default, the vehicle only get GPS fixes at the surface at
+the beginning and end of the mission, and not surface during the mission.
+If <I>gpsmode</I> = 1, then the vehicle will ascend for gps fixes at
+the start of each survey line. If <I>gpsmode</I> = 2, then the vehicle will
+ascend for gps fixes at the end of each survey line. If <I>gpsmode</I> = 3,
+then the vehicle will  ascend for gps fixes at the start and end of each survey line
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>routefile</I>
+<BR>
+
+Sets the filename of the input <B>mbgrdviz</B> route file.
+A route file specifies a desired survey route as a set of
+lines between waypoints. In addition to the waypoints, the file
+also includes the depth profiles along those lines.
+<DT><B>-J</B>
+
+<DD>
+<I>depthprofilefile</I>
+<BR>
+
+Sets the filename of an input desired depth profile file. This is the depth
+profile that the vehicle should follow when flying the mission (as opposed to
+following the bottom at a particular altitude).
+<DT><B>-L</B>
+
+<DD>
+<I>approachdepth</I>
+<BR>
+
+Sets the vehicle depth during the approach to the first waypoint when a
+spiral descent to depth at the first waypoint is specified  using the <B>-N</B> option.
+<DT><B>-M</B>
+
+<DD>
+<I>[sensorlist]</I>
+This option enables control of the Mapping AUV's mapping sonars and other possible
+sensors. By default, the AUV mission is generated without turning on the mapping sonars.
+If <B>-M</B> is given alone, the multibeam, subbottom profiler, and both low and high
+frequency sidescan sonars will be enabled. The <I>sonarlist</I> parameter can
+optionally specify which sonars are enabled in addition to the multibeam (the
+multibeam serves as the ping timing master for all sonars, and thus must be
+enabled if any mapping sonars are enabled). The <I>sonarlist</I> value is
+made up of one or more of the following characters:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>M<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>multibeam&nbsp;sonar<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>S<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>subbottom&nbsp;profiler&nbsp;(and&nbsp;multibeam)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>L<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>low&nbsp;frequency&nbsp;sidescan&nbsp;(and&nbsp;multibeam)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>H<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>high&nbsp;frequency&nbsp;sidescan&nbsp;(and&nbsp;multibeam)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>B<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>multibeam&nbsp;beam&nbsp;(water&nbsp;column)&nbsp;data<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>C<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>benthic&nbsp;imaging&nbsp;camera&nbsp;and&nbsp;strobes<BR>
+<BR>
+
+Thus, <B>-M</B><I>SL</I> will cause the multibeam, the subbottom profiler, and
+the low frequency sidescan to be enabled while leaving the high frequency
+sidescan off.
+<DT><B>-N</B>
+
+<DD>
+<I>spiraldescentaltitude</I>
+Sets the mission to include a shallow transit to the first waypoint followed by a
+spiral descent to depth to start the survey. The descent is terminated at the
+altitude <I>spiraldescentaltitude</I> if specified here. Otherwise, the descent is
+terminated at the altitude <I>altdesired</I> from the <B>-A</B> option.
+<DT><B>-O</B>
+
+<DD>
+<I>missionfile</I>
+<BR>
+
+Sets the filename of the output MBARI AUV mission script.
+<DT><B>-P</B>
+
+<DD>
+<I>lon/lat</I>
+<BR>
+
+This sets the expected starting position (<I>lon</I> longitude
+and <I>lat</I> latitude) of the Mapping AUV so that the
+expected time to run to the first waypoint can be estimated. If neither
+the <B>-P</B> or <B>-T</B> options are specified, a distance of 500 meters
+to the first waypoint is assumed.
+<DT><B>-R</B>
+
+<DD>
+<I>transmitpower/receivegain[/rangeminfraction[/pulsewidth]]</I>
+<BR>
+
+This sets the key multibeam sonar parameters. Here <I>transmitpower</I> is
+the transmit power of the multibeam in dB, with a range of 0-220 dB. The
+multibeam receive gain has a range of 0-83 dB. The <I>rangeminfraction</I> variable
+sets the minimum range at which the multibeam will make bottom picks; this
+prevents the multibeam from picking on nearfield arrivals usually reflecting
+interference from other sonars. If the sonar is operating with an altitude of
+50 m and <I>rangeminfraction</I> = 0.2, then the range gating minimum range will be
+0.2 * 50 m = 10 m. The <I>pulsewidth</I> variable sets the multibeam sonar
+transmit pulse width in microseconds. Default: <I>transmitpower</I> = 220, <I>receivegain</I> = 220,
+<I>rangeminfraction</I> = 0.2, <I>pulsewidth</I> = 60.
+<DT><B>-S</B>
+
+<DD>
+<I>speed</I>
+<BR>
+
+This sets the commanded AUV speed in meters/second. Default: <I>speed</I> = 1.5 m/s.
+<DT><B>-T</B>
+
+<DD>
+<I>starttime</I>
+<BR>
+
+This sets the expected time required for the AUV to reach the first waypoint
+in the survey mission. If neither
+the <B>-P</B> or <B>-T</B> options are specified, a distance of 500 meters
+to the first waypoint is assumed.
+<DT><B>-W</B>
+
+<DD>
+<I>waypointspacing</I>
+<BR>
+
+Sets the spacing in meters of the waypoints output to the mission script.
+<DT><B>-V</B>
+
+<DD>
+The <B>-V</B> option causes <B>mbm_route2mission</B> to print out status messages.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose you are going to run the MBARI Mapping AUV on the Coaxial Segment of the
+Juan de Fuca Ridge. You have created a route file called Coaxial2009_1v3.rte using
+<B>mbgrdviz</B>. In order to create an MBARI AUV mission script for mission beginning
+with a spiral descent to an altitude of 50 m, followed by a survey run at a 75 m altitude,
+the following will suffice:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_route2mission&nbsp;-I&nbsp;Coaxial2009_1v3.rte&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-A75/30/75&nbsp;-B1&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G0&nbsp;-MSL&nbsp;-N50&nbsp;-R220/83/0.3&nbsp;&nbsp;-O&nbsp;Coaxial2009_1v3.cfg&nbsp;&nbsp;-S1.5&nbsp;-L30&nbsp;-W100&nbsp;-V<BR>
+<BR>
+
+The resulting mission script has the following header:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;This&nbsp;MBARI&nbsp;Mapping&nbsp;AUV&nbsp;mission&nbsp;file&nbsp;has&nbsp;been&nbsp;generated
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;by&nbsp;the&nbsp;MB-System&nbsp;program&nbsp;mbm_route2mission&nbsp;run&nbsp;by
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;shepard&gt;&nbsp;at&nbsp;&lt;Thu&nbsp;Jul&nbsp;30&nbsp;11:36:47&nbsp;PDT&nbsp;2009&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Mission&nbsp;Summary:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route&nbsp;File:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coaxial2009_1v3.rte
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mission&nbsp;File:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coaxial2009_1v3.cfg
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Distance:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;79501.503455&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Estimated&nbsp;Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;57203&nbsp;(s)&nbsp;&nbsp;15.890&nbsp;(hr)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Abort&nbsp;Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;60067&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max&nbsp;battery&nbsp;life:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;64800&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Safety&nbsp;margin:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1800&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ascend&nbsp;time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2932&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Way&nbsp;Points:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;44
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route&nbsp;Points:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;550
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey&nbsp;behavior:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WaypointDepth
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Descent&nbsp;style:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spiral&nbsp;descent
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mapping&nbsp;sonar&nbsp;control&nbsp;enabled:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multibeam&nbsp;enabled
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multibeam&nbsp;receive&nbsp;gain:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;83
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multibeam&nbsp;transmit&nbsp;gain:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;220
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multibeam&nbsp;minimum&nbsp;range&nbsp;fraction:&nbsp;0.3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom&nbsp;enabled
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;sidescan&nbsp;enabled
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;sidescan&nbsp;disabled
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Mission&nbsp;Parameters:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vehicle&nbsp;Speed:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.500000&nbsp;(m/s)&nbsp;2.915769&nbsp;(knots)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Desired&nbsp;Vehicle&nbsp;Altitude:&nbsp;75&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Vehicle&nbsp;Altitude:&nbsp;75&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Abort&nbsp;Vehicle&nbsp;Altitude:&nbsp;&nbsp;&nbsp;30&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum&nbsp;Vehicle&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;2525.307922&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Abort&nbsp;Vehicle&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2562.807922&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Descent&nbsp;Vehicle&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spiral&nbsp;descent&nbsp;depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2324.917643&nbsp;m
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spiral&nbsp;descent&nbsp;altitude:&nbsp;&nbsp;50&nbsp;m
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward&nbsp;Looking&nbsp;Distance:&nbsp;&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Waypoint&nbsp;Spacing:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GPS&nbsp;Duration:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;600&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Descend&nbsp;Rate:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.417&nbsp;(m/s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ascend&nbsp;Rate:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;(m/s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Initial&nbsp;descend&nbsp;Duration:&nbsp;300&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Setpoint&nbsp;Duration:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;The&nbsp;primary&nbsp;waypoints&nbsp;from&nbsp;the&nbsp;route&nbsp;file&nbsp;are:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&lt;number&gt;&nbsp;&lt;longitude&nbsp;(deg)&gt;&nbsp;&lt;latitude&nbsp;(deg)&gt;&nbsp;&lt;topography&nbsp;(m)&gt;&nbsp;&lt;distance&nbsp;(m)&gt;&nbsp;&lt;type&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;0&nbsp;-129.588618&nbsp;46.504590&nbsp;-2384.917643&nbsp;0.000000&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;1&nbsp;-129.583151&nbsp;46.507559&nbsp;-2412.977865&nbsp;533.709482&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;2&nbsp;-129.569223&nbsp;46.503420&nbsp;-2548.389974&nbsp;1697.143568&nbsp;1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;3&nbsp;-129.566359&nbsp;46.501080&nbsp;-2494.963053&nbsp;2037.557099&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;4&nbsp;-129.548611&nbsp;46.529852&nbsp;-2539.510864&nbsp;5512.537193&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;5&nbsp;-129.551250&nbsp;46.530628&nbsp;-2562.807922&nbsp;5732.537193&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;6&nbsp;-129.568962&nbsp;46.501924&nbsp;-2531.034424&nbsp;9199.497998&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;7&nbsp;-129.571600&nbsp;46.502699&nbsp;-2519.138489&nbsp;9419.497998&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;8&nbsp;-129.553889&nbsp;46.531404&nbsp;-2547.114624&nbsp;12886.458803&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;9&nbsp;-129.556529&nbsp;46.532180&nbsp;-2514.533569&nbsp;13106.458803&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;10&nbsp;-129.574238&nbsp;46.503475&nbsp;-2470.815735&nbsp;16573.419607&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;11&nbsp;-129.576876&nbsp;46.504250&nbsp;-2444.596313&nbsp;16793.419607&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;12&nbsp;-129.559168&nbsp;46.532956&nbsp;-2521.781921&nbsp;20260.380412&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;13&nbsp;-129.561807&nbsp;46.533732&nbsp;-2537.382141&nbsp;20480.380412&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;14&nbsp;-129.579514&nbsp;46.505026&nbsp;-2429.459961&nbsp;23947.341216&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;15&nbsp;-129.582152&nbsp;46.505801&nbsp;-2412.764343&nbsp;24167.341217&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;16&nbsp;-129.564447&nbsp;46.534508&nbsp;-2545.397705&nbsp;27634.302021&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;17&nbsp;-129.567086&nbsp;46.535284&nbsp;-2534.068665&nbsp;27854.302021&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;18&nbsp;-129.584791&nbsp;46.506576&nbsp;-2398.283020&nbsp;31321.262826&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;19&nbsp;-129.587429&nbsp;46.507352&nbsp;-2390.671509&nbsp;31541.262826&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;20&nbsp;-129.569726&nbsp;46.536059&nbsp;-2489.889282&nbsp;35008.223630&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;21&nbsp;-129.572365&nbsp;46.536835&nbsp;-2465.280823&nbsp;35228.223630&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;22&nbsp;-129.590068&nbsp;46.508127&nbsp;-2389.067017&nbsp;38695.184435&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;23&nbsp;-129.592706&nbsp;46.508902&nbsp;-2409.290771&nbsp;38915.184435&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;24&nbsp;-129.575005&nbsp;46.537610&nbsp;-2466.533142&nbsp;42382.145240&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;25&nbsp;-129.577645&nbsp;46.538386&nbsp;-2491.371094&nbsp;42602.145240&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;26&nbsp;-129.595345&nbsp;46.509677&nbsp;-2397.609253&nbsp;46069.106044&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;27&nbsp;-129.597984&nbsp;46.510452&nbsp;-2413.315918&nbsp;46289.106044&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;28&nbsp;-129.580285&nbsp;46.539161&nbsp;-2499.048889&nbsp;49756.066849&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;29&nbsp;-129.582925&nbsp;46.539937&nbsp;-2523.030640&nbsp;49976.066849&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;30&nbsp;-129.600622&nbsp;46.511227&nbsp;-2443.481018&nbsp;53443.027653&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;31&nbsp;-129.603261&nbsp;46.512002&nbsp;-2419.008240&nbsp;53663.027653&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;32&nbsp;-129.585565&nbsp;46.540712&nbsp;-2518.522400&nbsp;57129.988458&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;33&nbsp;-129.588205&nbsp;46.541487&nbsp;-2498.521301&nbsp;57349.988458&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;34&nbsp;-129.605900&nbsp;46.512777&nbsp;-2450.386536&nbsp;60816.949263&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;35&nbsp;-129.608539&nbsp;46.513552&nbsp;-2473.623230&nbsp;61036.949263&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;36&nbsp;-129.590845&nbsp;46.542262&nbsp;-2487.422180&nbsp;64503.910067&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;37&nbsp;-129.593485&nbsp;46.543038&nbsp;-2491.040466&nbsp;64723.910067&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;38&nbsp;-129.611178&nbsp;46.514327&nbsp;-2472.610657&nbsp;68190.870872&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;39&nbsp;-129.606711&nbsp;46.517999&nbsp;-2485.114583&nbsp;68723.704236&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;40&nbsp;-129.557338&nbsp;46.509809&nbsp;-2488.398743&nbsp;72619.152031&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;41&nbsp;-129.550415&nbsp;46.521262&nbsp;-2545.285828&nbsp;73998.189601&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;42&nbsp;-129.600724&nbsp;46.536447&nbsp;-2470.920736&nbsp;78209.372536&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;43&nbsp;-129.606972&nbsp;46.525648&nbsp;-2443.988281&nbsp;79501.503455&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;A&nbsp;total&nbsp;of&nbsp;550&nbsp;mission&nbsp;points&nbsp;have&nbsp;been&nbsp;defined.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Define&nbsp;Mission&nbsp;parameters:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;MISSION_SPEED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.500000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;MISSION_DISTANCE&nbsp;&nbsp;&nbsp;79501.503455
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;MISSION_TIME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;57203
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;MISSION_TIMEOUT&nbsp;&nbsp;&nbsp;&nbsp;60067
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DEPTH_MAX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2525.307922
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DEPTH_ABORT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2562.807922
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ALTITUDE_DESIRED&nbsp;&nbsp;&nbsp;75.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ALTITUDE_MIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;75.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ALTITUDE_ABORT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;GPS_DURATION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;600
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DESCENT_DEPTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;SPIRAL_DESCENT_DEPTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2324.917643
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;SPIRAL_DESCENT_ALTITUDE&nbsp;&nbsp;&nbsp;50.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DESCEND_DURATION&nbsp;&nbsp;&nbsp;300
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;SETPOINT_DURATION&nbsp;&nbsp;30
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;GPSMINHITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ASCENDRUDDER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ASCENDPITCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;45.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ASCENDENDDEPTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DESCENDRUDDER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DESCENDPITCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-30.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;MAXCROSSTRACKERROR&nbsp;30
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;RESON_DURATION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#q
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbgrdviz.html">mbgrdviz</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Perhaps.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

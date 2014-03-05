@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_sb2000.h	10/4/94
  *	$Id$
  *
- *    Copyright (c) 1994-2012 by
+ *    Copyright (c) 1994-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -89,8 +89,8 @@
  *   5. The kind value in the mbsys_sb2000_struct indicates whether the
  *      mbsys_sb2000_data_struct structure holds data from a ping or
  *      data from a comment:
- *        kind = 1 : data from a ping 
- *        kind = 2 : comment 
+ *        kind = 1 : data from a ping
+ *        kind = 2 : comment
  *   6. The data structure defined below includes all of the values
  *      which are passed in SeaBeam 2000 records.
  */
@@ -145,7 +145,7 @@ struct mbsys_sb2000_struct
 	char	mode[2];	/* operation mode */
 	char	data_correction[2];	/* data correction */
 	char	ssv_source[2];	/* surface sound velocity source */
-	
+
 	/* sound velocity record */
 	int	svp_mean;
 	short	svp_number;
@@ -187,58 +187,57 @@ struct mbsys_sb2000_struct
 	char	ss_type;	/* sidescan type: G=grayscale, R=raw sidescan */
 	char	ss_dummy;
 	mb_u_char	ss[2*MBSYS_SB2000_PIXELS];
-	
+
 	};
-	
+
 /* system specific function prototypes */
-int mbsys_sb2000_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_sb2000_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_sb2000_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_sb2000_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_sb2000_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_sb2000_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_sb2000_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_sb2000_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_sb2000_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_sb2000_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_sb2000_copy(int verbose, void *mbio_ptr, 
+int mbsys_sb2000_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

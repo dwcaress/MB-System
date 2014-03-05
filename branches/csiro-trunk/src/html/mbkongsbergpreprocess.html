@@ -1,0 +1,357 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbkongsbergpreprocess</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbkongsbergpreprocess</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbkongsbergpreprocess</B> - performs preprocessing of data from third generation Kongsberg multibeam sonars (e.g. EM122, EM302, EM710).
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbkongsbergpreprocess</B> [<B>-A</B> <B>-C</B> <B>-D</B><I>outputdirectory</I> <B>-F</B><I>format</I>
+<B>-I</B><I>file </I><B>-O</B><I>outfile</I> <B>-SF</B><I>datatype/source</I>
+<B>-T</B><I>timelag</I> <B>-H -V</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbkongsbergpreprocess</B> reads data from a third generation
+Kongsberg multibeam sonar (e.g. EM122, EM302, EM710), interpolates the
+asynchronous navigation, heading, and attitude onto the multibeam data,
+and writes a new file with that information correctly embedded
+in the multibeam survey data. The input files may be in the vendor format
+MBF_EM710RAW (format id 58) or the <B>MB-System</B> extended format
+MBF_EM710MBA (format id 59); the output files will always be in
+the <B>MB-System</B> extended format MBF_EM710MBA (format id 59).
+<P>
+Like most modern swath survey data streams, Kongsberg multibeam data
+includes navigation, attitude, and heading data logged in separate
+data records as output by the respective sensors. Since each of these
+values is time stamped according to its origin rather than synced with
+multibeam pings, these values are asynchronous relative to the survey
+ping data. When multiple sources
+of navigation, heading, and/or attitude have been recorded in
+a data stream, <B>mbkongsbergpreprocess</B> allows the user to specify
+which asynchronous data are extracted and interpolated onto the
+survey data using the <B>-S</B> option.
+<P>
+This program allows the correction of a time latency
+(or time lag)  error between the sonar data and the attitude and
+navigation data using the <B>-T</B> option.
+<P>
+The format 58 files This program also creates four ancilliary files containing the full
+asynchronous attitude, sonar depth, and heading data and the synchronous
+attitude data in parallel with each output format 59 file.
+These files are used,
+when present, by <B>mbeditviz</B> to facillitate interactive analysis
+of time lag issues. Each of these are
+text files with white-space delimited columns; the first column
+is always time in decimal unix seconds. These have the following
+suffixes:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;asynchronous&nbsp;attitude&nbsp;(roll&nbsp;and&nbsp;pitch):<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>*.ata<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;asynchronous&nbsp;heading:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>*.ath<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;asynchronous&nbsp;sonar&nbsp;depth:<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>*.ats<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;synchronous&nbsp;attitude&nbsp;(roll&nbsp;and&nbsp;pitch):<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>*.sta<BR>
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<BR>
+
+This option causes the program to attempt to calculate reliable beam angles
+through iterative raytracing to match the original bathymetry. This process
+is very time consuming. At present, the simple calculation of beam angles
+produces noisy values that in turn produce noisy bathymetry when the
+soundings are recalculated by raytracing. Thus, if one needs to recalculate
+bathymetry with a new model for the sound speed structure of the water
+column (often called a sound velocity profile or SVP), the data should first
+be preprocessed using the <B>-A</B> option.
+<DT><B>-C</B>
+
+<DD>
+<BR>
+
+This option causes <B>mbkongsbergpreprocess</B> to print counts of the many
+different data record types compising a Kongsberg data stream. The data record
+counts are output for each file and as totals from all files processed.
+<DT><B>-D</B>
+
+<DD>
+<I>outputdirectory</I>
+<BR>
+
+This option causes all format 59 output files to be placed in the specified directory
+<I>outputdirectory</I> rather than parallel to the original &quot;raw&quot; files.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format used if the input is read from stdin
+or from a file. If <I>format</I> &lt; 0, then the input file specified
+with the <B>-I</B> option will actually contain a list of input swath sonar
+data files. This program only reads third generation Kongsberg multibeam
+format data files (<B>MBIO</B> formats 58 and 59).
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Sets the input file path. If <I>format</I> &gt; 0 (set with the
+<B>-f</B> option or <B>mbdefaults</B>) then the swath sonar data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile.all&nbsp;58<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile.all&nbsp;58<BR>
+<BR>
+
+This program only reads third generation Kongsberg multibeam
+format data files (<B>MBIO</B> formats 58 and 59).
+<DT><B>-O</B>
+
+<DD>
+<I>outfile</I>
+<BR>
+
+This option causes <B>mbkongsbergpreprocess</B> to output all data to a single file
+specified as <I>outfile</I>. By default, the program creates output files for
+each input file. If the <B>-D</B><I>outputdirectory</I> option is also used, then
+the output file <I>outfile</I> will be in <I>outputdirectory</I>.
+<DT><B>-S</B>
+
+<DD>
+<I>datatype/source</I>
+<BR>
+
+This option specifies which data records should be the source of the
+navigation (<I>datatype</I> = 1), heading (<I>datatype</I> = 2), and
+attitude (<I>datatype</I> = 3) data that are interpolated onto the
+survey ping times. In each case the <I>source</I> value specifies
+a data record type. The possibilities for Kongsberg data include:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>12<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEADING<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>17<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Hypack&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>18<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Hypack,&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>28<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;1&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>29<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;2&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>30<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;3&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE1<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>55<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;1&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;2&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;3&nbsp;*/<BR>
+<BR>
+
+<DT><B>-T</B>
+
+<DD>
+<I>timelag</I>
+<BR>
+
+This option specifies a <I>timelag</I> value in seconds to be applied
+to the navigation and attitude data prior to it being merged with the
+bathymetry. If <I>timelag</I> is a valid path to a file containing time
+stamp and time lag pairs, then these data will be read and the time lag
+applied to particular records will be interpolated by time.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that one has collected a set of three Kongsberg EM122 data files named:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;0000_20111219_154640_METEOR_EM122.all
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;0001_20111219_163703_METEOR_EM122.all
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;0002_20111219_175708_METEOR_EM122.all
+<BR>
+
+First, we want to generate a &quot;datalist&quot; file referencing the raw survey files. The
+following will suffice:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;/bin/ls&nbsp;-1&nbsp;*all&nbsp;|&nbsp;awk&nbsp;'{print&nbsp;$1&quot;&nbsp;58&quot;}'&nbsp;&gt;&nbsp;datalist_raw.mb-1
+<BR>
+
+We want to use <B>mbkongsbergpreprocess</B> to gracefully interpolate the
+asynchronous navigation, heading and attitude data onto the survey data and
+to generate data files in the extended format (MBF_EM710MBA = 59). To learn
+which potential sources of navigation, heading and attitude are available, use
+<B>mbinfo</B> with the <B>-N</B> option:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;$&nbsp;mbinfo&nbsp;-I&nbsp;0000_20111219_154640_METEOR_EM122.all&nbsp;-N
+<P>
+The <B>-N</B> option causes <B>mbinfo</B> to generate a list of the data record
+types read in the file at the end of the file statistics:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Swath&nbsp;Data&nbsp;File:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0000_20111219_154640_METEOR_EM122.all
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MBIO&nbsp;Data&nbsp;Format&nbsp;ID:&nbsp;&nbsp;58
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Format&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MBF_EM710RAW
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Informal&nbsp;Description:&nbsp;Kongsberg&nbsp;current&nbsp;multibeam&nbsp;vendor&nbsp;format
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Attributes:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kongsberg&nbsp;EM122,&nbsp;EM302,&nbsp;EM710,
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;bathymetry,&nbsp;amplitude,&nbsp;and&nbsp;sidescan,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;up&nbsp;to&nbsp;400&nbsp;beams,&nbsp;variable&nbsp;pixels,&nbsp;binary,&nbsp;Kongsberg.<BR>
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;Totals:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Records:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;334
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Bathymetry&nbsp;Data&nbsp;(432&nbsp;beams):
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;144288
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Good&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;129951&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90.06%
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Zero&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00%
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Flagged&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;14337&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.94%
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Amplitude&nbsp;Data&nbsp;(432&nbsp;beams):
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;144288
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Good&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;129951&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90.06%
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Zero&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00%
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Flagged&nbsp;Beams:&nbsp;&nbsp;&nbsp;&nbsp;14337&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.94%
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Sidescan&nbsp;Data&nbsp;(1024&nbsp;pixels):
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;342016
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Good&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;289910&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;84.77%
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Zero&nbsp;Pixels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00%
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;Flagged&nbsp;Pixels:&nbsp;&nbsp;&nbsp;52106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15.23%
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Navigation&nbsp;Totals:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Total&nbsp;Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.8327&nbsp;hours
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Total&nbsp;Track&nbsp;Length:&nbsp;&nbsp;&nbsp;&nbsp;13.6418&nbsp;km
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Average&nbsp;Speed:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;16.3823&nbsp;km/hr&nbsp;(&nbsp;8.8553&nbsp;knots)
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Start&nbsp;of&nbsp;Data:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Time:&nbsp;&nbsp;12&nbsp;19&nbsp;2011&nbsp;15:46:27.537000&nbsp;&nbsp;JD353&nbsp;(2011-12-19T15:46:27.537000)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Lon:&nbsp;&nbsp;&nbsp;-11.562232000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lat:&nbsp;&nbsp;&nbsp;&nbsp;36.848179850&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Depth:&nbsp;&nbsp;4931.4829&nbsp;meters
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Speed:&nbsp;17.6040&nbsp;km/hr&nbsp;(&nbsp;9.5157&nbsp;knots)&nbsp;&nbsp;Heading:&nbsp;129.1900&nbsp;degrees
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;5.6975&nbsp;m&nbsp;&nbsp;Sonar&nbsp;Altitude:&nbsp;5025.2964&nbsp;m
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;End&nbsp;of&nbsp;Data:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Time:&nbsp;&nbsp;12&nbsp;19&nbsp;2011&nbsp;16:36:25.308000&nbsp;&nbsp;JD353&nbsp;(2011-12-19T16:36:25.308000)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Lon:&nbsp;&nbsp;&nbsp;-11.489473500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lat:&nbsp;&nbsp;&nbsp;&nbsp;36.771997400&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Depth:&nbsp;&nbsp;3242.5244&nbsp;meters
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Speed:&nbsp;12.7800&nbsp;km/hr&nbsp;(&nbsp;6.9081&nbsp;knots)&nbsp;&nbsp;Heading:&nbsp;274.9200&nbsp;degrees
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;6.4334&nbsp;m&nbsp;&nbsp;Sonar&nbsp;Altitude:&nbsp;3236.0911&nbsp;m
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Limits:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Longitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-11.635798757&nbsp;&nbsp;&nbsp;Maximum&nbsp;Longitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-11.391532562
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.723994163&nbsp;&nbsp;&nbsp;Maximum&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.919907119
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0135&nbsp;&nbsp;&nbsp;Maximum&nbsp;Sonar&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.9798
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Altitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3175.1121&nbsp;&nbsp;&nbsp;Maximum&nbsp;Altitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5027.8770
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2391.9229&nbsp;&nbsp;&nbsp;Maximum&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5121.0713
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Amplitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-59.2000&nbsp;&nbsp;&nbsp;Maximum&nbsp;Amplitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-9.1000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Sidescan:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-90.1300&nbsp;&nbsp;&nbsp;Maximum&nbsp;Sidescan:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-0.4700
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;Record&nbsp;Type&nbsp;Notices:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;334&nbsp;MB_DATA_DATA&nbsp;(ID=1):&nbsp;survey&nbsp;data
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;1&nbsp;MB_DATA_VELOCITY_PROFILE&nbsp;(ID=6):&nbsp;SVP
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;1&nbsp;MB_DATA_START&nbsp;(ID=10):&nbsp;Simrad&nbsp;start&nbsp;datagram
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;1&nbsp;MB_DATA_STOP&nbsp;(ID=11):&nbsp;Simrad&nbsp;stop&nbsp;datagram
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;3023&nbsp;MB_DATA_NAV&nbsp;(ID=12):&nbsp;Navigation&nbsp;record
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;287&nbsp;MB_DATA_RUN_PARAMETER&nbsp;(ID=13):&nbsp;Simrad&nbsp;runtime&nbsp;parameter&nbsp;datagram
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;3022&nbsp;MB_DATA_CLOCK&nbsp;(ID=14):&nbsp;Simrad&nbsp;clock&nbsp;datagram
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;2964&nbsp;MB_DATA_ATTITUDE&nbsp;(ID=18):&nbsp;Attitude&nbsp;record
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;731&nbsp;MB_DATA_SSV&nbsp;(ID=19):&nbsp;Surface&nbsp;sound&nbsp;speed&nbsp;record
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;3022&nbsp;MB_DATA_NAV3&nbsp;(ID=30):&nbsp;Auxiliary&nbsp;nav&nbsp;system&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;3023&nbsp;MB_DATA_STATUS&nbsp;(ID=46):&nbsp;Status&nbsp;record
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;2964&nbsp;MB_DATA_ATTITUDE1&nbsp;(55):&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;1512&nbsp;MB_DATA_ATTITUDE2&nbsp;(56):&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;2
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Nonfatal&nbsp;Error&nbsp;Notices:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;EN:&nbsp;20551&nbsp;MB_ERROR_NO_DATA_REQUESTED&nbsp;(ID=-11):&nbsp;No&nbsp;data&nbsp;requested&nbsp;for&nbsp;buffer&nbsp;load
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Problem&nbsp;Notices:
+<P>
+This listing shows that the format 58 file includes
+MB_DATA_NAV (<I>source</I> = 12) and MB_DATA_NAV3 (<I>source</I> = 30) records,
+both of which include both position and heading data. Also included are three
+sources of attitude data: MB_DATA_ATTITUDE (<I>source</I> = 18),
+MB_DATA_ATTITUDE1 (<I>source</I> = 55), and MB_DATA_ATTITUDE2 (<I>source</I> = 56).
+<P>
+To extract and use the default navigation, heading, and attitude data, the
+following will suffice:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbkongsbergpreprocess&nbsp;-I&nbsp;datalist_raw.mb-1&nbsp;-V
+<P>
+An equivalent command that explicitly specifies the default asynchronous data
+sources using <B>-S</B><I>1/source</I> for navigation, <B>-S</B><I>2/source</I> for
+heading, and <B>-S</B><I>3/source</I> for attitude is:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbkongsbergpreprocess&nbsp;-I&nbsp;datalist_raw.mb-1&nbsp;-V&nbsp;<B>-S</B><I>1/12</I>&nbsp;<B>-S</B><I>2/12</I>&nbsp;<B>-S</B><I>3/18</I>
+<P>
+To interpolate navigation and heading from the secondary navigation source, use
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<B>-S</B><I>1/30</I>&nbsp;<B>-S</B><I>2/30</I>
+<P>
+To interpolate attitude from ancillary attitude system 2, use:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<B>-S</B><I>3/56</I>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbformat.html">mbformat</A></B>(1), <B><A HREF="mbinfo.html">mbinfo</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Not true bugs. More like arachnids.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

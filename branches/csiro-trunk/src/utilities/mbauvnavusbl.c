@@ -3,7 +3,7 @@
  *
  *    $Id$
  *
- *    Copyright (c) 2004-2012 by
+ *    Copyright (c) 2004-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -15,10 +15,10 @@
  *--------------------------------------------------------------------*/
 /*
  * MBauvnavusbl reads a primary navigation file (usually from a submerged platform
- * swath survey) and also reads secondary navigation (e.g. USBL fixes). 
+ * swath survey) and also reads secondary navigation (e.g. USBL fixes).
  * The program calculates position offsets between the raw survey navigation
- * and the secondary navigation every 3600 seconds (10 minutes), and then 
- * linearly interpolates and applies this adjustment vector for each 
+ * and the secondary navigation every 3600 seconds (10 minutes), and then
+ * linearly interpolates and applies this adjustment vector for each
  * primary navigation position. The adjusted navigation is output.
  *
  * Author:	D. W. Caress
@@ -50,10 +50,10 @@
 #include <time.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_format.h"
-#include "../../include/mb_define.h"
-#include "../../include/mb_aux.h"
+#include "mb_status.h"
+#include "mb_format.h"
+#include "mb_define.h"
+#include "mb_aux.h"
 
 /* local defines */
 #define	NCHARMAX	256
@@ -106,7 +106,7 @@ int main (int argc, char **argv)
 	double	navlat;
 	double	heading;
 	double	sonardepth;
-	
+
 	/* navigation handling variables */
 	int	useaverage = MB_NO;
 	double	tieinterval = 600.0;
@@ -138,7 +138,7 @@ int main (int argc, char **argv)
 	double	*tsonardepth = NULL;
 	double	loncoravg;
 	double	latcoravg;
-	
+
 	int	nav_ok;
 	int	nstime_i[7], nftime_i[7];
 	int	ustime_i[7], uftime_i[7];
@@ -169,7 +169,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhAaF:f:L:l:I:i:O:o:M:m:U:u:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -264,7 +264,7 @@ int main (int argc, char **argv)
 
 	/* count the nav points */
 	nnav = 0;
-	if ((fp = fopen(ifile, "r")) == NULL) 
+	if ((fp = fopen(ifile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",ifile);
@@ -308,7 +308,7 @@ int main (int argc, char **argv)
 
 	/* read in nav points */
 	nnav = 0;
-	if ((fp = fopen(ifile, "r")) == NULL) 
+	if ((fp = fopen(ifile, "r")) == NULL)
 		{
 		status = MB_FAILURE;
 		error = MB_ERROR_OPEN_FAIL;
@@ -321,7 +321,7 @@ int main (int argc, char **argv)
 	while ((result = fgets(buffer,NCHARMAX,fp)) == buffer)
 		{
 		nav_ok = MB_NO;
-		
+
 		nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 			&time_i[0],&time_i[1],&time_i[2],
 			&time_i[3],&time_i[4],&sec,
@@ -366,7 +366,7 @@ int main (int argc, char **argv)
 				nnav++;
 			else if (ntime[nnav] > ntime[nnav-1])
 				nnav++;
-			else if (nnav > 0 && ntime[nnav] <= ntime[nnav-1] 
+			else if (nnav > 0 && ntime[nnav] <= ntime[nnav-1]
 				&& verbose >= 5)
 				{
 				fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
@@ -381,7 +381,7 @@ int main (int argc, char **argv)
 		strncpy(buffer,"\0",sizeof(buffer));
 		}
 	fclose(fp);
-		
+
 	/* check for nav */
 	if (nnav < 2)
 		{
@@ -393,7 +393,7 @@ int main (int argc, char **argv)
 
 	/* count the usbl points */
 	nusbl = 0;
-	if ((fp = fopen(ufile, "r")) == NULL) 
+	if ((fp = fopen(ufile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open USBL Navigation File <%s> for reading\n",ufile);
@@ -424,7 +424,7 @@ int main (int argc, char **argv)
 
 	/* read in usbl points */
 	nusbl = 0;
-	if ((fp = fopen(ufile, "r")) == NULL) 
+	if ((fp = fopen(ufile, "r")) == NULL)
 		{
 		status = MB_FAILURE;
 		error = MB_ERROR_OPEN_FAIL;
@@ -437,7 +437,7 @@ int main (int argc, char **argv)
 	while ((result = fgets(buffer,NCHARMAX,fp)) == buffer)
 		{
 		nav_ok = MB_NO;
-		
+
 		/* ignore comments */
 		if (buffer[0] == '#')
 			{
@@ -458,11 +458,11 @@ int main (int argc, char **argv)
 				&uheading[nusbl],
 				&rov_altitude,
 				&rov_pitch,
-				&rov_roll, 
-				&position_flag, 
-				&pressure_flag, 
-				&heading_flag, 
-				&altitude_flag, 
+				&rov_roll,
+				&position_flag,
+				&pressure_flag,
+				&heading_flag,
+				&altitude_flag,
 				&attitude_flag);
 			}
 		    else
@@ -481,11 +481,11 @@ int main (int argc, char **argv)
 				&uheading[nusbl],
 				&rov_altitude,
 				&rov_pitch,
-				&rov_roll, 
-				&position_flag, 
-				&pressure_flag, 
-				&heading_flag, 
-				&altitude_flag, 
+				&rov_roll,
+				&position_flag,
+				&pressure_flag,
+				&heading_flag,
+				&altitude_flag,
 				&attitude_flag);
 			}
 		if (nget == 18)
@@ -524,7 +524,7 @@ int main (int argc, char **argv)
 				nusbl++;
 			else if (utime[nusbl] > utime[nusbl-1])
 				nusbl++;
-			else if (nusbl > 0 && utime[nusbl] <= utime[nusbl-1] 
+			else if (nusbl > 0 && utime[nusbl] <= utime[nusbl-1]
 				&& verbose >= 5)
 				{
 				fprintf(stderr,"\ndbg5  USBL Navigation time error in program <%s>\n",program_name);
@@ -539,7 +539,7 @@ int main (int argc, char **argv)
 		strncpy(buffer,"\0",sizeof(buffer));
 		}
 	fclose(fp);
-		
+
 	/* check for nav */
 	if (nusbl < 2)
 		{
@@ -554,7 +554,7 @@ int main (int argc, char **argv)
 	mb_get_date(verbose,ntime[nnav-1],nftime_i);
 	mb_get_date(verbose,utime[0],ustime_i);
 	mb_get_date(verbose,utime[nusbl-1],uftime_i);
-	
+
 	/* give the statistics */
 	if (verbose >= 1)
 		{
@@ -580,30 +580,30 @@ int main (int argc, char **argv)
 	latcoravg = 0.0;
 	for (i=0;i<nnav;i++)
 		{
-		if (ntie == 0 
+		if (ntie == 0
 			|| (ntime[i] - ttime[ntie-1]) > tieinterval)
 			{
 			/* get time */
 			ttime[ntie] = ntime[i];
-			
+
 			/* interpolate navigation from usbl navigation */
-			intstat = mb_linear_interp(verbose, 
+			intstat = mb_linear_interp(verbose,
 					utime-1, ulon-1,
-					nusbl, ttime[ntie], &navlon, &j, 
+					nusbl, ttime[ntie], &navlon, &j,
 					&error);
-			intstat = mb_linear_interp(verbose, 
+			intstat = mb_linear_interp(verbose,
 					utime-1, ulat-1,
-					nusbl, ttime[ntie], &navlat, &j, 
+					nusbl, ttime[ntie], &navlat, &j,
 					&error);
-			intstat = mb_linear_interp(verbose, 
+			intstat = mb_linear_interp(verbose,
 					utime-1, uheading-1,
-					nusbl, ttime[ntie], &heading, &j, 
+					nusbl, ttime[ntie], &heading, &j,
 					&error);
-			intstat = mb_linear_interp(verbose, 
+			intstat = mb_linear_interp(verbose,
 					utime-1, usonardepth-1,
-					nusbl, ttime[ntie], &sonardepth, &j, 
+					nusbl, ttime[ntie], &sonardepth, &j,
 					&error);
-					
+
 			/* get adjustments */
 			tlon[ntie] = navlon - nlon[i];
 			tlat[ntie] = navlat - nlat[i];
@@ -614,7 +614,7 @@ int main (int argc, char **argv)
 				theading[ntie] -= 360.0;
 			tsonardepth[ntie] = sonardepth - nsonardepth[i];
 			ntie++;
-			
+
 			/* get averages */
 			loncoravg += tlon[ntie-1];
 			latcoravg += tlat[ntie-1];
@@ -627,7 +627,7 @@ int main (int argc, char **argv)
 		loncoravg /= ntie;
 		latcoravg /= ntie;
 		}
-	
+
 fprintf(stderr,"\nCalculated %d adjustment points:\n",ntie);
 for (i=0;i<ntie;i++)
 fprintf(stderr,"time:%f lon:%f lat:%f heading:%f sonardepth:%f\n",
@@ -635,7 +635,7 @@ ttime[i],tlon[i],tlat[i],theading[i],tsonardepth[i]);
 fprintf(stderr,"Average lon:%f lat:%f\n",loncoravg,latcoravg);
 
 	/* open output file */
-	if ((fp = fopen(ofile, "w")) == NULL) 
+	if ((fp = fopen(ofile, "w")) == NULL)
 		{
 		status = MB_FAILURE;
 		error = MB_ERROR_OPEN_FAIL;
@@ -652,20 +652,20 @@ fprintf(stderr,"Average lon:%f lat:%f\n",loncoravg,latcoravg);
 		if (useaverage == MB_NO)
 			{
 			/* get adjustment by interpolation */
-			intstat = mb_linear_interp(verbose, 
+			intstat = mb_linear_interp(verbose,
 					ttime-1, tlon-1,
-					ntie, ntime[i], &navlon, &j, 
+					ntie, ntime[i], &navlon, &j,
 					&error);
-			intstat = mb_linear_interp(verbose, 
+			intstat = mb_linear_interp(verbose,
 					ttime-1, tlat-1,
-					ntie, ntime[i], &navlat, &j, 
+					ntie, ntime[i], &navlat, &j,
 					&error);
 
 			/* apply adjustment */
 			nlon[i] += navlon;
 			nlat[i] += navlat;
 			}
-		
+
 		/* else use average adjustments */
 		else
 			{
@@ -673,7 +673,7 @@ fprintf(stderr,"Average lon:%f lat:%f\n",loncoravg,latcoravg);
 			nlon[i] += loncoravg;
 			nlat[i] += latcoravg;
 			}
-		
+
 		/* write out the adjusted navigation */
 		mb_get_date(verbose,ntime[i],time_i);
 		sprintf(buffer,
@@ -713,24 +713,24 @@ fprintf(stderr,"Average lon:%f lat:%f\n",loncoravg,latcoravg);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&nlat,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&nheading,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&nspeed,&error);
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&nsonardepth,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&nroll,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&npitch,&error); 
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&nheave,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nsonardepth,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nroll,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&npitch,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nheave,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&alon,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&alat,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&aheading,&error);
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&asonardepth,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&asonardepth,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&utime,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&ulon,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&ulat,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&uheading,&error);
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&usonardepth,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&usonardepth,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&ttime,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&tlon,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&tlat,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&theading,&error);
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&tsonardepth,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&tsonardepth,&error);
 
 	/* check memory */
 	if (verbose >= 4)

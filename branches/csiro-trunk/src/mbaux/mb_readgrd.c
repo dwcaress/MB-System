@@ -2,7 +2,7 @@
  *    The MB-system:	mb_readgrd.c	12/10/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2012 by
+ *    Copyright (c) 2007-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -35,12 +35,12 @@
 #include <string.h>
 #include <time.h>
 
-/* MBIO include files */
-#include "../../include/mb_status.h"
-#include "../../include/mb_define.h"
-
 /* GMT include files */
 #include "gmt.h"
+
+/* MBIO include files */
+#include "mb_status.h"
+#include "mb_define.h"
 
 /* get NaN detector */
 #if defined(isnanf)
@@ -162,6 +162,10 @@ int mb_readgrd(int verbose, char *grdfile,
 					{
 					projectionid = 32700 + utmzone;
 					}
+				else
+					{
+					projectionid = 32600 + utmzone;
+					}
 				modeltype = ModelTypeProjected;
 				sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
 				*grid_projection_mode = MB_PROJECTION_PROJECTED;
@@ -221,9 +225,11 @@ int mb_readgrd(int verbose, char *grdfile,
     		status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
     					(void **)&rawdata, error);
     		if (status == MB_SUCCESS)
-		status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
+			{
+			status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
     					(void **)&usedata, error);
-		*data = usedata;
+			*data = usedata;
+			}
     		if (status == MB_SUCCESS && data_dzdx != NULL)
 			{
 			status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
@@ -379,7 +385,7 @@ int mb_readgrd(int verbose, char *grdfile,
 		fprintf(stderr,"  ymax:                     %f\n", *ymax);
 		fprintf(stderr,"  dx:                       %f\n", *dx);
 		fprintf(stderr,"  dy:                       %f\n", *dy);
-		fprintf(stderr,"  data:                     %lu\n", (size_t)*data);
+		fprintf(stderr,"  data:                     %p\n", *data);
 		}
 
 	/* print output debug statements */
@@ -418,7 +424,7 @@ int mb_readgrd(int verbose, char *grdfile,
 		fprintf(stderr,"dbg2       ymax:                     %f\n", *ymax);
 		fprintf(stderr,"dbg2       dx:                       %f\n", *dx);
 		fprintf(stderr,"dbg2       dy:                       %f\n", *dy);
-		fprintf(stderr,"dbg2       data:                     %lu\n", (size_t)*data);
+		fprintf(stderr,"dbg2       data:                     %p\n", *data);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);

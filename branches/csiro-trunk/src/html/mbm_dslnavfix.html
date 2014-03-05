@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_dslnavfix</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_dslnavfix</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_dslnavfix</B> - Translate WHOI DSL AMS-120 navigation from
+UTM eastings and northings to longitude and latitude.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_dslnavfix</B> <B>-F</B><I>navformat</I>
+<B>-I</B><I>infile</I> <B>-J</B><I>utm_zone</I>
+<B>-O</B><I>outfile</I>
+[<B>-D</B><I>decimate</I> <B>-E</B><I>ellipsoid</I> <B>-H</B> <B>-V</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_dslnavfix</B> is a macro to translate
+WHOI DSL AMS-120 navigation from
+UTM eastings and northings to longitude and latitude.
+The WHOI DSL group typically provides processed AMS-120
+navigation is files separate from the bathymetry and
+sidescan data. Moreover, the navigation is generally
+sampled less frequently than the sonar
+pings, and is reported in UTM easting and northing meters.
+The <B>mbm_dslnavfix</B> macro is used to translate the
+eastings and northings into the geographic coordinates
+(longitude and latitude) used by MB-System programs. The
+program <B>mbprocess</B> can be used to merge the translated
+navigation in with the bathymetry and sidescan.
+<P>
+The DSL AMS-120 bathymetry and sidescan are provided in
+either a set of parallel files supported as <B>MB-System</B>
+format 111 (the old scheme) or in the OIC single file format
+supported as <B>MB-System</B> format 141 (the new scheme).
+In either case, we recommend translating the data to similar
+but enhanced formats 112 and 142, respectively, to ease
+processing.
+<P>
+We recommend the following procedure when
+processing WHOI DSL AMS-120 data with MB-System:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1)&nbsp;Concatenate&nbsp;all&nbsp;of&nbsp;the&nbsp;processed&nbsp;navigation<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;files&nbsp;into&nbsp;a&nbsp;single&nbsp;file.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>cat&nbsp;*.nav&nbsp;&gt;&nbsp;cruise.rnav<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2)&nbsp;Translate&nbsp;the&nbsp;DSL&nbsp;UTM&nbsp;navigation&nbsp;into&nbsp;geographic<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;coordinates.&nbsp;In&nbsp;the&nbsp;&quot;old&quot;&nbsp;case&nbsp;the&nbsp;navigation&nbsp;is<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;a&nbsp;format&nbsp;designated&nbsp;by&nbsp;<B>-F</B><I>1</I>&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;the&nbsp;new&nbsp;case&nbsp;by&nbsp;<B>-F</B><I>2</I>.&nbsp;Note&nbsp;that
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;you&nbsp;must&nbsp;know&nbsp;the&nbsp;UTM&nbsp;zone&nbsp;used&nbsp;-&nbsp;here&nbsp;we&nbsp;assume
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;zone&nbsp;is&nbsp;+27.
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_dslnavfix&nbsp;-Icruise.rnav&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Ocruise.mrg2&nbsp;-F1&nbsp;-J27&nbsp;-V<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3)&nbsp;Copy&nbsp;the&nbsp;bathymetry&nbsp;and&nbsp;sidescan&nbsp;data&nbsp;in&nbsp;each<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;file&nbsp;from&nbsp;format&nbsp;111&nbsp;to&nbsp;format&nbsp;112&nbsp;or&nbsp;from<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;format&nbsp;141&nbsp;to&nbsp;142.
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcopy&nbsp;-F111/112&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-IDSL120.940630_1100.bat.dat&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-ODSL120.940630_1100.mb112<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4)&nbsp;Set&nbsp;the&nbsp;translated&nbsp;navigation&nbsp;to&nbsp;be&nbsp;merged&nbsp;with<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;of&nbsp;the&nbsp;format&nbsp;112&nbsp;or&nbsp;142&nbsp;files&nbsp;using
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>mbset</B>:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbset&nbsp;-I&nbsp;DSL120.940630_1100.mb112&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-P&nbsp;NAVFORMAT:2&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-P&nbsp;NAVFILE:cruise.mrg2&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-V<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4)&nbsp;Process&nbsp;the&nbsp;data&nbsp;using&nbsp;<B>mbprocess</B>,<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;producing&nbsp;a&nbsp;processed&nbsp;file&nbsp;called
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DSL120.940630_1100p.mb112&nbsp;with&nbsp;longitude&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;latitude&nbsp;navigation.
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbprocess&nbsp;-I&nbsp;DSL120.940630_1100.mb112<BR>
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-D</B>
+
+<DD>
+<I>decimate</I>
+<BR>
+
+This option allows the user to decimate the input navigation.
+The <I>decimate</I> value represents the decimation factor.
+The default is <I>decimate</I> = 1, or no decimation.
+<DT><B>-E</B>
+
+<DD>
+<I>ellipsoid</I>
+<BR>
+
+This option sets the ellipsoid used in the UTM projection.
+The choices are:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>WGS-84<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1984&nbsp;World&nbsp;Geodetic&nbsp;System<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GRS-80<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1980&nbsp;International&nbsp;Geodetic&nbsp;Reference&nbsp;System<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>WGS-72<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1972&nbsp;World&nbsp;Geodetic&nbsp;System<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Australian<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1965&nbsp;Used&nbsp;down&nbsp;under<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Krasovsky<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1940&nbsp;Used&nbsp;in&nbsp;the&nbsp;Soviet&nbsp;Union<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>International<TT>&nbsp;&nbsp;&nbsp;</TT>1924&nbsp;Worldwide&nbsp;use<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Hayford-1909<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>1909&nbsp;Same&nbsp;as&nbsp;the&nbsp;International&nbsp;1924<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Clarke-1880<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1880&nbsp;Most&nbsp;of&nbsp;Africa,&nbsp;France<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Clarke-1866<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1866&nbsp;North&nbsp;America,&nbsp;the&nbsp;Phillipines<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Airy<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1830&nbsp;Great&nbsp;Britain<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Bessel<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1841&nbsp;Central&nbsp;Europe,&nbsp;Chile,&nbsp;Indonesia<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Everest<TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1830&nbsp;India,&nbsp;Burma,&nbsp;Pakistan,&nbsp;&nbsp;etc.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Sphere<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1980&nbsp;The&nbsp;mean&nbsp;radius&nbsp;in&nbsp;GRS-80<BR>
+<BR>
+
+Default: Clarke-1866 as per USGS standard.
+<DT><B>-F</B>
+
+<DD>
+<I>navformat</I>
+<BR>
+
+Sets the input navigation format. The available formats
+include the old, pre-OIC format (<B>-F</B><I>1</I>), the new, OIC
+associated formats (<B>-F</B><I>2</I>), and navigation obtained
+using <B>mblist</B> with the <B>-OtXY</B> option.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>filename</I>
+<BR>
+
+Sets the input WHOI DSL AMS-120 navigation filename.
+<DT><B>-J</B>
+
+<DD>
+<I>utm_zone</I>
+<BR>
+
+Sets the UTM zone used for the translation. The UTM zones
+are 6 degrees wide in longitude and begin with zone 1 extending
+from 180 W to 174 W, zone 2 extending from 174 W to 168 W, and
+so on through zone 60. Negative zone
+values are used for the Southern Hemisphere.
+<DT><B>-O</B>
+
+<DD>
+<I>outfile</I>
+<BR>
+
+Sets the output filename for the translated navigation.
+<DT><B>-V</B>
+
+<DD>
+Causes <B>mbm_plot</B> to operate in &quot;verbose&quot; mode
+so that it outputs
+more information than usual.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose we have obtained a WHOI DSL navigation file
+as outlined above and execute the macro as suggested:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_dslnavfix&nbsp;-Icruise.rnav&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Ocruise.mrg2&nbsp;-F1&nbsp;-J27&nbsp;-V<BR>
+<BR>
+
+The output will appear as follows:
+<P>
+<BR>&nbsp;Running&nbsp;mbm_dslnavfix...
+<P>
+<BR>&nbsp;Program&nbsp;Status:
+<BR>&nbsp;--------------
+<P>
+<BR>&nbsp;&nbsp;&nbsp;Input&nbsp;DSL&nbsp;navigation&nbsp;format:&nbsp;&nbsp;&nbsp;1
+<BR>&nbsp;&nbsp;&nbsp;Input&nbsp;DSL&nbsp;navigation&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dsl.nav
+<BR>&nbsp;&nbsp;&nbsp;Output&nbsp;navigation&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dsl.mrg2
+<BR>&nbsp;&nbsp;&nbsp;Temporary&nbsp;projected&nbsp;nav&nbsp;file:&nbsp;&nbsp;tmp_proj_8044.nav
+<BR>&nbsp;&nbsp;&nbsp;Temporary&nbsp;geographic&nbsp;nav&nbsp;file:&nbsp;tmp_geo_8044.nav
+<P>
+<BR>&nbsp;&nbsp;&nbsp;------------
+<P>
+<BR>&nbsp;&nbsp;&nbsp;Projection:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UTM&nbsp;Zone&nbsp;27
+<BR>&nbsp;&nbsp;&nbsp;Projection&nbsp;units:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;meters
+<P>
+<BR>&nbsp;&nbsp;&nbsp;------------
+<P>
+<BR>&nbsp;586&nbsp;navigation&nbsp;records&nbsp;read...
+<P>
+<BR>&nbsp;Running&nbsp;mapproject...
+<BR>&nbsp;mapproject&nbsp;tmp_proj_8044.nav&nbsp;-Ju27/1:1000000&nbsp;-I&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-20:0/0:0/-19:0/1:0r&nbsp;&gt;&nbsp;tmp_geo_8044.nav<BR>
+<P>
+<BR>&nbsp;Deleting&nbsp;tmp_proj_8044.nav,&nbsp;tmp_geo_8044.nav...
+<P>
+<BR>&nbsp;Done...
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>BUGS</H2>
+
+Let us know...
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 June 2013</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
