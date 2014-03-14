@@ -102,7 +102,7 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-libmbio_la_DEPENDENCIES = $(top_builddir)/src/mr1pr/libmbmr1pr.la \
+libmbio_la_DEPENDENCIES = $(top_builddir)/src/bsio/libmbbsio.la \
 	$(top_builddir)/src/surf/libmbsapi.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__append_6)
@@ -139,7 +139,8 @@ am__libmbio_la_SOURCES_DIST = mb_format.c mb_error.c mb_swap.c \
 	mbr_nvnetcdf.c mbr_samesurf.c mbr_reson7kr.c mbr_edgjstar.c \
 	mbr_segysegy.c mbr_image83p.c mbr_imagemba.c mbr_hir2rnav.c \
 	mbr_hysweep1.c mbr_xtfb1624.c mbr_swplssxi.c mbr_swplssxp.c \
-	mbr_3ddepthp.c mbr_wasspenl.c mbsys_gsf.c mbr_gsfgenmb.c
+	mbr_3ddepthp.c mbr_wasspenl.c mbr_mgd77txt.c mbr_mgd77tab.c \
+	mbsys_gsf.c mbr_gsfgenmb.c
 @BUILD_GSF_TRUE@am__objects_1 = mbsys_gsf.lo mbr_gsfgenmb.lo
 am_libmbio_la_OBJECTS = mb_format.lo mb_error.lo mb_swap.lo \
 	mb_compare.lo mb_navint.lo mb_read_init.lo mb_write_init.lo \
@@ -181,7 +182,7 @@ am_libmbio_la_OBJECTS = mb_format.lo mb_error.lo mb_swap.lo \
 	mbr_image83p.lo mbr_imagemba.lo mbr_hir2rnav.lo \
 	mbr_hysweep1.lo mbr_xtfb1624.lo mbr_swplssxi.lo \
 	mbr_swplssxp.lo mbr_3ddepthp.lo mbr_wasspenl.lo \
-	$(am__objects_1)
+	mbr_mgd77txt.lo mbr_mgd77tab.lo $(am__objects_1)
 nodist_libmbio_la_OBJECTS =
 libmbio_la_OBJECTS = $(am_libmbio_la_OBJECTS) \
 	$(nodist_libmbio_la_OBJECTS)
@@ -403,7 +404,7 @@ include_HEADERS = mb_config.h mb_format.h mb_status.h mb_io.h \
 	mbf_oicmbari.h mbf_omghdcsj.h mbf_mgd77dat.h mbf_mbarirov.h \
 	mbf_mbarrov2.h mbf_mbpronav.h mbf_xtfr8101.h $(am__append_1)
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
-AM_CPPFLAGS = -I@top_srcdir@/src/mr1pr -I@top_srcdir@/src/surf \
+AM_CPPFLAGS = -I@top_srcdir@/src/bsio -I@top_srcdir@/src/surf \
 	${libgmt_CPPFLAGS} ${libnetcdf_CPPFLAGS} $(am__append_2) \
 	$(am__append_3) $(am__append_4)
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
@@ -440,8 +441,9 @@ libmbio_la_SOURCES = mb_format.c mb_error.c mb_swap.c mb_compare.c \
 	mbr_nvnetcdf.c mbr_samesurf.c mbr_reson7kr.c mbr_edgjstar.c \
 	mbr_segysegy.c mbr_image83p.c mbr_imagemba.c mbr_hir2rnav.c \
 	mbr_hysweep1.c mbr_xtfb1624.c mbr_swplssxi.c mbr_swplssxp.c \
-	mbr_3ddepthp.c mbr_wasspenl.c $(am__append_5)
-libmbio_la_LIBADD = $(top_builddir)/src/mr1pr/libmbmr1pr.la \
+	mbr_3ddepthp.c mbr_wasspenl.c mbr_mgd77txt.c mbr_mgd77tab.c \
+	$(am__append_5)
+libmbio_la_LIBADD = $(top_builddir)/src/bsio/libmbbsio.la \
 	$(top_builddir)/src/surf/libmbsapi.la ${libgmt_LIBS} \
 	${libnetcdf_LIBS} ${libproj_LIBS} ${XDR_LIB} $(am__append_6)
 nodist_libmbio_la_SOURCES = projections.h
@@ -614,6 +616,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mbnetcdf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mbpronav.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mgd77dat.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mgd77tab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mgd77txt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mr1aldeo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mr1bldeo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mr1prhig.Plo@am__quote@

@@ -11,7 +11,7 @@ if BUILD_PROJ
   XBUILD_SUB_PROJ = proj
 endif
 
-SUBDIRS = $(XBUILD_SUB_GSF) $(XBUILD_SUB_PROJ) surf mr1pr mbio mbaux \
+SUBDIRS = $(XBUILD_SUB_GSF) $(XBUILD_SUB_PROJ) surf bsio mbio mbaux \
 	utilities gmt otps macros \
 	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL) \
 	man html ps share

@@ -416,7 +416,7 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
             ac);
 	ac = 0;
         tmp0 = (XmString) BX_CONVERT(shared.mb3d_routelist.MB3DRouteList,
-				(char *)"Route | Waypoint | Lon | Lat | Depth | Distance | DistanceOverTopo |Color | Type",
+				(char *)"Route | Waypoint | Lon | Lat | Depth | Distance | DistanceOverTopo | Waypoint Type",
                 		XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
 	XtSetValues(shared.mb3d_routelist.mbview_routelist_label, args, ac);

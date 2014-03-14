@@ -410,7 +410,7 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    && line[0] == '#')
 	    {
 	    store->kind = MB_DATA_COMMENT;
-            strncpy(store->comment,&line[1],MBSYS_SINGLEBEAM_MAXLINE);
+            strncpy(store->comment,&line[1],MB_COMMENT_MAXLINE);
 	    if (store->comment[strlen(store->comment)-1] == '\n')
 		store->comment[strlen(store->comment)-1] = '\0';
 	    (*read_count)++;
@@ -576,7 +576,7 @@ int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		if (store->kind == MB_DATA_COMMENT)
 		    {
 		    line[0] = '#';
-        	    strncpy(&line[1],store->comment,MBSYS_SINGLEBEAM_MAXLINE-2);
+        	    strncpy(&line[1],store->comment,MB_COMMENT_MAXLINE-2);
         	    len = strlen(line);
 		    if (line[len-1] != '\n')
 			{

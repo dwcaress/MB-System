@@ -555,8 +555,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    mb_get_binary_short(MB_YES, buffer, &nentry);
 
 		    /* loop over all entries in the directory */
-		    if ((status = status = fread(buffer,
-		    	6 * nentry * sizeof(short), 1, mb_io_ptr->mbfp)) == 1)
+		    if ((status = fread(buffer, 6 * nentry * sizeof(short), 1, mb_io_ptr->mbfp)) == 1)
 			{
 			index = 0;
 		    	for (i=0;i<nentry && status == MB_SUCCESS;i++)

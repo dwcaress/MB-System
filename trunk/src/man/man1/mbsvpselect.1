@@ -1,0 +1,256 @@
+.TH mbsvpselect 1 "13 March 2014" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbsvpselect\fP \- Mbsvpselect chooses and implements the best
+available sound speed model for each swath file in a survey
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+mbsvpselect -N -V -Idatalist -Ssvplist -Pmode[/criteria[/submode]]
+
+[-P0, -P1, -P2/period, -P3/range, -P3/range/1]
+\fBmbsvpselect\fP [\fB\-C \-D \fB\-F\fIformat \fB\-H \fB\-I\fIfile \fB\-M\fImode\fP \fB\-O \-P \-S \-V \-Z\fP]
+
+.SH DESCRIPTION
+Mbsvpselect chooses and implements the best available sound speed model
+for each swath file in a survey. The user provides a list of the
+available sound speed models and specifies the criteria used for
+model selection. The program uses mbset to turn on bathymetry
+recalculation by raytracing through the sound speed model selected
+for each swath file.
+
+Description:
+
+The tool aims to help users to automatically apply the sound velocity
+correction to the survey files. since most surveys involve several SVPs,
+the seletion of the appropriate SVP for each survey profile is still
+missing in MB-System.
+
+After finding the appropriate svp for each profile based on the choosed
+method, the results are copied to a txt file that shows each survey
+profile with the corresponding SVP. the tool also calls mbset automatically
+so no need to assign SVP to the data. it is done automatically.
+
+There are 5 methods for choosing the appropriate SVP for each survey
+profile. These methods are:
+
+1. Nearest SVP in position: the middle position of each survey profile
+   is calculated and the geodesics (shortest distance on the ellipsoid)
+   to all SVPs are calcualted. and the SVP with the shortest distance is
+   chosen. when the middle position of the survey profile is calculated
+   there is an option to check for 0 lat 0 long wrong values. if it is
+   found at the starting the geodesic will be calculated to the end of
+   the profile.
+
+2. Nearest in time: the time interveal between the starting time of
+   the profile and the time of the SVP, and the SVP with  the shortest
+   interval will be chosen.
+
+3. Nearest in position within time: a default time radius from the
+   profile is set as 10 hours, and within this period the nearest SVP
+   in position is chosen. if none of the SVPs are within this period the
+   nearest in position will be taken despit of the period threshold. The
+   period threshold can be set by the user.
+
+4. Nearest in time within range: similar to the previous option but
+   this time a default range of 10000 meters is set and within this range
+   the svp nearest in time is chosen. also this 10000 meter value could
+   be set by the user.
+
+5. Nearest in season within range: similar to the previous option the
+   selected SVP could be chosen based on the month only not on the year.
+   it means within the specified range the user could chose either the svp
+   nearest in time or the svp nearest in month (this could be interpreted
+   as the svp that falls in the same seasonal period despite of the year
+   when it was taken).
+
+Mbsvpselect reads the .inf file of each swath file referenced in a recursive
+datalist structure to determine the location and collection time of the
+relevant data. The ancilliary *.inf, *.fbt, and *.fnv files must be created
+first. The water sound speed models (called SVPs by convention as an acronym
+for Sound Velocity Profiles) to be used must include one of three supported
+file headers specifying the time and location of the model.
+
+University of Bremen SVP headers:
+  MB-SVP 2011/01/08 19:30:00 -52.965437  -36.986314
+  (keyword yyyy/mm/dd hh:mm:ss latitude longitude)
+
+MB-System SVPs as now output by mbsvplist:
+  #MB-SVP 2011/01/08 19:30:00 -36.986314 -52.965437
+  (keyword yyyy/mm/dd hh:mm:ss longitude latitude)
+
+CARIS sound velocity header format:
+  Section 2013-150 23:22:18 -57:02:01 -26:02:18
+  (keyword yyyy-yearDay  hh:mm:ss latitude (degree:min:sec) longitude (degree:min:sec))
+
+Mbsvpselect supports SVP files with single models or files with multiple models where
+new headers occur between models.
+
+Instructions:
+
+1) Set up a survey (or surveys) for MB-System processing in the usual way,
+   including creating a datalist file referencing the swath data of interest
+   and generating the ancilliary *.inf, *.fbt, and *.fnv files for each of
+   the swath files.
+2) Create an svplist file (analagous to a datalist, but referencing the
+   relevant SVP files). Each SVP file is expected to be a text file with
+   depth-sound speed pairs on each line (depth in meters, sound speed in
+   meters/second) excepting for a header line at the start of each discrete
+   model. Any of the header formats listed above will work.
+   that refers to a local svp datalist. the local datalists includes
+3) In order to turn on bathymetry recalculation by raytracing through the
+   most appropriate sound speed model for each swath file, call mbsvpselect:
+
+     mbsvpselect -N -V -Idatalist -Ssvplist [-P0, -P1, -P2/period, -P3/range, -P3/range/1]
+
+   -N is the option to check 0 latitude 0 longitude in the survey lines.
+   -V verbosity.
+   -I input datalist
+   -S input svp datalist
+   -P the method for choosing the svp where:
+       -P or -P0                 is the nearest in position
+       -P1                       is the nearest in time
+       -P2                       is nearest in position within time (default time period is 10 hours)
+       -P2/time                  is nearest in position within specified time period (in hours)
+       -P3                       is nearest in time within range   (default range is 10000 meters)
+       -P3/range or -P3/range/0  is nearest in time within specified range (in meters)
+       -P3/range/1                     is nearest in month (seasonal) within specified range in meter.
+
+.SH AUTHORSHIP
+Ammar Aljuhe (ammaraljuhne@gmail.com)
+.br
+  MARUM, University of Bremen
+.br
+Christian do Santos Ferreira (cferreira@marum.de)
+.br
+  MARUM, University of Bremen
+.br
+
+.SH OPTIONS
+.TP
+.B \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-I
+\fIdatalist\fP
+.br
+Sets the input datalist file, where \fIdatalist\fP
+is an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the \fIfile\fP file, each
+data file should be followed by a data format identifier, e.g.:
+ 	datafile1 11
+ 	datafile2 24
+.br
+This program uses the \fBMBIO\fP library and will operate on any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page. Default: \fIfile\fP = "datalist.mb-1".
+.TP
+.B \-N
+.br
+Causes the program to check for SVPs with zero longitude and latitude values.
+.TP
+.B \-P
+.br
+This option sets the criteria by which \fBmbsvpselect\fP selects the
+sound speed model to be used for each swath file.
+  -P or -P0             nearest in position
+  -P1                   nearest in time
+  -P2                   nearest in position within time 
+  -P2/time              nearest in position within specified time period
+  -P3			nearest in time within range   
+  -P3/range  		nearest in time within specified range
+  -P3/range/0  		nearest in time within specified range
+  -P3/range/1           nearest in month (seasonal) within specified range
+.br
+The times are specified in hours and the ranges in meters. 
+The default time period is 10 hours and the default range is 10000 meters.
+.TP
+.B \-S
+\fIsvplist\fP
+.br
+Sets the input svplist file, where \fIsvplist\fP
+is an ascii file containing a list of the input sound speed model
+or SVP files.  The program will read
+the location and time stamp information for all of the models
+in each one of these files.
+In the \fIsvplist\fP file, each
+SVP file should be on a separate line, e.g.:
+ 	svpfile1
+ 	svpfile2
+.br
+Default: \fIfile\fP = "svplist.mb-1".
+.TP
+.B \-V
+Normally, \fBmbsvpselect\fP works "silently" without outputting
+anything to the stderr stream.  If the
+\fB\-V\fP flag is given, then \fBmblist\fP works in a "verbose" mode and
+outputs the program version being used and all error status messages.
+
+.SH EXAMPLES
+Suppose you are working in a directory called Survey_1 containing
+swath files that need to have the bathymetry recalculated by
+raytracing through water sound speed models. The local datalist
+file might contain something like:
+     13349457_3934_2845.mb88 88
+     13645323_3433_5543.mb88 88
+     46372536_6563_4637.mb88 88
+     64362825_6344_2635.mb88 88
+
+or, if you use absolute passwords, something like:
+
+     /MyMac/User/Survey_1/13349457_3934_2845.mb88 88
+     /MyMac/User/Survey_1/13645323_3433_5543.mb88 88
+     /MyMac/User/Survey_1/46372536_6563_4637.mb88 88
+     /MyMac/User/Survey_1/64362825_6344_2635.mb88 88
+
+By convention, this datalist will be named something
+like datalist.mb-1, where the ".mb-1" suffix indicates to
+MB-System programs that this is a datalist file. As
+documented elsewhere, datalist files can contain entries
+that reference datalists rather than single files; thus
+datalists can be recursive.
+
+Suppose that the water properties were variable during this
+survey, with the variability dominated by location.Further suppose 
+that there are three SVP files in a separate directory with
+names such as svp1.svp, svp2.svp, and svp3.svp. Each of these files
+contains a single model derived from CTD casts at a particular
+place and time indicated in the single header line. In that directory
+one can create an svplist file named SVP_list.mb-1 with contents:
+     svp1.svp
+     svp2.svp
+     svp3.svp
+Since mbsvpselect allows svplists to be recursive (like datalists),
+one can create a second svplist named my_svplist.mb-1in the survey 
+processing directory that references the first with an entry like:
+
+     /MyMac/User/Survey_1/SVP_folder/SVP_list.mb-1 -1
+
+In order to turn on bathymetry recalculation for all of the
+swath files referenced by datalist.mb-1 using the most appropriate
+of the available sound speed models, run mbsvpselect with arguments
+like:
+
+     mbsvpselect -N -V -I datalist.mb-1 -S my_svplist.mb-1 -P2/50
+
+Here the -P2/50 option specifies that the sound speed model to be
+used for each file will be the closest one collected within 50 hours
+of the swath data. The bathymetry recalculation will be turned on
+using an mbset call of the form:
+
+     mbset -Idatalist.mb-1 -PSVPFILE:/MyMac/User/Survey_1/SVP_folder/svp1.svp
+
+Following the mbsvpselect usage, mbprocess must be run to actually
+reprocess the swath data, including bathymetry recalculation by
+raytracing.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbprocess\fP(1), \fBmbset\fP(1), \fBmbsvplist\fP(1)
+
+.SH BUGS
+The bugs are special because they are from Egypt, Germany, and Brazil.

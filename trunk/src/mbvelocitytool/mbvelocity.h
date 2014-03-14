@@ -42,7 +42,7 @@ struct profile
 	{
 	int	n;
 	int	nalloc;
-	char	name[MB_PATH_MAXLINE];
+	mb_path	name;
 	double	*depth;
 	double	*velocity;
 	};

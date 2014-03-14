@@ -60,7 +60,7 @@ $(BINDIR)/mbcontour: mbcontour.o \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a  \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbps.a
 	$(CC) $(CFLAGS) mbcontour.o \
@@ -68,7 +68,7 @@ $(BINDIR)/mbcontour: mbcontour.o \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbps.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmtps.a \
@@ -79,14 +79,14 @@ $(BINDIR)/mbswath: mbswath.o \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a
+		$(LIBDIR)/libmbbsio.a
 	$(CC) $(CFLAGS) mbswath.o \
 		$(LIBDIR)/libmbio.a  \
 		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmtps.a \
 		$(LFLAGS) -o $(BINDIR)/mbswath
 $(BINDIR)/mbgrdtiff: mbgrdtiff.o \

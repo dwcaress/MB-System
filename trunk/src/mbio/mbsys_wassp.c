@@ -397,7 +397,6 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	double	headingx, headingy;
-	double	dx, dy;
 	int	i, j;
 
 	/* print input debug statements */
@@ -714,7 +713,6 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	double	headingx, headingy;
-	double	dx, dy;
 	int	i, j;
 
 	/* print input debug statements */
@@ -1624,9 +1622,9 @@ int mbsys_wassp_copy(int verbose, void *mbio_ptr,
         float	*wcdata_x_save;
         float	*wcdata_y_save;
         float	*wcdata_mag_save;
-	
         size_t	sys_cfg1_data_alloc_save;
         char	*sys_cfg1_data_save;
+	size_t	copy_len;
 	int	i;
 
 	/* print input debug statements */
@@ -1676,7 +1674,11 @@ int mbsys_wassp_copy(int verbose, void *mbio_ptr,
 		status = mb_reallocd(verbose, __FILE__, __LINE__, store->rawsonar.rawdata_alloc,
 					(void **)&(copy->rawsonar.rawdata), error);
 		if (status == MB_SUCCESS)
+			{
 			copy->rawsonar.rawdata_alloc = store->rawsonar.rawdata_alloc;
+			copy_len = (size_t)(copy->rawsonar.n * copy->rawsonar.m);
+			memcpy(copy->rawsonar.rawdata, store->rawsonar.rawdata, copy_len);
+			}
 		}
 
         /* GEN_SENS record */
@@ -1707,7 +1709,13 @@ int mbsys_wassp_copy(int verbose, void *mbio_ptr,
 		status = mb_reallocd(verbose, __FILE__, __LINE__, store->wcd_navi.wcdata_alloc,
 					(void **)&(copy->wcd_navi.wcdata_mag), error);
 		if (status == MB_SUCCESS)
+			{
 			copy->wcd_navi.wcdata_alloc = store->wcd_navi.wcdata_alloc;
+			copy_len = (size_t)(sizeof(float) * copy->wcd_navi.num_points);
+			memcpy(copy->wcd_navi.wcdata_x, store->wcd_navi.wcdata_x, copy_len);
+			memcpy(copy->wcd_navi.wcdata_y, store->wcd_navi.wcdata_y, copy_len);
+			memcpy(copy->wcd_navi.wcdata_mag, store->wcd_navi.wcdata_mag, copy_len);
+			}
 		}
 
         /* SYS_CFG1 record */
@@ -1722,7 +1730,11 @@ int mbsys_wassp_copy(int verbose, void *mbio_ptr,
 		status = mb_reallocd(verbose, __FILE__, __LINE__, store->sys_cfg1.sys_cfg1_data_alloc,
 					(void **)&(copy->sys_cfg1.sys_cfg1_data), error);
 		if (status == MB_SUCCESS)
+			{
 			copy->sys_cfg1.sys_cfg1_data_alloc = store->sys_cfg1.sys_cfg1_data_alloc;
+			copy_len = (size_t)(copy->sys_cfg1.sys_cfg1_len);
+			memcpy(copy->sys_cfg1.sys_cfg1_data, store->sys_cfg1.sys_cfg1_data, copy_len);
+			}
 		}
        
         /* COMMENT_ Record */

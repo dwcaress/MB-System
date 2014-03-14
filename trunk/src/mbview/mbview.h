@@ -438,6 +438,7 @@ struct mbview_site_struct {
 struct mbview_route_struct {
 	int	color;
 	int	size;
+	int	editmode;
 	mb_path	name;
 	double	distancelateral;
 	double	distancetopo;
@@ -1117,6 +1118,7 @@ int mbview_addroute(int verbose, size_t instance,
 			int	*waypoint,
 			int	routecolor,
 			int	routesize,
+                        int     routeeditmode,
 			mb_path	routename,
 			int 	*iroute,
 			int *error);

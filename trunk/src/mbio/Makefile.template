@@ -164,7 +164,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_hir2rnav.o mbr_hysweep1.o \
 		mbr_xtfb1624.o \
                 mbr_swplssxi.o mbr_swplssxp.o \
-		mbr_3ddepthp.o mbr_wasspenl.o
+		mbr_3ddepthp.o mbr_wasspenl.o \
+		mbr_mgd77txt.o  mbr_mgd77tab.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -233,7 +234,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_hir2rnav.o mbr_hysweep1.o \
 		mbr_xtfb1624.o \
                 mbr_swplssxi.o mbr_swplssxp.o \
-		mbr_3ddepthp.o mbr_wasspenl.o
+		mbr_3ddepthp.o mbr_wasspenl.o \
+		mbr_mgd77txt.o mbr_mgd77tab.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -316,8 +318,9 @@ mbsys_mr1.o:	mbsys_mr1.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.
 	$(CC) -c $(CFLAGS) mbsys_mr1.c
 mbsys_mr1b.o:	mbsys_mr1b.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_mr1b.h
 	$(CC) -c $(CFLAGS) mbsys_mr1b.c
-mbsys_mr1v2001.o:	mbsys_mr1v2001.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_mr1v2001.h
-	$(CC) -c $(CFLAGS) mbsys_mr1v2001.c
+mbsys_mr1v2001.o:	mbsys_mr1v2001.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_mr1v2001.h \
+		../bsio/mbbs.h ../bsio/mbbs_defines.h ../bsio/mbbs_mem.h
+	$(CC) -c $(CFLAGS) -I../bsio mbsys_mr1v2001.c
 mbsys_ldeoih.o:	mbsys_ldeoih.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_ldeoih.h
 	$(CC) -c $(CFLAGS) mbsys_ldeoih.c
 mbsys_reson.o:	mbsys_reson.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_reson.h
@@ -332,7 +335,8 @@ mbsys_hsmd.o:	mbsys_hsmd.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_defin
 	$(CC) -c $(CFLAGS) mbsys_hsmd.c
 mbsys_dsl.o:	mbsys_dsl.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_dsl.h
 	$(CC) -c $(CFLAGS) mbsys_dsl.c
-mbsys_gsf.o:	mbsys_gsf.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_gsf.h ../gsf/gsf.h ../gsf/gsf_ft.h ../gsf/gsf_enc.h
+mbsys_gsf.o:	mbsys_gsf.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_gsf.h \
+		$(GSFINCDIR)/gsf.h $(GSFINCDIR)/gsf_ft.h $(GSFINCDIR)/gsf_enc.h
 	$(CC) -c $(CFLAGS) -I$(GSFINCDIR) mbsys_gsf.c
 mbsys_mstiff.o:	mbsys_mstiff.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mbsys_mstiff.h
 	$(CC) -c $(CFLAGS) mbsys_mstiff.c
@@ -420,8 +424,9 @@ mbr_mr1aldeo.o: mbr_mr1aldeo.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_d
 	$(CC) -c $(CFLAGS) mbr_mr1aldeo.c
 mbr_mr1bldeo.o: mbr_mr1bldeo.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbf_mr1bldeo.h mbsys_mr1b.h
 	$(CC) -c $(CFLAGS) mbr_mr1bldeo.c
-mbr_mr1prvr2.o: mbr_mr1prvr2.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbsys_mr1v2001.h
-	$(CC) -c $(CFLAGS) mbr_mr1prvr2.c
+mbr_mr1prvr2.o: mbr_mr1prvr2.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbsys_mr1v2001.h \
+		../bsio/mbbs.h ../bsio/mbbs_defines.h ../bsio/mbbs_mem.h
+	$(CC) -c $(CFLAGS) -I../bsio mbr_mr1prvr2.c
 mbr_mbldeoih.o: mbr_mbldeoih.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbsys_ldeoih.h
 	$(CC) -c $(CFLAGS) mbr_mbldeoih.c
 mbr_cbat9001.o: mbr_cbat9001.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbf_cbat9001.h mbsys_reson.h
@@ -452,7 +457,8 @@ mbr_dsl120pf.o: mbr_dsl120pf.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_d
 	$(CC) -c $(CFLAGS) mbr_dsl120pf.c
 mbr_dsl120sf.o: mbr_dsl120sf.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbf_dsl120sf.h mbsys_dsl.h
 	$(CC) -c $(CFLAGS) mbr_dsl120sf.c
-mbr_gsfgenmb.o: mbr_gsfgenmb.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbf_gsfgenmb.h mbsys_gsf.h ../gsf/gsf.h ../gsf/gsf_ft.h ../gsf/gsf_enc.h
+mbr_gsfgenmb.o: mbr_gsfgenmb.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbf_gsfgenmb.h mbsys_gsf.h \
+		$(GSFINCDIR)/gsf.h $(GSFINCDIR)/gsf_ft.h $(GSFINCDIR)/gsf_enc.h
 	$(CC) -c $(CFLAGS) -I$(GSFINCDIR)  mbr_gsfgenmb.c
 mbr_mstiffss.o: mbr_mstiffss.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbf_mstiffss.h mbsys_mstiff.h
 	$(CC) -c $(CFLAGS) mbr_mstiffss.c
@@ -512,7 +518,10 @@ mbr_3ddepthp.o: mbr_3ddepthp.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_d
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_3ddepthp.c
 mbr_wasspenl.o: mbr_wasspenl.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbsys_3datdepthlidar.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_wasspenl.c
-
+mbr_mgd77txt.o: mbr_mgd77txt.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbsys_3datdepthlidar.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_mgd77txt.c
+mbr_mgd77tab.o: mbr_mgd77tab.c mb_status.h mb_format.h mb_io.h mb_config2.h mb_define.h mb_swap.h mbsys_3datdepthlidar.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_mgd77tab.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_config.h:	mb_config.h

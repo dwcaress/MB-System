@@ -46,9 +46,8 @@ bin_PROGRAMS = mbhsdump \
         mbkongsbergpreprocess \
         mbsxppreprocess \
         mbpreprocess \
+	mbsvpselect \
         $(FFTW_PROG)
-
-#Remove mbps if WIN32?
 
 include_HEADERS = levitus.h
 
@@ -174,6 +173,8 @@ mbsxppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
 mbpreprocess_SOURCES = mbpreprocess.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+
+mbsvpselect_SOURCES = mbsvpselect.c geodesic.c
 
 if BUILD_FFTW
 mbsegypsd_SOURCES = mbsegypsd.c

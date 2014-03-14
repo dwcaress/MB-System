@@ -45,6 +45,7 @@ mbm_grdtiff.1 \
 mbm_grid.1 \
 mbm_histplot.1 \
 mbm_makedatalist.1 \
+mbm_makesvp.1 \
 mbm_multicopy.1 \
 mbm_multidatalist.1 \
 mbm_multiprocess.1 \
@@ -73,6 +74,7 @@ mbsegypsd.1 \
 mbset.1 \
 mbstripnan.1 \
 mbsvplist.1 \
+mbsvpselect.1 \
 mbswath.1 \
 mbsystem.1 \
 mbtime.1 \

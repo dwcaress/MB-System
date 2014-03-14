@@ -1,0 +1,336 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbsvpselect</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbsvpselect</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  13 March 2014 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbsvpselect</B> - Mbsvpselect chooses and implements the best
+available sound speed model for each swath file in a survey
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+mbsvpselect -N -V -Idatalist -Ssvplist -Pmode[/criteria[/submode]]
+<P>
+[-P0, -P1, -P2/period, -P3/range, -P3/range/1]
+<B>mbsvpselect</B> [<B>-C -D -F</B><I>format </I><B>-H -I</B><I>file </I><B>-M</B><I>mode</I> <B>-O -P -S -V -Z</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+Mbsvpselect chooses and implements the best available sound speed model
+for each swath file in a survey. The user provides a list of the
+available sound speed models and specifies the criteria used for
+model selection. The program uses mbset to turn on bathymetry
+recalculation by raytracing through the sound speed model selected
+for each swath file.
+<P>
+Description:
+<P>
+The tool aims to help users to automatically apply the sound velocity
+correction to the survey files. since most surveys involve several SVPs,
+the seletion of the appropriate SVP for each survey profile is still
+missing in MB-System.
+<P>
+After finding the appropriate svp for each profile based on the choosed
+method, the results are copied to a txt file that shows each survey
+profile with the corresponding SVP. the tool also calls mbset automatically
+so no need to assign SVP to the data. it is done automatically.
+<P>
+There are 5 methods for choosing the appropriate SVP for each survey
+profile. These methods are:
+<P>
+1. Nearest SVP in position: the middle position of each survey profile
+<BR>&nbsp;&nbsp;&nbsp;is&nbsp;calculated&nbsp;and&nbsp;the&nbsp;geodesics&nbsp;(shortest&nbsp;distance&nbsp;on&nbsp;the&nbsp;ellipsoid)
+<BR>&nbsp;&nbsp;&nbsp;to&nbsp;all&nbsp;SVPs&nbsp;are&nbsp;calcualted.&nbsp;and&nbsp;the&nbsp;SVP&nbsp;with&nbsp;the&nbsp;shortest&nbsp;distance&nbsp;is
+<BR>&nbsp;&nbsp;&nbsp;chosen.&nbsp;when&nbsp;the&nbsp;middle&nbsp;position&nbsp;of&nbsp;the&nbsp;survey&nbsp;profile&nbsp;is&nbsp;calculated
+<BR>&nbsp;&nbsp;&nbsp;there&nbsp;is&nbsp;an&nbsp;option&nbsp;to&nbsp;check&nbsp;for&nbsp;0&nbsp;lat&nbsp;0&nbsp;long&nbsp;wrong&nbsp;values.&nbsp;if&nbsp;it&nbsp;is
+<BR>&nbsp;&nbsp;&nbsp;found&nbsp;at&nbsp;the&nbsp;starting&nbsp;the&nbsp;geodesic&nbsp;will&nbsp;be&nbsp;calculated&nbsp;to&nbsp;the&nbsp;end&nbsp;of
+<BR>&nbsp;&nbsp;&nbsp;the&nbsp;profile.
+<P>
+2. Nearest in time: the time interveal between the starting time of
+<BR>&nbsp;&nbsp;&nbsp;the&nbsp;profile&nbsp;and&nbsp;the&nbsp;time&nbsp;of&nbsp;the&nbsp;SVP,&nbsp;and&nbsp;the&nbsp;SVP&nbsp;with&nbsp;&nbsp;the&nbsp;shortest
+<BR>&nbsp;&nbsp;&nbsp;interval&nbsp;will&nbsp;be&nbsp;chosen.
+<P>
+3. Nearest in position within time: a default time radius from the
+<BR>&nbsp;&nbsp;&nbsp;profile&nbsp;is&nbsp;set&nbsp;as&nbsp;10&nbsp;hours,&nbsp;and&nbsp;within&nbsp;this&nbsp;period&nbsp;the&nbsp;nearest&nbsp;SVP
+<BR>&nbsp;&nbsp;&nbsp;in&nbsp;position&nbsp;is&nbsp;chosen.&nbsp;if&nbsp;none&nbsp;of&nbsp;the&nbsp;SVPs&nbsp;are&nbsp;within&nbsp;this&nbsp;period&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;nearest&nbsp;in&nbsp;position&nbsp;will&nbsp;be&nbsp;taken&nbsp;despit&nbsp;of&nbsp;the&nbsp;period&nbsp;threshold.&nbsp;The
+<BR>&nbsp;&nbsp;&nbsp;period&nbsp;threshold&nbsp;can&nbsp;be&nbsp;set&nbsp;by&nbsp;the&nbsp;user.
+<P>
+4. Nearest in time within range: similar to the previous option but
+<BR>&nbsp;&nbsp;&nbsp;this&nbsp;time&nbsp;a&nbsp;default&nbsp;range&nbsp;of&nbsp;10000&nbsp;meters&nbsp;is&nbsp;set&nbsp;and&nbsp;within&nbsp;this&nbsp;range
+<BR>&nbsp;&nbsp;&nbsp;the&nbsp;svp&nbsp;nearest&nbsp;in&nbsp;time&nbsp;is&nbsp;chosen.&nbsp;also&nbsp;this&nbsp;10000&nbsp;meter&nbsp;value&nbsp;could
+<BR>&nbsp;&nbsp;&nbsp;be&nbsp;set&nbsp;by&nbsp;the&nbsp;user.
+<P>
+5. Nearest in season within range: similar to the previous option the
+<BR>&nbsp;&nbsp;&nbsp;selected&nbsp;SVP&nbsp;could&nbsp;be&nbsp;chosen&nbsp;based&nbsp;on&nbsp;the&nbsp;month&nbsp;only&nbsp;not&nbsp;on&nbsp;the&nbsp;year.
+<BR>&nbsp;&nbsp;&nbsp;it&nbsp;means&nbsp;within&nbsp;the&nbsp;specified&nbsp;range&nbsp;the&nbsp;user&nbsp;could&nbsp;chose&nbsp;either&nbsp;the&nbsp;svp
+<BR>&nbsp;&nbsp;&nbsp;nearest&nbsp;in&nbsp;time&nbsp;or&nbsp;the&nbsp;svp&nbsp;nearest&nbsp;in&nbsp;month&nbsp;(this&nbsp;could&nbsp;be&nbsp;interpreted
+<BR>&nbsp;&nbsp;&nbsp;as&nbsp;the&nbsp;svp&nbsp;that&nbsp;falls&nbsp;in&nbsp;the&nbsp;same&nbsp;seasonal&nbsp;period&nbsp;despite&nbsp;of&nbsp;the&nbsp;year
+<BR>&nbsp;&nbsp;&nbsp;when&nbsp;it&nbsp;was&nbsp;taken).
+<P>
+Mbsvpselect reads the .inf file of each swath file referenced in a recursive
+datalist structure to determine the location and collection time of the
+relevant data. The ancilliary *.inf, *.fbt, and *.fnv files must be created
+first. The water sound speed models (called SVPs by convention as an acronym
+for Sound Velocity Profiles) to be used must include one of three supported
+file headers specifying the time and location of the model.
+<P>
+University of Bremen SVP headers:
+<BR>&nbsp;&nbsp;MB-SVP&nbsp;2011/01/08&nbsp;19:30:00&nbsp;-52.965437&nbsp;&nbsp;-36.986314
+<BR>&nbsp;&nbsp;(keyword&nbsp;yyyy/mm/dd&nbsp;hh:mm:ss&nbsp;latitude&nbsp;longitude)
+<P>
+MB-System SVPs as now output by mbsvplist:
+<BR>&nbsp;&nbsp;#MB-SVP&nbsp;2011/01/08&nbsp;19:30:00&nbsp;-36.986314&nbsp;-52.965437
+<BR>&nbsp;&nbsp;(keyword&nbsp;yyyy/mm/dd&nbsp;hh:mm:ss&nbsp;longitude&nbsp;latitude)
+<P>
+CARIS sound velocity header format:
+<BR>&nbsp;&nbsp;Section&nbsp;2013-150&nbsp;23:22:18&nbsp;-57:02:01&nbsp;-26:02:18
+<BR>&nbsp;&nbsp;(keyword&nbsp;yyyy-yearDay&nbsp;&nbsp;hh:mm:ss&nbsp;latitude&nbsp;(degree:min:sec)&nbsp;longitude&nbsp;(degree:min:sec))
+<P>
+Mbsvpselect supports SVP files with single models or files with multiple models where
+new headers occur between models.
+<P>
+Instructions:
+<P>
+1) Set up a survey (or surveys) for MB-System processing in the usual way,
+<BR>&nbsp;&nbsp;&nbsp;including&nbsp;creating&nbsp;a&nbsp;datalist&nbsp;file&nbsp;referencing&nbsp;the&nbsp;swath&nbsp;data&nbsp;of&nbsp;interest
+<BR>&nbsp;&nbsp;&nbsp;and&nbsp;generating&nbsp;the&nbsp;ancilliary&nbsp;*.inf,&nbsp;*.fbt,&nbsp;and&nbsp;*.fnv&nbsp;files&nbsp;for&nbsp;each&nbsp;of
+<BR>&nbsp;&nbsp;&nbsp;the&nbsp;swath&nbsp;files.
+2) Create an svplist file (analagous to a datalist, but referencing the
+<BR>&nbsp;&nbsp;&nbsp;relevant&nbsp;SVP&nbsp;files).&nbsp;Each&nbsp;SVP&nbsp;file&nbsp;is&nbsp;expected&nbsp;to&nbsp;be&nbsp;a&nbsp;text&nbsp;file&nbsp;with
+<BR>&nbsp;&nbsp;&nbsp;depth-sound&nbsp;speed&nbsp;pairs&nbsp;on&nbsp;each&nbsp;line&nbsp;(depth&nbsp;in&nbsp;meters,&nbsp;sound&nbsp;speed&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;meters/second)&nbsp;excepting&nbsp;for&nbsp;a&nbsp;header&nbsp;line&nbsp;at&nbsp;the&nbsp;start&nbsp;of&nbsp;each&nbsp;discrete
+<BR>&nbsp;&nbsp;&nbsp;model.&nbsp;Any&nbsp;of&nbsp;the&nbsp;header&nbsp;formats&nbsp;listed&nbsp;above&nbsp;will&nbsp;work.
+<BR>&nbsp;&nbsp;&nbsp;that&nbsp;refers&nbsp;to&nbsp;a&nbsp;local&nbsp;svp&nbsp;datalist.&nbsp;the&nbsp;local&nbsp;datalists&nbsp;includes
+3) In order to turn on bathymetry recalculation by raytracing through the
+<BR>&nbsp;&nbsp;&nbsp;most&nbsp;appropriate&nbsp;sound&nbsp;speed&nbsp;model&nbsp;for&nbsp;each&nbsp;swath&nbsp;file,&nbsp;call&nbsp;mbsvpselect:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbsvpselect&nbsp;-N&nbsp;-V&nbsp;-Idatalist&nbsp;-Ssvplist&nbsp;[-P0,&nbsp;-P1,&nbsp;-P2/period,&nbsp;-P3/range,&nbsp;-P3/range/1]
+<P>
+<BR>&nbsp;&nbsp;&nbsp;-N&nbsp;is&nbsp;the&nbsp;option&nbsp;to&nbsp;check&nbsp;0&nbsp;latitude&nbsp;0&nbsp;longitude&nbsp;in&nbsp;the&nbsp;survey&nbsp;lines.
+<BR>&nbsp;&nbsp;&nbsp;-V&nbsp;verbosity.
+<BR>&nbsp;&nbsp;&nbsp;-I&nbsp;input&nbsp;datalist
+<BR>&nbsp;&nbsp;&nbsp;-S&nbsp;input&nbsp;svp&nbsp;datalist
+<BR>&nbsp;&nbsp;&nbsp;-P&nbsp;the&nbsp;method&nbsp;for&nbsp;choosing&nbsp;the&nbsp;svp&nbsp;where:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-P&nbsp;or&nbsp;-P0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;the&nbsp;nearest&nbsp;in&nbsp;position
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-P1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;the&nbsp;nearest&nbsp;in&nbsp;time
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-P2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;nearest&nbsp;in&nbsp;position&nbsp;within&nbsp;time&nbsp;(default&nbsp;time&nbsp;period&nbsp;is&nbsp;10&nbsp;hours)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-P2/time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;nearest&nbsp;in&nbsp;position&nbsp;within&nbsp;specified&nbsp;time&nbsp;period&nbsp;(in&nbsp;hours)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-P3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;nearest&nbsp;in&nbsp;time&nbsp;within&nbsp;range&nbsp;&nbsp;&nbsp;(default&nbsp;range&nbsp;is&nbsp;10000&nbsp;meters)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-P3/range&nbsp;or&nbsp;-P3/range/0&nbsp;&nbsp;is&nbsp;nearest&nbsp;in&nbsp;time&nbsp;within&nbsp;specified&nbsp;range&nbsp;(in&nbsp;meters)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-P3/range/1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;nearest&nbsp;in&nbsp;month&nbsp;(seasonal)&nbsp;within&nbsp;specified&nbsp;range&nbsp;in&nbsp;meter.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+Ammar Aljuhe (<A HREF="mailto:ammaraljuhne@gmail.com">ammaraljuhne@gmail.com</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM,&nbsp;University&nbsp;of&nbsp;Bremen
+<BR>
+
+Christian do Santos Ferreira (<A HREF="mailto:cferreira@marum.de">cferreira@marum.de</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM,&nbsp;University&nbsp;of&nbsp;Bremen
+<BR>
+
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>datalist</I>
+<BR>
+
+Sets the input datalist file, where <I>datalist</I>
+is an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>file</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will operate on any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>file</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-N</B>
+
+<DD>
+<BR>
+
+Causes the program to check for SVPs with zero longitude and latitude values.
+<DT><B>-P</B>
+
+<DD>
+<BR>
+
+This option sets the criteria by which <B>mbsvpselect</B> selects the
+sound speed model to be used for each swath file.
+<BR>&nbsp;&nbsp;-P&nbsp;or&nbsp;-P0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nearest&nbsp;in&nbsp;position
+<BR>&nbsp;&nbsp;-P1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nearest&nbsp;in&nbsp;time
+<BR>&nbsp;&nbsp;-P2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nearest&nbsp;in&nbsp;position&nbsp;within&nbsp;time&nbsp;
+<BR>&nbsp;&nbsp;-P2/time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nearest&nbsp;in&nbsp;position&nbsp;within&nbsp;specified&nbsp;time&nbsp;period
+<BR>&nbsp;&nbsp;-P3<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>nearest&nbsp;in&nbsp;time&nbsp;within&nbsp;range&nbsp;&nbsp;&nbsp;<BR>
+<BR>&nbsp;&nbsp;-P3/range&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>nearest&nbsp;in&nbsp;time&nbsp;within&nbsp;specified&nbsp;range<BR>
+<BR>&nbsp;&nbsp;-P3/range/0&nbsp;&nbsp;<TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>nearest&nbsp;in&nbsp;time&nbsp;within&nbsp;specified&nbsp;range<BR>
+<BR>&nbsp;&nbsp;-P3/range/1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nearest&nbsp;in&nbsp;month&nbsp;(seasonal)&nbsp;within&nbsp;specified&nbsp;range
+<BR>
+
+The times are specified in hours and the ranges in meters. 
+The default time period is 10 hours and the default range is 10000 meters.
+<DT><B>-S</B>
+
+<DD>
+<I>svplist</I>
+<BR>
+
+Sets the input svplist file, where <I>svplist</I>
+is an ascii file containing a list of the input sound speed model
+or SVP files.  The program will read
+the location and time stamp information for all of the models
+in each one of these files.
+In the <I>svplist</I> file, each
+SVP file should be on a separate line, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>svpfile1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>svpfile2<BR>
+<BR>
+
+Default: <I>file</I> = &quot;svplist.mb-1&quot;.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbsvpselect</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mblist</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used and all error status messages.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose you are working in a directory called Survey_1 containing
+swath files that need to have the bathymetry recalculated by
+raytracing through water sound speed models. The local datalist
+file might contain something like:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13349457_3934_2845.mb88&nbsp;88
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13645323_3433_5543.mb88&nbsp;88
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;46372536_6563_4637.mb88&nbsp;88
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;64362825_6344_2635.mb88&nbsp;88
+<P>
+or, if you use absolute passwords, something like:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/MyMac/User/Survey_1/13349457_3934_2845.mb88&nbsp;88
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/MyMac/User/Survey_1/13645323_3433_5543.mb88&nbsp;88
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/MyMac/User/Survey_1/46372536_6563_4637.mb88&nbsp;88
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/MyMac/User/Survey_1/64362825_6344_2635.mb88&nbsp;88
+<P>
+By convention, this datalist will be named something
+like datalist.mb-1, where the &quot;.mb-1&quot; suffix indicates to
+MB-System programs that this is a datalist file. As
+documented elsewhere, datalist files can contain entries
+that reference datalists rather than single files; thus
+datalists can be recursive.
+<P>
+Suppose that the water properties were variable during this
+survey, with the variability dominated by location.Further suppose 
+that there are three SVP files in a separate directory with
+names such as svp1.svp, svp2.svp, and svp3.svp. Each of these files
+contains a single model derived from CTD casts at a particular
+place and time indicated in the single header line. In that directory
+one can create an svplist file named SVP_list.mb-1 with contents:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;svp1.svp
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;svp2.svp
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;svp3.svp
+Since mbsvpselect allows svplists to be recursive (like datalists),
+one can create a second svplist named my_svplist.mb-1in the survey 
+processing directory that references the first with an entry like:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/MyMac/User/Survey_1/SVP_folder/SVP_list.mb-1&nbsp;-1
+<P>
+In order to turn on bathymetry recalculation for all of the
+swath files referenced by datalist.mb-1 using the most appropriate
+of the available sound speed models, run mbsvpselect with arguments
+like:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbsvpselect&nbsp;-N&nbsp;-V&nbsp;-I&nbsp;datalist.mb-1&nbsp;-S&nbsp;my_svplist.mb-1&nbsp;-P2/50
+<P>
+Here the -P2/50 option specifies that the sound speed model to be
+used for each file will be the closest one collected within 50 hours
+of the swath data. The bathymetry recalculation will be turned on
+using an mbset call of the form:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbset&nbsp;-Idatalist.mb-1&nbsp;-PSVPFILE:/MyMac/User/Survey_1/SVP_folder/svp1.svp
+<P>
+Following the mbsvpselect usage, mbprocess must be run to actually
+reprocess the swath data, including bathymetry recalculation by
+raytracing.
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbset.html">mbset</A></B>(1), <B><A HREF="mbsvplist.html">mbsvplist</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+The bugs are special because they are from Egypt, Germany, and Brazil.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 13 March 2014</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

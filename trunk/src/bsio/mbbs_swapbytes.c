@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	swapbytes.c	3/7/2003
+ *    The MB-system:	mbbs_swapbytes.c	3/3/2014
  *	$Id$
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2014-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -12,8 +12,8 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/* This source code is part of the MR1PR library used to read and write
- * swath sonar data in the MR1PR format devised and used by the 
+/* This source code is part of the mbbsio library used to read and write
+ * swath sonar data in the bsio format devised and used by the
  * Hawaii Mapping Research Group of the University of Hawaii.
  * This source code was made available by Roger Davis of the
  * University of Hawaii under the GPL. Minor modifications have
@@ -21,34 +21,15 @@
  *
  * Author:	Roger Davis (primary author)
  * Author:	D. W. Caress (MB-System revisions)
- * Date:	March 7, 2003 (MB-System revisions)
- * $Log: swapbytes.c,v $
- * Revision 5.0  2003/03/11 19:09:14  caress
- * Initial version.
- *
- *
+ * Date:	March 3, 2014 (MB-System revisions)
  *
  *--------------------------------------------------------------------*/
 /*
  *	Copyright (c) 1998 by University of Hawaii.
  */
 
-/* Various system dependent defines */
-#ifdef SUN
-#define Free			(void) free
-#define MemType			char
-#define MemSizeType		unsigned int
-#define MemCopy(m0, m1, n)	bcopy((char *) (m0), (char *) (m1), (int) (n))
-#define MemZero(m, n)		bzero((char *) (m), (int) (n))
-#else
-#define Free			free
-#define MemType			void
-#define MemSizeType		size_t
-#define MemCopy(m0, m1, n)	(void) memmove((void *) (m1), (void *) (m0), (size_t) (n))
-#define MemZero(m, n)		(void) memset((void *) (m), (int) 0, (size_t) (n))
-#endif
-
-#include "mem.h"
+#include "mbbs_defines.h"
+#include "mbbs_mem.h"
 
 void
 swapbytes(MemType *buf, unsigned int bufsz)
@@ -59,6 +40,23 @@ swapbytes(MemType *buf, unsigned int bufsz)
 	a= (unsigned char *) buf;
 	b= a+1;
 	for (nswap= bufsz/2; nswap > 0; nswap--, a+= 2, b+= 2) {
+		tmp= *a;
+		*a= *b;
+		*b= tmp;
+	}
+
+	return;
+}
+
+void
+revbytes(MemType *buf, unsigned int bufsz)
+{
+	unsigned char *a, *b, tmp;
+	unsigned int nrev;
+
+	a= (unsigned char *) buf;
+	b= a+bufsz-1;
+	for (nrev= bufsz/2; nrev > 0; nrev--, a++, b--) {
 		tmp= *a;
 		*a= *b;
 		*b= tmp;

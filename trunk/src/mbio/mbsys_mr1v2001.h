@@ -52,9 +52,9 @@
  *      data from the MR1, SCAMP, and WHOI DSL 120.
  */
 
-/* get MR1PR library header file */
-#ifndef __MR1PR__
-#include "mr1pr.h"
+/* get MBBS library header file */
+#ifndef __MBBS__
+#include "mbbs.h"
 #endif
 
 /* maximum number of bathymetry beams per side for MR1 */
@@ -81,24 +81,17 @@ struct mbsys_mr1v2001_struct
 	int	kind;
 
 	/* file header info */
-	MR1File header;
+	BSFile header;
 
 	/* ping */
 	Ping 	ping;
 
 	/* data buffer */
-	unsigned int	mr1buffersize;
-	float 	*mr1buffer;
+	unsigned int	bsbuffersize;
+	void 	*bsbuffer;
 
-	/* sensors */
-	float 	*compass;
-	float 	*depth;
-	float 	*pitch;
-	float 	*roll;
-	float 	*pbty;
-	float 	*sbty;
-	float 	*pss;
-	float 	*sss;
+	/* PingData including sensors */
+	PingData    pingdata;
 
 	/* comment */
 	char	comment[MBSYS_MR1V2001_MAXLINE];

@@ -447,7 +447,7 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->seismic_line = mb_segyio_ptr->fileheader.line;
 		store->seismic_shot = traceheader.shot_num;
 		store->seismic_cdp = traceheader.rp_num;
-		for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
+		for (i=0;i<MB_COMMENT_MAXLINE;i++)
 		    store->comment[i] = '\0';
 		}
 

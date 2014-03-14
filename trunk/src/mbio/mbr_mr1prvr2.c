@@ -56,7 +56,7 @@
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_define.h"
-#include "../mr1pr/mr1pr.h"
+#include "mbbs.h"
 #include "mbsys_mr1v2001.h"
 
 /* essential function prototypes */
@@ -366,9 +366,9 @@ int mbr_dem_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 	store = (struct mbsys_mr1v2001_struct *) mb_io_ptr->store_data;
 
 	/* deallocate memory for data descriptor */
-	if (store->mr1buffersize > 0
-		&& store->mr1buffer != NULL)
-		free(store->mr1buffer);
+	if (store->bsbuffersize > 0
+		&& store->bsbuffer != NULL)
+		free(store->bsbuffer);
 	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
@@ -478,7 +478,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 	char	*store_ptr;
 	char	*xdrs;
 	int	read_size;
-	int	mr1pr_status = MR1_SUCCESS;
+	int	bs_status = BS_SUCCESS;
 	char	*eol;
 	int	i;
 
@@ -504,8 +504,8 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 	if (mb_io_ptr->fileheader == MB_NO)
 		{
 		/* read the header into memory */
-		mr1pr_status = mr1_rdmrfhdr(&(store->header), (XDR *)xdrs);
-		if (mr1pr_status == MR1_SUCCESS)
+		bs_status = mbbs_rdbsfhdr(&(store->header), (XDR *)xdrs);
+		if (bs_status == BS_SUCCESS)
 			{
 			mb_io_ptr->fileheader = MB_YES;
 			status = MB_SUCCESS;
@@ -521,14 +521,14 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 		if (mb_io_ptr->hdr_comment != NULL)
 			mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->hdr_comment,error);
 		if (status == MB_SUCCESS
-			&& store->header.mf_count > 0)
+			&& store->header.bsf_count > 0)
 			{
-			status = mb_mallocd(verbose,__FILE__,__LINE__,strlen(store->header.mf_log)+1,
+			status = mb_mallocd(verbose,__FILE__,__LINE__,strlen(store->header.bsf_log)+1,
 					(void **)&mb_io_ptr->hdr_comment,error);
 			}
 		if (status == MB_SUCCESS)
 			{
-			strcpy(mb_io_ptr->hdr_comment,store->header.mf_log);
+			strcpy(mb_io_ptr->hdr_comment,store->header.bsf_log);
 			if (mb_io_ptr->hdr_comment == NULL)
 				mb_io_ptr->hdr_comment_size = 0;
 			else
@@ -541,9 +541,9 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 		if (verbose >= 5)
 			{
 			fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-			fprintf(stderr,"dbg5       mf_version:       %d\n",store->header.mf_version);
-			fprintf(stderr,"dbg5       mf_count:         %d\n",store->header.mf_count);
-			fprintf(stderr,"dbg5       mf_log:         \n%s\n",store->header.mf_log);
+			fprintf(stderr,"dbg5       mf_version:       %d\n",store->header.bsf_version);
+			fprintf(stderr,"dbg5       mf_count:         %d\n",store->header.bsf_count);
+			fprintf(stderr,"dbg5       mf_log:         \n%s\n",store->header.bsf_log);
 			}
 		}
 
@@ -574,36 +574,33 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 	/* else read data */
 	else
 		{
-		if ((mr1pr_status = mr1_rdpnghdr(&(store->ping), (XDR *)xdrs,
-						store->header.mf_version))
-						!= MR1_SUCCESS)
+		if ((bs_status = mbbs_rdpnghdr(&(store->ping), (XDR *)xdrs,
+						store->header.bsf_version))
+						!= BS_SUCCESS)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
 		if (status == MB_SUCCESS
-			&& (mr1pr_status = mr1_pngrealloc(&(store->ping),
-						&(store->mr1buffer), &(store->mr1buffersize)))
-						!= MR1_SUCCESS)
+			&& (bs_status = mbbs_pngrealloc(&(store->ping),
+						&(store->bsbuffer), &(store->bsbuffersize)))
+						!= BS_SUCCESS)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_MEMORY_FAIL;
 			}
 		if (status == MB_SUCCESS
-			&& (mr1pr_status = mr1_rdpngdata(&(store->ping),
-						(float *)store->mr1buffer, (XDR *)xdrs))
-						!= MR1_SUCCESS)
+			&& (bs_status = mbbs_rdpngdata(&(store->ping),
+						(float *)store->bsbuffer, (XDR *)xdrs))
+						!= BS_SUCCESS)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
 		if (status == MB_SUCCESS
-			&& (mr1pr_status = mr1_getpngdataptrs(&(store->ping),
-						(float *)store->mr1buffer,
-						&(store->compass), &(store->depth),
-						&(store->pitch), &(store->roll),
-						&(store->pbty), &(store->pss),
-						&(store->sbty), &(store->sss))) != MR1_SUCCESS)
+			&& (bs_status = mbbs_getpngdataptrs(&(store->ping),
+						(float *)store->bsbuffer,
+						&(store->pingdata))) != BS_SUCCESS)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
@@ -612,12 +609,57 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			{
 			store->kind = MB_DATA_DATA;
 			}
+			
+		/* Fix case of old file with no beam flags excepting negative depths */
+		if (store->ping.png_flags & PNG_BTYSSFLAGSABSENT)
+			{
+			if (store->ping.png_flags & PNG_XYZ)
+				{
+				for (i=0;i<store->ping.png_sides[ACP_PORT].ps_btycount;i++)
+					{
+					if (store->pingdata.pd_bty[ACP_PORT][3*i+2] < 0.0)
+						{
+						store->pingdata.pd_bty[ACP_PORT][3*i+2] *= -1.0;
+						store->pingdata.pd_btyflags[ACP_PORT][i] = BTYD_EXTERNAL;
+						}
+					}
+				for (i=0;i<store->ping.png_sides[ACP_STBD].ps_btycount;i++)
+					{
+					if (store->pingdata.pd_bty[ACP_STBD][3*i+2] < 0.0)
+						{
+						store->pingdata.pd_bty[ACP_STBD][3*i+2] *= -1.0;
+						store->pingdata.pd_btyflags[ACP_STBD][i] = BTYD_EXTERNAL;
+						}
+					}
+				}
+			else
+				{
+				for (i=0;i<store->ping.png_sides[ACP_PORT].ps_btycount;i++)
+					{
+					if (store->pingdata.pd_bty[ACP_PORT][2*i+1] < 0.0)
+						{
+						store->pingdata.pd_bty[ACP_PORT][2*i+1] *= -1.0;
+						store->pingdata.pd_btyflags[ACP_PORT][i] = BTYD_EXTERNAL;
+						}
+					}
+				for (i=0;i<store->ping.png_sides[ACP_STBD].ps_btycount;i++)
+					{
+					if (store->pingdata.pd_bty[ACP_STBD][2*i+1] < 0.0)
+						{
+						store->pingdata.pd_bty[ACP_STBD][2*i+1] *= -1.0;
+						store->pingdata.pd_btyflags[ACP_STBD][i] = BTYD_EXTERNAL;
+						}
+					}
+				}
+			store->ping.png_flags = store->ping.png_flags ^ PNG_BTYSSFLAGSABSENT;
+			}
 
 		/* print debug statements */
 		if (verbose >= 5)
 			{
 			fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-			fprintf(stderr,"dbg5       sec:              %d\n",store->ping.png_tm.tv_sec);
+			fprintf(stderr,"dbg5       png_flags:        %u\n",store->ping.png_flags);
+			fprintf(stderr,"dbg5       sec:              %ld\n",store->ping.png_tm.tv_sec);
 			fprintf(stderr,"dbg5       usec:             %d\n",store->ping.png_tm.tv_usec);
 			fprintf(stderr,"dbg5       period:           %f\n",store->ping.png_period);
 			fprintf(stderr,"dbg5       ship longitude:   %f\n",store->ping.png_slon);
@@ -628,91 +670,146 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			fprintf(stderr,"dbg5       towfish longitude:%f\n",store->ping.png_tlon);
 			fprintf(stderr,"dbg5       towfish latitude: %f\n",store->ping.png_tlat);
 			fprintf(stderr,"dbg5       towfish course:   %f\n",store->ping.png_tcourse);
-			fprintf(stderr,"dbg5       compass ptr:      %p\n",(void *)store->compass);
+			fprintf(stderr,"dbg5       compass ptr:      %p\n",(void *)store->pingdata.pd_compass);
 			fprintf(stderr,"dbg5       towfish compass interval:  %f\n",store->ping.png_compass.sns_int);
 			fprintf(stderr,"dbg5       towfish compass samples:   %d\n",store->ping.png_compass.sns_nsamps);
 			fprintf(stderr,"dbg5       towfish compass value:     %f\n",store->ping.png_compass.sns_repval);
 			fprintf(stderr,"dbg5       towfish compass  heading:\n");
 			for (i=0;i<store->ping.png_compass.sns_nsamps;i++)
-			  {
-			  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->compass[i]);
-			  }
-			fprintf(stderr,"dbg5       depth ptr:        %p\n",(void *)store->depth);
+				{
+				fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pingdata.pd_compass[i]);
+				}
+			fprintf(stderr,"dbg5       depth ptr:                 %p\n",(void *)store->pingdata.pd_depth);
 			fprintf(stderr,"dbg5       towfish depth interval:    %f\n",store->ping.png_depth.sns_int);
 			fprintf(stderr,"dbg5       towfish depth samples:     %d\n",store->ping.png_depth.sns_nsamps);
 			fprintf(stderr,"dbg5       towfish depth value:       %f\n",store->ping.png_depth.sns_repval);
 			fprintf(stderr,"dbg5       towfish depth:\n");
 			for (i=0;i<store->ping.png_depth.sns_nsamps;i++)
-			  {
-			  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->depth[i]);
-			  }
-			fprintf(stderr,"dbg5       pitch ptr:        %p\n",(void *)store->pitch);
+				{
+				fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pingdata.pd_depth[i]);
+				}
+			fprintf(stderr,"dbg5       pitch ptr:                 %p\n",(void *)store->pingdata.pd_pitch);
 			fprintf(stderr,"dbg5       towfish pitch interval:    %f\n",store->ping.png_pitch.sns_int);
 			fprintf(stderr,"dbg5       towfish pitch samples:     %d\n",store->ping.png_pitch.sns_nsamps);
 			fprintf(stderr,"dbg5       towfish pitch value:       %f\n",store->ping.png_pitch.sns_repval);
 			fprintf(stderr,"dbg5       towfish pitch:\n");
 			for (i=0;i<store->ping.png_pitch.sns_nsamps;i++)
-			  {
-			  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pitch[i]);
-			  }
-			fprintf(stderr,"dbg5       roll ptr:         %p\n",(void *)store->roll);
+				{
+				fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pingdata.pd_pitch[i]);
+				}
+			fprintf(stderr,"dbg5       roll ptr:                  %p\n",(void *)store->pingdata.pd_roll);
 			fprintf(stderr,"dbg5       towfish roll interval:     %f\n",store->ping.png_roll.sns_int);
 			fprintf(stderr,"dbg5       towfish roll samples:      %d\n",store->ping.png_roll.sns_nsamps);
 			fprintf(stderr,"dbg5       towfish roll value:        %f\n",store->ping.png_roll.sns_repval);
 			fprintf(stderr,"dbg5       towfish roll:\n");
 			for (i=0;i<store->ping.png_roll.sns_nsamps;i++)
-			  {
-			  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->roll[i]);
-			  }
+				{
+				fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pingdata.pd_roll[i]);
+				}
 			fprintf(stderr,"dbg5       png_snspad:       %d\n",store->ping.png_snspad);
 			fprintf(stderr,"dbg5       png_temp:         %f\n",store->ping.png_temp);
-			fprintf(stderr,"dbg5       png_atssincr:     %f\n",store->ping.png_atssincr);
+			fprintf(stderr,"dbg5       png_ssincr:       %f\n",store->ping.png_ssincr);
+			fprintf(stderr,"dbg5       png_ssyoffsetmode:%d\n",store->ping.png_ssyoffsetmode);
 			fprintf(stderr,"dbg5       png_alt:          %f\n",store->ping.png_alt);
 			fprintf(stderr,"dbg5       png_magcorr:      %f\n",store->ping.png_magcorr);
 			fprintf(stderr,"dbg5       png_sndvel:       %f\n",store->ping.png_sndvel);
+			fprintf(stderr,"dbg5       png_cond:         %f\n",store->ping.png_cond);
+			fprintf(stderr,"dbg5       png_magx:         %f\n",store->ping.png_magx);
+			fprintf(stderr,"dbg5       png_magy:         %f\n",store->ping.png_magy);
+			fprintf(stderr,"dbg5       png_magz:         %f\n",store->ping.png_magz);
 			fprintf(stderr,"dbg5       port ps_xmitpwr:  %f\n",store->ping.png_sides[ACP_PORT].ps_xmitpwr);
 			fprintf(stderr,"dbg5       port ps_gain:     %f\n",store->ping.png_sides[ACP_PORT].ps_gain);
 			fprintf(stderr,"dbg5       port ps_pulse:    %f\n",store->ping.png_sides[ACP_PORT].ps_pulse);
 			fprintf(stderr,"dbg5       port ps_bdrange:  %f\n",store->ping.png_sides[ACP_PORT].ps_bdrange);
 			fprintf(stderr,"dbg5       port ps_btycount: %d\n",store->ping.png_sides[ACP_PORT].ps_btycount);
 			fprintf(stderr,"dbg5       port ps_btypad:   %d\n",store->ping.png_sides[ACP_PORT].ps_btypad);
-			fprintf(stderr,"dbg5       port bty ptr:     %p\n",(void *)store->pbty);
-			fprintf(stderr,"dbg5       port xtrack bathymetry:\n");
-			for (i=0;i<store->ping.png_sides[ACP_PORT].ps_btycount;i++)
-			  {
-			  fprintf(stderr,"dbg5         %3d     %12.4g %12.4g\n",i,store->pbty[2*i],store->pbty[2*i+1]);
-			  }
-			fprintf(stderr,"dbg5       port ps_ssoffset: %f\n",store->ping.png_sides[ACP_PORT].ps_ssoffset);
+			fprintf(stderr,"dbg5       port bty ptr:     %p\n",(void *)store->pingdata.pd_bty[ACP_PORT]);
+			fprintf(stderr,"dbg5       port btyflags ptr:%p\n",(void *)store->pingdata.pd_btyflags[ACP_PORT]);
+			fprintf(stderr,"dbg5       port abi ptr:     %p\n",(void *)store->pingdata.pd_abi[ACP_PORT]);
+			if (store->ping.png_flags & PNG_XYZ)
+				{
+				fprintf(stderr,"dbg5       port flag acrosstrack alongtrack bathymetry:\n");
+				for (i=0;i<store->ping.png_sides[ACP_PORT].ps_btycount;i++)
+					{
+					fprintf(stderr,"dbg5         %3d     %d %12.4g %12.4g %12.4g\n",
+							i,store->pingdata.pd_btyflags[ACP_PORT][i],
+							store->pingdata.pd_bty[ACP_PORT][3*i],
+							store->pingdata.pd_bty[ACP_PORT][3*i+1],
+							store->pingdata.pd_bty[ACP_PORT][3*i+2]);
+					}
+				}
+			else
+				{
+				fprintf(stderr,"dbg5       port flag acrosstrack bathymetry:\n");
+				for (i=0;i<store->ping.png_sides[ACP_PORT].ps_btycount;i++)
+					{
+					fprintf(stderr,"dbg5         %3d     %d %12.4g %12.4g\n",
+							i,store->pingdata.pd_btyflags[ACP_PORT][i],
+							store->pingdata.pd_bty[ACP_PORT][2*i],
+							store->pingdata.pd_bty[ACP_PORT][2*i+1]);
+					}
+				}
+			fprintf(stderr,"dbg5       port ps_ssxoffset:%f\n",store->ping.png_sides[ACP_PORT].ps_ssxoffset);
 			fprintf(stderr,"dbg5       port ps_sscount:  %d\n",store->ping.png_sides[ACP_PORT].ps_sscount);
 			fprintf(stderr,"dbg5       port ps_sspad:    %d\n",store->ping.png_sides[ACP_PORT].ps_sspad);
-			fprintf(stderr,"dbg5       port ss ptr:      %p\n",(void *)store->pss);
-			fprintf(stderr,"dbg5       port sidescan:\n");
+			fprintf(stderr,"dbg5       port ps_ssndrmask:%f\n",store->ping.png_sides[ACP_PORT].ps_ssndrmask);
+			fprintf(stderr,"dbg5       port ps_ssyoffset:%f\n",store->ping.png_sides[ACP_PORT].ps_ssyoffset);
+			fprintf(stderr,"dbg5       port ss ptr:      %p\n",(void *)store->pingdata.pd_ss[ACP_PORT]);
+			fprintf(stderr,"dbg5       port ssflags ptr: %p\n",(void *)store->pingdata.pd_ssflags[ACP_PORT]);
+			fprintf(stderr,"dbg5       port flag sidescan:\n");
 			for (i=0;i<store->ping.png_sides[ACP_PORT].ps_sscount;i++)
-			  {
-			  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pss[i]);
-			  }
-
+				{
+				fprintf(stderr,"dbg5         %3d     %d %12.4g\n",
+						i,store->pingdata.pd_ssflags[ACP_PORT][i],
+						store->pingdata.pd_ss[ACP_PORT][i]);
+				}
+	
 			fprintf(stderr,"dbg5       stbd ps_xmitpwr:  %f\n",store->ping.png_sides[ACP_STBD].ps_xmitpwr);
 			fprintf(stderr,"dbg5       stbd ps_gain:     %f\n",store->ping.png_sides[ACP_STBD].ps_gain);
 			fprintf(stderr,"dbg5       stbd ps_pulse:    %f\n",store->ping.png_sides[ACP_STBD].ps_pulse);
 			fprintf(stderr,"dbg5       stbd ps_bdrange:  %f\n",store->ping.png_sides[ACP_STBD].ps_bdrange);
 			fprintf(stderr,"dbg5       stbd ps_btycount: %d\n",store->ping.png_sides[ACP_STBD].ps_btycount);
 			fprintf(stderr,"dbg5       stbd ps_btypad:   %d\n",store->ping.png_sides[ACP_STBD].ps_btypad);
-			fprintf(stderr,"dbg5       stbd bty ptr:     %p\n",(void *)store->sbty);
-			fprintf(stderr,"dbg5       stbd xtrack bathymetry:\n");
-			for (i=0;i<store->ping.png_sides[ACP_STBD].ps_btycount;i++)
-			  {
-			  fprintf(stderr,"dbg5         %3d     %12.4g %12.4g\n",i,store->sbty[2*i],store->sbty[2*i+1]);
-			  }
-			fprintf(stderr,"dbg5       stbd ps_ssoffset: %f\n",store->ping.png_sides[ACP_STBD].ps_ssoffset);
+			fprintf(stderr,"dbg5       stbd bty ptr:     %p\n",(void *)store->pingdata.pd_bty[ACP_STBD]);
+			fprintf(stderr,"dbg5       stbd btyflags ptr:%p\n",(void *)store->pingdata.pd_btyflags[ACP_STBD]);
+			fprintf(stderr,"dbg5       stbd abi ptr:     %p\n",(void *)store->pingdata.pd_abi[ACP_STBD]);
+			if (store->ping.png_flags & PNG_XYZ)
+				{
+				fprintf(stderr,"dbg5       stbd flag acrosstrack alongtrack bathymetry:\n");
+				for (i=0;i<store->ping.png_sides[ACP_STBD].ps_btycount;i++)
+					{
+					fprintf(stderr,"dbg5         %3d     %d %12.4g %12.4g %12.4g\n",
+							i,store->pingdata.pd_btyflags[ACP_STBD][i],
+							store->pingdata.pd_bty[ACP_STBD][3*i],
+							store->pingdata.pd_bty[ACP_STBD][3*i+1],
+							store->pingdata.pd_bty[ACP_STBD][3*i+2]);
+					}
+				}
+			else
+				{
+				fprintf(stderr,"dbg5       stbd flag acrosstrack bathymetry:\n");
+				for (i=0;i<store->ping.png_sides[ACP_STBD].ps_btycount;i++)
+					{
+					fprintf(stderr,"dbg5         %3d     %d %12.4g %12.4g\n",
+							i,store->pingdata.pd_btyflags[ACP_STBD][i],
+							store->pingdata.pd_bty[ACP_STBD][2*i],
+							store->pingdata.pd_bty[ACP_STBD][2*i+1]);
+					}
+				}
+			fprintf(stderr,"dbg5       stbd ps_ssxoffset:%f\n",store->ping.png_sides[ACP_STBD].ps_ssxoffset);
 			fprintf(stderr,"dbg5       stbd ps_sscount:  %d\n",store->ping.png_sides[ACP_STBD].ps_sscount);
 			fprintf(stderr,"dbg5       stbd ps_sspad:    %d\n",store->ping.png_sides[ACP_STBD].ps_sspad);
-			fprintf(stderr,"dbg5       stbd ss ptr:      %p\n",(void *)store->sss);
-			fprintf(stderr,"dbg5       stbd sidescan:\n");
+			fprintf(stderr,"dbg5       stbd ps_ssndrmask:%f\n",store->ping.png_sides[ACP_STBD].ps_ssndrmask);
+			fprintf(stderr,"dbg5       stbd ps_ssyoffset:%f\n",store->ping.png_sides[ACP_STBD].ps_ssyoffset);
+			fprintf(stderr,"dbg5       stbd ss ptr:      %p\n",(void *)store->pingdata.pd_ss[ACP_STBD]);
+			fprintf(stderr,"dbg5       stbd ssflags ptr: %p\n",(void *)store->pingdata.pd_ssflags[ACP_STBD]);
+			fprintf(stderr,"dbg5       stbd flag sidescan:\n");
 			for (i=0;i<store->ping.png_sides[ACP_STBD].ps_sscount;i++)
-			  {
-			  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->sss[i]);
-			  }
+				{
+				fprintf(stderr,"dbg5         %3d     %d %12.4g\n",
+						i,store->pingdata.pd_ssflags[ACP_STBD][i],
+						store->pingdata.pd_ss[ACP_STBD][i]);
+				}
 			fprintf(stderr,"\n");
 			}
 		}
@@ -739,7 +836,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mr1v2001_struct *store;
 	char	*xdrs;
-	int	mr1pr_status = MR1_SUCCESS;
+	int	bs_status = BS_SUCCESS;
 	int	i;
 
 	/* print input debug statements */
@@ -763,7 +860,8 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       sec:              %d\n",store->ping.png_tm.tv_sec);
+		fprintf(stderr,"dbg5       png_flags:        %u\n",store->ping.png_flags);
+		fprintf(stderr,"dbg5       sec:              %ld\n",store->ping.png_tm.tv_sec);
 		fprintf(stderr,"dbg5       usec:             %d\n",store->ping.png_tm.tv_usec);
 		fprintf(stderr,"dbg5       period:           %f\n",store->ping.png_period);
 		fprintf(stderr,"dbg5       ship longitude:   %f\n",store->ping.png_slon);
@@ -774,69 +872,99 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg5       towfish longitude:%f\n",store->ping.png_tlon);
 		fprintf(stderr,"dbg5       towfish latitude: %f\n",store->ping.png_tlat);
 		fprintf(stderr,"dbg5       towfish course:   %f\n",store->ping.png_tcourse);
-		fprintf(stderr,"dbg5       compass ptr:      %p\n",(void *)store->compass);
+		fprintf(stderr,"dbg5       compass ptr:      %p\n",(void *)store->pingdata.pd_compass);
 		fprintf(stderr,"dbg5       towfish compass interval:  %f\n",store->ping.png_compass.sns_int);
 		fprintf(stderr,"dbg5       towfish compass samples:   %d\n",store->ping.png_compass.sns_nsamps);
 		fprintf(stderr,"dbg5       towfish compass value:     %f\n",store->ping.png_compass.sns_repval);
 		fprintf(stderr,"dbg5       towfish compass  heading:\n");
 		for (i=0;i<store->ping.png_compass.sns_nsamps;i++)
-		  {
-		  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->compass[i]);
-		  }
-		fprintf(stderr,"dbg5       depth ptr:        %p\n",(void *)store->depth);
+			{
+			fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pingdata.pd_compass[i]);
+			}
+		fprintf(stderr,"dbg5       depth ptr:                 %p\n",(void *)store->pingdata.pd_depth);
 		fprintf(stderr,"dbg5       towfish depth interval:    %f\n",store->ping.png_depth.sns_int);
 		fprintf(stderr,"dbg5       towfish depth samples:     %d\n",store->ping.png_depth.sns_nsamps);
 		fprintf(stderr,"dbg5       towfish depth value:       %f\n",store->ping.png_depth.sns_repval);
 		fprintf(stderr,"dbg5       towfish depth:\n");
 		for (i=0;i<store->ping.png_depth.sns_nsamps;i++)
-		  {
-		  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->depth[i]);
-		  }
-		fprintf(stderr,"dbg5       pitch ptr:        %p\n",(void *)store->pitch);
+			{
+			fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pingdata.pd_depth[i]);
+			}
+		fprintf(stderr,"dbg5       pitch ptr:                 %p\n",(void *)store->pingdata.pd_pitch);
 		fprintf(stderr,"dbg5       towfish pitch interval:    %f\n",store->ping.png_pitch.sns_int);
 		fprintf(stderr,"dbg5       towfish pitch samples:     %d\n",store->ping.png_pitch.sns_nsamps);
 		fprintf(stderr,"dbg5       towfish pitch value:       %f\n",store->ping.png_pitch.sns_repval);
 		fprintf(stderr,"dbg5       towfish pitch:\n");
 		for (i=0;i<store->ping.png_pitch.sns_nsamps;i++)
-		  {
-		  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pitch[i]);
-		  }
-		fprintf(stderr,"dbg5       roll ptr:         %p\n",(void *)store->roll);
+			{
+			fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pingdata.pd_pitch[i]);
+			}
+		fprintf(stderr,"dbg5       roll ptr:                  %p\n",(void *)store->pingdata.pd_roll);
 		fprintf(stderr,"dbg5       towfish roll interval:     %f\n",store->ping.png_roll.sns_int);
 		fprintf(stderr,"dbg5       towfish roll samples:      %d\n",store->ping.png_roll.sns_nsamps);
 		fprintf(stderr,"dbg5       towfish roll value:        %f\n",store->ping.png_roll.sns_repval);
 		fprintf(stderr,"dbg5       towfish roll:\n");
 		for (i=0;i<store->ping.png_roll.sns_nsamps;i++)
-		  {
-		  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->roll[i]);
-		  }
+			{
+			fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pingdata.pd_roll[i]);
+			}
 		fprintf(stderr,"dbg5       png_snspad:       %d\n",store->ping.png_snspad);
 		fprintf(stderr,"dbg5       png_temp:         %f\n",store->ping.png_temp);
-		fprintf(stderr,"dbg5       png_atssincr:     %f\n",store->ping.png_atssincr);
+		fprintf(stderr,"dbg5       png_ssincr:       %f\n",store->ping.png_ssincr);
+		fprintf(stderr,"dbg5       png_ssyoffsetmode:%d\n",store->ping.png_ssyoffsetmode);
 		fprintf(stderr,"dbg5       png_alt:          %f\n",store->ping.png_alt);
 		fprintf(stderr,"dbg5       png_magcorr:      %f\n",store->ping.png_magcorr);
 		fprintf(stderr,"dbg5       png_sndvel:       %f\n",store->ping.png_sndvel);
+		fprintf(stderr,"dbg5       png_cond:         %f\n",store->ping.png_cond);
+		fprintf(stderr,"dbg5       png_magx:         %f\n",store->ping.png_magx);
+		fprintf(stderr,"dbg5       png_magy:         %f\n",store->ping.png_magy);
+		fprintf(stderr,"dbg5       png_magz:         %f\n",store->ping.png_magz);
 		fprintf(stderr,"dbg5       port ps_xmitpwr:  %f\n",store->ping.png_sides[ACP_PORT].ps_xmitpwr);
 		fprintf(stderr,"dbg5       port ps_gain:     %f\n",store->ping.png_sides[ACP_PORT].ps_gain);
 		fprintf(stderr,"dbg5       port ps_pulse:    %f\n",store->ping.png_sides[ACP_PORT].ps_pulse);
 		fprintf(stderr,"dbg5       port ps_bdrange:  %f\n",store->ping.png_sides[ACP_PORT].ps_bdrange);
 		fprintf(stderr,"dbg5       port ps_btycount: %d\n",store->ping.png_sides[ACP_PORT].ps_btycount);
 		fprintf(stderr,"dbg5       port ps_btypad:   %d\n",store->ping.png_sides[ACP_PORT].ps_btypad);
-		fprintf(stderr,"dbg5       port bty ptr:     %p\n",(void *)store->pbty);
-		fprintf(stderr,"dbg5       port bathymetry xtrack:\n");
-		for (i=0;i<store->ping.png_sides[ACP_PORT].ps_btycount;i++)
-		  {
-		  fprintf(stderr,"dbg5         %3d     %12.4g %12.4g\n",i,store->pbty[2*i],store->pbty[2*i+1]);
-		  }
-		fprintf(stderr,"dbg5       port ps_ssoffset: %f\n",store->ping.png_sides[ACP_PORT].ps_ssoffset);
+		fprintf(stderr,"dbg5       port bty ptr:     %p\n",(void *)store->pingdata.pd_bty[ACP_PORT]);
+		fprintf(stderr,"dbg5       port btyflags ptr:%p\n",(void *)store->pingdata.pd_btyflags[ACP_PORT]);
+		fprintf(stderr,"dbg5       port abi ptr:     %p\n",(void *)store->pingdata.pd_abi[ACP_PORT]);
+		if (store->ping.png_flags & PNG_XYZ)
+			{
+			fprintf(stderr,"dbg5       port flag acrosstrack alongtrack bathymetry:\n");
+			for (i=0;i<store->ping.png_sides[ACP_PORT].ps_btycount;i++)
+				{
+				fprintf(stderr,"dbg5         %3d     %d %12.4g %12.4g %12.4g\n",
+						i,store->pingdata.pd_btyflags[ACP_PORT][i],
+						store->pingdata.pd_bty[ACP_PORT][3*i],
+						store->pingdata.pd_bty[ACP_PORT][3*i+1],
+						store->pingdata.pd_bty[ACP_PORT][3*i+2]);
+				}
+			}
+		else
+			{
+			fprintf(stderr,"dbg5       port flag acrosstrack bathymetry:\n");
+			for (i=0;i<store->ping.png_sides[ACP_PORT].ps_btycount;i++)
+				{
+				fprintf(stderr,"dbg5         %3d     %d %12.4g %12.4g\n",
+						i,store->pingdata.pd_btyflags[ACP_PORT][i],
+						store->pingdata.pd_bty[ACP_PORT][2*i],
+						store->pingdata.pd_bty[ACP_PORT][2*i+1]);
+				}
+			}
+		fprintf(stderr,"dbg5       port ps_ssxoffset:%f\n",store->ping.png_sides[ACP_PORT].ps_ssxoffset);
 		fprintf(stderr,"dbg5       port ps_sscount:  %d\n",store->ping.png_sides[ACP_PORT].ps_sscount);
 		fprintf(stderr,"dbg5       port ps_sspad:    %d\n",store->ping.png_sides[ACP_PORT].ps_sspad);
-		fprintf(stderr,"dbg5       port ss ptr:      %p\n",(void *)store->pss);
-		fprintf(stderr,"dbg5       port sidescan:\n");
+		fprintf(stderr,"dbg5       port ps_ssndrmask:%f\n",store->ping.png_sides[ACP_PORT].ps_ssndrmask);
+		fprintf(stderr,"dbg5       port ps_ssyoffset:%f\n",store->ping.png_sides[ACP_PORT].ps_ssyoffset);
+		fprintf(stderr,"dbg5       port ss ptr:      %p\n",(void *)store->pingdata.pd_ss[ACP_PORT]);
+		fprintf(stderr,"dbg5       port ssflags ptr: %p\n",(void *)store->pingdata.pd_ssflags[ACP_PORT]);
+		fprintf(stderr,"dbg5       port flag sidescan:\n");
 		for (i=0;i<store->ping.png_sides[ACP_PORT].ps_sscount;i++)
-		  {
-		  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pss[i]);
-		  }
+			{
+			fprintf(stderr,"dbg5         %3d     %d %12.4g\n",
+					i,store->pingdata.pd_ssflags[ACP_PORT][i],
+					store->pingdata.pd_ss[ACP_PORT][i]);
+			}
 
 		fprintf(stderr,"dbg5       stbd ps_xmitpwr:  %f\n",store->ping.png_sides[ACP_STBD].ps_xmitpwr);
 		fprintf(stderr,"dbg5       stbd ps_gain:     %f\n",store->ping.png_sides[ACP_STBD].ps_gain);
@@ -844,21 +972,46 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg5       stbd ps_bdrange:  %f\n",store->ping.png_sides[ACP_STBD].ps_bdrange);
 		fprintf(stderr,"dbg5       stbd ps_btycount: %d\n",store->ping.png_sides[ACP_STBD].ps_btycount);
 		fprintf(stderr,"dbg5       stbd ps_btypad:   %d\n",store->ping.png_sides[ACP_STBD].ps_btypad);
-		fprintf(stderr,"dbg5       stbd bty ptr:     %p\n",(void *)store->pbty);
-		fprintf(stderr,"dbg5       stbd bathymetry xtrack:\n");
-		for (i=0;i<store->ping.png_sides[ACP_STBD].ps_btycount;i++)
-		  {
-		  fprintf(stderr,"dbg5         %3d     %12.4g %12.4g\n",i,store->sbty[2*i],store->sbty[2*i+1]);
-		  }
-		fprintf(stderr,"dbg5       stbd ps_ssoffset: %f\n",store->ping.png_sides[ACP_STBD].ps_ssoffset);
+		fprintf(stderr,"dbg5       stbd bty ptr:     %p\n",(void *)store->pingdata.pd_bty[ACP_STBD]);
+		fprintf(stderr,"dbg5       stbd btyflags ptr:%p\n",(void *)store->pingdata.pd_btyflags[ACP_STBD]);
+		fprintf(stderr,"dbg5       stbd abi ptr:     %p\n",(void *)store->pingdata.pd_abi[ACP_STBD]);
+		if (store->ping.png_flags & PNG_XYZ)
+			{
+			fprintf(stderr,"dbg5       stbd flag acrosstrack alongtrack bathymetry:\n");
+			for (i=0;i<store->ping.png_sides[ACP_STBD].ps_btycount;i++)
+				{
+				fprintf(stderr,"dbg5         %3d     %d %12.4g %12.4g %12.4g\n",
+						i,store->pingdata.pd_btyflags[ACP_STBD][i],
+						store->pingdata.pd_bty[ACP_STBD][3*i],
+						store->pingdata.pd_bty[ACP_STBD][3*i+1],
+						store->pingdata.pd_bty[ACP_STBD][3*i+2]);
+				}
+			}
+		else
+			{
+			fprintf(stderr,"dbg5       stbd flag acrosstrack bathymetry:\n");
+			for (i=0;i<store->ping.png_sides[ACP_STBD].ps_btycount;i++)
+				{
+				fprintf(stderr,"dbg5         %3d     %d %12.4g %12.4g\n",
+						i,store->pingdata.pd_btyflags[ACP_STBD][i],
+						store->pingdata.pd_bty[ACP_STBD][2*i],
+						store->pingdata.pd_bty[ACP_STBD][2*i+1]);
+				}
+			}
+		fprintf(stderr,"dbg5       stbd ps_ssxoffset:%f\n",store->ping.png_sides[ACP_STBD].ps_ssxoffset);
 		fprintf(stderr,"dbg5       stbd ps_sscount:  %d\n",store->ping.png_sides[ACP_STBD].ps_sscount);
 		fprintf(stderr,"dbg5       stbd ps_sspad:    %d\n",store->ping.png_sides[ACP_STBD].ps_sspad);
-		fprintf(stderr,"dbg5       stbd ss ptr:      %p\n",(void *)store->sss);
-		fprintf(stderr,"dbg5       stbd sidescan:\n");
+		fprintf(stderr,"dbg5       stbd ps_ssndrmask:%f\n",store->ping.png_sides[ACP_STBD].ps_ssndrmask);
+		fprintf(stderr,"dbg5       stbd ps_ssyoffset:%f\n",store->ping.png_sides[ACP_STBD].ps_ssyoffset);
+		fprintf(stderr,"dbg5       stbd ss ptr:      %p\n",(void *)store->pingdata.pd_ss[ACP_STBD]);
+		fprintf(stderr,"dbg5       stbd ssflags ptr: %p\n",(void *)store->pingdata.pd_ssflags[ACP_STBD]);
+		fprintf(stderr,"dbg5       stbd flag sidescan:\n");
 		for (i=0;i<store->ping.png_sides[ACP_STBD].ps_sscount;i++)
-		  {
-		  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->sss[i]);
-		  }
+			{
+			fprintf(stderr,"dbg5         %3d     %d %12.4g\n",
+					i,store->pingdata.pd_ssflags[ACP_STBD][i],
+					store->pingdata.pd_ss[ACP_STBD][i]);
+			}
 		fprintf(stderr,"\n");
 		}
 
@@ -880,12 +1033,12 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		&& store->kind != MB_DATA_COMMENT)
 		{
 		/* insert new comments into file header */
-		mr1_replacestr(&(store->header.mf_log), mb_io_ptr->hdr_comment);
+		mbbs_replacestr(&(store->header.bsf_log), mb_io_ptr->hdr_comment);
 
 		/* write file header */
-		if ((mr1pr_status = mr1_wrmrfhdr(&(store->header),
+		if ((bs_status = mbbs_wrbsfhdr(&(store->header),
 				(XDR *)xdrs))
-				!= MR1_SUCCESS)
+				!= BS_SUCCESS)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;
@@ -899,17 +1052,17 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		&& store->kind == MB_DATA_DATA)
 		{
 		/* write data */
-		if ((mr1pr_status = mr1_wrpnghdr(&(store->ping),
+		if ((bs_status = mbbs_wrpnghdr(&(store->ping),
 				(XDR *)xdrs))
-				!= MR1_SUCCESS)
+				!= BS_SUCCESS)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;
 			}
-		if ((mr1pr_status = mr1_wrpngdata(&(store->ping),
-					(float *)store->mr1buffer,
+		if ((bs_status = mbbs_wrpngdata(&(store->ping),
+					(float *)store->bsbuffer,
 					(XDR *)xdrs))
-					!= MR1_SUCCESS)
+					!= BS_SUCCESS)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;

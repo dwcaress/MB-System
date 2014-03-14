@@ -22,6 +22,7 @@ all:
 	cd gsf; make all
 	cd surf; make all
 	cd mr1pr; make all
+	cd bsio; make all
 	cd proj; make all
 	cd mbio; make all
 	cd mbaux; make all
@@ -45,6 +46,7 @@ clean:
 	- cd gsf; make clean
 	- cd surf; make clean
 	- cd mr1pr; make clean
+	- cd bsio; make clean
 	- cd proj; make clean
 	- cd mbio; make clean
 	- cd mbaux; make clean
