@@ -1088,7 +1088,7 @@ the manual pages for mbprocess and mbset. \n\n";
                     }
                 else if (strncmp(pargv[i], "SAPPROFILE", 10) == 0)
                     {
-                    sscanf(pargv[i], "SAPPROFILE:%s", &process.mbp_sap_profile);
+                    sscanf(pargv[i], "SAPPROFILE:%s", process.mbp_sap_profile);
                     process.mbp_file2_modified = MB_YES;
                     }
                 else if (strncmp(pargv[i], "ABSLOGGED", 9) == 0)
