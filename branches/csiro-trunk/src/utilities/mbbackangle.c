@@ -157,6 +157,10 @@
 #include "mb_process.h"
 #include "mb_aux.h"
 
+/* mbio include files for format specific stuff which probably shouldn't be here, eg get_absorption */
+#include "mb_io.h"
+#include "mbsys_simrad2.h"
+
 /* get NaN detector */
 #if defined(isnanf)
 #define check_fnan(x) isnanf((x))
@@ -2621,9 +2625,6 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-/* mbio include files for format specific stuff which probably shouldn't be here, eg get_absorption */
-#include "../../include/mb_io.h"
-#include "../../include/mbsys_simrad2.h"
 
 int get_absorption(int verbose, int mbp_sap_src, double mbp_sap_old, void *mbio_ptr, double *absorption, int* error)
 {

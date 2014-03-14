@@ -3480,7 +3480,7 @@ and mbedit edit save files.\n";
 	    nrefampcorrangle = 0;
 	    ampcorrreftable.nangle=0;
 	    sscorrreftable.nangle=0;
-	    if (process.mbp_ampcorr_reffile[0] != NULL  && (tfp = fopen(process.mbp_ampcorr_reffile, "r")) != NULL)
+	    if (process.mbp_ampcorr_reffile[0] != 0  && (tfp = fopen(process.mbp_ampcorr_reffile, "r")) != NULL)
 		    {
 	    while ((result = fgets(buffer,MBP_FILENAMESIZE,tfp)) == buffer)
 	    	{

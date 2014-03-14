@@ -393,8 +393,8 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr,
 		int *tvg_stop,
 		double *bsn,
 		double *bso,
-		int *tx,
-		int *tvg_crossover,
+		double *tx,
+		double *tvg_crossover,
 		int *nbeams_ss,
 		int *npixels,
 		int *beam_samples,
@@ -5584,8 +5584,8 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2       tvg_stop:        %d\n",*tvg_stop);
 		fprintf(stderr,"dbg2       bsn:             %f\n",*bsn);
 		fprintf(stderr,"dbg2       bso:             %f\n",*bso);
-		fprintf(stderr,"dbg2       tx:              %d\n",*tx);
-		fprintf(stderr,"dbg2       tvg_crossover:   %d\n",*tvg_crossover);
+		fprintf(stderr,"dbg2       tx:              %f\n",*tx);
+		fprintf(stderr,"dbg2       tvg_crossover:   %f\n",*tvg_crossover);
 		fprintf(stderr,"dbg2       nbeams_ss:       %d\n",*nbeams_ss);
 		fprintf(stderr,"dbg2       npixels:         %d\n",*npixels);
 		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
@@ -5721,8 +5721,8 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2       tvg_stop:        %d\n",*tvg_stop);
 		fprintf(stderr,"dbg2       bsn:             %f\n",*bsn);
 		fprintf(stderr,"dbg2       bso:             %f\n",*bso);
-		fprintf(stderr,"dbg2       tx:              %d\n",*tx);
-		fprintf(stderr,"dbg2       tvg_crossover:   %d\n",*tvg_crossover);
+		fprintf(stderr,"dbg2       tx:              %f\n",*tx);
+		fprintf(stderr,"dbg2       tvg_crossover:   %f\n",*tvg_crossover);
 		fprintf(stderr,"dbg2       nbeams_ss:       %d\n",*nbeams_ss);
 		fprintf(stderr,"dbg2       npixels:         %d\n",*npixels);
 		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
@@ -5765,8 +5765,8 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr,
 			int 	*tvg_stop,
 			double 	*bsn,
 			double 	*bso,
-			int 	*tx,
-			int 	*tvg_crossover,
+			double 	*tx,
+			double 	*tvg_crossover,
 			int 	*nbeams_ss,
 			int 	*npixels,
 			int 	*beam_samples,
@@ -5851,8 +5851,8 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2       tvg_stop:        %d\n",*tvg_stop);
 		fprintf(stderr,"dbg2       bsn:             %f\n",*bsn);
 		fprintf(stderr,"dbg2       bso:             %f\n",*bso);
-		fprintf(stderr,"dbg2       tx:              %d\n",*tx);
-		fprintf(stderr,"dbg2       tvg_crossover:   %d\n",*tvg_crossover);
+		fprintf(stderr,"dbg2       tx:              %f\n",*tx);
+		fprintf(stderr,"dbg2       tvg_crossover:   %f\n",*tvg_crossover);
 		fprintf(stderr,"dbg2       nbeams_ss:       %d\n",*nbeams_ss);
 		fprintf(stderr,"dbg2       npixels:         %d\n",*npixels);
 		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)

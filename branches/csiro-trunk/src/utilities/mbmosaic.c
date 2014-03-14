@@ -5147,7 +5147,7 @@ int mbmosaic_get_sspriorities(
  * Get Other Data
  * This method is meant to be hacked to allow the gridding of any data value
  */
-#include "../../include/mbsys_simrad2.h"
+#include "mbsys_simrad2.h"
 
 
 int get_other_data(void* mbio_ptr, int beam, int datatype, double* data, int* error) {
