@@ -2,7 +2,7 @@
  *    The MB-system:	mbmosaic.c	2/10/97
  *    $Id$
  *
- *    Copyright (c) 1997-2013 by
+ *    Copyright (c) 1997-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -209,7 +209,7 @@
 #define	MBMOSAIC_PRIORITY_NONE		0
 #define	MBMOSAIC_PRIORITY_ANGLE		1
 #define	MBMOSAIC_PRIORITY_AZIMUTH	2
-#define	MBMOSAIC_PRIORITY_BOTH		3
+#define	MBMOSAIC_PRIORITY_HEADING	4
 
 /* priority tables */
 #define	MBMOSAIC_PRIORITYTABLE_FILE		0
@@ -303,6 +303,8 @@ int mbmosaic_get_beampriorities(
                 double  *priority_angle_priority,
                 double  priority_azimuth,
                 double  priority_azimuth_factor,
+                double  priority_heading,
+                double  priority_heading_factor,
                 double  heading,
                 int     beams_bath,
                 char    *beamflag,
@@ -367,6 +369,8 @@ int mbmosaic_get_sspriorities(
                 double  *priority_angle_priority,
                 double  priority_azimuth,
                 double  priority_azimuth_factor,
+                double  priority_heading,
+                double  priority_heading_factor,
                 double  heading,
                 int     pixels_ss,
                 double  *ss,
@@ -393,7 +397,7 @@ char usage_message[] = "mbmosaic -Ifilelist -Oroot \
 [-Rwest/east/south/north -Rfactor -Adatatype\n\
           -Bborder -Cclip/mode/tension -Dxdim/ydim -Edx/dy/units \n\
           -Fpriority_range -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings \n\
-          -Sspeed -Ttopogrid -Uazimuth/factor -V -Wscale -Xextend \n\
+          -Sspeed -Ttopogrid -Ubearing/factor[/mode] -V -Wscale -Xextend \n\
           -Ypriority_source -Zbathdef]";
 
 /*--------------------------------------------------------------------*/
@@ -469,6 +473,8 @@ int main (int argc, char **argv)
 	double	priority_range = 0.0;
 	double	priority_azimuth = 0.0;
 	double	priority_azimuth_factor = 1.0;
+	double	priority_heading = 0.0;
+	double	priority_heading_factor = 1.0;
 	char	pfile[MB_PATH_MAXLINE];
 	int	n_priority_angle = 0;
 	double	*priority_angle_angle = NULL;
@@ -614,6 +620,7 @@ int main (int argc, char **argv)
 	int	kgrid, kout, kint, ib;
 	int	ixx[4], iyy[4];
 	int	ix1, ix2, iy1, iy2;
+        double  t1, t2;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -789,12 +796,21 @@ int main (int argc, char **argv)
 			break;
 		case 'U':
 		case 'u':
-			sscanf (optarg,"%lf/%lf",
-			    &priority_azimuth, &priority_azimuth_factor);
-			if (priority_mode == MBMOSAIC_PRIORITY_ANGLE)
-			    priority_mode = MBMOSAIC_PRIORITY_BOTH;
-			else
-			    priority_mode = MBMOSAIC_PRIORITY_AZIMUTH;
+			n = sscanf (optarg,"%lf/%lf/%d", &t1, &t2, &kkk);
+                        if (n == 3 && kkk == 1)
+                            {
+                            priority_heading = t1;
+                            priority_heading_factor = t2;
+                            if ((priority_mode & MBMOSAIC_PRIORITY_HEADING) == 0)
+                                priority_mode += MBMOSAIC_PRIORITY_HEADING;
+                            }
+                        else if (n >= 2)
+                            {
+                            priority_azimuth = t1;
+                            priority_azimuth_factor = t2;
+                            if ((priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) == 0)
+                                priority_mode += MBMOSAIC_PRIORITY_AZIMUTH;
+                            }
 			flag++;
 			break;
 		case 'V':
@@ -866,10 +882,8 @@ int main (int argc, char **argv)
 				{
 				sscanf (optarg,"%s", pfile);
 				}
-			if (priority_mode == MBMOSAIC_PRIORITY_AZIMUTH)
-			    priority_mode = MBMOSAIC_PRIORITY_BOTH;
-			else
-			    priority_mode = MBMOSAIC_PRIORITY_ANGLE;
+                        if ((priority_mode & MBMOSAIC_PRIORITY_ANGLE) == 0)
+                            priority_mode += MBMOSAIC_PRIORITY_ANGLE;
 			break;
 		case 'Z':
 		case 'z':
@@ -1406,8 +1420,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
 	/* if specified get static angle priorities */
 	if (priority_source == MBMOSAIC_PRIORITYTABLE_FILE
-		&& (priority_mode == MBMOSAIC_PRIORITY_ANGLE
-			|| priority_mode == MBMOSAIC_PRIORITY_BOTH))
+		&& (priority_mode & MBMOSAIC_PRIORITY_ANGLE))
 		{
 		/* count priorities */
 		if ((fp = fopen(pfile, "r")) == NULL)
@@ -1577,8 +1590,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			}
 		if (priority_mode == MBMOSAIC_PRIORITY_NONE)
 			fprintf(outfp, "  All pixels weighted evenly\n");
-		if (priority_mode == MBMOSAIC_PRIORITY_ANGLE
-			|| priority_mode == MBMOSAIC_PRIORITY_BOTH)
+		if (priority_mode & MBMOSAIC_PRIORITY_ANGLE)
 			{
 			fprintf(outfp, "  Pixels prioritized by flat bottom grazing angle\n");
                         if (usetopogrid == MB_YES)
@@ -1610,12 +1622,17 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				i, priority_angle_angle[i],priority_angle_priority[i]);
 				}
 			}
-		if (priority_mode == MBMOSAIC_PRIORITY_AZIMUTH
-			|| priority_mode == MBMOSAIC_PRIORITY_BOTH)
+		if (priority_mode & MBMOSAIC_PRIORITY_AZIMUTH)
 			{
 			fprintf(outfp, "  Pixels weighted by look azimuth\n");
 			fprintf(outfp, "  Preferred look azimuth: %f\n", priority_azimuth);
 			fprintf(outfp, "  Look azimuth factor:    %f\n", priority_azimuth_factor);
+			}
+		if (priority_mode & MBMOSAIC_PRIORITY_HEADING)
+			{
+			fprintf(outfp, "  Pixels weighted by platform heading\n");
+			fprintf(outfp, "  Preferred heading:      %f\n", priority_heading);
+			fprintf(outfp, "  Heading factor:         %f\n", priority_heading_factor);
 			}
 		fprintf(outfp,"  Gaussian filter 1/e length: %f grid intervals\n",
 				scale);
@@ -1993,6 +2010,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
                               mbmosaic_get_beampriorities(verbose, priority_mode,
                                     n_priority_angle, priority_angle_angle, priority_angle_priority,
                                     priority_azimuth, priority_azimuth_factor,
+                                    priority_heading, priority_heading_factor,
                                     heading, beams_bath, beamflag, gangles, priorities, &error);
 
                               /* get bathymetry slopes if needed */
@@ -2225,6 +2243,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
                               mbmosaic_get_sspriorities(verbose, priority_mode,
                                     n_priority_angle, priority_angle_angle, priority_angle_priority,
                                     priority_azimuth, priority_azimuth_factor,
+                                    priority_heading, priority_heading_factor,
                                     heading, pixels_ss, ss, gangles, priorities, &error);
 
                               /* reproject pixel positions if necessary */
@@ -2625,6 +2644,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
                               mbmosaic_get_beampriorities(verbose, priority_mode,
                                     n_priority_angle, priority_angle_angle, priority_angle_priority,
                                     priority_azimuth, priority_azimuth_factor,
+                                    priority_heading, priority_heading_factor,
                                     heading, beams_bath, beamflag, gangles, priorities, &error);
 
                               /* get bathymetry slopes if needed */
@@ -2866,6 +2886,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
                               mbmosaic_get_sspriorities(verbose, priority_mode,
                                     n_priority_angle, priority_angle_angle, priority_angle_priority,
                                     priority_azimuth, priority_azimuth_factor,
+                                    priority_heading, priority_heading_factor,
                                     heading, pixels_ss, ss, gangles, priorities, &error);
 
                             /* reproject pixel positions if necessary */
@@ -4363,6 +4384,8 @@ int mbmosaic_get_beampriorities(
                 double  *priority_angle_priority,
                 double  priority_azimuth,
                 double  priority_azimuth_factor,
+                double  priority_heading,
+                double  priority_heading_factor,
                 double  heading,
                 int     beams_bath,
                 char    *beamflag,
@@ -4373,6 +4396,7 @@ int mbmosaic_get_beampriorities(
 	char	*function_name = "mbmosaic_get_beampriorities";
 	int	status = MB_SUCCESS;
         double  azi_starboard, azi_port, weight_starboard, weight_port;
+        double  heading_difference, weight_heading;
 	int	i, j;
 
 	/* print input debug statements */
@@ -4411,8 +4435,7 @@ int mbmosaic_get_beampriorities(
             }
 
 	/* get grazing angle priorities */
-	if (priority_mode == MBMOSAIC_PRIORITY_ANGLE
-		|| priority_mode == MBMOSAIC_PRIORITY_BOTH)
+	if (priority_mode & MBMOSAIC_PRIORITY_ANGLE)
             {
             /* loop over data getting angle based priorities */
             for (i=0;i<beams_bath;i++)
@@ -4446,8 +4469,7 @@ int mbmosaic_get_beampriorities(
             }
 
 	/* get look azimuth priorities */
-	if (priority_mode == MBMOSAIC_PRIORITY_AZIMUTH
-		|| priority_mode == MBMOSAIC_PRIORITY_BOTH)
+	if (priority_mode & MBMOSAIC_PRIORITY_AZIMUTH)
             {
             /* get priorities for starboard and port sides of ping */
             azi_starboard = heading - 90.0 - priority_azimuth;
@@ -4480,6 +4502,31 @@ int mbmosaic_get_beampriorities(
                         priorities[i] *= weight_starboard;
                     else
                         priorities[i] *= weight_port;
+                    }
+                }
+             }
+
+	/* get heading priorities */
+	if (priority_mode & MBMOSAIC_PRIORITY_HEADING)
+            {
+            /* get priorities for ping */
+            heading_difference = heading - priority_heading;
+            if (heading_difference > 180.0)
+                heading_difference -= 360.0;
+            else if (heading_difference < -180.0)
+                heading_difference += 360.0;
+            if (priority_heading_factor * heading_difference <= -90.0
+                || priority_heading_factor * heading_difference >= 90.0)
+                weight_heading = 0.0;
+            else
+                weight_heading = MAX(cos(DTR * priority_heading_factor * heading_difference), 0.0);
+
+            /* apply the heading priorities */
+            for (i=0;i<beams_bath;i++)
+                {
+                if (mb_beam_ok(beamflag[i]))
+                    {
+                    priorities[i] *= weight_heading;
                     }
                 }
              }
@@ -4964,6 +5011,8 @@ int mbmosaic_get_sspriorities(
                 double  *priority_angle_priority,
                 double  priority_azimuth,
                 double  priority_azimuth_factor,
+                double  priority_heading,
+                double  priority_heading_factor,
                 double  heading,
                 int     pixels_ss,
                 double  *ss,
@@ -4974,6 +5023,7 @@ int mbmosaic_get_sspriorities(
 	char	*function_name = "mbmosaic_get_sspriorities";
 	int	status = MB_SUCCESS;
         double  azi_starboard, azi_port, weight_starboard, weight_port;
+        double  heading_difference, weight_heading;
 	int	i, j;
 
 	/* print input debug statements */
@@ -5012,8 +5062,7 @@ int mbmosaic_get_sspriorities(
             }
 
 	/* get grazing angle priorities */
-	if (priority_mode == MBMOSAIC_PRIORITY_ANGLE
-		|| priority_mode == MBMOSAIC_PRIORITY_BOTH)
+	if (priority_mode & MBMOSAIC_PRIORITY_ANGLE)
             {
             /* loop over data getting angle based priorities */
             for (i=0;i<pixels_ss;i++)
@@ -5047,8 +5096,7 @@ int mbmosaic_get_sspriorities(
             }
 
 	/* get look azimuth priorities */
-	if (priority_mode == MBMOSAIC_PRIORITY_AZIMUTH
-		|| priority_mode == MBMOSAIC_PRIORITY_BOTH)
+	if (priority_mode & MBMOSAIC_PRIORITY_AZIMUTH)
             {
             /* get priorities for starboard and port sides of ping */
             azi_starboard = heading - 90.0 - priority_azimuth;
@@ -5081,6 +5129,31 @@ int mbmosaic_get_sspriorities(
                         priorities[i] *= weight_starboard;
                     else
                         priorities[i] *= weight_port;
+                    }
+                }
+             }
+
+	/* get heading priorities */
+	if (priority_mode & MBMOSAIC_PRIORITY_HEADING)
+            {
+            /* get priorities for ping */
+            heading_difference = heading - priority_heading;
+            if (heading_difference > 180.0)
+                heading_difference -= 360.0;
+            else if (heading_difference < -180.0)
+                heading_difference += 360.0;
+            if (priority_heading_factor * heading_difference <= -90.0
+                || priority_heading_factor * heading_difference >= 90.0)
+                weight_heading = 0.0;
+            else
+                weight_heading = MAX(cos(DTR * priority_heading_factor * heading_difference), 0.0);
+
+            /* apply the look azimuth priorities */
+            for (i=0;i<pixels_ss;i++)
+                {
+                if (ss[i] > MB_SIDESCAN_NULL)
+                    {
+                    priorities[i] *= weight_heading;
                     }
                 }
              }

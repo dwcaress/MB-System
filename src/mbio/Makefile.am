@@ -49,7 +49,7 @@ endif
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -I@top_srcdir@/src/mr1pr \
+AM_CPPFLAGS = -I@top_srcdir@/src/bsio \
 	-I@top_srcdir@/src/surf \
 	${libgmt_CPPFLAGS} \
 	${libnetcdf_CPPFLAGS}
@@ -132,12 +132,13 @@ libmbio_la_SOURCES = \
                 mbr_hir2rnav.c mbr_hysweep1.c \
                 mbr_xtfb1624.c mbr_swplssxi.c \
                 mbr_swplssxp.c mbr_3ddepthp.c \
-		mbr_wasspenl.c
+		mbr_wasspenl.c mbr_mgd77txt.c \
+		mbr_mgd77tab.c
 if BUILD_GSF
   libmbio_la_SOURCES += mbsys_gsf.c mbr_gsfgenmb.c
 endif
 
-libmbio_la_LIBADD = $(top_builddir)/src/mr1pr/libmbmr1pr.la \
+libmbio_la_LIBADD = $(top_builddir)/src/bsio/libmbbsio.la \
                    $(top_builddir)/src/surf/libmbsapi.la \
 		   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${XDR_LIB}
 if BUILD_GSF

@@ -1005,6 +1005,7 @@ int mbview_addroute(int verbose, size_t instance,
 			int	*waypoint,
 			int	routecolor,
 			int	routesize,
+                        int     routeeditmode,
 			mb_path	routename,
 			int 	*iroute,
 			int *error);

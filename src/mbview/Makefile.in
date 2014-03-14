@@ -96,7 +96,7 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-libmbview_la_DEPENDENCIES = ${top_builddir}/src/mr1pr/libmbmr1pr.la \
+libmbview_la_DEPENDENCIES = ${top_builddir}/src/bsio/libmbbsio.la \
 	${top_builddir}/src/surf/libmbsapi.la \
 	${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la $(am__DEPENDENCIES_1) \
@@ -308,7 +308,7 @@ libmbview_la_SOURCES = \
        mb3dsoundings_callbacks.c MBpedit.c mbpingedit_callbacks.c
 
 libmbview_la_LIBADD = \
-       ${top_builddir}/src/mr1pr/libmbmr1pr.la \
+       ${top_builddir}/src/bsio/libmbbsio.la \
        ${top_builddir}/src/surf/libmbsapi.la \
        ${top_builddir}/src/mbio/libmbio.la \
        ${top_builddir}/src/mbaux/libmbaux.la \

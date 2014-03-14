@@ -167,8 +167,8 @@ XFontStruct	*fontStruct;
 
 int	status;
 
-static char message_str[256];
-static char	input_file[128];
+static mb_path message_str;
+static mb_path	input_file;
 int selected = 0; /* indicates an input file is selected */
 
 void	*can_xgid;		/* XG graphics id */
@@ -842,7 +842,7 @@ do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs;
     acs=(XmAnyCallbackStruct*)call_data;
 
-    static char selection_text[128];
+    static mb_path selection_text;
     int	form;
 
     /* get selected text */

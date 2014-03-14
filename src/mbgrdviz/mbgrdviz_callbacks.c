@@ -2643,6 +2643,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 	int	*routewaypoint = NULL;
 	int	routecolor;
 	int	routesize;
+	int	routeeditmode;
 	mb_path	routename;
 	int	iroute;
 	int	waypoint;
@@ -2666,6 +2667,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 	    /* initialize route values */
 	    routecolor = MBV_COLOR_BLUE;
 	    routesize = 1;
+            routeeditmode = MB_YES;
 	    routename[0] = '\0';
 	    rawroutefile = MB_YES;
 	    npoint = 0;
@@ -2695,7 +2697,11 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 				}
 			else if (strncmp(buffer,"## ROUTENAME", 12) == 0)
 				{
-				sscanf(buffer,"## ROUTENAME %s", routename);
+                                strcpy(routename, &buffer[13]);
+                                if (routename[strlen(routename)-1] == '\n')
+                                    routename[strlen(routename)-1] = '\0';
+                                if (routename[strlen(routename)-1] == '\r')
+                                    routename[strlen(routename)-1] = '\0';
 				}
 			else if (strncmp(buffer,"## ROUTECOLOR", 13) == 0)
 				{
@@ -2704,6 +2710,10 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 			else if (strncmp(buffer,"## ROUTESIZE", 12) == 0)
 				{
 				sscanf(buffer,"## ROUTESIZE %d", &routesize);
+				}
+			else if (strncmp(buffer,"## ROUTEEDITMODE", 16) == 0)
+				{
+				sscanf(buffer,"## ROUTEEDITMODE %d", &routeeditmode);
 				}
 			}
 
@@ -2715,7 +2725,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 			    {
 			    status = mbview_addroute(verbose, instance,
 			    				npoint, routelon, routelat, routewaypoint,
-							routecolor, routesize, routename,
+							routecolor, routesize, routeeditmode, routename,
 							&iroute, &error);
 			    npoint = 0;
 			    }
@@ -2771,7 +2781,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 		    {
 		    status = mbview_addroute(verbose, instance,
 			    			npoint, routelon, routelat, routewaypoint,
-						routecolor, routesize, routename,
+						routecolor, routesize, routeeditmode, routename,
 						&iroute, &error);
 		    npoint = 0;
 		    }
@@ -6745,7 +6755,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 					{
 					mbview_addroute(verbose, instance,
 							1, &xlon, &ylat, &waypoint,
-							color, 2,
+							color, 2, MB_YES, 
 							survey_name,
 							&working_route, &error);
 					first = MB_NO;
@@ -6869,7 +6879,7 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 						{
 						mbview_addroute(verbose, instance,
 								1, &xlon, &ylat, &waypoint,
-								color, 2,
+								color, 2, MB_YES, 
 								survey_name,
 								&working_route, &error);
 						first = MB_NO;

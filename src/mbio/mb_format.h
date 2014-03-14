@@ -289,7 +289,7 @@
 #define MB_SYS_WASSP            36
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	74
+#define	MB_FORMATS	76
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -482,7 +482,7 @@
 					binary, SEG (SIOSEIS variant) */
 #define MBF_MGD77DAT    161     /* NGDC MGD77 underway geophysics format,
 					single beam bathymetry, nav, magnetics, gravity,
-					ascii, NOAA NGDC */
+					120 byte ascii records with no line breaks, NOAA NGDC */
 #define MBF_ASCIIXYZ    162     /* XYZ (lon lat depth) soundings, ascii, generic */
 #define MBF_ASCIIYXZ    163     /* YXZ (lat lon depth) soundings, ascii, generic */
 #define MBF_HYDROB93    164     /* NGDC hydrographic soundings, binary */
@@ -495,6 +495,12 @@
 #define MBF_HS10JAMS    171     /* Furuno HS10 multibeam format, 45 beams,
 					bathymetry and amplitude, ascii, JAMSTEC */
 #define MBF_HIR2RNAV    172     /* SIO GDC R2R navigation format, ascii, navigation, SIO */
+#define MBF_MGD77TXT    173     /* NGDC MGD77 underway geophysics format,
+					single beam bathymetry, nav, magnetics, gravity,
+					122 byte ascii records with CRLF line breaks, NOAA NGDC */
+#define MBF_MGD77TAB    174     /* NGDC MGD77T underway geophysics format,
+					single beam bathymetry, nav, magnetics, gravity,
+					tab delimited ascii records with CRLF line breaks, NOAA NGDC */
 #define MBF_SAMESURF    181     /* STN Atlas processing multibeam format,
 					Hydrosweep DS2, Hydrosweep MD,
 					Fansweep 10, Fansweep 20,
@@ -619,6 +625,8 @@ int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error);
 int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error);
 int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error);
 int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error);
+int mbr_register_mgd77txt(int verbose, void *mbio_ptr, int *error);
+int mbr_register_mgd77tab(int verbose, void *mbio_ptr, int *error);
 int mbr_info_sbsiomrg(int verbose,
 			int *system,
 			int *beams_bath_max,
@@ -2162,6 +2170,46 @@ int mbr_info_3ddepthp(int verbose,
 			double *beamwidth_ltrack,
 			int *error);
 int mbr_info_wasspenl(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
+int mbr_info_mgd77txt(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
+int mbr_info_mgd77tab(int verbose,
 			int *system,
 			int *beams_bath_max,
 			int *beams_amp_max,

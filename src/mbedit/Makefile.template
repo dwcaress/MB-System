@@ -53,7 +53,7 @@ $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a \
 		mbedit_callbacks.o \
@@ -64,7 +64,7 @@ $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a \
 		mbedit_callbacks.o \

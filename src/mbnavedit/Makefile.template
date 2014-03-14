@@ -57,7 +57,7 @@ $(BINDIR)/mbnavedit: mbnavedit.o \
 		$(LIBDIR)/libmbio.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbnavedit.o \
 		mbnavedit_creation.o \
@@ -69,7 +69,7 @@ $(BINDIR)/mbnavedit: mbnavedit.o \
 		$(LIBDIR)/libmbio.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(LIBDIR)/libsapi.a \
 		$(MOTIFLIBS) $(LFLAGS) \
 		-o $(BINDIR)/mbnavedit

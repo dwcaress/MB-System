@@ -66,7 +66,8 @@ bin_PROGRAMS = mbhsdump$(EXEEXT) mbformat$(EXEEXT) mbdefaults$(EXEEXT) \
 	mbdumpesf$(EXEEXT) mbtime$(EXEEXT) mbctdlist$(EXEEXT) \
 	mbfilter$(EXEEXT) mbroutetime$(EXEEXT) \
 	mbhysweeppreprocess$(EXEEXT) mbkongsbergpreprocess$(EXEEXT) \
-	mbsxppreprocess$(EXEEXT) mbpreprocess$(EXEEXT) $(am__EXEEXT_1)
+	mbsxppreprocess$(EXEEXT) mbpreprocess$(EXEEXT) \
+	mbsvpselect$(EXEEXT) $(am__EXEEXT_1)
 @BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/utilities
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
@@ -226,6 +227,9 @@ mbstripnan_LDADD = $(LDADD)
 am_mbsvplist_OBJECTS = mbsvplist.$(OBJEXT)
 mbsvplist_OBJECTS = $(am_mbsvplist_OBJECTS)
 mbsvplist_LDADD = $(LDADD)
+am_mbsvpselect_OBJECTS = mbsvpselect.$(OBJEXT) geodesic.$(OBJEXT)
+mbsvpselect_OBJECTS = $(am_mbsvpselect_OBJECTS)
+mbsvpselect_LDADD = $(LDADD)
 am_mbsxppreprocess_OBJECTS = mbsxppreprocess.$(OBJEXT)
 mbsxppreprocess_OBJECTS = $(am_mbsxppreprocess_OBJECTS)
 mbsxppreprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -263,8 +267,8 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbrphsbias_SOURCES) $(mbsegygrid_SOURCES) \
 	$(mbsegyinfo_SOURCES) $(mbsegylist_SOURCES) \
 	$(mbsegypsd_SOURCES) $(mbset_SOURCES) $(mbstripnan_SOURCES) \
-	$(mbsvplist_SOURCES) $(mbsxppreprocess_SOURCES) \
-	$(mbtime_SOURCES)
+	$(mbsvplist_SOURCES) $(mbsvpselect_SOURCES) \
+	$(mbsxppreprocess_SOURCES) $(mbtime_SOURCES)
 DIST_SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mb7kpreprocess_SOURCES) $(mbabsorption_SOURCES) \
 	$(mbareaclean_SOURCES) $(mbauvloglist_SOURCES) \
@@ -284,7 +288,8 @@ DIST_SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbsegyinfo_SOURCES) $(mbsegylist_SOURCES) \
 	$(am__mbsegypsd_SOURCES_DIST) $(mbset_SOURCES) \
 	$(mbstripnan_SOURCES) $(mbsvplist_SOURCES) \
-	$(mbsxppreprocess_SOURCES) $(mbtime_SOURCES)
+	$(mbsvpselect_SOURCES) $(mbsxppreprocess_SOURCES) \
+	$(mbtime_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -473,8 +478,6 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_FFTW_TRUE@FFTW_PROG = mbsegypsd
-
-#Remove mbps if WIN32?
 include_HEADERS = levitus.h
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
@@ -541,6 +544,7 @@ mbsxppreprocess_SOURCES = mbsxppreprocess.c
 mbsxppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbpreprocess_SOURCES = mbpreprocess.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbsvpselect_SOURCES = mbsvpselect.c geodesic.c
 @BUILD_FFTW_TRUE@mbsegypsd_SOURCES = mbsegypsd.c
 @BUILD_FFTW_TRUE@mbsegypsd_LDFLAGS = 
 @BUILD_FFTW_TRUE@mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
@@ -759,6 +763,9 @@ mbstripnan$(EXEEXT): $(mbstripnan_OBJECTS) $(mbstripnan_DEPENDENCIES) $(EXTRA_mb
 mbsvplist$(EXEEXT): $(mbsvplist_OBJECTS) $(mbsvplist_DEPENDENCIES) $(EXTRA_mbsvplist_DEPENDENCIES) 
 	@rm -f mbsvplist$(EXEEXT)
 	$(LINK) $(mbsvplist_OBJECTS) $(mbsvplist_LDADD) $(LIBS)
+mbsvpselect$(EXEEXT): $(mbsvpselect_OBJECTS) $(mbsvpselect_DEPENDENCIES) $(EXTRA_mbsvpselect_DEPENDENCIES) 
+	@rm -f mbsvpselect$(EXEEXT)
+	$(LINK) $(mbsvpselect_OBJECTS) $(mbsvpselect_LDADD) $(LIBS)
 mbsxppreprocess$(EXEEXT): $(mbsxppreprocess_OBJECTS) $(mbsxppreprocess_DEPENDENCIES) $(EXTRA_mbsxppreprocess_DEPENDENCIES) 
 	@rm -f mbsxppreprocess$(EXEEXT)
 	$(LINK) $(mbsxppreprocess_OBJECTS) $(mbsxppreprocess_LDADD) $(LIBS)
@@ -772,6 +779,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geodesic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb7k2jstar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb7k2ss.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb7kpreprocess.Po@am__quote@
@@ -815,6 +823,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbstripnan.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsvplist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsvpselect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsxppreprocess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtime.Po@am__quote@
 

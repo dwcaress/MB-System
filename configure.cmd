@@ -104,10 +104,13 @@ sudo ./configure \
     --with-netcdf-lib=/sw/lib \
     --with-gmt-include=/sw/include \
     --with-gmt-lib=/sw/lib \
+    --with-proj-include=/sw/include \
+    --with-proj-lib=/sw/lib \
     --with-fftw-include=/sw/include \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
-    --with-motif-lib=/sw/lib
+    --with-motif-lib=/sw/lib \
+    --with-otps-dir=/usr/local/tides/OTPS2
 
 #------------------------------------------------------------------------------
 

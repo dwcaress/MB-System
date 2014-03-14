@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbmosaic</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  13 March 2014 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -35,7 +35,7 @@ Version 5.0
 <B>-G</B><I>gridkind</I>  <B>-J</B><I>projection</I>
 <B>-H -L</B><I>lonflip</I> <B>-M -N -P</B><I>pings</I>
 <B>-R</B><I>west/east/south/north</I> <B>-R</B><I>factor</I>
-<B>-S</B><I>speed</I> <B>-T</B><I>tension</I> <B>-U</B><I>azimuth/factor</I>
+<B>-S</B><I>speed</I> <B>-T</B><I>tension</I> <B>-U</B><I>bearing/factor[/mode]</I>
 <B>-V</B> -W<I>scale</I> <B>-X</B><I>extend</I>
 <B>-Y</B><I>priority_source</I> <B>-Z</B><I>bath_default</I>]
 <P>
@@ -123,8 +123,8 @@ the working grid in both longitude and latitude.  The program reads all
 pings which lie within the data input bounds, and accepts all data
 values with locations within the working grid.
 <P>
-The sample priorities are set according to either or both of two
-criterea. The first criterea is set by using the <B>-Y</B> option
+The sample priorities are set according to three criteria. 
+The first criteria is set by using the <B>-Y</B> option
 to specify a file containing a list of data priorities
 as a function of apparent grazing angle (this angle is the
 arctan(x/z) where x is acrosstrack distance and z is depth, so
@@ -140,25 +140,46 @@ starboard side have a look azimuth equal to the heading + 90 degrees).
 The second parameter in the <B>-U</B> option is a factor (f) which
 modulates how rapidly the priority degrades away from the preferred
 look azimuth. The priority (p) is assigned as follows:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;=&nbsp;cos(&nbsp;f&nbsp;*&nbsp;(Ap&nbsp;-&nbsp;Al))
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;=&nbsp;cos(&nbsp;f&nbsp;*&nbsp;(Ap&nbsp;-&nbsp;Aa))
 <BR>
 
-where Ap is the preferred look azimuth and A is the actual
+where Ap is the preferred look azimuth and Aa is the actual
 look azimuth. If f = 1.0, the priority will be 1.0
 at the preferred look azimuth and will fall to zero for look
 azimuths more than 90 degrees away from the preferred look
 azimuth. If f &gt; 1.0, the range of nonzero priorities will shrink
-two azimuths closer to the preferred look azimuth (e.g. if f = 2.0,
+closer to the preferred look azimuth (e.g. if f = 2.0,
 nonzero priorities will be restricted to look azimuths within
 45 degrees of the preferred look azimuth). If f &lt; 1.0, the
 range of nonzero priorities will expand (e.g. if f = 0.5, only
 look azimuths 180 degrees away from the preferred look azimuth
 will have a zero priority).
 <P>
-If data priorities are set using both apparent grazing angles
-and look azimuths, the priorities used in the mosaicing are
-found by multiplying the grazing angle and look azimuth
-priorities together.
+The third criteria is set by using the <B>-U</B> option to specify
+a preferred heading.
+The second parameter in the <B>-U</B> option is a factor (f) which
+modulates how rapidly the priority degrades away from the preferred
+heading. The priority (p) is assigned as follows:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;=&nbsp;cos(&nbsp;f&nbsp;*&nbsp;(Hp&nbsp;-&nbsp;Ha))
+<BR>
+
+where Hp is the preferred heading and Ha is the actual
+heading. If f = 1.0, the priority will be 1.0
+at the preferred heading and will fall to zero for heading
+more than 90 degrees away from the heading.
+If f &gt; 1.0, the range of nonzero priorities will shrink
+closer to the preferred heading (e.g. if f = 2.0,
+nonzero priorities will be restricted to headings within
+45 degrees of the preferred heading). If f &lt; 1.0, the
+range of nonzero priorities will expand (e.g. if f = 0.5, only
+headings 180 degrees away from the preferred heading
+will have a zero priority).
+<P>
+The priorities used in the mosaicing are found by multiplying
+the grazing angle, look azimuth, and heading priorities
+together. Of course, the priority associated with a criteria
+that is not used because it has not been specified will be
+simply 1.0.
 <P>
 The default behavior is to set each bin to the value of the highest
 priority sample found in that bin. If more than one sample has
@@ -629,34 +650,62 @@ Default: <I>tension</I> = 1.0e10 (pure spline solution).
 <DT><B>-U</B>
 
 <DD>
-<I>azimuth/factor</I>
+<I>bearing/factor[/mode]</I>
 <BR>
 
 Enables prioritizing data points according to their look azimuth
-(data on the port side of the swath have
-a look azimuth equal to the heading - 90 degrees, and data on the
-starboard side have a look azimuth equal to the heading + 90 degrees).
-Here <I>azimuth</I> is the preferred look azimuth, and <I>factor</I>
+or to the platform heading at ping time.
+<P>
+If <I>mode</I> = 0 or is
+absent, then the look azimuth criteria is applied, with <I>bearing</I>
+being interpreted as the desired look azimuth. Data on the port side
+of the swath have a look azimuth equal to the heading - 90 degrees,
+and data on the starboard side have a look azimuth equal to the
+heading + 90 degrees). The <I>factor</I> value
 modulates how rapidly the priority degrades away from the preferred
 look azimuth. The priority (p) for a data point is assigned as follows:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;=&nbsp;cos(f&nbsp;*&nbsp;(Ap&nbsp;-&nbsp;Al))
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;=&nbsp;cos(f&nbsp;*&nbsp;(Ap&nbsp;-&nbsp;Aa))
 <BR>
 
-when -90 &lt; (f * (Ap - Al)) &lt; 90 and
+when -90 &lt; (f * (Ap - Aa)) &lt; 90 and
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;=&nbsp;0
 <BR>
 
-otherwise, where f = <I>factor</I>, Ap = <I>azimuth</I>, and Al is the
-look azimuth of the data point.
+otherwise, where f = <I>factor</I>, Ap = <I>bearing</I>, and Aa is the
+actual look azimuth of the data point.
 If <I>factor</I> = 1.0, the priority will be 1.0
-at <I>azimuth</I> and will fall to zero for look
-azimuths more than 90 degrees away from <I>azimuth</I>.
+at <I>bearing</I> and will fall to zero for look
+azimuths more than 90 degrees away from <I>bearing</I>.
 If <I>factor</I> &gt; 1.0, the range of nonzero priorities will shrink
-to azimuths closer to <I>azimuth</I> (e.g. if <I>factor</I> = 2.0,
+closer to <I>bearing</I> (e.g. if <I>factor</I> = 2.0,
 nonzero priorities will be restricted to look azimuths within
-45 degrees of <I>azimuth</I>). If <I>factor</I> &lt; 1.0, the
+45 degrees of <I>bearing</I>). If <I>factor</I> &lt; 1.0, the
 range of nonzero priorities will expand (e.g. if <I>factor</I> = 0.5, only
-look azimuths 180 degrees away from <I>azimuth</I>
+look azimuths 180 degrees away from <I>bearing</I>
+will have a zero priority).
+<P>
+If <I>mode</I> = 1 then the heading criteria is applied, with <I>bearing</I>
+being interpreted as the desired heading. The <I>factor</I> value
+modulates how rapidly the priority degrades away from the preferred
+heading. The priority (p) for a data point is assigned as follows:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;=&nbsp;cos(f&nbsp;*&nbsp;(Hp&nbsp;-&nbsp;Ha))
+<BR>
+
+when -90 &lt; (f * (Hp - Ha)) &lt; 90 and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;=&nbsp;0
+<BR>
+
+otherwise, where f = <I>factor</I>, Ap = <I>bearing</I>, and Aa is the
+actual heading of the data point.
+If <I>factor</I> = 1.0, the priority will be 1.0
+at <I>bearing</I> and will fall to zero for headings
+more than 90 degrees away from <I>bearing</I>.
+If <I>factor</I> &gt; 1.0, the range of nonzero priorities will shrink
+closer to <I>bearing</I> (e.g. if <I>factor</I> = 2.0,
+nonzero priorities will be restricted to headings within
+45 degrees of <I>bearing</I>). If <I>factor</I> &lt; 1.0, the
+range of nonzero priorities will expand (e.g. if <I>factor</I> = 0.5, only
+headings 180 degrees away from <I>bearing</I>
 will have a zero priority).
 <DT><B>-V</B>
 
@@ -8531,7 +8580,7 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 13 March 2014</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

@@ -1,0 +1,684 @@
+.TH BS 3 "13 February 2012"
+.SH NAME
+BS \- BS file data library
+.SH DESCRIPTION
+.LP
+/usr/lib/libbs.a is a collection of functions which allow a programmer to
+manipulate Hawaii Mapping Research Group (HMRG) BS data files.
+.SH USAGE
+.LP
+Following is a description of all available subroutines in the BS library.
+An application referencing any of these routines must be linked to the
+library at compile time by specifying the \fB-lbs\fR flag. The memory
+allocation library may also need to be referenced via the \fB-lmem\fR flag
+if the application calls certain of the routines described below.
+.LP
+Most of the subroutines described below which return an integer will return
+either \fB\s-1BS_SUCCESS\s0\fR or a defined failure code such as
+\fB\s-1BS_READ\s0\fR, \fB\s-1BS_MEMALLOC\s0\fR, etc. (See \fB\s-1ERROR
+CODES\s0\fR below.) Return values for all other functions will be
+explicitly described.
+.LP
+Many of the subroutines which relate to input or output require a pointer
+to an open XDR stream as one of the arguments. Such a stream will generally
+be obtained by calling \fBxdrstdio_create()\fR on an open file pointer.
+All of the input functions assume that the XDR stream is appropriately
+positioned at the time of the function call, e.g., a function which
+attempts to read a particular type of header will succeed only if the XDR
+stream is currently positioned at the beginning of such a header.
+.LP
+Note that the file reading functions described below are capable of reading
+files stored in certain obsolete versions of the file format as well as
+files stored in the current format. The file writing functions, however,
+will always write output files in the current format regardless of the
+value of the \fBbsf_version\fR field of the file header which defines
+the format version.
+.sp 6p
+\fB#include <rpc/rpc.h>\fR
+.br
+\fB#include <sys/time.h>\fR
+.br
+\fB#include <sys/ipc.h>\fR
+.br
+\fB#include <sys/shm.h>\fR
+.br
+\fB#include <local/bs.h>\fR
+.sp 6p
+\fBint
+.br
+bs_rdbsfhdr(BSFile *\fIbsf\fB, XDR *\fIxdrs\fB)\fR
+.sp 2p
+reads the next BS file header from the XDR input stream \fIxdrs\fR and
+stores it into the user-allocated structure \fIbsf\fR.
+.sp 6p
+\fBint
+.br
+bs_wrbsfhdr(BSFile *\fIbsf \fB, XDR *\fIxdrs\fB)\fR
+.sp 2p
+writes the BS file header \fIbsf\fR to the XDR output stream \fIxdrs\fR.
+.sp 6p
+\fBint
+.br
+bs_freebsfmem(BSFile *\fIbsf\fB)\fR
+.sp 2p
+frees all memory referenced by the structure members of \fIbsf\fR which
+was allocated by \fBbs_rdbsfhdr()\fR. It does not free the memory
+addressed by \fIbsf\fR itself. The function should generally be used
+between successive calls to \fBbs_rdbsfhdr()\fR.
+.sp 6p
+\fBint
+.br
+bs_rdversion(FILE *\fIfp\fB, int \fI*version\fB)\fR
+.sp 2p
+reads the file format version of \fIfp\fR and stores it into \fIversion\fR.
+The function should be called only with \fIfp\fR at the very beginning of
+the input stream, which in this case is a file pointer rather than the
+more common XDR stream. It is normally used only when an application needs
+to determine the format version of a dataset and no subsequent reading is
+intended. Nearly all callers should instead use \fBbs_rdbsfhdr()\fR as
+described above to read the entire BS file header (including the format
+version) and leave the input stream positioned in a more useful location,
+i.e., at the beginning of the first ping header.
+.sp 6p
+\fBint
+.br
+bs_rdpnghdr(Ping *\fIpng\fB, XDR *\fIxdrs\fB, int \fIversion\fB)\fR
+.sp 2p
+reads the next BS ping header from the XDR input stream \fIxdrs\fR and
+stores it into the user-allocated structure \fIpng\fR. The version of the
+file format being read must be indicated by \fIversion\fR, which should
+normally be the value of the \fIbsf_version\fR field of the input file's
+file header record.
+.sp 6p
+\fBint
+.br
+bs_wrpnghdr(Ping *\fIpng\fB, XDR *\fIxdrs\fB)\fR
+.sp 2p
+writes the ping header \fIpng\fR to the XDR output stream \fIxdrs\fR.
+.sp 6p
+\fBint
+.br
+bs_pngdatabufsz(Ping *\fIpng\fB, unsigned long long *\fIpngsz\fB)\fR
+.sp 2p
+writes into \fIpngsz\fR the size in bytes of the smallest buffer capable
+of holding the various data (e.g., sensor, bathymetry, sidescan, auxiliary
+beam information, etc.) associated with \fIpng\fR. The function itself
+returns \fB\s-1BS_SUCCESS\s0\fR or an error code in the event that a valid
+buffer size cannot be determined due to negative or otherwise invalid sample
+count values as described by \fIpng\fR. A reasonable (but possibly not
+airtight and definitely not precise) effort is made to guard against pings
+with overly large sample counts, as the original format implementation
+implicitly limited the maximum ping buffer size to be no greater than the
+number of bytes which could be described by a signed 32-bit integer, i.e.,
+\fB\s-1BS_MAXSIGNEDINT32\s0\fR (2147483647). This routine has been coded to
+enforce that limitation, but will attempt if possible to determine the
+actual size of a ping buffer even when it would be greater than this limit.
+In any case where the size of the ping is known to be over the limit, or it
+is believed that it might be over the limit under circumstances which
+diminish the precision of the size computation due to overflow issues, the
+function will return \fB\s-1BS_HUGEPING\s0\fR. In such cases the value
+written into \fIpngsz\fR will be accurate if and only if the host
+architecture supports 8-byte (or larger) unsigned long long integers.
+.sp 6p
+\fBMemType *
+.br
+bs_pngmemalloc(Ping *\fIpng\fB)\fR
+.sp 2p
+allocates enough memory to store the data associated with the ping
+header \fIpng\fR. A pointer to the allocated memory is returned. (The
+pointer may be a null pointer if the function fails for any reason.)
+The quantity of memory allocated is dependent upon the number of data
+samples and padding samples indicated by \fIpng\fR. Padding samples,
+i.e., meaningless placeholder samples that are immediately contiguous and
+subsequent to valid data samples, are never stored to files, but it is 
+sometimes convenient to allocate this additional sample memory at the
+time a ping is read in order to perform an operation that may result
+in an increase in the number of meaningful samples associated with that
+ping. An arbitrary amount of such additional memory can be allocated with
+this function by setting \fIpng\(->\fBpng_snspad\fR and the \fBps_btypad\fR
+and \fBps_sspad\fR fields of the \fIpng\(->\fBpng_sides[\s-1ACP_PORT\s0]\fR and
+\fIpng\(->\fBpng_sides[\s-1ACP_STBD\s0]\fR substructures to appropriate values
+before the function is called.
+.sp 6p
+\fBint
+.br
+bs_pngrealloc(Ping *\fIpng\fB, MemType **\fIdata\fB, unsigned int *\fIdatasz)\fR
+.sp 2p
+allocates memory similarly to \fBbs_pngmemalloc()\fR as described above but
+is generally more convenient to use. Its second and third arguments are the
+addresses of a buffer pointer and an integer describing the size of the
+buffer. The buffer pointer and the integer should be set to the null pointer
+and 0, respectively, before the first call to this routine. Each time the
+routine is called it will determine the smallest buffer size sufficient to hold
+the data samples and padding samples indicated by \fIpng\fR. If the buffer
+pointed to by *\fIdata\fR is large enough (as described by *\fIdatasz\fR) to
+hold those samples then it is zeroed and nothing else is done, otherwise the
+existing buffer (if any) is freed, a new buffer is allocated, and *\fIdata\fR
+and *\fIdatasz\fR are updated to reflect the new buffer and its size. Note
+that, unlike \fBbs_pngmemalloc()\fR, the return value of this function is an
+error code (e.g., \fB\s-1BS_SUCCESS\s0\fR) and not a pointer to the buffer.
+.sp 6p
+\fBint
+.br
+bs_rdpngdata(Ping *\fIpng\fB, MemType *\fIdata\fB, XDR *\fIxdrs\fB)\fR
+.sp 2p
+reads ping data from the XDR input stream \fIxdrs\fR and stores it
+into the memory pointed to by \fIdata\fR. The number of data samples to be
+read is obtained from the header structure \fIpng\fR. This routine assumes
+that the \fIdata\fR memory has already been allocated (e.g., by
+\fBbs_pngrealloc()\fR). Note that each bathymetry sample consists of either
+two or three consecutive floating point values depending upon the value of
+\fI\%png\(->\fBpng_flags\fR. If the \fB\s-1PNG_XYZ\s0\fR bit of the latter is
+set then each sample is an x/y/z triplet with the first value representing
+across-track distance, the second value representing along-track distance
+and the third value representing depth. If the \fB\s-1PNG_XYZ\s0\fR bit is
+not set then the data are in x/z format, i.e., the along-track distance is
+not present. Compass samples are read and stored into the first
+\fIpng\(->\fBpng_compass.sns_nsamps*sizeof(float)\fR bytes of \fIdata\fR.
+Towfish depth samples are read and stored into the next
+\fIpng\(->\fBpng_depth.sns_nsamps*sizeof(float)\fR bytes.
+Pitch samples are read and stored into the next
+\fIpng\(->\fBpng_pitch.sns_nsamps*sizeof(float)\fR
+bytes. Roll samples are read and stored into the next
+\fIpng\(->\fBpng_roll.sns_nsamps*sizeof(float)\fR bytes.
+Port bathymetry samples are read and stored into the next
+\fI\%bsi*png\(->\fBpng_sides[\s-1ACP_PORT\s0].ps_btycount*sizeof(float)\fR
+bytes, where \fIbsi\fR is 2 or 3 depending on whether the samples are in x/z
+or x/y/z format. Port bathymetry flags are read and stored into the next
+\fI\%png\(->\fBpng_sides[\s-1ACP_PORT\s0].ps_btycount*sizeof(unsigned int)\fR
+bytes. Port sidescan samples are read and stored into the next
+\fI\%png\(->\fBpng_sides[\s-1ACP_PORT\s0].ps_sscount*sizeof(float)\fR bytes.
+Port sidescan flags are read and stored into the next
+\fI\%png\(->\fBpng_sides[\s-1ACP_PORT\s0].ps_sscount*sizeof(unsigned char)\fR
+bytes. Starboard bathymetry samples are read and stored into the next
+\fI\%bsi*png\(->\fBpng_sides[\s-1ACP_STBD\s0].ps_btycount*sizeof(float)\fR
+bytes (where \fIbsi\fR is 2 or 3 as described above). Starboard bathymetry
+flags are read and stored into the next
+\fI\%png\(->\fBpng_sides[\s-1ACP_STBD\s0].ps_btycount*sizeof(unsigned int)\fR
+bytes. Starboard sidescan samples are read and stored into the next
+\fI\%png\(->\fBpng_sides[\s-1ACP_STBD\s0].ps_sscount*sizeof(float)\fR bytes.
+Starboard sidescan flags are read and stored into the next
+\fI\%png\(->\fBpng_sides[\s-1ACP_STBD\s0].ps_sscount*sizeof(unsigned char)\fR
+bytes. Port auxiliary beam information is read and stored into the next
+\fI\%png\(->\fBpng_sides[\s-1ACP_PORT\s0].ps_btycount*sizeof(AuxBeamInfo)\fR
+bytes. Finally, starboard auxiliary beam information is read and stored
+into the last
+\fI\%png\(->\fBpng_sides[\s-1ACP_STBD\s0].ps_btycount*sizeof(AuxBeamInfo)\fR
+bytes.
+If sample padding has been specified by the \fIpng\fR header as described
+above, each group of samples as described above may be separated from the
+preceding group by a byte offset corresponding to the amount of padding
+applied to the previous group. For instance, if the port bathymetry has
+been padded, then (i) the port bathymetry flags will be offset from the
+end of the port bathymetry samples by a gap which is
+\%\fIbsi*png\(->\fBpng_sides[\s-1ACP_PORT\s0].ps_btypad*sizeof(float)\fR bytes
+in length (where \fIbsi\fR is 2 or 3 as described above), (ii) the port
+sidescan samples will be offset from the end of the port bathymetry flags
+by a gap which is
+\%\fIpng\(->\fBpng_sides[\s-1ACP_PORT\s0].ps_btypad*sizeof(unsigned int)\fR
+bytes in length, and (iii) the starboard auxiliary beam information will be
+offset from the end of the port auxiliary beam information by a gap which is
+\%\fIpng\(->\fBpng_sides[\s-1ACP_PORT\s0].ps_btypad*sizeof(AuxBeamInfo)\fR
+bytes in length. Sensor sample padding as specified by
+\fIpng\(->\fBpng_snspad\fR is applied between the last group of sensor samples
+and the port bathymetry, not between each group (e.g., compass and depth)
+of sensor samples. Note that the port auxiliary beam information is
+constrained to begin on a byte which is offset from \fIdata\fR by a
+multiple of \fB\s-1PNG_BYTEALIGNSZ\s0\fR bytes.
+.sp 6p
+\fBint
+.br
+bs_wrpngdata(Ping *\fIpng\fB, MemType *\fIdata\fB, XDR *\fIxdrs\fB)\fR
+.sp 2p
+writes the ping data pointed to by \fIdata\fR and associated with the ping
+header \fIpng\fR to the XDR output stream \fIxdrs\fR. The number of data
+samples to be written is obtained from \fIpng\fR. (See \fBbs_rdpngdata()\fR
+above for a detailed description of the organization of the contents
+of \fIdata\fR.) Padding samples, if any, are not written, but their
+presence as indicated by the \fBpng_snspad\fR, \fBps_btypad\fR and
+\fBps_sspad\fR fields of \fIpng\fR will affect the offsets from \fIdata\fR
+at which the various bathymetry samples, bathymetry flags, sidescan samples
+and auxiliary beam information are presumed to be located.
+.sp 6p
+\fBint
+.br
+bs_getpngdataptrs(Ping *\fIpng\fB, MemType *\fIdata\fB, PingData *\fIpngdata\fB)\fR
+.sp 2p
+returns into the fields of \fIpngdata\fR pointers to the various components
+(e.g., sensor samples, bathymetry samples, bathymetry flags, sidescan
+samples and auxiliary beam information) of the \fIdata\fR buffer associated
+with \fIpng\fR. Null pointers may be returned into fields when certain
+components are not present, e.g., auxiliary beam information.
+.sp 6p
+\fBint
+.br
+bs_rdpngpddata(Ping *\fIpng\fB, PingData *\fIpngdata\fB, XDR *\fIxdrs\fB)\fR
+.sp 2p
+reads the ping data associated with the ping header \fIpng\fR from the XDR
+input stream \fIxdrs\fR, storing the various components of the data into
+the memory buffers pointed to by the fields of \fIpngdata\fR. This routine
+assumes that these buffers have already been allocated. The number of data
+samples to be read is obtained from \fIpng\fR.
+.sp 6p
+\fBint
+.br
+bs_wrpngpddata(Ping *\fIpng\fB, PingData *\fIpngdata\fB, XDR *\fIxdrs\fB)\fR
+.sp 2p
+writes the ping data whose various components are pointed to by the fields
+of \fIpngdata\fR and are associated with the ping header \fIpng\fR to the
+XDR output stream \fIxdrs\fR. The number of data samples to be written is
+obtained from \fIpng\fR.
+.sp 6p
+\fBint
+.br
+bs_rdpng(Ping *\fIpng\fB, MemType **\fIdata\fB, XDR *\fIxdrs\fB, int \fIversion\fB)\fR
+.sp 2p
+reads a ping from the XDR input stream \fIxdrs\fR. The header will be stored
+into \fIpng\fR, and the data will be stored into \fI*data\fR. This routine
+allocates the memory pointed to by \fI*data\fR. (The \fIdata\fR parameter
+should be passed as the address of a memory pointer variable, which will be
+set to point to the newly allocated memory.) The version of the file format
+being read must be indicated by \fIversion\fR, which should normally be the
+value of the \fBbsf_version\fR field of the input file's file header record.
+This function performs the same operation as calling \fBbs_rdpnghdr(),
+bs_pngmemalloc()\fR and \fBbs_rdpngdata()\fR in succession. Note that it is
+not possible to allocate sample padding with this routine.
+.sp 6p
+\fBint
+.br
+bs_wrpng(Ping *\fIpng\fB, MemType *\fIdata\fB, XDR *\fIxdrs\fB)\fR
+.sp 2p
+writes both the ping header pointed to by \fIpng\fR and the data pointed to
+by \fIdata\fR to the XDR output stream \fIxdrs\fR.
+.sp 6p
+\fBint
+.br
+bs_seekpng(int \fIn\fB, XDR *\fIxdrs\fB, int \fIversion\fB)\fR
+.sp 2p
+skips over the next \fIn\fR pings in the XDR input stream \fIxdrs\fR,
+leaving the stream positioned at the beginning of the next ping. The
+version of the file format being read must be indicated by \fIversion\fR,
+which should normally be the value of the \fBbsf_version\fR field of the
+input file's file header record.
+.sp 6p
+\fBint
+.br
+bs_seekpngdata(Ping *\fIpng\fB, XDR *\fIxdrs\fB)\fR
+.sp 2p
+skips over a ping data segment (whose size is described by \fIpng\fR) in
+the XDR input stream \fIxdrs\fR, leaving the stream positioned at the
+beginning of the next ping.
+.sp 6p
+\fBint
+.br
+bs_copypng(int \fIn\fB, XDR *\fIxdris\fB, XDR *\fIxdros\fB, int \fIversion\fB)\fR
+.sp 2p
+copies the next \fIn\fR pings from the XDR input stream \fIxdris\fR to the
+XDR output stream \fIxdros\fR, leaving the input stream positioned at the
+beginning of the next ping. The version of the file format being read must
+be indicated by \fIversion\fR, which should normally be the value of the
+\fBbsf_version\fR field of the input file's file header record.
+.LP
+The stream-oriented nature of the I/O routines described above dictates
+that BS datafiles will generally be processed by reading an input file
+and then writing a new output file, where the latter is written in full
+from beginning to end. It is convenient in some circumstances, however,
+to modify an existing file in place rather than create a new file,
+particularly in the case where only the file header flags and/or a small
+number of ping header field values or ping sample values or flags must be
+altered, e.g., ping flags, navigation data, individual bathymetry or sidescan
+sample flags, etc. A crude mechanism is provided to enable this via the
+publicly accessable global variable
+.sp 6p
+\fBunsigned long bs_iobytecnt\fR
+.sp 2p
+and a small number of write functions. The \fBbs_iobytecnt\fR variable
+is always set by all of the above I/O routines to the exact number of
+bytes transferred from/to an input/output file by any particular call
+to such a routine. (The \fBbs_copypng()\fR function which both reads
+and writes data stores the number of written output bytes to
+\fBbs_iobytecnt\fR.) A calling program can therefore monitor this
+variable carefully and retain knowledge of the exact file byte offsets
+(from the beginning of the file) of each ping header in the file.
+These remembered ping header byte offsets, which must take into account
+the number of bytes used to store the initial file header as well as
+each ping header and each ping data segment, can then be passed to the
+functions
+.sp 6p
+\fBint
+.br
+bs_wrpflags(int \fIversion\fB, FILE *\fIfp\fB, long \fIphoffset\fB, unsigned int \fIflags\fB)\fR
+.sp 2p
+\fBint
+.br
+bs_wrsllc(int \fIversion\fB, FILE *\fIfp\fB, long \fIphoffset\fB, double \fIslon\fB, double \fIslat\fB, float \fIscourse\fB)\fR
+.sp 2p
+and
+.sp 6p
+\fBint
+.br
+bs_wrtllc(int \fIversion\fB, FILE *\fIfp\fB, long \fIphoffset\fB, double \fItlon\fB, double \fItlat\fB, float \fItcourse\fB)\fR
+.sp 2p
+to directly rewrite the ping flags (via the first function), the longitude,
+latitude and course of the ship (via the second function) and the longitude,
+latitude and course of the towfish (via the third function), where
+\fIversion\fR is the BS file format version as recorded in the file's
+\fBbsf_version\fR file header field. The function
+.sp 6p
+\fBint
+.br
+bs_wrtll(int \fIversion\fB, FILE *\fIfp\fB, long \fIphoffset\fB, double \fItlon\fB, double \fItlat\fB)\fR
+.sp 2p
+directly rewrites only the longitude and latitude of the towfish.
+.sp 6p
+\fBint
+.br
+bs_wrfflagssetbits(FILE *\fIfp\fB, unsigned int \fIbitmask\fB)\fR
+.sp 2p
+and
+.sp 6p
+\fBint
+.br
+bs_wrfflagsclrbits(FILE *\fIfp\fB, unsigned int \fIbitmask\fB)\fR
+.sp 2p
+are similarly used to set and/or clear the bits of \fIbitmask\fR to and/or from
+the file header flags while preserving the state of all other bit flags, while
+.sp 6p
+\fBint
+.br
+bs_wrpflagssetbits(int \fIversion\fB, FILE *\fIfp\fB, long \fIphoffset\fB, unsigned int \fIbitmask\fB)\fR
+.sp 2p
+and
+.sp 6p
+\fBint
+.br
+bs_wrpflagsclrbits(int \fIversion\fB, FILE *\fIfp\fB, long \fIphoffset\fB, unsigned int \fIbitmask\fB)\fR
+.sp 2p
+may be used to set and/or clear the bits of \fIbitmask\fR to and/or from the
+ping flags while preserving the state of all other bit flags.
+.sp 6p
+\fBint
+.br
+bs_setswradius(int \fIversion\fB, FILE *\fIfp\fB, long \fIphoffset\fB, int \fIside\fB, unsigned int \fIdatatypemask\fB, float \fIswradius\fB)\fR
+.sp 2p
+flags all samples of any data type whose mask bit is present in
+\fIdatatypemask\fR (which must contain either or both of the mask bits
+\fB\s-1BS_DTM_BATHYMETRY\s0\fR and/or \fB\s-1BS_DTM_SIDESCAN\s0\fR) on the
+named \fIside\fR (either \fB\s-1ACP_PORT\s0\fR or \fB\s-1ACP_STBD\s0\fR)
+at across-track distances greater than \fIswradius\fR with
+\fB\s-1{BTYD,SSD}_SWEDGE\s0\fR for the ping whose header is located at the
+named file byte offset, thus effectively trimming the swath radius of that
+\fIside\fR of the ping to \fIswradius\fR.
+.LP
+Note that a file pointer rather than an XDR stream is passed to all of these
+file and ping header field and sample flag rewrite functions, which will
+internally seek to the specified file byte offset \fIphoffset\fR marking the
+start of some particular ping header and write XDR-formatted data at
+appropriate offsets from that point. The file pointer will be positioned
+just after the modified bytes when these routines return. Note that these
+functions are exceedingly dangerous insofar as the use of an incorrect
+\fIphoffset\fR which does not actually reference the exact beginning of a
+ping header will certainly result in a fatally corrupted datafile.
+.LP
+\fBint
+.br
+bs_xdrstring(XDR *\fIxdrs\fB, char **\fIcpp\fB, unsigned long *\fIbytecnt\fB)\fR
+.sp 2p
+was originally created only for internal use by the various BS I/O routines
+described above, but has since been made publicly available due to its more
+generally useful performance of XDR character string encoding and decoding. It
+is not typically used by any calling application to access BS datafiles, but
+rather to access other files used by HMRG software which employ a similar
+style of XDR character string storage where the string is stored as an integer
+(the string length) followed by the bytes of the string (if the length is
+greater than 0). The routine returns 1 if successful and 0 otherwise, also
+recording the total number of bytes transferred (including the leading
+integer) into *\fIbytecnt\fR.
+.LP
+\fBint
+.br
+bs_appendstr(char **\fIfield\fB, char *\fIstring\fB)\fR
+.sp 2p
+appends the specified \fIstring\fR to any character string \fIfield\fR of an
+existing BS header. Note that the \fIfield\fR parameter must be the address
+of the header's character string field, and not the string itself. This
+routine will allocate new memory for the appended string and deallocate the
+memory consumed by the previous string where appropriate.
+.sp 6p
+\fBint
+.br
+bs_replacestr(char **\fIfield\fB, char *\fIstring\fB)\fR
+.sp 2p
+replaces an existing character string \fIfield\fR of an BS header with
+the specified \fIstring\fR. Note that the \fIfield\fR parameter must be
+the address of the header's character string field, and not the string
+itself. This routine will allocate new memory for the replacement string
+and deallocate the memory consumed by the previous string where appropriate.
+(A copy is made of the character string pointed to by \fIstring\fR, so
+\fIstring\fR may be safely deallocated, overwritten, etc., after the
+function returns.)
+.sp 6p
+\fBint
+.br
+bs_striptail(char *\fIstring\fB, char \fIc\fB)\fR
+.sp 2p
+strips all consecutive instances of \fIc\fR from the end of \fIstring\fR.
+.sp 6p
+\fBint
+.br
+bs_appendlog(BSFile *\fIbsf\fB, char **\fIargv\fB)\fR
+.sp 2p
+appends the specified argument vector \fIargv\fR to the log field of the
+named BS header, inserting a blank space between each of the character
+strings pointed to by \fIargv\fR and appending a trailing semicolon to the
+final string. The routine will also append a newline to the pre-existing
+log field before appending \fIargv\fR if that pre-existing log field is
+non-empty. The last element of the \fIargv\fR array of character pointers 
+must be a null pointer. This routine will allocate new memory for the
+modified log field and deallocate the memory consumed by the previous log
+field.
+.LP
+Two routines are provided for the generation of single- and double-precision
+IEEE NaN (not-a-number) quantities which are used by the \fBbsfile\fR(4)
+format to note that the value of a certain parameter (e.g., the towfish
+pulse length as described by the \fBps_pulse\fR field of the \fBPingSide\fR
+data structure) is unknown.
+.sp 6p
+\fBfloat
+.br
+bs_nanf()\fR
+.sp 2p
+and
+.sp 6p
+\fBdouble
+.br
+bs_nand()\fR
+.sp 2p
+respectively generate these single- and double-precision NaN quantities.
+Each of the routines
+.sp 6p
+\fBint
+.br
+bs_isnanf(float \fIf\fB)\fR
+.sp 2p
+and
+.sp 6p
+\fBint
+.br
+bs_isnand(double \fId\fB)\fR
+.sp 2p
+will return 1 if its argument is a NaN quantity and 0 otherwise.
+.LP
+A group of routines are provided for the manipulation of ping marks,
+which are used to flag pings either within a single program or between
+cooperating applications. A ping mark will have an integer value which is
+either \fB\s-1BS_NULLMARK\s0\fR or some bitwise combination of the bitflags
+\fB\s-1BS_LOWMARK\s0\fR and/or \fB\s-1BS_HIGHMARK\s0\fR. Each side of
+a ping, \fB\s-1ACP_PORT\s0\fR and \fB\s-1ACP_STBD\s0\fR, is
+marked separately.
+.sp 6p
+\fBvoid *
+.br
+bs_mrkmemalloc(int \fIsize\fB)\fR
+.sp 2p
+allocates enough memory to maintain ping marks for a group of \fIsize\fR
+pings, sets all of those marks to \fB\s-1BS_NULLMARK\s0\fR and returns a
+pointer to that memory. (The pointer may be a null pointer if the function
+fails for any reason.)
+.sp 6p
+\fBint
+.br
+bs_mrkget(void *\fImarkers\fB, int \fIside\fB, int \fIpingid\fB)\fR
+.sp 2p
+returns the mark value of the specified \fIpingid\fR on the declared
+\fIside\fR from the ping mark memory buffer \fImarkers\fR.
+.sp 6p
+\fBvoid
+.br
+bs_mrkset(void *\fImarkers\fB, int \fIside\fB, int \fIpingid\fB, int \fIvalue\fB)\fR
+.sp 2p
+sets the mark value of the specified \fIpingid\fR on the declared \fIside\fR
+in the ping mark memory buffer \fImarkers\fR to the stated \fIvalue\fR.
+.LP
+The pre-processor macro
+.sp 6p
+\fBint
+.br
+\fBbs_pngvisible(\fIflags\fB)\fR
+.sp 2p
+returns zero if either of the \fB\s-1PNG_HIDE\s0\fR or
+\fB\s-1PNG_LOWQUALITY\s0\fR bits of \fIflags\fR (which should be the
+\fBpng_flags\fR field of a \fBPing\fR structure) is set, and non-zero otherwise.
+The
+.sp 6p
+\fBint
+.br
+\fBbs_pngmscvisible(\fIflags\fB)\fR
+.sp 2p
+macro returns zero if any of the \fB\s-1PNG_MSCHIDE\s0\fR, \fB\s-1PNG_HIDE\s0\fR
+or \fB\s-1PNG_LOWQUALITY\s0\fR bits of \fIflags\fR (which should be the
+\fBpng_flags\fR field of a \fBPing\fR structure) is set, and non-zero otherwise.
+.LP
+The routine
+.sp 6p
+\fBint
+.br
+\fBbs_splitfile(char *\fIdirnm\fB, char *\fIbsfnm0\fB, char *\fIbsfnm1\fB, int \fIpngid\fB, char *\fIlogprefix\fB)\fR
+.sp 2p
+splits the existing BS datafile \fIbsfnm0\fR located in directory \fIdirnm\fR
+into two pieces, leaving the initial \fIpngid\fR pings in \fIbsfnm0\fR and
+creating a new file \fIbsfnm1\fR to contain the remaining pings. (Note that
+a new \fIbsfnm0\fR will actually be recreated from the original \fIbsfnm0\fR
+which is then removed.) The \fIdirnm\fR argument may be set to a null pointer
+to indicate that the operation should be performed within the current
+directory. The \fIlogprefix\fR argument, which may also be a null pointer,
+should point to a short string (typically just the name of the calling
+program) which will be incorporated into both output files' log entries
+along with \fIpngid\fR by the routine.
+.LP
+Finally, the routines
+.sp 6p
+\fBint
+.br
+bs_tmparse(char *\fIstr\fB, int \fImode\fB, double *\fItmval\fB)\fR
+.sp 2p
+and
+.sp 6p
+\fBint
+.br
+bs_tmparsegmttz(char *\fIstr\fB, int \fImode\fB, double *\fItmval\fB)\fR
+.sp 2p
+parse a character string \fIstr\fR of the form
+.sp 2p
+	\fIyear\fB/\fIjulianday\fB-\fIhour\fB:\fIminute\fB:\fIsecond\fR
+.sp 2p
+(when \fImode\fR is \fB\s-1TM_JULIAN\s0\fR) or
+.sp 2p
+	\fIyear\fB/\fImonth\fB/\fIday\fB-\fIhour\fB:\fIminute\fB:\fIsecond\fR
+.sp 2p
+(when \fImode\fR is \fB\s-1TM_CALENDAR\s0\fR), setting *\fItmval\fR equal
+to the number of seconds since January 1, 1970, represented by the time
+described within \fIstr\fR. \fBbs_tmparsegmttz()\fR should be used only
+when the calling application's environment is using the GMT timezone, but
+is considerably more efficient in terms of memory usage than the more
+general \fBbs_tmparse()\fR when the routine is to be called a large number
+of times. The routines will allow any of the field separation
+characters '\fB/\fR', '\fB-\fR', '\fB:\fR' and/or ' ' to be used
+interchangeably within \fIstr\fR, e.g., '92-67-1-23-56' and '92/67 1:23:56'
+denote the same time value. All fields except the \fIyear\fR are optional
+and, if not specified, will be set to appropriate minimum values. If any
+particular field other than the \fIyear\fR is specified, however, then all
+other fields which would normally precede that field within the string
+must also be specified. The \fIyear\fR will be interpreted explicitly unless
+it is (i) between 0 and 49, in which case it will be interpreted as
+2000+\fIyear\fR, or (ii) between 50 and 99, in which case it will be
+interpreted as 1900+\fIyear\fR. Month and day values are specified in normal
+human (rather than Unix) format, meaning that the \fIjulianday\fR may range
+from 1 to 366, while the calendar \fImonth\fR and \fIday\fR may range from
+1 to 12 and 1 to 31 respectively. The \fIsecond\fR field may include a
+decimal fraction if so desired, while all other fields must be non-negative
+integers. The length of \fIstr\fR may not exceed \fB\s-1TM_MAXSTRLEN\s0\fR.
+.SH ERROR CODES
+.LP
+The following error codes are defined by /usr/local/bs.h.
+.sp 6p
+#define BS_SUCCESS			(0)
+.br
+#define BS_FAILURE			(1)
+.br
+#define BS_FILTERWAIT		(2)
+.br
+#define BS_MISC			(3)
+.br
+#define BS_BADARG			(4)
+.br
+#define BS_MEMALLOC			(5)
+.br
+#define BS_OPEN			(6)
+.br
+#define BS_READ			(7)
+.br
+#define BS_WRITE			(8)
+.br
+#define BS_SYSVIPC			(9)
+.br
+#define BS_X11				(10)
+.br
+#define BS_SIGNAL			(11)
+.br
+#define BS_PIPE				(12)
+.br
+#define BS_FCNTL			(13)
+.br
+#define BS_FORK			(14)
+.br
+#define BS_DUP2			(15)
+.br
+#define BS_CHDIR			(16)
+.br
+#define BS_EXEC			(17)
+.br
+#define BS_PDB				(18)
+.br
+#define BS_EOF				(19)
+.br
+#define BS_BADDATA			(20)
+.br
+#define BS_FSEEK			(21)
+.br
+#define BS_ACCESS			(22)
+.br
+#define BS_RENAME			(23)
+.br
+#define BS_BADARCH			(24)
+.br
+#define BS_HUGEPING			(25)
+.br
+#define BS_GTK				(26)
+.br
+#define BS_CAIRO			(27)
+.br
+.SH SEE ALSO
+.BR bsfile (4)
+.SH AUTHOR
+Roger Davis, July 2005.

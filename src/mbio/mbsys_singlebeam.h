@@ -83,9 +83,6 @@
  *      mbsys_singlebeam_swathbounds().
  */
 
-/* maximum line length in characters */
-#define MBSYS_SINGLEBEAM_MAXLINE 120
-
 struct mbsys_singlebeam_struct
 	{
 	/* type of data record */
@@ -205,6 +202,14 @@ struct mbsys_singlebeam_struct
 				In meters.
 				+ = Below sealevel
 				- = Above sealevel */
+	int	mag_qualco; /* quality code for magnetics 
+ 						1 – good
+ 						2 – fair
+ 						3 – poor
+ 						4 – bad
+ 						5 – suspected bad by contributor
+ 						6 – suspected bad by data center
+ 						nil - unspecified  */
 
 	/* gravity */
 	double	gravity;    /* OBSERVED GRAVITY
@@ -219,6 +224,14 @@ struct mbsys_singlebeam_struct
                              In milligals.
                              Free-air Anomaly = G(observed) -
                              G(theoretical) */
+ 	int	gra_qualco; /* quality code for gravity 
+ 						1 – good
+ 						2 – fair
+ 						3 – poor
+ 						4 – bad
+ 						5 – suspected bad by contributor
+ 						6 – suspected bad by data center
+ 						nil - unspecified  */
 
 	/* seismic */
 	int	seismic_line;
@@ -250,7 +263,7 @@ struct mbsys_singlebeam_struct
 	double	stbdlat;
 
 	/* comment */
-	char	comment[MBSYS_SINGLEBEAM_MAXLINE];
+	char	comment[MB_COMMENT_MAXLINE];
 	};
 
 

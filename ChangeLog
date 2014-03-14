@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.4.2172       March 14, 2014
 * Version 5.4.2168       February 19, 2014
 * Version 5.4.2163       January 31, 2014
   Version 5.4.2162       January 24, 2014
@@ -170,6 +171,40 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2172 (March 14, 2014)
+
+MBmosaic: Added option to apply priorities based on the platform heading.
+
+Format 64 (MBF_MR1PRVR2): Hawaii Mapping Research Group (HMRG) data format
+updated to use the current library and thereby support post-2005 data.
+Removed old HMRG mr1pr library from mbsystem/src and added current bsio
+library.
+
+MBgrdviz: Modified handling of routes so that if a route header contains a line
+like:
+      ## ROUTEEDITMODE:0
+then the route cannot be changed in MBgrdviz.
+
+MBnavadjust: Changed so that when a project is output, mbnavadjust writes out
+five different route files in which each tie point or crossing is a two point route
+consisting of the connected snav points
+- route files of ties (fixed and unfixed separate) represent each tie as a
+two point route consisting of the connected snav points
+- route files of crossings (<25%, >= 25% && < 50%, >= 50%, true crossings)
+represent each crossing as a two point route consisting of the central
+snav points for each of the two sections.
+
+Mbvelocitytool: made all filename and command strings type mb_path, which is
+a 1024 byte char array.
+
+Format 173 (MBF_MGD77TXT): Added format to read and write MGD77 format
+underway geophysical data files with "\r\n" characters at the ends of the
+data records.
+
+Format 174 (MBF_MGD77TAB): Added format to read and write MGD77T format
+underway geophysical data files with tab delimiters and "\r\n" characters
+at the ends of the data records.
 
 -----> 5.4.2168 (February 19, 2014)
 

@@ -67,7 +67,7 @@ $(BINDIR)/mbeditviz: mbeditviz_main.o \
 		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a \
 		$(GSFLIB) \
@@ -82,7 +82,7 @@ $(BINDIR)/mbeditviz: mbeditviz_main.o \
 		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(LIBDIR)/libmbxgr.a \
 		$(GSFLIB) \
 		$(GMTLIBDIR)/libgmt.a \
