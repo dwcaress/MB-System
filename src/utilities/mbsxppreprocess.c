@@ -2,7 +2,7 @@
  *    The MB-system:	mbsxppreprocess.c	09/12/2013
  *    $Id: mbsxppreprocess.c 2129 2013-07-08 07:45:32Z caress $
  *
- *    Copyright (c) 2005-2013 by
+ *    Copyright (c) 2005-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

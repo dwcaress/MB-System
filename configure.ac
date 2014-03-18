@@ -2,7 +2,7 @@ dnl--------------------------------------------------------------------
 dnl    The MB-system:	configure.ac	12/7/2011
 dnl    $Id$
 dnl
-dnl    Copyright (c) 2011-2013 by
+dnl    Copyright (c) 2011-2014 by
 dnl    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 dnl    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 dnl    Lamont-Doherty Earth Observatory
@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.4.2173],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.4.2175],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "17 March 2014", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "18 March 2014", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -33,7 +33,7 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO(["    The MB-system:	configure	12/7/2011"])
 AS_ECHO(["    $Id$"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2013 by"])
+AS_ECHO(["    Copyright (c) 2011-2014 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -820,7 +820,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
 	  src/utilities/Makefile src/gmt/Makefile \
 	  src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile \
 	  src/mbvelocitytool/Makefile src/mbnavadjust/Makefile \
-	  src/mbsvptool/Makefile src/otps/Makefile \
+	  src/otps/Makefile \
 	  src/mbview/Makefile  src/mbgrdviz/Makefile  src/mbeditviz/Makefile  \
 	  src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile \
 	  src/html/Makefile src/ps/Makefile src/share/Makefile])

@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_plot.c	9/26/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2013 by
+ *    Copyright (c) 2003-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
