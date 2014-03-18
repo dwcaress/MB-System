@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbsvplist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  17 March 2014 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -43,7 +43,13 @@ By default, all unique SVPs encountered are
 listed to stdout. The SVPs may instead be
 written to individual files with names FILE_XXX.svp,
 where FILE is the swath data filename and XXX is the
-SVP count within the file. Some files contain SVPs at
+SVP count within the file. The SVP files output by <B>mbsvplist</B>
+include a header line starting with &quot;## MB-SVP&quot; and including the
+timestamp and location of the SVP record as inferred from its
+location in the file. This header record is recognized by the program
+<B>mbsvpselect</B> which uses the information to select the best
+SVP models to apply to swath data files for bathymetry recalculation.
+Some files contain SVPs at
 regular intervals, typically with the same SVP duplicated
 many times. By default, <B>mbsvplist</B> ignores duplicate
 SVPs. The <B>-D</B> option causes duplicate SVPs to be output.
@@ -245,7 +251,7 @@ Total 1 SVP records written
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbsvpselect.html">mbsvpselect</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
@@ -270,7 +276,7 @@ Probably.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 17 March 2014</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

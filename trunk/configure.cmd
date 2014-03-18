@@ -175,6 +175,19 @@ Cflags: -I${includedir}
 # into /usr/local/bin, /usr/local/lib, etc with the simple make commands:
 make
 sudo make install
+#------------------------------------------------------------------------------
+
+# Install on CentOs 6 using only yum for prerequisites
+
+# Prerequisites
+sudo yum install openmotif openmotif-devel fftw fftw-devel netcdf netcdf-devel \
+		proj proj-devel gdal-devel gmt gmt-devel gv nedit
+
+# If the GMT installation is not known to pkg-config, then the installation
+# points of the libraries and the header files must be specified:
+./configure --prefix=/usr/local \
+    --with-netcdf-include=/usr/include \
+    --with-netcdf-lib=/usr/lib
 #
 #------------------------------------------------------------------------------
 # To modify the build system...

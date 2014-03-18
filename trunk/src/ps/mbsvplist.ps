@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
 %%Creator: groff version 1.22.2
-%%CreationDate: Fri Mar 14 00:16:34 2014
+%%CreationDate: Mon Mar 17 18:12:09 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
@@ -258,180 +258,187 @@ F(Sw)5.59 E .59(ath ba-)-.1 F(th)108 230.4 Q 1.478
 1.091(ault, all unique SVPs encountered are listed to stdout. The)-.1 F
 .462(SVPs may instead be written to indi)108 266.4 R .461
 (vidual \214les with names FILE_XXX.svp, where FILE is the sw)-.25 F
-.461(ath data)-.1 F .485(\214lename and XXX is the SVP count within the\
- \214le. Some \214les contain SVPs at re)108 278.4 R .486(gular interv)
--.15 F .486(als, typically)-.25 F .66(with the same SVP duplicated man)
-108 290.4 R 3.159(yt)-.15 G .659(imes. By def)-3.159 F(ault,)-.1 E F2
-(mbsvplist)3.159 E F0 .659(ignores duplicate SVPs. The)3.159 F F2<ad44>
-3.159 E F0(option)3.159 E .946(causes duplicate SVPs to be output.)108
-302.4 R(The)5.946 E F2<ad50>3.446 E F0 .946(option implies)3.446 F F2
-<ad4f>3.446 E F0 3.446(,a)C .946
-(nd also causes the parameter \214le to be)-3.446 F .662(modi\214ed so \
-that the \214rst SVP output for each \214le becomes the SVP used for re\
-calculating bath)108 314.4 R .662(ymetry for)-.05 F .348(that sw)108
-326.4 R .348(ath \214le.)-.1 F(The)5.348 E F2<ad43>2.848 E F0 .348
-(option causes)2.848 F F2(mbsvplist)2.848 E F0 .348
-(to output the number of unique SVPs in a \214le to the shell)2.848 F
-.394(\(standard out\).)108 338.4 R(The)5.394 E F2<ad53>2.894 E F0 .394
-(option causes)2.894 F F2(mbsvplist)2.893 E F0 .393
-(to output the sound v)2.893 F .393(elocity v)-.15 F .393
-(alues used for beamforming)-.25 F .363
-(by the sonar \(often called surf)108 350.4 R .363(ace sound v)-.1 F
-(elocity)-.15 E 2.863(,o)-.65 G 2.863(rS)-2.863 G .364
-(SV\) instead of SVP pro\214les. Each SSV v)-2.863 F .364(alue will be)
--.25 F .541(paired with the corresponding sonar depth, and there will g\
-enerally be one SSV v)108 362.4 R .541(alue output for each sur)-.25 F
-(-)-.2 E .3 -.15(vey p)108 374.4 T(ing.).15 E F1 -.548(AU)72 403.2 S
-(THORSHIP).548 E F0(Da)108 415.2 Q(vid W)-.2 E 2.5(.C)-.92 G
-(aress \(caress@mbari.or)-2.5 E(g\))-.18 E(Montere)113 427.2 Q 2.5(yB)
--.15 G(ay Aquarium Research Institute)-2.5 E
-(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 439.2 Q
-(Lamont-Doherty Earth Observ)113 451.2 Q(atory)-.25 E F1(OPTIONS)72 480
-Q F2<ad43>108 492 Q F0(Causes)144 504 Q F2(mbsvplist)2.5 E F0(to output\
+.461(ath data)-.1 F .899(\214lename and XXX is the SVP count within the\
+ \214le. The SVP \214les output by)108 278.4 R F2(mbsvplist)3.399 E F0
+.899(include a header)3.399 F 1.041(line starting with "## MB-SVP" and \
+including the timestamp and location of the SVP record as inferred)108
+290.4 R .645(from its location in the \214le. This header record is rec\
+ognized by the program)108 302.4 R F2(mbsvpselect)3.145 E F0 .645
+(which uses the)3.145 F .484
+(information to select the best SVP models to apply to sw)108 314.4 R
+.484(ath data \214les for bath)-.1 F .483(ymetry recalculation.)-.05 F
+(Some)5.483 E 1.363(\214les contain SVPs at re)108 326.4 R 1.363
+(gular interv)-.15 F 1.363
+(als, typically with the same SVP duplicated man)-.25 F 3.864(yt)-.15 G
+1.364(imes. By def)-3.864 F(ault,)-.1 E F2(mbsvplist)108 338.4 Q F0
+1.522(ignores duplicate SVPs. The)4.022 F F2<ad44>4.022 E F0 1.522
+(option causes duplicate SVPs to be output.)4.022 F(The)6.522 E F2<ad50>
+4.022 E F0(option)4.022 E(implies)108 350.4 Q F2<ad4f>3.885 E F0 3.885
+(,a)C 1.386(nd also causes the parameter \214le to be modi\214ed so tha\
+t the \214rst SVP output for each \214le)-3.885 F .163
+(becomes the SVP used for recalculating bath)108 362.4 R .163
+(ymetry for that sw)-.05 F .163(ath \214le.)-.1 F(The)5.163 E F2<ad43>
+2.663 E F0 .163(option causes)2.663 F F2(mbsvplist)2.663 E F0(to)2.663 E
+.464(output the number of unique SVPs in a \214le to the shell \(standa\
+rd out\).)108 374.4 R(The)5.464 E F2<ad53>2.964 E F0 .464(option causes)
+2.964 F F2(mbsvplist)2.964 E F0(to)2.964 E .159(output the sound v)108
+386.4 R .159(elocity v)-.15 F .159
+(alues used for beamforming by the sonar \(often called surf)-.25 F .158
+(ace sound v)-.1 F(elocity)-.15 E 2.658(,o)-.65 G(r)-2.658 E .151
+(SSV\) instead of SVP pro\214les. Each SSV v)108 398.4 R .152
+(alue will be paired with the corresponding sonar depth, and there)-.25
+F(will generally be one SSV v)108 410.4 Q(alue output for each surv)-.25
+E .3 -.15(ey p)-.15 H(ing.).15 E F1 -.548(AU)72 439.2 S(THORSHIP).548 E
+F0(Da)108 451.2 Q(vid W)-.2 E 2.5(.C)-.92 G(aress \(caress@mbari.or)-2.5
+E(g\))-.18 E(Montere)113 463.2 Q 2.5(yB)-.15 G
+(ay Aquarium Research Institute)-2.5 E
+(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 475.2 Q
+(Lamont-Doherty Earth Observ)113 487.2 Q(atory)-.25 E F1(OPTIONS)72 516
+Q F2<ad43>108 528 Q F0(Causes)144 540 Q F2(mbsvplist)2.5 E F0(to output\
  the number of unique SVPs in each \214le to the shell \(standard out\)\
-.)2.5 E F2<ad44>108 520.8 Q F0(Causes)144 532.8 Q F2(mbsvplist)2.5 E F0
+.)2.5 E F2<ad44>108 556.8 Q F0(Causes)144 568.8 Q F2(mbsvplist)2.5 E F0
 (to output duplicate SVPs. This is equi)2.5 E -.25(va)-.25 G(lent to).25
-E F2<ad4d>2.5 E F3(2)A F0(.)A F2<ad46>108 549.6 Q F3(format)144 549.6 Q
-F0 .422(Sets the format for the input sw)144 561.6 R .422
-(ath sonar data using)-.1 F F2(MBIO)2.923 E F0(inte)2.923 E .423
-(ger format identi\214ers.)-.15 F(If)5.423 E F3(format)2.923 E F0(<)
-2.923 E .718(0, then the input \214le speci\214ed with the)144 573.6 R
+E F2<ad4d>2.5 E F3(2)A F0(.)A F2<ad46>108 585.6 Q F3(format)144 585.6 Q
+F0 .423(Sets the format for the input sw)144 597.6 R .423
+(ath sonar data using)-.1 F F2(MBIO)2.922 E F0(inte)2.922 E .422
+(ger format identi\214ers.)-.15 F(If)5.422 E F3(format)2.922 E F0(<)
+2.922 E .717(0, then the input \214le speci\214ed with the)144 609.6 R
 F2<ad49>3.217 E F0 .717(option will actually contain a list of input sw)
-3.217 F .717(ath sonar)-.1 F .809(data \214les.)144 585.6 R .809
-(This program uses the)5.809 F F2(MBIO)3.309 E F0 .809
-(library and will read an)3.309 F 3.31(ys)-.15 G -.1(wa)-3.31 G .81
-(th sonar format supported).1 F(by)144 597.6 Q F2(MBIO)2.589 E F0 2.589
-(.Al)C .089(ist of the sw)-2.589 F .089
-(ath sonar data formats currently supported by)-.1 F F2(MBIO)2.588 E F0
-.088(and their identi\214er)2.588 F -.25(va)144 609.6 S(lues is gi).25 E
+3.217 F .718(ath sonar)-.1 F .81(data \214les.)144 621.6 R .81
+(This program uses the)5.81 F F2(MBIO)3.309 E F0 .809
+(library and will read an)3.309 F 3.309(ys)-.15 G -.1(wa)-3.309 G .809
+(th sonar format supported).1 F(by)144 633.6 Q F2(MBIO)2.588 E F0 2.588
+(.Al)C .089(ist of the sw)-2.588 F .089
+(ath sonar data formats currently supported by)-.1 F F2(MBIO)2.589 E F0
+.089(and their identi\214er)2.589 F -.25(va)144 645.6 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
-(manual page.)2.5 E F2<ad48>108 626.4 Q F0 .162(This "help" \215ag caus\
+(manual page.)2.5 E F2<ad48>108 662.4 Q F0 .162(This "help" \215ag caus\
 e the program to print out a description of its operation and then e)144
-626.4 R .162(xit immedi-)-.15 F(ately)144 638.4 Q(.)-.65 E F2<ad49>108
-655.2 Q F3(\214le)144 655.2 Q F0 .313(Sets the input \214lename. If)144
-667.2 R F3(format)2.813 E F0 2.813(>0\()2.813 G .313(set with the)-2.813
-F F2<ad46>2.813 E F0 .313(option\) then the sw)2.813 F .312
-(ath sonar data contained)-.1 F(in)144 679.2 Q F3(\214le)2.955 E F0 .455
-(is read and processed. If)2.955 F F3(format)2.956 E F0 2.956(<0)2.956 G
-2.956(,t)-2.956 G(hen)-2.956 E F3(\214le)2.956 E F0 .456
-(is assumed to be an ascii \214le containing a list)2.956 F .87
-(of the input sw)144 691.2 R .869
-(ath sonar data \214les to be processed and their formats.)-.1 F .869
-(The program will read the)5.869 F .663
-(data in each one of these \214les.)144 703.2 R .663(In the)5.663 F F3
-(\214le)3.163 E F0 .664(\214le, each data \214le should be follo)3.163 F
-.664(wed by a data format)-.25 F(identi\214er)144 715.2 Q 2.5(,e)-.4 G
-(.g.:)-2.5 E(data\214le1 11)180 727.2 Q(MB-System 5.0)72 768 Q 2.5(3J)
-146.495 G(une 2013)-2.5 E(1)204.835 E 0 Cg EP
+662.4 R .161(xit immedi-)-.15 F(ately)144 674.4 Q(.)-.65 E F2<ad49>108
+691.2 Q F3(\214le)144 691.2 Q F0 .312(Sets the input \214lename. If)144
+703.2 R F3(format)2.813 E F0 2.813(>0\()2.813 G .313(set with the)-2.813
+F F2<ad46>2.813 E F0 .313(option\) then the sw)2.813 F .313
+(ath sonar data contained)-.1 F(in)144 715.2 Q F3(\214le)2.956 E F0 .456
+(is read and processed. If)2.956 F F3(format)2.956 E F0 2.956(<0)2.956 G
+2.956(,t)-2.956 G(hen)-2.956 E F3(\214le)2.956 E F0 .455
+(is assumed to be an ascii \214le containing a list)2.956 F .869
+(of the input sw)144 727.2 R .869
+(ath sonar data \214les to be processed and their formats.)-.1 F .87
+(The program will read the)5.87 F(MB-System 5.0)72 768 Q(17 March 2014)
+140.11 E(1)198.45 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 149.27(mbsvplist\(1\) MB-System)72 48 R 149.27
-(5.0 mbsvplist\(1\))2.5 F(data\214le2 24)180 84 Q .569
-(This program uses the)144 96 R/F1 10/Times-Bold@0 SF(MBIO)3.068 E F0
+(5.0 mbsvplist\(1\))2.5 F .664(data in each one of these \214les.)144 84
+R .664(In the)5.664 F/F1 10/Times-Italic@0 SF(\214le)3.164 E F0 .663
+(\214le, each data \214le should be follo)3.164 F .663
+(wed by a data format)-.25 F(identi\214er)144 96 Q 2.5(,e)-.4 G(.g.:)
+-2.5 E(data\214le1 11)180 108 Q(data\214le2 24)180 120 Q .568
+(This program uses the)144 132 R/F2 10/Times-Bold@0 SF(MBIO)3.068 E F0
 .568(library and will read or write an)3.068 F 3.068(ys)-.15 G -.1(wa)
--3.068 G .568(th sonar format supported by).1 F F1(MBIO)144 108 Q F0
+-3.068 G .568(th sonar format supported by).1 F F2(MBIO)144 144 Q F0
 3.428(.Al)C .928(ist of the sw)-3.428 F .928
-(ath sonar data formats currently supported by)-.1 F F1(MBIO)3.428 E F0
-.928(and their identi\214er)3.428 F -.25(va)144 120 S(lues is gi).25 E
--.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0
-(manual page. Def)2.5 E(ault:)-.1 E/F2 10/Times-Italic@0 SF(\214le)2.5 E
-F0 2.5(=")2.5 G(datalist.mb-1".)-2.5 E F1<ad4d>108 136.8 Q F2(mode)144
-136.8 Q F0 .536(Sets the SVP output mode. If)144 148.8 R F2(mode)3.036 E
-F0 .536(=0 \(the def)B .536
-(ault\), then the \214rst SVP of each \214le will be output,)-.1 F .878
-(plus an)144 160.8 R 3.378(yS)-.15 G .878(VP that is dif)-3.378 F .878
+(ath sonar data formats currently supported by)-.1 F F2(MBIO)3.428 E F0
+.928(and their identi\214er)3.428 F -.25(va)144 156 S(lues is gi).25 E
+-.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
+(manual page. Def)2.5 E(ault:)-.1 E F1(\214le)2.5 E F0 2.5(=")2.5 G
+(datalist.mb-1".)-2.5 E F2<ad4d>108 172.8 Q F1(mode)144 172.8 Q F0 .536
+(Sets the SVP output mode. If)144 184.8 R F1(mode)3.036 E F0 .536
+(=0 \(the def)B .536
+(ault\), then the \214rst SVP of each \214le will be output,)-.1 F .879
+(plus an)144 196.8 R 3.379(yS)-.15 G .879(VP that is dif)-3.379 F .878
 (ferent from the pre)-.25 F .878(vious SVP)-.25 F 5.878(.I)-1.11 G(f)
--5.878 E F2(mode)3.378 E F0 .879(=1, then only the \214rst instance of)B
-.025(each unique SVP will be output, e)144 172.8 R -.15(ve)-.25 G 2.524
-(nt).15 G .024
+-5.878 E F1(mode)3.378 E F0 .878(=1, then only the \214rst instance of)B
+.024(each unique SVP will be output, e)144 208.8 R -.15(ve)-.25 G 2.524
+(nt).15 G .025
 (hrough multiple \214les referenced through a datalist structure.)-2.524
-F(If)144 184.8 Q F2(mode)2.5 E F0(=2, then all SVPs will be output e)A
+F(If)144 220.8 Q F1(mode)2.5 E F0(=2, then all SVPs will be output e)A
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(ft)-2.5 G(he)-2.5 E 2.5(ya)-.15 G
-(re duplicates \(equi)-2.5 E -.25(va)-.25 G(lent to the).25 E F1<ad44>
-2.5 E F0(option\).)2.5 E F1<ad4f>108 201.6 Q F0 .315(By def)144 213.6 R
-(ault,)-.1 E F1(mbsvplist)2.815 E F0 .315(writes the SVP records to std\
-out. This option causes the program to instead)2.815 F 1.25
-(write the SVPs to indi)144 225.6 R 1.249
+(re duplicates \(equi)-2.5 E -.25(va)-.25 G(lent to the).25 E F2<ad44>
+2.5 E F0(option\).)2.5 E F2<ad4f>108 237.6 Q F0 .316(By def)144 249.6 R
+(ault,)-.1 E F2(mbsvplist)2.816 E F0 .315(writes the SVP records to std\
+out. This option causes the program to instead)2.816 F 1.249
+(write the SVPs to indi)144 261.6 R 1.249
 (vidual \214les with names FILE_XXX.svp, where FILE is the source sw)
 -.25 F(ath)-.1 E
-(data \214lename and XXX is the SVP count within the \214le.)144 237.6 Q
-F1<ad50>108 254.4 Q F0 1.042(This option implies the output option)144
-266.4 R F1<ad4f>3.542 E F0 3.542(.A)C(dditionally)-3.542 E 3.542(,t)-.65
-G 1.042(his option sets the \214rst SVP output for)-3.542 F .155
-(each sw)144 278.4 R .155
+(data \214lename and XXX is the SVP count within the \214le.)144 273.6 Q
+F2<ad50>108 290.4 Q F0 1.042(This option implies the output option)144
+302.4 R F2<ad4f>3.542 E F0 3.542(.A)C(dditionally)-3.542 E 3.542(,t)-.65
+G 1.042(his option sets the \214rst SVP output for)-3.542 F .154
+(each sw)144 314.4 R .154
 (ath\214le to be used for recalculating the bath)-.1 F .155
-(ymetry in that sw)-.05 F .154(ath\214le by)-.1 F F1(mbpr)2.654 E(ocess)
--.18 E F0 .154(by mod-)2.654 F(ifying the associated parameter \214le.)
-144 290.4 Q F1<ad53>108 307.2 Q F0 1.252(This option causes)144 319.2 R
-F1(mbsvplist)3.752 E F0 1.252(to output the sound v)3.752 F 1.252
-(elocity v)-.15 F 1.252(alues used for beamforming by the)-.25 F .647
-(sonar \(often called surf)144 331.2 R .647(ace sound v)-.1 F(elocity)
--.15 E 3.147(,o)-.65 G 3.147(rS)-3.147 G .646
-(SV\) instead of SVP pro\214les. Each SSV v)-3.147 F .646(alue will)-.25
+(ymetry in that sw)-.05 F .155(ath\214le by)-.1 F F2(mbpr)2.655 E(ocess)
+-.18 E F0 .155(by mod-)2.655 F(ifying the associated parameter \214le.)
+144 326.4 Q F2<ad53>108 343.2 Q F0 1.253(This option causes)144 355.2 R
+F2(mbsvplist)3.752 E F0 1.252(to output the sound v)3.752 F 1.252
+(elocity v)-.15 F 1.252(alues used for beamforming by the)-.25 F .646
+(sonar \(often called surf)144 367.2 R .646(ace sound v)-.1 F(elocity)
+-.15 E 3.147(,o)-.65 G 3.147(rS)-3.147 G .647
+(SV\) instead of SVP pro\214les. Each SSV v)-3.147 F .647(alue will)-.25
 F .014(be paired with the corresponding sonar depth, and in general one\
- depth-SSV pair will be output for)144 343.2 R(each surv)144 355.2 Q .3
--.15(ey p)-.15 H(ing.).15 E F1<ad56>108 372 Q F0(Normally)144 372 Q(,)
--.65 E F1(mbsvplist)3.077 E F0 -.1(wo)3.077 G .576
+ depth-SSV pair will be output for)144 379.2 R(each surv)144 391.2 Q .3
+-.15(ey p)-.15 H(ing.).15 E F2<ad56>108 408 Q F0(Normally)144 408 Q(,)
+-.65 E F2(mbsvplist)3.076 E F0 -.1(wo)3.076 G .576
 (rks "silently" without outputting an).1 F .576
-(ything to the stderr stream.)-.15 F .576(If the)5.576 F F1<ad56>3.076 E
-F0 .525(\215ag is gi)144 384 R -.15(ve)-.25 G .525(n, then).15 F F1
+(ything to the stderr stream.)-.15 F .577(If the)5.576 F F2<ad56>3.077 E
+F0 .525(\215ag is gi)144 420 R -.15(ve)-.25 G .525(n, then).15 F F2
 (mblist)3.025 E F0 -.1(wo)3.025 G .525(rks in a "v).1 F .525
 (erbose" mode and outputs the program v)-.15 F .525(ersion being used)
--.15 F(and all error status messages.)144 396 Q F1<ad5a>108 412.8 Q F0
-(Normally)144 412.8 Q(,)-.65 E F1(mbsvplist)3.16 E F0 -.1(fa)3.16 G .659
-(ithfully outputs the SVP data just as it is stored in the sw).1 F .659
-(ath \214les. Rarely)-.1 F(,)-.65 E .933(sonars may store SVP data with\
- a nonzero depth for the \214rst sound speed v)144 424.8 R .934
-(alue, a circumstance)-.25 F 2.376(that causes problems with bath)144
-436.8 R 2.376(ymetry recalculation using)-.05 F F1(mbpr)4.875 E(ocess)
--.18 E F0 4.875(.T)C(he)-4.875 E F1<ad5a>4.875 E F0 2.375(option causes)
-4.875 F F1(mbsvplist)144 448.8 Q F0(to replace the \214rst depth v)2.5 E
+-.15 F(and all error status messages.)144 432 Q F2<ad5a>108 448.8 Q F0
+(Normally)144 448.8 Q(,)-.65 E F2(mbsvplist)3.159 E F0 -.1(fa)3.159 G
+.659(ithfully outputs the SVP data just as it is stored in the sw).1 F
+.66(ath \214les. Rarely)-.1 F(,)-.65 E .933(sonars may store SVP data w\
+ith a nonzero depth for the \214rst sound speed v)144 460.8 R .933
+(alue, a circumstance)-.25 F 2.375(that causes problems with bath)144
+472.8 R 2.375(ymetry recalculation using)-.05 F F2(mbpr)4.876 E(ocess)
+-.18 E F0 4.876(.T)C(he)-4.876 E F2<ad5a>4.876 E F0 2.376(option causes)
+4.876 F F2(mbsvplist)144 484.8 Q F0(to replace the \214rst depth v)2.5 E
 (alue with zero before outputting the SVP)-.25 E(.)-1.11 E/F3 10.95
-/Times-Bold@0 SF(EXAMPLES)72 477.6 Q F0 .402(Suppose one wishes to obta\
-in an SVP list from a Simrad EM300 data \214le in the MB)108 489.6 R
-.403(ARI format \(MBIO id)-.35 F(57\) called mbari_1998_107_msn.mb57. T)
-108 501.6 Q 2.5(oo)-.8 G(btain a listing to stdout, the follo)-2.5 E
+/Times-Bold@0 SF(EXAMPLES)72 513.6 Q F0 .402(Suppose one wishes to obta\
+in an SVP list from a Simrad EM300 data \214le in the MB)108 525.6 R
+.402(ARI format \(MBIO id)-.35 F(57\) called mbari_1998_107_msn.mb57. T)
+108 537.6 Q 2.5(oo)-.8 G(btain a listing to stdout, the follo)-2.5 E
 (wing will suf)-.25 E(\214ce:)-.25 E
-(mbsvplist \255F57 \255I mbari_1998_526_msn.mb57 \255V)144 525.6 Q
-(The output will be as follo)108 549.6 Q(ws:)-.25 E(Program mbsvplist)
-110.5 573.6 Q -1.11(Ve)110.5 585.6 S
+(mbsvplist \255F57 \255I mbari_1998_526_msn.mb57 \255V)144 561.6 Q
+(The output will be as follo)108 585.6 Q(ws:)-.25 E(Program mbsvplist)
+110.5 609.6 Q -1.11(Ve)110.5 621.6 S
 (rsion $Id$)1.11 E
-(MB-system V)110.5 597.6 Q(ersion 5.0)-1.11 E
-(Searching mbari_1998_526_msn.mb57 for SVP records)110.5 621.6 Q
-(Outputting SVP to \214le:)110.5 633.6 Q(## W)110.5 645.6 Q
+(MB-system V)110.5 633.6 Q(ersion 5.0)-1.11 E
+(Searching mbari_1998_526_msn.mb57 for SVP records)110.5 657.6 Q
+(Outputting SVP to \214le:)110.5 669.6 Q(## W)110.5 681.6 Q
 (ater Sound V)-.8 E(elocity Pro\214le \(SVP\))-1.11 E
-(## Output by Program mbsvplist)110.5 657.6 Q(## Program V)110.5 669.6 Q
+(## Output by Program mbsvplist)110.5 693.6 Q(## Program V)110.5 705.6 Q
 (ersion $Id$)-1.11 E
-(## MB-System V)110.5 681.6 Q(ersion 5.0.alpha01)-1.11 E
-(## Run by user <caress> on cpu <menard> at <Thu Jan)110.5 693.6 Q 2.5
-(41)5 G(3:36:44 2001>)-2.5 E(## Sw)110.5 705.6 Q
-(ath File: mbari_1998_526_msn.mb57)-.1 E(## Start T)110.5 717.6 Q
-(ime: 1998/05/02 01:33:08.300000)-.35 E(## SVP Count: 1)110.5 729.6 Q
-(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(2)204.835 E 0
-Cg EP
+(## MB-System V)110.5 717.6 Q(ersion 5.0.alpha01)-1.11 E
+(## Run by user <caress> on cpu <menard> at <Thu Jan)110.5 729.6 Q 2.5
+(41)5 G(3:36:44 2001>)-2.5 E(MB-System 5.0)72 768 Q(17 March 2014)140.11
+E(2)198.45 E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 149.27(mbsvplist\(1\) MB-System)72 48 R 149.27
-(5.0 mbsvplist\(1\))2.5 F(## Number of SVP Points: 15)110.5 84 Q 17.5
-(0.00 1503.50)120.5 96 R 17.5(9.99 1502.70)120.5 108 R 17.5
-(19.98 1501.80)118 120 R 17.5(30.00 1501.40)118 132 R 17.5
-(39.99 1501.40)118 144 R 17.5(49.98 1499.90)118 156 R 17.5
-(60.00 1499.80)118 168 R 17.5(69.99 1497.50)118 180 R 17.5
-(79.98 1496.90)118 192 R 17.5(90.00 1496.90)118 204 R 17.5
-(99.99 1495.10)118 216 R 17.5(198.99 1486.60)115.5 228 R 17.5
-(498.99 1480.60)115.5 240 R 17.5(1000.98 1481.90)113 252 R 17.5
-(1830.00 1488.70)113 264 R(##)110.5 276 Q(##)110.5 288 Q 2.5(4S)110.5
-300 S(VP records read)-2.5 E 2.5(1S)110.5 312 S(VP records written)-2.5
-E -.8(To)108 336 S(tal 4 SVP records read T).8 E
-(otal 1 SVP records written)-.8 E/F1 10.95/Times-Bold@0 SF(SEE ALSO)72
-364.8 Q/F2 10/Times-Bold@0 SF(mbsystem)108 376.8 Q F0(\(1\),)A F2(mbpr)
-2.5 E(ocess)-.18 E F0(\(1\))A F1 -.11(BU)72 405.6 S(GS).11 E F0
-(Probably)108 417.6 Q(.)-.65 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G
-(une 2013)-2.5 E(3)204.835 E 0 Cg EP
+(5.0 mbsvplist\(1\))2.5 F(## Sw)110.5 84 Q
+(ath File: mbari_1998_526_msn.mb57)-.1 E(## Start T)110.5 96 Q
+(ime: 1998/05/02 01:33:08.300000)-.35 E(## SVP Count: 1)110.5 108 Q
+(## Number of SVP Points: 15)110.5 120 Q 17.5(0.00 1503.50)120.5 132 R
+17.5(9.99 1502.70)120.5 144 R 17.5(19.98 1501.80)118 156 R 17.5
+(30.00 1501.40)118 168 R 17.5(39.99 1501.40)118 180 R 17.5
+(49.98 1499.90)118 192 R 17.5(60.00 1499.80)118 204 R 17.5
+(69.99 1497.50)118 216 R 17.5(79.98 1496.90)118 228 R 17.5
+(90.00 1496.90)118 240 R 17.5(99.99 1495.10)118 252 R 17.5
+(198.99 1486.60)115.5 264 R 17.5(498.99 1480.60)115.5 276 R 17.5
+(1000.98 1481.90)113 288 R 17.5(1830.00 1488.70)113 300 R(##)110.5 312 Q
+(##)110.5 324 Q 2.5(4S)110.5 336 S(VP records read)-2.5 E 2.5(1S)110.5
+348 S(VP records written)-2.5 E -.8(To)108 372 S
+(tal 4 SVP records read T).8 E(otal 1 SVP records written)-.8 E/F1 10.95
+/Times-Bold@0 SF(SEE ALSO)72 400.8 Q/F2 10/Times-Bold@0 SF(mbsystem)108
+412.8 Q F0(\(1\),)A F2(mbpr)2.5 E(ocess)-.18 E F0(\(1\),)A F2
+(mbsvpselect)2.5 E F0(\(1\))A F1 -.11(BU)72 441.6 S(GS).11 E F0
+(Probably)108 453.6 Q(.)-.65 E(MB-System 5.0)72 768 Q(17 March 2014)
+140.11 E(3)198.45 E 0 Cg EP
 %%Trailer
 end
 %%EOF

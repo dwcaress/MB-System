@@ -1,4 +1,4 @@
-.TH mbsvplist 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbsvplist 1 "17 March 2014" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsvplist\fP \- List water sound velocity profiles in swath sonar data files.
 
@@ -20,7 +20,13 @@ By default, all unique SVPs encountered are
 listed to stdout. The SVPs may instead be
 written to individual files with names FILE_XXX.svp,
 where FILE is the swath data filename and XXX is the
-SVP count within the file. Some files contain SVPs at
+SVP count within the file. The SVP files output by \fBmbsvplist\fP
+include a header line starting with "## MB-SVP" and including the
+timestamp and location of the SVP record as inferred from its
+location in the file. This header record is recognized by the program
+\fBmbsvpselect\fP which uses the information to select the best
+SVP models to apply to swath data files for bathymetry recalculation.
+Some files contain SVPs at
 regular intervals, typically with the same SVP duplicated
 many times. By default, \fBmbsvplist\fP ignores duplicate
 SVPs. The \fB\-D\fP option causes duplicate SVPs to be output.
@@ -188,7 +194,7 @@ Total 4 SVP records read
 Total 1 SVP records written
 
 .SH SEE ALSO
-\fBmbsystem\fP(1), \fBmbprocess\fP(1)
+\fBmbsystem\fP(1), \fBmbprocess\fP(1), \fBmbsvpselect\fP(1)
 
 .SH BUGS
 Probably.
