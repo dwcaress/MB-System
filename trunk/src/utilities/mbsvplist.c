@@ -2,7 +2,7 @@
  *    The MB-system:	mbsvplist.c	1/3/2001
  *    $Id$
  *
- *    Copyright (c) 2001-2013 by
+ *    Copyright (c) 2001-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

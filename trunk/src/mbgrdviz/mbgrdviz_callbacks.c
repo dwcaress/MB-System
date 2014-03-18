@@ -2,7 +2,7 @@
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
  *    $Id$
  *
- *    Copyright (c) 2002-2013 by
+ *    Copyright (c) 2002-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

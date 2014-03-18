@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
  *    $Id$
  *
- *    Copyright (c) 2000-2013 by
+ *    Copyright (c) 2000-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

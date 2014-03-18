@@ -16,7 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-* Version 5.4.2172       March 14, 2014
+* Version 5.4.2175       March 18, 2014
 * Version 5.4.2168       February 19, 2014
 * Version 5.4.2163       January 31, 2014
   Version 5.4.2162       January 24, 2014
@@ -171,6 +171,30 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2175 (March 18, 2014)
+
+Configure.ac: Removed reference to src/mbsvptool (src/mbsvptool/mbsvptool.c
+was moved to src/utilities/mbsvpselect.c for 5.4.2173).
+
+MBnavadjust: The program generates route files of crossings and ties that
+can be viewed in mbgrdviz. The coloring of the crossings and ties when
+displayed in mbgrdviz has changed. The route files generated are:
+    True Crossings (unfixed)
+    >50% Crossings (unfixed)
+    >25% && <50% Crossings (unfixed)
+    <25% Crossings (unfixed)
+    Ties (unfixed)
+    Ties (fixed)
+For the crossing files, individual crossings are colored as:
+    Unset - Red
+    Skipped - Yellow
+    Set - Green
+For the tie files, individual ties are colored as:
+    Ties (unfixed) - Blue-Green
+    Ties (fixed) - Purple
+
+All source files: Updated copyright notices to 2014.
 
 -----> 5.4.2173 (March 17, 2014)
 

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_segy.c	5/25/2004
  *    $Id$
  *
- *    Copyright (c) 2004-2013 by
+ *    Copyright (c) 2004-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

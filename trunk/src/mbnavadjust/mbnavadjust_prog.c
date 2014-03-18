@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
  *    $Id$
  *
- *    Copyright (c) 2000-2013 by
+ *    Copyright (c) 2000-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1391,7 +1391,6 @@ fprintf(stderr,"Writing project %s\n", project.name);
 		fprintf(hfp, "## Number of routes: %d\n",ncrossings_true);
 		fprintf(hfp, "## Route point format:\n");
 		fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
-		routecolor = ROUTE_COLOR_BLUE;
 
 		/* loop over all crossings */
 		nroute = 0;
@@ -1415,11 +1414,20 @@ fprintf(stderr,"Writing project %s\n", project.name);
 				navlon2 = section_2->snav_lon[snav_2] + section_2->snav_lon_offset[snav_2];
 				navlat2 = section_2->snav_lat[snav_2] + section_2->snav_lat_offset[snav_2];
 				if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+					{
 					status_char = 'U';
+					routecolor = ROUTE_COLOR_YELLOW;
+					}
 				else if (crossing->status == MBNA_CROSSING_STATUS_SET)
+					{
 					status_char = '*';
+					routecolor = ROUTE_COLOR_GREEN;
+					}
 				else
+					{
 					status_char = '-';
+					routecolor = ROUTE_COLOR_RED;
+					}
 				if (crossing->truecrossing == MB_NO)
 					truecrossing_char = ' ';
 				else
@@ -1480,7 +1488,6 @@ fprintf(stderr,"Output %d (expected %d) true crossing locations to %s\n", nroute
 		fprintf(hfp, "## Number of routes: %d\n",ncrossings_gt50);
 		fprintf(hfp, "## Route point format:\n");
 		fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
-		routecolor = ROUTE_COLOR_BLUEGREEN;
 
 		/* loop over all crossings */
 		nroute = 0;
@@ -1504,11 +1511,20 @@ fprintf(stderr,"Output %d (expected %d) true crossing locations to %s\n", nroute
 				navlon2 = section_2->snav_lon[snav_2] + section_2->snav_lon_offset[snav_2];
 				navlat2 = section_2->snav_lat[snav_2] + section_2->snav_lat_offset[snav_2];
 				if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+					{
 					status_char = 'U';
+					routecolor = ROUTE_COLOR_YELLOW;
+					}
 				else if (crossing->status == MBNA_CROSSING_STATUS_SET)
+					{
 					status_char = '*';
+					routecolor = ROUTE_COLOR_GREEN;
+					}
 				else
+					{
 					status_char = '-';
+					routecolor = ROUTE_COLOR_RED;
+					}
 				if (crossing->truecrossing == MB_NO)
 					truecrossing_char = ' ';
 				else
@@ -1569,7 +1585,6 @@ fprintf(stderr,"Output %d (expected %d) >=50%% overlap crossing locations to %s\
 		fprintf(hfp, "## Number of routes: %d\n",ncrossings_gt25);
 		fprintf(hfp, "## Route point format:\n");
 		fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
-		routecolor = ROUTE_COLOR_YELLOW;
 
 		/* loop over all crossings */
 		nroute = 0;
@@ -1593,11 +1608,20 @@ fprintf(stderr,"Output %d (expected %d) >=50%% overlap crossing locations to %s\
 				navlon2 = section_2->snav_lon[snav_2] + section_2->snav_lon_offset[snav_2];
 				navlat2 = section_2->snav_lat[snav_2] + section_2->snav_lat_offset[snav_2];
 				if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+					{
 					status_char = 'U';
+					routecolor = ROUTE_COLOR_YELLOW;
+					}
 				else if (crossing->status == MBNA_CROSSING_STATUS_SET)
+					{
 					status_char = '*';
+					routecolor = ROUTE_COLOR_GREEN;
+					}
 				else
+					{
 					status_char = '-';
+					routecolor = ROUTE_COLOR_RED;
+					}
 				if (crossing->truecrossing == MB_NO)
 					truecrossing_char = ' ';
 				else
@@ -1658,7 +1682,6 @@ fprintf(stderr,"Output %d (expected %d) >=25%% && < 50%% overlap crossing locati
 		fprintf(hfp, "## Number of routes: %d\n",ncrossings_lt25);
 		fprintf(hfp, "## Route point format:\n");
 		fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
-		routecolor = ROUTE_COLOR_PURPLE;
 
 		/* loop over all crossings */
 		nroute = 0;
@@ -1682,11 +1705,20 @@ fprintf(stderr,"Output %d (expected %d) >=25%% && < 50%% overlap crossing locati
 				navlon2 = section_2->snav_lon[snav_2] + section_2->snav_lon_offset[snav_2];
 				navlat2 = section_2->snav_lat[snav_2] + section_2->snav_lat_offset[snav_2];
 				if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+					{
 					status_char = 'U';
+					routecolor = ROUTE_COLOR_YELLOW;
+					}
 				else if (crossing->status == MBNA_CROSSING_STATUS_SET)
+					{
 					status_char = '*';
+					routecolor = ROUTE_COLOR_GREEN;
+					}
 				else
+					{
 					status_char = '-';
+					routecolor = ROUTE_COLOR_RED;
+					}
 				if (crossing->truecrossing == MB_NO)
 					truecrossing_char = ' ';
 				else
@@ -1747,7 +1779,6 @@ fprintf(stderr,"Output %d (expected %d) <25%% overlap crossing locations to %s\n
 		fprintf(hfp, "## Number of routes: %d\n",ncrossings_fixed);
 		fprintf(hfp, "## Route point format:\n");
 		fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
-		routecolor = ROUTE_COLOR_RED;
 
 		/* loop over all crossings */
 		nroute = 0;
@@ -1770,11 +1801,20 @@ fprintf(stderr,"Output %d (expected %d) <25%% overlap crossing locations to %s\n
 				navlon2 = section_2->snav_lon[snav_2] + section_2->snav_lon_offset[snav_2];
 				navlat2 = section_2->snav_lat[snav_2] + section_2->snav_lat_offset[snav_2];
 				if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+					{
 					status_char = 'U';
+					routecolor = ROUTE_COLOR_YELLOW;
+					}
 				else if (crossing->status == MBNA_CROSSING_STATUS_SET)
+					{
 					status_char = '*';
+					routecolor = ROUTE_COLOR_GREEN;
+					}
 				else
+					{
 					status_char = '-';
+					routecolor = ROUTE_COLOR_RED;
+					}
 				if (crossing->truecrossing == MB_NO)
 					truecrossing_char = ' ';
 				else
@@ -1835,7 +1875,7 @@ fprintf(stderr,"Output %d (expected %d) fixed crossing locations to %s\n", nrout
 		fprintf(hfp, "## Number of routes: %d\n",nties_unfixed);
 		fprintf(hfp, "## Route point format:\n");
 		fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
-		routecolor = ROUTE_COLOR_GREEN;
+		routecolor = ROUTE_COLOR_BLUEGREEN;
 
 		/* loop over all crossings */
 		nroute = 0;
