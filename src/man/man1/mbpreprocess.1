@@ -1,0 +1,68 @@
+.TH mbpreprocess 1 "14 March 2014" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbpreprocess\fP \- performs preprocessing of swath sonar data as part of setting
+up an MB-System processing structure for a dataset.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbpreprocess\fP [ 
+\fB--verbose\fP
+\fB--help\fP
+\fB--input\fP=\fIFILE\fP
+\fB--format\fP=\fIFORMAT\fP
+\fB--nav_file\fP=\fIFILE\fP
+\fB--nav_file_format\fP=\fIFORMAT\fP
+\fB--nav_async\fP=\fIRECORDTYPE\fP
+\fB--sensordepth_file\fP=\fIFILE\fP
+\fB--sensordepth_file_format\fP=\fIFILE\fP
+\fB--sensordepth_async\fP=\fIRECORDTYPE\fP
+\fB--heading_file\fP=\fIFILE\fP
+\fB--heading_file_format\fP=\fIFORMAT\fP
+\fB--heading_async\fP=\fIRECORDTYPE\fP
+\fB--attitude_file\fP=\fIFILE\fP
+\fB--attitude_file_format\fP=\fIFORMAT\fP
+\fB--attitude_async\fP=\fIRECORDTYPE\fP
+\fB--timeshift_file\fP=\fIFILE\fP
+\fB--timeshift_constant\fP=\fITIME\fP
+\fB--timeshift_apply_nav\fP
+\fB--timeshift_apply_sensordepth\fP
+\fB--timeshift_apply_heading\fP
+\fB--timeshift_apply_attitude\fP
+\fB--timeshift_apply_all_ancilliary\fP
+\fB--timeshift_apply_survey\fP
+\fB--timeshift_apply_all\fP
+]
+
+.SH DESCRIPTION
+MBpreprocess handles preprocessing of swath sonar data as part of setting
+up an MB-System processing structure for a dataset. This program replaces
+the several format-specific preprocessing programs
+found in MB-System version 5 releases with a single program for version 6.
+This program is under development, and is not ready for general use at
+this time.
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH OPTIONS
+.TP
+.B --verbose
+By default \fBmbpreprocess\fP outputs minimal information to the shell. This option
+causes the program to indicate it's progress as it runs. Goody.
+
+.SH EXAMPLES
+To be written.....
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbdatalist\fP(1), \fBmbprocess\fP(1)
+
+.SH BUGS
+Oh yeah.

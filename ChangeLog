@@ -172,6 +172,22 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2173 (March 17, 2014)
+
+MBsvpselect: Added program contributed by Ammar Aljuhe and Christian Ferreira
+of MARUM (University of Bremen). This program chooses and implements the best
+available sound speed model for each swath file in a survey. The user  provides
+a  list of the available sound speed models and specifies the criteria used for
+model selection. The program uses mbset to turn on bathymetry recalculation by
+raytracing through the sound speed model selected for each swath file.
+
+MBsvplist: The SVP files output by mbsvplist now include a header line that
+is recognized by mbsvpselect. This header line includes the time stamp and
+position associated with the SVP record's location in the swath file.
+
+MBpreprocess: Added an incomplete manual page for this incomplete MB-System 6
+program.
+
 -----> 5.4.2172 (March 14, 2014)
 
 MBmosaic: Added option to apply priorities based on the platform heading.
