@@ -3906,7 +3906,7 @@ int mb_datalist_read2(int verbose,
 		}
 
 	/* call mb_datalist_read3() */
-	status = mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, format, weight, &has_bounds, file_bounds, error);
+	status = mb_datalist_read3(verbose, datalist, pstatus, path, ppath, format, weight, &has_bounds, file_bounds, error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
