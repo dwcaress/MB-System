@@ -365,6 +365,11 @@ int mb_datalist_read2(int verbose,
 		void *datalist,
 		int *pstatus, char *path, char *ppath, int *format, double *weight,
 		int *error);
+int mb_datalist_read3(int verbose,
+		void *datalist,
+		int *pstatus, char *path, char *ppath, int *format, double *weight,
+		int *has_bounds, double *file_bounds,
+		int *error);
 int mb_datalist_close(int verbose,
 		void **datalist, int *error);
 int mb_get_relative_path(int verbose,

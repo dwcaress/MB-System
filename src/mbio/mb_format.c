@@ -3810,6 +3810,8 @@ int mb_datalist_read(int verbose,
 	struct mb_datalist_struct *datalist_ptr;
 	char	ppath[MB_PATH_MAXLINE];
 	int	pstatus;
+	int	has_bounds;
+	double	file_bounds[4];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3836,8 +3838,8 @@ int mb_datalist_read(int verbose,
 		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
 		}
 
-	/* call mb_datalist_read2() */
-	status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, format, weight, error);
+	/* call mb_datalist_read3() */
+	status = mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, format, weight, &has_bounds, file_bounds, error);
 
 	/* deal with pstatus */
 	if (status == MB_SUCCESS && *error == MB_ERROR_NO_ERROR)
@@ -3847,6 +3849,64 @@ int mb_datalist_read(int verbose,
 			strcpy(path, ppath);
 			}
 		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       path:        %s\n",path);
+		fprintf(stderr,"dbg2       format:      %d\n",*format);
+		fprintf(stderr,"dbg2       weight:      %f\n",*weight);
+		fprintf(stderr,"dbg2       error:       %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mb_datalist_read2(int verbose,
+		void *datalist,
+		int *pstatus, char *path, char* ppath, int *format, double *weight,
+		int *error)
+{
+	/* local variables */
+	char	*function_name = "mb_datalist_read";
+	int	status = MB_SUCCESS;
+	struct mb_datalist_struct *datalist_ptr;
+	int	has_bounds;
+	double	file_bounds[4];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       datalist:      %p\n",(void *)datalist);
+		}
+
+	/* get datalist pointer */
+	datalist_ptr = (struct mb_datalist_struct *) datalist;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       datalist_ptr->open:       %d\n",datalist_ptr->open);
+		fprintf(stderr,"dbg2       datalist_ptr->fp:         %p\n",(void *)datalist_ptr->fp);
+		fprintf(stderr,"dbg2       datalist_ptr->recursion:  %d\n",datalist_ptr->recursion);
+		fprintf(stderr,"dbg2       datalist_ptr->path:       %s\n",datalist_ptr->path);
+		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %p\n",(void *)datalist_ptr->datalist);
+		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
+		}
+
+	/* call mb_datalist_read3() */
+	status = mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, format, weight, &has_bounds, file_bounds, error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -4159,9 +4219,10 @@ int mb_datalist_readorg(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_datalist_read2(int verbose,
+int mb_datalist_read3(int verbose,
 		void *datalist,
 		int *pstatus, char *path, char *ppath, int *format, double *weight,
+		int *has_bounds, double *file_bounds,
 		int *error)
 {
 	/* local variables */
@@ -4282,7 +4343,8 @@ int mb_datalist_read2(int verbose,
 					istart = 0;
 
 				/* read datalist item */
-				nscan = sscanf(&(buffer[istart]),"%s %d %lf",path,format,weight);
+				nscan = sscanf(&(buffer[istart]),"%s %d %lf %lf/%lf/%lf/%lf",
+						path,format,weight,file_bounds,&file_bounds[1],&file_bounds[2],&file_bounds[3]);
 
 				/* get path */
 				if (nscan >= 1 && path[0] != '/'
@@ -4331,6 +4393,15 @@ int mb_datalist_read2(int verbose,
 						    }
 					    }
 				    }
+
+				if (nscan < 7)
+				{
+					*has_bounds = MB_NO;
+				}
+				else
+				{
+					*has_bounds = MB_YES;
+				}
 
 				/* check for processed file */
 				*pstatus = MB_PROCESSED_NONE;
@@ -4455,13 +4526,15 @@ int mb_datalist_read2(int verbose,
 			if (datalist2_ptr->open == MB_YES)
 			    {
 			    /* recursively call mb_read_datalist */
-			    status = mb_datalist_read2(verbose,
+			    status = mb_datalist_read3(verbose,
 					    (void *)datalist_ptr->datalist,
 					    pstatus,
 					    path,
 					    ppath,
 					    format,
 					    weight,
+					    has_bounds,
+					    file_bounds,
 					    error);
 
 			    /* if datalist read fails close it */

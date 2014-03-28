@@ -73,6 +73,7 @@
 #include "mb_format.h"
 #include "mb_status.h"
 #include "mb_process.h"
+#include "mb_info.h"
 
 static char rcs_id[] = "$Id$";
 
@@ -112,9 +113,14 @@ int main (int argc, char **argv)
 	double	timegap;
 	char	fileroot[MB_PATH_MAXLINE];
 	char	file[MB_PATH_MAXLINE];
+	char	pfile[MB_PATH_MAXLINE];
 	char	pwd[MB_PATH_MAXLINE];
 	char	command[MB_PATH_MAXLINE];
 	char	*filename;
+	int pstatus;
+	struct mb_info_struct mb_info;
+	double	file_bounds[4];
+	int	has_bounds = MB_NO;
 	int	nfile = 0;
 	int	make_inf = MB_NO;
 	int	force_update = MB_NO;
@@ -233,6 +239,7 @@ int main (int argc, char **argv)
 			break;
 		case '?':
 			errflg++;
+			break;
 		}
 
 	/* set output stream */
@@ -449,11 +456,15 @@ int main (int argc, char **argv)
 			    program_name);
 		    exit(error);
 		    }
-		while ((status = mb_datalist_read(verbose,datalist,
-					    file,&format,&file_weight,&error))
+		while ((status = mb_datalist_read3(verbose,datalist,&pstatus,
+					    file,pfile,&format,&file_weight,&has_bounds,file_bounds,&error))
 			    == MB_SUCCESS)
 			{
 			nfile++;
+			if (pstatus == MB_PROCESSED_USE)
+			{
+				strcpy(file, pfile);
+			}
 			bufptr = getcwd(pwd, MB_PATH_MAXLINE);
 			mb_get_relative_path(verbose, file, pwd, &error);
 			if (make_inf == MB_YES)
@@ -506,23 +517,31 @@ int main (int argc, char **argv)
 			    /* check for mbinfo file if bounds checking enabled */
 			    if (look_bounds == MB_YES)
 				{
-				status = mb_check_info(verbose, file, lonflip, bounds,
-					    &file_in_bounds, &error);
-				if (status == MB_FAILURE)
-				    {
-				    file_in_bounds = MB_YES;
-				    status = MB_SUCCESS;
-				    error = MB_ERROR_NO_ERROR;
-				    }
+			    	if (has_bounds == MB_NO)
+			    	{
+			    		status = mb_get_info(verbose, file, &mb_info, lonflip, &error);
+			    		file_bounds[0] = mb_info.lon_min;
+			    		file_bounds[1] = mb_info.lon_max;
+			    		file_bounds[2] = mb_info.lat_min;
+			    		file_bounds[3] = mb_info.lat_max;
+			    		has_bounds = MB_YES;
+			    	}
+
+			    	file_in_bounds = MB_YES;
+			    	if (file_bounds[3] < bounds[2] || file_bounds[2] > bounds[3])
+			    		file_in_bounds = MB_NO;
+			    	if (file_bounds[1] < bounds[0] || file_bounds[0] > bounds[1])
+			    		file_in_bounds = MB_NO;
 				}
 
-			    /* ouput file if no bounds checking or in bounds */
+			    /* output file if no bounds checking or in bounds */
 			    if (look_bounds == MB_NO || file_in_bounds == MB_YES)
 				{
+				fprintf(output, "%s %d %f", file, format, file_weight);
+				if (has_bounds == MB_YES)
+					fprintf(output, " %f/%f/%f/%f", file_bounds[0], file_bounds[1], file_bounds[2], file_bounds[3]);
 				if (verbose > 0)
-					fprintf(output, "%s %d %f\n", file, format, file_weight);
-				else
-					fprintf(output, "%s %d %f", file, format, file_weight);
+					fprintf(output, "\n");
 
 				/* check status if desired */
 				if (status_report == MB_YES)
