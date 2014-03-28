@@ -391,17 +391,17 @@ int get_other_data(
 		int	datatype,
 		double	*data,
 		int	*error);
+double exp10(double x);
 
 /* program identifiers */
 static char rcs_id[] = "$Id$";
 char program_name[] = "mbmosaic";
 char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
-char usage_message[] = "mbmosaic -Ifilelist -Oroot \
-[-Rwest/east/south/north -Rfactor -Adatatype\n\
-          -Bborder -Cclip/mode/tension -Dxdim/ydim -Edx/dy/units \n\
-          -Fpriority_range -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings \n\
-          -Sspeed -Ttopogrid -Uazimuth/factor -V -Wscale -Xextend \n\
-          -Ypriority_source -Zbathdef]";
+char usage_message[] = "mbmosaic -Ifilelist -Oroot [-Rwest/east/south/north -Rfactor -Adatatype\n"
+          "-Bborder -Cclip/mode/tension -Dxdim/ydim -Edx/dy/units \n"
+          "-Fpriority_range -Ggridkind -H -Jprojection -Kangle -Llonflip -M -N -Ppings \n"
+          "-Sspeed -Ttopogrid -Uazimuth/factor -V -Wscale -Xextend \n"
+          "-Ypriority_source -Zbathdef]";
 
 /*--------------------------------------------------------------------*/
 
@@ -495,6 +495,9 @@ int main (int argc, char **argv)
 	int 	use_slope = MB_NO;
 	int	linear = MB_NO;
 	double	value;
+	int	enforce_minimum_angle = MB_NO;
+	double	minimum_angle = 99;
+	int	use_ping = MB_YES;
 
 	/* topography parameters */
         mb_path topogridfile;
@@ -645,7 +648,7 @@ int main (int argc, char **argv)
 	gydim = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:")) != -1)
 	  switch (c)
 		{
 		case 'A':
@@ -743,6 +746,12 @@ int main (int argc, char **argv)
 		case 'j':
 			sscanf (optarg,"%s", projection_pars);
 			projection_pars_f = MB_YES;
+			flag++;
+			break;
+		case 'K':
+		case 'k':
+			sscanf (optarg,"%lf", &minimum_angle);
+			enforce_minimum_angle = MB_YES;
 			flag++;
 			break;
 		case 'L':
@@ -940,6 +949,7 @@ int main (int argc, char **argv)
 		fprintf(outfp,"dbg2       etime_i[6]:           %d\n",etime_i[6]);
 		fprintf(outfp,"dbg2       speedmin:             %f\n",speedmin);
 		fprintf(outfp,"dbg2       timegap:              %f\n",timegap);
+		fprintf(outfp,"dbg2       min angle:            %f\n",minimum_angle);
 		fprintf(outfp,"dbg2       file list:            %s\n",ifile);
 		fprintf(outfp,"dbg2       output file root:     %s\n",fileroot);
 		fprintf(outfp,"dbg2       grid x dimension:     %d\n",xdim);
@@ -2000,6 +2010,20 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
                               mbmosaic_get_beamangles(verbose, sonardepth, beams_bath, beamflag, bath, bathacrosstrack, bathalongtrack,
                                                       gangles, &error);
 
+                              use_ping = MB_YES;
+
+                              if (enforce_minimum_angle == MB_YES)
+                              {
+                            	  use_ping = MB_NO;
+                            	  for (j=0;j<beams_bath;j++)
+                            	  {
+                            		  if (gangles[j] > minimum_angle || gangles[j] < -minimum_angle) {
+                            			  use_ping = MB_YES;
+                            			  break;
+                            		  }
+                            	  }
+                              }
+
                               /* get priorities */
                               mbmosaic_get_beampriorities(verbose, priority_mode,
                                     n_priority_angle, priority_angle_angle, priority_angle_priority,
@@ -2032,7 +2056,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
                               /* deal with data */
                               for (ib=0;ib<beams_amp;ib++)
-                                if (mb_beam_ok(beamflag[ib]))
+                                if (use_ping == MB_YES && mb_beam_ok(beamflag[ib]))
                                   {
                                   /* get position in grid */
                                   for (j=0;j<4;j++)
@@ -2636,7 +2660,21 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
                               mbmosaic_get_beamangles(verbose, sonardepth, beams_bath, beamflag, bath, bathacrosstrack, bathalongtrack,
                                                       gangles, &error);
 
-                              /* get priorities */
+                              use_ping = MB_YES;
+
+                              if (enforce_minimum_angle == MB_YES)
+                              {
+                            	  use_ping = MB_NO;
+                            	  for (j=0;j<beams_bath;j++)
+                            	  {
+                            		  if (gangles[j] > minimum_angle || gangles[j] < -minimum_angle) {
+                            			  use_ping = MB_YES;
+                            			  break;
+                            		  }
+                            	  }
+                              }
+
+                             /* get priorities */
                               mbmosaic_get_beampriorities(verbose, priority_mode,
                                     n_priority_angle, priority_angle_angle, priority_angle_priority,
                                     priority_azimuth, priority_azimuth_factor,
@@ -2668,7 +2706,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
                               /* deal with data */
                               for (ib=0;ib<beams_amp;ib++)
-                                if (mb_beam_ok(beamflag[ib]))
+                                if (use_ping && mb_beam_ok(beamflag[ib]))
                                   {
                                   /* get position in grid */
                                   for (j=0;j<4;j++)
