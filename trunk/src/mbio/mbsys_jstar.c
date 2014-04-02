@@ -313,6 +313,178 @@ int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+                        double time_d, double navlon, double navlat,
+                        double speed, double heading, double sonardepth,
+                        double roll, double pitch, double heave,
+                        int *error)
+{
+	char	*function_name = "mbsys_jstar_extract";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_jstar_struct *store;
+	struct mbsys_jstar_channel_struct *sbp;
+	struct mbsys_jstar_channel_struct *ssport;
+	struct mbsys_jstar_channel_struct *ssstbd;
+	int	time_i[7], time_j[5];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
+		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
+		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
+		fprintf(stderr,"dbg2       speed:      %f\n",speed);
+		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       sonardepth: %f\n",sonardepth);
+		fprintf(stderr,"dbg2       roll:       %f\n",roll);
+		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
+		fprintf(stderr,"dbg2       heave:      %f\n",heave);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_jstar_struct *) store_ptr;
+
+	/* preprocess subbottom data */
+	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+		{
+		/* get channel */
+		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
+
+		/* get time */
+		mb_get_date(verbose,time_d,time_i);
+		mb_get_jtime(verbose,time_i,time_j);
+		sbp->year = time_i[0];
+		sbp->day = time_j[1];
+		sbp->hour = time_i[3];
+		sbp->minute = time_i[4];
+		sbp->second = time_i[5];
+		sbp->millisecondsToday = 0.001 * time_i[6]
+					+ 1000 * (time_i[5]
+						+ 60.0 * (time_i[4]
+							+ 60.0 * time_i[3]));
+
+		/* get navigation */
+		if (navlon < 180.0) navlon = navlon + 360.0;
+		if (navlon > 180.0) navlon = navlon - 360.0;
+		sbp->sourceCoordX = (int) (600000.0 * navlon);
+		sbp->sourceCoordY = (int) (600000.0 * navlat);
+		sbp->groupCoordX = (int) (600000.0 * navlon);
+		sbp->groupCoordY = (int) (600000.0 * navlat);
+
+		/* get heading */
+		sbp->heading = (short) (100.0 * heading);
+
+		/* get sonardepth */
+		sbp->startDepth = sonardepth /
+				sbp->sampleInterval / 0.00000075;
+		sbp->sonardepth = 1000 * sonardepth;
+
+		/* get attitude */
+		sbp->roll = 32768 * roll / 180.0;
+		sbp->pitch = 32768 * pitch / 180.0;
+		sbp->heaveCompensation = heave /
+				sbp->sampleInterval / 0.00000075;
+		}
+
+	/* preprocess sidescan data */
+	else if (store->kind == MB_DATA_DATA
+		|| store->kind == MB_DATA_SIDESCAN2)
+		{
+		/* get channels */
+		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
+		ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
+
+		/* get time */
+		mb_get_date(verbose,time_d,time_i);
+		mb_get_jtime(verbose,time_i,time_j);
+		ssport->year = time_i[0];
+		ssport->day = time_j[1];
+		ssport->hour = time_i[3];
+		ssport->minute = time_i[4];
+		ssport->second = time_i[5];
+		ssport->millisecondsToday = 0.001 * time_i[6]
+					+ 1000 * (time_i[5]
+						+ 60.0 * (time_i[4]
+							+ 60.0 * time_i[3]));
+		ssstbd->year = time_i[0];
+		ssstbd->day = time_j[1];
+		ssstbd->hour = time_i[3];
+		ssstbd->minute = time_i[4];
+		ssstbd->second = time_i[5];
+		ssstbd->millisecondsToday = 0.001 * time_i[6]
+					+ 1000 * (time_i[5]
+						+ 60.0 * (time_i[4]
+							+ 60.0 * time_i[3]));
+
+		/* get navigation */
+		if (navlon < 180.0) navlon = navlon + 360.0;
+		if (navlon > 180.0) navlon = navlon - 360.0;
+		ssport->sourceCoordX = 600000.0 * navlon;
+		ssport->sourceCoordY = 600000.0 * navlat;
+		ssstbd->sourceCoordX = 600000.0 * navlon;
+		ssstbd->sourceCoordY = 600000.0 * navlat;
+		ssport->groupCoordX = 600000.0 * navlon;
+		ssport->groupCoordY = 600000.0 * navlat;
+		ssstbd->groupCoordX = 600000.0 * navlon;
+		ssstbd->groupCoordY = 600000.0 * navlat;
+
+		/* get heading and speed */
+		ssport->heading = (short) (100.0 * heading);
+		ssstbd->heading = (short) (100.0 * heading);
+
+		/* get sonardepth */
+		ssport->startDepth = sonardepth /
+				ssport->sampleInterval / 0.00000075;
+		ssstbd->startDepth = sonardepth /
+				ssstbd->sampleInterval / 0.00000075;
+		ssport->sonardepth = 1000 * sonardepth;
+		ssstbd->sonardepth = 1000 * sonardepth;
+
+		/* get attitude */
+		ssport->roll = 32768 * roll / 180.0;
+		ssport->pitch = 32768 * pitch / 180.0;
+		ssport->heaveCompensation = heave /
+				ssport->sampleInterval / 0.00000075;
+		ssstbd->roll = 32768 * roll / 180.0;
+		ssstbd->pitch = 32768 * pitch / 180.0;
+		ssstbd->heaveCompensation = heave /
+				ssstbd->sampleInterval / 0.00000075;
+		}
+
+	/* preprocess comment */
+	else if (store->kind == MB_DATA_COMMENT)
+		{
+		}
+
+	/* preprocess anything else */
+	else
+		{
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -1697,12 +1869,11 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* insert data in structure */
-	else if (store->kind == MB_DATA_DATA)
+	else if (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2)
 		{
 		/* get channels */
 		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
 		ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
-
 
 		/* set kind and subsystem */
 		store->kind = MB_DATA_DATA;

@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template	5/24/94
 #	$Id$
 #
-#     Copyright (c) 1993-2013 by
+#     Copyright (c) 1993-2014 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -21,7 +21,6 @@
 all:
 	cd gsf; make all
 	cd surf; make all
-	cd mr1pr; make all
 	cd bsio; make all
 	cd proj; make all
 	cd mbio; make all
@@ -45,7 +44,6 @@ all:
 clean:
 	- cd gsf; make clean
 	- cd surf; make clean
-	- cd mr1pr; make clean
 	- cd bsio; make clean
 	- cd proj; make clean
 	- cd mbio; make clean

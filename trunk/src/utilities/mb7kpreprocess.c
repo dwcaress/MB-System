@@ -597,8 +597,9 @@ int main (int argc, char **argv)
 	int	sonardepth_time_d_index;
 	int	sonardepth_sonardepth_index;
 	int	sonardepth_len;
+	int	nhalffilter;
 	double	sonardepth_filterweight;
-	double	dtol, weight;
+	double	dtime, dtol, weight;
 	double	factor;
 	double	velocityx, velocityy;
 	int	type_save, kind_save;
@@ -3535,153 +3536,173 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		{
 		/* apply filtering to sonardepth data
 			read from asynchronous records in 7k files */
-fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
-		for (i=0;i<ndat_sonardepth;i++)
+		if (ndat_sonardepth > 1)
 			{
-			dat_sonardepth_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<ndat_sonardepth;j++)
+fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
+			dtime = (dat_sonardepth_time_d[ndat_sonardepth-1]  - dat_sonardepth_time_d[0]) / ndat_sonardepth;
+			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+			for (i=0;i<ndat_sonardepth;i++)
 				{
-				dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
+				dat_sonardepth_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+				for (j=j1;j<=j2;j++)
 					{
+					dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
 					weight = exp(-dtol * dtol);
 					dat_sonardepth_sonardepthfilter[i] += weight * dat_sonardepth_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
+				if (sonardepth_filterweight > 0.0)
+					dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
-			if (sonardepth_filterweight > 0.0)
-				dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<ndat_sonardepth;i++)
-			{
-			if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(dat_sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			dat_sonardepth_sonardepth[i] = (1.0 - factor) * dat_sonardepth_sonardepth[i]
-						+ factor * dat_sonardepth_sonardepthfilter[i];
+			for (i=0;i<ndat_sonardepth;i++)
+				{
+				if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(dat_sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				dat_sonardepth_sonardepth[i] = (1.0 - factor) * dat_sonardepth_sonardepth[i]
+							+ factor * dat_sonardepth_sonardepthfilter[i];
+				}
 			}
 
 		/* filter sonardepth data from separate file */
-fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
-		for (i=0;i<nsonardepth;i++)
+		if (nsonardepth > 1)
 			{
-			sonardepth_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<nsonardepth;j++)
+fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
+			dtime = (sonardepth_time_d[nsonardepth-1]  - sonardepth_time_d[0]) / nsonardepth;
+			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+			for (i=0;i<nsonardepth;i++)
 				{
-				dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
+				sonardepth_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, nsonardepth - 1);
+				for (j=j1;j<=j2;j++)
 					{
+					dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
 					weight = exp(-dtol * dtol);
 					sonardepth_sonardepthfilter[i] += weight * sonardepth_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
+				if (sonardepth_filterweight > 0.0)
+					sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
-			if (sonardepth_filterweight > 0.0)
-				sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<nsonardepth;i++)
-			{
-			if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			sonardepth_sonardepth[i] = (1.0 - factor) * sonardepth_sonardepth[i]
-						+ factor * sonardepth_sonardepthfilter[i];
+			for (i=0;i<nsonardepth;i++)
+				{
+				if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				sonardepth_sonardepth[i] = (1.0 - factor) * sonardepth_sonardepth[i]
+							+ factor * sonardepth_sonardepthfilter[i];
+				}
 			}
 
 		/* filter sonardepth data from separate INS file */
-fprintf(stderr,"Applying filtering to %d INS nav data\n", nins);
-		for (i=0;i<nins;i++)
+		if (nins > 1)
 			{
-			ins_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<nins;j++)
+fprintf(stderr,"Applying filtering to %d INS nav data\n", nins);
+			for (i=0;i<nins;i++)
 				{
-				dtol = (ins_time_d[j] - ins_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
+				ins_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				dtime = (ins_time_d[nins-1]  - ins_time_d[0]) / nins;
+				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, nins - 1);
+				for (j=j1;j<=j2;j++)
 					{
+					dtol = (ins_time_d[j] - ins_time_d[i]) / sonardepthfilterlength;
 					weight = exp(-dtol * dtol);
 					ins_sonardepthfilter[i] += weight * ins_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
+				if (sonardepth_filterweight > 0.0)
+					ins_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
-			if (sonardepth_filterweight > 0.0)
-				ins_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<nins;i++)
-			{
-			if (ins_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(ins_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			ins_sonardepth[i] = (1.0 - factor) * ins_sonardepth[i]
-						+ factor * ins_sonardepthfilter[i];
+			for (i=0;i<nins;i++)
+				{
+				if (ins_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(ins_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				ins_sonardepth[i] = (1.0 - factor) * ins_sonardepth[i]
+							+ factor * ins_sonardepthfilter[i];
+				}
 			}
 
 		/* filter sonardepth data from separate WHOI DSL file */
-fprintf(stderr,"Applying filtering to %d DSL nav data\n", ndsl);
-		for (i=0;i<ndsl;i++)
+		if (ndsl > 1)
 			{
-			dsl_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<ndsl;j++)
+fprintf(stderr,"Applying filtering to %d DSL nav data\n", ndsl);
+			for (i=0;i<ndsl;i++)
 				{
-				dtol = (dsl_time_d[j] - dsl_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
+				dsl_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				dtime = (dsl_time_d[ndsl-1]  - dsl_time_d[0]) / ndsl;
+				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, ndsl - 1);
+				for (j=j1;j<=j2;j++)
 					{
+					dtol = (dsl_time_d[j] - dsl_time_d[i]) / sonardepthfilterlength;
 					weight = exp(-dtol * dtol);
 					dsl_sonardepthfilter[i] += weight * dsl_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
+				if (sonardepth_filterweight > 0.0)
+					dsl_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
-			if (sonardepth_filterweight > 0.0)
-				dsl_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<ndsl;i++)
-			{
-			if (dsl_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(dsl_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			dsl_sonardepth[i] = (1.0 - factor) * dsl_sonardepth[i]
-						+ factor * dsl_sonardepthfilter[i];
+			for (i=0;i<ndsl;i++)
+				{
+				if (dsl_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(dsl_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				dsl_sonardepth[i] = (1.0 - factor) * dsl_sonardepth[i]
+							+ factor * dsl_sonardepthfilter[i];
+				}
 			}
 
 		/* filter sonardepth data from separate Steve Rock file */
-fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
-		for (i=0;i<nrock;i++)
+		if (nrock > 1)
 			{
-			rock_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<nrock;j++)
+fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
+			for (i=0;i<nrock;i++)
 				{
-				dtol = (rock_time_d[j] - rock_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
+				rock_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				dtime = (rock_time_d[nrock-1]  - rock_time_d[0]) / nrock;
+				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, ndsl - 1);
+				for (j=j1;j<=j2;j++)
 					{
+					dtol = (rock_time_d[j] - rock_time_d[i]) / sonardepthfilterlength;
 					weight = exp(-dtol * dtol);
 					rock_sonardepthfilter[i] += weight * rock_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
+				if (sonardepth_filterweight > 0.0)
+					rock_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
-			if (sonardepth_filterweight > 0.0)
-				rock_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<nrock;i++)
-			{
-			if (rock_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(rock_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			rock_sonardepth[i] = (1.0 - factor) * rock_sonardepth[i]
-						+ factor * rock_sonardepthfilter[i];
+			for (i=0;i<nrock;i++)
+				{
+				if (rock_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(rock_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				rock_sonardepth[i] = (1.0 - factor) * rock_sonardepth[i]
+							+ factor * rock_sonardepthfilter[i];
+				}
 			}
 		}
 

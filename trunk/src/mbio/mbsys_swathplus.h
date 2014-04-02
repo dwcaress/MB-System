@@ -249,7 +249,7 @@ struct mbsys_swplsr_parsed_ping_data_struct
 	int time_d;										/* start of ping, seconds since 1970 */
 	int microsec;									/* microseconds since time_d */
 	unsigned char channel;							/* identifies the transducer */
-	unsigned long pingnumber;						/* simultaneous pings are numbered seperately */
+	unsigned long pingnumber;						/* simultaneous pings are numbered separately */
 	float frequency;								/* frequency of the transducer in Hz */
 	float samp_period;								/* time period between sonar data samples, in
 													   seconds */

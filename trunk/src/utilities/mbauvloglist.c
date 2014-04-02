@@ -497,6 +497,14 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 				strcpy(printfields[i].format, "%f");
 				}
 			}
+		else if (strcmp(printfields[i].name,"timeTag") == 0)
+			{
+			printfields[i].index = INDEX_ZERO;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.8f");
+				}
+			}
 		else if (strcmp(printfields[i].name,"mergeLon") == 0)
 			{
 			printfields[i].index = INDEX_MERGE_LON;

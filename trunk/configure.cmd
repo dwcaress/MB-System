@@ -44,7 +44,8 @@ make uninstall (to remove a previously installed version)
 #                            architecture-dependent files should be relative to
 #                            exec_prefix.
 #                            [Default: ${prefix} ==> /usr/local]
-#    --datarootdir         - The root of the directory tree for read-only architecture-independent data files.
+#    --datarootdir         - The root of the directory tree for read-only architecture
+#                            -independent data files.
 #                            [Default: ${exec_prefix}/share ==> /usr/local/share]
 #    --bindir              - The directory for installing executables that users run.
 #                            [Default: ${exec_prefix}/bin ==> /usr/local/bin]
@@ -82,7 +83,7 @@ make uninstall (to remove a previously installed version)
 #------------------------------------------------------------------------------
 
 # Build in place on a Mac 10.9 with prerequisites installed through Fink in /sw:
-CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
+sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
     --with-netcdf-include=/sw/include \
@@ -97,8 +98,8 @@ CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 #------------------------------------------------------------------------------
 
 # Build in /usr/local on a Mac 10.9 with prerequisites installed through Fink in /sw:
-CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
-sudo ./configure \
+sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
+./configure \
     --prefix=/usr/local \
     --with-netcdf-include=/sw/include \
     --with-netcdf-lib=/sw/lib \
@@ -115,7 +116,7 @@ sudo ./configure \
 #------------------------------------------------------------------------------
 
 # Build in ~/buildtest on a Mac 10.9 with prerequisites installed through Fink in /sw:
-CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
+sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/buildtest \
     --with-netcdf-include=/sw/include \
@@ -163,17 +164,17 @@ Cflags: -I${includedir}
 
 # If the GMT installation has been augmented with a /usr/lib/pkgconfig/gmt.pc
 # file so that pkg-config knows about GMT, then the configure call is just:
-./configure --prefix=/usr/local
+sudo ./configure --prefix=/usr/local
 
 # If the GMT installation is not known to pkg-config, then the installation
 # points of the libraries and the header files must be specified:
-./configure --prefix=/usr/local \
+sudo ./configure --prefix=/usr/local \
     --with-gmt-include=/usr/include/gmt \
     --with-gmt-lib=/usr/lib
 
 # Either way, once configure has been run, build and install MB-System
 # into /usr/local/bin, /usr/local/lib, etc with the simple make commands:
-make
+sudo make
 sudo make install
 #------------------------------------------------------------------------------
 
@@ -183,11 +184,9 @@ sudo make install
 sudo yum install openmotif openmotif-devel fftw fftw-devel netcdf netcdf-devel \
 		proj proj-devel gdal-devel gmt gmt-devel gv nedit
 
-# If the GMT installation is not known to pkg-config, then the installation
-# points of the libraries and the header files must be specified:
-./configure --prefix=/usr/local \
-    --with-netcdf-include=/usr/include \
-    --with-netcdf-lib=/usr/lib
+# If the prerequisites have all been installed with yum and it is desired to
+# install MB-System in /usr/local, then only a simple call to configure is required:
+sudo ./configure
 #
 #------------------------------------------------------------------------------
 # To modify the build system...

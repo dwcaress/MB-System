@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsxppreprocess reads a BathySwath (formerly SWATHplus) SXP file
- * and seperates the data from each transducer into seperate SXP files,
+ * and separates the data from each transducer into separate SXP files,
  * one for each transducer. This scheme allows MB System to process all
  * configurations of the BathySwath interferometers, regardless of ping
  * mode or number of transducers installed. This program can also fix
@@ -62,7 +62,7 @@ int main
 {
 	char program_name[] = "mbsxppreprocess";
 	char help_message[] =
-		"mbsxppreprocess reads a BathySwath (formerly SWATHplus) SXP file \nand seperates the data from each transducer into seperate SXP files,\none for each transducer. This scheme allows MB System to process all \nconfigurations of the BathySwath interferometers, regardless of ping \nmode or number of transducers installed. This program can also fix \nvarious problems with SXP data.";
+		"mbsxppreprocess reads a BathySwath (formerly SWATHplus) SXP file \nand separates the data from each transducer into separate SXP files,\none for each transducer. This scheme allows MB System to process all \nconfigurations of the BathySwath interferometers, regardless of ping \nmode or number of transducers installed. This program can also fix \nvarious problems with SXP data.";
 	char usage_message[] = "mbsxppreprocess [-Fformat -Ifile -Ooutfile -H -V]";
 	extern char *optarg;
 	int errflg = 0;

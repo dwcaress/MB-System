@@ -3003,6 +3003,10 @@ elsif ($ps_viewer eq "ggv")
 		$view_pageflag = "--geometry=landscape";
 		}
 	}
+elsif ($ps_viewer eq "evince")
+	{
+	$view_pageflag = " ";
+	}
 if ($no_view_ps)
 	{
 	print FCMD "#echo Running $ps_viewer in background...\n";

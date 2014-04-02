@@ -49,7 +49,9 @@
 #define	MBSYS_JSTAR_MESSAGE_SIZE	16
 #define	MBSYS_JSTAR_SBPHEADER_SIZE	240
 #define	MBSYS_JSTAR_SSHEADER_SIZE	240
+#define	MBSYS_JSTAR_SSOLDHEADER_SIZE	80
 #define	MBSYS_JSTAR_PIXELS_MAX		2000
+#define	MBSYS_JSTAR_SYSINFO_MAX		16384
 
 #define	MBSYS_JSTAR_DATA_SONAR		80
 #define	MBSYS_JSTAR_DATA_SONAR2		82
@@ -102,6 +104,40 @@ struct mbsys_jstar_comment_struct
 	/* Comment */
 	char	comment[MB_COMMENT_MAXLINE];
 	};
+
+struct mbsys_jstar_sysinfo_struct
+	{
+	/* Message Header */
+	struct mbsys_jstar_message_struct message;
+
+	/* System Information */
+	int	system_type;		/* System Type Number and Description:
+                                            1       2xxx Series, Combined Sub-Bottom / Side Scan with SIB Electronics
+                                            2       2xxx Series, Combined Sub-Bottom / Side Scan with FSIC Electronics
+                                            4       4300-MPX (Multi-Ping)
+                                            5       3200-XS, Sub-Bottom Profiler with AIC Electronics
+                                            6       4400-SAS, 12-Channel Side Scan
+                                            7       3200-XS, Sub Bottom Profiler with SIB Electronics
+                                            11      4200 Limited Multipulse Dual Frequency Side Scan
+                                            14      3100-P, Sub Bottom Profiler
+                                            16      2xxx Series, Dual Side Scan with SIB Electronics
+                                            17      4200 Multipulse Dual Frequency Side Scan
+                                            18      4700 Dynamic Focus
+                                            19      4200 Dual Frequency Side Scan
+                                            20      4200 Dual Frequency non Simultaneous Side Scan
+                                            21      2200-MP Combined Sub-Bottom / Dual Frequency Multipulse Side Scan
+                                            23      4600 Bathymetric System
+                                            128     4100, 272 /560A Side Scan */
+	int	reserved1;
+	int     version;		/* Sonar software version */
+	int     reserved2;		
+	int     platformserialnumber;	/* Serial number of platform */
+
+	/* Sysinfo message */
+        int     sysinfosize;
+	char	sysinfo[MBSYS_JSTAR_SYSINFO_MAX];
+	};
+
 
 struct mbsys_jstar_nmea_struct
 	{
@@ -327,7 +363,7 @@ struct mbsys_jstar_channel_struct
 	unsigned short	*trace;
 	};
 
-struct mbsys_jstar_ss_struct
+struct mbsys_jstar_ssold_struct
 	{
 	/* Message Header */
 	struct mbsys_jstar_message_struct message;
@@ -409,6 +445,9 @@ struct mbsys_jstar_struct
 
 	/* Pressure data */
 	struct mbsys_jstar_pressure_struct pressure;
+        
+	/* System Information data */
+        struct mbsys_jstar_sysinfo_struct sysinfo;
 
 	/* Comment */
 	struct mbsys_jstar_comment_struct comment;
@@ -423,6 +462,11 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr,
 			int *pingnumber, int *error);
+int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+                        double time_d, double navlon, double navlat,
+                        double speed, double heading, double sonardepth,
+                        double roll, double pitch, double heave,
+                        int *error);
 int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

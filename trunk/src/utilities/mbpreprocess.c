@@ -1393,7 +1393,14 @@ int main (int argc, char **argv)
 				}
 				
 			/* apply preprocessing to survey data records */
-			if (status == MB_SUCCESS && kind == MB_DATA_DATA)
+			if (status == MB_SUCCESS
+				&& (kind == MB_DATA_DATA
+					|| kind == MB_DATA_SUBBOTTOM_MCS
+					|| kind == MB_DATA_SUBBOTTOM_CNTRBEAM
+					|| kind == MB_DATA_SUBBOTTOM_SUBBOTTOM
+					|| kind == MB_DATA_SIDESCAN2
+					|| kind == MB_DATA_SIDESCAN3
+					|| kind == MB_DATA_WATER_COLUMN))
 				{
 				/* start out with no change defined */
 				data_changed = MB_NO;
