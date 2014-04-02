@@ -472,6 +472,7 @@ int main (int argc, char **argv)
 	int	use_nav = MB_NO;
 	int	use_gains = MB_NO;
 	int	use_detects = MB_YES;
+        int     use_pingnumber = MB_NO;
 	int	check_values = MBLIST_CHECK_ON;
 	int	check_nav = MB_NO;
 	int	check_bath = MB_NO;
@@ -519,6 +520,7 @@ int main (int argc, char **argv)
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
 	int	icomment = 0;
+        int     pingnumber;
 
 	/* additional time variables */
 	int	first_m = MB_YES;
@@ -2365,6 +2367,8 @@ int main (int argc, char **argv)
 				use_attitude = MB_YES;
 			if (list[i] == 'Q' || list[i] == 'q')
 				use_detects = MB_YES;
+			if (list[i] == 'N' || list[i] == 'n')
+				use_pingnumber = MB_YES;
 			if (list[i] == 'X' || list[i] == 'x'
 				|| list[i] == 'Y' || list[i] == 'y')
 				use_nav = MB_YES;
@@ -2489,7 +2493,7 @@ int main (int argc, char **argv)
 		error = MB_ERROR_NO_ERROR;
 
 		/* read a ping of data */
-		if (pings == 1 || use_attitude == MB_YES || use_detects == MB_YES)
+		if (pings == 1 || use_attitude == MB_YES || use_detects == MB_YES || use_pingnumber == MB_YES)
 		    {
 		    /* read next data record */
 		    status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
@@ -2521,6 +2525,12 @@ int main (int argc, char **argv)
 			&& use_detects)
 			status = mb_detects(verbose,mbio_ptr,store_ptr,&kind,
 					&nbeams,detect,&error);
+
+		    /* if survey data extract pingnumber */
+		    if (error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA
+			&& use_pingnumber)
+			status = mb_pingnumber(verbose,mbio_ptr,&pingnumber,&error);
 		    }
 		else
 		    {
@@ -2552,6 +2562,8 @@ int main (int argc, char **argv)
 			&& kind == MB_DATA_DATA)
 			{
 			nread++;
+                        if (use_pingnumber == MB_NO)
+                            pingnumber = nread;
 			distance_total += distance;
 			}
 
@@ -3121,10 +3133,10 @@ int main (int argc, char **argv)
 					break;
 				case 'N': /* ping counter */
 					if (ascii == MB_YES)
-					    fprintf(output[i],"%6d",nread);
+					    fprintf(output[i],"%6d",pingnumber);
 					else
 					    {
-					    b = nread;
+					    b = pingnumber;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
@@ -3982,10 +3994,10 @@ int main (int argc, char **argv)
 					break;
 				case 'N': /* ping counter */
 					if (ascii == MB_YES)
-					    fprintf(output[i],"%6d",nread);
+					    fprintf(output[i],"%6d",pingnumber);
 					else
 					    {
-					    b = nread;
+					    b = pingnumber;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;

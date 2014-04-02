@@ -2217,6 +2217,8 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 		    || process->mbp_lever_mode != MBP_LEVER_OFF
 		    || process->mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF))
 	    process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFFSET;
+	else
+	    process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFF;
 
 	/* print output debug statements */
 	if (verbose >= 2)

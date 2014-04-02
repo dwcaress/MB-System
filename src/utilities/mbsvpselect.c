@@ -20,7 +20,7 @@
  * recalculation by raytracing through the sound speed model selected
  * for each swath file.
  *
- * Author:	Ammar Aljuhe (ammaraljuhne@gmail.com)
+ * Author:	Ammar Aljuhne (ammaraljuhne@gmail.com)
  * Co-author:   Christian do Santos Ferreira (cferreira@marum.de)
  *              MARUM, University of Bremen
  * Date:	3 March 2014

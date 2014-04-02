@@ -64,7 +64,7 @@
 
 /* header and data record in bytes */
 #define MBF_MGD77TXT_HEADER_NUM	    16
-#define MBF_MGD77TXT_DATA_LEN	    120
+#define MBF_MGD77TXT_DATA_LEN	    128
 
 struct mbf_mgd77txt_struct
 	{
@@ -1037,7 +1037,7 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77txt_struct *data;
-	char	line[MBF_MGD77TXT_DATA_LEN+1];
+	char	line[MB_COMMENT_MAXLINE];
 	int	itmp;
 	int	write_status;
 	int	shift;

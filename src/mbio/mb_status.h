@@ -111,7 +111,7 @@
 
 /* MBIO minimum and maximum error values */
 #define	MB_ERROR_MIN			-23
-#define	MB_ERROR_MAX			15
+#define	MB_ERROR_MAX			16
 
 /* MBIO function fatal error values */
 #define	MB_ERROR_NO_ERROR		0
@@ -130,6 +130,7 @@
 #define	MB_ERROR_BAD_BUFFER_ID		13
 #define	MB_ERROR_BAD_SYSTEM		14
 #define	MB_ERROR_BAD_DATA		15
+#define	MB_ERROR_MISSING_DATA		16
 
 /* MBIO function nonfatal error values */
 #define	MB_ERROR_TIME_GAP		-1
@@ -192,7 +193,8 @@ static char *fatal_error_msg[] =
 	"Invalid control parameter specified by user",
 	"Invalid buffer id",
 	"Invalid system id - this should not happen!",
-	"This data file is not in the specified format!"
+	"This data file is not in the specified format!",
+	"Required data are missing"
 	};
 static char *nonfatal_error_msg[] =
 	{

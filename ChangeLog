@@ -172,6 +172,42 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2180 (April 2, 2014)
+
+htmlsrc/mbsystem_home.html & htmlsrc/mbsystem_faq.html: Updated references
+to the MB-System team in the html documentation to include Christian Ferreira
+and Krystle Anderson.
+
+htmlsrc/mbsystem_how_to_get.html: Updated installation instructions
+in the html documentation.
+
+MB7kpreprocess: recoded the application of time domain filtering of pressure
+depth data to be much more efficient.
+
+Format 132 (MBF_EDGJSTAR): Supported obsolete sidescan records with 80 byte
+traceheaders.
+
+MBextractsegy: Now works with Edgetech Jstar files.
+
+MBauvloglist: reset default printing of timestamp values.
+
+Mbset: modified so that when mbset is used to turn off a mode that implies
+use of an external file, the associated filename is also erased. For example
+    mbset -PSVPMODE:0
+will now also erase (null) the filename set by -PSVPFILE.
+
+Mbm_grd3dplot, mbm_grdplot, mbm_histplot, mbm_plot, mbm_xyplot: added support
+for the evince postscript viewer.
+
+Format 172 (MBF_HIR2RNAV) and format 173 (MBF_MGD77TXT): fixed segmentation
+faults while handling comment records.
+
+MBlist: The 'N' output option will now use actual ping numbers if those are
+available (instead of ping count in the file).
+
+MBroutetime: Now exits with error message if no start line or end line waypoints
+are read from the input route file.
+
 -----> 5.4.2176 (March 18, 2014)
 
 Release 5.4.2176
@@ -202,7 +238,7 @@ All source files: Updated copyright notices to 2014.
 
 -----> 5.4.2173 (March 17, 2014)
 
-MBsvpselect: Added program contributed by Ammar Aljuhe and Christian Ferreira
+MBsvpselect: Added program contributed by Ammar Aljuhne and Christian Ferreira
 of MARUM (University of Bremen). This program chooses and implements the best
 available sound speed model for each swath file in a survey. The user  provides
 a  list of the available sound speed models and specifies the criteria used for

@@ -162,6 +162,7 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_edgjstar;
 	mb_io_ptr->mb_io_dimensions = &mbsys_jstar_dimensions;
 	mb_io_ptr->mb_io_pingnumber = &mbsys_jstar_pingnumber;
+	mb_io_ptr->mb_io_preprocess = &mbsys_jstar_preprocess;
 	mb_io_ptr->mb_io_extract = &mbsys_jstar_extract;
 	mb_io_ptr->mb_io_insert = &mbsys_jstar_insert;
 	mb_io_ptr->mb_io_extract_nav = &mbsys_jstar_extract_nav;
@@ -615,8 +616,10 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_jstar_pitchroll_struct *pitchroll;
 	struct mbsys_jstar_dvl_struct *dvl;
 	struct mbsys_jstar_pressure_struct *pressure;
+	struct mbsys_jstar_sysinfo_struct *sysinfo;
 	struct mbsys_jstar_comment_struct *comment;
-	char	buffer[MB_COMMENT_MAXLINE];
+	struct mbsys_jstar_ssold_struct ssold_tmp;
+	char	buffer[MBSYS_JSTAR_SYSINFO_MAX];
 	char	nmeastring[MB_COMMENT_MAXLINE];
 	int	index;
 	int	done;
@@ -651,6 +654,12 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_jstar_struct *) store_ptr;
+	
+	/* have a local struct mbsys_jstar_ss_struct ss_tmp for
+	 * reading old "sidescan" records and translating them
+	 * to the current form - initialize the trace to null */
+	ssold_tmp.trace_alloc = 0;
+	ssold_tmp.trace = NULL;
 
 	/* loop over reading data until a full record of some sort is read */
 	done = MB_NO;
@@ -674,6 +683,12 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_get_binary_int(MB_YES, &buffer[index], &(message.size)); index += 4;
 
 			store->subsystem = message.subsystem;
+			
+			status = MB_SUCCESS;
+#ifdef MBF_EDGJSTAR_DEBUG
+fprintf(stderr,"NEW MESSAGE HEADER: status:%d message.type:%d message.subsystem:%d channel:%d message.size:%d\n",
+status,message.type,message.subsystem,message.channel,message.size);
+#endif
 			}
 
 		/* end of file */
@@ -683,13 +698,12 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			*error = MB_ERROR_EOF;
 			done = MB_YES;
 			store->kind = MB_DATA_NONE;
+#ifdef MBF_EDGJSTAR_DEBUG
+fprintf(stderr,"REACHED END OF FILE: status:%d\n", status);
+#endif
 			}
 
 		/* if comment proceed to get data */
-#ifdef MBF_EDGJSTAR_DEBUG
-fprintf(stderr,"status:%d message.type:%d message.subsystem:%d channel:%d message.size:%d\n",
-status,message.type,message.subsystem,message.channel,message.size);
-#endif
 		if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_COMMENT
 			&& message.size < MB_COMMENT_MAXLINE)
 			{
@@ -716,8 +730,9 @@ status,message.type,message.subsystem,message.channel,message.size);
 				}
 			}
 
-		/* if subbottom data proceed to get data */
-		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_SONAR
+		/* if subbottom data and sonar trace 80 proceed to get data */
+		else if (status == MB_SUCCESS
+			&& message.type == MBSYS_JSTAR_DATA_SONAR
 			&& message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SBP)
 			{
 			/* sbp channel */
@@ -912,8 +927,9 @@ status,message.type,message.subsystem,message.channel,message.size);
 				}
 			}
 
-		/* if sidescan data proceed to get data */
-		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_SONAR
+		/* if sidescan data and sonar trace 80 proceed to get data */
+		else if (status == MB_SUCCESS
+			&& message.type == MBSYS_JSTAR_DATA_SONAR
 			&& message.subsystem != MBSYS_JSTAR_SUBSYSTEM_SBP)
 			{
 			/* sidescan channel */
@@ -1013,6 +1029,510 @@ status,message.type,message.subsystem,message.channel,message.size);
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->depth)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->sonardepth)); index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->sonaraltitude)); index += 4;
+
+				/* allocate memory for the trace */
+				if (ss->dataFormat == 1)
+					shortspersample = 2;
+				else
+					shortspersample = 1;
+				trace_size = shortspersample * ss->samples * sizeof(short);
+				if (ss->trace_alloc < trace_size)
+					{
+					if ((status = mb_reallocd(verbose, __FILE__, __LINE__,
+								trace_size, (void **)&(ss->trace), error))
+						== MB_SUCCESS)
+						{
+						ss->trace_alloc = trace_size;
+						}
+					}
+
+				/* read the trace */
+				if (status == MB_SUCCESS
+					&& (read_status = fread(ss->trace, trace_size,
+			    			1, mb_io_ptr->mbfp)) == 1)
+					{
+#ifndef BYTESWAPPED
+					for (i=0;i<shortspersample * ss->samples;i++)
+						{
+						ss->trace[i] = mb_swap_short(ss->trace[i]);;
+						}
+#endif
+					}
+				else
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					done = MB_YES;
+					store->kind = MB_DATA_NONE;
+					}
+
+				/* get time */
+				time_j[0] = ss->year;
+				time_j[1] = ss->day;
+				time_j[2] = 60 * ss->hour + ss->minute;
+				time_j[3] = ss->second;
+				time_j[4] = (int)1000 * (ss->millisecondsToday
+						- 1000 * floor(0.001 * ((double)ss->millisecondsToday)));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+
+				/* set navigation and attitude if needed and available */
+				if (ss->heading == 0 && mb_io_ptr->nheading > 0)
+					{
+					mb_hedint_interp(verbose, mbio_ptr, time_d, &heading, error);
+					ss->heading = (short) (100.0 * heading);
+					}
+				if ((ss->groupCoordX == 0 || ss->groupCoordY == 0 || ss->coordUnits == 2)
+					&& mb_io_ptr->nfix > 0)
+					{
+					mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0,
+								&navlon, &navlat, &speed, error);
+					ss->sourceCoordX = (int) (600000.0 * navlon);
+					ss->sourceCoordY = (int) (600000.0 * navlat);
+					ss->groupCoordX = (int) (600000.0 * navlon);
+					ss->groupCoordY = (int) (600000.0 * navlat);
+					}
+				if ((ss->roll == 0 || ss->pitch == 0 || ss->heaveCompensation == 0)
+					&& mb_io_ptr->nattitude > 0)
+					{
+					mb_attint_interp(verbose, mbio_ptr, time_d, &heave, &roll, &pitch, error);
+					ss->roll = 32768 * roll / 180.0;
+					ss->pitch = 32768 * pitch / 180.0;
+					ss->heaveCompensation = heave /
+							ss->sampleInterval / 0.00000075;
+					}
+				if (ss->sonaraltitude == 0 && mb_io_ptr->naltitude > 0)
+					{
+					mb_altint_interp(verbose, mbio_ptr, time_d, &altitude, error);
+					ss->sonaraltitude = 1000 * altitude;
+					}
+				if (ss->sonardepth == 0 && mb_io_ptr->nsonardepth > 0)
+					{
+					mb_depint_interp(verbose, mbio_ptr, time_d, &sonardepth, error);
+					ss->sonardepth = 1000 * sonardepth;
+					}
+
+				/* set kind */
+				if (mb_io_ptr->format == MBF_EDGJSTAR)
+					{
+					if (message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
+						store->kind = MB_DATA_DATA;
+					else if (message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
+						store->kind = MB_DATA_SIDESCAN2;
+					}
+				else
+					{
+					if (message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
+						store->kind = MB_DATA_DATA;
+					else if (message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
+						store->kind = MB_DATA_SIDESCAN2;
+					}
+				if (store->ssport.pingNum == store->ssstbd.pingNum
+							&& store->ssport.message.subsystem
+								== store->ssstbd.message.subsystem)
+					{
+					done = MB_YES;
+					}
+#ifdef MBF_EDGJSTAR_DEBUG
+fprintf(stderr,"Done reading 1: %d  pingNum:%d %d   subsystem:%d %d\n",
+done,store->ssport.pingNum,store->ssstbd.pingNum,
+store->ssport.message.subsystem,store->ssstbd.message.subsystem);
+#endif
+				}
+
+			/* else end of file */
+			else
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				done = MB_YES;
+				store->kind = MB_DATA_NONE;
+				}
+			}
+
+		/* if subbottom data and sonar trace 82 proceed to get data
+			- translate to current form */
+		else if (status == MB_SUCCESS
+			&& message.type == MBSYS_JSTAR_DATA_SONAR2
+			&& message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SBP)
+			{
+			/* reset message type to current sonar trace 80 */
+			message.type = MBSYS_JSTAR_DATA_SONAR;
+
+			/* sbp channel */
+			sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
+			sbp->message = message;
+			
+			/* temporary old format structure */
+			ssold_tmp.message = message;
+
+			/* read the 80 byte trace header */
+			if ((read_status = fread(buffer, MBSYS_JSTAR_SSOLDHEADER_SIZE,
+			    		1, mb_io_ptr->mbfp)) == 1)
+				{
+				index = 0;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.subsystem)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.channelNum)); index += 2;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.pingNum)); index += 4;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.packetNum)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.trigSource)); index += 2;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.samples)); index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.sampleInterval)); index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.startDepth)); index += 4;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.weightingFactor)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.ADCGain)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.ADCMax)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.rangeSetting)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.pulseID)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.markNumber)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.dataFormat)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.reserved)); index += 2;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.millisecondsToday)); index += 4;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.year)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.day)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.hour)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.minute)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.second)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.heading)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.pitch)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.roll)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.heave)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.yaw)); index += 2;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.depth)); index += 4;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.temperature)); index += 2;
+				for (i=0;i<10;i++)
+					{
+					ssold_tmp.reserved2[i] = buffer[index]; index++;
+					}
+					
+				/* translate traceheader to the current form */
+				sbp->sequenceNumber = 0;
+				sbp->startDepth = ssold_tmp.startDepth;
+				sbp->pingNum = ssold_tmp.pingNum;
+				sbp->channelNum = ssold_tmp.channelNum;
+				for (i=0;i<6;i++)
+					{
+					sbp->unused1[i] = 0;
+					}
+				sbp->traceIDCode = 1;
+				for (i=0;i<2;i++)
+					{
+					sbp->unused2[i] = 0;
+					}
+				sbp->dataFormat = ssold_tmp.dataFormat;
+				sbp->NMEAantennaeR = 0;
+				sbp->NMEAantennaeO= 0;
+				for (i=0;i<32;i++)
+					{
+					sbp->RS232[i] = 0;
+					}
+				sbp->sourceCoordX = 0;
+				sbp->sourceCoordY = 0;
+				sbp->groupCoordX = 0;
+				sbp->groupCoordY = 0;
+				sbp->coordUnits = 2;
+				for (i=0;i<24;i++)
+					{
+					sbp->annotation[i] = 0;
+					}
+				sbp->samples = ssold_tmp.samples;
+				sbp->sampleInterval = ssold_tmp.sampleInterval;
+				sbp->ADCGain = ssold_tmp.ADCGain;
+				sbp->pulsePower = 0;
+				sbp->correlated = 0;
+				sbp->startFreq = 0;
+				sbp->endFreq = 0;
+				sbp->sweepLength = 0;
+				for (i=0;i<7;i++)
+					{
+					sbp->unused7[i] = 0;
+					}
+				sbp->aliasFreq = (unsigned short)(500000000.0 / sbp->sampleInterval);
+				sbp->pulseID = ssold_tmp.pulseID;
+				for (i=0;i<6;i++)
+					{
+					sbp->unused8[i] = 0;
+					}
+				sbp->year = ssold_tmp.year;
+				sbp->day = ssold_tmp.day;
+				sbp->hour = ssold_tmp.hour;
+				sbp->minute = ssold_tmp.minute;
+				sbp->second = ssold_tmp.second;
+				sbp->timeBasis = 3;
+				sbp->weightingFactor = ssold_tmp.weightingFactor;
+				sbp->unused9 = 0;
+				sbp->heading = (short)(100.0 * ssold_tmp.heading / 60.0);
+				sbp->pitch = (short)(100.0 * ssold_tmp.pitch / 60.0);
+				sbp->roll = (short)(100.0 * ssold_tmp.roll / 60.0);
+				sbp->temperature = ssold_tmp.temperature;
+				sbp->heaveCompensation = 0;
+				sbp->trigSource = 0;
+				sbp->markNumber = 0;
+				sbp->NMEAHour = 0;
+				sbp->NMEAMinutes = 0;
+				sbp->NMEASeconds = 0;
+				sbp->NMEACourse = 0;
+				sbp->NMEASpeed = 0;
+				sbp->NMEADay = 0;
+				sbp->NMEAYear = 0;
+				sbp->millisecondsToday = ssold_tmp.millisecondsToday;
+				sbp->ADCMax = ssold_tmp.ADCMax;
+				sbp->calConst = 0;
+				sbp->vehicleID = 0;
+				for (i=0;i<6;i++)
+					{
+					sbp->softwareVersion[i] = 0;
+					}
+				sbp->sphericalCorrection = 0;
+				sbp->packetNum = 1;
+				sbp->ADCDecimation = 0;
+				sbp->decimation = 0;
+				sbp->unuseda = 0;
+				sbp->depth = 0;
+				sbp->sonardepth = 0;
+				sbp->sonaraltitude = 0;
+				
+				/* allocate memory for the trace */
+				if (sbp->dataFormat == 1)
+					shortspersample = 2;
+				else
+					shortspersample = 1;
+				trace_size = shortspersample * sbp->samples * sizeof(short);
+				if (sbp->trace_alloc < trace_size)
+					{
+					if ((status = mb_reallocd(verbose, __FILE__, __LINE__,
+								trace_size, (void **)&(sbp->trace), error))
+						== MB_SUCCESS)
+						{
+						sbp->trace_alloc = trace_size;
+						}
+					}
+
+				/* read the trace */
+				if (status == MB_SUCCESS
+					&& (read_status = fread(sbp->trace, trace_size,
+			    			1, mb_io_ptr->mbfp)) == 1)
+					{
+#ifndef BYTESWAPPED
+					for (i=0;i<shortspersample * sbp->samples;i++)
+						{
+						sbp->trace[i] = mb_swap_short(sbp->trace[i]);;
+						}
+#endif
+					}
+				else
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					done = MB_YES;
+					store->kind = MB_DATA_NONE;
+					}
+
+				/* get time */
+				time_j[0] = sbp->year;
+				time_j[1] = sbp->day;
+				time_j[2] = 60 * sbp->hour + sbp->minute;
+				time_j[3] = sbp->second;
+				time_j[4] = (int)1000 * (sbp->millisecondsToday
+						- 1000 * floor(0.001 * ((double)sbp->millisecondsToday)));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+
+				/* set navigation and attitude if needed and available */
+				if (sbp->heading == 0 && mb_io_ptr->nheading > 0)
+					{
+					mb_hedint_interp(verbose, mbio_ptr, time_d, &heading, error);
+					sbp->heading = (short) (100.0 * heading);
+					}
+				if ((sbp->groupCoordX == 0 || sbp->groupCoordY == 0 || sbp->coordUnits == 2)
+					&& mb_io_ptr->nfix > 0)
+					{
+					mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0,
+								&navlon, &navlat, &speed, error);
+					sbp->sourceCoordX = (int) (600000.0 * navlon);
+					sbp->sourceCoordY = (int) (600000.0 * navlat);
+					sbp->groupCoordX = (int) (600000.0 * navlon);
+					sbp->groupCoordY = (int) (600000.0 * navlat);
+					}
+				if ((sbp->roll == 0 || sbp->pitch == 0 || sbp->heaveCompensation == 0)
+					&& mb_io_ptr->nattitude > 0)
+					{
+					mb_attint_interp(verbose, mbio_ptr, time_d, &heave, &roll, &pitch, error);
+					sbp->roll = 32768 * roll / 180.0;
+					sbp->pitch = 32768 * pitch / 180.0;
+					sbp->heaveCompensation = heave /
+							sbp->sampleInterval / 0.00000075;
+					}
+				if (sbp->sonaraltitude == 0 && mb_io_ptr->naltitude > 0)
+					{
+					mb_altint_interp(verbose, mbio_ptr, time_d, &altitude, error);
+					sbp->sonaraltitude = altitude / 1000.0;
+					}
+				if (sbp->sonardepth == 0 && mb_io_ptr->nsonardepth > 0)
+					{
+					mb_depint_interp(verbose, mbio_ptr, time_d, &sonardepth, error);
+					sbp->sonardepth = sonardepth / 1000.0;
+					}
+
+				/* set kind */
+				store->kind = MB_DATA_SUBBOTTOM_SUBBOTTOM;
+				done = MB_YES;
+				}
+
+			/* end of file */
+			else
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				done = MB_YES;
+				store->kind = MB_DATA_NONE;
+				}
+			}
+
+		/* if sidescan data and sonar trace 82 proceed to get data
+			- translate to current form */
+		else if (status == MB_SUCCESS
+			&& message.type == MBSYS_JSTAR_DATA_SONAR2
+			&& message.subsystem != MBSYS_JSTAR_SUBSYSTEM_SBP)
+			{
+			/* reset message type to current sonar trace 80 */
+			message.type = MBSYS_JSTAR_DATA_SONAR;
+
+			/* sidescan channel */
+			if (message.channel == 0)
+				ss = (struct mbsys_jstar_channel_struct *) &(store->ssport);
+			else
+				ss = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
+			ss->message = message;
+	
+			/* temporary old format structure */
+			ssold_tmp.message = message;
+
+			/* read the 80 byte trace header */
+			if ((read_status = fread(buffer, MBSYS_JSTAR_SSOLDHEADER_SIZE,
+			    		1, mb_io_ptr->mbfp)) == 1)
+				{
+				index = 0;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.subsystem)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.channelNum)); index += 2;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.pingNum)); index += 4;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.packetNum)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.trigSource)); index += 2;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.samples)); index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.sampleInterval)); index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.startDepth)); index += 4;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.weightingFactor)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.ADCGain)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.ADCMax)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.rangeSetting)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.pulseID)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.markNumber)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.dataFormat)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.reserved)); index += 2;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.millisecondsToday)); index += 4;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.year)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.day)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.hour)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.minute)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.second)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.heading)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.pitch)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.roll)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.heave)); index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.yaw)); index += 2;
+				mb_get_binary_int(MB_YES, &buffer[index], &(ssold_tmp.depth)); index += 4;
+				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.temperature)); index += 2;
+				for (i=0;i<10;i++)
+					{
+					ssold_tmp.reserved2[i] = buffer[index]; index++;
+					}
+					
+				/* translate traceheader to the current form */
+				ss->sequenceNumber = 0;
+				ss->startDepth = ssold_tmp.startDepth;
+				ss->pingNum = ssold_tmp.pingNum;
+				ss->channelNum = ssold_tmp.channelNum;
+				for (i=0;i<6;i++)
+					{
+					ss->unused1[i] = 0;
+					}
+				ss->traceIDCode = 1;
+				for (i=0;i<2;i++)
+					{
+					ss->unused2[i] = 0;
+					}
+				ss->dataFormat = ssold_tmp.dataFormat;
+				ss->NMEAantennaeR = 0;
+				ss->NMEAantennaeO= 0;
+				for (i=0;i<32;i++)
+					{
+					ss->RS232[i] = 0;
+					}
+				ss->sourceCoordX = 0;
+				ss->sourceCoordY = 0;
+				ss->groupCoordX = 0;
+				ss->groupCoordY = 0;
+				ss->coordUnits = 2;
+				for (i=0;i<24;i++)
+					{
+					ss->annotation[i] = 0;
+					}
+				ss->samples = ssold_tmp.samples;
+				ss->sampleInterval = ssold_tmp.sampleInterval;
+				ss->ADCGain = ssold_tmp.ADCGain;
+				ss->pulsePower = 0;
+				ss->correlated = 0;
+				ss->startFreq = 0;
+				ss->endFreq = 0;
+				ss->sweepLength = 0;
+				for (i=0;i<7;i++)
+					{
+					ss->unused7[i] = 0;
+					}
+				ss->aliasFreq = (unsigned short)(500000000.0 / ss->sampleInterval);
+				ss->pulseID = ssold_tmp.pulseID;
+				for (i=0;i<6;i++)
+					{
+					ss->unused8[i] = 0;
+					}
+				ss->year = ssold_tmp.year;
+				ss->day = ssold_tmp.day;
+				ss->hour = ssold_tmp.hour;
+				ss->minute = ssold_tmp.minute;
+				ss->second = ssold_tmp.second;
+				ss->timeBasis = 3;
+				ss->weightingFactor = ssold_tmp.weightingFactor;
+				ss->unused9 = 0;
+				ss->heading = (short)(100.0 * ssold_tmp.heading / 60.0);
+				ss->pitch = (short)(100.0 * ssold_tmp.pitch / 60.0);
+				ss->roll = (short)(100.0 * ssold_tmp.roll / 60.0);
+				ss->temperature = ssold_tmp.temperature;
+				ss->heaveCompensation = 0;
+				ss->trigSource = 0;
+				ss->markNumber = 0;
+				ss->NMEAHour = 0;
+				ss->NMEAMinutes = 0;
+				ss->NMEASeconds = 0;
+				ss->NMEACourse = 0;
+				ss->NMEASpeed = 0;
+				ss->NMEADay = 0;
+				ss->NMEAYear = 0;
+				ss->millisecondsToday = ssold_tmp.millisecondsToday;
+				ss->ADCMax = ssold_tmp.ADCMax;
+				ss->calConst = 0;
+				ss->vehicleID = 0;
+				for (i=0;i<6;i++)
+					{
+					ss->softwareVersion[i] = 0;
+					}
+				ss->sphericalCorrection = 0;
+				ss->packetNum = 1;
+				ss->ADCDecimation = 0;
+				ss->decimation = 0;
+				ss->unuseda = 0;
+				ss->depth = 0;
+				ss->sonardepth = 0;
+				ss->sonaraltitude = 0;
 
 				/* allocate memory for the trace */
 				if (ss->dataFormat == 1)
@@ -1370,10 +1890,46 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],pressure->
 				store->kind = MB_DATA_NONE;
 				}
 			}
+			
+		/* system info record */
+		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_SYSINFO)
+			{
+			/* get message */
+			sysinfo = (struct mbsys_jstar_sysinfo_struct *) &(store->sysinfo);
+			sysinfo->message = message;
+
+			/* read the pressure record */
+			if ((read_status = fread(buffer, message.size,
+			    		1, mb_io_ptr->mbfp)) == 1)
+				{
+				index = 0;
+				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->system_type)); index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->reserved1)); index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->version)); index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->reserved2)); index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->platformserialnumber)); index += 4;
+				sysinfo->sysinfosize = MIN((message.size - index), MBSYS_JSTAR_SYSINFO_MAX-1);
+				for (i=0;i<sysinfo->sysinfosize;i++)
+					{
+					sysinfo->sysinfo[i] = buffer[index]; index++;
+					}
+				sysinfo->sysinfo[sysinfo->sysinfosize] = '\0';
+#ifdef MBF_EDGJSTAR_DEBUG
+fprintf(stderr,"SYSINFO: system_type:%d version:%d platformserialnumber:%d sysinfosize:%d\n",
+sysinfo->system_type,sysinfo->version,sysinfo->platformserialnumber,sysinfo->sysinfosize);
+#endif
+
+				done = MB_YES;
+				store->kind = MB_DATA_HEADER;
+				}
+			}
 
 		/* if not supported data read it and throw it away */
 		else if (status == MB_SUCCESS)
 			{
+#ifdef MBF_EDGJSTAR_DEBUG
+fprintf(stderr,"UNKNOWN: throwing away %d bytes\n", message.size);
+#endif
 			for (i=0;i<message.size;i++)
 				{
 				read_status = fread(buffer, 1, 1, mb_io_ptr->mbfp);
@@ -1851,7 +2407,7 @@ fprintf(stderr,"kind:%d error:%d status:%d\n",store->kind,*error,status);
 		(store->kind == MB_DATA_NMEA_RMC || store->kind == MB_DATA_NMEA_DBT || store->kind == MB_DATA_NMEA_DPT))
 		{
 		nmea = (struct mbsys_jstar_nmea_struct *) &(store->nmea);
-		fprintf(stderr,"\ndbg5  New pressure data record read by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg5  New NMEA data record read by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5     start_marker:                %d\n",nmea->message.start_marker);
 		fprintf(stderr,"dbg5     version:                     %d\n",nmea->message.version);
 		fprintf(stderr,"dbg5     session:                     %d\n",nmea->message.session);
@@ -1870,6 +2426,30 @@ fprintf(stderr,"kind:%d error:%d status:%d\n",store->kind,*error,status);
 		fprintf(stderr,"dbg5     reserve[1]:                  %d\n",nmea->reserve[1]);
 		fprintf(stderr,"dbg5     reserve[2]:                  %d\n",nmea->reserve[2]);
 		fprintf(stderr,"dbg5     nmea:                        %s\n",nmea->nmea);
+		}
+	else if (status == MB_SUCCESS && verbose >= 5 &&
+		(store->kind == MB_DATA_HEADER))
+		{
+		sysinfo = (struct mbsys_jstar_sysinfo_struct *) &(store->sysinfo);
+		fprintf(stderr,"\ndbg5  New sysinfo data record read by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5     start_marker:                %d\n",sysinfo->message.start_marker);
+		fprintf(stderr,"dbg5     version:                     %d\n",sysinfo->message.version);
+		fprintf(stderr,"dbg5     session:                     %d\n",sysinfo->message.session);
+		fprintf(stderr,"dbg5     type:                        %d\n",sysinfo->message.type);
+		fprintf(stderr,"dbg5     command:                     %d\n",sysinfo->message.command);
+		fprintf(stderr,"dbg5     subsystem:                   %d\n",sysinfo->message.subsystem);
+		fprintf(stderr,"dbg5     channel:                     %d\n",sysinfo->message.channel);
+		fprintf(stderr,"dbg5     sequence:                    %d\n",sysinfo->message.sequence);
+		fprintf(stderr,"dbg5     reserved:                    %d\n",sysinfo->message.reserved);
+		fprintf(stderr,"dbg5     size:                        %d\n",sysinfo->message.size);
+
+		fprintf(stderr,"dbg5     system_type:                 %d\n",sysinfo->system_type);
+		fprintf(stderr,"dbg5     reserved1:                   %d\n",sysinfo->reserved1);
+		fprintf(stderr,"dbg5     version:                     %d\n",sysinfo->version);
+		fprintf(stderr,"dbg5     reserved2:                   %d\n",sysinfo->reserved2);
+		fprintf(stderr,"dbg5     platformserialnumber:        %d\n",sysinfo->platformserialnumber);
+		fprintf(stderr,"dbg5     sysinfosize:                 %d\n",sysinfo->sysinfosize);
+		fprintf(stderr,"dbg5     sysinfo:                     \n%s\n",sysinfo->sysinfo);
 		}
 
 	/* print output debug statements */
@@ -1898,6 +2478,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_jstar_pitchroll_struct *pitchroll;
 	struct mbsys_jstar_dvl_struct *dvl;
 	struct mbsys_jstar_pressure_struct *pressure;
+	struct mbsys_jstar_sysinfo_struct *sysinfo;
 	struct mbsys_jstar_comment_struct *comment;
 	char	buffer[MBSYS_JSTAR_SBPHEADER_SIZE];
 	int	index;
@@ -1926,7 +2507,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_COMMENT)
 		{
-		fprintf(stderr,"\ndbg5  New comment read by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg5  New comment to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == 0)
@@ -1954,7 +2535,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 		{
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
-		fprintf(stderr,"\ndbg5  New subbottom data record read by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg5  New subbottom data record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d (subbottom)\n", store->subsystem);
 		fprintf(stderr,"\ndbg5  Channel:\n");
@@ -2052,7 +2633,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	else if (status == MB_SUCCESS && verbose >= 5
 	&& (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2))
 		{
-		fprintf(stderr,"\ndbg5  New sidescan data record read by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg5  New sidescan data record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -2248,7 +2829,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_ATTITUDE)
 		{
-		fprintf(stderr,"\ndbg5  New roll pitch data record read by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg5  New roll pitch data record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -2292,7 +2873,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_DVL)
 		{
-		fprintf(stderr,"\ndbg5  New dvl data record read by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg5  New dvl data record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -2343,7 +2924,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_HEIGHT)
 		{
 		pressure = (struct mbsys_jstar_pressure_struct *) &(store->pressure);
-		fprintf(stderr,"\ndbg5  New pressure data record read by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg5  New pressure data record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5     start_marker:                %d\n",pressure->message.start_marker);
 		fprintf(stderr,"dbg5     version:                     %d\n",pressure->message.version);
 		fprintf(stderr,"dbg5     session:                     %d\n",pressure->message.session);
@@ -2373,7 +2954,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		(store->kind == MB_DATA_NMEA_RMC || store->kind == MB_DATA_NMEA_DBT || store->kind == MB_DATA_NMEA_DPT))
 		{
 		nmea = (struct mbsys_jstar_nmea_struct *) &(store->nmea);
-		fprintf(stderr,"\ndbg5  New pressure data record read by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg5  New NMEA data record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5     start_marker:                %d\n",nmea->message.start_marker);
 		fprintf(stderr,"dbg5     version:                     %d\n",nmea->message.version);
 		fprintf(stderr,"dbg5     session:                     %d\n",nmea->message.session);
@@ -2392,6 +2973,30 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5     reserve[1]:                  %d\n",nmea->reserve[1]);
 		fprintf(stderr,"dbg5     reserve[2]:                  %d\n",nmea->reserve[2]);
 		fprintf(stderr,"dbg5     nmea:                        %s\n",nmea->nmea);
+		}
+	else if (status == MB_SUCCESS && verbose >= 5 &&
+		(store->kind == MB_DATA_HEADER))
+		{
+		sysinfo = (struct mbsys_jstar_sysinfo_struct *) &(store->sysinfo);
+		fprintf(stderr,"\ndbg5  New sysinfo data record to be written by MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5     start_marker:                %d\n",sysinfo->message.start_marker);
+		fprintf(stderr,"dbg5     version:                     %d\n",sysinfo->message.version);
+		fprintf(stderr,"dbg5     session:                     %d\n",sysinfo->message.session);
+		fprintf(stderr,"dbg5     type:                        %d\n",sysinfo->message.type);
+		fprintf(stderr,"dbg5     command:                     %d\n",sysinfo->message.command);
+		fprintf(stderr,"dbg5     subsystem:                   %d\n",sysinfo->message.subsystem);
+		fprintf(stderr,"dbg5     channel:                     %d\n",sysinfo->message.channel);
+		fprintf(stderr,"dbg5     sequence:                    %d\n",sysinfo->message.sequence);
+		fprintf(stderr,"dbg5     reserved:                    %d\n",sysinfo->message.reserved);
+		fprintf(stderr,"dbg5     size:                        %d\n",sysinfo->message.size);
+
+		fprintf(stderr,"dbg5     system_type:                 %d\n",sysinfo->system_type);
+		fprintf(stderr,"dbg5     reserved1:                   %d\n",sysinfo->reserved1);
+		fprintf(stderr,"dbg5     version:                     %d\n",sysinfo->version);
+		fprintf(stderr,"dbg5     reserved2:                   %d\n",sysinfo->reserved2);
+		fprintf(stderr,"dbg5     platformserialnumber:        %d\n",sysinfo->platformserialnumber);
+		fprintf(stderr,"dbg5     sysinfosize:                 %d\n",sysinfo->sysinfosize);
+		fprintf(stderr,"dbg5     sysinfo:                     \n%s\n",sysinfo->sysinfo);
 		}
 
 	/* write out comment */
@@ -3094,6 +3699,51 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* write the pressure data */
 		if ((write_len = fwrite(buffer,1,pressure->message.size,mb_io_ptr->mbfp))
 			!= pressure->message.size)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		}
+
+	/* write out sysinfo data */
+	else if (store->kind == MB_DATA_HEADER)
+		{
+		/* insert the message header values */
+		index = 0;
+		sysinfo = (struct mbsys_jstar_sysinfo_struct *) &(store->sysinfo);
+		mb_put_binary_short(MB_YES, sysinfo->message.start_marker, &buffer[index]); index += 2;
+		buffer[index] = sysinfo->message.version; index++;
+		buffer[index] = sysinfo->message.session; index++;
+		mb_put_binary_short(MB_YES, sysinfo->message.type, &buffer[index]); index += 2;
+		buffer[index] = sysinfo->message.command; index++;
+		buffer[index] = sysinfo->message.subsystem; index++;
+		buffer[index] = sysinfo->message.channel; index++;
+		buffer[index] = sysinfo->message.sequence; index++;
+		mb_put_binary_short(MB_YES, sysinfo->message.reserved, &buffer[index]); index += 2;
+		mb_put_binary_int(MB_YES, sysinfo->message.size, &buffer[index]); index += 4;
+
+		/* write the message header */
+		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp))
+			!= MBSYS_JSTAR_MESSAGE_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+
+		index = 0;
+		mb_put_binary_int(MB_YES, sysinfo->system_type, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, sysinfo->reserved1, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, sysinfo->version, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, sysinfo->reserved2, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, sysinfo->platformserialnumber, &buffer[index]); index += 4;
+		for (i=0;i<sysinfo->sysinfosize;i++)
+			{
+			buffer[index] = sysinfo->sysinfo[i];
+			}
+
+		/* write the sysinfo data */
+		if ((write_len = fwrite(buffer,1,sysinfo->message.size,mb_io_ptr->mbfp))
+			!= sysinfo->message.size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
