@@ -110,7 +110,7 @@ print "mbformat -W > mbsystem_formats.html\n";
 
 # Copy necessary files
 `cp mbsystem_home.html index.html`;
-@preformatted_files = `/bin/ls -1 index.html mbsystem*.html gpl.html mbsystem_version.txt MBTeamJul2003.gif caress2001.gif ChayesJul2003.gif ValJul2003.gif mbsystem*.gif`;
+@preformatted_files = `/bin/ls -1 index.html mbsystem*.html gpl.html mbsystem_version.txt MBTeamJul2003.jpg caress_chayes_ferreira_Feb2014.jpg caress2001.gif ChayesJul2003.gif Christina_d_S_Ferreira_crop.jpg KrystleAnderson2013.gif ValJul2003.gif mbsystem*.gif`;
 foreach $file (@preformatted_files) {
     chop($file);
     print "cp $file ../html\n";
