@@ -179,7 +179,7 @@
 
 /* defines */
 #define MBF_3DDEPTHP_MAGICNUMBER                    0x3D07    /* '=', Bell */
-#define MBF_3DDEPTHP_RECORD_RAWLIDAR                0x0000    /*        */
+#define MBF_3DDEPTHP_RECORD_RAWLIDAR                0x3D52    /* '=''R' */
 #define MBF_3DDEPTHP_RECORD_PARAMETER               0x3D46    /* '=''F' */
 #define MBF_3DDEPTHP_RECORD_COMMENT                 0x3D43    /* '=''C' */
 #define MBF_3DDEPTHP_RECORD_LIDAR                   0x3D4C    /* '=''L' */
@@ -190,8 +190,10 @@
 #define MBF_3DDEPTHP_FILEHEADER_SIZE                6
 #define MBF_3DDEPTHP_PARAMETER_SIZE                 32
 #define MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE    14
+#define MBF_3DDEPTHP_VERSION_1_1_RAWSCANHEADER_SIZE 20
 #define MBF_3DDEPTHP_VERSION_1_1_SCANHEADER_SIZE    66
 #define MBF_3DDEPTHP_VERSION_1_0_PULSE_SIZE         31
+#define MBF_3DDEPTHP_VERSION_1_1_RAWPULSE_SIZE      31
 #define MBF_3DDEPTHP_VERSION_1_1_PULSE_SIZE         100
 
 /* Kearfoot INS position and attitude data structure */
@@ -199,7 +201,7 @@
 /* 3DatDepth LIDAR data structure */
 struct mbsys_3datdepthlidar_pulse_struct
 	{
-        /* Laser Pulse Data (1 to m pulses per scan) */
+        /* Laser Pulse Data (1 to counts_per_scan pulses per scan) */
         float           range;                      /* meters from glass front */
         short           amplitude;                  /* peak of signal - to 1023 */
         float           snr;                        /* SNR of signal return */
@@ -280,7 +282,7 @@ struct mbsys_3datdepthlidar_struct
         float           pitch;                      /* pitch (degrees) */
         float           speed;                      /* speed (degrees) */
 
-        /* Laser Scan Data (1 to m pulses per scan) */
+        /* Laser Scan Data (1 to counts_per_scan pulses per scan) */
         int             num_pulses;                 /* number of pulses */
         int             num_pulses_alloc;           /* array allocated for this number of pulses */
         struct mbsys_3datdepthlidar_pulse_struct *pulses;

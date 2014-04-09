@@ -92,7 +92,7 @@ static char rcs_id[]="$Id$";
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
 		list used for interpolation/extrapolation. */
-int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double lat, int *error)
+int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting, double lat_northing, int *error)
 {
 	char	*function_name = "mb_navint_add";
 	int	status = MB_SUCCESS;
@@ -105,12 +105,12 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
-		fprintf(stderr,"dbg2       lon:        %f\n",lon);
-		fprintf(stderr,"dbg2       lat:        %f\n",lat);
+		fprintf(stderr,"dbg2       rcs_id:       %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       time_d:       %f\n",time_d);
+		fprintf(stderr,"dbg2       lon_easting:  %f\n",lon_easting);
+		fprintf(stderr,"dbg2       lat_northing: %f\n",lat_northing);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -146,11 +146,11 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 
 		/* add new fix to list */
 		mb_io_ptr->fix_time_d[mb_io_ptr->nfix] = time_d;
-		mb_io_ptr->fix_lon[mb_io_ptr->nfix] = lon;
-		mb_io_ptr->fix_lat[mb_io_ptr->nfix] = lat;
+		mb_io_ptr->fix_lon[mb_io_ptr->nfix] = lon_easting;
+		mb_io_ptr->fix_lat[mb_io_ptr->nfix] = lat_northing;
 		mb_io_ptr->nfix++;
 #ifdef MB_NAVINT_DEBUG
-	fprintf(stderr, "mb_navint_add:    Nav fix %d %f %f added\n", mb_io_ptr->nfix, lon, lat);
+	fprintf(stderr, "mb_navint_add:    Nav fix %d %f %f added\n", mb_io_ptr->nfix, lon_easting, lat_northing);
 #endif
 
 		/* print debug statements */
@@ -204,11 +204,13 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 	char	*function_name = "mb_navint_interp";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	double	mtodeglon, mtodeglat;
+	double	mtodeglon = 0.0;
+	double	mtodeglat = 0.0;
 	double	dx, dy, dt, dd;
 	double	factor, headingx, headingy;
 	double  speed_mps;
-	int	ifix;
+	int	ifix = 0;
+	int	ifix0, ifix1;
 	int	i;
 
 	/* print input debug statements */
@@ -246,20 +248,48 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 			mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
 			&mtodeglon,&mtodeglat);
 		}
+		
+	/* find location of time_d in the list arrays */
+	if (mb_io_ptr->nfix > 1)
+		{
+		if (time_d <= mb_io_ptr->fix_time_d[0])
+			ifix = 0;
+		else if (time_d >= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+			ifix = mb_io_ptr->nfix - 1;
+		else
+			{
+			ifix = (mb_io_ptr->nfix - 1) * (time_d - mb_io_ptr->fix_time_d[0])
+				/(mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] - mb_io_ptr->fix_time_d[0]);
+			while (time_d > mb_io_ptr->fix_time_d[ifix])
+				{
+				ifix++;
+				}
+			while (time_d < mb_io_ptr->fix_time_d[ifix-1])
+				{
+				ifix--;
+				}
+			}
+		}
+	else if (mb_io_ptr->nfix == 1)
+		{
+		ifix = 0;
+		}
 
 	/* use raw speed if available */
 	if (rawspeed > 0.0)
 	  *speed = rawspeed; /* km/hr */
 
-	/* else get speed averaged over all available fixes */
+	/* else get speed averaged over as many as 100 fixes */
 	else if (mb_io_ptr->nfix > 1)
 		{
-		dx = (mb_io_ptr->fix_lon[mb_io_ptr->nfix-1]
-			- mb_io_ptr->fix_lon[0])/mtodeglon;
-		dy = (mb_io_ptr->fix_lat[mb_io_ptr->nfix-1]
-			- mb_io_ptr->fix_lat[0])/mtodeglat;
-		dt = mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
-			- mb_io_ptr->fix_time_d[0];
+		ifix0 = MAX(ifix - 50, 0 );
+		ifix1 = MIN(ifix + 50, mb_io_ptr->nfix - 1);
+		dx = (mb_io_ptr->fix_lon[ifix1]
+			- mb_io_ptr->fix_lon[ifix0])/mtodeglon;
+		dy = (mb_io_ptr->fix_lat[ifix1]
+			- mb_io_ptr->fix_lat[ifix0])/mtodeglat;
+		dt = mb_io_ptr->fix_time_d[ifix1]
+			- mb_io_ptr->fix_time_d[ifix0];
 		*speed = 3.6 * sqrt(dx*dx + dy*dy)/dt; /* km/hr */
 		}
 
@@ -272,23 +302,9 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 
 	/* interpolate if possible */
 	if (mb_io_ptr->nfix > 1
-		&& (mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
-			>= time_d)
-		&& (mb_io_ptr->fix_time_d[0]
-			<= time_d))
+		&& (time_d >= mb_io_ptr->fix_time_d[0])
+		&& (time_d <= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]))
 		{
-		/* get interpolated position */
-		ifix = (mb_io_ptr->nfix - 1) * (time_d - mb_io_ptr->fix_time_d[0])
-			/(mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] - mb_io_ptr->fix_time_d[0]);
-		while (time_d > mb_io_ptr->fix_time_d[ifix])
-			{
-			ifix++;
-			}
-		while (time_d < mb_io_ptr->fix_time_d[ifix-1])
-			{
-			ifix--;
-			}
-
 		factor = (time_d - mb_io_ptr->fix_time_d[ifix-1])
 			/(mb_io_ptr->fix_time_d[ifix] - mb_io_ptr->fix_time_d[ifix-1]);
 		*lon = mb_io_ptr->fix_lon[ifix-1]
@@ -305,8 +321,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 	/* extrapolate from last fix - note zero speed
 	    results in just using the last fix */
 	else if (mb_io_ptr->nfix > 1
-		&& (mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
-			< time_d))
+		&& (time_d > mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]))
 		{
 		/* extrapolated position using average speed */
 		dd = (time_d - mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
@@ -365,6 +380,194 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       lon:        %f\n",*lon);
 		fprintf(stderr,"dbg2       lat:        %f\n",*lat);
+		fprintf(stderr,"dbg2       speed:      %f\n",*speed);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/* 	function mb_navint_prjinterp interpolates or extrapolates a
+		nav fix from the internal list treating the position
+		list as being in a projected coordinate system
+		rather than in geographic lon lat. */
+int mb_navint_prjinterp(int verbose, void *mbio_ptr,
+		double time_d, double heading, double rawspeed,
+		double *easting, double *northing, double *speed,
+		int *error)
+{
+	char	*function_name = "mb_navintprj_interp";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	double	dx, dy, dt, dd;
+	double	factor, headingx, headingy;
+	double  speed_mps;
+	int	ifix = 0;
+	int	ifix0, ifix1;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
+		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       rawspeed:   %f\n",rawspeed);
+		}
+
+	/* get pointers to mbio descriptor and data structures */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Current nav fix values:\n");
+		for (i=0;i<mb_io_ptr->nfix;i++)
+			fprintf(stderr,"dbg2       nav fix[%2d]:   %f %f %f\n",
+						i, mb_io_ptr->fix_time_d[i],
+						mb_io_ptr->fix_lon[i],
+						mb_io_ptr->fix_lat[i]);
+		}
+		
+	/* find location of time_d in the list arrays */
+	if (mb_io_ptr->nfix > 1)
+		{
+		if (time_d <= mb_io_ptr->fix_time_d[0])
+			ifix = 0;
+		else if (time_d >= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+			ifix = mb_io_ptr->nfix - 1;
+		else
+			{
+			ifix = (mb_io_ptr->nfix - 1) * (time_d - mb_io_ptr->fix_time_d[0])
+				/(mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] - mb_io_ptr->fix_time_d[0]);
+			while (time_d > mb_io_ptr->fix_time_d[ifix])
+				{
+				ifix++;
+				}
+			while (time_d < mb_io_ptr->fix_time_d[ifix-1])
+				{
+				ifix--;
+				}
+			}
+		}
+	else if (mb_io_ptr->nfix == 1)
+		{
+		ifix = 0;
+		}
+
+	/* use raw speed if available */
+	if (rawspeed > 0.0)
+	  *speed = rawspeed; /* km/hr */
+
+	/* else get speed averaged over as many as 100 fixes */
+	else if (mb_io_ptr->nfix > 1)
+		{
+		ifix0 = MAX(ifix - 50, 0 );
+		ifix1 = MIN(ifix + 50, mb_io_ptr->nfix - 1);
+		dx = (mb_io_ptr->fix_lon[ifix1]
+			- mb_io_ptr->fix_lon[ifix0]);
+		dy = (mb_io_ptr->fix_lat[ifix1]
+			- mb_io_ptr->fix_lat[ifix0]);
+		dt = mb_io_ptr->fix_time_d[ifix1]
+			- mb_io_ptr->fix_time_d[ifix0];
+		*speed = 3.6 * sqrt(dx*dx + dy*dy)/dt; /* km/hr */
+		}
+
+	/* else speed unknown */
+	else
+		*speed = 0.0;
+
+	/* get speed in m/s */
+	speed_mps = *speed / 3.6;
+
+	/* interpolate if possible */
+	if (mb_io_ptr->nfix > 1
+		&& (time_d >= mb_io_ptr->fix_time_d[0])
+		&& (time_d <= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]))
+		{
+		factor = (time_d - mb_io_ptr->fix_time_d[ifix-1])
+			/(mb_io_ptr->fix_time_d[ifix] - mb_io_ptr->fix_time_d[ifix-1]);
+		*easting = mb_io_ptr->fix_lon[ifix-1]
+			+ factor*(mb_io_ptr->fix_lon[ifix] - mb_io_ptr->fix_lon[ifix-1]);
+		*northing = mb_io_ptr->fix_lat[ifix-1]
+			+ factor*(mb_io_ptr->fix_lat[ifix] - mb_io_ptr->fix_lat[ifix-1]);
+		status = MB_SUCCESS;
+#ifdef MB_NAVINT_DEBUG
+	fprintf(stderr, "mb_navint_interp: Nav  %f %f interpolated at fix %d of %d with factor:%f\n",
+		*easting, *northing, ifix, mb_io_ptr->nfix, factor);
+#endif
+		}
+
+	/* extrapolate from last fix - note zero speed
+	    results in just using the last fix */
+	else if (mb_io_ptr->nfix > 1
+		&& (time_d > mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]))
+		{
+		/* extrapolated position using average speed */
+		dd = (time_d - mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+			* speed_mps; /* meters */
+		headingx = sin(DTR * heading);
+		headingy = cos(DTR * heading);
+		*easting = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1]
+			+ headingx * dd;
+		*northing = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1]
+			+ headingy * dd;
+		status = MB_SUCCESS;
+#ifdef MB_NAVINT_DEBUG
+	fprintf(stderr, "mb_navint_interp: Nav %f %f extrapolated from last fix of %d with distance:%f and speed:%f\n",
+		*easting, *northing, mb_io_ptr->nfix, dd, speed_mps);
+#endif
+		}
+
+	/* extrapolate from first fix - note zero speed
+	    results in just using the first fix */
+	else if (mb_io_ptr->nfix >= 1)
+		{
+		/* extrapolated position using average speed */
+		dd = (time_d - mb_io_ptr->fix_time_d[0])
+			* speed_mps; /* meters */
+		headingx = sin(DTR * heading);
+		headingy = cos(DTR * heading);
+		*easting = mb_io_ptr->fix_lon[0]
+			+ headingx * dd;
+		*northing = mb_io_ptr->fix_lat[0]
+			+ headingy * dd;
+		status = MB_SUCCESS;
+#ifdef MB_NAVINT_DEBUG
+	fprintf(stderr, "mb_navint_interp: Nav %f %f extrapolated from first fix of %d with distance %f and speed:%f\n",
+		*easting, *northing, mb_io_ptr->nfix, dd, speed_mps);
+#endif
+		}
+
+	/* else no fix */
+	else
+		{
+		*easting = 0.0;
+		*northing = 0.0;
+		*speed = 0.0;
+		status = MB_FAILURE;
+		*error = MB_ERROR_NOT_ENOUGH_DATA;
+#ifdef MB_NAVINT_DEBUG
+	fprintf(stderr, "mb_navint_interp: Nav zeroed\n");
+#endif
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       easting:    %f\n",*easting);
+		fprintf(stderr,"dbg2       northing:   %f\n",*northing);
 		fprintf(stderr,"dbg2       speed:      %f\n",*speed);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

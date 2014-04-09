@@ -16,7 +16,8 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-* Version 5.4.2181       April 4, 2014
+  Version 5.4.2182       April 8, 2014
+  Version 5.4.2181       April 4, 2014
 * Version 5.4.2176       March 18, 2014
 * Version 5.4.2168       February 19, 2014
 * Version 5.4.2163       January 31, 2014
@@ -173,7 +174,18 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.4.2181 (April 2, 2014)
+-----> 5.4.2182 (April 8, 2014)
+
+Format 231 (MBF_3DDEPTHP): Added new raw Lidar record to be used by 3DatDepth.
+
+Format 201 (): Corrected bug in handling of navigation in projected coordinate
+systems.
+
+mbio/mb_navint.c and mbio/mb_define.h: Added a new function mb_navint_prjinterp()
+that interpolates navigation and speed from internal runnings lists assuming the
+navigation is in eastings and northings rather than longitude and latitude.
+
+-----> 5.4.2181 (April 4, 2014)
 
 Release 5.4.2181
 
