@@ -671,10 +671,14 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id);
 int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list);
 int mb_notice_message(int verbose, int notice, char **message);
 int mb_navint_add(int verbose, void *mbio_ptr,
-		double time_d, double lon, double lat, int *error);
+		double time_d, double lon_easting, double lat_northing, int *error);
 int mb_navint_interp(int verbose, void *mbio_ptr,
 		double time_d, double heading, double rawspeed,
 		double *lon, double *lat, double *speed,
+		int *error);
+int mb_navint_prjinterp(int verbose, void *mbio_ptr,
+		double time_d, double heading, double rawspeed,
+		double *easting, double *northing, double *speed,
 		int *error);
 int mb_attint_add(int verbose, void *mbio_ptr,
 		double time_d, double heave,

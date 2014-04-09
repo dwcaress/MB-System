@@ -2263,14 +2263,30 @@ fprintf(stderr,"SAVED:"); */
 
 				/* handle some bookkeeping since the header has all been read */
 				*file_header_read = MB_YES;
-
-				/* set projection to UTM zone 1 if no projection specified */
-				if (strlen(store->PRJ_proj4_command) == 0)
+				
+				/* handle projection - if one is already initialized from
+				   a *.prj file leave it in place, if not use the first
+				   PRJ record in the file, if no projection set just use
+				   UTM01N */
+				if (mb_io_ptr->projection_initialized == MB_YES)
 					{
-					strcpy(store->PRJ_proj4_command, "UTM01N");
+					strcpy(store->PRJ_proj4_command,
+						mb_io_ptr->projection_id);
 					}
-				mb_proj_init(verbose, store->PRJ_proj4_command, &(mb_io_ptr->pjptr), error);
-				mb_io_ptr->projection_initialized = MB_YES;
+				else
+					{
+					/* if no projection set just use UTM01N */
+					if (strlen(store->PRJ_proj4_command) == 0)
+						{
+						strcpy(store->PRJ_proj4_command, "UTM01N");
+						}
+						
+					/* initialize the projection */
+					mb_proj_init(verbose, store->PRJ_proj4_command,
+							&(mb_io_ptr->pjptr), error);
+					strcpy(mb_io_ptr->projection_id, store->PRJ_proj4_command);
+					mb_io_ptr->projection_initialized = MB_YES;
+					}
 				}
 
 			/* EOL end of line data record */
