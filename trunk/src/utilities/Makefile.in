@@ -67,7 +67,7 @@ bin_PROGRAMS = mbhsdump$(EXEEXT) mbformat$(EXEEXT) mbdefaults$(EXEEXT) \
 	mbdumpesf$(EXEEXT) mbtime$(EXEEXT) mbctdlist$(EXEEXT) \
 	mbfilter$(EXEEXT) mbroutetime$(EXEEXT) \
 	mbhysweeppreprocess$(EXEEXT) mbkongsbergpreprocess$(EXEEXT) \
-	mbsxppreprocess$(EXEEXT) mbpreprocess$(EXEEXT) \
+	mbswplspreprocess$(EXEEXT) mbpreprocess$(EXEEXT) \
 	mbsvpselect$(EXEEXT) $(am__EXEEXT_1)
 @BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/utilities
@@ -231,9 +231,10 @@ mbsvplist_LDADD = $(LDADD)
 am_mbsvpselect_OBJECTS = mbsvpselect.$(OBJEXT) geodesic.$(OBJEXT)
 mbsvpselect_OBJECTS = $(am_mbsvpselect_OBJECTS)
 mbsvpselect_LDADD = $(LDADD)
-am_mbsxppreprocess_OBJECTS = mbsxppreprocess.$(OBJEXT)
-mbsxppreprocess_OBJECTS = $(am_mbsxppreprocess_OBJECTS)
-mbsxppreprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
+am_mbswplspreprocess_OBJECTS = mbswplspreprocess.$(OBJEXT)
+mbswplspreprocess_OBJECTS = $(am_mbswplspreprocess_OBJECTS)
+mbswplspreprocess_DEPENDENCIES =  \
+	${top_builddir}/src/mbaux/libmbaux.la
 am_mbtime_OBJECTS = mbtime.$(OBJEXT)
 mbtime_OBJECTS = $(am_mbtime_OBJECTS)
 mbtime_LDADD = $(LDADD)
@@ -269,7 +270,7 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbsegyinfo_SOURCES) $(mbsegylist_SOURCES) \
 	$(mbsegypsd_SOURCES) $(mbset_SOURCES) $(mbstripnan_SOURCES) \
 	$(mbsvplist_SOURCES) $(mbsvpselect_SOURCES) \
-	$(mbsxppreprocess_SOURCES) $(mbtime_SOURCES)
+	$(mbswplspreprocess_SOURCES) $(mbtime_SOURCES)
 DIST_SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mb7kpreprocess_SOURCES) $(mbabsorption_SOURCES) \
 	$(mbareaclean_SOURCES) $(mbauvloglist_SOURCES) \
@@ -289,7 +290,7 @@ DIST_SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbsegyinfo_SOURCES) $(mbsegylist_SOURCES) \
 	$(am__mbsegypsd_SOURCES_DIST) $(mbset_SOURCES) \
 	$(mbstripnan_SOURCES) $(mbsvplist_SOURCES) \
-	$(mbsvpselect_SOURCES) $(mbsxppreprocess_SOURCES) \
+	$(mbsvpselect_SOURCES) $(mbswplspreprocess_SOURCES) \
 	$(mbtime_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -541,8 +542,8 @@ mbhysweeppreprocess_SOURCES = mbhysweeppreprocess.c
 mbhysweeppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
 mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-mbsxppreprocess_SOURCES = mbsxppreprocess.c
-mbsxppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbswplspreprocess_SOURCES = mbswplspreprocess.c
+mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbpreprocess_SOURCES = mbpreprocess.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbsvpselect_SOURCES = mbsvpselect.c geodesic.c
@@ -767,9 +768,9 @@ mbsvplist$(EXEEXT): $(mbsvplist_OBJECTS) $(mbsvplist_DEPENDENCIES) $(EXTRA_mbsvp
 mbsvpselect$(EXEEXT): $(mbsvpselect_OBJECTS) $(mbsvpselect_DEPENDENCIES) $(EXTRA_mbsvpselect_DEPENDENCIES) 
 	@rm -f mbsvpselect$(EXEEXT)
 	$(LINK) $(mbsvpselect_OBJECTS) $(mbsvpselect_LDADD) $(LIBS)
-mbsxppreprocess$(EXEEXT): $(mbsxppreprocess_OBJECTS) $(mbsxppreprocess_DEPENDENCIES) $(EXTRA_mbsxppreprocess_DEPENDENCIES) 
-	@rm -f mbsxppreprocess$(EXEEXT)
-	$(LINK) $(mbsxppreprocess_OBJECTS) $(mbsxppreprocess_LDADD) $(LIBS)
+mbswplspreprocess$(EXEEXT): $(mbswplspreprocess_OBJECTS) $(mbswplspreprocess_DEPENDENCIES) $(EXTRA_mbswplspreprocess_DEPENDENCIES) 
+	@rm -f mbswplspreprocess$(EXEEXT)
+	$(LINK) $(mbswplspreprocess_OBJECTS) $(mbswplspreprocess_LDADD) $(LIBS)
 mbtime$(EXEEXT): $(mbtime_OBJECTS) $(mbtime_DEPENDENCIES) $(EXTRA_mbtime_DEPENDENCIES) 
 	@rm -f mbtime$(EXEEXT)
 	$(LINK) $(mbtime_OBJECTS) $(mbtime_LDADD) $(LIBS)
@@ -825,7 +826,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbstripnan.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsvplist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsvpselect.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsxppreprocess.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbswplspreprocess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtime.Po@am__quote@
 
 .c.o:

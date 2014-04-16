@@ -413,7 +413,7 @@ and mbedit edit save files.\n";
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
 	/* parameter controls */
 	struct mb_process_struct process;
@@ -3892,9 +3892,9 @@ and mbedit edit save files.\n";
 		sprintf(comment,"MB-system Version %s",MB_VERSION);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		strncpy(date,"\0",25);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
 		if (user_ptr != NULL)

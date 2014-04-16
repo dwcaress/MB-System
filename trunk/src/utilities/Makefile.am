@@ -44,7 +44,7 @@ bin_PROGRAMS = mbhsdump \
         mbroutetime \
         mbhysweeppreprocess \
         mbkongsbergpreprocess \
-        mbsxppreprocess \
+        mbswplspreprocess \
         mbpreprocess \
 	mbsvpselect \
         $(FFTW_PROG)
@@ -168,8 +168,8 @@ mbhysweeppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
 mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
-mbsxppreprocess_SOURCES = mbsxppreprocess.c
-mbsxppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbswplspreprocess_SOURCES = mbswplspreprocess.c
+mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
 mbpreprocess_SOURCES = mbpreprocess.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la

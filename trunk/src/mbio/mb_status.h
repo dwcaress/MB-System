@@ -110,7 +110,7 @@
 #define	MB_FAILURE			0
 
 /* MBIO minimum and maximum error values */
-#define	MB_ERROR_MIN			-23
+#define	MB_ERROR_MIN			-24
 #define	MB_ERROR_MAX			16
 
 /* MBIO function fatal error values */
@@ -156,6 +156,7 @@
 #define	MB_ERROR_NOT_ENOUGH_DATA	-21
 #define	MB_ERROR_FILE_NOT_FOUND		-22
 #define	MB_ERROR_FILE_LOCKED		-23
+#define	MB_ERROR_INIT_FAIL		-24
 
 /* MBIO problem values */
 #define	MB_PROBLEM_MAX			6
@@ -222,6 +223,7 @@ static char *nonfatal_error_msg[] =
 	"Not enough data available to perform operation",
 	"Requested file not found",
 	"Requested file locked",
+	"Initialization failed",
 	};
 static char *unknown_error_msg[] =
 	{

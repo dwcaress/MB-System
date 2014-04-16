@@ -73,6 +73,11 @@ identifiable swath files in the specified target directory.: <a
       <li>Process data from a Seabird SBE53 pressure sensor into a tidal model for
        use by mbprocess: <a href="mbm_bpr.html">mbm_bpr</a></li>
       <li>Generate a sound velocity profile model from sound speed and depth values in swath files: <a href="mbm_makesvp.html">mbm_makesvp</a></li>
+      <li>Extract water sound velocity profiles
+(SVPs) from swath data files: <a href="mbsvplist.html">mbsvplist</a></li>
+  	  <li>Select the best
+available sound speed model for each swath file in a survey according to 
+user specified criteria: <a href="mbsvpselect.html">mbsvpselect</a></li>
     </ul>
     <li>Navigation Data Processing</li>
     <ul>
@@ -112,10 +117,13 @@ submerged sonar platforms (e.g. ROVs and AUVs): <a
 edit save file format: <a href="mbneptune2esf.html">mbneptune2esf</a></li>
       <li>Obtain reference water sound velocity profile (SVP): <a
  href="mblevitus.html">mblevitus</a>*</li>
-      <li>Extract water sound velocity profiles (SVPs) from data: <a
- href="mbsvplist.html">mbsvplist</a></li>
       <li>Interactive modeling of SVP effects on bathymetry: <a
  href="mbvelocitytool.html">mbvelocitytool</a>*</li>
+      <li>Extract water sound velocity profiles
+(SVPs) from swath data files: <a href="mbsvplist.html">mbsvplist</a></li>
+  	  <li>Select the best
+available sound speed model for each swath file in a survey according to 
+user specified criteria: <a href="mbsvpselect.html">mbsvpselect</a></li>
       <li>Create or modify parameter files used to control mbprocess: <a
  href="mbset.html">mbset</a></li>
       <li>Recalculate or correct swath bathymetry and apply bathymetry
@@ -216,6 +224,9 @@ mbm_plot</a>*</li>
       <li>Preprocess HYSWEEP HSX data (format 201), including applying time
         lag and biases to attitude and navigation data: <a
  href="mbhysweeppreprocess.html">mbhysweeppreprocess</a></li>
+      <li>Preprocess SwathPlus SXP data (format 222), including applying time
+        lag and biases to attitude and navigation data: <a
+ href="mbswplspreprocess.html">mbswplspreprocess</a></li>
   <li>Scan a Hydrosweep swath sonar data file using the  program  mbhsdump  and generate a list in columnar format with time, date, latitude, longitude, C-mean, and C-keel entrys: <a href="mbm_fmtvel.html">mbm_fmtvel</a></li>
       <li>Extract Jstar format (format 132) sidescan and subbottom data
       from Reson 7k (format 88) data files: <a href="mb7k2jstar.html">mb7k2jstar</a>      </li>

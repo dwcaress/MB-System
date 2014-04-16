@@ -1044,7 +1044,7 @@ int mb_register_array(int verbose, void *mbio_ptr,
 		int type, size_t size, void **handle, int *error)
 {
 	static char rcs_id[]="$Id$";
-	char	*function_name = "mb_update_arrays";
+	char	*function_name = "mb_register_array";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int	nalloc;

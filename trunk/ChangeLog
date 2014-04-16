@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.4.2183       April 16, 2014
   Version 5.4.2182       April 8, 2014
   Version 5.4.2181       April 4, 2014
 * Version 5.4.2176       March 18, 2014
@@ -173,6 +174,18 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2183 (April 16, 2014)
+
+Many programs: Fixed handling of system time character string provided by
+function ctime() to prevent occasional overflows.
+
+Format 222 (MBF_SWPLSSXP): Revised implementation of SEA SwathPlus SXP data format
+(format id 222) contributed by David Finlayson.
+
+MBswplspreprocess: Preprocess program for SEA SwathPlus SXP data format
+(format id 222) contributed by David Finlayson. This was formerly known as
+mbsxppreprocess.
 
 -----> 5.4.2182 (April 8, 2014)
 

@@ -264,6 +264,7 @@ struct mbna_project {
 	char	path[STRING_MAX];
 	char	home[STRING_MAX];
 	char	datadir[STRING_MAX];
+	char	logfile[STRING_MAX];
 	int	num_files;
 	int	num_files_alloc;
 	struct mbna_file *files;

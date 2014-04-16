@@ -29,8 +29,8 @@ HTMLDIR = ../../share/doc/mbsystem/html
 
 ### make all copies the html files to the share/doc/mbsystem/html file directory
 all:    ../../share ../../share/doc ../../share/doc/mbsystem ../../share/doc/mbsystem/html
-	cp *.html *.txt *.gif $(HTMLDIR)
-	chmod 664 $(HTMLDIR)/*.html $(HTMLDIR)/*.txt $(HTMLDIR)/*.gif
+	cp *.html *.txt *.gif *.jpg ChangeLog.txt $(HTMLDIR)
+	chmod 664 $(HTMLDIR)/*.html $(HTMLDIR)/*.txt $(HTMLDIR)/*.gif $(HTMLDIR)/*.jpg $(HTMLDIR)/ChangeLog.txt
 ../../share:
 	mkdir ../../share
 ../../share/doc:

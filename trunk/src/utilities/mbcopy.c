@@ -406,7 +406,7 @@ int main (int argc, char **argv)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
+	char	date[32], user[128], *user_ptr, host[128];
 
 	FILE	*fp;
 	char	*result;
@@ -922,9 +922,9 @@ int main (int argc, char **argv)
 		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		strncpy(date,"\0",25);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
 		if (user_ptr != NULL)
