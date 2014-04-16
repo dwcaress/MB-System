@@ -13,7 +13,7 @@
 <H1 ALIGN=CENTER>What's New in MB-System Version 5.4</H1>
 
 <P>The version 5.4.x releases of MB-System includes a number of changes and
-improvements relative to the earlier version 5 releases. The most significant change is the addition of an autoconf-based build system including a configure script. A detailed listing of bug fixes and other changes is found in the <a href="ChangeLog.txt">ChangeLog</a> file. The particulars follow: </P>
+improvements relative to the earlier version 5 releases. The most significant change is the addition of an autoconf-based build system including a configure script. A detailed listing of bug fixes and other changes is found in the <a href="ChangeLog.txt">ChangeLog</a> file. The most prominent particulars follow: </P>
 
 <UL>
   <LI>New autoconf based build system.</LI>
@@ -23,6 +23,21 @@ improvements relative to the earlier version 5 releases. The most significant ch
   <LI>The configure script generates Makefiles that support installing the executables, libraries, header files, and man pages in locations outside the MB-System source directories (e.g. in /usr/local).</LI>
   <LI>The configure script generated Makefiles build shared libraries.</LI>
   <LI>The older &quot;install_makefiles&quot; build system is still included in the distribution, and can be used to build MB-System.</LI>
+  </UL>
+</UL>  
+<UL>
+  <LI>Support for several new data formats.</LI>
+  <UL>
+  <LI>SEA Swathplus interferometric sonar SXP data format is supported as format 222 (MBF_SWPLSSXP).</LI>
+  <LI>3DatDepth lidar data format is supported as format 231 (MBF_3DDEPTHP).</LI>
+  <LI>Electronic Navigation Ltd. WASSP multibeam sonar data format supported as format 241 (MBF_WASSPENL).</LI>
+  <LI>NGDC MGD77T data format for tab delimited underway marine geophysical data is supported as format 174 (MBF_MGD77TAB).</LI>
+  </UL>
+</UL>
+<UL>
+  <LI>New programs:</LI>
+  <UL>
+  <LI>MBsvpselect: This program chooses and implements the best available sound speed model for each swath file in a survey according to user specified criteria.</LI>
   </UL>
 </UL>
 

@@ -613,7 +613,7 @@ int main (int argc, char **argv)
 	char	variable[MB_PATH_MAXLINE];
 	int	lcount = 0;
 	time_t	right_now;
-	char	date[128], user[128], *user_ptr, host[128];
+	char	date[32], user[128], *user_ptr, host[128];
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -1024,7 +1024,8 @@ int main (int argc, char **argv)
 	    fprintf(outfile, "\t:mbsystem_version = \"%s\";\n", MB_VERSION);
 
 	    right_now = time((time_t *)0);
-	    strncpy(date,ctime(&right_now),128);
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
 	    if ((user_ptr = (char *) getenv("USER")) == NULL)
 	      user_ptr = (char *) getenv("LOGNAME");
 	    if (user_ptr != NULL)

@@ -329,6 +329,7 @@ mbstripnan.1 \
 mbsvplist.1 \
 mbsvpselect.1 \
 mbswath.1 \
+mbswplspreprocess.1 \
 mbsystem.1 \
 mbtime.1 \
 mbvelocitytool.1

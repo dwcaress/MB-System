@@ -360,7 +360,7 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], user[128], *user_ptr, host[MB_PATH_MAXLINE];
 
 	/* processing control variables */
 	int	datakind = MBFILTER_SS;
@@ -939,9 +939,9 @@ The default input and output streams are stdin and stdout.\n";
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	strncpy(date,"\0",25);
 	right_now = time((time_t *)0);
-	strncpy(date,ctime(&right_now),24);
+	strcpy(date,ctime(&right_now));
+        date[strlen(date)-1] = '\0';
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
 	if (user_ptr != NULL)

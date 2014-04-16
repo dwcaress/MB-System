@@ -1731,7 +1731,7 @@ int mb_pr_writepar(int verbose, char *file,
 	FILE	*fp;
 	int	status = MB_SUCCESS;
 	time_t	right_now;
-	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 	char	*bufptr;
 	int	i;
 
@@ -1900,8 +1900,8 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp,"## Written by %s version %s\n", function_name, rcs_id);
 	    fprintf(fp,"## MB-system Version %s\n",MB_VERSION);
 	    right_now = time((time_t *)0);
-	    strncpy(date,ctime(&right_now),24);
-	    date[24] = 0;
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
 	    if ((user_ptr = getenv("USER")) == NULL)
 		    user_ptr = getenv("LOGNAME");
 	    if (user_ptr != NULL)
@@ -5932,7 +5932,7 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
 
 	/* print input debug statements */
@@ -5955,8 +5955,8 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 	    	if ((fp = fopen(lockfile, "wx")) != NULL)
 			{
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
-			date[24] = 0;
+			strcpy(date,ctime(&right_now));
+			date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				user_ptr = getenv("LOGNAME");
 			if (user_ptr != NULL)

@@ -5735,7 +5735,7 @@ do_info_add(char *info, int timetag)
     int		pos;
     char	tag[STRING_MAX];
     time_t	right_now;
-    char	date[25], user[128], *user_ptr, host[128];
+    char	date[32], user[128], *user_ptr, host[128];
     char	*ctime();
     char	*getenv();
 
@@ -5755,8 +5755,8 @@ do_info_add(char *info, int timetag)
     if (timetag == MB_YES)
 	{
 	right_now = time((time_t *)0);
-	memset(date,0,25);
-	strncpy(date,ctime(&right_now),24);
+	strcpy(date,ctime(&right_now));
+        date[strlen(date)-1] = '\0';
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
 	if (user_ptr != NULL)

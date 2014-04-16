@@ -286,7 +286,7 @@ double	zmisfitmax;
 
 /* time, user, host variables */
 time_t	right_now;
-char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
 /* minimum initial sigma_crossing (meters) */
 #define	SIGMA_MINIMUM	0.1
@@ -1116,10 +1116,6 @@ int mbnavadjust_write_project()
 	int	nties_fixed = 0;
 	char	status_char, truecrossing_char;
 	int	routecolor = 1;
-
-	/* time, user, host variables */
-	time_t	right_now;
-	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*unknown = "Unknown";
 
 	int	i, j, k, l;
@@ -1136,7 +1132,8 @@ int mbnavadjust_write_project()
 		{
 fprintf(stderr,"Writing project %s\n", project.name);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
 		if (user_ptr != NULL)
@@ -1381,7 +1378,8 @@ fprintf(stderr,"Writing project %s\n", project.name);
 		fprintf(hfp, "## MB-System Version %s\n",MB_VERSION);
 		strncpy(date,"\0",25);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			if ((user_ptr = getenv("LOGNAME")) == NULL)
 				user_ptr = unknown;
@@ -1478,7 +1476,8 @@ fprintf(stderr,"Output %d (expected %d) true crossing locations to %s\n", nroute
 		fprintf(hfp, "## MB-System Version %s\n",MB_VERSION);
 		strncpy(date,"\0",25);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			if ((user_ptr = getenv("LOGNAME")) == NULL)
 				user_ptr = unknown;
@@ -1575,7 +1574,8 @@ fprintf(stderr,"Output %d (expected %d) >=50%% overlap crossing locations to %s\
 		fprintf(hfp, "## MB-System Version %s\n",MB_VERSION);
 		strncpy(date,"\0",25);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			if ((user_ptr = getenv("LOGNAME")) == NULL)
 				user_ptr = unknown;
@@ -1672,7 +1672,8 @@ fprintf(stderr,"Output %d (expected %d) >=25%% && < 50%% overlap crossing locati
 		fprintf(hfp, "## MB-System Version %s\n",MB_VERSION);
 		strncpy(date,"\0",25);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			if ((user_ptr = getenv("LOGNAME")) == NULL)
 				user_ptr = unknown;
@@ -1769,7 +1770,8 @@ fprintf(stderr,"Output %d (expected %d) <25%% overlap crossing locations to %s\n
 		fprintf(hfp, "## MB-System Version %s\n",MB_VERSION);
 		strncpy(date,"\0",25);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			if ((user_ptr = getenv("LOGNAME")) == NULL)
 				user_ptr = unknown;
@@ -1865,7 +1867,8 @@ fprintf(stderr,"Output %d (expected %d) fixed crossing locations to %s\n", nrout
 		fprintf(hfp, "## MB-System Version %s\n",MB_VERSION);
 		strncpy(date,"\0",25);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			if ((user_ptr = getenv("LOGNAME")) == NULL)
 				user_ptr = unknown;
@@ -1958,7 +1961,8 @@ fprintf(stderr,"Output %d (expected %d) unfixed tie locations to %s\n", nroute, 
 		fprintf(hfp, "## MB-System Version %s\n",MB_VERSION);
 		strncpy(date,"\0",25);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			if ((user_ptr = getenv("LOGNAME")) == NULL)
 				user_ptr = unknown;
@@ -12396,7 +12400,8 @@ mbnavadjust_applynav()
 
 			/* write file header */
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
+			strcpy(date,ctime(&right_now));
+                        date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				user_ptr = getenv("LOGNAME");
 			if (user_ptr != NULL)

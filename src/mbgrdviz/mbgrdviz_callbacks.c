@@ -2509,7 +2509,7 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*unknown = "Unknown";
 
 	/* print input debug statements */
@@ -2579,9 +2579,9 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr)
 			fprintf(sfp, "## Output by Program %s\n",program_name);
 			fprintf(sfp, "## Program Version %s\n",rcs_id);
 			fprintf(sfp, "## MB-System Version %s\n",MB_VERSION);
-			strncpy(date,"\0",25);
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
+			strcpy(date,ctime(&right_now));
+                        date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				if ((user_ptr = getenv("LOGNAME")) == NULL)
 					user_ptr = unknown;
@@ -2844,7 +2844,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*unknown = "Unknown";
 
 	/* print input debug statements */
@@ -2889,9 +2889,9 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 			fprintf(sfp, "## Output by Program %s\n",program_name);
 			fprintf(sfp, "## Program Version %s\n",rcs_id);
 			fprintf(sfp, "## MB-System Version %s\n",MB_VERSION);
-			strncpy(date,"\0",25);
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
+			strcpy(date,ctime(&right_now));
+                        date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				if ((user_ptr = getenv("LOGNAME")) == NULL)
 					user_ptr = unknown;
@@ -3086,7 +3086,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*unknown = "Unknown";
 
 	/* print input debug statements */
@@ -3131,9 +3131,9 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr)
 			fprintf(sfp, "## Output by Program %s\r\n",program_name);
 			fprintf(sfp, "## Program Version %s\r\n",rcs_id);
 			fprintf(sfp, "## MB-System Version %s\r\n",MB_VERSION);
-			strncpy(date,"\0",25);
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
+			strcpy(date,ctime(&right_now));
+                        date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				if ((user_ptr = getenv("LOGNAME")) == NULL)
 					user_ptr = unknown;
@@ -4240,7 +4240,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*unknown = "Unknown";
 
 	/* read data for valid instance */
@@ -4268,9 +4268,9 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
 			fprintf(sfp, "## Output by Program %s\n",program_name);
 			fprintf(sfp, "## Program Version %s\n",rcs_id);
 			fprintf(sfp, "## MB-System Version %s\n",MB_VERSION);
-			strncpy(date,"\0",25);
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
+			strcpy(date,ctime(&right_now));
+                        date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				if ((user_ptr = getenv("LOGNAME")) == NULL)
 					user_ptr = unknown;

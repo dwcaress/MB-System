@@ -155,9 +155,6 @@ int main (int argc, char **argv)
 	int	intstat;
 	int	i, j;
 
-	char	*ctime();
-	char	*getenv();
-
 	/* get current default values - only interested in lonflip */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);

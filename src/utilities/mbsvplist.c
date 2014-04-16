@@ -226,7 +226,7 @@ int main (int argc, char **argv)
 	double	ssv;
 
 	time_t	right_now;
-	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int	read_data;
 	int	i, j, isvp;
 
@@ -795,9 +795,9 @@ int main (int argc, char **argv)
 					fprintf(svp_fp, "## Output by Program %s\n",program_name);
 					fprintf(svp_fp, "## Program Version %s\n",rcs_id);
 					fprintf(svp_fp, "## MB-System Version %s\n",MB_VERSION);
-					strncpy(date,"\0",25);
 					right_now = time((time_t *)0);
-					strncpy(date,ctime(&right_now),24);
+					strcpy(date,ctime(&right_now));
+					date[strlen(date)-1] = '\0';
 					if ((user_ptr = getenv("USER")) == NULL)
 						user_ptr = getenv("LOGNAME");
 					if (user_ptr != NULL)

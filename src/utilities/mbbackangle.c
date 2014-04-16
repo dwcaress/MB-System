@@ -408,7 +408,7 @@ by MBprocess.";
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
 	double	d1, d2;
 	int	i, j;
@@ -1142,7 +1142,8 @@ by MBprocess.";
 	    	fprintf(atfp,"## MB-system Version %s\n",MB_VERSION);
 	    	fprintf(atfp,"## Table file format: 1.0.0\n");
 	    	right_now = time((time_t *)0);
-	    	strncpy(date,ctime(&right_now),24);
+	    	strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 	    	if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
 	    	if (user_ptr != NULL)
@@ -1170,7 +1171,8 @@ by MBprocess.";
 	    	fprintf(stfp,"## MB-system Version %s\n",MB_VERSION);
 	    	fprintf(stfp,"## Table file format: 1.0.0\n");
 	    	right_now = time((time_t *)0);
-	    	strncpy(date,ctime(&right_now),24);
+	    	strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 	    	if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
 	    	if (user_ptr != NULL)
@@ -1838,7 +1840,8 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	    fprintf(atfp,"## MB-system Version %s\n",MB_VERSION);
 	    fprintf(atfp,"## Table file format: 1.0.0\n");
 	    right_now = time((time_t *)0);
-	    strncpy(date,ctime(&right_now),24);
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
 	    if ((user_ptr = getenv("USER")) == NULL)
 		    user_ptr = getenv("LOGNAME");
 	    if (user_ptr != NULL)
@@ -1884,7 +1887,8 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	    fprintf(stfp,"## MB-system Version %s\n",MB_VERSION);
 	    fprintf(stfp,"## Table file format: 1.0.0\n");
 	    right_now = time((time_t *)0);
-	    strncpy(date,ctime(&right_now),24);
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
 	    if ((user_ptr = getenv("USER")) == NULL)
 		    user_ptr = getenv("LOGNAME");
 	    if (user_ptr != NULL)
@@ -2215,7 +2219,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 #endif
 	float	*a;
 	time_t	right_now;
-	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	char	remark[MB_PATH_MAXLINE];
 	int	i, j, kg, ka;
 	char	*message;

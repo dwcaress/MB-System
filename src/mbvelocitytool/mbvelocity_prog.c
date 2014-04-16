@@ -1002,7 +1002,7 @@ int mbvt_save_edit_profile(char *file)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr;
+	char	date[32], *user_ptr;
         mb_path user, host;
 
 	/* print input debug statements */
@@ -1033,9 +1033,9 @@ int mbvt_save_edit_profile(char *file)
 	fprintf(fp, "## Output by Program %s\n",program_name);
 	fprintf(fp, "## Program Version %s\n",rcs_id);
 	fprintf(fp, "## MB-System Version %s\n",MB_VERSION);
-	strncpy(date,"\0",25);
 	right_now = time((time_t *)0);
-	strncpy(date,ctime(&right_now),24);
+	strcpy(date,ctime(&right_now));
+        date[strlen(date)-1] = '\0';
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
 	if (user_ptr != NULL)
@@ -1093,7 +1093,7 @@ int mbvt_save_swath_profile(char *file)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr;
+	char	date[32], *user_ptr;
         mb_path user, host;
 
 	/* print input debug statements */
@@ -1129,9 +1129,9 @@ int mbvt_save_swath_profile(char *file)
 	    fprintf(fp, "## Output by Program %s\n", program_name);
 	    fprintf(fp, "## Program Version %s\n", rcs_id);
 	    fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-	    strncpy(date,"\0",25);
 	    right_now = time((time_t *)0);
-	    strncpy(date,ctime(&right_now),24);
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
 	    if ((user_ptr = getenv("USER")) == NULL)
 		    user_ptr = getenv("LOGNAME");
 	    if (user_ptr != NULL)
@@ -1196,7 +1196,7 @@ int mbvt_save_residuals(char *file)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr;
+	char	date[32], *user_ptr;
         mb_path user, host;
 
 	/* print input debug statements */
@@ -1229,9 +1229,9 @@ int mbvt_save_residuals(char *file)
 	    fprintf(fp, "## Output by Program %s\n", program_name);
 	    fprintf(fp, "## Program Version %s\n", rcs_id);
 	    fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-	    strncpy(date,"\0",25);
 	    right_now = time((time_t *)0);
-	    strncpy(date,ctime(&right_now),24);
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
 	    if ((user_ptr = getenv("USER")) == NULL)
 		    user_ptr = getenv("LOGNAME");
 	    if (user_ptr != NULL)
