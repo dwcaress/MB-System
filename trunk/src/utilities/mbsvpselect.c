@@ -776,7 +776,7 @@ void fill_struct_inf
 
 	fgets(buffer, sizeof buffer, fileName);
 
-	sscanf(buffer, "%*s %Lf %*s %Lf %*s %*lf %*s", &inf_hold->s_lon, &inf_hold->s_lat);
+	sscanf(buffer, "%*s %Lf %*s %Lf %*s %*f %*s", &inf_hold->s_lon, &inf_hold->s_lat);
 
 	/*parsing end of data information*/
 
@@ -808,7 +808,7 @@ void fill_struct_inf
 	/* Lon and Lat processing */
 	fgets(buffer, sizeof buffer, fileName);
 
-	sscanf(buffer, "%*s %Lf %*s %Lf %*s %*lf %*s", &inf_hold->e_lon, &inf_hold->e_lat);
+	sscanf(buffer, "%*s %Lf %*s %Lf %*s %*f %*s", &inf_hold->e_lon, &inf_hold->e_lat);
 	if (zero_test>0)
 		{
 		if ((inf_hold->s_lat == 0.0) && (inf_hold->s_lon == 0.0))

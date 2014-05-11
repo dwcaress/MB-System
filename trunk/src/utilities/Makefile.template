@@ -78,6 +78,7 @@ all:	$(BINDIR)/mb7k2jstar \
 	$(BINDIR)/mbhsdump \
 	$(BINDIR)/mbhysweeppreprocess \
 	$(BINDIR)/mbinfo \
+	$(BINDIR)/mbinsreprocess \
 	$(BINDIR)/mbkongsbergpreprocess \
 	$(BINDIR)/mblevitus \
 	$(BINDIR)/mblist \
@@ -95,6 +96,7 @@ all:	$(BINDIR)/mb7k2jstar \
 	$(BINDIR)/mbsegylist \
 	$(BINDIR)/mbsegypsd \
 	$(BINDIR)/mbset \
+	$(BINDIR)/mbsslayout \
 	$(BINDIR)/mbstripnan \
 	$(BINDIR)/mbsvplist \
 	$(BINDIR)/mbtime \
@@ -179,6 +181,9 @@ $(BINDIR)/mbsvplist:	mbsvplist.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBD
 $(BINDIR)/mbset:	mbset.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbset.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
 		$(LFLAGS) -o $(BINDIR)/mbset
+$(BINDIR)/mbsslayout:	mbsslayout.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbsslayout.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
+		$(LFLAGS) -o $(BINDIR)/mbsslayout
 $(BINDIR)/mbprocess:	mbprocess.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbprocess.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
@@ -252,6 +257,9 @@ $(BINDIR)/mbpreprocess:	mbpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a 
 $(BINDIR)/mbsvpselect:	mbsvpselect.o geodesic.o
 	$(CC) $(CFLAGS) mbsvpselect.o geodesic.o \
 		$(LFLAGS) -o $(BINDIR)/mbsvpselect
+$(BINDIR)/mbinsreprocess:	mbinsreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbinsreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mbinsreprocess
 
 ### compile the source files
 mbhsdump.o:	mbhsdump.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
@@ -301,6 +309,8 @@ mbsvplist.o:	mbsvplist.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_defi
 	$(CC) -c $(CFLAGS) -I../mbio mbsvplist.c
 mbset.o:	mbset.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio mbset.c
+mbsslayout.o:	mbsslayout.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
+	$(CC) -c $(CFLAGS) -I../mbio mbsslayout.c
 mbprocess.o:	mbprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbprocess.c
 mbextractsegy.o:	mbextractsegy.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h ../mbio/mb_segy.h
@@ -349,3 +359,5 @@ mbsvpselect.o:	mbsvpselect.c ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio mbsvpselect.c
 geodesic.o:	geodesic.c geodesic.h
 	$(CC) -c $(CFLAGS) geodesic.c
+mbinsreprocess.o:	mbinsreprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
+	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbinsreprocess.c

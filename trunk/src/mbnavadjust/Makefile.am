@@ -1,4 +1,4 @@
-bin_PROGRAMS = mbnavadjust
+bin_PROGRAMS = mbnavadjust mbnavadjustmerge
 
 AM_CFLAGS = 
 
@@ -20,3 +20,5 @@ LIBS = ${top_builddir}/src/mbio/libmbio.la \
 mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust_callbacks.c mbnavadjust_creation.c \
 	mbnavadjust_prog.c mbnavadjust_util.c mbnavadjust_creation.h \
 	mbnavadjust_extrawidgets.h mbnavadjust.h
+
+mbnavadjustmerge_SOURCES = mbnavadjustmerge.c mbnavadjust_io.c mbnavadjust_io.h

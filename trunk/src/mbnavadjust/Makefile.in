@@ -51,7 +51,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = mbnavadjust$(EXEEXT)
+bin_PROGRAMS = mbnavadjust$(EXEEXT) mbnavadjustmerge$(EXEEXT)
 @BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/mbnavadjust
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -73,6 +73,10 @@ am_mbnavadjust_OBJECTS = mbnavadjust.$(OBJEXT) \
 	mbnavadjust_prog.$(OBJEXT) mbnavadjust_util.$(OBJEXT)
 mbnavadjust_OBJECTS = $(am_mbnavadjust_OBJECTS)
 mbnavadjust_LDADD = $(LDADD)
+am_mbnavadjustmerge_OBJECTS = mbnavadjustmerge.$(OBJEXT) \
+	mbnavadjust_io.$(OBJEXT)
+mbnavadjustmerge_OBJECTS = $(am_mbnavadjustmerge_OBJECTS)
+mbnavadjustmerge_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -86,8 +90,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(mbnavadjust_SOURCES)
-DIST_SOURCES = $(mbnavadjust_SOURCES)
+SOURCES = $(mbnavadjust_SOURCES) $(mbnavadjustmerge_SOURCES)
+DIST_SOURCES = $(mbnavadjust_SOURCES) $(mbnavadjustmerge_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -257,6 +261,7 @@ mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust_callbacks.c mbnavadjust_creation
 	mbnavadjust_prog.c mbnavadjust_util.c mbnavadjust_creation.h \
 	mbnavadjust_extrawidgets.h mbnavadjust.h
 
+mbnavadjustmerge_SOURCES = mbnavadjustmerge.c mbnavadjust_io.c mbnavadjust_io.h
 all: all-am
 
 .SUFFIXES:
@@ -340,6 +345,9 @@ clean-binPROGRAMS:
 mbnavadjust$(EXEEXT): $(mbnavadjust_OBJECTS) $(mbnavadjust_DEPENDENCIES) $(EXTRA_mbnavadjust_DEPENDENCIES) 
 	@rm -f mbnavadjust$(EXEEXT)
 	$(LINK) $(mbnavadjust_OBJECTS) $(mbnavadjust_LDADD) $(LIBS)
+mbnavadjustmerge$(EXEEXT): $(mbnavadjustmerge_OBJECTS) $(mbnavadjustmerge_DEPENDENCIES) $(EXTRA_mbnavadjustmerge_DEPENDENCIES) 
+	@rm -f mbnavadjustmerge$(EXEEXT)
+	$(LINK) $(mbnavadjustmerge_OBJECTS) $(mbnavadjustmerge_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -350,8 +358,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjust.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjust_callbacks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjust_creation.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjust_io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjust_prog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjust_util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjustmerge.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

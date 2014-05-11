@@ -13,8 +13,8 @@
  * 2) This library assumes that the data types u_short and u_int are defined
  *    on the host machine, where a u_short is a 16 bit unsigned integer, and
  *    a u_int is a 32 bit unsigned integer.
- * 3) This library assumes that the type short is at least 16 bits, and that
- *    the type int is at least 32 bits.
+ * 3) This library assumes that the type short is 16 bits, and that
+ *    the type int is 32 bits.
  *
  *
  * Change Descriptions :
@@ -26,7 +26,21 @@
  *
  * References : DoDBL Generic Sensor Format Sept. 30, 1993
  *
- * Copyright (C) Science Applications International Corp.
+ * © 2014 Leidos, Inc.
+ * There is no charge to use the library, and it may be accessed at:
+ * https://www.leidos.com/maritime/gsf.
+ * This library may be redistributed and/or modified under the terms of
+ * the GNU Lesser General Public License version 2.1, as published by the
+ * Free Software Foundation.  A copy of the LGPL 2.1 license is included with
+ * the GSF distribution and is avaialbe at: http://opensource.org/licenses/LGPL-2.1.
+ *
+ * Leidos, Inc. configuration manages GSF, and provides GSF releases. Users are
+ * strongly encouraged to communicate change requests and change proposals to Leidos, Inc.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.
+ *
  ********************************************************************/
 
 /* standard c library includes */
@@ -36,7 +50,7 @@
 
 /* rely on the network type definitions of (u_short, and u_int) */
 #include <sys/types.h>
-#ifndef WIN32
+#if !defined WIN32 && !defined WIN64
 #include <netinet/in.h>
 #else
 #include <winsock.h>
@@ -64,10 +78,10 @@ extern int      gsfError;                               /* defined in gsf.c */
  *
  * Inputs :
  *  handle = the integer handle returned from gsfOpen()
- *  status = A pointer to an integer allocated by caller into which the 
- *            function result is placed. *status is assigned a value of 1 
+ *  status = A pointer to an integer allocated by caller into which the
+ *            function result is placed. *status is assigned a value of 1
  *            if this file provides sufficient information to support full
- *            recalculation of the platform relative XYZ values, otherwise 
+ *            recalculation of the platform relative XYZ values, otherwise
  *            *status is assigned a value of 0.
  *
  * Returns :
@@ -104,7 +118,7 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
     int             ping_rec;
     gsfDataID       id;
     gsfRecords      rec;
-    
+
     memset (&id, 0, sizeof(id));
     memset (&rec, 0, sizeof(rec));
     att_rec = 0;
@@ -116,21 +130,21 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
 
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
-    if (ret) 
+    if (ret)
     {
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
     }
 
-    for (i = 0; i < 100; i++) 
+    for (i = 0; i < 100; i++)
     {
         rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
-        if (rec_size < 0) 
+        if (rec_size < 0)
         {
-            if (gsfError == GSF_READ_TO_END_OF_FILE) 
-            {            
+            if (gsfError == GSF_READ_TO_END_OF_FILE)
+            {
                 ret = gsfSeek(handle, GSF_REWIND);
-                if (ret) 
+                if (ret)
                 {
                     gsfError = GSF_FILE_SEEK_ERROR;
                     return (-1);
@@ -143,7 +157,7 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
                 return (-1);
             }
         }
-        
+
         switch (id.recordID)
         {
             default:
@@ -158,7 +172,7 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
             case (GSF_RECORD_SWATH_BATHYMETRY_PING):
                 if ((rec.mb_ping.travel_time) && (rec.mb_ping.beam_angle))
                 {
-                    switch (rec.mb_ping.sensor_id) 
+                    switch (rec.mb_ping.sensor_id)
                     {
                         default:
                             break;
@@ -171,7 +185,7 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
                         case GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_RESON_7125_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM300_RAW_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM1002_RAW_SPECIFIC: 
+                        case GSF_SWATH_BATHY_SUBRECORD_EM1002_RAW_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM2000_RAW_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM3000_RAW_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM120_RAW_SPECIFIC:
@@ -184,7 +198,7 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
                         case GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC:
-                            if (rec.mb_ping.sector_number) 
+                            if (rec.mb_ping.sector_number)
                             {
                                 ping_rec++;
                             }
@@ -208,14 +222,14 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
                 break;
 
             case (GSF_RECORD_ATTITUDE):
-                if (rec.attitude.num_measurements > 1) 
+                if (rec.attitude.num_measurements > 1)
                 {
                     att_rec++;
                 }
                 break;
         }
 
-        if (ping_rec && svp_rec && param_rec && att_rec) 
+        if (ping_rec && svp_rec && param_rec && att_rec)
         {
             *status = 1;
             break;
@@ -225,7 +239,7 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
     /* reset the file pointer to where it was when function was called */
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
-    if (ret) 
+    if (ret)
     {
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
@@ -248,8 +262,8 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
  *
  * Inputs :
  *  handle = the integer handle returned from gsfOpen()
- *  status = A pointer to an integer allocated by caller into which the 
- *           function result is placed. *status is assigned a value of 1 
+ *  status = A pointer to an integer allocated by caller into which the
+ *           function result is placed. *status is assigned a value of 1
  *           if this file provides sufficient information to support TPU
  *           estimation, otherwise *status is assigned a value of 0.
  *
@@ -286,7 +300,7 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
     int             ping_rec;
     gsfDataID       id;
     gsfRecords      rec;
-    
+
     memset (&id, 0, sizeof(id));
     memset (&rec, 0, sizeof(rec));
     svp_rec = 0;
@@ -297,21 +311,21 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
 
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
-    if (ret) 
+    if (ret)
     {
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
     }
 
-    for (i = 0; i < 100; i++) 
+    for (i = 0; i < 100; i++)
     {
         rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
-        if (rec_size < 0) 
+        if (rec_size < 0)
         {
-            if (gsfError == GSF_READ_TO_END_OF_FILE) 
-            {            
+            if (gsfError == GSF_READ_TO_END_OF_FILE)
+            {
                 ret = gsfSeek(handle, GSF_REWIND);
-                if (ret) 
+                if (ret)
                 {
                     gsfError = GSF_FILE_SEEK_ERROR;
                     return (-1);
@@ -324,7 +338,7 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
                 return (-1);
             }
         }
-        
+
         switch (id.recordID)
         {
             default:
@@ -339,7 +353,7 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
             case (GSF_RECORD_SWATH_BATHYMETRY_PING):
                 if ((rec.mb_ping.depth) && (rec.mb_ping.across_track))
                 {
-                    switch (rec.mb_ping.sensor_id) 
+                    switch (rec.mb_ping.sensor_id)
                     {
                         case GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC:
                         case GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC:
@@ -349,7 +363,7 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
                                 ping_rec++;
                             }
                             break;
-                      
+
                         default:
                             ping_rec++;
                             break;
@@ -372,7 +386,7 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
                 break;
         }
 
-        if (ping_rec && svp_rec && param_rec) 
+        if (ping_rec && svp_rec && param_rec)
         {
             *status = 1;
             break;
@@ -382,7 +396,7 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
     /* reset the file pointer to where it was when function was called */
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
-    if (ret) 
+    if (ret)
     {
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
@@ -398,17 +412,17 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
  * Description :
  *  This function reads the GSF file referenced by handle and determines
  *  if the file contains sufficient information to support a recalculation
- *  of the nominal depth array. This function rewinds the file to the first 
- *  record and reads through the file looking for the information required 
+ *  of the nominal depth array. This function rewinds the file to the first
+ *  record and reads through the file looking for the information required
  *  to support calculation of the nominal depth values. On success, the file
  *  pointer is reset to the beginning of the file before the function returns.
  *
  * Inputs :
  *  handle = the integer handle returned from gsfOpen()
- *  status = A pointer to an integer allocated by caller into which the 
- *           function result is placed. *status is assigned a value of 1 
+ *  status = A pointer to an integer allocated by caller into which the
+ *           function result is placed. *status is assigned a value of 1
  *           if this file provides sufficient information to support
- *           nominal depth calculation, otherwise *status is assigned 
+ *           nominal depth calculation, otherwise *status is assigned
  *           a value of 0.
  *
  * Returns :
@@ -444,7 +458,7 @@ gsfFileSupportsRecalculateNominalDepth(int handle, int *status)
     int             ping_rec;
     gsfDataID       id;
     gsfRecords      rec;
-    
+
     memset (&id, 0, sizeof(id));
     memset (&rec, 0, sizeof(rec));
     svp_rec = 0;
@@ -455,21 +469,21 @@ gsfFileSupportsRecalculateNominalDepth(int handle, int *status)
 
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
-    if (ret) 
+    if (ret)
     {
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
     }
 
-    for (i = 0; i < 100; i++) 
+    for (i = 0; i < 100; i++)
     {
         rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
-        if (rec_size < 0) 
+        if (rec_size < 0)
         {
-            if (gsfError == GSF_READ_TO_END_OF_FILE) 
-            {            
+            if (gsfError == GSF_READ_TO_END_OF_FILE)
+            {
                 ret = gsfSeek(handle, GSF_REWIND);
-                if (ret) 
+                if (ret)
                 {
                     gsfError = GSF_FILE_SEEK_ERROR;
                     return (-1);
@@ -482,7 +496,7 @@ gsfFileSupportsRecalculateNominalDepth(int handle, int *status)
                 return (-1);
             }
         }
-        
+
         switch (id.recordID)
         {
             default:
@@ -516,7 +530,7 @@ gsfFileSupportsRecalculateNominalDepth(int handle, int *status)
                 break;
         }
 
-        if (ping_rec && svp_rec && param_rec) 
+        if (ping_rec && svp_rec && param_rec)
         {
             *status = 1;
             break;
@@ -526,7 +540,7 @@ gsfFileSupportsRecalculateNominalDepth(int handle, int *status)
     /* reset the file pointer to where it was when function was called */
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
-    if (ret) 
+    if (ret)
     {
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
@@ -542,17 +556,17 @@ gsfFileSupportsRecalculateNominalDepth(int handle, int *status)
  * Description :
  *  This function reads the GSF file referenced by handle and determines
  *  if the file contains the average per receive beam amplitude data.
- *  This function rewinds the file to the first record and reads through 
+ *  This function rewinds the file to the first record and reads through
  *  the file up to and including the first ping record. If amplitude data
- *  are contained in the first ping record it is assumed that amplitude 
- *  data are contained with all ping records in this file. On success, 
- *  the file pointer is reset to the beginning of the file before the 
+ *  are contained in the first ping record it is assumed that amplitude
+ *  data are contained with all ping records in this file. On success,
+ *  the file pointer is reset to the beginning of the file before the
  *  function returns.
  *
  * Inputs :
  *  handle = the integer handle returned from gsfOpen()
- *  status = A pointer to an integer allocated by caller into which the 
- *           function result is placed. *status is assigned a value of 1 
+ *  status = A pointer to an integer allocated by caller into which the
+ *           function result is placed. *status is assigned a value of 1
  *           if this file contains the per receive beam amplitude data,
  *           otherwise *status is assigned a value of 0.
  *
@@ -587,7 +601,7 @@ gsfFileContainsMBAmplitude(int handle, int *status)
     int             mb_ping;
     gsfDataID       id;
     gsfRecords      rec;
-    
+
     memset (&id, 0, sizeof(id));
     memset (&rec, 0, sizeof(rec));
     mb_ping = 0;
@@ -595,21 +609,21 @@ gsfFileContainsMBAmplitude(int handle, int *status)
 
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
-    if (ret) 
+    if (ret)
     {
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
     }
 
-    for (i = 0; i < 100; i++) 
+    for (i = 0; i < 100; i++)
     {
         rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
-        if (rec_size < 0) 
+        if (rec_size < 0)
         {
-            if (gsfError == GSF_READ_TO_END_OF_FILE) 
-            {            
+            if (gsfError == GSF_READ_TO_END_OF_FILE)
+            {
                 ret = gsfSeek(handle, GSF_REWIND);
-                if (ret) 
+                if (ret)
                 {
                     gsfError = GSF_FILE_SEEK_ERROR;
                     return (-1);
@@ -622,7 +636,7 @@ gsfFileContainsMBAmplitude(int handle, int *status)
                 return (-1);
             }
         }
-        
+
         switch (id.recordID)
         {
             case (GSF_RECORD_SWATH_BATHYMETRY_PING):
@@ -633,7 +647,7 @@ gsfFileContainsMBAmplitude(int handle, int *status)
                 mb_ping = 1;
                 break;
         }
-        if (mb_ping == 1) 
+        if (mb_ping == 1)
         {
             break;
         }
@@ -642,7 +656,7 @@ gsfFileContainsMBAmplitude(int handle, int *status)
     /* reset the file pointer to where it was when function was called */
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
-    if (ret) 
+    if (ret)
     {
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
@@ -658,18 +672,18 @@ gsfFileContainsMBAmplitude(int handle, int *status)
  * Description :
  *  This function reads the GSF file referenced by handle and determines
  *  if the file contains the per receive beam imagery time series data.
- *  This function rewinds the file to the first record and reads through 
+ *  This function rewinds the file to the first record and reads through
  *  the file up to and including the first ping record. If MB imagery data
- *  are contained in the first ping record it is assumed that MB imagery 
- *  data are contained with all ping records in this file. On success, 
- *  the file pointer is reset to the beginning of the file before the 
+ *  are contained in the first ping record it is assumed that MB imagery
+ *  data are contained with all ping records in this file. On success,
+ *  the file pointer is reset to the beginning of the file before the
  *  function returns.
  *
  * Inputs :
  *  handle = the integer handle returned from gsfOpen()
- *  status = A pointer to an integer allocated by caller into which the 
- *           function result is placed. *status is assigned a value of 1 
- *           if this file contains the per receive beam imagery time  
+ *  status = A pointer to an integer allocated by caller into which the
+ *           function result is placed. *status is assigned a value of 1
+ *           if this file contains the per receive beam imagery time
  *           series data, otherwise *status is assigned a value of 0.
  *
  * Returns :
@@ -703,7 +717,7 @@ gsfFileContainsMBImagery(int handle, int *status)
     int             mb_ping;
     gsfDataID       id;
     gsfRecords      rec;
-    
+
     memset (&id, 0, sizeof(id));
     memset (&rec, 0, sizeof(rec));
     mb_ping = 0;
@@ -711,21 +725,21 @@ gsfFileContainsMBImagery(int handle, int *status)
 
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
-    if (ret) 
+    if (ret)
     {
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
     }
 
-    for (i = 0; i < 100; i++) 
+    for (i = 0; i < 100; i++)
     {
         rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
-        if (rec_size < 0) 
+        if (rec_size < 0)
         {
-            if (gsfError == GSF_READ_TO_END_OF_FILE) 
-            {            
+            if (gsfError == GSF_READ_TO_END_OF_FILE)
+            {
                 ret = gsfSeek(handle, GSF_REWIND);
-                if (ret) 
+                if (ret)
                 {
                     gsfError = GSF_FILE_SEEK_ERROR;
                     return (-1);
@@ -738,7 +752,7 @@ gsfFileContainsMBImagery(int handle, int *status)
                 return (-1);
             }
         }
-        
+
         switch (id.recordID)
         {
             case (GSF_RECORD_SWATH_BATHYMETRY_PING):
@@ -749,7 +763,7 @@ gsfFileContainsMBImagery(int handle, int *status)
                 mb_ping = 1;
                 break;
         }
-        if (mb_ping == 1) 
+        if (mb_ping == 1)
         {
             break;
         }
@@ -758,7 +772,7 @@ gsfFileContainsMBImagery(int handle, int *status)
     /* reset the file pointer to where it was when function was called */
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
-    if (ret) 
+    if (ret)
     {
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);

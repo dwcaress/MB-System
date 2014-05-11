@@ -1081,7 +1081,7 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		/* transform samples from world to body axis */
 		swpls_init_transform(verbose, &wtov, error);
 		swpls_concat_translate(verbose, &wtov, -sxp_ping->txer_e,
-			-(-sxp_ping->height), -sxp_ping->txer_n, error);
+			-(-(sxp_ping->height - sxp_ping->tide)), -sxp_ping->txer_n, error);
 		swpls_concat_rotate_y(verbose, &wtov, -sxp_ping->heading, error);
 
 		points = sxp_ping->points;
@@ -1419,7 +1419,7 @@ int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr,
 		if (n > 0)
 			{
 			ave = sum / n;
-			*altitude = ave - store->sxp_ping.height;
+			*altitude = ave - (sxp_ping->height - sxp_ping->tide);
 			}
 		else
 			{
@@ -1695,7 +1695,7 @@ int mbsys_swathplus_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* from old world coordinates to vessel body coordinates*/
 		swpls_init_transform(verbose, &m, error);
 		swpls_concat_translate(verbose, &m, -(sxp_ping->txer_e),
-			-(-sxp_ping->height), -sxp_ping->txer_n, error);
+			-(-(sxp_ping->height - sxp_ping->tide)), -sxp_ping->txer_n, error);
 		swpls_concat_translate(verbose, &m, -old_txoffset.x, -old_txoffset.y,
 			-old_txoffset.z, error);
 		swpls_concat_rotate_y(verbose, &m, -(sxp_ping->heading) * DTR, error);
@@ -1708,7 +1708,7 @@ int mbsys_swathplus_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		swpls_concat_rotate_y(verbose, &m, +heading * DTR, error);
 		swpls_concat_translate(verbose, &m, new_txoffset.x, new_txoffset.y,
 			new_txoffset.z, error);
-		swpls_concat_translate(verbose, &m, navlon, height, navlat, error);
+		swpls_concat_translate(verbose, &m, navlon, (height - sxp_ping->tide), navlat, error);
 
 		/* transform points from old to new coordinates */
 		points = sxp_ping->points;

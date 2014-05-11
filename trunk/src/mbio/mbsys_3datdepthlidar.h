@@ -42,13 +42,15 @@
  * from all pulses in that scan (including itself), such that the
  * first pulse would be 0 μsec accordingly.
  * 
+ * ---------------------------------------------------------------------------------------
  * Range Angle Angle data format (binary)
  *              Item	                                Value	            Bytes
- * File Header		
- *           File Magic Number	                        0x3D07	            2   (1 UINT16)
+ * ---------------------------------------------------------------------------------------
+ * File Header Record	
+ *           File magic number	                        0x3D46	            2   (1 UINT16)
+ *           Parameter record id	                0x3D07	            2   (1 UINT16)
  *           File version	                        1	            2   (1 UINT16)
- *           File sub version	                        0	            2   (1 UINT16)
- *           
+ *           File sub version	                        1	            2   (1 UINT16)
  * Scan Information		
  *           Scan type (AZ raster, AZEL raster, bowtie)	2, 3, 4             2   (1 UINT16)
  *           Cross track angle start (deg)		                    4   (1 float32)
@@ -59,7 +61,12 @@
  *           Counts per cross track (AZEL raster)		            2   (1 UINT16)
  *           Counts per forward track (AZEL raster)		            2   (1 UINT16)
  *           Scanner Efficiency		                                    2   (1 UINT16)
- *           Scans per File		                                    4   (1 UINT32)
+ *           Scans per File		                                    2   (1 UINT16)
+ *           Scan count		                                            4   (1 UINT32)
+ *           
+ * ---------------------------------------------------------------------------------------
+ * Lidar Scan Record	
+ *           Lidar scan record id	                0x3D52	            2   (1 UINT16)
  * First Pulse Timestamp ( 1 to n Scans )		
  *           Timestamp year		                                    2   (1 UINT16)
  *           Timestamp month		                                    1   (1 UINT8)
@@ -178,19 +185,19 @@
 #endif
 
 /* defines */
-#define MBF_3DDEPTHP_MAGICNUMBER                    0x3D07    /* '=', Bell */
+#define MBF_3DDEPTHP_MAGICNUMBER                    0x3D46    /* '=''F' */
+#define MBF_3DDEPTHP_RECORD_PARAMETER               0x3D07    /* '=', Bell */
 #define MBF_3DDEPTHP_RECORD_RAWLIDAR                0x3D52    /* '=''R' */
-#define MBF_3DDEPTHP_RECORD_PARAMETER               0x3D46    /* '=''F' */
 #define MBF_3DDEPTHP_RECORD_COMMENT                 0x3D43    /* '=''C' */
 #define MBF_3DDEPTHP_RECORD_LIDAR                   0x3D4C    /* '=''L' */
 #define MBF_3DDEPTHP_RECORD_POSITION                0x3D50    /* '=''P' */
 #define MBF_3DDEPTHP_RECORD_ATTITUDE                0x3D41    /* '=''A' */
 #define MBF_3DDEPTHP_RECORD_HEADING                 0x3D48    /* '=''H' */
 #define MBF_3DDEPTHP_RECORD_SENSORDEPTH             0x3D5A    /* '=''Z' */
-#define MBF_3DDEPTHP_FILEHEADER_SIZE                6
-#define MBF_3DDEPTHP_PARAMETER_SIZE                 32
+#define MBF_3DDEPTHP_VERSION_1_0_PARAMETER_SIZE     36
+#define MBF_3DDEPTHP_VERSION_1_1_PARAMETER_SIZE     38
 #define MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE    14
-#define MBF_3DDEPTHP_VERSION_1_1_RAWSCANHEADER_SIZE 20
+#define MBF_3DDEPTHP_VERSION_1_1_RAWSCANHEADER_SIZE 18
 #define MBF_3DDEPTHP_VERSION_1_1_SCANHEADER_SIZE    66
 #define MBF_3DDEPTHP_VERSION_1_0_PULSE_SIZE         31
 #define MBF_3DDEPTHP_VERSION_1_1_RAWPULSE_SIZE      31
@@ -247,8 +254,8 @@ struct mbsys_3datdepthlidar_struct
         unsigned short  counts_per_cross_track;     /* across track pulse count for scan type AZEL raster */
         unsigned short  counts_per_forward_track;   /* along track pulse count for scan type AZEL raster */
         unsigned short  scanner_efficiency;         /* */
-        unsigned int    scans_per_file;             /* number of scans in this file */
-        unsigned short  unused;
+        unsigned short  scans_per_file;             /* number of scans in this file */
+        unsigned int    scan_count;                 /* global scan count */
         
         /* Id of most recently read record */
         unsigned short  record_id;                  /* MBF_3DDEPTHP_RECORD_RAWLIDAR     0x0000          */
@@ -283,6 +290,7 @@ struct mbsys_3datdepthlidar_struct
         float           speed;                      /* speed (degrees) */
 
         /* Laser Scan Data (1 to counts_per_scan pulses per scan) */
+        int             bathymetry_calculated;      /* boolean flag re calculation of bathymetry from ranges and angles */
         int             num_pulses;                 /* number of pulses */
         int             num_pulses_alloc;           /* array allocated for this number of pulses */
         struct mbsys_3datdepthlidar_pulse_struct *pulses;

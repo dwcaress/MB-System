@@ -13,8 +13,8 @@
  * 2) This library assumes that the data types u_short and u_int are defined
  *    on the host machine, where a u_short is a 16 bit unsigned integer, and
  *    a u_int is a 32 bit unsigned integer.
- * 3) This library assumes that the type short is at least 16 bits, and that
- *    the type int is at least 32 bits.
+ * 3) This library assumes that the type short is 16 bits, and that
+ *    the type int is 32 bits.
  *
  *
  * Change Descriptions :
@@ -85,9 +85,9 @@
  * dhg          11-01-06  Corrected "model_number" and "frequency" for "GeoSwathPlusSpecific" record
  * mab          02-01-09  Updates to support Reson 7125. Added new subrecord IDs and subrecord definitions for Kongsberg
  *                        sonar systems where TWTT and angle are populated from raw range and beam angle datagram. Added
- *                        new subrecord definition for EM2000.  Bug fixes in gsfOpen and gsfPercent. 
+ *                        new subrecord definition for EM2000.  Bug fixes in gsfOpen and gsfPercent.
  * clb          02-25-11  Changed the EncodeBRBIntensity() function when bits_per_sample is 12
- * clb          04-06-11  Changes made for DeltaT 
+ * clb          04-06-11  Changes made for DeltaT
  * clb          04-13-11  When encoding a ping, reject it if the number of beams <= 0
  * clb          06-21-11  Added em12 to list of available sensors
  * clb          09-20-11  Added support for R2Sonic
@@ -97,8 +97,21 @@
  *
  * References : DoDBL Generic Sensor Format Sept. 30, 1993
  *
+ * © 2014 Leidos, Inc.
+ * There is no charge to use the library, and it may be accessed at:
+ * https://www.leidos.com/maritime/gsf.
+ * This library may be redistributed and/or modified under the terms of
+ * the GNU Lesser General Public License version 2.1, as published by the
+ * Free Software Foundation.  A copy of the LGPL 2.1 license is included with
+ * the GSF distribution and is avaialbe at: http://opensource.org/licenses/LGPL-2.1.
  *
- * Copyright (C) Science Applications International Corp.
+ * Leidos, Inc. configuration manages GSF, and provides GSF releases. Users are
+ * strongly encouraged to communicate change requests and change proposals to Leidos, Inc.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.
+ *
  ********************************************************************/
 
 /* standard c library includes */
@@ -108,7 +121,7 @@
 
 /* rely on the network type definitions of (u_short, and u_int) */
 #include <sys/types.h>
-#ifndef WIN32
+#if !defined WIN32  && !defined WIN64
 #include <netinet/in.h>
 #else
 #include <winsock.h>
@@ -202,7 +215,8 @@ gsfEncodeHeader(unsigned char *sptr, gsfHeader * header)
     unsigned char  *p = sptr;
 
     memset(header->version, 0, sizeof(header->version));
-    sprintf(header->version, "%s", GSF_VERSION);
+    strncpy(header->version, GSF_VERSION, sizeof(header->version)-1);
+    header->version[sizeof(header->version)] = 0;
     memcpy(p, header->version, sizeof(gsfHeader));
     p += sizeof(gsfHeader);
 
@@ -1020,8 +1034,8 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
         }
         ltemp = htonl((gsfsLong) dtemp);
         memcpy(p, &ltemp, 4);
-        p += 4;      
-    
+        p += 4;
+
         /* Next four byte integer contains the SEP. Round the scaled quantity
          * to the nearest whole integer.
          */
@@ -1036,7 +1050,7 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
         }
         ltemp = htonl((gsfsLong) dtemp);
         memcpy(p, &ltemp, 4);
-        p += 4;      
+        p += 4;
 
         /* Next four byte integer contains the GPS tide corrector for this ping.
          * Round this to the nearest whole millimeter.
@@ -1504,6 +1518,18 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
         p += ret;
     }
 
+    /* The next possible subrecord is the array of vertical uncertainties provided by the sonar */
+    if (ping->sonar_vert_uncert != (double *) NULL)
+    {
+        ret = EncodeTwoByteArray(p, ping->sonar_vert_uncert, ping->number_beams,
+            &ping->scaleFactors, GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY);
+        if (ret <= 0)
+        {
+            return (-1);
+        }
+        p += ret;
+    }
+
     /* Next possible subrecord is the sensor specific subrecord. Save the
     *  current pointer, and leave room for the four byte subrecord identifier.
     */
@@ -1671,6 +1697,7 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
             sensor_size = EncodeDeltaTSpecific(p, &ping->sensor_data);
             break;
 
+        case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2020_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC):
             sensor_size = EncodeR2SonicSpecific(p, &ping->sensor_data);
@@ -1730,7 +1757,7 @@ EncodeScaleFactors(unsigned char *sptr, gsfScaleFactors *sf)
     unsigned char  *p = sptr;
     gsfuLong        ltemp, subID;
     double          dtemp;
-    int             subrecordID;
+    unsigned int    subrecordID;
     int             sf_counter;
     unsigned int    itemp;
 
@@ -1847,7 +1874,7 @@ EncodeTwoByteArray(unsigned char *sptr, double *array, int num_beams,
         gsfError = GSF_INVALID_NUM_BEAMS;
         return(-1);
     }
-    
+
     /* subrecord identifier has array id in first byte, and size in the
     *  remaining three bytes
     */
@@ -2013,7 +2040,7 @@ EncodeFourByteArray(unsigned char *sptr, double *array, int num_beams,
         gsfError = GSF_INVALID_NUM_BEAMS;
         return(-1);
     }
-    
+
     /* subrecord identifier has array id in first byte, and size in the
     *  remaining three bytes
     */
@@ -2177,7 +2204,7 @@ EncodeByteArray(unsigned char *sptr, double *array, int num_beams,
         gsfError = GSF_INVALID_NUM_BEAMS;
         return(-1);
     }
-    
+
     /* subrecord identifier has array id in first byte, and size in the
     *  remaining three bytes
     */
@@ -4592,9 +4619,9 @@ EncodeEM3RawSpecific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TAB
     stemp = htons(sdata->gsfEM3RawSpecific.run_time.max_stbd_swath_width);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The contents of the next two byte value depends on the sonar model number */
-    switch (sdata->gsfEM3RawSpecific.run_time.model_number) 
+    switch (sdata->gsfEM3RawSpecific.run_time.model_number)
     {
         case 1002:
             /* The next two byte value contains the Durotong speed. This field is valid only for the EM1002 */
@@ -4610,13 +4637,13 @@ EncodeEM3RawSpecific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TAB
             stemp = htons((gsfuShort) dtemp);
             memcpy(p, &stemp, 2);
             p += 2;
-            break;        
-        
+            break;
+
         case 300:
         case 120:
         case 3000:
         case 3020:
-            /* The next two byte value contains the transmit along track tilt in degrees. 
+            /* The next two byte value contains the transmit along track tilt in degrees.
              * JSB: As of 3/1/09, still don't have final datagram documentation from KM
              * to know whether the tx_along_tilt field is EM4 specific or if it will be supported
              * on EM3 systems.
@@ -4633,8 +4660,8 @@ EncodeEM3RawSpecific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TAB
             sstemp = htons((gsfsShort) dtemp);
             memcpy(p, &sstemp, 2);
             p += 2;
-            break;      
-        
+            break;
+
         default:
             /* Then next two byte value is spare */
             p += 2;
@@ -4642,7 +4669,7 @@ EncodeEM3RawSpecific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TAB
     }
 
     /* The contents of the next one byte value depends on the sonar model number */
-    switch (sdata->gsfEM3RawSpecific.run_time.model_number) 
+    switch (sdata->gsfEM3RawSpecific.run_time.model_number)
     {
         default:
             /* The next one byte value contains the HiLo frequency absorption coefficient ratio
@@ -4657,7 +4684,7 @@ EncodeEM3RawSpecific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TAB
 
     /* The next 16 bytes of space on the byte stream are spare space for future use. */
     memset (p, 0, (size_t) 16);
-    p += 16;    
+    p += 16;
 
     /* Encode and write the PU status fields. */
 
@@ -5660,16 +5687,16 @@ EncodeReson7100Specific(unsigned char *sptr, gsfSensorSpecific *sdata)
     stemp = htons((gsfuShort) sdata->gsfReson7100Specific.protocol_version);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The next four bytes contains the sonar device ID */
     ltemp = htonl((gsfuLong) sdata->gsfReson7100Specific.device_id);
     memcpy(p, &ltemp, 4);
     p += 4;
-        
+
     /* The next 16 bytes are spare space for future growth */
     memset(p, 0, 16);
     p += 16;
-        
+
     /* The next four byte integer contains the high order four bytes of the sonar serial number */
     ltemp = htonl((gsfuLong) sdata->gsfReson7100Specific.major_serial_number);
     memcpy(p, &ltemp, 4);
@@ -5754,7 +5781,7 @@ EncodeReson7100Specific(unsigned char *sptr, gsfSensorSpecific *sdata)
 
     /* Next four byte integer contains the power setting * 100.0 */
     dtemp = (sdata->gsfReson7100Specific.power * 1.0e2);
-    if (dtemp < 0.0) 
+    if (dtemp < 0.0)
     {
         dtemp = dtemp - 0.501;
     }
@@ -5768,7 +5795,7 @@ EncodeReson7100Specific(unsigned char *sptr, gsfSensorSpecific *sdata)
 
     /* Next four byte integer contains the gain setting * 100.0 */
     dtemp = (sdata->gsfReson7100Specific.gain * 1.0e2);
-    if (dtemp < 0.0) 
+    if (dtemp < 0.0)
     {
         dtemp = dtemp - 0.501;
     }
@@ -5792,7 +5819,7 @@ EncodeReson7100Specific(unsigned char *sptr, gsfSensorSpecific *sdata)
 
     /* Next four byte integer contains the projector steering angle, in deg * 1000.0 */
     dtemp = (sdata->gsfReson7100Specific.projector_steer_angl_vert * 1.0e3);
-    if (dtemp < 0.0) 
+    if (dtemp < 0.0)
     {
         dtemp = dtemp - 0.501;
     }
@@ -5806,7 +5833,7 @@ EncodeReson7100Specific(unsigned char *sptr, gsfSensorSpecific *sdata)
 
     /* Next four byte integer contains the projector steering angle, in deg * 1000.0 */
     dtemp = (sdata->gsfReson7100Specific.projector_steer_angl_horz * 1.0e3);
-    if (dtemp < 0.0) 
+    if (dtemp < 0.0)
     {
         dtemp = dtemp - 0.501;
     }
@@ -5922,7 +5949,7 @@ EncodeReson7100Specific(unsigned char *sptr, gsfSensorSpecific *sdata)
     /* The next 16 bytes are spare space for future growth */
     memset(p, 0, 16);
     p += 16;
-        
+
     /* The next byte contains the sv source */
     *p = sdata->gsfReson7100Specific.sv_source;
     p += 1;
@@ -5966,7 +5993,7 @@ EncodeDeltaTSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     /* The next four bytes contains the file extension */
     memcpy (p, (unsigned char *) (sdata->gsfDeltaTSpecific.decode_file_type), 4);
     p += 4;
-    
+
     /* The next byte contains the version number */
     *p = (unsigned char) sdata->gsfDeltaTSpecific.version;
     p += 1;
@@ -5999,13 +6026,13 @@ EncodeDeltaTSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     stemp = htons((gsfuShort) dtemp);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The next two bytes contains the angle increment field. */
     dtemp = ((sdata->gsfDeltaTSpecific.angle_increment) * 100.0) + 0.501;
     stemp = htons((gsfuShort) dtemp);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The next two bytes contains the acoustic range field */
     stemp = htons((gsfuShort) sdata->gsfDeltaTSpecific.acoustic_range);
     memcpy(p, &stemp, 2);
@@ -6021,23 +6048,23 @@ EncodeDeltaTSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     stemp = htons((gsfuShort) dtemp);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The next two bytes contains the range resolution field. */
     stemp = htons((gsfuShort) sdata->gsfDeltaTSpecific.range_resolution);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The next two bytes contains the profile tilt field. */
     dtemp = ((sdata->gsfDeltaTSpecific.profile_tilt_angle) + 180.0) + 0.501;
     stemp = htons((gsfuShort) dtemp);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The next two bytes contains the repetition rate field. */
     stemp = htons((gsfuShort) sdata->gsfDeltaTSpecific.repetition_rate);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The next four bytes contains the ping number field */
     ltemp = htonl((gsfuLong) sdata->gsfDeltaTSpecific.ping_number);
     memcpy(p, &ltemp, 4);
@@ -6052,13 +6079,13 @@ EncodeDeltaTSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     stemp = htons((gsfuShort) dtemp);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The next two bytes contains the data latency field. */
     dtemp = ((sdata->gsfDeltaTSpecific.data_latency) * 10000.0) + 0.501;
     stemp = htons((gsfuShort) dtemp);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The next byte contains the sample rate flag field. */
     *p = (unsigned char) sdata->gsfDeltaTSpecific.sample_rate_flag;
     p += 1;
@@ -6076,7 +6103,7 @@ EncodeDeltaTSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     stemp = htons((gsfuShort) dtemp);
     memcpy(p, &stemp, 2);
     p += 2;
-    
+
     /* The next byte contains the user defined byte field. */
     *p = (unsigned char) sdata->gsfDeltaTSpecific.user_defined_byte;
     p += 1;
@@ -6110,7 +6137,7 @@ EncodeDeltaTSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     /* The next 32 bytes are spare space for future growth */
     memset(p, 0, 32);
     p += 32;
-    
+
     return (p - sptr);
 }
 
@@ -6118,7 +6145,7 @@ EncodeDeltaTSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
  *
  * Function Name : EncodeR2SonicSpecific
  *
- * Description : This function encodes the R2Sonic 2022/2024
+ * Description : This function encodes the R2Sonic 2020/2022/2024
  *  sensor specific information into external byte stream form.
  *
  * Inputs :
@@ -6133,7 +6160,7 @@ EncodeDeltaTSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
 static int
 EncodeR2SonicSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
 {
-	int i;
+    int i;
     unsigned char  *p = sptr;
     gsfuShort       stemp;
     gsfuLong        ltemp;
@@ -6207,9 +6234,9 @@ EncodeR2SonicSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     /* The next four bytes contains the transmit steering in the vertical  * 1,000,000*/
     dtemp = sdata->gsfR2SonicSpecific.tx_steering_vert * 1.0e6;
     if (dtemp < 0.0)
-    	dtemp -= 0.501;
+        dtemp -= 0.501;
     else
-    	dtemp += 0.501;
+        dtemp += 0.501;
     ltemp = htonl((gsfuLong) dtemp);
     memcpy(p, &ltemp, 4);
     p += 4;
@@ -6217,9 +6244,9 @@ EncodeR2SonicSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     /* The next four bytes contains the transmit steering in the horizontal  * 1,000,000*/
     dtemp = sdata->gsfR2SonicSpecific.tx_steering_horiz * 1.0e6;
     if (dtemp < 0.0)
-    	dtemp -= 0.501;
+        dtemp -= 0.501;
     else
-    	dtemp += 0.501;
+        dtemp += 0.501;
     ltemp = htonl((gsfuLong) dtemp);
     memcpy(p, &ltemp, 4);
     p += 4;
@@ -6268,9 +6295,9 @@ EncodeR2SonicSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     /* The next four bytes contains the receiver mount tilt angle * 1,000,000 */
     dtemp = sdata->gsfR2SonicSpecific.rx_mount_tilt * 1.0e6;
     if (dtemp < 0.0)
-    	dtemp -= 0.501;
+        dtemp -= 0.501;
     else
-    	dtemp += 0.501;
+        dtemp += 0.501;
     ltemp = htonl((gsfuLong) dtemp);
     memcpy(p, &ltemp, 4);
     p += 4;
@@ -6291,30 +6318,30 @@ EncodeR2SonicSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     p += 2;
 
     /* The next set of 6x4 (24) bytes contains reserved fields from the A0 subgroup of the BTH0 */
-	for (i=0; i<6; i++)
-	{
+    for (i=0; i<6; i++)
+    {
         dtemp = sdata->gsfR2SonicSpecific.A0_more_info[i] * 1.0e6;
         if (dtemp < 0.0)
-        	dtemp -= 0.501;
+            dtemp -= 0.501;
         else
-        	dtemp += 0.501;
+            dtemp += 0.501;
         ltemp = htonl((gsfuLong) dtemp);
         memcpy(p, &ltemp, 4);
         p += 4;
-	}
+    }
 
     /* The next set of 6x4 (24) bytes contains reserved fields from the A2 subgroup of BTH0 */
-	for (i=0; i<6; i++)
-	{
+    for (i=0; i<6; i++)
+    {
         dtemp = sdata->gsfR2SonicSpecific.A2_more_info[i] * 1.0e6;
         if (dtemp < 0.0)
-        	dtemp -= 0.501;
+            dtemp -= 0.501;
         else
-        	dtemp += 0.501;
+            dtemp += 0.501;
         ltemp = htonl((gsfuLong) dtemp);
         memcpy(p, &ltemp, 4);
         p += 4;
-	}
+    }
 
     /* The next four bytes contain minimum depth gate from the G0 subgroup of BTH0 */
     dtemp = (sdata->gsfR2SonicSpecific.G0_depth_gate_min * 1.0e6) + 0.501;
@@ -6331,9 +6358,9 @@ EncodeR2SonicSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
     /* The next four bytes contain the depth gate slope from the G0 subgroup of BTH0 */
     dtemp = sdata->gsfR2SonicSpecific.G0_depth_gate_slope * 1.0e6;
     if (dtemp < 0.0)
-    	dtemp -= 0.501;
+        dtemp -= 0.501;
     else
-    	dtemp += 0.501;
+        dtemp += 0.501;
     ltemp = htonl((gsfuLong) dtemp);
     memcpy(p, &ltemp, 4);
     p += 4;
@@ -6994,7 +7021,7 @@ EncodeReson8100ImagerySpecific(unsigned char *sptr, gsfSensorImagery *sdata)
  *
  * Function Name : EncodeR2SonicImagerySpecific
  *
- * Description : This function encodes the R2Sonic 2022/2024
+ * Description : This function encodes the R2Sonic 2020/2022/2024
  *  sensor specific imagery information into external byte stream form.
  *
  * Inputs :
@@ -7009,7 +7036,7 @@ EncodeReson8100ImagerySpecific(unsigned char *sptr, gsfSensorImagery *sdata)
 static int
 EncodeR2SonicImagerySpecific(unsigned char *sptr, gsfSensorImagery *sdata)
 {
-	int i;
+    int i;
     unsigned char  *p = sptr;
     gsfuShort       stemp;
     gsfuLong        ltemp;
@@ -7083,9 +7110,9 @@ EncodeR2SonicImagerySpecific(unsigned char *sptr, gsfSensorImagery *sdata)
     /* The next four bytes contains the transmit steering in the vertical  * 1,000,000*/
     dtemp = sdata->gsfR2SonicImagerySpecific.tx_steering_vert * 1.0e6;
     if (dtemp < 0.0)
-    	dtemp -= 0.501;
+        dtemp -= 0.501;
     else
-    	dtemp += 0.501;
+        dtemp += 0.501;
     ltemp = htonl((gsfuLong) dtemp);
     memcpy(p, &ltemp, 4);
     p += 4;
@@ -7093,9 +7120,9 @@ EncodeR2SonicImagerySpecific(unsigned char *sptr, gsfSensorImagery *sdata)
     /* The next four bytes contains the transmit steering in the horizontal  * 1,000,000*/
     dtemp = sdata->gsfR2SonicImagerySpecific.tx_steering_horiz * 1.0e6;
     if (dtemp < 0.0)
-    	dtemp -= 0.501;
+        dtemp -= 0.501;
     else
-    	dtemp += 0.501;
+        dtemp += 0.501;
     ltemp = htonl((gsfuLong) dtemp);
     memcpy(p, &ltemp, 4);
     p += 4;
@@ -7144,9 +7171,9 @@ EncodeR2SonicImagerySpecific(unsigned char *sptr, gsfSensorImagery *sdata)
     /* The next four bytes contains the receiver mount tilt angle * 1,000,000 */
     dtemp = sdata->gsfR2SonicImagerySpecific.rx_mount_tilt * 1.0e6;
     if (dtemp < 0.0)
-    	dtemp -= 0.501;
+        dtemp -= 0.501;
     else
-    	dtemp += 0.501;
+        dtemp += 0.501;
     ltemp = htonl((gsfuLong) dtemp);
     memcpy(p, &ltemp, 4);
     p += 4;
@@ -7167,17 +7194,17 @@ EncodeR2SonicImagerySpecific(unsigned char *sptr, gsfSensorImagery *sdata)
     p += 2;
 
     /* The next set of 6x4 (24) bytes contains "more_info" from the SNI0 datagram */
-	for (i=0; i<6; i++)
-	{
+    for (i=0; i<6; i++)
+    {
         dtemp = sdata->gsfR2SonicImagerySpecific.more_info[i] * 1.0e6;
         if (dtemp < 0.0)
-        	dtemp -= 0.501;
+            dtemp -= 0.501;
         else
-        	dtemp += 0.501;
+            dtemp += 0.501;
         ltemp = htonl((gsfuLong) dtemp);
         memcpy(p, &ltemp, 4);
         p += 4;
-	}
+    }
 
     /* write the spare bytes */
     memcpy(p, sdata->gsfR2SonicImagerySpecific.spare, 32);
@@ -7295,6 +7322,7 @@ EncodeBRBIntensity(unsigned char *sptr, gsfBRBIntensity *idata, int num_beams, i
             sensor_size = EncodeKlein5410BssImagerySpecific(ptr, &idata->sensor_imagery);
             break;
 
+        case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2020_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC):
             sensor_size = EncodeR2SonicImagerySpecific(ptr, &idata->sensor_imagery);
@@ -7338,15 +7366,15 @@ EncodeBRBIntensity(unsigned char *sptr, gsfBRBIntensity *idata, int num_beams, i
                 /* pack the first sample */
                 ltemp = htonl ((gsfuLong) idata->time_series[i].samples[j]);
                 memcpy (bytes_to_pack, &ltemp, 4);
-                
+
                 /* Although bytes_to_pack is 4 bytes, we know that bytes 0 and 1 are zero. */
                 /* We want to save the lower bits of byte 2 in the upper bits of ptr[0] (we */
                 /* know the upper bits of byte 2 are zero) */
                 ptr[0] = bytes_to_pack[2] << 4;
-                
+
                 /* We sant to save the upper bits of bytes_to_pack[3] in the lower bits of */
                 /* ptr[0].  The lower bits of bytes_to_pack[3] need to be saved in the upper */
-                /* bits of ptr[1] */          
+                /* bits of ptr[1] */
                 ptr[0] |= (bytes_to_pack[3] & 0xf0) >> 4;
                 ptr[1] = bytes_to_pack[3] << 4;
                 if (j+1 < idata->time_series[i].sample_count)
@@ -7929,9 +7957,9 @@ gsfEncodeHVNavigationError(unsigned char *sptr, gsfHVNavigationError *hv_nav_err
     p += 4;
 
     /* The next two bytes contains the SEP uncertainty estimate.
-     * This value is always >= 0.0, so rounding is a simple addition 
+     * This value is always >= 0.0, so rounding is a simple addition
      */
-    dtemp = (hv_nav_error->SEP_uncertainty * 100.0);    
+    dtemp = (hv_nav_error->SEP_uncertainty * 100.0);
     dtemp += 0.501;
     utemp = htons((gsfuShort) dtemp);
     memcpy(p, &utemp, 2);
@@ -8156,6 +8184,7 @@ int gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping)
     const double GSF_INCIDENT_BEAM_ADJ_ASSUMED_HIGHEST_PRECISION = 100;
     const double GSF_SYSTEM_CLEANING_ASSUMED_HIGHEST_PRECISION = 100;
     const double GSF_DOPPLER_CORRECTION_ASSUMED_HIGHEST_PRECISION = 100;
+    const double GSF_SONAR_VERT_UNCERT_ASSUMED_HIGHEST_PRECISION = 100;
 
     int             i, j; /* iterators */
     double          *dptr; /* pointer to ping array */
@@ -8347,6 +8376,13 @@ int gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping)
                 id = GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY;
                 max_scale_factor = SCHAR_MAX;
                 min_scale_factor = SCHAR_MIN;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY:
+                dptr = mb_ping->sonar_vert_uncert;
+                highest_precision = GSF_SONAR_VERT_UNCERT_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
                 break;
 
         }

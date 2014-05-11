@@ -173,12 +173,14 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_insert_svp = NULL;
 	mb_io_ptr->mb_io_ttimes = &mbsys_jstar_ttimes;
 	mb_io_ptr->mb_io_detects = &mbsys_jstar_detects;
-	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copy;
-	mb_io_ptr->mb_io_extract_rawss = NULL;
-	mb_io_ptr->mb_io_insert_rawss = NULL;
+	mb_io_ptr->mb_io_extract_rawssdimensions = &mbsys_jstar_extract_rawssdimensions;
+	mb_io_ptr->mb_io_extract_rawss = &mbsys_jstar_extract_rawss;
+	mb_io_ptr->mb_io_insert_rawss = &mbsys_jstar_insert_rawss;
 	mb_io_ptr->mb_io_extract_segytraceheader = &mbsys_jstar_extract_segytraceheader;
 	mb_io_ptr->mb_io_extract_segy = &mbsys_jstar_extract_segy;
 	mb_io_ptr->mb_io_insert_segy = &mbsys_jstar_insert_segy;
+	mb_io_ptr->mb_io_ctd = &mbsys_jstar_ctd;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copyrecord;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -219,11 +221,13 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
 		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawssdimensions: %p\n",(void *)mb_io_ptr->mb_io_extract_rawssdimensions);
 		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       extract_segytraceheader: %p\n",(void *)mb_io_ptr->mb_io_extract_segytraceheader);
 		fprintf(stderr,"dbg2       extract_segy:       %p\n",(void *)mb_io_ptr->mb_io_extract_segy);
 		fprintf(stderr,"dbg2       insert_segy:        %p\n",(void *)mb_io_ptr->mb_io_insert_segy);
+		fprintf(stderr,"dbg2       ctd:                %p\n",(void *)mb_io_ptr->mb_io_ctd);
 		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -370,6 +374,8 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_edgjstar;
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_edgjstar;
 	mb_io_ptr->mb_io_dimensions = &mbsys_jstar_dimensions;
+	mb_io_ptr->mb_io_pingnumber = &mbsys_jstar_pingnumber;
+	mb_io_ptr->mb_io_preprocess = &mbsys_jstar_preprocess;
 	mb_io_ptr->mb_io_extract = &mbsys_jstar_extract;
 	mb_io_ptr->mb_io_insert = &mbsys_jstar_insert;
 	mb_io_ptr->mb_io_extract_nav = &mbsys_jstar_extract_nav;
@@ -379,12 +385,15 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_svp = NULL;
 	mb_io_ptr->mb_io_insert_svp = NULL;
 	mb_io_ptr->mb_io_ttimes = &mbsys_jstar_ttimes;
-	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copy;
-	mb_io_ptr->mb_io_extract_rawss = NULL;
-	mb_io_ptr->mb_io_insert_rawss = NULL;
+	mb_io_ptr->mb_io_detects = &mbsys_jstar_detects;
+	mb_io_ptr->mb_io_extract_rawssdimensions = &mbsys_jstar_extract_rawssdimensions;
+	mb_io_ptr->mb_io_extract_rawss = &mbsys_jstar_extract_rawss;
+	mb_io_ptr->mb_io_insert_rawss = &mbsys_jstar_insert_rawss;
 	mb_io_ptr->mb_io_extract_segytraceheader = &mbsys_jstar_extract_segytraceheader;
 	mb_io_ptr->mb_io_extract_segy = &mbsys_jstar_extract_segy;
 	mb_io_ptr->mb_io_insert_segy = &mbsys_jstar_insert_segy;
+	mb_io_ptr->mb_io_ctd = &mbsys_jstar_ctd;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copyrecord;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -424,11 +433,14 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
 		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawssdimensions: %p\n",(void *)mb_io_ptr->mb_io_extract_rawssdimensions);
 		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       extract_segytraceheader: %p\n",(void *)mb_io_ptr->mb_io_extract_segytraceheader);
 		fprintf(stderr,"dbg2       extract_segy:       %p\n",(void *)mb_io_ptr->mb_io_extract_segy);
 		fprintf(stderr,"dbg2       insert_segy:        %p\n",(void *)mb_io_ptr->mb_io_insert_segy);
+		fprintf(stderr,"dbg2       ctd:                %p\n",(void *)mb_io_ptr->mb_io_ctd);
 		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -660,6 +672,14 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	 * to the current form - initialize the trace to null */
 	ssold_tmp.trace_alloc = 0;
 	ssold_tmp.trace = NULL;
+	
+	/* make sure the sidescan ping numbers and channels are initialized so
+	 * that it is impossible to mistakenly report a full ping read when only
+	 * one channel has been read */
+	store->ssport.pingNum = -1;
+	store->ssstbd.pingNum = -1;
+	store->ssport.message.subsystem = -1;
+	store->ssstbd.message.subsystem = -1;
 
 	/* loop over reading data until a full record of some sort is read */
 	done = MB_NO;
@@ -844,6 +864,9 @@ fprintf(stderr,"REACHED END OF FILE: status:%d\n", status);
 						{
 						sbp->trace_alloc = trace_size;
 						}
+					else
+						fprintf(stderr,"TRACE ALLOCATION FAILED %s Line:%d Size:%d\n",
+							__FILE__, __LINE__, trace_size);
 					}
 
 				/* read the trace */
@@ -934,9 +957,13 @@ fprintf(stderr,"REACHED END OF FILE: status:%d\n", status);
 			{
 			/* sidescan channel */
 			if (message.channel == 0)
+				{
 				ss = (struct mbsys_jstar_channel_struct *) &(store->ssport);
+				}
 			else
+				{
 				ss = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
+				}
 			ss->message = message;
 
 			/* read the 240 byte trace header */
@@ -1044,6 +1071,9 @@ fprintf(stderr,"REACHED END OF FILE: status:%d\n", status);
 						{
 						ss->trace_alloc = trace_size;
 						}
+					else
+						fprintf(stderr,"TRACE ALLOCATION FAILED %s Line:%d Size:%d\n",
+							__FILE__, __LINE__, trace_size);
 					}
 
 				/* read the trace */
@@ -1243,7 +1273,7 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);
 				sbp->startFreq = 0;
 				sbp->endFreq = 0;
 				sbp->sweepLength = 0;
-				for (i=0;i<7;i++)
+				for (i=0;i<4;i++)
 					{
 					sbp->unused7[i] = 0;
 					}
@@ -1306,6 +1336,9 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);
 						{
 						sbp->trace_alloc = trace_size;
 						}
+					else
+						fprintf(stderr,"TRACE ALLOCATION FAILED %s Line:%d Size:%d\n",
+							__FILE__, __LINE__, trace_size);
 					}
 
 				/* read the trace */
@@ -1485,7 +1518,7 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);
 				ss->startFreq = 0;
 				ss->endFreq = 0;
 				ss->sweepLength = 0;
-				for (i=0;i<7;i++)
+				for (i=0;i<4;i++)
 					{
 					ss->unused7[i] = 0;
 					}
@@ -1548,6 +1581,9 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);
 						{
 						ss->trace_alloc = trace_size;
 						}
+					else
+						fprintf(stderr,"TRACE ALLOCATION FAILED %s Line:%d Size:%d\n",
+							__FILE__, __LINE__, trace_size);
 					}
 
 				/* read the trace */
@@ -1878,7 +1914,7 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],pressure->
 #endif
 
 				done = MB_YES;
-				store->kind = MB_DATA_HEIGHT;
+				store->kind = MB_DATA_CTD;
 				}
 
 			/* end of file */
@@ -2374,7 +2410,7 @@ fprintf(stderr,"kind:%d error:%d status:%d\n",store->kind,*error,status);
 		for (i=0;i<7;i++)
 		fprintf(stderr,"dbg5     reserve2[%d]:                %d\n",i,dvl->reserve2[i]);
 		}
-	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_HEIGHT)
+	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_CTD)
 		{
 		pressure = (struct mbsys_jstar_pressure_struct *) &(store->pressure);
 		fprintf(stderr,"\ndbg5  New pressure data record read by MBIO function <%s>\n",function_name);
@@ -2921,7 +2957,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<7;i++)
 			fprintf(stderr,"dbg5     reserve2[%d]:                %d\n",i,dvl->reserve2[i]);
 		}
-	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_HEIGHT)
+	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_CTD)
 		{
 		pressure = (struct mbsys_jstar_pressure_struct *) &(store->pressure);
 		fprintf(stderr,"\ndbg5  New pressure data record to be written by MBIO function <%s>\n",function_name);
@@ -3655,7 +3691,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* write out pressure data */
-	else if (store->kind == MB_DATA_HEIGHT)
+	else if (store->kind == MB_DATA_CTD)
 		{
 		/* insert the message header values */
 		index = 0;

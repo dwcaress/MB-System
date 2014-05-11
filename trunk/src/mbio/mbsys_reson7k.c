@@ -2731,37 +2731,39 @@ int mbsys_reson7k_print_fsdwssheader(int verbose,
 			first,function_name);
 		}
 	fprintf(stderr,"%sStructure Contents:\n", first);
-	fprintf(stderr,"%s     subsystem;                    %d\n",first,fsdwssheader->subsystem);
-	fprintf(stderr,"%s     channelNum;                   %d\n",first,fsdwssheader->channelNum);
-	fprintf(stderr,"%s     pingNum;                      %d\n",first,fsdwssheader->pingNum);
-	fprintf(stderr,"%s     packetNum;                    %d\n",first,fsdwssheader->packetNum);
-	fprintf(stderr,"%s     trigSource;                   %d\n",first,fsdwssheader->trigSource);
-	fprintf(stderr,"%s     samples;                      %d\n",first,fsdwssheader->samples);
-	fprintf(stderr,"%s     sampleInterval;               %d\n",first,fsdwssheader->sampleInterval);
-	fprintf(stderr,"%s     startDepth;                   %d\n",first,fsdwssheader->startDepth);
-	fprintf(stderr,"%s     weightingFactor;              %d\n",first,fsdwssheader->weightingFactor);
-	fprintf(stderr,"%s     ADCGain;                      %d\n",first,fsdwssheader->ADCGain);
-	fprintf(stderr,"%s     ADCMax;                       %d\n",first,fsdwssheader->ADCMax);
-	fprintf(stderr,"%s     rangeSetting;                 %d\n",first,fsdwssheader->rangeSetting);
-	fprintf(stderr,"%s     pulseID;                      %d\n",first,fsdwssheader->pulseID);
-	fprintf(stderr,"%s     markNumber;                   %d\n",first,fsdwssheader->markNumber);
-	fprintf(stderr,"%s     dataFormat;                   %d\n",first,fsdwssheader->dataFormat);
-	fprintf(stderr,"%s     reserved;                     %d\n",first,fsdwssheader->reserved);
-	fprintf(stderr,"%s     millisecondsToday;            %d\n",first,fsdwssheader->millisecondsToday);
-	fprintf(stderr,"%s     year;                         %d\n",first,fsdwssheader->year);
-	fprintf(stderr,"%s     day;                          %d\n",first,fsdwssheader->day);
-	fprintf(stderr,"%s     hour;                         %d\n",first,fsdwssheader->hour);
-	fprintf(stderr,"%s     minute;                       %d\n",first,fsdwssheader->minute);
-	fprintf(stderr,"%s     second;                       %d\n",first,fsdwssheader->second);
-	fprintf(stderr,"%s     heading;                      %d\n",first,fsdwssheader->heading);
-	fprintf(stderr,"%s     pitch;                        %d\n",first,fsdwssheader->pitch);
-	fprintf(stderr,"%s     roll;                         %d\n",first,fsdwssheader->roll);
-	fprintf(stderr,"%s     heave;                        %d\n",first,fsdwssheader->heave);
-	fprintf(stderr,"%s     yaw;                          %d\n",first,fsdwssheader->yaw);
-	fprintf(stderr,"%s     depth;                        %d\n",first,fsdwssheader->depth);
-	fprintf(stderr,"%s     temperature;                  %d\n",first,fsdwssheader->temperature);
-	for (i=0;i<10;i++)
-		fprintf(stderr,"%s     reserved2[%d];                 %d\n",first,i,fsdwssheader->reserved2[i]);
+	fprintf(stderr,"%s     subsystem:                    %d\n",first,fsdwssheader->subsystem);
+	fprintf(stderr,"%s     channelNum:                   %d\n",first,fsdwssheader->channelNum);
+	fprintf(stderr,"%s     pingNum:                      %d\n",first,fsdwssheader->pingNum);
+	fprintf(stderr,"%s     packetNum:                    %d\n",first,fsdwssheader->packetNum);
+	fprintf(stderr,"%s     trigSource:                   %d\n",first,fsdwssheader->trigSource);
+	fprintf(stderr,"%s     samples:                      %d\n",first,fsdwssheader->samples);
+	fprintf(stderr,"%s     sampleInterval:               %d\n",first,fsdwssheader->sampleInterval);
+	fprintf(stderr,"%s     startDepth:                   %d\n",first,fsdwssheader->startDepth);
+	fprintf(stderr,"%s     weightingFactor:              %d\n",first,fsdwssheader->weightingFactor);
+	fprintf(stderr,"%s     ADCGain:                      %d\n",first,fsdwssheader->ADCGain);
+	fprintf(stderr,"%s     ADCMax:                       %d\n",first,fsdwssheader->ADCMax);
+	fprintf(stderr,"%s     rangeSetting:                 %d\n",first,fsdwssheader->rangeSetting);
+	fprintf(stderr,"%s     pulseID:                      %d\n",first,fsdwssheader->pulseID);
+	fprintf(stderr,"%s     markNumber:                   %d\n",first,fsdwssheader->markNumber);
+	fprintf(stderr,"%s     dataFormat:                   %d\n",first,fsdwssheader->dataFormat);
+	fprintf(stderr,"%s     reserved:                     %d\n",first,fsdwssheader->reserved);
+	fprintf(stderr,"%s     millisecondsToday:            %d\n",first,fsdwssheader->millisecondsToday);
+	fprintf(stderr,"%s     year:                         %d\n",first,fsdwssheader->year);
+	fprintf(stderr,"%s     day:                          %d\n",first,fsdwssheader->day);
+	fprintf(stderr,"%s     hour:                         %d\n",first,fsdwssheader->hour);
+	fprintf(stderr,"%s     minute:                       %d\n",first,fsdwssheader->minute);
+	fprintf(stderr,"%s     second:                       %d\n",first,fsdwssheader->second);
+	fprintf(stderr,"%s     heading:                      %d\n",first,fsdwssheader->heading);
+	fprintf(stderr,"%s     pitch:                        %d\n",first,fsdwssheader->pitch);
+	fprintf(stderr,"%s     roll:                         %d\n",first,fsdwssheader->roll);
+	fprintf(stderr,"%s     heave:                        %d\n",first,fsdwssheader->heave);
+	fprintf(stderr,"%s     yaw:                          %d\n",first,fsdwssheader->yaw);
+	fprintf(stderr,"%s     depth:                        %d\n",first,fsdwssheader->depth);
+	fprintf(stderr,"%s     temperature:                  %d\n",first,fsdwssheader->temperature);
+	for (i=0;i<2;i++)
+		fprintf(stderr,"%s     reserved2[%d]:                 %d\n",first,i,fsdwssheader->reserved2[i]);
+	fprintf(stderr,"%s     longitude:                    %d\n",first,fsdwssheader->longitude);
+	fprintf(stderr,"%s     latitude:                     %d\n",first,fsdwssheader->latitude);
 
 
 	/* print output debug statements */
@@ -2810,73 +2812,73 @@ int mbsys_reson7k_print_fsdwsegyheader(int verbose,
 			first,function_name);
 		}
 	fprintf(stderr,"%sStructure Contents:\n", first);
-	fprintf(stderr,"%s     sequenceNumber;              %d\n",first,fsdwsegyheader->sequenceNumber);
-	fprintf(stderr,"%s     startDepth;                  %d\n",first,fsdwsegyheader->startDepth);
-	fprintf(stderr,"%s     pingNum;                     %d\n",first,fsdwsegyheader->pingNum);
-	fprintf(stderr,"%s     channelNum;                  %d\n",first,fsdwsegyheader->channelNum);
+	fprintf(stderr,"%s     sequenceNumber:              %d\n",first,fsdwsegyheader->sequenceNumber);
+	fprintf(stderr,"%s     startDepth:                  %d\n",first,fsdwsegyheader->startDepth);
+	fprintf(stderr,"%s     pingNum:                     %d\n",first,fsdwsegyheader->pingNum);
+	fprintf(stderr,"%s     channelNum:                  %d\n",first,fsdwsegyheader->channelNum);
 	for (i=0;i<6;i++)
-		fprintf(stderr,"%s     unused1[%d];                  %d\n",first,i,fsdwsegyheader->unused1[i]);
-	fprintf(stderr,"%s     traceIDCode;                 %d\n",first,fsdwsegyheader->traceIDCode);
+		fprintf(stderr,"%s     unused1[%d]:                  %d\n",first,i,fsdwsegyheader->unused1[i]);
+	fprintf(stderr,"%s     traceIDCode:                 %d\n",first,fsdwsegyheader->traceIDCode);
 	for (i=0;i<2;i++)
-		fprintf(stderr,"%s     unused2[%d];                  %d\n",first,i,fsdwsegyheader->unused2[i]);
-	fprintf(stderr,"%s     dataFormat;                  %d\n",first,fsdwsegyheader->dataFormat);
-	fprintf(stderr,"%s     NMEAantennaeR;               %d\n",first,fsdwsegyheader->NMEAantennaeR);
-	fprintf(stderr,"%s     NMEAantennaeO;               %d\n",first,fsdwsegyheader->NMEAantennaeO);
+		fprintf(stderr,"%s     unused2[%d]:                  %d\n",first,i,fsdwsegyheader->unused2[i]);
+	fprintf(stderr,"%s     dataFormat:                  %d\n",first,fsdwsegyheader->dataFormat);
+	fprintf(stderr,"%s     NMEAantennaeR:               %d\n",first,fsdwsegyheader->NMEAantennaeR);
+	fprintf(stderr,"%s     NMEAantennaeO:               %d\n",first,fsdwsegyheader->NMEAantennaeO);
 	for (i=0;i<32;i++)
-		fprintf(stderr,"%s     RS232[%d];                   %d\n",first,i,fsdwsegyheader->RS232[i]);
-	fprintf(stderr,"%s     sourceCoordX;                %d\n",first,fsdwsegyheader->sourceCoordX);
-	fprintf(stderr,"%s     sourceCoordY;                %d\n",first,fsdwsegyheader->sourceCoordY);
-	fprintf(stderr,"%s     groupCoordX;                 %d\n",first,fsdwsegyheader->groupCoordX);
-	fprintf(stderr,"%s     groupCoordY;                 %d\n",first,fsdwsegyheader->groupCoordY);
-	fprintf(stderr,"%s     coordUnits;                  %d\n",first,fsdwsegyheader->coordUnits);
-	fprintf(stderr,"%s     annotation;                  %s\n",first,fsdwsegyheader->annotation);
-	fprintf(stderr,"%s     samples;                     %d\n",first,fsdwsegyheader->samples);
-	fprintf(stderr,"%s     sampleInterval;              %d\n",first,fsdwsegyheader->sampleInterval);
-	fprintf(stderr,"%s     ADCGain;                     %d\n",first,fsdwsegyheader->ADCGain);
-	fprintf(stderr,"%s     pulsePower;                  %d\n",first,fsdwsegyheader->pulsePower);
-	fprintf(stderr,"%s     correlated;                  %d\n",first,fsdwsegyheader->correlated);
-	fprintf(stderr,"%s     startFreq;                   %d\n",first,fsdwsegyheader->startFreq);
-	fprintf(stderr,"%s     endFreq;                     %d\n",first,fsdwsegyheader->endFreq);
-	fprintf(stderr,"%s     sweepLength;                 %d\n",first,fsdwsegyheader->sweepLength);
+		fprintf(stderr,"%s     RS232[%d]:                   %d\n",first,i,fsdwsegyheader->RS232[i]);
+	fprintf(stderr,"%s     sourceCoordX:                %d\n",first,fsdwsegyheader->sourceCoordX);
+	fprintf(stderr,"%s     sourceCoordY:                %d\n",first,fsdwsegyheader->sourceCoordY);
+	fprintf(stderr,"%s     groupCoordX:                 %d\n",first,fsdwsegyheader->groupCoordX);
+	fprintf(stderr,"%s     groupCoordY:                 %d\n",first,fsdwsegyheader->groupCoordY);
+	fprintf(stderr,"%s     coordUnits:                  %d\n",first,fsdwsegyheader->coordUnits);
+	fprintf(stderr,"%s     annotation:                  %s\n",first,fsdwsegyheader->annotation);
+	fprintf(stderr,"%s     samples:                     %d\n",first,fsdwsegyheader->samples);
+	fprintf(stderr,"%s     sampleInterval:              %d\n",first,fsdwsegyheader->sampleInterval);
+	fprintf(stderr,"%s     ADCGain:                     %d\n",first,fsdwsegyheader->ADCGain);
+	fprintf(stderr,"%s     pulsePower:                  %d\n",first,fsdwsegyheader->pulsePower);
+	fprintf(stderr,"%s     correlated:                  %d\n",first,fsdwsegyheader->correlated);
+	fprintf(stderr,"%s     startFreq:                   %d\n",first,fsdwsegyheader->startFreq);
+	fprintf(stderr,"%s     endFreq:                     %d\n",first,fsdwsegyheader->endFreq);
+	fprintf(stderr,"%s     sweepLength:                 %d\n",first,fsdwsegyheader->sweepLength);
 	for (i=0;i<4;i++)
-		fprintf(stderr,"%s     unused7[%d];                  %d\n",first,i,fsdwsegyheader->unused7[i]);
-	fprintf(stderr,"%s     aliasFreq;                   %d\n",first,fsdwsegyheader->aliasFreq);
-	fprintf(stderr,"%s     pulseID;                     %d\n",first,fsdwsegyheader->pulseID);
+		fprintf(stderr,"%s     unused7[%d]:                  %d\n",first,i,fsdwsegyheader->unused7[i]);
+	fprintf(stderr,"%s     aliasFreq:                   %d\n",first,fsdwsegyheader->aliasFreq);
+	fprintf(stderr,"%s     pulseID:                     %d\n",first,fsdwsegyheader->pulseID);
 	for (i=0;i<6;i++)
-		fprintf(stderr,"%s     unused8[%d];                  %d\n",first,i,fsdwsegyheader->unused8[i]);
-	fprintf(stderr,"%s     year;                        %d\n",first,fsdwsegyheader->year);
-	fprintf(stderr,"%s     day;                         %d\n",first,fsdwsegyheader->day);
-	fprintf(stderr,"%s     hour;                        %d\n",first,fsdwsegyheader->hour);
-	fprintf(stderr,"%s     minute;                      %d\n",first,fsdwsegyheader->minute);
-	fprintf(stderr,"%s     second;                      %d\n",first,fsdwsegyheader->second);
-	fprintf(stderr,"%s     timeBasis;                   %d\n",first,fsdwsegyheader->timeBasis);
-	fprintf(stderr,"%s     weightingFactor;             %d\n",first,fsdwsegyheader->weightingFactor);
-	fprintf(stderr,"%s     unused9;                     %d\n",first,fsdwsegyheader->unused9);
-	fprintf(stderr,"%s     heading;                     %d\n",first,fsdwsegyheader->heading);
-	fprintf(stderr,"%s     pitch;                       %d\n",first,fsdwsegyheader->pitch);
-	fprintf(stderr,"%s     roll;                        %d\n",first,fsdwsegyheader->roll);
-	fprintf(stderr,"%s     temperature;                 %d\n",first,fsdwsegyheader->temperature);
-	fprintf(stderr,"%s     heaveCompensation;           %d\n",first,fsdwsegyheader->heaveCompensation);
-	fprintf(stderr,"%s     trigSource;                  %d\n",first,fsdwsegyheader->trigSource);
-	fprintf(stderr,"%s     markNumber;                  %d\n",first,fsdwsegyheader->markNumber);
-	fprintf(stderr,"%s     NMEAHour;                    %d\n",first,fsdwsegyheader->NMEAHour);
-	fprintf(stderr,"%s     NMEAMinutes;                 %d\n",first,fsdwsegyheader->NMEAMinutes);
-	fprintf(stderr,"%s     NMEASeconds;                 %d\n",first,fsdwsegyheader->NMEASeconds);
-	fprintf(stderr,"%s     NMEACourse;                  %d\n",first,fsdwsegyheader->NMEACourse);
-	fprintf(stderr,"%s     NMEASpeed;                   %d\n",first,fsdwsegyheader->NMEASpeed);
-	fprintf(stderr,"%s     NMEADay;                     %d\n",first,fsdwsegyheader->NMEADay);
-	fprintf(stderr,"%s     NMEAYear;                    %d\n",first,fsdwsegyheader->NMEAYear);
-	fprintf(stderr,"%s     millisecondsToday;           %d\n",first,fsdwsegyheader->millisecondsToday);
-	fprintf(stderr,"%s     ADCMax;                      %d\n",first,fsdwsegyheader->ADCMax);
-	fprintf(stderr,"%s     calConst;                    %d\n",first,fsdwsegyheader->calConst);
-	fprintf(stderr,"%s     vehicleID;                   %d\n",first,fsdwsegyheader->vehicleID);
-	fprintf(stderr,"%s     softwareVersion;             %s\n",first,fsdwsegyheader->softwareVersion);
-	fprintf(stderr,"%s     sphericalCorrection;         %d\n",first,fsdwsegyheader->sphericalCorrection);
-	fprintf(stderr,"%s     packetNum;                   %d\n",first,fsdwsegyheader->packetNum);
-	fprintf(stderr,"%s     ADCDecimation;               %d\n",first,fsdwsegyheader->ADCDecimation);
-	fprintf(stderr,"%s     decimation;                  %d\n",first,fsdwsegyheader->decimation);
+		fprintf(stderr,"%s     unused8[%d]:                  %d\n",first,i,fsdwsegyheader->unused8[i]);
+	fprintf(stderr,"%s     year:                        %d\n",first,fsdwsegyheader->year);
+	fprintf(stderr,"%s     day:                         %d\n",first,fsdwsegyheader->day);
+	fprintf(stderr,"%s     hour:                        %d\n",first,fsdwsegyheader->hour);
+	fprintf(stderr,"%s     minute:                      %d\n",first,fsdwsegyheader->minute);
+	fprintf(stderr,"%s     second:                      %d\n",first,fsdwsegyheader->second);
+	fprintf(stderr,"%s     timeBasis:                   %d\n",first,fsdwsegyheader->timeBasis);
+	fprintf(stderr,"%s     weightingFactor:             %d\n",first,fsdwsegyheader->weightingFactor);
+	fprintf(stderr,"%s     unused9:                     %d\n",first,fsdwsegyheader->unused9);
+	fprintf(stderr,"%s     heading:                     %d\n",first,fsdwsegyheader->heading);
+	fprintf(stderr,"%s     pitch:                       %d\n",first,fsdwsegyheader->pitch);
+	fprintf(stderr,"%s     roll:                        %d\n",first,fsdwsegyheader->roll);
+	fprintf(stderr,"%s     temperature:                 %d\n",first,fsdwsegyheader->temperature);
+	fprintf(stderr,"%s     heaveCompensation:           %d\n",first,fsdwsegyheader->heaveCompensation);
+	fprintf(stderr,"%s     trigSource:                  %d\n",first,fsdwsegyheader->trigSource);
+	fprintf(stderr,"%s     markNumber:                  %d\n",first,fsdwsegyheader->markNumber);
+	fprintf(stderr,"%s     NMEAHour:                    %d\n",first,fsdwsegyheader->NMEAHour);
+	fprintf(stderr,"%s     NMEAMinutes:                 %d\n",first,fsdwsegyheader->NMEAMinutes);
+	fprintf(stderr,"%s     NMEASeconds:                 %d\n",first,fsdwsegyheader->NMEASeconds);
+	fprintf(stderr,"%s     NMEACourse:                  %d\n",first,fsdwsegyheader->NMEACourse);
+	fprintf(stderr,"%s     NMEASpeed:                   %d\n",first,fsdwsegyheader->NMEASpeed);
+	fprintf(stderr,"%s     NMEADay:                     %d\n",first,fsdwsegyheader->NMEADay);
+	fprintf(stderr,"%s     NMEAYear:                    %d\n",first,fsdwsegyheader->NMEAYear);
+	fprintf(stderr,"%s     millisecondsToday:           %d\n",first,fsdwsegyheader->millisecondsToday);
+	fprintf(stderr,"%s     ADCMax:                      %d\n",first,fsdwsegyheader->ADCMax);
+	fprintf(stderr,"%s     calConst:                    %d\n",first,fsdwsegyheader->calConst);
+	fprintf(stderr,"%s     vehicleID:                   %d\n",first,fsdwsegyheader->vehicleID);
+	fprintf(stderr,"%s     softwareVersion:             %s\n",first,fsdwsegyheader->softwareVersion);
+	fprintf(stderr,"%s     sphericalCorrection:         %d\n",first,fsdwsegyheader->sphericalCorrection);
+	fprintf(stderr,"%s     packetNum:                   %d\n",first,fsdwsegyheader->packetNum);
+	fprintf(stderr,"%s     ADCDecimation:               %d\n",first,fsdwsegyheader->ADCDecimation);
+	fprintf(stderr,"%s     decimation:                  %d\n",first,fsdwsegyheader->decimation);
 	for (i=0;i<7;i++)
-		fprintf(stderr,"%s     unuseda[%d];                  %d\n",first,i,fsdwsegyheader->unuseda[i]);
+		fprintf(stderr,"%s     unuseda[%d]:                  %d\n",first,i,fsdwsegyheader->unuseda[i]);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -4633,7 +4635,7 @@ int mbsys_reson7k_print_v2snippet(int verbose,
 	fprintf(stderr,"%s     number_beams:               %u\n",first,v2snippet->number_beams);
 	fprintf(stderr,"%s     error_flag:                 %u\n",first,v2snippet->error_flag);
 	fprintf(stderr,"%s     control_flags:              %u\n",first,v2snippet->control_flags);
-	for (i=0;i<32;i++)
+	for (i=0;i<28;i++)
 		fprintf(stderr,"%u ",v2snippet->reserved[i]);
 	for (i=0;i<v2snippet->number_beams;i++)
 		{

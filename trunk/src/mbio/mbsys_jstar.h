@@ -508,6 +508,19 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
+int mbsys_jstar_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr,
+                        int *kind, double *sample_interval,
+                        int *num_samples_port, int *num_samples_stbd, int *error);
+int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
+                        int *kind, int *sidescan_type, double *sample_interval,
+                        double *beamwidth_xtrack, double *beamwidth_ltrack,
+                        int *num_samples_port, double *rawss_port, 
+                        int *num_samples_stbd, double *rawss_stbd, int *error);
+int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
+                        int kind, int sidescan_type, double sample_interval,
+                        double beamwidth_xtrack, double beamwidth_ltrack,
+                        int num_samples_port, double *rawss_port,
+                        int num_samples_stbd, double *rawss_stbd, int *error);
 int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind,
 			void *segyheader_ptr,
@@ -523,6 +536,10 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			void *segyheader_ptr,
 			float *segydata,
 			int *error);
-int mbsys_jstar_copy(int verbose, void *mbio_ptr,
+int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr,
+                        int *kind, int *nctd, double *time_d,
+                        double *conductivity, double *temperature,
+                        double *depth, double *salinity, double *soundspeed, int *error);
+int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
