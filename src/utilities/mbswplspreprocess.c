@@ -173,10 +173,10 @@ static char help_message[] =
 	"-H        print this help text\n"
 	"-Iinfile  SXP file to process\n"
 	"-Jproj4   Proj4 projection command\n"
-	"-N        do not write output to file, mostly usefull with -G\n"
+	"-N        do not write output to file, mostly useful with -G\n"
 	"-Ooutfile basename for output files [default: same as input]\n"
 	"-R        remove rejected samples from pings.\n"
-	"-S        split each transducer channel into a seperate file\n"
+	"-S        split each transducer channel into a separate file\n"
 	"-V        verbosity\n"	
 	"\n"
 	"Report bugs to the MB System development team\n";

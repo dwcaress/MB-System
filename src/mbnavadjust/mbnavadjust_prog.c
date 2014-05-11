@@ -288,17 +288,6 @@ double	zmisfitmax;
 time_t	right_now;
 char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
-/* minimum initial sigma_crossing (meters) */
-#define	SIGMA_MINIMUM	0.1
-
-/* ping type defines */
-#define	SIDE_PORT	0
-#define	SIDE_STBD	1
-#define	SIDE_FULLSWATH	2
-
-/* route version define */
-#define ROUTE_VERSION "1.00"
-
 /* local prototypes */
 int mbnavadjust_crossing_compare(void *a, void *b);
 void mbnavadjust_plot(double xx,double yy,int ipen);
@@ -2706,10 +2695,10 @@ fprintf(stderr, "read failed on tie covariance: %s\n", buffer);
 						}
 					if (tie->sigmar1 <= 0.0)
 						{
-						tie->sigmax2[0] = 1.0;
-						tie->sigmax2[1] = 0.0;
-						tie->sigmax2[2] = 0.0;
-						mbna_minmisfit_sr2 = 1.0;
+						tie->sigmax1[0] = 1.0;
+						tie->sigmax1[1] = 0.0;
+						tie->sigmax1[2] = 0.0;
+						mbna_minmisfit_sr1 = 1.0;
 						}
 					if (tie->sigmar2 <= 0.0)
 						{

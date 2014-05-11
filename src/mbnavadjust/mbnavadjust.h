@@ -161,6 +161,17 @@
 #define MBNA_CONVERGENCE		0.000001
 #define MBNA_SMALL			0.0001
 
+/* minimum initial sigma_crossing (meters) */
+#define	SIGMA_MINIMUM	0.1
+
+/* ping type defines */
+#define	SIDE_PORT	0
+#define	SIDE_STBD	1
+#define	SIDE_FULLSWATH	2
+
+/* route version define */
+#define ROUTE_VERSION "1.00"
+
 /* mbnavadjust project and file structures */
 struct mbna_section {
 	int	num_pings;

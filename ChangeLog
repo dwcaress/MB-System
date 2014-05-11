@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2185       May 11, 2014
 * Version 5.4.2183       April 16, 2014
   Version 5.4.2182       April 8, 2014
   Version 5.4.2181       April 4, 2014
@@ -174,6 +175,55 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2185 (May 11, 2014)
+
+Several programs: Fixed formating error in printing system time_tm.tv_sec values.
+
+MBsvpselect: Fixed sscanf format warning.
+
+MBcopy: Fixed array dimensioning bug that occasionally caused buffer overflows.
+
+MBnavadjust: Moved some declarations from mbnavadjust_prog.c to mbnavadjust.h in
+preparation for breaking project i/o out into a separate source file to be shared
+with the new program mbnavadjustmerge.
+
+MBsslayout: Added shell of program under development to read sidescan in raw time
+series form, lay the sidescan out regularly sampled on a specified topography
+model, and output the sidescan to format 71 (MBF_MBLDEOIH) files.
+
+HSDS formats (MBF_HSATLRAW, MBF_HSLDEDMB, MBF_HSURIVAX, MBF_HSURICEN): Fixed bug
+in handling of system gain arrays (16 rather than 59 values).
+
+MBsegygrid: Attempted to incorporate actual nonvertical geometry into the
+subbottom sections - not satisfactory yet.
+
+MBrolltimelag: Fixed bug regarding the default roll source. The program will
+now work with roll values derived from survey records by default.
+
+Format 88 (MBF_RESON7KR): Cleaned up some debug print statements.
+
+MBinsreprocess: Incomplete new MB6 program to reprocess INS data of various sorts
+to improve on realtime Kalman filtered navigation and attitude data.
+
+MBsslayout: Incomplete new MB6 program to perform layout of time series sidescan
+onto a 3D topography model. This will replace mb7k2ss and extend the functionality
+to conventional sidescan data in several data formats.
+
+Mbm_route2mission: Fixed output AUV mission script to have "\r\n" line ends on
+all lines.
+
+Format 222 (MBF_SWPLSSXP): Revised implementation of SEA SwathPlus SXP data format
+(format id 222) contributed by David Finlayson.
+
+Format 121 (MBF_GSFGENMB): Changed the source for the internally supplied GSF
+library to be the new 3.05 release. This includes for the first time a proper
+open source license (LGPL 2.1).
+
+-----> 5.4.2184 (April 22, 2014)
+
+
+src/bsio/Makefile.in: Added to archive (previously mistakenly left out).
 
 -----> 5.4.2183 (April 16, 2014)
 

@@ -1797,12 +1797,18 @@ int main (int argc, char **argv)
 				if (good_nav_only == MB_YES)
 					{
 					if (navlon == 0.0 || navlat == 0.0)
+					    {
 					    good_nav = MB_NO;
+					    }
 					else if (beginnav == MB_YES
 					    && speed_apparent >= speed_threshold)
+					    {
 					    good_nav = MB_NO;
+					    }
 					else
+					    {
 					    good_nav = MB_YES;
+					    }
 					}
 				else
 					good_nav = MB_YES;

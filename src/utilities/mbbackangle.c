@@ -2280,9 +2280,9 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	strcpy(grd.z_units,zlab);
 	strcpy(grd.title,titl);
 	strcpy(grd.command,"\0");
-	strncpy(date,"\0",MB_PATH_MAXLINE);
 	right_now = time((time_t *)0);
-	strncpy(date,ctime(&right_now),24);
+	strcpy(date,ctime(&right_now));
+        date[strlen(date)-1] = '\0';
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
 	if (user_ptr != NULL)

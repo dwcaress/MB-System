@@ -2335,7 +2335,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 					    08:12:51.234 = 29570234 */
 		ostore->svp_num = istore->svp_num;		/* number of svp entries */
 		ostore->svp_depth_res = 100;	/* depth resolution (cm) */
-		for (i=0;i<MBSYS_SIMRAD2_MAXSVP;i++)
+		for (i=0;i<MBSYS_SIMRAD_MAXSVP;i++)
 		    {
 		    ostore->svp_depth[i] = istore->svp_depth[i];	/* depth of svp entries (according to svp_depth_res) */
 		    ostore->svp_vel[i] = istore->svp_vel[i];	/* sound speed of svp entries (0.1 m/sec) */

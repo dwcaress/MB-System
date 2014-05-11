@@ -234,6 +234,8 @@ int main (int argc, char **argv)
 		case 'S':
 		case 's':
 			sscanf (optarg,"%d", &navchannel);
+			if (navchannel > 0)
+				kind = MB_DATA_NONE;
 			flag++;
 			break;
 		case 'T':

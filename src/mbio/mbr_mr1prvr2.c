@@ -660,7 +660,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 			fprintf(stderr,"dbg5       png_flags:        %u\n",store->ping.png_flags);
 			fprintf(stderr,"dbg5       sec:              %ld\n",store->ping.png_tm.tv_sec);
-			fprintf(stderr,"dbg5       usec:             %d\n",store->ping.png_tm.tv_usec);
+			fprintf(stderr,"dbg5       usec:             %ld\n",store->ping.png_tm.tv_usec);
 			fprintf(stderr,"dbg5       period:           %f\n",store->ping.png_period);
 			fprintf(stderr,"dbg5       ship longitude:   %f\n",store->ping.png_slon);
 			fprintf(stderr,"dbg5       ship latitude:    %f\n",store->ping.png_slat);
@@ -862,7 +862,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       png_flags:        %u\n",store->ping.png_flags);
 		fprintf(stderr,"dbg5       sec:              %ld\n",store->ping.png_tm.tv_sec);
-		fprintf(stderr,"dbg5       usec:             %d\n",store->ping.png_tm.tv_usec);
+		fprintf(stderr,"dbg5       usec:             %ld\n",store->ping.png_tm.tv_usec);
 		fprintf(stderr,"dbg5       period:           %f\n",store->ping.png_period);
 		fprintf(stderr,"dbg5       ship longitude:   %f\n",store->ping.png_slon);
 		fprintf(stderr,"dbg5       ship latitude:    %f\n",store->ping.png_slat);

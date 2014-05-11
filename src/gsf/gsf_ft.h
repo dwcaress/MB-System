@@ -28,7 +28,21 @@
  * References :
  *
  *
- * Copyright (C) Science Applications International Corp.
+ * © 2014 Leidos, Inc.
+ * There is no charge to use the library, and it may be accessed at:
+ * https://www.leidos.com/maritime/gsf.
+ * This library may be redistributed and/or modified under the terms of
+ * the GNU Lesser General Public License version 2.1, as published by the
+ * Free Software Foundation.  A copy of the LGPL 2.1 license is included with
+ * the GSF distribution and is avaialbe at: http://opensource.org/licenses/LGPL-2.1.
+ *
+ * Leidos, Inc. configuration manages GSF, and provides GSF releases. Users are
+ * strongly encouraged to communicate change requests and change proposals to Leidos, Inc.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.
+ *
  ********************************************************************/
 
 #ifndef __GSF_FT_H__
@@ -53,7 +67,7 @@ typedef struct
 {
     int             sec;                              /* seconds from the epoch       */
     int             nsec;                             /* nanoseconds of the second    */
-    int             addr;                             /* address in the gsf file      */
+    long long       addr;                             /* address in the gsf file      */
 }
 INDEX_REC;
 
@@ -64,7 +78,7 @@ typedef struct t_index_data
     int             swap;                             /* byte swap flag               */
     int             number_of_types;                  /* number of record types       */
     int             record_type[NUM_REC_TYPES];       /* record types                 */
-    int             start_addr[NUM_REC_TYPES];        /* start address of record type */
+    long long       start_addr[NUM_REC_TYPES];        /* start address of record type */
     int             number_of_records[NUM_REC_TYPES]; /* number of record type recs   */
     INDEX_REC      *scale_factor_addr;                /* scale factor index array     */
     int             last_scale_factor_index;          /* last scale index             */
@@ -80,8 +94,8 @@ typedef struct t_gsfFileTable
     char            file_name[1024];               /* The file's name */
     int             major_version_number;          /* The gsf library version ID which created this file */
     int             minor_version_number;          /* The gsf library version ID which created this file */
-    int             file_size;                     /* The file's size when gsfOpen is called */
-    int             previous_record;               /* File offset to previous record */
+    long long       file_size;                     /* The file's size when gsfOpen is called */
+    long long       previous_record;               /* File offset to previous record */
     int             buf_size;                      /* Standard library buffer size */
     int             bufferedBytes;                 /* How many bytes we've transfered */
     int             occupied;                      /* Is this table slot being used */
@@ -95,6 +109,26 @@ typedef struct t_gsfFileTable
     gsfRecords      rec;                           /* Our copy of pointers to dynamic memory and scale factors */
 }
 GSF_FILE_TABLE;
+
+//------------------------------------------------------------------------------
+// _LARGEFILE64_SOURCE
+//------------------------------------------------------------------------------
+//#undef fopen
+//#undef fseek
+//#undef ftell
+//#undef stat
+//#if (defined __WINDOWS__) || (defined __MINGW32__)
+//#define stat(x,y) _stati64((x), (y))
+//#define fopen(x, y)  fopen64((x), (y))
+//#define fseek(x, y, z) fseeko64((x), (y), (z))
+//#define ftell(x)   ftello64((x))
+//#else
+//#define stat(x,y) stat64((x), (y))
+//#define fopen(x, y)  fopen64((x), (y))
+//#define fseek(x, y, z) fseeko64((x), (y), (z))
+//#define ftell(x)   ftello64((x))
+//#endif
+
 
 #endif   /* define __GSF_FT_H__ */
 

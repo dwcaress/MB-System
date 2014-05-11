@@ -582,7 +582,7 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	header_rec_written = &(mb_io_ptr->save1);
 	projection_rec_written = &(mb_io_ptr->save2);
 	
-	/* write header record if needed */
+	/* write header record if needed (just once, here at top of file) */
 	if ((store->sxp_header_set == MB_YES) &&
 		(*header_rec_written == MB_NO))
 		{
@@ -599,7 +599,7 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->type = origtype;
 		}
 
-	/* write projection record if needed */
+	/* write projection record if needed (just once, here at top of file) */
 	if ((store->projection_set == MB_YES) &&
 		(*projection_rec_written == MB_NO))
 		{
@@ -616,8 +616,12 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->type = origtype;
 		}
 
-	/* write next data to file */
-	status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
+	/* write the record to file EXCEPT headers and projections */
+	if ((store->type != SWPLS_ID_SXP_HEADER_DATA) &&
+		(store->type != SWPLS_ID_PROJECTION))
+		{
+		status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)

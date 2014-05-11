@@ -551,19 +551,19 @@ int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 int mb_gains(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, double *transmit_gain, double *pulse_length,
 		double *receive_gain, int *error);
+int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, double *sample_interval,
+		int *num_samples_port, int *num_samples_stbd, int *error);
 int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind,
-		int *nrawss,
-		double *rawss,
-		double *rawssacrosstrack,
-		double *rawssalongtrack,
-		int *error);
+		int *kind, int *sidescan_type, double *sample_interval,
+		double *beamwidth_xtrack, double *beamwidth_ltrack,
+		int *num_samples_port, double *rawss_port, 
+		int *num_samples_stbd, double *rawss_stbd, int *error);
 int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
-		int nrawss,
-		double *rawss,
-		double *rawssacrosstrack,
-		double *rawssalongtrack,
-		int *error);
+		int kind, int sidescan_type, double sample_interval,
+		double beamwidth_xtrack, double beamwidth_ltrack,
+		int num_samples_port, double *rawss_port,
+		int num_samples_stbd, double *rawss_stbd, int *error);
 int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		void *segytraceheader_ptr,
@@ -713,6 +713,10 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
                 int *merge_sensordepth_num, int *merge_sensordepth_alloc,
                 double **merge_sensordepth_time_d, double **merge_sensordepth_sensordepth,
                 int *error);
+int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitude_format,
+                int *merge_altitude_num, int *merge_altitude_alloc,
+                double **merge_altitude_time_d, double **merge_altitude_altitude,
+		int *error);
 int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_format,
                 int *merge_heading_num, int *merge_heading_alloc,
                 double **merge_heading_time_d, double **merge_heading_heading,
@@ -722,6 +726,10 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
                 double **merge_attitude_time_d, double **merge_attitude_roll,
                 double **merge_attitude_pitch, double **merge_attitude_heave,
                 int *error);
+int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_soundspeed_format,
+                int *merge_soundspeed_num, int *merge_soundspeed_alloc,
+                double **merge_soundspeed_time_d, double **merge_soundspeed_soundspeed,
+		int *error);
 int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_timeshift_format,
                 int *merge_timeshift_num, int *merge_timeshift_alloc,
                 double **merge_timeshift_time_d, double **merge_timeshift_timeshift,

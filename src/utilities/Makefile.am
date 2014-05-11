@@ -36,6 +36,7 @@ bin_PROGRAMS = mbhsdump \
         mbrolltimelag \
         mbauvloglist \
         mb7k2ss \
+	mbsslayout \
         mbabsorption \
         mbdumpesf \
         mbtime \
@@ -47,6 +48,7 @@ bin_PROGRAMS = mbhsdump \
         mbswplspreprocess \
         mbpreprocess \
 	mbsvpselect \
+	mbinsreprocess \
         $(FFTW_PROG)
 
 include_HEADERS = levitus.h
@@ -149,6 +151,9 @@ mbauvloglist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mb7k2ss_SOURCES = mb7k2ss.c
 mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
+mbsslayout_SOURCES = mbsslayout.c
+mbsslayout_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+
 mbabsorption_SOURCES = mbabsorption.c
 
 mbdumpesf_SOURCES = mbdumpesf.c
@@ -175,6 +180,8 @@ mbpreprocess_SOURCES = mbpreprocess.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
 mbsvpselect_SOURCES = mbsvpselect.c geodesic.c
+
+mbinsreprocess_SOURCES = mbinsreprocess.c
 
 if BUILD_FFTW
 mbsegypsd_SOURCES = mbsegypsd.c

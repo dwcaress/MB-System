@@ -623,7 +623,7 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->amplitude[i] = 0;
 			store->echo_duration[i] = 0;
 			}
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+		for (i=0;i<16;i++)
 			{
 			store->gain[i] = 0;
 			store->echo_scale[i] = 0;

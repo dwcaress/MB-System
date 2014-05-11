@@ -1019,6 +1019,13 @@ i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality
 				{
 				ping->png_beamflag[i] = MB_FLAG_NONE;
 				}
+				
+			/* check for NaN value */
+			if (isnan(ping->png_depth[i]))
+				{
+				ping->png_beamflag[i] = MB_FLAG_NULL;
+				ping->png_depth[i] = 0.0;
+				}
 			}
 
 		/* generate processed sidescan */

@@ -4947,10 +4947,12 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index,
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->yaw)); *index += 2;
 	mb_get_binary_int(MB_YES, &buffer[*index], &(fsdwssheader->depth)); *index += 4;
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->temperature)); *index += 2;
-	for (i=0;i<10;i++)
+	for (i=0;i<2;i++)
 		{
 		fsdwssheader->reserved2[i] = buffer[*index]; (*index)++;
 		}
+	mb_get_binary_int(MB_YES, &buffer[*index], &(fsdwssheader->longitude)); *index += 4;
+	mb_get_binary_int(MB_YES, &buffer[*index], &(fsdwssheader->latitude)); *index += 4;
 
 	/* print out the results */
 	/*mbsys_reson7k_print_fsdwssheader(verbose, fsdwssheader, error);*/
@@ -12698,10 +12700,12 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index,
 	mb_put_binary_short(MB_YES, fsdwssheader->yaw, &buffer[*index]); *index += 2;
 	mb_put_binary_int(MB_YES, fsdwssheader->depth, &buffer[*index]); *index += 4;
 	mb_put_binary_short(MB_YES, fsdwssheader->temperature, &buffer[*index]); *index += 2;
-	for (i=0;i<10;i++)
+	for (i=0;i<2;i++)
 		{
 		buffer[*index] = fsdwssheader->reserved2[i]; (*index)++;
 		}
+	mb_put_binary_int(MB_YES, fsdwssheader->longitude, &buffer[*index]); *index += 4;
+	mb_put_binary_int(MB_YES, fsdwssheader->latitude, &buffer[*index]); *index += 4;
 
 	/* print output debug statements */
 	if (verbose >= 2)

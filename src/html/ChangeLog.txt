@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2185       April 22, 2014
 * Version 5.4.2183       April 16, 2014
   Version 5.4.2182       April 8, 2014
   Version 5.4.2181       April 4, 2014
@@ -174,6 +175,30 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2185 (April 22, 2014)
+
+Several programs: Fixed formating error in printing system time_tm.tv_sec values.
+
+MBsvpselect: Fixed sscanf format warning.
+
+MBcopy: Fixed array dimensioning bug that occasionally caused buffer overflows.
+
+MBnavadjust: Moved some declarations from mbnavadjust_prog.c to mbnavadjust.h in
+preparation for breaking project i/o out into a separate source file to be shared
+with the new program mbnavadjustmerge.
+
+MBsslayout: Added shell of program under development to read sidescan in raw time
+series form, lay the sidescan out regularly sampled on a specified topography
+model, and output the sidescan to format 71 (MBF_MBLDEOIH) files.
+
+HSDS formats (MBF_HSATLRAW, MBF_HSLDEDMB, MBF_HSURIVAX, MBF_HSURICEN): Fixed bug
+in handling of system gain arrays (16 rather than 59 values).
+
+-----> 5.4.2184 (April 22, 2014)
+
+
+src/bsio/Makefile.in: Added to archive (previously mistakenly left out).
 
 -----> 5.4.2183 (April 16, 2014)
 
