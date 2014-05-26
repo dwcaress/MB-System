@@ -1875,11 +1875,11 @@ int mbeditviz_beam_position(double navlon, double navlat, double headingx, doubl
 
 	/* locate lon lat position */
 	*lon = navlon
-		+ headingy * mtodeglon * acrosstrack
-		+ headingx * mtodeglon * alongtrack;
+		+ headingy * mtodeglon * newacrosstrack
+		+ headingx * mtodeglon * newalongtrack;
 	*lat = navlat
-		- headingx * mtodeglat * acrosstrack
-		+ headingy * mtodeglat * alongtrack;
+		- headingx * mtodeglat * newacrosstrack
+		+ headingy * mtodeglat * newalongtrack;
 if (isnan(*bathcorr))
 {
 fprintf(stderr,"\nFunction mbeditviz_beam_position(): Calculated NaN bathcorr\n");

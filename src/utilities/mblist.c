@@ -1265,6 +1265,33 @@ int main (int argc, char **argv)
 
 		    break;
 
+		  case 'F': /* beamflag (numeric only for netcdf) */
+		  case 'f':
+		    strcpy(variable, "beamflag");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Beamflag\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    if (bathy_in_feet == MB_YES)
+		      fprintf(outfile, "f\";\n");
+		    else
+		      fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+
+		    break;
+
 		  case 'G': /* flat bottom grazing angle */
 		    strcpy(variable, "flatgrazing");
 		    if (signflip_next_value == MB_YES)
@@ -2984,6 +3011,53 @@ int main (int argc, char **argv)
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
+					break;
+				case 'F': /* Beamflag numeric value */
+					if (ascii == MB_YES)
+                                            {
+					    if (netcdf == MB_YES)
+					    fprintf(output[i],"%u",beamflag[k]);
+					    else
+					    fprintf(output[i],"%u",beamflag[k]);
+                                            }
+                                        else
+                                            {
+					    b = beamflag[k];
+					    fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+					break;
+				case 'f': /* Beamflag character value (ascii only) */
+					if (ascii == MB_YES)
+                                            {
+					    if (netcdf == MB_YES)
+                                                fprintf(output[i],"%u",beamflag[k]);
+					    else
+                                                {
+                                                if (mb_beam_check_flag_null(beamflag[k]))
+                                                    fprintf(output[i],"-");
+                                               else if (mb_beam_ok(beamflag[k]))
+                                                    fprintf(output[i],"G");
+                                               else if (mb_beam_check_flag_manual(beamflag[k]))
+                                                    fprintf(output[i],"M");
+                                               else if (mb_beam_check_flag_filter(beamflag[k]))
+                                                    fprintf(output[i],"F");
+                                               else if (mb_beam_check_flag_filter2(beamflag[k]))
+                                                    fprintf(output[i],"F");
+                                               else if (mb_beam_check_flag_gt_1x_iho(beamflag[k]))
+                                                    fprintf(output[i],"F");
+                                               else if (mb_beam_check_flag_gt_2x_iho(beamflag[k]))
+                                                    fprintf(output[i],"F");
+                                               else if (mb_beam_check_flag_footprint(beamflag[k]))
+                                                    fprintf(output[i],"F");
+                                               else if (mb_beam_check_flag_sonar(beamflag[k]))
+                                                    fprintf(output[i],"S");
+                                                }
+                                            }
+                                        else
+                                            {
+					    b = beamflag[k];
+					    fwrite(&b, sizeof(double), 1, outfile);
+                                            }
 					break;
 				case 'G': /* flat bottom grazing angle */
 					if (beamflag[k] == MB_FLAG_NULL

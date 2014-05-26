@@ -240,10 +240,12 @@ gsfStat (char *filename, long long *sz)
     struct _stati64    stbuf;
     rc = _stat64(filename, &stbuf);
 #else
-    struct stat64      stbuf;
-    rc = stat64(filename, &stbuf);
+//    struct stat64      stbuf;
+//    rc = stat64(filename, &stbuf);
+    struct stat stbuf;
+    rc = stat(filename, &stbuf);
 #endif
-
+ 
     if (!rc)
     {
         *sz = stbuf.st_size;

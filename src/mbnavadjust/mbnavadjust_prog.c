@@ -876,6 +876,7 @@ int mbnavadjust_file_open(char *projectname)
 		if (strlen(nameptr) > 4
 			&& strcmp(&nameptr[strlen(nameptr)-4],".nvh") == 0)
 			nameptr[strlen(nameptr)-4] = '\0';
+fprintf(stderr,"projectname:%s nameptr:%s strlen:%ld\n",projectname,nameptr,strlen(nameptr));
 		if (strlen(nameptr) > 0)
 			{
 			strcpy(project.name,nameptr);

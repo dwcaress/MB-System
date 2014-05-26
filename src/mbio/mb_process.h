@@ -660,6 +660,7 @@
 #ifndef MB_IO_DEF
 #include "mb_io.h"
 #endif
+
 /* mbprocess value defines */
 #define MBP_FILENAMESIZE	MB_PATH_MAXLINE
 #define MBP_METANOVALUE		9999999.
@@ -941,7 +942,7 @@ struct mb_process_struct
 	};
 
 /* edit save file definitions */
-#define MB_ESF_MAXTIMEDIFF 0.0011
+#define MB_ESF_MAXTIMEDIFF 0.00011
 #define MB_ESF_MULTIPLICITY_FACTOR	1000000
 struct mb_edit_struct
 	{
@@ -959,6 +960,7 @@ struct mb_esf_struct
 	struct mb_edit_struct	*edit;
 	FILE	*esffp;
 	FILE	*essfp;
+        int     startnextsearch;
 	};
 
 int mb_pr_checkstatus(int verbose, char *file,

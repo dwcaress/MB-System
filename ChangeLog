@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2186       May 26, 2014
   Version 5.4.2185       May 11, 2014
 * Version 5.4.2183       April 16, 2014
   Version 5.4.2182       April 8, 2014
@@ -175,6 +176,21 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2186 (May 26, 2014)
+
+Quick commit - details will be filled in here later.
+
+-----> 5.4.2185 (May 17, 2014)
+
+MBrolltimelag: Now checks for case when all beams are flagged.
+
+MBlist: Added beamflag values to those that can be printed ('F' or 'f').
+
+Bathymetry editing: Fixed bug that prevented successful flagging of some beams
+when files include simultaneous pings with different numbers of beams.
+
+GSF library: Updated to new release 03.05. This release is licensed using LGPL 2.1.
 
 -----> 5.4.2185 (May 11, 2014)
 
