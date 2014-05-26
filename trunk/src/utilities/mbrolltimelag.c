@@ -571,7 +571,10 @@ int main (int argc, char **argv)
 						sumsloperoll += slopeminusmean * rollminusmean;
 						}
 
-					r = sumsloperoll / sqrt(sumslopesq) / sqrt(sumrollsq);
+					if (sumslopesq > 0.0 && sumrollsq > 0.0)
+						r = sumsloperoll / sqrt(sumslopesq) / sqrt(sumrollsq);
+					else
+						r = 0.0;
 					rr[k] = r;
 
 					/* output results */

@@ -117,17 +117,17 @@ GSF_FILE_TABLE;
 //#undef fseek
 //#undef ftell
 //#undef stat
-//#if (defined __WINDOWS__) || (defined __MINGW32__)
-//#define stat(x,y) _stati64((x), (y))
-//#define fopen(x, y)  fopen64((x), (y))
-//#define fseek(x, y, z) fseeko64((x), (y), (z))
-//#define ftell(x)   ftello64((x))
+#if (defined __WINDOWS__) || (defined __MINGW32__)
+#define stat(x,y) _stati64((x), (y))
+#define fopen(x, y)  fopen64((x), (y))
+#define fseek(x, y, z) fseeko64((x), (y), (z))
+#define ftell(x)   ftello64((x))
 //#else
 //#define stat(x,y) stat64((x), (y))
 //#define fopen(x, y)  fopen64((x), (y))
 //#define fseek(x, y, z) fseeko64((x), (y), (z))
 //#define ftell(x)   ftello64((x))
-//#endif
+#endif
 
 
 #endif   /* define __GSF_FT_H__ */
