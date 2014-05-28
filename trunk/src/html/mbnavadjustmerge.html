@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbnavadjustmerge</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbnavadjustmerge</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  28 May 2014 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbnavadjustmerge</B> - Tool to merge two MBnavadjust projects,
+either adding one to the first or outputting a new project combining
+both existing projects.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbnavadjustmerge</B> --input=project-base --input=project-add --output=project-output --verbose
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MBnavadjustmerge</B> is a command line program that merges two
+existing <B>MBnavadjust</B> projects. If the user specifies two
+input projects and no output project, then the second project is
+added to the first. If an output project is specified, then the
+two projects are merged and the new combined project is output.
+<P>
+<B>MBnavadjust</B> is an interactive graphical program used to
+adjust swath data navigation by matching bathymetric features
+in overlapping and crossing swaths. The primary purpose of
+<B>mbnavadjust</B> is to eliminate relative navigational errors in swath
+data obtained from poorly navigated sonars.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--input=project-base</B>
+
+<DD>
+<B>--input=project-add</B>
+
+This option defines either of the input, existing <B>MBnavadjust</B>
+projects. A project may be defined by a relative or absolute path
+to the project *.nvh file or the project *.dir directory. The first
+use of <B>--input</B> defines the base input project, and the second
+defines the add input project. In the case where the <B>--output</B>
+option is used to define an output project, the two input projects
+will both be copied to the new output project (<I>project-base</I> 
+first followed by <I>project-add</I>). If the <B>output</B> option is
+not specified, then the <I>project-base</I> project is used as the
+output, and the <I>project-add</I> project is added on to the
+<I>project-base</I> project.
+<DT><B>--output=project-output</B>
+
+<DD>
+This option defines the new <B>MBnavadjust output project. The two
+input projects will both be copied to the new output project
+(</B><I>project-base</I>  first followed by <I>project-add</I>).
+If the <B>output</B> option is
+not specified, then the <I>project-base</I> project is used as the
+output, and the <I>project-add</I> project is added on to the
+<I>project-base</I> project.
+<DT><B>--verbose</B>
+
+<DD>
+This option increases the verbosity of <B>MBnavadjustmerge</B>, which
+means that more information than by default is output to the stderr stream of the
+shell.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose you have two AUV survey missions, 20140515m1 and 10140515m2, that overlap
+slightly. If you have used <B>MBnavadjust</B> to adjust the navigation of the
+two missions separately, you can use <B>MBnavadjustmerge</B> to merge the two
+<B>MBnavadjust</B> projects into a single new project without losing any of the
+ties made between overlapping sections in the existing projects. If the two
+existing projects are named &quot;Navadjust20140515m1&quot; and &quot;Navadjust20140515m2&quot;,
+respectively, then there exist project files with a &quot;.nvh&quot; suffix and project
+directories with a &quot;.dir&quot; suffix. To create a new <B>MBnavadjust</B> project
+combining the two existing projects, the following will suffice:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbnavadjustmerge&nbsp;--input=Navadjust20140515m1.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input=Navadjust20140515m1.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=Navadjust20140515All.nvh
+<BR>
+
+The new project Navadjust20140515All can be opened and analyzed further using
+<B>MBnavadjust</B>. When opening the new project, the user should first solve
+for a comprehensive navigation adjustment model by selecting the &lt;Action-&gt;Invert Navigation&gt;
+menu item, and then find the crossings between the two previously separate missions
+by selecting the &lt;Action-&gt;Check For New Crossings&gt; menu item
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbio.html">mbio</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1),
+<B><A HREF="mbnavadjust.html">mbnavadjust</A></B>(1), <B><A HREF="mbset.html">mbset</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+It used to be too new to be bulletproof, now its too complicated to be bulletproof.
+Good luck.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 28 May 2014</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

@@ -63,6 +63,7 @@ mbm_utm.html \
 mbm_xbt.html \
 mbm_xyplot.html \
 mbnavadjust.html \
+mbnavadjustmerge.html \
 mbnavedit.html \
 mbnavlist.html \
 mbneptune2esf.html \

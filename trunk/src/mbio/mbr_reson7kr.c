@@ -24,6 +24,10 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: mbr_reson7kr.c,v $
+ *
+ * Revision 2014/05/12 finlayson
+ * Added support for Calibrated Snippet record (7058)
+ *
  * Revision 5.21  2008/09/27 03:27:10  caress
  * Working towards release 5.1.1beta24
  *
@@ -197,6 +201,7 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
 int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *error);
@@ -257,6 +262,7 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
 int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
@@ -1240,7 +1246,9 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 		&& store->read_processedsidescan == MB_NO)
 		{
 		/* set source of processed sidescan to be best available data */
-		if (store->read_v2snippet == MB_YES)
+		if (store->read_calibratedsnippet == MB_YES)
+			ss_source = R7KRECID_7kCalibratedSnippetData;
+		else if (store->read_v2snippet == MB_YES)
 			ss_source = R7KRECID_7kV2SnippetData;
 		else if (store->read_beam == MB_YES)
 			ss_source = R7KRECID_7kBeamData;
@@ -1523,7 +1531,8 @@ skip, *recordid, *recordid,
 				|| *recordid == R7KRECID_7kV2BeamformedData
 				|| *recordid == R7KRECID_7kV2Detection
 				|| *recordid == R7KRECID_7kV2RawDetection
-				|| *recordid == R7KRECID_7kV2SnippetData)
+				|| *recordid == R7KRECID_7kV2SnippetData
+				|| *recordid == R7KRECID_7kCalibratedSnippetData)
 				{
 				/* check for ping number */
 				ping_record = MB_YES;
@@ -1743,6 +1752,7 @@ if (*recordid == R7KRECID_7kV28kWetEndVersion) fprintf(stderr," R7KRECID_7kV28kW
 if (*recordid == R7KRECID_7kV2Detection) fprintf(stderr," R7KRECID_7kV2Detection %d\n",*recordid);
 if (*recordid == R7KRECID_7kV2RawDetection) fprintf(stderr," R7KRECID_7kV2RawDetection %d\n",*recordid);
 if (*recordid == R7KRECID_7kV2SnippetData) fprintf(stderr," R7KRECID_7kV2SnippetData %d\n",*recordid);
+if (*recordid == R7KRECID_7kCalibrationData) fprintf(stderr, " R7KRECID_7kCalibratedSnippetData %d\n", *recordid);
 if (*recordid == R7KRECID_7kInstallationParameters) fprintf(stderr," R7KRECID_7kInstallationParameters %d\n",*recordid);
 if (*recordid == R7KRECID_7kSystemEventMessage) fprintf(stderr,"R7KRECID_7kSystemEventMessage %d\n",*recordid);
 if (*recordid == R7KRECID_7kDataStorageStatus) fprintf(stderr," R7KRECID_7kDataStorageStatus %d\n",*recordid);
@@ -2327,6 +2337,12 @@ header->RecordNumber,image->ping_number);
 				if (status == MB_SUCCESS)
 					store->read_v2snippet = MB_YES;
 				}
+			else if (*recordid == R7KRECID_7kCalibratedSnippetData)
+				{
+				status = mbr_reson7kr_rd_calibratedsnippet(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					store->read_calibratedsnippet = MB_YES;
+				}
 			else if (*recordid == R7KRECID_7kInstallationParameters)
 				{
 				status = mbr_reson7kr_rd_installation(verbose, buffer, store_ptr, error);
@@ -2584,6 +2600,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 			&& *recordid != R7KRECID_7kV2Detection
 			&& *recordid != R7KRECID_7kV2RawDetection
 			&& *recordid != R7KRECID_7kV2SnippetData
+			&& *recordid != R7KRECID_7kCalibratedSnippetData
 			&& *recordid != R7KRECID_7kInstallationParameters
 			&& *recordid != R7KRECID_7kSystemEventMessage
 			&& *recordid != R7KRECID_7kDataStorageStatus
@@ -2656,6 +2673,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 			if (*recordid == R7KRECID_7kV2Detection) fprintf(stderr," R7KRECID_7kV2Detection\n");
 			if (*recordid == R7KRECID_7kV2RawDetection) fprintf(stderr," R7KRECID_7kV2RawDetection\n");
 			if (*recordid == R7KRECID_7kV2SnippetData) fprintf(stderr," R7KRECID_7kV2SnippetData\n");
+			if (*recordid == R7KRECID_7kCalibratedSnippetData) fprintf(stderr, " R&R7KRECID_7kCalibratedSnippetData\n");
 			if (*recordid == R7KRECID_7kInstallationParameters) fprintf(stderr," R7KRECID_7kInstallationParameters\n");
 			if (*recordid == R7KRECID_7kSystemEventMessage) fprintf(stderr,"R7KRECID_7kSystemEventMessage\n");
 			if (*recordid == R7KRECID_7kDataStorageStatus) fprintf(stderr," R7KRECID_7kDataStorageStatus\n");
@@ -2796,6 +2814,12 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer,
 		index = offset + 12;
 		mb_get_binary_int(MB_YES, &buffer[index], ping_number);
 		status = MB_SUCCESS;
+		}
+	else if (recordid == R7KRECID_7kCalibratedSnippetData)
+		{
+		index = offset + 12;
+		mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+		status = MB_SUCCESS;			
 		}
 	else if (recordid == R7KRECID_7kRemoteControlSonarSettings)
 		{
@@ -8826,6 +8850,138 @@ header->RecordNumber,v2snippet->ping_number);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr, int *error)
+{
+	char	*function_name = "mbr_reson7kr_rd_calibratedsnippet";
+	int	status = MB_SUCCESS;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_calibratedsnippet *calibratedsnippet;
+	s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
+	int	index;
+	int	time_j[5];
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+	calibratedsnippet = &(store->calibratedsnippet);
+	header = &(calibratedsnippet->header);
+
+	/* extract the header */
+	index = 0;
+	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
+
+	/* extract the data */
+	index = header->Offset + 4;
+	mb_get_binary_long(MB_YES, &buffer[index], &(calibratedsnippet->serial_number)); index += 8;
+	mb_get_binary_int(MB_YES, &buffer[index], &(calibratedsnippet->ping_number)); index += 4;
+	mb_get_binary_short(MB_YES, &buffer[index], &(calibratedsnippet->multi_ping)); index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(calibratedsnippet->number_beams)); index += 2;
+	calibratedsnippet->error_flag = buffer[index]; index++;
+	mb_get_binary_int(MB_YES, &buffer[index], &(calibratedsnippet->control_flags)); index += 4;
+	for (i=0;i<28;i++)
+		{
+		calibratedsnippet->reserved[i] = buffer[index]; index++;
+		}
+
+	/* loop over all beams to get snippet parameters */
+	for (i=0;i<calibratedsnippet->number_beams;i++)
+		{
+		calibratedsnippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+
+		/* extract snippettimeseries data */
+		mb_get_binary_short(MB_YES, &buffer[index], &(calibratedsnippettimeseries->beam_number)); index += 2;
+		mb_get_binary_int(MB_YES, &buffer[index], &(calibratedsnippettimeseries->begin_sample)); index += 4;
+		mb_get_binary_int(MB_YES, &buffer[index], &(calibratedsnippettimeseries->detect_sample)); index += 4;
+		mb_get_binary_int(MB_YES, &buffer[index], &(calibratedsnippettimeseries->end_sample)); index += 4;
+
+		/* allocate memory for snippettimeseries if needed */
+		if (status == MB_SUCCESS
+			&& calibratedsnippettimeseries->nalloc
+				< sizeof(float) * (calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1))
+			{
+			calibratedsnippettimeseries->nalloc = sizeof(float) * (calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1);
+			if (status == MB_SUCCESS)
+			status = mb_reallocd(verbose, __FILE__, __LINE__, calibratedsnippettimeseries->nalloc,
+						(void **)&(calibratedsnippettimeseries->amplitude), error);
+			if (status != MB_SUCCESS)
+				{
+				calibratedsnippettimeseries->nalloc = 0;
+				}
+			}
+		}
+
+	/* loop over all beams to get snippet data */
+	if (status == MB_SUCCESS)
+	for (i=0;i<calibratedsnippet->number_beams;i++)
+		{
+		calibratedsnippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+		for (j=0;j<(calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1);j++)
+			{
+			mb_get_binary_float(MB_YES, &buffer[index], &(calibratedsnippettimeseries->amplitude[j])); index += 4;
+			}
+		}
+
+	/* set kind */
+	if (status == MB_SUCCESS)
+		{
+		/* set kind */
+		store->kind = MB_DATA_DATA;
+		store->type = R7KRECID_7kCalibratedSnippetData;
+
+		/* get the time */
+		time_j[0] = header->s7kTime.Year;
+		time_j[1] = header->s7kTime.Day;
+		time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+		time_j[3] = (int) header->s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, store->time_i);
+		mb_get_time(verbose, store->time_i, &(store->time_d));
+		}
+	else
+		{
+		store->kind = MB_DATA_NONE;
+		}
+
+	/* print out the results */
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"R7KRECID_7kCalibratedSnippetData:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,calibratedsnippet->ping_number);
+#endif
+#ifdef MBR_RESON7KR_DEBUG
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_calibratedsnippet(verbose, calibratedsnippet, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_reson7kr_rd_installation";
@@ -10080,6 +10236,21 @@ fprintf(stderr," R7KRECID_7kV2SnippetData\n");
 			write_len = (size_t)size;
 			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
+
+		/* Reson 7k calibrated snippet (record 7058) */
+		if (status == MB_SUCCESS && store->read_calibratedsnippet == MB_YES)
+			{
+			store->type = R7KRECID_7kCalibratedSnippetData;
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kCalibratedSnippetData, R7KRECID_7kCalibratedSnippetData);
+fprintf(stderr," R7KRECID_7kCalibratedSnippetData\n");
+#endif
+			status = mbr_reson7kr_wr_calibratedsnippet(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+			buffer = (char *) *bufferptr;
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+			}
+
 		}
 
 	/* call appropriate writing routine for other records */
@@ -10134,6 +10305,7 @@ if (store->type == R7KRECID_7kV28kWetEndVersion) fprintf(stderr," R7KRECID_7kV28
 if (store->type == R7KRECID_7kV2Detection) fprintf(stderr," R7KRECID_7kV2Detection\n");
 if (store->type == R7KRECID_7kV2RawDetection) fprintf(stderr," R7KRECID_7kV2RawDetection\n");
 if (store->type == R7KRECID_7kV2SnippetData) fprintf(stderr," R7KRECID_7kV2SnippetData\n");
+if (store->type == R7KRECID_7kCalibratedSnippetData) fprintf(stderr, " R7KRECID_7kCalibratedSnippetData\n");
 if (store->type == R7KRECID_7kInstallationParameters) fprintf(stderr," R7KRECID_7kInstallationParameters\n");
 if (store->type == R7KRECID_7kSystemEventMessage) fprintf(stderr,"R7KRECID_7kSystemEventMessage\n");
 if (store->type == R7KRECID_7kDataStorageStatus) fprintf(stderr," R7KRECID_7kDataStorageStatus\n");
@@ -16416,6 +16588,151 @@ fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error)
+{
+	char	*function_name = "mbr_reson7kr_wr_calibratedsnippet";
+	int	status = MB_SUCCESS;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_calibratedsnippet *calibratedsnippet;
+	s7kr_calibratedsnippettimeseries *snippettimeseries;
+	unsigned int checksum;
+	int	index;
+	char	*buffer;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+	calibratedsnippet = &(store->calibratedsnippet);
+	header = &(calibratedsnippet->header);
+
+	/* figure out size of output record */
+	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
+	*size += R7KHDRSIZE_7kCalibratedSnippetData;
+	for (i=0;i<calibratedsnippet->number_beams;i++)
+		{
+		snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+
+		*size += R7KRDTSIZE_7kCalibratedSnippetTimeseries
+			+ sizeof(float) * (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1);
+		}
+	header->OffsetToOptionalData = 0;
+	header->Size = *size;
+
+	/* print out the data to be output */
+#ifdef MBR_RESON7KR_DEBUG
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_calibratedsnippet(verbose, calibratedsnippet, error);
+
+	/* allocate memory to write rest of record if necessary */
+	if (*bufferalloc < *size)
+		{
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
+		if (status != MB_SUCCESS)
+			{
+			*bufferalloc = 0;
+			}
+		else
+			{
+			*bufferalloc = *size;
+			}
+		}
+
+	/* proceed to write if buffer allocated */
+	if (status == MB_SUCCESS)
+		{
+		/* get buffer for writing */
+		buffer = (char *) *bufferptr;
+
+		/* insert the header */
+		index = 0;
+		status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
+
+		/* insert the data */
+		index = header->Offset + 4;
+		mb_put_binary_long(MB_YES, calibratedsnippet->serial_number, &buffer[index]); index += 8;
+		mb_put_binary_int(MB_YES, calibratedsnippet->ping_number, &buffer[index]); index += 4;
+		mb_put_binary_short(MB_YES, calibratedsnippet->multi_ping, &buffer[index]); index += 2;
+		mb_put_binary_short(MB_YES, calibratedsnippet->number_beams, &buffer[index]); index += 2;
+		buffer[index] = calibratedsnippet->error_flag; index++;
+		mb_put_binary_int(MB_YES, calibratedsnippet->control_flags, &buffer[index]); index += 4;
+		for (i=0;i<28;i++)
+			{
+			buffer[index] = calibratedsnippet->reserved[i]; index++;
+			}
+
+		/* insert the snippet parameters */
+		for (i=0;i<calibratedsnippet->number_beams;i++)
+			{
+			snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+
+			/* extract snippettimeseries data */
+			mb_put_binary_short(MB_YES, snippettimeseries->beam_number, &buffer[index]); index += 2;
+			mb_put_binary_int(MB_YES, snippettimeseries->begin_sample, &buffer[index]); index += 4;
+			mb_put_binary_int(MB_YES, snippettimeseries->detect_sample, &buffer[index]); index += 4;
+			mb_put_binary_int(MB_YES, snippettimeseries->end_sample, &buffer[index]); index += 4;
+			}
+
+		/* loop over all beams to insert snippet data */
+		for (i=0;i<calibratedsnippet->number_beams;i++)
+			{
+			snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+			for (j=0;j<(snippettimeseries->end_sample - snippettimeseries->begin_sample + 1);j++)
+				{
+				mb_put_binary_float(MB_YES, snippettimeseries->amplitude[j], &buffer[index]); index += 4;
+				}
+			}
+
+		/* reset the header size value */
+		mb_put_binary_int(MB_YES, ((unsigned int)(index + 4)), &buffer[8]);
+
+		/* now add the checksum */
+		checksum = 0;
+		for (i=0;i<index;i++)
+			checksum += (unsigned char) buffer[i];
+		mb_put_binary_int(MB_YES, checksum, &buffer[index]); index += 4;
+
+		/* check size */
+		if (*size != index)
+			{
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_DATA;
+			*size = 0;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
+		fprintf(stderr,"dbg2       size:       %d\n",*size);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}/*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error)
 {
 	char	*function_name = "mbr_reson7kr_wr_installation";

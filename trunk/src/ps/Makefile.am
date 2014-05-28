@@ -58,6 +58,7 @@ mbm_xbt.ps \
 mbm_xyplot.ps \
 mbmosaic.ps \
 mbnavadjust.ps \
+mbnavadjustmerge.ps \
 mbnavedit.ps \
 mbnavlist.ps \
 mbneptune2esf.ps \

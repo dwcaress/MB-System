@@ -304,7 +304,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
 			}
                 else
 			{
-			strncpy(project->path, projectpath, strlen(projectpath)-strlen(nameptr));
+			strcpy(project->path, projectpath);
+			project->path[strlen(projectpath)-strlen(nameptr)] = '\0';
 			}
                 strcpy(project->home,project->path);
                 strcat(project->home,project->name);
