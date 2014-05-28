@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2187       May 28, 2014
   Version 5.4.2186       May 26, 2014
   Version 5.4.2185       May 11, 2014
 * Version 5.4.2183       April 16, 2014
@@ -177,9 +178,24 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2187 (May 28, 2014)
+
+Format 201 (MBF_HYSWEEP1): Added code to ignore bad RMB records found in some
+NOAA HSX data.
+
+Format 88 (MBF_RESON7KR): Support for calibrated snippet records (contributed
+by David Finlayson).
+
+MB7kpreprocess: Support for calibrated snippet records (contributed
+by David Finlayson).
+
+MBnavadjustmerge: Fixed to handle projects not in the current working directory.
+
 -----> 5.4.2186 (May 26, 2014)
 
-Quick commit - details will be filled in here later.
+MBeditviz: Fixed interactive application of pitch bias and heading bias changes.
+
+MBnavadjustmerge: New program to merge two existing MBnavadjust projects.
 
 -----> 5.4.2185 (May 17, 2014)
 

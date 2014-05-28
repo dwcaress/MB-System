@@ -21,6 +21,10 @@
  * Date:	March 3, 2004
  *
  * $Log: mbsys_reson7k.h,v $
+ *
+ * Revision 2014/05/12 finlayson
+ * Added support for Calibrated Snippet record (7058)
+ *
  * Revision 5.16  2008/09/27 03:27:10  caress
  * Working towards release 5.1.1beta24
  *
@@ -192,6 +196,7 @@
 #define R7KRECID_7kSystemEventMessage			7051
 #define R7KRECID_7kTargetData				7060
 #define R7KRECID_7kDataStorageStatus			7052
+#define R7KRECID_7kCalibratedSnippetData    7058
 #define R7KRECID_7kFileHeader				7200
 #define R7KRECID_7kTrigger				7300
 #define R7KRECID_7kTriggerSequenceSetup			7301
@@ -286,6 +291,8 @@
 #define R7KHDRSIZE_7kV2RawDetection				99
 #define R7KHDRSIZE_7kV2SnippetData				46
 #define R7KRDTSIZE_7kV2SnippetTimeseries			14
+#define R7KHDRSIZE_7kCalibratedSnippetData      49
+#define R7KRDTSIZE_7kCalibratedSnippetTimeseries    14
 #define R7KHDRSIZE_7kInstallationParameters			616
 #define R7KHDRSIZE_7kSystemEvents				22
 #define R7KHDRSIZE_7kSystemEventMessage				14
@@ -1157,7 +1164,8 @@ typedef struct s7kr_processedsidescan_struct
                                                         ss_source = 1:     Non-Reson sidescan
                                                         ss_source = 7007:  7kBackscatterImageData
                                                         ss_source = 7008:  7kBeamData
-                                                        ss_source = 7028:  7kV2SnippetData */
+                                                        ss_source = 7028:  7kV2SnippetData 
+                                                        ss_source = 7058:  7kCalibratedSnippetData */
 	unsigned int	number_pixels;		/* Number of sidescan pixels across the entire swath */
 	unsigned int	ss_type;		/* indicates if sidescan values are logarithmic or linear
                                                     ss_type = 0: logarithmic (dB)
@@ -2019,6 +2027,58 @@ typedef struct s7kr_systemeventmessage_struct
 }
 s7kr_systemeventmessage;
 
+/* Reson 7k calibrated snippet data (part of record 7058) */
+typedef struct s7kr_calibratedsnippettimeseries_struct
+{
+    unsigned short  beam_number;        /* Beam or element number */
+    unsigned int    begin_sample;       /* First sample included in snippet */
+    unsigned int    detect_sample;      /* Detection point */
+    unsigned int    end_sample;     /* Last sample included in snippet */
+    unsigned int    nalloc;         /* Bytes allocated to hold amplitude time series */
+    float  *amplitude;     /* Amplitude time series */
+}
+s7kr_calibratedsnippettimeseries;
+
+/* Reson 7k calibrated snippet (record 7058) */
+typedef struct s7kr_calibratedsnippet_struct
+{
+    s7k_header  header;
+    mb_u_long   serial_number;      /* Sonar serial number */
+    unsigned int    ping_number;        /* Sequential number */
+    unsigned short  multi_ping;     /* Flag to indicate multi-ping mode
+                            0 = no multi-ping
+                            >0 = sequence number of ping
+                                in the multi-ping
+                                sequence */
+    unsigned short  number_beams;       /* Number of detection points */
+    mb_u_char   error_flag;     /* If set, record will not contain any data
+                            Flag itself will indicate an error:
+                            0 = Ok
+                            1 = No calibration
+                            2 = TVG read error (R7010)
+                            3 = CTD not available (R1010)
+                            4 = Invalid or not available geometry (R7004)
+                            5 = Invalid sonar specifications (XML)
+                            6 = Bottom detection failed (R7006)
+                            7 = No power (Power is set to zero)
+                            8 = No gain (Gain is too low)
+                            255 = System cannot be calibrated (c7k file missing)
+                            Other = reserved */
+    unsigned int  control_flags;      /* Control settings from RC 1113 command:
+                            Bit 0: Brightness is required to pass
+                            Bit 1: Colinearity is required to pass
+                            Bit 2: Bottom detection results are used for snippet
+                            Bit 3: Snippets display min requirements are used
+                            Bit 4: Minimum window size is required
+                            Bit 5: Maximum window size is required
+                            6-31: reserved */
+    mb_u_char   reserved[28];       /* Reserved for future use */
+    s7kr_calibratedsnippettimeseries    calibratedsnippettimeseries[MBSYS_RESON7K_MAX_BEAMS];
+                        /* Snippet time series for each beam */
+}
+s7kr_calibratedsnippet;
+
+
 /* Reson 7k subsystem structure */
 typedef struct s7kr_subsystem_struct
 {
@@ -2228,6 +2288,7 @@ struct mbsys_reson7k_struct
 	int		read_v2detection;
 	int		read_v2rawdetection;
 	int		read_v2snippet;
+    int     read_calibratedsnippet;
 	int		read_processedsidescan;
 
 	/* MB-System time stamp */
@@ -2369,6 +2430,9 @@ struct mbsys_reson7k_struct
 
 	/* Reson 7k system event (record 7051) */
 	s7kr_systemeventmessage	systemeventmessage;
+
+    /* Reson 7k calibrated snippet (record 7058) */
+    s7kr_calibratedsnippet calibratedsnippet;
 
 	/* Reson 7k file header (record 7200) */
 	s7kr_fileheader		fileheader;
@@ -2662,6 +2726,9 @@ int mbsys_reson7k_print_v2rawdetection(int verbose,
 			int *error);
 int mbsys_reson7k_print_v2snippet(int verbose,
 			s7kr_v2snippet *v2snippet,
+			int *error);
+int mbsys_reson7k_print_calibratedsnippet(int verbose,
+            s7kr_calibratedsnippet *calsnippet,
 			int *error);
 int mbsys_reson7k_print_installation(int verbose,
 			s7kr_installation *installation,

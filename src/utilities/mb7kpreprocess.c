@@ -24,6 +24,10 @@
  * Date:	October 12, 2005
  *
  * $Log: mb7kpreprocess.c,v $
+ *
+ * Revision 5.XX 2014/05/12 finlayson
+ * Added support for Calibrated Snippet record (7058)
+ *
  * Revision 5.23  2008/11/16 21:51:18  caress
  * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
  *
@@ -252,6 +256,7 @@ int main (int argc, char **argv)
 	s7kr_v2detection	*v2detection;
 	s7kr_v2rawdetection	*v2rawdetection;
 	s7kr_v2snippet		*v2snippet;
+	s7kr_calibratedsnippet *calibratedsnippet;
 	s7kr_processedsidescan	*processedsidescan;
 	s7kr_image		*image;
 	s7kr_fileheader		*fileheader;
@@ -299,6 +304,7 @@ int main (int argc, char **argv)
 	int	nrec_v2detection = 0;
 	int	nrec_v2rawdetection = 0;
 	int	nrec_v2snippet = 0;
+	int nrec_calibratedsnippet = 0;
 	int	nrec_processedsidescan = 0;
 	int	nrec_installation = 0;
 	int	nrec_systemeventmessage = 0;
@@ -344,6 +350,7 @@ int main (int argc, char **argv)
 	int	nrec_v2detection_tot = 0;
 	int	nrec_v2rawdetection_tot = 0;
 	int	nrec_v2snippet_tot = 0;
+	int nrec_calibratedsnippet_tot = 0;
 	int	nrec_processedsidescan_tot = 0;
 	int	nrec_installation_tot = 0;
 	int	nrec_systemeventmessage_tot = 0;
@@ -771,7 +778,9 @@ int main (int argc, char **argv)
 			break;
 		case 'S':
 		case 's':
-			if (optarg[0] == 'S')
+			if (optarg[0] == 'C')
+				ss_source == R7KRECID_7kCalibratedSnippetData;
+			else if (optarg[0] == 'S')
 				ss_source = R7KRECID_7kV2SnippetData;
 			else if (optarg[0] == 'B')
 				ss_source = R7KRECID_7kBackscatterImageData;
@@ -1646,6 +1655,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	nrec_v2detection = 0;
 	nrec_v2rawdetection = 0;
 	nrec_v2snippet = 0;
+	nrec_calibratedsnippet = 0;
 	nrec_processedsidescan = 0;
 	nrec_installation = 0;
 	nrec_systemeventmessage = 0;
@@ -1714,6 +1724,8 @@ sonardepth_sonardepth[nsonardepth]);*/
 				nrec_v2rawdetection++;
 			if (istore->read_v2snippet == MB_YES)
 				nrec_v2snippet++;
+			if (istore->read_calibratedsnippet == MB_YES)
+				nrec_calibratedsnippet++;
 			if (istore->read_processedsidescan == MB_YES)
 				nrec_processedsidescan++;
 
@@ -2014,6 +2026,24 @@ sonardepth_sonardepth[nsonardepth]);*/
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber,v2snippet->ping_number,v2snippet->number_beams);
+				}
+			if (istore->read_calibratedsnippet == MB_YES)
+				{
+				calibratedsnippet = &(istore->calibratedsnippet);
+				header = &(calibratedsnippet->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kCalibratedSnippetData:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,calibratedsnippet->ping_number,calibratedsnippet->number_beams);
+
 				}
 			if (istore->read_processedsidescan == MB_YES)
 				{
@@ -3131,7 +3161,8 @@ sonardepth_sonardepth[nsonardepth]);*/
 	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection);
 	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection);
 	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet);
-	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan);
+	fprintf(stdout, "          Calibrated Snippet:                %d\n", nrec_calibratedsnippet);
+	fprintf(stdout, "          Processedsidescan:                 %d\n", nrec_processedsidescan);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal);
@@ -3176,6 +3207,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	nrec_v2detection_tot += nrec_v2detection;
 	nrec_v2rawdetection_tot += nrec_v2rawdetection;
 	nrec_v2snippet_tot += nrec_v2snippet;
+	nrec_calibratedsnippet_tot += nrec_calibratedsnippet;
 	nrec_processedsidescan_tot += nrec_processedsidescan;
 	nrec_reference_tot += nrec_reference;
 	nrec_sensoruncal_tot += nrec_sensoruncal;
@@ -3941,7 +3973,8 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection_tot);
 	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection_tot);
 	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet_tot);
-	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan_tot);
+	fprintf(stdout, "          Calibrated Snippet:                %d\n", nrec_calibratedsnippet_tot);
+	fprintf(stdout, "          Processedsidescan:                 %d\n", nrec_processedsidescan_tot);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference_tot);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal_tot);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal_tot);
@@ -4245,6 +4278,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 	nrec_v2detection = 0;
 	nrec_v2rawdetection = 0;
 	nrec_v2snippet = 0;
+	nrec_calibratedsnippet = 0;
 	nrec_processedsidescan = 0;
 	nrec_installation = 0;
 	nrec_systemeventmessage = 0;
@@ -4314,6 +4348,8 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 				nrec_v2rawdetection++;
 			if (istore->read_v2snippet == MB_YES)
 				nrec_v2snippet++;
+			if (istore->read_calibratedsnippet == MB_YES)
+				nrec_calibratedsnippet++;
 			if (istore->read_processedsidescan == MB_YES)
 				nrec_processedsidescan++;
 
@@ -6599,7 +6635,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection);
 	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection);
 	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet);
-	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan);
+	fprintf(stdout, "          Calibrated Snippet:                %d\n", nrec_calibratedsnippet);
+	fprintf(stdout, "          Processedsidescan:                 %d\n", nrec_processedsidescan);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal);
@@ -6644,6 +6681,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	nrec_v2detection_tot += nrec_v2detection;
 	nrec_v2rawdetection_tot += nrec_v2rawdetection;
 	nrec_v2snippet_tot += nrec_v2snippet;
+	nrec_calibratedsnippet_tot += nrec_calibratedsnippet;
 	nrec_processedsidescan_tot += nrec_processedsidescan;
 	nrec_reference_tot += nrec_reference;
 	nrec_sensoruncal_tot += nrec_sensoruncal;
@@ -6735,7 +6773,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection_tot);
 	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection_tot);
 	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet_tot);
-	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan_tot);
+	fprintf(stdout, "          Calibrated Snippet:                %d\n", nrec_calibratedsnippet_tot);
+	fprintf(stdout, "          Processedsidescan:                 %d\n", nrec_processedsidescan_tot);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference_tot);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal_tot);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal_tot);
