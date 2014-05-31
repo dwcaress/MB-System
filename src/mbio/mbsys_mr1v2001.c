@@ -19,7 +19,7 @@
  * DSL 120
  *.
  * The data formats associated with mbsys_mr1v2001v2001 are:
- *      MBF_MR1PRVR2 : MBIO ID 63
+ *      MBF_MR1PRVR2 : MBIO ID 64
  *
  * Author:	D. W. Caress
  * Date:	March 6, 2003
