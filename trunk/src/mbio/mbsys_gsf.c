@@ -811,7 +811,11 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	else if (*kind == MB_DATA_COMMENT)
 		{
 		/* copy comment */
-		strcpy(comment, records->comment.comment);
+		if (records->comment.comment_length > 0
+		    && records->comment.comment != NULL)
+			strcpy(comment, records->comment.comment);
+		else
+			comment[0] = '\0';
 
 		/* print debug statements */
 		if (verbose >= 4)

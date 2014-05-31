@@ -5158,7 +5158,6 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie)
 					}
 				else
 					{
-					mbna_survey_select = project.files[crossing->file_id_1].block;
 					mbna_file_select = crossing->file_id_1;
 					mbna_section_select = crossing->section_1;
 					}
@@ -5179,7 +5178,6 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie)
 				else
 					{
 					mbna_survey_select = project.files[crossing->file_id_1].block;
-					mbna_file_select = crossing->file_id_1;
 					mbna_section_select = crossing->section_1;
 					}
 				}
@@ -5189,17 +5187,18 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie)
 				    && mbna_section_select == crossing->section_1)
 					{
 					mbna_survey_select = project.files[crossing->file_id_1].block;
+					mbna_file_select = crossing->file_id_1;
 					}
 				else if (mbna_file_select == crossing->file_id_2
 				    && mbna_section_select == crossing->section_2)
 					{
 					mbna_survey_select = project.files[crossing->file_id_2].block;
+					mbna_file_select = crossing->file_id_2;
 					}
 				else
 					{
 					mbna_survey_select = project.files[crossing->file_id_1].block;
 					mbna_file_select = crossing->file_id_1;
-					mbna_section_select = crossing->section_1;
 					}
 				}
  			}
@@ -9298,18 +9297,80 @@ mbnavadjust_autopick(int do_vertical)
 				mbna_current_tie = -1;
 
 				/* reset survey file and section selections */
-				if (mbna_file_select == crossing->file_id_1)
+                                if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+                                    || mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
+                                        {
+                                        if (mbna_survey_select == project.files[crossing->file_id_1].block)
+                                                {
+                                                mbna_file_select = crossing->file_id_1;
+                                                mbna_section_select = crossing->section_1;
+                                                }
+                                        else if (mbna_survey_select == project.files[crossing->file_id_2].block)
+                                                {
+                                                mbna_file_select = crossing->file_id_2;
+                                                mbna_section_select = crossing->section_2;
+                                                }
+                                        else
+                                                {
+                                                mbna_file_select = crossing->file_id_1;
+                                                mbna_section_select = crossing->section_1;
+                                                }
+                                        }
+                                else if (mbna_view_mode == MBNA_VIEW_MODE_FILE
+                                    || mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
+                                        {
+                                        if (mbna_file_select == crossing->file_id_1)
+                                                {
+                                                mbna_survey_select = project.files[crossing->file_id_1].block;
+                                                mbna_section_select = crossing->section_1;
+                                                }
+                                        else if (mbna_file_select == crossing->file_id_2)
+                                                {
+                                                mbna_survey_select = project.files[crossing->file_id_2].block;
+                                                mbna_section_select = crossing->section_2;
+                                                }
+                                        else
+                                                {
+                                                mbna_survey_select = project.files[crossing->file_id_1].block;
+                                                mbna_section_select = crossing->section_1;
+                                                }
+                                        }
+                                else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
+                                        {
+                                        if (mbna_file_select == crossing->file_id_1
+                                            && mbna_section_select == crossing->section_1)
+                                                {
+                                                mbna_survey_select = project.files[crossing->file_id_1].block;
+                                                mbna_file_select = crossing->file_id_1;
+                                                }
+                                        else if (mbna_file_select == crossing->file_id_2
+                                            && mbna_section_select == crossing->section_2)
+                                                {
+                                                mbna_survey_select = project.files[crossing->file_id_2].block;
+                                                mbna_file_select = crossing->file_id_2;
+                                                }
+                                        else
+                                                {
+                                                mbna_survey_select = project.files[crossing->file_id_1].block;
+                                                mbna_file_select = crossing->file_id_1;
+                                                }
+                                        }
+				else if (mbna_file_select == crossing->file_id_1)
 					{
+					mbna_survey_select = project.files[crossing->file_id_1].block;
+					mbna_file_select = crossing->file_id_1;
 					mbna_section_select = crossing->section_1;
 					}
 				else if (mbna_file_select == crossing->file_id_2)
 					{
+					mbna_survey_select = project.files[crossing->file_id_2].block;
+					mbna_file_select = crossing->file_id_2;
 					mbna_section_select = crossing->section_2;
 					}
 				else
 					{
-					mbna_file_select = crossing->file_id_1;
 					mbna_survey_select = project.files[crossing->file_id_1].block;
+					mbna_file_select = crossing->file_id_1;
 					mbna_section_select = crossing->section_1;
 					}
 

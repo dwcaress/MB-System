@@ -967,7 +967,9 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT)
 		{
-		strcpy(store->comment,comment);
+		strncpy(store->comment,comment,MBSYS_LDEOIH_MAXLINE-1);
+		if (strlen(comment) > MBSYS_LDEOIH_MAXLINE-2)
+			store->comment[MBSYS_LDEOIH_MAXLINE-1] = '\0';
 		}
 
 	/* print output debug statements */
