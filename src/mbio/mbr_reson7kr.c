@@ -1105,7 +1105,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 				bathymetry->range[i] = v2rawdetection->detection_point[j]
 							/ v2rawdetection->sampling_rate;
 				bathymetry->quality[i] = v2rawdetection->quality[j];
-				alpha = RTD * bathymetry->pitch;
+				alpha = RTD * (bathymetry->pitch + v2rawdetection->tx_angle);
 				beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - bathymetry->roll);
 				mb_rollpitch_to_takeoff(
 					verbose,
@@ -1136,7 +1136,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 				i = v2detectionsetup->beam_descriptor[j];
 
 				bathymetry->range[i] = v2detection->range[j];
-				alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch);
+				alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch
+						+ volatilesettings->steering_vertical);
 				beta = 90.0 - RTD * (v2detection->angle_x[j] - bathymetry->roll);
 				mb_rollpitch_to_takeoff(
 					verbose,
@@ -1167,7 +1168,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				i = j;
 
 				bathymetry->range[i] = v2detection->range[j];
-				alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch);
+				alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch
+						+ volatilesettings->steering_vertical);
 				beta = 90.0 - RTD * (v2detection->angle_x[j] - bathymetry->roll);
 				mb_rollpitch_to_takeoff(
 					verbose,
@@ -1197,7 +1199,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				if ((bathymetry->quality[i] & 15) > 0)
 					{
-					alpha = RTD * (beamgeometry->angle_alongtrack[i] + bathymetry->pitch);
+					alpha = RTD * (beamgeometry->angle_alongtrack[i] + bathymetry->pitch
+						       + volatilesettings->steering_vertical);
 					beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - bathymetry->roll);
 					mb_rollpitch_to_takeoff(
 						verbose,

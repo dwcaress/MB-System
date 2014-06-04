@@ -742,6 +742,47 @@ int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(doub
 }
 
 /*------------------------------------------------------------------------------*/
+int mb3dsoundings_set_colorsoundings_notify(int verbose, void (colorsoundings_notify)(int), int *error)
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_set_colorsoundings_notify";
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		}
+
+	/* set the function pointer */
+	mb3dsoundings.mb3dsoundings_colorsoundings_notify = colorsoundings_notify;
+
+	/* set error */
+	*error = mbs_error;
+
+	/* set error */
+	*error = mbs_error;
+
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+
+/*------------------------------------------------------------------------------*/
 int mb3dsoundings_reset()
 {
 	/* local variables */
@@ -2974,6 +3015,9 @@ sounding->x, sounding->y, sounding->z,
 sounding->glx, sounding->gly, sounding->glz, sounding->beamflag);*/
 		if (mb_beam_ok(sounding->beamflag))
 			{
+			glColor3f(colortable_object_red[sounding->beamcolor],
+				colortable_object_green[sounding->beamcolor],
+				colortable_object_blue[sounding->beamcolor]);
 			glVertex3f(sounding->glx, sounding->gly, sounding->glz);
 			/* fprintf(stderr," PLOTTED");*/
 			}
@@ -3453,6 +3497,131 @@ do_mb3dsdg_action_applybias( Widget w, XtPointer client_data, XtPointer call_dat
 						0.01 *((double)mb3dsoundings.ipitchbias),
 						0.01 *((double)mb3dsoundings.iheadingbias),
 						0.01 *((double)mb3dsoundings.itimelag));
+}
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_colorsoundingsblack( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsblack\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_BLACK);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_colorsoundingsred( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsred\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_RED);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_colorsoundingsyellow( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsyellow\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_YELLOW);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_colorsoundingsgreen( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsgreen\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_GREEN);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_colorsoundingsbluegreen( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsbluegreen\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_BLUEGREEN);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_colorsoundingsblue( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsblue\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_BLUE);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_colorsoundingspurple( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingspurple\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_PURPLE);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
 
 /*---------------------------------------------------------------------------------------*/

@@ -69,6 +69,13 @@ extern void do_mb3dsdg_view_goodprofile(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_allprofile(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_scalewithflagged(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_applybias(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_colorsoundingsblack(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_colorsoundingsred(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_colorsoundingsyellow(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_colorsoundingsgreen(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_colorsoundingsbluegreen(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_colorsoundingsblue(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_colorsoundingspurple(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_dismiss(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_toggle(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_pick(Widget, XtPointer, XtPointer);
@@ -812,6 +819,174 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
 
     XtAddCallback(class_in->pushButton_action_applybias, XmNactivateCallback, do_mb3dsdg_action_applybias, (XtPointer)0);
 
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Black",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_colorsoundingsblack = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_colorsoundingsblack",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_colorsoundingsblack);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_colorsoundingsblack, XmNactivateCallback, do_mb3dsdg_action_colorsoundingsblack, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Red",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_colorsoundingsred = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_colorsoundingsred",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_colorsoundingsred);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_colorsoundingsred, XmNactivateCallback, do_mb3dsdg_action_colorsoundingsred, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Yellow",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_colorsoundingsyellow = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_colorsoundingsyellow",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_colorsoundingsyellow);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_colorsoundingsyellow, XmNactivateCallback, do_mb3dsdg_action_colorsoundingsyellow, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Green",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_colorsoundingsgreen = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_colorsoundingsgreen",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_colorsoundingsgreen);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_colorsoundingsgreen, XmNactivateCallback, do_mb3dsdg_action_colorsoundingsgreen, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Bluegreen",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_colorsoundingsbluegreen = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_colorsoundingsbluegreen",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_colorsoundingsbluegreen);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_colorsoundingsbluegreen, XmNactivateCallback, do_mb3dsdg_action_colorsoundingsbluegreen, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Blue",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_colorsoundingsblue = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_colorsoundingsblue",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_colorsoundingsblue);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_colorsoundingsblue, XmNactivateCallback, do_mb3dsdg_action_colorsoundingsblue, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Purple",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_colorsoundingspurple = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_colorsoundingspurple",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_colorsoundingspurple);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_colorsoundingspurple, XmNactivateCallback, do_mb3dsdg_action_colorsoundingspurple, (XtPointer)0);
+    
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, class_in->pulldownMenu_action); ac++;
     XtSetValues(class_in->cascadeButton_action, args, ac);

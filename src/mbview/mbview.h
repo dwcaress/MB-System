@@ -705,6 +705,7 @@ struct mb3dsoundings_sounding_struct {
 	int	ifile;
 	int	iping;
 	int	ibeam;
+        int     beamcolor;
 	char	beamflag;
         char	beamflagorg;
 	double	x;
@@ -740,7 +741,6 @@ struct mb3dsoundings_struct {
 	int	num_soundings_flagged;
 	int	num_soundings_alloc;
 	struct mb3dsoundings_sounding_struct *soundings;
-
 };
 
 
@@ -1251,6 +1251,8 @@ int mb3dsoundings_set_dismiss_notify(int verbose, void (dismiss_notify)(), int *
 int mb3dsoundings_set_edit_notify(int verbose, void (edit_notify)(int, int, int, char, int), int *error);
 int mb3dsoundings_set_info_notify(int verbose, void (edit_notify)(int, int, int, char *), int *error);
 int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double, double), int *error);
+int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double, double), int *error);
+int mb3dsoundings_set_colorsoundings_notify(int verbose, void (colorsoundings_notify)(int), int *error);
 int mb3dsoundings_plot(int verbose, int *error);
 int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, double *timelag, int *error);
 /*--------------------------------------------------------------------*/
