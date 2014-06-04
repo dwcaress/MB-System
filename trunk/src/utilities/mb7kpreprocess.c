@@ -779,7 +779,7 @@ int main (int argc, char **argv)
 		case 'S':
 		case 's':
 			if (optarg[0] == 'C')
-				ss_source == R7KRECID_7kCalibratedSnippetData;
+				ss_source = R7KRECID_7kCalibratedSnippetData;
 			else if (optarg[0] == 'S')
 				ss_source = R7KRECID_7kV2SnippetData;
 			else if (optarg[0] == 'B')
@@ -5002,7 +5002,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							bathymetry->range[i] = v2rawdetection->detection_point[j]
 										/ v2rawdetection->sampling_rate;
 							bathymetry->quality[i] = v2rawdetection->quality[j];
-							alpha = RTD * pitchr + pitchbias;
+							alpha = RTD * (pitchr + v2rawdetection->tx_angle) + pitchbias;
 							beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - rollr) + rollbias;
 							mb_rollpitch_to_takeoff(
 								verbose,
@@ -5024,6 +5024,38 @@ alpha,beta,theta,phi,
 bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							}
 						}
+			
+					/* case of v2detection record with v2detectionsetup */
+					else if (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES)
+						{
+						/* now loop over the detects */
+						for (j=0;j<v2detection->number_beams;j++)
+							{
+							i = v2detectionsetup->beam_descriptor[j];
+			
+							bathymetry->range[i] = v2detection->range[j];
+							alpha = RTD * (v2detection->angle_y[j] + pitchr
+									+ volatilesettings->steering_vertical) + pitchbias;
+							beta = 90.0 - RTD * (v2detection->angle_x[j] - rollr) + rollbias;
+							mb_rollpitch_to_takeoff(
+								verbose,
+								alpha, beta,
+								&theta, &phi,
+								&error);
+							rr = 0.5 * soundspeed * bathymetry->range[i];
+							xx = rr * sin(DTR * theta);
+							zz = rr * cos(DTR * theta);
+							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+							bathymetry->depth[i] = zz + sonardepth;
+							bathymetry->pointing_angle[i] = DTR * theta;
+							bathymetry->azimuth_angle[i] = DTR * phi;
+/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+i,roll, rollr, pitchr, bathymetry->pitch,
+alpha,beta,theta,phi,
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+							}
+						}
 
 					/* case of v2detection record */
 					else if (istore->read_v2detection == MB_YES)
@@ -5032,7 +5064,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 						for (i=0;i<v2detection->number_beams;i++)
 							{
 							bathymetry->range[i] = v2detection->range[i];
-							alpha = RTD * (v2detection->angle_y[i] + pitchr) + pitchbias;
+							alpha = RTD * (v2detection->angle_y[i] + pitchr
+									+ volatilesettings->steering_vertical) + pitchbias;
 							beta = 90.0 - RTD * (v2detection->angle_x[i] - rollr) + rollbias;
 							mb_rollpitch_to_takeoff(
 								verbose,
@@ -5062,7 +5095,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							{
 							if ((bathymetry->quality[i] & 15) > 0)
 								{
-								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr) + pitchbias;
+								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr
+									       + volatilesettings->steering_vertical) + pitchbias;
 								beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - rollr) + rollbias;
 								mb_rollpitch_to_takeoff(
 									verbose,

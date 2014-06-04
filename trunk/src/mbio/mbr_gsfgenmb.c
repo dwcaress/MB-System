@@ -465,7 +465,8 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* deal with errors */
 	if (ret < 0)
 	    {
-	    if (gsfError == GSF_READ_TO_END_OF_FILE)
+	    if (gsfError == GSF_READ_TO_END_OF_FILE
+		|| gsfError == GSF_PARTIAL_RECORD_AT_END_OF_FILE)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;

@@ -71,6 +71,13 @@ typedef struct _Mb3dsdgData
     Widget cascadeButton_action;
     Widget pulldownMenu_action;
     Widget pushButton_action_applybias;
+    Widget pushButton_action_colorsoundingsblack;
+    Widget pushButton_action_colorsoundingsred;
+    Widget pushButton_action_colorsoundingsyellow;
+    Widget pushButton_action_colorsoundingsgreen;
+    Widget pushButton_action_colorsoundingsbluegreen;
+    Widget pushButton_action_colorsoundingsblue;
+    Widget pushButton_action_colorsoundingspurple;
     Widget cascadeButton_dismiss;
     Widget pulldownMenu_dismiss;
     Widget pushButton_dismiss;

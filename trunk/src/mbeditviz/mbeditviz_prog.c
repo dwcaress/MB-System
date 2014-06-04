@@ -858,6 +858,8 @@ int mbeditviz_load_file(int ifile)
 						mbev_error = MB_ERROR_MEMORY_FAIL;
 					if ((ping->beamflagorg = (char *) malloc(ping->beams_bath)) == NULL)
 						mbev_error = MB_ERROR_MEMORY_FAIL;
+					if ((ping->beamcolor = (int *) malloc(sizeof(int) * ping->beams_bath)) == NULL)
+						mbev_error = MB_ERROR_MEMORY_FAIL;
 					if ((ping->bath = (double *) malloc(sizeof(double) * (ping->beams_bath))) == NULL)
 						mbev_error = MB_ERROR_MEMORY_FAIL;
 					if ((ping->bathacrosstrack = (double *) malloc(sizeof(double) * (ping->beams_bath))) == NULL)
@@ -899,6 +901,11 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 							{
 							free(ping->beamflagorg);
 							ping->beamflagorg = NULL;
+							}
+						if (ping->beamcolor != NULL)
+							{
+							free(ping->beamcolor);
+							ping->beamcolor = NULL;
 							}
 						if (ping->bath != NULL)
 							{
@@ -990,6 +997,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 						{
 						ping->beamflag[ibeam] = beamflag[ibeam];
 						ping->beamflagorg[ibeam] = beamflag[ibeam];
+						ping->beamcolor[ibeam] = MBV_COLOR_BLACK;
 						if (!mb_beam_check_flag_null(ping->beamflag[ibeam])
 							&& (isnan(bath[ibeam] || isnan(bathacrosstrack[ibeam] || isnan(bathalongtrack[ibeam])))))
 							{
@@ -1963,6 +1971,11 @@ int mbeditviz_unload_file(int ifile)
 				{
 				free(ping->beamflagorg);
 				ping->beamflagorg = NULL;
+				}
+			if (ping->beamcolor != NULL)
+				{
+				free(ping->beamcolor);
+				ping->beamcolor = NULL;
 				}
 			if (ping->bath != NULL)
 				{
@@ -3574,6 +3587,7 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
 
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
@@ -3760,6 +3774,7 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
 
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
@@ -3921,6 +3936,7 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
 
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
@@ -4406,6 +4422,48 @@ rollbias, pitchbias, headingbias, timelag);
 
 	/* redisplay grid */
 	mbview_plothigh(0);
+
+	/* print output debug statements */
+	if (mbev_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",mbev_error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       mbev_status:%d\n",mbev_status);
+		}
+}
+/*--------------------------------------------------------------------*/
+void mbeditviz_mb3dsoundings_colorsoundings(int color)
+{
+	char	*function_name = "mbeditviz_mb3dsoundings_colorsoundings";
+	struct mb3dsoundings_sounding_struct *sounding;
+	int	isounding;
+
+if (mbev_verbose > 0)
+fprintf(stderr,"mbeditviz_mb3dsoundings_colorsoundings:%d\n", color);
+
+	/* print input debug statements */
+	if (mbev_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       color:       %d\n",color);
+		}
+
+	/* apply the specified color to all unflagged, currently selected soundings
+		(currently selected soundings are displayed in the 3D soundings view) */
+	for (isounding=0;isounding<mbev_selected.num_soundings;isounding++)
+		{
+		sounding = &mbev_selected.soundings[isounding];
+		if (mb_beam_ok(sounding->beamflag))
+			{
+			sounding->beamcolor = color;
+			mbev_files[sounding->ifile].pings[sounding->iping].beamcolor[sounding->ibeam] = color;
+			}
+		}
 
 	/* print output debug statements */
 	if (mbev_verbose >= 2)
