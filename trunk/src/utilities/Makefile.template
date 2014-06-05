@@ -100,7 +100,7 @@ all:	$(BINDIR)/mb7k2jstar \
 	$(BINDIR)/mbstripnan \
 	$(BINDIR)/mbsvplist \
 	$(BINDIR)/mbtime \
-	$(BINDIR)/mbsxppreprocess \
+	$(BINDIR)/mbswplspreprocess \
 	$(BINDIR)/mbpreprocess \
 	$(BINDIR)/mbsvpselect
 
@@ -183,6 +183,7 @@ $(BINDIR)/mbset:	mbset.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libm
 		$(LFLAGS) -o $(BINDIR)/mbset
 $(BINDIR)/mbsslayout:	mbsslayout.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbsslayout.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbsslayout
 $(BINDIR)/mbprocess:	mbprocess.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbprocess.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
@@ -248,9 +249,9 @@ $(BINDIR)/mbhysweeppreprocess:	mbhysweeppreprocess.o $(LIBDIR)/libmbio.a $(LIBDI
 $(BINDIR)/mbkongsbergpreprocess:	mbkongsbergpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbkongsbergpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbkongsbergpreprocess
-$(BINDIR)/mbsxppreprocess:	mbsxppreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbsxppreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a \
-		$(LFLAGS) -o $(BINDIR)/mbsxppreprocess
+$(BINDIR)/mbswplspreprocess:	mbswplspreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbswplspreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mbswplspreprocess
 $(BINDIR)/mbpreprocess:	mbpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbpreprocess
@@ -310,7 +311,7 @@ mbsvplist.o:	mbsvplist.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_defi
 mbset.o:	mbset.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio mbset.c
 mbsslayout.o:	mbsslayout.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
-	$(CC) -c $(CFLAGS) -I../mbio mbsslayout.c
+	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbsslayout.c
 mbprocess.o:	mbprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbprocess.c
 mbextractsegy.o:	mbextractsegy.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h ../mbio/mb_segy.h
@@ -351,8 +352,8 @@ mbhysweeppreprocess.o:	mbhysweeppreprocess.c ../mbio/mb_format.h ../mbio/mb_stat
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbhysweeppreprocess.c
 mbkongsbergpreprocess.o:	mbkongsbergpreprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbkongsbergpreprocess.c
-mbsxppreprocess.o:	mbsxppreprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
-	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbsxppreprocess.c
+mbswplspreprocess.o:	mbswplspreprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
+	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbswplspreprocess.c
 mbpreprocess.o:	mbpreprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbpreprocess.c
 mbsvpselect.o:	mbsvpselect.c ../mbio/mb_status.h ../mbio/mb_define.h
