@@ -302,7 +302,11 @@ int main (int argc, char **argv)
 	int	jsensordepth = 0;
 	int	jheading = 0;
 	int	jattitude = 0;
-	int	data_changed;
+	int	survey_changed;
+	int	nav_changed;
+	int	sensordepth_changed;
+	int	heading_changed;
+	int	attitude_changed;
 	int	i, j, n;
 
 	/* get current default values */
@@ -1403,7 +1407,11 @@ int main (int argc, char **argv)
 					|| kind == MB_DATA_WATER_COLUMN))
 				{
 				/* start out with no change defined */
-				data_changed = MB_NO;
+				survey_changed = MB_NO;
+				nav_changed = MB_NO;
+				sensordepth_changed = MB_NO;
+				heading_changed = MB_NO;
+				attitude_changed = MB_NO;
 				
 				/* call mb_extract_nav to get attitude */
 				status = mb_extract_nav(verbose,imbio_ptr,istore_ptr,&kind,
@@ -1437,6 +1445,7 @@ int main (int argc, char **argv)
 						{
 						time_d += timeshift_constant;
 						}
+					survey_changed = MB_YES;
 					}
 
 				/* get nav sensordepth heading attitude values for record timestamp */
@@ -1454,7 +1463,7 @@ int main (int argc, char **argv)
 								nav_time_d-1, nav_speed-1, nav_num, 
 								time_d, &speed, &jnav,
 								&interp_error);
-					data_changed = MB_YES;
+					nav_changed = MB_YES;
 					}
 				if (sensordepth_num > 0)
 					{
@@ -1462,7 +1471,7 @@ int main (int argc, char **argv)
 								sensordepth_time_d-1, sensordepth_sensordepth-1, sensordepth_num, 
 								time_d, &sensordepth, &jsensordepth,
 								&interp_error);
-					data_changed = MB_YES;
+					sensordepth_changed = MB_YES;
 					}
 				if (heading_num > 0)
 					{
@@ -1470,7 +1479,7 @@ int main (int argc, char **argv)
 								heading_time_d-1, heading_heading-1, heading_num, 
 								time_d, &heading, &jheading,
 								&interp_error);
-					data_changed = MB_YES;
+					heading_changed = MB_YES;
 					}
 				if (attitude_num > 0)
 					{
@@ -1486,7 +1495,7 @@ int main (int argc, char **argv)
 								attitude_time_d-1, attitude_heave-1, attitude_num, 
 								time_d, &heave, &jattitude,
 								&interp_error);
-					data_changed = MB_YES;
+					attitude_changed = MB_YES;
 					}
 				if (sensordepth_num > 0 || attitude_num > 0)
 					{
@@ -1499,7 +1508,7 @@ int main (int argc, char **argv)
 							heading, sensordepth,
 							roll, pitch,heave, &error);
 				if (status == MB_SUCCESS)
-					data_changed = MB_YES;
+					survey_changed = MB_YES;
 
 				
 				/* if a predefined preprocess function does not exist then

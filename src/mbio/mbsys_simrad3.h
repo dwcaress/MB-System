@@ -14,8 +14,8 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_simrad3.h defines the MBIO data structures for handling data from
- * new (post-2006) Simrad multibeam sonars (e.g. EM710, EM3002, EM302, EM122).
- * The data formats associated with Simrad multibeams
+ * new (post-2006) Kongsberg multibeam sonars (e.g. EM710, EM3002, EM302, EM122).
+ * The data formats associated with Kongsberg multibeams
  * (both old and new) include:
  *    MBSYS_SIMRAD formats (code in mbsys_simrad.c and mbsys_simrad.h):
  *      MBF_EMOLDRAW : MBIO ID 51 - Vendor EM1000, EM12S, EM12D, EM121
@@ -48,63 +48,76 @@
  */
 /*
  * Notes on the MBSYS_SIMRAD3 data structure:
- *   1. Simrad multibeam systems output datagrams which are
+ *   0. Kongsberg was formerly known as Simrad; the names Kongsberg
+ *      and Simrad are interchangeable within MB-System source code
+ *      and documentation.
+ *   1. Kongsberg multibeam systems output datagrams which are
  *      a combination of ascii and binary. This code has been written
- *      using data format specifications found in Simrad document
- *	16092ai EM Series Data Formats (rev I January 20, 2006).
- *   2. Simrad multibeam sonars output both bathymetry
+ *      using data format specifications found in Kongsberg document
+ *	16092ai EM Series Data Formats (rev I January 20, 2006
+ *	through Rev Q February 2013).
+ *   2. Kongsberg multibeam sonars output both bathymetry
  *      and amplitude information for beams and sidescan information
  *      with a higher resolution than the bathymetry and amplitude.
  *   3. This code and formats 58 and 59 support data from the
  *         EM-710 multibeam sonar and later models. Data from older
- *         Simrad multibeams are supported by formats 51, 56, and 57.
-  *   4. Each telegram is preceded by a two byte start code 0x02 and
+ *         Kongsberg multibeams are supported by formats 51, 56, and 57.
+ *   4. Each telegram is preceded by a two byte start code 0x02 and
  *      followed by a three byte end code consisting of 0x03
  *      followed by two bytes representing the checksum for
  *      the data bytes.  MB-System does not check the checksums
  *      on input, but does calculate the checksums for output.
- *   5. The Kongsberg Simrad datagram format manual lists a large number
+ *   5. The Kongsberg datagram format manual lists a large number
  *      of datagram types. The complete list of telegram start codes,
  *      types, and sizes is given below. Datagram listings preceded
  *      by an "*" are recognized by MB-System. Unrecognized datagrams
  *      will be skipped on input and not included in output files.
- *        *0x0230: Parameter - Stop                       variable size
- *        *0x0231: Parameter - Data out off               variable size
- *        *0x0232: Parameter - Data out on                variable size
- *        *0x0233: Extra Parameter                        variable size
- *        *0x0241: Attitude Output                        1222 bytes
- *        *0x0243: Clock Output                           28 bytes
+ *
+ *      Multibeam Datagrams:
  *        *0x0244: Bathymetry                             48-4092 bytes
- *         0x0245: Single beam echosounder depth          32 bytes
- *        *0x0246: Raw range and beam angle "F"           24-2056 bytes
- *        *0x0247: Surface sound speed                    variable size
- *        *0x0248: Heading Output                         422 bytes
- *        *0x0249: Parameter - Start                      variable size
- *        *0x024A: Mechanical transducer tilt             variable size
+ *        *0x0258: Bathymetry  (EM710 and later)          variable size
  *         0x024B: Central beams echogram                 variable size
- *         0x024E: Raw range and beam angle "N" (EM710 and later) variable size
- *        *0x0250: Position                               100-134 bytes
- *        *0x0252: Runtime Parameter                      52 bytes
- *        *0x0253: Sidescan                               48->5K bytes
- *        *0x0254: Tide Output                            30 bytes
- *        *0x0255: Sound velocity profile (new)           variable size
- *        *0x0256: Sound velocity profile (old)           variable size
- *         0x0257: SSP input                              variable size
- *         0x0258: Bathymetry  (EM710 and later)          variable size
- *         0x0259: Sidescan (EM710 and later)             variable size
- *        *0x0265: Raw range and beam angle               112-1658 bytes
+ *        *0x0265: Raw range and beam angle (deprecated)  112-1658 bytes
+ *        *0x0246: Raw range and beam angle "F"           24-2056 bytes
  *        *0x0266: Raw range and beam angle "f"           44-1658 bytes
- *        *0x0268: Height Output                          24 bytes
- *        *0x0269: Parameter - Stop                       variable size
+ *        *0x024E: Raw range and beam angle "N" (EM710 and later) variable size
+ *        *0x0253: Sidescan                               48->5K bytes
+ *        *0x0259: Sidescan (EM710 and later)             variable size
  *        *0x026B: Water column                           variable size
- *        *0x026E: Network attitude                       variable size
- *         0x0270: Parameter - Remote                     variable size
- *         0x0273: Surface sound speed                    variable size
+ *        *0x024F: Quality factor                         variable size
  *        *0x02E1: Bathymetry (MBARI format 57)           48-4092 bytes
  *        *0x02E2: Sidescan (MBARI format 57)             48->5K bytes
  *        *0x02E3: Bathymetry (MBARI format 59)           48-4092 bytes
  *        *0x02E4: Sidescan (MBARI format 59)             48->5K bytes
- *   6. Simrad systems record navigation fixes using the position
+ *        *0x02E5: Bathymetry (MBARI format 59)           48-4092 bytes
+ *
+ *      External Sensor Datagrams
+ *        *0x0241: Attitude Output                        1222 bytes
+ *        *0x026E: Network attitude                       variable size
+ *        *0x0243: Clock Output                           28 bytes
+ *        *0x0268: Height Output                          24 bytes
+ *        *0x0248: Heading Output                         422 bytes
+ *        *0x0250: Position                               100-134 bytes
+ *         0x0245: Single beam echosounder depth          32 bytes
+ *        *0x0254: Tide Output                            30 bytes
+ *         0x0273: Surface sound speed (deprecated)       variable size
+ *        *0x0247: Surface sound speed                    variable size
+ *        *0x0256: Sound velocity profile (deprecated)    variable size
+ *        *0x0255: Sound velocity profile                 variable size
+ *         0x0257: SSP input                              variable size
+ *
+ *      Multibeam Parameters
+ *        *0x0249: Parameter - Start                      variable size
+ *        *0x0269: Parameter - Stop                       variable size
+ *         0x0270: Parameter - Remote                     variable size
+ *        *0x0252: Runtime Parameter                      52 bytes
+ *        *0x024A: Mechanical transducer tilt             variable size
+ *        *0x0233: Extra Parameter                        variable size
+ *        *0x0230: Processing Unit ID                     108 bytes
+ *        *0x0231: Processing Unit Status                 85 bytes
+ *        *0x0232: Processing Unit BIST                   variable size
+ *   
+ *   6. Kongsberg systems record navigation fixes using the position
  *      datagram; no navigation is included in the per ping data.  Thus,
  *      it is necessary to extrapolate the navigation for each ping
  *      at read time from the last navigation fix.  The frequency of
@@ -118,7 +131,7 @@
  *      positioning system's antenna (or reference point). Heave,
  *      roll, pitch, sound speed at the transducer depth and ray
  *      bending have been applied.
- *   8. The new Simrad sonars record the heading and attitude sensor
+ *   8. The new Kongsberg sonars record the heading and attitude sensor
  *      data streams input into the sonar, usually at a sampling
  *      frequency of 100 Hz.
 \*   9. The beam angles and travel times are reported in the raw range
@@ -159,6 +172,9 @@
  *      beamflags and navigation in the bathymetry records. This format
  *      is identical to the vendor format except for the use of a
  *      slightly different bathymetry record.
+ *  14. The EM2040D outputs two simultaneous sets of datagrams for each
+ *      receive head with the same ping number. The data can be distinguished
+ *      only by the sonar serial number in each record.
  *
  */
 
@@ -202,6 +218,7 @@
 #define	MBSYS_SIMRAD3_MAXPIXELS		1024
 #define	MBSYS_SIMRAD3_MAXRAWPIXELS	65535
 #define MBSYS_SIMRAD3_MAXTX		19
+#define MBSYS_SIMRAD3_MAXQUALITYPARAMETERS  3
 #define	MBSYS_SIMRAD3_MAXSVP		1024
 #define	MBSYS_SIMRAD3_MAXATTITUDE	256
 #define	MBSYS_SIMRAD3_MAXHEADING	256
@@ -218,10 +235,9 @@
 
 /* datagram types including start byte */
 #define	EM3_NONE		0
-#define	EM3_STOP2		0x0230
-#define	EM3_STATUS		0x0231
-#define	EM3_OFF			0x0231
-#define	EM3_ON			0x0232
+#define	EM3_PU_ID		0x0230
+#define	EM3_PU_STATUS		0x0231
+#define	EM3_PU_BIST		0x0232
 #define	EM3_EXTRAPARAMETERS	0x0233
 #define	EM3_ATTITUDE		0x0241
 #define	EM3_CLOCK		0x0243
@@ -234,6 +250,7 @@
 #define	EM3_TILT		0x024A
 #define	EM3_CBECHO		0x024B
 #define	EM3_RAWBEAM4		0x024E
+#define	EM3_QUALITY		0x024F
 #define	EM3_POS			0x0250
 #define	EM3_RUN_PARAMETER	0x0252
 #define	EM3_SS			0x0253
@@ -258,10 +275,9 @@
 #define	EM3_BATH3_MBA		0x02E5
 
 /* datagram types */
-#define	EM3_ID_STOP2		0x30
-#define	EM3_ID_STATUS		0x31
-#define	EM3_ID_OFF		0x31
-#define	EM3_ID_ON		0x32
+#define	EM3_ID_PU_ID		0x30
+#define	EM3_ID_PU_STATUS	0x31
+#define	EM3_ID_PU_BIST		0x32
 #define	EM3_ID_EXTRAPARAMETERS	0x33
 #define	EM3_ID_ATTITUDE		0x41
 #define	EM3_ID_CLOCK		0x43
@@ -274,6 +290,7 @@
 #define	EM3_ID_TILT		0x4A
 #define	EM3_ID_CBECHO		0x4B
 #define	EM3_ID_RAWBEAM4		0x4E
+#define	EM3_ID_QUALITY		0x4F
 #define	EM3_ID_POS		0x50
 #define	EM3_ID_RUN_PARAMETER	0x52
 #define	EM3_ID_SS		0x53
@@ -298,7 +315,7 @@
 #define	EM3_ID_BATH3_MBA	0xE5
 
 /* datagram sizes where constant */
-#define	EM3_STATUS_SIZE			88
+#define	EM3_PU_STATUS_SIZE		88
 #define	EM3_EXTRAPARAMETERS_HEADER_SIZE	14
 #define	EM3_RUN_PARAMETER_SIZE		52
 #define	EM3_CLOCK_SIZE			28
@@ -329,6 +346,7 @@
 #define	EM3_RAWBEAM4_HEADER_SIZE	28
 #define	EM3_RAWBEAM4_TX_SIZE		24
 #define	EM3_RAWBEAM4_BEAM_SIZE		16
+#define	EM3_QUALITY_HEADER_SIZE	        16
 #define	EM3_BATH3_MBA_HEADER_SIZE	48
 #define	EM3_BATH3_MBA_BEAM_SIZE		38
 #define	EM3_SS2_HEADER_SIZE		28
@@ -352,16 +370,17 @@
 /* internal data structure for survey data */
 struct mbsys_simrad3_ping_struct
 	{
+	int	png_bath_read;	/* flag indicating actual reading of bathymetry record */
 	int	png_date;	/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
 	int	png_msec;	/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
 	int	png_count;	/* sequential counter or input identifier */
 	int	png_serial;	/* system 1 or system 2 serial number */
-	double	png_latitude;	/* latitude in decimal degrees * 20000000
+	int	png_latitude;	/* latitude in decimal degrees * 20000000
 				    (negative in southern hemisphere)
 				    if valid, invalid = 0x7FFFFFFF */
-	double	png_longitude;	/* longitude in decimal degrees * 10000000
+	int	png_longitude;	/* longitude in decimal degrees * 10000000
 				    (negative in western hemisphere)
 				    if valid, invalid = 0x7FFFFFFF */
 	int	png_heading;	/* heading (0.01 deg) */
@@ -465,7 +484,7 @@ struct mbsys_simrad3_ping_struct
 				   as measured by heave  */
 
 	/* raw travel time and angle data version 4 */
-	int	png_raw4_read;	/* flag indicating actual reading of raw beam record */
+	int	png_raw_read;	/* flag indicating actual reading of raw beam record */
 	int	png_raw_date;	/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
 	int	png_raw_msec;	/* time since midnight in msec
@@ -547,8 +566,23 @@ struct mbsys_simrad3_ping_struct
 	int	png_raw_rxspare2[MBSYS_SIMRAD3_MAXBEAMS];	/* spare */
 
 
+	/* quality factor */
+	int	png_quality_read;	/* flag indicating actual reading of quality factor record */
+	int	png_quality_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+	int	png_quality_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+	int	png_quality_count;	        /* sequential counter or input identifier */
+	int	png_quality_serial;	        /* system 1 or system 2 serial number */
+	int	png_quality_nbeams;	        /* number of receive beams */
+	int	png_quality_nparameters;	/* number of quality parameters per beam */
+        int     png_quality_spare;
+	float	png_quality_parameters[MBSYS_SIMRAD3_MAXBEAMS][MBSYS_SIMRAD3_MAXQUALITYPARAMETERS];
+                                                /* The first quality parameter is the IFREMER quality factor
+                                                    defined by Xavier Lurton. Others have not yet been defined */
+
 	/* sidescan */
-	int	png_ss2_read;	/* flag indicating actual reading of sidescan record */
+	int	png_ss_read;	/* flag indicating actual reading of sidescan record */
 	int	png_ss_date;	/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
 	int	png_ss_msec;	/* time since midnight in msec
@@ -827,10 +861,13 @@ struct mbsys_simrad3_struct
 	{
 	/* type of data record */
 	int	kind;		/* MB-System record ID */
-	int	type;		/* Simrad datagram ID */
+	int	type;		/* Kongsberg datagram ID */
 
 	/* type of sonar */
-	int	sonar;		/* Type of Simrad sonar */
+	int	sonar;		/* Type of Kongsberg sonar */
+        int     serial;         /* Serial number of Kongsberg sonar in most recent record
+                                    - for EM2040D this is used to tell which of two sonars
+                                    the most recent record came from */
 
 	/* time stamp */
 	int	date;		/* date = year*10000 + month*100 + day
@@ -838,7 +875,7 @@ struct mbsys_simrad3_struct
 	int	msec;		/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
 
-	/* status parameter values */
+	/* processing unit status parameter values */
 	int	sts_date;	/* status date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
 	int	sts_msec;	/* status time since midnight in msec
@@ -1128,7 +1165,10 @@ struct mbsys_simrad3_struct
 	struct mbsys_simrad3_tilt_struct *tilt;
 
 	/* pointer to survey data structure */
-	struct mbsys_simrad3_ping_struct *ping;
+	struct mbsys_simrad3_ping_struct *ping1;
+
+	/* pointer to secord survey data structure */
+	struct mbsys_simrad3_ping_struct *ping2;
 
 	/* pointer to water column data structure */
 	struct mbsys_simrad3_watercolumn_struct *wc;

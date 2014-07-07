@@ -28,7 +28,7 @@
  * References :
  *
  *
- * © 2014 Leidos, Inc.
+ * copyright 2014 Leidos, Inc.
  * There is no charge to use the library, and it may be accessed at:
  * https://www.leidos.com/maritime/gsf.
  * This library may be redistributed and/or modified under the terms of
@@ -109,26 +109,6 @@ typedef struct t_gsfFileTable
     gsfRecords      rec;                           /* Our copy of pointers to dynamic memory and scale factors */
 }
 GSF_FILE_TABLE;
-
-//------------------------------------------------------------------------------
-// _LARGEFILE64_SOURCE
-//------------------------------------------------------------------------------
-//#undef fopen
-//#undef fseek
-//#undef ftell
-//#undef stat
-#if (defined __WINDOWS__) || (defined __MINGW32__)
-#define stat(x,y) _stati64((x), (y))
-#define fopen(x, y)  fopen64((x), (y))
-#define fseek(x, y, z) fseeko64((x), (y), (z))
-#define ftell(x)   ftello64((x))
-//#else
-//#define stat(x,y) stat64((x), (y))
-//#define fopen(x, y)  fopen64((x), (y))
-//#define fseek(x, y, z) fseeko64((x), (y), (z))
-//#define ftell(x)   ftello64((x))
-#endif
-
 
 #endif   /* define __GSF_FT_H__ */
 

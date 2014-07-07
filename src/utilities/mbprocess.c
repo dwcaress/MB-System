@@ -258,6 +258,8 @@
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
 #include "mbsys_reson7k.h"
+#include "gsf.h"
+#include "mbsys_gsf.h"
 
 /* define sidescan correction table structure */
 struct mbprocess_sscorr_struct
@@ -484,17 +486,36 @@ and mbedit edit save files.\n";
 	int	degree, time_set;
 	double	dminute;
 	double	splineflag;
-	double	*ntime, *nlon, *nlat, *nheading, *nspeed;
-	double	*ndraft, *nroll, *npitch, *nheave;
-	double	*natime, *nalon, *nalat, *naz;
-	double	zoffset;
-	double	*nlonspl, *nlatspl;
-	double	*nalonspl, *nalatspl, *nazspl;
-	double	*attitudetime, *attituderoll, *attitudepitch, *attitudeheave;
-	double	*fsonardepthtime, *fsonardepth;
-	double	*tidetime, *tide, tideval;
-	int	*staticbeam;
-	double	*staticoffset;
+	double	*ntime = NULL;
+        double  *nlon = NULL;
+        double  *nlat = NULL;
+        double  *nheading = NULL;
+        double  *nspeed = NULL;
+        double  *ndraft = NULL;
+        double  *nroll = NULL;
+        double  *npitch = NULL;
+        double  *nheave = NULL;
+        double  *natime = NULL;
+        double  *nalon = NULL;
+        double  *nalat = NULL;
+        double  *naz = NULL;
+        double  zoffset;
+	double	*nlonspl = NULL;
+        double  *nlatspl = NULL;
+        double  *nalonspl = NULL;
+        double  *nalatspl = NULL;
+        double  *nazspl = NULL;
+        double  *attitudetime = NULL;
+        double  *attituderoll = NULL;
+        double  *attitudepitch = NULL;
+        double  *attitudeheave = NULL;
+	double	*fsonardepthtime = NULL;
+        double  *fsonardepth = NULL;
+	double	*tidetime = NULL;
+        double  *tide = NULL;
+        double  tideval;
+	int	*staticbeam = NULL;
+	double	*staticoffset = NULL;
 	int	itime, iatime;
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
@@ -512,7 +533,7 @@ and mbedit edit save files.\n";
 	double	*depth = NULL;
 	double	*velocity = NULL;
 	double	*velocity_sum = NULL;
-	void	*rt_svp;
+	void	*rt_svp = NULL;
 	double	ssv;
 
 	/* swath file locking variables */
@@ -568,12 +589,12 @@ and mbedit edit save files.\n";
 	struct mbprocess_sscorr_struct	*ampcorrtable = NULL;
 	struct mbprocess_sscorr_struct	ampcorrtableuse;
 	int	ndepths;
-	double	*depths;
-	double	*depthsmooth;
-	double	*depthacrosstrack;
+	double	*depths = NULL;
+	double	*depthsmooth = NULL;
+	double	*depthacrosstrack = NULL;
 	int	nslopes;
-	double	*slopes;
-	double	*slopeacrosstrack;
+	double	*slopes = NULL;
+	double	*slopeacrosstrack = NULL;
 	double	r[3];
 	double	v1[3], v2[3], v[3], vv;
 	double	slope;
@@ -6620,7 +6641,6 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_COMMENT))
 			{
-
 			status = mb_insert(verbose,imbio_ptr,
 					store_ptr,kind,
 					time_i,time_d,

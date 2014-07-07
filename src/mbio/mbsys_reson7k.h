@@ -196,7 +196,7 @@
 #define R7KRECID_7kSystemEventMessage			7051
 #define R7KRECID_7kTargetData				7060
 #define R7KRECID_7kDataStorageStatus			7052
-#define R7KRECID_7kCalibratedSnippetData    7058
+#define R7KRECID_7kCalibratedSnippetData                7058
 #define R7KRECID_7kFileHeader				7200
 #define R7KRECID_7kTrigger				7300
 #define R7KRECID_7kTriggerSequenceSetup			7301
@@ -2288,7 +2288,7 @@ struct mbsys_reson7k_struct
 	int		read_v2detection;
 	int		read_v2rawdetection;
 	int		read_v2snippet;
-    int     read_calibratedsnippet;
+        int             read_calibratedsnippet;
 	int		read_processedsidescan;
 
 	/* MB-System time stamp */
@@ -2431,8 +2431,8 @@ struct mbsys_reson7k_struct
 	/* Reson 7k system event (record 7051) */
 	s7kr_systemeventmessage	systemeventmessage;
 
-    /* Reson 7k calibrated snippet (record 7058) */
-    s7kr_calibratedsnippet calibratedsnippet;
+        /* Reson 7k calibrated snippet (record 7058) */
+        s7kr_calibratedsnippet calibratedsnippet;
 
 	/* Reson 7k file header (record 7200) */
 	s7kr_fileheader		fileheader;

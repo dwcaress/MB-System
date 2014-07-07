@@ -121,7 +121,7 @@
  * References : DoDBL Generic Sensor Format Sept. 30, 1993
  *
  *
- * © 2014 Leidos, Inc.
+ * copyright 2014 Leidos, Inc.
  * There is no charge to use the library, and it may be accessed at:
  * https://www.leidos.com/maritime/gsf.
  * This library may be redistributed and/or modified under the terms of
@@ -165,6 +165,18 @@
 #include "gsf_indx.h"
 
 /* Macros required for this module */
+// #undef fseek
+// #undef ftell
+// #if (defined _WIN32) && (defined _MSC_VER)
+// #define fseek(x, y, z) _fseeki64((x), (y), (z))
+// #define ftell(x)   _ftelli64((x))
+// #else  // Linux, MingW, MacOS
+// #undef fopen
+// #define fopen(x, y)  fopen64((x), (y))
+// #define fseek(x, y, z) fseeko64((x), (y), (z))
+// #define ftell(x)   ftello64((x))
+// #endif
+
 #define GSF_FILL_SIZE 8                   /* gsf packaging with no checksum */
 #define GSF_FILL_SIZE_CHECKSUM 12         /* gsf packaging with checksum */
 #define GSF_STREAM_BUF_SIZE 8192          /* gsf default stream buffer size */
@@ -224,7 +236,7 @@ static int      gsfNumberParams(char *param);
  *
  ********************************************************************/
 int
-gsfStat (char *filename, long long *sz)
+gsfStat (const char *filename, long long *sz)
 {
     int rc;
 
@@ -238,14 +250,12 @@ gsfStat (char *filename, long long *sz)
 
 #if (defined __WINDOWS__) || (defined __MINGW32__)
     struct _stati64    stbuf;
-    rc = _stat64(filename, &stbuf);
+    rc = _stati64(filename, &stbuf);
 #else
-//    struct stat64      stbuf;
-//    rc = stat64(filename, &stbuf);
-    struct stat stbuf;
-    rc = stat(filename, &stbuf);
+    struct stat64      stbuf;
+    rc = stat64(filename, &stbuf);
 #endif
- 
+
     if (!rc)
     {
         *sz = stbuf.st_size;

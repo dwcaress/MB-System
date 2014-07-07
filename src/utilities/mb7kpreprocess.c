@@ -350,7 +350,7 @@ int main (int argc, char **argv)
 	int	nrec_v2detection_tot = 0;
 	int	nrec_v2rawdetection_tot = 0;
 	int	nrec_v2snippet_tot = 0;
-	int nrec_calibratedsnippet_tot = 0;
+	int	nrec_calibratedsnippet_tot = 0;
 	int	nrec_processedsidescan_tot = 0;
 	int	nrec_installation_tot = 0;
 	int	nrec_systemeventmessage_tot = 0;
