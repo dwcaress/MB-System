@@ -232,8 +232,8 @@ sed -i.bak s/2\.69/2\.65/ configure.ac
 #     prior to making a source distribution
 #
 # First clean up old installation and build
-make uninstall
-make clean
+make -j uninstall
+make -j clean
 
 # Reconstruct the build system, and then use it to build in place
 # in my personal development tree
@@ -266,13 +266,13 @@ CFLAGS="-g -Wall -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 #    --without-gsf \
 #    --enable-bundledproj
 
-make
+make -j
 
-make install
+make -j install
 
 cd src/htmlsrc ; make_mbhtml ; cd ../..
 
-make install
+make -j install
 
 #
 #------------------------------------------------------------------------------

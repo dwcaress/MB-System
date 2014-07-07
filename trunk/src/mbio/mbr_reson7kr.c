@@ -1686,6 +1686,7 @@ fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %
 					store->read_v2detection = MB_NO;
 					store->read_v2rawdetection = MB_NO;
 					store->read_v2snippet = MB_NO;
+					store->read_calibratedsnippet = MB_NO;
 					store->read_processedsidescan = MB_NO;
 					}
 				}

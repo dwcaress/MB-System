@@ -756,7 +756,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 					}
 				}
 			}
-
+			
 		/* print debug statements */
 		if (verbose >= 5)
 			{
@@ -1004,7 +1004,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_ping->number_beams = nbath;
 
 		/* allocate memory in arrays if required */
-		if (nbath > 0)
+		if (nbath > mb_ping->number_beams)
 		    {
 		    mb_ping->beam_flags
 			= (unsigned char *)
@@ -1023,7 +1023,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			*error = MB_ERROR_MEMORY_FAIL;
 			}
 		    }
-		if (namp > 0
+		if (namp > mb_ping->number_beams
 		    && mb_ping->mc_amplitude != NULL)
 		    {
 		    mb_ping->mc_amplitude = (double *) realloc(mb_ping->mc_amplitude, namp * sizeof(double));
@@ -1042,6 +1042,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			*error = MB_ERROR_MEMORY_FAIL;
 			}
 		    }
+		mb_ping->number_beams = nbath;
 
 		/* if ping flag set check for any unset
 		    beam flags - set or unset ping flag based on whether any
@@ -1069,9 +1070,9 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    }
 			else
 			    {
-			    mb_ping->depth[i] = 0.0;
-			    mb_ping->across_track[i] = 0.0;
-			    mb_ping->along_track[i] = 0.0;
+			    mb_ping->depth[i] = GSF_NULL_DEPTH;
+			    mb_ping->across_track[i] = GSF_NULL_ACROSS_TRACK;
+			    mb_ping->along_track[i] = GSF_NULL_ALONG_TRACK;
 			    }
 			}
 
@@ -1087,8 +1088,9 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			mb_ping->mr_amplitude[i] = amp[i];
 			}
 
-		/* get scale factor for bathymetry */
-		gsfSetDefaultScaleFactor(mb_ping);
+		/* reset GSF scale factors if needed */
+		mbsys_gsf_setscalefactors(verbose, MB_NO, mb_ping, error);
+			
 		}
 
 	/* insert comment in structure */
@@ -1601,6 +1603,7 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		mb_ping->depth_corrector = 0.0;
 		}
+
 	    /* get transducer_depth */
 	    *transducer_depth = mb_ping->depth_corrector + mb_ping->heave;
 
@@ -1742,7 +1745,7 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	    /* get scale factor for bathymetry */
-	    gsfSetDefaultScaleFactor(mb_ping);
+	    // gsfSetDefaultScaleFactor(mb_ping);
 
 	    /* set status */
 	    *error = MB_ERROR_NO_ERROR;
@@ -2068,20 +2071,20 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get roll pitch and heave */
 		if (roll != 0.0)
-			mb_ping->roll = heading;
+			mb_ping->roll = roll;
 		else
 			mb_ping->roll = GSF_NULL_ROLL;
 		if (pitch != 0.0)
-			mb_ping->pitch = heading;
+			mb_ping->pitch = pitch;
 		else
 			mb_ping->pitch = GSF_NULL_PITCH;
 		if (heave != 0.0)
-			mb_ping->heave = heading;
+			mb_ping->heave = heave;
 		else
 			mb_ping->heave = GSF_NULL_HEAVE;
 
 		/* get scale factors */
-		gsfSetDefaultScaleFactor(mb_ping);
+		// gsfSetDefaultScaleFactor(mb_ping);
 		}
 
 	/* print output debug statements */
@@ -2309,16 +2312,47 @@ int mbsys_gsf_copy(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata,
-			int nbits, int signedvalue,
-			double *multiplier, double *offset, int *error)
+int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_ping, int *error)
 {
-	char	*function_name = "mbsys_gsf_getscale";
+	char	*function_name = "mbsys_gsf_setscalefactors";
 	int	status = MB_SUCCESS;
-	double	datamin;
-	double	datamax;
-	int	firstfound;
-	int 	i;
+
+	const double GSF_DEPTH_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_ACROSS_TRACK_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_ALONG_TRACK_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_TRAVEL_TIME_ASSUMED_HIGHEST_PRECISION = 10e6;
+	const double GSF_BEAM_ANGLE_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_MEAN_CAL_AMPLITUDE_ASSUMED_HIGHEST_PRECISION = 10;
+	const double GSF_MEAN_REL_AMPLITUDE_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_ECHO_WIDTH_ASSUMED_HIGHEST_PRECISION = 10e5;
+	const double GSF_QUALITY_FACTOR_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_RECEIVE_HEAVE_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_DEPTH_ERROR_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_ACROSS_TRACK_ERROR_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_ALONG_TRACK_ERROR_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_NOMINAL_DEPTH_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_QUALITY_FLAGS_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_BEAM_FLAGS_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_SIGNAL_TO_NOISE_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_BEAM_ANGLE_FORWARD_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_VERTICAL_ERROR_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_HORIZONTAL_ERROR_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_SECTOR_NUMBER_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_DETECTION_INFO_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_INCIDENT_BEAM_ADJ_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_SYSTEM_CLEANING_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_DOPPLER_CORRECTION_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_SONAR_VERT_UNCERT_ASSUMED_HIGHEST_PRECISION = 10000;
+    
+	int             i, j; /* iterators */
+	double          *dptr; /* pointer to ping array */
+	unsigned short  *usptr; /* pointer to ping array */
+	unsigned char   *ucptr; /* pointer to ping array */
+	int             id; /* type of ping array subrecord */
+	double          max, min; /* min and max value of each ping array */
+	double          max_scale_factor, min_scale_factor; /* min and max allowable size of values in ping array */
+	double          highest_precision; /* starting value for multiplier */
+	double		multiplier, offset, multiplier_min, multiplier_max;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2327,59 +2361,395 @@ int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
-		fprintf(stderr,"dbg2       data:        %p\n",(void *)data);
-		fprintf(stderr,"dbg2       flag:        %p\n",(void *)flag);
-		fprintf(stderr,"dbg2       ndata:       %d\n",ndata);
-		fprintf(stderr,"dbg2       nbits:       %d\n",nbits);
-		fprintf(stderr,"dbg2       signedvalue: %d\n",signedvalue);
+		fprintf(stderr,"dbg2       reset_all:   %d\n",reset_all);
+		fprintf(stderr,"dbg2       mb_ping:     %p\n",(void *)mb_ping);
 		}
 
-	/* create multipliers and offset for the array */
-	*multiplier = 0.0;
-	*offset = 0.0;
-	datamax = 0.0;
-	datamin  = 0.0;
-	firstfound = MB_NO;
-	for (i=0; i < ndata; i++)
+	for (i = 1; i <= GSF_MAX_PING_ARRAY_SUBRECORDS; i++)
 		{
-		if (flag == NULL || flag[i] != MB_FLAG_NULL )
+		dptr = NULL;
+		usptr = NULL;
+    
+		switch (i)
 			{
-			if (firstfound == MB_NO)
+			case GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY:
+				dptr = mb_ping->depth;
+				highest_precision = GSF_DEPTH_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = UINT_MAX;
+					min_scale_factor = 0;
+					}
+				else
+					{
+					max_scale_factor = USHRT_MAX;
+					min_scale_factor = 0;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY:
+				dptr = mb_ping->across_track;
+				highest_precision = GSF_ACROSS_TRACK_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = INT_MAX;
+					min_scale_factor = INT_MIN;
+					}
+				else
+					{
+					max_scale_factor = SHRT_MAX;
+					min_scale_factor = SHRT_MIN;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY:
+				dptr = mb_ping->along_track;
+				highest_precision = GSF_ALONG_TRACK_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = INT_MAX;
+					min_scale_factor = INT_MIN;
+					}
+				else
+					{
+					max_scale_factor = SHRT_MAX;
+					min_scale_factor = SHRT_MIN;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY:
+				dptr = mb_ping->travel_time;
+				highest_precision = GSF_TRAVEL_TIME_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY;
+				max_scale_factor = USHRT_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_ARRAY:
+				dptr = mb_ping->beam_angle;
+				highest_precision = GSF_BEAM_ANGLE_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = INT_MAX;
+					min_scale_factor = INT_MIN;
+					}
+				else
+					{
+					max_scale_factor = SHRT_MAX;
+					min_scale_factor = SHRT_MIN;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY:
+				dptr = mb_ping->mc_amplitude;
+				highest_precision = GSF_MEAN_CAL_AMPLITUDE_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY;
+				max_scale_factor = SCHAR_MAX;
+				min_scale_factor = SCHAR_MIN;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY:
+				dptr = mb_ping->mr_amplitude;
+				highest_precision = GSF_MEAN_REL_AMPLITUDE_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY;
+				max_scale_factor = UCHAR_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_ECHO_WIDTH_ARRAY:
+				dptr = mb_ping->echo_width;
+				highest_precision = GSF_ECHO_WIDTH_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_ECHO_WIDTH_ARRAY;
+				max_scale_factor = UCHAR_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_QUALITY_FACTOR_ARRAY:
+				dptr = mb_ping->quality_factor;
+				highest_precision = GSF_QUALITY_FACTOR_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_QUALITY_FACTOR_ARRAY;
+				max_scale_factor = UCHAR_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_RECEIVE_HEAVE_ARRAY:
+				dptr = mb_ping->receive_heave;
+				highest_precision = GSF_RECEIVE_HEAVE_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_RECEIVE_HEAVE_ARRAY;
+				max_scale_factor = UCHAR_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_DEPTH_ERROR_ARRAY:
+				dptr = mb_ping->depth_error;
+				highest_precision = GSF_DEPTH_ERROR_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_DEPTH_ERROR_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = UINT_MAX;
+					min_scale_factor = 0;
+					}
+				else
+					{
+					max_scale_factor = USHRT_MAX;
+					min_scale_factor = 0;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ERROR_ARRAY:
+				dptr = mb_ping->across_track_error;
+				highest_precision = GSF_ACROSS_TRACK_ERROR_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ERROR_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = UINT_MAX;
+					min_scale_factor = 0;
+					}
+				else
+					{
+					max_scale_factor = USHRT_MAX;
+					min_scale_factor = 0;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ERROR_ARRAY:
+				dptr = mb_ping->along_track_error;
+				highest_precision = GSF_ALONG_TRACK_ERROR_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ERROR_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = UINT_MAX;
+					min_scale_factor = 0;
+					}
+				else
+					{
+					max_scale_factor = USHRT_MAX;
+					min_scale_factor = 0;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY:
+				dptr = mb_ping->nominal_depth;
+				highest_precision = GSF_NOMINAL_DEPTH_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = UINT_MAX;
+					min_scale_factor = 0;
+					}
+				else
+					{
+					max_scale_factor = USHRT_MAX;
+					min_scale_factor = 0;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_QUALITY_FLAGS_ARRAY:
+				ucptr = mb_ping->quality_flags;
+				highest_precision = GSF_QUALITY_FLAGS_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_QUALITY_FLAGS_ARRAY;
+				max_scale_factor = UCHAR_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_BEAM_FLAGS_ARRAY:
+				ucptr = mb_ping->beam_flags;
+				highest_precision = GSF_BEAM_FLAGS_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_BEAM_FLAGS_ARRAY;
+				max_scale_factor = UCHAR_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_SIGNAL_TO_NOISE_ARRAY:
+				dptr = mb_ping->signal_to_noise;
+				highest_precision = GSF_SIGNAL_TO_NOISE_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_SIGNAL_TO_NOISE_ARRAY;
+				max_scale_factor = UCHAR_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY:
+				dptr = mb_ping->beam_angle_forward;
+				highest_precision = GSF_BEAM_ANGLE_FORWARD_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = UINT_MAX;
+					min_scale_factor = 0;
+					}
+				else
+					{
+					max_scale_factor = USHRT_MAX;
+					min_scale_factor = 0;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_VERTICAL_ERROR_ARRAY:
+				dptr = mb_ping->vertical_error;
+				highest_precision = GSF_VERTICAL_ERROR_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_VERTICAL_ERROR_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = UINT_MAX;
+					min_scale_factor = 0;
+					}
+				else
+					{
+					max_scale_factor = USHRT_MAX;
+					min_scale_factor = 0;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_HORIZONTAL_ERROR_ARRAY:
+				dptr = mb_ping->horizontal_error;
+				highest_precision = GSF_HORIZONTAL_ERROR_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_HORIZONTAL_ERROR_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = UINT_MAX;
+					min_scale_factor = 0;
+					}
+				else
+					{
+					max_scale_factor = USHRT_MAX;
+					min_scale_factor = 0;
+					}
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_SECTOR_NUMBER_ARRAY:
+				usptr = mb_ping->sector_number;
+				highest_precision = GSF_SECTOR_NUMBER_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_SECTOR_NUMBER_ARRAY;
+				max_scale_factor = UCHAR_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_DETECTION_INFO_ARRAY:
+				usptr = mb_ping->detection_info;
+				highest_precision = GSF_DETECTION_INFO_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_DETECTION_INFO_ARRAY;
+				max_scale_factor = UCHAR_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY:
+				dptr = mb_ping->incident_beam_adj;
+				highest_precision = GSF_INCIDENT_BEAM_ADJ_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY;
+				max_scale_factor = SCHAR_MAX;
+				min_scale_factor = SCHAR_MIN;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_SYSTEM_CLEANING_ARRAY:
+				usptr = mb_ping->system_cleaning;
+				highest_precision = GSF_SYSTEM_CLEANING_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_SYSTEM_CLEANING_ARRAY;
+				max_scale_factor = UCHAR_MAX;
+				min_scale_factor = 0;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY:
+				dptr = mb_ping->doppler_corr;
+				highest_precision = GSF_DOPPLER_CORRECTION_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY;
+				max_scale_factor = SCHAR_MAX;
+				min_scale_factor = SCHAR_MIN;
+				break;
+			case GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY:
+				dptr = mb_ping->sonar_vert_uncert;
+				highest_precision = GSF_SONAR_VERT_UNCERT_ASSUMED_HIGHEST_PRECISION;
+				id = GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY;
+				if ((mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag & 0xF0) == GSF_FIELD_SIZE_FOUR)
+					{
+					max_scale_factor = UINT_MAX;
+					min_scale_factor = 0;
+					}
+				else
+					{
+					max_scale_factor = USHRT_MAX;
+					min_scale_factor = 0;
+					}
+				break;
+    
+			}
+    
+		if (dptr != NULL || usptr != NULL)
+			{
+			max = DBL_MIN;
+			min = DBL_MAX;
+	    
+			if (dptr != NULL)
 				{
-				datamax = data[i];
-				datamin = data[i];
-				firstfound = MB_YES;
+				for (j = 0; j < mb_ping->number_beams; j++)
+					{
+					if (dptr[j] > max)
+						max = dptr[j];
+					if (dptr[j] < min)
+						min = dptr[j];
+					}
 				}
+			else if (usptr != NULL)
+				{
+				for (j = 0; j < mb_ping->number_beams; j++)
+					{
+					if (usptr[j] > max)
+						max = (double) usptr[j];
+					if (usptr[j] < min)
+						min = (double) usptr[j];
+					}
+				}
+			else if (ucptr != NULL)
+				{
+				for (j = 0; j < mb_ping->number_beams; j++)
+					{
+					if (ucptr[j] > max)
+						max = (double) ucptr[j];
+					if (ucptr[j] < min)
+						min = (double) ucptr[j];
+					}
+				}
+	    
+
+			if (min_scale_factor == 0.0 && min < 0.0)
+				offset = floor(-min) + 1.0;
+			else if (id == 1 && mb_ping->depth_corrector > 0.0)
+				offset = floor(MAX(-mb_ping->depth_corrector, -min)) + 1.0;				
 			else
+				offset = 0;
+			
+			/* calculate the ideal multiplier, but use no value larger than the max scale factor multiplier */
+			multiplier_min = highest_precision;
+			multiplier_max = highest_precision;
+			if (max > 0.0 && max > offset)
+				multiplier_max = floor(max_scale_factor / ( max + mb_ping->scaleFactors.scaleTable[id - 1].offset));
+			if (min < 0.0 && min < -offset)
+				multiplier_min = floor(min_scale_factor / ( min + mb_ping->scaleFactors.scaleTable[id - 1].offset));
+			multiplier = MAX(MIN(multiplier_min, multiplier_max), 1.0);
+			
+			if (reset_all == MB_YES
+				|| multiplier < mb_ping->scaleFactors.scaleTable[id - 1].multiplier)
 				{
-				datamax = MAX(datamax, data[i]);
-				datamin = MIN(datamin, data[i]);
+fprintf(stderr,"BEFORE Scale Factors %2d of %2d: minmax: %10f %10f compressionFlag:%5x offset:%10f multiplier:%10f\n",
+id, GSF_MAX_PING_ARRAY_SUBRECORDS, min, max,
+mb_ping->scaleFactors.scaleTable[id - 1].compressionFlag,
+mb_ping->scaleFactors.scaleTable[id - 1].offset,
+mb_ping->scaleFactors.scaleTable[id - 1].multiplier);
+fprintf(stderr,"     highest_precision:%f offset:%f multiplier_min:%f multiplier_max:%f multiplier:%f\n",
+highest_precision,offset,multiplier_min,multiplier_max,multiplier);
+
+				mb_ping->scaleFactors.scaleTable[id - 1].multiplier = multiplier;
+				mb_ping->scaleFactors.scaleTable[id - 1].offset = offset;
+
+fprintf(stderr,"AFTER  Scale Factors %2d of %2d: minmax: %10f %10f compressionFlag:%5x offset:%10f multiplier:%10f\n\n",
+id, GSF_MAX_PING_ARRAY_SUBRECORDS, min, max,
+mb_ping->scaleFactors.scaleTable[id - 1].compressionFlag,
+mb_ping->scaleFactors.scaleTable[id - 1].offset,
+mb_ping->scaleFactors.scaleTable[id - 1].multiplier);
 				}
+			}
+    
+		}
+				
+	/* print output debug statements */
+	if (verbose >= 4)
+		{
+		fprintf(stderr,"\ndbg4  GSF Scale Factors Calculated in MBIO function <%s>\n",function_name);
+		for (i = 1; i <= GSF_MAX_PING_ARRAY_SUBRECORDS; i++)
+			{
+			fprintf(stderr,"dbg4       Scale Factors %2d of %2d: compressionFlag:%5x offset:%10f multiplier:%10f\n",
+				i, GSF_MAX_PING_ARRAY_SUBRECORDS,
+				mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag,
+				mb_ping->scaleFactors.scaleTable[i - 1].offset,
+				mb_ping->scaleFactors.scaleTable[i - 1].multiplier);
 			}
 		}
 
-	if (datamin != datamax)
-		{
-		/* double rounded to an integer */
-		*multiplier = (double)((int)pow(2, nbits)
-			/ (1.05 * (datamax - datamin)));
-		if (signedvalue == MB_YES)
-			{
-			*offset = -(datamax + datamin) / 2;
-			}
-		else
-			{
-			*offset = -datamin;
-			}
-		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       multiplier: %f\n",*multiplier);
-		fprintf(stderr,"dbg2       offset:     %f\n",*offset);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -2388,4 +2758,5 @@ int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata,
 	/* return status */
 	return(status);
 }
+
 /*--------------------------------------------------------------------*/

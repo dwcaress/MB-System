@@ -157,9 +157,9 @@ int main (int argc, char **argv)
 	int	output_counts = MB_NO;
 	int	nfile_read = 0;
 	int	nfile_write = 0;
-	int	nrec_0x30_parameter_stop = 0;
-	int	nrec_0x31_parameter_off = 0;
-	int	nrec_0x32_parameter_on = 0;
+	int	nrec_0x30_pu_id = 0;
+	int	nrec_0x31_pu_status = 0;
+	int	nrec_0x32_pu_bist = 0;
 	int	nrec_0x33_parameter_extra = 0;
 	int	nrec_0x41_attitude = 0;
 	int	nrec_0x43_clock = 0;
@@ -172,6 +172,7 @@ int main (int argc, char **argv)
 	int	nrec_0x4A_tilt = 0;
 	int	nrec_0x4B_echogram = 0;
 	int	nrec_0x4E_rawbeamN = 0;
+	int	nrec_0x4F_quality = 0;
 	int	nrec_0x50_pos = 0;
 	int	nrec_0x52_runtime = 0;
 	int	nrec_0x53_sidescan = 0;
@@ -195,9 +196,9 @@ int main (int argc, char **argv)
 	int	nrec_0xE5_bathymetry_mbari59 = 0;
 
 	/* counting variables total */
-	int	nrec_0x30_parameter_stop_tot = 0;
-	int	nrec_0x31_parameter_off_tot = 0;
-	int	nrec_0x32_parameter_on_tot = 0;
+	int	nrec_0x30_pu_id_tot = 0;
+	int	nrec_0x31_pu_status_tot = 0;
+	int	nrec_0x32_pu_bist_tot = 0;
 	int	nrec_0x33_parameter_extra_tot = 0;
 	int	nrec_0x41_attitude_tot = 0;
 	int	nrec_0x43_clock_tot = 0;
@@ -210,6 +211,7 @@ int main (int argc, char **argv)
 	int	nrec_0x4A_tilt_tot = 0;
 	int	nrec_0x4B_echogram_tot = 0;
 	int	nrec_0x4E_rawbeamN_tot = 0;
+	int	nrec_0x4F_quality_tot = 0;
 	int	nrec_0x50_pos_tot = 0;
 	int	nrec_0x52_runtime_tot = 0;
 	int	nrec_0x53_sidescan_tot = 0;
@@ -662,9 +664,9 @@ int main (int argc, char **argv)
 		}
 
 	/* reset file record counters */
-	nrec_0x30_parameter_stop = 0;
-	nrec_0x31_parameter_off = 0;
-	nrec_0x32_parameter_on = 0;
+	nrec_0x30_pu_id = 0;
+	nrec_0x31_pu_status = 0;
+	nrec_0x32_pu_bist = 0;
 	nrec_0x33_parameter_extra = 0;
 	nrec_0x41_attitude = 0;
 	nrec_0x43_clock = 0;
@@ -677,6 +679,7 @@ int main (int argc, char **argv)
 	nrec_0x4A_tilt = 0;
 	nrec_0x4B_echogram = 0;
 	nrec_0x4E_rawbeamN = 0;
+	nrec_0x4F_quality = 0;
 	nrec_0x50_pos = 0;
 	nrec_0x52_runtime = 0;
 	nrec_0x53_sidescan = 0;
@@ -725,50 +728,56 @@ int main (int argc, char **argv)
 		/* count the record that was just read */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
-			/* get survey data structure */
-			ping = (struct mbsys_simrad3_ping_struct *) istore->ping;
+			if (istore->serial != 0 && istore->serial == istore->par_serial_2)
+				ping = (struct mbsys_simrad3_ping_struct *) istore->ping2;
+			else
+				ping = (struct mbsys_simrad3_ping_struct *) istore->ping1;
 
 			if (format == MBF_EM300RAW)
 				{
 				nrec_0x58_bathymetry2++;
-				if (ping->png_raw4_read == MB_YES)
+				if (ping->png_raw_read == MB_YES)
 					nrec_0x4E_rawbeamN++;
-				if (ping->png_ss2_read == MB_YES)
+				if (ping->png_ss_read == MB_YES)
 					nrec_0x59_sidescan2++;
 				}
 			else if (format == MBF_EM300MBA)
 				{
 				nrec_0xE5_bathymetry_mbari59++;
-				if (ping->png_raw4_read == MB_YES)
+				if (ping->png_raw_read == MB_YES)
 					nrec_0x4E_rawbeamN++;
-				if (ping->png_ss2_read == MB_YES)
+				if (ping->png_ss_read == MB_YES)
 					nrec_0x59_sidescan2++;
 				}
 			else if (format == MBF_EM710RAW)
 				{
 				nrec_0x58_bathymetry2++;
-				if (ping->png_raw4_read == MB_YES)
+				if (ping->png_raw_read == MB_YES)
 					nrec_0x4E_rawbeamN++;
-				if (ping->png_ss2_read == MB_YES)
+				if (ping->png_ss_read == MB_YES)
 					nrec_0x59_sidescan2++;
+				if (ping->png_quality_read == MB_YES)
+					nrec_0x4F_quality++;
 				}
 			else if (format == MBF_EM710MBA)
 				{
 				nrec_0xE5_bathymetry_mbari59++;
-				if (ping->png_raw4_read == MB_YES)
+				if (ping->png_raw_read == MB_YES)
 					nrec_0x4E_rawbeamN++;
-				if (ping->png_ss2_read == MB_YES)
+				if (ping->png_ss_read == MB_YES)
 					nrec_0x59_sidescan2++;
+				if (ping->png_quality_read == MB_YES)
+					nrec_0x4F_quality++;
 				}
 			}
 		else if (status == MB_SUCCESS)
 			{
-			if (istore->type == EM3_STOP2)
-				nrec_0x30_parameter_stop++;
-			if (istore->type == EM3_OFF)
-				nrec_0x31_parameter_off++;
-			if (istore->type == EM3_ON)
-				nrec_0x32_parameter_on++;
+			if (istore->type == EM3_PU_ID)
+				nrec_0x30_pu_id++;
+			if (istore->type == EM3_PU_STATUS)
+				nrec_0x31_pu_status++;
+			if (istore->type == EM3_PU_BIST)
+				nrec_0x32_pu_bist++;
 			if (istore->type == EM3_ATTITUDE)
 				nrec_0x41_attitude++;
 			if (istore->type == EM3_CLOCK)
@@ -791,6 +800,8 @@ int main (int argc, char **argv)
 				nrec_0x4B_echogram++;
 			if (istore->type == EM3_RAWBEAM4)
 				nrec_0x4E_rawbeamN++;
+			if (istore->type == EM3_QUALITY)
+				nrec_0x4F_quality++;
 			if (istore->type == EM3_POS)
 				nrec_0x50_pos++;
 			if (istore->type == EM3_RUN_PARAMETER)
@@ -1190,9 +1201,9 @@ int main (int argc, char **argv)
 	if (output_counts == MB_YES)
 		{
 		fprintf(stdout, "\nData records read from: %s\n", ifile);
-		fprintf(stdout, "     nrec_0x30_parameter_stop:         %d\n", nrec_0x30_parameter_stop);
-		fprintf(stdout, "     nrec_0x31_parameter_off:          %d\n", nrec_0x31_parameter_off);
-		fprintf(stdout, "     nrec_0x32_parameter_on:           %d\n", nrec_0x32_parameter_on);
+		fprintf(stdout, "     nrec_0x30_pu_id:         %d\n", nrec_0x30_pu_id);
+		fprintf(stdout, "     nrec_0x31_pu_status:          %d\n", nrec_0x31_pu_status);
+		fprintf(stdout, "     nrec_0x32_pu_bist:           %d\n", nrec_0x32_pu_bist);
 		fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
 		fprintf(stdout, "     nrec_0x41_attitude:               %d\n", nrec_0x41_attitude);
 		fprintf(stdout, "     nrec_0x43_clock:                  %d\n", nrec_0x43_clock);
@@ -1205,6 +1216,7 @@ int main (int argc, char **argv)
 		fprintf(stdout, "     nrec_0x4A_tilt:                   %d\n", nrec_0x4A_tilt);
 		fprintf(stdout, "     nrec_0x4B_echogram:               %d\n", nrec_0x4B_echogram);
 		fprintf(stdout, "     nrec_0x4E_rawbeamN:               %d\n", nrec_0x4E_rawbeamN);
+		fprintf(stdout, "     nrec_0x4F_quality:                %d\n", nrec_0x4F_quality);
 		fprintf(stdout, "     nrec_0x50_pos:                    %d\n", nrec_0x50_pos);
 		fprintf(stdout, "     nrec_0x52_runtime:                %d\n", nrec_0x52_runtime);
 		fprintf(stdout, "     nrec_0x53_sidescan:               %d\n", nrec_0x53_sidescan);
@@ -1227,9 +1239,9 @@ int main (int argc, char **argv)
 		fprintf(stdout, "     nrec_0xE4_sidescan_mbari59:       %d\n", nrec_0xE4_sidescan_mbari59);
 		fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59:     %d\n", nrec_0xE5_bathymetry_mbari59);
 
-		nrec_0x30_parameter_stop_tot += nrec_0x30_parameter_stop;
-		nrec_0x31_parameter_off_tot += nrec_0x31_parameter_off;
-		nrec_0x32_parameter_on_tot += nrec_0x32_parameter_on;
+		nrec_0x30_pu_id_tot += nrec_0x30_pu_id;
+		nrec_0x31_pu_status_tot += nrec_0x31_pu_status;
+		nrec_0x32_pu_bist_tot += nrec_0x32_pu_bist;
 		nrec_0x33_parameter_extra_tot += nrec_0x33_parameter_extra;
 		nrec_0x41_attitude_tot += nrec_0x41_attitude;
 		nrec_0x43_clock_tot += nrec_0x43_clock;
@@ -1242,6 +1254,7 @@ int main (int argc, char **argv)
 		nrec_0x4A_tilt_tot += nrec_0x4A_tilt;
 		nrec_0x4B_echogram_tot += nrec_0x4B_echogram;
 		nrec_0x4E_rawbeamN_tot += nrec_0x4E_rawbeamN;
+		nrec_0x4F_quality_tot += nrec_0x4F_quality;
 		nrec_0x50_pos_tot += nrec_0x50_pos;
 		nrec_0x52_runtime_tot += nrec_0x52_runtime;
 		nrec_0x53_sidescan_tot += nrec_0x53_sidescan;
@@ -1315,9 +1328,9 @@ int main (int argc, char **argv)
 	if (output_counts == MB_YES)
 		{
 		fprintf(stdout, "\nTotal data records read from: %s\n", read_file);
-		fprintf(stdout, "     nrec_0x30_parameter_stop_tot:     %d\n", nrec_0x30_parameter_stop_tot);
-		fprintf(stdout, "     nrec_0x31_parameter_off_tot:      %d\n", nrec_0x31_parameter_off_tot);
-		fprintf(stdout, "     nrec_0x32_parameter_on_tot:       %d\n", nrec_0x32_parameter_on_tot);
+		fprintf(stdout, "     nrec_0x30_pu_id_tot:     %d\n", nrec_0x30_pu_id_tot);
+		fprintf(stdout, "     nrec_0x31_pu_status_tot:      %d\n", nrec_0x31_pu_status_tot);
+		fprintf(stdout, "     nrec_0x32_pu_bist_tot:       %d\n", nrec_0x32_pu_bist_tot);
 		fprintf(stdout, "     nrec_0x33_parameter_extra_tot:    %d\n", nrec_0x33_parameter_extra_tot);
 		fprintf(stdout, "     nrec_0x41_attitude_tot:           %d\n", nrec_0x41_attitude_tot);
 		fprintf(stdout, "     nrec_0x43_clock_tot:              %d\n", nrec_0x43_clock_tot);
@@ -1330,6 +1343,7 @@ int main (int argc, char **argv)
 		fprintf(stdout, "     nrec_0x4A_tilt_tot:               %d\n", nrec_0x4A_tilt_tot);
 		fprintf(stdout, "     nrec_0x4B_echogram_tot:           %d\n", nrec_0x4B_echogram_tot);
 		fprintf(stdout, "     nrec_0x4E_rawbeamN_tot:           %d\n", nrec_0x4E_rawbeamN_tot);
+		fprintf(stdout, "     nrec_0x4F_quality_tot:            %d\n", nrec_0x4F_quality_tot);
 		fprintf(stdout, "     nrec_0x50_pos_tot:                %d\n", nrec_0x50_pos_tot);
 		fprintf(stdout, "     nrec_0x52_runtime_tot:            %d\n", nrec_0x52_runtime_tot);
 		fprintf(stdout, "     nrec_0x53_sidescan_tot:           %d\n", nrec_0x53_sidescan_tot);
@@ -1352,9 +1366,9 @@ int main (int argc, char **argv)
 		fprintf(stdout, "     nrec_0xE4_sidescan_mbari59_tot:   %d\n", nrec_0xE4_sidescan_mbari59_tot);
 		fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59_tot: %d\n", nrec_0xE5_bathymetry_mbari59_tot);
 		}
-	nrec_0x30_parameter_stop_tot = 0;
-	nrec_0x31_parameter_off_tot = 0;
-	nrec_0x32_parameter_on_tot = 0;
+	nrec_0x30_pu_id_tot = 0;
+	nrec_0x31_pu_status_tot = 0;
+	nrec_0x32_pu_bist_tot = 0;
 	nrec_0x33_parameter_extra_tot = 0;
 	nrec_0x41_attitude_tot = 0;
 	nrec_0x43_clock_tot = 0;
@@ -1367,6 +1381,7 @@ int main (int argc, char **argv)
 	nrec_0x4A_tilt_tot = 0;
 	nrec_0x4B_echogram_tot = 0;
 	nrec_0x4E_rawbeamN_tot = 0;
+	nrec_0x4F_quality_tot = 0;
 	nrec_0x50_pos_tot = 0;
 	nrec_0x52_runtime_tot = 0;
 	nrec_0x53_sidescan_tot = 0;
@@ -1561,9 +1576,9 @@ int main (int argc, char **argv)
 		}
 
 	/* reset file record counters */
-	nrec_0x30_parameter_stop = 0;
-	nrec_0x31_parameter_off = 0;
-	nrec_0x32_parameter_on = 0;
+	nrec_0x30_pu_id = 0;
+	nrec_0x31_pu_status = 0;
+	nrec_0x32_pu_bist = 0;
 	nrec_0x33_parameter_extra = 0;
 	nrec_0x41_attitude = 0;
 	nrec_0x43_clock = 0;
@@ -1576,6 +1591,7 @@ int main (int argc, char **argv)
 	nrec_0x4A_tilt = 0;
 	nrec_0x4B_echogram = 0;
 	nrec_0x4E_rawbeamN = 0;
+	nrec_0x4F_quality = 0;
 	nrec_0x50_pos = 0;
 	nrec_0x52_runtime = 0;
 	nrec_0x53_sidescan = 0;
@@ -1634,22 +1650,27 @@ int main (int argc, char **argv)
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 			/* get survey data structure */
-			ping = (struct mbsys_simrad3_ping_struct *) istore->ping;
+			if (istore->serial != 0 && istore->serial == istore->par_serial_2)
+				ping = (struct mbsys_simrad3_ping_struct *) istore->ping2;
+			else
+				ping = (struct mbsys_simrad3_ping_struct *) istore->ping1;
 
 			nrec_0xE5_bathymetry_mbari59++;
-			if (ping->png_raw4_read == MB_YES)
+			if (ping->png_raw_read == MB_YES)
 				nrec_0x4E_rawbeamN++;
-			if (ping->png_ss2_read == MB_YES)
+			if (ping->png_ss_read == MB_YES)
 				nrec_0x59_sidescan2++;
+			if (ping->png_quality_read == MB_YES)
+				nrec_0x4F_quality++;
 			}
 		else if (status == MB_SUCCESS)
 			{
-			if (istore->type == EM3_STOP2)
-				nrec_0x30_parameter_stop++;
-			if (istore->type == EM3_OFF)
-				nrec_0x31_parameter_off++;
-			if (istore->type == EM3_ON)
-				nrec_0x32_parameter_on++;
+			if (istore->type == EM3_PU_ID)
+				nrec_0x30_pu_id++;
+			if (istore->type == EM3_PU_STATUS)
+				nrec_0x31_pu_status++;
+			if (istore->type == EM3_PU_BIST)
+				nrec_0x32_pu_bist++;
 			if (istore->type == EM3_ATTITUDE)
 				nrec_0x41_attitude++;
 			if (istore->type == EM3_CLOCK)
@@ -1672,6 +1693,8 @@ int main (int argc, char **argv)
 				nrec_0x4B_echogram++;
 			if (istore->type == EM3_RAWBEAM4)
 				nrec_0x4E_rawbeamN++;
+			if (istore->type == EM3_QUALITY)
+				nrec_0x4F_quality++;
 			if (istore->type == EM3_POS)
 				nrec_0x50_pos++;
 			if (istore->type == EM3_RUN_PARAMETER)
@@ -1710,7 +1733,10 @@ int main (int argc, char **argv)
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 			/* get survey data structure */
-			ping = (struct mbsys_simrad3_ping_struct *) istore->ping;
+			if (istore->serial != 0 && istore->serial == istore->par_serial_2)
+				ping = (struct mbsys_simrad3_ping_struct *) istore->ping2;
+			else
+				ping = (struct mbsys_simrad3_ping_struct *) istore->ping1;
 
 			/* merge navigation from best available source */
 			if (ndat_nav > 0)
@@ -2331,9 +2357,9 @@ int main (int argc, char **argv)
 	if(output_counts == MB_YES)
 		{
 		fprintf(stdout, "\nData records written to: %s\n", ofile);
-		fprintf(stdout, "     nrec_0x30_parameter_stop:         %d\n", nrec_0x30_parameter_stop);
-		fprintf(stdout, "     nrec_0x31_parameter_off:          %d\n", nrec_0x31_parameter_off);
-		fprintf(stdout, "     nrec_0x32_parameter_on:           %d\n", nrec_0x32_parameter_on);
+		fprintf(stdout, "     nrec_0x30_pu_id:         %d\n", nrec_0x30_pu_id);
+		fprintf(stdout, "     nrec_0x31_pu_status:          %d\n", nrec_0x31_pu_status);
+		fprintf(stdout, "     nrec_0x32_pu_bist:           %d\n", nrec_0x32_pu_bist);
 		fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
 		fprintf(stdout, "     nrec_0x41_attitude:               %d\n", nrec_0x41_attitude);
 		fprintf(stdout, "     nrec_0x43_clock:                  %d\n", nrec_0x43_clock);
@@ -2346,6 +2372,7 @@ int main (int argc, char **argv)
 		fprintf(stdout, "     nrec_0x4A_tilt:                   %d\n", nrec_0x4A_tilt);
 		fprintf(stdout, "     nrec_0x4B_echogram:               %d\n", nrec_0x4B_echogram);
 		fprintf(stdout, "     nrec_0x4E_rawbeamN:               %d\n", nrec_0x4E_rawbeamN);
+		fprintf(stdout, "     nrec_0x4F_quality:            v   %d\n", nrec_0x4F_quality);
 		fprintf(stdout, "     nrec_0x50_pos:                    %d\n", nrec_0x50_pos);
 		fprintf(stdout, "     nrec_0x52_runtime:                %d\n", nrec_0x52_runtime);
 		fprintf(stdout, "     nrec_0x53_sidescan:               %d\n", nrec_0x53_sidescan);
@@ -2369,9 +2396,9 @@ int main (int argc, char **argv)
 		fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59:     %d\n", nrec_0xE5_bathymetry_mbari59);
 		}
 
-	nrec_0x30_parameter_stop_tot += nrec_0x30_parameter_stop;
-	nrec_0x31_parameter_off_tot += nrec_0x31_parameter_off;
-	nrec_0x32_parameter_on_tot += nrec_0x32_parameter_on;
+	nrec_0x30_pu_id_tot += nrec_0x30_pu_id;
+	nrec_0x31_pu_status_tot += nrec_0x31_pu_status;
+	nrec_0x32_pu_bist_tot += nrec_0x32_pu_bist;
 	nrec_0x33_parameter_extra_tot += nrec_0x33_parameter_extra;
 	nrec_0x41_attitude_tot += nrec_0x41_attitude;
 	nrec_0x43_clock_tot += nrec_0x43_clock;
@@ -2384,6 +2411,7 @@ int main (int argc, char **argv)
 	nrec_0x4A_tilt_tot += nrec_0x4A_tilt;
 	nrec_0x4B_echogram_tot += nrec_0x4B_echogram;
 	nrec_0x4E_rawbeamN_tot += nrec_0x4E_rawbeamN;
+	nrec_0x4F_quality_tot += nrec_0x4F_quality;
 	nrec_0x50_pos_tot += nrec_0x50_pos;
 	nrec_0x52_runtime_tot += nrec_0x52_runtime;
 	nrec_0x53_sidescan_tot += nrec_0x53_sidescan;
@@ -2495,9 +2523,9 @@ int main (int argc, char **argv)
 		fprintf(stdout, "\nTotal files read:  %d\n", nfile_read);
 		fprintf(stdout, "Total files written: %d\n", nfile_write);
 		fprintf(stdout, "\nTotal data records written from: %s\n", read_file);
-		fprintf(stdout, "     nrec_0x30_parameter_stop_tot:     %d\n", nrec_0x30_parameter_stop_tot);
-		fprintf(stdout, "     nrec_0x31_parameter_off_tot:      %d\n", nrec_0x31_parameter_off_tot);
-		fprintf(stdout, "     nrec_0x32_parameter_on_tot:       %d\n", nrec_0x32_parameter_on_tot);
+		fprintf(stdout, "     nrec_0x30_pu_id_tot:     %d\n", nrec_0x30_pu_id_tot);
+		fprintf(stdout, "     nrec_0x31_pu_status_tot:      %d\n", nrec_0x31_pu_status_tot);
+		fprintf(stdout, "     nrec_0x32_pu_bist_tot:       %d\n", nrec_0x32_pu_bist_tot);
 		fprintf(stdout, "     nrec_0x33_parameter_extra_tot:    %d\n", nrec_0x33_parameter_extra_tot);
 		fprintf(stdout, "     nrec_0x41_attitude_tot:           %d\n", nrec_0x41_attitude_tot);
 		fprintf(stdout, "     nrec_0x43_clock_tot:              %d\n", nrec_0x43_clock_tot);
@@ -2510,6 +2538,7 @@ int main (int argc, char **argv)
 		fprintf(stdout, "     nrec_0x4A_tilt_tot:               %d\n", nrec_0x4A_tilt_tot);
 		fprintf(stdout, "     nrec_0x4B_echogram_tot:           %d\n", nrec_0x4B_echogram_tot);
 		fprintf(stdout, "     nrec_0x4E_rawbeamN_tot:           %d\n", nrec_0x4E_rawbeamN_tot);
+		fprintf(stdout, "     nrec_0x4F_quality_tot:            %d\n", nrec_0x4F_quality_tot);
 		fprintf(stdout, "     nrec_0x50_pos_tot:                %d\n", nrec_0x50_pos_tot);
 		fprintf(stdout, "     nrec_0x52_runtime_tot:            %d\n", nrec_0x52_runtime_tot);
 		fprintf(stdout, "     nrec_0x53_sidescan_tot:           %d\n", nrec_0x53_sidescan_tot);

@@ -745,6 +745,7 @@ int mbeditviz_load_file(int ifile)
 			mb_get_fbt(mbev_verbose, swathfile, &format, &mbev_error);
 
 			/* initialize reading the swath file */
+			
 			if ((mbev_status = mb_read_init(
 				mbev_verbose,swathfile,format,mbdef_pings,mbdef_lonflip,mbdef_bounds,
 				mbdef_btime_i,mbdef_etime_i,mbdef_speedmin,mbdef_timegap,

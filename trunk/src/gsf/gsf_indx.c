@@ -70,7 +70,7 @@
  * References : DoDBL Generic Sensor Format Sept. 30, 1993
  *
  *
- * © 2014 Leidos, Inc.
+ * copyright 2014 Leidos, Inc.
  * There is no charge to use the library, and it may be accessed at:
  * https://www.leidos.com/maritime/gsf.
  * This library may be redistributed and/or modified under the terms of
@@ -108,6 +108,18 @@
 #include "gsf.h"
 #include "gsf_indx.h"
 #include "gsf_ft.h"
+
+// #undef fseek
+// #undef ftell
+// #if (defined _WIN32) && (defined _MSC_VER)
+// #define fseek(x, y, z) _fseeki64((x), (y), (z))
+// #define ftell(x)   _ftelli64((x))
+// #else  // Linux, MingW, MacOS
+// #undef fopen
+// #define fopen(x, y)  fopen64((x), (y))
+// #define fseek(x, y, z) fseeko64((x), (y), (z))
+// #define ftell(x)   ftello64((x))
+// #endif
 
 /*  Error flag defined in gsf.c */
 extern int      gsfError;
@@ -351,7 +363,6 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
      * size to the size that existed when the index was file was created,
      * and append to the index file if necessary.
      */
-
     if (index_header.gsfFileSize < ft->file_size)
     {
         ret = gsfAppendIndexFile(ndx_file, handle, ft);
@@ -361,7 +372,7 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
         }
         return(0);
     }
-    else if (index_header.gsfFileSize > ft->file_size)
+    if (index_header.gsfFileSize > ft->file_size)
     {
         /* if the indexed file size is greater than the current gsf file
          *  size, then the file has gotten smaller and the index file is
@@ -1130,6 +1141,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     gsfRecords       records;
     INDEX_REC        index_rec;
     GSF_INDEX_HEADER index_header;
+    long long        save_pos;
 
     /* Clear the index header data structure */
     memset (&index_header, 0, sizeof(index_header));
@@ -1201,6 +1213,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         {
             /* Move the index file's pointer to the first record for this type */
             fseek(ft->index_data.fp, ft->index_data.start_addr[i], 0);
+
             for(j=0; j<ft->index_data.number_of_records[i]; j++)
             {
                 /* Read the index record from the disk */
@@ -1265,6 +1278,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     /* If any ping records have been indexed read the last one. This is
      * required to ensure we have the most recent scale factors loaded.
      */
+
     if (ft->index_data.number_of_records[GSF_RECORD_SWATH_BATHYMETRY_PING])
     {
         data_id.recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
@@ -1288,11 +1302,14 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             return(-1);
         }
     }
+    gsfSeek(handle, GSF_PREVIOUS_RECORD);
+    save_pos = ftell(ft->fp);
 
     /* If the last indexed record is not the ping record we just loaded, then
      * go load the last indexed record so that the gsf file pointer is one
      * record beyond the last record we have an index for.
      */
+
     if (last_record_type != GSF_RECORD_SWATH_BATHYMETRY_PING)
     {
         data_id.recordID = last_record_type;
@@ -1316,6 +1333,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             return(-1);
         }
     }
+    fseek(ft->fp, save_pos, SEEK_SET);
 
     /*  Get the address of the end of file so we can compute percentage
      *  processed for creating the index file.
@@ -1426,6 +1444,30 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                         index_rec.nsec = records.mb_ping.ping_time.tv_nsec;
                         fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[0]);
                         ft->index_data.number_of_records[0]++;
+
+                        if (ft->index_data.record_type[0] != -1)
+                        {
+                            if (ft->index_data.scale_factor_addr == (INDEX_REC *) NULL)
+                            {
+                                ft->index_data.scale_factor_addr =
+                                    (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
+                                    sizeof(INDEX_REC));
+                            }
+                            else
+                            {
+                                ft->index_data.scale_factor_addr =
+                                    (INDEX_REC *) realloc(ft->index_data.scale_factor_addr,
+                                    ft->index_data.number_of_records[0] * sizeof(INDEX_REC));
+                            }
+
+                            /*  Couldn't calloc the memory for the scale factor addresses.  */
+
+                            if (ft->index_data.scale_factor_addr == NULL)
+                            {
+                                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                                return (-1);
+                            }
+                        }
                     }
 
                     /*  If this is the first record of this type open the
@@ -1449,7 +1491,6 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     index_rec.nsec = records.mb_ping.ping_time.tv_nsec;
                     fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
                     ft->index_data.number_of_records[id]++;
-
                     break;
 
                 case GSF_RECORD_SOUND_VELOCITY_PROFILE:
@@ -1733,6 +1774,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
      * for reading and writing.
      */
     fclose (ft->index_data.fp);
+
     if ((ft->index_data.fp = fopen(ndx_file, "rb+")) == NULL)
     {
         gsfError = GSF_INDEX_FILE_OPEN_ERROR;
@@ -1869,47 +1911,6 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             j++;
         }
     }
-
-    /* Read the scale factor addresses into memory. */
-    if (ft->index_data.record_type[0] != -1)
-    {
-        if (ft->index_data.scale_factor_addr == (INDEX_REC *) NULL)
-        {
-            ft->index_data.scale_factor_addr =
-                (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
-                sizeof(INDEX_REC));
-        }
-        else
-        {
-            ft->index_data.scale_factor_addr =
-                (INDEX_REC *) realloc(ft->index_data.scale_factor_addr,
-                ft->index_data.number_of_records[0] * sizeof(INDEX_REC));
-        }
-
-
-        /*  Couldn't calloc the memory for the scale factor addresses.  */
-
-        if (ft->index_data.scale_factor_addr == NULL)
-        {
-            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-            return (-1);
-        }
-
-        fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
-        for (i = 0; i < ft->index_data.number_of_records[0]; i++)
-        {
-            fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
-                ft->index_data.fp);
-            if (ft->index_data.swap)
-            {
-                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].sec, 1);
-                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].nsec, 1);
-                SwapLongLong((long long *) &ft->index_data.scale_factor_addr[i].addr, 1);
-            }
-
-        }
-    }
-
     /*  Set the byte swap indicator off.  No need to swap on a
      *  machine of the same sex.
      *

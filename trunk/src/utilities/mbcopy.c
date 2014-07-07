@@ -3102,7 +3102,6 @@ int mbcopy_reson8k_to_gsf(int verbose,
 	gsfRecords	    *records;
 	gsfSwathBathyPing   *mb_ping;
 	gsfMBParams params;
-	double  multiplier, offset;
 	double gain_correction;
 	double	angscale;
 	double	alpha;
@@ -3337,36 +3336,6 @@ int mbcopy_reson8k_to_gsf(int verbose,
 				  mb_ping->mr_amplitude[i] = istore->amp[i];
 				  }
 
-			  /* set scale factor for bathymetry */
-			  mbsys_gsf_getscale(verbose, istore->bath, istore->beamflag, istore->beams_bath,
-					16, MB_NO,
-					&mb_ping->scaleFactors.scaleTable[0].multiplier,
-					&mb_ping->scaleFactors.scaleTable[0].offset,
-					error);
-			  mbsys_gsf_getscale(verbose, istore->bath_acrosstrack, istore->beamflag, istore->beams_bath,
-					16, MB_YES,
-					&mb_ping->scaleFactors.scaleTable[1].multiplier,
-					&mb_ping->scaleFactors.scaleTable[1].offset,
-					error);
-			  mbsys_gsf_getscale(verbose, istore->bath_alongtrack, istore->beamflag, istore->beams_bath,
-					16, MB_YES,
-					&mb_ping->scaleFactors.scaleTable[2].multiplier,
-					&mb_ping->scaleFactors.scaleTable[2].offset,
-					error);
-
-			  /* set travel time scale assume two full byte for a
-			  	two way 120 m travel path */
-			  mb_ping->scaleFactors.scaleTable[3].multiplier = 65535/0.160;
-			  mb_ping->scaleFactors.scaleTable[3].offset = 0;
-
-			  /* assume angle degrees are stored in hundreds of a degree */
-			  mb_ping->scaleFactors.scaleTable[4].multiplier  = 100.;
-			  mb_ping->scaleFactors.scaleTable[4].offset = 0;
-			  mb_ping->scaleFactors.scaleTable[17].multiplier = 50.;
-			  mb_ping->scaleFactors.scaleTable[17].offset = 0;
-
-			  mb_ping->scaleFactors.numArraySubrecords = 6;
-
 			  /* choose gain factor -it's a guess based on dataset
 			  	regression analysis!! rcc */
 			  gain_correction = 2.2*(istore->gain & 63) + 6*istore->power;
@@ -3379,15 +3348,6 @@ int mbcopy_reson8k_to_gsf(int verbose,
 				 	/* note - we are storing 1/2 db increments */
 					mb_ping->mc_amplitude[i] = 40*log10(istore->intensity[i]);
 				  	}
-
-				/* set scale factor for mc_amplitude */
-				mbsys_gsf_getscale(verbose, mb_ping->mc_amplitude, istore->beamflag, istore->beams_amp,
-						8, MB_YES, &multiplier, &offset, error);
-		    		mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY-1].multiplier
-						= multiplier;
-				mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY-1].offset
-						= offset;
-				mb_ping->scaleFactors.numArraySubrecords ++ ;
 			  	}
 			  else if (mb_ping->mr_amplitude != NULL)
 			  	{
@@ -3395,15 +3355,6 @@ int mbcopy_reson8k_to_gsf(int verbose,
 					{
 					mb_ping->mr_amplitude[i] = 40*log10(istore->intensity[i])- gain_correction;
 					}
-
-			       /* Set scale factor for mr _amplitude */
-				mbsys_gsf_getscale(verbose, mb_ping->mr_amplitude, istore->beamflag, istore->beams_amp,
-						8, MB_NO, &multiplier, &offset, error);
-		    		mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY-1].multiplier
-						= multiplier;
-				mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY-1].offset
-						= offset;
-				mb_ping->scaleFactors.numArraySubrecords  ++ ;
 			  	}
 
 			/* generate imagery from sidescan trace
@@ -3448,6 +3399,9 @@ int mbcopy_reson8k_to_gsf(int verbose,
 			mb_ping->sensor_data.gsfReson8100Specific.filters_active = istore->filters_active ;
 			mb_ping->sensor_data.gsfReson8100Specific.temperature = istore->temperature ;
 			mb_ping->sensor_data.gsfReson8100Specific.beam_spacing = (double)istore->beam_width_num/(double)istore->beam_width_denom;
+
+			/* set the GSF scale factors for this ping */
+			status = mbsys_gsf_setscalefactors(verbose, MB_YES, mb_ping, error);
 			}
 
 		/* insert comment in structure */

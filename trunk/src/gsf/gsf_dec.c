@@ -92,7 +92,7 @@
  * References : DoDBL Generic Sensor Format Sept. 30, 1993
  *
  *
- * © 2014 Leidos, Inc.
+ * copyright 2014 Leidos, Inc.
  * There is no charge to use the library, and it may be accessed at:
  * https://www.leidos.com/maritime/gsf.
  * This library may be redistributed and/or modified under the terms of
@@ -1396,7 +1396,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
 
             /* 02/25/14 jhp - added sonar_vert_uncertainty subrecord */
            case (GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY):
-             ret = DecodeTwoByteArray(&ft->rec.mb_ping.sonar_vert_uncert, (char *) p, ping->number_beams,
+             ret = DecodeTwoByteArray(&ft->rec.mb_ping.sonar_vert_uncert, (unsigned char *) p, ping->number_beams,
                    &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY, handle);
                if (ret < 0)
                {
@@ -7889,4 +7889,3 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, unsigned char *sptr
 
     return (p - sptr);
 }
-
