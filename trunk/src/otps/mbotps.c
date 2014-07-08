@@ -62,7 +62,7 @@
 #include "mb_define.h"
 #include "mb_process.h"
 
-/* OTPS isntallation location include */
+/* OTPS installation location include */
 #include "otps.h"
 
 /* local defines */
@@ -80,7 +80,7 @@ int main (int argc, char **argv)
 	static char rcs_id[] = "$Id$";
 	static char program_name[] = "mbotps";
 	static char help_message[] =  "MBotps predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions.";
-	static char usage_message[] = "mbotps [-Atideformat -Byear/month/day/hour/minute/second -Dinterval\n\t-Eyear/month/day/hour/minute/second -Fformat\n\t-Idatalist.mb-1 -Ooutput -Rlon/lat -Tmodel -V]";
+	static char usage_message[] = "mbotps [-Atideformat -Byear/month/day/hour/minute/second -Dinterval\n\t-Eyear/month/day/hour/minute/second -Fformat\n\t-Idatalist.mb-1 -Lopts_path -Ooutput -Rlon/lat -Tmodel -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
