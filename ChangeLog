@@ -16,7 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-  Version 5.4.2193       July 7, 2014
+  Version 5.4.2194       July 8, 2014
 * Version 5.4.2191       June 4, 2014
 * Version 5.4.2188       May 31, 2014
   Version 5.4.2187       May 28, 2014
@@ -181,7 +181,7 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.4.2193 (July 7, 2014)
+-----> 5.4.2194 (July 8, 2014)
 
 Format 121 (MBF_GSFGENMB): Updated source files in src/gsf/ to GSF release 3.06.
 

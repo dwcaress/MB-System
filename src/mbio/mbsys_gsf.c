@@ -1033,7 +1033,8 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			*error = MB_ERROR_MEMORY_FAIL;
 			}
 		    }
-		else if (namp > 0)
+		else if (namp > mb_ping->number_beams
+		    && mb_ping->mr_amplitude != NULL)
 		    {
 		    mb_ping->mr_amplitude = (double *) realloc(mb_ping->mr_amplitude, namp * sizeof(double));
 		    if (mb_ping->mr_amplitude == NULL)
@@ -2319,9 +2320,9 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 
 	const double GSF_DEPTH_ASSUMED_HIGHEST_PRECISION = 10000;
 	const double GSF_ACROSS_TRACK_ASSUMED_HIGHEST_PRECISION = 10000;
-	const double GSF_ALONG_TRACK_ASSUMED_HIGHEST_PRECISION = 10000;
+	const double GSF_ALONG_TRACK_ASSUMED_HIGHEST_PRECISION = 100000;
 	const double GSF_TRAVEL_TIME_ASSUMED_HIGHEST_PRECISION = 10e6;
-	const double GSF_BEAM_ANGLE_ASSUMED_HIGHEST_PRECISION = 100;
+	const double GSF_BEAM_ANGLE_ASSUMED_HIGHEST_PRECISION = 1000;
 	const double GSF_MEAN_CAL_AMPLITUDE_ASSUMED_HIGHEST_PRECISION = 10;
 	const double GSF_MEAN_REL_AMPLITUDE_ASSUMED_HIGHEST_PRECISION = 100;
 	const double GSF_ECHO_WIDTH_ASSUMED_HIGHEST_PRECISION = 10e5;
@@ -2709,22 +2710,22 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 			if (reset_all == MB_YES
 				|| multiplier < mb_ping->scaleFactors.scaleTable[id - 1].multiplier)
 				{
-fprintf(stderr,"BEFORE Scale Factors %2d of %2d: minmax: %10f %10f compressionFlag:%5x offset:%10f multiplier:%10f\n",
+/* fprintf(stderr,"BEFORE Scale Factors %2d of %2d: minmax: %10f %10f compressionFlag:%5x offset:%10f multiplier:%10f\n",
 id, GSF_MAX_PING_ARRAY_SUBRECORDS, min, max,
 mb_ping->scaleFactors.scaleTable[id - 1].compressionFlag,
 mb_ping->scaleFactors.scaleTable[id - 1].offset,
 mb_ping->scaleFactors.scaleTable[id - 1].multiplier);
 fprintf(stderr,"     highest_precision:%f offset:%f multiplier_min:%f multiplier_max:%f multiplier:%f\n",
-highest_precision,offset,multiplier_min,multiplier_max,multiplier);
+highest_precision,offset,multiplier_min,multiplier_max,multiplier); */
 
 				mb_ping->scaleFactors.scaleTable[id - 1].multiplier = multiplier;
 				mb_ping->scaleFactors.scaleTable[id - 1].offset = offset;
 
-fprintf(stderr,"AFTER  Scale Factors %2d of %2d: minmax: %10f %10f compressionFlag:%5x offset:%10f multiplier:%10f\n\n",
+/* fprintf(stderr,"AFTER  Scale Factors %2d of %2d: minmax: %10f %10f compressionFlag:%5x offset:%10f multiplier:%10f\n\n",
 id, GSF_MAX_PING_ARRAY_SUBRECORDS, min, max,
 mb_ping->scaleFactors.scaleTable[id - 1].compressionFlag,
 mb_ping->scaleFactors.scaleTable[id - 1].offset,
-mb_ping->scaleFactors.scaleTable[id - 1].multiplier);
+mb_ping->scaleFactors.scaleTable[id - 1].multiplier); */
 				}
 			}
     
