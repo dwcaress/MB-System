@@ -1289,7 +1289,6 @@ if (!$outputoff)
 	printf MFILE "#define ASCENTDESCENT_SPEED        %f\r\n", $ascentdescent_speed;
 	printf MFILE "#define TRANSIT_SPEED              %f\r\n", $transit_speed;
 	printf MFILE "#define MISSION_DISTANCE           %f\r\n", $distancelastmpoint;
-	printf MFILE "#define MISSION_TIME               %d\r\n", $missiontime;
 	printf MFILE "#define MISSION_TIMEOUT            %d\r\n", $aborttime;
 	printf MFILE "#define DEPTH_MAX                  %f\r\n", $depthmax;
 	printf MFILE "#define DEPTH_ABORT                %f\r\n", $depthabort;

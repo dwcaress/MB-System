@@ -7040,6 +7040,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	double	heave, roll, pitch;
 	double	xtrackmin;
 	int	altitude_found;
+	char	flag;
 	int	i;
 
 	/* print input debug statements */
@@ -7107,7 +7108,40 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			xtrackmin = 999999.9;
 			for (i=0;i<bathymetry->number_beams;i++)
 				{
-				if (((bathymetry->quality[i] & 15) == 15)
+				if (bathymetry->quality[i] == 0)
+					{
+					flag = MB_FLAG_NULL;
+					}
+				else if (bathymetry->quality[i] & 64)
+					{
+					flag = MB_FLAG_FLAG + MB_FLAG_FILTER;
+					}
+				else if (bathymetry->quality[i] & 128)
+					{
+					flag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+					}
+				else if (bathymetry->quality[i] & 240)
+					{
+					flag = MB_FLAG_NONE;
+					}
+				else if ((bathymetry->quality[i] & 3) == 3)
+					{
+					flag = MB_FLAG_NONE;
+					}
+				else if ((bathymetry->quality[i] & 15) == 0)
+					{
+					flag = MB_FLAG_NULL;
+					}
+				else if ((bathymetry->quality[i] & 3) == 0)
+					{
+					flag = MB_FLAG_FLAG + MB_FLAG_FILTER;
+					}
+				else
+					{
+					flag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+					}
+
+				if ((flag == MB_FLAG_NONE)
 					&& fabs((double)bathymetry->acrosstrack[i]) < xtrackmin)
 					{
 					*altitudev = bathymetry->depth[i] - *transducer_depth;

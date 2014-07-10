@@ -125,7 +125,8 @@ int main (int argc, char **argv)
 	 * 		--format=format
 	 * 		
 	 * 		--output_source=record_kind
-	 * 		--output_name=name
+	 * 		--output_name1=name
+	 * 		--output_name2=name
 	 * 		
 	 * 		--line_nameroot=name
 	 * 		--line_time_list=filename
@@ -182,8 +183,8 @@ int main (int argc, char **argv)
 		{"input",			required_argument, 	NULL, 		0},
 		{"format",			required_argument, 	NULL, 		0},
 		{"output_source",		required_argument, 	NULL, 		0},
-		{"output_name",			required_argument, 	NULL, 		0},
-		{"line_nameroot",		required_argument, 	NULL, 		0},
+		{"output_name1",		required_argument, 	NULL, 		0},
+		{"output_name2",		required_argument, 	NULL, 		0},
 		{"line_time_list",		required_argument, 	NULL, 		0},
 		{"line_position_list",		required_argument, 	NULL, 		0},
 		{"line_check_bearing",		no_argument, 		NULL, 		0},
@@ -232,11 +233,11 @@ int main (int argc, char **argv)
 		
 	/* output variables */
 	int	output_source = MB_DATA_NONE;
-	mb_path	output_name = "sslo";
+	mb_path	output_name1 = "Survey";
+	mb_path	output_name2 = "sidescan";
 	
 	/* survey line variables */
 	int	line_mode = MBSSLAYOUT_LINE_OFF;
-	mb_path	line_nameroot = "SurveyLine";
 	mb_path	line_time_list;
 	mb_path	line_route;
 	int	line_check_bearing = MB_NO;
@@ -475,8 +476,10 @@ int main (int argc, char **argv)
 	int	n_wt_data = 0;
 	int	n_wt_comment = 0;
 	
+	mb_path	command;
 	int	interp_status = MB_SUCCESS;
 	int	interp_error = MB_ERROR_NO_ERROR;
+	int	shellstatus;
 	double	timeshift;
 	int	jsurvey = 0;
 	int	jnav = 0;
@@ -573,20 +576,20 @@ int main (int argc, char **argv)
 				n = sscanf(optarg, "%d", &output_source);
 				}
 			
-			/* output_name */
-			else if (strcmp("output_name", options[option_index].name) == 0)
+			/* output_name1 */
+			else if (strcmp("output_name1", options[option_index].name) == 0)
 				{
-				strcpy(output_name, optarg);
+				strcpy(output_name1, optarg);
+				}
+			
+			/* output_name2 */
+			else if (strcmp("output_name2", options[option_index].name) == 0)
+				{
+				strcpy(output_name2, optarg);
 				}
 												
 			/*-------------------------------------------------------
 			 * Define survey line specification */
-			
-			/* line_nameroot */
-			else if (strcmp("line_nameroot", options[option_index].name) == 0)
-				{
-				strcpy(line_nameroot, optarg);
-				}
 			
 			/* line_time_list */
 			else if (strcmp("line_time_list", options[option_index].name) == 0)
@@ -960,10 +963,10 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       format:                     %d\n",format);
 		fprintf(stderr,"dbg2  Source Data Parameters:\n");
 		fprintf(stderr,"dbg2       output_source:              %d\n",output_source);
-		fprintf(stderr,"dbg2       output_name:                %s\n",output_name);
+		fprintf(stderr,"dbg2       output_name1:               %s\n",output_name1);
+		fprintf(stderr,"dbg2       output_name2:               %s\n",output_name2);
 		fprintf(stderr,"dbg2  Survey Line Parameters:\n");
 		fprintf(stderr,"dbg2       line_mode:                  %d\n",line_mode);
-		fprintf(stderr,"dbg2       line_nameroot:              %s\n",line_nameroot);
 		fprintf(stderr,"dbg2       line_time_list:             %s\n",line_time_list);
 		fprintf(stderr,"dbg2       line_route:                 %s\n",line_route);
 		fprintf(stderr,"dbg2       line_check_bearing:         %d\n",line_check_bearing);
@@ -1039,7 +1042,8 @@ int main (int argc, char **argv)
 		if (output_source != MB_DATA_NONE)
 			{
 			fprintf(stderr,"     output_source:            %d\n",output_source);
-			fprintf(stderr,"     output_name:              %s\n",output_name);
+			fprintf(stderr,"     output_name1:             %s\n",output_name1);
+			fprintf(stderr,"     output_name2:             %s\n",output_name2);
 			}
 		fprintf(stderr,"Survey Line Parameters:\n");
 		if (line_mode == MBSSLAYOUT_LINE_OFF)
@@ -1050,7 +1054,6 @@ int main (int argc, char **argv)
 			{
 			fprintf(stderr,"     line_mode:                Lines defined by waypoint time list.\n");
 			fprintf(stderr,"     line_time_list:           %s\n",line_time_list);
-			fprintf(stderr,"     line_nameroot:            %s\n",line_nameroot);
 			fprintf(stderr,"     line_check_bearing:       %d\n",line_check_bearing);
 			
 			}
@@ -1058,7 +1061,6 @@ int main (int argc, char **argv)
 			{
 			fprintf(stderr,"     line_mode:                Lines defined by route waypoint position list.\n");
 			fprintf(stderr,"     line_route:               %s\n",line_route);
-			fprintf(stderr,"     line_nameroot:            %s\n",line_nameroot);
 			fprintf(stderr,"     line_check_bearing:       %d\n",line_check_bearing);
 			}
 		fprintf(stderr,"Sidescan Layout Algorithm Parameters:\n");
@@ -1480,25 +1482,11 @@ int main (int argc, char **argv)
 			}
 		}
 
-	/* read topography grid if 3D bottom correction specified */
-	if (layout_mode == MBSSLAYOUT_ALTITUDE_TOPO_GRID)
-		{
-		status = mb_topogrid_init(verbose, topo_grid_file, &lonflip, &topogrid_ptr, &error);
-		}
-	if (error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error loading topography grid: %s\n%s\n",topo_grid_file,message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",program_name);
-		mb_memory_clear(verbose, &error);
-		exit(error);
-		}
-
 	/* set up plotting script file */
 	if ((line_mode == MBSSLAYOUT_LINE_ROUTE && nroutepoint > 1) ||
 		(line_mode == MBSSLAYOUT_LINE_TIME && ntimepoint > 1))
 		{
-		sprintf(scriptfile, "%s_ssswathplot.cmd", line_nameroot);
+		sprintf(scriptfile, "%s_%s_ssswathplot.cmd", output_name1, output_name2);
 		}
 	else
 		{
@@ -2388,6 +2376,118 @@ int main (int argc, char **argv)
 				n_rf_nav3++;
 				n_rt_nav3++;
 				}
+				
+			/* check for new line only if generating survey line files
+				and new line not already set
+				and this record is target data */
+			if (status == MB_SUCCESS
+				&& line_mode != MBSSLAYOUT_LINE_OFF
+				&& new_output_file == MB_NO
+				&& kind == output_source)
+				{
+				/* check waypoint time list */
+				if (line_mode == MBSSLAYOUT_LINE_TIME
+					&& time_d >= routetime_d[activewaypoint]
+					&& activewaypoint < ntimepoint)
+					{
+					new_output_file = MB_YES;
+/* fprintf(stderr,"LINECHANGE BY TIME!! dx:%f dy:%f range:%f activewaypoint:%d time_d: %f %f\n",
+dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
+					activewaypoint++;
+					line_number = activewaypoint;
+					}
+					
+				/* check waypoint position list */
+				else if (line_mode == MBSSLAYOUT_LINE_ROUTE)
+					{
+					dx = (navlon - routelon[activewaypoint]) / mtodeglon;
+					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
+					range = sqrt(dx * dx + dy * dy);
+/* fprintf(stderr,"CHECK WAYPOINT: activewaypoint:%d range:%f line_range_threshold:%f\n",activewaypoint,range,line_range_threshold); */
+					if (range < line_range_threshold
+						&& (activewaypoint == 0 || range > rangelast)
+						&& activewaypoint < nroutepoint - 1)
+						{
+						new_output_file = MB_YES;
+/* fprintf(stderr,"LINECHANGE BY WAYPOINT!! dx:%f dy:%f range:%f activewaypoint:%d time_d: %f %f\n",
+dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
+						activewaypoint++;
+						line_number = activewaypoint;
+						}
+					}
+				}
+				
+			/* open output files if needed */
+			if (new_output_file == MB_YES)
+				{
+				/* reset flag */
+				new_output_file = MB_NO;
+				
+				if (output_source != MB_DATA_NONE)
+					{
+					/* close any old output file unless a single file has been specified */
+					if (ombio_ptr != NULL)
+						{
+						/* close the swath file */
+						status = mb_close(verbose,&ombio_ptr,&error);
+		
+						/* generate inf file */
+						/* if (status == MB_SUCCESS)
+							{
+							status = mb_make_info(verbose, MB_YES,
+										output_file,
+										MBF_MBLDEOIH,
+										&error);
+							}*/
+		
+						/* output counts */
+						if (verbose > 0)
+							{
+							fprintf(stdout, "\nPass 2: Closing output file: %s\n", output_file);
+							fprintf(stdout, "Pass 2: Records written to output file %s\n", output_file);
+							fprintf(stdout, "     %d survey records\n", n_wf_data);
+							fprintf(stdout, "     %d comment records\n", n_wf_comment);
+							}
+		
+						/* output commands to first cut plotting script file */
+						fprintf(sfp, "# Generate swath plot of sidescan file: %s\n", output_file);
+						fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n",
+							output_file, output_file);
+						fprintf(sfp, "%s_ssrawplot.cmd\n\n", output_file);
+						}
+		
+					/* define the filename */
+					if (line_mode == MBSSLAYOUT_LINE_OFF)
+						sprintf(output_file, "%s_%s.mb%2.2d",
+							ifile, output_name2, MBF_MBLDEOIH);
+					else
+						sprintf(output_file, "%s_%4.4d_%s.mb%2.2d",
+							output_name1, line_number, output_name2, MBF_MBLDEOIH);
+
+					/* open the new file */
+					if (verbose > 0)
+						fprintf(stderr,"Pass 2: Opening output file:  %s %d\n", output_file, MBF_MBLDEOIH);
+					if ((status = mb_write_init(
+						verbose,output_file, MBF_MBLDEOIH,
+						&ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) != MB_SUCCESS)
+						{
+						mb_error(verbose,error,&message);
+						fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
+						fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",output_file);
+						fprintf(stderr,"\nProgram <%s> Terminated\n",
+							program_name);
+						exit(error);
+						}
+		
+					/* get pointers to data storage */
+					omb_io_ptr = (struct mb_io_struct *) ombio_ptr;
+					ostore_ptr = omb_io_ptr->store_data;
+					ostore = (struct mbsys_ldeoih_struct *) ostore_ptr;
+					
+					n_wf_data = 0;
+					n_wf_comment = 0;
+					}
+				}
 	
 			/* if data of interest have been read process them */
 			if (status == MB_SUCCESS
@@ -2595,11 +2695,13 @@ int main (int argc, char **argv)
 									table_range, &error);
 				/* else get 3D bottom layout table */
 				else
+					{
 					mb_topogrid_getangletable(verbose, topogrid_ptr, nangle, angle_min, angle_max,
 									navlon, navlat, heading,
 									ss_altitude, sensordepth, pitch,
 									table_angle, table_xtrack, table_ltrack,
 									table_altitude, table_range, &error);
+					}
 				
 				/* set some values */
 				ostore->depth_scale = 0;
@@ -2609,6 +2711,12 @@ int main (int argc, char **argv)
 				ostore->kind = MB_DATA_DATA;
 				ostore->ss_type = sidescan_type;
 				opixels_ss = MBSSLAYOUT_SSDIMENSION;
+				
+				/* set one bathymetry sample from sensor depth and altitude */
+				obeams_bath = 1;
+				bath[0] = sensordepth + altitude;
+				bathacrosstrack[0] = 0.0;
+				bathalongtrack[0] = 0.0;
 
 				/* get swath width and pixel size */
 				if (swath_mode == MBSSLAYOUT_SWATHWIDTH_VARIABLE)
@@ -2840,121 +2948,10 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 						oss,ossacrosstrack,ossalongtrack,
 						comment, &error);
 				}
-				
-			/* check for new line only if generating survey line files
-				and new line not already set
-				and this record is target data */
-			if (status == MB_SUCCESS
-				&& line_mode != MBSSLAYOUT_LINE_OFF
-				&& new_output_file == MB_NO
-				&& kind == output_source)
-				{
-				/* check waypoint time list */
-				if (line_mode == MBSSLAYOUT_LINE_TIME
-					&& time_d >= routetime_d[activewaypoint]
-					&& activewaypoint < ntimepoint)
-					{
-					new_output_file = MB_YES;
-/* fprintf(stderr,"LINECHANGE BY TIME!! dx:%f dy:%f range:%f activewaypoint:%d time_d: %f %f\n",
-dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
-					activewaypoint++;
-					line_number = activewaypoint;
-					}
-					
-				/* check waypoint position list */
-				else if (line_mode == MBSSLAYOUT_LINE_ROUTE)
-					{
-					dx = (navlon - routelon[activewaypoint]) / mtodeglon;
-					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
-					range = sqrt(dx * dx + dy * dy);
-/* fprintf(stderr,"CHECK WAYPOINT: activewaypoint:%d range:%f line_range_threshold:%f\n",activewaypoint,range,line_range_threshold); */
-					if (range < line_range_threshold
-						&& (activewaypoint == 0 || range > rangelast)
-						&& activewaypoint < nroutepoint - 1)
-						{
-						new_output_file = MB_YES;
-/* fprintf(stderr,"LINECHANGE BY WAYPOINT!! dx:%f dy:%f range:%f activewaypoint:%d time_d: %f %f\n",
-dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
-						activewaypoint++;
-						line_number = activewaypoint;
-						}
-					}
-				}
-				
-			/* open output files if needed */
-			if (new_output_file == MB_YES)
-				{
-				/* reset flag */
-				new_output_file = MB_NO;
-				
-				if (output_source != MB_DATA_NONE)
-					{
-					/* close any old output file unless a single file has been specified */
-					if (ombio_ptr != NULL)
-						{
-						/* close the swath file */
-						status = mb_close(verbose,&ombio_ptr,&error);
-		
-						/* generate inf file */
-						/* if (status == MB_SUCCESS)
-							{
-							status = mb_make_info(verbose, MB_YES,
-										output_file,
-										MBF_MBLDEOIH,
-										&error);
-							}*/
-		
-						/* output counts */
-						if (verbose > 0)
-							{
-							fprintf(stdout, "\nPass 2: Closing output file: %s\n", output_file);
-							fprintf(stdout, "Pass 2: Records written to output file %s\n", output_file);
-							fprintf(stdout, "     %d survey records\n", n_wf_data);
-							fprintf(stdout, "     %d comment records\n", n_wf_comment);
-							}
-		
-						/* output commands to first cut plotting script file */
-						fprintf(sfp, "# Generate swath plot of sidescan file: %s\n", output_file);
-						fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n",
-							output_file, output_file);
-						fprintf(sfp, "%s_ssrawplot.cmd\n\n", output_file);
-						}
-		
-					/* define the filename */
-					if (line_mode == MBSSLAYOUT_LINE_OFF)
-						sprintf(output_file, "%s_%s.mb%2.2d",
-							ifile, output_name, MBF_MBLDEOIH);
-					else
-						sprintf(output_file, "%s_%s_%4.4d.mb%2.2d",
-							line_nameroot, output_name, line_number, MBF_MBLDEOIH);
-
-					/* open the new file */
-					if (verbose > 0)
-						fprintf(stderr,"Pass 2: Opening output file:  %s %d\n", output_file, MBF_MBLDEOIH);
-					if ((status = mb_write_init(
-						verbose,output_file, MBF_MBLDEOIH,
-						&ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) != MB_SUCCESS)
-						{
-						mb_error(verbose,error,&message);
-						fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
-						fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",output_file);
-						fprintf(stderr,"\nProgram <%s> Terminated\n",
-							program_name);
-						exit(error);
-						}
-		
-					/* get pointers to data storage */
-					omb_io_ptr = (struct mb_io_struct *) ombio_ptr;
-					ostore_ptr = omb_io_ptr->store_data;
-					ostore = (struct mbsys_ldeoih_struct *) ostore_ptr;
-					
-					n_wf_data = 0;
-					n_wf_comment = 0;
-					}
-				}
 
 			/* write some data */
-			if (error == MB_ERROR_NO_ERROR)
+			if (error == MB_ERROR_NO_ERROR
+				&& kind == output_source)
 				{
 				/* write the record */
 				status = mb_write_ping(verbose, ombio_ptr, (void *)ostore, &error);
@@ -3053,6 +3050,11 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 			output_file, output_file);
 		fprintf(sfp, "%s_ssrawplot.cmd\n\n", output_file);
 		}
+
+	/* close plotting script file */
+	fclose(sfp);
+	sprintf(command, "chmod +x %s", scriptfile);
+	shellstatus = system(command);
 
 	/* output data counts */
 	if (verbose > 0)

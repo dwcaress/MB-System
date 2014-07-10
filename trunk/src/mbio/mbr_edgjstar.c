@@ -168,7 +168,7 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_nav = &mbsys_jstar_extract_nav;
 	mb_io_ptr->mb_io_insert_nav = &mbsys_jstar_insert_nav;
 	mb_io_ptr->mb_io_extract_altitude = &mbsys_jstar_extract_altitude;
-	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_insert_altitude = &mbsys_jstar_insert_altitude;
 	mb_io_ptr->mb_io_extract_svp = NULL;
 	mb_io_ptr->mb_io_insert_svp = NULL;
 	mb_io_ptr->mb_io_ttimes = &mbsys_jstar_ttimes;
