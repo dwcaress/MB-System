@@ -496,6 +496,8 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude,
 			int *error);
+int mbsys_jstar_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
+                        double transducer_depth, double altitude, int *error);
 int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

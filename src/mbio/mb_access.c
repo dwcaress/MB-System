@@ -574,6 +574,7 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 				speed, heading, sonardepth,
 				roll, pitch, heave, error);
 		}
+		
 	else
 		{
 		status = MB_FAILURE;

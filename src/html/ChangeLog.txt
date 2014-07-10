@@ -181,6 +181,16 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2195 (July 9, 2014)
+
+Format 88 (MBF_RESON7KR): Fixed bug in mbsys_reson7k_extract_altitude().
+
+Format 132 (MBF_EDGJSTAR): Added mbsys_jstar_insert_altitude() to support
+mbpreprocess and mbsslayout. Fixed handling of heading on extract and insert.
+
+mbm_route2mission: Removed confusing juxtaposition of estimated AUV mission time
+with actual AUV mission termination time in the output AUV mission script.
+
 -----> 5.4.2194 (July 8, 2014)
 
 Format 121 (MBF_GSFGENMB): Updated source files in src/gsf/ to GSF release 3.06.
