@@ -2461,8 +2461,8 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 						sprintf(output_file, "%s_%s.mb%2.2d",
 							ifile, output_name2, MBF_MBLDEOIH);
 					else
-						sprintf(output_file, "%s_%4.4d_%s.mb%2.2d",
-							output_name1, line_number, output_name2, MBF_MBLDEOIH);
+						sprintf(output_file, "%s_%s_%4.4d.mb%2.2d",
+							output_name1, output_name2, line_number, MBF_MBLDEOIH);
 
 					/* open the new file */
 					if (verbose > 0)
@@ -2678,7 +2678,8 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				/* else if getting altitude from topography model set initial value zero */
 				else if (ss_altitude_mode == MBSSLAYOUT_ALTITUDE_TOPO_GRID)
 					{
-					ss_altitude = 0.0;
+					mb_topogrid_topo(verbose, topogrid_ptr, navlon, navlat, &topo, &error);
+					ss_altitude = -sensordepth - topo;
 					}
 				
 				/* else just use existing altitude value */
@@ -2702,7 +2703,9 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 									table_angle, table_xtrack, table_ltrack,
 									table_altitude, table_range, &error);
 					}
-				
+/* fprintf(stderr,"altitude:%f sensordepth:%f pitch:%f\n",ss_altitude,sensordepth,pitch);
+for (i=0;i<nangle;i++)
+fprintf(stderr,"%d %f %f %f %f %f\n",i,table_angle[i],table_xtrack[i],table_ltrack[i],table_altitude[i],table_range[i]);*/
 				/* set some values */
 				ostore->depth_scale = 0;
 				ostore->distance_scale = 0;
@@ -2746,7 +2749,7 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 						kstart = kangle;
 						}
 					}
-/*fprintf(stderr,"port minimum range:%f kstart:%d\n",rangemin,kstart);*/
+/* fprintf(stderr,"port minimum range:%f kstart:%d\n",rangemin,kstart);*/
 
 				/* bin port trace */
 				istart = rangemin / (soundspeed * sample_interval);
@@ -2817,8 +2820,8 @@ i,rr,xtrack,ltrack,kangle); */
 						kstart = kangle;
 						}
 					}
-/*fprintf(stderr,"stbd minimum range:%f kstart:%d\n",rr,kstart);*/
-/*fprintf(stderr,"kstart:%d angle:%f range:%f xtrack:%f ltrack:%f\n",
+/* fprintf(stderr,"stbd minimum range:%f kstart:%d\n",rr,kstart); */
+/* fprintf(stderr,"kstart:%d angle:%f range:%f xtrack:%f ltrack:%f\n",
 kstart,
 angle_min + kstart * (angle_max - angle_min) / (nangle - 1),
 table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
@@ -2966,15 +2969,15 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					}
 				
 				/* count records */
-				if (kind == MB_DATA_DATA)
-					{
-					n_wf_data++;
-					n_wt_data++;
-					}
-				else if (kind == MB_DATA_COMMENT)
+				if (kind == MB_DATA_COMMENT)
 					{
 					n_wf_comment++;
 					n_wt_comment++;
+					}
+				else
+					{
+					n_wf_data++;
+					n_wt_data++;
 					}
 				}
 			}
