@@ -16,6 +16,8 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2196       July 14, 2014
+  Version 5.4.2195       July 9, 2014
   Version 5.4.2194       July 8, 2014
 * Version 5.4.2191       June 4, 2014
 * Version 5.4.2188       May 31, 2014
@@ -181,6 +183,19 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.4.2196 (July 14, 2014)
+
+mbotps: Added -P option to specify the location of the OTPS package.
+
+mbsslayout: Made to work (again) with Reson 7k data with embedded Edgetech
+sidescan and subbottom data.
+
+mb7kpreprocess: Made to work (again) with Reson 7k data with embedded Edgetech
+sidescan and subbottom data.
+
+mbextractsegy: Made to work (again) with Reson 7k data with embedded Edgetech
+sidescan and subbottom data.
+
 -----> 5.4.2195 (July 9, 2014)
 
 Format 88 (MBF_RESON7KR): Fixed bug in mbsys_reson7k_extract_altitude().
@@ -190,6 +205,14 @@ mbpreprocess and mbsslayout. Fixed handling of heading on extract and insert.
 
 mbm_route2mission: Removed confusing juxtaposition of estimated AUV mission time
 with actual AUV mission termination time in the output AUV mission script.
+
+mbpreprocess: Added ability to merge altitude data. Tested successfully with
+raw Edgetech sidescan data collected without embedded navigation, attitude,
+or anything really.
+
+mbsslayout: A new program to lay out raw sidescan onto the seafloor, most
+often on a 3D seafloor topographic model. Achieved functionality, at least 
+for use with Edgetech sidescan data in Jstar format.
 
 -----> 5.4.2194 (July 8, 2014)
 

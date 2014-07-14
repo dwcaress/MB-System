@@ -831,6 +831,13 @@ int main (int argc, char **argv)
 				    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				    ss,ssacrosstrack,ssalongtrack,
 				    comment,&error);
+		
+		/* ignore nonfatal errors */
+		if (error < 0)
+			{
+			error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
 
 		/* deal with nav and time from survey data only - not nav, sidescan, or subbottom */
 		if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)

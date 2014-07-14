@@ -198,6 +198,91 @@ int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_topogrid_topo(int verbose, void *topogrid_ptr,
+			double navlon, double navlat,
+			double *topo, int *error)
+{
+	char	*function_name = "mb_topogrid_topo";
+	int	status = MB_SUCCESS;
+	struct mb_topogrid_struct *topogrid;
+	int	nfound;
+	int	i, j, ii, jj, k;
+
+	/* get pointer to topogrid structure */
+	topogrid = (struct mb_topogrid_struct *) topogrid_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
+		fprintf(stderr,"dbg2       navlon:                    %f\n", navlon);
+		fprintf(stderr,"dbg2       navlat:                    %f\n", navlat);
+		fprintf(stderr,"dbg2       topogrid:                  %p\n", topogrid);
+		fprintf(stderr,"dbg2       topogrid->projection_mode: %d\n", topogrid->projection_mode);
+		fprintf(stderr,"dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
+		fprintf(stderr,"dbg2       topogrid->nodatavalue:     %f\n", topogrid->nodatavalue);
+		fprintf(stderr,"dbg2       topogrid->nxy:             %d\n", topogrid->nxy);
+		fprintf(stderr,"dbg2       topogrid->nx:              %d\n", topogrid->nx);
+		fprintf(stderr,"dbg2       topogrid->ny:              %d\n", topogrid->ny);
+		fprintf(stderr,"dbg2       topogrid->min:             %f\n", topogrid->min);
+		fprintf(stderr,"dbg2       topogrid->max:             %f\n", topogrid->max);
+		fprintf(stderr,"dbg2       topogrid->xmin:            %f\n", topogrid->xmin);
+		fprintf(stderr,"dbg2       topogrid->xmax:            %f\n", topogrid->xmax);
+		fprintf(stderr,"dbg2       topogrid->ymin:            %f\n", topogrid->ymin);
+		fprintf(stderr,"dbg2       topogrid->ymax:            %f\n", topogrid->ymax);
+		fprintf(stderr,"dbg2       topogrid->dx:              %f\n", topogrid->dx);
+		fprintf(stderr,"dbg2       topogrid->dy               %f\n", topogrid->dy);
+		fprintf(stderr,"dbg2       topogrid->data:            %p\n", topogrid->data);
+		}
+
+	/* get topography at specified location */
+	nfound = 0;
+	*topo = 0.0;
+	i = (int)((navlon - topogrid->xmin) / topogrid->dx);
+	j = (int)((navlat - topogrid->ymin) / topogrid->dy);
+	if (i >= 0 && i < topogrid->nx - 1
+	    && j >= 0 && j < topogrid->ny - 1)
+		{
+		for (ii=i;ii<=i+1;ii++)
+		for (jj=j;jj<=j+1;jj++)
+		    {
+		    k = ii * topogrid->ny + jj;
+		    if (topogrid->data[k] != topogrid->nodatavalue)
+			{
+			nfound++;
+			*topo += topogrid->data[k];
+			}
+		    }
+		}
+	if (nfound > 0)
+		{
+		*topo /= (double)nfound;
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_NOT_ENOUGH_DATA;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MB7K2SS function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       topo:            %f\n",*topo);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_topogrid_intersect(int verbose, void *topogrid_ptr,
 			double navlon, double navlat,
 			double altitude, double sonardepth,

@@ -1,4 +1,4 @@
-.TH mbotps 1 "15 August 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbotps 1 "12 July 2014" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbotps\fP \- Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution.
 
@@ -9,7 +9,7 @@ Version 5.0
 \fBmbotps\fP [\fB\-A\fP\fItideformat\fP \fB\-B\fP\fIyear/month/day/hour/minute/second\fP
 \fB\-D\fP\fIinterval\fP \fB\-E\fP\fIyear/month/day/hour/minute/second
 \fB\-F\fP\fIformat\fP \fB\-I\fP\fIdatalist.mb-1\fP
-\fB\-M\fP \fB\-O\fP\fIoutput\fP \fB\-R\fP\fIlon/lat\fP \fB\-V\fP]
+\fB\-M\fP \fB\-O\fP\fIoutput\fP \fB\-P\fP\fIotps_location\fP \fB\-R\fP\fIlon/lat\fP \fB\-V\fP]
 
 .SH DESCRIPTION
 \fBMBotps\fP is a utility that predicts tides using the OTPS (OSU Tidal Prediction
@@ -21,7 +21,7 @@ allows \fBMB-System\fP users to easily obtain tide models for specified location
 and times. \fBMBotps\fP is built during a normal installation of \fBMB-System\fP,
 but will work only if the OTPS package has been installed separately and
 the OTPS location has been specified. See the INSTALL file in the \fBMB-System\fP
-top directory for guidance on the build process.
+top directory for guidance on the build process. 
 
 There are actually three variants of the OTPS package available for download and
 installation: OTPS, OTPSnc, and OTPS2. The three versions use different tide
@@ -165,6 +165,13 @@ then this option causes each swath file's parameter file to be modified so that
 \fIfilename\fP
 .br
 Sets the filename of the tidal model output.
+.TP
+.B \-P
+\fIotps_location\fP
+.br
+Sets the path to the local installation of OTPS, which in turn defines the
+location of the program \fBpredict_tide\fP called by \fBmbotps\fP and
+the tide model to be used by \fBpredict_tide\fP.
 .TP
 .B \-R
 \fIlongitude/latitude\fP
