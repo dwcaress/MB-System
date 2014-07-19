@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:46 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:14 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -416,20 +410,19 @@ G(aress \(caress@mbari.or)-2.5 E(g\))-.18 E(Montere)113 364.8 Q 2.5(yB)
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 376.8 Q
 (Lamont-Doherty Earth Observ)113 388.8 Q(atory)-.25 E F2(OPTIONS)72
 417.6 Q F1<ad42>108 429.6 Q/F3 10/Times-Italic@0 SF(yr/mo/da/hr/mn/sc)
-144 429.6 Q F0 .614(Sets the starting time for data allo)144 441.6 R
-.614(wed in the input data; pings with times before the starting time)
--.25 F(will be ignored.)144 453.6 Q(Def)5 E(ault:)-.1 E F3
-(yr/mo/da/hr/mn/sc)2.5 E F0 2.5(=1)2.5 G(962/2/21/10/30/0.)-2.5 E F1
-<ad45>108 470.4 Q F3(yr/mo/da/hr/mn/sc)144 470.4 Q F0 .286
-(Sets the ending time for data allo)144 482.4 R .287
+23.63 E F0 .614(Sets the starting time for data allo)144 441.6 R .614
+(wed in the input data; pings with times before the starting time)-.25 F
+(will be ignored.)144 453.6 Q(Def)5 E(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)
+2.5 E F0 2.5(=1)2.5 G(962/2/21/10/30/0.)-2.5 E F1<ad45>108 470.4 Q F3
+(yr/mo/da/hr/mn/sc)23.63 E F0 .286(Sets the ending time for data allo)
+144 482.4 R .287
 (wed in the input data; pings with times after the ending time will)-.25
 F(be ignored.)144 494.4 Q(Def)5 E(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)2.5 E
 F0 2.5(=2)2.5 G(062/2/21/10/30/0.)-2.5 E F1<ad46>108 511.2 Q F3(format)
-144 511.2 Q F0 1.018
-(Sets the format at startup for the input and output sw)144 523.2 R
-1.018(ath sonar data using)-.1 F F1(MBIO)3.518 E F0(inte)3.518 E 1.018
-(ger format)-.15 F .974(identi\214ers. This v)144 535.2 R .974
-(alue can also be set interacti)-.25 F -.15(ve)-.25 G .974
+24.19 E F0 1.018(Sets the format at startup for the input and output sw)
+144 523.2 R 1.018(ath sonar data using)-.1 F F1(MBIO)3.518 E F0(inte)
+3.518 E 1.018(ger format)-.15 F .974(identi\214ers. This v)144 535.2 R
+.974(alue can also be set interacti)-.25 F -.15(ve)-.25 G .974
 (ly when specifying the input \214le.).15 F .975(This program)5.975 F
 .992(uses the)144 547.2 R F1(MBIO)3.492 E F0 .991
 (library and will read an)3.492 F 3.491(ys)-.15 G -.1(wa)-3.491 G .991
@@ -440,19 +433,18 @@ F0 2.5(=2)2.5 G(062/2/21/10/30/0.)-2.5 E F1<ad46>108 511.2 Q F3(format)
 -.25 G 3.194(ni).15 G 3.194(nt)-3.194 G(he)-3.194 E F1(MBIO)144 571.2 Q
 F0(manual page.)2.5 E(Def)5 E(ault:)-.1 E F3(format)2.5 E F0 2.5(=1)2.5
 G(1.)-2.5 E F1<ad48>108 588 Q F0 .162(This "help" \215ag cause the prog\
-ram to print out a description of its operation and then e)144 588 R
-.161(xit immedi-)-.15 F(ately)144 600 Q(.)-.65 E F1<ad49>108 616.8 Q F3
-(\214le)144 616.8 Q F0 .702
-(Sets the data \214le from which the input sw)144 628.8 R .703
-(ath data will be read at startup.)-.1 F .703(This v)5.703 F .703
-(alue can also be)-.25 F(set interacti)144 640.8 Q -.15(ve)-.25 G(ly).15
-E 2.5(.S)-.65 G(ee belo)-2.5 E -.65(w.)-.25 G F1<ad53>108 657.6 Q F3
-(svp\214le)144 657.6 Q F0 .985
+ram to print out a description of its operation and then e)22.52 F .161
+(xit immedi-)-.15 F(ately)144 600 Q(.)-.65 E F1<ad49>108 616.8 Q F3
+(\214le)26.41 E F0 .702(Sets the data \214le from which the input sw)144
+628.8 R .703(ath data will be read at startup.)-.1 F .703(This v)5.703 F
+.703(alue can also be)-.25 F(set interacti)144 640.8 Q -.15(ve)-.25 G
+(ly).15 E 2.5(.S)-.65 G(ee belo)-2.5 E -.65(w.)-.25 G F1<ad53>108 657.6
+Q F3(svp\214le)24.74 E F0 .985
 (Sets the data \214le from which an input display sound v)144 669.6 R
 .984(elocity pro\214le will be read at startup. See)-.15 F(belo)144
 681.6 Q 3.8 -.65(w. T)-.25 H(his v).65 E(alue can also be set interacti)
 -.25 E -.15(ve)-.25 G(ly).15 E(.)-.65 E F1<ad57>108 698.4 Q F3
-(svp\214le)144 698.4 Q F0 .478
+(svp\214le)20.3 E F0 .478
 (Sets the data \214le from which an input editable sound v)144 710.4 R
 .478(elocity pro\214le will be read at startup.)-.15 F(This)5.479 E -.25
 (va)144 722.4 S(lue can also be set interacti).25 E -.15(ve)-.25 G(ly)
@@ -465,7 +457,7 @@ BP
 /F0 10/Times-Roman@0 SF(mb)72 48 Q -.15(ve)-.15 G 127.91
 (locitytool\(1\) MB-System).15 F 127.91(5.0 mb)2.5 F -.15(ve)-.15 G
 (locitytool\(1\)).15 E/F1 10/Times-Bold@0 SF<ad56>108 84 Q F0(Normally)
-144 84 Q(,)-.65 E F1(mb)2.626 E -.1(ve)-.15 G(locitytool).1 E F0 -.1(wo)
+23.08 E(,)-.65 E F1(mb)2.626 E -.1(ve)-.15 G(locitytool).1 E F0 -.1(wo)
 2.626 G .126(rks "silently" without outputting an).1 F .126
 (ything to the stderr stream.)-.15 F .125(If the)5.125 F F1<ad56>144 96
 Q F0 .178(\215ag is gi)2.678 F -.15(ve)-.25 G .178(n, then).15 F F1(mb)
@@ -474,7 +466,7 @@ Q F0 .178(\215ag is gi)2.678 F -.15(ve)-.25 G .178(n, then).15 F F1(mb)
 (ersion)-.15 E(being used, all error status messages, and a lar)144 108
 Q(ge amount of other information.)-.18 E/F2 10.95/Times-Bold@0 SF
 (INTERA)72 136.8 Q(CTIVE CONTR)-.602 E(OLS)-.329 E F1(File)108 148.8 Q
-F0(This b)144 148.8 Q
+F0(This b)19.89 E
 (utton brings up a menu containing the commands listed belo)-.2 E(w:)
 -.25 E F1(File->Open Display Pr)108 165.6 Q(o\214le)-.18 E F0 .211
 (Selecting this menu item brings up a popup windo)144 177.6 R 2.711(ww)
@@ -724,11 +716,11 @@ plot will be roughly \215at.)-.15 F .52(If the w)144 192 R .52(ater v)
 /Times-Bold@0 SF(mble)2.589 E(vitus)-.15 E F0 2.589(\)m)C .088
 (ay be read in as)-2.589 F
 (display pro\214les to guide the editing process.)144 240 Q F1(Quit)108
-256.8 Q F0 .046(This b)144 256.8 R .046(utton causes the program to e)
--.2 F .047(xit gracefully)-.15 F 2.547(,b)-.65 G .047
-(ut without asking an)-2.747 F 2.547(yq)-.15 G 2.547(uestions. If)-2.547
-F .047(you ha)2.547 F -.15(ve)-.2 G(n').15 E(t)-.18 E(already sa)144
-268.8 Q -.15(ve)-.2 G 2.5(dy).15 G(our edited v)-2.5 E
+256.8 Q F0 .046(This b)16.55 F .046(utton causes the program to e)-.2 F
+.047(xit gracefully)-.15 F 2.547(,b)-.65 G .047(ut without asking an)
+-2.747 F 2.547(yq)-.15 G 2.547(uestions. If)-2.547 F .047(you ha)2.547 F
+-.15(ve)-.2 G(n').15 E(t)-.18 E(already sa)144 268.8 Q -.15(ve)-.2 G 2.5
+(dy).15 G(our edited v)-2.5 E
 (elocity pro\214le it will be lost when you quit.)-.15 E/F2 10.95
 /Times-Bold@0 SF(SEE ALSO)72 297.6 Q F1(mbsystem)108 309.6 Q F0(\(1\),)A
 F1(mbpr)2.5 E(ocess)-.18 E F0(\(1\),)A F1(mbset)2.5 E F0(,)A F1

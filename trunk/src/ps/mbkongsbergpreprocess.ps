@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:41 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:10 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -333,22 +327,22 @@ F 4.246(yd)-.15 G(if)-4.246 E 1.745(ferent data record)-.25 F .778
 (types compising a K)144 124.8 R(ongsber)-.35 E 3.278(gd)-.18 G .778
 (ata stream. The data record counts are output for each \214le and as)
 -3.278 F(totals from all \214les processed.)144 136.8 Q F1<ad44>108
-153.6 Q/F2 10/Times-Italic@0 SF(outputdir)144 153.6 Q(ectory)-.37 E F0
-.223(This option causes all format 59 output \214les to be placed in th\
-e speci\214ed directory)144 165.6 R F2(outputdir)2.723 E(ectory)-.37 E
-F0(rather than parallel to the original "ra)144 177.6 Q(w" \214les.)-.15
-E F1<ad46>108 194.4 Q F2(format)144 194.4 Q F0 .22(Sets the data format\
- used if the input is read from stdin or from a \214le. If)144 206.4 R
-F2(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)-2.72 G .22(hen the input)
--2.72 F .008(\214le speci\214ed with the)144 218.4 R F1<ad49>2.508 E F0
-.008(option will actually contain a list of input sw)2.508 F .007
+153.6 Q/F2 10/Times-Italic@0 SF(outputdir)23.08 E(ectory)-.37 E F0 .223
+(This option causes all format 59 output \214les to be placed in the sp\
+eci\214ed directory)144 165.6 R F2(outputdir)2.723 E(ectory)-.37 E F0
+(rather than parallel to the original "ra)144 177.6 Q(w" \214les.)-.15 E
+F1<ad46>108 194.4 Q F2(format)24.19 E F0 .22(Sets the data format used \
+if the input is read from stdin or from a \214le. If)144 206.4 R F2
+(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)-2.72 G .22(hen the input)-2.72
+F .008(\214le speci\214ed with the)144 218.4 R F1<ad49>2.508 E F0 .008
+(option will actually contain a list of input sw)2.508 F .007
 (ath sonar data \214les. This pro-)-.1 F .827
 (gram only reads third generation K)144 230.4 R(ongsber)-.35 E 3.327(gm)
 -.18 G .827(ultibeam format data \214les \()-3.327 F F1(MBIO)A F0 .827
 (formats 58 and)3.327 F(59\).)144 242.4 Q F1<ad48>108 259.2 Q F0 .162(T\
 his "help" \215ag cause the program to print out a description of its o\
-peration and then e)144 259.2 R .161(xit immedi-)-.15 F(ately)144 271.2
-Q(.)-.65 E F1<ad49>108 288 Q F2(in\214le)144 288 Q F0 .514
+peration and then e)22.52 F .161(xit immedi-)-.15 F(ately)144 271.2 Q(.)
+-.65 E F1<ad49>108 288 Q F2(in\214le)26.41 E F0 .514
 (Sets the input \214le path. If)144 300 R F2(format)3.015 E F0 3.015
 (>0\()3.015 G .515(set with the)-3.015 F F1<ad66>3.015 E F0 .515
 (option or)3.015 F F1(mbdefaults)3.015 E F0 3.015(\)t)C .515(hen the sw)
@@ -367,16 +361,16 @@ Q(.)-.65 E F1<ad49>108 288 Q F2(in\214le)144 288 Q F0 .514
 (This program only reads third generation K)144 384 R(ongsber)-.35 E
 3.048(gm)-.18 G .549(ultibeam format data \214les \()-3.048 F F1(MBIO)A
 F0(formats)3.049 E(58 and 59\).)144 396 Q F1<ad4f>108 412.8 Q F2
-(out\214le)144 412.8 Q F0 .533(This option causes)144 424.8 R F1(mbk)
-3.033 E(ongsber)-.15 E(gpr)-.1 E(epr)-.18 E(ocess)-.18 E F0 .533
+(out\214le)22.52 E F0 .533(This option causes)144 424.8 R F1(mbk)3.033 E
+(ongsber)-.15 E(gpr)-.1 E(epr)-.18 E(ocess)-.18 E F0 .533
 (to output all data to a single \214le speci\214ed as)3.033 F F2
 (out\214le)3.032 E F0(.)A .591(By def)144 436.8 R .591
 (ault, the program creates output \214les for each input \214le. If the)
 -.1 F F1<ad44>3.092 E F2(outputdir)A(ectory)-.37 E F0 .592(option is)
 3.092 F(also used, then the output \214le)144 448.8 Q F2(out\214le)2.5 E
 F0(will be in)2.5 E F2(outputdir)2.5 E(ectory)-.37 E F0(.)A F1<ad53>108
-465.6 Q F2(datatype/sour)144 465.6 Q(ce)-.37 E F0 1.267(This option spe\
-ci\214es which data records should be the source of the na)144 477.6 R
+465.6 Q F2(datatype/sour)24.74 E(ce)-.37 E F0 1.267(This option speci\
+\214es which data records should be the source of the na)144 477.6 R
 (vig)-.2 E 1.266(ation \()-.05 F F2(datatype)A F0 3.766(=1)3.766 G(\),)
 -3.766 E .508(heading \()144 489.6 R F2(datatype)A F0 3.008(=2)3.008 G
 .509(\), and attitude \()-3.008 F F2(datatype)A F0 3.009(=3)3.009 G
@@ -402,8 +396,8 @@ G 91.65(33)1.35 G 26(0/)-91.65 G 2.5(*a)-26 G(ncillary na)-2.5 E 2.5(vs)
 -1.11 F(/* ancillary attitude system 2 */)15 E(MB_D)156.5 621.6 Q -1.21
 -1.11(AT A)-.4 H(_A)1.11 E 60.79(TTITUDE3 57)-1.11 F
 (/* ancillary attitude system 3 */)26 E F1<ad54>108 638.4 Q F2(timela)
-144 638.4 Q(g)-.1 E F0 .831(This option speci\214es a)144 650.4 R F2
-(timela)3.331 E(g)-.1 E F0 -.25(va)3.331 G .831
+23.63 E(g)-.1 E F0 .831(This option speci\214es a)144 650.4 R F2(timela)
+3.331 E(g)-.1 E F0 -.25(va)3.331 G .831
 (lue in seconds to be applied to the na).25 F(vig)-.2 E .832
 (ation and attitude data)-.05 F 1.067(prior to it being mer)144 662.4 R
 1.067(ged with the bath)-.18 F(ymetry)-.05 E 3.567(.I)-.65 G(f)-3.567 E

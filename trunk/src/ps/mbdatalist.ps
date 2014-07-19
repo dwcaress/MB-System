@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:40 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:09 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -424,8 +418,8 @@ F F2(-P)3.164 E F0(,)A F2(-R)3.164 E F0 3.164(,a)C(nd)-3.164 E F2(-U)
 (*inf metadata \214les\) will also be copied, b)144 621.6 R .063
 (ut processed data \214les deri)-.2 F -.15(ve)-.25 G 2.563(df).15 G .063
 (rom the tar)-2.563 F .063(get copied \214les)-.18 F
-(will not be copied.)144 633.6 Q F1<ad46>108 650.4 Q F2(format)144 650.4
-Q F0 .319(Sets the data format associated with the datalist or sw)144
+(will not be copied.)144 633.6 Q F1<ad46>108 650.4 Q F2(format)24.19 E
+F0 .319(Sets the data format associated with the datalist or sw)144
 662.4 R .32(ath data \214le speci\214ed with the)-.1 F F1<ad49>2.82 E F0
 .32(option. By)2.82 F(def)144 674.4 Q .147(ault, this program will atte\
 mpt to determine the format from the input \214le suf)-.1 F .147
@@ -433,16 +427,16 @@ mpt to determine the format from the input \214le suf)-.1 F .147
  57, and a \214le ending in .mb-1 has a format id of \2551\). A datalis\
 t has)144 686.4 R 2.5(af)144 698.4 S(ormat id of \2551.)-2.5 E F1<ad48>
 108 715.2 Q F0 .162(This "help" \215ag cause the program to print out a\
- description of its operation and then e)144 715.2 R .161(xit immedi-)
--.15 F(ately)144 727.2 Q(.)-.65 E(MB-System 5.0)72 768 Q 2.5(3J)146.495
-G(une 2013)-2.5 E(2)204.835 E 0 Cg EP
+ description of its operation and then e)22.52 F .161(xit immedi-)-.15 F
+(ately)144 727.2 Q(.)-.65 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G
+(une 2013)-2.5 E(2)204.835 E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 146.5(mbdatalist\(1\) MB-System)72 48 R 146.5
 (5.0 mbdatalist\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad49>108 84 Q/F2 10
-/Times-Italic@0 SF(\214lename)144 84 Q F0 .59
+/Times-Italic@0 SF(\214lename)26.41 E F0 .59
 (Sets the input \214lename. If)144 96 R F2(format)3.09 E F0 3.09(>0\()
 3.09 G .591(set with the)-3.09 F F1<ad66>3.091 E F0 .591
 (option\) then the sw)3.091 F .591(ath data \214lename speci-)-.1 F .719
@@ -457,8 +451,8 @@ R 1.114(ath sonar data \214les to be processed and)-.1 F .061
 (ly).15 E 2.561(,i)-.65 G 2.561(fn)-2.561 G .06
 (ecessary\) and output each sw)-2.561 F(ath)-.1 E
 (\214lename and the associated format and \214le weight.)144 144 Q F1
-<ad4e>108 160.8 Q F0 .788(This ar)144 160.8 R .788(gument causes)-.18 F
-F1(MBdatalist)3.288 E F0 .789
+<ad4e>108 160.8 Q F0 .788(This ar)23.08 F .788(gument causes)-.18 F F1
+(MBdatalist)3.288 E F0 .789
 (to generate three types of ancillary data \214les \("inf", "fbt", and)
 3.288 F("fn)144 172.8 Q 4.002(v"\). In)-.4 F 1.502(all cases, the ancil\
 lary \214lenames are just the original \214lename with ".inf", ".fbt", \
@@ -485,13 +479,12 @@ E F1(mbcontour)3.514 E F0 1.014(will try to read "fbt" and "fn)3.514 F
 1.013(v" \214les instead of the full data)-.4 F(\214les whene)144 280.8
 Q -.15(ve)-.25 G 2.5(ro).15 G(nly bath)-2.5 E(ymetry or na)-.05 E(vig)
 -.2 E(ation information are required.)-.05 E F1<ad4f>108 297.6 Q F0 .274
-(This ar)144 297.6 R .274(gument causes)-.18 F F1(MBdatalist)2.774 E F0
-.274
+(This ar)22.52 F .274(gument causes)-.18 F F1(MBdatalist)2.774 E F0 .274
 (to generate the three ancillary data \214les \("inf", "fbt", and "fn)
 2.774 F(v"\))-.4 E(if these \214les don')144 309.6 Q 2.5(ta)-.18 G
 (lready e)-2.5 E(xist or are out of date.)-.15 E F1<ad50>108 326.4 Q F0
-(Normally)144 326.4 Q(,)-.65 E F1(mbdatalist)2.836 E F0(allo)2.836 E
-.336(ws $PR)-.25 F .336(OCESSED and $RA)-.4 F 2.836(Wt)-.9 G .336
+(Normally)24.19 E(,)-.65 E F1(mbdatalist)2.836 E F0(allo)2.836 E .336
+(ws $PR)-.25 F .336(OCESSED and $RA)-.4 F 2.836(Wt)-.9 G .336
 (ags within the datalist \214les to determine)-2.836 F .267
 (whether processed \214le names are reported when a)144 338.4 R -.25(va)
 -.2 G .267(ilable \($PR).25 F .267(OCESSED\) or only ra)-.4 F 2.767
@@ -500,7 +493,7 @@ Q -.15(ve)-.25 G 2.5(ro).15 G(nly bath)-2.5 E(ymetry or na)-.05 E(vig)
 (mbdatalist)2.939 E F0 .438(to output processed \214le names when the)
 2.939 F(y)-.15 E -.15(ex)144 362.4 S(ist.).15 E F1<ad51>108 379.2 Q F0
 .11(This option causes the program to check each data \214le for the e)
-144 379.2 R .111(xistence of an)-.15 F 2.611(ya)-.15 G .111
+22.52 F .111(xistence of an)-.15 F 2.611(ya)-.15 G .111
 (ncillary \214les refer)-2.611 F(-)-.2 E 1.652
 (enced in its mbprocess parameter \214le \(if the parameter \214le e)144
 391.2 R 1.651(xists\). The rele)-.15 F -.25(va)-.25 G 1.651
@@ -511,19 +504,19 @@ E F1(mbclean)2.995 E F0 2.996(,n)C -.2(av)-2.996 G(ig).2 E .496
 E F0(or)144 415.2 Q F1(mbna)3.592 E -.1(va)-.25 G(djust).1 E F0 3.592
 (,t)C 1.092(ide \214les, and svp \214les. An error message is output fo\
 r each missing ancillary)-3.592 F(\214le.)144 427.2 Q F1<ad52>108 444 Q
-F2(w/e/s/n)144 444 Q F0 .033(The bounds of the desired area are set in \
-longitude and latitude using w=west, e=east, s=south, and)144 456 R
-2.733(n=north. This)144 468 R .232(option causes the program to check e\
-ach data \214le with an "inf" \214le for o)2.733 F -.15(ve)-.15 G .232
+F2(w/e/s/n)23.08 E F0 .033(The bounds of the desired area are set in lo\
+ngitude and latitude using w=west, e=east, s=south, and)144 456 R 2.733
+(n=north. This)144 468 R .232(option causes the program to check each d\
+ata \214le with an "inf" \214le for o)2.733 F -.15(ve)-.15 G .232
 (rlap with).15 F 1.287(the desired bounds, and only report those \214le\
 s with data in the desired area \(or no "inf" \214le to)144 480 R .23
 (check\). This beha)144 492 R .23(vior mimics that of)-.2 F F1(mbgrid)
 2.729 E F0 2.729(,a)C(llo)-2.729 E .229
 (wing users to check what data \214les will contrib-)-.25 F
 (ute to gridding some particular area.)144 504 Q F1<ad53>108 520.8 Q F0
-.516(This option causes)144 520.8 R F1(mbdatalist)3.016 E F0 .517(to re\
-port the status of the \214les it lists, including whether the \214le i\
-s)3.016 F .778
+.516(This option causes)24.74 F F1(mbdatalist)3.016 E F0 .517(to report\
+ the status of the \214les it lists, including whether the \214le is)
+3.016 F .778
 (up to date or needs reprocessing, and if the \214le is lock)144 532.8 R
 (ed.)-.1 E F1(MBpr)3.278 E(ocess)-.18 E F0 .778
 (sets locks while operating)3.278 F 1.392(on a sw)144 544.8 R 1.393
@@ -541,23 +534,23 @@ F F1(mbpr)3.893 E(ocess)-.18 E F0 1.393
 (nt reprocessing by).15 F F1(mbpr)2.773 E(ocess)-.18 E F0 2.773(,b)C
 .273(ut can be both detected and remo)-2.973 F -.15(ve)-.15 G(d).15 E
 (using)144 604.8 Q F1(mbdatalist)2.5 E F0(.)A F1<ad55>108 621.6 Q F0
-(Normally)144 621.6 Q(,)-.65 E F1(mbdatalist)2.836 E F0(allo)2.836 E
-.336(ws $PR)-.25 F .336(OCESSED and $RA)-.4 F 2.836(Wt)-.9 G .336
+(Normally)23.08 E(,)-.65 E F1(mbdatalist)2.836 E F0(allo)2.836 E .336
+(ws $PR)-.25 F .336(OCESSED and $RA)-.4 F 2.836(Wt)-.9 G .336
 (ags within the datalist \214les to determine)-2.836 F .915
 (whether processed \214le names are reported when a)144 633.6 R -.25(va)
 -.2 G .915(ilable \($PR).25 F .915(OCESSED\) or only \(ra)-.4 F .915
 (w\) unpro-)-.15 F .613(cessed \214le names are reported \($RA)144 645.6
 R .613(W\). The)-.9 F F1<ad55>3.113 E F0 .613(option forces)3.113 F F1
 (mbdatalist)3.113 E F0 .612(to only output ra)3.112 F 3.112<778c>-.15 G
-(le)-3.112 E(names.)144 657.6 Q F1<ad56>108 674.4 Q F0(Normally)144
-674.4 Q(,)-.65 E F1(mbdatalist)4.091 E F0 1.591
+(le)-3.112 E(names.)144 657.6 Q F1<ad56>108 674.4 Q F0(Normally)23.08 E
+(,)-.65 E F1(mbdatalist)4.091 E F0 1.591
 (only prints out the \214lenames and formats.)4.091 F 1.591(If the)6.591
 F F1<ad56>4.092 E F0 1.592(\215ag is gi)4.092 F -.15(ve)-.25 G 1.592
 (n, then).15 F F1(mbinf)144 686.4 Q(o)-.25 E F0 -.1(wo)2.5 G
 (rks in a "v).1 E(erbose" mode and outputs the program v)-.15 E
 (ersion being used.)-.15 E F1<ad59>108 703.2 Q F0 .615
-(This option causes)144 703.2 R F1(mbdatalist)3.115 E F0 .615(to remo)
-3.115 F .915 -.15(ve a)-.15 H .915 -.15(ny p).15 H .615
+(This option causes)23.08 F F1(mbdatalist)3.115 E F0 .615(to remo)3.115
+F .915 -.15(ve a)-.15 H .915 -.15(ny p).15 H .615
 (rocessing locks on \214les it parses.).15 F F1(MBpr)3.115 E(ocess)-.18
 E F0(and)3.115 E 1.678
 (other programs may set locks while operating on a sw)144 715.2 R 1.678
@@ -579,9 +572,9 @@ phaned lock \214les may be)-.1 F .076(left if)144 108 R/F1 10
 /Times-Bold@0 SF(MB-System)2.576 E F0 .076
 (programs crash or are interrupted. These can be detected using the)
 2.576 F F1<ad53>2.577 E F0 .077(option of)2.577 F F1(mbdatalist)144 120
-Q F0(.)A F1<ad5a>108 136.8 Q F0(The)144 136.8 Q F1<ad5a>2.625 E F0 .124
-(option causes the program to generate a datalist \214le that will \214\
-rst set a $PR)2.625 F .124(OCESSED \215ag)-.4 F 1.889
+Q F0(.)A F1<ad5a>108 136.8 Q F0(The)23.63 E F1<ad5a>2.625 E F0 .124(opt\
+ion causes the program to generate a datalist \214le that will \214rst \
+set a $PR)2.625 F .124(OCESSED \215ag)-.4 F 1.889
 (and then reference the input \214le speci\214ed using the)144 148.8 R
 F1<ad49>4.389 E/F2 10/Times-Italic@0 SF(\214lename)A F0 4.39
 (option. The)4.389 F 1.89(output datalist is)4.39 F .611

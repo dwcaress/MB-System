@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:40 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:10 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -291,7 +285,7 @@ ling beams that were originally classi\214ed as good or un\215ag-)-.15 F
 -.15 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 499.2 Q
 (Lamont-Doherty Earth Observ)113 511.2 Q(atory)-.25 E F1(OPTIONS)72 540
-Q F2<ad46>108 552 Q F3(format)144 552 Q F0 .401
+Q F2<ad46>108 552 Q F3(format)24.19 E F0 .401
 (Sets the format for the input and output sw)144 564 R .401
 (ath data using)-.1 F F2(MBIO)2.9 E F0(inte)2.9 E .4
 (ger format identi\214ers.)-.15 F(These)5.4 E .238(utilities uses the)
@@ -303,14 +297,14 @@ Q F2<ad46>108 552 Q F3(format)144 552 Q F0 .401
 -.25 G 3.823(ni).15 G 3.823(nt)-3.823 G(he)-3.823 E F2(MBIO)144 600 Q F0
 (manual page.)2.5 E F2<ad48>108 616.8 Q F0 .391(This "help" \215ag caus\
 es the program to print out a description of its operation and then e)
-144 616.8 R .391(xit imme-)-.15 F(diately)144 628.8 Q(.)-.65 E F2<ad49>
-108 645.6 Q F3(in\214le)144 645.6 Q F0 .33(Data \214le from which the i\
-nput data will be read. If no input \214le is speci\214ed, the input wi\
-ll be read)144 657.6 R(from stdin. Def)144 669.6 Q(ault:)-.1 E F3
-(in\214le)2.5 E F0 2.5(=s)2.5 G(tdin.)-2.5 E F2<ad4d>108 686.4 Q F3
-(mode)144 686.4 Q F0 .487(Speci\214es which beam \215ag v)144 698.4 R
-.488(alues are output as edit e)-.25 F -.15(ve)-.25 G 2.988(nts. If).15
-F F3(mode)2.988 E F0 2.988(=1)2.988 G 2.988(,t)-2.988 G .488
+22.52 F .391(xit imme-)-.15 F(diately)144 628.8 Q(.)-.65 E F2<ad49>108
+645.6 Q F3(in\214le)26.41 E F0 .33(Data \214le from which the input dat\
+a will be read. If no input \214le is speci\214ed, the input will be re\
+ad)144 657.6 R(from stdin. Def)144 669.6 Q(ault:)-.1 E F3(in\214le)2.5 E
+F0 2.5(=s)2.5 G(tdin.)-2.5 E F2<ad4d>108 686.4 Q F3(mode)20.86 E F0 .487
+(Speci\214es which beam \215ag v)144 698.4 R .488
+(alues are output as edit e)-.25 F -.15(ve)-.25 G 2.988(nts. If).15 F F3
+(mode)2.988 E F0 2.988(=1)2.988 G 2.988(,t)-2.988 G .488
 (hen only \215agged beams)-2.988 F .871(are output. If)144 710.4 R F3
 (mode)3.371 E F0 3.371(=2)3.371 G 3.371(,t)-3.371 G .871
 (hen \215agged and null beams are output. If)-3.371 F F3(mode)3.37 E F0
@@ -325,15 +319,15 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 151.51(mbgetesf\(1\) MB-System)72 48 R 151.51
 (5.0 mbgetesf\(1\))2.5 F/F1 10/Times-Italic@0 SF(mode)144 84 Q F0 2.5
-(=1)2.5 G(.)-2.5 E/F2 10/Times-Bold@0 SF<ad4f>108 100.8 Q F1(esf)144
-100.8 Q(\214le)-.18 E F0 .464(Speci\214es output edit sa)144 112.8 R
-.763 -.15(ve \214)-.2 H .463(le to which the edit e).15 F -.15(ve)-.25 G
-.463(nts will be written. If no edit sa).15 F .763 -.15(ve \214)-.2 H
-.463(le is speci-).15 F
-(\214ed, the output will be written to stdout. Def)144 124.8 Q(ault:)-.1
-E F1(esf)2.5 E(\214le)-.18 E F0 2.5(=s)2.5 G(tdout.)-2.5 E F2<ad56>108
-141.6 Q F0(Normally)144 141.6 Q(,)-.65 E F2(mbgetesf)3.291 E F0 -.1(wo)
-3.291 G .791(rks "silently" without outputting an).1 F .792
+(=1)2.5 G(.)-2.5 E/F2 10/Times-Bold@0 SF<ad4f>108 100.8 Q F1(esf)22.52 E
+(\214le)-.18 E F0 .464(Speci\214es output edit sa)144 112.8 R .763 -.15
+(ve \214)-.2 H .463(le to which the edit e).15 F -.15(ve)-.25 G .463
+(nts will be written. If no edit sa).15 F .763 -.15(ve \214)-.2 H .463
+(le is speci-).15 F(\214ed, the output will be written to stdout. Def)
+144 124.8 Q(ault:)-.1 E F1(esf)2.5 E(\214le)-.18 E F0 2.5(=s)2.5 G
+(tdout.)-2.5 E F2<ad56>108 141.6 Q F0(Normally)23.08 E(,)-.65 E F2
+(mbgetesf)3.291 E F0 -.1(wo)3.291 G .791
+(rks "silently" without outputting an).1 F .792
 (ything to the stderr stream.)-.15 F .792(If the)5.792 F F2<ad56>3.292 E
 F0 1.172(\215ag is gi)144 153.6 R -.15(ve)-.25 G 1.172(n, then).15 F F2
 (mbgetesf)3.672 E F0 -.1(wo)3.672 G 1.172(rks in a "v).1 F 1.172

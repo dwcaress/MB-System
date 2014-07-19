@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:46 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:13 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -298,8 +292,8 @@ Q F2<ad43>108 528 Q F0(Causes)144 540 Q F2(mbsvplist)2.5 E F0(to output\
  the number of unique SVPs in each \214le to the shell \(standard out\)\
 .)2.5 E F2<ad44>108 556.8 Q F0(Causes)144 568.8 Q F2(mbsvplist)2.5 E F0
 (to output duplicate SVPs. This is equi)2.5 E -.25(va)-.25 G(lent to).25
-E F2<ad4d>2.5 E F3(2)A F0(.)A F2<ad46>108 585.6 Q F3(format)144 585.6 Q
-F0 .423(Sets the format for the input sw)144 597.6 R .423
+E F2<ad4d>2.5 E F3(2)A F0(.)A F2<ad46>108 585.6 Q F3(format)24.19 E F0
+.423(Sets the format for the input sw)144 597.6 R .423
 (ath sonar data using)-.1 F F2(MBIO)2.922 E F0(inte)2.922 E .422
 (ger format identi\214ers.)-.15 F(If)5.422 E F3(format)2.922 E F0(<)
 2.922 E .717(0, then the input \214le speci\214ed with the)144 609.6 R
@@ -313,9 +307,9 @@ F2<ad49>3.217 E F0 .717(option will actually contain a list of input sw)
 .089(and their identi\214er)2.589 F -.25(va)144 645.6 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
 (manual page.)2.5 E F2<ad48>108 662.4 Q F0 .162(This "help" \215ag caus\
-e the program to print out a description of its operation and then e)144
-662.4 R .161(xit immedi-)-.15 F(ately)144 674.4 Q(.)-.65 E F2<ad49>108
-691.2 Q F3(\214le)144 691.2 Q F0 .312(Sets the input \214lename. If)144
+e the program to print out a description of its operation and then e)
+22.52 F .161(xit immedi-)-.15 F(ately)144 674.4 Q(.)-.65 E F2<ad49>108
+691.2 Q F3(\214le)26.41 E F0 .312(Sets the input \214lename. If)144
 703.2 R F3(format)2.813 E F0 2.813(>0\()2.813 G .313(set with the)-2.813
 F F2<ad46>2.813 E F0 .313(option\) then the sw)2.813 F .313
 (ath sonar data contained)-.1 F(in)144 715.2 Q F3(\214le)2.956 E F0 .456
@@ -344,7 +338,7 @@ R .664(In the)5.664 F/F1 10/Times-Italic@0 SF(\214le)3.164 E F0 .663
 .928(and their identi\214er)3.428 F -.25(va)144 156 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
 (manual page. Def)2.5 E(ault:)-.1 E F1(\214le)2.5 E F0 2.5(=")2.5 G
-(datalist.mb-1".)-2.5 E F2<ad4d>108 172.8 Q F1(mode)144 172.8 Q F0 .536
+(datalist.mb-1".)-2.5 E F2<ad4d>108 172.8 Q F1(mode)20.86 E F0 .536
 (Sets the SVP output mode. If)144 184.8 R F1(mode)3.036 E F0 .536
 (=0 \(the def)B .536
 (ault\), then the \214rst SVP of each \214le will be output,)-.1 F .879
@@ -379,18 +373,18 @@ F2(mbsvplist)3.752 E F0 1.252(to output the sound v)3.752 F 1.252
 (SV\) instead of SVP pro\214les. Each SSV v)-3.147 F .647(alue will)-.25
 F .014(be paired with the corresponding sonar depth, and in general one\
  depth-SSV pair will be output for)144 379.2 R(each surv)144 391.2 Q .3
--.15(ey p)-.15 H(ing.).15 E F2<ad56>108 408 Q F0(Normally)144 408 Q(,)
--.65 E F2(mbsvplist)3.076 E F0 -.1(wo)3.076 G .576
+-.15(ey p)-.15 H(ing.).15 E F2<ad56>108 408 Q F0(Normally)23.08 E(,)-.65
+E F2(mbsvplist)3.076 E F0 -.1(wo)3.076 G .576
 (rks "silently" without outputting an).1 F .576
 (ything to the stderr stream.)-.15 F .577(If the)5.576 F F2<ad56>3.077 E
 F0 .525(\215ag is gi)144 420 R -.15(ve)-.25 G .525(n, then).15 F F2
 (mblist)3.025 E F0 -.1(wo)3.025 G .525(rks in a "v).1 F .525
 (erbose" mode and outputs the program v)-.15 F .525(ersion being used)
 -.15 F(and all error status messages.)144 432 Q F2<ad5a>108 448.8 Q F0
-(Normally)144 448.8 Q(,)-.65 E F2(mbsvplist)3.159 E F0 -.1(fa)3.159 G
-.659(ithfully outputs the SVP data just as it is stored in the sw).1 F
-.66(ath \214les. Rarely)-.1 F(,)-.65 E .933(sonars may store SVP data w\
-ith a nonzero depth for the \214rst sound speed v)144 460.8 R .933
+(Normally)23.63 E(,)-.65 E F2(mbsvplist)3.159 E F0 -.1(fa)3.159 G .659
+(ithfully outputs the SVP data just as it is stored in the sw).1 F .66
+(ath \214les. Rarely)-.1 F(,)-.65 E .933(sonars may store SVP data with\
+ a nonzero depth for the \214rst sound speed v)144 460.8 R .933
 (alue, a circumstance)-.25 F 2.375(that causes problems with bath)144
 472.8 R 2.375(ymetry recalculation using)-.05 F F2(mbpr)4.876 E(ocess)
 -.18 E F0 4.876(.T)C(he)-4.876 E F2<ad5a>4.876 E F0 2.376(option causes)

@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:43 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:11 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -274,17 +268,17 @@ F .946(ruly ambitious users may edit the plot shellscript to tak)-.35 F
 (Lamont-Doherty Earth Observ)113 403.2 Q(atory)-.25 E
 (Suzanne H. O'Hara \(sohara@ldeo.columbia.edu\))108 415.2 Q
 (Lamont-Doherty Earth Observ)113 427.2 Q(atory)-.25 E F1(OPTIONS)72 456
-Q F2<ad42>108 468 Q F3(tic)144 468 Q(kinfo)-.2 E F0 .219
+Q F2<ad42>108 468 Q F3(tic)23.63 E(kinfo)-.2 E F0 .219
 (Sets map boundary tickmark interv)144 480 R .219(als. See the)-.25 F F2
 (psbasemap)2.719 E F0 .218(manual page for details. By def)2.719 F .218
 (ault the)-.1 F
 (program chooses basemap annotations based on the map boundaries.)144
-492 Q F2<ad43>108 508.8 Q F3(cellwidth)144 508.8 Q F0 .236(Sets the wid\
-th of the cells into which the data are binned to form the histogram. T\
-he def)144 520.8 R .236(ault is use)-.1 F 2.5(ac)144 532.8 S
+492 Q F2<ad43>108 508.8 Q F3(cellwidth)23.08 E F0 .236(Sets the width o\
+f the cells into which the data are binned to form the histogram. The d\
+ef)144 520.8 R .236(ault is use)-.1 F 2.5(ac)144 532.8 S
 (ell width that is 1/10 the data range.)-2.5 E F2<ad47>108 549.6 Q F3
-(\214ll)144 549.6 Q F0 .638(Select \214lling of the histogram.)144 561.6
-R .638(Set the shade \(0-255\) or color \(r/g/b\) [Def)5.638 F .637
+(\214ll)22.52 E F0 .638(Select \214lling of the histogram.)144 561.6 R
+.638(Set the shade \(0-255\) or color \(r/g/b\) [Def)5.638 F .637
 (ault is a light gray]. T)-.1 F(o)-.8 E .096(reset no \214ll, use)144
 573.6 R F3(\214ll)2.596 E F0 2.596(=")2.596 G 2.596(N". Y)-2.596 F .097
 (ou may optionally specify)-1.1 F F2(\255Gp)2.597 E F3
@@ -299,15 +293,14 @@ F2(\255Gp)2.795 E F0 5.295(.S)C(ee)-5.295 E F2(GMTs)2.795 E F0 .295
 (chnical Reference Appendix E for information on indi).7 E
 (vidual patterns.)-.25 E F2<ad48>108 626.4 Q F0 .162(This "help" \215ag\
  cause the program to print out a description of its operation and then\
- e)144 626.4 R .161(xit immedi-)-.15 F(ately)144 638.4 Q(.)-.65 E F2
-<ad49>108 655.2 Q F3([\214lepar)144 655.2 Q(s:]xy_\214le)-.1 E F0 1.694
-(Speci\214es the \214le containing the data to be plotted in a histogra\
-m. A single column of data is)144 679.2 R -.15(ex)144 691.2 S(pected.)
-.15 E F2<ad4a>108 708 Q F3(pr)144 708 Q(ojection)-.45 E F0([)A F3
-(/width/height)A F0(])A .993
-(Sets the plot scale. The projection is linear \()144 720 R F2<ad4a>A F3
-.993(X\), and the user can optionally specify the width)B F0
-(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0
+ e)22.52 F .161(xit immedi-)-.15 F(ately)144 638.4 Q(.)-.65 E F2<ad49>
+108 655.2 Q F3([\214lepar)26.41 E(s:]xy_\214le)-.1 E F0 1.694(Speci\214\
+es the \214le containing the data to be plotted in a histogram. A singl\
+e column of data is)144 679.2 R -.15(ex)144 691.2 S(pected.).15 E F2
+<ad4a>108 708 Q F3(pr)25.3 E(ojection)-.45 E F0([)A F3(/width/height)A
+F0(])A .993(Sets the plot scale. The projection is linear \()144 720 R
+F2<ad4a>A F3 .993(X\), and the user can optionally specify the width)B
+F0(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0
 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
@@ -315,8 +308,8 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 132.6(mbm_histplot\(1\) MB-System)72 48 R 132.6
 (5.0 mbm_histplot\(1\))2.5 F/F1 10/Times-Italic@0 SF(and height.)144 84
-Q/F2 10/Times-Bold@0 SF<ad4c>108 100.8 Q F1(title[:xlabel[:ylabel]])144
-100.8 Q F0 .173(Sets the title and the labels for the x and y ax)144
+Q/F2 10/Times-Bold@0 SF<ad4c>108 100.8 Q F1(title[:xlabel[:ylabel]])
+23.63 E F0 .173(Sets the title and the labels for the x and y ax)144
 112.8 R .174
 (es of the plot. Note that a colon \(:\) rather than a slash)-.15 F .652
 (\(/\) is used to separate the labels. Colons cannot be used in the lab\
@@ -325,17 +318,17 @@ els themselv)144 124.8 R .652(es. If this option is)-.15 F .156
 (ault title and colorscale label are pro)-.1 F .157
 (vided. If the title is supplied alone, no x or)-.15 F
 (y-axis labels will be pro)144 148.8 Q(vided.)-.15 E F2<ad4f>108 165.6 Q
-F1 -.45(ro)144 165.6 S(ot).45 E F0 .423(Sets the root used to construct\
- the \214lename of the output shellscript \()144 177.6 R F1 -.45(ro)C
-(ot).45 E F0 .422(.cmd\) and names of \214les)B .156
+F1 -.45(ro)22.52 G(ot).45 E F0 .423(Sets the root used to construct the\
+ \214lename of the output shellscript \()144 177.6 R F1 -.45(ro)C(ot).45
+E F0 .422(.cmd\) and names of \214les)B .156
 (created when the shellscript is run.)144 189.6 R .157
 (Normally the name of the input grid \214le or grid \214le list is used)
 5.157 F(as the)144 201.6 Q F1 -.45(ro)2.5 G(ot).45 E F0(.)A F2<ad50>108
-218.4 Q F1(pa)144 218.4 Q -.1(ge)-.1 G(size).1 E F0 .632(This option se\
-ts the size of the page the plot will be centered on. If the user does \
-not set the plot)144 230.4 R .125(scale, the plot will be sized as lar)
-144 242.4 R .125(ge as will \214t on the designated page. If the user s\
-ets the plot scale)-.18 F .948
+218.4 Q F1(pa)24.19 E -.1(ge)-.1 G(size).1 E F0 .632(This option sets t\
+he size of the page the plot will be centered on. If the user does not \
+set the plot)144 230.4 R .125(scale, the plot will be sized as lar)144
+242.4 R .125(ge as will \214t on the designated page. If the user sets \
+the plot scale)-.18 F .948
 (such that the plot will not \214t on the designated page, a lar)144
 254.4 R .948(ger page will be used.)-.18 F .947(The supported)5.947 F
 (page sizes are:)144 266.4 Q(American ANSI sizes:)169 290.4 Q 12.5(A8)
@@ -399,7 +392,7 @@ R 5(x1)2.5 G(62.6 mm)-5 E 2.5(\(4)5 G(.50 x)-2.5 E(6.40 in.\))5 E 7.5
 240 R 2.5(x2)2.5 G(133.6 mm)-2.5 E(\(60.00 x 84.00 in.\))5 E 2.5
 (m6 1524.0)169 252 R 2.5(x2)2.5 G(438.4 mm)-2.5 E(\(60.00 x 96.00 in.\))
 5 E(The def)144 276 Q(ault page size is A.)-.1 E/F1 10/Times-Bold@0 SF
-<ad51>108 292.8 Q F0(Normally)144 292.8 Q 2.866(,t)-.65 G .367
+<ad51>108 292.8 Q F0(Normally)22.52 E 2.866(,t)-.65 G .367
 (he output plot generation shellscript includes lines which e)-2.866 F
 -.15(xe)-.15 G .367(cute a program to display).15 F 1.072
 (the Postscript image on the screen.)144 304.8 R 1.071
@@ -412,28 +405,28 @@ R F1(mbdefaults)2.826 E F0 2.826(;t)C .326(he def)-2.826 F .326(ault v)
 -.1 F .326(alue can be)-.25 F -.15(ove)144 340.8 S
 (rridden by setting the en).15 E(vironment v)-.4 E
 (ariable $MB_PS_VIEWER.)-.25 E F1<ad52>108 357.6 Q/F2 10/Times-Italic@0
-SF(west/east/south/north)144 357.6 Q .196(west, east, south,)144 369.6 R
-F0(and)2.696 E F2(north)2.696 E F0 .196(specify the Re)2.696 F .196
+SF(west/east/south/north)23.08 E .196(west, east, south,)144 369.6 R F0
+(and)2.696 E F2(north)2.696 E F0 .196(specify the Re)2.696 F .196
 (gion of interest. [Def)-.15 F .196
 (ault is the range of the data and the)-.1 F(histogram distrib)144 381.6
-Q(ution].)-.2 E F1<ad55>108 398.4 Q F2(orientation)144 398.4 Q F0 .2(No\
-rmally the orientation of the plot \(portrait or landscape\) is selecte\
-d automatically so as to maxi-)144 410.4 R .333(mize the plot scale.)144
+Q(ution].)-.2 E F1<ad55>108 398.4 Q F2(orientation)23.08 E F0 .2(Normal\
+ly the orientation of the plot \(portrait or landscape\) is selected au\
+tomatically so as to maxi-)144 410.4 R .333(mize the plot scale.)144
 422.4 R(The)5.333 E F1<ad55>2.833 E F0 .333(option allo)2.833 F .333
 (ws the user to set the plot orientation. If)-.25 F F2(orientation)2.833
 E F0 2.834(=1)2.834 G 2.834(,a)-2.834 G
 (portrait plot will be produced; if)144 434.4 Q F2(orientation)2.5 E F0
 2.5(=2)2.5 G 2.5(,al)-2.5 G(andscape plot will be produced.)-2.5 E F1
-<ad56>108 451.2 Q F0(Causes)144 451.2 Q F1(mbm_histplot)4.463 E F0 1.963
+<ad56>108 451.2 Q F0(Causes)23.08 E F1(mbm_histplot)4.463 E F0 1.963
 (to operate in "v)4.463 F 1.962
 (erbose" mode so that it outputs more information than)-.15 F(usual.)144
-463.2 Q F1<ad57>108 480 Q F2(pen)144 480 Q F0 .054(Set pen attrib)144
-492 R .054(utes for plotting. See chapter 4.12 in the GMT T)-.2 F .055
+463.2 Q F1<ad57>108 480 Q F2(pen)20.3 E F0 .054(Set pen attrib)144 492 R
+.054(utes for plotting. See chapter 4.12 in the GMT T)-.2 F .055
 (echnical reference for a discussion of)-.7 F(GMT pen v)144 504 Q 2.5
 (alues. [Def)-.25 F(aults: width = 1, color = 0/0/0, te)-.1 E
-(xture = solid].)-.15 E F1<ad58>108 520.8 Q F0(Normally)144 520.8 Q(,)
--.65 E F1(mbm_histplot)3.258 E F0 .758(creates an e)3.258 F -.15(xe)-.15
-G .758(cutable shellscript and then e).15 F 3.257(xits. This)-.15 F .757
+(xture = solid].)-.15 E F1<ad58>108 520.8 Q F0(Normally)23.08 E(,)-.65 E
+F1(mbm_histplot)3.258 E F0 .758(creates an e)3.258 F -.15(xe)-.15 G .758
+(cutable shellscript and then e).15 F 3.257(xits. This)-.15 F .757
 (option will cause)3.257 F(the shellscript to be e)144 532.8 Q -.15(xe)
 -.15 G(cuted in the background before).15 E F1(mbm_histplot)2.5 E F0
 -.15(ex)2.5 G(its.).15 E/F3 10.95/Times-Bold@0 SF(EXAMPLES)72 561.6 Q F0

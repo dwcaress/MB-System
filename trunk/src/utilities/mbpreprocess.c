@@ -88,7 +88,7 @@ int main (int argc, char **argv)
 	/* mbpreprocess --verbose
 	 * 		--help
 	 * 		--input=datalist
-	 * 		--format=format
+	 * 		--format=format_id
 	 * 		--nav_file=file
 	 * 		--nav_file_format=format_id
 	 * 		--nav_async=record_kind
@@ -302,12 +302,20 @@ int main (int argc, char **argv)
 	int	n_rf_nav1 = 0;
 	int	n_rf_nav2 = 0;
 	int	n_rf_nav3 = 0;
+	int	n_rf_att = 0;
+	int	n_rf_att1 = 0;
+	int	n_rf_att2 = 0;
+	int	n_rf_att3 = 0;
 	int	n_rt_data = 0;
 	int	n_rt_comment = 0;
 	int	n_rt_nav = 0;
 	int	n_rt_nav1 = 0;
 	int	n_rt_nav2 = 0;
 	int	n_rt_nav3 = 0;
+	int	n_rt_att = 0;
+	int	n_rt_att1 = 0;
+	int	n_rt_att2 = 0;
+	int	n_rt_att3 = 0;
 	
 	int	n_wf_data = 0;
 	int	n_wf_comment = 0;
@@ -315,12 +323,20 @@ int main (int argc, char **argv)
 	int	n_wf_nav1 = 0;
 	int	n_wf_nav2 = 0;
 	int	n_wf_nav3 = 0;
+	int	n_wf_att = 0;
+	int	n_wf_att1 = 0;
+	int	n_wf_att2 = 0;
+	int	n_wf_att3 = 0;
 	int	n_wt_data = 0;
 	int	n_wt_comment = 0;
 	int	n_wt_nav = 0;
 	int	n_wt_nav1 = 0;
 	int	n_wt_nav2 = 0;
 	int	n_wt_nav3 = 0;
+	int	n_wt_att = 0;
+	int	n_wt_att1 = 0;
+	int	n_wt_att2 = 0;
+	int	n_wt_att3 = 0;
 	
 	int	testformat;
 	int	interp_status = MB_SUCCESS;
@@ -538,8 +554,8 @@ int main (int argc, char **argv)
 				timeshift_apply =  timeshift_apply | MBPREPROCESS_TIMESHIFT_APPLY_HEADING;
 				}
 			
-			/* timeshift_apply_altitude */
-			else if (strcmp("timeshift_apply_altitude", options[option_index].name) == 0)
+			/* timeshift_apply_attitude */
+			else if (strcmp("timeshift_apply_attitude", options[option_index].name) == 0)
 				{
 				timeshift_apply =  timeshift_apply | MBPREPROCESS_TIMESHIFT_APPLY_ATTITUDE;
 				}
@@ -833,6 +849,10 @@ int main (int argc, char **argv)
 		n_rf_nav1 = 0;
 		n_rf_nav2 = 0;
 		n_rf_nav3 = 0;
+		n_rf_att = 0;
+		n_rf_att1 = 0;
+		n_rf_att2 = 0;
+		n_rf_att3 = 0;
 	
 		/* read data */
 		while (error <= MB_ERROR_NO_ERROR)
@@ -897,6 +917,26 @@ int main (int argc, char **argv)
 				{
 				n_rf_nav3++;
 				n_rt_nav3++;
+				}
+			else if (kind == MB_DATA_ATTITUDE)
+				{
+				n_rf_att++;
+				n_rt_att++;
+				}
+			else if (kind == MB_DATA_ATTITUDE1)
+				{
+				n_rf_att1++;
+				n_rt_att1++;
+				}
+			else if (kind == MB_DATA_ATTITUDE2)
+				{
+				n_rf_att2++;
+				n_rt_att2++;
+				}
+			else if (kind == MB_DATA_ATTITUDE3)
+				{
+				n_rf_att3++;
+				n_rt_att3++;
 				}
 				
 			/* look for nav if not externally defined */
@@ -1115,9 +1155,9 @@ int main (int argc, char **argv)
 					for (i=0;i<nanav;i++)
 						{
 						attitude_time_d[attitude_num] = atime_d[i];
-						attitude_roll[attitude_num] = alon[i];
-						attitude_pitch[attitude_num] = alat[i];
-						attitude_heave[attitude_num] = aspeed[i];
+						attitude_roll[attitude_num] = aroll[i];
+						attitude_pitch[attitude_num] = apitch[i];
+						attitude_heave[attitude_num] = aheave[i];
 						attitude_num++;
 						}
 					}
@@ -1134,6 +1174,10 @@ int main (int argc, char **argv)
 			fprintf(stderr,"     %d nav1 records\n", n_rf_nav1);
 			fprintf(stderr,"     %d nav2 records\n", n_rf_nav2);
 			fprintf(stderr,"     %d nav3 records\n", n_rf_nav3);
+			fprintf(stderr,"     %d att records\n", n_rf_att);
+			fprintf(stderr,"     %d att1 records\n", n_rf_att1);
+			fprintf(stderr,"     %d att2 records\n", n_rf_att2);
+			fprintf(stderr,"     %d att3 records\n", n_rf_att3);
 			}
 			
 		/* close the swath file */
@@ -1162,13 +1206,26 @@ int main (int argc, char **argv)
 	/* output data counts */
 	if (verbose > 0)
 		{
-		fprintf(stderr,"\nPass 1: Total records read from all input files\n");
+		fprintf(stderr,"\n-----------------------------------------------\n");
+		fprintf(stderr,"Pass 1: Total records read from all input files:\n");
 		fprintf(stderr,"     %d survey records\n", n_rt_data);
 		fprintf(stderr,"     %d comment records\n", n_rt_comment);
 		fprintf(stderr,"     %d nav records\n", n_rt_nav);
 		fprintf(stderr,"     %d nav1 records\n", n_rt_nav1);
 		fprintf(stderr,"     %d nav2 records\n", n_rt_nav2);
 		fprintf(stderr,"     %d nav3 records\n", n_rt_nav3);
+		fprintf(stderr,"     %d att records\n", n_rt_att);
+		fprintf(stderr,"     %d att1 records\n", n_rt_att1);
+		fprintf(stderr,"     %d att2 records\n", n_rt_att2);
+		fprintf(stderr,"     %d att3 records\n", n_rt_att3);
+		fprintf(stderr,"Pass 1: Asynchronous data available for merging:\n");
+		fprintf(stderr,"     %d navigation data (mode:%d)\n", nav_num, nav_mode);
+		fprintf(stderr,"     %d sensordepth data (mode:%d)\n", sensordepth_num, sensordepth_mode);
+		fprintf(stderr,"     %d heading data (mode:%d)\n", heading_num, heading_mode);
+		fprintf(stderr,"     %d altitude data (mode:%d)\n", altitude_num, altitude_mode);
+		fprintf(stderr,"     %d attitude data (mode:%d)\n", attitude_num, attitude_mode);
+		fprintf(stderr,"     %d timeshift data (mode:%d)\n", timeshift_num, timeshift_mode);
+		fprintf(stderr,"-----------------------------------------------\n");
 		}
 		
 	/* end first pass through data */
@@ -1320,24 +1377,40 @@ int main (int argc, char **argv)
 	n_rf_nav1 = 0;
 	n_rf_nav2 = 0;
 	n_rf_nav3 = 0;
+	n_rf_att = 0;
+	n_rf_att1 = 0;
+	n_rf_att2 = 0;
+	n_rf_att3 = 0;
 	n_rt_data = 0;
 	n_rt_comment = 0;
 	n_rt_nav = 0;
 	n_rt_nav1 = 0;
 	n_rt_nav2 = 0;
 	n_rt_nav3 = 0;
+	n_rt_att = 0;
+	n_rt_att1 = 0;
+	n_rt_att2 = 0;
+	n_rt_att3 = 0;
 	n_wf_data = 0;
 	n_wf_comment = 0;
 	n_wf_nav = 0;
 	n_wf_nav1 = 0;
 	n_wf_nav2 = 0;
 	n_wf_nav3 = 0;
+	n_wf_att = 0;
+	n_wf_att1 = 0;
+	n_wf_att2 = 0;
+	n_wf_att3 = 0;
 	n_wt_data = 0;
 	n_wt_comment = 0;
 	n_wt_nav = 0;
 	n_wt_nav1 = 0;
 	n_wt_nav2 = 0;
 	n_wt_nav3 = 0;
+	n_wt_att = 0;
+	n_wt_att1 = 0;
+	n_wt_att2 = 0;
+	n_wt_att3 = 0;
 
 	/* open file list */
 	if (read_datalist == MB_YES)
@@ -1373,7 +1446,17 @@ int main (int argc, char **argv)
 		/* get output format - in some cases this may be a
 		 * different, generally extended format
 		 * more suitable for processing than the original */
-		oformat = iformat;
+		if (iformat == MBF_EMOLDRAW
+			|| iformat == MBF_EM12IFRM
+			|| iformat == MBF_EM12DARW
+			|| iformat == MBF_EM300RAW
+			|| iformat == MBF_EM300MBA)
+			oformat = MBF_EM300MBA;
+		else if (iformat == MBF_EM710RAW
+			|| iformat == MBF_EM710MBA)
+			oformat = MBF_EM710MBA;
+		else
+			oformat = iformat;
 		
 		/* figure out the output file name */
 		status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
@@ -1466,12 +1549,20 @@ int main (int argc, char **argv)
 		n_rf_nav1 = 0;
 		n_rf_nav2 = 0;
 		n_rf_nav3 = 0;
+		n_rf_att = 0;
+		n_rf_att1 = 0;
+		n_rf_att2 = 0;
+		n_rf_att3 = 0;
 		n_wf_data = 0;
 		n_wf_comment = 0;
 		n_wf_nav = 0;
 		n_wf_nav1 = 0;
 		n_wf_nav2 = 0;
 		n_wf_nav3 = 0;
+		n_wf_att = 0;
+		n_wf_att1 = 0;
+		n_wf_att2 = 0;
+		n_wf_att3 = 0;
 
 		/* ------------------------------- */
 		/* write comments to output file   */
@@ -1531,6 +1622,26 @@ int main (int argc, char **argv)
 				{
 				n_rf_nav3++;
 				n_rt_nav3++;
+				}
+			else if (kind == MB_DATA_ATTITUDE)
+				{
+				n_rf_att++;
+				n_rt_att++;
+				}
+			else if (kind == MB_DATA_ATTITUDE1)
+				{
+				n_rf_att1++;
+				n_rt_att1++;
+				}
+			else if (kind == MB_DATA_ATTITUDE2)
+				{
+				n_rf_att2++;
+				n_rt_att2++;
+				}
+			else if (kind == MB_DATA_ATTITUDE3)
+				{
+				n_rf_att3++;
+				n_rt_att3++;
 				}
 
 			timestamp_changed = MB_NO;
@@ -1869,6 +1980,26 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					n_wf_nav3++;
 					n_wt_nav3++;
 					}
+				else if (kind == MB_DATA_ATTITUDE)
+					{
+					n_wf_att++;
+					n_wt_att++;
+					}
+				else if (kind == MB_DATA_ATTITUDE1)
+					{
+					n_wf_att1++;
+					n_wt_att1++;
+					}
+				else if (kind == MB_DATA_ATTITUDE2)
+					{
+					n_wf_att2++;
+					n_wt_att2++;
+					}
+				else if (kind == MB_DATA_ATTITUDE3)
+					{
+					n_wf_att3++;
+					n_wt_att3++;
+					}
 				}
 			}
 		/* end read+process+output data loop */
@@ -1884,6 +2015,10 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			fprintf(stderr,"     %d nav1 records\n", n_rf_nav1);
 			fprintf(stderr,"     %d nav2 records\n", n_rf_nav2);
 			fprintf(stderr,"     %d nav3 records\n", n_rf_nav3);
+			fprintf(stderr,"     %d att records\n", n_rf_att);
+			fprintf(stderr,"     %d att1 records\n", n_rf_att1);
+			fprintf(stderr,"     %d att2 records\n", n_rf_att2);
+			fprintf(stderr,"     %d att3 records\n", n_rf_att3);
 			fprintf(stderr,"Pass 2: Records written to output file %s\n", ofile);
 			fprintf(stderr,"     %d survey records\n", n_wf_data);
 			fprintf(stderr,"     %d comment records\n", n_wf_comment);
@@ -1891,6 +2026,10 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			fprintf(stderr,"     %d nav1 records\n", n_wf_nav1);
 			fprintf(stderr,"     %d nav2 records\n", n_wf_nav2);
 			fprintf(stderr,"     %d nav3 records\n", n_wf_nav3);
+			fprintf(stderr,"     %d att records\n", n_wf_att);
+			fprintf(stderr,"     %d att1 records\n", n_wf_att1);
+			fprintf(stderr,"     %d att2 records\n", n_wf_att2);
+			fprintf(stderr,"     %d att3 records\n", n_wf_att3);
 			}
 	
 		/* close the input swath file */
@@ -1934,6 +2073,10 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 		fprintf(stderr,"     %d nav1 records\n", n_rt_nav1);
 		fprintf(stderr,"     %d nav2 records\n", n_rt_nav2);
 		fprintf(stderr,"     %d nav3 records\n", n_rt_nav3);
+		fprintf(stderr,"     %d att records\n", n_rt_att);
+		fprintf(stderr,"     %d att1 records\n", n_rt_att1);
+		fprintf(stderr,"     %d att2 records\n", n_rt_att2);
+		fprintf(stderr,"     %d att3 records\n", n_rt_att3);
 		fprintf(stderr,"Pass 2: Total records written to all output files\n");
 		fprintf(stderr,"     %d survey records\n", n_wt_data);
 		fprintf(stderr,"     %d comment records\n", n_wt_comment);
@@ -1941,6 +2084,10 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 		fprintf(stderr,"     %d nav1 records\n", n_wt_nav1);
 		fprintf(stderr,"     %d nav2 records\n", n_wt_nav2);
 		fprintf(stderr,"     %d nav3 records\n", n_wt_nav3);
+		fprintf(stderr,"     %d att records\n", n_wt_att);
+		fprintf(stderr,"     %d att1 records\n", n_wt_att1);
+		fprintf(stderr,"     %d att2 records\n", n_wt_att2);
+		fprintf(stderr,"     %d att3 records\n", n_wt_att3);
 		}
 		
 	/* end second pass through data */

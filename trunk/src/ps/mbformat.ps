@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:40 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:10 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -280,8 +274,8 @@ F F2<ad4c>4.221 E F0 1.721(option is used,)4.221 F F2(mbf)108 309.6 Q
 -.15 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 398.4 Q
 (Lamont-Doherty Earth Observ)113 410.4 Q(atory)-.25 E F1(OPTIONS)72
-439.2 Q F2<ad46>108 451.2 Q/F4 10/Times-Italic@0 SF(format)144 451.2 Q
-F0 .281(Sets the format id to be listed.)144 463.2 R .281
+439.2 Q F2<ad46>108 451.2 Q/F4 10/Times-Italic@0 SF(format)24.19 E F0
+.281(Sets the format id to be listed.)144 463.2 R .281
 (If no format is gi)5.281 F -.15(ve)-.25 G .28
 (n, all of the currently supported formats will be).15 F .139
 (listed. A list of the sw)144 475.2 R .139
@@ -289,19 +283,19 @@ F0 .281(Sets the format id to be listed.)144 463.2 R .281
 .14(and their identi\214er v)2.64 F(al-)-.25 E(ues is gi)144 487.2 Q
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
 (manual page.)2.5 E F2<ad48>108 504 Q F0 .162(This "help" \215ag cause \
-the program to print out a description of its operation and then e)144
-504 R .161(xit immedi-)-.15 F(ately)144 516 Q(.)-.65 E F2<ad49>108 532.8
-Q F4(\214le)144 532.8 Q F0 1.346(Sets the \214lename to be tested ag)144
-544.8 R 1.346(ainst kno)-.05 F 1.346(wn \214lename pre\214x and suf)-.25
-F 1.346(\214x con)-.25 F -.15(ve)-.4 G 1.346(ntions in order to).15 F
+the program to print out a description of its operation and then e)22.52
+F .161(xit immedi-)-.15 F(ately)144 516 Q(.)-.65 E F2<ad49>108 532.8 Q
+F4(\214le)26.41 E F0 1.346(Sets the \214lename to be tested ag)144 544.8
+R 1.346(ainst kno)-.05 F 1.346(wn \214lename pre\214x and suf)-.25 F
+1.346(\214x con)-.25 F -.15(ve)-.4 G 1.346(ntions in order to).15 F
 (identify the format id.)144 556.8 Q F2<ad4b>108 573.6 Q F0 .112(Causes\
  the \214leroot and the format id to be output. The \214leroot is the \
-\214lename with an)144 573.6 R 2.612(yf)-.15 G .112(ormat spe-)-2.612 F
+\214lename with an)22.52 F 2.612(yf)-.15 G .112(ormat spe-)-2.612 F
 (ci\214c suf)144 585.6 Q(\214x remo)-.25 E -.15(ve)-.15 G(d.).15 E F2
 <ad4c>108 602.4 Q F0
-(Causes the format descriptions to be omitted so that only the)144 602.4
-Q F2(MBIO)2.5 E F0(format id numbers are listed.)2.5 E F2<ad56>108 619.2
-Q F0(Normally)144 619.2 Q(,)-.65 E F2(mbf)2.952 E(ormat)-.25 E F0 .453
+(Causes the format descriptions to be omitted so that only the)23.63 E
+F2(MBIO)2.5 E F0(format id numbers are listed.)2.5 E F2<ad56>108 619.2 Q
+F0(Normally)23.08 E(,)-.65 E F2(mbf)2.952 E(ormat)-.25 E F0 .453
 (only prints out format descriptions.)2.952 F .453(If the)5.453 F F2
 <ad56>2.953 E F0 .453(\215ag is gi)2.953 F -.15(ve)-.25 G .453(n, then)
 .15 F F2(mbf)2.953 E(ormat)-.25 E F0 -.1(wo)144 631.2 S(rks in a "v).1 E

@@ -79,13 +79,13 @@ $(LIBDIR)/libmbgsf.a:	gsf.o gsf_dec.o gsf_enc.o gsf_indx.o gsf_info.o
 
 ### compile the source files
 gsf.o:      gsf.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
-	$(CC) -c $(CFLAGS) gsf.c
+	$(CC) -c $(CFLAGS) -DUSE_DEFAULT_FILE_FUNCTIONS gsf.c
 gsf_dec.o:  gsf_dec.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
 	$(CC) -c $(CFLAGS) gsf_dec.c
 gsf_enc.o:  gsf_enc.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
 	$(CC) -c $(CFLAGS) gsf_enc.c
 gsf_indx.o: gsf_indx.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
-	$(CC) -c $(CFLAGS) gsf_indx.c
+	$(CC) -c $(CFLAGS) -DUSE_DEFAULT_FILE_FUNCTIONS gsf_indx.c
 gsf_info.o: gsf_info.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
 	$(CC) -c $(CFLAGS) gsf_info.c
 dump_gsf.o:	dump_gsf.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h

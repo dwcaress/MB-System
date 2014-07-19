@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:40 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:09 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -282,8 +276,8 @@ G -.15(ny)-2.598 G .002(option \215ag is gi)108 266.4 R -.15(ve)-.25 G
 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 420 Q
 (Lamont-Doherty Earth Observ)113 432 Q(atory)-.25 E F1(OPTIONS)72 460.8
-Q F2<ad42>108 472.8 Q F3(\214leiob)144 472.8 Q(uf)-.2 E(fer)-.18 E F0
-.05(Sets the \214le i/o block b)144 484.8 R(uf)-.2 E .049
+Q F2<ad42>108 472.8 Q F3(\214leiob)23.63 E(uf)-.2 E(fer)-.18 E F0 .05
+(Sets the \214le i/o block b)144 484.8 R(uf)-.2 E .049
 (fer size for certain formats \(currently formats 88 and 58\).)-.25 F
 (The)5.049 E F3(\214leiob)2.549 E(uf)-.2 E(fer)-.18 E F0 -.25(va)144
 496.8 S 1.296(lue is in kilobytes, so).25 F F3(\214leiob)3.796 E(uf)-.2
@@ -309,8 +303,8 @@ G 3.44(%r)-3.44 G .94(un time reduction for)-3.44 F F2(mbpr)3.44 E
 (ocess)-.18 E F0 3.44(.D)C(ef)-3.44 E(ault:)-.1 E F3(\214leiob)3.44 E
 (uf)-.2 E(fer)-.18 E F0 3.44(=0)3.44 G 3.44(,w)-3.44 G .94(hich corre-)
 -3.44 F(sponds to the system def)144 580.8 Q(ault.)-.1 E F2<ad44>108
-597.6 Q F3(psdisplay)144 597.6 Q F0 .696(Sets the program used for disp\
-laying Postscript graphics \214les on a screen; this f)144 609.6 R .695
+597.6 Q F3(psdisplay)23.08 E F0 .696(Sets the program used for displayi\
+ng Postscript graphics \214les on a screen; this f)144 609.6 R .695
 (acility is used by)-.1 F 1.351(shellscripts created through macros lik)
 144 621.6 R(e)-.1 E F2(mbm_plot)3.852 E F0 3.852(.T)C 1.352(he def)
 -3.852 F 1.352(ault Postscript display utility is)-.1 F F2(gv)3.852 E F0
@@ -318,8 +312,8 @@ laying Postscript graphics \214les on a screen; this f)144 609.6 R .695
 (ghostview)5.792 E F0 5.792(;p)C 3.292(ast postscript vie)-5.792 F 3.292
 (wers included)-.25 F F2(page)144 645.6 Q(view)-.15 E F0(\(for Sun w)2.5
 E(orkstations\) and)-.1 E F2(xpsview)2.5 E F0(\(for Silicon Graphics w)
-2.5 E(orkstations\).)-.1 E F2<ad46>108 662.4 Q F3(fbtver)144 662.4 Q
-(sion)-.1 E F0 1.555(Set the v)144 674.4 R 1.555
+2.5 E(orkstations\).)-.1 E F2<ad46>108 662.4 Q F3(fbtver)24.19 E(sion)
+-.1 E F0 1.555(Set the v)144 674.4 R 1.555
 (ersion of fbt \214les created by)-.15 F F2(mbdatalist)4.056 E F0(and)
 4.056 E F2(mbpr)4.056 E(ocess)-.18 E F0 6.556(.I)C(f)-6.556 E F3(fbtver)
 4.056 E(sion)-.1 E F0 4.056(=2)4.056 G 4.056(,")-4.056 G 1.556(old", or)
@@ -339,9 +333,9 @@ BP
 /F0 10/Times-Roman@0 SF(mbdef)72 48 Q 143.83(aults\(1\) MB-System)-.1 F
 143.83(5.0 mbdef)2.5 F(aults\(1\))-.1 E/F1 10/Times-Bold@0 SF<ad48>108
 84 Q F0 .162(This "help" \215ag cause the program to print out a descri\
-ption of its operation and then e)144 84 R .161(xit immedi-)-.15 F
-(ately)144 96 Q(.)-.65 E F1<ad49>108 112.8 Q/F2 10/Times-Italic@0 SF
-(ima)144 112.8 Q -.1(ge)-.1 G(display).1 E F0 2.817
+ption of its operation and then e)22.52 F .161(xit immedi-)-.15 F(ately)
+144 96 Q(.)-.65 E F1<ad49>108 112.8 Q/F2 10/Times-Italic@0 SF(ima)26.41
+E -.1(ge)-.1 G(display).1 E F0 2.817
 (Sets the program used for displaying T)144 124.8 R(if)-.35 E 5.317(fi)
 -.25 G 2.817(mage \214les on a screen; this f)-5.317 F 2.817
 (acility is used by)-.1 F 1.678(shellscripts created through macros lik)
@@ -349,23 +343,23 @@ ption of its operation and then e)144 84 R .161(xit immedi-)-.15 F
 -4.178 F 1.677(ault image display utility is)-.1 F F1(xv)4.177 E F0(.)A
 (Other common image display utilities are)144 148.8 Q F1(gimp)2.5 E F0
 (\(GNU image processing\) and)2.5 E F1(gqview)2.5 E F0(.)A F1<ad4c>108
-165.6 Q F2(lon\215ip)144 165.6 Q F0 .572
-(Sets the range of the longitude v)144 177.6 R .572(alues returned.)-.25
-F(If)5.572 E F2(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
-.572(alues will be in)-.25 F .489(the range from \255360 to 0 de)144
-189.6 R .488(grees. If)-.15 F F2(lon\215ip)2.988 E F0 .488
-(=0 then the longitude v)B .488(alues will be in the range from)-.25 F
-1.382(\255180 to 180 de)144 201.6 R 1.382(grees. If)-.15 F F2(lon\215ip)
-3.882 E F0 1.382(=1 then the longitude v)B 1.382
+165.6 Q F2(lon\215ip)23.63 E F0 .572(Sets the range of the longitude v)
+144 177.6 R .572(alues returned.)-.25 F(If)5.572 E F2(lon\215ip)3.072 E
+F0 .572(=\2551 then the longitude v)B .572(alues will be in)-.25 F .489
+(the range from \255360 to 0 de)144 189.6 R .488(grees. If)-.15 F F2
+(lon\215ip)2.988 E F0 .488(=0 then the longitude v)B .488
+(alues will be in the range from)-.25 F 1.382(\255180 to 180 de)144
+201.6 R 1.382(grees. If)-.15 F F2(lon\215ip)3.882 E F0 1.382
+(=1 then the longitude v)B 1.382
 (alues will be in the range from 0 to 360)-.25 F(de)144 213.6 Q 2.5
 (grees. Def)-.15 F(ault:)-.1 E F2(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
-E F1<ad54>108 230.4 Q F2(time)144 230.4 Q(gap)-.4 E F0 .479
+E F1<ad54>108 230.4 Q F2(time)23.63 E(gap)-.4 E F0 .479
 (Sets the maximum time g)144 242.4 R .479
 (ap in minutes between adjacent pings allo)-.05 F .478
 (wed before the data is consid-)-.25 F(ered to ha)144 254.4 Q .3 -.15
 (ve a g)-.2 H(ap. Def).1 E(ault:)-.1 E F2(time)2.5 E(gap)-.4 E F0 2.5
-(=1)2.5 G(.)-2.5 E F1<ad55>108 271.2 Q F2(useloc)144 271.2 Q(k\214les)
--.2 E F0 .661(Sets whether)144 283.2 R F1(MB-System)3.161 E F0 .661
+(=1)2.5 G(.)-2.5 E F1<ad55>108 271.2 Q F2(useloc)23.08 E(k\214les)-.2 E
+F0 .661(Sets whether)144 283.2 R F1(MB-System)3.161 E F0 .661
 (uses the \214le locking mechanism to insure that a sw)3.161 F .662
 (ath \214le is only pro-)-.1 F .016
 (cessed or edited by a single program at a time.)144 295.2 R 1.615 -.8
@@ -377,15 +371,15 @@ E F1<ad54>108 230.4 Q F2(time)144 230.4 Q(gap)-.4 E F0 .479
 (0)A F0(or)3.221 E F1<ad55>5.721 E F2(no)A F0 3.221(.T)C 3.221(or)-4.021
 G .721(einstate use)-3.221 F(of lock \214les, use)144 319.2 Q F1<ad55>
 2.5 E F2(1)A F0(or)2.5 E F1<ad55>5 E F2(yes)A F0(.)A F1<ad56>108 336 Q
-F0(Normally)144 336 Q(,)-.65 E F1(mbdefaults)2.807 E F0 .307
+F0(Normally)23.08 E(,)-.65 E F1(mbdefaults)2.807 E F0 .307
 (outputs only a list of the def)2.807 F .306(ault v)-.1 F .306
 (alues to the stdout stream.)-.25 F .306(If the)5.306 F F1<ad56>2.806 E
 F0(\215ag)2.806 E .467(is gi)144 348 R -.15(ve)-.25 G .467(n, then).15 F
 F1(mbdefaults)2.967 E F0 -.1(wo)2.967 G .467(rks in a "v).1 F .468
 (erbose" mode and also outputs the program v)-.15 F .468(ersion being)
--.15 F(used.)144 360 Q F1<ad57>108 376.8 Q F2(pr)144 376.8 Q(oject)-.45
-E F0 .336(Sets the name of the def)144 388.8 R .335(ault project. This \
-will be used by MB-System database management utili-)-.1 F
+-.15 F(used.)144 360 Q F1<ad57>108 376.8 Q F2(pr)20.3 E(oject)-.45 E F0
+.336(Sets the name of the def)144 388.8 R .335(ault project. This will \
+be used by MB-System database management utili-)-.1 F
 (ties yet to be created.)144 400.8 Q(Def)5 E(ault:)-.1 E F2(pr)2.5 E
 (oject)-.45 E F0 2.5(=")2.5 G(none".)-2.5 E/F3 10.95/Times-Bold@0 SF
 (EXAMPLES)72 429.6 Q F0 .127(Suppose that one wishes the def)108 441.6 R

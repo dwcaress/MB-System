@@ -109,17 +109,21 @@
 #include "gsf_indx.h"
 #include "gsf_ft.h"
 
-// #undef fseek
-// #undef ftell
-// #if (defined _WIN32) && (defined _MSC_VER)
-// #define fseek(x, y, z) _fseeki64((x), (y), (z))
-// #define ftell(x)   _ftelli64((x))
-// #else  // Linux, MingW, MacOS
-// #undef fopen
-// #define fopen(x, y)  fopen64((x), (y))
-// #define fseek(x, y, z) fseeko64((x), (y), (z))
-// #define ftell(x)   ftello64((x))
-// #endif
+#ifndef USE_DEFAULT_FILE_FUNCTIONS
+
+#undef fseek
+#undef ftell
+#if (defined _WIN32) && (defined _MSC_VER)
+#define fseek(x, y, z) _fseeki64((x), (y), (z))
+#define ftell(x)   _ftelli64((x))
+#else  // Linux, MingW, MacOS
+#undef fopen
+#define fopen(x, y)  fopen64((x), (y))
+#define fseek(x, y, z) fseeko64((x), (y), (z))
+#define ftell(x)   ftello64((x))
+#endif
+
+#endif
 
 /*  Error flag defined in gsf.c */
 extern int      gsfError;

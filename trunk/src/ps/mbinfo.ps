@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:41 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:10 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 7
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -357,7 +351,7 @@ end of the).1 F/F1 10/Times-Bold@0 SF(mbinf)108 96 Q(o)-.25 E F0
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 160.8 Q
 (Lamont-Doherty Earth Observ)113 172.8 Q(atory)-.25 E F2(OPTIONS)72
 201.6 Q F1<ad42>108 213.6 Q/F3 10/Times-Italic@0 SF(yr/mo/da/hr/mn/sc)
-144 213.6 Q F0 .155(This option sets the starting time for data allo)144
+23.63 E F0 .155(This option sets the starting time for data allo)144
 225.6 R .155(wed in the input data.)-.25 F(The)5.155 E F1<ad45>2.655 E
 F0 .155(option sets the ending)2.655 F .195
 (time for data. If the starting time is before the ending time, then an)
@@ -368,12 +362,12 @@ the starting time is after the ending)144 249.6 R .194(time, then an)144
 ill be ignored. This scheme allo)-2.694 F .195(ws time)-.25 F(windo)144
 273.6 Q 5.376(wing both inside and outside a speci\214ed interv)-.25 F
 7.876(al. Def)-.25 F(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)7.876 E F0(=)7.876
-E(1962/2/21/10/30/0.)144 285.6 Q F1<ad43>108 302.4 Q F0(Normally)144
-302.4 Q(,)-.65 E F1(mbinf)2.547 E(o)-.25 E F0 .047
+E(1962/2/21/10/30/0.)144 285.6 Q F1<ad43>108 302.4 Q F0(Normally)23.08 E
+(,)-.65 E F1(mbinf)2.547 E(o)-.25 E F0 .047
 (ignores comments encountered in the data \214le.)2.547 F .048(If the)
 5.048 F F1<ad43>2.548 E F0 .048(\215ag is gi)2.548 F -.15(ve)-.25 G .048
 (n, all of the).15 F(comments will be printed out.)144 314.4 Q F1<ad45>
-108 331.2 Q F3(yr/mo/da/hr/mn/sc)144 331.2 Q F0 .155
+108 331.2 Q F3(yr/mo/da/hr/mn/sc)23.63 E F0 .155
 (This option sets the ending time for data allo)144 343.2 R .155
 (wed in the input data.)-.25 F(The)5.155 E F1<ad42>2.655 E F0 .155
 (option sets the starting)2.655 F .195
@@ -385,22 +379,22 @@ the starting time is after the ending)144 367.2 R .194(time, then an)144
 ill be ignored. This scheme allo)-2.694 F .195(ws time)-.25 F(windo)144
 391.2 Q 5.376(wing both inside and outside a speci\214ed interv)-.25 F
 7.876(al. Def)-.25 F(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)7.876 E F0(=)7.876
-E(2062/2/21/10/30/0.)144 403.2 Q F1<ad46>108 420 Q F3(format)144 420 Q
-F0 .22(Sets the data format used if the input is read from stdin or fro\
-m a \214le. If)144 432 R F3(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)
--2.72 G .22(hen the input)-2.72 F .008(\214le speci\214ed with the)144
-444 R F1<ad49>2.508 E F0 .008
-(option will actually contain a list of input sw)2.508 F .007
-(ath sonar data \214les. This pro-)-.1 F .011(gram uses the)144 456 R F1
-(MBIO)2.511 E F0 .012(library and will read or write an)2.511 F 2.512
-(ys)-.15 G -.1(wa)-2.512 G .012(th sonar format supported by).1 F F1
-(MBIO)2.512 E F0 2.512(.A)C 1.297(list of the sw)144 468 R 1.297
+E(2062/2/21/10/30/0.)144 403.2 Q F1<ad46>108 420 Q F3(format)24.19 E F0
+.22(Sets the data format used if the input is read from stdin or from a\
+ \214le. If)144 432 R F3(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)-2.72 G
+.22(hen the input)-2.72 F .008(\214le speci\214ed with the)144 444 R F1
+<ad49>2.508 E F0 .008(option will actually contain a list of input sw)
+2.508 F .007(ath sonar data \214les. This pro-)-.1 F .011(gram uses the)
+144 456 R F1(MBIO)2.511 E F0 .012(library and will read or write an)
+2.511 F 2.512(ys)-.15 G -.1(wa)-2.512 G .012
+(th sonar format supported by).1 F F1(MBIO)2.512 E F0 2.512(.A)C 1.297
+(list of the sw)144 468 R 1.297
 (ath sonar data formats currently supported by)-.1 F F1(MBIO)3.797 E F0
 1.296(and their identi\214er v)3.796 F 1.296(alues is)-.25 F(gi)144 480
 Q -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0
 (manual page. The def)2.5 E(ault format is set using)-.1 E F1
 (mbdefaults)2.5 E F0(.)A F1<ad47>108 496.8 Q F0 .463
-(Enables checking for reasonable na)144 496.8 R(vig)-.2 E .463
+(Enables checking for reasonable na)22.52 F(vig)-.2 E .463
 (ation to be used in calculating the minimum and maximum)-.05 F 1.133
 (longitude and latitude v)144 508.8 R 3.632(alues. This)-.25 F 1.132
 (mode e)3.632 F 1.132(xcludes longitude and latitude v)-.15 F 1.132
@@ -411,8 +405,8 @@ Q -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0
 option is particularly useful when one is trying to)-.25 F
 (obtain reasonable bounds for a plot.)144 544.8 Q F1<ad48>108 561.6 Q F0
 .162(This "help" \215ag cause the program to print out a description of\
- its operation and then e)144 561.6 R .162(xit immedi-)-.15 F(ately)144
-573.6 Q(.)-.65 E F1<ad49>108 590.4 Q F3(\214lename)144 590.4 Q F0 .468
+ its operation and then e)22.52 F .162(xit immedi-)-.15 F(ately)144
+573.6 Q(.)-.65 E F1<ad49>108 590.4 Q F3(\214lename)26.41 E F0 .468
 (Sets the input \214lename. If)144 602.4 R F3(format)2.967 E F0 2.967
 (>0\()2.967 G .467(set with the)-2.967 F F1<ad66>2.967 E F0 .467
 (option\) then the sw)2.967 F .467(ath sonar data contained)-.1 F(in)144
@@ -442,7 +436,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 159.28(mbinfo\(1\) MB-System)72 48 R 159.28
 (5.0 mbinfo\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad4c>108 84 Q/F2 10
-/Times-Italic@0 SF(lon\215ip)144 84 Q F0 .572
+/Times-Italic@0 SF(lon\215ip)23.63 E F0 .572
 (Sets the range of the longitude v)144 96 R .572(alues returned.)-.25 F
 (If)5.572 E F2(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
 .571(alues will be in)-.25 F .488(the range from \255360 to 0 de)144 108
@@ -453,7 +447,7 @@ R .488(grees. If)-.15 F F2(lon\215ip)2.988 E F0 .488
 (alues will be in the range from 0 to 360)-.25 F(de)144 132 Q 2.5
 (grees. Def)-.15 F(ault:)-.1 E F1(mbinf)2.5 E(o)-.25 E F0
 (selects the be)2.5 E(xt longitude range based on the \214rst data.)-.15
-E F1<ad4d>108 148.8 Q F2(londim/latdim)144 148.8 Q F0 .397
+E F1<ad4d>108 148.8 Q F2(londim/latdim)20.86 E F0 .397
 (The program output can be e)144 160.8 R .397
 (xtended to include a coarse mask representing where data lies within)
 -.15 F .667(the \214le')144 172.8 R 3.167(sb)-.55 G .667
@@ -485,8 +479,8 @@ E F1<ad4f>108 314.4 Q F0 .278(This option causes the program output to \
 be directed to "inf" \214les rather than to stdout. Each "inf")144 326.4
 R
 (\214le is named using the original data \214le path with an ".inf" suf)
-144 338.4 Q(\214x appended.)-.25 E F1<ad50>108 355.2 Q F2(pings)144
-355.2 Q F0 -.45(Tu)144 367.2 S .05(rns on v).45 F .05
+144 338.4 Q(\214x appended.)-.25 E F1<ad50>108 355.2 Q F2(pings)24.19 E
+F0 -.45(Tu)144 367.2 S .05(rns on v).45 F .05
 (ariance calculations for the bath)-.25 F(ymetry)-.05 E 2.551(,a)-.65 G
 .051(mplitude, and sidescan data \(as a)-2.551 F -.25(va)-.2 G .051
 (ilable in the).25 F .111(data stream\).)144 379.2 R(If)5.111 E F2
@@ -503,49 +497,49 @@ R
 (vide crude measures of noise and/or signal as a function of beam)-.15 F
 (and pix)144 427.2 Q(el number)-.15 E 5(.D)-.55 G(ef)-5 E(ault:)-.1 E F2
 (pings)2.5 E F0 2.5(=1\()2.5 G(no v)-2.5 E(ariance calculations\).)-.25
-E F1<ad52>108 444 Q F2(west/east/south/north)144 444 Q F0 .679
+E F1<ad52>108 444 Q F2(west/east/south/north)23.08 E F0 .679
 (Sets the longitude and latitude bounds within which sw)144 456 R .679
-(ath sonar data will be read. Only the data)-.1 F
-(which lies within these bounds will be read.)144 468 Q(Def)5 E(ault:)
--.1 E F2(west)2.5 E F0(=\255360, east)A F2(=360)A F0(,)A F2(south)2.5 E
-F0(=\25590,)A F2(north)2.5 E F0(=90.)A F1<ad53>108 484.8 Q F2(speed)144
-484.8 Q F0 .532
+(ath sonar data will be read. Only the data)-.1 F .097
+(which lies within these bounds will be read.)144 468 R(Def)5.098 E
+(ault:)-.1 E F2(west)2.598 E F0 .098(=\255360, east)B F2(=360)A F0(,)A
+F2(south)2.598 E F0(=\25590,)A F2(north)2.598 E F0(=90.)A F1<ad53>108
+484.8 Q F2(speed)24.74 E F0 .532
 (Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)144 496.8 R
-.532(wed in the input data; pings associated)-.25 F
+.531(wed in the input data; pings associated)-.25 F
 (with a smaller ship speed will not be copied. Def)144 508.8 Q(ault:)-.1
 E F2(speed)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1<ad54>108 525.6 Q F2(time)
-144 525.6 Q(gap)-.4 E F0 .479(Sets the maximum time g)144 537.6 R .479
-(ap in minutes between adjacent pings allo)-.05 F .478
+23.63 E(gap)-.4 E F0 .478(Sets the maximum time g)144 537.6 R .479
+(ap in minutes between adjacent pings allo)-.05 F .479
 (wed before the data is consid-)-.25 F(ered to ha)144 549.6 Q .3 -.15
 (ve a g)-.2 H(ap. Def).1 E(ault:)-.1 E F2(time)2.5 E(gap)-.4 E F0 2.5
-(=1)2.5 G(.)-2.5 E F1<ad56>108 566.4 Q F0(Normally)144 566.4 Q(,)-.65 E
-F1(mbinf)2.521 E(o)-.25 E F0 .022
+(=1)2.5 G(.)-2.5 E F1<ad56>108 566.4 Q F0(Normally)23.08 E(,)-.65 E F1
+(mbinf)2.522 E(o)-.25 E F0 .022
 (only prints out the statistics obtained by reading all of the data.)
-2.521 F .022(If the)5.022 F F1<ad56>2.522 E F0 .022(\215ag is)2.522 F
-(gi)144 578.4 Q -.15(ve)-.25 G .125(n, then).15 F F1(mbinf)2.625 E(o)
--.25 E F0 -.1(wo)2.625 G .125(rks in a "v).1 F .124
-(erbose" mode and outputs the program v)-.15 F .124
+2.522 F .021(If the)5.021 F F1<ad56>2.521 E F0 .021(\215ag is)2.521 F
+(gi)144 578.4 Q -.15(ve)-.25 G .124(n, then).15 F F1(mbinf)2.624 E(o)
+-.25 E F0 -.1(wo)2.624 G .124(rks in a "v).1 F .124
+(erbose" mode and outputs the program v)-.15 F .125
 (ersion being used and all)-.15 F(read error status messages.)144 590.4
-Q F1<ad57>108 607.2 Q F0(Normally)144 607.2 Q(,)-.65 E F1(mbinf)3.827 E
-(o)-.25 E F0 1.327(reports depth v)3.827 F 1.327
-(alues in meters. If the)-.25 F F1<ad57>3.827 E F0 1.328(\215ag is gi)
-3.827 F -.15(ve)-.25 G 1.328(n, then).15 F F1(mbinf)3.828 E(o)-.25 E F0
-(reports)3.828 E(these v)144 619.2 Q(alues in feet.)-.25 E F1<ad58>108
-636 Q F2(outputformat)144 636 Q F0(Normally)144 648 Q(,)-.65 E F1(mbinf)
-3.67 E(o)-.25 E F0 1.17(reports information as te)3.67 F 1.17
+Q F1<ad57>108 607.2 Q F0(Normally)20.3 E(,)-.65 E F1(mbinf)3.828 E(o)
+-.25 E F0 1.328(reports depth v)3.828 F 1.327(alues in meters. If the)
+-.25 F F1<ad57>3.827 E F0 1.327(\215ag is gi)3.827 F -.15(ve)-.25 G
+1.327(n, then).15 F F1(mbinf)3.827 E(o)-.25 E F0(reports)3.827 E
+(these v)144 619.2 Q(alues in feet.)-.25 E F1<ad58>108 636 Q F2
+(outputformat)23.08 E F0(Normally)144 648 Q(,)-.65 E F1(mbinf)3.67 E(o)
+-.25 E F0 1.17(reports information as te)3.67 F 1.17
 (xt formatted for easy reading. If this option is gi)-.15 F -.15(ve)-.25
-G(n).15 E(with)144 660 Q F2(outputformat)4.064 E F0 1.565
-(=1, then the output will be in the JSON format. If the)B F1<ad4f>4.065
-E F0 1.565(option is used to)4.065 F -.15(ex)144 672 S .299
-(plicitly mak).15 F 2.799(e")-.1 G .298(*.inf" \214les, then the output\
- will be JSON and the output \214lenames will be named)-2.799 F 1.087
+G(n).15 E(with)144 660 Q F2(outputformat)4.065 E F0 1.565
+(=1, then the output will be in the JSON format. If the)B F1<ad4f>4.064
+E F0 1.564(option is used to)4.064 F -.15(ex)144 672 S .298
+(plicitly mak).15 F 2.798(e")-.1 G .298(*.inf" \214les, then the output\
+ will be JSON and the output \214lenames will be named)-2.798 F 1.087
 (using the original data \214le path with an "_inf.json" suf)144 684 R
-1.087(\214x appended. If this option is gi)-.25 F -.15(ve)-.25 G 3.587
-(nw).15 G(ith)-3.587 E F2(outputformat)144 696 Q F0 .495
+1.087(\214x appended. If this option is gi)-.25 F -.15(ve)-.25 G 3.586
+(nw).15 G(ith)-3.586 E F2(outputformat)144 696 Q F0 .495
 (=2, then the output will be in the XML format. If the)B F1<ad4f>2.995 E
-F0 .495(option is used to e)2.995 F(xplicitly)-.15 E(mak)144 708 Q 2.951
+F0 .496(option is used to e)2.996 F(xplicitly)-.15 E(mak)144 708 Q 2.952
 (e")-.1 G .452(*.inf" \214les, then the output will be XML and the outp\
-ut \214lenames will be named using the)-2.951 F
+ut \214lenames will be named using the)-2.952 F
 (original data \214le path with an "_inf.xml" suf)144 720 Q
 (\214x appended.)-.25 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G
 (une 2013)-2.5 E(3)204.835 E 0 Cg EP
@@ -554,14 +548,14 @@ ut \214lenames will be named using the)-2.951 F
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 159.28(mbinfo\(1\) MB-System)72 48 R 159.28
-(5.0 mbinfo\(1\))2.5 F/F1 10.95/Times-Bold@0 SF(EXAMPLES)72 84 Q F0 .571
-(Suppose one wishes to kno)108 96 R 3.071(ws)-.25 G .57(omething about \
-the contents of a Hydrosweep \214le \(format 24\) called e)-3.071 F
-(xam-)-.15 E 2.5(ple_hs.mb24. The)108 108 R(follo)2.5 E(wing will suf)
--.25 E(\214ce:)-.25 E(mbinfo \255F24 \255Ie)144 120 Q(xample_hs.mb24)
--.15 E(The follo)108 144 Q(wing output is produced:)-.25 E(Sw)110.5 180
-Q(ath Data File:)-.1 E -.15(ex)15 G(ample_hs.mb24).15 E(MBIO Data F)
-110.5 192 Q(ormat ID:)-.15 E(24)5 E -.15(Fo)110.5 204 S(rmat name:).15 E
+(5.0 mbinfo\(1\))2.5 F/F1 10.95/Times-Bold@0 SF(EXAMPLES)72 84 Q F0 .57
+(Suppose one wishes to kno)108 96 R 3.07(ws)-.25 G .571(omething about \
+the contents of a Hydrosweep \214le \(format 24\) called e)-3.07 F(xam-)
+-.15 E 2.5(ple_hs.mb24. The)108 108 R(follo)2.5 E(wing will suf)-.25 E
+(\214ce:)-.25 E(mbinfo \255F24 \255Ie)144 120 Q(xample_hs.mb24)-.15 E
+(The follo)108 144 Q(wing output is produced:)-.25 E(Sw)110.5 180 Q
+(ath Data File:)-.1 E -.15(ex)15 G(ample_hs.mb24).15 E(MBIO Data F)110.5
+192 Q(ormat ID:)-.15 E(24)5 E -.15(Fo)110.5 204 S(rmat name:).15 E
 (MBF_HSLDEOIH)25 E
 (Informal Description: L-DEO in-house binary Hydrosweep)110.5 216 Q
 (Attrib)110.5 228 Q 25(utes: Hydrosweep)-.2 F(DS, 59 beams, bath)2.5 E

@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:43 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:11 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -286,15 +280,15 @@ Q(UM, Uni)-.4 E -.15(ve)-.25 G(rsity of Bremen).15 E(Da)108 463.2 Q
 (Lamont-Doherty Earth Observ)113 499.2 Q(atory)-.25 E F1
 (SIMPLE DESCRIPTION OF B)72 528 Q(ASIC OPTIONS)-.329 E F2<ad48>108 540 Q
 F0 .162(This "help" \215ag cause the program to print out a description\
- of its operation and then e)144 540 R .162(xit immedi-)-.15 F(ately)144
+ of its operation and then e)22.52 F .162(xit immedi-)-.15 F(ately)144
 552 Q(.)-.65 E F2<ad43>108 568.8 Q F0 1.013(This option causes the prog\
 ram to check if each output \214le already e)144 580.8 R 1.013
 (xists, and to for)-.15 F 1.013(go cop)-.18 F(ying)-.1 E
 (those that do e)144 592.8 Q(xist.)-.15 E F2<ad49>108 609.6 Q F3
-(datalist)144 609.6 Q F0 .417(Sets the input datalist \214lename. A dat\
-alist is an ascii \214le containing a list of the input sw)144 621.6 R
-.417(ath sonar)-.1 F 1.005(data \214les to be copied and their formats.)
-144 633.6 R 1.005(In the)6.005 F F3(datalist)3.505 E F0 1.005
+(datalist)26.41 E F0 .417(Sets the input datalist \214lename. A datalis\
+t is an ascii \214le containing a list of the input sw)144 621.6 R .417
+(ath sonar)-.1 F 1.005(data \214les to be copied and their formats.)144
+633.6 R 1.005(In the)6.005 F F3(datalist)3.505 E F0 1.005
 (\214le, each sw)3.505 F 1.005(ath data \214le should be fol-)-.1 F(lo)
 144 645.6 Q(wed by a data format identi\214er)-.25 E 2.5(,e)-.4 G(.g.:)
 -2.5 E(data\214le1 11)180 657.6 Q(data\214le2 24)180 669.6 Q 1.498
@@ -317,18 +311,17 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 112.6(mbm_multidatalist\(1\) MB-System)72 48 R
 112.6(5.0 mbm_multidatalist\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad4e>108 84
-Q F0 1.151(This ar)144 84 R 1.151(gument causes)-.18 F F1
+Q F0 1.151(This ar)23.08 F 1.151(gument causes)-.18 F F1
 (mbm_multidatalist)3.651 E F0 1.151
 (to generate the three ancillary data \214les \("inf", "fbt",)3.651 F
 (and "fn)144 96 Q(v"\) e)-.4 E -.15(ve)-.25 G 2.5(ni).15 G 2.5(ft)-2.5 G
 (he)-2.5 E 2.5(ya)-.15 G(lready e)-2.5 E(xist and are up to date.)-.15 E
-F1<ad56>108 112.8 Q F0(Causes)144 112.8 Q F1(mbm_multidatalist)2.753 E
-F0 .253(to operate in "v)2.753 F .253
+F1<ad56>108 112.8 Q F0(Causes)23.08 E F1(mbm_multidatalist)2.753 E F0
+.253(to operate in "v)2.753 F .253
 (erbose" mode so that it outputs more information than)-.15 F(usual.)144
-124.8 Q F1<ad58>108 141.6 Q/F2 10/Times-Italic@0 SF(npr)144 141.6 Q
-(ocesses)-.45 E F0
-(This option sets the number of parallel, simultaneous)144 153.6 Q F1
-(mbdatalist)2.5 E F0(processes that may be run.)2.5 E/F3 10.95
+124.8 Q F1<ad58>108 141.6 Q/F2 10/Times-Italic@0 SF(npr)23.08 E(ocesses)
+-.45 E F0(This option sets the number of parallel, simultaneous)144
+153.6 Q F1(mbdatalist)2.5 E F0(processes that may be run.)2.5 E/F3 10.95
 /Times-Bold@0 SF(EXAMPLES)72 182.4 Q F0(Suppose one has tw)108 194.4 Q
 2.5(of)-.1 G(ormat 88 Reson 7125 data \214les:)-2.5 E
 (20110805_053612.mb88)144 206.4 Q(20110805_054149.mb88)144 218.4 Q .236

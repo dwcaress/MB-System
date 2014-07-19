@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:45 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:13 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -291,16 +285,16 @@ Q(w-pass \214ltering can be applied to the traces before gridding using\
 -.18 E(Montere)113 559.2 Q 2.5(yB)-.15 G(ay Aquarium Research Institute)
 -2.5 E(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 571.2 Q
 (Lamont-Doherty Earth Observ)113 583.2 Q(atory)-.25 E F1(OPTIONS)72 612
-Q F2<ad41>108 624 Q F3(shotscale/timescale)144 624 Q F0 .275(This optio\
-n causes the x-axis to be rescaled from shot number to distance in mete\
-rs and the y-axis)144 636 R 1.019
+Q F2<ad41>108 624 Q F3(shotscale/timescale)23.08 E F0 .275(This option \
+causes the x-axis to be rescaled from shot number to distance in meters\
+ and the y-axis)144 636 R 1.019
 (to be rescaled from time in seconds to depth in meters.)144 648 R(The)
 6.02 E F3(shotscale)3.52 E F0 -.25(va)3.52 G 1.02
 (lue represents the shot).25 F .517(spacing in meters and the)144 660 R
 F3(timescale)3.017 E F0 -.25(va)3.017 G .517
 (lue is the scaling from time to depth \(typically 750 m/s for).25 F
 (the w)144 672 Q(ater column\).)-.1 E F2<ad42>108 688.8 Q F3
-(maxvalue[/window])144 688.8 Q F0 .428
+(maxvalue[/window])23.63 E F0 .428
 (This option causes the application of automatic g)144 700.8 R .429
 (ain control \(A)-.05 F .429(GC\). At each sample, a time inter)-.4 F(-)
 -.2 E -.25(va)144 712.8 S(l).25 E F3(window)2.899 E F0 .399
@@ -324,28 +318,28 @@ BP
 -2.641 G .141(ce is nor).15 F(-)-.2 E
 (malized using the same scale factor)144 108 Q 2.5(,a)-1.11 G(nd all tr)
 -2.5 E(aces has the same maximum value of maxvalue)-.15 E(.)-.15 E/F2 10
-/Times-Bold@0 SF<ad44>108 124.8 Q F1(decimate)144 124.8 Q(x/decimate)-.2
-E(y)-.3 E F0 .913(Sets the decimation of traces \()144 136.8 R F1
+/Times-Bold@0 SF<ad44>108 124.8 Q F1(decimate)23.08 E(x/decimate)-.2 E
+(y)-.3 E F0 .913(Sets the decimation of traces \()144 136.8 R F1
 (decimate)A(x)-.2 E F0 3.412(\)a)C .912(nd samples \()-3.412 F F1
 (decimate)A(y)-.3 E F0 3.412(\)u)C .912(sed in generating the output)
 -3.412 F .513(grid. The do)144 148.8 R .513
 (wnsampling of the data is actually accomplished by a)-.25 F -.15(ve)-.2
 G .514(raging the v).15 F .514(alues within each)-.25 F
 (grid bin rather than omitting traces or samples.)144 160.8 Q F2<ad46>
-108 177.6 Q F1(mode/window)144 177.6 Q F0 .414
-(Sets the application of lo)144 189.6 R .413(w-pass \214ltering to the \
-trace data. The \214ltering is applied by con)-.25 F -.2(vo)-.4 G .413
-(lving a).2 F 1.617(\214lter function of length)144 201.6 R F1(window)
-4.117 E F0 1.617(seconds with the trace. Currently the only a)4.117 F
--.25(va)-.2 G 1.618(ilable \214lter is a).25 F(cosine taper)144 213.6 Q
-2.5(,s)-.4 G(et using)-2.5 E F1(mode)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F2
-<ad47>108 230.4 Q F1(mode/gain[/window])144 230.4 Q F0 .507
-(Sets the application of g)144 242.4 R .507(ain to the trace data. The)
--.05 F F1(mode)3.006 E F0 -.25(va)3.006 G .506(lue determines ho).25 F
-3.006(wt)-.25 G .506(he g)-3.006 F .506(ain is applied.)-.05 F(If)144
-254.4 Q F1(mode)2.987 E F0 2.987(=0)2.987 G 2.987(,n)-2.987 G 2.987(og)
--2.987 G .487(ain is applied.If)-3.037 F F1(mode)2.987 E F0 2.987(=1)
-2.987 G 2.987(,t)-2.987 G .487(he g)-2.987 F .487
+108 177.6 Q F1(mode/window)24.19 E F0 .414(Sets the application of lo)
+144 189.6 R .413(w-pass \214ltering to the trace data. The \214ltering \
+is applied by con)-.25 F -.2(vo)-.4 G .413(lving a).2 F 1.617
+(\214lter function of length)144 201.6 R F1(window)4.117 E F0 1.617
+(seconds with the trace. Currently the only a)4.117 F -.25(va)-.2 G
+1.618(ilable \214lter is a).25 F(cosine taper)144 213.6 Q 2.5(,s)-.4 G
+(et using)-2.5 E F1(mode)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F2<ad47>108
+230.4 Q F1(mode/gain[/window])22.52 E F0 .507(Sets the application of g)
+144 242.4 R .507(ain to the trace data. The)-.05 F F1(mode)3.006 E F0
+-.25(va)3.006 G .506(lue determines ho).25 F 3.006(wt)-.25 G .506(he g)
+-3.006 F .506(ain is applied.)-.05 F(If)144 254.4 Q F1(mode)2.987 E F0
+2.987(=0)2.987 G 2.987(,n)-2.987 G 2.987(og)-2.987 G .487
+(ain is applied.If)-3.037 F F1(mode)2.987 E F0 2.987(=1)2.987 G 2.987
+(,t)-2.987 G .487(he g)-2.987 F .487
 (ain is applied starting from the be)-.05 F .487(ginning of the)-.15 F
 .875(trace. If)144 266.4 R F1(mode)5.875 E F0 3.375(=2)3.375 G 3.375(,t)
 -3.375 G .875(he g)-3.375 F .875(ain is applied starting at the sea\215\
@@ -364,18 +358,18 @@ F .265(that g)144 314.4 R .265(ain is applied. When the g)-.05 F .265
 (alues after the end of the g)-.25 F .264(ain windo)-.05 F 2.764(wa)-.25
 G(re)-2.764 E(zeroed.)144 326.4 Q F2<ad48>108 343.2 Q F0 .162(This "hel\
 p" \215ag cause the program to print out a description of its operation\
- and then e)144 343.2 R .162(xit immedi-)-.15 F(ately)144 355.2 Q(.)-.65
-E F2<ad49>108 372 Q F1(se)144 372 Q(gy\214le)-.4 E F0
+ and then e)22.52 F .162(xit immedi-)-.15 F(ately)144 355.2 Q(.)-.65 E
+F2<ad49>108 372 Q F1(se)26.41 E(gy\214le)-.4 E F0
 (Sets the \214lename of the input se)144 384 Q
 (gy seismic data \214le to be gridded.)-.15 E F2<ad4f>108 400.8 Q F1
-(grid\214le)144 400.8 Q F0
+(grid\214le)22.52 E F0
 (Sets the \214lename for the output GMT netCDF format grid.)144 412.8 Q
-F2<ad52>108 429.6 Q F1(cellsize/startlon/endlon/startlat/endlat)144
-429.6 Q F0 .128(If the)144 441.6 R F2<ad52>2.628 E F0 .128(option is us\
-ed, then the pro\214le will represent a line between start and end posi\
-tions spec-)2.628 F .343(i\214ed using longitude and latitude v)144
-453.6 R .343(alues in decimal de)-.25 F .343(grees. This line se)-.15 F
-.344(gment is di)-.15 F .344(vided into bin-)-.25 F 1.437
+F2<ad52>108 429.6 Q F1(cellsize/startlon/endlon/startlat/endlat)23.08 E
+F0 .128(If the)144 441.6 R F2<ad52>2.628 E F0 .128(option is used, then\
+ the pro\214le will represent a line between start and end positions sp\
+ec-)2.628 F .343(i\214ed using longitude and latitude v)144 453.6 R .343
+(alues in decimal de)-.25 F .343(grees. This line se)-.15 F .344
+(gment is di)-.15 F .344(vided into bin-)-.25 F 1.437
 (ning cells according to)144 465.6 R F1(cellsize)3.937 E F0 1.437
 (in meters, and the x-dimension of the grid will be the distance)3.937 F
 1.001(along the line \(in meters\) di)144 477.6 R 1.001
@@ -386,9 +380,9 @@ tions spec-)2.628 F .343(i\214ed using longitude and latitude v)144
 1.474(gment and the se)-.15 F(gment)-.15 E
 (added to the appropriate cell. Where cells ha)144 501.6 Q .3 -.15(ve m)
 -.2 H(ultiple traces, the traces will be a).15 E -.15(ve)-.2 G(raged.)
-.15 E F2<ad53>108 518.4 Q F1(mode[/start/end[/sc)144 518.4 Q(han/ec)-.15
-E(han]])-.15 E F0 .847(This option sets the range of traces that are gr\
-idded, and thus determines the x-dimension of the)144 530.4 R .531
+.15 E F2<ad53>108 518.4 Q F1(mode[/start/end[/sc)24.74 E(han/ec)-.15 E
+(han]])-.15 E F0 .847(This option sets the range of traces that are gri\
+dded, and thus determines the x-dimension of the)144 530.4 R .531
 (output grid \(also impacted by an)144 542.4 R 3.031(yd)-.15 G .531
 (ecimation speci\214ed with)-3.031 F F2<ad44>3.031 E F0 .531(\). If)B F1
 (mode)3.03 E F0 3.03(=0)3.03 G 3.03(,t)-3.03 G(hen)-3.03 E F1(start)3.03
@@ -410,7 +404,7 @@ E(han)-.15 E F0(and)3.307 E F1(ec)3.307 E(han)-.15 E F0 3.307(,r)C
 614.4 Q F1(end)A F0<ad>2.5 E F1(start)2.5 E F0 2.5(+1)2.5 G 2.5(\)*\()
 -2.5 G F1(ec)-2.5 E(han)-.15 E F0<ad>2.5 E F1(sc)2.5 E(han)-.15 E F0 2.5
 (+1)2.5 G 2.5(\)/)-2.5 G F1(decimate)A(x)-.2 E F0(.)A F2<ad54>108 631.2
-Q F1(sweep[/delay])144 631.2 Q F0 .814
+Q F1(sweep[/delay])23.63 E F0 .814
 (Sets the time range of seismic data to be gridded. The)144 643.2 R F1
 (sweep)3.314 E F0 .814(speci\214es the number of seconds of)3.314 F .219
 (data comprising the y-axis of the grid. The number of samples follo)144
@@ -424,7 +418,7 @@ Q F1(sweep[/delay])144 631.2 Q F0 .814
 3.46 E F0 3.46(/s)3.46 G(ampleinterv)-3.46 E .96(al /)-.25 F F1
 (decimate)144 691.2 Q(y)-.3 E F0 2.5(,w)C(here the sampleinterv)-2.5 E
 (al is a parameter read with the seismic data.)-.25 E F2<ad56>108 708 Q
-F0(Normally)144 708 Q(,)-.65 E F2(mbsegygrid)3.525 E F0 1.025
+F0(Normally)23.08 E(,)-.65 E F2(mbsegygrid)3.525 E F0 1.025
 (prints out information re)3.525 F -.05(ga)-.15 G 1.025
 (rding its controlling parameters during e).05 F -.15(xe)-.15 G(cu-).15
 E(tion; the)144 720 Q F2<ad56>2.5 E F0(option causes the program to als\
@@ -436,9 +430,9 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbse)72 48 Q 141.1(gygrid\(1\) MB-System)-.15 F
 141.1(5.0 mbse)2.5 F(gygrid\(1\))-.15 E/F1 10/Times-Bold@0 SF<ad57>108
-84 Q/F2 10/Times-Italic@0 SF(mode/start/end)144 84 Q F0 1.348(This opti\
-on can be used to limit the data being gridded to a particular time win\
-do)144 96 R 3.849(wi)-.25 G 3.849(nv)-3.849 G(arious)-4.099 E -.1(wa)144
+84 Q/F2 10/Times-Italic@0 SF(mode/start/end)20.3 E F0 1.348(This option\
+ can be used to limit the data being gridded to a particular time windo)
+144 96 R 3.849(wi)-.25 G 3.849(nv)-3.849 G(arious)-4.099 E -.1(wa)144
 108 S .9(ys. This option does not impact the de\214nition of the o).1 F
 -.15(ve)-.15 G .9(rall grid bounds, b).15 F .9(ut does restrict the)-.2
 F .115(data gridded to samples within particular times of interest. If)
