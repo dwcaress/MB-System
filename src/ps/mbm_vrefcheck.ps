@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:44 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:12 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -281,15 +275,15 @@ F1 -.548(AU)72 367.2 S(THORSHIP).548 E F0(Da)108 379.2 Q(vid W)-.2 E 2.5
 (Lamont-Doherty Earth Observ)113 415.2 Q(atory)-.25 E
 (Suzanne H. O'Hara \(sohara@ldeo.columbia.edu\))108 427.2 Q
 (Lamont-Doherty Earth Observ)113 439.2 Q(atory)-.25 E F1(OPTIONS)72 468
-Q F2<ad41>108 480 Q F3(xmin)144 480 Q F0 1.1
+Q F2<ad41>108 480 Q F3(xmin)23.08 E F0 1.1
 (Sets the start time of the plot in hours from the be)144 492 R 1.099
 (ginning of the input \214le. If not speci\214ed, the)-.15 F(be)144 504
 Q(ginning of the input \214le will be used as)-.15 E F3(xmin)2.5 E F0(.)
-A F2<ad42>108 520.8 Q F3(xmax)144 520.8 Q F0 .336
+A F2<ad42>108 520.8 Q F3(xmax)23.63 E F0 .336
 (Sets the end time of the plot in hours from the be)144 532.8 R .337
 (ginning of the input \214le. If not speci\214ed, the end)-.15 F
 (of the input \214le will be used as)144 544.8 Q F3(xmax)2.5 E F0(.)A F2
-<ad46>108 561.6 Q F3(format)144 561.6 Q F0 .364
+<ad46>108 561.6 Q F3(format)24.19 E F0 .364
 (Sets the format for the input sw)144 573.6 R .364(ath sonar data using)
 -.1 F F2(MBIO)2.864 E F0(inte)2.864 E .364(ger format identi\214ers.)
 -.15 F .364(This macro)5.364 F .991(uses the)144 585.6 R F2(MBIO)3.491 E
@@ -300,12 +294,12 @@ F0 .991(library and will read an)3.491 F 3.491(ys)-.15 G -.1(wa)-3.491 G
 .694(and their identi\214er v)3.194 F .694(alues is gi)-.25 F -.15(ve)
 -.25 G 3.194(ni).15 G 3.194(nt)-3.194 G(he)-3.194 E F2(MBIO)144 609.6 Q
 F0(manual page.)2.5 E(Def)5 E(ault:)-.1 E F3(format)2.5 E F0 2.5(=2)2.5
-G(4.)-2.5 E F2<ad49>108 626.4 Q F3(\214le)144 626.4 Q F0
+G(4.)-2.5 E F2<ad49>108 626.4 Q F3(\214le)26.41 E F0
 (Data \214le from which the input data will be read.)144 638.4 Q F2
-<ad53>108 655.2 Q F3(xscale)144 655.2 Q F0
+<ad53>108 655.2 Q F3(xscale)24.74 E F0
 (Sets the x-axis scale of the plot in inches/hour)144 667.2 Q 5(.D)-.55
 G(ef)-5 E(ault:)-.1 E F3(xscale)2.5 E F0 2.5(=1)2.5 G(.2.)-2.5 E F2
-<ad58>108 684 Q F3(xaxis)144 684 Q F0
+<ad58>108 684 Q F3(xaxis)23.08 E F0
 (Sets the length of the x-axis in inches.)144 696 Q(MB-System 5.0)72 768
 Q 2.5(3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0 Cg EP
 %%Page: 2 2

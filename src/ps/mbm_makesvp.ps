@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:43 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:11 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -278,11 +272,11 @@ T .494(rage sound speed v).2 F .494
 -.15 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 403.2 Q
 (Lamont-Doherty Earth Observ)113 415.2 Q(atory)-.25 E F1(OPTIONS)72 444
-Q F2<ad44>108 456 Q F3(depthinterval)144 456 Q F0 1.122
+Q F2<ad44>108 456 Q F3(depthinterval)23.08 E F0 1.122
 (Sets the size in meters of the depth bins used to calculate an a)144
 468 R -.15(ve)-.2 G 1.121(rage sound speed v).15 F 1.121(ersus depth)
 -.15 F(model. The def)144 480 Q(ault v)-.1 E(alue is 25 meters.)-.25 E
-F2<ad46>108 496.8 Q F3(format)144 496.8 Q F0 1.358
+F2<ad46>108 496.8 Q F3(format)24.19 E F0 1.358
 (Sets the data format for the input data.)144 508.8 R(If)6.358 E F3
 (format)3.858 E F0 3.858(<0)3.858 G 3.858(,t)-3.858 G 1.358
 (hen the input \214le speci\214ed with the)-3.858 F F2<ad49>3.858 E F0
@@ -296,16 +290,15 @@ F0 .391(and their identi\214er v)2.891 F .39(alues is gi)-.25 F -.15(ve)
 -.25 G 2.89(ni).15 G 2.89(nt)-2.89 G(he)-2.89 E F2(MBIO)2.89 E F0
 (manual page. Def)144 556.8 Q(ault:)-.1 E F3(format)2.5 E F0 2.5<3dad>
 2.5 G(1.)-2.5 E F2<ad48>108 573.6 Q F0 .162(This "help" \215ag cause th\
-e program to print out a description of its operation and then e)144
-573.6 R .162(xit immedi-)-.15 F(ately)144 585.6 Q(.)-.65 E F2<ad49>108
-602.4 Q F3(input\214le)144 602.4 Q F0 .468
-(Sets the input \214lename. If)144 614.4 R F3(format)2.967 E F0 2.967
-(>0\()2.967 G .467(set with the)-2.967 F F2<ad66>2.967 E F0 .467
-(option\) then the sw)2.967 F .467(ath sonar data contained)-.1 F(in)144
-626.4 Q F3(in\214le)2.942 E F0 .442(is read and processed. If)2.942 F F3
-(format)2.942 E F0 2.942(<0\()2.942 G .443(the def)-2.942 F .443
-(ault\), then)-.1 F F3(in\214le)2.943 E F0 .443
-(is assumed to be an ascii \214le)2.943 F .052
+e program to print out a description of its operation and then e)22.52 F
+.162(xit immedi-)-.15 F(ately)144 585.6 Q(.)-.65 E F2<ad49>108 602.4 Q
+F3(input\214le)26.41 E F0 .468(Sets the input \214lename. If)144 614.4 R
+F3(format)2.967 E F0 2.967(>0\()2.967 G .467(set with the)-2.967 F F2
+<ad66>2.967 E F0 .467(option\) then the sw)2.967 F .467
+(ath sonar data contained)-.1 F(in)144 626.4 Q F3(in\214le)2.942 E F0
+.442(is read and processed. If)2.942 F F3(format)2.942 E F0 2.942(<0\()
+2.942 G .443(the def)-2.942 F .443(ault\), then)-.1 F F3(in\214le)2.943
+E F0 .443(is assumed to be an ascii \214le)2.943 F .052
 (containing a list of the input sw)144 638.4 R .052
 (ath sonar data \214les to be processed and their formats.)-.1 F .051
 (The program)5.051 F .42
@@ -334,11 +327,11 @@ BP
 3.057(ni).15 G 3.058(nt)-3.057 G(he)-3.058 E F1(MBIO)3.058 E F0 .558
 (manual page. The)3.058 F(def)144 96 Q
 (ault input \214lename is "datalist.mb-1".)-.1 E F1<ad4f>108 112.8 Q/F2
-10/Times-Italic@0 SF(output)144 112.8 Q F0 .565
+10/Times-Italic@0 SF(output)22.52 E F0 .565
 (Sets the name of the output \214le for the sound speed v)144 124.8 R
 .565(ersus depth model. By def)-.15 F .565(ault, the model is)-.1 F
-(output to the stdout stream.)144 136.8 Q F1<ad56>108 153.6 Q F0(The)144
-153.6 Q F1<ad56>2.5 E F0(option causes)2.5 E F1(mbm_mak)2.5 E(esvp)-.1 E
+(output to the stdout stream.)144 136.8 Q F1<ad56>108 153.6 Q F0(The)
+23.08 E F1<ad56>2.5 E F0(option causes)2.5 E F1(mbm_mak)2.5 E(esvp)-.1 E
 F0(to print out status messages.)2.5 E/F3 10.95/Times-Bold@0 SF
 (EXAMPLES)72 182.4 Q F0 .252(Suppose we ha)108 194.4 R .552 -.15(ve a s)
 -.2 H .252(et of sw).15 F .252(ath \214les from an A)-.1 F(UV)-.55 E

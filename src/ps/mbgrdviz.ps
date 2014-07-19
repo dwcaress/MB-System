@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:41 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:10 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 7
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -423,9 +417,9 @@ R 1.965(wpoint. T)-.25 F 4.465(or)-.8 G 1.965
 -2.5 E(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 616.8 Q
 (Lamont-Doherty Earth Observ)113 628.8 Q(atory)-.25 E F3(OPTIONS)72
 657.6 Q F1<ad48>108 669.6 Q F0 .162(This "help" \215ag cause the progra\
-m to print out a description of its operation and then e)144 669.6 R
-.161(xit immedi-)-.15 F(ately)144 681.6 Q(.)-.65 E F1<ad49>108 698.4 Q
-F2(grid\214le)144 698.4 Q F0 .859
+m to print out a description of its operation and then e)22.52 F .161
+(xit immedi-)-.15 F(ately)144 681.6 Q(.)-.65 E F1<ad49>108 698.4 Q F2
+(grid\214le)26.41 E F0 .859
 (Sets a GMT grid \214le to be read and displayed at startup.)144 710.4 R
 .86(This option is usually used only when)5.86 F F1(MBgrdviz)144 722.4 Q
 F0(is started automatically from some other process.)2.5 E
@@ -437,12 +431,12 @@ BP
 /F0 10/Times-Roman@0 SF 149.84(mbgrdviz\(1\) MB-System)72 48 R 149.84
 (5.0 mbgrdviz\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad54>108 84 Q F0 .362
 (Sets a test grid to be calculated and displayed at startup.This allo)
-144 84 R .361(ws the program to be tested e)-.25 F -.15(ve)-.25 G(n).15
-E(when a grid \214le is una)144 96 Q -.25(va)-.2 G(ilable.).25 E F1
-<ad56>108 112.8 Q F0(Normally)144 112.8 Q(,)-.65 E F1(MBgrdviz)2.536 E
-F0 .036(outputs limited information to the stderr stream.)2.536 F .036
-(If the)5.036 F F1<ad56>2.536 E F0 .036(\215ag is gi)2.536 F -.15(ve)
--.25 G .036(n, then).15 F F1(MBgrdviz)144 124.8 Q F0 -.1(wo)2.683 G .183
+23.63 F .361(ws the program to be tested e)-.25 F -.15(ve)-.25 G(n).15 E
+(when a grid \214le is una)144 96 Q -.25(va)-.2 G(ilable.).25 E F1<ad56>
+108 112.8 Q F0(Normally)23.08 E(,)-.65 E F1(MBgrdviz)2.536 E F0 .036
+(outputs limited information to the stderr stream.)2.536 F .036(If the)
+5.036 F F1<ad56>2.536 E F0 .036(\215ag is gi)2.536 F -.15(ve)-.25 G .036
+(n, then).15 F F1(MBgrdviz)144 124.8 Q F0 -.1(wo)2.683 G .183
 (rks in a "v).1 F .183(erbose" mode and outputs the program v)-.15 F
 .182(ersion being used, all error status)-.15 F(messages, and a lar)144
 136.8 Q(ge amount of other information including all of the beams \215a\

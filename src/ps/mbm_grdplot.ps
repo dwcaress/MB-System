@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:43 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:11 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 16
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -275,47 +269,47 @@ F3(F)A F2(|)8.496 E F3(FP)8.496 E F2 8.496<5dad>C(MNP[)-8.496 E F3
 (k_len)-.2 E F2 2.635<5dad>C(MTC)-2.635 E F3(\214ll)A F2(\255MTD)2.635 E
 F3 -.37(re)C(solution).37 E F2(\255MTG)2.635 E F3(\214ll)A F2(\255MTI)
 2.635 E F3(river[/pen])A F2(\255MTN)108 357.6 Q F3(bor)A(der[/pen])-.37
-E F2(\255MTS)2.5 E F3(\214ll)A F2(\255MTW)2.5 E F3(pen)A F2(\255MXG)2.5
-E F3(\214ll)A F2(\255MXI)2.5 E F3(xy_\214le)A F2(\255MXM \255MXS)2.5 E
-F3(symbol/size)A F2(\255MXW)2.5 E F3(pen)A F2(])A F1(DESCRIPTION)72
-386.4 Q F2(mbm_grdplot)108 398.4 Q F0 .398
-(is a macro that generates a shellscript of)2.898 F F2(GMT)2.899 E F0
-.399(commands which, when e)2.899 F -.15(xe)-.15 G .399
-(cuted, will gen-).15 F .717(erate a Postscript plot of gridded data.)
-108 410.4 R(Se)5.717 E -.15(ve)-.25 G .716
+E F2(\255MTS)2.561 E F3(\214ll)A F2(\255MTW)2.561 E F3(pen)A F2(\255MXG)
+2.561 E F3(\214ll)A F2(\255MXI)2.561 E F3(xy_\214le)A F2 .062
+(\255MXM \255MXS)2.562 F F3(symbol/size)A F2(\255MXW)2.562 E F3(pen)A F2
+(])A F1(DESCRIPTION)72 386.4 Q F2(mbm_grdplot)108 398.4 Q F0 .399
+(is a macro that generates a shellscript of)2.899 F F2(GMT)2.899 E F0
+.398(commands which, when e)2.899 F -.15(xe)-.15 G .398
+(cuted, will gen-).15 F .716(erate a Postscript plot of gridded data.)
+108 410.4 R(Se)5.716 E -.15(ve)-.25 G .717
 (ral styles of plots can be generated, including color \214ll maps,).15
-F 1.635(contour maps, color \214ll maps o)108 422.4 R -.15(ve)-.15 G
+F 1.636(contour maps, color \214ll maps o)108 422.4 R -.15(ve)-.15 G
 1.636
 (rlaid with contours, shaded relief color maps, slope magnitude maps,)
-.15 F .267(coastline maps, te)108 434.4 R .267
-(xt labels, and xy data in lines or symbols. Fi)-.15 F .566 -.15(ve d)
--.25 H(if).15 E .266(ferent color schemes are included.)-.25 F(The)5.266
-E .312(plot will be scaled to \214t on the speci\214ed page size or)108
-446.4 R 2.813(,i)-.4 G 2.813(ft)-2.813 G .313
-(he scale is user de\214ned, the page size will be cho-)-2.813 F .561(s\
-en in accordance with the plot size. The primary purpose of this macro \
-is to allo)108 458.4 R 3.06(wt)-.25 G .56(he simple, semi-auto-)-3.06 F
-.564(mated production of nice looking maps with a fe)108 470.4 R 3.064
-(wc)-.25 G .564(ommand line ar)-3.064 F .565(guments. F)-.18 F .565
-(or users seeking more con-)-.15 F 1.528(trol o)108 482.4 R -.15(ve)-.15
-G 4.028(rt).15 G 1.527
-(he plot appearance, a number of additional optional ar)-4.028 F 1.527
-(guments are pro)-.18 F 1.527(vided. T)-.15 F 1.527(ruly ambitious)-.35
+.15 F .266(coastline maps, te)108 434.4 R .266
+(xt labels, and xy data in lines or symbols. Fi)-.15 F .567 -.15(ve d)
+-.25 H(if).15 E .267(ferent color schemes are included.)-.25 F(The)5.267
+E .313(plot will be scaled to \214t on the speci\214ed page size or)108
+446.4 R 2.813(,i)-.4 G 2.813(ft)-2.813 G .312
+(he scale is user de\214ned, the page size will be cho-)-2.813 F .56(se\
+n in accordance with the plot size. The primary purpose of this macro i\
+s to allo)108 458.4 R 3.061(wt)-.25 G .561(he simple, semi-auto-)-3.061
+F .565(mated production of nice looking maps with a fe)108 470.4 R 3.064
+(wc)-.25 G .564(ommand line ar)-3.064 F .564(guments. F)-.18 F .564
+(or users seeking more con-)-.15 F 1.527(trol o)108 482.4 R -.15(ve)-.15
+G 4.027(rt).15 G 1.527
+(he plot appearance, a number of additional optional ar)-4.027 F 1.527
+(guments are pro)-.18 F 1.528(vided. T)-.15 F 1.528(ruly ambitious)-.35
 F .827(users may edit the plot shellscript to tak)108 494.4 R 3.327(ea)
 -.1 G(dv)-3.327 E .827(antage of)-.25 F F2(GMT)3.327 E F0 .827
-(capabilities not supported by this macro. A)3.327 F(companion macro)108
-506.4 Q F2(mbm_grd3dplot)2.5 E F0
-(can be used similarly to generate 3D perspecti)2.5 E .3 -.15(ve v)-.25
-H(ie).15 E(ws of gridded data.)-.25 E F1 -.548(AU)72 535.2 S(THORSHIP)
-.548 E F0(Da)108 547.2 Q(vid W)-.2 E 2.5(.C)-.92 G
+(capabilities not supported by this macro. A)3.327 F .055
+(companion macro)108 506.4 R F2(mbm_grd3dplot)2.555 E F0 .056
+(can be used similarly to generate 3D perspecti)2.555 F .356 -.15(ve v)
+-.25 H(ie).15 E .056(ws of gridded data.)-.25 F F1 -.548(AU)72 535.2 S
+(THORSHIP).548 E F0(Da)108 547.2 Q(vid W)-.2 E 2.5(.C)-.92 G
 (aress \(caress@mbari.or)-2.5 E(g\))-.18 E(Montere)113 559.2 Q 2.5(yB)
 -.15 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 571.2 Q
 (Lamont-Doherty Earth Observ)113 583.2 Q(atory)-.25 E F1
 (SIMPLE DESCRIPTION OF B)72 612 Q(ASIC OPTIONS)-.329 E F2<ad41>108 624 Q
-F3(ma)144 624 Q(gnitude[/azimuth/ele)-.1 E(vation])-.15 E F0 1.15(Sets \
-the parameters which control the synthetic illumination of the gridded \
-data \(shaded relief\).)144 636 R .05(The v)144 648 R(alue)-.25 E F3(ma)
+F3(ma)23.08 E(gnitude[/azimuth/ele)-.1 E(vation])-.15 E F0 1.15(Sets th\
+e parameters which control the synthetic illumination of the gridded da\
+ta \(shaded relief\).)144 636 R .05(The v)144 648 R(alue)-.25 E F3(ma)
 2.55 E(gnitude)-.1 E F0 .05(is an ef)2.55 F(fecti)-.25 E .351 -.15
 (ve ve)-.25 H .051(rtical e).15 F .051
 (xageration which modulates the intensity of the shad-)-.15 F .882
@@ -328,7 +322,7 @@ data \(shaded relief\).)144 636 R .05(The v)144 648 R(alue)-.25 E F3(ma)
 (grees from horizontal.)-.15 E(Def)5 E(aults:)-.1 E F3(ma)2.5 E(gnitude)
 -.1 E F0 2.5(=0)2.5 G(.2;)-2.5 E F3(azimuth)2.5 E F0 2.5(=0)2.5 G(.0;)
 -2.5 E F3(ele)2.5 E(vation)-.15 E F0 2.5(=3)2.5 G(0.0;)-2.5 E F2<ad43>
-108 700.8 Q F3(contour_contr)144 700.8 Q(ol)-.45 E F0(If)144 712.8 Q F2
+108 700.8 Q F3(contour_contr)23.08 E(ol)-.45 E F0(If)144 712.8 Q F2
 <ad43>3.459 E F0 .959(is gi)3.459 F -.15(ve)-.25 G 3.459(na).15 G .959
 (lone, it causes unannotated contours to be dra)-3.459 F .958
 (wn using a contour interv)-.15 F .958(al calcu-)-.25 F .214
@@ -344,7 +338,7 @@ BP
 (5.0 mbm_grdplot\(1\))2.5 F
 (COMPLETE DESCRIPTION OF OPTIONS section belo)144 84 Q 2.5(wf)-.25 G
 (or a more complete discussion.)-2.5 E/F1 10/Times-Bold@0 SF<ad44>108
-100.8 Q/F2 10/Times-Italic@0 SF([\215ipcolor/\215ipshade])144 100.8 Q F0
+100.8 Q/F2 10/Times-Italic@0 SF([\215ipcolor/\215ipshade])23.08 E F0
 (Normally)144 112.8 Q 3.321(,t)-.65 G .821(he color or grayscale tables\
  used for color maps run from cool colors \(or dark grays\))-3.321 F
 1.289(for lo)144 124.8 R 3.789(wg)-.25 G 1.289(rid v)-3.789 F 1.289
@@ -368,7 +362,7 @@ the color table used for color or gray \214ll plots,)-3.954 F .216
 F0 .087(will \215ip the shading con-)2.587 F -.15(ve)144 196.8 S
 (ntion b).15 E(ut lea)-.2 E .3 -.15(ve t)-.2 H(he def).15 E
 (ault color con)-.1 E -.15(ve)-.4 G(ntion.).15 E F1<ad47>108 213.6 Q F2
-(color_mode)144 213.6 Q F0 -.45(Tu)144 225.6 S
+(color_mode)22.52 E F0 -.45(Tu)144 225.6 S
 (rns on color \214ll plot and sets the style of the plot.).45 E F2
 (color_mode)164 237.6 Q F0 2.5(=1)2.5 G 2.5(:C)-2.5 G(olor/gray \214ll.)
 -2.5 E F2(color_mode)164 249.6 Q F0 2.5(=2)2.5 G 2.5(:C)-2.5 G
@@ -381,14 +375,13 @@ F1<ad4b>2.5 E F0(option must be used to specify)204 297.6 Q
 333.6 Q F2(color_mode)164 345.6 Q F0 2.5(=5)2.5 G 2.5(:C)-2.5 G
 (olor/gray \214ll shaded by)-2.5 E(slope magnitude.)204 357.6 Q F1<ad48>
 108 374.4 Q F0 .162(This "help" \215ag cause the program to print out a\
- description of its operation and then e)144 374.4 R .162(xit immedi-)
--.15 F(ately)144 386.4 Q(.)-.65 E F1<ad49>108 403.2 Q F2(gr)144 403.2 Q
-(d\214le)-.37 E F0 .159
-(Sets the name of the gridded data \214le to be plotted.)144 415.2 R
-(Alternati)5.158 E -.15(ve)-.25 G(ly).15 E(,)-.65 E F2(gr)2.658 E
-(d\214le)-.37 E F0 .158(may be a list of grid \214les)2.658 F
+ description of its operation and then e)22.52 F .162(xit immedi-)-.15 F
+(ately)144 386.4 Q(.)-.65 E F1<ad49>108 403.2 Q F2(gr)26.41 E(d\214le)
+-.37 E F0 .159(Sets the name of the gridded data \214le to be plotted.)
+144 415.2 R(Alternati)5.158 E -.15(ve)-.25 G(ly).15 E(,)-.65 E F2(gr)
+2.658 E(d\214le)-.37 E F0 .158(may be a list of grid \214les)2.658 F
 (\(one \214lename on each line\) to be plotted together)144 427.2 Q(.)
--.55 E F1<ad4b>108 444 Q F2(intensity_\214le)144 444 Q F0 .599
+-.55 E F1<ad4b>108 444 Q F2(intensity_\214le)22.52 E F0 .599
 (Sets the name of the gridded data \214le containing intensity v)144 456
 R .599(alues to be used for shading the map.)-.25 F(Alternati)144 468 Q
 -.15(ve)-.25 G(ly).15 E(,)-.65 E F2(gr)2.704 E(d\214le)-.37 E F0 .204(m\
@@ -396,17 +389,17 @@ ay be a list of grid \214les \(one \214lename on each line\) to be used\
  together)2.704 F 2.703(.I)-.55 G 2.703(fa)-2.703 G 1.499(list of \214l\
 e is supplied, the intensity \214les must conform in order to the data \
 grid \214les the)144 480 R 3.999(yw)-.15 G(ill)-3.999 E(shade.)144 492 Q
-F1<ad4f>108 508.8 Q F2 -.45(ro)144 508.8 S(ot).45 E F0 .423(Sets the ro\
-ot used to construct the \214lename of the output shellscript \()144
-520.8 R F2 -.45(ro)C(ot).45 E F0 .422(.cmd\) and names of \214les)B .156
+F1<ad4f>108 508.8 Q F2 -.45(ro)22.52 G(ot).45 E F0 .423(Sets the root u\
+sed to construct the \214lename of the output shellscript \()144 520.8 R
+F2 -.45(ro)C(ot).45 E F0 .422(.cmd\) and names of \214les)B .156
 (created when the shellscript is run.)144 532.8 R .157
 (Normally the name of the input grid \214le or grid \214le list is used)
 5.157 F(as the)144 544.8 Q F2 -.45(ro)2.5 G(ot).45 E F0(.)A F1<ad50>108
-561.6 Q F2(pa)144 561.6 Q -.1(ge)-.1 G(size).1 E F0 .632(This option se\
-ts the size of the page the plot will be centered on. If the user does \
-not set the plot)144 573.6 R .125(scale, the plot will be sized as lar)
-144 585.6 R .125(ge as will \214t on the designated page. If the user s\
-ets the plot scale)-.18 F .948
+561.6 Q F2(pa)24.19 E -.1(ge)-.1 G(size).1 E F0 .632(This option sets t\
+he size of the page the plot will be centered on. If the user does not \
+set the plot)144 573.6 R .125(scale, the plot will be sized as lar)144
+585.6 R .125(ge as will \214t on the designated page. If the user sets \
+the plot scale)-.18 F .948
 (such that the plot will not \214t on the designated page, a lar)144
 597.6 R .948(ger page will be used.)-.18 F .947(The supported)5.947 F
 1.342(page sizes include ANSI A, B, C, D, E, F)144 609.6 R 3.842(,a)-.8
@@ -414,8 +407,8 @@ G 1.343(nd E1, as well as most metric page sizes. See the)-3.842 F 1.31
 (COMPLETE DESCRIPTION OF OPTIONS section belo)144 621.6 R 3.81(wf)-.25 G
 1.31(or a complete list of the supported)-3.81 F(page sizes. The def)144
 633.6 Q(ault page size is A.)-.1 E F1<ad53>108 650.4 Q F2([color/shade])
-144 650.4 Q F0 1.392(This option enables ef)144 662.4 R(fecti)-.25 E
-1.692 -.15(ve h)-.25 H 1.392
+24.74 E F0 1.392(This option enables ef)144 662.4 R(fecti)-.25 E 1.692
+-.15(ve h)-.25 H 1.392
 (istogram equalization of the color and/or shading of the gridded).15 F
 .628(data. The equalization is not achie)144 674.4 R -.15(ve)-.25 G
 3.128(db).15 G 3.128(yc)-3.128 G .628(hanging the data v)-3.128 F .628
@@ -444,8 +437,8 @@ BP
 2.754 F F2(shade)2.754 E F0(=)2.754 E 3.097(1w)144 96 S .597
 (ill cause the shading to be equalized.)-3.097 F(Using)5.597 E F1<ad53>
 3.097 E F2(0/1)A F0 .596(will equalize the shading without equaliz-)
-3.097 F(ing the color table.)144 108 Q F1<ad54>108 124.8 Q F0(If)144
-124.8 Q F1<ad54>2.7 E F0 .201(is gi)2.701 F -.15(ve)-.25 G .201
+3.097 F(ing the color table.)144 108 Q F1<ad54>108 124.8 Q F0(If)23.63 E
+F1<ad54>2.7 E F0 .201(is gi)2.701 F -.15(ve)-.25 G .201
 (n, it causes a coastline to be dra).15 F .201(wn on the map. The def)
 -.15 F .201(ault is to dra)-.1 F 2.701(wt)-.15 G .201(he coastline as)
 -2.701 F .629(the thinnest possible line. T)144 136.8 R 3.129(oe)-.8 G
@@ -458,19 +451,19 @@ E F0(,)A F1(\255MTN)3.915 E F0(,)A F1(\255MTS)3.915 E F0 3.915(,a)C(nd)
 -3.915 E F1(\255MTW)3.915 E F0 1.414
 (options described in the COMPLETE DESCRIP-)3.915 F
 (TION OF OPTIONS section belo)144 172.8 Q -.65(w.)-.25 G F1<ad55>108
-189.6 Q F2(orientation)144 189.6 Q F0 .2(Normally the orientation of th\
-e plot \(portrait or landscape\) is selected automatically so as to max\
-i-)144 201.6 R .334(mize the plot scale.)144 213.6 R(The)5.333 E F1
-<ad55>2.833 E F0 .333(option allo)2.833 F .333
+189.6 Q F2(orientation)23.08 E F0 .2(Normally the orientation of the pl\
+ot \(portrait or landscape\) is selected automatically so as to maxi-)
+144 201.6 R .334(mize the plot scale.)144 213.6 R(The)5.333 E F1<ad55>
+2.833 E F0 .333(option allo)2.833 F .333
 (ws the user to set the plot orientation. If)-.25 F F2(orientation)2.833
 E F0 2.833(=1)2.833 G 2.833(,a)-2.833 G
 (portrait plot will be produced; if)144 225.6 Q F2(orientation)2.5 E F0
 2.5(=2)2.5 G 2.5(,al)-2.5 G(andscape plot will be produced.)-2.5 E F1
-<ad56>108 242.4 Q F0(Causes)144 242.4 Q F1(mbm_grdplot)4.505 E F0 2.005
+<ad56>108 242.4 Q F0(Causes)23.08 E F1(mbm_grdplot)4.505 E F0 2.005
 (to operate in "v)4.505 F 2.006
 (erbose" mode so that it outputs more information than)-.15 F(usual.)144
-254.4 Q F1<ad57>108 271.2 Q F2([color_style)144 271.2 Q F0([)A F2
-(/palette)A F0([)A F2(ncolor)A(s)-.1 E F0(]] | cpt\214le])A
+254.4 Q F1<ad57>108 271.2 Q F2([color_style)20.3 E F0([)A F2(/palette)A
+F0([)A F2(ncolor)A(s)-.1 E F0(]] | cpt\214le])A
 (This option controls the color scheme used for color \214ll plots.)144
 283.2 Q(If)144 307.2 Q F2(color_style)3.136 E F0 3.136(=1[)3.136 G(def)
 -3.136 E .636(ault], then the color scheme used will be a continuous gr\
@@ -497,9 +490,9 @@ e [def)144 451.2 Q(ault is 11].)-.1 E .523(If the option ar)144 475.2 R
 .522(color palette \(CPT\) \214le, then that CPT \214le)3.022 F
 (and its color scheme will be used for the plot)144 487.2 Q/F3 10.95
 /Times-Bold@0 SF(COMPLETE DESCRIPTION OF OPTIONS)72 516 Q F1<ad41>108
-528 Q F2(ma)144 528 Q(gnitude[/azimuth])-.1 E F0 1.15(Sets the paramete\
-rs which control the synthetic illumination of the gridded data \(shade\
-d relief\).)144 540 R .051(The v)144 552 R(alue)-.25 E F2(ma)2.551 E
+528 Q F2(ma)23.08 E(gnitude[/azimuth])-.1 E F0 1.15(Sets the parameters\
+ which control the synthetic illumination of the gridded data \(shaded \
+relief\).)144 540 R .051(The v)144 552 R(alue)-.25 E F2(ma)2.551 E
 (gnitude)-.1 E F0 .051(is an ef)2.551 F(fecti)-.25 E .351 -.15(ve ve)
 -.25 H .051(rtical e).15 F .05
 (xageration which modulates the intensity of the shad-)-.15 F .826
@@ -508,27 +501,28 @@ d relief\).)144 540 R .051(The v)144 552 R(alue)-.25 E F2(ma)2.551 E
 (is the azimuth from which the)3.327 F(data is illuminated.)144 576 Q
 (Def)5 E(aults:)-.1 E F2(ma)2.5 E(gnitude)-.1 E F0 2.5(=0)2.5 G(.2;)-2.5
 E F2(azimuth)2.5 E F0 2.5(=0)2.5 G(.0;)-2.5 E F1<ad42>108 592.8 Q F2
-(tic)144 592.8 Q(kinfo)-.2 E F0 .219(Sets map boundary tickmark interv)
-144 604.8 R .219(als. See the)-.25 F F1(psbasemap)2.719 E F0 .218
+(tic)23.63 E(kinfo)-.2 E F0 .219(Sets map boundary tickmark interv)144
+604.8 R .219(als. See the)-.25 F F1(psbasemap)2.719 E F0 .218
 (manual page for details. By def)2.719 F .218(ault the)-.1 F
 (program chooses basemap annotations based on the map boundaries.)144
-616.8 Q F1<ad43>108 633.6 Q F2(contour_contr)144 633.6 Q(ol)-.45 E F0
-(If)144 645.6 Q F1<ad43>3.458 E F0 .958(is gi)3.458 F -.15(ve)-.25 G
-3.458(na).15 G .959(lone, it causes unannotated contours to be dra)
--3.458 F .959(wn using a contour interv)-.15 F .959(al calcu-)-.25 F
-1.281(lated from the data. If)144 657.6 R F2(contour_contr)3.781 E(ol)
--.45 E F0 1.281(is gi)3.781 F -.15(ve)-.25 G 1.28
+616.8 Q F1<ad43>108 633.6 Q F2(contour_contr)23.08 E(ol)-.45 E F0(If)144
+645.6 Q F1<ad43>3.458 E F0 .958(is gi)3.458 F -.15(ve)-.25 G 3.458(na)
+.15 G .959(lone, it causes unannotated contours to be dra)-3.458 F .959
+(wn using a contour interv)-.15 F .959(al calcu-)-.25 F 1.281
+(lated from the data. If)144 657.6 R F2(contour_contr)3.781 E(ol)-.45 E
+F0 1.281(is gi)3.781 F -.15(ve)-.25 G 1.28
 (n, it speci\214es the contours to be dra).15 F 1.28(wn in one of)-.15 F
 (three possible w)144 669.6 Q(ays:)-.1 E(If)144 693.6 Q F2
-(contour_contr)2.735 E(ol)-.45 E F0 .235(has the suf)2.735 F .236(\214x\
- ".cpt" and can be opened as a \214le, it is assumed to be a color pal-)
--.25 F .37(ette table.)144 705.6 R .37
-(The color boundaries are then used as contour le)5.37 F -.15(ve)-.25 G
-2.87(ls. If).15 F .37(the cpt-\214le has anotation \215ags)2.87 F .905
-(in the last column then those contours will be anotated.)144 717.6 R
-.905(By def)5.905 F .905(ault no contours are labeled; use)-.1 F F1
-(\255MCA)144 729.6 Q F0(to anotate all contours.)2.5 E(MB-System 5.0)72
-768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(3)204.835 E 0 Cg EP
+(contour_contr)3.697 E(ol)-.45 E F0 1.198(has the suf)3.697 F 1.198(\
+\214x ".cpt" and can be opened as a \214le, it is assumed to be a color)
+-.25 F 1.006(palette table.)144 705.6 R 1.006
+(The color boundaries are then used as contour le)6.006 F -.15(ve)-.25 G
+3.506(ls. If).15 F 1.006(the cpt-\214le has anotation)3.506 F .557
+(\215ags in the last column then those contours will be anotated.)144
+717.6 R .558(By def)5.558 F .558(ault no contours are labeled;)-.1 F
+(use)144 729.6 Q F1(\255MCA)2.5 E F0(to anotate all contours.)2.5 E
+(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(3)204.835 E 0
+Cg EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
@@ -551,7 +545,7 @@ F0(is interpreted as a constant contour interv)2.5 E(al.)-.25 E .824
 /F2 10/Times-Bold@0 SF(\255MCT)3.324 E F0 .824
 (is set, then only contours mark)3.324 F .824
 (ed with upper case C or A will ha)-.1 F -.15(ve)-.2 G(tickmarks.)144
-180 Q F2<ad44>108 196.8 Q F1([\215ipcolor/\215ipshade])144 196.8 Q F0
+180 Q F2<ad44>108 196.8 Q F1([\215ipcolor/\215ipshade])23.08 E F0
 (Normally)144 208.8 Q 3.321(,t)-.65 G .821(he color or grayscale tables\
  used for color maps run from cool colors \(or dark grays\))-3.321 F
 1.289(for lo)144 220.8 R 3.789(wg)-.25 G 1.289(rid v)-3.789 F 1.289
@@ -575,7 +569,7 @@ the color table used for color or gray \214ll plots,)-3.954 F .216
 F0 .087(will \215ip the shading con-)2.587 F -.15(ve)144 292.8 S
 (ntion b).15 E(ut lea)-.2 E .3 -.15(ve t)-.2 H(he def).15 E
 (ault color con)-.1 E -.15(ve)-.4 G(ntion.).15 E F2<ad46>108 309.6 Q F1
-(contour_\214le)144 309.6 Q F0 .893
+(contour_\214le)24.19 E F0 .893
 (Sets the name of the \214le to use for generating contour lines.)144
 321.6 R .894(The def)5.894 F .894(ault is to use the \214le being)-.1 F
 .288(plotted, b)144 333.6 R .287(ut in some situations, it can be usefu\
@@ -584,7 +578,7 @@ l to specify a separate \214le for contouring. F)-.2 F .287(or e)-.15 F
 1.224(rlay a backscatter mosaic with bath).15 F 1.224
 (ymetry contours, or a shaded ba-)-.05 F(th)144 357.6 Q
 (ymetry map with gra)-.05 E(vity anomaly contours.)-.2 E F2<ad47>108
-374.4 Q F1(color_mode)144 374.4 Q F0 -.45(Tu)144 386.4 S
+374.4 Q F1(color_mode)22.52 E F0 -.45(Tu)144 386.4 S
 (rns on color \214ll plot and sets the style of the plot.).45 E F1
 (color_mode)164 398.4 Q F0 2.5(=1)2.5 G 2.5(:C)-2.5 G(olor/gray \214ll.)
 -2.5 E F1(color_mode)164 410.4 Q F0 2.5(=2)2.5 G 2.5(:C)-2.5 G
@@ -599,9 +593,9 @@ F2<ad4b>2.5 E F0(option must be used to specify)204 458.4 Q
 144 530.4 Q F2(grdimage)2.5 E F0
 (manual page for information on shading with intensity \214les)2.5 E F2
 <ad48>108 547.2 Q F0 .162(This "help" \215ag cause the program to print\
- out a description of its operation and then e)144 547.2 R .161
-(xit immedi-)-.15 F(ately)144 559.2 Q(.)-.65 E F2<ad49>108 576 Q F1(gr)
-144 576 Q(d\214le)-.37 E F0 1.298
+ out a description of its operation and then e)22.52 F .161(xit immedi-)
+-.15 F(ately)144 559.2 Q(.)-.65 E F2<ad49>108 576 Q F1(gr)26.41 E
+(d\214le)-.37 E F0 1.298
 (Sets the name of the gridded data \214le to be plotted.)144 588 R 1.299
 (The data must be in a form acceptable to)6.298 F F2(GMT)144 600 Q F0
 -.15(ve)2.57 G .07(rsion 3 programs \(see the).15 F F2(GMT)2.57 E F0 .07
@@ -611,8 +605,8 @@ y be a list of grid \214les \(one \214lename on each line\) to be plott\
 ed together)144 612 R 3.286(.T)-.55 G .786(his is useful when)-3.286 F
 (data from a re)144 624 Q(gion is brok)-.15 E(en up into se)-.1 E -.15
 (ve)-.25 G(ral grid \214les rather than a single v).15 E(ery lar)-.15 E
-(ge grid \214le.)-.18 E F2<ad4a>108 640.8 Q F1(pr)144 640.8 Q(ojection)
--.45 E F0([)A F1(/scale | /width)A F0(])A .368
+(ge grid \214le.)-.18 E F2<ad4a>108 640.8 Q F1(pr)25.3 E(ojection)-.45 E
+F0([)A F1(/scale | /width)A F0(])A .368
 (Selects the map projection. By def)144 652.8 R .367
 (ault the map projection is Mercator and the plot scale is chosen)-.1 F
 .667(to \214t on the selected page size \(see)144 664.8 R F2<ad50>3.168
@@ -671,27 +665,26 @@ E F1(\255Jr)144 444 Q F2(lon0/scale)A F0(\(W)2.5 E(ink)-.4 E(el T)-.1 E
 (/y-scale)A F0([)A F1(l|p)A F2(pow)A F0(]] \(Linear)A 2.5(,l)-.4 G
 (og, and po)-2.5 E(wer scaling\))-.25 E
 (More details can be found in the)144 528 Q F1(psbasemap)2.5 E F0
-(manpages.)2.5 E F1<ad4b>108 544.8 Q F2(intensity_\214le)144 544.8 Q F0
-.599(Sets the name of the gridded data \214le containing intensity v)144
+(manpages.)2.5 E F1<ad4b>108 544.8 Q F2(intensity_\214le)22.52 E F0 .599
+(Sets the name of the gridded data \214le containing intensity v)144
 556.8 R .599(alues to be used for shading the map.)-.25 F(Alternati)144
 568.8 Q -.15(ve)-.25 G(ly).15 E(,)-.65 E F2(gr)2.703 E(d\214le)-.37 E F0
 .204(may be a list of grid \214les \(one \214lename on each line\) to b\
 e used together)2.703 F 2.704(.I)-.55 G 2.704(fa)-2.704 G .821(list of \
 \214les is supplied, the intensity \214les must conform in order to the\
  list of data grid \214les the)144 580.8 R(y)-.15 E(will shade.)144
-592.8 Q F1<ad4c>108 609.6 Q F2(title:scalelabel)144 609.6 Q F0 .157(Set\
-s the title and the label for the colorscale \(if used\) of the plot. N\
-ote that a colon \(:\) rather than a)144 621.6 R 1.557(slash \(/\) is u\
-sed to separate the labels. Colons cannot be used in the labels themsel\
-v)144 633.6 R 1.557(es. If this)-.15 F 1.367
-(option is not used, then a def)144 645.6 R 1.367
-(ault title and colorscale label are pro)-.1 F 1.367
+592.8 Q F1<ad4c>108 609.6 Q F2(title:scalelabel)23.63 E F0 .157(Sets th\
+e title and the label for the colorscale \(if used\) of the plot. Note \
+that a colon \(:\) rather than a)144 621.6 R 1.557(slash \(/\) is used \
+to separate the labels. Colons cannot be used in the labels themselv)144
+633.6 R 1.557(es. If this)-.15 F 1.367(option is not used, then a def)
+144 645.6 R 1.367(ault title and colorscale label are pro)-.1 F 1.367
 (vided. If the title is supplied)-.15 F .742(alone, a def)144 657.6 R
 .742(ault colorscale label will be pro)-.1 F .742(vided. T)-.15 F 3.242
 (of)-.8 G .742(orce no title use)-3.242 F F1<ad4c>3.241 E F0 3.241("")C
 3.241(;t)-3.241 G 3.241(of)-3.241 G .741(orce no title or)-3.241 F
 (colorscale label use)144 669.6 Q F1<ad4c>2.5 E F0 2.5(":")C(.)-2.5 E F1
-<ad4d>108 686.4 Q F0 3.055(As)144 686.4 S .555
+<ad4d>108 686.4 Q F0 3.055(As)20.86 G .555
 (eries of "miscellaneous" options are pro)-3.055 F .555
 (vided which are gi)-.15 F -.15(ve)-.25 G 3.055(na).15 G(s)-3.055 E F1
 <ad4d>3.055 E F0(follo)3.055 E .555(wed by a tw)-.25 F 3.055(oc)-.1 G
@@ -709,7 +702,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 133.72(mbm_grdplot\(1\) MB-System)72 48 R 133.72
 (5.0 mbm_grdplot\(1\))2.5 F/F1 10/Times-Bold@0 SF(\255MGD)108 84 Q/F2 10
-/Times-Italic@0 SF(gmtdef/value)144 84 Q F0(Allo)144 96 Q .227
+/Times-Italic@0 SF(gmtdef/value)5.86 E F0(Allo)144 96 Q .227
 (ws the user to set the)-.25 F F1(GMT)2.727 E F0(def)2.727 E .227
 (ault v)-.1 F .227
 (alues used as the plot is constructed. This command may)-.25 F 1.133
@@ -718,7 +711,7 @@ BP
 1.133(aults as required. F)-.1 F 1.133(or e)-.15 F 1.133
 (xample, to set the basemap)-.15 F(annotation font to Courier)144 120 Q
 2.5(,u)-.4 G(se "-MGD)-2.5 E(ANO)-.4 E(T_FONT/Courier".)-.4 E F1
-(\255MGF)108 136.8 Q F2(scale_loc)144 136.8 Q F0
+(\255MGF)108 136.8 Q F2(scale_loc)6.97 E F0
 (Sets the location of the color scale. The possible v)144 148.8 Q
 (alues of)-.25 E F2(scale_loc)2.5 E F0(are:)2.5 E F2(scale_loc)180 160.8
 Q F0 2.5(=b)2.5 G 15.81(:b)-2.5 G(ottom of plot)-15.81 E F2(scale_loc)
@@ -726,28 +719,28 @@ Q F0 2.5(=b)2.5 G 15.81(:b)-2.5 G(ottom of plot)-15.81 E F2(scale_loc)
 (scale_loc)180 184.8 Q F0 2.5(=l)2.5 G 18.03(:l)-2.5 G(eft of plot)
 -18.03 E F2(scale_loc)180 196.8 Q F0 2.5(=r)2.5 G 17.48(:r)-2.5 G
 (ight of plot)-17.48 E([Def)144 208.8 Q(ault)-.1 E F2(scale_loc)2.5 E F0
-2.5(=b)2.5 G(])-2.5 E F1(\255MGL)108 225.6 Q F0([)144 225.6 Q F2(f)A F0
-(][)A F2(x)A F0(])A F2(lon0/lat0/slat/length)A F0([)A F2(m)A F0(])A(Dra)
-144 237.6 Q 1.44(ws a simple map scale centered on)-.15 F F2(lon0/lat0)
-3.94 E F0 6.44(.U)C(se)-6.44 E F1(\255Lx)3.94 E F0 1.44
+2.5(=b)2.5 G(])-2.5 E F1(\255MGL)108 225.6 Q F0([)6.41 E F2(f)A F0(][)A
+F2(x)A F0(])A F2(lon0/lat0/slat/length)A F0([)A F2(m)A F0(])A(Dra)144
+237.6 Q 1.44(ws a simple map scale centered on)-.15 F F2(lon0/lat0)3.94
+E F0 6.44(.U)C(se)-6.44 E F1(\255Lx)3.94 E F0 1.44
 (to specify position in inch instead.)3.94 F 1.333
 (Scale is calculated at latitude)144 249.6 R F2(slat)3.833 E F0(,)A F2
 (length)3.833 E F0 1.333(is in km [miles if m is appended].)3.833 F(Use)
 6.333 E F1(\255Lf)3.833 E F0 1.334(to get a)3.834 F("f)144 261.6 Q(anc)
 -.1 E(y" scale [Def)-.15 E(ault is plain].)-.1 E F1(\255MGQ)108 278.4 Q
-F2(dpi)144 278.4 Q F0 .839(Sets the resolution in dots per inch of the \
-raster image used for color \214ll maps. Lar)144 290.4 R .838(ger v)-.18
-F .838(alues of)-.25 F F2(dpi)144 302.4 Q F0(produce lar)2.5 E
+F2(dpi)5.3 E F0 .839(Sets the resolution in dots per inch of the raster\
+ image used for color \214ll maps. Lar)144 290.4 R .838(ger v)-.18 F
+.838(alues of)-.25 F F2(dpi)144 302.4 Q F0(produce lar)2.5 E
 (ger Postscript plot \214les. [Def)-.18 E(ault is 100].)-.1 E F1
-(\255MGS)108 319.2 Q F2(scalefactor)144 319.2 Q F0 .728
+(\255MGS)108 319.2 Q F2(scalefactor)7.52 E F0 .728
 (The gridded data is multiplied by)144 331.2 R F2(scalefactor)3.229 E F0
 5.729(.T)C .729(his option is most often used \215ip the sign of the)
 -5.729 F(data \()144 343.2 Q F2(scalefactor)A F0 2.5<3dad>2.5 G
 (1\). [Def)-2.5 E(ault no scaling])-.1 E F1(\255MGT)108 360 Q F2
-(x/y/size/angle/font/just/te)144 360 Q(xt)-.2 E F0 .488(Causes a te)144
-372 R .488(xt label to plotted on the map.)-.15 F F2(size)5.487 E F0
-.487(is te)2.987 F .487(xt size in points,)-.15 F F2(angle)2.987 E F0
-.487(is measured in de)2.987 F(grees)-.15 E(counter)144 384 Q .8
+(x/y/size/angle/font/just/te)6.41 E(xt)-.2 E F0 .488(Causes a te)144 372
+R .488(xt label to plotted on the map.)-.15 F F2(size)5.487 E F0 .487
+(is te)2.987 F .487(xt size in points,)-.15 F F2(angle)2.987 E F0 .487
+(is measured in de)2.987 F(grees)-.15 E(counter)144 384 Q .8
 (-clockwise from horizontal,)-.2 F F2(fontno)3.3 E F0 .8
 (sets the font type,)3.3 F F2(justify)3.3 E F0 .8(sets the alignment.)
 3.3 F(If)5.8 E F2(fontno)3.3 E F0 1.615(starts with a leading h)144 396
@@ -765,9 +758,9 @@ F F0 2.612(\). The)B .111(alignment number refers to the part of the te)
 .283(id Right, 9 = Upper Left, 10 = Upper Center)-2.783 F 2.783(,1)-.4 G
 2.783(1=U)-2.783 G .283(pper Right. This option may be)-2.783 F(gi)144
 456 Q -.15(ve)-.25 G 2.5(na).15 G 2.5(sm)-2.5 G(an)-2.5 E 2.5(yt)-.15 G
-(imes as needed.)-2.5 E F1(\255MGU)108 472.8 Q F0([)144 472.8 Q F2
-(/dx/dy/)A F0(][)A F2(label)A F0(])A(Dra)144 484.8 Q 2.635(wU)-.15 G
-.135(nix System time stamp on plot.)-2.635 F .135
+(imes as needed.)-2.5 E F1(\255MGU)108 472.8 Q F0([)5.86 E F2(/dx/dy/)A
+F0(][)A F2(label)A F0(])A(Dra)144 484.8 Q 2.635(wU)-.15 G .135
+(nix System time stamp on plot.)-2.635 F .135
 (User may specify where the lo)5.135 F .136
 (wer left corner of the stamp)-.25 F 1.926(should f)144 496.8 R 1.926
 (all on the page relati)-.1 F 2.226 -.15(ve t)-.25 H 4.426(ol).15 G -.25
@@ -775,13 +768,13 @@ F F0 2.612(\). The)B .111(alignment number refers to the part of the te)
 (ault is \(-0.75,-0.75\)].)-.1 F(Optionally)144 508.8 Q 2.5(,a)-.65 G
 (ppend a label, or)-2.5 E F1(c)2.5 E F0
 (\(which will plot the command string.\))2.5 E F1(\255MCA)108 525.6 Q F2
-(anot_int/)144 525.6 Q F0([)A F2 -.18(ff)C(ont_size).18 E F0(][)A F2
-(aangle)A F0(][)A F2(/r/g/b)A F0(][)A F2(o)A F0(]])A F2(anot_int)144
-537.6 Q F0 .415(is annotation interv)2.915 F .415(al in data units.)-.25
-F .415(Ignored if contour le)5.415 F -.15(ve)-.25 G .415(ls are gi).15 F
--.15(ve)-.25 G 2.915(ni).15 G 2.915(na\214)-2.915 G 2.915(le. [Def)
--2.915 F(ault)-.1 E 1.744(is no annotations].)144 549.6 R(Se)6.744 E
--.15(ve)-.25 G 1.744
+(anot_int/)6.42 E F0([)A F2 -.18(ff)C(ont_size).18 E F0(][)A F2(aangle)A
+F0(][)A F2(/r/g/b)A F0(][)A F2(o)A F0(]])A F2(anot_int)144 537.6 Q F0
+.415(is annotation interv)2.915 F .415(al in data units.)-.25 F .415
+(Ignored if contour le)5.415 F -.15(ve)-.25 G .415(ls are gi).15 F -.15
+(ve)-.25 G 2.915(ni).15 G 2.915(na\214)-2.915 G 2.915(le. [Def)-2.915 F
+(ault)-.1 E 1.744(is no annotations].)144 549.6 R(Se)6.744 E -.15(ve)
+-.25 G 1.744
 (ral options can be set to modify the form of the annotation.).15 F
 (Append)6.744 E(f)144 561.6 Q F2(font_size)A F0 .519
 (to change font size [9], append)3.019 F F2(/r/g/b)3.019 E F0 .519
@@ -790,22 +783,22 @@ F .415(Ignored if contour le)5.415 F -.15(ve)-.25 G .415(ls are gi).15 F
 (to \214x annotation angle [Def)3.198 F .697(ault follo)-.1 F .697
 (ws contour], and append 'o' to dra)-.25 F 3.197(wt)-.15 G .697(he out-)
 -3.197 F(line of the surrounding te)144 585.6 Q(xt box [Def)-.15 E
-(ault is no outline].)-.1 E F1(\255MCG)108 602.4 Q F2(gap/width)144
-602.4 Q F1(\255MCQ)2.5 E F2(cut)A(gap)144 614.4 Q F0 .03
+(ault is no outline].)-.1 E F1(\255MCG)108 602.4 Q F2(gap/width)5.86 E
+F1(\255MCQ)2.5 E F2(cut)A(gap)144 614.4 Q F0 .03
 (is distance in inch between each annotation along the same contour)2.53
 F(.)-.55 E F2(width)5.03 E F0 .03(is number of points)2.53 F -.15(ove)
 144 626.4 S 2.5(rw).15 G
 (hich to estimate the best \214tting slope for contour labels)-2.5 E
-([Def)5 E(ault is 4/10].)-.1 E F1(\255MCQ)108 643.2 Q F2(cut)144 643.2 Q
-F0(Do not dra)144 655.2 Q 2.5(wc)-.15 G(ontours with less than)-2.5 E F2
+([Def)5 E(ault is 4/10].)-.1 E F1(\255MCQ)108 643.2 Q F2(cut)5.86 E F0
+(Do not dra)144 655.2 Q 2.5(wc)-.15 G(ontours with less than)-2.5 E F2
 (cut)2.5 E F0(number of points [Dra)2.5 E 2.5(wa)-.15 G(ll contours].)
--2.5 E F1(\255MCT)108 672 Q F0([)144 672 Q F2(+|-)A F0(][)A F2
-(gap/length)A F0(][)A F2(:LH)A F0(])A -.4(Wi)144 684 S 1.484(ll dra).4 F
-3.984(wt)-.15 G 1.484(ickmarks pointing in the do)-3.984 F(wnw)-.25 E
-1.484(ard direction e)-.1 F -.15(ve)-.25 G(ry).15 E F2(gap)3.984 E F0
-1.483(along the innermost closed)3.984 F 2.98(contours. Append)144 696 R
-F2(gap)2.98 E F0 .48(and tickmark length \(in inch\) or use def)2.98 F
-.48(aults [0.2/0.05].)-.1 F .48(User may choose)5.48 F .263
+-2.5 E F1(\255MCT)108 672 Q F0([)6.97 E F2(+|-)A F0(][)A F2(gap/length)A
+F0(][)A F2(:LH)A F0(])A -.4(Wi)144 684 S 1.484(ll dra).4 F 3.984(wt)-.15
+G 1.484(ickmarks pointing in the do)-3.984 F(wnw)-.25 E 1.484
+(ard direction e)-.1 F -.15(ve)-.25 G(ry).15 E F2(gap)3.984 E F0 1.483
+(along the innermost closed)3.984 F 2.98(contours. Append)144 696 R F2
+(gap)2.98 E F0 .48(and tickmark length \(in inch\) or use def)2.98 F .48
+(aults [0.2/0.05].)-.1 F .48(User may choose)5.48 F .263
 (to tick only local highs or local lo)144 708 R .263(ws by specifying)
 -.25 F F1(\255T+)2.762 E F0(or)2.762 E F1<ad54>2.762 E(-)-.92 E F0 2.762
 (,r)C(especti)-2.762 E -.15(ve)-.25 G(ly).15 E 5.262(.A)-.65 G .262
@@ -834,7 +827,7 @@ G .533(ingle character \(e.g., LH, \255+, etc.\))-3.033 F .533
 (alues for annotated contours: width = 3, color = black,)-.25 F(te)144
 160.8 Q(xture = solid.)-.15 E(Re)5 E(gular contours ha)-.15 E .3 -.15
 (ve d)-.2 H(ef).15 E(ault width = 1.)-.1 E F1(\255MN)108 177.6 Q(A)-.2 E
-F2([nhgt[/P] | P])144 177.6 Q F0 -.45(Tu)144 189.6 S .426
+F2([nhgt[/P] | P])6.62 E F0 -.45(Tu)144 189.6 S .426
 (rns on \214lename annotation of na).45 F(vig)-.2 E .426
 (ation tracks. If)-.05 F F1(\255MN)2.926 E(A)-.2 E F0 .427(is gi)2.927 F
 -.15(ve)-.25 G 2.927(nw).15 G .427(ithout specifying an)-2.927 F 2.927
@@ -851,9 +844,9 @@ F2(P)A F0(or)2.897 E F1(\255MN)2.897 E(A)-.2 E F2(nhgt/P)A F0 .397
 -.05 F .401(Filename annotation can also be speci\214ed using the)5.401
 F F1<ad4e>2.901 E F0 2.5(option. Def)144 249.6 R
 (aults: Filename annotation of)-.1 E(f.)-.25 E F1(\255MNF)108 266.4 Q F2
-(format)144 266.4 Q F0 .606(Sets the data format for the input sw)144
-278.4 R .606(ath data speci\214ed with the)-.1 F F1(\255MNI)3.106 E F0
-.606(option. If)3.106 F F2(format)3.106 E F0 3.106(<0)3.106 G 3.106(,t)
+(format)7.53 E F0 .606(Sets the data format for the input sw)144 278.4 R
+.606(ath data speci\214ed with the)-.1 F F1(\255MNI)3.106 E F0 .606
+(option. If)3.106 F F2(format)3.106 E F0 3.106(<0)3.106 G 3.106(,t)
 -3.106 G(hen)-3.106 E .4(the input \214le speci\214ed with the)144 290.4
 R F1(\255MNI)2.9 E F0 .401
 (option will actually contain a list of input sw)2.9 F .401
@@ -866,7 +859,7 @@ F1(MBIO)3.884 E F0 1.384(library and will read or write an)3.884 F 3.883
 .749(and their)3.249 F(identi\214er v)144 326.4 Q(alues is gi)-.25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0
 (manual page.)2.5 E(Def)5 E(ault:)-.1 E F2(format)2.5 E F0 2.5<3dad>2.5
-G(1.)-2.5 E F1(\255MNI)108 343.2 Q F2(swathdata)144 343.2 Q F0 1.042
+G(1.)-2.5 E F1(\255MNI)108 343.2 Q F2(swathdata)9.75 E F0 1.042
 (This option causes the na)144 355.2 R(vig)-.2 E 1.041
 (ation track of sw)-.05 F 1.041(ath data to be plotted. Here)-.1 F F2
 (swathdata)3.541 E F0 1.041(is the input)3.541 F .222
@@ -893,7 +886,7 @@ G .568(th sonar format supported by).1 F F1(MBIO)144 463.2 Q F0 3.428
 (ath sonar data formats currently supported by)-.1 F F1(MBIO)3.428 E F0
 .928(and their identi\214er)3.428 F -.25(va)144 475.2 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0
-(manual page.)2.5 E F1(\255MNN)108 492 Q F0([)144 492 Q F2(ttic)A
+(manual page.)2.5 E F1(\255MNN)108 492 Q F0([)6.42 E F2(ttic)A
 (k/tannot/dannot/tlen)-.2 E F0([)A F2(/nhgt/nperp)A F0 2.5(]|)C F2(F)A
 F0(|)2.5 E F2(FP)2.5 E F0(])A .525
 (This option sets the annotation of the sw)144 504 R .525(ath \214le na)
@@ -935,8 +928,8 @@ ptrack. If the)-.1 F F1(\255MNN)144 636 Q F2(FP)A F0 .409(is gi)2.909 F
 (dan-)2.901 E(not)144 660 Q F0 2.5(=4)2.5 G(.0;)-2.5 E F2(tlen)2.5 E F0
 2.5(=0)2.5 G(.1;)-2.5 E F2(nhgt)2.5 E F0 2.5(=0)2.5 G(.1;)-2.5 E F2
 (nperp)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1(\255MNP)108 676.8 Q F2
-([pingnumber_tic)144 676.8 Q(k/pingnumber_annot/pingnumber_tic)-.2 E
-(k_len])-.2 E F0 -.45(Tu)144 688.8 S 1.421
+([pingnumber_tic)7.53 E(k/pingnumber_annot/pingnumber_tic)-.2 E(k_len])
+-.2 E F0 -.45(Tu)144 688.8 S 1.421
 (rns on ping number \(or shot number\) annotation of na).45 F(vig)-.2 E
 1.421(ation tracks.)-.05 F -.35(Ti)6.42 G 1.42(ck marks are made).35 F
 .287(along the shiptrack at)144 700.8 R F2(pingnumber_tic)2.787 E(k)-.2
@@ -959,18 +952,18 @@ BP
 5.079 G(0,)-5.079 E F1(pingnumber_annot)5.079 E F0 5.079(=1)5.079 G
 2.579(00, and)-5.079 F F1(pingnum-)5.079 E(ber_tic)144 96 Q(k_len)-.2 E
 F0 2.5(=0)2.5 G(.1.)-2.5 E/F2 10/Times-Bold@0 SF(\255MTC)108 112.8 Q F1
-(\214ll)144 112.8 Q F0 2.234(Coastline plotting option.)144 124.8 R
-2.234(Set the shade \(0-255\), color \(r/g/b\), or pattern \(p|Pdpi/pat\
-tern; see)7.234 F F2(\255MTG)144 136.8 Q F0 2.5(\)f)C(or lak)-2.5 E 2.5
-(es [Def)-.1 F(ault is the \214ll chosen for "wet" areas \(-S\)].)-.1 E
-F2(\255MTD)108 153.6 Q F1 -.37(re)144 153.6 S(solution).37 E F0 1.621
+(\214ll)6.97 E F0 2.234(Coastline plotting option.)144 124.8 R 2.234(Se\
+t the shade \(0-255\), color \(r/g/b\), or pattern \(p|Pdpi/pattern; se\
+e)7.234 F F2(\255MTG)144 136.8 Q F0 2.5(\)f)C(or lak)-2.5 E 2.5(es [Def)
+-.1 F(ault is the \214ll chosen for "wet" areas \(-S\)].)-.1 E F2
+(\255MTD)108 153.6 Q F1 -.37(re)6.97 G(solution).37 E F0 1.621
 (Coastline plotting option.)144 165.6 R 1.621(Selects the resolution of\
  the coastline data set to use \(\(f\)ull, \(h\)igh,)6.621 F .693
 (\(i\)ntermediate, \(1\)o)144 177.6 R 1.993 -.65(w, a)-.25 H .694
 (nd \(c\)rude\).).65 F .694(The resolution drops of)5.694 F 3.194(fb)
 -.25 G 3.194(y8)-3.194 G .694(0% between data sets. [Def)-3.194 F(ault)
--.1 E(is l].)144 189.6 Q F2(\255MTG)108 206.4 Q F1(\214ll)144 206.4 Q F0
-.592(Coastline plotting option.)144 218.4 R .592
+-.1 E(is l].)144 189.6 Q F2(\255MTG)108 206.4 Q F1(\214ll)6.41 E F0 .592
+(Coastline plotting option.)144 218.4 R .592
 (Select painting or clipping of "dry" areas.)5.592 F .591
 (Append a shade, color)5.591 F 3.091(,p)-.4 G(at-)-3.091 E .998
 (tern, or c for clipping.)144 230.4 R .999
@@ -983,7 +976,7 @@ F .131
 (sets the resolution of the image.)2.982 F(See)5.482 E F2(GMT)2.982 E F0
 .482(Cookbook & T)2.982 F .483(echnical Reference Appendix)-.7 F 2.5(Ef)
 144 266.4 S(or information on indi)-2.5 E(vidual patterns.)-.25 E F2
-(\255MTI)108 283.2 Q F1(river[/pen])144 283.2 Q F0 1.457
+(\255MTI)108 283.2 Q F1(river[/pen])10.3 E F0 1.457
 (Coastline plotting option.)144 295.2 R(Dra)6.457 E 3.957(wr)-.15 G
 -2.15 -.25(iv e)-3.957 H 3.957(rs. Specify).25 F 1.457(the type of ri)
 3.957 F -.15(ve)-.25 G 1.457(rs and [optionally] append pen).15 F
@@ -1005,7 +998,7 @@ S(inor ri)-2.5 E -.15(ve)-.25 G(rs).15 E 2.5(5=I)156.5 379.2 S
 (rs and canals \(1-10\)).15 E 2.5(r=A)156.5 463.2 S(ll permanent ri)-2.5
 E -.15(ve)-.25 G(rs \(1-4\)).15 E 2.5(i=A)156.5 475.2 S
 (ll intermittent ri)-2.5 E -.15(ve)-.25 G(rs \(5-7\)).15 E 2.5(c=A)156.5
-487.2 S(ll canals \(8-10\))-2.5 E F2(\255MTN)108 504 Q F1(bor)144 504 Q
+487.2 S(ll canals \(8-10\))-2.5 E F2(\255MTN)108 504 Q F1(bor)6.97 E
 (der[/pen])-.37 E F0 .84(Coastline plotting option.)144 516 R(Dra)5.839
 E 3.339(wp)-.15 G .839(olitical boundaries.)-3.339 F .839
 (Specify the type of boundary and [option-)5.839 F .546
@@ -1017,7 +1010,7 @@ E 3.339(wp)-.15 G .839(olitical boundaries.)-3.339 F .839
 (ational boundaries)-2.5 E 2.5(2=S)156.5 564 S
 (tate boundaries within the Americas)-2.5 E 2.5(3=M)156.5 576 S
 (arine boundaries)-2.5 E 2.5(a=A)156.5 588 S(ll boundaries \(1-3\))-2.5
-E F2(\255MTS)108 604.8 Q F1(\214ll)144 604.8 Q F0 .777
+E F2(\255MTS)108 604.8 Q F1(\214ll)8.63 E F0 .777
 (Coastline plotting option.)144 616.8 R .777
 (Select painting or clipping of "wet" areas.)5.777 F .777
 (Append the shade \(0-255\),)5.777 F(color \(r/g/b\), pattern \(see)144
@@ -1026,7 +1019,7 @@ E F2(\255MTS)108 604.8 Q F1(\214ll)144 604.8 Q F0 .777
 R 1.078(Append pen attrib)6.078 F 3.578(utes [Def)-.2 F 3.579
 (aults: width)-.1 F 3.579(=1)3.579 G 3.579(,c)-3.579 G 1.079
 (olor = 0/0/0, te)-3.579 F 1.079(xture =)-.15 F(solid].)144 681.6 Q F2
-(\255MXG)108 698.4 Q F1(\214ll)144 698.4 Q F0 .393
+(\255MXG)108 698.4 Q F1(\214ll)5.86 E F0 .393
 (Select \214lling of symbols for xy plotting.)144 710.4 R .393
 (Set the shade \(0-255\) or color \(r/g/b\) [Def)5.393 F .393
 (ault is no \214ll].)-.1 F 2.548 -.8(To r)144 722.4 T .948
@@ -1048,9 +1041,9 @@ umber of the image pattern \(1-32\) OR the name of a icon-format \214le\
 (\255GP)3.629 E F0 1.129(instead of)3.629 F F2(\255Gp)3.629 E F0(.)A
 (See)144 108 Q F2(GMTs)2.5 E F0(Cookbook & T)2.5 E
 (echnical Reference Appendix E for information on indi)-.7 E
-(vidual patterns.)-.25 E F2(\255MXI)108 124.8 Q F1(xy_\214le)144 124.8 Q
-F0 .481(Speci\214es a \214le containing \(x,y\) pairs to be plotted as \
-lines or symbols. The line and symbol char)144 136.8 R(-)-.2 E .533
+(vidual patterns.)-.25 E F2(\255MXI)108 124.8 Q F1(xy_\214le)9.75 E F0
+.481(Speci\214es a \214le containing \(x,y\) pairs to be plotted as lin\
+es or symbols. The line and symbol char)144 136.8 R(-)-.2 E .533
 (acteristics are set using the last)144 148.8 R F2(\255MXG)3.033 E F0(,)
 A F2(\255MXS)3.033 E F0 3.033(,a)C(nd)-3.033 E F2(\255MXW)3.033 E F0
 .533(options used. All of the)3.033 F F2(\255MX)3.034 E F0(com-)3.034 E
@@ -1068,7 +1061,7 @@ can)-2.643 F(plot dif)144 172.8 Q(ferent \214les using dif)-.25 E
 1.878(xpected. Users may gi)-.15 F 2.178 -.15(ve t)-.25 H 1.879
 (his command multiple times, allo).15 F 1.879(wing some)-.25 F
 (input \214les to be handled as se)144 237.6 Q(gmented and others not.)
--.15 E F2(\255MXS)108 254.4 Q F1(symbol/size)144 254.4 Q F0 .333
+-.15 E F2(\255MXS)108 254.4 Q F1(symbol/size)8.08 E F0 .333
 (Selects symbol to be used for plotting the ne)144 266.4 R .332
 (xt xy data \214le. Setting)-.15 F F1(symbol)2.832 E F0 2.832(=")2.832 G
 .332(N" causes line plot-)-2.832 F 2.5(ting. Choose)144 278.4 R
@@ -1098,12 +1091,12 @@ F0(or)2.899 E F2(r)2.899 E F0 .399(to dra)2.899 F 2.899(wt)-.15 G .399
 (is centered].)144 499.2 Q(Upper case)5 E F2(L)2.5 E F0(or)2.5 E F2(R)
 2.5 E F0(dra)2.5 E(ws a triangle instead of line se)-.15 E(gment.)-.15 E
 F2(\255MXSh)108 516 Q(h)144 528 Q F0 -.15(ex)C 2.5(agon. Gi).15 F .3
--.15(ve s)-.25 H(ide in inch.).15 E F2(\255MXSi)108 544.8 Q(i)144 544.8
-Q F0 -1.85 -.4(nv e)D(rted triangle.).4 E(Gi)5 E .3 -.15(ve s)-.25 H
-(ide in inch.).15 E F2(\255MXSl)108 561.6 Q(l)144 561.6 Q F0 .405
-(etter or te)B .405(xt string.)-.15 F(Gi)5.405 E .706 -.15(ve s)-.25 H
-.406(ize in inch, and append /).15 F F1(string)A F0 .406
-(after the size.)2.906 F .406(Note that the size is only)5.406 F .92
+-.15(ve s)-.25 H(ide in inch.).15 E F2 2.8(\255MXSi i)108 544.8 R F0
+-1.85 -.4(nv e)D(rted triangle.).4 E(Gi)5 E .3 -.15(ve s)-.25 H
+(ide in inch.).15 E F2 2.8(\255MXSl l)108 561.6 R F0 .405(etter or te)B
+.405(xt string.)-.15 F(Gi)5.405 E .706 -.15(ve s)-.25 H .406
+(ize in inch, and append /).15 F F1(string)A F0 .406(after the size.)
+2.906 F .406(Note that the size is only)5.406 F .92
 (approximate; no indi)144 573.6 R .919(vidual scaling is done for dif)
 -.25 F .919(ferent characters.)-.25 F .919(Remember to escape special)
 5.919 F(characters lik)144 585.6 Q 2.5(e*)-.1 G(.)-2.5 E F2(\255MXSp)108
@@ -1146,18 +1139,18 @@ A F0(lea)2.579 E -.15(ve)-.2 G 2.579(st).15 G(he)-2.579 E
 R .784(utes for xy plotting. See chapter 4.12 in the GMT T)-.2 F .784
 (echnical reference for a discus-)-.7 F(sion of GMT pen v)144 230.4 Q
 2.5(alues. [Def)-.25 F(aults: width = 1, color = 0/0/0, te)-.1 E
-(xture = solid].)-.15 E F2<ad4f>108 247.2 Q F1 -.45(ro)144 247.2 S(ot)
-.45 E F0 .423(Sets the root used to construct the \214lename of the out\
-put shellscript \()144 259.2 R F1 -.45(ro)C(ot).45 E F0 .422
+(xture = solid].)-.15 E F2<ad4f>108 247.2 Q F1 -.45(ro)22.52 G(ot).45 E
+F0 .423(Sets the root used to construct the \214lename of the output sh\
+ellscript \()144 259.2 R F1 -.45(ro)C(ot).45 E F0 .422
 (.cmd\) and names of \214les)B .156
 (created when the shellscript is run.)144 271.2 R .157
 (Normally the name of the input grid \214le or grid \214le list is used)
 5.157 F(as the)144 283.2 Q F1 -.45(ro)2.5 G(ot).45 E F0(.)A F2<ad50>108
-300 Q F1(pa)144 300 Q -.1(ge)-.1 G(size).1 E F0 .632(This option sets t\
-he size of the page the plot will be centered on. If the user does not \
-set the plot)144 312 R .125(scale, the plot will be sized as lar)144 324
-R .125(ge as will \214t on the designated page. If the user sets the pl\
-ot scale)-.18 F .948
+300 Q F1(pa)24.19 E -.1(ge)-.1 G(size).1 E F0 .632(This option sets the\
+ size of the page the plot will be centered on. If the user does not se\
+t the plot)144 312 R .125(scale, the plot will be sized as lar)144 324 R
+.125(ge as will \214t on the designated page. If the user sets the plot\
+ scale)-.18 F .948
 (such that the plot will not \214t on the designated page, a lar)144 336
 R .948(ger page will be used.)-.18 F .947(The supported)5.947 F
 (page sizes are:)144 348 Q(American ANSI sizes:)169 372 Q 12.5(A8)169
@@ -1220,8 +1213,8 @@ G(.20 x)-2.5 E(4.50 in.\))5 E(MB-System lar)185 264 Q(ge format sizes:)
 (m5 1524.0)169 324 R 2.5(x2)2.5 G(133.6 mm)-2.5 E(\(60.00 x 84.00 in.\))
 5 E 2.5(m6 1524.0)169 336 R 2.5(x2)2.5 G(438.4 mm)-2.5 E
 (\(60.00 x 96.00 in.\))5 E(The def)144 360 Q(ault page size is A.)-.1 E
-/F1 10/Times-Bold@0 SF<ad51>108 376.8 Q F0(Normally)144 376.8 Q 2.866
-(,t)-.65 G .367
+/F1 10/Times-Bold@0 SF<ad51>108 376.8 Q F0(Normally)22.52 E 2.866(,t)
+-.65 G .367
 (he output plot generation shellscript includes lines which e)-2.866 F
 -.15(xe)-.15 G .367(cute a program to display).15 F 1.072
 (the Postscript image on the screen.)144 388.8 R 1.071
@@ -1234,8 +1227,8 @@ R F1(mbdefaults)2.826 E F0 2.826(;t)C .326(he def)-2.826 F .326(ault v)
 -.1 F .326(alue can be)-.25 F -.15(ove)144 424.8 S
 (rridden by setting the en).15 E(vironment v)-.4 E
 (ariable $MB_PS_VIEWER.)-.25 E F1<ad52>108 441.6 Q/F2 10/Times-Italic@0
-SF(west/east/south/north)144 441.6 Q .736(west, east, south,)144 453.6 R
-F0(and)3.236 E F2(north)3.236 E F0 .736(specify the Re)3.236 F .736
+SF(west/east/south/north)23.08 E .736(west, east, south,)144 453.6 R F0
+(and)3.236 E F2(north)3.236 E F0 .736(specify the Re)3.236 F .736
 (gion of interest.)-.15 F 2.336 -.8(To s)5.736 H .736
 (pecify boundaries in de).8 F .736(grees and)-.15 F 1.162
 (minutes [and seconds], use the dd:mm[:ss] format.)144 465.6 R(Append)
@@ -1249,7 +1242,7 @@ H .209(ore room).15 F .199(between the image and the ax)144 489.6 R
 (gion than speci\214ed in the grd\214le will result in a sub-)-.15 F
 (set of the grid [Def)144 501.6 Q(ault is re)-.1 E(gion gi)-.15 E -.15
 (ve)-.25 G 2.5(nb).15 G 2.5(yt)-2.5 G(he grd\214le].)-2.5 E F1<ad53>108
-518.4 Q F2([color/shade])144 518.4 Q F0 1.392(This option enables ef)144
+518.4 Q F2([color/shade])24.74 E F0 1.392(This option enables ef)144
 530.4 R(fecti)-.25 E 1.692 -.15(ve h)-.25 H 1.392
 (istogram equalization of the color and/or shading of the gridded).15 F
 .628(data. The equalization is not achie)144 542.4 R -.15(ve)-.25 G
@@ -1272,21 +1265,20 @@ A F2(2)A F0 3.137(\)o)C 3.137(ru)-3.137 G .637
 F0 3.138(=1)3.138 G .5(will cause the shading to be equalized.)144 614.4
 R(Using)5.5 E F1<ad53>3 E F2(0/1)A F0 .5
 (will equalize the shading without equalizing)3 F(the color table.)144
-626.4 Q F1<ad54>108 643.2 Q F0(If)144 643.2 Q F1<ad54>2.7 E F0 .201
-(is gi)2.701 F -.15(ve)-.25 G .201(n, it causes a coastline to be dra)
-.15 F .201(wn on the map. The def)-.15 F .201(ault is to dra)-.1 F 2.701
-(wt)-.15 G .201(he coastline as)-2.701 F .629
-(the thinnest possible line. T)144 655.2 R 3.129(oe)-.8 G -.15(xe)-3.279
-G .628(rcise greater control of the coastline plotting, including color\
- \214ll).15 F 2.068(of "dry" areas and display of lak)144 667.2 R 2.068
-(es, ri)-.1 F -.15(ve)-.25 G 2.068
-(rs, and political boundaries, use the).15 F F1(\255MTC)4.568 E F0(,)A
-F1(\255MTD)4.568 E F0(,)A F1(\255MTG)144 679.2 Q F0(,)A F1(\255MTI)2.5 E
-F0(,)A F1(\255MTN)2.5 E F0(,)A F1(\255MTS)2.5 E F0 2.5(,a)C(nd)-2.5 E F1
-(\255MTW)2.5 E F0(options.)2.5 E F1<ad55>108 696 Q F2(orientation)144
-696 Q F0 .2(Normally the orientation of the plot \(portrait or landscap\
-e\) is selected automatically so as to maxi-)144 708 R .333
-(mize the plot scale.)144 720 R(The)5.333 E F1<ad55>2.833 E F0 .333
+626.4 Q F1<ad54>108 643.2 Q F0(If)23.63 E F1<ad54>2.7 E F0 .201(is gi)
+2.701 F -.15(ve)-.25 G .201(n, it causes a coastline to be dra).15 F
+.201(wn on the map. The def)-.15 F .201(ault is to dra)-.1 F 2.701(wt)
+-.15 G .201(he coastline as)-2.701 F .629(the thinnest possible line. T)
+144 655.2 R 3.129(oe)-.8 G -.15(xe)-3.279 G .628(rcise greater control \
+of the coastline plotting, including color \214ll).15 F 2.068
+(of "dry" areas and display of lak)144 667.2 R 2.068(es, ri)-.1 F -.15
+(ve)-.25 G 2.068(rs, and political boundaries, use the).15 F F1(\255MTC)
+4.568 E F0(,)A F1(\255MTD)4.568 E F0(,)A F1(\255MTG)144 679.2 Q F0(,)A
+F1(\255MTI)2.5 E F0(,)A F1(\255MTN)2.5 E F0(,)A F1(\255MTS)2.5 E F0 2.5
+(,a)C(nd)-2.5 E F1(\255MTW)2.5 E F0(options.)2.5 E F1<ad55>108 696 Q F2
+(orientation)23.08 E F0 .2(Normally the orientation of the plot \(portr\
+ait or landscape\) is selected automatically so as to maxi-)144 708 R
+.333(mize the plot scale.)144 720 R(The)5.333 E F1<ad55>2.833 E F0 .333
 (option allo)2.833 F .333(ws the user to set the plot orientation. If)
 -.25 F F2(orientation)2.833 E F0 2.834(=1)2.834 G 2.834(,a)-2.834 G
 (MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(11)199.835 E 0
@@ -1299,11 +1291,11 @@ BP
 (5.0 mbm_grdplot\(1\))2.5 F(portrait plot will be produced; if)144 84 Q
 /F1 10/Times-Italic@0 SF(orientation)2.5 E F0 2.5(=2)2.5 G 2.5(,al)-2.5
 G(andscape plot will be produced.)-2.5 E/F2 10/Times-Bold@0 SF<ad56>108
-100.8 Q F0(Causes)144 100.8 Q F2(mbm_grdplot)4.506 E F0 2.006
+100.8 Q F0(Causes)23.08 E F2(mbm_grdplot)4.506 E F0 2.006
 (to operate in "v)4.506 F 2.005
 (erbose" mode so that it outputs more information than)-.15 F(usual.)144
-112.8 Q F2<ad57>108 129.6 Q F1([color_style)144 129.6 Q F0([)A F1
-(/palette)A F0([)A F1(ncolor)A(s)-.1 E F0(]] | cpt\214le])A
+112.8 Q F2<ad57>108 129.6 Q F1([color_style)20.3 E F0([)A F1(/palette)A
+F0([)A F1(ncolor)A(s)-.1 E F0(]] | cpt\214le])A
 (This option controls the color scheme used for color \214ll plots.)144
 141.6 Q(If)144 165.6 Q F1(color_style)3.135 E F0 3.136(=1[)3.135 G(def)
 -3.136 E .636(ault], then the color scheme used will be a continuous gr\
@@ -1379,24 +1371,24 @@ nd is commonly used for plots of sidescan and amplitude data.)144 144 R
 (gument is the path to an e)-.18 F(xisting)-.15 E/F2 10/Times-Bold@0 SF
 (GMT)3.022 E F0 .522(color palette \(CPT\) \214le, then that CPT \214le)
 3.022 F(and its color scheme will be used for the plot)144 228 Q F2
-<ad58>108 244.8 Q F0(Normally)144 244.8 Q(,)-.65 E F2(mbm_grdplot)3.304
-E F0 .804(creates an e)3.304 F -.15(xe)-.15 G .804
+<ad58>108 244.8 Q F0(Normally)23.08 E(,)-.65 E F2(mbm_grdplot)3.304 E F0
+.804(creates an e)3.304 F -.15(xe)-.15 G .804
 (cutable shellscript and then e).15 F 3.304(xits. This)-.15 F .805
 (option will cause)3.304 F(the shellscript to be e)144 256.8 Q -.15(xe)
 -.15 G(cuted in the background before).15 E F2(mbm_grdplot)2.5 E F0 -.15
-(ex)2.5 G(its.).15 E F2<ad59>108 273.6 Q F0(Normally)144 273.6 Q(,)-.65
-E F2(mbm_grdplot)3.593 E F0 1.092
-(generates nicely rounded numbers for the boundaries of the color pal-)
-3.593 F 1.469(ette. Often, the resulting color bounds e)144 285.6 R
-1.469(xtend well outside the range of the gridded data.)-.15 F(This)6.47
-E .923(option causes the minimum and maximum color boundaries to e)144
+(ex)2.5 G(its.).15 E F2<ad59>108 273.6 Q F0(Normally)23.08 E(,)-.65 E F2
+(mbm_grdplot)5.333 E F0 2.833
+(generates nicely rounded numbers for the boundaries of the color)5.333
+F .654(palette. Often, the resulting color bounds e)144 285.6 R .655
+(xtend well outside the range of the gridded data.)-.15 F(This)5.655 E
+.923(option causes the minimum and maximum color boundaries to e)144
 297.6 R .923(xactly conform to the minimum)-.15 F .495(and maximum v)144
 309.6 R .496(alues of the grid, or)-.25 F 2.996(,i)-.4 G 2.996(ft)-2.996
 G(he)-2.996 E F2<ad5a>2.996 E F0 .496
 (option is used, the minimum and maximum v)2.996 F(alues)-.25 E
 (speci\214ed by the user)144 321.6 Q(.)-.55 E F2<ad5a>108 338.4 Q F1
-(min/max[/mode])144 338.4 Q F0 .787(This option o)144 350.4 R -.15(ve)
--.15 G .787(rrides the minimum and maximum v).15 F .786
+(min/max[/mode])23.63 E F0 .787(This option o)144 350.4 R -.15(ve)-.15 G
+.787(rrides the minimum and maximum v).15 F .786
 (alues of the gridded data, af)-.25 F .786(fecting the color)-.25 F .905
 (palette and the contour interv)144 362.4 R .905
 (al if those parameters are not speci\214ed by the user)-.25 F 3.405(.B)

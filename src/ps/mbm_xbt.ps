@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:44 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:12 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -259,22 +253,22 @@ F0 .12(is a perl shellscript to translate v)2.62 F .119
 (Lamont-Doherty Earth Observ)113 331.2 Q(atory)-.25 E
 (Suzanne H. O'Hara \(sohara@ldeo.columbia.edu\))108 343.2 Q
 (Lamont-Doherty Earth Observ)113 355.2 Q(atory)-.25 E F1(OPTIONS)72 384
-Q F2<ad46>108 396 Q F3(format)144 396 Q F0(Allo)144 408 Q .099(ws the u\
-ser to select the type of XBT data. Currently supported formats are: 1 \
-= Sparton XBT)-.25 F(,)-.74 E 2.5(2=S)144 420 S(ippican MK12 XBT)-2.5 E
+Q F2<ad46>108 396 Q F3(format)24.19 E F0(Allo)144 408 Q .099(ws the use\
+r to select the type of XBT data. Currently supported formats are: 1 = \
+Sparton XBT)-.25 F(,)-.74 E 2.5(2=S)144 420 S(ippican MK12 XBT)-2.5 E
 2.5(,3=S)-.74 G(ippican MK21.)-2.5 E(Def)5 E(ault:)-.1 E F3(format)2.5 E
 F0 2.5(=2)2.5 G(.)-2.5 E F2<ad48>108 436.8 Q F0 .162(This "help" \215ag\
  cause the program to print out a description of its operation and then\
- e)144 436.8 R .161(xit immedi-)-.15 F(ately)144 448.8 Q(.)-.65 E F2
-<ad49>108 465.6 Q F3(\214le)144 465.6 Q F0
+ e)22.52 F .161(xit immedi-)-.15 F(ately)144 448.8 Q(.)-.65 E F2<ad49>
+108 465.6 Q F3(\214le)26.41 E F0
 (Data \214le from which the input data will be read.)144 477.6 Q F2
-<ad4c>108 494.4 Q F3(latitude)144 494.4 Q F0(Latitude of the XBT cast.)
-144 506.4 Q F2<ad53>108 523.2 Q F3(salinity)144 523.2 Q F0 .002(Sets th\
-e salinity used to calculate sound speed from temperature and depth. Th\
-e def)144 535.2 R .002(ault v)-.1 F .002(alue of 35)-.25 F
+<ad4c>108 494.4 Q F3(latitude)23.63 E F0(Latitude of the XBT cast.)144
+506.4 Q F2<ad53>108 523.2 Q F3(salinity)24.74 E F0 .002(Sets the salini\
+ty used to calculate sound speed from temperature and depth. The def)144
+535.2 R .002(ault v)-.1 F .002(alue of 35)-.25 F
 (ppt may be signi\214cantly in error in some areas.)144 547.2 Q(Def)5 E
 (ault:)-.1 E F3(salinity)2.5 E F0 2.5(=3)2.5 G(5.)-2.5 E F2<ad56>108 564
-Q F0(Causes)144 564 Q F2(mbm_xbt)2.5 E F0(to operate in "v)2.5 E
+Q F0(Causes)23.08 E F2(mbm_xbt)2.5 E F0(to operate in "v)2.5 E
 (erbose" mode so that it outputs more information than usual.)-.15 E F1
 (NO)72 592.8 Q(TES)-.438 E F0 .178
 (There is a hard limit in the code that pre)108 604.8 R -.15(ve)-.25 G
@@ -284,11 +278,11 @@ Q F0(Causes)144 564 Q F2(mbm_xbt)2.5 E F0(to operate in "v)2.5 E
 616.8 Q F1(SEE ALSO)72 645.6 Q F2(mbsystem)108 657.6 Q F0(\(1\),)A F2
 (mbpr)2.5 E(ocess)-.18 E F0(\(1\),)A F2(mbset)2.5 E F0(\(1\),)A F2(mb)
 2.5 E -.1(ve)-.15 G(locitytool).1 E F0(\(1\),)A F2(mble)2.5 E(vitus)-.15
-E F0(\(1\))A F1(REFERENCES)72 686.4 Q F0 .186(Dusha, B. D., P)108 698.4
-R 2.686(.F)-1.11 G 2.686(.W)-3.486 G(orcester)-3.486 E 2.686(,B)-.4 G
-2.686(.D)-2.686 G 2.686(.C)-2.686 G .186(ornuelle, B. M. Ho)-2.686 F
-.187(we, On equations for the speed of sound in sea)-.25 F -.1(wa)-.15 G
-(-).1 E(ter)108 710.4 Q 2.5(,J)-.4 G 2.5(.A)-2.5 G
+E F0(\(1\))A F1(REFERENCES)72 686.4 Q F0 .757(Dusha, B. D., P)108 698.4
+R 3.257(.F)-1.11 G 3.257(.W)-4.057 G(orcester)-4.057 E 3.257(,B)-.4 G
+3.257(.D)-3.257 G 3.257(.C)-3.257 G .757(ornuelle, B. M. Ho)-3.257 F
+.757(we, On equations for the speed of sound in sea-)-.25 F -.1(wa)108
+710.4 S(ter).1 E 2.5(,J)-.4 G 2.5(.A)-2.5 G
 (coust. Soc. Am., 93, 255-275, 1993.)-2.5 E(MB-System 5.0)72 768 Q 2.5
 (3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0 Cg EP
 %%Page: 2 2

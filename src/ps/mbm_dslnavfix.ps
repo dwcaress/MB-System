@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:42 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:11 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -314,16 +308,15 @@ SF -.548(AU)72 112.8 S(THORSHIP).548 E F0(Da)108 124.8 Q(vid W)-.2 E 2.5
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 148.8 Q
 (Lamont-Doherty Earth Observ)113 160.8 Q(atory)-.25 E F1(OPTIONS)72
 189.6 Q/F2 10/Times-Bold@0 SF<ad44>108 201.6 Q/F3 10/Times-Italic@0 SF
-(decimate)144 201.6 Q F0 .963(This option allo)144 213.6 R .962
+(decimate)23.08 E F0 .963(This option allo)144 213.6 R .962
 (ws the user to decimate the input na)-.25 F(vig)-.2 E 3.462(ation. The)
 -.05 F F3(decimate)3.462 E F0 -.25(va)3.462 G .962(lue represents the)
 .25 F(decimation f)144 225.6 Q(actor)-.1 E 5(.T)-.55 G(he def)-5 E
 (ault is)-.1 E F3(decimate)2.5 E F0 2.5(=1)2.5 G 2.5(,o)-2.5 G 2.5(rn)
 -2.5 G 2.5(od)-2.5 G(ecimation.)-2.5 E F2<ad45>108 242.4 Q F3(ellipsoid)
-144 242.4 Q F0
-(This option sets the ellipsoid used in the UTM projection.)144 254.4 Q
-(The choices are:)5 E 33.95(WGS-84 1984)180 266.4 R -.8(Wo)2.5 G
-(rld Geodetic System).8 E 36.72(GRS-80 1980)180 278.4 R
+23.63 E F0(This option sets the ellipsoid used in the UTM projection.)
+144 254.4 Q(The choices are:)5 E 33.95(WGS-84 1984)180 266.4 R -.8(Wo)
+2.5 G(rld Geodetic System).8 E 36.72(GRS-80 1980)180 278.4 R
 (International Geodetic Reference System)2.5 E 33.95(WGS-72 1972)180
 290.4 R -.8(Wo)2.5 G(rld Geodetic System).8 E 27.84(Australian 1965)180
 302.4 R(Used do)2.5 E(wn under)-.25 E(Kraso)180 314.4 Q(vsk)-.15 E 29.53
@@ -338,34 +331,34 @@ SF -.548(AU)72 112.8 S(THORSHIP).548 E F0(Da)108 124.8 Q(vid W)-.2 E 2.5
 -.15 F(India, Burma, P)2.5 E 2.5(akistan, etc.)-.15 F 41.73(Sphere 1980)
 180 410.4 R(The mean radius in GRS-80)2.5 E(Def)144 422.4 Q(ault: Clark)
 -.1 E(e-1866 as per USGS standard.)-.1 E F2<ad46>108 439.2 Q F3
-(navformat)144 439.2 Q F0 .254(Sets the input na)144 451.2 R(vig)-.2 E
-.254(ation format. The a)-.05 F -.25(va)-.2 G .254
+(navformat)24.19 E F0 .254(Sets the input na)144 451.2 R(vig)-.2 E .254
+(ation format. The a)-.05 F -.25(va)-.2 G .254
 (ilable formats include the old, pre-OIC format \().25 F F2<ad46>A F3(1)
-A F0 .255(\), the)B(ne)144 463.2 Q 1.3 -.65(w, O)-.25 H
-(IC associated formats \().65 E F2<ad46>A F3(2)A F0(\), and na)A(vig)-.2
-E(ation obtained using)-.05 E F2(mblist)2.5 E F0(with the)2.5 E F2
-(\255OtXY)2.5 E F0(option.)2.5 E F2<ad48>108 480 Q F0 .162(This "help" \
-\215ag cause the program to print out a description of its operation an\
-d then e)144 480 R .161(xit immedi-)-.15 F(ately)144 492 Q(.)-.65 E F2
-<ad49>108 508.8 Q F3(\214lename)144 508.8 Q F0
+A F0 .255(\), the)B(ne)144 463.2 Q 1.447 -.65(w, O)-.25 H .146
+(IC associated formats \().65 F F2<ad46>A F3(2)A F0 .146(\), and na)B
+(vig)-.2 E .146(ation obtained using)-.05 F F2(mblist)2.646 E F0 .146
+(with the)2.646 F F2(\255OtXY)2.646 E F0(option.)2.646 E F2<ad48>108 480
+Q F0 .162(This "help" \215ag cause the program to print out a descripti\
+on of its operation and then e)22.52 F .162(xit immedi-)-.15 F(ately)144
+492 Q(.)-.65 E F2<ad49>108 508.8 Q F3(\214lename)26.41 E F0
 (Sets the input WHOI DSL AMS-120 na)144 520.8 Q(vig)-.2 E
-(ation \214lename.)-.05 E F2<ad4a>108 537.6 Q F3(utm_zone)144 537.6 Q F0
-.529(Sets the UTM zone used for the translation. The UTM zones are 6 de)
-144 549.6 R .53(grees wide in longitude and)-.15 F(be)144 561.6 Q .501
-(gin with zone 1 e)-.15 F .501(xtending from 180 W to 174 W)-.15 F 3(,z)
--.92 G .5(one 2 e)-3 F .5(xtending from 174 W to 168 W)-.15 F 3(,a)-.92
-G(nd)-3 E(so on through zone 60. Ne)144 573.6 Q -.05(ga)-.15 G(ti).05 E
-.3 -.15(ve z)-.25 H(one v).15 E
+(ation \214lename.)-.05 E F2<ad4a>108 537.6 Q F3(utm_zone)25.3 E F0 .53
+(Sets the UTM zone used for the translation. The UTM zones are 6 de)144
+549.6 R .529(grees wide in longitude and)-.15 F(be)144 561.6 Q .5
+(gin with zone 1 e)-.15 F .5(xtending from 180 W to 174 W)-.15 F 3.001
+(,z)-.92 G .501(one 2 e)-3.001 F .501(xtending from 174 W to 168 W)-.15
+F 3.001(,a)-.92 G(nd)-3.001 E(so on through zone 60. Ne)144 573.6 Q -.05
+(ga)-.15 G(ti).05 E .3 -.15(ve z)-.25 H(one v).15 E
 (alues are used for the Southern Hemisphere.)-.25 E F2<ad4f>108 590.4 Q
-F3(out\214le)144 590.4 Q F0
+F3(out\214le)22.52 E F0
 (Sets the output \214lename for the translated na)144 602.4 Q(vig)-.2 E
-(ation.)-.05 E F2<ad56>108 619.2 Q F0(Causes)144 619.2 Q F2(mbm_plot)2.5
-E F0(to operate in "v)2.5 E
+(ation.)-.05 E F2<ad56>108 619.2 Q F0(Causes)23.08 E F2(mbm_plot)2.5 E
+F0(to operate in "v)2.5 E
 (erbose" mode so that it outputs more information than usual.)-.15 E F1
-(EXAMPLES)72 648 Q F0 .797(Suppose we ha)108 660 R 1.097 -.15(ve o)-.2 H
-.797(btained a WHOI DSL na).15 F(vig)-.2 E .798
-(ation \214le as outlined abo)-.05 F 1.098 -.15(ve a)-.15 H .798(nd e)
-.15 F -.15(xe)-.15 G .798(cute the macro as sug-).15 F(gested:)108 672 Q
+(EXAMPLES)72 648 Q F0 .798(Suppose we ha)108 660 R 1.098 -.15(ve o)-.2 H
+.798(btained a WHOI DSL na).15 F(vig)-.2 E .798
+(ation \214le as outlined abo)-.05 F 1.097 -.15(ve a)-.15 H .797(nd e)
+.15 F -.15(xe)-.15 G .797(cute the macro as sug-).15 F(gested:)108 672 Q
 (mbm_dslna)180 684 Q(v\214x \255Icruise.rna)-.2 E 2.5(v\\)-.2 G
 (-Ocruise.mr)216 696 Q(g2 \255F1 \255J27 \255V)-.18 E
 (The output will appear as follo)108 708 Q(ws:)-.25 E(MB-System 5.0)72

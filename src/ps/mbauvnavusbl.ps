@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:39 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:09 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 1
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -269,9 +263,9 @@ Q(vig)-.2 E(ation is output in format 166.)-.05 E F1 -.548(AU)72 331.2 S
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 367.2 Q
 (Lamont-Doherty Earth Observ)113 379.2 Q(atory)-.25 E F1(OPTIONS)72 408
 Q F2<ad48>108 420 Q F0 .162(This "help" \215ag cause the program to pri\
-nt out a description of its operation and then e)144 420 R .162
+nt out a description of its operation and then e)22.52 F .162
 (xit immedi-)-.15 F(ately)144 432 Q(.)-.65 E F2<ad49>108 448.8 Q F3
-(inav\214le)144 448.8 Q F0(Sets the input na)144 460.8 Q(vig)-.2 E
+(inav\214le)26.41 E F0(Sets the input na)144 460.8 Q(vig)-.2 E
 (ation \214lename. The na)-.05 E(vig)-.2 E
 (ation data must be in format 166.)-.05 E F2<ad4c>5 E F3(lon\215ip)2.5 E
 F0 .554(Sets the range of the longitude v)144 472.8 R .554(alues used.)
@@ -285,13 +279,13 @@ R .702(grees. If)-.15 F F3(lon\215ip)3.202 E F0 .702
 (alues will be in the range from 0 to 360 de)-.25 F(grees.)-.15 E(Def)
 144 508.8 Q(ault:)-.1 E F2(mbauvna)2.5 E(vusbl)-.25 E F0
 (uses the user def)2.5 E(ault)-.1 E F3(lon\215ip)2.5 E F0(set using)2.5
-E F2(mbdefaults)2.5 E F0(.)A F2<ad4f>108 525.6 Q F3(onav\214le)144 525.6
-Q F0(Sets the output na)144 537.6 Q(vig)-.2 E(ation \214lename. The na)
+E F2(mbdefaults)2.5 E F0(.)A F2<ad4f>108 525.6 Q F3(onav\214le)22.52 E
+F0(Sets the output na)144 537.6 Q(vig)-.2 E(ation \214lename. The na)
 -.05 E(vig)-.2 E(ation data will be in format 166.)-.05 E F2<ad55>108
-554.4 Q F3(usbl\214le)144 554.4 Q F0(Sets the input usbl na)144 566.4 Q
-(vig)-.2 E(ation \214lename. The usbl na)-.05 E(vig)-.2 E
-(ation data must be in format 165.)-.05 E F2<ad56>108 583.2 Q F0(The)144
-583.2 Q F2<ad56>2.5 E F0(option causes the program to be v)2.5 E
+554.4 Q F3(usbl\214le)23.08 E F0(Sets the input usbl na)144 566.4 Q(vig)
+-.2 E(ation \214lename. The usbl na)-.05 E(vig)-.2 E
+(ation data must be in format 165.)-.05 E F2<ad56>108 583.2 Q F0(The)
+23.08 E F2<ad56>2.5 E F0(option causes the program to be v)2.5 E
 (erbose.)-.15 E F1(EXAMPLE)72 600 Q F0(Coming...)108 612 Q F1(SEE ALSO)
 72 640.8 Q F2(mbsystem)108 652.8 Q F0(\(1\))A F1 -.11(BU)72 681.6 S(GS)
 .11 E F0(Da.)108 693.6 Q(MB-System 5.0)72 768 Q 2.5(3J)146.495 G

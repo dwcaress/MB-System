@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:44 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:12 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 10
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -327,7 +321,7 @@ BP
 /F0 10/Times-Roman@0 SF 137.05(mbm_xyplot\(1\) MB-System)72 48 R 137.05
 (5.0 mbm_xyplot\(1\))2.5 F/F1 10.95/Times-Bold@0 SF
 (SIMPLE DESCRIPTION OF B)72 84 Q(ASIC OPTIONS)-.329 E/F2 10/Times-Bold@0
-SF<ad47>108 96 Q/F3 10/Times-Italic@0 SF(\214ll)144 96 Q F0 .393
+SF<ad47>108 96 Q/F3 10/Times-Italic@0 SF(\214ll)22.52 E F0 .393
 (Select \214lling of symbols for xy plotting.)144 108 R .393
 (Set the shade \(0-255\) or color \(r/g/b\) [Def)5.393 F .393
 (ault is no \214ll].)-.1 F 2.548 -.8(To r)144 120 T .948
@@ -344,10 +338,10 @@ umber of the image pattern \(1-32\) OR the name of a icon-format \214le\
 (echnical Reference Appendix E for information on indi)-.7 E
 (vidual patterns.)-.25 E F2<ad48>108 172.8 Q F0 .162(This "help" \215ag\
  cause the program to print out a description of its operation and then\
- e)144 172.8 R .161(xit immedi-)-.15 F(ately)144 184.8 Q(.)-.65 E F2
-<ad49>108 201.6 Q F3([\214lepar)144 201.6 Q(s:]xy_\214le)-.1 E F0 .866(\
-Speci\214es a \214le containing \(x,y\) pairs to be plotted as lines or\
- symbols. Optional parameters pre-)144 213.6 R .598
+ e)22.52 F .161(xit immedi-)-.15 F(ately)144 184.8 Q(.)-.65 E F2<ad49>
+108 201.6 Q F3([\214lepar)26.41 E(s:]xy_\214le)-.1 E F0 .866(Speci\214e\
+s a \214le containing \(x,y\) pairs to be plotted as lines or symbols. \
+Optional parameters pre-)144 213.6 R .598
 (ceed the \214le name and consist of a list of \215ag-ar)144 225.6 R
 .598(gument pairs, strung together with colons. These)-.18 F(ar)144
 237.6 Q .402(guments may include the column delimiter)-.18 F 2.902(,w)
@@ -363,48 +357,48 @@ lack lines)-.1 F
 (without symbols [ SN ], [ GN ], [ W1 ], and no multiple se)144 321.6 Q
 (gments \(omitted M \215ag\).)-.15 E
 (Please see the "Complete Description of Options" belo)144 345.6 Q 2.5
-(wf)-.25 G(or details.)-2.5 E F2<ad4f>108 362.4 Q F3 -.45(ro)144 362.4 S
-(ot).45 E F0 .423(Sets the root used to construct the \214lename of the\
- output shellscript \()144 374.4 R F3 -.45(ro)C(ot).45 E F0 .422
+(wf)-.25 G(or details.)-2.5 E F2<ad4f>108 362.4 Q F3 -.45(ro)22.52 G(ot)
+.45 E F0 .423(Sets the root used to construct the \214lename of the out\
+put shellscript \()144 374.4 R F3 -.45(ro)C(ot).45 E F0 .422
 (.cmd\) and names of \214les)B .156
 (created when the shellscript is run.)144 386.4 R .157
 (Normally the name of the input grid \214le or grid \214le list is used)
 5.157 F(as the)144 398.4 Q F3 -.45(ro)2.5 G(ot).45 E F0(.)A F2<ad50>108
-415.2 Q F3(pa)144 415.2 Q -.1(ge)-.1 G(size).1 E F0 .632(This option se\
-ts the size of the page the plot will be centered on. If the user does \
-not set the plot)144 427.2 R .125(scale, the plot will be sized as lar)
-144 439.2 R .125(ge as will \214t on the designated page. If the user s\
-ets the plot scale)-.18 F .948
+415.2 Q F3(pa)24.19 E -.1(ge)-.1 G(size).1 E F0 .632(This option sets t\
+he size of the page the plot will be centered on. If the user does not \
+set the plot)144 427.2 R .125(scale, the plot will be sized as lar)144
+439.2 R .125(ge as will \214t on the designated page. If the user sets \
+the plot scale)-.18 F .948
 (such that the plot will not \214t on the designated page, a lar)144
 451.2 R .948(ger page will be used.)-.18 F .947(The supported)5.947 F
 1.342(page sizes include ANSI A, B, C, D, E, F)144 463.2 R 3.842(,a)-.8
 G 1.343(nd E1, as well as most metric page sizes. See the)-3.842 F 1.31
 (COMPLETE DESCRIPTION OF OPTIONS section belo)144 475.2 R 3.81(wf)-.25 G
 1.31(or a complete list of the supported)-3.81 F(page sizes. The def)144
-487.2 Q(ault page size is A.)-.1 E F2<ad53>108 504 Q F3(symbol/size)144
-504 Q F0 .332(Selects symbol to be used for plotting the ne)144 516 R
+487.2 Q(ault page size is A.)-.1 E F2<ad53>108 504 Q F3(symbol/size)
+24.74 E F0 .332(Selects symbol to be used for plotting the ne)144 516 R
 .332(xt xy data \214le. Setting)-.15 F F3(symbol)2.832 E F0 2.833(=")
 2.832 G .333(N" causes line plot-)-2.833 F 3.775(ting. The)144 528 R
 1.275(list of a)3.775 F -.25(va)-.2 G 1.275(ilable symbols is gi).25 F
 -.15(ve)-.25 G 3.775(ni).15 G 3.774(nt)-3.775 G 1.274
 (he COMPLETE DESCRIPTION OF OPTIONS)-3.774 F(section belo)144 540 Q -.65
-(w.)-.25 G F2<ad55>108 556.8 Q F3(orientation)144 556.8 Q F0 .2(Normall\
-y the orientation of the plot \(portrait or landscape\) is selected aut\
-omatically so as to maxi-)144 568.8 R .334(mize the plot scale.)144
-580.8 R(The)5.333 E F2<ad55>2.833 E F0 .333(option allo)2.833 F .333
+(w.)-.25 G F2<ad55>108 556.8 Q F3(orientation)23.08 E F0 .2(Normally th\
+e orientation of the plot \(portrait or landscape\) is selected automat\
+ically so as to maxi-)144 568.8 R .334(mize the plot scale.)144 580.8 R
+(The)5.333 E F2<ad55>2.833 E F0 .333(option allo)2.833 F .333
 (ws the user to set the plot orientation. If)-.25 F F3(orientation)2.833
 E F0 2.833(=1)2.833 G 2.833(,a)-2.833 G
 (portrait plot will be produced; if)144 592.8 Q F3(orientation)2.5 E F0
 2.5(=2)2.5 G 2.5(,al)-2.5 G(andscape plot will be produced.)-2.5 E F2
-<ad56>108 609.6 Q F0(Causes)144 609.6 Q F2(mbm_grdplot)4.505 E F0 2.005
+<ad56>108 609.6 Q F0(Causes)23.08 E F2(mbm_grdplot)4.505 E F0 2.005
 (to operate in "v)4.505 F 2.006
 (erbose" mode so that it outputs more information than)-.15 F(usual.)144
-621.6 Q F2<ad57>108 638.4 Q F3(pen)144 638.4 Q F0 .784(Set pen attrib)
-144 650.4 R .784(utes for xy plotting. See chapter 4.12 in the GMT T)-.2
-F .783(echnical reference for a discus-)-.7 F(sion of GMT pen v)144
-662.4 Q 2.5(alues. [Def)-.25 F(aults: width = 1, color = 0/0/0, te)-.1 E
+621.6 Q F2<ad57>108 638.4 Q F3(pen)20.3 E F0 .784(Set pen attrib)144
+650.4 R .784(utes for xy plotting. See chapter 4.12 in the GMT T)-.2 F
+.783(echnical reference for a discus-)-.7 F(sion of GMT pen v)144 662.4
+Q 2.5(alues. [Def)-.25 F(aults: width = 1, color = 0/0/0, te)-.1 E
 (xture = solid].)-.15 E F1(COMPLETE DESCRIPTION OF OPTIONS)72 691.2 Q F2
-<ad42>108 703.2 Q F3(tic)144 703.2 Q(kinfo)-.2 E F0 .218
+<ad42>108 703.2 Q F3(tic)23.63 E(kinfo)-.2 E F0 .218
 (Sets map boundary tickmark interv)144 715.2 R .218(als. See the)-.25 F
 F2(psbasemap)2.719 E F0 .219(manual page for details. By def)2.719 F
 .219(ault the)-.1 F
@@ -417,7 +411,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 137.05(mbm_xyplot\(1\) MB-System)72 48 R 137.05
 (5.0 mbm_xyplot\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad47>108 84 Q/F2 10
-/Times-Italic@0 SF(\214ll)144 84 Q F0 .393
+/Times-Italic@0 SF(\214ll)22.52 E F0 .393
 (Select \214lling of symbols for xy plotting.)144 96 R .393
 (Set the shade \(0-255\) or color \(r/g/b\) [Def)5.393 F .393
 (ault is no \214ll].)-.1 F 2.548 -.8(To r)144 108 T .948
@@ -434,10 +428,10 @@ umber of the image pattern \(1-32\) OR the name of a icon-format \214le\
 (echnical Reference Appendix E for information on indi)-.7 E
 (vidual patterns.)-.25 E F1<ad48>108 160.8 Q F0 .162(This "help" \215ag\
  cause the program to print out a description of its operation and then\
- e)144 160.8 R .161(xit immedi-)-.15 F(ately)144 172.8 Q(.)-.65 E F1
-<ad49>108 189.6 Q F2([\214lepar)144 189.6 Q(s:]xy_\214le)-.1 E F0 .089(\
-Speci\214es the \214les containing the data to be plotted, and for each\
- \214le, a list of \214le parameters which)144 213.6 R .166
+ e)22.52 F .161(xit immedi-)-.15 F(ately)144 172.8 Q(.)-.65 E F1<ad49>
+108 189.6 Q F2([\214lepar)26.41 E(s:]xy_\214le)-.1 E F0 .089(Speci\214e\
+s the \214les containing the data to be plotted, and for each \214le, a\
+ list of \214le parameters which)144 213.6 R .166
 (are comprised of the rules used by)144 225.6 R F1(mbm_xyplot)2.666 E F0
 .165(to parse and manipulate the x and y v)2.666 F .165(alues on the)
 -.25 F<8d79>144 237.6 Q 2.5(,a)-.65 G 2.5(sw)-2.5 G
@@ -526,9 +520,8 @@ F1(\255IM)4.107 E F0(:xy)A 1.607(.dat w)-.65 F 1.608
 -.65 F(se)144 180 Q(gements were separated as in the follo)-.15 E
 (wing snippet:)-.25 E 5(1.2 3)144 204 R 5(1.3 5)144 216 R(>)144 228 Q
 12.5(0.)144 240 S(1)-12.5 E 5(0.1 .4)144 252 R F1<ad4a>108 280.8 Q/F2 10
-/Times-Italic@0 SF(pr)144 280.8 Q(ojection)-.45 E F0([)A F2
-(/scale | /width)A F0(])A .368(Selects the map projection. By def)144
-292.8 R .367
+/Times-Italic@0 SF(pr)25.3 E(ojection)-.45 E F0([)A F2(/scale | /width)A
+F0(])A .368(Selects the map projection. By def)144 292.8 R .367
 (ault the map projection is Mercator and the plot scale is chosen)-.1 F
 .667(to \214t on the selected page size \(see)144 304.8 R F1<ad50>3.168
 E F0 .668(option\). The user may specify a dif)3.168 F .668
@@ -585,27 +578,26 @@ E F1(\255Jx)144 168 Q F2(x-scale)A F0([)A F1(l|p)A F2(pow)A F0(][)A F2
 (/y-scale)A F0([)A F1(l|p)A F2(pow)A F0(]] \(Linear)A 2.5(,l)-.4 G
 (og, and po)-2.5 E(wer scaling\))-.25 E
 (More details can be found in the)144 180 Q F1(psbasemap)2.5 E F0
-(manpages.)2.5 E F1<ad4c>108 196.8 Q F2(title[:xlabel[:ylabel]])144
-196.8 Q F0 .174(Sets the title and the labels for the x and y ax)144
-208.8 R .173
-(es of the plot. Note that a colon \(:\) rather than a slash)-.15 F .652
-(\(/\) is used to separate the labels. Colons cannot be used in the lab\
-els themselv)144 220.8 R .653(es. If this option is)-.15 F .157
+(manpages.)2.5 E F1<ad4c>108 196.8 Q F2(title[:xlabel[:ylabel]])23.63 E
+F0 .174(Sets the title and the labels for the x and y ax)144 208.8 R
+.173(es of the plot. Note that a colon \(:\) rather than a slash)-.15 F
+.652(\(/\) is used to separate the labels. Colons cannot be used in the\
+ labels themselv)144 220.8 R .653(es. If this option is)-.15 F .157
 (not used, then a def)144 232.8 R .157
 (ault title and colorscale label are pro)-.1 F .157
 (vided. If the title is supplied alone, no x or)-.15 F
 (y-axis labels will be pro)144 244.8 Q(vided.)-.15 E F1<ad4d>108 261.6 Q
-F0 3.055(As)144 261.6 S .555(eries of "miscellaneous" options are pro)
--3.055 F .555(vided which are gi)-.15 F -.15(ve)-.25 G 3.055(na).15 G(s)
--3.055 E F1<ad4d>3.055 E F0(follo)3.055 E .555(wed by a tw)-.25 F 3.055
-(oc)-.1 G(har)-3.055 E(-)-.2 E 1.329(acter identi\214er)144 273.6 R
-3.829(,f)-.4 G(ollo)-3.829 E 1.329(wed by an)-.25 F 3.829(yo)-.15 G
-1.328(ther parameters associated with that option.)-3.829 F(The)6.328 E
-F1<ad4d>3.828 E F0(options)3.828 E .636(may be strung together separate\
-d by colons, e.g. "-MGQ100:GU:CA200/10", which is equi)144 285.6 R -.25
+F0 3.055(As)20.86 G .555(eries of "miscellaneous" options are pro)-3.055
+F .555(vided which are gi)-.15 F -.15(ve)-.25 G 3.055(na).15 G(s)-3.055
+E F1<ad4d>3.055 E F0(follo)3.055 E .555(wed by a tw)-.25 F 3.055(oc)-.1
+G(har)-3.055 E(-)-.2 E 1.329(acter identi\214er)144 273.6 R 3.829(,f)-.4
+G(ollo)-3.829 E 1.329(wed by an)-.25 F 3.829(yo)-.15 G 1.328
+(ther parameters associated with that option.)-3.829 F(The)6.328 E F1
+<ad4d>3.828 E F0(options)3.828 E .636(may be strung together separated \
+by colons, e.g. "-MGQ100:GU:CA200/10", which is equi)144 285.6 R -.25
 (va)-.25 G(lent).25 E(to "-MGQ \255MGU \255MCA200/10".)144 297.6 Q F1
-(\255MGD)108 314.4 Q F2(gmtdef/value)144 314.4 Q F0(Allo)144 326.4 Q
-.227(ws the user to set the)-.25 F F1(GMT)2.727 E F0(def)2.727 E .227
+(\255MGD)108 314.4 Q F2(gmtdef/value)5.86 E F0(Allo)144 326.4 Q .227
+(ws the user to set the)-.25 F F1(GMT)2.727 E F0(def)2.727 E .227
 (ault v)-.1 F .227
 (alues used as the plot is constructed. This command may)-.25 F 1.133
 (be gi)144 338.4 R -.15(ve)-.25 G 3.633(nr).15 G 1.133
@@ -613,30 +605,30 @@ d by colons, e.g. "-MGQ100:GU:CA200/10", which is equi)144 285.6 R -.25
 1.133(aults as required. F)-.1 F 1.133(or e)-.15 F 1.133
 (xample, to set the basemap)-.15 F(annotation font to Courier)144 350.4
 Q 2.5(,u)-.4 G(se "-MGD)-2.5 E(ANO)-.4 E(T_FONT/Courier".)-.4 E F1
-(\255MGT)108 367.2 Q F2(x/y/size/angle/font/just/te)144 367.2 Q(xt)-.2 E
-F0 .488(Causes a te)144 379.2 R .488(xt label to plotted on the map.)
--.15 F F2(size)5.487 E F0 .487(is te)2.987 F .487(xt size in points,)
--.15 F F2(angle)2.987 E F0 .487(is measured in de)2.987 F(grees)-.15 E
-(counter)144 391.2 Q .8(-clockwise from horizontal,)-.2 F F2(fontno)3.3
-E F0 .8(sets the font type,)3.3 F F2(justify)3.3 E F0 .8
-(sets the alignment.)3.3 F(If)5.8 E F2(fontno)3.3 E F0 1.615
-(starts with a leading h)144 403.2 R 1.615(yphen, then the remainder of)
--.05 F F2(fontno)4.115 E F0 1.615(is tak)4.115 F 1.614(en to be a te)-.1
-F 1.614(xtstring with the)-.15 F 1.022(desired fontname.)144 415.2 R
-1.022(See the)6.022 F F1(gmtdefaults)3.522 E F0 1.022
-(man page for names and numbers of a)3.522 F -.25(va)-.2 G 1.023
-(ilable fonts \(or).25 F(run)144 427.2 Q F1 .112(pstext \255L)2.612 F F0
-2.612(\). The)B .111(alignment number refers to the part of the te)2.611
-F .111(xtstring that will be mapped onto)-.15 F .289(the \()144 439.2 R
-F2(x,y)A F0 2.789(\)p)C .289(oint: 1 = Lo)-2.789 F .289(wer Left corner)
+(\255MGT)108 367.2 Q F2(x/y/size/angle/font/just/te)6.41 E(xt)-.2 E F0
+.488(Causes a te)144 379.2 R .488(xt label to plotted on the map.)-.15 F
+F2(size)5.487 E F0 .487(is te)2.987 F .487(xt size in points,)-.15 F F2
+(angle)2.987 E F0 .487(is measured in de)2.987 F(grees)-.15 E(counter)
+144 391.2 Q .8(-clockwise from horizontal,)-.2 F F2(fontno)3.3 E F0 .8
+(sets the font type,)3.3 F F2(justify)3.3 E F0 .8(sets the alignment.)
+3.3 F(If)5.8 E F2(fontno)3.3 E F0 1.615(starts with a leading h)144
+403.2 R 1.615(yphen, then the remainder of)-.05 F F2(fontno)4.115 E F0
+1.615(is tak)4.115 F 1.614(en to be a te)-.1 F 1.614(xtstring with the)
+-.15 F 1.022(desired fontname.)144 415.2 R 1.022(See the)6.022 F F1
+(gmtdefaults)3.522 E F0 1.022(man page for names and numbers of a)3.522
+F -.25(va)-.2 G 1.023(ilable fonts \(or).25 F(run)144 427.2 Q F1 .112
+(pstext \255L)2.612 F F0 2.612(\). The)B .111
+(alignment number refers to the part of the te)2.611 F .111
+(xtstring that will be mapped onto)-.15 F .289(the \()144 439.2 R F2
+(x,y)A F0 2.789(\)p)C .289(oint: 1 = Lo)-2.789 F .289(wer Left corner)
 -.25 F 2.789(,2=L)-.4 G -.25(ow)-2.789 G .289(er Center).25 F 2.789
 (,3=L)-.4 G -.25(ow)-2.789 G .289(er Right, 5 = Mid Left, 6 = Mid).25 F
 (Center)144 451.2 Q 2.783(,7=M)-.4 G .283
 (id Right, 9 = Upper Left, 10 = Upper Center)-2.783 F 2.783(,1)-.4 G
 2.783(1=U)-2.783 G .283(pper Right. This option may be)-2.783 F(gi)144
 463.2 Q -.15(ve)-.25 G 2.5(na).15 G 2.5(sm)-2.5 G(an)-2.5 E 2.5(yt)-.15
-G(imes as needed.)-2.5 E F1(\255MGU)108 480 Q F0([)144 480 Q F2(/dx/dy/)
-A F0(][)A F2(label)A F0(])A(Dra)144 492 Q 2.635(wU)-.15 G .135
+G(imes as needed.)-2.5 E F1(\255MGU)108 480 Q F0([)5.86 E F2(/dx/dy/)A
+F0(][)A F2(label)A F0(])A(Dra)144 492 Q 2.635(wU)-.15 G .135
 (nix System time stamp on plot.)-2.635 F .135
 (User may specify where the lo)5.135 F .136
 (wer left corner of the stamp)-.25 F 1.926(should f)144 504 R 1.926
@@ -645,17 +637,17 @@ A F0(][)A F2(label)A F0(])A(Dra)144 492 Q 2.635(wU)-.15 G .135
 (ault is \(-0.75,-0.75\)].)-.1 F(Optionally)144 516 Q 2.5(,a)-.65 G
 (ppend a label, or)-2.5 E F1(c)2.5 E F0
 (\(which will plot the command string.\))2.5 E F1<ad4f>108 532.8 Q F2
--.45(ro)144 532.8 S(ot).45 E F0 .422(Sets the root used to construct th\
-e \214lename of the output shellscript \()144 544.8 R F2 -.45(ro)C(ot)
-.45 E F0 .423(.cmd\) and names of \214les)B .157
+-.45(ro)22.52 G(ot).45 E F0 .422(Sets the root used to construct the \
+\214lename of the output shellscript \()144 544.8 R F2 -.45(ro)C(ot).45
+E F0 .423(.cmd\) and names of \214les)B .157
 (created when the shellscript is run.)144 556.8 R .157
 (Normally the name of the input grid \214le or grid \214le list is used)
 5.157 F(as the)144 568.8 Q F2 -.45(ro)2.5 G(ot).45 E F0(.)A F1<ad50>108
-585.6 Q F2(pa)144 585.6 Q -.1(ge)-.1 G(size).1 E F0 .632(This option se\
-ts the size of the page the plot will be centered on. If the user does \
-not set the plot)144 597.6 R .126(scale, the plot will be sized as lar)
-144 609.6 R .125(ge as will \214t on the designated page. If the user s\
-ets the plot scale)-.18 F .948
+585.6 Q F2(pa)24.19 E -.1(ge)-.1 G(size).1 E F0 .632(This option sets t\
+he size of the page the plot will be centered on. If the user does not \
+set the plot)144 597.6 R .126(scale, the plot will be sized as lar)144
+609.6 R .125(ge as will \214t on the designated page. If the user sets \
+the plot scale)-.18 F .948
 (such that the plot will not \214t on the designated page, a lar)144
 621.6 R .948(ger page will be used.)-.18 F .948(The supported)5.948 F
 (page sizes are:)144 633.6 Q(American ANSI sizes:)169 657.6 Q 12.5(A8)
@@ -719,8 +711,8 @@ G(.20 x)-2.5 E(4.50 in.\))5 E(MB-System lar)185 540 Q(ge format sizes:)
 (m5 1524.0)169 600 R 2.5(x2)2.5 G(133.6 mm)-2.5 E(\(60.00 x 84.00 in.\))
 5 E 2.5(m6 1524.0)169 612 R 2.5(x2)2.5 G(438.4 mm)-2.5 E
 (\(60.00 x 96.00 in.\))5 E(The def)144 636 Q(ault page size is A.)-.1 E
-/F1 10/Times-Bold@0 SF<ad51>108 652.8 Q F0(Normally)144 652.8 Q 2.867
-(,t)-.65 G .367
+/F1 10/Times-Bold@0 SF<ad51>108 652.8 Q F0(Normally)22.52 E 2.867(,t)
+-.65 G .367
 (he output plot generation shellscript includes lines which e)-2.867 F
 -.15(xe)-.15 G .367(cute a program to display).15 F 1.071
 (the Postscript image on the screen.)144 664.8 R 1.071
@@ -733,8 +725,8 @@ R F1(mbdefaults)2.827 E F0 2.827(;t)C .327(he def)-2.827 F .327(ault v)
 -.1 F .327(alue can be)-.25 F -.15(ove)144 700.8 S
 (rridden by setting the en).15 E(vironment v)-.4 E
 (ariable $MB_PS_VIEWER.)-.25 E F1<ad52>108 717.6 Q/F2 10/Times-Italic@0
-SF(west/east/south/north)144 717.6 Q .736(west, east, south,)144 729.6 R
-F0(and)3.236 E F2(north)3.236 E F0 .736(specify the Re)3.236 F .736
+SF(west/east/south/north)23.08 E .736(west, east, south,)144 729.6 R F0
+(and)3.236 E F2(north)3.236 E F0 .736(specify the Re)3.236 F .736
 (gion of interest.)-.15 F 2.336 -.8(To s)5.736 H .736
 (pecify boundaries in de).8 F .736(grees and)-.15 F(MB-System 5.0)72 768
 Q 2.5(3J)146.495 G(une 2013)-2.5 E(6)204.835 E 0 Cg EP
@@ -756,27 +748,26 @@ E/F1 10/Times-Bold@0 SF(r)3.661 E F0 1.161(if lo)3.661 F 1.162
 (gion than speci\214ed in the grd\214le will result in a sub-)-.15 F
 (set of the grid [Def)144 120 Q(ault is re)-.1 E(gion gi)-.15 E -.15(ve)
 -.25 G 2.5(nb).15 G 2.5(yt)-2.5 G(he grd\214le].)-2.5 E F1<ad53>108
-136.8 Q F2(symbol/size)144 136.8 Q F0 .333
+136.8 Q F2(symbol/size)24.74 E F0 .333
 (Selects symbol to be used for plotting the ne)144 148.8 R .332
 (xt xy data \214le. Setting)-.15 F F2(symbol)2.832 E F0 2.832(=")2.832 G
 .332(N" causes line plot-)-2.832 F 2.5(ting. Choose)144 160.8 R
-(between:)2.5 E F1(\255Sa)108 177.6 Q F0(st)144 177.6 Q F1(a)A F0 -.55
-(r.)C F2(size)5.55 E F0(is radius of circumscribing circle.)2.5 E F1
-(\255Sb)108 194.4 Q(b)144 194.4 Q F0 .921(ar e)B .921(xtending from)-.15
-F F2(base)3.421 E F0 .921(to y)3.421 F(.)-.65 E F2(size)5.921 E F0 .921
+(between:)2.5 E F1(\255Sa)108 177.6 Q F0(st)19.74 E F1(a)A F0 -.55(r.)C
+F2(size)5.55 E F0(is radius of circumscribing circle.)2.5 E F1 16.68
+(\255Sb b)108 194.4 R F0 .921(ar e)B .921(xtending from)-.15 F F2(base)
+3.421 E F0 .921(to y)3.421 F(.)-.65 E F2(size)5.921 E F0 .921
 (is bar width.)3.421 F .921(By def)5.921 F(ault,)-.1 E F2(base)3.421 E
 F0 3.421(=0)3.421 G 5.921(.A)-3.421 G .921(ppend /)-5.921 F F2(base)A F0
 .922(to change)3.422 F(this v)144 206.4 Q 2.5(alue. Append)-.25 F F1(u)
 2.5 E F0(if)2.5 E F2(size)2.5 E F0(is in x-units [Def)2.5 E
-(ault is inch].)-.1 E F1(\255Sc)108 223.2 Q(c)144 223.2 Q F0(ircle.)A F2
-(size)5 E F0(is diameter of circle.)2.5 E F1(\255Sd)108 240 Q(d)144 240
-Q F0(iamond.)A F2(size)5 E F0(is side of diamond.)2.5 E F1(\255Se)108
-256.8 Q(e)144 256.8 Q F0 5.678(llipse. Direction)B 3.178(\(in de)5.678 F
-3.178
+(ault is inch].)-.1 E F1 17.8(\255Sc c)108 223.2 R F0(ircle.)A F2(size)5
+E F0(is diameter of circle.)2.5 E F1 16.68(\255Sd d)108 240 R F0
+(iamond.)A F2(size)5 E F0(is side of diamond.)2.5 E F1 17.8(\255Se e)108
+256.8 R F0 5.678(llipse. Direction)B 3.178(\(in de)5.678 F 3.178
 (grees counterclockwise from horizontal\), major_axis \(in inch\), and)
 -.15 F(minor_axis \(in inch\) must be found in columns 3, 4, and 5.)144
-268.8 Q F1(\255Sf)108 285.6 Q(f)144 285.6 Q F0 2.528(ault. Gi)B .328
--.15(ve d)-.25 H .028(istance g).15 F .029
+268.8 Q F1 18.91(\255Sf f)108 285.6 R F0 2.528(ault. Gi)B .328 -.15
+(ve d)-.25 H .028(istance g).15 F .029
 (ap between ticks and ticklength in inch.)-.05 F .029(If g)5.029 F .029
 (ap is ne)-.05 F -.05(ga)-.15 G(ti).05 E -.15(ve)-.25 G 2.529(,i).15 G
 2.529(ti)-2.529 G 2.529(si)-2.529 G .029(nterpreted to)-2.529 F .399
@@ -785,25 +776,24 @@ F0(or)2.899 E F1(r)2.899 E F0 .399(to dra)2.899 F 2.899(wt)-.15 G .399
 (ick on the left or right side of line [Def)-2.899 F(ault)-.1 E
 (is centered].)144 309.6 Q(Upper case)5 E F1(L)2.5 E F0(or)2.5 E F1(R)
 2.5 E F0(dra)2.5 E(ws a triangle instead of line se)-.15 E(gment.)-.15 E
-F1(\255Sh)108 326.4 Q(h)144 326.4 Q F0 -.15(ex)C 2.5(agon. Gi).15 F .3
--.15(ve s)-.25 H(ide in inch.).15 E F1(\255Si)108 343.2 Q(i)144 343.2 Q
-F0 -1.85 -.4(nv e)D(rted triangle.).4 E(Gi)5 E .3 -.15(ve s)-.25 H
-(ide in inch.).15 E F1(\255Sl)108 360 Q(l)144 360 Q F0 .405(etter or te)
-B .405(xt string.)-.15 F(Gi)5.405 E .706 -.15(ve s)-.25 H .406
-(ize in inch, and append /).15 F F2(string)A F0 .406(after the size.)
-2.906 F .406(Note that the size is only)5.406 F .92
-(approximate; no indi)144 372 R .919(vidual scaling is done for dif)-.25
-F .919(ferent characters.)-.25 F .919(Remember to escape special)5.919 F
-(characters lik)144 384 Q 2.5(e*)-.1 G(.)-2.5 E F1(\255Sp)108 400.8 Q(p)
-144 400.8 Q F0 2.5(oint. No)B(size needs to be speci\214ed \(1 pix)2.5 E
-(el is used\).)-.15 E F1(\255Ss)108 417.6 Q(s)144 417.6 Q F0 2.5
-(quare. Gi)B .3 -.15(ve s)-.25 H(ide in inch.).15 E F1(\255St)108 434.4
-Q(t)144 434.4 Q F0 2.5(riangle. Gi)B .3 -.15(ve s)-.25 H(ide in inch.)
-.15 E F1(\255Sv)108 451.2 Q(v)144 451.2 Q F0(ector)A 7(.D)-.55 G 2
-(irection \(in de)-7 F 2(grees counterclockwise from horizontal\) and l\
-ength \(in inch\) must be)-.15 F .036(found in columns 3 and 4.)144
-463.2 R F2(size)5.036 E F0 2.536(,i)C 2.536(fp)-2.536 G .036
-(resent, will be interpreted as arro)-2.536 F
+F1 16.68(\255Sh h)108 326.4 R F0 -.15(ex)C 2.5(agon. Gi).15 F .3 -.15
+(ve s)-.25 H(ide in inch.).15 E F1 19.46(\255Si i)108 343.2 R F0 -1.85
+-.4(nv e)D(rted triangle.).4 E(Gi)5 E .3 -.15(ve s)-.25 H(ide in inch.)
+.15 E F1 19.46(\255Sl l)108 360 R F0 .405(etter or te)B .405(xt string.)
+-.15 F(Gi)5.405 E .706 -.15(ve s)-.25 H .406(ize in inch, and append /)
+.15 F F2(string)A F0 .406(after the size.)2.906 F .406
+(Note that the size is only)5.406 F .92(approximate; no indi)144 372 R
+.919(vidual scaling is done for dif)-.25 F .919(ferent characters.)-.25
+F .919(Remember to escape special)5.919 F(characters lik)144 384 Q 2.5
+(e*)-.1 G(.)-2.5 E F1 16.68(\255Sp p)108 400.8 R F0 2.5(oint. No)B
+(size needs to be speci\214ed \(1 pix)2.5 E(el is used\).)-.15 E F1
+18.35(\255Ss s)108 417.6 R F0 2.5(quare. Gi)B .3 -.15(ve s)-.25 H
+(ide in inch.).15 E F1 18.91(\255St t)108 434.4 R F0 2.5(riangle. Gi)B
+.3 -.15(ve s)-.25 H(ide in inch.).15 E F1 17.24(\255Sv v)108 451.2 R F0
+(ector)A 7(.D)-.55 G 2(irection \(in de)-7 F 2(grees counterclockwise f\
+rom horizontal\) and length \(in inch\) must be)-.15 F .036
+(found in columns 3 and 4.)144 463.2 R F2(size)5.036 E F0 2.536(,i)C
+2.536(fp)-2.536 G .036(resent, will be interpreted as arro)-2.536 F
 (wwidth/headlength/headwidth)-.25 E 2.103(\(in inch\) [Def)144 475.2 R
 2.104(ault is 0.03/0.12/0.1 inch].)-.1 F 2.104(By def)7.104 F 2.104
 (ault arro)-.1 F 4.604(wa)-.25 G(ttrib)-4.604 E 2.104(utes remains in)
@@ -813,39 +803,39 @@ ength \(in inch\) must be)-.15 F .036(found in columns 3 and 4.)144
 (wn with decreasing size, append n)-.25 F F2(norm)A F0(,)A(where v)144
 499.2 Q(ectors shorter than)-.15 E F2(norm)2.5 E F0(will ha)2.5 E .3
 -.15(ve t)-.2 H(heir attrib).15 E(utes scaled by length/)-.2 E F2(norm)A
-F0(.)A F1(\255SV)108 516 Q F0 .5(Same as)144 516 R F1(\255Sv)3 E F0 3
-(,e)C .5(xcept azimuth \(in de)-3.15 F .501
+F0(.)A F1(\255SV)108 516 Q F0 .5(Same as)17.52 F F1(\255Sv)3 E F0 3(,e)C
+.5(xcept azimuth \(in de)-3.15 F .501
 (grees east of north\) should be gi)-.15 F -.15(ve)-.25 G 3.001(ni).15 G
 .501(nstead of direction.)-3.001 F(The)5.501 E .635(azimuth will be map\
 ped into an angle based on the chosen map projection \()144 528 R F1
 (\255Sv)A F0(lea)3.135 E -.15(ve)-.2 G 3.135(st).15 G .635(he direc-)
 -3.135 F(tions unchanged.\))144 540 Q F1(\255Sx)108 556.8 Q F0 2.5
-(cross. Gi)144 556.8 R .3 -.15(ve l)-.25 H(ength in inch.).15 E F1<ad55>
-108 573.6 Q F2(orientation)144 573.6 Q F0 .2(Normally the orientation o\
-f the plot \(portrait or landscape\) is selected automatically so as to\
- maxi-)144 585.6 R .334(mize the plot scale.)144 597.6 R(The)5.333 E F1
-<ad55>2.833 E F0 .333(option allo)2.833 F .333
+(cross. Gi)19.74 F .3 -.15(ve l)-.25 H(ength in inch.).15 E F1<ad55>108
+573.6 Q F2(orientation)23.08 E F0 .2(Normally the orientation of the pl\
+ot \(portrait or landscape\) is selected automatically so as to maxi-)
+144 585.6 R .334(mize the plot scale.)144 597.6 R(The)5.333 E F1<ad55>
+2.833 E F0 .333(option allo)2.833 F .333
 (ws the user to set the plot orientation. If)-.25 F F2(orientation)2.833
 E F0 2.833(=1)2.833 G 2.833(,a)-2.833 G
 (portrait plot will be produced; if)144 609.6 Q F2(orientation)2.5 E F0
 2.5(=2)2.5 G 2.5(,al)-2.5 G(andscape plot will be produced.)-2.5 E F1
-<ad56>108 626.4 Q F0(Causes)144 626.4 Q F1(mbm_xyplot)2.5 E F0
-(to operate in "v)2.5 E
-(erbose" mode so that it outputs more information than usual.)-.15 E F1
-<ad57>108 643.2 Q F2(pen)144 643.2 Q F0 .783(Set pen attrib)144 655.2 R
-.784(utes for xy plotting. See chapter 4.12 in the GMT T)-.2 F .784
+<ad56>108 626.4 Q F0(Causes)23.08 E F1(mbm_xyplot)2.854 E F0 .354
+(to operate in "v)2.854 F .354
+(erbose" mode so that it outputs more information than usual.)-.15 F F1
+<ad57>108 643.2 Q F2(pen)20.3 E F0 .784(Set pen attrib)144 655.2 R .784
+(utes for xy plotting. See chapter 4.12 in the GMT T)-.2 F .783
 (echnical reference for a discus-)-.7 F(sion of GMT pen v)144 667.2 Q
 2.5(alues. [Def)-.25 F(aults: width = 1, color = 0/0/0, te)-.1 E
-(xture = solid].)-.15 E F1<ad58>108 684 Q F0(Normally)144 684 Q(,)-.65 E
-F1(mbm_xyplot)3.721 E F0 1.221(creates an e)3.721 F -.15(xe)-.15 G 1.221
-(cutable shellscript and then e).15 F 3.721(xits. This)-.15 F 1.22
+(xture = solid].)-.15 E F1<ad58>108 684 Q F0(Normally)23.08 E(,)-.65 E
+F1(mbm_xyplot)3.72 E F0 1.221(creates an e)3.72 F -.15(xe)-.15 G 1.221
+(cutable shellscript and then e).15 F 3.721(xits. This)-.15 F 1.221
 (option will cause)3.721 F(the shellscript to be e)144 696 Q -.15(xe)
 -.15 G(cuted in the background before).15 E F1(mbm_xyplot)2.5 E F0 -.15
-(ex)2.5 G(its.).15 E F1<ad5a>108 712.8 Q(mbm_xyplot)144 712.8 Q F0 -.15
-(ex)2.599 G .099(tracts the desired columns of the input data and creat\
-es secondary \214les with the xy).15 F -.25(va)144 724.8 S 1.988
+(ex)2.5 G(its.).15 E F1 21.13(\255Z mbm_xyplot)108 712.8 R F0 -.15(ex)
+2.6 G .099(tracts the desired columns of the input data and creates sec\
+ondary \214les with the xy).15 F -.25(va)144 724.8 S 1.987
 (lues to be plotted.).25 F 1.988(Normally these \214les are left in pla\
-ce by the plot shellscript to be used)6.988 F(MB-System 5.0)72 768 Q 2.5
+ce by the plot shellscript to be used)6.987 F(MB-System 5.0)72 768 Q 2.5
 (3J)146.495 G(une 2013)-2.5 E(7)204.835 E 0 Cg EP
 %%Page: 8 8
 %%BeginPageSetup
@@ -855,26 +845,26 @@ BP
 (5.0 mbm_xyplot\(1\))2.5 F(multiple times. The)144 84 Q/F1 10
 /Times-Bold@0 SF<ad5a>2.5 E F0
 (option causes the shellscript to delete those secondary \214les.)2.5 E
-/F2 10.95/Times-Bold@0 SF(EXAMPLES)72 112.8 Q F0 .21(Suppose we ha)108
-124.8 R .51 -.15(ve o)-.2 H .21(btained a sw).15 F .211
-(ath sonar data \214le called sb2112_e)-.1 F .211
-(xample.mb41 collected using a SeaBeam)-.15 F .827(2112 sonar)108 136.8
-R 5.827(.I)-.55 G 3.327(no)-5.827 G .827
-(rder to obtain an xy plot of the center beam depth v)-3.327 F .826
-(ersus time, we \214rst e)-.15 F .826(xtract the time-)-.15 F
+/F2 10.95/Times-Bold@0 SF(EXAMPLES)72 112.8 Q F0 .211(Suppose we ha)108
+124.8 R .511 -.15(ve o)-.2 H .211(btained a sw).15 F .211
+(ath sonar data \214le called sb2112_e)-.1 F .21
+(xample.mb41 collected using a SeaBeam)-.15 F .826(2112 sonar)108 136.8
+R 5.826(.I)-.55 G 3.326(no)-5.826 G .826
+(rder to obtain an xy plot of the center beam depth v)-3.326 F .827
+(ersus time, we \214rst e)-.15 F .827(xtract the time-)-.15 F
 (depth xy doubles from the sw)108 148.8 Q(ath sonar \214le using)-.1 E
 F1(mblist)2.5 E F0(:)A(mblist \255F41 \255Isb2112_e)144 172.8 Q
 (xample.mb41 \255OmZ > mz.dat)-.15 E .372(Here time is in seconds from \
 the start of the \214le and the depths are in meters, positi)108 196.8 R
-.672 -.15(ve u)-.25 H(pw).15 E .372(ard \(topograph)-.1 F(y)-.05 E 1.03
-(rather than bath)108 208.8 R 3.53(ymetry\). No)-.05 F 2.33 -.65(w, w)
--.25 H 3.529(eu).65 G(se)-3.529 E F1(mbm_xyplot)3.529 E F0 1.029
+.671 -.15(ve u)-.25 H(pw).15 E .371(ard \(topograph)-.1 F(y)-.05 E 1.029
+(rather than bath)108 208.8 R 3.529(ymetry\). No)-.05 F 2.329 -.65(w, w)
+-.25 H 3.529(eu).65 G(se)-3.529 E F1(mbm_xyplot)3.529 E F0 1.03
 (to generate shellscripts which in turn generate plots)3.529 F(when e)
 108 220.8 Q -.15(xe)-.15 G 2.5(cuted. First,).15 F
 (we generate a simple black line plot:)2.5 E
-(mbm_xyplot \255Imz.dat \255Omz)144 244.8 Q .241(The abo)108 268.8 R
-.541 -.15(ve c)-.15 H .241(ommand generates an e).15 F -.15(xe)-.15 G
-.242(cutable shellscript mz_line.cmd; e).15 F -.15(xe)-.15 G .242
+(mbm_xyplot \255Imz.dat \255Omz)144 244.8 Q .242(The abo)108 268.8 R
+.542 -.15(ve c)-.15 H .242(ommand generates an e).15 F -.15(xe)-.15 G
+.242(cutable shellscript mz_line.cmd; e).15 F -.15(xe)-.15 G .241
 (cuting this shellscript will gener).15 F(-)-.2 E
 (ate a Postscript plot and display it on the screen.)108 280.8 Q .39
 (Suppose we also ha)108 304.8 R .69 -.15(ve a s)-.2 H .39
@@ -937,26 +927,26 @@ BP
 (ps a \255or landscape \255maxp 4m mz.ps &)-2.5 E(#)110.5 360 Q 2.5(#A)
 110.5 372 S(ll done!)-2.5 E(echo All done!)110.5 384 Q/F1 10.95
 /Times-Bold@0 SF(AD)72 412.8 Q -1.478(VA)-.438 G(NCED EXAMPLES)1.478 E
-F0 .549(Suppose we ha)108 424.8 R .849 -.15(ve a \214)-.2 H .548
+F0 .548(Suppose we ha)108 424.8 R .848 -.15(ve a \214)-.2 H .548
 (le of NMEA GGA strings logged from a GPS recei).15 F -.15(ve)-.25 G
-3.048(rw).15 G .548(hose data looks lik)-3.048 F 3.048(et)-.1 G .548
-(he fol-)-3.048 F(lo)108 436.8 Q(wing:)-.25 E(\214lename: gps.ra)108
+3.049(rw).15 G .549(hose data looks lik)-3.049 F 3.049(et)-.1 G .549
+(he fol-)-3.049 F(lo)108 436.8 Q(wing:)-.25 E(\214lename: gps.ra)108
 460.8 Q(w:)-.15 E($GPGGA,23.0,5427.89080,N,14600.29458,W)110.5 484.8 Q
 (,1,10,0.9,19.01,M,6.40,M,,*70)-.92 E
 ($GPGGA,24.0,5427.89248,N,14600.30088,W)110.5 496.8 Q
 (,1,10,0.9,19.39,M,6.40,M,,*7B)-.92 E
 ($GPGGA,25.0,5427.89424,N,14600.30713,W)110.5 508.8 Q
-(,1,10,0.9,19.72,M,6.40,M,,*7C)-.92 E 2.152 -.8(We c)108 532.8 T .553
+(,1,10,0.9,19.72,M,6.40,M,,*7C)-.92 E 2.153 -.8(We c)108 532.8 T .553
 (an specify a comma delimited \214le and con).8 F -.15(ve)-.4 G .553
-(rt the latitude and longitude \214elds to decimal de).15 F .553
+(rt the latitude and longitude \214elds to decimal de).15 F .552
 (grees on)-.15 F(the \215y with the follo)108 544.8 Q(wing:)-.25 E
 20.485(mbm_xyplot \255ID,:C')120.5 568.8 R 37.985(substr\(c[5],0,3\)+su\
 bstr\(c[5],3,length\(c[5]\)\) /60_substr\(c[3],0,2\)+sub-)-.55 F
-(str\(c[3],2,length\(c[3]\)\)/60':gps.ra)108 580.8 Q(w)-.15 E .097
+(str\(c[3],2,length\(c[3]\)\)/60':gps.ra)108 580.8 Q(w)-.15 E .098
 (This is about as ugly as it gets. Ho)108 604.8 R(we)-.25 E -.15(ve)-.25
 G .898 -.4(r, i).15 H 2.598(ti).4 G 2.598(sq)-2.598 G .098
-(uite straightforw)-2.598 F .098(ard and v)-.1 F .098(ery handy)-.15 F
-2.598(,s)-.65 G 2.598(ol)-2.598 G .098(et us pick this apart.)-2.598 F
+(uite straightforw)-2.598 F .098(ard and v)-.1 F .097(ery handy)-.15 F
+2.597(,s)-.65 G 2.597(ol)-2.597 G .097(et us pick this apart.)-2.597 F
 .701(The \255I \215ag speci\214es the \214le to plot and its parameters\
 . The D sub\214eld follo)108 616.8 R .701(wed by ',)-.25 F 3.201('i)-.7
 G .701(ndicates the \214le is)-3.201 F 1.453
@@ -971,9 +961,9 @@ S .53(pressions here, the x v).15 F .53
 -.15 F .85(xtracted and added to the)-.15 F
 (minute portion of the longitude di)108 664.8 Q
 (vided by 60. The same is done with the latitude \214eld, \(c[3]\).)-.25
-E 1.351(Note the single quotes surrounding the C e)108 688.8 R 1.351
-(xpression. These are required to ensure comple)-.15 F 3.85(xe)-.15 G
-(xpressions)-4 E(such as these are not inadv)108 700.8 Q
+E 1.35(Note the single quotes surrounding the C e)108 688.8 R 1.351
+(xpression. These are required to ensure comple)-.15 F 3.851(xe)-.15 G
+(xpressions)-4.001 E(such as these are not inadv)108 700.8 Q
 (ertently interpreted by the shell.)-.15 E(MB-System 5.0)72 768 Q 2.5
 (3J)146.495 G(une 2013)-2.5 E(9)204.835 E 0 Cg EP
 %%Page: 10 10

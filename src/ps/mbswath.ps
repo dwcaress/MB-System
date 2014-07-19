@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:46 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:14 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 6
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -302,7 +296,7 @@ F0(option)3.239 E(can be used to specify plotting the \214ltered rather\
 -.15 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 547.2 Q
 (Lamont-Doherty Earth Observ)113 559.2 Q(atory)-.25 E F1(OPTIONS)72 588
-Q F2<ad41>108 600 Q F3(factor/mode/depth)144 600 Q F0 1.215
+Q F2<ad41>108 600 Q F3(factor/mode/depth)23.08 E F0 1.215
 (This option determines ho)144 612 R 3.715(wt)-.25 G 1.214
 (he along-track dimension of the beam or pix)-3.715 F 1.214
 (el footprints is calcu-)-.15 F 1.762(lated. If)144 624 R F3(mode)4.262
@@ -341,21 +335,21 @@ BP
 /F0 10/Times-Roman@0 SF(mbsw)72 48 Q 152.16(ath\(1\) MB-System)-.1 F
 152.16(5.0 mbsw)2.5 F(ath\(1\))-.1 E(1,)144 84 Q/F1 10/Times-Italic@0 SF
 (depth)2.5 E F0 2.5(=3)2.5 G(000.0.)-2.5 E/F2 10/Times-Bold@0 SF<ad42>
-108 100.8 Q F1(tic)144 100.8 Q(kinfo)-.2 E F0
+108 100.8 Q F1(tic)23.63 E(kinfo)-.2 E F0
 (Sets map boundary tickmark interv)144 112.8 Q(als. See the)-.25 E F2
 (psbasemap)2.5 E F0(manual page for details.)2.5 E F2<ad62>108 129.6 Q
-F1(yr/mo/da/hr/mn/sc)144 129.6 Q F0 .614
+F1(yr/mo/da/hr/mn/sc)24.74 E F0 .614
 (Sets the starting time for data allo)144 141.6 R .614
 (wed in the input data; pings with times before the starting time)-.25 F
 (will be ignored.)144 153.6 Q(Def)5 E(ault:)-.1 E F1(yr/mo/da/hr/mn/sc)
 2.5 E F0 2.5(=1)2.5 G(962/2/21/10/30/0.)-2.5 E F2<ad43>108 170.4 Q F0
 1.245
-(Sets the color palette \214le which controls the color of the plot.)144
-170.4 R 1.246(See documentation of the GMT)6.246 F
+(Sets the color palette \214le which controls the color of the plot.)
+23.08 F 1.246(See documentation of the GMT)6.246 F
 (package for a complete description of cpt \214les.)144 182.4 Q F2<ad63>
-108 199.2 Q F1(copies)144 199.2 Q F0
+108 199.2 Q F1(copies)25.86 E F0
 (Speci\214es the number of plot copies \(the def)144 211.2 Q
-(ault is 1\).)-.1 E F2<ad44>108 228 Q F1(mode/scale/min/max)144 228 Q F0
+(ault is 1\).)-.1 E F2<ad44>108 228 Q F1(mode/scale/min/max)23.08 E F0
 .876(Sets scaling of beam amplitude or sidescan pix)144 240 R .875(el v)
 -.15 F .875(alues which can be applied before plotting. If)-.25 F F1
 (mode)144 252 Q F0 2.5(=1o)2.5 G 2.5(r2)-2.5 G 2.5(,t)-2.5 G
@@ -374,18 +368,18 @@ E F1(max)3.002 E F0 .502(if it is greater than)3.002 F F1(max)3.002 E F0
 F(by)144 324 Q F1(scale)2.5 E F0 2.5(.D)C(ef)-2.5 E(ault:)-.1 E F1(mode)
 2.5 E F0 2.5(=1)2.5 G(,)-2.5 E F1(scale)2.5 E F0 2.5(=1)2.5 G(.0,)-2.5 E
 F1(min)2.5 E F0 2.5(=0)2.5 G(.0,)-2.5 E F1(max)2.5 E F0 2.5(=1)2.5 G
-(.0.)-2.5 E F2<ad45>108 340.8 Q F1(yr/mo/da/hr/mn/sc)144 340.8 Q F0 .286
+(.0.)-2.5 E F2<ad45>108 340.8 Q F1(yr/mo/da/hr/mn/sc)23.63 E F0 .286
 (Sets the ending time for data allo)144 352.8 R .287
 (wed in the input data; pings with times after the ending time will)-.25
 F(be ignored.)144 364.8 Q(Def)5 E(ault:)-.1 E F1(yr/mo/da/hr/mn/sc)2.5 E
 F0 2.5(=2)2.5 G(062/2/21/10/30/0.)-2.5 E F2<ad46>108 381.6 Q F1 -.37(re)
-144 381.6 S(d/gr).37 E(een/blue)-.37 E F0
+24.19 G(d/gr).37 E(een/blue)-.37 E F0
 (Sets the color used for Frame and annotation. [Def)144 393.6 Q
-(ault is black])-.1 E F2<ad66>108 410.4 Q F1(format)144 410.4 Q F0 .22(\
-Sets the data format used if the input is read from stdin or from a \
-\214le. If)144 422.4 R F1(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)-2.72
-G .22(hen the input)-2.72 F .007(\214le speci\214ed with the)144 434.4 R
-F2<ad49>2.507 E F0 .008(option will actually contain a list of input sw)
+(ault is black])-.1 E F2<ad66>108 410.4 Q F1(format)26.97 E F0 .22(Sets\
+ the data format used if the input is read from stdin or from a \214le.\
+ If)144 422.4 R F1(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)-2.72 G .22
+(hen the input)-2.72 F .007(\214le speci\214ed with the)144 434.4 R F2
+<ad49>2.507 E F0 .008(option will actually contain a list of input sw)
 2.508 F .008(ath sonar data \214les. This pro-)-.1 F .012(gram uses the)
 144 446.4 R F2(MBIO)2.512 E F0 .012(library and will read or write an)
 2.512 F 2.512(ys)-.15 G -.1(wa)-2.512 G .012
@@ -395,8 +389,8 @@ F2<ad49>2.507 E F0 .008(option will actually contain a list of input sw)
 1.297(and their identi\214er v)3.797 F 1.297(alues is)-.25 F(gi)144
 470.4 Q -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5
 E F0(manual page. Def)2.5 E(ault:)-.1 E F1(format)2.5 E F0 2.5<3dad>2.5
-G(1.)-2.5 E F2<ad47>108 487.2 Q F1(ma)144 487.2 Q(gnitude/azimuth)-.1 E
-F0(or)2.5 E F1(ma)2.5 E(gnitude/median)-.1 E F0 .535
+G(1.)-2.5 E F2<ad47>108 487.2 Q F1(ma)22.52 E(gnitude/azimuth)-.1 E F0
+(or)2.5 E F1(ma)2.5 E(gnitude/median)-.1 E F0 .535
 (Sets the parameters which control ho)144 499.2 R(w)-.25 E F2(mbswath)
 3.035 E F0 .534(generates simulated illumination of bath)3.034 F(ymetry)
 -.05 E(,)-.65 E .521(which can be either shaded relief bath)144 511.2 R
@@ -419,8 +413,8 @@ R(alue)-.25 E F1(median)3.439 E F0 .939(sets the amplitude v)3.439 F
 .939(alue which serv)-.25 F .939(es as the)-.15 F(zero or neutral le)144
 583.2 Q -.15(ve)-.25 G(l.).15 E F2<ad48>108 600 Q F0 .162(This "help" \
 \215ag cause the program to print out a description of its operation an\
-d then e)144 600 R .162(xit immedi-)-.15 F(ately)144 612 Q(.)-.65 E F2
-<ad49>108 628.8 Q F1(in\214le)144 628.8 Q F0 .468
+d then e)22.52 F .162(xit immedi-)-.15 F(ately)144 612 Q(.)-.65 E F2
+<ad49>108 628.8 Q F1(in\214le)26.41 E F0 .468
 (Sets the input \214lename. If)144 640.8 R F1(format)2.967 E F0 2.967
 (>0\()2.967 G .467(set with the)-2.967 F F2<ad66>2.967 E F0 .467
 (option\) then the sw)2.967 F .467(ath sonar data contained)-.1 F(in)144
@@ -463,7 +457,7 @@ F2(2)A F0 4.633(\). the)B 2.134(program will)4.633 F
 (attempt to read an "fbt" \214le in lieu of the original data.)144 156 Q
 (Def)144 168 Q(ault:)-.1 E F2(in\214le)2.5 E F0 2.5(=")2.5 G(stdin".)
 -2.5 E F1<ad4a>108 184.8 Q F0 .96
-(Selects the map projection. Scale is inch/de)144 184.8 R .959
+(Selects the map projection. Scale is inch/de)25.3 F .959
 (gree, 1:xxxxx.)-.15 F .959(or width in inches \(upper case modi-)5.959
 F(\214er\).)144 196.8 Q F1(CYLINDRICAL PR)144 220.8 Q(OJECTIONS:)-.3 E
 (\255Jc)144 244.8 Q F2(lon0/lat0/scale)A F0(\(Cassini\))2.5 E F1(\255Jm)
@@ -501,13 +495,13 @@ F0(\(Sinusoidal\))2.5 E F1(\255Jk)144 556.8 Q F2(lon0/scale)A F0(\(Eck)
 (/y-scale)A F0([)A F1(l|p)A F2(pow)A F0(]] \(Linear)A 2.5(,l)-.4 G
 (og, and po)-2.5 E(wer scaling\))-.25 E
 (More details can be found in the)144 664.8 Q F1(psbasemap)2.5 E F0
-(manpages.)2.5 E F1<ad4b>108 681.6 Q F0(More)144 681.6 Q F2 -.8(Po)2.5 G
+(manpages.)2.5 E F1<ad4b>108 681.6 Q F0(More)22.52 E F2 -.8(Po)2.5 G
 (stScript).8 E F0(code will be appended later [Def)2.5 E
 (ault terminates the plot system].)-.1 E F1<ad4c>108 698.4 Q F2
-(lon\215ip)144 698.4 Q F0 .458(Sets the range of the longitude v)144
-710.4 R .459(alues returned by the sw)-.25 F .459
-(ath sonar i/o routines.)-.1 F(If)5.459 E F2(lon\215ip)2.959 E F0 .459
-(=\2551 then)B .892(the longitude v)144 722.4 R .892
+(lon\215ip)23.63 E F0 .458(Sets the range of the longitude v)144 710.4 R
+.459(alues returned by the sw)-.25 F .459(ath sonar i/o routines.)-.1 F
+(If)5.459 E F2(lon\215ip)2.959 E F0 .459(=\2551 then)B .892
+(the longitude v)144 722.4 R .892
 (alues will be in the range from \255360 to 0 de)-.25 F .892(grees. If)
 -.15 F F2(lon\215ip)3.391 E F0 .891(=0 then the longitude)B
 (MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(3)204.835 E 0
@@ -523,20 +517,20 @@ BP
 (=1 then the longitude v)B .132(alues will be)-.25 F
 (in the range from 0 to 360 de)144 96 Q 2.5(grees. Def)-.15 F(ault:)-.1
 E F1(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E/F2 10/Times-Bold@0 SF
-<ad4e>108 112.8 Q F1(cpt\214le)144 112.8 Q F0(Normally)144 124.8 Q 2.924
-(,s)-.65 G .424(hading of bath)-2.924 F .424(ymetry with amplitudes \()
--.05 F F1(mode)A F0 2.924(=3a)2.924 G 2.924(ss)-2.924 G .424
-(et with the)-2.924 F F2<ad5a>2.923 E F0 .423(option\) is accom-)2.923 F
-.707(plished by linearly mapping the amplitudes to shade v)144 136.8 R
-.707(alues. This option speci\214es a grayscale cpt)-.25 F
+<ad4e>108 112.8 Q F1(cpt\214le)23.08 E F0(Normally)144 124.8 Q 2.924(,s)
+-.65 G .424(hading of bath)-2.924 F .424(ymetry with amplitudes \()-.05
+F F1(mode)A F0 2.924(=3a)2.924 G 2.924(ss)-2.924 G .424(et with the)
+-2.924 F F2<ad5a>2.923 E F0 .423(option\) is accom-)2.923 F .707
+(plished by linearly mapping the amplitudes to shade v)144 136.8 R .707
+(alues. This option speci\214es a grayscale cpt)-.25 F
 (\214le used to map amplitude v)144 148.8 Q(alues to grayscale shade v)
--.25 E(alues.)-.25 E F2<ad4f>108 165.6 Q F0(Selects Ov)144 165.6 Q
+-.25 E(alues.)-.25 E F2<ad4f>108 165.6 Q F0(Selects Ov)22.52 E
 (erlay plot mode [Def)-.15 E(ault initializes a ne)-.1 E 2.5(wp)-.25 G
 (lot system].)-2.5 E F2<ad50>108 182.4 Q F0
-(Selects Portrait plotting mode [GMT Def)144 182.4 Q
+(Selects Portrait plotting mode [GMT Def)24.19 E
 (ault is Landscape, see gmtdef)-.1 E(aults to change this].)-.1 E F2
-<ad70>108 199.2 Q F1(pings)144 199.2 Q F0 1.22(Sets the ping a)144 211.2
-R -.15(ve)-.2 G 1.22(raging of the input data. If).15 F F1(pings)3.719 E
+<ad70>108 199.2 Q F1(pings)24.74 E F0 1.22(Sets the ping a)144 211.2 R
+-.15(ve)-.2 G 1.22(raging of the input data. If).15 F F1(pings)3.719 E
 F0 3.719(=1)3.719 G 3.719(,t)-3.719 G 1.219(hen no ping a)-3.719 F -.15
 (ve)-.2 G 1.219(raging is performed. If).15 F F1(pings)144 223.2 Q F0
 2.651(>0)2.651 G 2.651(,t)-2.651 G .151
@@ -546,47 +540,47 @@ F0 3.719(=1)3.719 G 3.719(,t)-3.719 G 1.219(hen no ping a)-3.719 F -.15
 g will automatically be done so that the along-track ping spacing is eq\
 ual).15 F(to the across-track beam spacing.)144 247.2 Q(Def)5 E(ault:)
 -.1 E F1(pings)2.5 E F0 2.5(=1\()2.5 G(no ping a)-2.5 E -.15(ve)-.2 G
-(raging\).).15 E F2<ad51>108 264 Q F1(dpi)144 264 Q F0 .544
+(raging\).).15 E F2<ad51>108 264 Q F1(dpi)22.52 E F0 .544
 (Sets the resolution of the color image output by)144 276 R F2(mbswath)
 3.044 E F0 .544(in pix)3.044 F .544(els per inch \(e)-.15 F .544
 (xcept when the)-.15 F F2<ad31>3.045 E F0(option is used to force indi)
 144 288 Q(vidual polygon color \214lls\). Def)-.25 E(ault:)-.1 E F1(dpi)
 2.5 E F0 2.5(=1)2.5 G(00.)-2.5 E F2<ad52>108 304.8 Q F1
-(west/east/south/north)144 304.8 Q F0 1.335
+(west/east/south/north)23.08 E F0 1.335
 (Sets the longitude and latitude bounds within which sw)144 316.8 R
 1.334(ath sonar data will be read and plotted.)-.1 F 2.696
 (Only the data which lies within these bounds will be read.)144 328.8 R
 (Def)7.696 E(ault:)-.1 E F1(west)5.197 E F0 2.697(=\255360, east)B F1
 (=360)A F0(,)A F1(south)144 340.8 Q F0(=\25590,)A F1(north)2.5 E F0
-(=90.)A F2<ad53>108 357.6 Q F1(speed)144 357.6 Q F0 .532
+(=90.)A F2<ad53>108 357.6 Q F1(speed)24.74 E F0 .532
 (Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)144 369.6 R
 .531(wed in the input data; pings associated)-.25 F
 (with a smaller ship speed will not be processed. Def)144 381.6 Q(ault:)
 -.1 E F1(speed)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F2<ad54>108 398.4 Q F1
-(time)144 398.4 Q(gap)-.4 E F0 .478(Sets the maximum time g)144 410.4 R
-.479(ap in minutes between adjacent pings allo)-.05 F .479
+(time)23.63 E(gap)-.4 E F0 .478(Sets the maximum time g)144 410.4 R .479
+(ap in minutes between adjacent pings allo)-.05 F .479
 (wed before the data is consid-)-.25 F(ered to ha)144 422.4 Q .3 -.15
 (ve a g)-.2 H(ap. Def).1 E(ault:)-.1 E F1(time)2.5 E(gap)-.4 E F0 2.5
-(=1)2.5 G(.)-2.5 E F2<ad55>108 439.2 Q F0(Dra)144 439.2 Q 2.625(wU)-.15
-G .124(nix System time stamp on plot.)-2.625 F(Optionally)5.124 E 2.624
+(=1)2.5 G(.)-2.5 E F2<ad55>108 439.2 Q F0(Dra)23.08 E 2.625(wU)-.15 G
+.124(nix System time stamp on plot.)-2.625 F(Optionally)5.124 E 2.624
 (,a)-.65 G .124(ppend a label, or 'c' which will plot the com-)-2.624 F
-(mand string.)144 451.2 Q F2<ad56>108 468 Q F0(Selects v)144 468 Q
+(mand string.)144 451.2 Q F2<ad56>108 468 Q F0(Selects v)23.08 E
 (erbose mode, which will send progress reports to stderr [Def)-.15 E
-(ault runs "silently"].)-.1 E F2<ad57>108 484.8 Q F0(Normally)144 484.8
-Q(,)-.65 E F2(mbswath)4.77 E F0 -.1(wo)4.77 G 2.27(rks with bath).1 F
-2.27(ymetry v)-.05 F 2.27(alues in meters.)-.25 F 2.27(If the)7.27 F F2
+(ault runs "silently"].)-.1 E F2<ad57>108 484.8 Q F0(Normally)20.3 E(,)
+-.65 E F2(mbswath)4.77 E F0 -.1(wo)4.77 G 2.27(rks with bath).1 F 2.27
+(ymetry v)-.05 F 2.27(alues in meters.)-.25 F 2.27(If the)7.27 F F2
 <ad57>4.77 E F0 2.27(\215ag is gi)4.77 F -.15(ve)-.25 G 2.27(n, then).15
 F F2(mbswath)144 496.8 Q F0 .004(will w)2.504 F .003(ork with bath)-.1 F
 .003(ymetry v)-.05 F .003
 (alues in feet. The color palette \214le used must conform to the)-.25 F
 (range of bath)144 508.8 Q(ymetry v)-.05 E(alues in feet.)-.25 E F2
-<ad5820ad59>108 525.6 Q F0(Shift origin of plot by \()144 525.6 Q F1
+<ad5820ad59>108 525.6 Q F0(Shift origin of plot by \()7.66 E F1
 (x-shift,y-shift)A F0 2.5(\)i)C 2.5(nches [Def)-2.5 F
 (ault is \(1,1\) for ne)-.1 E 2.5(wp)-.25 G(lots, \(0,0\) for o)-2.5 E
--.15(ve)-.15 G(rlays].).15 E F2<ad5a>108 542.4 Q F1(mode[F])144 542.4 Q
-F0(Sets the style of the plot.)144 554.4 Q F1(mode)180 566.4 Q F0 2.5
-(=1)2.5 G 31.92(:C)-2.5 G(olor \214ll of bath)-31.92 E(ymetry data.)-.05
-E F1(mode)180 578.4 Q F0 2.5(=2)2.5 G 31.92(:C)-2.5 G
+-.15(ve)-.15 G(rlays].).15 E F2<ad5a>108 542.4 Q F1(mode[F])23.63 E F0
+(Sets the style of the plot.)144 554.4 Q F1(mode)180 566.4 Q F0 2.5(=1)
+2.5 G 31.92(:C)-2.5 G(olor \214ll of bath)-31.92 E(ymetry data.)-.05 E
+F1(mode)180 578.4 Q F0 2.5(=2)2.5 G 31.92(:C)-2.5 G
 (olor shaded relief bath)-31.92 E(ymetry)-.05 E(.)-.65 E F1(mode)180
 590.4 Q F0 2.5(=3)2.5 G 31.92(:B)-2.5 G(ath)-31.92 E
 (ymetry shaded using amplitude data.)-.05 E F1(mode)180 602.4 Q F0 2.5
@@ -607,11 +601,11 @@ de data are stored in ancilliary \214les end-)-.15 F 1.308(ing with ".f)
 (ported, and so appending "F" to)144 674.4 Q F1(mode)2.5 E F0 -.25(va)
 2.5 G(lues of 1 or 2 will ha).25 E .3 -.15(ve n)-.2 H 2.5(oe).15 G -.25
 (ff)-2.5 G 2.5(ect. Def).25 F(ault:)-.1 E F1(mode)2.5 E F0 2.5(=1)2.5 G
-(;)-2.5 E F2<ad30>108 691.2 Q F0(Create the image using the Adobe)144
-691.2 Q F1 -.8(Po)2.5 G(stScript).8 E F0(colorimage operator)2.5 E 5(.T)
--.55 G(his is the def)-5 E(ault.)-.1 E F2<ad31>108 708 Q F0
-(Create the image by plotting indi)144 708 Q(vidual color polygons.)-.25
-E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(4)204.835 E 0
+(;)-2.5 E F2<ad30>108 691.2 Q F0(Create the image using the Adobe)25.3 E
+F1 -.8(Po)2.5 G(stScript).8 E F0(colorimage operator)2.5 E 5(.T)-.55 G
+(his is the def)-5 E(ault.)-.1 E F2<ad31>108 708 Q F0
+(Create the image by plotting indi)25.3 E(vidual color polygons.)-.25 E
+(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(4)204.835 E 0
 Cg EP
 %%Page: 5 5
 %%BeginPageSetup
@@ -620,11 +614,11 @@ BP
 /F0 10/Times-Roman@0 SF(mbsw)72 48 Q 152.16(ath\(1\) MB-System)-.1 F
 152.16(5.0 mbsw)2.5 F(ath\(1\))-.1 E/F1 10/Times-Bold@0 SF<ad32>108 84 Q
 F0(Create the image by color separation using three calls to image for \
-later processing by)144 84 Q F1(psto24)2.5 E F0(.)A/F2 10.95
-/Times-Bold@0 SF(EXAMPLES)72 100.8 Q F0 .792(Suppose the user has a Hyd\
-rosweep data \214le in the L-DEO in-house binary format \()108 112.8 R
-F1(MBIO)A F0 .792(format id 24\))3.292 F 1.022(called hs_e)108 124.8 R
-1.021(w9302_157_mn.mb24 which lies in the re)-.25 F 1.021
+later processing by)25.3 E F1(psto24)2.5 E F0(.)A/F2 10.95/Times-Bold@0
+SF(EXAMPLES)72 100.8 Q F0 .792(Suppose the user has a Hydrosweep data \
+\214le in the L-DEO in-house binary format \()108 112.8 R F1(MBIO)A F0
+.792(format id 24\))3.292 F 1.022(called hs_e)108 124.8 R 1.021
+(w9302_157_mn.mb24 which lies in the re)-.25 F 1.021
 (gion w/s/e/n = \25532.1874/-26.6236/54.6349/56.7536.)-.15 F(The follo)
 108 136.8 Q(wing will suf)-.25 E
 (\214ce to generate a color \214ll plot:)-.25 E(mbsw)144 148.8 Q

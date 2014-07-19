@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:45 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:13 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -357,8 +351,8 @@ F(processing.)108 180 Q/F2 10.95/Times-Bold@0 SF -.548(AU)72 208.8 S
 -.15 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 244.8 Q
 (Lamont-Doherty Earth Observ)113 256.8 Q(atory)-.25 E F2(OPTIONS)72
-285.6 Q F1<ad41>108 297.6 Q/F3 10/Times-Italic@0 SF(tideformat)144 297.6
-Q F0 .451(This option sets the tide format of the output te)144 309.6 R
+285.6 Q F1<ad41>108 297.6 Q/F3 10/Times-Italic@0 SF(tideformat)23.08 E
+F0 .451(This option sets the tide format of the output te)144 309.6 R
 .452(xt tide model \214les.)-.15 F(If)5.452 E F3(tideformat)2.952 E F0
 2.952(=2\()2.952 G .452(the def)-2.952 F(ault\),)-.1 E
 (the tide is output in this format:)144 321.6 Q
@@ -366,14 +360,14 @@ Q F0 .451(This option sets the tide format of the output te)144 309.6 R
 345.6 Q(alue is in meters.)-.25 E(If)5 E F3(tideformat)2.5 E F0 2.5(=1)
 2.5 G 2.5(,t)-2.5 G(hen the output format is:)-2.5 E(time_d tide)180
 357.6 Q(where time_d is in seconds since January 1, 1970 and tide is in\
- meters.)144 369.6 Q F1<ad42>108 386.4 Q F3(yr/mo/da/hr/mn/sc)144 386.4
-Q F0(This option sets the starting time for for the output tidal model.)
-144 398.4 Q F1<ad44>108 415.2 Q F3(interval)144 415.2 Q F0
+ meters.)144 369.6 Q F1<ad42>108 386.4 Q F3(yr/mo/da/hr/mn/sc)23.63 E F0
+(This option sets the starting time for for the output tidal model.)144
+398.4 Q F1<ad44>108 415.2 Q F3(interval)23.08 E F0
 (This option sets the time interv)144 427.2 Q(al between tidal model v)
 -.25 E(alues in seconds.)-.25 E(Def)5 E(ault: 60 seconds.)-.1 E F1<ad45>
-108 444 Q F3(yr/mo/da/hr/mn/sc)144 444 Q F0
+108 444 Q F3(yr/mo/da/hr/mn/sc)23.63 E F0
 (This option sets the ending time for the output tidal model)144 456 Q
-F1<ad46>108 472.8 Q F3(format)144 472.8 Q F0 .045
+F1<ad46>108 472.8 Q F3(format)24.19 E F0 .045
 (Sets the data format of the input sw)144 484.8 R .045
 (ath data \214le speci\214ed with the)-.1 F F1<ad49>2.545 E F0 .045
 (option. If)2.545 F F3(format)2.545 E F0 2.545(<0)2.545 G 2.545(,t)
@@ -391,15 +385,15 @@ F1<ad46>108 472.8 Q F3(format)144 472.8 Q F0 .045
 (manual page. The def)2.5 E(ault format is set using)-.1 E F1
 (mbdefaults)2.5 E F0(.)A F1<ad48>108 549.6 Q F0 .162(This "help" \215ag\
  cause the program to print out a description of its operation and then\
- e)144 549.6 R .161(xit immedi-)-.15 F(ately)144 561.6 Q(.)-.65 E F1
-<ad49>108 578.4 Q F3(\214lename)144 578.4 Q F0 .467
-(Sets the input \214lename. If)144 590.4 R F3(format)2.967 E F0 2.967
-(>0\()2.967 G .467(set with the)-2.967 F F1<ad66>2.967 E F0 .467
-(option\) then the sw)2.967 F .468(ath sonar data contained)-.1 F(in)144
-602.4 Q F3(in\214le)2.937 E F0 .437(is read and processed. If)2.937 F F3
-(format)2.937 E F0 2.937(<0)2.937 G 2.937(,t)-2.937 G(hen)-2.937 E F3
-(in\214le)2.937 E F0 .437(is assumed to be an ascii \214le containing a)
-2.937 F .002(list of the input sw)144 614.4 R .003
+ e)22.52 F .161(xit immedi-)-.15 F(ately)144 561.6 Q(.)-.65 E F1<ad49>
+108 578.4 Q F3(\214lename)26.41 E F0 .467(Sets the input \214lename. If)
+144 590.4 R F3(format)2.967 E F0 2.967(>0\()2.967 G .467(set with the)
+-2.967 F F1<ad66>2.967 E F0 .467(option\) then the sw)2.967 F .468
+(ath sonar data contained)-.1 F(in)144 602.4 Q F3(in\214le)2.937 E F0
+.437(is read and processed. If)2.937 F F3(format)2.937 E F0 2.937(<0)
+2.937 G 2.937(,t)-2.937 G(hen)-2.937 E F3(in\214le)2.937 E F0 .437
+(is assumed to be an ascii \214le containing a)2.937 F .002
+(list of the input sw)144 614.4 R .003
 (ath sonar data \214les to be processed and their formats.)-.1 F .003
 (The program will read the)5.003 F .275
 (data in each one of these \214les.)144 626.4 R .275(In the)5.275 F F3
@@ -414,7 +408,7 @@ G .568(th sonar format supported by).1 F F1(MBIO)144 686.4 Q F0 3.428
 .928(and their identi\214er)3.428 F -.25(va)144 698.4 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0
 (manual page. Def)2.5 E(ault:)-.1 E F3(in\214le)2.5 E F0 2.5(=")2.5 G
-(stdin".)-2.5 E F1<ad4d>108 715.2 Q F0 1.305(If the)144 715.2 R F1<ad49>
+(stdin".)-2.5 E F1<ad4d>108 715.2 Q F0 1.305(If the)20.86 F F1<ad49>
 3.805 E F0 1.306
 (option has been used so that tidal models are created for sw)3.805 F
 1.306(ath \214les, then this option)-.1 F .779(causes each sw)144 727.2
@@ -429,20 +423,20 @@ BP
 /F0 10/Times-Roman@0 SF 158.72(mbotps\(1\) MB-System)72 48 R 158.72
 (5.0 mbotps\(1\))2.5 F(ancilliary tidal model \214le created by)144 84 Q
 /F1 10/Times-Bold@0 SF(mbotps)2.5 E F0(.)A F1<ad4f>108 100.8 Q/F2 10
-/Times-Italic@0 SF(\214lename)144 100.8 Q F0
+/Times-Italic@0 SF(\214lename)22.52 E F0
 (Sets the \214lename of the tidal model output.)144 112.8 Q F1<ad50>108
-129.6 Q F2(otps_location)144 129.6 Q F0 .77
+129.6 Q F2(otps_location)24.19 E F0 .77
 (Sets the path to the local installation of O)144 141.6 R .77
 (TPS, which in turn de\214nes the location of the program)-.4 F F1(pr)
 144 153.6 Q(edict_tide)-.18 E F0(called by)2.5 E F1(mbotps)2.5 E F0
 (and the tide model to be used by)2.5 E F1(pr)2.5 E(edict_tide)-.18 E F0
-(.)A F1<ad52>108 170.4 Q F2(longitude/latitude)144 170.4 Q F0(Sets the \
-longitude and latitude position at which the tidal model will be calcul\
-ated.)144 182.4 Q F1<ad54>108 199.2 Q F2(\214lename)144 199.2 Q F0 .126
+(.)A F1<ad52>108 170.4 Q F2(longitude/latitude)23.08 E F0(Sets the long\
+itude and latitude position at which the tidal model will be calculated\
+.)144 182.4 Q F1<ad54>108 199.2 Q F2(\214lename)23.63 E F0 .126
 (Sets the name of the O)144 211.2 R .125
 (TPSnc tidal model to be used. This model must be part of the local O)
 -.4 F(TPSnc)-.4 E(installation.)144 223.2 Q F1<ad56>108 240 Q F0
-(Increases the v)144 240 Q(erbosity of)-.15 E F1(mbotps)2.5 E F0(.)A/F3
+(Increases the v)23.08 E(erbosity of)-.15 E F1(mbotps)2.5 E F0(.)A/F3
 10.95/Times-Bold@0 SF(EXAMPLES)72 268.8 Q F0 1.042
 (Suppose one wishes to obtain a tidal model for the location 121W 36N e)
 108 280.8 R 1.043(xtending at 60 second interv)-.15 F(als)-.25 E -.15

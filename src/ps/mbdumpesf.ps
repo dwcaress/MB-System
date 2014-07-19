@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:40 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:09 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -260,15 +254,14 @@ F0 5.83(.I)C(n)-5.83 E F2(MB-System)3.33 E F0 3.33(,t)C .831
 (Lamont-Doherty Earth Observ)113 319.2 Q(atory)-.25 E F1
 (MBDUMPESF OPTIONS)72 348 Q F2<ad48>108 360 Q F0 .391(This "help" \215a\
 g causes the program to print out a description of its operation and th\
-en e)144 360 R .39(xit imme-)-.15 F(diately)144 372 Q(.)-.65 E F2<ad49>
-108 388.8 Q/F3 10/Times-Italic@0 SF(\214le)144 388.8 Q F0("Edit sa)144
-400.8 Q .3 -.15(ve \214)-.2 H(le" from which the edit e).15 E -.15(ve)
--.25 G(nts will be read.).15 E F2<ad56>108 417.6 Q F0(Normally)144 417.6
-Q(,)-.65 E F2(mbdumpesf)3.147 E F0 .648
-(outputs one line for each edit e)3.147 F -.15(ve)-.25 G .648
-(nt in the input esf \214le.).15 F .648(If the)5.648 F F2<ad56>3.148 E
-F0 .648(\215ag is)3.148 F(gi)144 429.6 Q -.15(ve)-.25 G .55(n, then).15
-F F2(mbdumpesf)3.05 E F0 .55
+en e)22.52 F .39(xit imme-)-.15 F(diately)144 372 Q(.)-.65 E F2<ad49>108
+388.8 Q/F3 10/Times-Italic@0 SF(\214le)26.41 E F0("Edit sa)144 400.8 Q
+.3 -.15(ve \214)-.2 H(le" from which the edit e).15 E -.15(ve)-.25 G
+(nts will be read.).15 E F2<ad56>108 417.6 Q F0(Normally)23.08 E(,)-.65
+E F2(mbdumpesf)3.147 E F0 .648(outputs one line for each edit e)3.147 F
+-.15(ve)-.25 G .648(nt in the input esf \214le.).15 F .648(If the)5.648
+F F2<ad56>3.148 E F0 .648(\215ag is)3.148 F(gi)144 429.6 Q -.15(ve)-.25
+G .55(n, then).15 F F2(mbdumpesf)3.05 E F0 .55
 (also outputs the total number of each type of edit e)3.05 F -.15(ve)
 -.25 G .55(nt at the end of the).15 F(listing.)144 441.6 Q F1(EXAMPLES)
 72 470.4 Q F0 5.142(Suppose one has edited a sw)108 482.4 R 5.142

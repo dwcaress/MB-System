@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:41 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:10 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 5
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -271,7 +265,7 @@ format 201\) \214le, interpolates the asynchronous na)3.111 F(vig)-.2 E
 (ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 367.2 Q
 (Lamont-Doherty Earth Observ)113 379.2 Q(atory)-.25 E F1(OPTIONS)72 408
-Q F2<ad41>108 420 Q F3(type/of)144 420 Q(fsetx/of)-.18 E(fsety/of)-.18 E
+Q F2<ad41>108 420 Q F3(type/of)23.08 E(fsetx/of)-.18 E(fsety/of)-.18 E
 (fsetz/of)-.18 E(fsett)-.18 E F0 .544
 (This option sets the spatial and time of)144 432 R .544
 (fset for a sensor relati)-.25 F .845 -.15(ve t)-.25 H 3.045(oar).15 G
@@ -297,11 +291,11 @@ F F2(mbh)3.837 E(ysweeppr)-.15 E(epr)-.18 E(ocess)-.18 E F0 1.337
 -.65 G .344(nd z of)-2.844 F .345(fsets associated with the platform at\
 titude for each ping, and add those)-.25 F(to the sonar na)144 516 Q
 (vig)-.2 E(ation and depth v)-.05 E(alues.)-.25 E F2<ad42>108 532.8 Q F3
--.45(ro)144 532.8 S(llbias/pitc).45 E(hbias/headingbias)-.15 E F0 .578
+-.45(ro)23.63 G(llbias/pitc).45 E(hbias/headingbias)-.15 E F0 .578
 (This option sets roll, pitch, and heading bias v)144 544.8 R .578
 (alues to be applied before mer)-.25 F .578(ging the attitude and)-.18 F
 (heading data with the sonar data while calculating bath)144 556.8 Q
-(ymetry)-.05 E(.)-.65 E F2<ad44>108 573.6 Q F3(sonar)144 573.6 Q
+(ymetry)-.05 E(.)-.65 E F2<ad44>108 573.6 Q F3(sonar)23.08 E
 (depth\214le)-.37 E F0 .151(This option causes)144 585.6 R F2(mbh)2.651
 E(ysweeppr)-.15 E(epr)-.18 E(ocess)-.18 E F0 .152
 (to read a sonar depth time series from the speci\214ed \214le)2.651 F
@@ -312,17 +306,16 @@ F(depth data must be in an ascii format of the form:)144 609.6 Q
 633.6 R 3.861(,m)-.4 G 1.361(m=month, dd=day)-3.861 F 3.861(,h)-.65 G
 (h=hour)-3.861 E 3.861(,m)-.4 G 1.361
 (m=minute, ss.sss = seconds, and zzzz.zzz =)-3.861 F
-(sonar depth in meters.)144 645.6 Q F2<ad46>108 662.4 Q F3(format)144
-662.4 Q F0 .737
-(Sets the format of the input \214le speci\214ed with the)144 674.4 R F2
-<ad49>3.236 E F0 .736(option. This is normally omitted unless the)3.236
-F .083(input \214lename does not conform to the)144 686.4 R F2
-(MB-System)2.584 E F0 .084(\214le naming con)2.584 F -.15(ve)-.4 G .084
-(ntions. F).15 F .084(or this program, the)-.15 F .624(only rele)144
-698.4 R -.25(va)-.25 G .624(nt options are).25 F F3(format)3.124 E F0
-3.124(=2)3.124 G .624(01 for an HSX format \214le, or)-3.124 F F3
-(format)3.124 E F0 3.124<3dad>C 3.124(1f)-3.124 G .623
-(or a datalist refer)-3.124 F(-)-.2 E
+(sonar depth in meters.)144 645.6 Q F2<ad46>108 662.4 Q F3(format)24.19
+E F0 .737(Sets the format of the input \214le speci\214ed with the)144
+674.4 R F2<ad49>3.236 E F0 .736
+(option. This is normally omitted unless the)3.236 F .083
+(input \214lename does not conform to the)144 686.4 R F2(MB-System)2.584
+E F0 .084(\214le naming con)2.584 F -.15(ve)-.4 G .084(ntions. F).15 F
+.084(or this program, the)-.15 F .624(only rele)144 698.4 R -.25(va)-.25
+G .624(nt options are).25 F F3(format)3.124 E F0 3.124(=2)3.124 G .624
+(01 for an HSX format \214le, or)-3.124 F F3(format)3.124 E F0 3.124
+<3dad>C 3.124(1f)-3.124 G .623(or a datalist refer)-3.124 F(-)-.2 E
 (encing multiple format 201 \214les.)144 710.4 Q(MB-System 5.0)72 768 Q
 2.5(3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0 Cg EP
 %%Page: 2 2
@@ -333,15 +326,15 @@ BP
 (ysweeppreprocess\(1\) MB-System)-.05 F 97.69(5.0 mbh)2.5 F
 (ysweeppreprocess\(1\))-.05 E/F1 10/Times-Bold@0 SF<ad48>108 84 Q F0
 .162(This "help" \215ag cause the program to print out a description of\
- its operation and then e)144 84 R .162(xit immedi-)-.15 F(ately)144 96
-Q(.)-.65 E F1<ad49>108 112.8 Q/F2 10/Times-Italic@0 SF(in\214le)144
-112.8 Q F0 .515(Sets the input \214le path. If)144 124.8 R F2(format)
-3.015 E F0 3.015(>0\()3.015 G .515(set with the)-3.015 F F1<ad66>3.015 E
-F0 .515(option or)3.015 F F1(mbdefaults)3.014 E F0 3.014(\)t)C .514
-(hen the sw)-3.014 F .514(ath sonar)-.1 F .796(data contained in)144
-136.8 R F2(in\214le)3.296 E F0 .797(is read and processed. If)3.297 F F2
-(format)3.297 E F0 3.297(<0)3.297 G 3.297(,t)-3.297 G(hen)-3.297 E F2
-(in\214le)3.297 E F0 .797(is assumed to be an ascii)3.297 F .157
+ its operation and then e)22.52 F .162(xit immedi-)-.15 F(ately)144 96 Q
+(.)-.65 E F1<ad49>108 112.8 Q/F2 10/Times-Italic@0 SF(in\214le)26.41 E
+F0 .515(Sets the input \214le path. If)144 124.8 R F2(format)3.015 E F0
+3.015(>0\()3.015 G .515(set with the)-3.015 F F1<ad66>3.015 E F0 .515
+(option or)3.015 F F1(mbdefaults)3.014 E F0 3.014(\)t)C .514(hen the sw)
+-3.014 F .514(ath sonar)-.1 F .796(data contained in)144 136.8 R F2
+(in\214le)3.296 E F0 .797(is read and processed. If)3.297 F F2(format)
+3.297 E F0 3.297(<0)3.297 G 3.297(,t)-3.297 G(hen)-3.297 E F2(in\214le)
+3.297 E F0 .797(is assumed to be an ascii)3.297 F .157
 (\214le containing a list of the input sw)144 148.8 R .157
 (ath sonar data \214les to be processed and their formats.)-.1 F .156
 (The pro-)5.156 F .928
@@ -351,7 +344,7 @@ F0 .515(option or)3.015 F F1(mbdefaults)3.014 E F0 3.014(\)t)C .514
 (wed by a data format identi\214er)-.25 E 2.5(,e)-.4 G(.g.:)-2.5 E
 (data\214le1 201)154 184.8 Q(data\214le2 201)154 196.8 Q
 (This program only reads Hysweep HSX format data \214les \()144 208.8 Q
-F1(MBIO)A F0(format 201\).)2.5 E F1<ad4a>108 225.6 Q F2(pr)144 225.6 Q
+F1(MBIO)A F0(format 201\).)2.5 E F1<ad4a>108 225.6 Q F2(pr)25.3 E
 (ojection)-.45 E F0 .74(The Hypack and Hysweep softw)144 237.6 R .74
 (are packages operate with na)-.1 F(vig)-.2 E .74(ation in a user)-.05 F
 .74(-de\214ned projected)-.2 F .788(coordinate system. Resultantly)144
@@ -388,9 +381,9 @@ F1(mbgrid)2.5 E F0(manual page.)2.5 E F1<ad4c>108 410.4 Q F0 .836
 (This option causes the program to list the timetags of bath)144 422.4 R
 (ymetry)-.05 E 3.336(,n)-.65 G -.2(av)-3.336 G(ig).2 E .836
 (ation, attitude, and other)-.05 F(data records.)144 434.4 Q F1<ad4d>108
-451.2 Q F2(navformat)144 451.2 Q F0(Sets the input na)144 463.2 Q(vig)
--.2 E(ation \214le format used by the \214le speci\214ed with the)-.05 E
-F1<ad4e>2.5 E F0(option.)2.5 E(At present, the only option for the na)
+451.2 Q F2(navformat)20.86 E F0(Sets the input na)144 463.2 Q(vig)-.2 E
+(ation \214le format used by the \214le speci\214ed with the)-.05 E F1
+<ad4e>2.5 E F0(option.)2.5 E(At present, the only option for the na)
 146.5 475.2 Q(vig)-.2 E(ation \214le format is)-.05 E F2(navformat)2.5 E
 F0(=1:)A(yyyy:mm:dd:hh:mm:ss.sss sssss.sss eeeeeeee.eee nnnnnnnn.nnn zz\
 zz.zzz aaa.aaa hhh.hhh)154 487.2 Q 1.207(where yyyy=year)144 499.2 R
@@ -402,7 +395,7 @@ zz.zzz aaa.aaa hhh.hhh)154 487.2 Q 1.207(where yyyy=year)144 499.2 R
 1.606
 (meters, zzzz.zzz = sonar depth in meters, and hhh.hhh = heading in de)
 144 523.2 R 4.105(grees. Def)-.15 F(ault:)-.1 E F2(navfor)4.105 E(-)-.2
-E(mat)144 535.2 Q F0(=1.)A F1<ad4e>108 552 Q F2(nav\214le)144 552 Q F0
+E(mat)144 535.2 Q F0(=1.)A F1<ad4e>108 552 Q F2(nav\214le)23.08 E F0
 .895(The program will read na)144 564 R(vig)-.2 E .895
 (ation from the \214le)-.05 F F2(nav\214le)3.395 E F0 .895(and mer)3.395
 F .896(ge those data with the multibeam)-.18 F .286
@@ -422,8 +415,8 @@ tput format 201)3.664 F .078(data. An)144 612 R 2.578(yp)-.15 G(re-e)
 .603(he ne)-3.104 F .603(wly mer)-.25 F .603
 (ged data as "enabled" and the original,)-.18 F
 (asynchronous data as not enabled.)144 636 Q F1<ad54>108 652.8 Q F2
-(timela)144 652.8 Q(g)-.1 E F0 .831(This option speci\214es a)144 664.8
-R F2(timela)3.331 E(g)-.1 E F0 -.25(va)3.331 G .831
+(timela)23.63 E(g)-.1 E F0 .831(This option speci\214es a)144 664.8 R F2
+(timela)3.331 E(g)-.1 E F0 -.25(va)3.331 G .831
 (lue in seconds to be applied to the na).25 F(vig)-.2 E .832
 (ation and attitude data)-.05 F 1.067(prior to it being mer)144 676.8 R
 1.067(ged with the bath)-.18 F(ymetry)-.05 E 3.567(.I)-.65 G(f)-3.567 E
@@ -431,7 +424,7 @@ F2(timela)3.567 E(g)-.1 E F0 1.067(is a v)3.567 F 1.066
 (alid path to a \214le containing time)-.25 F .137(stamp and time lag p\
 airs, then these data will be read and the time lag applied to particul\
 ar records)144 688.8 R(will be interpolated by time.)144 700.8 Q F1
-<ad56>108 717.6 Q F0 .129(This option increases the v)144 717.6 R .129
+<ad56>108 717.6 Q F0 .129(This option increases the v)23.08 F .129
 (erbosity of)-.15 F F1(mbh)2.629 E(ysweeppr)-.15 E(epr)-.18 E(ocess)-.18
 E F0 .129(with respect to informational output)2.629 F(to the shell.)144
 729.6 Q(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(2)

@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:45 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:12 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 6
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -367,9 +361,9 @@ H 1.035(ouble precision \215oating point\) rather than ASCII. Some).15 F
 (grees and minutes. These v)-.15 F 1.064
 (alues are output as multiple \214elds as appropriate.)-.25 F(Def)144
 172.8 Q(ault: ASCII output with \214elds separated by tabs.)-.1 E F2
-<ad42>108 189.6 Q/F3 10/Times-Italic@0 SF(yr/mo/da/hr/mn/sc)144 189.6 Q
-F0 .155(This option sets the starting time for data allo)144 201.6 R
-.155(wed in the input data.)-.25 F(The)5.155 E F2<ad45>2.655 E F0 .155
+<ad42>108 189.6 Q/F3 10/Times-Italic@0 SF(yr/mo/da/hr/mn/sc)23.63 E F0
+.155(This option sets the starting time for data allo)144 201.6 R .155
+(wed in the input data.)-.25 F(The)5.155 E F2<ad45>2.655 E F0 .155
 (option sets the ending)2.655 F .195
 (time for data. If the starting time is before the ending time, then an)
 144 213.6 R 2.695(yd)-.15 G .196(ata with a time stamp before)-2.695 F
@@ -379,14 +373,14 @@ the starting time is after the ending)144 225.6 R .194(time, then an)144
 ill be ignored. This scheme allo)-2.694 F .195(ws time)-.25 F(windo)144
 249.6 Q 5.376(wing both inside and outside a speci\214ed interv)-.25 F
 7.876(al. Def)-.25 F(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)7.876 E F0(=)7.876
-E(1962/2/21/10/30/0.)144 261.6 Q F2<ad44>108 278.4 Q F3(decimate)144
-278.4 Q F0 .407(Sets the decimation of the output data. By def)144 290.4
-R .407(ault \(i.e.)-.1 F F3(decimate)2.907 E F0 .408(=1\), e)B -.15(ve)
--.25 G .408(ry a).15 F -.25(va)-.2 G .408(ilable data record is).25 F
+E(1962/2/21/10/30/0.)144 261.6 Q F2<ad44>108 278.4 Q F3(decimate)23.08 E
+F0 .407(Sets the decimation of the output data. By def)144 290.4 R .407
+(ault \(i.e.)-.1 F F3(decimate)2.907 E F0 .408(=1\), e)B -.15(ve)-.25 G
+.408(ry a).15 F -.25(va)-.2 G .408(ilable data record is).25 F
 (output. If)144 302.4 Q F3(decimate)2.5 E F0(>1, then only e)A -.15(ve)
 -.25 G(ry ").15 E F3(decimate)A F0("th record will be output. Def)A
 (ault:)-.1 E F3(decimate)2.5 E F0(=1.)A F2<ad45>108 319.2 Q F3
-(yr/mo/da/hr/mn/sc)144 319.2 Q F0 .155
+(yr/mo/da/hr/mn/sc)23.63 E F0 .155
 (This option sets the ending time for data allo)144 331.2 R .155
 (wed in the input data.)-.25 F(The)5.155 E F2<ad42>2.655 E F0 .155
 (option sets the starting)2.655 F .195
@@ -398,8 +392,8 @@ the starting time is after the ending)144 355.2 R .194(time, then an)144
 ill be ignored. This scheme allo)-2.694 F .195(ws time)-.25 F(windo)144
 379.2 Q 5.376(wing both inside and outside a speci\214ed interv)-.25 F
 7.876(al. Def)-.25 F(ault:)-.1 E F3(yr/mo/da/hr/mn/sc)7.876 E F0(=)7.876
-E(2062/2/21/10/30/0.)144 391.2 Q F2<ad46>108 408 Q F3(format)144 408 Q
-F0 .919(Sets the format for the input sw)144 420 R .919
+E(2062/2/21/10/30/0.)144 391.2 Q F2<ad46>108 408 Q F3(format)24.19 E F0
+.919(Sets the format for the input sw)144 420 R .919
 (ath sonar data using)-.1 F F2(MBIO)3.419 E F0(inte)3.42 E .92
 (ger format identi\214ers.)-.15 F .92(This pro-)5.92 F .502
 (gram uses the)144 432 R F2(MBIO)3.002 E F0 .501
@@ -410,14 +404,14 @@ F0 .919(Sets the format for the input sw)144 420 R .919
 .694(and their identi\214er v)3.194 F .694(alues is gi)-.25 F -.15(ve)
 -.25 G 3.194(ni).15 G(n)-3.194 E(the)144 456 Q F2(MBIO)2.5 E F0
 (manual page. Def)2.5 E(ault:)-.1 E F3(format)2.5 E F0 2.5(=1)2.5 G(1.)
--2.5 E F2<ad47>108 472.8 Q F3(delimiter)144 472.8 Q F0 .079(Sets the ch\
-aracter\(s\) used to separate output \214elds when ascii columns are ou\
-tput. Def)144 484.8 R .078(ault: tabs are)-.1 F(used as delimiters.)144
+-2.5 E F2<ad47>108 472.8 Q F3(delimiter)22.52 E F0 .079(Sets the charac\
+ter\(s\) used to separate output \214elds when ascii columns are output\
+. Def)144 484.8 R .078(ault: tabs are)-.1 F(used as delimiters.)144
 496.8 Q F2<ad48>108 513.6 Q F0 .162(This "help" \215ag cause the progra\
-m to print out a description of its operation and then e)144 513.6 R
-.162(xit immedi-)-.15 F(ately)144 525.6 Q(.)-.65 E F2<ad49>108 542.4 Q
-F3(\214le)144 542.4 Q F0 .313(Sets the input \214lename. If)144 554.4 R
-F3(format)2.813 E F0 2.813(>0\()2.813 G .313(set with the)-2.813 F F2
+m to print out a description of its operation and then e)22.52 F .162
+(xit immedi-)-.15 F(ately)144 525.6 Q(.)-.65 E F2<ad49>108 542.4 Q F3
+(\214le)26.41 E F0 .313(Sets the input \214lename. If)144 554.4 R F3
+(format)2.813 E F0 2.813(>0\()2.813 G .313(set with the)-2.813 F F2
 <ad46>2.813 E F0 .313(option\) then the sw)2.813 F .312
 (ath sonar data contained)-.1 F(in)144 566.4 Q F3(\214le)2.955 E F0 .455
 (is read and processed. If)2.955 F F3(format)2.956 E F0 2.956(<0)2.956 G
@@ -438,9 +432,9 @@ G .568(th sonar format supported by).1 F F2(MBIO)144 650.4 Q F0 3.428
 .928(and their identi\214er)3.428 F -.25(va)144 662.4 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
 (manual page.)2.5 E(Def)5 E(ault:)-.1 E F3(\214le)2.5 E F0 2.5(=")2.5 G
-(datalist.mb-1".)-2.5 E F2<ad4b>108 679.2 Q F3(kind)144 679.2 Q F0 .62(\
-This option sets the type of data record used as the trigger for output\
-. By def)144 691.2 R .62(ault, data are output)-.1 F .508
+(datalist.mb-1".)-2.5 E F2<ad4b>108 679.2 Q F3(kind)22.52 E F0 .62(This\
+ option sets the type of data record used as the trigger for output. By\
+ def)144 691.2 R .62(ault, data are output)-.1 F .508
 (when the record type listed as the "na)144 703.2 R(vig)-.2 E .509
 (ation source" for a particular data format is encountered.)-.05 F(The)
 144 715.2 Q F2<ad4b>2.991 E F0 .491(option causes output to be k)2.991 F
@@ -504,20 +498,19 @@ BP
 (put without modi\214cation, whereas other v)144 408 R .27
 (alues \(e.g. position\) will be interpolated onto the time of)-.25 F
 (the attitude record.)144 420 Q(This option supercedes the)5 E F1<ad4e>
-2.5 E F0(option.)2.5 E F1<ad4c>108 436.8 Q F2(lon\215ip)144 436.8 Q F0
-.572(Sets the range of the longitude v)144 448.8 R .572(alues returned.)
--.25 F(If)5.572 E F2(lon\215ip)3.072 E F0 .572
-(=\2551 then the longitude v)B .571(alues will be in)-.25 F .488
-(the range from \255360 to 0 de)144 460.8 R .488(grees. If)-.15 F F2
-(lon\215ip)2.988 E F0 .488(=0 then the longitude v)B .489
-(alues will be in the range from)-.25 F 1.383(\255180 to 180 de)144
-472.8 R 1.383(grees. If)-.15 F F2(lon\215ip)3.882 E F0 1.382
-(=1 then the longitude v)B 1.382
+2.5 E F0(option.)2.5 E F1<ad4c>108 436.8 Q F2(lon\215ip)23.63 E F0 .572
+(Sets the range of the longitude v)144 448.8 R .572(alues returned.)-.25
+F(If)5.572 E F2(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
+.571(alues will be in)-.25 F .488(the range from \255360 to 0 de)144
+460.8 R .488(grees. If)-.15 F F2(lon\215ip)2.988 E F0 .488
+(=0 then the longitude v)B .489(alues will be in the range from)-.25 F
+1.383(\255180 to 180 de)144 472.8 R 1.383(grees. If)-.15 F F2(lon\215ip)
+3.882 E F0 1.382(=1 then the longitude v)B 1.382
 (alues will be in the range from 0 to 360)-.25 F(de)144 484.8 Q 2.5
 (grees. Def)-.15 F(ault:)-.1 E F2(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
-E F1<ad4e>108 501.6 Q F2(navc)144 501.6 Q(hannel)-.15 E F0(Sets)144
-513.6 Q F1(mbna)2.577 E(vlist)-.25 E F0 .077(to look for na)2.577 F(vig)
--.2 E .077(ation in na)-.05 F(vig)-.2 E .078
+E F1<ad4e>108 501.6 Q F2(navc)23.08 E(hannel)-.15 E F0(Sets)144 513.6 Q
+F1(mbna)2.577 E(vlist)-.25 E F0 .077(to look for na)2.577 F(vig)-.2 E
+.077(ation in na)-.05 F(vig)-.2 E .078
 (ation records rather than the record type listed as the)-.05 F("na)144
 525.6 Q(vig)-.2 E .011(ation source" for a particular data format. Sw)
 -.05 F .011(ath data formats may contain synchronous na)-.1 F(v-)-.2 E
@@ -556,7 +549,7 @@ E F0 .845(will output nothing. T)144 645.6 R 3.345(od)-.8 G .845
 F1<ad4e>3.193 E F0 .693
 (option to get counts of all data record types in the \214le. This)3.193
 F(option is superceded by the)144 669.6 Q F1<ad4b>2.5 E F0(option.)2.5 E
-F1<ad4f>108 686.4 Q F2(output_format)144 686.4 Q F0 .389
+F1<ad4f>108 686.4 Q F2(output_format)22.52 E F0 .389
 (Determines the form of the output.)144 698.4 R F2(Output_format)2.888 E
 F0 .388(is a string composed of one or more of the fol-)2.888 F(lo)144
 710.4 Q(wing characters:)-.25 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G
@@ -597,47 +590,47 @@ E F1(Y)180 396 Q F0(for latitude \(decimal de)5 E(grees\))-.15 E F1(y)
 E(Def)144 432 Q(ault)-.1 E/F2 10/Times-Italic@0 SF(output_format)2.5 E
 F0(=)2.5 E F1(tMXYHs)2.5 E F0
 (\(time, unix time, latitude, longitude, heading, speed\).)2.5 E F1
-<ad52>108 448.8 Q F2(west/east/south/north)144 448.8 Q F0 .678
+<ad52>108 448.8 Q F2(west/east/south/north)23.08 E F0 .678
 (Sets the longitude and latitude bounds within which sw)144 460.8 R .679
-(ath sonar data will be read. Only the data)-.1 F
-(which lies within these bounds will be read.)144 472.8 Q(Def)5 E(ault:)
--.1 E F2(west)2.5 E F0(=\255360, east)A F2(=360)A F0(,)A F2(south)2.5 E
-F0(=\25590,)A F2(north)2.5 E F0(=90.)A F1<ad53>108 489.6 Q F2(speed)144
-489.6 Q F0 .532
+(ath sonar data will be read. Only the data)-.1 F .098
+(which lies within these bounds will be read.)144 472.8 R(Def)5.097 E
+(ault:)-.1 E F2(west)2.597 E F0 .097(=\255360, east)B F2(=360)A F0(,)A
+F2(south)2.597 E F0(=\25590,)A F2(north)2.597 E F0(=90.)A F1<ad53>108
+489.6 Q F2(speed)24.74 E F0 .532
 (Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)144 501.6 R
-.531(wed in the input data; pings associated)-.25 F
+.532(wed in the input data; pings associated)-.25 F
 (with a smaller ship speed will not be copied. Def)144 513.6 Q(ault:)-.1
 E F2(speed)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1<ad54>108 530.4 Q F2(time)
-144 530.4 Q(gap)-.4 E F0 .478(Sets the maximum time g)144 542.4 R .479
-(ap in minutes between adjacent pings allo)-.05 F .479
+23.63 E(gap)-.4 E F0 .479(Sets the maximum time g)144 542.4 R .479
+(ap in minutes between adjacent pings allo)-.05 F .478
 (wed before the data is consid-)-.25 F(ered to ha)144 554.4 Q .3 -.15
 (ve a g)-.2 H(ap. Def).1 E(ault:)-.1 E F2(time)2.5 E(gap)-.4 E F0 2.5
-(=1)2.5 G(.)-2.5 E F1<ad56>108 571.2 Q F0(Normally)144 571.2 Q(,)-.65 E
-F1(mbna)3.01 E(vlist)-.25 E F0 -.1(wo)3.01 G .51
+(=1)2.5 G(.)-2.5 E F1<ad56>108 571.2 Q F0(Normally)23.08 E(,)-.65 E F1
+(mbna)3.01 E(vlist)-.25 E F0 -.1(wo)3.01 G .51
 (rks "silently" without outputting an).1 F .51
 (ything to the stderr stream.)-.15 F .51(If the)5.51 F F1<ad56>3.01 E F0
 .928(\215ag is gi)144 583.2 R -.15(ve)-.25 G .928(n, then).15 F F1(mbna)
 3.428 E(vlist)-.25 E F0 -.1(wo)3.428 G .928(rks in a "v).1 F .928
 (erbose" mode and outputs the program v)-.15 F .928(ersion being)-.15 F
 (used and all error status messages.)144 595.2 Q F1<ad5a>108 612 Q F2
-(se)144 612 Q(gment)-.4 E F0 .678(Causes the ascii output of dif)144 624
-R .678(ferent input sw)-.25 F .677
+(se)23.63 E(gment)-.4 E F0 .677(Causes the ascii output of dif)144 624 R
+.677(ferent input sw)-.25 F .678
 (ath \214les \(e.g. when a datalist is speci\214ed with the)-.1 F F1
-<ad49>3.177 E F0 .372(option\) to be separated by lines with)144 636 R
+<ad49>3.178 E F0 .373(option\) to be separated by lines with)144 636 R
 F2(se)2.873 E(gment)-.4 E F0 2.873(.I)C(f)-2.873 E F2(se)2.873 E(gment)
--.4 E F0 .373(is a single character)2.873 F 2.873(,t)-.4 G .373
-(hen the output is a)-2.873 F 1.252(multiple se)144 648 R 1.252
+-.4 E F0 .373(is a single character)2.873 F 2.873(,t)-.4 G .372
+(hen the output is a)-2.873 F 1.251(multiple se)144 648 R 1.251
 (gment \214le of the sort accepted by the)-.15 F F1(GMT)3.751 E F0
-(program)3.751 E F1(psxy)3.751 E F0 6.251(.T)C 1.251(his option only w)
--6.251 F(orks)-.1 E .1(with ascii output, and is thus disabled when the)
+(program)3.751 E F1(psxy)3.752 E F0 6.252(.T)C 1.252(his option only w)
+-6.252 F(orks)-.1 E .1(with ascii output, and is thus disabled when the)
 144 660 R F1<ad41>2.6 E F0 .1
 (option is speci\214ed. The most common usage is)2.6 F F1<ad5a>144 672 Q
 F0(I>)A F1(.)A/F3 10.95/Times-Bold@0 SF(EXAMPLES)72 700.8 Q F0 1.837
 (Suppose one wishes to obtain a na)108 712.8 R(vig)-.2 E 1.837
-(ation list from a Simrad EM300 data \214le in the MB)-.05 F 1.837
-(ARI format)-.35 F 1.986
-(\(MBIO id 57\) called mbari_1998_107_msn.mb57. T)108 724.8 R 4.486(oo)
--.8 G 1.987(btain a listing with time in unix second forms)-4.486 F
+(ation list from a Simrad EM300 data \214le in the MB)-.05 F 1.838
+(ARI format)-.35 F 1.987
+(\(MBIO id 57\) called mbari_1998_107_msn.mb57. T)108 724.8 R 4.487(oo)
+-.8 G 1.986(btain a listing with time in unix second forms)-4.487 F
 (MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(4)204.835 E 0
 Cg EP
 %%Page: 5 5
@@ -662,10 +655,10 @@ BP
 -.25 G 3.294(st).15 G .794
 (he data record types and numerical identi\214ers used within)-3.294 F
 /F2 10/Times-Bold@0 SF(MB-System)3.294 E F0 3.294(.U)C .794
-(sers can specify)-3.294 F(that)108 280.8 Q F2(mbna)3.375 E(vlist)-.25 E
-F0 .875(output be k)3.375 F -.15(ey)-.1 G .875
+(sers can specify)-3.294 F(that)108 280.8 Q F2(mbna)3.376 E(vlist)-.25 E
+F0 .876(output be k)3.376 F -.15(ey)-.1 G .875
 (ed to the time stamps of particular record types by using the).15 F F2
-<ad4b>3.376 E/F3 10/Times-Italic@0 SF(kind)A F0(option)3.376 E(where)108
+<ad4b>3.375 E/F3 10/Times-Italic@0 SF(kind)A F0(option)3.375 E(where)108
 292.8 Q F3(kind)2.5 E F0
 (corresponds to the desired record type identi\214er from this table.)
 2.5 E(MB_D)120.5 316.8 Q -1.21 -1.11(AT A)-.4 H 83.56(_KINDS 54)1.11 F

@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Sun Jul 13 22:22:41 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sat Jul 19 11:23:10 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -283,7 +277,7 @@ nd install require a parallel "w)108 350.4 R 1.338(orld" \214le to)-.1 F
 -2.5 E(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 415.2 Q
 (Lamont-Doherty Earth Observ)113 427.2 Q(atory)-.25 E F1(OPTIONS)72 456
 Q F2<ad43>108 468 Q F0 1.072(Sets the color palette \(CPT\) \214le whic\
-h controls the color of the plot.)144 468 R 1.071
+h controls the color of the plot.)23.08 F 1.071
 (See documentation of the)6.072 F .329(GMT package for a complete descr\
 iption of cpt \214les. If the R, G, and B v)144 480 R .33
 (alues in the CPT \214le are)-.25 F .266(all equal for each data le)144
@@ -292,14 +286,14 @@ iption of cpt \214les. If the R, G, and B v)144 480 R .33
 .265(el. Oth-)-.15 F
 (erwise, the output TIFF image will be 24 bits per pix)144 504 Q(el.)
 -.15 E F2<ad48>108 520.8 Q F0 .162(This "help" \215ag cause the program\
- to print out a description of its operation and then e)144 520.8 R .162
+ to print out a description of its operation and then e)22.52 F .162
 (xit immedi-)-.15 F(ately)144 532.8 Q(.)-.65 E F2<ad49>108 549.6 Q F3
-(gr)144 549.6 Q(d\214le)-.37 E F0 1.299
+(gr)26.41 E(d\214le)-.37 E F0 1.299
 (Sets the name of the gridded data \214le to be plotted.)144 561.6 R
 1.298(The data must be in a form acceptable to)6.298 F F2(GMT)144 573.6
 Q F0 -.15(ve)2.5 G(rsion 3 programs \(see the).15 E F2(GMT)2.5 E F0
 (Cookbook & T)2.5 E(echnical Reference\).)-.7 E F2<ad4b>108 590.4 Q F3
-(intensity_\214le)144 590.4 Q F0 .599
+(intensity_\214le)22.52 E F0 .599
 (Sets the name of the gridded data \214le containing intensity v)144
 602.4 R .599(alues to be used for shading the map.)-.25 F(Alternati)144
 614.4 Q -.15(ve)-.25 G(ly).15 E(,)-.65 E F3(gr)2.704 E(d\214le)-.37 E F0
@@ -307,14 +301,13 @@ Q F0 -.15(ve)2.5 G(rsion 3 programs \(see the).15 E F2(GMT)2.5 E F0
 e used together)2.704 F 2.703(.I)-.55 G 2.703(fa)-2.703 G .821(list of \
 \214les is supplied, the intensity \214les must conform in order to the\
  list of data grid \214les the)144 626.4 R(y)-.15 E(will shade.)144
-638.4 Q F2<ad4f>108 655.2 Q F3 -.45(ro)144 655.2 S(ot).45 E F0 .423(Set\
-s the root used to construct the \214lename of the output shellscript \
-\()144 667.2 R F3 -.45(ro)C(ot).45 E F0 .422
-(.cmd\) and names of \214les)B .156
+638.4 Q F2<ad4f>108 655.2 Q F3 -.45(ro)22.52 G(ot).45 E F0 .423(Sets th\
+e root used to construct the \214lename of the output shellscript \()144
+667.2 R F3 -.45(ro)C(ot).45 E F0 .422(.cmd\) and names of \214les)B .156
 (created when the shellscript is run.)144 679.2 R .157
 (Normally the name of the input grid \214le or grid \214le list is used)
 5.157 F(as the)144 691.2 Q F3 -.45(ro)2.5 G(ot).45 E F0(.)A F2<ad56>108
-708 Q F0(Selects v)144 708 Q(erbose mode [Def)-.15 E
+708 Q F0(Selects v)23.08 E(erbose mode [Def)-.15 E
 (ault runs "silently"].)-.1 E(MB-System 5.0)72 768 Q(28 September 2013)
 131.775 E(1)190.115 E 0 Cg EP
 %%Page: 2 2
@@ -323,9 +316,9 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbgrdtif)72 48 Q 150.09(f\(1\) MB-System)-.25 F
 150.09(5.0 mbgrdtif)2.5 F(f\(1\))-.25 E/F1 10/Times-Bold@0 SF<ad57>108
-84 Q F0(The)144 84 Q F1(-W)3.442 E F0 .942(option causes a "w)3.442 F
-.942(orld" \214le to be generated parallel to the GeoT)-.1 F(if)-.35 E
-3.441(fi)-.25 G .941(mage with a ".tfw")-3.441 F(suf)144 96 Q 2.893
+84 Q F0(The)20.3 E F1(-W)3.442 E F0 .942(option causes a "w)3.442 F .942
+(orld" \214le to be generated parallel to the GeoT)-.1 F(if)-.35 E 3.441
+(fi)-.25 G .941(mage with a ".tfw")-3.441 F(suf)144 96 Q 2.893
 (\214x. Some softw)-.25 F 2.893(are packages \(e.g. W)-.1 F 2.894
 (infrog\) do not recognize the coordinate information)-.4 F
 (embedded in the GeoT)144 108 Q(if)-.35 E 2.5<668c>-.25 G

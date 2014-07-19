@@ -165,17 +165,21 @@
 #include "gsf_indx.h"
 
 /* Macros required for this module */
-// #undef fseek
-// #undef ftell
-// #if (defined _WIN32) && (defined _MSC_VER)
-// #define fseek(x, y, z) _fseeki64((x), (y), (z))
-// #define ftell(x)   _ftelli64((x))
-// #else  // Linux, MingW, MacOS
-// #undef fopen
-// #define fopen(x, y)  fopen64((x), (y))
-// #define fseek(x, y, z) fseeko64((x), (y), (z))
-// #define ftell(x)   ftello64((x))
-// #endif
+#ifndef USE_DEFAULT_FILE_FUNCTIONS
+
+#undef fseek
+#undef ftell
+#if (defined _WIN32) && (defined _MSC_VER)
+#define fseek(x, y, z) _fseeki64((x), (y), (z))
+#define ftell(x)   _ftelli64((x))
+#else  // Linux, MingW, MacOS
+#undef fopen
+#define fopen(x, y)  fopen64((x), (y))
+#define fseek(x, y, z) fseeko64((x), (y), (z))
+#define ftell(x)   ftello64((x))
+#endif
+
+#endif
 
 #define GSF_FILL_SIZE 8                   /* gsf packaging with no checksum */
 #define GSF_FILL_SIZE_CHECKSUM 12         /* gsf packaging with checksum */
@@ -248,12 +252,17 @@ gsfStat (const char *filename, long long *sz)
         return -1;
     }
 
-#if (defined __WINDOWS__) || (defined __MINGW32__)
+#ifdef USE_DEFAULT_FILE_FUNCTIONS
+    struct stat stbuf;
+    rc = stat(filename, &stbuf);
+#else
+#ifdef (defined __WINDOWS__) || (defined __MINGW32__)
     struct _stati64    stbuf;
     rc = _stati64(filename, &stbuf);
 #else
     struct stat64      stbuf;
     rc = stat64(filename, &stbuf);
+#endif
 #endif
 
     if (!rc)
