@@ -83,7 +83,11 @@ mbinfo_SOURCES = mbinfo.c
 mbset_SOURCES = mbset.c
 
 mbprocess_SOURCES = mbprocess.c
-mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+if BUILD_GSF
+  mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
+else
+  mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+endif
 
 mbcopy_SOURCES = mbcopy.c
 if BUILD_GSF

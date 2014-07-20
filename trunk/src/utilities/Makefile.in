@@ -216,7 +216,11 @@ mbpreprocess_OBJECTS = $(am_mbpreprocess_OBJECTS)
 mbpreprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbprocess_OBJECTS = mbprocess.$(OBJEXT)
 mbprocess_OBJECTS = $(am_mbprocess_OBJECTS)
-mbprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
+@BUILD_GSF_FALSE@mbprocess_DEPENDENCIES =  \
+@BUILD_GSF_FALSE@	${top_builddir}/src/mbaux/libmbaux.la
+@BUILD_GSF_TRUE@mbprocess_DEPENDENCIES =  \
+@BUILD_GSF_TRUE@	${top_builddir}/src/gsf/libmbgsf.la \
+@BUILD_GSF_TRUE@	${top_builddir}/src/mbaux/libmbaux.la
 am_mbps_OBJECTS = mbps.$(OBJEXT)
 mbps_OBJECTS = $(am_mbps_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -570,7 +574,8 @@ mbdatalist_SOURCES = mbdatalist.c
 mbinfo_SOURCES = mbinfo.c
 mbset_SOURCES = mbset.c
 mbprocess_SOURCES = mbprocess.c
-mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+@BUILD_GSF_FALSE@mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+@BUILD_GSF_TRUE@mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
 mbcopy_SOURCES = mbcopy.c
 @BUILD_GSF_TRUE@mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
 mblist_SOURCES = mblist.c
