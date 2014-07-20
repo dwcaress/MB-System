@@ -313,7 +313,7 @@ mbset.o:	mbset.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 mbsslayout.o:	mbsslayout.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux mbsslayout.c
 mbprocess.o:	mbprocess.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
-	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbprocess.c
+	$(CC) -c $(CFLAGS) -I../mbio -I../mbaux -I$(GSFINCDIR) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbprocess.c
 mbextractsegy.o:	mbextractsegy.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h ../mbio/mb_segy.h
 	$(CC) -c $(CFLAGS) -I../mbio mbextractsegy.c
 mbsegylist.o:	mbsegylist.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h ../mbio/mb_segy.h
