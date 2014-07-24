@@ -1604,6 +1604,10 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		mb_ping->depth_corrector = 0.0;
 		}
+	    if (mb_ping->heave == GSF_NULL_HEAVE)
+		{
+		mb_ping->heave = 0.0;
+		}
 
 	    /* get transducer_depth */
 	    *transducer_depth = mb_ping->depth_corrector + mb_ping->heave;

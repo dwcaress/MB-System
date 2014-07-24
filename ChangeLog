@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2200       July 24, 2014
 * Version 5.4.2199       July 19, 2014
   Version 5.4.2196       July 14, 2014
   Version 5.4.2195       July 9, 2014
@@ -183,6 +184,11 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2200 (July 24, 2014)
+
+Format 121 (MBF_GSFGENMB): Fixed bug in which null sensor depth and altitude
+values are handled incorrectly.
 
 -----> 5.4.2199 (July 20, 2014)
 
