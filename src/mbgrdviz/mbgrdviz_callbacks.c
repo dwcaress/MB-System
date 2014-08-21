@@ -1922,8 +1922,8 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
                         mbv_modelazimuth3d = 0.0;
                         mbv_viewelevation3d = 90.0;
                         mbv_viewazimuth3d = 0.0;
-                        mbv_illuminate_magnitude = 5.0;
-                        mbv_illuminate_elevation = 30.0;
+                        mbv_illuminate_magnitude = 1.0;
+                        mbv_illuminate_elevation = 5.0;
                         mbv_illuminate_azimuth = 90.0;
                         mbv_slope_magnitude = 1.0;
                         mbv_overlay_shade_magnitude = 1.0;
@@ -2900,7 +2900,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 				user_ptr,host,date);
 			fprintf(sfp, "## Number of routes: %d\n",nroutewrite);
 			fprintf(sfp, "## Route point format:\n");
-			fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <waypoint (boolean)> <topography (m)> <bearing (deg)> <lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n");
+			fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)> <bearing (deg)> <lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n");
 			}
 
 		/* output error message */

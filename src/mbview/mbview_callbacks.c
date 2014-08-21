@@ -689,8 +689,8 @@ int mbview_reset(size_t instance)
 		data->viewbounds[3] = 0;
 
 		/* shading controls */
-		data->illuminate_magnitude = 5.0;
-		data->illuminate_elevation = 30.0;
+		data->illuminate_magnitude = 1.0;
+		data->illuminate_elevation = 5.0;
 		data->illuminate_azimuth = 90.0;
 		data->slope_magnitude = 1.0;
 		data->overlay_shade_magnitude = 1.0;
@@ -2164,7 +2164,8 @@ int mbview_open(int verbose, size_t instance, int *error)
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_muted, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_gray, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_flat, args, ac);
-		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_sealevel, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_sealevel1, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_sealevel2, args, ac);
 		XtSetValues(view->mb3dview.separator1, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_profile, args, ac);
 		XtSetValues(view->mb3dview.mbview_cascadeButton_controls, args, ac);
@@ -6486,7 +6487,7 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_flat\n");
 /*------------------------------------------------------------------------------*/
 
 void
-do_mbview_colortable_sealevel( Widget w, XtPointer client_data, XtPointer call_data)
+do_mbview_colortable_sealevel1( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
@@ -6506,25 +6507,25 @@ do_mbview_colortable_sealevel( Widget w, XtPointer client_data, XtPointer call_d
     /* get mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
     	{
-	data->primary_colortable = MBV_COLORTABLE_SEALEVEL;
+	data->primary_colortable = MBV_COLORTABLE_SEALEVEL1;
         set_mbview_colortable(instance, data->primary_colortable);
         set_mbview_colortable_mode(instance, data->primary_colortable_mode);
 	}
     else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
     	{
-	data->slope_colortable = MBV_COLORTABLE_SEALEVEL;
+	data->slope_colortable = MBV_COLORTABLE_SEALEVEL1;
         set_mbview_colortable(instance, data->slope_colortable);
         set_mbview_colortable_mode(instance, data->slope_colortable_mode);
 	}
     else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
     	{
-	data->secondary_colortable = MBV_COLORTABLE_SEALEVEL;
+	data->secondary_colortable = MBV_COLORTABLE_SEALEVEL1;
         set_mbview_colortable(instance, data->secondary_colortable);
         set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
 	}
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_colortable_sealevel instance:%zu\n", instance);
+fprintf(stderr,"do_mbview_colortable_sealevel1 instance:%zu\n", instance);
 
     /* clear color status array */
     mbview_setcolorparms(instance);
@@ -6532,7 +6533,59 @@ fprintf(stderr,"do_mbview_colortable_sealevel instance:%zu\n", instance);
 
     /* draw */
 if (mbv_verbose >= 2)
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_sealevel\n");
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_sealevel1\n");
+    mbview_plotlowhigh(instance);
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_colortable_sealevel2( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    size_t	instance;
+    struct mbview_world_struct *view;
+    struct mbview_struct *data;
+
+    /* get instance */
+    ac = 0;
+    XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+    XtGetValues(w, args, ac);
+
+    /* get view */
+    view = &(mbviews[instance]);
+    data = &(view->data);
+
+    /* get mode value */
+    if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+    	{
+	data->primary_colortable = MBV_COLORTABLE_SEALEVEL2;
+        set_mbview_colortable(instance, data->primary_colortable);
+        set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+	}
+    else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+    	{
+	data->slope_colortable = MBV_COLORTABLE_SEALEVEL2;
+        set_mbview_colortable(instance, data->slope_colortable);
+        set_mbview_colortable_mode(instance, data->slope_colortable_mode);
+	}
+    else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+    	{
+	data->secondary_colortable = MBV_COLORTABLE_SEALEVEL2;
+        set_mbview_colortable(instance, data->secondary_colortable);
+        set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
+	}
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_colortable_sealevel2 instance:%zu\n", instance);
+
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
+
+    /* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_sealevel2\n");
     mbview_plotlowhigh(instance);
 }
 
@@ -7314,11 +7367,18 @@ fprintf(stderr,"do_mbview_colortable: instance:%zu mode:%d\n", instance, mode);
 	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_colortable_flat,
 				    value, False);
 
-	if (mode == MBV_COLORTABLE_SEALEVEL)
+	if (mode == MBV_COLORTABLE_SEALEVEL1)
 		value = True;
 	else
 		value = False;
-	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_colortable_sealevel,
+	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_colortable_sealevel1,
+				    value, False);
+
+	if (mode == MBV_COLORTABLE_SEALEVEL2)
+		value = True;
+	else
+		value = False;
+	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_colortable_sealevel2,
 				    value, False);
 
 }

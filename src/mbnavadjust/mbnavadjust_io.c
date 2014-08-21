@@ -127,12 +127,6 @@ int mbnavadjust_new_project(int verbose, char *projectpath,
                 strcat(project->datadir,".dir");
                 strcpy(project->logfile,project->datadir);
                 strcat(project->logfile,"/log.txt");
-fprintf(stderr,"projectpath:%s nameptr:%s strlen:%ld\n",projectpath,nameptr,strlen(nameptr));
-fprintf(stderr,"project->path:%s\n",project->path);
-fprintf(stderr,"project->name:%s\n",project->name);
-fprintf(stderr,"project->home:%s\n",project->home);
-fprintf(stderr,"project->datadir:%s\n",project->datadir);
-fprintf(stderr,"project->logfile:%s\n",project->logfile);
 
                 /* no new project if file or directory already exist */
                 if (stat(project->home,&statbuf) == 0)
@@ -315,12 +309,6 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
                 strcat(project->datadir,".dir");
                 strcpy(project->logfile,project->datadir);
                 strcat(project->logfile,"/log.txt");
-fprintf(stderr,"projectpath:%s nameptr:%s strlen:%ld\n",projectpath,nameptr,strlen(nameptr));
-fprintf(stderr,"project->path:%s\n",project->path);
-fprintf(stderr,"project->name:%s\n",project->name);
-fprintf(stderr,"project->home:%s\n",project->home);
-fprintf(stderr,"project->datadir:%s\n",project->datadir);
-fprintf(stderr,"project->logfile:%s\n",project->logfile);
 
                 /* check if project exists */
                 if (stat(project->home,&statbuf) != 0)

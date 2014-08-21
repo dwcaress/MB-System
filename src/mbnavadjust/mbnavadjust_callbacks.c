@@ -1199,22 +1199,22 @@ void do_update_status()
 				MAX(iselect+1-5, 1));
 			}
 		}
- 	else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
+ 	else if (mbna_view_list == MBNA_VIEW_LIST_MEDIOCRECROSSINGS)
 		{
 		if (mbna_view_mode == MBNA_VIEW_MODE_ALL)
-			sprintf(string,">25%% Overlap Crossings:");
+			sprintf(string,">10%% Overlap Crossings:");
 		else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
-			sprintf(string,">25%% Overlap Crossings of Survey %d:",mbna_survey_select);
+			sprintf(string,">10%% Overlap Crossings of Survey %d:",mbna_survey_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
-			sprintf(string,">25%% Overlap Crossings of File %d:%d:",mbna_survey_select,mbna_file_select);
+			sprintf(string,">10%% Overlap Crossings of File %d:%d:",mbna_survey_select,mbna_file_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
-			sprintf(string,">25%% Overlap Crossings with Survey %d:",mbna_survey_select);
+			sprintf(string,">10%% Overlap Crossings with Survey %d:",mbna_survey_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
-			sprintf(string,">25%% Overlap Crossings with File %d:%d:",mbna_survey_select,mbna_file_select);
+			sprintf(string,">10%% Overlap Crossings with File %d:%d:",mbna_survey_select,mbna_file_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
-			sprintf(string,">25%% Overlap Crossings with Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
+			sprintf(string,">10%% Overlap Crossings with Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
 		else
-			sprintf(string,">25%% Overlap Crossings:");
+			sprintf(string,">10%% Overlap Crossings:");
 		set_label_string(label_listdata,string);
 		if (mbna_verbose > 0)
 			fprintf(stderr,"%s\n",string);
@@ -1225,7 +1225,7 @@ void do_update_status()
 			for (i=0;i<project.num_crossings;i++)
 				{
 				crossing = &(project.crossings[i]);
-				if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD
+				if (crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD
 					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
 							&& mbna_survey_select == project.files[crossing->file_id_1].block
@@ -1255,7 +1255,126 @@ void do_update_status()
 			for (i=0;i<project.num_crossings;i++)
 				{
 				crossing = &(project.crossings[i]);
-				if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD
+				if (crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD
+					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+							&& mbna_survey_select == project.files[crossing->file_id_1].block
+							&& mbna_survey_select == project.files[crossing->file_id_2].block)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_file_select == crossing->file_id_2)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_section_select == crossing->section_1)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
+							&& mbna_file_select == crossing->file_id_2
+							&& mbna_section_select == crossing->section_2)))
+					{
+					if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+						status_char = 'U';
+					else if (crossing->status == MBNA_CROSSING_STATUS_SET)
+						status_char = '*';
+					else
+						status_char = '-';
+					if (crossing->truecrossing == MB_NO)
+						truecrossing = ' ';
+					else
+						truecrossing = 'X';
+					sprintf(string,"%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d",
+						status_char, truecrossing, i,
+						project.files[crossing->file_id_1].block,
+						crossing->file_id_1,
+						crossing->section_1,
+						project.files[crossing->file_id_2].block,
+						crossing->file_id_2,
+						crossing->section_2,
+						crossing->overlap,
+						crossing->num_ties);
+    					xstr[num_crossings] = XmStringCreateLocalized(string);
+					if (mbna_verbose > 0)
+						fprintf(stderr,"%s\n",string);
+					if (i == mbna_crossing_select)
+						iselect = num_crossings;
+					num_crossings++;
+					}
+				}
+    			XmListAddItems(list_data,xstr,num_crossings,0);
+			for (i=0;i<num_crossings;i++)
+				{
+    				XmStringFree(xstr[i]);
+    				}
+    			free(xstr);
+			}
+		if (iselect != MBNA_SELECT_NONE)
+			{
+			XmListSelectPos(list_data,iselect+1,0);
+			XmListSetPos(list_data,
+				MAX(iselect+1-5, 1));
+			}
+		}
+ 	else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
+		{
+		if (mbna_view_mode == MBNA_VIEW_MODE_ALL)
+			sprintf(string,">25%% Overlap Crossings:");
+		else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
+			sprintf(string,">25%% Overlap Crossings of Survey %d:",mbna_survey_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
+			sprintf(string,">25%% Overlap Crossings of File %d:%d:",mbna_survey_select,mbna_file_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
+			sprintf(string,">25%% Overlap Crossings with Survey %d:",mbna_survey_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
+			sprintf(string,">25%% Overlap Crossings with File %d:%d:",mbna_survey_select,mbna_file_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
+			sprintf(string,">25%% Overlap Crossings with Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
+		else
+			sprintf(string,">25%% Overlap Crossings:");
+		set_label_string(label_listdata,string);
+		if (mbna_verbose > 0)
+			fprintf(stderr,"%s\n",string);
+		if (project.num_files > 0)
+			{
+			/* count crossings */
+			num_crossings = 0;
+			for (i=0;i<project.num_crossings;i++)
+				{
+				crossing = &(project.crossings[i]);
+				if (crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD
+					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+							&& mbna_survey_select == project.files[crossing->file_id_1].block
+							&& mbna_survey_select == project.files[crossing->file_id_2].block)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_file_select == crossing->file_id_2)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_section_select == crossing->section_1)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
+							&& mbna_file_select == crossing->file_id_2
+							&& mbna_section_select == crossing->section_2)))
+					num_crossings++;
+				}
+			xstr = (XmString *) malloc(num_crossings * sizeof(XmString));
+
+			/* generate list */
+			num_crossings = 0;
+			iselect = MBNA_SELECT_NONE;
+			for (i=0;i<project.num_crossings;i++)
+				{
+				crossing = &(project.crossings[i]);
+				if (crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD
 					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
 							&& mbna_survey_select == project.files[crossing->file_id_1].block
@@ -1344,7 +1463,7 @@ void do_update_status()
 			for (i=0;i<project.num_crossings;i++)
 				{
 				crossing = &(project.crossings[i]);
-				if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD
+				if (crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD
 					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
 							&& mbna_survey_select == project.files[crossing->file_id_1].block
@@ -1374,7 +1493,7 @@ void do_update_status()
 			for (i=0;i<project.num_crossings;i++)
 				{
 				crossing = &(project.crossings[i]);
-				if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD
+				if (crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD
 					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
 							&& mbna_survey_select == project.files[crossing->file_id_1].block
@@ -2033,6 +2152,9 @@ void do_update_status()
 			XtVaSetValues(pushButton_showcrossings,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_showmediocrecrossings,
+				XmNsensitive, True,
+				NULL);
 			XtVaSetValues(pushButton_showgoodcrossings,
 				XmNsensitive, True,
 				NULL);
@@ -2067,6 +2189,9 @@ void do_update_status()
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showcrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showmediocrecrossings,
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showgoodcrossings,
@@ -2105,6 +2230,9 @@ void do_update_status()
 			XtVaSetValues(pushButton_showcrossings,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_showmediocrecrossings,
+				XmNsensitive, True,
+				NULL);
 			XtVaSetValues(pushButton_showgoodcrossings,
 				XmNsensitive, True,
 				NULL);
@@ -2139,6 +2267,53 @@ void do_update_status()
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showcrossings,
+				XmNsensitive, False,
+				NULL);
+			XtVaSetValues(pushButton_showmediocrecrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showgoodcrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showbettercrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showtruecrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showties,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_naverr_previous,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_naverr_next,
+				XmNsensitive, True,
+				NULL);
+			if (project.num_crossings == project.num_crossings_analyzed)
+				XtVaSetValues(pushButton_naverr_nextunset,
+					XmNsensitive, False,
+					NULL);
+			else
+				XtVaSetValues(pushButton_naverr_nextunset,
+					XmNsensitive, True,
+					NULL);
+			}
+		else if (mbna_view_list == MBNA_VIEW_LIST_MEDIOCRECROSSINGS)
+			{
+			XtVaSetValues(pushButton_showsurveys,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showdata,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showsections,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showcrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showmediocrecrossings,
 				XmNsensitive, False,
 				NULL);
 			XtVaSetValues(pushButton_showgoodcrossings,
@@ -2182,6 +2357,9 @@ void do_update_status()
 			XtVaSetValues(pushButton_showcrossings,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_showmediocrecrossings,
+				XmNsensitive, True,
+				NULL);
 			XtVaSetValues(pushButton_showgoodcrossings,
 				XmNsensitive, False,
 				NULL);
@@ -2221,6 +2399,9 @@ void do_update_status()
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showcrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showmediocrecrossings,
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showgoodcrossings,
@@ -2264,6 +2445,9 @@ void do_update_status()
 			XtVaSetValues(pushButton_showcrossings,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_showmediocrecrossings,
+				XmNsensitive, True,
+				NULL);
 			XtVaSetValues(pushButton_showgoodcrossings,
 				XmNsensitive, True,
 				NULL);
@@ -2305,6 +2489,9 @@ void do_update_status()
 			XtVaSetValues(pushButton_showcrossings,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_showmediocrecrossings,
+				XmNsensitive, True,
+				NULL);
 			XtVaSetValues(pushButton_showgoodcrossings,
 				XmNsensitive, True,
 				NULL);
@@ -2340,6 +2527,9 @@ void do_update_status()
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_showcrossings,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_showmediocrecrossings,
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_showgoodcrossings,
@@ -3089,6 +3279,57 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		    do_update_naverr();
 		    }
 		}
+	else if (mbna_view_list == MBNA_VIEW_LIST_MEDIOCRECROSSINGS)
+		{
+		/* get selected crossing from list */
+		num_crossings = 0;
+		for (i=0;i<project.num_crossings;i++)
+			{
+			crossing = &(project.crossings[i]);
+			if (crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD
+				&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+						&& mbna_survey_select == project.files[crossing->file_id_1].block
+						&& mbna_survey_select == project.files[crossing->file_id_2].block)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+						&& mbna_file_select == crossing->file_id_1
+						&& mbna_file_select == crossing->file_id_2)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block
+							|| mbna_survey_select == project.files[crossing->file_id_2].block))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+						&& (mbna_file_select == crossing->file_id_1
+							|| mbna_file_select == crossing->file_id_2))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
+						&& mbna_file_select == crossing->file_id_1
+						&& mbna_section_select == crossing->section_1)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
+						&& mbna_file_select == crossing->file_id_2
+						&& mbna_section_select == crossing->section_2)))
+				{
+				if (num_crossings == position_list[0] - 1)
+					{
+					mbna_crossing_select = i;
+					mbna_tie_select = 0;
+					}
+				num_crossings++;
+				}
+			}
+
+		/* bring up naverr window if required */
+		if (mbna_naverr_load == MB_NO)
+		    {
+		    do_naverr_init();
+		    }
+
+		/* else if naverr window is up, load selected crossing */
+		else
+		    {
+		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+		    do_update_naverr();
+		    }
+		}
 	else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
 		{
 		/* get selected crossing from list */
@@ -3096,7 +3337,7 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		for (i=0;i<project.num_crossings;i++)
 			{
 			crossing = &(project.crossings[i]);
-			if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD
+			if (crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD
 				&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
 						&& mbna_survey_select == project.files[crossing->file_id_1].block
@@ -3147,7 +3388,7 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		for (i=0;i<project.num_crossings;i++)
 			{
 			crossing = &(project.crossings[i]);
-			if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD
+			if (crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD
 				&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
 						&& mbna_survey_select == project.files[crossing->file_id_1].block
@@ -4894,6 +5135,22 @@ do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data)
     acs = (XmAnyCallbackStruct*)call_data;
 
     mbna_view_list = MBNA_VIEW_LIST_CROSSINGS;
+    do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_view_showmediocrecrossings( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mbna_view_list = MBNA_VIEW_LIST_MEDIOCRECROSSINGS;
     do_update_status();
     if (project.modelplot == MB_YES)
 	{

@@ -397,15 +397,24 @@ float	colortable_flat_green[MBV_NUM_COLORS] =
 float	colortable_flat_blue[MBV_NUM_COLORS] =
                 { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500,
                   0.500, 0.500, 0.500, 0.500, 0.500 };
-float	colortable_abovesealevel_red[MBV_NUM_COLORS+1] =
+float	colortable_abovesealevel1_red[MBV_NUM_COLORS+1] =
                 { 0.980, 0.960, 0.941, 0.921, 0.902, 0.882,
 		  0.862, 0.843, 0.823, 0.804, 0.784};
-float	colortable_abovesealevel_green[MBV_NUM_COLORS+1] =
+float	colortable_abovesealevel1_green[MBV_NUM_COLORS+1] =
                 { 0.980, 0.940, 0.901, 0.862, 0.823, 0.784,
 		  0.744, 0.705, 0.666, 0.627, 0.588};
-float	colortable_abovesealevel_blue[MBV_NUM_COLORS+1] =
+float	colortable_abovesealevel1_blue[MBV_NUM_COLORS+1] =
                 { 0.471, 0.440, 0.408, 0.376, 0.345, 0.314,
 		  0.282, 0.250, 0.219, 0.188, 0.157};
+float	colortable_abovesealevel2_red[MBV_NUM_COLORS+1] =
+                { 1.000, 0.824, 0.667, 0.569, 0.471, 0.471,
+		  0.408, 0.263, 0.129, 0.000, 0.000};
+float	colortable_abovesealevel2_green[MBV_NUM_COLORS+1] =
+                { 1.000, 0.784, 0.627, 0.569, 0.510, 0.392,
+		  0.420, 0.482, 0.549, 0.627, 0.902};
+float	colortable_abovesealevel2_blue[MBV_NUM_COLORS+1] =
+                { 0.392, 0.294, 0.196, 0.176, 0.157, 0.118,
+		  0.094, 0.027, 0.000, 0.000, 0.000};
 
 float	colortable_object_red[MBV_NUM_COLORS] =
                 { 0.000, 1.000, 1.000, 1.000, 0.000, 0.000,
@@ -456,9 +465,12 @@ extern float	colortable_gray_blue[MBV_NUM_COLORS];
 extern float	colortable_flat_red[MBV_NUM_COLORS];
 extern float	colortable_flat_green[MBV_NUM_COLORS];
 extern float	colortable_flat_blue[MBV_NUM_COLORS];
-extern float	colortable_abovesealevel_red[MBV_NUM_COLORS+1];
-extern float	colortable_abovesealevel_green[MBV_NUM_COLORS+1];
-extern float	colortable_abovesealevel_blue[MBV_NUM_COLORS+1];
+extern float	colortable_abovesealevel1_red[MBV_NUM_COLORS+1];
+extern float	colortable_abovesealevel1_green[MBV_NUM_COLORS+1];
+extern float	colortable_abovesealevel1_blue[MBV_NUM_COLORS+1];
+extern float	colortable_abovesealevel2_red[MBV_NUM_COLORS+1];
+extern float	colortable_abovesealevel2_green[MBV_NUM_COLORS+1];
+extern float	colortable_abovesealevel2_blue[MBV_NUM_COLORS+1];
 extern float	colortable_object_red[MBV_NUM_COLORS+1];
 extern float	colortable_object_green[MBV_NUM_COLORS+1];
 extern float	colortable_object_blue[MBV_NUM_COLORS+1];
@@ -575,7 +587,8 @@ void do_mbview_colortable_bright( Widget w, XtPointer client_data, XtPointer cal
 void do_mbview_colortable_muted( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_colortable_gray( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_colortable_flat( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_colortable_sealevel( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_colortable_sealevel1( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_colortable_sealevel2( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_mouse_rmode( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_mouse_mode( Widget w, XtPointer client_data, XtPointer call_data);
 void set_mbview_mouse_mode(size_t instance, int mode);

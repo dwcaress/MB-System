@@ -130,10 +130,11 @@
 #define	MB7KPREPROCESS_TIMELAG_OFF	0
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
-#define	MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH	1
+#define	MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH		1
 #define	MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES	2
 #define	MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION	3
-#define	MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE	4
+#define	MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE		4
+#define	MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK		5
 static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -538,10 +539,13 @@ int main (int argc, char **argv)
 
 	/* kluge modes */
 	int	klugemode;
+	double	klugevalue;
 	int	kluge_useverticaldepth = MB_NO; /* kluge 1 */
 	int	kluge_zeroalongtrackangles = MB_NO; /* kluge 2 */
 	int	kluge_zeroattitudecorrection = MB_NO; /* kluge 3 */
 	int	kluge_kearfottrovnoise = MB_NO; /* kluge 4 */
+	int	kluge_beampatterntweak = MB_NO; /* kluge 5 */
+	double	kluge_beampatternfactor = 1.0;
 
 	/* MBARI data flag */
 	int	MBARIdata = MB_NO;
@@ -689,7 +693,7 @@ int main (int argc, char **argv)
 			break;
 		case 'K':
 		case 'k':
-			sscanf (optarg,"%d", &klugemode);
+			nscan = sscanf (optarg,"%d/%lf", &klugemode, &klugevalue);
 			if (klugemode == MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH)
 				{
 				kluge_useverticaldepth = MB_YES;
@@ -705,6 +709,12 @@ int main (int argc, char **argv)
 			if (klugemode == MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE)
 				{
 				kluge_kearfottrovnoise = MB_YES;
+				}
+			if (klugemode == MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK
+				&& nscan == 2)
+				{
+				kluge_beampatterntweak = MB_YES;
+				kluge_beampatternfactor = klugevalue;
 				}
 			flag++;
 			break;
@@ -887,7 +897,12 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       goodnavattitudeonly: %d\n",goodnavattitudeonly);
 		fprintf(stderr,"dbg2       timedelaymode:       %d\n",timedelaymode);
 		fprintf(stderr,"dbg2       timelagmode:         %d\n",timelagmode);
-		fprintf(stderr,"dbg2       kluge_useverticaldepth: %d\n",kluge_useverticaldepth);
+		fprintf(stderr,"dbg2       kluge_useverticaldepth:        %d\n",kluge_useverticaldepth);
+		fprintf(stderr,"dbg2       kluge_zeroalongtrackangles:    %d\n",kluge_zeroalongtrackangles);
+		fprintf(stderr,"dbg2       kluge_zeroattitudecorrection:  %d\n",kluge_zeroattitudecorrection);
+		fprintf(stderr,"dbg2       kluge_kearfottrovnoise:        %d\n",kluge_useverticaldepth);
+		fprintf(stderr,"dbg2       kluge_beampatterntweak:        %d\n",kluge_useverticaldepth);
+		fprintf(stderr,"dbg2       kluge_beampatternfactor:       %f\n",kluge_beampatternfactor);
 		if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 			{
 			fprintf(stderr,"dbg2       timelagfile:         %s\n",timelagfile);
@@ -4984,6 +4999,15 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 					/* case of v2rawdetection record */
 					if (istore->read_v2rawdetection == MB_YES)
 						{
+						/* if requested apply kluge scaling of rx beam angles */
+						if (kluge_beampatterntweak == MB_YES)
+							{
+							for (j=0;j<v2rawdetection->number_beams;j++)
+								{
+								v2rawdetection->rx_angle[j] *= kluge_beampatternfactor;
+								}
+							}
+							
 						/* initialize all of the beams */
 						for (i=0;i<bathymetry->number_beams;i++)
 							{
@@ -5028,6 +5052,15 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					/* case of v2detection record with v2detectionsetup */
 					else if (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES)
 						{
+						/* if requested apply kluge scaling of rx beam angles */
+						if (kluge_beampatterntweak == MB_YES)
+							{
+							for (j=0;j<v2detection->number_beams;j++)
+								{
+								v2detection->angle_x[j] *= kluge_beampatternfactor;
+								}
+							}
+
 						/* now loop over the detects */
 						for (j=0;j<v2detection->number_beams;j++)
 							{
@@ -5060,6 +5093,15 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					/* case of v2detection record */
 					else if (istore->read_v2detection == MB_YES)
 						{
+						/* if requested apply kluge scaling of rx beam angles */
+						if (kluge_beampatterntweak == MB_YES)
+							{
+							for (i=0;i<v2detection->number_beams;i++)
+								{
+								v2detection->angle_x[i] *= kluge_beampatternfactor;
+								}
+							}
+
 						/* now loop over the detects */
 						for (i=0;i<v2detection->number_beams;i++)
 							{
@@ -5090,6 +5132,15 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					/* else default case of beamgeometry record */
 					else
 						{
+						/* if requested apply kluge scaling of rx beam angles */
+						if (kluge_beampatterntweak == MB_YES)
+							{
+							for (i=0;i<bathymetry->number_beams;i++)
+								{
+								beamgeometry->angle_acrosstrack[i] *= kluge_beampatternfactor;
+								}
+							}
+
 						/* loop over all beams */
 						for (i=0;i<bathymetry->number_beams;i++)
 							{
