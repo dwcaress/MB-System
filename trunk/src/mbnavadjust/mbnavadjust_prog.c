@@ -5262,11 +5262,14 @@ int mbnavadjust_naverr_next()
 			crossing_ok = MB_NO;
 			if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS)
 				crossing_ok = MB_YES;
+			else if (mbna_view_list == MBNA_VIEW_LIST_MEDIOCRECROSSINGS
+				&& crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD)
+				crossing_ok = MB_YES;
 			else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS
-				&& crossing->overlap >= MBNA_OVERLAP_THRESHOLD)
+				&& crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD)
 				crossing_ok = MB_YES;
 			else if (mbna_view_list == MBNA_VIEW_LIST_BETTERCROSSINGS
-				&& crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD)
+				&& crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD)
 				crossing_ok = MB_YES;
 			else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS
 				&& crossing->truecrossing == MB_YES)
@@ -5413,11 +5416,14 @@ int mbnavadjust_naverr_previous()
 			crossing_ok = MB_NO;
 			if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS)
 				crossing_ok = MB_YES;
+			else if (mbna_view_list == MBNA_VIEW_LIST_MEDIOCRECROSSINGS
+				&& crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD)
+				crossing_ok = MB_YES;
 			else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS
-				&& crossing->overlap >= MBNA_OVERLAP_THRESHOLD)
+				&& crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD)
 				crossing_ok = MB_YES;
 			else if (mbna_view_list == MBNA_VIEW_LIST_BETTERCROSSINGS
-				&& crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD)
+				&& crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD)
 				crossing_ok = MB_YES;
 			else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS
 				&& crossing->truecrossing == MB_YES)
@@ -5564,11 +5570,14 @@ int mbnavadjust_naverr_nextunset()
 			crossing_ok = MB_NO;
 			if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS)
 				crossing_ok = MB_YES;
+			else if (mbna_view_list == MBNA_VIEW_LIST_MEDIOCRECROSSINGS
+				&& crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD)
+				crossing_ok = MB_YES;
 			else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS
-				&& crossing->overlap >= MBNA_OVERLAP_THRESHOLD)
+				&& crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD)
 				crossing_ok = MB_YES;
 			else if (mbna_view_list == MBNA_VIEW_LIST_BETTERCROSSINGS
-				&& crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD)
+				&& crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD)
 				crossing_ok = MB_YES;
 			else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS
 				&& crossing->truecrossing == MB_YES)
@@ -9178,7 +9187,7 @@ mbnavadjust_autopick(int do_vertical)
 			/* check if processing should proceed */
 			process = MB_NO;
 			if (crossing->status == MBNA_CROSSING_STATUS_NONE
-				&& crossing->overlap >=  MBNA_OVERLAP_THRESHOLD / 2)
+				&& crossing->overlap >=  MBNA_MEDIOCREOVERLAP_THRESHOLD)
 				{
 				if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS)
 					{
@@ -9203,9 +9212,35 @@ mbnavadjust_autopick(int do_vertical)
 							&& mbna_section_select == crossing->section_2))
 						process = MB_YES;
 					}
+				else if (mbna_view_list == MBNA_VIEW_LIST_MEDIOCRECROSSINGS)
+					{
+					if (crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD)
+						{
+						if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+								&& mbna_survey_select == project.files[crossing->file_id_1].block
+								&& mbna_survey_select == project.files[crossing->file_id_2].block)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+								&& mbna_file_select == crossing->file_id_1
+								&& mbna_file_select == crossing->file_id_2)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+								&& (mbna_survey_select == project.files[crossing->file_id_1].block
+									|| mbna_survey_select == project.files[crossing->file_id_2].block))
+							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+								&& (mbna_file_select == crossing->file_id_1
+									|| mbna_file_select == crossing->file_id_2))
+							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
+								&& mbna_file_select == crossing->file_id_1
+								&& mbna_section_select == crossing->section_1)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
+								&& mbna_file_select == crossing->file_id_2
+								&& mbna_section_select == crossing->section_2))
+						process = MB_YES;
+						}
+					}
 				else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
 					{
-					if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD)
+					if (crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD)
 						{
 						if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 							|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
@@ -9231,7 +9266,7 @@ mbnavadjust_autopick(int do_vertical)
 					}
 				else if (mbna_view_list == MBNA_VIEW_LIST_BETTERCROSSINGS)
 					{
-					if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD)
+					if (crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD)
 						{
 						if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 							|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY

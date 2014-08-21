@@ -74,7 +74,8 @@ procedure do_mbview_colortable_flat();
 procedure do_mbview_colortable_gray();
 procedure do_mbview_colortable_haxby();
 procedure do_mbview_colortable_muted();
-procedure do_mbview_colortable_sealevel();
+procedure do_mbview_colortable_sealevel1();
+procedure do_mbview_colortable_sealevel2();
 procedure do_mbview_data_primary();
 procedure do_mbview_data_primaryslope();
 procedure do_mbview_data_secondary();
@@ -4298,16 +4299,32 @@ object mB3DView_mbview_toggleButton_colortable_flat : XmToggleButton widget {
 !(BX)    };
 };
 
-object mB3DView_mbview_toggleButton_colortable_sealevel : XmToggleButton widget {
+object mB3DView_mbview_toggleButton_colortable_sealevel1 : XmToggleButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Sealevel Colortable");
+        XmNlabelString = compound_string("Sealevel1 Colortable");
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
-        XmNvalueChangedCallback = procedure do_mbview_colortable_sealevel();
+        XmNvalueChangedCallback = procedure do_mbview_colortable_sealevel1();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_toggleButton_colortable_sealevel2 : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Sealevel2 Colortable");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_colortable_sealevel2();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -4374,7 +4391,8 @@ object mbview_pulldownMenu_view : XmPulldownMenu widget {
          managed XmToggleButton mB3DView_mbview_toggleButton_colortable_muted;
          managed XmToggleButton mB3DView_mbview_toggleButton_colortable_gray;
          managed XmToggleButton mB3DView_mbview_toggleButton_colortable_flat;
-         managed XmToggleButton mB3DView_mbview_toggleButton_colortable_sealevel;
+         managed XmToggleButton mB3DView_mbview_toggleButton_colortable_sealevel1;
+         managed XmToggleButton mB3DView_mbview_toggleButton_colortable_sealevel2;
          managed XmSeparator mB3DView_separator1;
          managed XmToggleButton mB3DView_mbview_toggleButton_profile;
     };

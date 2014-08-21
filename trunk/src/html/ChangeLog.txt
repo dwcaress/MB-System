@@ -16,6 +16,8 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.4.2201       August 20, 2014
+* Version 5.4.2200       July 24, 2014
 * Version 5.4.2199       July 19, 2014
   Version 5.4.2196       July 14, 2014
   Version 5.4.2195       July 9, 2014
@@ -183,6 +185,29 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2201 (August 20, 2014)
+
+Mbm_grdplot: Added two "sealevel" color palletes that use Haxby colors for
+negative values (e.g. topography below sea level) and either greens or browns
+for positive values (e.g. topography above sea level). The Sealevel 2 pallette
+was contributed by Jenny Paduan.
+
+Mbeditviz: Changed default illumination parameters to magnitude=1.0 and
+elevation=5.0.
+
+Mbgrdviz: Changed default illumination parameters to magnitude=1.0 and
+elevation=5.0.
+
+Mbnavadjust: Added views for 10% coverage crossings.
+
+Mb7kpreprocess: Added kluge function to "tweak" the beam angles as if the speed of
+sound used for beamforming had been wrong.
+
+-----> 5.4.2200 (July 24, 2014)
+
+Format 121 (MBF_GSFGENMB): Fixed bug in which null sensor depth and altitude
+values are handled incorrectly.
 
 -----> 5.4.2199 (July 20, 2014)
 
