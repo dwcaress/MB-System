@@ -2839,6 +2839,30 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
+	/* look for NIO Hydrosweep DS raw format suffix convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 4)
+		i = strlen(filename) - 3;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".hs")) != NULL
+	    	|| (suffix = strstr(&filename[i],".HS")) != NULL)
+		suffix_len = 3;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 3)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_HSATLRAW;
+		found = MB_YES;
+		}
+	    }
+
 	/* look for STN Atlas raw format suffix convention */
 	if (found == MB_NO)
 	    {

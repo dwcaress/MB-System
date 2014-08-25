@@ -1310,6 +1310,8 @@ int	mbr_hsatlraw_read_line(int verbose, FILE *mbfp,
 	int	nchars;
 	int	done;
 	char	*result;
+	int	blank;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1329,14 +1331,28 @@ int	mbr_hsatlraw_read_line(int verbose, FILE *mbfp,
 		strncpy(line,"\0",MBF_HSATLRAW_MAXLINE);
 		result = fgets(line,MBF_HSATLRAW_MAXLINE,mbfp);
 
-		/* check size of line */
-		nchars = strlen(line);
 
 		/* check for eof */
 		if (result == line)
 			{
+			/* check size of line */
+			nchars = strlen(line);
 			if (nchars >= minimum_size)
+				{
 				done = MB_YES;
+			
+				/* trim trailing blank characters */
+				blank = MB_YES;
+				for (i=(nchars-1); i>=0 && blank==MB_YES; i--)
+					{
+					if (line[i] == ' ' || line[i] == '\r' || line[i] == '\n')
+						line[i] = '\0';
+					else
+						blank = MB_NO;
+					}
+				nchars = strlen(line);
+				}
+				
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
