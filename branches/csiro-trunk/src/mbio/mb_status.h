@@ -2,7 +2,7 @@
  *    The MB-system:	mbio_status.h	2/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -110,8 +110,8 @@
 #define	MB_FAILURE			0
 
 /* MBIO minimum and maximum error values */
-#define	MB_ERROR_MIN			-23
-#define	MB_ERROR_MAX			15
+#define	MB_ERROR_MIN			-24
+#define	MB_ERROR_MAX			16
 
 /* MBIO function fatal error values */
 #define	MB_ERROR_NO_ERROR		0
@@ -130,6 +130,7 @@
 #define	MB_ERROR_BAD_BUFFER_ID		13
 #define	MB_ERROR_BAD_SYSTEM		14
 #define	MB_ERROR_BAD_DATA		15
+#define	MB_ERROR_MISSING_DATA		16
 
 /* MBIO function nonfatal error values */
 #define	MB_ERROR_TIME_GAP		-1
@@ -155,6 +156,7 @@
 #define	MB_ERROR_NOT_ENOUGH_DATA	-21
 #define	MB_ERROR_FILE_NOT_FOUND		-22
 #define	MB_ERROR_FILE_LOCKED		-23
+#define	MB_ERROR_INIT_FAIL		-24
 
 /* MBIO problem values */
 #define	MB_PROBLEM_MAX			6
@@ -192,7 +194,8 @@ static char *fatal_error_msg[] =
 	"Invalid control parameter specified by user",
 	"Invalid buffer id",
 	"Invalid system id - this should not happen!",
-	"This data file is not in the specified format!"
+	"This data file is not in the specified format!",
+	"Required data are missing"
 	};
 static char *nonfatal_error_msg[] =
 	{
@@ -220,6 +223,7 @@ static char *nonfatal_error_msg[] =
 	"Not enough data available to perform operation",
 	"Requested file not found",
 	"Requested file locked",
+	"Initialization failed",
 	};
 static char *unknown_error_msg[] =
 	{

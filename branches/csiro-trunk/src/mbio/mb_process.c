@@ -2,7 +2,7 @@
  *    The MB-system:	mb_process.c	9/11/00
  *    $Id$
  *
- *    Copyright (c) 2000-2013 by
+ *    Copyright (c) 2000-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1914,7 +1914,7 @@ int mb_pr_writepar(int verbose, char *file,
 	FILE	*fp;
 	int	status = MB_SUCCESS;
 	time_t	right_now;
-	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 	char	*bufptr;
 	int	i;
 
@@ -2090,8 +2090,8 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp,"## Written by %s version %s\n", function_name, rcs_id);
 	    fprintf(fp,"## MB-system Version %s\n",MB_VERSION);
 	    right_now = time((time_t *)0);
-	    strncpy(date,ctime(&right_now),24);
-	    date[24] = 0;
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
 	    if ((user_ptr = getenv("USER")) == NULL)
 		    user_ptr = getenv("LOGNAME");
 	    if (user_ptr != NULL)
@@ -2475,6 +2475,8 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 		    || process->mbp_lever_mode != MBP_LEVER_OFF
 		    || process->mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF))
 	    process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFFSET;
+	else
+	    process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFF;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -6319,7 +6321,7 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
 
 	/* print input debug statements */
@@ -6342,8 +6344,8 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 	    	if ((fp = fopen(lockfile, "wx")) != NULL)
 			{
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
-			date[24] = 0;
+			strcpy(date,ctime(&right_now));
+			date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				user_ptr = getenv("LOGNAME");
 			if (user_ptr != NULL)

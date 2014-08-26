@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:13 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:42 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -304,14 +298,14 @@ F1 -.548(AU)72 571.2 S(THORSHIP).548 E F0(Da)108 583.2 Q(vid W)-.2 E 2.5
 2.5(yB)-.15 G(ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 607.2 Q
 (Lamont-Doherty Earth Observ)113 619.2 Q(atory)-.25 E F1(OPTIONS)72 648
-Q F2<ad41>108 660 Q F3(shotscale)144 660 Q F0 .031(This option causes t\
-he x-axis to be rescaled from shot number to distance in meters.)144 672
-R(The)5.032 E F3(shotscale)2.532 E F0 -.25(va)144 684 S
+Q F2<ad41>108 660 Q F3(shotscale)23.08 E F0 .031(This option causes the\
+ x-axis to be rescaled from shot number to distance in meters.)144 672 R
+(The)5.032 E F3(shotscale)2.532 E F0 -.25(va)144 684 S
 (lue represents the shot spacing in meters.).25 E F2<ad44>108 700.8 Q F3
-(decimate)144 700.8 Q(x)-.2 E F0(Sets the decimation of traces \()144
-712.8 Q F3(decimate)A(x)-.2 E F0 2.5(\)u)C
-(sed in generating the output grid.)-2.5 E(MB-System 5.0)72 768 Q 2.5
-(3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0 Cg EP
+(decimate)23.08 E(x)-.2 E F0(Sets the decimation of traces \()144 712.8
+Q F3(decimate)A(x)-.2 E F0 2.5(\)u)C(sed in generating the output grid.)
+-2.5 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(1)204.835
+E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
@@ -319,16 +313,16 @@ BP
 /F0 10/Times-Roman@0 SF(mbse)72 48 Q 143.32(gypsd\(1\) MB-System)-.15 F
 143.32(5.0 mbse)2.5 F(gypsd\(1\))-.15 E/F1 10/Times-Bold@0 SF<ad48>108
 84 Q F0 .162(This "help" \215ag cause the program to print out a descri\
-ption of its operation and then e)144 84 R .161(xit immedi-)-.15 F
-(ately)144 96 Q(.)-.65 E F1<ad49>108 112.8 Q/F2 10/Times-Italic@0 SF(se)
-144 112.8 Q(gy\214le)-.4 E F0(Sets the \214lename of the input se)144
-124.8 Q(gy seismic data \214le to be gridded.)-.15 E F1<ad4c>108 141.6 Q
-F0(Sets the PSD grid output to be in dB/Hz.)144 153.6 Q F1<ad4f>108
-170.4 Q F2 -.45(ro)144 170.4 S(ot).45 E F0
+ption of its operation and then e)22.52 F .161(xit immedi-)-.15 F(ately)
+144 96 Q(.)-.65 E F1<ad49>108 112.8 Q/F2 10/Times-Italic@0 SF(se)26.41 E
+(gy\214le)-.4 E F0(Sets the \214lename of the input se)144 124.8 Q
+(gy seismic data \214le to be gridded.)-.15 E F1<ad4c>108 141.6 Q F0
+(Sets the PSD grid output to be in dB/Hz.)144 153.6 Q F1<ad4f>108 170.4
+Q F2 -.45(ro)22.52 G(ot).45 E F0
 (Sets the \214lename root for the output GMT netCDF format grid.)144
-182.4 Q F1<ad53>108 199.2 Q F2(mode[/start/end[/sc)144 199.2 Q(han/ec)
--.15 E(han]])-.15 E F0 .847(This option sets the range of traces that a\
-re gridded, and thus determines the x-dimension of the)144 211.2 R .531
+182.4 Q F1<ad53>108 199.2 Q F2(mode[/start/end[/sc)24.74 E(han/ec)-.15 E
+(han]])-.15 E F0 .847(This option sets the range of traces that are gri\
+dded, and thus determines the x-dimension of the)144 211.2 R .531
 (output grid \(also impacted by an)144 223.2 R 3.031(yd)-.15 G .531
 (ecimation speci\214ed with)-3.031 F F1<ad44>3.031 E F0 .531(\). If)B F2
 (mode)3.03 E F0 3.03(=0)3.03 G 3.03(,t)-3.03 G(hen)-3.03 E F2(start)3.03
@@ -350,19 +344,19 @@ E(han)-.15 E F0(and)3.307 E F2(ec)3.307 E(han)-.15 E F0 3.307(,r)C
 295.2 Q F2(end)A F0<ad>2.5 E F2(start)2.5 E F0 2.5(+1)2.5 G 2.5(\)*\()
 -2.5 G F2(ec)-2.5 E(han)-.15 E F0<ad>2.5 E F2(sc)2.5 E(han)-.15 E F0 2.5
 (+1)2.5 G 2.5(\)/)-2.5 G F2(decimate)A(x)-.2 E F0(.)A F1<ad54>108 312 Q
-F2(sweep[/delay])144 312 Q F0(The)144 324 Q F2(sweep)3.937 E F0 -.25(va)
+F2(sweep[/delay])23.63 E F0(The)144 324 Q F2(sweep)3.937 E F0 -.25(va)
 3.937 G 1.436
 (lue sets the time range of seismic data to be processed in seconds.).25
 F 1.436(The optional)6.436 F F2(delay)144 336 Q F0 -.25(va)2.5 G
 (lue sets the sweep start time, ag).25 E(ain in seconds.)-.05 E F1<ad56>
-108 352.8 Q F0(Normally)144 352.8 Q(,)-.65 E F1(mbsegypsd)3.802 E F0
-1.302(prints out information re)3.802 F -.05(ga)-.15 G 1.302
+108 352.8 Q F0(Normally)23.08 E(,)-.65 E F1(mbsegypsd)3.802 E F0 1.302
+(prints out information re)3.802 F -.05(ga)-.15 G 1.302
 (rding its controlling parameters during e).05 F -.15(xe)-.15 G(cu-).15
 E(tion; the)144 364.8 Q F1<ad56>2.5 E F0(option causes the program to a\
 lso print out statements indicating its progress.)2.5 E F1<ad57>108
-381.6 Q F2(mode/start/end)144 381.6 Q F0 .826(This option can be used t\
-o limit the data being processed to a particular time windo)144 393.6 R
-3.325(wi)-.25 G 3.325(nv)-3.325 G(arious)-3.575 E -.1(wa)144 405.6 S .9
+381.6 Q F2(mode/start/end)20.3 E F0 .826(This option can be used to lim\
+it the data being processed to a particular time windo)144 393.6 R 3.325
+(wi)-.25 G 3.325(nv)-3.325 G(arious)-3.575 E -.1(wa)144 405.6 S .9
 (ys. This option does not impact the de\214nition of the o).1 F -.15(ve)
 -.15 G .9(rall grid bounds, b).15 F .9(ut does restrict the)-.2 F .793
 (data processed to samples within particular times of interest. If)144

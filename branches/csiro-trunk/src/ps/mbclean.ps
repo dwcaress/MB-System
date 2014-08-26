@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:07 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:38 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 6
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -328,7 +322,7 @@ BP
 Q(Lamont-Doherty Earth Observ)113 96 Q(atory)-.25 E(Alberto Malin)108
 108 Q -.15(ve)-.4 G(rno).15 E(Schlumber)113 120 Q(ger)-.18 E(-Doll)-.2 E
 /F1 10.95/Times-Bold@0 SF(OPTIONS)72 148.8 Q/F2 10/Times-Bold@0 SF<ad41>
-108 160.8 Q/F3 10/Times-Italic@0 SF(max)144 160.8 Q F0 1.929
+108 160.8 Q/F3 10/Times-Italic@0 SF(max)23.08 E F0 1.929
 (This option sets the range of acceptable depth v)144 172.8 R 1.929
 (alues relati)-.25 F 2.229 -.15(ve t)-.25 H 4.43(ot).15 G 1.93
 (he local median depth. The)-4.43 F 1.089(median depth is obtained from\
@@ -338,17 +332,16 @@ Q(Lamont-Doherty Earth Observ)113 96 Q(atory)-.25 E(Alberto Malin)108
 F F3(max)3.111 E F0 3.111(,t)C .611(hen it will be \215agged.)-3.111 F
 (No de)144 208.8 Q
 (viation from the median depth checking is done if the)-.25 E F2<ad41>
-2.5 E F0(option is not used.)2.5 E F2<ad42>108 225.6 Q F3(low/high)144
-225.6 Q F0 1.013(This option sets the range of acceptable depth v)144
-237.6 R 3.513(alues. If)-.25 F 3.513(ad)3.513 G 1.013(epth v)-3.513 F
-1.013(alue is less than)-.25 F F3(low)3.512 E F0 1.012(or more)3.512 F
-(than)144 249.6 Q F3(high)2.5 E F0
+2.5 E F0(option is not used.)2.5 E F2<ad42>108 225.6 Q F3(low/high)23.63
+E F0 1.013(This option sets the range of acceptable depth v)144 237.6 R
+3.513(alues. If)-.25 F 3.513(ad)3.513 G 1.013(epth v)-3.513 F 1.013
+(alue is less than)-.25 F F3(low)3.512 E F0 1.012(or more)3.512 F(than)
+144 249.6 Q F3(high)2.5 E F0
 (then it will be \215agged. No depth range checking is done if the)2.5 E
 F2<ad42>2.5 E F0(option is not used.)2.5 E F2<ad43>108 266.4 Q F3
-(slope/unit)144 266.4 Q F0 .271(The v)144 278.4 R(alue)-.25 E F3(slope)
-2.771 E F0 .271
-(is the maximum acceptable slope. Beams associated with e)2.771 F
-(xcessi)-.15 E .572 -.15(ve s)-.25 H .272(lopes will be).15 F .106
+(slope/unit)23.08 E F0 .271(The v)144 278.4 R(alue)-.25 E F3(slope)2.771
+E F0 .271(is the maximum acceptable slope. Beams associated with e)2.771
+F(xcessi)-.15 E .572 -.15(ve s)-.25 H .272(lopes will be).15 F .106
 (\215agged or remo)144 290.4 R -.15(ve)-.15 G 2.606(da).15 G .106
 (ccording to the operational mode speci\214ed using the)-2.606 F F2
 <ad4d>2.605 E F0 .105(option. This method)2.605 F 1.061(will be used if\
@@ -359,7 +352,7 @@ ed b)144 302.4 R(ut)-.2 E F2<ad43>3.562 E F0 1.062(is not)3.562 F .329
 (slope)2.828 E F0 2.828(,0\()C(def)-2.828 E(ault\))-.1 E(indicates the \
 slope is in tangents, 1 slope is in radians, 2 slope is in de)144 326.4
 Q 2.5(grees. Def)-.15 F(ault:)-.1 E F3(slope)2.5 E F0 2.5(=1)2.5 G(.0)
--2.5 E F2<ad44>108 343.2 Q F3(min/max)144 343.2 Q F0 .488
+-2.5 E F2<ad44>108 343.2 Q F3(min/max)23.08 E F0 .488
 (Sets the minimum and maximum allo)144 355.2 R .489
 (wed distances between beams used for some of the \215agging)-.25 F 4.43
 (algorithms. Both)144 367.2 R -.25(va)4.43 G 1.93(lues are e).25 F 1.929
@@ -387,11 +380,11 @@ Q F3(max)3.533 E F0 -.25(va)3.533 G 1.033(lue sets the maximum distance\
 ed to calculate the local median depth, and only beams within the maxim\
 um dis-)144 475.2 R(tance are used to check for e)144 487.2 Q(xcessi)
 -.15 E .3 -.15(ve s)-.25 H 2.5(lopes. Def).15 F(ault:)-.1 E F3(min/max)
-2.5 E F0 2.5(=0)2.5 G(.01/0.25.)-2.5 E F2<ad46>108 504 Q F3(format)144
-504 Q F0 .22(Sets the data format used if the input is read from stdin \
-or from a \214le. If)144 516 R F3(format)2.72 E F0 2.72(<0)2.72 G 2.72
-(,t)-2.72 G .22(hen the input)-2.72 F .007(\214le speci\214ed with the)
-144 528 R F2<ad49>2.507 E F0 .008
+2.5 E F0 2.5(=0)2.5 G(.01/0.25.)-2.5 E F2<ad46>108 504 Q F3(format)24.19
+E F0 .22(Sets the data format used if the input is read from stdin or f\
+rom a \214le. If)144 516 R F3(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)
+-2.72 G .22(hen the input)-2.72 F .007(\214le speci\214ed with the)144
+528 R F2<ad49>2.507 E F0 .008
 (option will actually contain a list of input sw)2.508 F .008
 (ath sonar data \214les. This pro-)-.1 F .012(gram uses the)144 540 R F2
 (MBIO)2.512 E F0 .012(library and will read or write an)2.512 F 2.512
@@ -401,7 +394,7 @@ or from a \214le. If)144 516 R F3(format)2.72 E F0 2.72(<0)2.72 G 2.72
 1.297(and their identi\214er v)3.797 F 1.297(alues is)-.25 F(gi)144 564
 Q -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
 (manual page. Def)2.5 E(ault:)-.1 E F3(format)2.5 E F0 2.5(=1)2.5 G(1.)
--2.5 E F2<ad47>108 580.8 Q F3(fr)144 580.8 Q(action_low/fr)-.15 E
+-2.5 E F2<ad47>108 580.8 Q F3(fr)22.52 E(action_low/fr)-.15 E
 (action_high)-.15 E F0 .198
 (This option sets the range of acceptable depth v)144 592.8 R .198
 (alues relati)-.25 F .498 -.15(ve t)-.25 H 2.698(ol).15 G .697 -.25
@@ -417,10 +410,10 @@ E(action_high)-.15 E F0 .194(times the median)2.694 F .837(depth then i\
 t will be \215agged. No fractional depth range checking is done if the)
 144 640.8 R F2<ad47>3.336 E F0 .836(option is not)3.336 F(used.)144
 652.8 Q F2<ad48>108 669.6 Q F0 .162(This "help" \215ag cause the progra\
-m to print out a description of its operation and then e)144 669.6 R
-.162(xit immedi-)-.15 F(ately)144 681.6 Q(.)-.65 E F2<ad49>108 698.4 Q
-F3(in\214le)144 698.4 Q F0 .313(Sets the input \214lename. If)144 710.4
-R F3(format)2.813 E F0 2.813(>0\()2.813 G .313(set with the)-2.813 F F2
+m to print out a description of its operation and then e)22.52 F .162
+(xit immedi-)-.15 F(ately)144 681.6 Q(.)-.65 E F2<ad49>108 698.4 Q F3
+(in\214le)26.41 E F0 .313(Sets the input \214lename. If)144 710.4 R F3
+(format)2.813 E F0 2.813(>0\()2.813 G .313(set with the)-2.813 F F2
 <ad46>2.813 E F0 .313(option\) then the sw)2.813 F .312
 (ath sonar data contained)-.1 F(in)144 722.4 Q F3(in\214le)2.937 E F0
 .437(is read and processed. If)2.937 F F3(format)2.937 E F0 2.937(<0)
@@ -450,9 +443,9 @@ F 2.781(\214x. In)-.25 F(the)2.781 E/F1 10/Times-Italic@0 SF(in\214le)
 .928(and their identi\214er)3.428 F -.25(va)144 180 S(lues is gi).25 E
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
 (manual page. Def)2.5 E(ault:)-.1 E F1(in\214le)2.5 E F0 2.5(=")2.5 G
-(datalist.mb-1".)-2.5 E F2<ad4c>108 196.8 Q F1(lon\215ip)144 196.8 Q F0
-.554(Sets the range of the longitude v)144 208.8 R .554(alues used.)-.25
-F(If)5.554 E F1(lon\215ip)3.054 E F0 .554(=\2551 then the longitude v)B
+(datalist.mb-1".)-2.5 E F2<ad4c>108 196.8 Q F1(lon\215ip)23.63 E F0 .554
+(Sets the range of the longitude v)144 208.8 R .554(alues used.)-.25 F
+(If)5.554 E F1(lon\215ip)3.054 E F0 .554(=\2551 then the longitude v)B
 .554(alues will be in the)-.25 F .021(range from \255360 to 0 de)144
 220.8 R .021(grees. If)-.15 F F1(lon\215ip)2.521 E F0 .021
 (=0 then the longitude v)B .02(alues will be in the range from \255180)
@@ -460,7 +453,7 @@ F(If)5.554 E F1(lon\215ip)3.054 E F0 .554(=\2551 then the longitude v)B
 3.201 E F0 .701(=1 then the longitude v)B .702
 (alues will be in the range from 0 to 360 de)-.25 F(grees.)-.15 E(Def)
 144 244.8 Q(ault:)-.1 E F1(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F2
-<ad4d>108 261.6 Q F1(mode)144 261.6 Q F0
+<ad4d>108 261.6 Q F1(mode)20.86 E F0
 (Sets the manner in which bad beams identi\214ed by e)144 273.6 Q
 (xcessi)-.15 E .3 -.15(ve s)-.25 H(lope are handled.).15 E F1(mode)180
 285.6 Q F0 2.5(=1)2.5 G 31.92(:F)-2.5 G
@@ -478,7 +471,7 @@ F(If)5.554 E F1(lon\215ip)3.054 E F0 .554(=\2551 then the longitude v)B
 (ti).05 E .789 -.15(ve d)-.25 H .49
 (epths, an error message will be output and the pro-).15 F(gram will e)
 144 393.6 Q(xit. Def)-.15 E(ault:)-.1 E F1(mode)2.5 E F0 2.5(=1)2.5 G(.)
--2.5 E F2<ad51>108 410.4 Q F1(bac)144 410.4 Q(kup)-.2 E F0 1.092
+-2.5 E F2<ad51>108 410.4 Q F1(bac)22.52 E(kup)-.2 E F0 1.092
 (This \215ag causes)144 422.4 R F2(mbclean)3.592 E F0 1.092
 (to search for bad "rails" in the sw)3.592 F 1.092(ath sonar sw)-.1 F
 1.091(ath; the "rails" refer to)-.1 F .985
@@ -489,13 +482,13 @@ F(If)5.554 E F1(lon\215ip)3.054 E F0 .554(=\2551 then the longitude v)B
 -5.103 F F1(bac)2.602 E(kup)-.2 E F0 .102(meters inboard of)2.602 F 2.5
 (am)144 458.4 S
 (ore inner beam; all beams meeting this criteria are \215agged.)-2.5 E
-F2<ad52>108 475.2 Q F1(maxheadingr)144 475.2 Q(ate)-.15 E F0 .916(The v)
-144 487.2 R(alue)-.25 E F1(maxheadingr)3.417 E(ate)-.15 E F0 .917
+F2<ad52>108 475.2 Q F1(maxheadingr)23.08 E(ate)-.15 E F0 .916(The v)144
+487.2 R(alue)-.25 E F1(maxheadingr)3.417 E(ate)-.15 E F0 .917
 (is the maximum acceptable rate of change in heading in de)3.417 F
 (grees/sec-)-.15 E .16
 (ond. All soundings associated with pings for which the heading w)144
 499.2 R .159(as changing at a greater rate will)-.1 F(be \215agged.)144
-511.2 Q F2<ad53>108 528 Q F1(slope/mode/unit)144 528 Q F0 .54(The v)144
+511.2 Q F2<ad53>108 528 Q F1(slope/mode/unit)24.74 E F0 .54(The v)144
 540 R(alue)-.25 E F1(slope)3.04 E F0 .54(is the maximum acceptable spik)
 3.04 F 3.04(es)-.1 G 3.04(lope. If)-3.04 F .54
 (the slope from the preceding beam to)3.04 F .342(this beam e)144 552 R
@@ -535,7 +528,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 154.29(mbclean\(1\) MB-System)72 48 R 154.29
 (5.0 mbclean\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad54>108 84 Q/F2 10
-/Times-Italic@0 SF(toler)144 84 Q(ance)-.15 E F0 .38
+/Times-Italic@0 SF(toler)23.63 E(ance)-.15 E F0 .38
 (If requested this option will reset the timestamps of edit e)144 96 R
 -.15(ve)-.25 G .38(nts from an e).15 F .38(xisting esf \214le to e)-.15
 F(xactly)-.15 E 1.339(match the timestamps of the surv)144 108 R 1.639
@@ -547,20 +540,20 @@ ase where surv)144 120 R .533 -.15(ey d)-.15 H .233(ata ha).15 F -.15
 (softw)3.126 E .626(are and a user is e)-.1 F .626
 (xtracting the edits from one set of)-.15 F(\214les with)144 144 Q F1
 (mbgetesf)2.5 E F0(and then applying them to another using)2.5 E F1
-(mbpr)2.5 E(ocess)-.18 E F0(.)A F1<ad55>108 160.8 Q F2(nmin)144 160.8 Q
-F0 .335(This \215ag causes)144 172.8 R F1(mbclean)2.835 E F0 .336
+(mbpr)2.5 E(ocess)-.18 E F0(.)A F1<ad55>108 160.8 Q F2(nmin)23.08 E F0
+.335(This \215ag causes)144 172.8 R F1(mbclean)2.835 E F0 .336
 (to search for port or starboard halv)2.835 F .336
 (es of pings which contain fe)-.15 F .336(wer than)-.25 F F2(nmin)144
 184.8 Q F0(good bath)2.5 E(ymetry v)-.05 E(alues. All bath)-.25 E
 (ymetry v)-.05 E(alues in the af)-.25 E
 (fected half-pings are \215agged.)-.25 E F1<ad58>108 201.6 Q F2
-(zap_beams)144 201.6 Q F0 .118(If this option is used, the outermost)144
+(zap_beams)23.08 E F0 .118(If this option is used, the outermost)144
 213.6 R F2(zap_beams)2.618 E F0 .118(at both ends of the sw)2.618 F .118
 (ath are \215agged as bad; this is)-.1 F
 (useful if the outer beams are kno)144 225.6 Q(wn to be unreliable. Def)
 -.25 E(ault:)-.1 E F2(zap_beams)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1<ad56>
-108 242.4 Q F0(Normally)144 242.4 Q(,)-.65 E F1(mbclean)3.461 E F0 -.1
-(wo)3.461 G .961(rks "silently" without outputting an).1 F .962
+108 242.4 Q F0(Normally)23.08 E(,)-.65 E F1(mbclean)3.461 E F0 -.1(wo)
+3.461 G .961(rks "silently" without outputting an).1 F .962
 (ything to the stderr stream.)-.15 F .962(If the)5.962 F F1<ad56>3.462 E
 F0 1.32(\215ag is gi)144 254.4 R -.15(ve)-.25 G 1.32(n, then).15 F F1
 (mbclean)3.82 E F0 -.1(wo)3.82 G 1.319(rks in a "v).1 F 1.319

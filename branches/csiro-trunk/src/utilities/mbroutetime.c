@@ -2,7 +2,7 @@
  *    The MB-system:	mbroutetime.c	5/4/2009
  *    $Id$
  *
- *    Copyright (c) 2009-2013 by
+ *    Copyright (c) 2009-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -343,6 +343,24 @@ int main (int argc, char **argv)
 	/* close the file */
 	fclose(fp);
 	fp = NULL;
+	
+	/* Check that there are valid waypoints in memory */
+	if (nroutepoint < 1)
+		{
+		error = MB_ERROR_EOF;
+		status = MB_FAILURE;
+		fprintf(stderr,"\nNo line start or line end waypoints read from route file: <%s>\n",route_file);
+		fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+		exit(error);
+		}
+	else if (nroutepoint < 2)
+		{
+		error = MB_ERROR_EOF;
+		status = MB_FAILURE;
+		fprintf(stderr,"\nOnly one line start or line end waypoint read from route file: <%s>\n",route_file);
+		fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+		exit(error);
+		}
 
 	/* set starting values */
 	activewaypoint = 0;

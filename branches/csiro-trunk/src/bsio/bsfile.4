@@ -1,0 +1,622 @@
+.TH bsfile 4 "31 December 2011"
+.SH NAME
+bsfile \- file format for Hawaii Mapping Research Group BS software
+.SH SYNOPSIS
+\fB#include <local/bs.h>\fR
+.SH DESCRIPTION
+.LP
+A BS file is used for the storage of binary ping data operated upon by the
+Hawaii Mapping Research Group's BS processing system. The file is portable
+among machines of varying architecture by virtue of its XDR implementation.
+It is composed of a file header which describes the number of pings
+contained in the file followed by the pings themselves. Each ping contains
+a header structure followed by a stream of sensor (i.e., towfish compass,
+depth, pitch and roll), bathymetry and sidescan data of arbitrary length.
+.LP
+This file format was originally known as MR1 format due to its initial
+purpose of supporting the HAWAII-MR1 sonar. The format was renamed as
+BS in 2005 to indicate its more general support for bathymetry and
+sidescan data from various instruments, as well as to differentiate it
+from the raw HAWAII-MR1 acquisition format which is radically different.
+Any perceived comment on its inherent quality is wholly unintentional.
+.LP
+Following is a partial listing of the contents of the file bs.h which define
+the file and ping header structures and a few relevant constants:
+.sp 24p
+/* version number, guaranteed to be strictly
+.br
+   increasing and in chronological order */
+.br
+#define MR1_VERSION_1_0		(6666)		/* obsolete version */
+.br
+#define MR1_VERSION_2_0		(6667)		/* obsolete version */
+.br
+#define BS_VERSION_1_0		(6668)		/* obsolete as of 2007/06/28 */
+.br
+#define BS_VERSION_1_1		(6669)		/* obsolete as of 2007/11/27 */
+.br
+#define BS_VERSION_1_2		(6670)		/* obsolete as of 2008/04/14 */
+.br
+#define BS_VERSION_1_3		(6671)		/* obsolete as of 2010/03/10 */
+.br
+#define BS_VERSION_1_4		(6672)		/* current version */
+
+.br
+/* file flag bits */
+.br
+#define BS_CLEAR			(0x0)
+.br
+#define BS_SSSLANTRNG		(0x1)		/* sidescan are slant range */
+.br
+#define BS_MSCPINGDELRST		(0x2)		/* ping delete/restore via mosaic GUI */
+.br
+#define BS_MSCNAVEDIT		(0x4)		/* navigation edits via mosaic GUI */
+.br
+#define BS_MSCBRKFILE		(0x8)		/* file break via mosaic GUI */
+.br
+#define BS_MSCEDGETRIM		(0x10)		/* edge trims via mosaic GUI */
+.br
+
+.br
+/* acquisition instruments */
+.br
+#define BS_INST_UNDEFINED		(-1)
+.br
+#define BS_INST_MR1			(0)
+.br
+#define BS_INST_SEAMAPB		(1)
+.br
+#define BS_INST_IMI30			(2)
+.br
+#define BS_INST_IMI12			(3)
+.br
+#define BS_INST_DSL120A		(4)
+.br
+#define BS_INST_SEAMAPC		(100)
+.br
+#define BS_INST_SCAMP		(150)
+.br
+#define BS_INST_EM120			(2000)
+.br
+#define BS_INST_EM1002		(2001)
+.br
+#define BS_INST_EM300			(2002)
+.br
+#define BS_INST_EM3000		(2003)
+.br
+#define BS_INST_EM3002		(2004)
+.br
+#define BS_INST_EM3000D		(2005)
+.br
+#define BS_INST_EM3002D		(2006)
+.br
+#define BS_INST_EM2000		(2007)
+.br
+#define BS_INST_EM122			(2008)
+.br
+#define BS_INST_EM302			(2009)
+.br
+#define BS_INST_EM710			(2010)
+.br
+#define BS_INST_SM2000		(2050)
+.br
+#define BS_INST_RESON8101		(3000)
+.br
+#define BS_INST_RESON8111		(3001)
+.br
+#define BS_INST_RESON8124		(3002)
+.br
+#define BS_INST_RESON8125		(3003)
+.br
+#define BS_INST_RESON8150		(3004)
+.br
+#define BS_INST_RESON8160		(3005)
+.br
+#define BS_INST_AMS120		(4000)
+.br
+#define BS_INST_REMUS		(4100)
+.br
+#define BS_INST_KLEIN5000		(5000)
+.br
+#define BS_INST_SEABEAM2000	(6000)
+.br
+#define BS_INST_SEABEAM2100	(6010)
+.br
+#define BS_INST_SEABEAM3012	(6050)
+.br
+#define BS_INST_SSI			(7000)
+.br
+#define BS_INST_SAICLLS		(8000)
+.br
+#define BS_INST_EDGETECHSS		(9000)
+.br
+#define BS_INST_EDGETECHSSM		(9001)
+.br
+#define BS_INST_EDGETECHSSH		(9002)
+.br
+#define BS_INST_EDGETECHSB		(9003)
+.br
+
+.br
+/* source file formats */
+.br
+#define BS_SFMT_UNDEFINED		(-1)
+.br
+#define BS_SFMT_MR1			(0)
+.br
+#define BS_SFMT_TTS			(1)
+.br
+#define BS_SFMT_GSF			(1000)
+.br
+#define BS_SFMT_GSFDUAL		(1001)
+.br
+#define BS_SFMT_XTF			(1100)
+.br
+#define BS_SFMT_SIMRADEM		(2000)
+.br
+#define BS_SFMT_SIMRADMPB		(2001)
+.br
+#define BS_SFMT_OIC			(4000)
+.br
+#define BS_SFMT_OICLLS		(4001)
+.br
+#define BS_SFMT_MSTIFF		(4100)
+.br
+#define BS_SFMT_SIOSB2000		(6000)
+.br
+#define BS_SFMT_SSIV21		(7000)
+.br
+#define BS_SFMT_XSE			(8000)
+.br
+#define BS_SFMT_JSF			(9000)
+.br
+
+.br
+/* data type mask bits */
+.br
+#define BS_DTM_NONE			(0)
+.br
+#define BS_DTM_COMPASS			(0x1)
+.br
+#define BS_DTM_DEPTH			(0x2)
+.br
+#define BS_DTM_PITCH			(0x4)
+.br
+#define BS_DTM_ROLL			(0x8)
+.br
+#define BS_DTM_BATHYMETRY		(0x10)
+.br
+#define BS_DTM_SIDESCAN			(0x20)
+.br
+
+.br
+typedef struct bsf_struct {
+.br
+	int bsf_version;			/* file format version number */
+.br
+	int bsf_count;			/* number of objects */
+.br
+	unsigned int bsf_flags;		/* BS_SSSLANTRNG, etc. */
+.br
+	int bsf_inst;			/* acquisition instrument */
+.br
+	int bsf_srcformat;		/* source file format */
+.br
+	char *bsf_srcfilenm;		/* source file name */
+.br
+	char *bsf_log;			/* processing log */
+.br
+} BSFile;
+.br
+
+.br
+typedef struct sns_struct {
+.br
+	float sns_int;			/* sample interval (secs) */
+.br
+	int sns_nsamps;			/* number of samples */
+.br
+	float sns_repval;			/* single representative value of the sensor
+.br
+					   for an entire ping, usually derived from
+.br
+					   the full set of samples for that ping */
+.br
+} Sensor;
+.br
+
+.br
+typedef struct ps_struct {
+.br
+	float ps_xmitpwr;			/* transmitter power (1=full) */
+.br
+	float ps_gain;			/* gain setting */
+.br
+	float ps_pulse;			/* pulse length (millisecs) */
+.br
+	float ps_bdrange;			/* bottom detect range (m) */
+.br
+	int ps_btycount;			/* number of bathymetry samples */
+.br
+	int ps_btypad;			/* number of trailing bathymetry pad samples */
+.br
+	float ps_ssxoffset;			/* across-track distance (m) or, for
+.br
+					   BS_SSSLANTRNG files, time (s) to first
+.br
+					   sidescan sample */
+.br
+	int ps_sscount;			/* number of sidescan samples */
+.br
+	int ps_sspad;			/* number of trailing sidescan pad samples */
+.br
+	float ps_ssndrmask;		/* across-track distance to outer edge
+.br
+					   of nadir region data to be masked */
+.br
+	float ps_ssyoffset;			/* sidescan along-track offset (m) */
+.br
+} PingSide;
+.br
+
+.br
+#define PNG_CLEAR			(0x0)
+.br
+#define PNG_XYZ			(0x1)	/* bathymetry is x/y/z instead
+.br
+						   of x/z only */
+.br
+#define PNG_ABI			(0x2)	/* auxiliary beam info present */
+.br
+#define PNG_BTYSSFLAGSABSENT	(0x4)	/* indicates that input file does
+.br
+						   not contain bathymetry or
+.br
+						   sidescan flags, i.e., the file
+.br
+						   is in an older flagless format
+.br
+						   version; all output files are
+.br
+						   written with flags and this bit
+.br
+						   is always unset when written
+.br
+						   to output */
+.br
+#define PNG_HIDE			(0x8)	/* ping should not be displayed */
+.br
+#define PNG_LOWQUALITY		(0x10)	/* ping is of unacceptably low quality */
+.br
+#define PNG_MSCHIDE			(0x20)	/* ping should not be displayed
+.br
+						   in a mosaic */
+.br
+/* sidescan along-track offset mode */
+.br
+#define PNG_SSYOM_UNKNOWN	(0)	/* unknown (all pre-BS-1.4 files) */
+.br
+#define PNG_SSYOM_CONSTANT	(1)	/* constant offset for entire ping */
+.br
+#define PNG_SSYOM_USEBTYY	(2)	/* use bathymetry y-offsets */
+.br
+
+.br
+#define PNG_BYTEALIGNSZ		(8)	/* byte alignment constraint for
+.br
+						   beginning of auxiliary beam
+.br
+						   info section of data buffer */
+.br
+
+.br
+typedef struct png_struct {
+.br
+	unsigned int png_flags;		/* PNG_XYZ, etc. */
+.br
+	struct timeval png_tm;		/* timestamp */
+.br
+	float png_period;			/* ping period (secs) */
+.br
+	double png_slon;			/* ship longitude (deg) */
+.br
+	double png_slat;			/* ship latitude (deg) */
+.br
+	float png_scourse;		/* ship course (deg) */
+.br
+	float png_laybackrng;		/* towfish layback range (m) */
+.br
+	float png_laybackbrg;		/* towfish layback bearing (deg, where 0=shipaxis,
+.br
+					   pos=port, neg=starboard) */
+.br
+	double png_tlon;			/* towfish longitude (deg) */
+.br
+	double png_tlat;			/* towfish latitude (deg) */
+.br
+	float png_tcourse;		/* towfish course (deg) */
+.br
+	Sensor png_compass;		/* towfish compass heading (deg, where 0=N, 90=E)
+.br
+					   with no magnetic correction applied to either
+.br
+					   the representative value or the sample array */
+.br
+	Sensor png_depth;		/* towfish depth (m) */
+.br
+	Sensor png_pitch;		/* towfish pitch (deg, where + is nose up) */
+.br
+	Sensor png_roll;			/* towfish roll (deg, where + is port down) */
+.br
+	int png_snspad;			/* number of invalid trailing pad sensor samples */
+.br
+	float png_temp;			/* water temperature (deg C) */
+.br
+	float png_ssincr;			/* sidescan increment in across-track distance (m)
+.br
+					   or, for BS_SSSLANTRNG files, time (s) */
+.br
+	int png_ssyoffsetmode;		/* sidescan along-track offset mode */
+.br
+	float png_alt;			/* towfish altitude (m) */
+.br
+	float png_magcorr;		/* magnetic correction (deg) */
+.br
+	float png_sndvel;			/* sound velocity (m/sec) */
+.br
+	float png_cond;			/* conductivity (siemens/m) */
+.br
+	float png_magx;			/* magnetic field x (microteslas) */
+.br
+	float png_magy;			/* magnetic field y (microteslas) */
+.br
+	float png_magz;			/* magnetic field z (microteslas) */
+.br
+	PingSide png_sides[ACP_NSIDES];
+.br
+} Ping;
+.br
+
+.br
+/* bathymetry per-sample flag bits
+.br
+   (must fit in a 4-byte integer) */
+.br
+#define BTYD_CLEAR		(0x0)	/* no flag -- sample is valid */
+.br
+#define BTYD_MISC		(0x1)	/* invalidated for non-specific reason */
+.br
+#define BTYD_EXTERNAL	(0x2)	/* invalidated by external (non-HMRG) software */
+.br
+#define BTYD_MINMAXCLIP	(0x4)	/* deleted by min/max depth clip */
+.br
+#define BTYD_MAXANGLE	(0x8)	/* exceeds maximum angle */
+.br
+#define BTYD_MINANGLE	(0x10)	/* less than minimum angle */
+.br
+#define BTYD_SWEDGE		(0x20)	/* deleted from edge of swath */
+.br
+#define BTYD_SWRECT		(0x40)	/* deleted swath rectangle interior */
+.br
+#define BTYD_MFSWAPERR	(0x80)	/* mapping function swap error */
+.br
+#define BTYD_SRFABOVECLIP	(0x100)	/* clipped from above a surface */
+.br
+#define BTYD_SRFBELOWCLIP	(0x200)	/* clipped from below a surface */
+.br
+#define BTYD_XZPRECT		(0x400)	/* deleted xz-profile rectangle interior */
+.br
+
+.br
+/* sidescan per-sample flag bits (must
+.br
+   fit in a 1-byte unsigned char) */
+.br
+#define SSD_CLEAR		(0x0)	/* no flag -- sample is valid */
+.br
+#define SSD_MISC		(0x1)	/* invalidated for non-specific reason */
+.br
+#define SSD_EXTERNAL	(0x2)	/* invalidated by external (non-HMRG) software */
+.br
+#define SSD_MAXANGLE	(0x4)	/* exceeds maximum angle */
+.br
+#define SSD_MINANGLE	(0x8)	/* less than minimum angle */
+.br
+#define SSD_SWEDGE		(0x10)	/* deleted from edge of swath */
+.br
+#define SSD_SWRECT		(0x20)	/* deleted swath rectangle interior */
+.br
+
+.br
+/* AuxBeamInfo --
+.br
+   This structure contains various bits of per-beam information
+.br
+   necessary to reconvert back to a source multibeam format. */
+.br
+
+.br
+/* auxiliary beam information flag bits */
+.br
+#define ABI_CLEAR		(0x0)
+.br
+#define ABI_SSVALID		(0x1)	/* sidescan valid */
+.br
+
+.br
+typedef struct abi_struct {
+.br
+	unsigned int abi_flags;		/* ABI_SSVALID, etc. */
+.br
+	int abi_id;			/* beam number */
+.br
+	float abi_ssat0;			/* across-track distance of first sidescan sample */
+.br
+	float abi_ssat1;			/* across-track distance of last sidescan sample */
+.br
+} AuxBeamInfo;
+.br
+
+.br
+typedef struct pd_struct {
+.br
+	float *pd_compass;
+.br
+	float *pd_depth;
+.br
+	float *pd_pitch;
+.br
+	float *pd_roll;
+.br
+	float *pd_bty[ACP_NSIDES];
+.br
+	unsigned int *pd_btyflags[ACP_NSIDES];
+.br
+	float *pd_ss[ACP_NSIDES];
+.br
+	unsigned char *pd_ssflags[ACP_NSIDES];
+.br
+	AuxBeamInfo *pd_abi[ACP_NSIDES];
+.br
+} PingData;
+.LP
+The first data object in the file is a \fIBSFile\fR structure. The
+structure is stored in the file by storing one XDR primitive for each
+of the structure's fields. These are stored in the same order as the
+fields are defined within the structure, i.e., an initial 4-byte XDR
+integer containing the file format version number, a second 4-byte XDR
+integer representing the count of pings contained within the file,
+a 4-byte XDR unsigned integer containing various flag bits, another
+4-byte XDR integer representing the type of acquisition instrument,
+if any, which originally generated the data which is either in the
+file or from which the file's data were derived, another 4-byte XDR
+integer describing the source format of the data, if any, from which
+the file's data were derived, a string which is the name of the file
+containing the data, if any, from which the file's data were derived
+and finally a string containing a log entry. (Note that strings are
+stored as a 4-byte XDR integer describing the string's length followed
+by the bytes of the string, if any. No null terminator byte is stored
+in the file.)
+.LP
+The remainder of the file consists of a sequence of 0 or more pings,
+where each ping consists of some ping header information immediately
+followed by that ping's data samples. The ping header data is stored
+by storing one XDR primitive for each of the \fIPing\fR structure's
+fields. These primitives are written in the order in which they are
+defined within the \fIPing\fR structure, with the exception of the
+\fIpng_snspad\fR field which is not stored in the file (as no sensor
+sample padding is ever written to a file and hence the value of this
+field is assumed to be 0). Wherever a field is of non-primitive type,
+i.e., is not a simple \fIint, unsigned int, float, double\fR, etc., but
+is rather a structure of some other type (i.e., \fIstruct timeval, Sensor\fR
+or \fIPingSide\fR), then that substructure is stored by storing one XDR
+primitive for each of its fields in turn with certain exceptions as
+follows: (i) the fields of the \fIpng_tm\fR substructure are stored as
+4-byte XDR integers regardless of whether the host platform is 32- or
+64-bit, and (ii) the \fIps_btypad\fR and \fIps_sspad\fR fields of the
+\fIPingSide\fR structure are not stored (as no bathymetry or sidescan
+sample padding is ever written to a file and hence the values of these
+fields are assumed to be 0). Note that the last member of the \fIPing\fR
+structure is an array of two \fIPingSide\fR structure elements. The port
+\fIPingSide\fR structure is stored first and the starboard \fIPingSide\fR
+structure is stored second.
+.LP
+Immediately after each ping's header its data samples are stored in the
+following order: (i) towfish compass, (ii) towfish depth, (iii) towfish
+pitch, (iv) towfish roll, (v) port bathymetry, (vi) port bathymetry flags,
+(vii) port sidescan, (viii) port sidescan flags, (ix) starboard bathymetry,
+(x) starboard bathymetry flags, (xi) starboard sidescan, (xii) starboard
+sidescan flags, (xiii) port auxiliary beam information, and
+(xiv) starboard auxiliary beam information.
+.LP
+The numbers of towfish compass, depth, pitch and roll samples are contained
+in the \fIsns_nsamps\fR fields of the \fIpng_compass\fR, \fIpng_depth\fR,
+\fIpng_pitch\fR and \fIpng_roll\fR \fISensor\fR structures embedded within
+the \fIPing\fR structure. A single 4-byte XDR float is stored for each
+sample from these sensors.
+.LP
+The numbers of bathymetry samples for the two sides are contained
+in the \fIps_btycount\fR fields of the port and starboard
+\fIPingSide\fR structures embedded within the \fIPing\fR structure.
+Each bathymetry sample consists of either two or three consecutive 4-byte
+XDR float values depending upon the value of the \fIPing\fR structure's
+\fIpng_flags\fR field. If the \fB\s-1PNG_XYZ\s0\fR bit of the latter is
+set then each sample is an x/y/z triplet with the first value
+representing across-track distance, the second value representing
+along-track distance and the third value representing depth. If the
+\fB\s-1PNG_XYZ\s0\fR bit is not set then the data are in x/z format, i.e.,
+the along-track distance is not present. The samples of each side must
+be sorted in order of increasing x, i.e., increasing across-track distance.
+Note that x will nearly always be non-negative for samples on both sides,
+e.g., an x-value of 5 indicates that a port sample lies 5 meters to the
+port side of nadir or that a starboard sample lies 5 meters to the
+starboard side of nadir. Negative x-values are rare though legal, and
+indicate that a sample actually lies on the opposite side of nadir, e.g.
+a port sample with an x-value of -5 lies 5 meters to the starboard side
+of nadir.
+.LP
+A sequence of bathymetry flag values follows the bathymetry samples, one
+flag value per sample where each flag value is stored as a 4-byte XDR
+unsigned integer. Each flag value is a composite bitmask of the bit-fields
+\fB\s-1BTYD_MISC, BTYD_DEPTHCLIP\s0\fR, etc., and indicates whether
+a particular sample has been flagged as invalid for one or more
+reasons. A flag value of \fB\s-1BTYD_CLEAR\s0\fR indicates that a
+sample has not been flagged as invalid.
+.LP
+The numbers of sidescan samples for the two sides are contained in the
+\fIps_sscount\fR fields of the port and starboard \fIPingSide\fR
+structures embedded within the \fIPing\fR structure. Each sidescan sample
+consists of a single 4-byte XDR float value representing a reflection
+intensity. Samples are stored in order of their increasing distance from
+swath nadir or, if the \fB\s-1BS_SSSLANTRNG\s0\fR bit of the
+\fIbsf_flags\fR field of the \fIBSFile\fR structure is set, in order of
+their increasing time from the start of the ping.
+.LP
+A sequence of sidescan flag values follows the sidescan samples, one
+flag value per sample where the complete set of flag values for each side
+of a ping is stored as a single XDR byte array (via \fBxdr_bytes()\fR)
+containing a 1-byte flag value per sidescan sample. Each flag value is
+a composite bitmask of the bit-fields \fB\s-1SSD_MISC, SSD_MAXANGLE\s0\fR,
+etc., and indicates whether a particular sample has been flagged as invalid
+for one or more reasons. A flag value of \fB\s-1SSD_CLEAR\s0\fR indicates
+that a sample has not been flagged as invalid.
+.LP
+The final component of the ping data samples is the optional auxiliary
+beam information. If this component is present, a single \fIAuxBeamInfo\fR
+structure will be stored for each bathymetry sample. Those structures
+corresponding to the port data are stored first, followed by those
+structures corresponding to the starboard data. Each such structure is
+stored by storing one XDR primitive for each of its fields, written in the
+order in which they are defined within the \fIAuxBeamInfo\fR structure.
+.LP
+Note that the ordering of bathymetry samples, bathymetry flags and auxiliary
+beam information structures, which are all in one-to-one correspondence,
+is identical, e.g., the \fIn\fRth port bathymetry sample corresponds to
+the \fIn\fRth port bathymetry flag value and the \fIn\fRth port auxiliary
+beam information structure.
+.LP
+Although the sample padding described in the \fBbs\fR(3) manual page may
+be present within an in-memory image of a BS data set, such padding will
+never be stored into a BS disk file. Consequently, the various
+\fIpng_snspad, ps_btypad\fR and \fIps_sspad\fR fields are never written
+to BS files and are assumed to be 0 as noted above.
+.LP
+IEEE NaN (not-a-number) is used by this format to indicate that the value
+of a particular header field (e.g., towfish altitude) or data sample is
+unknown. It is common for most of the sensor samples (e.g., roll) in files
+derived from HAWAII-MR1, for instance, to be stored as NaNs because that
+instrument logs such samples at an irregular rate. Those samples are then
+transformed into a set of regularly logged samples by filling the gaps
+between the real samples with NaN placeholder values, with the expectation
+that in some later processing stage those placeholder values will be turned
+into real numbers via some form of interpolation.
+.LP
+I/O routines which read and write the structures described here are
+available from the \fBbs\fR(3) library.
+.SH FILES
+\fB/usr/include/local/bs.h\fR
+.SH SEE ALSO
+.BR bs (3),
+.BR bs2asc (1)
+.SH AUTHOR
+Roger Davis, July 2005.

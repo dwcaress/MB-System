@@ -2,7 +2,7 @@
  *    The MB-system:	mb_access.c	11/1/00
  *    $Id$
 
- *    Copyright (c) 2000-2013 by
+ *    Copyright (c) 2000-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -574,6 +574,7 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 				speed, heading, sonardepth,
 				roll, pitch, heave, error);
 		}
+		
 	else
 		{
 		status = MB_FAILURE;
@@ -1881,13 +1882,66 @@ int mb_gains(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+	int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, double *sample_interval,
+		int *num_samples_port, int *num_samples_stbd, int *error)
+{
+	char	*function_name = "mb_io_extract_rawsssdimensions";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	if (mb_io_ptr->mb_io_extract_rawssdimensions != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_extract_rawssdimensions)
+				(verbose,mbio_ptr,store_ptr,
+				kind,sample_interval,
+				num_samples_port,num_samples_stbd,error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
+		fprintf(stderr,"dbg2       sample_interval:   %lf\n",*sample_interval);
+		fprintf(stderr,"dbg2       num_samples_port:  %d\n",*num_samples_port);
+		fprintf(stderr,"dbg2       num_samples_stbd:  %d\n",*num_samples_stbd);
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind,
-		int *nrawss,
-		double *rawss,
-		double *rawssacrosstrack,
-		double *rawssalongtrack,
-		int *error)
+		int *kind, int *sidescan_type, double *sample_interval,
+		double *beamwidth_xtrack, double *beamwidth_ltrack,
+		int *num_samples_port, double *rawss_port, 
+		int *num_samples_stbd, double *rawss_stbd, int *error)
 {
 	char	*function_name = "mb_extract_rawss";
 	int	status;
@@ -1912,9 +1966,11 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 	if (mb_io_ptr->mb_io_extract_rawss != NULL)
 		{
 		status = (*mb_io_ptr->mb_io_extract_rawss)
-				(verbose,mbio_ptr,store_ptr,
-				kind,nrawss,rawss,
-				rawssacrosstrack,rawssalongtrack,
+				(verbose, mbio_ptr, store_ptr,
+				kind, sidescan_type, sample_interval,
+				beamwidth_xtrack, beamwidth_ltrack,
+				num_samples_port, rawss_port,
+				num_samples_stbd, rawss_stbd,
 				error);
 		}
 	else
@@ -1930,10 +1986,18 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
-		fprintf(stderr,"dbg2       nrawss:            %d\n",*nrawss);
-		for (i=0;i<*nrawss;i++)
-		    fprintf(stderr,"dbg2       sample: %d  rawss:%f  %f  %f\n",
-			    i, rawss[i], rawssacrosstrack[i], rawssalongtrack[i]);
+		fprintf(stderr,"dbg2       sidescan_type:     %d\n",*sidescan_type);
+		fprintf(stderr,"dbg2       sample_interval:   %lf\n",*sample_interval);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:  %lf\n",*beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:  %lf\n",*beamwidth_ltrack);
+		fprintf(stderr,"dbg2       num_samples_port:  %d\n",*num_samples_port);
+		for (i=0;i<*num_samples_port;i++)
+		    fprintf(stderr,"dbg2       sample: %d  rawss_port:%f\n",
+			    i, rawss_port[i]);
+		fprintf(stderr,"dbg2       num_samples_stbd:  %d\n",*num_samples_stbd);
+		for (i=0;i<*num_samples_stbd;i++)
+		    fprintf(stderr,"dbg2       sample: %d  rawss_stbd:%f\n",
+			    i, rawss_stbd[i]);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:            %d\n",status);
@@ -1944,11 +2008,10 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
-		int nrawss,
-		double *rawss,
-		double *rawssacrosstrack,
-		double *rawssalongtrack,
-		int *error)
+		int kind, int sidescan_type, double sample_interval,
+		double beamwidth_xtrack, double beamwidth_ltrack,
+		int num_samples_port, double *rawss_port,
+		int num_samples_stbd, double *rawss_stbd, int *error)
 {
 	char	*function_name = "mb_insert_rawss";
 	int	status;
@@ -1964,10 +2027,19 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:         %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       nrawss:            %d\n",nrawss);
-		for (i=0;i<nrawss;i++)
-		    fprintf(stderr,"dbg2       sample: %d  rawss:%f  %f  %f\n",
-			    i, rawss[i], rawssacrosstrack[i], rawssalongtrack[i]);
+		fprintf(stderr,"dbg2       kind:              %d\n",kind);
+		fprintf(stderr,"dbg2       sidescan_type:     %d\n",sidescan_type);
+		fprintf(stderr,"dbg2       sample_interval:   %lf\n",sample_interval);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:  %lf\n",beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:  %lf\n",beamwidth_ltrack);
+		fprintf(stderr,"dbg2       num_samples_port:  %d\n",num_samples_port);
+		for (i=0;i<num_samples_port;i++)
+		    fprintf(stderr,"dbg2       sample: %d  rawss_port:%f\n",
+			    i, rawss_port[i]);
+		fprintf(stderr,"dbg2       num_samples_stbd:  %d\n",num_samples_stbd);
+		for (i=0;i<num_samples_stbd;i++)
+		    fprintf(stderr,"dbg2       sample: %d  rawss_stbd:%f\n",
+			    i, rawss_stbd[i]);
 		}
 
 	/* get mbio descriptor */
@@ -1978,8 +2050,10 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		status = (*mb_io_ptr->mb_io_insert_rawss)
 				(verbose,mbio_ptr,store_ptr,
-				nrawss,rawss,
-				rawssacrosstrack,rawssalongtrack,
+				kind, sidescan_type, sample_interval,
+				beamwidth_xtrack, beamwidth_ltrack,
+				num_samples_port,rawss_port,
+				num_samples_stbd,rawss_stbd,
 				error);
 		}
 	else

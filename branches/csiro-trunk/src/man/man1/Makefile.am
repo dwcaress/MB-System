@@ -45,6 +45,7 @@ mbm_grdtiff.1 \
 mbm_grid.1 \
 mbm_histplot.1 \
 mbm_makedatalist.1 \
+mbm_makesvp.1 \
 mbm_multicopy.1 \
 mbm_multidatalist.1 \
 mbm_multiprocess.1 \
@@ -57,10 +58,12 @@ mbm_vrefcheck.1 \
 mbm_xbt.1 \
 mbm_xyplot.1 \
 mbnavadjust.1 \
+mbnavadjustmerge.1 \
 mbnavedit.1 \
 mbnavlist.1 \
 mbneptune2esf.1 \
 mbotps.1 \
+mbpreprocess.1 \
 mbprocess.1 \
 mbps.1 \
 mbrollbias.1 \
@@ -73,7 +76,9 @@ mbsegypsd.1 \
 mbset.1 \
 mbstripnan.1 \
 mbsvplist.1 \
+mbsvpselect.1 \
 mbswath.1 \
+mbswplspreprocess.1 \
 mbsystem.1 \
 mbtime.1 \
 mbvelocitytool.1

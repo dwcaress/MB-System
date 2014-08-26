@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hysweep1.c	12/23/2011
  *	$Id$
  *
- *    Copyright (c) 2011-2013 by
+ *    Copyright (c) 2011-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -964,6 +964,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	SSI_sonar_flags;
 	int	SSI_port_num_samples;
 	int	SSI_starboard_num_samples;
+	int	tmpRMB_device_number;
+	double	tmpRMB_time;
+	int	tmpRMB_sonar_type;
+	int	tmpRMB_sonar_flags;
+	int	tmpRMB_beam_data_available;
+	int	tmpRMB_num_beams;
+	double	tmpRMB_sound_velocity;
+	int	tmpRMB_ping_number;
 	int	SNRok, RSSok;
 	int	i;
 
@@ -1014,39 +1022,69 @@ fprintf(stderr,"SAVED:"); */
 				has been processed */
 			if (*RMB_read == MB_YES && strncmp(line, "RMB", 3) == 0)
 				{
-/* fprintf(stderr,"Saving line because *RMB_read:%d\n",*RMB_read); */
-				*line_saved = MB_YES;
-				done = MB_YES;
-				store->kind = MB_DATA_DATA;
-				store->time_d = store->TND_survey_time_d + store->RMB_time;
-				mb_get_date(verbose, store->time_d, store->time_i);
-				*RMB_read = MB_NO;
+				/* check for erroneous RMB records associated with non-multibeam devices */
+				/* parse the first line */
+				nscan = sscanf(line+4, "%d %lf %x %x %x %d %lf %d",
+						&(tmpRMB_device_number),
+						&(tmpRMB_time),
+						&(tmpRMB_sonar_type),
+						&(tmpRMB_sonar_flags),
+						&(tmpRMB_beam_data_available),
+						&(tmpRMB_num_beams),
+						&(tmpRMB_sound_velocity),
+						&(tmpRMB_ping_number));
+				if (nscan == 8 && store->devices[tmpRMB_device_number].DEV_device_capability >= 32768)
+					{
+					*line_saved = MB_YES;
+					done = MB_YES;
+					store->kind = MB_DATA_DATA;
+					store->time_d = store->TND_survey_time_d + store->RMB_time;
+					mb_get_date(verbose, store->time_d, store->time_i);
+					*RMB_read = MB_NO;
+					}
+				else
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_UNINTELLIGIBLE;
+					}
 				}
 
 			/* RMB multibeam data record */
 			else if (strncmp(line, "RMB", 3) == 0)
 				{
 /* fprintf(stderr,"Reading line because *RMB_read:%d\n",*RMB_read); */
-				store->type = MBSYS_HYSWEEP_RECORDTYPE_RMB;
 
 				/* parse the first line */
 				nscan = sscanf(line+4, "%d %lf %x %x %x %d %lf %d",
-						&(store->RMB_device_number),
-						&(store->RMB_time),
-						&(store->RMB_sonar_type),
-						&(store->RMB_sonar_flags),
-						&(store->RMB_beam_data_available),
-						&(store->RMB_num_beams),
-						&(store->RMB_sound_velocity),
-						&(store->RMB_ping_number));
-				if (nscan != 9)
+						&(tmpRMB_device_number),
+						&(tmpRMB_time),
+						&(tmpRMB_sonar_type),
+						&(tmpRMB_sonar_flags),
+						&(tmpRMB_beam_data_available),
+						&(tmpRMB_num_beams),
+						&(tmpRMB_sound_velocity),
+						&(tmpRMB_ping_number));
+				if (nscan == 8 && store->devices[tmpRMB_device_number].DEV_device_capability >= 32768)
+					{
+					store->type = MBSYS_HYSWEEP_RECORDTYPE_RMB;
+					store->RMB_device_number = tmpRMB_device_number;
+					store->RMB_time = tmpRMB_time;
+					store->RMB_sonar_type = tmpRMB_sonar_type;
+					store->RMB_sonar_flags = tmpRMB_sonar_flags;
+					store->RMB_beam_data_available = tmpRMB_beam_data_available;
+					store->RMB_num_beams = tmpRMB_num_beams;
+					store->RMB_sound_velocity = tmpRMB_sound_velocity;
+					store->RMB_ping_number = tmpRMB_ping_number;
+					}
+				else
 					{
 					status = MB_FAILURE;
 					*error = MB_ERROR_UNINTELLIGIBLE;
 					}
 
 				/* allocate space for beam data if required */
-				if (store->RMB_num_beams > store->RMB_num_beams_alloc)
+				if (status == MB_SUCCESS
+					&& store->RMB_num_beams > store->RMB_num_beams_alloc)
 					{
 					status = mb_reallocd(verbose, __FILE__, __LINE__, store->RMB_num_beams * sizeof(double),
 									(void **)&(store->RMB_beam_ranges), error);
@@ -1602,7 +1640,7 @@ fprintf(stderr,"SAVED:"); */
 					}
 
 				/* set *RMB_read flag */
-				if (done == MB_NO)
+				if (done == MB_NO && status == MB_SUCCESS)
 					*RMB_read = MB_YES;
 				}
 
@@ -2263,14 +2301,30 @@ fprintf(stderr,"SAVED:"); */
 
 				/* handle some bookkeeping since the header has all been read */
 				*file_header_read = MB_YES;
-
-				/* set projection to UTM zone 1 if no projection specified */
-				if (strlen(store->PRJ_proj4_command) == 0)
+				
+				/* handle projection - if one is already initialized from
+				   a *.prj file leave it in place, if not use the first
+				   PRJ record in the file, if no projection set just use
+				   UTM01N */
+				if (mb_io_ptr->projection_initialized == MB_YES)
 					{
-					strcpy(store->PRJ_proj4_command, "UTM01N");
+					strcpy(store->PRJ_proj4_command,
+						mb_io_ptr->projection_id);
 					}
-				mb_proj_init(verbose, store->PRJ_proj4_command, &(mb_io_ptr->pjptr), error);
-				mb_io_ptr->projection_initialized = MB_YES;
+				else
+					{
+					/* if no projection set just use UTM01N */
+					if (strlen(store->PRJ_proj4_command) == 0)
+						{
+						strcpy(store->PRJ_proj4_command, "UTM01N");
+						}
+						
+					/* initialize the projection */
+					mb_proj_init(verbose, store->PRJ_proj4_command,
+							&(mb_io_ptr->pjptr), error);
+					strcpy(mb_io_ptr->projection_id, store->PRJ_proj4_command);
+					mb_io_ptr->projection_initialized = MB_YES;
+					}
 				}
 
 			/* EOL end of line data record */
@@ -2954,6 +3008,14 @@ fprintf(stderr,"SAVED:"); */
 			/* unknown data record */
 			else
 				{
+				store->type = MBSYS_HYSWEEP_RECORDTYPE_NONE;
+				}
+				
+			/* treat unintelligible records as unknown */
+			if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE)
+				{
+				status = MB_SUCCESS;
+				*error = MB_ERROR_NO_ERROR;
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_NONE;
 				}
 

@@ -2,7 +2,7 @@
  *    The MB-system:	mb7k2ss.c		8/15/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2013 by
+ *    Copyright (c) 2007-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1275,7 +1275,7 @@ kind,notice_msg[kind],time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5
 istore->time_i[0],istore->time_i[1],istore->time_i[2],istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],istore->time_d);*/
 
 		/* reset nonfatal errors */
-		if (kind == MB_DATA_DATA && error < 0)
+		if (error < 0)
 			{
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
@@ -1678,6 +1678,14 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						ss_altitude = 0.5 * ssv_use * ttime_min_use;
 						}
 					}
+				
+				/* else if getting altitude from topography model set initial value zero */
+				else if (bottompickmode == MB7K2SS_BOTTOMPICK_3DBATHY)
+					{
+					mb_topogrid_topo(verbose, topogrid_ptr, navlon, navlat, &topo, &error);
+					ss_altitude = -sonardepth - topo;
+					}
+
 				/* else use the altitude we already have */
 				else
 					{

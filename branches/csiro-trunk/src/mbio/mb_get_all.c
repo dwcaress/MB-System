@@ -2,7 +2,7 @@
  *    The MB-system:	mb_get_all.c	1/26/93
  *    $Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -218,11 +218,17 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 	/* if survey data read into storage array */
 	if (status == MB_SUCCESS
 		&& (*kind == MB_DATA_DATA
-		    || *kind == MB_DATA_NAV
-		    || *kind == MB_DATA_NAV1
-		    || *kind == MB_DATA_NAV2
-		    || *kind == MB_DATA_NAV3
-		    || *kind == MB_DATA_COMMENT))
+			|| *kind == MB_DATA_SUBBOTTOM_MCS
+			|| *kind == MB_DATA_SUBBOTTOM_CNTRBEAM
+			|| *kind == MB_DATA_SUBBOTTOM_SUBBOTTOM
+			|| *kind == MB_DATA_SIDESCAN2
+			|| *kind == MB_DATA_SIDESCAN3
+			|| *kind == MB_DATA_WATER_COLUMN
+			|| *kind == MB_DATA_NAV
+			|| *kind == MB_DATA_NAV1
+			|| *kind == MB_DATA_NAV2
+			|| *kind == MB_DATA_NAV3
+			|| *kind == MB_DATA_COMMENT))
 		{
 		/* initialize return values */
 		*kind = MB_DATA_NONE;
@@ -265,7 +271,14 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 			ss, ssacrosstrack, ssalongtrack,
 			comment, error);
 		if (status == MB_SUCCESS
-			&& *kind == MB_DATA_DATA)
+			&& (*kind == MB_DATA_DATA
+				|| *kind == MB_DATA_CALIBRATE
+				|| *kind == MB_DATA_SUBBOTTOM_MCS
+				|| *kind == MB_DATA_SUBBOTTOM_CNTRBEAM
+				|| *kind == MB_DATA_SUBBOTTOM_SUBBOTTOM
+				|| *kind == MB_DATA_SIDESCAN2
+				|| *kind == MB_DATA_SIDESCAN3
+				|| *kind == MB_DATA_WATER_COLUMN))
 			{
 			status = mb_extract_altitude(verbose,
 				mbio_ptr, *store_ptr,
@@ -274,7 +287,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 				altitude,
 				error);
 			}
-		else if (status == MB_SUCCESS
+		if (status == MB_SUCCESS
 			&& (*kind == MB_DATA_NAV
 				|| *kind == MB_DATA_NAV1
 				|| *kind == MB_DATA_NAV2
@@ -338,7 +351,13 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 	/* calculate speed and distance for ping data */
 	if (status == MB_SUCCESS
 		&& (*kind == MB_DATA_DATA
-		    || *kind == MB_DATA_CALIBRATE))
+		    || *kind == MB_DATA_CALIBRATE
+		    || *kind == MB_DATA_SUBBOTTOM_MCS
+		    || *kind == MB_DATA_SUBBOTTOM_CNTRBEAM
+		    || *kind == MB_DATA_SUBBOTTOM_SUBBOTTOM
+		    || *kind == MB_DATA_SIDESCAN2
+		    || *kind == MB_DATA_SIDESCAN3
+		    || *kind == MB_DATA_WATER_COLUMN))
 		{
 		/* get coordinate scaling */
 		mb_coor_scale(verbose,*navlat,&mtodeglon,&mtodeglat);

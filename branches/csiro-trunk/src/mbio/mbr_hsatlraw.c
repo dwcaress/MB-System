@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
  *	$Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -784,7 +784,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->amplitude[i] = data->amplitude[i];
 			store->echo_duration[i] = data->echo_duration[i];
 			}
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+		for (i=0;i<16;i++)
 			{
 			store->gain[i] = data->gain[i];
 			store->echo_scale[i] = data->echo_scale[i];
@@ -964,7 +964,7 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->amplitude[i] = store->amplitude[i];
 			data->echo_duration[i] = store->echo_duration[i];
 			}
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+		for (i=0;i<16;i++)
 			{
 			data->gain[i] = store->gain[i];
 			data->echo_scale[i] = store->echo_scale[i];
@@ -1310,6 +1310,8 @@ int	mbr_hsatlraw_read_line(int verbose, FILE *mbfp,
 	int	nchars;
 	int	done;
 	char	*result;
+	int	blank;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1329,14 +1331,28 @@ int	mbr_hsatlraw_read_line(int verbose, FILE *mbfp,
 		strncpy(line,"\0",MBF_HSATLRAW_MAXLINE);
 		result = fgets(line,MBF_HSATLRAW_MAXLINE,mbfp);
 
-		/* check size of line */
-		nchars = strlen(line);
 
 		/* check for eof */
 		if (result == line)
 			{
+			/* check size of line */
+			nchars = strlen(line);
 			if (nchars >= minimum_size)
+				{
 				done = MB_YES;
+			
+				/* trim trailing blank characters */
+				blank = MB_YES;
+				for (i=(nchars-1); i>=0 && blank==MB_YES; i--)
+					{
+					if (line[i] == ' ' || line[i] == '\r' || line[i] == '\n')
+						line[i] = '\0';
+					else
+						blank = MB_NO;
+					}
+				nchars = strlen(line);
+				}
+				
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}

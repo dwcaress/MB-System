@@ -1,0 +1,104 @@
+.TH bs2asc 1 "22 July 2005"
+.SH NAME
+bs2asc \- BS to ASCII conversion program
+.SH SYNOPSIS
+\fBbs2asc [ -f \fIfilename\fB ] [ -h | -d ] [ -nip ] [ -nsns ]
+[ -nb ] [ -nbd ] [ -nbf ] [ -nabi ] [ -ns ] [ -nsd ] [ -nsf ]
+[ -i ] [ -pco ] [ -jt | -ct ] [ -s \fIskip\fB ] [ -c \fIcount\fB ] [ -H ]
+-sm \fIshmcid\fB | <\fIbsfile\fB >\fIASCIIfile\fB
+\fR
+.SH DESCRIPTION
+.LP
+\fBbs2asc\fR converts the information contained within a BS dataset in
+\fBbsfile\fR(4) format from binary XDR format to a human-readable ASCII
+format.
+.SH OPTIONS
+.TP
+\fB\-f\fI filename
+\fRWrite the ASCII output to the named file instead of the default \fIstdout\fR.
+.TP
+\fB\-h
+\fRConvert and output the file header and ping headers only. (The file header
+will not be output if the \fB-sm\fR option has been specified.)
+.TP
+\fB\-d
+\fRConvert and output the ping data only.
+.TP
+\fB\-nip
+\fRLimit the conversion and output of pings whose \fB\s-1PNG_HIDE\s0\fR or
+\fB\s-1PNG_LOWQUALITY\s0\fR flag is set by just outputting the ping number,
+flag value and timestamp.
+.TP
+\fB\-nsns
+\fRDo not output sensor (i.e., compass, depth, pitch and roll) data.
+.TP
+\fB\-nb
+\fRDo not output bathymetry data.
+.TP
+\fB\-nbd
+\fRDo not output bathymetry data which have been flagged for deletion.
+.TP
+\fB\-nbf
+\fRDo not output bathymetry flags.
+.TP
+\fB\-nabi
+\fRDo not output auxiliary beam information.
+.TP
+\fB\-ns
+\fRDo not output sidescan data.
+.TP
+\fB\-nsd
+\fRDo not output sidescan data which have been flagged for deletion.
+.TP
+\fB\-nsf
+\fRDo not output sidescan flags.
+.TP
+\fB\-i
+\fRIgnore the ping count contained in the file header. This value is normally
+used as an upper bound on the number of pings to be converted to ASCII, and is
+also used to check the validity of any skip and/or count values passed to the
+program via the \fB-s\fR and/or \fB-c\fR options. It may be useful to ignore
+this count in situations where it is known to be incorrect (such as a file
+that has been only partially written by another program which has not yet
+updated the header count). This option may not be used in conjunction with
+the \fB-sm\fR option.
+.TP
+\fB\-pco
+\fROutput the ping count only and immediately exit. Default program behavior
+displays considerably more information. Note that the program makes no
+attempt to verify that the input actually contains the number of pings
+claimed by its file header.
+.TP
+\fB\-jt
+\fRUse the default julian format for the display of time values.
+.TP
+\fB\-ct
+\fRUse calendar (i.e., month and day) format for the display of time values.
+The default format is julian.
+.TP
+\fB\-s\fI skip
+\fRSkip the specified number of pings at the beginning of the dataset
+before converting any subsequent pings. The default value is 0.
+.TP
+\fB\-c\fI count
+\fRApply the conversion operation only to the specified number of pings.
+The default value is the total number of pings in the dataset minus
+the number of initial pings to be skipped as specified by the \fB-s\fR
+option, if any.
+.TP
+\fB\-H\fI
+\fRDisplay help information.
+.TP
+\fB\-sm\fI shmcid
+\fRRun the program in shared memory mode using the shared memory control
+block \fIshmcid\fR. The default mode of operation is to read a BS input
+file from \fIstdin\fR. The \fB-sm\fR option should be used only when the
+program is invoked by specialized controlling software such as \fBssp\fR(1)
+which is capable of implementing the required shared memory protocol.
+.SH SEE ALSO
+.BR ssp (1),
+.BR bsfile (4)
+.SH AUTHOR
+Originally written as \fBmr2asc\fR to support \fBmr1file\fR(4) format by
+Roger Davis, September 1991. Enhanced to support new \fBbsfile\fR(4) format
+in July, 2005.

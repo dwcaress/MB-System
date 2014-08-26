@@ -2,7 +2,7 @@
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2013 by
+ *    Copyright (c) 2007-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1198,8 +1198,8 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 		mbv_modelazimuth3d = 0.0;
 		mbv_viewelevation3d = 90.0;
 		mbv_viewazimuth3d = 0.0;
-		mbv_illuminate_magnitude = 5.0;
-		mbv_illuminate_elevation = 30.0;
+		mbv_illuminate_magnitude = 1.0;
+		mbv_illuminate_elevation = 5.0;
 		mbv_illuminate_azimuth = 90.0;
 		mbv_slope_magnitude = 1.0;
 		mbv_overlay_shade_magnitude = 1.0;
@@ -2043,6 +2043,7 @@ fprintf(stderr,"do_mbeditviz_pickarea_notify:%zu\n", instance);
 	mbev_status = mb3dsoundings_set_info_notify(mbev_verbose, &mbeditviz_mb3dsoundings_info, &mbev_error);
 	mbev_status = mb3dsoundings_set_bias_notify(mbev_verbose, &mbeditviz_mb3dsoundings_bias, &mbev_error);
 	mbev_status = mb3dsoundings_set_biasapply_notify(mbev_verbose, &mbeditviz_mb3dsoundings_biasapply, &mbev_error);
+	mbev_status = mb3dsoundings_set_colorsoundings_notify(mbev_verbose, &mbeditviz_mb3dsoundings_colorsoundings, &mbev_error);
 
 if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_picktwopoint_notify status:%d\n", mbev_status);
@@ -2072,6 +2073,7 @@ fprintf(stderr,"do_mbeditviz_pickregion_notify:%zu\n", instance);
 	mbev_status = mb3dsoundings_set_info_notify(mbev_verbose, &mbeditviz_mb3dsoundings_info, &mbev_error);
 	mbev_status = mb3dsoundings_set_bias_notify(mbev_verbose, &mbeditviz_mb3dsoundings_bias, &mbev_error);
 	mbev_status = mb3dsoundings_set_biasapply_notify(mbev_verbose, &mbeditviz_mb3dsoundings_biasapply, &mbev_error);
+	mbev_status = mb3dsoundings_set_colorsoundings_notify(mbev_verbose, &mbeditviz_mb3dsoundings_colorsoundings, &mbev_error);
 
 if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_pickregion_notify status:%d\n", mbev_status);
@@ -2148,6 +2150,7 @@ fprintf(stderr,"do_mbeditviz_picknav_notify:%zu\n", instance);
 	mbev_status = mb3dsoundings_set_info_notify(mbev_verbose, &mbeditviz_mb3dsoundings_info, &mbev_error);
 	mbev_status = mb3dsoundings_set_bias_notify(mbev_verbose, &mbeditviz_mb3dsoundings_bias, &mbev_error);
 	mbev_status = mb3dsoundings_set_biasapply_notify(mbev_verbose, &mbeditviz_mb3dsoundings_biasapply, &mbev_error);
+	mbev_status = mb3dsoundings_set_colorsoundings_notify(mbev_verbose, &mbeditviz_mb3dsoundings_colorsoundings, &mbev_error);
 
 if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_picknav_notify status:%d\n", mbev_status);

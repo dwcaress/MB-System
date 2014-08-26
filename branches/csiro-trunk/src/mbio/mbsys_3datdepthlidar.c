@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_3datdepthlidar.c	3.00	5/7/2013
  *	$Id$
  *
- *    Copyright (c) 2013-2013 by
+ *    Copyright (c) 2013-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -31,13 +31,15 @@
  * from all pulses in that scan (including itself), such that the
  * first pulse would be 0 μsec accordingly.
  * 
+ * ---------------------------------------------------------------------------------------
  * Range Angle Angle data format (binary)
  *              Item	                                Value	            Bytes
- * File Header		
- *           File Magic Number	                        0x3D07	            2   (1 UINT16)
+ * ---------------------------------------------------------------------------------------
+ * File Header Record	
+ *           File header record id	                0x3D46	            2   (1 UINT16)
+ *           File magic number	                        0x3D07	            2   (1 UINT16)
  *           File version	                        1	            2   (1 UINT16)
- *           File sub version	                        0	            2   (1 UINT16)
- *           
+ *           File sub version	                        1	            2   (1 UINT16)
  * Scan Information		
  *           Scan type (AZ raster, AZEL raster, bowtie)	2, 3, 4             2   (1 UINT16)
  *           Cross track angle start (deg)		                    4   (1 float32)
@@ -48,7 +50,12 @@
  *           Counts per cross track (AZEL raster)		            2   (1 UINT16)
  *           Counts per forward track (AZEL raster)		            2   (1 UINT16)
  *           Scanner Efficiency		                                    2   (1 UINT16)
- *           Scans per File		                                    4   (1 UINT32)
+ *           Scans per File		                                    2   (1 UINT16)
+ *           Scan count		                                            4   (1 UINT32)
+ *           
+ * ---------------------------------------------------------------------------------------
+ * Lidar Scan Record	
+ *           Lidar scan record id	                0x3D52	            2   (1 UINT16)
  * First Pulse Timestamp ( 1 to n Scans )		
  *           Timestamp year		                                    2   (1 UINT16)
  *           Timestamp month		                                    1   (1 UINT8)
@@ -143,7 +150,7 @@
  * Data files are named CTD_MMDDYYYY_HHMMSS.bin. The file format is as follows.
  * CTD Packets
  *              Item                                Value                   Bytes
- *           Header Magic Number                    0x3D0F                  2 (1 UINT16)
+ *           Header Magic Number                    0x3D07                  2 (1 UINT16)
  *           Timestamp year                                                 2 (1 UINT16)
  *           Timestamp month                                                1 (1 UINT8)
  *           Timestamp day                                                  1 (1 UINT8)
@@ -240,7 +247,7 @@ int mbsys_3datdepthlidar_alloc
         store->counts_per_forward_track = 0;     /* AZEL raster */
         store->scanner_efficiency = 0;           /* */
         store->scans_per_file = 0;               /* */
-	store->unused = 0;
+	store->scan_count = 0;
         
         /* Id of most recently read record */
         store->record_id = 0;
@@ -505,7 +512,7 @@ int mbsys_3datdepthlidar_preprocess(int verbose, void *mbio_ptr, void *store_ptr
 	int i;
 
 	/* print input debug statements */
-	if (verbose >= 5)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
@@ -599,7 +606,7 @@ int mbsys_3datdepthlidar_extract
 	double *time_d,			/* out: MBIO time (seconds since 1,1,1970) */
 	double *navlon,			/* out: transducer longitude -180.0..+180.0 */
 	double *navlat,			/* out: transducer latitude -180.0..+180.0 */
-	double *speed,			/* out: vessel speed (km/s) */
+	double *speed,			/* out: vessel speed (km/hr) */
 	double *heading,		/* out: vessel heading -180.0..+180.0 */
 	int *nbath,				/* out: number of bathymetry samples (beams) */
 	int *namp,				/* out: number of amplitude samples, usually namp = nbath */
@@ -726,7 +733,7 @@ int mbsys_3datdepthlidar_insert
 	double time_d,			/* in: time in seconds since 1,1,1970) */
 	double navlon,			/* in: transducer longitude -180.0..+180.0 */
 	double navlat,			/* in: transducer latitude -180.0..+180.0 */
-	double speed,			/* in: vessel speed (m/s) */
+	double speed,			/* in: vessel speed (km/hr) */
 	double heading,			/* in: vessel heading -180.0..+180.0 */
 	int nbath,				/* in: number of bathymetry samples/beams */
 	int namp,				/* in: number of amplitude samples, usually namp == nbath */
@@ -1986,61 +1993,70 @@ int mbsys_3datdepthlidar_print_store
 	fprintf(stderr,"%s     counts_per_forward_track:      %u\n",first,store->counts_per_forward_track);
 	fprintf(stderr,"%s     scanner_efficiency:            %u\n",first,store->scanner_efficiency);
 	fprintf(stderr,"%s     scans_per_file:                %u\n",first,store->scans_per_file);
-	fprintf(stderr,"%s     unused:                        %u\n",first,store->unused);
+	fprintf(stderr,"%s     scan_count:                    %u\n",first,store->scan_count);
 	fprintf(stderr,"%s     record_id:                     %u\n",first,store->record_id);
-	fprintf(stderr,"%s     current_scan:                  %d\n",first,store->current_scan);
-	fprintf(stderr,"%s     year:                          %u\n",first,store->year);
-	fprintf(stderr,"%s     month:                         %u\n",first,store->month);
-	fprintf(stderr,"%s     day:                           %u\n",first,store->day);
-	fprintf(stderr,"%s     days_since_jan_1:              %u\n",first,store->days_since_jan_1);
-	fprintf(stderr,"%s     hour:                          %u\n",first,store->hour);
-	fprintf(stderr,"%s     minutes:                       %u\n",first,store->minutes);
-	fprintf(stderr,"%s     seconds:                       %u\n",first,store->seconds);
-	fprintf(stderr,"%s     nanoseconds:                   %u\n",first,store->nanoseconds);
-	fprintf(stderr,"%s     time_d:                        %f\n",first,store->time_d);
-	fprintf(stderr,"%s     navlon:                        %f\n",first,store->navlon);
-	fprintf(stderr,"%s     navlat:                        %f\n",first,store->navlat);
-	fprintf(stderr,"%s     sonardepth:                    %f\n",first,store->sensordepth);
-	fprintf(stderr,"%s     heading:                       %f\n",first,store->heading);
-	fprintf(stderr,"%s     roll:                          %f\n",first,store->roll);
-	fprintf(stderr,"%s     pitch:                         %f\n",first,store->pitch);
-	fprintf(stderr,"%s     speed:                         %f\n",first,store->speed);
-	if (store->counts_per_scan > 0)
+	if (store->kind == MB_DATA_DATA)
 		{
-		npulses = store->counts_per_scan;
+		fprintf(stderr,"%s     current_scan:                  %d\n",first,store->current_scan);
+		fprintf(stderr,"%s     year:                          %u\n",first,store->year);
+		fprintf(stderr,"%s     month:                         %u\n",first,store->month);
+		fprintf(stderr,"%s     day:                           %u\n",first,store->day);
+		fprintf(stderr,"%s     days_since_jan_1:              %u\n",first,store->days_since_jan_1);
+		fprintf(stderr,"%s     hour:                          %u\n",first,store->hour);
+		fprintf(stderr,"%s     minutes:                       %u\n",first,store->minutes);
+		fprintf(stderr,"%s     seconds:                       %u\n",first,store->seconds);
+		fprintf(stderr,"%s     nanoseconds:                   %u\n",first,store->nanoseconds);
+		fprintf(stderr,"%s     time_d:                        %f\n",first,store->time_d);
+		fprintf(stderr,"%s     navlon:                        %f\n",first,store->navlon);
+		fprintf(stderr,"%s     navlat:                        %f\n",first,store->navlat);
+		fprintf(stderr,"%s     sonardepth:                    %f\n",first,store->sensordepth);
+		fprintf(stderr,"%s     heading:                       %f\n",first,store->heading);
+		fprintf(stderr,"%s     roll:                          %f\n",first,store->roll);
+		fprintf(stderr,"%s     pitch:                         %f\n",first,store->pitch);
+		fprintf(stderr,"%s     speed:                         %f\n",first,store->speed);
+		fprintf(stderr,"%s     bathymetry_calculated:         %d\n",first,store->bathymetry_calculated);
+		fprintf(stderr,"%s     num_pulses:                    %d\n",first,store->num_pulses);
+		fprintf(stderr,"%s     num_pulses_alloc:              %d\n",first,store->num_pulses_alloc);
+		if (store->counts_per_scan > 0)
+			{
+			npulses = store->counts_per_scan;
+			}
+		else
+			{
+			npulses = store->counts_per_cross_track * store->counts_per_forward_track;
+			}
+		for (i=0;i<store->num_pulses;i++)
+			{
+			pulse = &(store->pulses[i]);
+			fprintf(stderr,"%s------------------------------------------\n",first);
+			fprintf(stderr,"%s     pulse:                         %d\n",first,i);
+			fprintf(stderr,"%s     range:                         %f\n",first,pulse->range);
+			fprintf(stderr,"%s     amplitude:                     %d\n",first,pulse->amplitude);
+			fprintf(stderr,"%s     snr:                           %f\n",first,pulse->snr);
+			fprintf(stderr,"%s     cross_track_angle:             %f\n",first,pulse->cross_track_angle);
+			fprintf(stderr,"%s     forward_track_angle:           %f\n",first,pulse->forward_track_angle);
+			fprintf(stderr,"%s     cross_track_offset:            %f\n",first,pulse->cross_track_offset);
+			fprintf(stderr,"%s     forward_track_offset:          %f\n",first,pulse->forward_track_offset);
+			fprintf(stderr,"%s     pulse_time_offset:             %d\n",first,pulse->pulse_time_offset);
+			fprintf(stderr,"%s     saturated:                     %u\n",first,pulse->saturated);
+			fprintf(stderr,"%s     time_d:                        %f\n",first,pulse->time_d);
+			fprintf(stderr,"%s     beamflag:                      %u\n",first,pulse->beamflag);
+			fprintf(stderr,"%s     acrosstrack:                   %f\n",first,pulse->acrosstrack);
+			fprintf(stderr,"%s     alongtrack:                    %f\n",first,pulse->alongtrack);
+			fprintf(stderr,"%s     depth:                         %f\n",first,pulse->depth);
+			fprintf(stderr,"%s     navlon:                        %f\n",first,pulse->navlon);
+			fprintf(stderr,"%s     navlat:                        %f\n",first,pulse->navlat);
+			fprintf(stderr,"%s     sonardepth:                    %f\n",first,pulse->sensordepth);
+			fprintf(stderr,"%s     heading:                       %f\n",first,pulse->heading);
+			fprintf(stderr,"%s     roll:                          %f\n",first,pulse->roll);
+			fprintf(stderr,"%s     pitch:                         %f\n",first,pulse->pitch);
+			}
 		}
-	else
+	else if (store->kind == MB_DATA_COMMENT)
 		{
-		npulses = store->counts_per_cross_track * store->counts_per_forward_track;
+		fprintf(stderr,"%s     comment_len:                   %d\n",first,store->comment_len);
+		fprintf(stderr,"%s     comment:                       %s\n",first,store->comment);
 		}
-	for (i=0;i<npulses;i++)
-		{
-		pulse = &(store->pulses[i]);
-		fprintf(stderr,"%s------------------------------------------\n",first);
-		fprintf(stderr,"%s     pulse:                         %d\n",first,i);
-		fprintf(stderr,"%s     range:                         %f\n",first,pulse->range);
-		fprintf(stderr,"%s     amplitude:                     %d\n",first,pulse->amplitude);
-		fprintf(stderr,"%s     snr:                           %f\n",first,pulse->snr);
-		fprintf(stderr,"%s     cross_track_angle:             %f\n",first,pulse->cross_track_angle);
-		fprintf(stderr,"%s     forward_track_angle:           %f\n",first,pulse->forward_track_angle);
-		fprintf(stderr,"%s     cross_track_offset:            %f\n",first,pulse->cross_track_offset);
-		fprintf(stderr,"%s     forward_track_offset:          %f\n",first,pulse->forward_track_offset);
-		fprintf(stderr,"%s     pulse_time_offset:             %d\n",first,pulse->pulse_time_offset);
-		fprintf(stderr,"%s     saturated:                     %u\n",first,pulse->saturated);
-		fprintf(stderr,"%s     time_d:                        %f\n",first,pulse->time_d);
-		fprintf(stderr,"%s     beamflag:                      %u\n",first,pulse->beamflag);
-		fprintf(stderr,"%s     acrosstrack:                   %f\n",first,pulse->acrosstrack);
-		fprintf(stderr,"%s     alongtrack:                    %f\n",first,pulse->alongtrack);
-		fprintf(stderr,"%s     depth:                         %f\n",first,pulse->depth);
-		fprintf(stderr,"%s     navlon:                        %f\n",first,pulse->navlon);
-		fprintf(stderr,"%s     navlat:                        %f\n",first,pulse->navlat);
-		fprintf(stderr,"%s     sonardepth:                    %f\n",first,pulse->sensordepth);
-		fprintf(stderr,"%s     heading:                       %f\n",first,pulse->heading);
-		fprintf(stderr,"%s     roll:                          %f\n",first,pulse->roll);
-		fprintf(stderr,"%s     pitch:                         %f\n",first,pulse->pitch);
-		}
-	fprintf(stderr,"%s     comment_len:                   %d\n",first,store->comment_len);
-	fprintf(stderr,"%s     comment:                       %s\n",first,store->comment);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2136,8 +2152,9 @@ int mbsys_3datdepthlidar_calculatebathymetry
 				/* get lateral and vertical components of range */
 				xx = pulse->range * sin(DTR * theta);
 				pulse->depth = pulse->range * cos(DTR * theta);
-				pulse->acrosstrack = xx * cos(DTR * phi);
-				pulse->alongtrack = xx * sin(DTR * phi);
+				pulse->acrosstrack = xx * cos(DTR * phi) + pulse->cross_track_offset;
+				pulse->alongtrack = xx * sin(DTR * phi) + pulse->forward_track_offset
+							+ 0.0000002777777 * pulse->pulse_time_offset * store->speed;
 				}
 			else
 				{
@@ -2148,6 +2165,9 @@ int mbsys_3datdepthlidar_calculatebathymetry
 				pulse->alongtrack = 0.0;
 				}
 			}
+		
+		/* set the bathymetry_calculated flag */
+		store->bathymetry_calculated = MB_YES;
 		}
 
 	/* print output debug statements */

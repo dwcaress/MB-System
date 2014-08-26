@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_asciixyz.c	5/8/2002
  *	$Id$
  *
- *    Copyright (c) 2002-2013 by
+ *    Copyright (c) 2002-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1004,7 +1004,7 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	char	line[MBSYS_SINGLEBEAM_MAXLINE+1];
+	char	line[MB_COMMENT_MAXLINE+1];
 	char	flag;
 	char	*line_ptr;
 	int	nread;
@@ -1029,7 +1029,7 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next record */
-	if ((line_ptr = fgets(line, MBSYS_SINGLEBEAM_MAXLINE,
+	if ((line_ptr = fgets(line, MB_COMMENT_MAXLINE,
 			mb_io_ptr->mbfp)) != NULL)
 		{
 		mb_io_ptr->file_bytes += strlen(line);
@@ -1051,7 +1051,7 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    && line[0] != '-')
 	    {
 	    store->kind = MB_DATA_COMMENT;
-            strncpy(store->comment,&line[1],MBSYS_SINGLEBEAM_MAXLINE);
+            strncpy(store->comment,&line[1],MB_COMMENT_MAXLINE);
 	    }
 	else if (status == MB_SUCCESS)
 	    {
@@ -1191,7 +1191,7 @@ int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	char	line[MBSYS_SINGLEBEAM_MAXLINE+1];
+	char	line[MB_COMMENT_MAXLINE+1];
 	int	len;
 	char	flag;
 	double	depth;
@@ -1217,7 +1217,7 @@ int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if (store->kind == MB_DATA_COMMENT)
 	    {
 	    line[0] = '#';
-            strncpy(&line[1],store->comment,MBSYS_SINGLEBEAM_MAXLINE-2);
+            strncpy(&line[1],store->comment,MB_COMMENT_MAXLINE-2);
             len = strlen(line);
             line[len] = '\n';
             line[len+1] = '\0';

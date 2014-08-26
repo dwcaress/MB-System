@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_mr1v2001.h	3/6/2003
  *	$Id$
  *
- *    Copyright (c) 2003-2013 by
+ *    Copyright (c) 2003-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,7 +19,7 @@
  * DSL 120
  *.
  * The data formats associated with mbsys_mr1v2001 are:
- *      MBF_MR1PRVR2 : MBIO ID 63
+ *      MBF_MR1PRVR2 : MBIO ID 64
  *
  * Author:	D. W. Caress
  * Date:	March 6, 2003
@@ -52,9 +52,9 @@
  *      data from the MR1, SCAMP, and WHOI DSL 120.
  */
 
-/* get MR1PR library header file */
-#ifndef __MR1PR__
-#include "mr1pr.h"
+/* get MBBS library header file */
+#ifndef __MBBS__
+#include "mbbs.h"
 #endif
 
 /* maximum number of bathymetry beams per side for MR1 */
@@ -81,24 +81,17 @@ struct mbsys_mr1v2001_struct
 	int	kind;
 
 	/* file header info */
-	MR1File header;
+	BSFile header;
 
 	/* ping */
 	Ping 	ping;
 
 	/* data buffer */
-	unsigned int	mr1buffersize;
-	float 	*mr1buffer;
+	unsigned int	bsbuffersize;
+	void 	*bsbuffer;
 
-	/* sensors */
-	float 	*compass;
-	float 	*depth;
-	float 	*pitch;
-	float 	*roll;
-	float 	*pbty;
-	float 	*sbty;
-	float 	*pss;
-	float 	*sss;
+	/* PingData including sensors */
+	PingData    pingdata;
 
 	/* comment */
 	char	comment[MBSYS_MR1V2001_MAXLINE];

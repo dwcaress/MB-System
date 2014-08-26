@@ -2,7 +2,7 @@
  *    The MB-system:	mb3dsoundingsprivate.h	9/24/2003
  *    $Id$
  *
- *    Copyright (c) 2007-2013 by
+ *    Copyright (c) 2007-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -107,6 +107,7 @@ struct mb3dsoundings_world_struct
     void (*mb3dsoundings_info_notify)(int ifile, int iping, int ibeam, char *infostring);
     void (*mb3dsoundings_bias_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
     void (*mb3dsoundings_biasapply_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
+    void (*mb3dsoundings_colorsoundings_notify)(int color);
 
     /* pointer to structure holding data to be rendered */
     struct mb3dsoundings_struct *soundingdata;
@@ -288,6 +289,13 @@ void do_mb3dsdg_view_noprofile( Widget w, XtPointer client_data, XtPointer call_
 void do_mb3dsdg_view_goodprofile( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_allprofile( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_applybias( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_colorsoundingsblack( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_colorsoundingsred( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_colorsoundingsyellow( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_colorsoundingsgreen( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_colorsoundingsbluegreen( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_colorsoundingsblue( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_colorsoundingspurple( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_boundingbox( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_scalewithflagged( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_reset( Widget w, XtPointer client_data, XtPointer call_data);

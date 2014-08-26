@@ -1,8 +1,8 @@
 #! /bin/sh
 
 # libtool - Provide generalized library-building support services.
-# Generated automatically by config.status (mbsystem) 5.4.2168
-# Libtool was configured on host deitz:
+# Generated automatically by config.status (mbsystem) 5.4.2202
+# Libtool was configured on host tharp.local:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -66,28 +66,28 @@ PATH_SEPARATOR=":"
 
 # The host system.
 host_alias=
-host=x86_64-apple-darwin13.0.0
-host_os=darwin13.0.0
+host=x86_64-apple-darwin13.3.0
+host_os=darwin13.3.0
 
 # The build system.
 build_alias=
-build=x86_64-apple-darwin13.0.0
-build_os=darwin13.0.0
+build=x86_64-apple-darwin13.3.0
+build_os=darwin13.3.0
 
 # A sed program that does not truncate output.
-SED="/sw/bin/sed"
+SED="/usr/bin/sed"
 
 # Sed that helps us avoid accidentally triggering echo(1) options like -n.
 Xsed="$SED -e 1s/^X//"
 
 # A grep program that handles long lines.
-GREP="/sw/bin/grep"
+GREP="/usr/bin/grep"
 
 # An ERE matcher.
-EGREP="/sw/bin/grep -E"
+EGREP="/usr/bin/grep -E"
 
 # A literal string matcher.
-FGREP="/sw/bin/grep -F"
+FGREP="/usr/bin/grep -F"
 
 # A BSD- or MS-compatible name lister.
 NM="/usr/bin/nm"
@@ -272,7 +272,7 @@ finish_eval=""
 hardcode_into_libs=no
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/5.0  /usr/local/lib"
+sys_lib_search_path_spec="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/5.1  /usr/local/lib"
 
 # Run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/usr/local/lib /lib /usr/lib"
@@ -1260,7 +1260,7 @@ exec_cmd=
 # Append VALUE to the end of shell variable VAR.
 func_append ()
 {
-    eval "${1}+=\${2}"
+eval "${1}+=\${2}"
 } # Extended-shell func_append implementation
 
 # func_append_quoted var value
@@ -1276,7 +1276,7 @@ func_append_quoted ()
 # func_arith arithmetic-term...
 func_arith ()
 {
-    func_arith_result=$(( $* ))
+func_arith_result=$(( $* ))
 } # Extended-shell func_arith implementation
 
 
@@ -1284,7 +1284,7 @@ func_arith ()
 # STRING may not start with a hyphen.
 func_len ()
 {
-    func_len_result=${#1}
+func_len_result=${#1}
 } # Extended-shell func_len implementation
 
 
@@ -1301,7 +1301,7 @@ func_lo2o ()
 # func_xform libobj-or-source
 func_xform ()
 {
-    func_xform_result=${1%.*}.lo
+func_xform_result=${1%.*}.lo
 } # Extended-shell func_xform implementation
 
 

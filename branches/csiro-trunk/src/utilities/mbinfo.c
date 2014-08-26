@@ -2,7 +2,7 @@
  *    The MB-system:	mbinfo.c	2/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1797,12 +1797,18 @@ int main (int argc, char **argv)
 				if (good_nav_only == MB_YES)
 					{
 					if (navlon == 0.0 || navlat == 0.0)
+					    {
 					    good_nav = MB_NO;
+					    }
 					else if (beginnav == MB_YES
 					    && speed_apparent >= speed_threshold)
+					    {
 					    good_nav = MB_NO;
+					    }
 					else
+					    {
 					    good_nav = MB_YES;
+					    }
 					}
 				else
 					good_nav = MB_YES;

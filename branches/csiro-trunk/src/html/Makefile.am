@@ -1,8 +1,12 @@
 dist_mbsystemhtml_DATA = \
 caress2001.gif \
+caress_chayes_ferreira_Feb2014.jpg \
 ChayesJul2003.gif \
+Christina_d_S_Ferreira_crop.jpg \
+ChangeLog.txt \
 gpl.html \
 index.html \
+KrystleAnderson2013.gif \
 mb7k2jstar.html \
 mb7k2ss.html \
 mb7kpreprocess.html \
@@ -59,6 +63,7 @@ mbm_utm.html \
 mbm_xbt.html \
 mbm_xyplot.html \
 mbnavadjust.html \
+mbnavadjustmerge.html \
 mbnavedit.html \
 mbnavlist.html \
 mbneptune2esf.html \
@@ -75,6 +80,7 @@ mbsegypsd.html \
 mbset.html \
 mbstripnan.html \
 mbsvplist.html \
+mbsvpselect.html \
 mbswath.html \
 mbsystem_capabilities.html \
 mbsystem_copyright.html \
@@ -89,7 +95,7 @@ mbsystem_logo_small.gif \
 mbsystem_man_list.html \
 mbsystem_version.txt \
 mbsystem_whatsnew.html \
-MBTeamJul2003.gif \
+MBTeamJul2003.jpg \
 mbtime.html \
 mbvelocitytool.html \
 ValJul2003.gif

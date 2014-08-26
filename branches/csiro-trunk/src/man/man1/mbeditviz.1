@@ -1,4 +1,4 @@
-.TH MBeditviz 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH MBeditviz 1 "2 June 2014" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBMBeditviz\fP \- 3D visualization-based editing of swath bathymetry soundings.
 
@@ -84,6 +84,23 @@ using the middle and right mouse buttons in either rotation mode or zoom/exagera
 You can edit the soundings in the point cloud context using the left mouse button. The
 editing mouse modes work just like MBedit. The View menu in the
 point cloud display lets you show, or not show, the flagged soundings (which are displayed in red).
+
+\fIChanging Sounding Colors\fP
+
+The [3D Soundings]:<Action> pulldown menu has seven buttons that allow the user to change the
+display color of all currently selected unflagged soundings. Each of these options
+(black, red, yellow, green, bluegreen, blue, purple) acts on the soundings  displayed in
+the 3D Soundings window, and these color settings are saved when the 3D Soundings window is
+dismissed or redisplayed. This feature can aid in using \fBMBeditviz\fP for patch test
+(bias parameter) analysis. For instance, if a survey includes reciprocal lines (two coincident
+survey lines collected in opposite directions), one can use a narrow strip of soundings across
+the swaths to assess the roll bias value. This analysis is easier if the soundings from the
+two reciprocal swaths can be differentiated. To accomplish this, a user can select one line using the
+[MBview]:<Pick Nav> mode, bringing those associated soundings up in the 3D Soundings window,
+and then set all those soundings to be colored green. The soundings of the opposite line
+can be similarly colored purple. Then, selecting a narrow area across the reciprocal lines
+will select and display soundings from both lines, and those soundings will be green or
+purple depending on which line they are part of.
 
 \fIApplying the Bathyemtry Edits\fP
 

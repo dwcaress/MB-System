@@ -539,7 +539,7 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char	**bufferptr;
 	char	*buffer;
 	int	*bufferalloc;
-	unsigned int *synctest;
+	unsigned int syncvalue;
 	char	recordid[12];
 	size_t	read_len;
 	int	skip;
@@ -575,9 +575,8 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	bufferptr = (char **) &mb_io_ptr->saveptr1;
 	buffer = (char *) *bufferptr;
 	bufferalloc = (int *) &mb_io_ptr->save6;
-	synctest = (unsigned int *) buffer;
 	record_size = (unsigned int *)&buffer[4];
-
+	
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
@@ -593,15 +592,16 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		/* check header - if not a good header read a byte
 			at a time until a good header is found */
 		skip = 0;
+		mb_get_binary_int(MB_YES, buffer, &syncvalue);
 		while (status == MB_SUCCESS
-			&& *synctest != MBSYS_WASSP_SYNC)
+			&& syncvalue != MBSYS_WASSP_SYNC)
 			{
 			/* get next byte */
 			for (i=0;i<15;i++)
 			    buffer[i] = buffer[i+1];
 			read_len = (size_t)1;
-			status = mb_fileio_get(verbose, mbio_ptr, &buffer[15],
-					   &read_len, error);
+			status = mb_fileio_get(verbose, mbio_ptr, &buffer[15], &read_len, error);
+			mb_get_binary_int(MB_YES, buffer, &syncvalue);
 			skip++;
 			}
 		    

@@ -665,6 +665,118 @@ object mb3dsdg_pushButton_action_applybias : XmPushButton widget {
 !(BX)    };
 };
 
+object mb3dsdg_pushButton_action_colorsoundingsblack : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Color Unflagged Soundings Black");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mb3dsdg_action_colorsoundingsblack();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mb3dsdg_pushButton_action_colorsoundingsred : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Color Unflagged Soundings Red");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mb3dsdg_action_colorsoundingsred();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mb3dsdg_pushButton_action_colorsoundingsyellow : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Color Unflagged Soundings Yellow");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mb3dsdg_action_colorsoundingsyellow();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mb3dsdg_pushButton_action_colorsoundingsgreen : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Color Unflagged Soundings Green");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mb3dsdg_action_colorsoundingsgreen();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mb3dsdg_pushButton_action_colorsoundingsbluegreen : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Color Unflagged Soundings Bluegreen");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mb3dsdg_action_colorsoundingsbluegreen();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mb3dsdg_pushButton_action_colorsoundingsblue : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Color Unflagged Soundings Blue");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mb3dsdg_action_colorsoundingsblue();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mb3dsdg_pushButton_action_colorsoundingspurple : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Color Unflagged Soundings Purple");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mb3dsdg_action_colorsoundingspurple();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mb3dsdg_pulldownMenu_action : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
@@ -675,6 +787,13 @@ object mb3dsdg_pulldownMenu_action : XmPulldownMenu widget {
     };
     controls {
          managed XmPushButton mb3dsdg_pushButton_action_applybias;
+         managed XmPushButton mb3dsdg_pushButton_action_colorsoundingsblack;
+         managed XmPushButton mb3dsdg_pushButton_action_colorsoundingsred;
+         managed XmPushButton mb3dsdg_pushButton_action_colorsoundingsyellow;
+         managed XmPushButton mb3dsdg_pushButton_action_colorsoundingsgreen;
+         managed XmPushButton mb3dsdg_pushButton_action_colorsoundingsbluegreen;
+         managed XmPushButton mb3dsdg_pushButton_action_colorsoundingsblue;
+         managed XmPushButton mb3dsdg_pushButton_action_colorsoundingspurple;
     };
     callbacks {
         callbacks Style_useReasons;

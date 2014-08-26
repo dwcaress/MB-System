@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
  *	$Id$
  *
- *    Copyright (c) 2004-2013 by
+ *    Copyright (c) 2004-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -26,6 +26,11 @@
  * Date:	March 23, 2004
  *
  * $Log: mbsys_reson7k.c,v $
+ *
+ *
+ * Revision 2014/05/12 finlayson
+ * Added support for Calibrated Snippet record (7058)
+ *
  * Revision 5.21  2008/09/27 03:27:10  caress
  * Working towards release 5.1.1beta24
  *
@@ -229,6 +234,8 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	s7kr_v2rawdetection	*v2rawdetection;
 	s7kr_v2snippettimeseries	*v2snippettimeseries;
 	s7kr_v2snippet		*v2snippet;
+	s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
+	s7kr_calibratedsnippet *calibratedsnippet;
 	s7kr_installation	*installation;
 	s7kr_systemeventmessage	*systemeventmessage;
 	s7kr_fileheader		*fileheader;
@@ -278,6 +285,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->read_v2detection = MB_NO;
 	store->read_v2rawdetection = MB_NO;
 	store->read_v2snippet = MB_NO;
+	store->read_calibratedsnippet = MB_NO;
 	store->read_processedsidescan = MB_NO;
 
 	/* MB-System time stamp */
@@ -1118,6 +1126,28 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	systemeventmessage->message_alloc = 0;
 	systemeventmessage->message = NULL;
 
+	/* Reson 7k calibrated snippet (record 7058) */
+	calibratedsnippet = &store->calibratedsnippet;
+	mbsys_reson7k_zero7kheader(verbose, &calibratedsnippet->header, error);
+	calibratedsnippet->serial_number = 0;
+	calibratedsnippet->ping_number = 0;
+	calibratedsnippet->multi_ping = 0;
+	calibratedsnippet->number_beams = 0;
+	calibratedsnippet->error_flag = 0;
+	calibratedsnippet->control_flags = 0;
+	for (i=0;i<28;i++)
+		calibratedsnippet->reserved[i] = 0;
+	for (i=0;i<MBSYS_RESON7K_MAX_BEAMS;i++)
+		{
+		calibratedsnippettimeseries = &calibratedsnippet->calibratedsnippettimeseries[i];
+		calibratedsnippettimeseries->beam_number = 0;
+		calibratedsnippettimeseries->begin_sample = 0;
+		calibratedsnippettimeseries->detect_sample = 0;
+		calibratedsnippettimeseries->end_sample = 0;
+		calibratedsnippettimeseries->nalloc = 0;
+		calibratedsnippettimeseries->amplitude = NULL;
+		}
+
 	/* Reson 7k file header (record 7200) */
 	fileheader = &store->fileheader;
 	mbsys_reson7k_zero7kheader(verbose, &fileheader->header, error);
@@ -1246,6 +1276,8 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	s7kr_v2bite		*v2bite;
 	s7kr_v2snippettimeseries	*v2snippettimeseries;
 	s7kr_v2snippet		*v2snippet;
+	s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
+	s7kr_calibratedsnippet *calibratedsnippet;
 	s7kr_systemeventmessage	*systemeventmessage;
 	int	i;
 
@@ -1474,6 +1506,21 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	systemeventmessage->message_alloc = 0;
 	if (systemeventmessage->message != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(systemeventmessage->message),error);
+
+	/* Reson 7k calibrated snippet (record 7058) */
+	calibratedsnippet = &store->calibratedsnippet;
+	calibratedsnippet->number_beams = 0;
+	for (i=0;i<MBSYS_RESON7K_MAX_BEAMS;i++)
+		{
+		calibratedsnippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+		calibratedsnippettimeseries->beam_number = 0;
+		calibratedsnippettimeseries->begin_sample = 0;
+		calibratedsnippettimeseries->detect_sample = 0;
+		calibratedsnippettimeseries->end_sample = 0;
+		calibratedsnippettimeseries->nalloc = 0;
+		if (amplitudephase->amplitude != NULL)
+			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(calibratedsnippettimeseries->amplitude),error);
+		}
 
 	/* deallocate memory for data structure */
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)store_ptr,error);
@@ -2731,37 +2778,39 @@ int mbsys_reson7k_print_fsdwssheader(int verbose,
 			first,function_name);
 		}
 	fprintf(stderr,"%sStructure Contents:\n", first);
-	fprintf(stderr,"%s     subsystem;                    %d\n",first,fsdwssheader->subsystem);
-	fprintf(stderr,"%s     channelNum;                   %d\n",first,fsdwssheader->channelNum);
-	fprintf(stderr,"%s     pingNum;                      %d\n",first,fsdwssheader->pingNum);
-	fprintf(stderr,"%s     packetNum;                    %d\n",first,fsdwssheader->packetNum);
-	fprintf(stderr,"%s     trigSource;                   %d\n",first,fsdwssheader->trigSource);
-	fprintf(stderr,"%s     samples;                      %d\n",first,fsdwssheader->samples);
-	fprintf(stderr,"%s     sampleInterval;               %d\n",first,fsdwssheader->sampleInterval);
-	fprintf(stderr,"%s     startDepth;                   %d\n",first,fsdwssheader->startDepth);
-	fprintf(stderr,"%s     weightingFactor;              %d\n",first,fsdwssheader->weightingFactor);
-	fprintf(stderr,"%s     ADCGain;                      %d\n",first,fsdwssheader->ADCGain);
-	fprintf(stderr,"%s     ADCMax;                       %d\n",first,fsdwssheader->ADCMax);
-	fprintf(stderr,"%s     rangeSetting;                 %d\n",first,fsdwssheader->rangeSetting);
-	fprintf(stderr,"%s     pulseID;                      %d\n",first,fsdwssheader->pulseID);
-	fprintf(stderr,"%s     markNumber;                   %d\n",first,fsdwssheader->markNumber);
-	fprintf(stderr,"%s     dataFormat;                   %d\n",first,fsdwssheader->dataFormat);
-	fprintf(stderr,"%s     reserved;                     %d\n",first,fsdwssheader->reserved);
-	fprintf(stderr,"%s     millisecondsToday;            %d\n",first,fsdwssheader->millisecondsToday);
-	fprintf(stderr,"%s     year;                         %d\n",first,fsdwssheader->year);
-	fprintf(stderr,"%s     day;                          %d\n",first,fsdwssheader->day);
-	fprintf(stderr,"%s     hour;                         %d\n",first,fsdwssheader->hour);
-	fprintf(stderr,"%s     minute;                       %d\n",first,fsdwssheader->minute);
-	fprintf(stderr,"%s     second;                       %d\n",first,fsdwssheader->second);
-	fprintf(stderr,"%s     heading;                      %d\n",first,fsdwssheader->heading);
-	fprintf(stderr,"%s     pitch;                        %d\n",first,fsdwssheader->pitch);
-	fprintf(stderr,"%s     roll;                         %d\n",first,fsdwssheader->roll);
-	fprintf(stderr,"%s     heave;                        %d\n",first,fsdwssheader->heave);
-	fprintf(stderr,"%s     yaw;                          %d\n",first,fsdwssheader->yaw);
-	fprintf(stderr,"%s     depth;                        %d\n",first,fsdwssheader->depth);
-	fprintf(stderr,"%s     temperature;                  %d\n",first,fsdwssheader->temperature);
-	for (i=0;i<10;i++)
-		fprintf(stderr,"%s     reserved2[%d];                 %d\n",first,i,fsdwssheader->reserved2[i]);
+	fprintf(stderr,"%s     subsystem:                    %d\n",first,fsdwssheader->subsystem);
+	fprintf(stderr,"%s     channelNum:                   %d\n",first,fsdwssheader->channelNum);
+	fprintf(stderr,"%s     pingNum:                      %d\n",first,fsdwssheader->pingNum);
+	fprintf(stderr,"%s     packetNum:                    %d\n",first,fsdwssheader->packetNum);
+	fprintf(stderr,"%s     trigSource:                   %d\n",first,fsdwssheader->trigSource);
+	fprintf(stderr,"%s     samples:                      %d\n",first,fsdwssheader->samples);
+	fprintf(stderr,"%s     sampleInterval:               %d\n",first,fsdwssheader->sampleInterval);
+	fprintf(stderr,"%s     startDepth:                   %d\n",first,fsdwssheader->startDepth);
+	fprintf(stderr,"%s     weightingFactor:              %d\n",first,fsdwssheader->weightingFactor);
+	fprintf(stderr,"%s     ADCGain:                      %d\n",first,fsdwssheader->ADCGain);
+	fprintf(stderr,"%s     ADCMax:                       %d\n",first,fsdwssheader->ADCMax);
+	fprintf(stderr,"%s     rangeSetting:                 %d\n",first,fsdwssheader->rangeSetting);
+	fprintf(stderr,"%s     pulseID:                      %d\n",first,fsdwssheader->pulseID);
+	fprintf(stderr,"%s     markNumber:                   %d\n",first,fsdwssheader->markNumber);
+	fprintf(stderr,"%s     dataFormat:                   %d\n",first,fsdwssheader->dataFormat);
+	fprintf(stderr,"%s     reserved:                     %d\n",first,fsdwssheader->reserved);
+	fprintf(stderr,"%s     millisecondsToday:            %d\n",first,fsdwssheader->millisecondsToday);
+	fprintf(stderr,"%s     year:                         %d\n",first,fsdwssheader->year);
+	fprintf(stderr,"%s     day:                          %d\n",first,fsdwssheader->day);
+	fprintf(stderr,"%s     hour:                         %d\n",first,fsdwssheader->hour);
+	fprintf(stderr,"%s     minute:                       %d\n",first,fsdwssheader->minute);
+	fprintf(stderr,"%s     second:                       %d\n",first,fsdwssheader->second);
+	fprintf(stderr,"%s     heading:                      %d\n",first,fsdwssheader->heading);
+	fprintf(stderr,"%s     pitch:                        %d\n",first,fsdwssheader->pitch);
+	fprintf(stderr,"%s     roll:                         %d\n",first,fsdwssheader->roll);
+	fprintf(stderr,"%s     heave:                        %d\n",first,fsdwssheader->heave);
+	fprintf(stderr,"%s     yaw:                          %d\n",first,fsdwssheader->yaw);
+	fprintf(stderr,"%s     depth:                        %d\n",first,fsdwssheader->depth);
+	fprintf(stderr,"%s     temperature:                  %d\n",first,fsdwssheader->temperature);
+	for (i=0;i<2;i++)
+		fprintf(stderr,"%s     reserved2[%d]:                 %d\n",first,i,fsdwssheader->reserved2[i]);
+	fprintf(stderr,"%s     longitude:                    %d\n",first,fsdwssheader->longitude);
+	fprintf(stderr,"%s     latitude:                     %d\n",first,fsdwssheader->latitude);
 
 
 	/* print output debug statements */
@@ -2810,73 +2859,73 @@ int mbsys_reson7k_print_fsdwsegyheader(int verbose,
 			first,function_name);
 		}
 	fprintf(stderr,"%sStructure Contents:\n", first);
-	fprintf(stderr,"%s     sequenceNumber;              %d\n",first,fsdwsegyheader->sequenceNumber);
-	fprintf(stderr,"%s     startDepth;                  %d\n",first,fsdwsegyheader->startDepth);
-	fprintf(stderr,"%s     pingNum;                     %d\n",first,fsdwsegyheader->pingNum);
-	fprintf(stderr,"%s     channelNum;                  %d\n",first,fsdwsegyheader->channelNum);
+	fprintf(stderr,"%s     sequenceNumber:              %d\n",first,fsdwsegyheader->sequenceNumber);
+	fprintf(stderr,"%s     startDepth:                  %d\n",first,fsdwsegyheader->startDepth);
+	fprintf(stderr,"%s     pingNum:                     %d\n",first,fsdwsegyheader->pingNum);
+	fprintf(stderr,"%s     channelNum:                  %d\n",first,fsdwsegyheader->channelNum);
 	for (i=0;i<6;i++)
-		fprintf(stderr,"%s     unused1[%d];                  %d\n",first,i,fsdwsegyheader->unused1[i]);
-	fprintf(stderr,"%s     traceIDCode;                 %d\n",first,fsdwsegyheader->traceIDCode);
+		fprintf(stderr,"%s     unused1[%d]:                  %d\n",first,i,fsdwsegyheader->unused1[i]);
+	fprintf(stderr,"%s     traceIDCode:                 %d\n",first,fsdwsegyheader->traceIDCode);
 	for (i=0;i<2;i++)
-		fprintf(stderr,"%s     unused2[%d];                  %d\n",first,i,fsdwsegyheader->unused2[i]);
-	fprintf(stderr,"%s     dataFormat;                  %d\n",first,fsdwsegyheader->dataFormat);
-	fprintf(stderr,"%s     NMEAantennaeR;               %d\n",first,fsdwsegyheader->NMEAantennaeR);
-	fprintf(stderr,"%s     NMEAantennaeO;               %d\n",first,fsdwsegyheader->NMEAantennaeO);
+		fprintf(stderr,"%s     unused2[%d]:                  %d\n",first,i,fsdwsegyheader->unused2[i]);
+	fprintf(stderr,"%s     dataFormat:                  %d\n",first,fsdwsegyheader->dataFormat);
+	fprintf(stderr,"%s     NMEAantennaeR:               %d\n",first,fsdwsegyheader->NMEAantennaeR);
+	fprintf(stderr,"%s     NMEAantennaeO:               %d\n",first,fsdwsegyheader->NMEAantennaeO);
 	for (i=0;i<32;i++)
-		fprintf(stderr,"%s     RS232[%d];                   %d\n",first,i,fsdwsegyheader->RS232[i]);
-	fprintf(stderr,"%s     sourceCoordX;                %d\n",first,fsdwsegyheader->sourceCoordX);
-	fprintf(stderr,"%s     sourceCoordY;                %d\n",first,fsdwsegyheader->sourceCoordY);
-	fprintf(stderr,"%s     groupCoordX;                 %d\n",first,fsdwsegyheader->groupCoordX);
-	fprintf(stderr,"%s     groupCoordY;                 %d\n",first,fsdwsegyheader->groupCoordY);
-	fprintf(stderr,"%s     coordUnits;                  %d\n",first,fsdwsegyheader->coordUnits);
-	fprintf(stderr,"%s     annotation;                  %s\n",first,fsdwsegyheader->annotation);
-	fprintf(stderr,"%s     samples;                     %d\n",first,fsdwsegyheader->samples);
-	fprintf(stderr,"%s     sampleInterval;              %d\n",first,fsdwsegyheader->sampleInterval);
-	fprintf(stderr,"%s     ADCGain;                     %d\n",first,fsdwsegyheader->ADCGain);
-	fprintf(stderr,"%s     pulsePower;                  %d\n",first,fsdwsegyheader->pulsePower);
-	fprintf(stderr,"%s     correlated;                  %d\n",first,fsdwsegyheader->correlated);
-	fprintf(stderr,"%s     startFreq;                   %d\n",first,fsdwsegyheader->startFreq);
-	fprintf(stderr,"%s     endFreq;                     %d\n",first,fsdwsegyheader->endFreq);
-	fprintf(stderr,"%s     sweepLength;                 %d\n",first,fsdwsegyheader->sweepLength);
+		fprintf(stderr,"%s     RS232[%d]:                   %d\n",first,i,fsdwsegyheader->RS232[i]);
+	fprintf(stderr,"%s     sourceCoordX:                %d\n",first,fsdwsegyheader->sourceCoordX);
+	fprintf(stderr,"%s     sourceCoordY:                %d\n",first,fsdwsegyheader->sourceCoordY);
+	fprintf(stderr,"%s     groupCoordX:                 %d\n",first,fsdwsegyheader->groupCoordX);
+	fprintf(stderr,"%s     groupCoordY:                 %d\n",first,fsdwsegyheader->groupCoordY);
+	fprintf(stderr,"%s     coordUnits:                  %d\n",first,fsdwsegyheader->coordUnits);
+	fprintf(stderr,"%s     annotation:                  %s\n",first,fsdwsegyheader->annotation);
+	fprintf(stderr,"%s     samples:                     %d\n",first,fsdwsegyheader->samples);
+	fprintf(stderr,"%s     sampleInterval:              %d\n",first,fsdwsegyheader->sampleInterval);
+	fprintf(stderr,"%s     ADCGain:                     %d\n",first,fsdwsegyheader->ADCGain);
+	fprintf(stderr,"%s     pulsePower:                  %d\n",first,fsdwsegyheader->pulsePower);
+	fprintf(stderr,"%s     correlated:                  %d\n",first,fsdwsegyheader->correlated);
+	fprintf(stderr,"%s     startFreq:                   %d\n",first,fsdwsegyheader->startFreq);
+	fprintf(stderr,"%s     endFreq:                     %d\n",first,fsdwsegyheader->endFreq);
+	fprintf(stderr,"%s     sweepLength:                 %d\n",first,fsdwsegyheader->sweepLength);
 	for (i=0;i<4;i++)
-		fprintf(stderr,"%s     unused7[%d];                  %d\n",first,i,fsdwsegyheader->unused7[i]);
-	fprintf(stderr,"%s     aliasFreq;                   %d\n",first,fsdwsegyheader->aliasFreq);
-	fprintf(stderr,"%s     pulseID;                     %d\n",first,fsdwsegyheader->pulseID);
+		fprintf(stderr,"%s     unused7[%d]:                  %d\n",first,i,fsdwsegyheader->unused7[i]);
+	fprintf(stderr,"%s     aliasFreq:                   %d\n",first,fsdwsegyheader->aliasFreq);
+	fprintf(stderr,"%s     pulseID:                     %d\n",first,fsdwsegyheader->pulseID);
 	for (i=0;i<6;i++)
-		fprintf(stderr,"%s     unused8[%d];                  %d\n",first,i,fsdwsegyheader->unused8[i]);
-	fprintf(stderr,"%s     year;                        %d\n",first,fsdwsegyheader->year);
-	fprintf(stderr,"%s     day;                         %d\n",first,fsdwsegyheader->day);
-	fprintf(stderr,"%s     hour;                        %d\n",first,fsdwsegyheader->hour);
-	fprintf(stderr,"%s     minute;                      %d\n",first,fsdwsegyheader->minute);
-	fprintf(stderr,"%s     second;                      %d\n",first,fsdwsegyheader->second);
-	fprintf(stderr,"%s     timeBasis;                   %d\n",first,fsdwsegyheader->timeBasis);
-	fprintf(stderr,"%s     weightingFactor;             %d\n",first,fsdwsegyheader->weightingFactor);
-	fprintf(stderr,"%s     unused9;                     %d\n",first,fsdwsegyheader->unused9);
-	fprintf(stderr,"%s     heading;                     %d\n",first,fsdwsegyheader->heading);
-	fprintf(stderr,"%s     pitch;                       %d\n",first,fsdwsegyheader->pitch);
-	fprintf(stderr,"%s     roll;                        %d\n",first,fsdwsegyheader->roll);
-	fprintf(stderr,"%s     temperature;                 %d\n",first,fsdwsegyheader->temperature);
-	fprintf(stderr,"%s     heaveCompensation;           %d\n",first,fsdwsegyheader->heaveCompensation);
-	fprintf(stderr,"%s     trigSource;                  %d\n",first,fsdwsegyheader->trigSource);
-	fprintf(stderr,"%s     markNumber;                  %d\n",first,fsdwsegyheader->markNumber);
-	fprintf(stderr,"%s     NMEAHour;                    %d\n",first,fsdwsegyheader->NMEAHour);
-	fprintf(stderr,"%s     NMEAMinutes;                 %d\n",first,fsdwsegyheader->NMEAMinutes);
-	fprintf(stderr,"%s     NMEASeconds;                 %d\n",first,fsdwsegyheader->NMEASeconds);
-	fprintf(stderr,"%s     NMEACourse;                  %d\n",first,fsdwsegyheader->NMEACourse);
-	fprintf(stderr,"%s     NMEASpeed;                   %d\n",first,fsdwsegyheader->NMEASpeed);
-	fprintf(stderr,"%s     NMEADay;                     %d\n",first,fsdwsegyheader->NMEADay);
-	fprintf(stderr,"%s     NMEAYear;                    %d\n",first,fsdwsegyheader->NMEAYear);
-	fprintf(stderr,"%s     millisecondsToday;           %d\n",first,fsdwsegyheader->millisecondsToday);
-	fprintf(stderr,"%s     ADCMax;                      %d\n",first,fsdwsegyheader->ADCMax);
-	fprintf(stderr,"%s     calConst;                    %d\n",first,fsdwsegyheader->calConst);
-	fprintf(stderr,"%s     vehicleID;                   %d\n",first,fsdwsegyheader->vehicleID);
-	fprintf(stderr,"%s     softwareVersion;             %s\n",first,fsdwsegyheader->softwareVersion);
-	fprintf(stderr,"%s     sphericalCorrection;         %d\n",first,fsdwsegyheader->sphericalCorrection);
-	fprintf(stderr,"%s     packetNum;                   %d\n",first,fsdwsegyheader->packetNum);
-	fprintf(stderr,"%s     ADCDecimation;               %d\n",first,fsdwsegyheader->ADCDecimation);
-	fprintf(stderr,"%s     decimation;                  %d\n",first,fsdwsegyheader->decimation);
+		fprintf(stderr,"%s     unused8[%d]:                  %d\n",first,i,fsdwsegyheader->unused8[i]);
+	fprintf(stderr,"%s     year:                        %d\n",first,fsdwsegyheader->year);
+	fprintf(stderr,"%s     day:                         %d\n",first,fsdwsegyheader->day);
+	fprintf(stderr,"%s     hour:                        %d\n",first,fsdwsegyheader->hour);
+	fprintf(stderr,"%s     minute:                      %d\n",first,fsdwsegyheader->minute);
+	fprintf(stderr,"%s     second:                      %d\n",first,fsdwsegyheader->second);
+	fprintf(stderr,"%s     timeBasis:                   %d\n",first,fsdwsegyheader->timeBasis);
+	fprintf(stderr,"%s     weightingFactor:             %d\n",first,fsdwsegyheader->weightingFactor);
+	fprintf(stderr,"%s     unused9:                     %d\n",first,fsdwsegyheader->unused9);
+	fprintf(stderr,"%s     heading:                     %d\n",first,fsdwsegyheader->heading);
+	fprintf(stderr,"%s     pitch:                       %d\n",first,fsdwsegyheader->pitch);
+	fprintf(stderr,"%s     roll:                        %d\n",first,fsdwsegyheader->roll);
+	fprintf(stderr,"%s     temperature:                 %d\n",first,fsdwsegyheader->temperature);
+	fprintf(stderr,"%s     heaveCompensation:           %d\n",first,fsdwsegyheader->heaveCompensation);
+	fprintf(stderr,"%s     trigSource:                  %d\n",first,fsdwsegyheader->trigSource);
+	fprintf(stderr,"%s     markNumber:                  %d\n",first,fsdwsegyheader->markNumber);
+	fprintf(stderr,"%s     NMEAHour:                    %d\n",first,fsdwsegyheader->NMEAHour);
+	fprintf(stderr,"%s     NMEAMinutes:                 %d\n",first,fsdwsegyheader->NMEAMinutes);
+	fprintf(stderr,"%s     NMEASeconds:                 %d\n",first,fsdwsegyheader->NMEASeconds);
+	fprintf(stderr,"%s     NMEACourse:                  %d\n",first,fsdwsegyheader->NMEACourse);
+	fprintf(stderr,"%s     NMEASpeed:                   %d\n",first,fsdwsegyheader->NMEASpeed);
+	fprintf(stderr,"%s     NMEADay:                     %d\n",first,fsdwsegyheader->NMEADay);
+	fprintf(stderr,"%s     NMEAYear:                    %d\n",first,fsdwsegyheader->NMEAYear);
+	fprintf(stderr,"%s     millisecondsToday:           %d\n",first,fsdwsegyheader->millisecondsToday);
+	fprintf(stderr,"%s     ADCMax:                      %d\n",first,fsdwsegyheader->ADCMax);
+	fprintf(stderr,"%s     calConst:                    %d\n",first,fsdwsegyheader->calConst);
+	fprintf(stderr,"%s     vehicleID:                   %d\n",first,fsdwsegyheader->vehicleID);
+	fprintf(stderr,"%s     softwareVersion:             %s\n",first,fsdwsegyheader->softwareVersion);
+	fprintf(stderr,"%s     sphericalCorrection:         %d\n",first,fsdwsegyheader->sphericalCorrection);
+	fprintf(stderr,"%s     packetNum:                   %d\n",first,fsdwsegyheader->packetNum);
+	fprintf(stderr,"%s     ADCDecimation:               %d\n",first,fsdwsegyheader->ADCDecimation);
+	fprintf(stderr,"%s     decimation:                  %d\n",first,fsdwsegyheader->decimation);
 	for (i=0;i<7;i++)
-		fprintf(stderr,"%s     unuseda[%d];                  %d\n",first,i,fsdwsegyheader->unuseda[i]);
+		fprintf(stderr,"%s     unuseda[%d]:                  %d\n",first,i,fsdwsegyheader->unuseda[i]);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -4633,7 +4682,7 @@ int mbsys_reson7k_print_v2snippet(int verbose,
 	fprintf(stderr,"%s     number_beams:               %u\n",first,v2snippet->number_beams);
 	fprintf(stderr,"%s     error_flag:                 %u\n",first,v2snippet->error_flag);
 	fprintf(stderr,"%s     control_flags:              %u\n",first,v2snippet->control_flags);
-	for (i=0;i<32;i++)
+	for (i=0;i<28;i++)
 		fprintf(stderr,"%u ",v2snippet->reserved[i]);
 	for (i=0;i<v2snippet->number_beams;i++)
 		{
@@ -4646,6 +4695,76 @@ int mbsys_reson7k_print_v2snippet(int verbose,
 		for (j=0;j<v2snippettimeseries->end_sample-v2snippettimeseries->begin_sample+1;j++)
 			fprintf(stderr,"%s     amplitude[%d]:%d\n",
 				first,v2snippettimeseries->begin_sample+j,v2snippettimeseries->amplitude[j]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_calibratedsnippet(int verbose,
+			s7kr_calibratedsnippet *calibratedsnippet,
+			int *error)
+{
+	char	*function_name = "mbsys_reson7k_print_calibratedsnippet";
+	int	status = MB_SUCCESS;
+	s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
+	char	*debug_str = "dbg2  ";
+	char	*nodebug_str = "  ";
+	char	*first;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       calibratedsnippet:      %p\n",(void *)calibratedsnippet);
+		}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &calibratedsnippet->header, error);
+
+	/* print Reson 7k version 2 snippet (record 7028) */
+	if (verbose >= 2)
+		first = debug_str;
+	else
+		{
+		first = nodebug_str;
+		fprintf(stderr,"\n%sMBIO function <%s> called\n",
+			first,function_name);
+		}
+	fprintf(stderr,"%sStructure Contents:\n", first);
+	fprintf(stderr,"%s     serial_number:              %llu\n",first,calibratedsnippet->serial_number);
+	fprintf(stderr,"%s     ping_number:                %u\n",first,calibratedsnippet->ping_number);
+	fprintf(stderr,"%s     multi_ping:                 %u\n",first,calibratedsnippet->multi_ping);
+	fprintf(stderr,"%s     number_beams:               %u\n",first,calibratedsnippet->number_beams);
+	fprintf(stderr,"%s     error_flag:                 %u\n",first,calibratedsnippet->error_flag);
+	fprintf(stderr,"%s     control_flags:              %lu\n",first,calibratedsnippet->control_flags);
+	for (i=0;i<28;i++)
+		fprintf(stderr,"%s     reserved[%d]:                %u\n", first, i, calibratedsnippet->reserved[i]);
+	for (i=0;i<calibratedsnippet->number_beams;i++)
+		{
+		calibratedsnippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+		fprintf(stderr,"%s     beam: %u begin:%u detect:%u end:%u\n",
+			first,calibratedsnippettimeseries->beam_number,
+			calibratedsnippettimeseries->begin_sample,
+			calibratedsnippettimeseries->detect_sample,
+			calibratedsnippettimeseries->end_sample);
+		for (j=0;j<calibratedsnippettimeseries->end_sample-calibratedsnippettimeseries->begin_sample+1;j++)
+			fprintf(stderr,"%s     snippet amplitude[%d]:%f\n",
+				first,calibratedsnippettimeseries->begin_sample+j,calibratedsnippettimeseries->amplitude[j]);
 		}
 
 	/* print output debug statements */
@@ -6921,6 +7040,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	double	heave, roll, pitch;
 	double	xtrackmin;
 	int	altitude_found;
+	char	flag;
 	int	i;
 
 	/* print input debug statements */
@@ -6988,7 +7108,40 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			xtrackmin = 999999.9;
 			for (i=0;i<bathymetry->number_beams;i++)
 				{
-				if (((bathymetry->quality[i] & 15) == 15)
+				if (bathymetry->quality[i] == 0)
+					{
+					flag = MB_FLAG_NULL;
+					}
+				else if (bathymetry->quality[i] & 64)
+					{
+					flag = MB_FLAG_FLAG + MB_FLAG_FILTER;
+					}
+				else if (bathymetry->quality[i] & 128)
+					{
+					flag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+					}
+				else if (bathymetry->quality[i] & 240)
+					{
+					flag = MB_FLAG_NONE;
+					}
+				else if ((bathymetry->quality[i] & 3) == 3)
+					{
+					flag = MB_FLAG_NONE;
+					}
+				else if ((bathymetry->quality[i] & 15) == 0)
+					{
+					flag = MB_FLAG_NULL;
+					}
+				else if ((bathymetry->quality[i] & 3) == 0)
+					{
+					flag = MB_FLAG_FLAG + MB_FLAG_FILTER;
+					}
+				else
+					{
+					flag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+					}
+
+				if ((flag == MB_FLAG_NONE)
 					&& fabs((double)bathymetry->acrosstrack[i]) < xtrackmin)
 					{
 					*altitudev = bathymetry->depth[i] - *transducer_depth;
@@ -9679,6 +9832,8 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	s7kr_beam		*beam;
 	s7kr_v2snippettimeseries *snippettimeseries;
 	s7kr_v2snippet		*v2snippet;
+	s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
+	s7kr_calibratedsnippet *calibratedsnippet;
 	s7kr_processedsidescan  *processedsidescan;
 	s7kr_bluefin		*bluefin;
 	s7kr_soundvelocity	*soundvelocity;
@@ -9741,6 +9896,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
 	backscatter = (s7kr_backscatter *) &store->backscatter;
 	v2snippet = (s7kr_v2snippet *) &store->v2snippet;
+	calibratedsnippet = (s7kr_calibratedsnippet *) &store->calibratedsnippet;
 	beam = (s7kr_beam *) &store->beam;
 	processedsidescan = (s7kr_processedsidescan *) &store->processedsidescan;
 	bluefin = (s7kr_bluefin *) &store->bluefin;
@@ -9749,6 +9905,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	/* calculate sidescan from the desired source data if it is available */
 	if (store->kind == MB_DATA_DATA &&
 		((source == R7KRECID_7kV2SnippetData && store->read_v2snippet == MB_YES)
+		 || (source == R7KRECID_7kCalibratedSnippetData && store->read_calibratedsnippet == MB_YES)
 		 || (source == R7KRECID_7kBeamData && store->read_beam == MB_YES)
 		 || (source == R7KRECID_7kBackscatterImageData && store->read_backscatter == MB_YES)))
 		{
@@ -9901,8 +10058,69 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		/* loop over raw backscatter or sidescan from the desired source,
 		 * 	putting each raw sample into the binning arrays */
 
-		/* use current generation snippet data */
-		if (source == R7KRECID_7kV2SnippetData && v2snippet->error_flag == MB_NO)
+		/* use calibrated snippet data 
+		   error_flag = 0 is calibrated snippet data 
+		   error_flag = 1 is uncalibrated snippet data
+		   error_flag > 1 indicates a problem */
+		if (source == R7KRECID_7kCalibratedSnippetData && calibratedsnippet->error_flag < 3)
+			{
+			for (i=0;i<calibratedsnippet->number_beams;i++)
+				{
+				calibratedsnippettimeseries = (s7kr_calibratedsnippettimeseries *)&(calibratedsnippet->calibratedsnippettimeseries[i]);
+				ibeam = calibratedsnippettimeseries->beam_number;
+
+				/* only use snippets from non-null and unflagged beams */
+				/* note: errors have been observed in data produced by a Reson
+					simulator in which the detect_sample was
+					was outside the range of begin_sample to end_sample
+					- the current code effectively ignores this case because
+					sample_end < sample_start, so no samples are processed. */
+				if (mb_beam_ok(beamflag[ibeam]))
+					{
+					nsample = calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1;
+					altitude = bathymetry->depth[ibeam] + bathymetry->vehicle_height;
+					xtrack = bathymetry->acrosstrack[ibeam];
+					range = 0.5 * soundspeed * bathymetry->range[ibeam];
+					angle = RTD * beamgeometry->angle_acrosstrack[ibeam];
+					beam_foot = range * sin(DTR * beamwidth)
+								/ cos(DTR * angle);
+					sint = fabs(sin(DTR * angle));
+					nsample_use = beam_foot / ss_spacing;
+					if (sint < nsample_use * ss_spacing / beam_foot)
+					    ss_spacing_use = beam_foot / nsample_use;
+					else
+					    ss_spacing_use = ss_spacing / sint;
+/* fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
+ss_spacing, ss_spacing_use,
+nsample_use, sint, angle, range, beam_foot,
+nsample_use * ss_spacing / beam_foot); */
+					sample_start = MAX(((int)calibratedsnippettimeseries->detect_sample - (nsample_use / 2)),
+								(int)calibratedsnippettimeseries->begin_sample);
+					sample_end = MIN(((int)calibratedsnippettimeseries->detect_sample + (nsample_use / 2)),
+								(int)calibratedsnippettimeseries->end_sample);
+/* fprintf(stderr,"beam:%d snippet samples: b:%d d:%d e:%d   start:%d end:%d\n",
+ibeam,calibratedsnippettimeseries->begin_sample,calibratedsnippettimeseries->detect_sample,calibratedsnippettimeseries->end_sample,sample_start,sample_end); */
+					for (k=sample_start;k<=sample_end;k++)
+						{
+						if (xtrack < 0.0)
+							xtrackss = xtrack - ss_spacing_use * (k - (int)calibratedsnippettimeseries->detect_sample);
+						else
+							xtrackss = xtrack + ss_spacing_use * (k - (int)calibratedsnippettimeseries->detect_sample);
+						kk = nss / 2
+						    + (int)(xtrackss / (*pixel_size));
+						kk = MIN(MAX(0,kk), nss-1);
+						ss[kk]  += (double) calibratedsnippettimeseries->amplitude[k-(int)calibratedsnippettimeseries->begin_sample];
+						ssalongtrack[kk] += bathymetry->alongtrack[i];
+						ss_cnt[kk]++;
+/* fprintf(stderr,"k:%d detect:%d xtrack:%f xtrackss:%f kk:%d ss:%f ss_cnt:%d\n",
+k,snippettimeseries->detect_sample,xtrack,xtrackss,kk,ss[kk],ss_cnt[kk]); */
+						}
+					}
+				}
+			}
+
+		/* use v2 snippet data */
+		else if (source == R7KRECID_7kV2SnippetData && v2snippet->error_flag == MB_NO)
 			{
 			for (i=0;i<v2snippet->number_beams;i++)
 				{

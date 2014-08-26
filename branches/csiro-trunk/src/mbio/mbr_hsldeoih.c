@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
  *	$Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -766,7 +766,7 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->amplitude[i] = data->amplitude[i];
 			store->echo_duration[i] = data->echo_duration[i];
 			}
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+		for (i=0;i<16;i++)
 			{
 			store->gain[i] = data->gain[i];
 			store->echo_scale[i] = data->echo_scale[i];
@@ -919,7 +919,7 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->amplitude[i] = store->amplitude[i];
 			data->echo_duration[i] = store->echo_duration[i];
 			}
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+		for (i=0;i<16;i++)
 			{
 			data->gain[i] = store->gain[i];
 			data->echo_scale[i] = store->echo_scale[i];

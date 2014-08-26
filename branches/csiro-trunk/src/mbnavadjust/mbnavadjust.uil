@@ -94,6 +94,7 @@ identifier BXG_pushButton_showties;
 identifier BXG_pushButton_showtruecrossings;
 identifier BXG_pushButton_showbettercrossings;
 identifier BXG_pushButton_showgoodcrossings;
+identifier BXG_pushButton_showmediocrecrossings;
 identifier BXG_pushButton_showcrossings;
 identifier BXG_pushButton_showsections;
 identifier BXG_pushButton_showdata;
@@ -237,6 +238,7 @@ procedure do_view_showallsurveys();
 procedure do_view_showbettercrossings();
 procedure do_view_showcrossings();
 procedure do_view_showdata();
+procedure do_view_showmediocrecrossings();
 procedure do_view_showgoodcrossings();
 procedure do_view_showsections();
 procedure do_view_showselectedfile();
@@ -3150,6 +3152,23 @@ object pushButton_showcrossings : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_showmediocrecrossings : XmPushButton widget {
+    arguments {
+        arguments Style_use2;
+        XmNlabelString = compound_string("Show >10% Overlap Crossings");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_use2Reasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showmediocrecrossings);
+        XmNactivateCallback = procedure do_view_showmediocrecrossings();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_use2Handlers;
+!(BX)    };
+};
+
 object pushButton_showgoodcrossings : XmPushButton widget {
     arguments {
         arguments Style_use2;
@@ -3388,6 +3407,7 @@ object pulldownMenu_view : XmPulldownMenu widget {
          managed XmPushButton pushButton_showdata;
          managed XmPushButton pushButton_showsections;
          managed XmPushButton pushButton_showcrossings;
+         managed XmPushButton pushButton_showmediocrecrossings;
          managed XmPushButton pushButton_showgoodcrossings;
          managed XmPushButton pushButton_showbettercrossings;
          managed XmPushButton pushButton_showtruecrossings;

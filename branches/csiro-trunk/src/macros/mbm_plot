@@ -3,7 +3,7 @@
 #    The MB-system:	mbm_plot.perl	6/18/93
 #    $Id$
 #
-#    Copyright (c) 1993-2012 by
+#    Copyright (c) 1993-2014 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -521,7 +521,7 @@ if ($help)
 	print "Additional Options:\n";
 	print "\t\t[-Btickinfo -Dflipcolor/flipshade\n";
 	print "\t\t-Jprojection[/scale | width] -Ltitle[:scale_label] \n";
-	print "\t\t-Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max\]n";
+	print "\t\t-Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max\]\n";
 	print "Miscellaneous Options:\n";
 	print "\t\t[-MGDgmtdef/value -MGFscale_loc\n";
 	print "\t\t-MGL[f][x]lon0/lat0/slat/length[m]\n";
@@ -2885,6 +2885,10 @@ elsif ($ps_viewer eq "ggv")
 		{
 		$view_pageflag = "--geometry=landscape";
 		}
+	}
+elsif ($ps_viewer eq "evince")
+	{
+	$view_pageflag = " ";
 	}
 if ($no_view_ps)
 	{

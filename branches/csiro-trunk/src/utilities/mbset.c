@@ -2,7 +2,7 @@
  *    The MB-system:	mbset.c	1/4/2000
  *    $Id$
  *
- *    Copyright (c) 2000-2013 by
+ *    Copyright (c) 2000-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -404,7 +404,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		    if (nscan == 1)
 			process.mbp_ofile_specified = MB_YES;
 		    else
+			{
 			process.mbp_ofile_specified = MB_NO;
+			process.mbp_ofile[0] = '\0';
+			}
 		    }
 		else if (strncmp(pargv[i], "FORMAT", 6) == 0)
 		    {
@@ -416,6 +419,14 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "NAVMODE", 7) == 0)
 		    {
 		    sscanf(pargv[i], "NAVMODE:%d", &process.mbp_nav_mode);
+		    if (explicit == MB_NO && process.mbp_nav_mode == MBP_NAV_OFF)
+			{
+			process.mbp_navfile[0] = '\0';
+			process.mbp_nav_heading = MBP_NAV_OFF;
+			process.mbp_nav_speed = MBP_NAV_OFF;
+			process.mbp_nav_draft = MBP_NAV_OFF;
+			process.mbp_nav_attitude = MBP_NAV_OFF;
+			}
 		    }
 		else if (strncmp(pargv[i], "NAVFILE", 7) == 0)
 		    {
@@ -493,7 +504,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "NAVADJMODE", 10) == 0)
 		    {
 		    sscanf(pargv[i], "NAVADJMODE:%d", &process.mbp_navadj_mode);
-		    if (explicit == MB_NO)
+		    if (explicit == MB_NO && process.mbp_navadj_mode == MBP_NAV_OFF)
 			{
 			process.mbp_navadjfile[0] = '\0';
 			}
@@ -515,6 +526,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "ATTITUDEMODE", 12) == 0)
 		    {
 		    sscanf(pargv[i], "ATTITUDEMODE:%d", &process.mbp_attitude_mode);
+		    if (explicit == MB_NO && process.mbp_attitude_mode == MBP_ATTITUDE_OFF)
+			{
+			process.mbp_attitudefile[0] = '\0';
+			}
 		    }
 		else if (strncmp(pargv[i], "ATTITUDEFILE", 12) == 0)
 		    {
@@ -533,6 +548,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "SONARDEPTHMODE", 14) == 0)
 		    {
 		    sscanf(pargv[i], "SONARDEPTHMODE:%d", &process.mbp_sonardepth_mode);
+		    if (explicit == MB_NO && process.mbp_sonardepth_mode == MBP_SONARDEPTH_OFF)
+			{
+			process.mbp_sonardepthfile[0] = '\0';
+			}
 		    }
 		else if (strncmp(pargv[i], "SONARDEPTHFILE", 14) == 0)
 		    {
@@ -677,6 +696,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "EDITSAVEMODE", 12) == 0)
 		    {
 		    sscanf(pargv[i], "EDITSAVEMODE:%d", &process.mbp_edit_mode);
+		    if (explicit == MB_NO && process.mbp_edit_mode == MBP_EDIT_OFF)
+			{
+			process.mbp_editfile[0] = '\0';
+			}
 		    }
 		else if (strncmp(pargv[i], "EDITSAVEFILE", 12) == 0)
 		    {
@@ -695,6 +718,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "SVPMODE", 7) == 0)
 		    {
 		    sscanf(pargv[i], "SVPMODE:%d", &process.mbp_svp_mode);
+		    if (explicit == MB_NO && process.mbp_svp_mode == MBP_SVP_OFF)
+			{
+			process.mbp_svpfile[0] = '\0';
+			}
 		    }
 		else if (strncmp(pargv[i], "SVPFILE", 7) == 0)
 		    {
@@ -737,6 +764,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "STATICMODE", 10) == 0)
 		    {
 		    sscanf(pargv[i], "STATICMODE:%d", &process.mbp_static_mode);
+		    if (explicit == MB_NO && process.mbp_static_mode == MBP_SVP_OFF)
+			{
+			process.mbp_staticfile[0] = '\0';
+			}
 		    }
 		else if (strncmp(pargv[i], "STATICFILE", 10) == 0)
 		    {
@@ -945,6 +976,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "TIDEMODE", 8) == 0)
 		    {
 		    sscanf(pargv[i], "TIDEMODE:%d", &process.mbp_tide_mode);
+		    if (explicit == MB_NO && process.mbp_tide_mode == MBP_TIDE_OFF)
+			{
+			process.mbp_tidefile[0] = '\0';
+			}
 		    }
 		else if (strncmp(pargv[i], "TIDEFILE", 8) == 0)
 		    {
@@ -963,6 +998,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "AMPCORRMODE", 11) == 0)
 		    {
 		    sscanf(pargv[i], "AMPCORRMODE:%d", &process.mbp_ampcorr_mode);
+		    if (explicit == MB_NO && process.mbp_ampcorr_mode == MBP_AMPCORR_OFF)
+			{
+			process.mbp_ampcorrfile[0] = '\0';
+			}
 		    }
 		else if (strncmp(pargv[i], "AMPCORRFILE", 11) == 0)
 		    {
@@ -1012,6 +1051,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "SSCORRMODE", 10) == 0)
 		    {
 		    sscanf(pargv[i], "SSCORRMODE:%d", &process.mbp_sscorr_mode);
+		    if (explicit == MB_NO && process.mbp_sscorr_mode == MBP_SSCORR_OFF)
+			{
+			process.mbp_sscorrfile[0] = '\0';
+			}
 		    }
 		else if (strncmp(pargv[i], "SSCORRFILE", 10) == 0)
 		    {

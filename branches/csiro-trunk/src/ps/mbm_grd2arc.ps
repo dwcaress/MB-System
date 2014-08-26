@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:10 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:39 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -277,21 +271,20 @@ r of the)-.25 F .131(output ArcV)108 314.4 R(ie)-.6 E 2.631(wA)-.25 G
 -2.5 E(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 415.2 Q
 (Lamont-Doherty Earth Observ)113 427.2 Q(atory)-.25 E F1(OPTIONS)72 456
 Q F2<ad48>108 468 Q F0 .162(This "help" \215ag cause the program to pri\
-nt out a description of its operation and then e)144 468 R .161
+nt out a description of its operation and then e)22.52 F .161
 (xit immedi-)-.15 F(ately)144 480 Q(.)-.65 E F2<ad49>108 496.8 Q F3(gr)
-144 496.8 Q(dname)-.37 E F0(Sets the \214lename of the input GMT grid \
-\214le. This \214le must be in the GMT NetCDF GRD format.)144 508.8 Q F2
-<ad4e>108 525.6 Q F3(nodata)144 525.6 Q F0(Sets the "no data" v)144
-537.6 Q(alue used in the output ASCII \214le.)-.25 E(Def)5 E(ault:)-.1 E
-F3(nodata)2.5 E F0 2.5<3dad>2.5 G(99999.)-2.5 E F2<ad4f>108 554.4 Q F3
-(ar)144 554.4 Q(c\214le)-.37 E F0
-(Sets the \214lename of the output ArcV)144 566.4 Q(ie)-.6 E 2.5(wA)-.25
-G(SCII grid.)-2.5 E F2<ad56>108 583.2 Q F0(The)144 583.2 Q F2<ad56>2.5 E
-F0(option causes)2.5 E F2(mbm_grd2ar)2.5 E(c)-.18 E F0
-(to print out status messages.)2.5 E F1(EXAMPLES)72 612 Q F0 .713
-(Suppose that we ha)108 624 R 1.013 -.15(ve u)-.2 H(sed).15 E F2(mbgrid)
-3.213 E F0 .713(to obtain a topograph)3.213 F 3.213(yg)-.05 G .713
-(rid \214le called K)-3.213 F .714(ohalaA_bath.grd in the GMT)-.35 F
+26.41 E(dname)-.37 E F0(Sets the \214lename of the input GMT grid \214l\
+e. This \214le must be in the GMT NetCDF GRD format.)144 508.8 Q F2
+<ad4e>108 525.6 Q F3(nodata)23.08 E F0(Sets the "no data" v)144 537.6 Q
+(alue used in the output ASCII \214le.)-.25 E(Def)5 E(ault:)-.1 E F3
+(nodata)2.5 E F0 2.5<3dad>2.5 G(99999.)-2.5 E F2<ad4f>108 554.4 Q F3(ar)
+22.52 E(c\214le)-.37 E F0(Sets the \214lename of the output ArcV)144
+566.4 Q(ie)-.6 E 2.5(wA)-.25 G(SCII grid.)-2.5 E F2<ad56>108 583.2 Q F0
+(The)23.08 E F2<ad56>2.5 E F0(option causes)2.5 E F2(mbm_grd2ar)2.5 E(c)
+-.18 E F0(to print out status messages.)2.5 E F1(EXAMPLES)72 612 Q F0
+.713(Suppose that we ha)108 624 R 1.013 -.15(ve u)-.2 H(sed).15 E F2
+(mbgrid)3.213 E F0 .713(to obtain a topograph)3.213 F 3.213(yg)-.05 G
+.713(rid \214le called K)-3.213 F .714(ohalaA_bath.grd in the GMT)-.35 F
 (NetCDF GRD format:)108 636 Q(mbgrid \255Idatalist \\)144 648 Q(-OK)180
 660 Q(ohalaA_bath \\)-.35 E
 (-R-155.72855/-155.31928/20.09488/20.47645 \\)180 672 Q

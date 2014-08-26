@@ -1,0 +1,278 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbswplspreprocess</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbswplspreprocess</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  26 March 2014 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbswplspreprocess</B> - prepairs a SWATHplus sonar file (<B>MBIO</B> 
+format 222) for processed with MB System.                             
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbswplspreprocess</B> [<B>-ABGNRSHV</B>] [<B>-F</B><I>format</I>] 
+[<B>-J</B><I>proj4command</I>] [<B>-O</B><I>outfile</I>] <B>-I</B><I>file
+<P>
+</I><A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbswplspreprocess</B> prepairs a SWATHplus SXP (<B>MBIO</B> format 222) 
+file for processing with MB System. 
+<P>
+
+MB System can read and plot SXP files 
+without modification. However, many of the editing and calibration programs 
+work best if each transducer channel is stored in a separate file (use 
+the <B>-S</B> option). In particular, multiple transducer channels pinging 
+simultaneously will trip up time filtering, since each channel in the 
+ping series has the same time stamp.                                  
+<P>
+
+If during data acquisition using the SEA SWATH Real-Time Acquisition System 
+(SEA Swath Processor), the &quot;Store All Data&quot; option was selected in combination 
+with the &quot;Downsample&quot; Bathy filter, the SXP ping records will contain 
+both the original data (all samples rejected) and the filtered data (all 
+samples accepted) simultaneously. This will confuse most programs in MB 
+System. Use the <B>-B</B> and <B>-R</B> options as needed to strip out 
+the undesired set prior to processing.                                
+<P>
+
+SXP ping records contain both a raw amplitude and a processed amplitude 
+value for each sample. MB System reads and writes ONLY the processed amplitude 
+values, leaving the raw values untouched. Use the <B>-A</B> option to 
+copy (or restore) the raw amplitude values into the processed amplitude 
+slots so that they can be accessed by MB System.              
+<BR>
+
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David P. Finlayson (<A HREF="mailto:dfinlayson@usgs.gov">dfinlayson@usgs.gov</A>)
+<BR>
+
+<BR>&nbsp;Pacific&nbsp;Coastal&nbsp;and&nbsp;Marine&nbsp;Science&nbsp;Center,&nbsp;USGS
+<BR>
+
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<BR>
+
+This option causes the program to copy the raw amplitude values stored 
+with each sample into the corresponding processed amplitude slot where 
+it can then be used by MB System.
+<DT><B>-B</B>
+
+<DD>
+<BR>
+
+This option causes the program to reverse the sample flag setting. That 
+is, rejected samples become accepted samples and vis-a-vis. This option 
+is always applied before option <B>-R</B>.                 
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format used if the input is read from stdin or from a file. 
+If <I>format</I> &lt; 0, then the input file specified with the <B>-I</B> 
+option will actually contain a list of input swath sonar data files. This 
+program only reads Bathyswath (SWATHplus) format data files (<B>MBIO</B> 
+format 222).                                                                                                          
+<DT><B>-G</B>
+
+<DD>
+Print to stdout an ASCII representation of each data record read from the file.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Sets the input file path. If <I>format</I> &gt; 0 (set with the
+<B>-f</B> option or <B>mbdefaults</B>) then the swath sonar data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;222&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;222&nbsp;1<BR>
+<BR>
+
+This program only reads SWATHplus format data files (<B>MBIO</B> format 
+222). .                                                               
+<DT><B>-J</B>
+
+<DD>
+<I>projection</I>
+<BR>
+
+The SWATHplus software packages operate with navigation in a user-defined
+projected coordinate system.  Resultantly, SXP format files contain
+positions in a projected coordinate system rather than longitude and
+latitude in geographic coordinates.  Generally, the SXP files do not contain
+any description of the projection used to obtain the eastings and northings
+in those files.  This option allows a user to specifiy the projection used
+to translate the eastings and northings back into longitude and latitude. 
+If this option is not specified, <B>MB-System</B> will assume the data are
+associated with UTM zone 1 north.  The projection identifier must conform to
+the same usage as with projections specified for <B>mbgrid</B>.  For
+instance, to fully specify a particular northern UTM zone, set projection =
+UTMXXN where XX gives the UTM zone (defined from 01 to 60).  As an example,
+a northern UTM zone 12 projection can be specified using -JUTM12N.  Southern
+UTM zones are specified as UTMXXS.  The European Petroleum Survey Group
+(EPSG) has defined a large number of PCS's used worldwide and assigned
+number id's to each; one can also specify the northern UTM zone 12
+projection using its EPSG designation, or -Jepsg32612.  The complete list of
+projected coordinate systems supported by MB-System is given in the mbgrid
+manual page.
+<DT><B>-N</B>
+
+<DD>
+Do not write output file. Useful for inspecting files, especially combined 
+with <B>-G</B>.
+<DT><B>-O</B>
+
+<DD>
+<I>outfile</I>
+<BR>
+
+This option causes <B>mbswplspreprocess</B> to output all data to a single file
+specified as <I>outfile</I>. By default, the program creates output files for
+each input file. If combined with <B>-S</B>, this will serve as the basename
+for a set of output files, one for each transducer.
+<DT><B>-R</B>
+
+<DD>
+This option removes all rejected samples from pings before writing output.
+<DT><B>-S</B>
+
+<DD>
+This option saves each transducer channel into a separate output file. This is
+the best way to handle simultaneous pinging in MB System and the only way to
+handle 3 or more transducer channel systems. The transducer channel will
+be appended to the output filename as follows:
+<BR>
+
+outfile_txer&lt;channel&gt;.mb222
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that one has collected a SWATHplus datafile incorporating interferometric 
+sonar data from a 2-transducer system pinging simultaneously. The file name 
+is:
+<P>
+
+<PRE>
+<DL COMPACT><DT><DD>20140418_150155.sxp
+</DL>
+</PRE>
+
+<P>
+
+To split each transducer into its own file for better filtering support 
+from MB System, to reset the amplitude values to their original pre-processed 
+values, and to strip out any previously flagged data run:
+<P>
+
+<PRE>
+<DL COMPACT><DT><DD>mbswplspreprocess -SAR -I20140418_150155.sxp
+</DL>
+</PRE>
+
+<P>
+
+To export the data records stored in an SXP file to a text file:
+<P>
+
+<PRE>
+<DL COMPACT><DT><DD>mbswplspreprocess -GN -I20140418_150155.sxp &gt; output.txt
+</DL>
+</PRE>
+
+<P>
+
+<A NAME="lbAI">&nbsp;</A>
+<H2>NOTES</H2>
+
+The SXP file format does not contain sufficient information to completely re-process 
+the data in MB System itself. For example, you should not attempt to re-calculate 
+bathymetry based on new sound velocity information. Ridged translations and
+rotations are OK (static shifts in x, y, or z, rotations about the transducer reference point) 
+provided that each transducer channel resides in its own file (see the <B>-S</B> option). It is 
+always safe to edit and filter the soundings in <B>mbedit</B> and <B>mbeditviz</B>.                         
+<P>
+
+SXP files use a projected coordinate system for all transducer and sea 
+floor sample coordinates. The user must supply a .PRJ file defining the 
+coordinate system (usually UTM) for each input file before proceeding 
+with further processing in MB System. The coordinate system is not stored 
+in the SXP file data itself.                                          
+<A NAME="lbAJ">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbformat.html">mbformat</A></B>(1), <B><A HREF="mbinfo.html">mbinfo</A></B>(1)
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>BUGS</H2>
+
+Oh yeah.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">NOTES</A><DD>
+<DT><A HREF="#lbAJ">SEE ALSO</A><DD>
+<DT><A HREF="#lbAK">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 26 March 2014</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

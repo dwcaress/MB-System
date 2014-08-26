@@ -1,4 +1,4 @@
-.TH mbmosaic 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic 1 "13 March 2014" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP \- Mosaic amplitude or sidescan data
 from swath mapping sonar data files.
@@ -14,7 +14,7 @@ Version 5.0
 \fB\-G\fIgridkind\fP  \fB\-J\fIprojection\fP
 \fB\-H \-L\fIlonflip\fP \fB\-M \-K\fIangle\fP \fB\-N \-P\fIpings\fP
 \fB\-R\fIwest/east/south/north\fP \fB\-R\fIfactor\fP
-\fB\-S\fIspeed\fP \fB\-T\fItension\fP \fB\-U\fIazimuth/factor\fP
+\fB\-S\fIspeed\fP \fB\-T\fItension\fP \fB\-U\fIbearing/factor[/mode]\fP
 \fB\-V\fP \-W\fIscale\fP \fB\-X\fIextend\fP
 \fB\-Y\fIpriority_source\fP \fB\-Z\fIbath_default\fP]
 
@@ -100,8 +100,8 @@ the working grid in both longitude and latitude.  The program reads all
 pings which lie within the data input bounds, and accepts all data
 values with locations within the working grid.
 
-The sample priorities are set according to either or both of two
-criterea. The first criterea is set by using the \fB\-Y\fP option
+The sample priorities are set according to three criteria. 
+The first criteria is set by using the \fB\-Y\fP option
 to specify a file containing a list of data priorities
 as a function of apparent grazing angle (this angle is the
 arctan(x/z) where x is acrosstrack distance and z is depth, so
@@ -117,24 +117,44 @@ starboard side have a look azimuth equal to the heading + 90 degrees).
 The second parameter in the \fB\-U\fP option is a factor (f) which
 modulates how rapidly the priority degrades away from the preferred
 look azimuth. The priority (p) is assigned as follows:
-        p = cos( f * (Ap \- Al))
+        p = cos( f * (Ap \- Aa))
 .br
-where Ap is the preferred look azimuth and A is the actual
+where Ap is the preferred look azimuth and Aa is the actual
 look azimuth. If f = 1.0, the priority will be 1.0
 at the preferred look azimuth and will fall to zero for look
 azimuths more than 90 degrees away from the preferred look
 azimuth. If f > 1.0, the range of nonzero priorities will shrink
-two azimuths closer to the preferred look azimuth (e.g. if f = 2.0,
+closer to the preferred look azimuth (e.g. if f = 2.0,
 nonzero priorities will be restricted to look azimuths within
 45 degrees of the preferred look azimuth). If f < 1.0, the
 range of nonzero priorities will expand (e.g. if f = 0.5, only
 look azimuths 180 degrees away from the preferred look azimuth
 will have a zero priority).
 
-If data priorities are set using both apparent grazing angles
-and look azimuths, the priorities used in the mosaicing are
-found by multiplying the grazing angle and look azimuth
-priorities together.
+The third criteria is set by using the \fB\-U\fP option to specify
+a preferred heading.
+The second parameter in the \fB\-U\fP option is a factor (f) which
+modulates how rapidly the priority degrades away from the preferred
+heading. The priority (p) is assigned as follows:
+        p = cos( f * (Hp \- Ha))
+.br
+where Hp is the preferred heading and Ha is the actual
+heading. If f = 1.0, the priority will be 1.0
+at the preferred heading and will fall to zero for heading
+more than 90 degrees away from the heading.
+If f > 1.0, the range of nonzero priorities will shrink
+closer to the preferred heading (e.g. if f = 2.0,
+nonzero priorities will be restricted to headings within
+45 degrees of the preferred heading). If f < 1.0, the
+range of nonzero priorities will expand (e.g. if f = 0.5, only
+headings 180 degrees away from the preferred heading
+will have a zero priority).
+
+The priorities used in the mosaicing are found by multiplying
+the grazing angle, look azimuth, and heading priorities
+together. Of course, the priority associated with a criteria
+that is not used because it has not been specified will be
+simply 1.0.
 
 The default behavior is to set each bin to the value of the highest
 priority sample found in that bin. If more than one sample has
@@ -562,31 +582,57 @@ greater.
 Default: \fItension\fP = 1.0e10 (pure spline solution).
 .TP
 .B \-U
-\fIazimuth/factor\fP
+\fIbearing/factor[/mode]\fP
 .br
 Enables prioritizing data points according to their look azimuth
-(data on the port side of the swath have
-a look azimuth equal to the heading \- 90 degrees, and data on the
-starboard side have a look azimuth equal to the heading + 90 degrees).
-Here \fIazimuth\fP is the preferred look azimuth, and \fIfactor\fP
+or to the platform heading at ping time.
+
+If \fImode\fP = 0 or is
+absent, then the look azimuth criteria is applied, with \fIbearing\fP
+being interpreted as the desired look azimuth. Data on the port side
+of the swath have a look azimuth equal to the heading \- 90 degrees,
+and data on the starboard side have a look azimuth equal to the
+heading + 90 degrees). The \fIfactor\fP value
 modulates how rapidly the priority degrades away from the preferred
 look azimuth. The priority (p) for a data point is assigned as follows:
-        p = cos(f * (Ap \- Al))
+        p = cos(f * (Ap \- Aa))
 .br
-when \-90 < (f * (Ap \- Al)) < 90 and
+when \-90 < (f * (Ap \- Aa)) < 90 and
         p = 0
 .br
-otherwise, where f = \fIfactor\fP, Ap = \fIazimuth\fP, and Al is the
-look azimuth of the data point.
+otherwise, where f = \fIfactor\fP, Ap = \fIbearing\fP, and Aa is the
+actual look azimuth of the data point.
 If \fIfactor\fP = 1.0, the priority will be 1.0
-at \fIazimuth\fP and will fall to zero for look
-azimuths more than 90 degrees away from \fIazimuth\fP.
+at \fIbearing\fP and will fall to zero for look
+azimuths more than 90 degrees away from \fIbearing\fP.
 If \fIfactor\fP > 1.0, the range of nonzero priorities will shrink
-to azimuths closer to \fIazimuth\fP (e.g. if \fIfactor\fP = 2.0,
+closer to \fIbearing\fP (e.g. if \fIfactor\fP = 2.0,
 nonzero priorities will be restricted to look azimuths within
-45 degrees of \fIazimuth\fP). If \fIfactor\fP < 1.0, the
+45 degrees of \fIbearing\fP). If \fIfactor\fP < 1.0, the
 range of nonzero priorities will expand (e.g. if \fIfactor\fP = 0.5, only
-look azimuths 180 degrees away from \fIazimuth\fP
+look azimuths 180 degrees away from \fIbearing\fP
+will have a zero priority).
+
+If \fImode\fP = 1 then the heading criteria is applied, with \fIbearing\fP
+being interpreted as the desired heading. The \fIfactor\fP value
+modulates how rapidly the priority degrades away from the preferred
+heading. The priority (p) for a data point is assigned as follows:
+        p = cos(f * (Hp \- Ha))
+.br
+when \-90 < (f * (Hp \- Ha)) < 90 and
+        p = 0
+.br
+otherwise, where f = \fIfactor\fP, Ap = \fIbearing\fP, and Aa is the
+actual heading of the data point.
+If \fIfactor\fP = 1.0, the priority will be 1.0
+at \fIbearing\fP and will fall to zero for headings
+more than 90 degrees away from \fIbearing\fP.
+If \fIfactor\fP > 1.0, the range of nonzero priorities will shrink
+closer to \fIbearing\fP (e.g. if \fIfactor\fP = 2.0,
+nonzero priorities will be restricted to headings within
+45 degrees of \fIbearing\fP). If \fIfactor\fP < 1.0, the
+range of nonzero priorities will expand (e.g. if \fIfactor\fP = 0.5, only
+headings 180 degrees away from \fIbearing\fP
 will have a zero priority).
 .TP
 .B \-V

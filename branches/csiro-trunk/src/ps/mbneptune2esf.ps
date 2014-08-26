@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:12 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:41 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -342,16 +336,16 @@ BP
 (ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 184.8 Q
 (Lamont-Doherty Earth Observ)113 196.8 Q(atory)-.25 E F2(OPTIONS)72
-225.6 Q F1<ad46>108 237.6 Q/F3 10/Times-Italic@0 SF(format)144 237.6 Q
-F0 .22(Sets the data format used if the input is read from stdin or fro\
-m a \214le. If)144 249.6 R F3(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)
--2.72 G .22(hen the input)-2.72 F .007(\214le speci\214ed with the)144
-261.6 R F1<ad49>2.507 E F0 .008
-(option will actually contain a list of input sw)2.508 F .008
-(ath sonar data \214les. This pro-)-.1 F .012(gram uses the)144 273.6 R
-F1(MBIO)2.512 E F0 .012(library and will read or write an)2.512 F 2.512
-(ys)-.15 G -.1(wa)-2.512 G .012(th sonar format supported by).1 F F1
-(MBIO)2.511 E F0 2.511(.A)C 1.296(list of the sw)144 285.6 R 1.297
+225.6 Q F1<ad46>108 237.6 Q/F3 10/Times-Italic@0 SF(format)24.19 E F0
+.22(Sets the data format used if the input is read from stdin or from a\
+ \214le. If)144 249.6 R F3(format)2.72 E F0 2.72(<0)2.72 G 2.72(,t)-2.72
+G .22(hen the input)-2.72 F .007(\214le speci\214ed with the)144 261.6 R
+F1<ad49>2.507 E F0 .008(option will actually contain a list of input sw)
+2.508 F .008(ath sonar data \214les. This pro-)-.1 F .012(gram uses the)
+144 273.6 R F1(MBIO)2.512 E F0 .012(library and will read or write an)
+2.512 F 2.512(ys)-.15 G -.1(wa)-2.512 G .012
+(th sonar format supported by).1 F F1(MBIO)2.511 E F0 2.511(.A)C 1.296
+(list of the sw)144 285.6 R 1.297
 (ath sonar data formats currently supported by)-.1 F F1(MBIO)3.797 E F0
 1.297(and their identi\214er v)3.797 F 1.297(alues is)-.25 F(gi)144
 297.6 Q -.15(ve)-.25 G 2.929(ni).15 G 2.929(nt)-2.929 G(he)-2.929 E F1
@@ -360,9 +354,9 @@ F1(MBIO)2.512 E F0 .012(library and will read or write an)2.512 F 2.512
 (formats 56 and 57 \214les are af)2.928 F(fected)-.25 E
 (by this program. Other \214les are ignored.)144 309.6 Q F1<ad48>108
 326.4 Q F0 .162(This "help" \215ag cause the program to print out a des\
-cription of its operation and then e)144 326.4 R .162(xit immedi-)-.15 F
-(ately)144 338.4 Q(.)-.65 E F1<ad49>108 355.2 Q F3(in\214le)144 355.2 Q
-F0 .313(Sets the input \214lename. If)144 367.2 R F3(format)2.813 E F0
+cription of its operation and then e)22.52 F .162(xit immedi-)-.15 F
+(ately)144 338.4 Q(.)-.65 E F1<ad49>108 355.2 Q F3(in\214le)26.41 E F0
+.313(Sets the input \214lename. If)144 367.2 R F3(format)2.813 E F0
 2.813(>0\()2.813 G .313(set with the)-2.813 F F1<ad46>2.813 E F0 .313
 (option\) then the sw)2.813 F .312(ath sonar data contained)-.1 F(in)144
 379.2 Q F3(in\214le)2.937 E F0 .437(is read and processed. If)2.937 F F3
@@ -388,24 +382,24 @@ G .568(th sonar format supported by).1 F F1(MBIO)144 475.2 Q F0 3.428
 (Only formats 56 and 57 \214les are af)5.51 F .51(fected by this pro-)
 -.25 F(gram. Other \214les are ignored.)144 499.2 Q(Def)5 E(ault:)-.1 E
 F3(in\214le)2.5 E F0 2.5(=")2.5 G(datalist.mb-1".)-2.5 E F1<ad4d>108 516
-Q F3(mode)144 516 Q F0
+Q F3(mode)20.86 E F0
 (Sets the manner in which \215agged by neptune are handled.)144 528 Q F3
 (mode)180 540 Q F0 2.5(=1)2.5 G 31.92(:F)-2.5 G
 (lags the \215agged beam.)-31.92 E F3(mode)180 552 Q F0 2.5(=3)2.5 G
 31.92(:Z)-2.5 G(eros the \215agged beam.)-31.92 E(Def)5 E(ault:)-.1 E F3
 (mode)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F1<ad4f>108 568.8 Q F3(out\214le)
-144 568.8 Q F0 .927(Speci\214es a \214le to write a cop)144 580.8 R
-3.427(yo)-.1 G 3.427(ft)-3.427 G .926(he beam information e)-3.427 F
-.926(xtracted from the rules \214le. Mostly for)-.15 F(deb)144 592.8 Q
-(ugging purposes.)-.2 E F1<ad52>108 609.6 Q F3(rules_\214le)144 609.6 Q
-F0 .735(The binstat rules \214le containing the manual \215agging rules\
- to be applied. Rules \214les are normally)144 621.6 R($PR)144 633.6 Q
+22.52 E F0 .927(Speci\214es a \214le to write a cop)144 580.8 R 3.427
+(yo)-.1 G 3.427(ft)-3.427 G .926(he beam information e)-3.427 F .926
+(xtracted from the rules \214le. Mostly for)-.15 F(deb)144 592.8 Q
+(ugging purposes.)-.2 E F1<ad52>108 609.6 Q F3(rules_\214le)23.08 E F0
+.735(The binstat rules \214le containing the manual \215agging rules to\
+ be applied. Rules \214les are normally)144 621.6 R($PR)144 633.6 Q
 (OCHOME/)-.4 E F3(surve)A(y)-.3 E F0(/binstat_)A F3(bloc)A(k)-.2 E F0
 3.582(.rules. The)B(LINES_PING_BEAM_R)3.582 E 1.082
 (ULE rules from this \214le)-.4 F
 (will be applied to the matching line\(s\) in the input \214le.)144
 645.6 Q(Def)5 E(ault:)-.1 E F3(rules_\214le)2.5 E F0 2.5(=s)2.5 G(tdin.)
--2.5 E F1<ad56>108 662.4 Q F0(Normally)144 662.4 Q(,)-.65 E F1
+-2.5 E F1<ad56>108 662.4 Q F0(Normally)23.08 E(,)-.65 E F1
 (mbneptune2esf)3.75 E F0 -.1(wo)3.75 G 1.25
 (rks "silently" without outputting an).1 F 1.25
 (ything to the stderr stream.)-.15 F(If)6.25 E(the)144 674.4 Q F1<ad56>

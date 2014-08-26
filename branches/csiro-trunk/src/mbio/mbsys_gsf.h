@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_gsf.h	6/10/97
  *	$Id$
  *
- *    Copyright (c) 1998-2013 by
+ *    Copyright (c) 1998-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -161,6 +161,4 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_gsf_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata,
-			int nbits, int signedvalue,
-			double *multiplier, double *offset, int *error);
+int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_ping, int *error);

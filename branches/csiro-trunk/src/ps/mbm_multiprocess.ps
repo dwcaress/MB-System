@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:11 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:40 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -267,10 +261,10 @@ Q(UM, Uni)-.4 E -.15(ve)-.25 G(rsity of Bremen).15 E(Da)108 367.2 Q
 (Lamont-Doherty Earth Observ)113 403.2 Q(atory)-.25 E F1
 (SIMPLE DESCRIPTION OF B)72 432 Q(ASIC OPTIONS)-.329 E F2<ad48>108 444 Q
 F0 .162(This "help" \215ag cause the program to print out a description\
- of its operation and then e)144 444 R .162(xit immedi-)-.15 F(ately)144
-456 Q(.)-.65 E F2<ad49>108 472.8 Q F3(datalist)144 472.8 Q F0 .417(Sets\
- the input datalist \214lename. A datalist is an ascii \214le containin\
-g a list of the input sw)144 484.8 R .416(ath sonar)-.1 F 1.005
+ of its operation and then e)22.52 F .162(xit immedi-)-.15 F(ately)144
+456 Q(.)-.65 E F2<ad49>108 472.8 Q F3(datalist)26.41 E F0 .417(Sets the\
+ input datalist \214lename. A datalist is an ascii \214le containing a \
+list of the input sw)144 484.8 R .416(ath sonar)-.1 F 1.005
 (data \214les to be copied and their formats.)144 496.8 R 1.005(In the)
 6.005 F F3(datalist)3.505 E F0 1.005(\214le, each sw)3.505 F 1.005
 (ath data \214le should be fol-)-.1 F(lo)144 508.8 Q
@@ -287,10 +281,10 @@ F2(MBIO)2.803 E F0 .303(library and will read)2.803 F .651(or write an)
 (rently supported by)144 580.8 Q F2(MBIO)2.5 E F0
 (and their identi\214er v)2.5 E(alues is gi)-.25 E -.15(ve)-.25 G 2.5
 (ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0(manual page.)2.5 E F2
-<ad56>108 597.6 Q F0(Causes)144 597.6 Q F2(mbm_multipr)2.767 E(ocess)
--.18 E F0 .267(to operate in "v)2.767 F .268
+<ad56>108 597.6 Q F0(Causes)23.08 E F2(mbm_multipr)2.767 E(ocess)-.18 E
+F0 .267(to operate in "v)2.767 F .268
 (erbose" mode so that it outputs more information than)-.15 F(usual.)144
-609.6 Q F2<ad58>108 626.4 Q F3(npr)144 626.4 Q(ocesses)-.45 E F0
+609.6 Q F2<ad58>108 626.4 Q F3(npr)23.08 E(ocesses)-.45 E F0
 (This option sets the number of parallel, simultaneous)144 638.4 Q F2
 (mbcopy)2.5 E F0(processes that may be run.)2.5 E F1(EXAMPLES)72 667.2 Q
 F0(Suppose one has tw)108 679.2 Q 2.5(of)-.1 G

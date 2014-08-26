@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
  *	$Id$
  *
- *    Copyright (c) 1999-2013 by
+ *    Copyright (c) 1999-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -158,9 +158,11 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->mag_res_sensor = 9;
 	store->mag_diurnal = 0.0;
 	store->mag_altitude = 0.0;
+	store->mag_qualco = 0;
 	store->gravity = 0.0;
 	store->eotvos = 0.0;
 	store->free_air = 0.0;
+	store->gra_qualco = 0;
 	store->seismic_line = 0;
 	store->seismic_shot = 0;
 	store->position_flag = 0;
@@ -172,7 +174,7 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->portlat = 0.0;
 	store->stbdlon = 0.0;
 	store->stbdlat = 0.0;
-	for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
+	for (i=0;i<MB_COMMENT_MAXLINE;i++)
 	    store->comment[i] = 0;
 
 	/* print output debug statements */

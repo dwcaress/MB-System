@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_mbpronav.c	5/20/99
  *	$Id$
  *
- *    Copyright (c) 1999-2013 by
+ *    Copyright (c) 1999-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -523,7 +523,7 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->roll = data->roll;
 		store->pitch = data->pitch;
 		store->heave = data->heave;
-        	for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
+        	for (i=0;i<MB_COMMENT_MAXLINE;i++)
 		    store->comment[i] = data->comment[i];
 
 		/* zero the other parts of the structure */
@@ -620,7 +620,7 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->roll = store->roll;
 		data->pitch = store->pitch;
 		data->heave = store->heave;
-		for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
+		for (i=0;i<MB_COMMENT_MAXLINE;i++)
 		    data->comment[i] = store->comment[i];
 		data->portlon = store->portlon;
 		data->portlat = store->portlat;

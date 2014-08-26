@@ -2,7 +2,7 @@
  *    The MB-system:	mb_io.h	1/19/93
  *    $Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -549,18 +549,19 @@ struct mb_io_struct
 	int (*mb_io_gains)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, double *transmit_gain, double *pulse_length,
 		double *receive_gain, int *error);
+	int (*mb_io_extract_rawssdimensions)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, double *sample_interval,
+		int *num_samples_port, int *num_samples_stbd, int *error);
 	int (*mb_io_extract_rawss)(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, int *nrawss,
-		double *rawss,
-		double *rawssacrosstrack,
-		double *rawssalongtrack,
-		int *error);
+		int *kind, int *sidescan_type, double *sample_interval,
+                double *beamwidth_xtrack, double *beamwidth_ltrack,
+		int *num_samples_port, double *rawss_port, 
+		int *num_samples_stbd, double *rawss_stbd, int *error);
 	int (*mb_io_insert_rawss)(int verbose, void *mbio_ptr, void *store_ptr,
-		int nrawss,
-		double *rawss,
-		double *rawssacrosstrack,
-		double *rawssalongtrack,
-		int *error);
+		int kind, int sidescan_type, double sample_interval,
+		double beamwidth_xtrack, double beamwidth_ltrack,
+		int num_samples_port, double *rawss_port,
+		int num_samples_stbd, double *rawss_stbd, int *error);
 	int (*mb_io_extract_segytraceheader)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		void *segytraceheader_ptr,

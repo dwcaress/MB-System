@@ -90,7 +90,8 @@ extern void do_mbview_colortable_bright(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_muted(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_gray(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_flat(Widget, XtPointer, XtPointer);
-extern void do_mbview_colortable_sealevel(Widget, XtPointer, XtPointer);
+extern void do_mbview_colortable_sealevel1(Widget, XtPointer, XtPointer);
+extern void do_mbview_colortable_sealevel2(Widget, XtPointer, XtPointer);
 extern void do_mbview_view_profile(Widget, XtPointer, XtPointer);
 extern void do_mbview_colorboundspopup(Widget, XtPointer, XtPointer);
 extern void do_mbview_2dparmspopup(Widget, XtPointer, XtPointer);
@@ -1200,17 +1201,17 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     {
         XmString    tmp0;
 
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Sealevel Colortable",
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Sealevel1 Colortable",
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
             BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_colortable_sealevel = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_colortable_sealevel",
+        class_in->mbview_toggleButton_colortable_sealevel1 = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
+            (char *)"mbview_toggleButton_colortable_sealevel1",
             args,
             ac);
-        XtManageChild(class_in->mbview_toggleButton_colortable_sealevel);
+        XtManageChild(class_in->mbview_toggleButton_colortable_sealevel1);
 
         /**
          * Free any memory allocated for resources.
@@ -1218,7 +1219,31 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XmStringFree((XmString)tmp0);
     }
 
-    XtAddCallback(class_in->mbview_toggleButton_colortable_sealevel, XmNvalueChangedCallback, do_mbview_colortable_sealevel, (XtPointer)0);
+    XtAddCallback(class_in->mbview_toggleButton_colortable_sealevel1, XmNvalueChangedCallback, do_mbview_colortable_sealevel1, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Sealevel2 Colortable",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_toggleButton_colortable_sealevel2 = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
+            (char *)"mbview_toggleButton_colortable_sealevel2",
+            args,
+            ac);
+        XtManageChild(class_in->mbview_toggleButton_colortable_sealevel2);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->mbview_toggleButton_colortable_sealevel2, XmNvalueChangedCallback, do_mbview_colortable_sealevel2, (XtPointer)0);
 
     ac = 0;
     class_in->separator1 = XmCreateSeparator(class_in->mbview_pulldownMenu_view,
