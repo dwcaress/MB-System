@@ -2,7 +2,7 @@
  *    The MB-system:	mblist.c	2/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -478,6 +478,7 @@ int main (int argc, char **argv)
 	int	use_nav = MB_NO;
 	int	use_gains = MB_NO;
 	int	use_detects = MB_YES;
+        int     use_pingnumber = MB_NO;
 	int	check_values = MBLIST_CHECK_ON;
 	int	check_nav = MB_NO;
 	int	check_bath = MB_NO;
@@ -525,6 +526,7 @@ int main (int argc, char **argv)
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
 	int	icomment = 0;
+        int     pingnumber;
 
 	/* additional time variables */
 	int	first_m = MB_YES;
@@ -620,7 +622,7 @@ int main (int argc, char **argv)
 	char	variable[MB_PATH_MAXLINE];
 	int	lcount = 0;
 	time_t	right_now;
-	char	date[128], user[128], *user_ptr, host[128];
+	char	date[32], user[128], *user_ptr, host[128];
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -1031,7 +1033,8 @@ int main (int argc, char **argv)
 	    fprintf(outfile, "\t:mbsystem_version = \"%s\";\n", MB_VERSION);
 
 	    right_now = time((time_t *)0);
-	    strncpy(date,ctime(&right_now),128);
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
 	    if ((user_ptr = (char *) getenv("USER")) == NULL)
 	      user_ptr = (char *) getenv("LOGNAME");
 	    if (user_ptr != NULL)
@@ -1256,6 +1259,33 @@ int main (int argc, char **argv)
 
 		    fprintf(outfile, "\tfloat %s(data);\n", variable);
 		    fprintf(outfile, "\t\t%s:long_name = \"Alongtrack distance\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    if (bathy_in_feet == MB_YES)
+		      fprintf(outfile, "f\";\n");
+		    else
+		      fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+
+		    break;
+
+		  case 'F': /* beamflag (numeric only for netcdf) */
+		  case 'f':
+		    strcpy(variable, "beamflag");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Beamflag\";\n", variable);
 		    fprintf(outfile, "\t\t%s:units = \"", variable);
 		    if (signflip_next_value == MB_YES)
 		      fprintf(outfile, "-");
@@ -2502,6 +2532,8 @@ int main (int argc, char **argv)
 				use_attitude = MB_YES;
 			if (list[i] == 'Q' || list[i] == 'q')
 				use_detects = MB_YES;
+			if (list[i] == 'N' || list[i] == 'n')
+				use_pingnumber = MB_YES;
 			if (list[i] == 'X' || list[i] == 'x'
 				|| list[i] == 'Y' || list[i] == 'y')
 				use_nav = MB_YES;
@@ -2632,7 +2664,7 @@ int main (int argc, char **argv)
 		error = MB_ERROR_NO_ERROR;
 
 		/* read a ping of data */
-		if (pings == 1 || use_attitude == MB_YES || use_detects == MB_YES)
+		if (pings == 1 || use_attitude == MB_YES || use_detects == MB_YES || use_pingnumber == MB_YES)
 		    {
 		    /* read next data record */
 		    status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
@@ -2664,6 +2696,12 @@ int main (int argc, char **argv)
 			&& use_detects)
 			status = mb_detects(verbose,mbio_ptr,store_ptr,&kind,
 					&nbeams,detect,&error);
+
+		    /* if survey data extract pingnumber */
+		    if (error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA
+			&& use_pingnumber)
+			status = mb_pingnumber(verbose,mbio_ptr,&pingnumber,&error);
 		    }
 		else
 		    {
@@ -2695,6 +2733,8 @@ int main (int argc, char **argv)
 			&& kind == MB_DATA_DATA)
 			{
 			nread++;
+                        if (use_pingnumber == MB_NO)
+                            pingnumber = nread;
 			distance_total += distance;
 			}
 
@@ -3118,6 +3158,53 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					    }
 					break;
+				case 'F': /* Beamflag numeric value */
+					if (ascii == MB_YES)
+                                            {
+					    if (netcdf == MB_YES)
+					    fprintf(output[i],"%u",beamflag[k]);
+					    else
+					    fprintf(output[i],"%u",beamflag[k]);
+                                            }
+                                        else
+                                            {
+					    b = beamflag[k];
+					    fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+					break;
+				case 'f': /* Beamflag character value (ascii only) */
+					if (ascii == MB_YES)
+                                            {
+					    if (netcdf == MB_YES)
+                                                fprintf(output[i],"%u",beamflag[k]);
+					    else
+                                                {
+                                                if (mb_beam_check_flag_null(beamflag[k]))
+                                                    fprintf(output[i],"-");
+                                               else if (mb_beam_ok(beamflag[k]))
+                                                    fprintf(output[i],"G");
+                                               else if (mb_beam_check_flag_manual(beamflag[k]))
+                                                    fprintf(output[i],"M");
+                                               else if (mb_beam_check_flag_filter(beamflag[k]))
+                                                    fprintf(output[i],"F");
+                                               else if (mb_beam_check_flag_filter2(beamflag[k]))
+                                                    fprintf(output[i],"F");
+                                               else if (mb_beam_check_flag_gt_1x_iho(beamflag[k]))
+                                                    fprintf(output[i],"F");
+                                               else if (mb_beam_check_flag_gt_2x_iho(beamflag[k]))
+                                                    fprintf(output[i],"F");
+                                               else if (mb_beam_check_flag_footprint(beamflag[k]))
+                                                    fprintf(output[i],"F");
+                                               else if (mb_beam_check_flag_sonar(beamflag[k]))
+                                                    fprintf(output[i],"S");
+                                                }
+                                            }
+                                        else
+                                            {
+					    b = beamflag[k];
+					    fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+					break;
 				case 'G': /* flat bottom grazing angle */
 					if (beamflag[k] == MB_FLAG_NULL
 					    && (check_values == MBLIST_CHECK_OFF_NAN
@@ -3267,10 +3354,10 @@ int main (int argc, char **argv)
 					break;
 				case 'N': /* ping counter */
 					if (ascii == MB_YES)
-					    fprintf(output[i],"%6d",nread);
+					    fprintf(output[i],"%6d",pingnumber);
 					else
 					    {
-					    b = nread;
+					    b = pingnumber;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
@@ -4186,10 +4273,10 @@ int main (int argc, char **argv)
 					break;
 				case 'N': /* ping counter */
 					if (ascii == MB_YES)
-					    fprintf(output[i],"%6d",nread);
+					    fprintf(output[i],"%6d",pingnumber);
 					else
 					    {
-					    b = nread;
+					    b = pingnumber;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
@@ -5796,7 +5883,14 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr,
 
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store_ptr = (struct mbsys_simrad3_struct *) mb_io_ptr->store_data;
-	ping_ptr = store_ptr->ping;
+ 	if (store_ptr->serial == store_ptr->par_serial_2)
+		{
+		ping_ptr = (struct mbsys_simrad3_ping_struct *) store_ptr->ping2;
+		}
+	else
+		{
+		ping_ptr = (struct mbsys_simrad3_ping_struct *) store_ptr->ping1;
+		}
 
 	if (store_ptr->kind == MB_DATA_DATA)
 	  {

@@ -2,7 +2,7 @@
  *    The MB-system:	mbotps.c	7/30/2009
  *    $Id$
  *
- *    Copyright (c) 2009-2013 by
+ *    Copyright (c) 2009-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -62,7 +62,7 @@
 #include "mb_define.h"
 #include "mb_process.h"
 
-/* OTPS isntallation location include */
+/* OTPS installation location include */
 #include "otps.h"
 
 /* local defines */
@@ -80,7 +80,7 @@ int main (int argc, char **argv)
 	static char rcs_id[] = "$Id$";
 	static char program_name[] = "mbotps";
 	static char help_message[] =  "MBotps predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions.";
-	static char usage_message[] = "mbotps [-Atideformat -Byear/month/day/hour/minute/second -Dinterval\n\t-Eyear/month/day/hour/minute/second -Fformat\n\t-Idatalist.mb-1 -Ooutput -Rlon/lat -Tmodel -V]";
+	static char usage_message[] = "mbotps [-Atideformat -Byear/month/day/hour/minute/second -Dinterval\n\t-Eyear/month/day/hour/minute/second -Fformat\n\t-Idatalist.mb-1 -Lopts_path -Ooutput -Potps_location -Rlon/lat -Tmodel -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -135,6 +135,7 @@ int main (int argc, char **argv)
 	char	comment[MB_COMMENT_MAXLINE];
 
 	/* mbotps control parameters */
+	mb_path	otps_location_use;
 	int	notpsmodels = 0;
 	int	nmodeldatafiles = 0;
 	int	mbotps_mode = MBOTPS_MODE_POSITION;
@@ -152,7 +153,7 @@ int main (int argc, char **argv)
 
 	/* time parameters */
 	time_t	right_now;
-	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int	pid;
 
 	FILE	*tfp, *mfp, *ofp;
@@ -191,6 +192,9 @@ int main (int argc, char **argv)
 	/* set default input to datalist.mb-1 */
 	strcpy (read_file, "datalist.mb-1");
 
+	/* set default location of the OTPS package */
+	strcpy(otps_location_use, otps_location);
+
 	/* set defaults for the AUV survey we were running on Coaxial Segment, Juan de Fuca Ridge
 		while I wrote this code */
 	sprintf(otps_model, "tpxo7.2");
@@ -214,7 +218,7 @@ int main (int argc, char **argv)
 	etime_i[6] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:I:i:MmO:o:R:r:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:I:i:MmO:o:P:p:R:r:T:t:VvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -270,6 +274,10 @@ int main (int argc, char **argv)
 		case 'o':
 			sscanf (optarg,"%s", tidefile);
 			break;
+		case 'P':
+		case 'p':
+			sscanf (optarg,"%s", otps_location_use);
+			break;
 		case 'R':
 		case 'r':
 			sscanf (optarg,"%lf/%lf", &tidelon, &tidelat);
@@ -312,17 +320,17 @@ int main (int argc, char **argv)
 	if (help || verbose > 0)
 		{
 		fprintf(stderr,"\nChecking for available OTPS tide models\n");
-		fprintf(stderr,"OTPS location: %s\nValid OTPS tidal models:\n", otps_location);
+		fprintf(stderr,"OTPS location: %s\nValid OTPS tidal models:\n", otps_location_use);
 		}
 	notpsmodels = 0;
-	sprintf(line, "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location);
+	sprintf(line, "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
 	if ((tfp = popen(line, "r")) != NULL)
 		{
 		/* send relevant input to predict_tide through its stdin stream */
 		while (fgets(line, sizeof(line), tfp))
 			{
 			sscanf(line, "%s", modelname);
-			sprintf(modelfile, "%s/DATA/Model_%s", otps_location, modelname);
+			sprintf(modelfile, "%s/DATA/Model_%s", otps_location_use, modelname);
 			nmodeldatafiles = 0;
 
 			/* check the files referenced in the model file */
@@ -381,6 +389,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       help:             %d\n",help);
 		fprintf(stderr,"dbg2       otps_location:    %s\n",otps_location);
+		fprintf(stderr,"dbg2       otps_location_use:%s\n",otps_location_use);
 		fprintf(stderr,"dbg2       otps_model_set:   %d\n",otps_model_set);
 		fprintf(stderr,"dbg2       otps_model:       %s\n",otps_model);
 		fprintf(stderr,"dbg2       mbotps_mode:      %d\n",mbotps_mode);
@@ -460,7 +469,7 @@ int main (int argc, char **argv)
 		fclose(tfp);
 
 		/* call predict_tide with popen */
-		sprintf(predict_tide, "%s/predict_tide", otps_location);
+		sprintf(predict_tide, "%s/predict_tide", otps_location_use);
 		if ((tfp = popen(predict_tide, "w")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
@@ -471,7 +480,7 @@ int main (int argc, char **argv)
 			}
 
 		/* send relevant input to predict_tide through its stdin stream */
-		fprintf(tfp, "%s/DATA/Model_%s\n", otps_location,otps_model);
+		fprintf(tfp, "%s/DATA/Model_%s\n", otps_location_use,otps_model);
 		fprintf(tfp, "%s\n", lltfile);
 		fprintf(tfp, "z\n\nAP\noce\n1\n");
 		/*fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");*/
@@ -520,7 +529,8 @@ int main (int argc, char **argv)
 			fprintf(ofp, "# and tide is in meters\n");
 			}
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
 		if (user_ptr != NULL)
@@ -753,7 +763,7 @@ int main (int argc, char **argv)
 			fclose(tfp);
 
 			/* call predict_tide with popen */
-			sprintf(predict_tide, "%s/predict_tide", otps_location);
+			sprintf(predict_tide, "%s/predict_tide", otps_location_use);
 			if ((tfp = popen(predict_tide, "w")) == NULL)
 				{
 				error = MB_ERROR_OPEN_FAIL;
@@ -764,7 +774,7 @@ int main (int argc, char **argv)
 				}
 
 			/* send relevant input to predict_tide through its stdin stream */
-			fprintf(tfp, "%s/DATA/Model_%s\n", otps_location,otps_model);
+			fprintf(tfp, "%s/DATA/Model_%s\n", otps_location_use,otps_model);
 			fprintf(tfp, "%s\n", lltfile);
 			fprintf(tfp, "z\n\nAP\noce\n1\n");
 			/*fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");*/
@@ -797,7 +807,8 @@ int main (int argc, char **argv)
 			fprintf(ofp, "# which in turn calls OTPS program predict_tide obtained from:\n");
 			fprintf(ofp, "#     http://www.coas.oregonstate.edu/research/po/research/tide/\n");
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
+			strcpy(date,ctime(&right_now));
+			date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				user_ptr = getenv("LOGNAME");
 			if (user_ptr != NULL)

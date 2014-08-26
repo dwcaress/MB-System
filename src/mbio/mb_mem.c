@@ -2,7 +2,7 @@
  *    The MB-system:	mb_mem.c	3/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1044,7 +1044,7 @@ int mb_register_array(int verbose, void *mbio_ptr,
 		int type, size_t size, void **handle, int *error)
 {
 	static char rcs_id[]="$Id$";
-	char	*function_name = "mb_update_arrays";
+	char	*function_name = "mb_register_array";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int	nalloc;

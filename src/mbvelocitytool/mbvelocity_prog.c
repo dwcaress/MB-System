@@ -2,7 +2,7 @@
  *    The MB-system:    mbvelocitytool.c        6/6/93
  *    $Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -231,7 +231,7 @@ struct profile	profile_display[MAX_PROFILES];
 struct profile	profile_edit;
 int	*edit_x = NULL;
 int	*edit_y = NULL;
-char	editfile[MB_PATH_MAXLINE];
+mb_path	editfile;
 int	edit = 0;
 int	ndisplay = 0;
 void	*mbvt_xgid;
@@ -275,7 +275,7 @@ double	timegap;
 int	beams_bath;
 int	beams_amp;
 int	pixels_ss;
-char	swathfile[MB_PATH_MAXLINE];
+mb_path	swathfile;
 void	*mbio_ptr;
 
 /* mbio read and write values */
@@ -359,7 +359,7 @@ int mbvt_init(int argc, char **argv)
 	/* local variables */
 	char	*function_name = "mbvt_init";
 	int	status = MB_SUCCESS;
-	char	ifile[MB_PATH_MAXLINE], sfile[MB_PATH_MAXLINE], wfile[MB_PATH_MAXLINE];
+	mb_path	ifile, sfile, wfile;
 	int	i;
 
 	/* parsing variables */
@@ -759,7 +759,7 @@ int mbvt_open_edit_profile(char *file)
 	char	*function_name = "mbvt_open_edit_profile";
 	int	status = MB_SUCCESS;
 	int	size;
-	char	buffer[MB_PATH_MAXLINE];
+	mb_path	buffer;
 	char	*result;
 	struct profile *profile;
 	FILE	*fp;
@@ -1002,7 +1002,8 @@ int mbvt_save_edit_profile(char *file)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr;
+        mb_path user, host;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1032,9 +1033,9 @@ int mbvt_save_edit_profile(char *file)
 	fprintf(fp, "## Output by Program %s\n",program_name);
 	fprintf(fp, "## Program Version %s\n",rcs_id);
 	fprintf(fp, "## MB-System Version %s\n",MB_VERSION);
-	strncpy(date,"\0",25);
 	right_now = time((time_t *)0);
-	strncpy(date,ctime(&right_now),24);
+	strcpy(date,ctime(&right_now));
+        date[strlen(date)-1] = '\0';
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
 	if (user_ptr != NULL)
@@ -1087,12 +1088,13 @@ int mbvt_save_swath_profile(char *file)
 	struct profile *profile;
 	FILE	*fp;
 	int	oldmode, oldanglemode, corrected;
-	char	oldfile[MB_PATH_MAXLINE];
+	mb_path	oldfile;
 	int	i;
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr;
+        mb_path user, host;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1127,9 +1129,9 @@ int mbvt_save_swath_profile(char *file)
 	    fprintf(fp, "## Output by Program %s\n", program_name);
 	    fprintf(fp, "## Program Version %s\n", rcs_id);
 	    fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-	    strncpy(date,"\0",25);
 	    right_now = time((time_t *)0);
-	    strncpy(date,ctime(&right_now),24);
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
 	    if ((user_ptr = getenv("USER")) == NULL)
 		    user_ptr = getenv("LOGNAME");
 	    if (user_ptr != NULL)
@@ -1189,12 +1191,13 @@ int mbvt_save_residuals(char *file)
 	int	status = MB_SUCCESS;
 	FILE	*fp;
 	int	oldmode;
-	char	oldfile[MB_PATH_MAXLINE];
+	mb_path	oldfile;
 	int	i;
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr;
+        mb_path user, host;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1226,9 +1229,9 @@ int mbvt_save_residuals(char *file)
 	    fprintf(fp, "## Output by Program %s\n", program_name);
 	    fprintf(fp, "## Program Version %s\n", rcs_id);
 	    fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-	    strncpy(date,"\0",25);
 	    right_now = time((time_t *)0);
-	    strncpy(date,ctime(&right_now),24);
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
 	    if ((user_ptr = getenv("USER")) == NULL)
 		    user_ptr = getenv("LOGNAME");
 	    if (user_ptr != NULL)
@@ -1283,7 +1286,7 @@ int mbvt_open_display_profile(char *file)
 	/* local variables */
 	char	*function_name = "mbvt_open_display_profile";
 	int	status = MB_SUCCESS;
-	char	buffer[MB_PATH_MAXLINE];
+	mb_path	buffer;
 	char	*result;
 	struct profile *profile;
 	FILE	*fp;
@@ -1562,7 +1565,7 @@ int mbvt_plot()
 	double	vx, vy;
 	int	xxo, yyo;
 	int	swidth, sascent, sdescent;
-	char	string[MB_PATH_MAXLINE];
+	mb_path	string;
 	char	format_str[10];
 	int	color;
 	int	i, j;
@@ -2402,7 +2405,7 @@ int mbvt_get_format(char *file, int *form)
 	/* local variables */
 	char	*function_name = "mbvt_get_format";
 	int	status = MB_SUCCESS;
-	char	tmp[MB_PATH_MAXLINE];
+	mb_path	tmp;
 	int	tform;
 
 	/* print input debug statements */
@@ -2474,9 +2477,9 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	int	variable_beams;
 	int	traveltime;
 	int	beam_flagging;
-	char	command[64];
-	char	string[MB_PATH_MAXLINE];
-	char	svp_file[MB_PATH_MAXLINE];
+	mb_path	command;
+	mb_path	string;
+	mb_path	svp_file;
 	int	done, count;
 	struct stat file_status;
 	int	fstat;

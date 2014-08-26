@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:13 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:41 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 24
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -1035,8 +1029,8 @@ G 3.323(;t).15 G .823(he adjustments are numbered)-3.323 F
 -.18 E(Montere)113 364.8 Q 2.5(yB)-.15 G(ay Aquarium Research Institute)
 -2.5 E(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 376.8 Q
 (Lamont\255Doherty Earth Observ)113 388.8 Q(atory)-.25 E F2(OPTIONS)72
-417.6 Q F1<ad46>108 429.6 Q/F3 10/Times-Italic@0 SF(format)144 429.6 Q
-F0 .418(Sets the)144 441.6 R F1(MBIO)2.918 E F0(inte)2.918 E .418
+417.6 Q F1<ad46>108 429.6 Q/F3 10/Times-Italic@0 SF(format)24.19 E F0
+.418(Sets the)144 441.6 R F1(MBIO)2.918 E F0(inte)2.918 E .418
 (ger format identi\214er for the input \214le speci\214ed with the)-.15
 F F1<ad49>2.917 E F0 .417(option. By def)2.917 F(ault,)-.1 E F1(mbpr)144
 453.6 Q(ocess)-.18 E F0(deri)2.947 E -.15(ve)-.25 G 2.947(st).15 G .447
@@ -1046,11 +1040,11 @@ Q F1<ad49>A F0(option\) or)2.5 E 2.5(,i)-.4 G 2.5(fn)-2.5 G(ecessary)
 -2.5 E 2.5(,i)-.65 G(nfers the format from the "*.mbXX")-2.5 E F1
 (MB\255System)2.5 E F0(suf)2.5 E(\214x con)-.25 E -.15(ve)-.4 G(ntion.)
 .15 E F1<ad48>108 482.4 Q F0 .391(This "help" \215ag causes the program\
- to print out a description of its operation and then e)144 482.4 R .39
+ to print out a description of its operation and then e)22.52 F .39
 (xit imme-)-.15 F(diately)144 494.4 Q(.)-.65 E F1<ad49>108 511.2 Q F3
-(in\214le)144 511.2 Q F0(Sw)144 523.2 Q .732(ath data \214le from which\
- the input data will be read, or a datalist \214le containing a list of\
- input)-.1 F(sw)144 535.2 Q .289
+(in\214le)26.41 E F0(Sw)144 523.2 Q .732(ath data \214le from which the\
+ input data will be read, or a datalist \214le containing a list of inp\
+ut)-.1 F(sw)144 535.2 Q .289
 (ath data \214les and/or other datalist \214les. If)-.1 F F3(in\214le)
 2.789 E F0 .289(is a datalist \214le, then)2.789 F F1(mbpr)2.789 E
 (ocess)-.18 E F0 .288(will attempt to)2.788 F
@@ -1065,11 +1059,11 @@ Q F1<ad49>A F0(option\) or)2.5 E 2.5(,i)-.4 G 2.5(fn)-2.5 G(ecessary)
 (his option causes)-5.172 F F1(mbpr)2.672 E(ocess)-.18 E F0 .172
 (to not pass ne)2.672 F 2.673(wo)-.25 G 2.673(ro)-2.673 G .173
 (ld comment records to the out-)-2.673 F(put data \214le.)144 612 Q F1
-<ad4f>108 628.8 Q F3(out\214le)144 628.8 Q F0 .273(Data \214le to which\
- the output data will be written. If no output \214le is speci\214ed, t\
-he output \214lename)144 640.8 R .328(is set automatically)144 652.8 R
-2.828(.I)-.65 G 2.828(fa)-2.828 G 2.828(ni)-2.828 G .328(nput sw)-2.828
-F .328(ath data \214le is named "root.mbXX", where XX is the format id,)
+<ad4f>108 628.8 Q F3(out\214le)22.52 E F0 .273(Data \214le to which the\
+ output data will be written. If no output \214le is speci\214ed, the o\
+utput \214lename)144 640.8 R .328(is set automatically)144 652.8 R 2.828
+(.I)-.65 G 2.828(fa)-2.828 G 2.828(ni)-2.828 G .328(nput sw)-2.828 F
+.328(ath data \214le is named "root.mbXX", where XX is the format id,)
 -.1 F .08(then the def)144 664.8 R .08
 (ault processed output \214le will be "rootp.mbXX".)-.1 F .08
 (The "p" inserted before the ".mbXX")5.08 F(suf)144 676.8 Q .117
@@ -1108,8 +1102,8 @@ cess the data or produce an output processed \214le.)-.2 E F1<ad53>108
 (to print out the status of each \214le \(e.g. up to date, out of date,)
 4.018 F(lock)144 189.6 Q .475(ed, unlock)-.1 F .475(ed\) along with the\
  \214le modi\214cation times used to determine if the output \214le is \
-out)-.1 F(of date.)144 201.6 Q F1<ad56>108 218.4 Q F0(Normally)144 218.4
-Q(,)-.65 E F1(mbpr)2.749 E(ocess)-.18 E F0 -.1(wo)2.749 G .249
+out)-.1 F(of date.)144 201.6 Q F1<ad56>108 218.4 Q F0(Normally)23.08 E
+(,)-.65 E F1(mbpr)2.749 E(ocess)-.18 E F0 -.1(wo)2.749 G .249
 (rks "silently" without outputting an).1 F .249
 (ything to the stderr stream.)-.15 F .25(If the)5.25 F F1<ad56>2.75 E F0
 .702(\215ag is gi)144 230.4 R -.15(ve)-.25 G .702(n, then).15 F F1(mbpr)

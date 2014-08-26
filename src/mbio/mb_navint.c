@@ -2,7 +2,7 @@
  *    The MB-system:	mb_time.c	10/30/2000
  *    $Id$
  *
- *    Copyright (c) 2000-2013 by
+ *    Copyright (c) 2000-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -92,7 +92,7 @@ static char rcs_id[]="$Id$";
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
 		list used for interpolation/extrapolation. */
-int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double lat, int *error)
+int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting, double lat_northing, int *error)
 {
 	char	*function_name = "mb_navint_add";
 	int	status = MB_SUCCESS;
@@ -105,12 +105,12 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
-		fprintf(stderr,"dbg2       lon:        %f\n",lon);
-		fprintf(stderr,"dbg2       lat:        %f\n",lat);
+		fprintf(stderr,"dbg2       rcs_id:       %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       time_d:       %f\n",time_d);
+		fprintf(stderr,"dbg2       lon_easting:  %f\n",lon_easting);
+		fprintf(stderr,"dbg2       lat_northing: %f\n",lat_northing);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -146,11 +146,11 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 
 		/* add new fix to list */
 		mb_io_ptr->fix_time_d[mb_io_ptr->nfix] = time_d;
-		mb_io_ptr->fix_lon[mb_io_ptr->nfix] = lon;
-		mb_io_ptr->fix_lat[mb_io_ptr->nfix] = lat;
+		mb_io_ptr->fix_lon[mb_io_ptr->nfix] = lon_easting;
+		mb_io_ptr->fix_lat[mb_io_ptr->nfix] = lat_northing;
 		mb_io_ptr->nfix++;
 #ifdef MB_NAVINT_DEBUG
-	fprintf(stderr, "mb_navint_add:    Nav fix %d %f %f added\n", mb_io_ptr->nfix, lon, lat);
+	fprintf(stderr, "mb_navint_add:    Nav fix %d %f %f added\n", mb_io_ptr->nfix, lon_easting, lat_northing);
 #endif
 
 		/* print debug statements */
@@ -204,11 +204,13 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 	char	*function_name = "mb_navint_interp";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	double	mtodeglon, mtodeglat;
+	double	mtodeglon = 0.0;
+	double	mtodeglat = 0.0;
 	double	dx, dy, dt, dd;
 	double	factor, headingx, headingy;
 	double  speed_mps;
-	int	ifix;
+	int	ifix = 0;
+	int	ifix0, ifix1;
 	int	i;
 
 	/* print input debug statements */
@@ -246,20 +248,48 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 			mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
 			&mtodeglon,&mtodeglat);
 		}
+		
+	/* find location of time_d in the list arrays */
+	if (mb_io_ptr->nfix > 1)
+		{
+		if (time_d <= mb_io_ptr->fix_time_d[0])
+			ifix = 0;
+		else if (time_d >= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+			ifix = mb_io_ptr->nfix - 1;
+		else
+			{
+			ifix = (mb_io_ptr->nfix - 1) * (time_d - mb_io_ptr->fix_time_d[0])
+				/(mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] - mb_io_ptr->fix_time_d[0]);
+			while (time_d > mb_io_ptr->fix_time_d[ifix])
+				{
+				ifix++;
+				}
+			while (time_d < mb_io_ptr->fix_time_d[ifix-1])
+				{
+				ifix--;
+				}
+			}
+		}
+	else if (mb_io_ptr->nfix == 1)
+		{
+		ifix = 0;
+		}
 
 	/* use raw speed if available */
 	if (rawspeed > 0.0)
 	  *speed = rawspeed; /* km/hr */
 
-	/* else get speed averaged over all available fixes */
+	/* else get speed averaged over as many as 100 fixes */
 	else if (mb_io_ptr->nfix > 1)
 		{
-		dx = (mb_io_ptr->fix_lon[mb_io_ptr->nfix-1]
-			- mb_io_ptr->fix_lon[0])/mtodeglon;
-		dy = (mb_io_ptr->fix_lat[mb_io_ptr->nfix-1]
-			- mb_io_ptr->fix_lat[0])/mtodeglat;
-		dt = mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
-			- mb_io_ptr->fix_time_d[0];
+		ifix0 = MAX(ifix - 50, 0 );
+		ifix1 = MIN(ifix + 50, mb_io_ptr->nfix - 1);
+		dx = (mb_io_ptr->fix_lon[ifix1]
+			- mb_io_ptr->fix_lon[ifix0])/mtodeglon;
+		dy = (mb_io_ptr->fix_lat[ifix1]
+			- mb_io_ptr->fix_lat[ifix0])/mtodeglat;
+		dt = mb_io_ptr->fix_time_d[ifix1]
+			- mb_io_ptr->fix_time_d[ifix0];
 		*speed = 3.6 * sqrt(dx*dx + dy*dy)/dt; /* km/hr */
 		}
 
@@ -272,23 +302,9 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 
 	/* interpolate if possible */
 	if (mb_io_ptr->nfix > 1
-		&& (mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
-			>= time_d)
-		&& (mb_io_ptr->fix_time_d[0]
-			<= time_d))
+		&& (time_d >= mb_io_ptr->fix_time_d[0])
+		&& (time_d <= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]))
 		{
-		/* get interpolated position */
-		ifix = (mb_io_ptr->nfix - 1) * (time_d - mb_io_ptr->fix_time_d[0])
-			/(mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] - mb_io_ptr->fix_time_d[0]);
-		while (time_d > mb_io_ptr->fix_time_d[ifix])
-			{
-			ifix++;
-			}
-		while (time_d < mb_io_ptr->fix_time_d[ifix-1])
-			{
-			ifix--;
-			}
-
 		factor = (time_d - mb_io_ptr->fix_time_d[ifix-1])
 			/(mb_io_ptr->fix_time_d[ifix] - mb_io_ptr->fix_time_d[ifix-1]);
 		*lon = mb_io_ptr->fix_lon[ifix-1]
@@ -305,8 +321,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 	/* extrapolate from last fix - note zero speed
 	    results in just using the last fix */
 	else if (mb_io_ptr->nfix > 1
-		&& (mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
-			< time_d))
+		&& (time_d > mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]))
 		{
 		/* extrapolated position using average speed */
 		dd = (time_d - mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
@@ -365,6 +380,194 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       lon:        %f\n",*lon);
 		fprintf(stderr,"dbg2       lat:        %f\n",*lat);
+		fprintf(stderr,"dbg2       speed:      %f\n",*speed);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/* 	function mb_navint_prjinterp interpolates or extrapolates a
+		nav fix from the internal list treating the position
+		list as being in a projected coordinate system
+		rather than in geographic lon lat. */
+int mb_navint_prjinterp(int verbose, void *mbio_ptr,
+		double time_d, double heading, double rawspeed,
+		double *easting, double *northing, double *speed,
+		int *error)
+{
+	char	*function_name = "mb_navintprj_interp";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	double	dx, dy, dt, dd;
+	double	factor, headingx, headingy;
+	double  speed_mps;
+	int	ifix = 0;
+	int	ifix0, ifix1;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
+		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       rawspeed:   %f\n",rawspeed);
+		}
+
+	/* get pointers to mbio descriptor and data structures */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Current nav fix values:\n");
+		for (i=0;i<mb_io_ptr->nfix;i++)
+			fprintf(stderr,"dbg2       nav fix[%2d]:   %f %f %f\n",
+						i, mb_io_ptr->fix_time_d[i],
+						mb_io_ptr->fix_lon[i],
+						mb_io_ptr->fix_lat[i]);
+		}
+		
+	/* find location of time_d in the list arrays */
+	if (mb_io_ptr->nfix > 1)
+		{
+		if (time_d <= mb_io_ptr->fix_time_d[0])
+			ifix = 0;
+		else if (time_d >= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+			ifix = mb_io_ptr->nfix - 1;
+		else
+			{
+			ifix = (mb_io_ptr->nfix - 1) * (time_d - mb_io_ptr->fix_time_d[0])
+				/(mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] - mb_io_ptr->fix_time_d[0]);
+			while (time_d > mb_io_ptr->fix_time_d[ifix])
+				{
+				ifix++;
+				}
+			while (time_d < mb_io_ptr->fix_time_d[ifix-1])
+				{
+				ifix--;
+				}
+			}
+		}
+	else if (mb_io_ptr->nfix == 1)
+		{
+		ifix = 0;
+		}
+
+	/* use raw speed if available */
+	if (rawspeed > 0.0)
+	  *speed = rawspeed; /* km/hr */
+
+	/* else get speed averaged over as many as 100 fixes */
+	else if (mb_io_ptr->nfix > 1)
+		{
+		ifix0 = MAX(ifix - 50, 0 );
+		ifix1 = MIN(ifix + 50, mb_io_ptr->nfix - 1);
+		dx = (mb_io_ptr->fix_lon[ifix1]
+			- mb_io_ptr->fix_lon[ifix0]);
+		dy = (mb_io_ptr->fix_lat[ifix1]
+			- mb_io_ptr->fix_lat[ifix0]);
+		dt = mb_io_ptr->fix_time_d[ifix1]
+			- mb_io_ptr->fix_time_d[ifix0];
+		*speed = 3.6 * sqrt(dx*dx + dy*dy)/dt; /* km/hr */
+		}
+
+	/* else speed unknown */
+	else
+		*speed = 0.0;
+
+	/* get speed in m/s */
+	speed_mps = *speed / 3.6;
+
+	/* interpolate if possible */
+	if (mb_io_ptr->nfix > 1
+		&& (time_d >= mb_io_ptr->fix_time_d[0])
+		&& (time_d <= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]))
+		{
+		factor = (time_d - mb_io_ptr->fix_time_d[ifix-1])
+			/(mb_io_ptr->fix_time_d[ifix] - mb_io_ptr->fix_time_d[ifix-1]);
+		*easting = mb_io_ptr->fix_lon[ifix-1]
+			+ factor*(mb_io_ptr->fix_lon[ifix] - mb_io_ptr->fix_lon[ifix-1]);
+		*northing = mb_io_ptr->fix_lat[ifix-1]
+			+ factor*(mb_io_ptr->fix_lat[ifix] - mb_io_ptr->fix_lat[ifix-1]);
+		status = MB_SUCCESS;
+#ifdef MB_NAVINT_DEBUG
+	fprintf(stderr, "mb_navint_interp: Nav  %f %f interpolated at fix %d of %d with factor:%f\n",
+		*easting, *northing, ifix, mb_io_ptr->nfix, factor);
+#endif
+		}
+
+	/* extrapolate from last fix - note zero speed
+	    results in just using the last fix */
+	else if (mb_io_ptr->nfix > 1
+		&& (time_d > mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]))
+		{
+		/* extrapolated position using average speed */
+		dd = (time_d - mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+			* speed_mps; /* meters */
+		headingx = sin(DTR * heading);
+		headingy = cos(DTR * heading);
+		*easting = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1]
+			+ headingx * dd;
+		*northing = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1]
+			+ headingy * dd;
+		status = MB_SUCCESS;
+#ifdef MB_NAVINT_DEBUG
+	fprintf(stderr, "mb_navint_interp: Nav %f %f extrapolated from last fix of %d with distance:%f and speed:%f\n",
+		*easting, *northing, mb_io_ptr->nfix, dd, speed_mps);
+#endif
+		}
+
+	/* extrapolate from first fix - note zero speed
+	    results in just using the first fix */
+	else if (mb_io_ptr->nfix >= 1)
+		{
+		/* extrapolated position using average speed */
+		dd = (time_d - mb_io_ptr->fix_time_d[0])
+			* speed_mps; /* meters */
+		headingx = sin(DTR * heading);
+		headingy = cos(DTR * heading);
+		*easting = mb_io_ptr->fix_lon[0]
+			+ headingx * dd;
+		*northing = mb_io_ptr->fix_lat[0]
+			+ headingy * dd;
+		status = MB_SUCCESS;
+#ifdef MB_NAVINT_DEBUG
+	fprintf(stderr, "mb_navint_interp: Nav %f %f extrapolated from first fix of %d with distance %f and speed:%f\n",
+		*easting, *northing, mb_io_ptr->nfix, dd, speed_mps);
+#endif
+		}
+
+	/* else no fix */
+	else
+		{
+		*easting = 0.0;
+		*northing = 0.0;
+		*speed = 0.0;
+		status = MB_FAILURE;
+		*error = MB_ERROR_NOT_ENOUGH_DATA;
+#ifdef MB_NAVINT_DEBUG
+	fprintf(stderr, "mb_navint_interp: Nav zeroed\n");
+#endif
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       easting:    %f\n",*easting);
+		fprintf(stderr,"dbg2       northing:   %f\n",*northing);
 		fprintf(stderr,"dbg2       speed:      %f\n",*speed);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1459,13 +1662,14 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 				{
 				nav_ok = MB_NO;
 
-				/* deal with nav in form: time_d lon lat */
+				/* deal with nav in form: time_d lon lat speed */
 				if (merge_nav_format == 1)
 					{
-					nget = sscanf(buffer,"%lf %lf %lf",
-						&n_time_d[nrecord],&n_lon[nrecord],&n_lat[nrecord]);
-					n_speed[nrecord] = 0.0;
+					nget = sscanf(buffer,"%lf %lf %lf %lf",
+						&n_time_d[nrecord],&n_lon[nrecord],&n_lat[nrecord],&n_speed[nrecord]);
 					if (nget == 3)
+						n_speed[nrecord] = 0.0;
+					if (nget >= 3)
 						nav_ok = MB_YES;
 					}
 		
@@ -2048,6 +2252,215 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 
 /*--------------------------------------------------------------------*/
 
+int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitude_format,
+                int *merge_altitude_num, int *merge_altitude_alloc,
+                double **merge_altitude_time_d, double **merge_altitude_altitude,
+		int *error)
+	{
+	char	*function_name = "mb_loadaltitudedata";
+	int	status = MB_SUCCESS;
+	char	buffer[MBP_FILENAMESIZE], *result;
+	int	nrecord;
+	int	nchar, nget;
+	size_t	size;
+	FILE	*tfp;
+	int	altitude_ok;
+	int	time_i[7], time_j[6], ihr;
+	double	sec;
+	double	time_d;
+	double	*n_time_d;
+	double	*n_altitude;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:                           %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:                          %d\n",verbose);
+		fprintf(stderr,"dbg2       merge_altitude_file:              %s\n",merge_altitude_file);
+		fprintf(stderr,"dbg2       merge_altitude_format:            %d\n",merge_altitude_format);
+		fprintf(stderr,"dbg2       merge_altitude_num *:             %p\n",merge_altitude_num);
+		fprintf(stderr,"dbg2       merge_altitude_num:               %d\n",*merge_altitude_num);
+		fprintf(stderr,"dbg2       merge_altitude_alloc *:           %p\n",merge_altitude_alloc);
+		fprintf(stderr,"dbg2       merge_altitude_alloc:             %d\n",*merge_altitude_alloc);
+		fprintf(stderr,"dbg2       merge_altitude_time_d **:         %p\n",merge_altitude_time_d);
+		fprintf(stderr,"dbg2       merge_altitude_time_d *:          %p\n",*merge_altitude_time_d);
+		fprintf(stderr,"dbg2       merge_altitude_altitude **:       %p\n",merge_altitude_altitude);
+		fprintf(stderr,"dbg2       merge_altitude_altitude *:        %p\n",*merge_altitude_altitude);
+		}
+	
+	/* set max number of characters to be read at a time */
+	nchar = MBP_FILENAMESIZE-1;
+
+	/* count the records */
+	*error = MB_ERROR_NO_ERROR;
+	nrecord = 0;
+	if ((tfp = fopen(merge_altitude_file, "r")) != NULL)
+		{
+		/* loop over reading the records */
+		while ((result = fgets(buffer,nchar,tfp)) == buffer)
+			nrecord++;
+			
+		/* close the file */
+		fclose(tfp);
+		tfp = NULL;
+		}
+	else
+		{
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+		}
+	
+	/* allocate memory if necessary */
+	if (status == MB_SUCCESS && *merge_altitude_alloc < nrecord)
+		{
+		size = nrecord * sizeof(double);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)merge_altitude_time_d, error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)merge_altitude_altitude, error);
+		if (status == MB_SUCCESS)
+			*merge_altitude_alloc = nrecord;
+		n_time_d = *merge_altitude_time_d;
+		n_altitude = *merge_altitude_altitude;
+		}
+
+	/* read the records */
+	if (status == MB_SUCCESS)
+		{
+		nrecord = 0;
+		if ((tfp = fopen(merge_altitude_file, "r")) == NULL)
+			{
+			*error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			/* loop over reading the records - handle the different formats */
+			while ((result = fgets(buffer,nchar,tfp)) == buffer)
+				{
+				altitude_ok = MB_NO;
+
+				/* deal with altitude in form: time_d altitude */
+				if (merge_altitude_format == 1)
+					{
+					nget = sscanf(buffer,"%lf %lf",
+						&n_time_d[nrecord],&n_altitude[nrecord]);
+					if (nget == 2)
+						altitude_ok = MB_YES;
+					}
+		
+				/* deal with altitude in form: yr mon day hour min sec altitude */
+				else if (merge_altitude_format == 2)
+					{
+					nget = sscanf(buffer,"%d %d %d %d %d %lf %lf",
+						&time_i[0],&time_i[1],&time_i[2],
+						&time_i[3],&time_i[4],&sec,
+						&n_altitude[nrecord]);
+					time_i[5] = (int) sec;
+					time_i[6] = 1000000*(sec - time_i[5]);
+					mb_get_time(verbose,time_i,&time_d);
+					n_time_d[nrecord] = time_d;
+					if (nget == 7)
+						altitude_ok = MB_YES;
+					}
+		
+				/* deal with altitude in form: yr jday hour min sec altitude */
+				else if (merge_altitude_format == 3)
+					{
+					nget = sscanf(buffer,"%d %d %d %d %lf %lf",
+						&time_j[0],&time_j[1],&ihr,
+						&time_j[2],&sec,
+						&n_altitude[nrecord]);
+					time_j[2] = time_j[2] + 60*ihr;
+					time_j[3] = (int) sec;
+					time_j[4] = 1000000*(sec - time_j[3]);
+					mb_get_itime(verbose,time_j,time_i);
+					mb_get_time(verbose,time_i,&time_d);
+					n_time_d[nrecord] = time_d;
+					if (nget == 6)
+						altitude_ok = MB_YES;
+					}
+		
+				/* deal with altitude in form: yr jday daymin sec altitude */
+				else if (merge_altitude_format == 4)
+					{
+					nget = sscanf(buffer,"%d %d %d %lf %lf",
+						&time_j[0],&time_j[1],&time_j[2],
+						&sec,
+						&n_altitude[nrecord]);
+					time_j[3] = (int) sec;
+					time_j[4] = 1000000*(sec - time_j[3]);
+					mb_get_itime(verbose,time_j,time_i);
+					mb_get_time(verbose,time_i,&time_d);
+					n_time_d[nrecord] = time_d;
+					if (nget == 5)
+						altitude_ok = MB_YES;
+					}
+		
+				/* output some debug values */
+				if (verbose >= 5 && altitude_ok == MB_YES)
+					{
+					fprintf(stderr,"\ndbg5  New altitude point read in function <%s>\n",function_name);
+					fprintf(stderr,"dbg5       altitude[%d]: %f %f\n",
+						nrecord,n_time_d[nrecord],n_altitude[nrecord]);
+					}
+				else if (verbose >= 5)
+					{
+					fprintf(stderr,"\ndbg5  Error parsing line in altitude file in function <%s>\n",function_name);
+					fprintf(stderr,"dbg5       line: %s\n",buffer);
+					}
+		
+				/* check for reverses or repeats in time */
+				if (altitude_ok == MB_YES)
+					{
+					if (nrecord == 0)
+						nrecord++;
+					else if (n_time_d[nrecord] > n_time_d[nrecord-1])
+						nrecord++;
+					else if (nrecord > 0 && n_time_d[nrecord] <= n_time_d[nrecord-1]
+						&& verbose >= 5)
+						{
+						fprintf(stderr,"\ndbg5  altitude time error in function <%s>\n",function_name);
+						fprintf(stderr,"dbg5       altitude[%d]: %f %f\n",
+							nrecord-1,n_time_d[nrecord-1],n_altitude[nrecord-1]);
+						fprintf(stderr,"dbg5       altitude[%d]: %f %f\n",
+							nrecord,n_time_d[nrecord],n_altitude[nrecord]);
+						}
+					}
+				strncpy(buffer,"\0",sizeof(buffer));
+				}
+			
+			/* get the good record count */
+			*merge_altitude_num = nrecord;
+			
+			/* close the file */
+			fclose(tfp);
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       merge_altitude_num:               %d\n",*merge_altitude_num);
+		fprintf(stderr,"dbg2       merge_altitude_alloc:             %d\n",*merge_altitude_alloc);
+		fprintf(stderr,"dbg2       merge_altitude_time_d *:          %p\n",*merge_altitude_time_d);
+		fprintf(stderr,"dbg2       merge_altitude_altitude *:        %p\n",*merge_altitude_altitude);
+		fprintf(stderr,"dbg2       error:                            %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                           %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+	}
+
+/*--------------------------------------------------------------------*/
+
 int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_format,
                 int *merge_heading_num, int *merge_heading_alloc,
                 double **merge_heading_time_d, double **merge_heading_heading,
@@ -2501,6 +2914,213 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 		fprintf(stderr,"dbg2       merge_attitude_roll *:            %p\n",*merge_attitude_roll);
 		fprintf(stderr,"dbg2       merge_attitude_pitch *:           %p\n",*merge_attitude_pitch);
 		fprintf(stderr,"dbg2       merge_attitude_heave *:           %p\n",*merge_attitude_heave);
+		fprintf(stderr,"dbg2       error:                            %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                           %d\n",status);
+		}
+
+	/* return success */
+	return(status);	
+	}
+/*--------------------------------------------------------------------*/
+
+int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_soundspeed_format,
+                int *merge_soundspeed_num, int *merge_soundspeed_alloc,
+                double **merge_soundspeed_time_d, double **merge_soundspeed_soundspeed,
+		int *error)
+	{
+	char	*function_name = "mb_loadsoundspeeddata";
+	int	status = MB_SUCCESS;
+	char	buffer[MBP_FILENAMESIZE], *result;
+	int	nrecord;
+	int	nchar, nget;
+	size_t	size;
+	FILE	*tfp;
+	int	soundspeed_ok;
+	int	time_i[7], time_j[6], ihr;
+	double	sec;
+	double	time_d;
+	double	*n_time_d;
+	double	*n_soundspeed;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:                           %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:                          %d\n",verbose);
+		fprintf(stderr,"dbg2       merge_soundspeed_file:            %s\n",merge_soundspeed_file);
+		fprintf(stderr,"dbg2       merge_soundspeed_format:          %d\n",merge_soundspeed_format);
+		fprintf(stderr,"dbg2       merge_soundspeed_num *:           %p\n",merge_soundspeed_num);
+		fprintf(stderr,"dbg2       merge_soundspeed_num:             %d\n",*merge_soundspeed_num);
+		fprintf(stderr,"dbg2       merge_soundspeed_alloc *:         %p\n",merge_soundspeed_alloc);
+		fprintf(stderr,"dbg2       merge_soundspeed_alloc:           %d\n",*merge_soundspeed_alloc);
+		fprintf(stderr,"dbg2       merge_soundspeed_time_d **:       %p\n",merge_soundspeed_time_d);
+		fprintf(stderr,"dbg2       merge_soundspeed_time_d *:        %p\n",*merge_soundspeed_time_d);
+		fprintf(stderr,"dbg2       merge_soundspeed_soundspeed **:   %p\n",merge_soundspeed_soundspeed);
+		fprintf(stderr,"dbg2       merge_soundspeed_soundspeed *:    %p\n",*merge_soundspeed_soundspeed);
+		}
+	
+	/* set max number of characters to be read at a time */
+	nchar = MBP_FILENAMESIZE-1;
+
+	/* count the records */
+	*error = MB_ERROR_NO_ERROR;
+	nrecord = 0;
+	if ((tfp = fopen(merge_soundspeed_file, "r")) != NULL)
+		{
+		/* loop over reading the records */
+		while ((result = fgets(buffer,nchar,tfp)) == buffer)
+			nrecord++;
+			
+		/* close the file */
+		fclose(tfp);
+		tfp = NULL;
+		}
+	else
+		{
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+		}
+	
+	/* allocate memory if necessary */
+	if (status == MB_SUCCESS && *merge_soundspeed_alloc < nrecord)
+		{
+		size = nrecord * sizeof(double);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)merge_soundspeed_time_d, error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)merge_soundspeed_soundspeed, error);
+		if (status == MB_SUCCESS)
+			*merge_soundspeed_alloc = nrecord;
+		n_time_d = *merge_soundspeed_time_d;
+		n_soundspeed = *merge_soundspeed_soundspeed;
+		}
+
+	/* read the records */
+	if (status == MB_SUCCESS)
+		{
+		nrecord = 0;
+		if ((tfp = fopen(merge_soundspeed_file, "r")) == NULL)
+			{
+			*error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			/* loop over reading the records - handle the different formats */
+			while ((result = fgets(buffer,nchar,tfp)) == buffer)
+				{
+				soundspeed_ok = MB_NO;
+
+				/* deal with soundspeed in form: time_d soundspeed */
+				if (merge_soundspeed_format == 1)
+					{
+					nget = sscanf(buffer,"%lf %lf",
+						&n_time_d[nrecord],&n_soundspeed[nrecord]);
+					if (nget == 4)
+						soundspeed_ok = MB_YES;
+					}
+		
+				/* deal with soundspeed in form: yr mon day hour min sec soundspeed */
+				else if (merge_soundspeed_format == 2)
+					{
+					nget = sscanf(buffer,"%d %d %d %d %d %lf %lf",
+						&time_i[0],&time_i[1],&time_i[2],
+						&time_i[3],&time_i[4],&sec,
+						&n_soundspeed[nrecord]);
+					time_i[5] = (int) sec;
+					time_i[6] = 1000000*(sec - time_i[5]);
+					mb_get_time(verbose,time_i,&time_d);
+					n_time_d[nrecord] = time_d;
+					if (nget == 9)
+						soundspeed_ok = MB_YES;
+					}
+		
+				/* deal with soundspeed in form: yr jday hour min sec soundspeed */
+				else if (merge_soundspeed_format == 3)
+					{
+					nget = sscanf(buffer,"%d %d %d %d %lf %lf",
+						&time_j[0],&time_j[1],&ihr,
+						&time_j[2],&sec,
+						&n_soundspeed[nrecord]);
+					time_j[2] = time_j[2] + 60*ihr;
+					time_j[3] = (int) sec;
+					time_j[4] = 1000000*(sec - time_j[3]);
+					mb_get_itime(verbose,time_j,time_i);
+					mb_get_time(verbose,time_i,&time_d);
+					n_time_d[nrecord] = time_d;
+					if (nget == 8)
+						soundspeed_ok = MB_YES;
+					}
+		
+				/* deal with soundspeed in form: yr jday daymin sec soundspeed */
+				else if (merge_soundspeed_format == 4)
+					{
+					nget = sscanf(buffer,"%d %d %d %lf %lf",
+						&time_j[0],&time_j[1],&time_j[2],
+						&sec,&n_soundspeed[nrecord]);
+					time_j[3] = (int) sec;
+					time_j[4] = 1000000*(sec - time_j[3]);
+					mb_get_itime(verbose,time_j,time_i);
+					mb_get_time(verbose,time_i,&time_d);
+					n_time_d[nrecord] = time_d;
+					if (nget == 7)
+						soundspeed_ok = MB_YES;
+					}
+		
+				/* output some debug values */
+				if (verbose >= 5 && soundspeed_ok == MB_YES)
+					{
+					fprintf(stderr,"\ndbg5  New soundspeed point read in function <%s>\n",function_name);
+					fprintf(stderr,"dbg5       soundspeed[%d]: %f %f\n",
+						nrecord,n_time_d[nrecord],n_soundspeed[nrecord]);
+					}
+				else if (verbose >= 5)
+					{
+					fprintf(stderr,"\ndbg5  Error parsing line in soundspeed file in function <%s>\n",function_name);
+					fprintf(stderr,"dbg5       line: %s\n",buffer);
+					}
+		
+				/* check for reverses or repeats in time */
+				if (soundspeed_ok == MB_YES)
+					{
+					if (nrecord == 0)
+						nrecord++;
+					else if (n_time_d[nrecord] > n_time_d[nrecord-1])
+						nrecord++;
+					else if (nrecord > 0 && n_time_d[nrecord] <= n_time_d[nrecord-1]
+						&& verbose >= 5)
+						{
+						fprintf(stderr,"\ndbg5  soundspeed time error in function <%s>\n",function_name);
+						fprintf(stderr,"dbg5       soundspeed[%d]: %f %f\n",
+							nrecord-1,n_time_d[nrecord-1],n_soundspeed[nrecord-1]);
+						fprintf(stderr,"dbg5       soundspeed[%d]: %f %f\n",
+							nrecord,n_time_d[nrecord],n_soundspeed[nrecord]);
+						}
+					}
+				strncpy(buffer,"\0",sizeof(buffer));
+				}
+			
+			/* get the good record count */
+			*merge_soundspeed_num = nrecord;
+			
+			/* close the file */
+			fclose(tfp);
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       merge_soundspeed_num:             %d\n",*merge_soundspeed_num);
+		fprintf(stderr,"dbg2       merge_soundspeed_alloc:           %d\n",*merge_soundspeed_alloc);
+		fprintf(stderr,"dbg2       merge_soundspeed_time_d *:        %p\n",*merge_soundspeed_time_d);
+		fprintf(stderr,"dbg2       merge_soundspeed_soundspeed *:    %p\n",*merge_soundspeed_soundspeed);
 		fprintf(stderr,"dbg2       error:                            %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                           %d\n",status);

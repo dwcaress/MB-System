@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_process.c	9/25/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2013 by
+ *    Copyright (c) 2003-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -3115,7 +3115,13 @@ fprintf(stderr,"ILLUMLGT: %f %f %f %f\n",view->illum_x, view->illum_y, view->ill
 		view->colortable_blue = colortable_flat_blue;
 		view->colortable_green = colortable_flat_green;
 		}
-	else if (view->colortable == MBV_COLORTABLE_SEALEVEL)
+	else if (view->colortable == MBV_COLORTABLE_SEALEVEL1)
+		{
+		view->colortable_red = colortable_haxby_red;
+		view->colortable_blue = colortable_haxby_blue;
+		view->colortable_green = colortable_haxby_green;
+		}
+	else if (view->colortable == MBV_COLORTABLE_SEALEVEL2)
 		{
 		view->colortable_red = colortable_haxby_red;
 		view->colortable_blue = colortable_haxby_blue;
@@ -3389,7 +3395,7 @@ int mbview_colorpoint(
 
 	/* get color */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE
-		&& view->colortable != MBV_COLORTABLE_SEALEVEL)
+		&& view->colortable < MBV_COLORTABLE_SEALEVEL1)
 	    {
 	    mbview_getcolor(value, view->min, view->max, view->colortable_mode,
 	    		(float) 0.0, (float) 0.0, (float) 1.0,
@@ -3401,7 +3407,7 @@ int mbview_colorpoint(
 			&data->primary_g[k],
 			&data->primary_b[k]);
 	    }
-	else if (view->colortable != MBV_COLORTABLE_SEALEVEL)
+	else if (view->colortable < MBV_COLORTABLE_SEALEVEL1)
 	    {
 	    mbview_getcolor(value, view->min, view->max, view->colortable_mode,
 			view->colortable_red[0],
@@ -3417,22 +3423,22 @@ int mbview_colorpoint(
 			&data->primary_g[k],
 			&data->primary_b[k]);
 	    }
-	else
+	else if (view->colortable == MBV_COLORTABLE_SEALEVEL1)
 	    {
 	    if (value > 0.0)
 		{
 		if (view->colortable_mode == MBV_COLORTABLE_NORMAL)
 		    {
 		    mbview_getcolor(value, 0.0, view->max, view->colortable_mode,
-			colortable_abovesealevel_red[0],
-			colortable_abovesealevel_green[0],
-			colortable_abovesealevel_blue[0],
-			colortable_abovesealevel_red[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_green[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_blue[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_red,
-			colortable_abovesealevel_green,
-			colortable_abovesealevel_blue,
+			colortable_abovesealevel1_red[0],
+			colortable_abovesealevel1_green[0],
+			colortable_abovesealevel1_blue[0],
+			colortable_abovesealevel1_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_blue[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_red,
+			colortable_abovesealevel1_green,
+			colortable_abovesealevel1_blue,
 			&data->primary_r[k],
 			&data->primary_g[k],
 			&data->primary_b[k]);
@@ -3459,15 +3465,88 @@ int mbview_colorpoint(
 		if (view->colortable_mode == MBV_COLORTABLE_REVERSED)
 		    {
 		    mbview_getcolor(value, view->min, 0.0, view->colortable_mode,
-			colortable_abovesealevel_red[0],
-			colortable_abovesealevel_green[0],
-			colortable_abovesealevel_blue[0],
-			colortable_abovesealevel_red[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_green[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_blue[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_red,
-			colortable_abovesealevel_green,
-			colortable_abovesealevel_blue,
+			colortable_abovesealevel1_red[0],
+			colortable_abovesealevel1_green[0],
+			colortable_abovesealevel1_blue[0],
+			colortable_abovesealevel1_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_blue[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_red,
+			colortable_abovesealevel1_green,
+			colortable_abovesealevel1_blue,
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		else
+		    {
+		    mbview_getcolor(value, view->min, -view->min / 11.0, view->colortable_mode,
+			colortable_haxby_red[0],
+			colortable_haxby_green[0],
+			colortable_haxby_blue[0],
+			colortable_haxby_red[MBV_NUM_COLORS-1],
+			colortable_haxby_green[MBV_NUM_COLORS-1],
+			colortable_haxby_blue[MBV_NUM_COLORS-1],
+			colortable_haxby_red,
+			colortable_haxby_green,
+			colortable_haxby_blue,
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		}
+	    }
+	else if (view->colortable == MBV_COLORTABLE_SEALEVEL2)
+	    {
+	    if (value > 0.0)
+		{
+		if (view->colortable_mode == MBV_COLORTABLE_NORMAL)
+		    {
+		    mbview_getcolor(value, 0.0, view->max, view->colortable_mode,
+			colortable_abovesealevel2_red[0],
+			colortable_abovesealevel2_green[0],
+			colortable_abovesealevel2_blue[0],
+			colortable_abovesealevel2_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_blue[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_red,
+			colortable_abovesealevel2_green,
+			colortable_abovesealevel2_blue,
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		else
+		    {
+		    mbview_getcolor(value, -view->max / 11.0, view->max, view->colortable_mode,
+			colortable_haxby_red[0],
+			colortable_haxby_green[0],
+			colortable_haxby_blue[0],
+			colortable_haxby_red[MBV_NUM_COLORS-1],
+			colortable_haxby_green[MBV_NUM_COLORS-1],
+			colortable_haxby_blue[MBV_NUM_COLORS-1],
+			colortable_haxby_red,
+			colortable_haxby_green,
+			colortable_haxby_blue,
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		}
+	    else
+		{
+		if (view->colortable_mode == MBV_COLORTABLE_REVERSED)
+		    {
+		    mbview_getcolor(value, view->min, 0.0, view->colortable_mode,
+			colortable_abovesealevel2_red[0],
+			colortable_abovesealevel2_green[0],
+			colortable_abovesealevel2_blue[0],
+			colortable_abovesealevel2_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_blue[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_red,
+			colortable_abovesealevel2_green,
+			colortable_abovesealevel2_blue,
 			&data->primary_r[k],
 			&data->primary_g[k],
 			&data->primary_b[k]);
@@ -3616,7 +3695,7 @@ int mbview_colorpoint_histogram(
 
 	/* get color */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE
-		&& view->colortable != MBV_COLORTABLE_SEALEVEL)
+		&& view->colortable < MBV_COLORTABLE_SEALEVEL1)
 	    {
 	    mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode,
 	    		(float) 0.0, (float) 0.0, (float) 1.0,
@@ -3629,7 +3708,7 @@ int mbview_colorpoint_histogram(
 			&data->primary_g[k],
 			&data->primary_b[k]);
 	    }
-	else if (view->colortable != MBV_COLORTABLE_SEALEVEL)
+	else if (view->colortable < MBV_COLORTABLE_SEALEVEL1)
 	    {
 	    mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode,
 			view->colortable_red[0],
@@ -3646,22 +3725,22 @@ int mbview_colorpoint_histogram(
 			&data->primary_g[k],
 			&data->primary_b[k]);
 	    }
-	else
+	else if (view->colortable == MBV_COLORTABLE_SEALEVEL1)
 	    {
 	    if (value > 0.0)
 		{
 		if (view->colortable_mode == MBV_COLORTABLE_NORMAL)
 		    {
 		    mbview_getcolor_histogram(value, 0.0, view->max, view->colortable_mode,
-			colortable_abovesealevel_red[0],
-			colortable_abovesealevel_green[0],
-			colortable_abovesealevel_blue[0],
-			colortable_abovesealevel_red[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_green[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_blue[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_red,
-			colortable_abovesealevel_green,
-			colortable_abovesealevel_blue,
+			colortable_abovesealevel1_red[0],
+			colortable_abovesealevel1_green[0],
+			colortable_abovesealevel1_blue[0],
+			colortable_abovesealevel1_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_blue[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_red,
+			colortable_abovesealevel1_green,
+			colortable_abovesealevel1_blue,
 			&(histogram[2*MBV_NUM_COLORS]),
 			&data->primary_r[k],
 			&data->primary_g[k],
@@ -3690,15 +3769,92 @@ int mbview_colorpoint_histogram(
 		if (view->colortable_mode == MBV_COLORTABLE_REVERSED)
 		    {
 		    mbview_getcolor_histogram(value, view->min, 0.0, view->colortable_mode,
-			colortable_abovesealevel_red[0],
-			colortable_abovesealevel_green[0],
-			colortable_abovesealevel_blue[0],
-			colortable_abovesealevel_red[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_green[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_blue[MBV_NUM_COLORS-1],
-			colortable_abovesealevel_red,
-			colortable_abovesealevel_green,
-			colortable_abovesealevel_blue,
+			colortable_abovesealevel1_red[0],
+			colortable_abovesealevel1_green[0],
+			colortable_abovesealevel1_blue[0],
+			colortable_abovesealevel1_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_blue[MBV_NUM_COLORS-1],
+			colortable_abovesealevel1_red,
+			colortable_abovesealevel1_green,
+			colortable_abovesealevel1_blue,
+			&(histogram[MBV_NUM_COLORS]),
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		else
+		    {
+		    mbview_getcolor_histogram(value, view->min, -view->min / 11.0, view->colortable_mode,
+			colortable_haxby_red[0],
+			colortable_haxby_green[0],
+			colortable_haxby_blue[0],
+			colortable_haxby_red[MBV_NUM_COLORS-1],
+			colortable_haxby_green[MBV_NUM_COLORS-1],
+			colortable_haxby_blue[MBV_NUM_COLORS-1],
+			colortable_haxby_red,
+			colortable_haxby_green,
+			colortable_haxby_blue,
+			&(histogram[MBV_NUM_COLORS]),
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		}
+	    }
+	else if (view->colortable == MBV_COLORTABLE_SEALEVEL2)
+	    {
+	    if (value > 0.0)
+		{
+		if (view->colortable_mode == MBV_COLORTABLE_NORMAL)
+		    {
+		    mbview_getcolor_histogram(value, 0.0, view->max, view->colortable_mode,
+			colortable_abovesealevel2_red[0],
+			colortable_abovesealevel2_green[0],
+			colortable_abovesealevel2_blue[0],
+			colortable_abovesealevel2_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_blue[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_red,
+			colortable_abovesealevel2_green,
+			colortable_abovesealevel2_blue,
+			&(histogram[2*MBV_NUM_COLORS]),
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		else
+		    {
+		    mbview_getcolor_histogram(value, -view->max / 11.0, view->max, view->colortable_mode,
+			colortable_haxby_red[0],
+			colortable_haxby_green[0],
+			colortable_haxby_blue[0],
+			colortable_haxby_red[MBV_NUM_COLORS-1],
+			colortable_haxby_green[MBV_NUM_COLORS-1],
+			colortable_haxby_blue[MBV_NUM_COLORS-1],
+			colortable_haxby_red,
+			colortable_haxby_green,
+			colortable_haxby_blue,
+			&(histogram[2*MBV_NUM_COLORS]),
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		}
+	    else
+		{
+		if (view->colortable_mode == MBV_COLORTABLE_REVERSED)
+		    {
+		    mbview_getcolor_histogram(value, view->min, 0.0, view->colortable_mode,
+			colortable_abovesealevel2_red[0],
+			colortable_abovesealevel2_green[0],
+			colortable_abovesealevel2_blue[0],
+			colortable_abovesealevel2_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_blue[MBV_NUM_COLORS-1],
+			colortable_abovesealevel2_red,
+			colortable_abovesealevel2_green,
+			colortable_abovesealevel2_blue,
 			&(histogram[MBV_NUM_COLORS]),
 			&data->primary_r[k],
 			&data->primary_g[k],

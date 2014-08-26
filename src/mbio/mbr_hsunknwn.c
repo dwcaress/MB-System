@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsunknwn.c	10/13/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2013 by
+ *    Copyright (c) 2008-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

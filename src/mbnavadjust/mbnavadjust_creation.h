@@ -102,6 +102,7 @@ EXTERNAL Widget   pushButton_showsurveys;
 EXTERNAL Widget   pushButton_showdata;
 EXTERNAL Widget   pushButton_showsections;
 EXTERNAL Widget   pushButton_showcrossings;
+EXTERNAL Widget   pushButton_showmediocrecrossings;
 EXTERNAL Widget   pushButton_showgoodcrossings;
 EXTERNAL Widget   pushButton_showbettercrossings;
 EXTERNAL Widget   pushButton_showtruecrossings;

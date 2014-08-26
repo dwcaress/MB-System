@@ -2,7 +2,7 @@
  *    The MB-system:	mblevitus.c	4/15/93
  *    $Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -187,7 +187,7 @@ int main (int argc, char **argv)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
+	char	date[32], user[128], *user_ptr, host[128];
 
 	char	*lonptr, *latptr;
 	int	last_good;
@@ -458,9 +458,9 @@ int main (int argc, char **argv)
 	fprintf(ofp,"# Water velocity profile created by program %s version %s\n",
 		program_name,rcs_id);
 	fprintf(ofp,"# MB-system Version %s\n",MB_VERSION);
-	strncpy(date,"\0",25);
 	right_now = time((time_t *)0);
-	strncpy(date,ctime(&right_now),24);
+	strcpy(date,ctime(&right_now));
+        date[strlen(date)-1] = '\0';
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
 	if (user_ptr != NULL)

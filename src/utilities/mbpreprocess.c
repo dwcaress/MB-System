@@ -59,7 +59,8 @@ static char version_id[] = "$Id$";
 #define MBPREPROCESS_TIMESHIFT_APPLY_NAV		0x01
 #define MBPREPROCESS_TIMESHIFT_APPLY_SENSORDEPTH	0x02
 #define MBPREPROCESS_TIMESHIFT_APPLY_HEADING		0x04
-#define MBPREPROCESS_TIMESHIFT_APPLY_ATTITUDE		0x08
+#define MBPREPROCESS_TIMESHIFT_APPLY_ALTITUDE		0x08
+#define MBPREPROCESS_TIMESHIFT_APPLY_ATTITUDE		0x10
 #define MBPREPROCESS_TIMESHIFT_APPLY_ALL_ANCILLIARY	0x7F
 #define MBPREPROCESS_TIMESHIFT_APPLY_SURVEY		0x80
 #define MBPREPROCESS_TIMESHIFT_APPLY_ALL		0xFF
@@ -87,7 +88,7 @@ int main (int argc, char **argv)
 	/* mbpreprocess --verbose
 	 * 		--help
 	 * 		--input=datalist
-	 * 		--format=format
+	 * 		--format=format_id
 	 * 		--nav_file=file
 	 * 		--nav_file_format=format_id
 	 * 		--nav_async=record_kind
@@ -97,10 +98,14 @@ int main (int argc, char **argv)
 	 * 		--heading_file=file
 	 * 		--heading_file_format=format_id
 	 * 		--heading_async=record_kind
+	 * 		--altitude_file=file
+	 * 		--altitude_file_format=format_id
+	 * 		--altitude_async=record_kind
 	 * 		--attitude_file=file
 	 * 		--attitude_file_format=format_id
 	 * 		--attitude_async=record_kind
 	 * 		--sensor_offsets=offset_file
+	 * 		--no_change_survey
 	 */
 	static struct option options[] =
 		{
@@ -118,6 +123,9 @@ int main (int argc, char **argv)
 		{"heading_file",		required_argument, 	NULL, 		0},
 		{"heading_file_format",		required_argument, 	NULL, 		0},
 		{"heading_async",		required_argument, 	NULL, 		0},
+		{"altitude_file",		required_argument, 	NULL, 		0},
+		{"altitude_file_format",	required_argument, 	NULL, 		0},
+		{"altitude_async",		required_argument, 	NULL, 		0},
 		{"attitude_file",		required_argument, 	NULL, 		0},
 		{"attitude_file_format",	required_argument, 	NULL, 		0},
 		{"attitude_async",		required_argument, 	NULL, 		0},
@@ -131,6 +139,7 @@ int main (int argc, char **argv)
 		{"timeshift_apply_survey",	no_argument, 		NULL, 		0},
 		{"timeshift_apply_all",		no_argument, 		NULL, 		0},
 		{"sensor_offsets",		required_argument, 	NULL, 		0},
+		{"no_change_survey",		no_argument,		NULL,		0},
 		{NULL,				0, 			NULL, 		0}
 		};
 
@@ -164,6 +173,15 @@ int main (int argc, char **argv)
 	double	*heading_time_d = NULL;
 	double	*heading_heading = NULL;
 
+	int	altitude_mode = MBPREPROCESS_MERGE_OFF;
+	mb_path	altitude_file;
+	int	altitude_file_format = 0;
+	int	altitude_async = MB_DATA_DATA;
+	int	altitude_num = 0;
+	int	altitude_alloc = 0;
+	double	*altitude_time_d = NULL;
+	double	*altitude_altitude = NULL;
+
 	int	attitude_mode = MBPREPROCESS_MERGE_OFF;
 	mb_path	attitude_file;
 	int	attitude_file_format = 0;
@@ -184,6 +202,15 @@ int main (int argc, char **argv)
 	double	*timeshift_time_d = NULL;
 	double	*timeshift_timeshift = NULL;
 	double	timeshift_constant = 0.0;
+	
+	int	no_change_survey = MB_NO;
+	
+	int	timestamp_changed = MB_NO;
+	int	nav_changed = MB_NO;
+	int	heading_changed = MB_NO;
+	int	sensordepth_changed = MB_NO;
+	int	altitude_changed = MB_NO;
+	int	attitude_changed = MB_NO;
 
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
@@ -251,6 +278,8 @@ int main (int argc, char **argv)
 	double	roll_org;
 	double	pitch_org;
 	double	heave_org;
+	double	depth_offset_use, depth_offset_org, depth_offset_change;
+	double	range, alphar, betar;
 
 	/* arrays for asynchronous data accessed using mb_extract_nnav() */
 	int	nanavmax = MB_NAV_MAX;
@@ -273,12 +302,20 @@ int main (int argc, char **argv)
 	int	n_rf_nav1 = 0;
 	int	n_rf_nav2 = 0;
 	int	n_rf_nav3 = 0;
+	int	n_rf_att = 0;
+	int	n_rf_att1 = 0;
+	int	n_rf_att2 = 0;
+	int	n_rf_att3 = 0;
 	int	n_rt_data = 0;
 	int	n_rt_comment = 0;
 	int	n_rt_nav = 0;
 	int	n_rt_nav1 = 0;
 	int	n_rt_nav2 = 0;
 	int	n_rt_nav3 = 0;
+	int	n_rt_att = 0;
+	int	n_rt_att1 = 0;
+	int	n_rt_att2 = 0;
+	int	n_rt_att3 = 0;
 	
 	int	n_wf_data = 0;
 	int	n_wf_comment = 0;
@@ -286,12 +323,20 @@ int main (int argc, char **argv)
 	int	n_wf_nav1 = 0;
 	int	n_wf_nav2 = 0;
 	int	n_wf_nav3 = 0;
+	int	n_wf_att = 0;
+	int	n_wf_att1 = 0;
+	int	n_wf_att2 = 0;
+	int	n_wf_att3 = 0;
 	int	n_wt_data = 0;
 	int	n_wt_comment = 0;
 	int	n_wt_nav = 0;
 	int	n_wt_nav1 = 0;
 	int	n_wt_nav2 = 0;
 	int	n_wt_nav3 = 0;
+	int	n_wt_att = 0;
+	int	n_wt_att1 = 0;
+	int	n_wt_att2 = 0;
+	int	n_wt_att3 = 0;
 	
 	int	testformat;
 	int	interp_status = MB_SUCCESS;
@@ -301,8 +346,8 @@ int main (int argc, char **argv)
 	int	jnav = 0;
 	int	jsensordepth = 0;
 	int	jheading = 0;
+	int	jaltitude = 0;
 	int	jattitude = 0;
-	int	data_changed;
 	int	i, j, n;
 
 	/* get current default values */
@@ -421,6 +466,31 @@ int main (int argc, char **argv)
 				}
 				
 			/*-------------------------------------------------------
+			 * Define source of altitude - could be an external file
+			 * or an internal asynchronous record */
+			
+			/* altitude_file */
+			else if (strcmp("altitude_file", options[option_index].name) == 0)
+				{
+				strcpy(altitude_file, optarg);
+				altitude_mode = MBPREPROCESS_MERGE_FILE;
+				}
+			
+			/* altitude_file_format */
+			else if (strcmp("altitude_file_format", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%d", &altitude_file_format);
+				}
+			
+			/* altitude_async */
+			else if (strcmp("altitude_async", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%d", &altitude_async);
+				if (n == 1)
+					altitude_mode = MBPREPROCESS_MERGE_ASYNC;
+				}
+				
+			/*-------------------------------------------------------
 			 * Define source of attitude - could be an external file
 			 * or an internal asynchronous record */
 			
@@ -490,6 +560,12 @@ int main (int argc, char **argv)
 				timeshift_apply =  timeshift_apply | MBPREPROCESS_TIMESHIFT_APPLY_ATTITUDE;
 				}
 			
+			/* timeshift_apply_altitude */
+			else if (strcmp("timeshift_apply_altitude", options[option_index].name) == 0)
+				{
+				timeshift_apply =  timeshift_apply | MBPREPROCESS_TIMESHIFT_APPLY_ATTITUDE;
+				}
+			
 			/* timeshift_apply_all_ancilliary */
 			else if (strcmp("timeshift_apply_all_ancilliary", options[option_index].name) == 0)
 				{
@@ -506,6 +582,12 @@ int main (int argc, char **argv)
 			else if (strcmp("timeshift_apply_all", options[option_index].name) == 0)
 				{
 				timeshift_apply =  MBPREPROCESS_TIMESHIFT_APPLY_ALL;
+				}
+			
+			/* no_change_survey */
+			else if (strcmp("no_change_survey", options[option_index].name) == 0)
+				{
+				no_change_survey =  MB_YES;
 				}
 			
 			break;
@@ -576,6 +658,10 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       heading_file:         %s\n",heading_file);
 		fprintf(stderr,"dbg2       heading_file_format:       %d\n",heading_file_format);
 		fprintf(stderr,"dbg2       heading_async:        %d\n",heading_async);
+		fprintf(stderr,"dbg2       altitude_mode:        %d\n",altitude_mode);
+		fprintf(stderr,"dbg2       altitude_file:        %s\n",altitude_file);
+		fprintf(stderr,"dbg2       altitude_file_format:      %d\n",altitude_file_format);
+		fprintf(stderr,"dbg2       altitude_async:       %d\n",altitude_async);
 		fprintf(stderr,"dbg2       attitude_mode:        %d\n",attitude_mode);
 		fprintf(stderr,"dbg2       attitude_file:        %s\n",attitude_file);
 		fprintf(stderr,"dbg2       attitude_file_format:      %d\n",attitude_file_format);
@@ -584,6 +670,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       timeshift_file:       %s\n",timeshift_file);
 		fprintf(stderr,"dbg2       timeshift_format:     %d\n",timeshift_format);
 		fprintf(stderr,"dbg2       timeshift_apply:      %x\n",timeshift_apply);
+		fprintf(stderr,"dbg2       no_change_survey:     %d\n",no_change_survey);
 		}
 
 	/* if help desired then print it and exit */
@@ -621,6 +708,15 @@ int main (int argc, char **argv)
 		
 		if (verbose > 0)
 			fprintf(stderr,"%d heading records loaded from file %s\n", heading_num, heading_file);
+		}
+	if (altitude_mode == MBPREPROCESS_MERGE_FILE)
+		{
+		mb_loadaltitudedata(verbose, altitude_file, altitude_file_format,
+			       &altitude_num, &altitude_alloc,
+			       &altitude_time_d, &altitude_altitude, &error);
+		
+		if (verbose > 0)
+			fprintf(stderr,"%d altitude records loaded from file %s\n", altitude_num, altitude_file);
 		}
 	if (attitude_mode == MBPREPROCESS_MERGE_FILE)
 		{
@@ -753,6 +849,10 @@ int main (int argc, char **argv)
 		n_rf_nav1 = 0;
 		n_rf_nav2 = 0;
 		n_rf_nav3 = 0;
+		n_rf_att = 0;
+		n_rf_att1 = 0;
+		n_rf_att2 = 0;
+		n_rf_att3 = 0;
 	
 		/* read data */
 		while (error <= MB_ERROR_NO_ERROR)
@@ -817,6 +917,26 @@ int main (int argc, char **argv)
 				{
 				n_rf_nav3++;
 				n_rt_nav3++;
+				}
+			else if (kind == MB_DATA_ATTITUDE)
+				{
+				n_rf_att++;
+				n_rt_att++;
+				}
+			else if (kind == MB_DATA_ATTITUDE1)
+				{
+				n_rf_att1++;
+				n_rt_att1++;
+				}
+			else if (kind == MB_DATA_ATTITUDE2)
+				{
+				n_rf_att2++;
+				n_rt_att2++;
+				}
+			else if (kind == MB_DATA_ATTITUDE3)
+				{
+				n_rf_att3++;
+				n_rt_att3++;
 				}
 				
 			/* look for nav if not externally defined */
@@ -958,10 +1078,46 @@ int main (int argc, char **argv)
 					}
 				}
 				
+			/* look for altitude if not externally defined */
+			if (status == MB_SUCCESS
+				&& altitude_mode == MBPREPROCESS_MERGE_ASYNC
+				&& kind == altitude_async)
+				{
+				/* extract altitude data */
+				status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr,
+							&kind, &sensordepth, &altitude,
+							&error);
+
+				/* allocate memory if needed */
+				if (status == MB_SUCCESS
+					&& altitude_num + 1 >= altitude_alloc)
+					{
+					altitude_alloc += MBPREPROCESS_ALLOC_CHUNK;
+					status = mb_reallocd(verbose,__FILE__,__LINE__,altitude_alloc*sizeof(double),(void **)&altitude_time_d,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,altitude_alloc*sizeof(double),(void **)&altitude_altitude,&error);
+					if (error != MB_ERROR_NO_ERROR)
+						{
+						mb_error(verbose,error,&message);
+						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+						fprintf(stderr,"\nProgram <%s> Terminated\n",
+						    program_name);
+						exit(error);
+						}
+					}
+					
+				/* copy the altitude data */
+				if (status == MB_SUCCESS)
+					{
+					altitude_time_d[altitude_num] = time_d;
+					altitude_altitude[altitude_num] = altitude;
+					altitude_num++;
+					}
+				}
+				
 			/* look for attitude if not externally defined */
 			if (status == MB_SUCCESS
 				&& attitude_mode == MBPREPROCESS_MERGE_ASYNC
-				&& kind == sensordepth_async)
+				&& kind == attitude_async)
 				{
 				/* extract attitude data */
 				status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr,
@@ -999,9 +1155,9 @@ int main (int argc, char **argv)
 					for (i=0;i<nanav;i++)
 						{
 						attitude_time_d[attitude_num] = atime_d[i];
-						attitude_roll[attitude_num] = alon[i];
-						attitude_pitch[attitude_num] = alat[i];
-						attitude_heave[attitude_num] = aspeed[i];
+						attitude_roll[attitude_num] = aroll[i];
+						attitude_pitch[attitude_num] = apitch[i];
+						attitude_heave[attitude_num] = aheave[i];
 						attitude_num++;
 						}
 					}
@@ -1018,6 +1174,10 @@ int main (int argc, char **argv)
 			fprintf(stderr,"     %d nav1 records\n", n_rf_nav1);
 			fprintf(stderr,"     %d nav2 records\n", n_rf_nav2);
 			fprintf(stderr,"     %d nav3 records\n", n_rf_nav3);
+			fprintf(stderr,"     %d att records\n", n_rf_att);
+			fprintf(stderr,"     %d att1 records\n", n_rf_att1);
+			fprintf(stderr,"     %d att2 records\n", n_rf_att2);
+			fprintf(stderr,"     %d att3 records\n", n_rf_att3);
 			}
 			
 		/* close the swath file */
@@ -1046,13 +1206,26 @@ int main (int argc, char **argv)
 	/* output data counts */
 	if (verbose > 0)
 		{
-		fprintf(stderr,"\nPass 1: Total records read from all input files\n");
+		fprintf(stderr,"\n-----------------------------------------------\n");
+		fprintf(stderr,"Pass 1: Total records read from all input files:\n");
 		fprintf(stderr,"     %d survey records\n", n_rt_data);
 		fprintf(stderr,"     %d comment records\n", n_rt_comment);
 		fprintf(stderr,"     %d nav records\n", n_rt_nav);
 		fprintf(stderr,"     %d nav1 records\n", n_rt_nav1);
 		fprintf(stderr,"     %d nav2 records\n", n_rt_nav2);
 		fprintf(stderr,"     %d nav3 records\n", n_rt_nav3);
+		fprintf(stderr,"     %d att records\n", n_rt_att);
+		fprintf(stderr,"     %d att1 records\n", n_rt_att1);
+		fprintf(stderr,"     %d att2 records\n", n_rt_att2);
+		fprintf(stderr,"     %d att3 records\n", n_rt_att3);
+		fprintf(stderr,"Pass 1: Asynchronous data available for merging:\n");
+		fprintf(stderr,"     %d navigation data (mode:%d)\n", nav_num, nav_mode);
+		fprintf(stderr,"     %d sensordepth data (mode:%d)\n", sensordepth_num, sensordepth_mode);
+		fprintf(stderr,"     %d heading data (mode:%d)\n", heading_num, heading_mode);
+		fprintf(stderr,"     %d altitude data (mode:%d)\n", altitude_num, altitude_mode);
+		fprintf(stderr,"     %d attitude data (mode:%d)\n", attitude_num, attitude_mode);
+		fprintf(stderr,"     %d timeshift data (mode:%d)\n", timeshift_num, timeshift_mode);
+		fprintf(stderr,"-----------------------------------------------\n");
 		}
 		
 	/* end first pass through data */
@@ -1141,6 +1314,31 @@ int main (int argc, char **argv)
 				}
 			}
 			
+		/* apply timeshift to altitude data */
+		if (timeshift_apply & MBPREPROCESS_TIMESHIFT_APPLY_ALTITUDE)
+			{
+			if (timeshift_mode == MBPREPROCESS_TIMESHIFT_FILE)
+				{
+				j = 0;
+				for (i=0;i<altitude_num;i++)
+					{
+					interp_status = mb_linear_interp(verbose,
+								timeshift_time_d-1, timeshift_timeshift-1,
+								timeshift_num, altitude_time_d[i], &timeshift, &j,
+								&interp_error);
+					altitude_time_d[i] -= timeshift;
+					}
+				
+				}
+			else if (timeshift_mode == MBPREPROCESS_TIMESHIFT_CONSTANT)
+				{
+				for (i=0;i<altitude_num;i++)
+					{
+					altitude_time_d[i] -= timeshift_constant;
+					}
+				}
+			}
+			
 		/* apply timeshift to attitude data */
 		if (timeshift_apply & MBPREPROCESS_TIMESHIFT_APPLY_ATTITUDE)
 			{
@@ -1179,24 +1377,40 @@ int main (int argc, char **argv)
 	n_rf_nav1 = 0;
 	n_rf_nav2 = 0;
 	n_rf_nav3 = 0;
+	n_rf_att = 0;
+	n_rf_att1 = 0;
+	n_rf_att2 = 0;
+	n_rf_att3 = 0;
 	n_rt_data = 0;
 	n_rt_comment = 0;
 	n_rt_nav = 0;
 	n_rt_nav1 = 0;
 	n_rt_nav2 = 0;
 	n_rt_nav3 = 0;
+	n_rt_att = 0;
+	n_rt_att1 = 0;
+	n_rt_att2 = 0;
+	n_rt_att3 = 0;
 	n_wf_data = 0;
 	n_wf_comment = 0;
 	n_wf_nav = 0;
 	n_wf_nav1 = 0;
 	n_wf_nav2 = 0;
 	n_wf_nav3 = 0;
+	n_wf_att = 0;
+	n_wf_att1 = 0;
+	n_wf_att2 = 0;
+	n_wf_att3 = 0;
 	n_wt_data = 0;
 	n_wt_comment = 0;
 	n_wt_nav = 0;
 	n_wt_nav1 = 0;
 	n_wt_nav2 = 0;
 	n_wt_nav3 = 0;
+	n_wt_att = 0;
+	n_wt_att1 = 0;
+	n_wt_att2 = 0;
+	n_wt_att3 = 0;
 
 	/* open file list */
 	if (read_datalist == MB_YES)
@@ -1232,7 +1446,17 @@ int main (int argc, char **argv)
 		/* get output format - in some cases this may be a
 		 * different, generally extended format
 		 * more suitable for processing than the original */
-		oformat = iformat;
+		if (iformat == MBF_EMOLDRAW
+			|| iformat == MBF_EM12IFRM
+			|| iformat == MBF_EM12DARW
+			|| iformat == MBF_EM300RAW
+			|| iformat == MBF_EM300MBA)
+			oformat = MBF_EM300MBA;
+		else if (iformat == MBF_EM710RAW
+			|| iformat == MBF_EM710MBA)
+			oformat = MBF_EM710MBA;
+		else
+			oformat = iformat;
 		
 		/* figure out the output file name */
 		status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
@@ -1325,12 +1549,20 @@ int main (int argc, char **argv)
 		n_rf_nav1 = 0;
 		n_rf_nav2 = 0;
 		n_rf_nav3 = 0;
+		n_rf_att = 0;
+		n_rf_att1 = 0;
+		n_rf_att2 = 0;
+		n_rf_att3 = 0;
 		n_wf_data = 0;
 		n_wf_comment = 0;
 		n_wf_nav = 0;
 		n_wf_nav1 = 0;
 		n_wf_nav2 = 0;
 		n_wf_nav3 = 0;
+		n_wf_att = 0;
+		n_wf_att1 = 0;
+		n_wf_att2 = 0;
+		n_wf_att3 = 0;
 
 		/* ------------------------------- */
 		/* write comments to output file   */
@@ -1391,17 +1623,53 @@ int main (int argc, char **argv)
 				n_rf_nav3++;
 				n_rt_nav3++;
 				}
+			else if (kind == MB_DATA_ATTITUDE)
+				{
+				n_rf_att++;
+				n_rt_att++;
+				}
+			else if (kind == MB_DATA_ATTITUDE1)
+				{
+				n_rf_att1++;
+				n_rt_att1++;
+				}
+			else if (kind == MB_DATA_ATTITUDE2)
+				{
+				n_rf_att2++;
+				n_rt_att2++;
+				}
+			else if (kind == MB_DATA_ATTITUDE3)
+				{
+				n_rf_att3++;
+				n_rt_att3++;
+				}
+
+			timestamp_changed = MB_NO;
+			nav_changed = MB_NO;
+			heading_changed = MB_NO;
+			sensordepth_changed = MB_NO;
+			attitude_changed = MB_NO;
 				
 			/* apply preprocessing to survey data records */
-			if (status == MB_SUCCESS && kind == MB_DATA_DATA)
+			if (status == MB_SUCCESS
+				&& (kind == MB_DATA_DATA
+					|| kind == MB_DATA_SUBBOTTOM_MCS
+					|| kind == MB_DATA_SUBBOTTOM_CNTRBEAM
+					|| kind == MB_DATA_SUBBOTTOM_SUBBOTTOM
+					|| kind == MB_DATA_SIDESCAN2
+					|| kind == MB_DATA_SIDESCAN3
+					|| kind == MB_DATA_WATER_COLUMN))
 				{
-				/* start out with no change defined */
-				data_changed = MB_NO;
-				
 				/* call mb_extract_nav to get attitude */
-				status = mb_extract_nav(verbose,imbio_ptr,istore_ptr,&kind,
-						time_i,&time_d,&navlon_org,&navlat_org,
-						&speed_org,&heading_org,&draft_org,&roll_org,&pitch_org,&heave_org,&error);
+				status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind,
+							time_i, &time_d, &navlon_org, &navlat_org,
+							&speed_org, &heading_org, &draft_org,
+							&roll_org, &pitch_org, &heave_org, &error);
+				
+				/* call mb_extract_altitude to get altitude */
+				status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr,
+							&kind, &sensordepth_org, &altitude_org,
+							&error);
 				
 				/* save the original values */
 				navlon = navlon_org;
@@ -1430,6 +1698,7 @@ int main (int argc, char **argv)
 						{
 						time_d += timeshift_constant;
 						}
+					timestamp_changed = MB_YES;
 					}
 
 				/* get nav sensordepth heading attitude values for record timestamp */
@@ -1447,7 +1716,7 @@ int main (int argc, char **argv)
 								nav_time_d-1, nav_speed-1, nav_num, 
 								time_d, &speed, &jnav,
 								&interp_error);
-					data_changed = MB_YES;
+					nav_changed = MB_YES;
 					}
 				if (sensordepth_num > 0)
 					{
@@ -1455,7 +1724,7 @@ int main (int argc, char **argv)
 								sensordepth_time_d-1, sensordepth_sensordepth-1, sensordepth_num, 
 								time_d, &sensordepth, &jsensordepth,
 								&interp_error);
-					data_changed = MB_YES;
+					sensordepth_changed = MB_YES;
 					}
 				if (heading_num > 0)
 					{
@@ -1463,7 +1732,15 @@ int main (int argc, char **argv)
 								heading_time_d-1, heading_heading-1, heading_num, 
 								time_d, &heading, &jheading,
 								&interp_error);
-					data_changed = MB_YES;
+					heading_changed = MB_YES;
+					}
+				if (altitude_num > 0)
+					{
+					interp_status = mb_linear_interp(verbose,
+								altitude_time_d-1, altitude_altitude-1, altitude_num, 
+								time_d, &altitude, &jaltitude,
+								&interp_error);
+					altitude_changed = MB_YES;
 					}
 				if (attitude_num > 0)
 					{
@@ -1479,7 +1756,7 @@ int main (int argc, char **argv)
 								attitude_time_d-1, attitude_heave-1, attitude_num, 
 								time_d, &heave, &jattitude,
 								&interp_error);
-					data_changed = MB_YES;
+					attitude_changed = MB_YES;
 					}
 				if (sensordepth_num > 0 || attitude_num > 0)
 					{
@@ -1487,25 +1764,167 @@ int main (int argc, char **argv)
 					}
 					
 				/* attempt to execute a preprocess function for these data */
-				status = mb_preprocess(verbose, imbio_ptr, istore_ptr,
-							time_d, navlon, navlat, speed,
-							heading, sensordepth,
-							roll, pitch,heave, &error);
-				if (status == MB_SUCCESS)
-					data_changed = MB_YES;
-
+				//status = mb_preprocess(verbose, imbio_ptr, istore_ptr,
+				//			time_d, navlon, navlat, speed,
+				//			heading, sensordepth,
+				//			roll, pitch, heave, &error);
+				status = MB_FAILURE;
 				
-				/* if a predefined preprocess function does not exist then
-				 * execute standard preprocessing:
-				 * 	1) if attitude values changed rotate bathymetry accordingly
-				 * 	2) if any values changed reinsert the data */
-				else if (status == MB_FAILURE)
+				/* If a predefined preprocess function does not exist for 
+				 * this format then standard preprocessing will be done
+				 *      1) Replace time tag, nav, attitude
+				 * 	2) if attitude values changed rotate bathymetry accordingly
+				 * 	3) if any values changed reinsert the data */
+				if (status == MB_FAILURE)
 					{
 					/* reset status and error */
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 					
-					/* if attitude changed rotate the bathymetry */
+					/* if attitude changed apply rigid rotations to the bathymetry */
+					if (attitude_changed == MB_YES)
+						{
+						/* loop over the beams */
+						for (i=0;i<beams_bath;i++)
+							{
+							if (beamflag[i] != MB_FLAG_NULL)
+								{
+								/* output some debug messages */
+								if (verbose >= 5)
+									{
+									fprintf(stderr,"\ndbg5  Depth value to be calculated in program <%s>:\n",program_name);
+									fprintf(stderr,"dbg5       kind:  %d\n",kind);
+									fprintf(stderr,"dbg5       beam:  %d\n",i);
+									fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
+									fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
+									fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
+									}
+				
+								/* add heave and draft */
+								depth_offset_use = heave + draft;
+								depth_offset_org = heave + draft_org;
+				
+								/* strip off heave + draft */
+								bath[i] -= depth_offset_org;
+				
+								/* get range and angles in
+								    roll-pitch frame */
+								range = sqrt(bath[i] * bath[i]
+									    + bathacrosstrack[i]
+										* bathacrosstrack[i]
+									    + bathalongtrack[i]
+										* bathalongtrack[i]);
+								if (fabs(range) < 0.001)
+									{
+									alphar = 0.0;
+									betar = 0.5 * M_PI;
+									}
+								else
+									{
+									alphar = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
+									betar = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alphar)))));
+									}
+								if (bath[i] < 0.0)
+									betar = 2.0 * M_PI - betar;
+				
+								/* apply roll pitch corrections */
+								betar += DTR * (roll - roll_org);
+								alphar += DTR * (pitch - pitch_org);
+				
+								/* recalculate bathymetry */
+								bath[i] = range * cos(alphar) * sin(betar);
+								bathalongtrack[i] = range * sin(alphar);
+								bathacrosstrack[i] = range * cos(alphar) * cos(betar);
+				
+								/* add heave and draft back in */
+								bath[i] += depth_offset_use;
+								
+								/* output some debug messages */
+								if (verbose >= 5)
+									{
+									fprintf(stderr,"\ndbg5  Depth value calculated in program <%s>:\n",program_name);
+									fprintf(stderr,"dbg5       kind:  %d\n",kind);
+									fprintf(stderr,"dbg5       beam:  %d\n",i);
+									fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
+									fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
+									fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
+									}
+								}
+							}
+						}
+		    
+					/* recalculate bathymetry by changes to sensor depth  */
+					else if (sensordepth_changed == MB_YES)
+						{
+						/* get draft change */
+						depth_offset_change = draft - draft_org;
+/* fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  depth_offset_change:%f\n",
+time_d, draft, draft_org, lever_heave, depth_offset_change);*/
+			    
+						/* loop over the beams */
+						for (i=0;i<beams_bath;i++)
+							{
+							if (beamflag[i] != MB_FLAG_NULL)
+								{
+								/* apply transducer depth change to depths */
+								bath[i] += depth_offset_change;
+/* fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);*/
+				
+								/* output some debug messages */
+								if (verbose >= 5)
+									{
+									fprintf(stderr,"\ndbg5  Depth value calculated in program <%s>:\n",program_name);
+									fprintf(stderr,"dbg5       kind:  %d\n",kind);
+									fprintf(stderr,"dbg5       beam:  %d\n",i);
+									fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
+									fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
+									fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
+									}
+								}
+							}
+/*fprintf(stderr, "time:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d draft:%f depth_offset_change:%f\n",
+time_i[0], time_i[1], time_i[2], time_i[3],
+time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
+						}
+
+					/* insert navigation */
+					if (nav_changed == MB_YES
+						|| heading_changed == MB_YES
+						|| sensordepth_changed == MB_YES
+						|| attitude_changed == MB_YES)
+						{
+						status = mb_insert_nav(verbose, imbio_ptr, istore_ptr,
+									time_i, time_d, navlon, navlat,
+									speed, heading, draft,
+									roll, pitch, heave, &error);
+						}
+				
+					/* insert altitude */
+					if (altitude_changed == MB_YES)
+						{
+						status = mb_insert_altitude(verbose, imbio_ptr, istore_ptr,
+									sensordepth, altitude, &error);
+						if (status == MB_FAILURE)
+							{
+							status = MB_SUCCESS;
+							error = MB_ERROR_NO_ERROR;
+							}
+						}
+						
+					/* if attitude changed apply rigid rotations to the bathymetry */
+					if (no_change_survey == MB_NO
+						&& (attitude_changed == MB_YES
+							|| sensordepth_changed == MB_YES))
+						{
+						status = mb_insert(verbose,imbio_ptr,
+									istore_ptr, kind,
+									time_i, time_d,
+									navlon, navlat, speed, heading,
+									beams_bath,beams_amp,pixels_ss,
+									beamflag, bath, amp, bathacrosstrack, bathalongtrack,
+									ss, ssacrosstrack, ssalongtrack,
+									comment, &error);
+						}
 					}
 				}
 
@@ -1561,6 +1980,26 @@ int main (int argc, char **argv)
 					n_wf_nav3++;
 					n_wt_nav3++;
 					}
+				else if (kind == MB_DATA_ATTITUDE)
+					{
+					n_wf_att++;
+					n_wt_att++;
+					}
+				else if (kind == MB_DATA_ATTITUDE1)
+					{
+					n_wf_att1++;
+					n_wt_att1++;
+					}
+				else if (kind == MB_DATA_ATTITUDE2)
+					{
+					n_wf_att2++;
+					n_wt_att2++;
+					}
+				else if (kind == MB_DATA_ATTITUDE3)
+					{
+					n_wf_att3++;
+					n_wt_att3++;
+					}
 				}
 			}
 		/* end read+process+output data loop */
@@ -1576,6 +2015,10 @@ int main (int argc, char **argv)
 			fprintf(stderr,"     %d nav1 records\n", n_rf_nav1);
 			fprintf(stderr,"     %d nav2 records\n", n_rf_nav2);
 			fprintf(stderr,"     %d nav3 records\n", n_rf_nav3);
+			fprintf(stderr,"     %d att records\n", n_rf_att);
+			fprintf(stderr,"     %d att1 records\n", n_rf_att1);
+			fprintf(stderr,"     %d att2 records\n", n_rf_att2);
+			fprintf(stderr,"     %d att3 records\n", n_rf_att3);
 			fprintf(stderr,"Pass 2: Records written to output file %s\n", ofile);
 			fprintf(stderr,"     %d survey records\n", n_wf_data);
 			fprintf(stderr,"     %d comment records\n", n_wf_comment);
@@ -1583,6 +2026,10 @@ int main (int argc, char **argv)
 			fprintf(stderr,"     %d nav1 records\n", n_wf_nav1);
 			fprintf(stderr,"     %d nav2 records\n", n_wf_nav2);
 			fprintf(stderr,"     %d nav3 records\n", n_wf_nav3);
+			fprintf(stderr,"     %d att records\n", n_wf_att);
+			fprintf(stderr,"     %d att1 records\n", n_wf_att1);
+			fprintf(stderr,"     %d att2 records\n", n_wf_att2);
+			fprintf(stderr,"     %d att3 records\n", n_wf_att3);
 			}
 	
 		/* close the input swath file */
@@ -1626,6 +2073,10 @@ int main (int argc, char **argv)
 		fprintf(stderr,"     %d nav1 records\n", n_rt_nav1);
 		fprintf(stderr,"     %d nav2 records\n", n_rt_nav2);
 		fprintf(stderr,"     %d nav3 records\n", n_rt_nav3);
+		fprintf(stderr,"     %d att records\n", n_rt_att);
+		fprintf(stderr,"     %d att1 records\n", n_rt_att1);
+		fprintf(stderr,"     %d att2 records\n", n_rt_att2);
+		fprintf(stderr,"     %d att3 records\n", n_rt_att3);
 		fprintf(stderr,"Pass 2: Total records written to all output files\n");
 		fprintf(stderr,"     %d survey records\n", n_wt_data);
 		fprintf(stderr,"     %d comment records\n", n_wt_comment);
@@ -1633,6 +2084,10 @@ int main (int argc, char **argv)
 		fprintf(stderr,"     %d nav1 records\n", n_wt_nav1);
 		fprintf(stderr,"     %d nav2 records\n", n_wt_nav2);
 		fprintf(stderr,"     %d nav3 records\n", n_wt_nav3);
+		fprintf(stderr,"     %d att records\n", n_wt_att);
+		fprintf(stderr,"     %d att1 records\n", n_wt_att1);
+		fprintf(stderr,"     %d att2 records\n", n_wt_att2);
+		fprintf(stderr,"     %d att3 records\n", n_wt_att3);
 		}
 		
 	/* end second pass through data */

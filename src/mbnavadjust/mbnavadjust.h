@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavadjust.h	6/24/95
  *    $Id$
  *
- *    Copyright (c) 2000-2013 by
+ *    Copyright (c) 2000-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -114,10 +114,11 @@
 #define MBNA_VIEW_LIST_FILES		1
 #define MBNA_VIEW_LIST_FILESECTIONS	2
 #define MBNA_VIEW_LIST_CROSSINGS	3
-#define MBNA_VIEW_LIST_GOODCROSSINGS	4
-#define MBNA_VIEW_LIST_BETTERCROSSINGS	5
-#define MBNA_VIEW_LIST_TRUECROSSINGS	6
-#define MBNA_VIEW_LIST_TIES		7
+#define MBNA_VIEW_LIST_MEDIOCRECROSSINGS	4
+#define MBNA_VIEW_LIST_GOODCROSSINGS	5
+#define MBNA_VIEW_LIST_BETTERCROSSINGS	6
+#define MBNA_VIEW_LIST_TRUECROSSINGS	7
+#define MBNA_VIEW_LIST_TIES		8
 #define MBNA_VIEW_MODE_ALL		0
 #define MBNA_VIEW_MODE_SURVEY		1
 #define MBNA_VIEW_MODE_WITHSURVEY	2
@@ -142,7 +143,9 @@
 #define MBNA_MISFIT_DIMZ		51
 #define MBNA_BIAS_SAME			0
 #define MBNA_BIAS_DIFFERENT		1
-#define MBNA_OVERLAP_THRESHOLD		25
+#define MBNA_MEDIOCREOVERLAP_THRESHOLD		10
+#define MBNA_GOODOVERLAP_THRESHOLD		25
+#define MBNA_BETTEROVERLAP_THRESHOLD		50
 
 #define	MBNA_MODELPLOT_SEQUENTIAL	0
 #define	MBNA_MODELPLOT_SURVEY		1
@@ -160,6 +163,17 @@
 #define MBNA_INTERATION_MAX		10000
 #define MBNA_CONVERGENCE		0.000001
 #define MBNA_SMALL			0.0001
+
+/* minimum initial sigma_crossing (meters) */
+#define	SIGMA_MINIMUM	0.1
+
+/* ping type defines */
+#define	SIDE_PORT	0
+#define	SIDE_STBD	1
+#define	SIDE_FULLSWATH	2
+
+/* route version define */
+#define ROUTE_VERSION "1.00"
 
 /* mbnavadjust project and file structures */
 struct mbna_section {
@@ -264,6 +278,7 @@ struct mbna_project {
 	char	path[STRING_MAX];
 	char	home[STRING_MAX];
 	char	datadir[STRING_MAX];
+	char	logfile[STRING_MAX];
 	int	num_files;
 	int	num_files_alloc;
 	struct mbna_file *files;
@@ -567,6 +582,7 @@ void	do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_da
 void	do_view_showsurveys( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showdata( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showmediocrecrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showgoodcrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showtruecrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showties( Widget w, XtPointer client_data, XtPointer call_data);

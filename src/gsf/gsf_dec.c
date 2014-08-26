@@ -15,8 +15,8 @@
  * 2) This library assumes that the data types u_short and u_int are defined
  *    on the host machine, where a u_short is a 16 bit unsigned integer, and
  *    a u_int is a 32 bit unsigned integer.
- * 3) This library assumes that the type short is at least 16 bits, and that
- *    the type int is at least 32 bits.
+ * 3) This library assumes that the type short is 16 bits, and that
+ *    the type int is 32 bits.
  *
  *
  * Change Descriptions :
@@ -79,9 +79,9 @@
  * dhg          11-01-06  Corrected "model_number" and "frequency" for "GeoSwathPlusSpecific" record
  * mab          02-01-09  Updates to support Reson 7125. Added new subrecord IDs and subrecord definitions for Kongsberg
  *                        sonar systems where TWTT and angle are populated from raw range and beam angle datagram. Added
- *                        new subrecord definition for EM2000.  Bug fixes in gsfOpen and gsfPercent. 
+ *                        new subrecord definition for EM2000.  Bug fixes in gsfOpen and gsfPercent.
  * clb          02-25-11  Changed the DecodeBRBIntensity function when bits_per_sample is 12
- * clb          04-06-11  Changes made for DeltaT 
+ * clb          04-06-11  Changes made for DeltaT
  * clb          05-13-11  when decoding a ping, reject it if number of beams <= 0
  * clb          06-21-11  implemented DecodeEM12Specific() function
  * clb          09-20-11  added support for R2Sonic
@@ -92,7 +92,21 @@
  * References : DoDBL Generic Sensor Format Sept. 30, 1993
  *
  *
- * Copyright (C) Science Applications International Corp.
+ * copyright 2014 Leidos, Inc.
+ * There is no charge to use the library, and it may be accessed at:
+ * https://www.leidos.com/maritime/gsf.
+ * This library may be redistributed and/or modified under the terms of
+ * the GNU Lesser General Public License version 2.1, as published by the
+ * Free Software Foundation.  A copy of the LGPL 2.1 license is included with
+ * the GSF distribution and is avaialbe at: http://opensource.org/licenses/LGPL-2.1.
+ *
+ * Leidos, Inc. configuration manages GSF, and provides GSF releases. Users are
+ * strongly encouraged to communicate change requests and change proposals to Leidos, Inc.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.
+ *
  ********************************************************************/
 
 /* standard c library includes */
@@ -102,7 +116,7 @@
 
 /* rely on the network type definitions of (u_short, and u_int) */
 #include <sys/types.h>
-#ifndef WIN32
+#if !defined WIN32 && !defined WIN64
 #include <netinet/in.h>
 #else
 #include <winsock.h>
@@ -814,13 +828,13 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
         /* Next four byte integer contains the height */
         memcpy(&ltemp, p, 4);
         signed_int = (signed) ntohl(ltemp);
-        ping->height = ((double) signed_int) / 1000.0;      
+        ping->height = ((double) signed_int) / 1000.0;
         p += 4;
 
         /* Next four byte integer contains the SEP */
         memcpy(&ltemp, p, 4);
         signed_int = (signed) ntohl(ltemp);
-        ping->sep = ((double) signed_int) / 1000.0;      
+        ping->sep = ((double) signed_int) / 1000.0;
         p += 4;
 
         /* Next four byte integer contains the tide corrector for this ping. */
@@ -828,15 +842,15 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
         signed_int = (signed) ntohl(ltemp);
         ping->gps_tide_corrector = ((double) signed_int) / 1000.0;
         p += 4;
-        
+
         /* Next two bytes are spare space */
         p += 2;
     }
     else
     {
-    	ping->height = GSF_NULL_HEIGHT;
-    	ping->sep = GSF_NULL_SEP;
-    	ping->gps_tide_corrector = GSF_NULL_TIDE_CORRECTOR;
+        ping->height = GSF_NULL_HEIGHT;
+        ping->sep = GSF_NULL_SEP;
+        ping->gps_tide_corrector = GSF_NULL_TIDE_CORRECTOR;
     }
 
     /* Set the caller's array pointers to NULL to guarrantee that non
@@ -867,6 +881,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
     ping->incident_beam_adj = (double *) NULL;
     ping->system_cleaning = (unsigned short *) NULL;
     ping->doppler_corr = (double *) NULL;
+    ping->sonar_vert_uncert = (double *) NULL;
     ping->brb_inten = (gsfBRBIntensity *) NULL;
 
     /* Clear the flag which indicates that we've read scale factors */
@@ -923,7 +938,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
         count = 0;
         while (((record_size - bytes - sr_size) > 4) && (count <= 3))
         {
-          
+
             int test_sizes[3] = {1, 2, 4};
             int test_fs;
 
@@ -1267,7 +1282,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                         gsfError = GSF_QUALITY_FLAGS_DECODE_ERROR;
                         return -1;
                     }
-                }                
+                }
                 ret = DecodeQualityFlagsArray(&ft->rec.mb_ping.quality_flags, p, ping->number_beams, subrecord_size, handle);
                 if (ret < 0)
                 {
@@ -1376,6 +1391,18 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                    return (-1);
                }
                ping->doppler_corr = ft->rec.mb_ping.doppler_corr;
+               p += ret;
+               break;
+
+            /* 02/25/14 jhp - added sonar_vert_uncertainty subrecord */
+           case (GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY):
+             ret = DecodeTwoByteArray(&ft->rec.mb_ping.sonar_vert_uncert, (unsigned char *) p, ping->number_beams,
+                   &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY, handle);
+               if (ret < 0)
+               {
+                   return (-1);
+               }
+               ping->sonar_vert_uncert = ft->rec.mb_ping.sonar_vert_uncert;
                p += ret;
                break;
 
@@ -1565,6 +1592,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC;
                 break;
 
+            case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2020_SPECIFIC):
             case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC):
             case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC):
                 p += DecodeR2SonicSpecific(&ping->sensor_data, p);
@@ -1630,7 +1658,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
         }
         bytes = p - sptr;
     }
-    
+
     /*  Extract subrecord id if the subrecord size is 0 */
     if (((record_size - bytes) == 4) && (ping->sensor_id != subrecord_id))
     {
@@ -1680,7 +1708,7 @@ DecodeScaleFactors(gsfScaleFactors *sf, unsigned char *sptr)
     unsigned char   compressionFlag;
     gsfuLong        ltemp;
     int             i;
-    int             subrecordID;
+    unsigned int    subrecordID;
     int             numArraySubrecords;
     int             stemp;
     unsigned int    itemp;
@@ -2674,9 +2702,9 @@ DecodeQualityFlagsArray(unsigned char **array, unsigned char *sptr, int num_beam
     /*  If j doesn't get reset to 0 then we have a number of beams that is not evenly divisible by 4.  This causes all
         sorts of problems because the sensor_id will get set to the wrong number when it returns to gsfDecodeSwathBathymetryPing.
         The problem is that we actually decoded part of another byte but we didn't increment the ptr.  */
-    
+
     if (j) ptr++;
-  
+
     return (ptr - sptr);
 }
 
@@ -2744,20 +2772,20 @@ DecodeEM12Specific (gsfSensorSpecific * sdata, unsigned char *sptr)
     sdata->gsfEM12Specific.ping_quality = (int) *p;
     p += 1;
 
-	/* Next two byte integer contains the sea surface sound speed * 10 */
-	memcpy(&stemp, p, 2);
-	sdata->gsfEM12Specific.sound_velocity = ((double) ntohs(stemp)) / 10.0;
-	p += 2;
+    /* Next two byte integer contains the sea surface sound speed * 10 */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM12Specific.sound_velocity = ((double) ntohs(stemp)) / 10.0;
+    p += 2;
 
-	/* Next byte is operational mode */
-	sdata->gsfEM12Specific.mode = (int) *p;
-	p += 1;
+    /* Next byte is operational mode */
+    sdata->gsfEM12Specific.mode = (int) *p;
+    p += 1;
 
     /* The next 32 bytes are spare space for future use */
     memset (&sdata->gsfEM12Specific.spare, 0, 32);
     p += 32;
 
-	return (p - sptr);
+    return (p - sptr);
 }
 
 /********************************************************************
@@ -4150,7 +4178,7 @@ DecodeEM3Specific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TABLE 
  * Function Name : DecodeEM3RawSpecific
  *
  * Description : This function decodes the Simrad EM3000 series sensor
- *    using raw range and beam anlge specific information from 
+ *    using raw range and beam anlge specific information from
  *    the GSF byte stream.
  *
  * Inputs :
@@ -4420,21 +4448,21 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TAB
     /* The contents of the next two byte value depends on the sonar model number */
     sdata->gsfEM3RawSpecific.run_time.durotong_speed = 0.0;
     sdata->gsfEM3RawSpecific.run_time.tx_along_tilt  = 0.0;
-    switch (sdata->gsfEM3RawSpecific.run_time.model_number) 
+    switch (sdata->gsfEM3RawSpecific.run_time.model_number)
     {
         case 1002:
             /* The next two byte value contains the Durotong speed. This field is valid only for the EM1002 */
             memcpy(&stemp, p, 2);
             sdata->gsfEM3RawSpecific.run_time.durotong_speed = ((double) ntohs(stemp)) / 10.0;
-            
+
             p += 2;
-            break;        
-        
+            break;
+
         case 300:
         case 120:
         case 3000:
         case 3020:
-            /* The next two byte value contains the transmit along track tilt in degrees. 
+            /* The next two byte value contains the transmit along track tilt in degrees.
              * JSB: As of 3/1/09, still don't have final datagram documentation from KM
              * to know whether the tx_along_tilt field is EM4 specific or if it will be supported
              * on EM3 systems.
@@ -4443,8 +4471,8 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TAB
             sstemp = (gsfsShort) ntohs(stemp);
             sdata->gsfEM3RawSpecific.run_time.tx_along_tilt = ((double) sstemp) / 100.0;
             p += 2;
-            break;      
-        
+            break;
+
         default:
             /* Then next two byte value is spare */
             p += 2;
@@ -4452,7 +4480,7 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TAB
     }
 
     /* The contents of the next one byte value depends on the sonar model number */
-    switch (sdata->gsfEM3RawSpecific.run_time.model_number) 
+    switch (sdata->gsfEM3RawSpecific.run_time.model_number)
     {
         default:
             /* The next one byte value contains the HiLo frequency absorption coefficient ratio
@@ -4471,8 +4499,8 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TAB
      *  will be increased from 9 bytes to 16 bytes.
      */
     memset (&sdata->gsfEM3RawSpecific.run_time.spare, 0, (size_t) sizeof(sdata->gsfEM3RawSpecific.run_time.spare));
-    p += 16;    
-  
+    p += 16;
+
     /* Decode the PU status fields */
 
     /* The next one byte value contains the processor unit CPU load */
@@ -4513,7 +4541,7 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TAB
  * Function Name : DecodeEM4Specific
  *
  * Description : This function decodes the Simrad EM4 series sonar system
- *    (EM710, EM302, EM122, and EM2040) sensor specific information from 
+ *    (EM710, EM302, EM122, and EM2040) sensor specific information from
  *    the GSF byte stream.
  *
  * Inputs :
@@ -5285,6 +5313,7 @@ DecodeReson7100Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
     gsfuShort       stemp;
     gsfuLong        ltemp;
     gsfsLong        sltemp;
+    gsfsShort       signed_temp;
 
     /* First two bytes contains the data format definition version number */
     memcpy(&stemp, p, 2);
@@ -5299,7 +5328,7 @@ DecodeReson7100Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
     /* The next 16 bytes are spare space for future growth */
     memset(&sdata->gsfReson7100Specific.reserved_1[0], 0, 16);
     p += 16;
-        
+
     /* The next four byte integer contains the high order four bytes of the sonar serial number */
     memcpy(&ltemp, p, 4);
     sdata->gsfReson7100Specific.major_serial_number = (unsigned int) ntohl(ltemp);
@@ -5359,7 +5388,7 @@ DecodeReson7100Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
     memcpy(&ltemp, p, 4);
     sdata->gsfReson7100Specific.tx_pulse_reserved = (unsigned int) ntohl(stemp);
     p += 4;
-    
+
     /* Next four byte integer contains the ping rate */
     memcpy(&ltemp, p, 4);
     sdata->gsfReson7100Specific.max_ping_rate = ((double) ntohl(ltemp)) / 1.0e6;
@@ -5382,7 +5411,8 @@ DecodeReson7100Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
 
     /* Next four byte integer contains the gain setting */
     memcpy(&ltemp, p, 4);
-    sdata->gsfReson7100Specific.gain = ((double) ntohl(ltemp)) / 1.0e2;
+    signed_temp = (gsfsLong) ntohl(ltemp);
+    sdata->gsfReson7100Specific.gain = ((double) signed_temp) / 1.0e2;
     p += 4;
 
     /* Next four byte integer contains the control flags */
@@ -5494,11 +5524,11 @@ DecodeReson7100Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
     memcpy(&ltemp, p, 4);
     sdata->gsfReson7100Specific.spreading = ((double) ntohl(ltemp)) / 1.0e3;
     p += 4;
-    
+
     /* The next 16 bytes are spare space for future growth */
     memset(&sdata->gsfReson7100Specific.reserved_2[0], 0, 16);
     p += 16;
-        
+
     /* The next byte contains the sv source */
     sdata->gsfReson7100Specific.sv_source = *p;
     p += 1;
@@ -5507,10 +5537,10 @@ DecodeReson7100Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
     sdata->gsfReson7100Specific.layer_comp_flag = *p;
     p += 1;
 
-    /* The next 16 bytes are spare space for future growth */
+    /* The next 8 bytes are spare space for future growth */
     memset(&sdata->gsfReson7100Specific.reserved_3[0], 0, 8);
     p += 8;
-        
+
     return (p - sptr);
 }
 
@@ -5560,7 +5590,7 @@ DecodeDeltaTSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
     memcpy(&ltemp, p, 4);
     sdata->gsfDeltaTSpecific.interrogation_time.tv_nsec = ntohl(ltemp);
     p += 4;
-   
+
     /* Next two byte integer contains the samples per beam */
     memcpy(&stemp, p, 2);
     sdata->gsfDeltaTSpecific.samples_per_beam = ntohs(stemp);
@@ -5668,7 +5698,7 @@ DecodeDeltaTSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
     /* Next byte contains the fore aft beamwidth field */
     sdata->gsfDeltaTSpecific.fore_aft_beamwidth = ((double) *p) / 10.0;
     p += 1;
-    
+
     /* Next byte contains the athwartships beamwidth field */
     sdata->gsfDeltaTSpecific.athwartships_beamwidth = ((double) *p) / 10.0;
     p += 1;
@@ -5676,7 +5706,7 @@ DecodeDeltaTSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
     /* The next 32 bytes are spare space for future growth */
     memset(&sdata->gsfDeltaTSpecific.spare[0], 0, 32);
     p += 32;
-        
+
     return (p - sptr);
 }
 
@@ -5700,7 +5730,7 @@ DecodeDeltaTSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
 static int
 DecodeR2SonicSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
 {
-	int i;
+    int i;
     unsigned char  *p = sptr;
     gsfuShort       stemp;
     gsfuLong        ltemp;
@@ -5836,22 +5866,22 @@ DecodeR2SonicSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
     p += 2;
 
     /* The next set of 6x4 (24) bytes contains reserved fields from the A0 subgroup of the BTH0 */
-	for (i=0; i<6; i++)
-	{
+    for (i=0; i<6; i++)
+    {
         memcpy(&ltemp, p, 4);
         sltemp = (gsfsLong) ntohl (ltemp);
         sdata->gsfR2SonicSpecific.A0_more_info[i] = ((double) sltemp) / 1.0e6;
-    	p += 4;
-	}
+        p += 4;
+    }
 
     /* The next set of 6x4 (24) bytes contains reserved fields from the A2 subgroup of the BTH0 */
-	for (i=0; i<6; i++)
-	{
+    for (i=0; i<6; i++)
+    {
         memcpy(&ltemp, p, 4);
         sltemp = (gsfsLong) ntohl (ltemp);
         sdata->gsfR2SonicSpecific.A2_more_info[i] = ((double) sltemp) / 1.0e6;
-    	p += 4;
-	}
+        p += 4;
+    }
 
     /* The next four bytes contains minimum depth gate from the G0 subgroup of BTH0  */
     memcpy(&ltemp, p, 4);
@@ -6459,7 +6489,7 @@ DecodeReson8100ImagerySpecific(gsfSensorImagery *sdata, unsigned char *sptr)
 static int
 DecodeR2SonicImagerySpecific(gsfSensorImagery * sdata, unsigned char *sptr)
 {
-	int i;
+    int i;
     unsigned char  *p = sptr;
     gsfuShort       stemp;
     gsfuLong        ltemp;
@@ -6595,13 +6625,13 @@ DecodeR2SonicImagerySpecific(gsfSensorImagery * sdata, unsigned char *sptr)
     p += 2;
 
     /* The next set of 6x4 (24) bytes contains "more_info" from the SNI0 datagram */
-	for (i=0; i<6; i++)
-	{
+    for (i=0; i<6; i++)
+    {
         memcpy(&ltemp, p, 4);
         sltemp = (gsfsLong) ntohl (ltemp);
         sdata->gsfR2SonicImagerySpecific.more_info[i] = ((double) sltemp) / 1.0e6;
-    	p += 4;
-	}
+        p += 4;
+    }
 
     /* The next 32 bytes are spare space for future growth */
     memset(&sdata->gsfR2SonicImagerySpecific.spare[0], 0, 32);
@@ -6763,6 +6793,7 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
             sensor_size = DecodeKlein5410BssImagerySpecific(&(*idata)->sensor_imagery, ptr);
             break;
 
+        case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2020_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC):
             sensor_size = DecodeR2SonicImagerySpecific(&(*idata)->sensor_imagery, ptr);
@@ -6831,14 +6862,14 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
 
                 /* unpack the first sample */
                 memset (bytes_to_unpack, 0, 4);
-                
+
                 /* Put the upper bits of ptr[0] into the lower bits of bytes_to_unpack[2] */
                 bytes_to_unpack[2] = ptr[0] >> 4;
-                
+
                 /* Grab the lower bits of ptr[0] and save them in the upper bits of */
                 /* bytes_to_unpack[3] */
                 bytes_to_unpack[3] = (ptr[0] & 0x0f) << 4;
-                
+
                 /* Grab the upper bits of ptr[1] and save them in the lower bits of */
                 /* bytes_to_unpack[3] */
                 bytes_to_unpack[3] |= (ptr[1] & 0xf0) >> 4;
@@ -7563,7 +7594,7 @@ gsfDecodeHVNavigationError(gsfHVNavigationError *hv_nav_error, GSF_FILE_TABLE *f
     memcpy(&utemp, p, 2);
     p += 2;
     hv_nav_error->SEP_uncertainty = ((double) ntohs(utemp)) / 100.0;
-        
+
     /* The next three bytes are reserved for future use */
     hv_nav_error->spare[0] = (char) *p;
     p += 1;
@@ -7858,4 +7889,3 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, unsigned char *sptr
 
     return (p - sptr);
 }
-

@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_segysegy.c	10/27/2006
  *	$Id$
  *
- *    Copyright (c) 2006-2013 by
+ *    Copyright (c) 2006-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -447,7 +447,7 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->seismic_line = mb_segyio_ptr->fileheader.line;
 		store->seismic_shot = traceheader.shot_num;
 		store->seismic_cdp = traceheader.rp_num;
-		for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
+		for (i=0;i<MB_COMMENT_MAXLINE;i++)
 		    store->comment[i] = '\0';
 		}
 

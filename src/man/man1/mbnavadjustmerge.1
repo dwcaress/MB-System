@@ -1,0 +1,92 @@
+.TH mbnavadjustmerge 1 "28 May 2014" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbnavadjustmerge\fP \- Tool to merge two MBnavadjust projects,
+either adding one to the first or outputting a new project combining
+both existing projects.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbnavadjustmerge\fP --input=project-base --input=project-add --output=project-output --verbose
+
+.SH DESCRIPTION
+\fBMBnavadjustmerge\fP is a command line program that merges two
+existing \fBMBnavadjust\fP projects. If the user specifies two
+input projects and no output project, then the second project is
+added to the first. If an output project is specified, then the
+two projects are merged and the new combined project is output.
+
+\fBMBnavadjust\fP is an interactive graphical program used to
+adjust swath data navigation by matching bathymetric features
+in overlapping and crossing swaths. The primary purpose of
+\fBmbnavadjust\fP is to eliminate relative navigational errors in swath
+data obtained from poorly navigated sonars.
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH OPTIONS
+.TP
+.B \--input=project-base
+.B \--input=project-add
+This option defines either of the input, existing \fBMBnavadjust\fP
+projects. A project may be defined by a relative or absolute path
+to the project *.nvh file or the project *.dir directory. The first
+use of \fB--input\fP defines the base input project, and the second
+defines the add input project. In the case where the \fB--output\fP
+option is used to define an output project, the two input projects
+will both be copied to the new output project (\fIproject-base\fP 
+first followed by \fIproject-add\fP). If the \fBoutput\fP option is
+not specified, then the \fIproject-base\fP project is used as the
+output, and the \fIproject-add\fP project is added on to the
+\fIproject-base\fP project.
+.TP
+.B \--output=project-output
+This option defines the new \fBMBnavadjust output project. The two
+input projects will both be copied to the new output project
+(\fIproject-base\fP  first followed by \fIproject-add\fP).
+If the \fBoutput\fP option is
+not specified, then the \fIproject-base\fP project is used as the
+output, and the \fIproject-add\fP project is added on to the
+\fIproject-base\fP project.
+.TP
+.B \--verbose
+This option increases the verbosity of \fBMBnavadjustmerge\fP, which
+means that more information than by default is output to the stderr stream of the
+shell.
+
+.SH EXAMPLES
+Suppose you have two AUV survey missions, 20140515m1 and 10140515m2, that overlap
+slightly. If you have used \fBMBnavadjust\fP to adjust the navigation of the
+two missions separately, you can use \fBMBnavadjustmerge\fP to merge the two
+\fBMBnavadjust\fP projects into a single new project without losing any of the
+ties made between overlapping sections in the existing projects. If the two
+existing projects are named "Navadjust20140515m1" and "Navadjust20140515m2",
+respectively, then there exist project files with a ".nvh" suffix and project
+directories with a ".dir" suffix. To create a new \fBMBnavadjust\fP project
+combining the two existing projects, the following will suffice:
+.br
+     mbnavadjustmerge --input=Navadjust20140515m1.nvh \
+                      --input=Navadjust20140515m1.nvh \
+                      --output=Navadjust20140515All.nvh
+.br
+The new project Navadjust20140515All can be opened and analyzed further using
+\fBMBnavadjust\fP. When opening the new project, the user should first solve
+for a comprehensive navigation adjustment model by selecting the <Action->Invert Navigation>
+menu item, and then find the crossings between the two previously separate missions
+by selecting the <Action->Check For New Crossings> menu item
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbio\fP(1), \fBmbprocess\fP(1),
+\fBmbnavadjust\fP(1), \fBmbset\fP(1)
+
+.SH BUGS
+It used to be too new to be bulletproof, now its too complicated to be bulletproof.
+Good luck.

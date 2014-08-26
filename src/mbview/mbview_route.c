@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_route.c	9/25/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2013 by
+ *    Copyright (c) 2003-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -567,6 +567,7 @@ int mbview_addroute(int verbose, size_t instance,
 			int	*waypoint,
 			int	routecolor,
 			int	routesize,
+			int	routeeditmode,
 			mb_path	routename,
 			int	*iroute,
 			int *error)
@@ -601,6 +602,7 @@ int mbview_addroute(int verbose, size_t instance,
 			}
 		fprintf(stderr,"dbg2       routecolor:                %d\n", routecolor);
 		fprintf(stderr,"dbg2       routesize:                 %d\n", routesize);
+		fprintf(stderr,"dbg2       routeeditmode:             %d\n", routeeditmode);
 		fprintf(stderr,"dbg2       routename:                 %s\n", routename);
 		}
 
@@ -656,6 +658,7 @@ routelon[i],routelat[i],xdisplay,ydisplay,zdisplay);
 	/* set color size and name for new route */
 	shared.shareddata.routes[*iroute].color = routecolor;
 	shared.shareddata.routes[*iroute].size = routesize;
+	shared.shareddata.routes[*iroute].editmode = routeeditmode;
 	strcpy(shared.shareddata.routes[*iroute].name,routename);
 
 	/* set distance values */
@@ -1176,9 +1179,9 @@ int mbview_pick_route_select(size_t instance, int which, int xpixel, int ypixel)
 				&xdisplay, &ydisplay, &zdisplay);
 
 		/* reset selected route position */
-		if (found)
+		iroute = shared.shareddata.route_selected;
+		if (found && shared.shareddata.routes[iroute].editmode == MB_YES)
 			{
-			iroute = shared.shareddata.route_selected;
 			jpoint = shared.shareddata.route_point_selected;
 			shared.shareddata.routes[iroute].points[jpoint].xgrid[instance] = xgrid;
 			shared.shareddata.routes[iroute].points[jpoint].ygrid[instance] = ygrid;
@@ -1214,6 +1217,13 @@ iroute,jpoint,shared.shareddata.routes[iroute].npoints);
 
 			/* set distance values */
 			mbview_route_setdistance(instance, iroute);
+			}
+
+		/* else beep */
+		else
+			{
+			shared.shareddata.route_selected = MBV_SELECT_NONE;
+			XBell(view->dpy,100);
 			}
 		}
 
@@ -1536,7 +1546,8 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 			}
 
 		/* else just add point to currently selected route and point */
-		else if (found && shared.shareddata.route_selected != MBV_SELECT_NONE)
+		else if (found && shared.shareddata.route_selected != MBV_SELECT_NONE
+				&& shared.shareddata.routes[shared.shareddata.route_selected].editmode == MB_YES)
 			{
 			/* add route point after currently selected route point if any */
 			inew = shared.shareddata.route_selected;
@@ -1554,9 +1565,15 @@ int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel)
 			shared.shareddata.route_point_selected = jnew;
 			}
 
+		/* if selected route not editable then complain */
+		else if (found)
+			{
+			XBell(view->dpy,100);
+			}
+			
+		/* if not found then deselect the new route */
 		else
 			{
-			/* deselect the new route */
 			shared.shareddata.route_selected = MBV_SELECT_NONE;
 			shared.shareddata.route_point_selected = MBV_SELECT_NONE;
 			XBell(view->dpy,100);
@@ -1864,6 +1881,7 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 					{
 					shared.shareddata.routes[i].color = MBV_COLOR_RED;
 					shared.shareddata.routes[i].size = 1;
+					shared.shareddata.routes[i].editmode = MB_YES;
 					shared.shareddata.routes[i].name[0] = '\0';
 					shared.shareddata.routes[i].npoints = 0;
 					shared.shareddata.routes[i].npoints_alloc = MBV_ALLOC_NUM;
@@ -1905,6 +1923,7 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 		/* add the new route */
 		shared.shareddata.routes[inew].color = MBV_COLOR_BLACK;
 		shared.shareddata.routes[inew].size = 1;
+		shared.shareddata.routes[inew].editmode = MB_YES;
 		sprintf(shared.shareddata.routes[inew].name, "Route:%d", shared.shareddata.nroute);
 		}
 
@@ -1936,6 +1955,7 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 		}
 
 	/* add the new route point */
+fprintf(stderr,"mbview_route_add: inew:%d jnew:%d waypoint:%d editmode:%d\n",inew,jnew,waypoint,shared.shareddata.routes[inew].editmode);
 	if (status == MB_SUCCESS)
 		{
 		/* move points after jnew if necessary */
@@ -2005,6 +2025,12 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 			data->route_view_mode = MBV_VIEW_ON;
 			set_mbview_route_view_mode(instance, MBV_VIEW_ON);
 			}
+		}
+
+	/* else beep */
+	else
+		{
+		XBell(view->dpy,100);
 		}
 
 
@@ -2122,9 +2148,11 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint)
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
+fprintf(stderr,"mbview_route_delete: iroute:%d ipoint:%d editmode:%d\n",iroute,ipoint,shared.shareddata.routes[iroute].editmode);
 	/* delete route point if its valid */
 	if (iroute >= 0 && iroute < shared.shareddata.nroute
-		&& ipoint >= 0 && ipoint < shared.shareddata.routes[iroute].npoints)
+		&& ipoint >= 0 && ipoint < shared.shareddata.routes[iroute].npoints
+		&& shared.shareddata.routes[iroute].editmode == MB_YES)
 		{
 		/* free segment immediately after deleted point */
 		if (shared.shareddata.routes[iroute].npoints > 1)
@@ -2506,7 +2534,8 @@ int mbview_drawroute(size_t instance, int rez)
 
 				/* set the color for this route */
 				if (iroute == shared.shareddata.route_selected
-					&& jpoint == shared.shareddata.route_point_selected)
+					&& (jpoint == shared.shareddata.route_point_selected
+						|| shared.shareddata.route_point_selected == MBV_SELECT_ALL))
 					icolor = MBV_COLOR_RED;
 				else
 					icolor = shared.shareddata.routes[iroute].color;
@@ -2629,7 +2658,15 @@ int mbview_updateroutelist()
 			nitems = 0;
 			for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
 				{
-				sprintf(value_string,"Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s",
+				if (shared.shareddata.routes[iroute].editmode == MB_YES)
+				sprintf(value_string,"Editable Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s",
+					iroute, shared.shareddata.routes[iroute].npoints,
+					shared.shareddata.routes[iroute].distancelateral,
+					shared.shareddata.routes[iroute].distancetopo,
+					mbview_colorname[shared.shareddata.routes[iroute].color],
+					shared.shareddata.routes[iroute].name);
+				else
+				sprintf(value_string,"Static Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s",
 					iroute, shared.shareddata.routes[iroute].npoints,
 					shared.shareddata.routes[iroute].distancelateral,
 					shared.shareddata.routes[iroute].distancetopo,

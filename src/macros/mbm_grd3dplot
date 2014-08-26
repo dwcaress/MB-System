@@ -3,7 +3,7 @@
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
 #    $Id$
 #
-#    Copyright (c) 1993-2012 by
+#    Copyright (c) 1993-2014 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -2325,6 +2325,10 @@ elsif ($ps_viewer eq "ggv")
 		{
 		$view_pageflag = "--geometry=landscape";
 		}
+	}
+elsif ($ps_viewer eq "evince")
+	{
+	$view_pageflag = " ";
 	}
 if ($no_view_ps)
 	{

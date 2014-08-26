@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
  *	$Id$
  *
- *    Copyright (c) 1998-2013 by
+ *    Copyright (c) 1998-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -465,7 +465,8 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* deal with errors */
 	if (ret < 0)
 	    {
-	    if (gsfError == GSF_READ_TO_END_OF_FILE)
+	    if (gsfError == GSF_READ_TO_END_OF_FILE
+		|| gsfError == GSF_PARTIAL_RECORD_AT_END_OF_FILE)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -666,7 +667,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	gsfDataID		*dataID;
 	gsfRecords		*records;
 	gsfSwathBathyPing	*mb_ping;
-	int	ret;
+	int	ret = 0;
 	int	i;
 
 	/* print input debug statements */
@@ -778,18 +779,18 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_WRITE_FAIL;
-/*fprintf(stderr,"FAILED 1 to write gsfid:%d ret:%d\n",mb_io_ptr->gsfid,ret);*/
 		    }
 		dataID->recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
 		mb_io_ptr->save1 = MB_YES;
 		}
+		
+	    /* if a processing parameter record is output, keep track of it */
 	    else if (data->kind == MB_DATA_PROCESSING_PARAMETERS)
-		mb_io_ptr->save1 = MB_YES;
+		mb_io_ptr->save1 = MB_YES; 
 
 	    /* write the record */
 	    if ((ret = gsfWrite((int)mb_io_ptr->gsfid, dataID, records)) < 0)
 		{
-/*fprintf(stderr,"FAILED 2 to write gsfid:%d ret:%d\n",mb_io_ptr->gsfid,ret);*/
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
 		}

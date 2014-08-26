@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:13 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:42 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 21
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -1022,7 +1016,7 @@ R F1<ad50>3.384 E/F3 10/Times-Italic@0 SF(SVPFILE:best.svp)A F0(,)A F1
 (mbset)3.384 E F0 -.1(wo)3.384 G .884(uld normally set the bath).1 F
 .884(ymetry recalculation mode)-.05 F
 (on so that the SVP \214le speci\214ed actually gets used.)144 369.6 Q
-F1<ad49>108 386.4 Q F3(in\214le)144 386.4 Q F0(Sw)144 398.4 Q .276
+F1<ad49>108 386.4 Q F3(in\214le)26.41 E F0(Sw)144 398.4 Q .276
 (ath data \214le for which an)-.1 F F1(mbpr)2.776 E(ocess)-.18 E F0 .276
 (parameter \214le will be created or updated, or a datalist \214le)2.776
 F .741(containing a list of input sw)144 410.4 R .741
@@ -1066,10 +1060,10 @@ ectory as the input \214le. This)144 559.2 R .142(special option allo)
 ths for output \214les \(as generated)-.25 F(by early v)144 583.2 Q
 (ersions of this program\).)-.15 E F1<ad48>108 600 Q F0 .391(This "help\
 " \215ag causes the program to print out a description of its operation\
- and then e)144 600 R .391(xit imme-)-.15 F(diately)144 612 Q(.)-.65 E
-F1<ad50>108 628.8 Q F3 -.9(PA)144 628.8 S(RAMETER:value).9 E F0(The)
-4.085 E F1<ad50>4.085 E F0 1.585(option of)4.085 F F1(mbset)4.085 E F0
-1.584(is used to modify a single)4.085 F F1(mbpr)4.084 E(ocess)-.18 E F0
+ and then e)22.52 F .391(xit imme-)-.15 F(diately)144 612 Q(.)-.65 E F1
+<ad50>108 628.8 Q F3 -.9(PA)24.19 G(RAMETER:value).9 E F0(The)4.085 E F1
+<ad50>4.085 E F0 1.585(option of)4.085 F F1(mbset)4.085 E F0 1.584
+(is used to modify a single)4.085 F F1(mbpr)4.084 E(ocess)-.18 E F0
 (parameter)4.084 E 1.106(command. Here)144 640.8 R F3 -.9(PA)3.606 G
 (RAMETER).9 E F0 1.106(may be an)3.606 F 3.606(yo)-.15 G 3.606(ft)-3.606
 G 1.106(he processing parameter names listed abo)-3.606 F -.15(ve)-.15 G
@@ -1085,7 +1079,7 @@ G 1.106(he processing parameter names listed abo)-3.606 F -.15(ve)-.15 G
 (can be either ':' or '='. Only the \214rst ':' or '=' acts)2.618 F
 (as a separater; later instances of these characters are tak)144 688.8 Q
 (en as part of)-.1 E F3(value)2.5 E F0(.)A F1<ad56>108 705.6 Q F0
-(Normally)144 705.6 Q(,)-.65 E F1(mbset)2.897 E F0 -.1(wo)2.897 G .397
+(Normally)23.08 E(,)-.65 E F1(mbset)2.897 E F0 -.1(wo)2.897 G .397
 (rks "silently" without outputting an).1 F .397
 (ything to the stderr stream.)-.15 F .397(If the)5.397 F F1<ad56>2.898 E
 F0(\215ag)2.898 E .63(is gi)144 717.6 R -.15(ve)-.25 G .63(n, then).15 F

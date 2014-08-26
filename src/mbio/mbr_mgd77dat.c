@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_mgd77dat.c	5/18/99
  *	$Id$
  *
- *    Copyright (c) 1999-2013 by
+ *    Copyright (c) 1999-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -563,7 +563,7 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->free_air = data->free_air;
 		store->seismic_line = data->seismic_line;
 		store->seismic_shot = data->seismic_shot;
-		for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
+		for (i=0;i<MB_COMMENT_MAXLINE;i++)
 		    store->comment[i] = data->comment[i];
 		}
 
@@ -643,7 +643,7 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->free_air = store->free_air;
 		data->seismic_line = store->seismic_line;
 		data->seismic_shot = store->seismic_shot;
-		for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
+		for (i=0;i<MB_COMMENT_MAXLINE;i++)
 		    data->comment[i] = store->comment[i];
 		}
 
@@ -672,7 +672,8 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 	struct mbf_mgd77dat_struct *data;
 	int	*header_read;
 	char	line[MBF_MGD77DAT_DATA_LEN];
-	int	read_len;
+	size_t	read_len;
+	size_t	skip;
 	int	shift;
 	int 	neg_unit;
 	int	itmp;
@@ -723,17 +724,20 @@ fprintf(stderr,"%c",line[i]);
 fprintf(stderr,"\n");*/
 
 	/* handle "pseudo-mgd77" in which each record is
-	 * followed by a cr or lf */
-	for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
-	    {
-	    if (line[i] == '\r' || line[i] == '\n')
-	    	{
-		for (j=i;j<MBF_MGD77DAT_DATA_LEN-1;j++)
+	 * followed by a cr or lf or both */
+	skip = 0;
+	if (line[0] == '\r' || line[0] == '\n')
+		skip++;
+	if (line[1] == '\r' || line[1] == '\n')
+		skip++;
+	if (skip > 0)
+		{
+		for (j=0;j<MBF_MGD77DAT_DATA_LEN-skip;j++)
 			{
-			line[j] = line[j+1];
+			line[j] = line[j+skip];
 			}
-	        if ((read_len = fread(&line[MBF_MGD77DAT_DATA_LEN-1],1,1,
-			    mb_io_ptr->mbfp)) == 1)
+	        if ((read_len = fread(&line[MBF_MGD77DAT_DATA_LEN-skip],1,skip,
+			    mb_io_ptr->mbfp)) == skip)
 		    {
 		    mb_io_ptr->file_bytes += read_len;
 		    status = MB_SUCCESS;
@@ -745,8 +749,8 @@ fprintf(stderr,"\n");*/
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
 		    }
+/*fprintf(stderr,"---SKIPPED %zu BYTES---\n",skip);*/
 		}
-	    }
 /*fprintf(stderr,"+FIXLINE:");
 for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
 fprintf(stderr,"%c",line[i]);

@@ -2,7 +2,7 @@
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
  *    $Id$
  *
- *    Copyright (c) 2002-2013 by
+ *    Copyright (c) 2002-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1922,8 +1922,8 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
                         mbv_modelazimuth3d = 0.0;
                         mbv_viewelevation3d = 90.0;
                         mbv_viewazimuth3d = 0.0;
-                        mbv_illuminate_magnitude = 5.0;
-                        mbv_illuminate_elevation = 30.0;
+                        mbv_illuminate_magnitude = 1.0;
+                        mbv_illuminate_elevation = 5.0;
                         mbv_illuminate_azimuth = 90.0;
                         mbv_slope_magnitude = 1.0;
                         mbv_overlay_shade_magnitude = 1.0;
@@ -2509,7 +2509,7 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*unknown = "Unknown";
 
 	/* print input debug statements */
@@ -2579,9 +2579,9 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr)
 			fprintf(sfp, "## Output by Program %s\n",program_name);
 			fprintf(sfp, "## Program Version %s\n",rcs_id);
 			fprintf(sfp, "## MB-System Version %s\n",MB_VERSION);
-			strncpy(date,"\0",25);
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
+			strcpy(date,ctime(&right_now));
+                        date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				if ((user_ptr = getenv("LOGNAME")) == NULL)
 					user_ptr = unknown;
@@ -2643,6 +2643,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 	int	*routewaypoint = NULL;
 	int	routecolor;
 	int	routesize;
+	int	routeeditmode;
 	mb_path	routename;
 	int	iroute;
 	int	waypoint;
@@ -2666,6 +2667,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 	    /* initialize route values */
 	    routecolor = MBV_COLOR_BLUE;
 	    routesize = 1;
+            routeeditmode = MB_YES;
 	    routename[0] = '\0';
 	    rawroutefile = MB_YES;
 	    npoint = 0;
@@ -2695,7 +2697,11 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 				}
 			else if (strncmp(buffer,"## ROUTENAME", 12) == 0)
 				{
-				sscanf(buffer,"## ROUTENAME %s", routename);
+                                strcpy(routename, &buffer[13]);
+                                if (routename[strlen(routename)-1] == '\n')
+                                    routename[strlen(routename)-1] = '\0';
+                                if (routename[strlen(routename)-1] == '\r')
+                                    routename[strlen(routename)-1] = '\0';
 				}
 			else if (strncmp(buffer,"## ROUTECOLOR", 13) == 0)
 				{
@@ -2704,6 +2710,10 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 			else if (strncmp(buffer,"## ROUTESIZE", 12) == 0)
 				{
 				sscanf(buffer,"## ROUTESIZE %d", &routesize);
+				}
+			else if (strncmp(buffer,"## ROUTEEDITMODE", 16) == 0)
+				{
+				sscanf(buffer,"## ROUTEEDITMODE %d", &routeeditmode);
 				}
 			}
 
@@ -2715,7 +2725,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 			    {
 			    status = mbview_addroute(verbose, instance,
 			    				npoint, routelon, routelat, routewaypoint,
-							routecolor, routesize, routename,
+							routecolor, routesize, routeeditmode, routename,
 							&iroute, &error);
 			    npoint = 0;
 			    }
@@ -2771,7 +2781,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 		    {
 		    status = mbview_addroute(verbose, instance,
 			    			npoint, routelon, routelat, routewaypoint,
-						routecolor, routesize, routename,
+						routecolor, routesize, routeeditmode, routename,
 						&iroute, &error);
 		    npoint = 0;
 		    }
@@ -2834,7 +2844,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*unknown = "Unknown";
 
 	/* print input debug statements */
@@ -2879,9 +2889,9 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 			fprintf(sfp, "## Output by Program %s\n",program_name);
 			fprintf(sfp, "## Program Version %s\n",rcs_id);
 			fprintf(sfp, "## MB-System Version %s\n",MB_VERSION);
-			strncpy(date,"\0",25);
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
+			strcpy(date,ctime(&right_now));
+                        date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				if ((user_ptr = getenv("LOGNAME")) == NULL)
 					user_ptr = unknown;
@@ -2890,7 +2900,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 				user_ptr,host,date);
 			fprintf(sfp, "## Number of routes: %d\n",nroutewrite);
 			fprintf(sfp, "## Route point format:\n");
-			fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <waypoint (boolean)> <topography (m)> <bearing (deg)> <lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n");
+			fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)> <bearing (deg)> <lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n");
 			}
 
 		/* output error message */
@@ -3076,7 +3086,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*unknown = "Unknown";
 
 	/* print input debug statements */
@@ -3121,9 +3131,9 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr)
 			fprintf(sfp, "## Output by Program %s\r\n",program_name);
 			fprintf(sfp, "## Program Version %s\r\n",rcs_id);
 			fprintf(sfp, "## MB-System Version %s\r\n",MB_VERSION);
-			strncpy(date,"\0",25);
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
+			strcpy(date,ctime(&right_now));
+                        date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				if ((user_ptr = getenv("LOGNAME")) == NULL)
 					user_ptr = unknown;
@@ -4230,7 +4240,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*unknown = "Unknown";
 
 	/* read data for valid instance */
@@ -4258,9 +4268,9 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
 			fprintf(sfp, "## Output by Program %s\n",program_name);
 			fprintf(sfp, "## Program Version %s\n",rcs_id);
 			fprintf(sfp, "## MB-System Version %s\n",MB_VERSION);
-			strncpy(date,"\0",25);
 			right_now = time((time_t *)0);
-			strncpy(date,ctime(&right_now),24);
+			strcpy(date,ctime(&right_now));
+                        date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				if ((user_ptr = getenv("LOGNAME")) == NULL)
 					user_ptr = unknown;
@@ -6745,7 +6755,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 					{
 					mbview_addroute(verbose, instance,
 							1, &xlon, &ylat, &waypoint,
-							color, 2,
+							color, 2, MB_YES, 
 							survey_name,
 							&working_route, &error);
 					first = MB_NO;
@@ -6869,7 +6879,7 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 						{
 						mbview_addroute(verbose, instance,
 								1, &xlon, &ylat, &waypoint,
-								color, 2,
+								color, 2, MB_YES, 
 								survey_name,
 								&working_route, &error);
 						first = MB_NO;

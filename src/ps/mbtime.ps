@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:14 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:42 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -263,24 +257,24 @@ F0 1.24(documentation \(and source code\) as "time_d" v)3.74 F(alues.)
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 343.2 Q
 (Lamont-Doherty Earth Observ)113 355.2 Q(atory)-.25 E F1(OPTIONS)72 384
 Q F2<ad48>108 396 Q F0 .162(This "help" \215ag cause the program to pri\
-nt out a description of its operation and then e)144 396 R .162
+nt out a description of its operation and then e)22.52 F .162
 (xit immedi-)-.15 F(ately)144 408 Q(.)-.65 E F2<ad4d>108 424.8 Q F3
-(time_d)144 424.8 Q F0 .584(Sets the input time to be)144 436.8 R F3
-(time_d)3.084 E F0 .584
+(time_d)20.86 E F0 .584(Sets the input time to be)144 436.8 R F3(time_d)
+3.084 E F0 .584
 (in unix time, which is de\214ned as seconds since 00:00:00.000000)3.084
 F .142(01 January 1970. If)144 448.8 R F2<ad4d>2.642 E F0 .142
 (is speci\214ed, this time will be con)2.642 F -.15(ve)-.4 G .143
 (rted to calendar time and output to std-).15 F(out in the form)144
 460.8 Q(yyyy/mm/dd/hh/mm/ss.ssssss)180 472.8 Q F2<ad54>108 489.6 Q F3
-(year/month/day/hour/minute/second)144 489.6 Q F0 .399
+(year/month/day/hour/minute/second)23.63 E F0 .399
 (Sets the input time to be)144 501.6 R F3
 (year/month/day/hour/minute/second)2.899 E F0 5.399(.I)C(f)-5.399 E F2
 <ad54>2.899 E F0 .398(is speci\214ed, this time will be)2.898 F(con)144
-513.6 Q -.15(ve)-.4 G .658(rted to).15 F F3(time_d)3.158 E F0 .659(in e\
-poch \(Unix\) seconds, which are seconds since 00:00:00.000000 01 Janu-)
-3.158 F(ary 1970.)144 525.6 Q(The)5 E F3(time_d)2.5 E F0 -.25(va)2.5 G
-(lue will be output to stdout.).25 E F2<ad56>108 542.4 Q F0(Normally)144
-542.4 Q(,)-.65 E F2(mbtime)2.732 E F0 .232(only prints out the con)2.732
+513.6 Q -.15(ve)-.4 G 1.043(rted to).15 F F3(time_d)3.543 E F0 1.043(in\
+ epoch \(Unix\) seconds, which are seconds since 00:00:00.000000 01 Jan\
+-)3.543 F(uary 1970.)144 525.6 Q(The)5 E F3(time_d)2.5 E F0 -.25(va)2.5
+G(lue will be output to stdout.).25 E F2<ad56>108 542.4 Q F0(Normally)
+23.08 E(,)-.65 E F2(mbtime)2.732 E F0 .232(only prints out the con)2.732
 F -.15(ve)-.4 G .232(rted time.).15 F .232(If the)5.232 F F2<ad56>2.732
 E F0 .232(\215ag is gi)2.732 F -.15(ve)-.25 G .232(n, then).15 F F2
 (mbtime)2.731 E F0 -.1(wo)2.731 G(rks).1 E(in a "v)144 554.4 Q

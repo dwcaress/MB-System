@@ -2,7 +2,7 @@
  *    The MB-system:	mbeditviz.h		4/27/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2013 by
+ *    Copyright (c) 2007-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -111,6 +111,7 @@ struct	mbev_ping_struct
 	int	beams_bath;
 	char	*beamflag;
 	char	*beamflagorg;
+        int     *beamcolor;
 	double	*bath;
 	double	*bathacrosstrack;
 	double	*bathalongtrack;
@@ -314,6 +315,7 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostring);
 void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag);
 void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag);
+void mbeditviz_mb3dsoundings_colorsoundings(int color);
 int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double, double), int *error);
 
 /* end this include */

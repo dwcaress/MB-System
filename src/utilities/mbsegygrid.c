@@ -2,7 +2,7 @@
  *    The MB-system:	mbsegygrid.c	6/12/2004
  *    $Id$
  *
- *    Copyright (c) 2004-2013 by
+ *    Copyright (c) 2004-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -264,8 +264,8 @@ int main (int argc, char **argv)
 	double	xwidth, ywidth;
 	int	ix, iy, iys, igainstart, igainend;
 	int	iystart, iyend;
-	double	factor, gtime, btime, stime, dtime, ttime, tmax;
-	double	cosfactor, sinfactor, rangefactor, range;
+	double	factor, gtime, btime, stime, dtime, tmax;
+	double	cosfactor;
 	double	filtersum;
 	double	btimesave = 0.0;
 	double	stimesave = 0.0;
@@ -279,7 +279,7 @@ int main (int argc, char **argv)
 	int	filtertrace_alloc;
 	int	nfilter;
 	int	iagchalfwindow;
-	int	ixc, iyc;
+	int	iyc;
 	int	jstart, jend;
 	int	i, ii, j, k, n;
 
@@ -1034,28 +1034,16 @@ igainstart,igainend,tmax,factor);*/
 					else /* if (geometrymode == MBSEGYGRID_GEOMETRY_REAL) */
 						{
 						cosfactor = cos(DTR * traceheader.pitch);
-						sinfactor = sin(DTR * traceheader.pitch);
-						rangefactor = 0.5 * traceheader.soundspeed;
-
 						for (i=0;i<traceheader.nsamps;i++)
 							{
-							/* get range of sample in meters using sound speed */
-							ttime = i * sampleinterval + timedelay;
-							range = rangefactor * ttime;
-
-							/* get corrected x and y location of this sample
+							/* get corrected y location of this sample
 							  in the section grid using the pitch angle */
-							iyc = iys + ((int)((ttime * cosfactor - timedelay) / sampleinterval)) / decimatey;
-							if (traceheader.distance > 0.0)
-								ixc = ix + ((int)(range * sinfactor / traceheader.distance)) / decimatex;
-							else
-								ixc = ix;
+							iyc = iys + (int)(cosfactor * ((double)i)) / decimatey;
 
 							/* get the index of the sample location */
-							if (iyc >= iystart && iyc <= iyend
-								&& ixc >= 0 && ixc < ngridx)
+							if (iyc >= iystart && iyc <= iyend)
 								{
-								k = iyc * ngridx + ixc;
+								k = iyc * ngridx + ix;
 								grid[k] += trace[i];
 								gridweight[k] += 1.0;
 								}
@@ -1354,7 +1342,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	pad[4];
 #endif
 	time_t	right_now;
-	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	char	remark[MB_PATH_MAXLINE];
 	char	*ctime();
 	char	*getenv();
@@ -1414,9 +1402,9 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	strcpy(grd.z_units,zlab);
 	strcpy(grd.title,titl);
 	strcpy(grd.command,"\0");
-	strncpy(date,"\0",MB_PATH_MAXLINE);
 	right_now = time((time_t *)0);
-	strncpy(date,ctime(&right_now),24);date[24]='\0';
+	strcpy(date,ctime(&right_now));
+        date[strlen(date)-1] = '\0';
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
 	if (user_ptr != NULL)

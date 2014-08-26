@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:07 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:38 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -285,14 +279,14 @@ Q F2<ad41>108 456 Q F0 1.035(Causes the output to be binary \(nati)144
 (grees and minutes. These v)-.15 F 1.063
 (alues are output as multiple \214elds as appropriate.)-.25 F(Def)144
 504 Q(ault: ASCII output with \214elds separated by tabs.)-.1 E F2<ad44>
-108 520.8 Q F3(decimate)144 520.8 Q F0 .407
+108 520.8 Q F3(decimate)23.08 E F0 .407
 (Sets the decimation of the output data. By def)144 532.8 R .407
 (ault \(i.e.)-.1 F F3(decimate)2.907 E F0 .408(=1\), e)B -.15(ve)-.25 G
 .408(ry a).15 F -.25(va)-.2 G .408(ilable data record is).25 F
 (output. If)144 544.8 Q F3(decimate)2.5 E F0(>1, then only e)A -.15(ve)
 -.25 G(ry ").15 E F3(decimate)A F0("th record will be output. Def)A
 (ault:)-.1 E F3(decimate)2.5 E F0(=1.)A F2<ad46>108 561.6 Q F3(format)
-144 561.6 Q F0 .92(Sets the format for the input sw)144 573.6 R .919
+24.19 E F0 .92(Sets the format for the input sw)144 573.6 R .919
 (ath sonar data using)-.1 F F2(MBIO)3.419 E F0(inte)3.419 E .919
 (ger format identi\214ers.)-.15 F .919(This pro-)5.919 F .501
 (gram uses the)144 585.6 R F2(MBIO)3.001 E F0 .501
@@ -303,13 +297,13 @@ Q F2<ad41>108 456 Q F0 1.035(Causes the output to be binary \(nati)144
 .694(and their identi\214er v)3.194 F .694(alues is gi)-.25 F -.15(ve)
 -.25 G 3.194(ni).15 G(n)-3.194 E(the)144 609.6 Q F2(MBIO)2.5 E F0
 (manual page. Def)2.5 E(ault:)-.1 E F3(format)2.5 E F0 2.5(=1)2.5 G(1.)
--2.5 E F2<ad47>108 626.4 Q F3(delimiter)144 626.4 Q F0 .079(Sets the ch\
-aracter\(s\) used to separate output \214elds when ascii columns are ou\
-tput. Def)144 638.4 R .079(ault: tabs are)-.1 F(used as delimiters.)144
+-2.5 E F2<ad47>108 626.4 Q F3(delimiter)22.52 E F0 .079(Sets the charac\
+ter\(s\) used to separate output \214elds when ascii columns are output\
+. Def)144 638.4 R .079(ault: tabs are)-.1 F(used as delimiters.)144
 650.4 Q F2<ad48>108 667.2 Q F0 .162(This "help" \215ag cause the progra\
-m to print out a description of its operation and then e)144 667.2 R
-.161(xit immedi-)-.15 F(ately)144 679.2 Q(.)-.65 E F2<ad49>108 696 Q F3
-(\214le)144 696 Q F0 .312(Sets the input \214lename. If)144 708 R F3
+m to print out a description of its operation and then e)22.52 F .161
+(xit immedi-)-.15 F(ately)144 679.2 Q(.)-.65 E F2<ad49>108 696 Q F3
+(\214le)26.41 E F0 .312(Sets the input \214lename. If)144 708 R F3
 (format)2.813 E F0 2.813(>0\()2.813 G .313(set with the)-2.813 F F2
 <ad46>2.813 E F0 .313(option\) then the sw)2.813 F .313
 (ath sonar data contained)-.1 F(in)144 720 Q F3(\214le)2.956 E F0 .456
@@ -342,18 +336,17 @@ BP
 .539(and their identi\214er v)3.039 F(al-)-.25 E(ues is gi)144 180 Q
 -.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
 (manual page.)2.5 E(Def)5 E(ault:)-.1 E F1(\214le)2.5 E F0 2.5(=")2.5 G
-(datalist.mb-1".)-2.5 E F2<ad4c>108 196.8 Q F1(lon\215ip)144 196.8 Q F0
-.572(Sets the range of the longitude v)144 208.8 R .572(alues returned.)
--.25 F(If)5.572 E F1(lon\215ip)3.072 E F0 .572
-(=\2551 then the longitude v)B .571(alues will be in)-.25 F .488
-(the range from \255360 to 0 de)144 220.8 R .488(grees. If)-.15 F F1
-(lon\215ip)2.988 E F0 .488(=0 then the longitude v)B .489
-(alues will be in the range from)-.25 F 1.383(\255180 to 180 de)144
-232.8 R 1.383(grees. If)-.15 F F1(lon\215ip)3.882 E F0 1.382
-(=1 then the longitude v)B 1.382
+(datalist.mb-1".)-2.5 E F2<ad4c>108 196.8 Q F1(lon\215ip)23.63 E F0 .572
+(Sets the range of the longitude v)144 208.8 R .572(alues returned.)-.25
+F(If)5.572 E F1(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
+.571(alues will be in)-.25 F .488(the range from \255360 to 0 de)144
+220.8 R .488(grees. If)-.15 F F1(lon\215ip)2.988 E F0 .488
+(=0 then the longitude v)B .489(alues will be in the range from)-.25 F
+1.383(\255180 to 180 de)144 232.8 R 1.383(grees. If)-.15 F F1(lon\215ip)
+3.882 E F0 1.382(=1 then the longitude v)B 1.382
 (alues will be in the range from 0 to 360)-.25 F(de)144 244.8 Q 2.5
 (grees. Def)-.15 F(ault:)-.1 E F1(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
-E F2<ad4f>108 261.6 Q F1(output_format)144 261.6 Q F0 .388
+E F2<ad4f>108 261.6 Q F1(output_format)22.52 E F0 .388
 (Determines the form of the output.)144 273.6 R F1(Output_format)2.888 E
 F0 .388(is a string composed of one or more of the fol-)2.888 F(lo)144
 285.6 Q(wing characters:)-.25 E F2(C)180 309.6 Q F0(for conducti)5 E
@@ -390,12 +383,11 @@ F2(x)180 621.6 Q F0(for longitude \(de)5 E
 669.6 Q(ault)-.1 E F1(output_format)4.1 E F0(=)4.1 E F2(TXYCc^cSs)4.1 E
 F0(\(T)4.1 E 1.6(ime, lon, lat, conducti)-.35 F(vity)-.25 E 4.1(,t)-.65
 G 1.6(emperature, depth, salinity)-4.1 F(,)-.65 E(sound speed\).)144
-681.6 Q F2<ad56>108 698.4 Q F0(Normally)144 698.4 Q(,)-.65 E F2
-(mbctdlist)3.162 E F0 -.1(wo)3.162 G .662
-(rks "silently" without outputting an).1 F .662
-(ything to the stderr stream.)-.15 F .663(If the)5.663 F F2<ad56>3.163 E
-F0 1.06(\215ag is gi)144 710.4 R -.15(ve)-.25 G 1.06(n, then).15 F F2
-(mbctdlist)3.56 E F0 -.1(wo)3.56 G 1.06(rks in a "v).1 F 1.06
+681.6 Q F2<ad56>108 698.4 Q F0(Normally)23.08 E(,)-.65 E F2(mbctdlist)
+3.162 E F0 -.1(wo)3.162 G .662(rks "silently" without outputting an).1 F
+.662(ything to the stderr stream.)-.15 F .663(If the)5.663 F F2<ad56>
+3.163 E F0 1.06(\215ag is gi)144 710.4 R -.15(ve)-.25 G 1.06(n, then).15
+F F2(mbctdlist)3.56 E F0 -.1(wo)3.56 G 1.06(rks in a "v).1 F 1.06
 (erbose" mode and outputs the program v)-.15 F 1.06(ersion being)-.15 F
 (used and all error status messages.)144 722.4 Q(MB-System 5.0)72 768 Q
 2.5(3J)146.495 G(une 2013)-2.5 E(2)204.835 E 0 Cg EP
@@ -405,7 +397,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 150.94(mbctdlist\(1\) MB-System)72 48 R 150.94
 (5.0 mbctdlist\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad5a>108 84 Q/F2 10
-/Times-Italic@0 SF(se)144 84 Q(gment)-.4 E F0 .677
+/Times-Italic@0 SF(se)23.63 E(gment)-.4 E F0 .677
 (Causes the ascii output of dif)144 96 R .677(ferent input sw)-.25 F
 .678(ath \214les \(e.g. when a datalist is speci\214ed with the)-.1 F F1
 <ad49>3.178 E F0 .373(option\) to be separated by lines with)144 108 R

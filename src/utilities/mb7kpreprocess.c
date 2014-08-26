@@ -2,7 +2,7 @@
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
  *    $Id$
  *
- *    Copyright (c) 2005-2013 by
+ *    Copyright (c) 2005-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,10 @@
  * Date:	October 12, 2005
  *
  * $Log: mb7kpreprocess.c,v $
+ *
+ * Revision 5.XX 2014/05/12 finlayson
+ * Added support for Calibrated Snippet record (7058)
+ *
  * Revision 5.23  2008/11/16 21:51:18  caress
  * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
  *
@@ -126,10 +130,11 @@
 #define	MB7KPREPROCESS_TIMELAG_OFF	0
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
-#define	MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH	1
+#define	MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH		1
 #define	MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES	2
 #define	MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION	3
-#define	MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE	4
+#define	MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE		4
+#define	MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK		5
 static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -252,6 +257,7 @@ int main (int argc, char **argv)
 	s7kr_v2detection	*v2detection;
 	s7kr_v2rawdetection	*v2rawdetection;
 	s7kr_v2snippet		*v2snippet;
+	s7kr_calibratedsnippet *calibratedsnippet;
 	s7kr_processedsidescan	*processedsidescan;
 	s7kr_image		*image;
 	s7kr_fileheader		*fileheader;
@@ -299,6 +305,7 @@ int main (int argc, char **argv)
 	int	nrec_v2detection = 0;
 	int	nrec_v2rawdetection = 0;
 	int	nrec_v2snippet = 0;
+	int nrec_calibratedsnippet = 0;
 	int	nrec_processedsidescan = 0;
 	int	nrec_installation = 0;
 	int	nrec_systemeventmessage = 0;
@@ -344,6 +351,7 @@ int main (int argc, char **argv)
 	int	nrec_v2detection_tot = 0;
 	int	nrec_v2rawdetection_tot = 0;
 	int	nrec_v2snippet_tot = 0;
+	int	nrec_calibratedsnippet_tot = 0;
 	int	nrec_processedsidescan_tot = 0;
 	int	nrec_installation_tot = 0;
 	int	nrec_systemeventmessage_tot = 0;
@@ -531,10 +539,13 @@ int main (int argc, char **argv)
 
 	/* kluge modes */
 	int	klugemode;
+	double	klugevalue;
 	int	kluge_useverticaldepth = MB_NO; /* kluge 1 */
 	int	kluge_zeroalongtrackangles = MB_NO; /* kluge 2 */
 	int	kluge_zeroattitudecorrection = MB_NO; /* kluge 3 */
 	int	kluge_kearfottrovnoise = MB_NO; /* kluge 4 */
+	int	kluge_beampatterntweak = MB_NO; /* kluge 5 */
+	double	kluge_beampatternfactor = 1.0;
 
 	/* MBARI data flag */
 	int	MBARIdata = MB_NO;
@@ -597,8 +608,9 @@ int main (int argc, char **argv)
 	int	sonardepth_time_d_index;
 	int	sonardepth_sonardepth_index;
 	int	sonardepth_len;
+	int	nhalffilter;
 	double	sonardepth_filterweight;
-	double	dtol, weight;
+	double	dtime, dtol, weight;
 	double	factor;
 	double	velocityx, velocityy;
 	int	type_save, kind_save;
@@ -681,7 +693,7 @@ int main (int argc, char **argv)
 			break;
 		case 'K':
 		case 'k':
-			sscanf (optarg,"%d", &klugemode);
+			nscan = sscanf (optarg,"%d/%lf", &klugemode, &klugevalue);
 			if (klugemode == MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH)
 				{
 				kluge_useverticaldepth = MB_YES;
@@ -697,6 +709,12 @@ int main (int argc, char **argv)
 			if (klugemode == MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE)
 				{
 				kluge_kearfottrovnoise = MB_YES;
+				}
+			if (klugemode == MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK
+				&& nscan == 2)
+				{
+				kluge_beampatterntweak = MB_YES;
+				kluge_beampatternfactor = klugevalue;
 				}
 			flag++;
 			break;
@@ -770,7 +788,9 @@ int main (int argc, char **argv)
 			break;
 		case 'S':
 		case 's':
-			if (optarg[0] == 'S')
+			if (optarg[0] == 'C')
+				ss_source = R7KRECID_7kCalibratedSnippetData;
+			else if (optarg[0] == 'S')
 				ss_source = R7KRECID_7kV2SnippetData;
 			else if (optarg[0] == 'B')
 				ss_source = R7KRECID_7kBackscatterImageData;
@@ -877,7 +897,12 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       goodnavattitudeonly: %d\n",goodnavattitudeonly);
 		fprintf(stderr,"dbg2       timedelaymode:       %d\n",timedelaymode);
 		fprintf(stderr,"dbg2       timelagmode:         %d\n",timelagmode);
-		fprintf(stderr,"dbg2       kluge_useverticaldepth: %d\n",kluge_useverticaldepth);
+		fprintf(stderr,"dbg2       kluge_useverticaldepth:        %d\n",kluge_useverticaldepth);
+		fprintf(stderr,"dbg2       kluge_zeroalongtrackangles:    %d\n",kluge_zeroalongtrackangles);
+		fprintf(stderr,"dbg2       kluge_zeroattitudecorrection:  %d\n",kluge_zeroattitudecorrection);
+		fprintf(stderr,"dbg2       kluge_kearfottrovnoise:        %d\n",kluge_useverticaldepth);
+		fprintf(stderr,"dbg2       kluge_beampatterntweak:        %d\n",kluge_useverticaldepth);
+		fprintf(stderr,"dbg2       kluge_beampatternfactor:       %f\n",kluge_beampatternfactor);
 		if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 			{
 			fprintf(stderr,"dbg2       timelagfile:         %s\n",timelagfile);
@@ -1645,6 +1670,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	nrec_v2detection = 0;
 	nrec_v2rawdetection = 0;
 	nrec_v2snippet = 0;
+	nrec_calibratedsnippet = 0;
 	nrec_processedsidescan = 0;
 	nrec_installation = 0;
 	nrec_systemeventmessage = 0;
@@ -1713,6 +1739,8 @@ sonardepth_sonardepth[nsonardepth]);*/
 				nrec_v2rawdetection++;
 			if (istore->read_v2snippet == MB_YES)
 				nrec_v2snippet++;
+			if (istore->read_calibratedsnippet == MB_YES)
+				nrec_calibratedsnippet++;
 			if (istore->read_processedsidescan == MB_YES)
 				nrec_processedsidescan++;
 
@@ -2013,6 +2041,24 @@ sonardepth_sonardepth[nsonardepth]);*/
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber,v2snippet->ping_number,v2snippet->number_beams);
+				}
+			if (istore->read_calibratedsnippet == MB_YES)
+				{
+				calibratedsnippet = &(istore->calibratedsnippet);
+				header = &(calibratedsnippet->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kCalibratedSnippetData:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,calibratedsnippet->ping_number,calibratedsnippet->number_beams);
+
 				}
 			if (istore->read_processedsidescan == MB_YES)
 				{
@@ -3130,7 +3176,8 @@ sonardepth_sonardepth[nsonardepth]);*/
 	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection);
 	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection);
 	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet);
-	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan);
+	fprintf(stdout, "          Calibrated Snippet:                %d\n", nrec_calibratedsnippet);
+	fprintf(stdout, "          Processedsidescan:                 %d\n", nrec_processedsidescan);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal);
@@ -3175,6 +3222,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	nrec_v2detection_tot += nrec_v2detection;
 	nrec_v2rawdetection_tot += nrec_v2rawdetection;
 	nrec_v2snippet_tot += nrec_v2snippet;
+	nrec_calibratedsnippet_tot += nrec_calibratedsnippet;
 	nrec_processedsidescan_tot += nrec_processedsidescan;
 	nrec_reference_tot += nrec_reference;
 	nrec_sensoruncal_tot += nrec_sensoruncal;
@@ -3535,153 +3583,173 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		{
 		/* apply filtering to sonardepth data
 			read from asynchronous records in 7k files */
-fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
-		for (i=0;i<ndat_sonardepth;i++)
+		if (ndat_sonardepth > 1)
 			{
-			dat_sonardepth_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<ndat_sonardepth;j++)
+fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
+			dtime = (dat_sonardepth_time_d[ndat_sonardepth-1]  - dat_sonardepth_time_d[0]) / ndat_sonardepth;
+			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+			for (i=0;i<ndat_sonardepth;i++)
 				{
-				dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
+				dat_sonardepth_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+				for (j=j1;j<=j2;j++)
 					{
+					dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
 					weight = exp(-dtol * dtol);
 					dat_sonardepth_sonardepthfilter[i] += weight * dat_sonardepth_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
+				if (sonardepth_filterweight > 0.0)
+					dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
-			if (sonardepth_filterweight > 0.0)
-				dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<ndat_sonardepth;i++)
-			{
-			if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(dat_sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			dat_sonardepth_sonardepth[i] = (1.0 - factor) * dat_sonardepth_sonardepth[i]
-						+ factor * dat_sonardepth_sonardepthfilter[i];
+			for (i=0;i<ndat_sonardepth;i++)
+				{
+				if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(dat_sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				dat_sonardepth_sonardepth[i] = (1.0 - factor) * dat_sonardepth_sonardepth[i]
+							+ factor * dat_sonardepth_sonardepthfilter[i];
+				}
 			}
 
 		/* filter sonardepth data from separate file */
-fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
-		for (i=0;i<nsonardepth;i++)
+		if (nsonardepth > 1)
 			{
-			sonardepth_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<nsonardepth;j++)
+fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
+			dtime = (sonardepth_time_d[nsonardepth-1]  - sonardepth_time_d[0]) / nsonardepth;
+			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+			for (i=0;i<nsonardepth;i++)
 				{
-				dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
+				sonardepth_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, nsonardepth - 1);
+				for (j=j1;j<=j2;j++)
 					{
+					dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
 					weight = exp(-dtol * dtol);
 					sonardepth_sonardepthfilter[i] += weight * sonardepth_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
+				if (sonardepth_filterweight > 0.0)
+					sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
-			if (sonardepth_filterweight > 0.0)
-				sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<nsonardepth;i++)
-			{
-			if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			sonardepth_sonardepth[i] = (1.0 - factor) * sonardepth_sonardepth[i]
-						+ factor * sonardepth_sonardepthfilter[i];
+			for (i=0;i<nsonardepth;i++)
+				{
+				if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				sonardepth_sonardepth[i] = (1.0 - factor) * sonardepth_sonardepth[i]
+							+ factor * sonardepth_sonardepthfilter[i];
+				}
 			}
 
 		/* filter sonardepth data from separate INS file */
-fprintf(stderr,"Applying filtering to %d INS nav data\n", nins);
-		for (i=0;i<nins;i++)
+		if (nins > 1)
 			{
-			ins_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<nins;j++)
+fprintf(stderr,"Applying filtering to %d INS nav data\n", nins);
+			for (i=0;i<nins;i++)
 				{
-				dtol = (ins_time_d[j] - ins_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
+				ins_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				dtime = (ins_time_d[nins-1]  - ins_time_d[0]) / nins;
+				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, nins - 1);
+				for (j=j1;j<=j2;j++)
 					{
+					dtol = (ins_time_d[j] - ins_time_d[i]) / sonardepthfilterlength;
 					weight = exp(-dtol * dtol);
 					ins_sonardepthfilter[i] += weight * ins_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
+				if (sonardepth_filterweight > 0.0)
+					ins_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
-			if (sonardepth_filterweight > 0.0)
-				ins_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<nins;i++)
-			{
-			if (ins_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(ins_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			ins_sonardepth[i] = (1.0 - factor) * ins_sonardepth[i]
-						+ factor * ins_sonardepthfilter[i];
+			for (i=0;i<nins;i++)
+				{
+				if (ins_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(ins_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				ins_sonardepth[i] = (1.0 - factor) * ins_sonardepth[i]
+							+ factor * ins_sonardepthfilter[i];
+				}
 			}
 
 		/* filter sonardepth data from separate WHOI DSL file */
-fprintf(stderr,"Applying filtering to %d DSL nav data\n", ndsl);
-		for (i=0;i<ndsl;i++)
+		if (ndsl > 1)
 			{
-			dsl_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<ndsl;j++)
+fprintf(stderr,"Applying filtering to %d DSL nav data\n", ndsl);
+			for (i=0;i<ndsl;i++)
 				{
-				dtol = (dsl_time_d[j] - dsl_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
+				dsl_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				dtime = (dsl_time_d[ndsl-1]  - dsl_time_d[0]) / ndsl;
+				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, ndsl - 1);
+				for (j=j1;j<=j2;j++)
 					{
+					dtol = (dsl_time_d[j] - dsl_time_d[i]) / sonardepthfilterlength;
 					weight = exp(-dtol * dtol);
 					dsl_sonardepthfilter[i] += weight * dsl_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
+				if (sonardepth_filterweight > 0.0)
+					dsl_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
-			if (sonardepth_filterweight > 0.0)
-				dsl_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<ndsl;i++)
-			{
-			if (dsl_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(dsl_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			dsl_sonardepth[i] = (1.0 - factor) * dsl_sonardepth[i]
-						+ factor * dsl_sonardepthfilter[i];
+			for (i=0;i<ndsl;i++)
+				{
+				if (dsl_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(dsl_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				dsl_sonardepth[i] = (1.0 - factor) * dsl_sonardepth[i]
+							+ factor * dsl_sonardepthfilter[i];
+				}
 			}
 
 		/* filter sonardepth data from separate Steve Rock file */
-fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
-		for (i=0;i<nrock;i++)
+		if (nrock > 1)
 			{
-			rock_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<nrock;j++)
+fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
+			for (i=0;i<nrock;i++)
 				{
-				dtol = (rock_time_d[j] - rock_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
+				rock_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				dtime = (rock_time_d[nrock-1]  - rock_time_d[0]) / nrock;
+				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, ndsl - 1);
+				for (j=j1;j<=j2;j++)
 					{
+					dtol = (rock_time_d[j] - rock_time_d[i]) / sonardepthfilterlength;
 					weight = exp(-dtol * dtol);
 					rock_sonardepthfilter[i] += weight * rock_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
+				if (sonardepth_filterweight > 0.0)
+					rock_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
-			if (sonardepth_filterweight > 0.0)
-				rock_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<nrock;i++)
-			{
-			if (rock_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(rock_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			rock_sonardepth[i] = (1.0 - factor) * rock_sonardepth[i]
-						+ factor * rock_sonardepthfilter[i];
+			for (i=0;i<nrock;i++)
+				{
+				if (rock_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(rock_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				rock_sonardepth[i] = (1.0 - factor) * rock_sonardepth[i]
+							+ factor * rock_sonardepthfilter[i];
+				}
 			}
 		}
 
@@ -3920,7 +3988,8 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection_tot);
 	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection_tot);
 	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet_tot);
-	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan_tot);
+	fprintf(stdout, "          Calibrated Snippet:                %d\n", nrec_calibratedsnippet_tot);
+	fprintf(stdout, "          Processedsidescan:                 %d\n", nrec_processedsidescan_tot);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference_tot);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal_tot);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal_tot);
@@ -4224,6 +4293,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 	nrec_v2detection = 0;
 	nrec_v2rawdetection = 0;
 	nrec_v2snippet = 0;
+	nrec_calibratedsnippet = 0;
 	nrec_processedsidescan = 0;
 	nrec_installation = 0;
 	nrec_systemeventmessage = 0;
@@ -4293,6 +4363,8 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 				nrec_v2rawdetection++;
 			if (istore->read_v2snippet == MB_YES)
 				nrec_v2snippet++;
+			if (istore->read_calibratedsnippet == MB_YES)
+				nrec_calibratedsnippet++;
 			if (istore->read_processedsidescan == MB_YES)
 				nrec_processedsidescan++;
 
@@ -4927,6 +4999,15 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 					/* case of v2rawdetection record */
 					if (istore->read_v2rawdetection == MB_YES)
 						{
+						/* if requested apply kluge scaling of rx beam angles */
+						if (kluge_beampatterntweak == MB_YES)
+							{
+							for (j=0;j<v2rawdetection->number_beams;j++)
+								{
+								v2rawdetection->rx_angle[j] *= kluge_beampatternfactor;
+								}
+							}
+							
 						/* initialize all of the beams */
 						for (i=0;i<bathymetry->number_beams;i++)
 							{
@@ -4945,7 +5026,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							bathymetry->range[i] = v2rawdetection->detection_point[j]
 										/ v2rawdetection->sampling_rate;
 							bathymetry->quality[i] = v2rawdetection->quality[j];
-							alpha = RTD * pitchr + pitchbias;
+							alpha = RTD * (pitchr + v2rawdetection->tx_angle) + pitchbias;
 							beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - rollr) + rollbias;
 							mb_rollpitch_to_takeoff(
 								verbose,
@@ -4967,15 +5048,66 @@ alpha,beta,theta,phi,
 bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							}
 						}
+			
+					/* case of v2detection record with v2detectionsetup */
+					else if (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES)
+						{
+						/* if requested apply kluge scaling of rx beam angles */
+						if (kluge_beampatterntweak == MB_YES)
+							{
+							for (j=0;j<v2detection->number_beams;j++)
+								{
+								v2detection->angle_x[j] *= kluge_beampatternfactor;
+								}
+							}
+
+						/* now loop over the detects */
+						for (j=0;j<v2detection->number_beams;j++)
+							{
+							i = v2detectionsetup->beam_descriptor[j];
+			
+							bathymetry->range[i] = v2detection->range[j];
+							alpha = RTD * (v2detection->angle_y[j] + pitchr
+									+ volatilesettings->steering_vertical) + pitchbias;
+							beta = 90.0 - RTD * (v2detection->angle_x[j] - rollr) + rollbias;
+							mb_rollpitch_to_takeoff(
+								verbose,
+								alpha, beta,
+								&theta, &phi,
+								&error);
+							rr = 0.5 * soundspeed * bathymetry->range[i];
+							xx = rr * sin(DTR * theta);
+							zz = rr * cos(DTR * theta);
+							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+							bathymetry->depth[i] = zz + sonardepth;
+							bathymetry->pointing_angle[i] = DTR * theta;
+							bathymetry->azimuth_angle[i] = DTR * phi;
+/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+i,roll, rollr, pitchr, bathymetry->pitch,
+alpha,beta,theta,phi,
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+							}
+						}
 
 					/* case of v2detection record */
 					else if (istore->read_v2detection == MB_YES)
 						{
+						/* if requested apply kluge scaling of rx beam angles */
+						if (kluge_beampatterntweak == MB_YES)
+							{
+							for (i=0;i<v2detection->number_beams;i++)
+								{
+								v2detection->angle_x[i] *= kluge_beampatternfactor;
+								}
+							}
+
 						/* now loop over the detects */
 						for (i=0;i<v2detection->number_beams;i++)
 							{
 							bathymetry->range[i] = v2detection->range[i];
-							alpha = RTD * (v2detection->angle_y[i] + pitchr) + pitchbias;
+							alpha = RTD * (v2detection->angle_y[i] + pitchr
+									+ volatilesettings->steering_vertical) + pitchbias;
 							beta = 90.0 - RTD * (v2detection->angle_x[i] - rollr) + rollbias;
 							mb_rollpitch_to_takeoff(
 								verbose,
@@ -5000,12 +5132,22 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					/* else default case of beamgeometry record */
 					else
 						{
+						/* if requested apply kluge scaling of rx beam angles */
+						if (kluge_beampatterntweak == MB_YES)
+							{
+							for (i=0;i<bathymetry->number_beams;i++)
+								{
+								beamgeometry->angle_acrosstrack[i] *= kluge_beampatternfactor;
+								}
+							}
+
 						/* loop over all beams */
 						for (i=0;i<bathymetry->number_beams;i++)
 							{
 							if ((bathymetry->quality[i] & 15) > 0)
 								{
-								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr) + pitchbias;
+								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr
+									       + volatilesettings->steering_vertical) + pitchbias;
 								beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - rollr) + rollbias;
 								mb_rollpitch_to_takeoff(
 									verbose,
@@ -6578,7 +6720,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection);
 	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection);
 	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet);
-	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan);
+	fprintf(stdout, "          Calibrated Snippet:                %d\n", nrec_calibratedsnippet);
+	fprintf(stdout, "          Processedsidescan:                 %d\n", nrec_processedsidescan);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal);
@@ -6623,6 +6766,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	nrec_v2detection_tot += nrec_v2detection;
 	nrec_v2rawdetection_tot += nrec_v2rawdetection;
 	nrec_v2snippet_tot += nrec_v2snippet;
+	nrec_calibratedsnippet_tot += nrec_calibratedsnippet;
 	nrec_processedsidescan_tot += nrec_processedsidescan;
 	nrec_reference_tot += nrec_reference;
 	nrec_sensoruncal_tot += nrec_sensoruncal;
@@ -6714,7 +6858,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection_tot);
 	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection_tot);
 	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet_tot);
-	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan_tot);
+	fprintf(stdout, "          Calibrated Snippet:                %d\n", nrec_calibratedsnippet_tot);
+	fprintf(stdout, "          Processedsidescan:                 %d\n", nrec_processedsidescan_tot);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference_tot);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal_tot);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal_tot);

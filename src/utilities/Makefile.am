@@ -36,6 +36,7 @@ bin_PROGRAMS = mbhsdump \
         mbrolltimelag \
         mbauvloglist \
         mb7k2ss \
+	mbsslayout \
         mbabsorption \
         mbdumpesf \
         mbtime \
@@ -44,11 +45,11 @@ bin_PROGRAMS = mbhsdump \
         mbroutetime \
         mbhysweeppreprocess \
         mbkongsbergpreprocess \
-        mbsxppreprocess \
+        mbswplspreprocess \
         mbpreprocess \
+	mbsvpselect \
+	mbinsreprocess \
         $(FFTW_PROG)
-
-#Remove mbps if WIN32?
 
 include_HEADERS = levitus.h
 
@@ -82,7 +83,11 @@ mbinfo_SOURCES = mbinfo.c
 mbset_SOURCES = mbset.c
 
 mbprocess_SOURCES = mbprocess.c
-mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+if BUILD_GSF
+  mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
+else
+  mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+endif
 
 mbcopy_SOURCES = mbcopy.c
 if BUILD_GSF
@@ -150,6 +155,9 @@ mbauvloglist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mb7k2ss_SOURCES = mb7k2ss.c
 mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
+mbsslayout_SOURCES = mbsslayout.c
+mbsslayout_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+
 mbabsorption_SOURCES = mbabsorption.c
 
 mbdumpesf_SOURCES = mbdumpesf.c
@@ -169,11 +177,15 @@ mbhysweeppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
 mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
-mbsxppreprocess_SOURCES = mbsxppreprocess.c
-mbsxppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbswplspreprocess_SOURCES = mbswplspreprocess.c
+mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 
 mbpreprocess_SOURCES = mbpreprocess.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+
+mbsvpselect_SOURCES = mbsvpselect.c geodesic.c
+
+mbinsreprocess_SOURCES = mbinsreprocess.c
 
 if BUILD_FFTW
 mbsegypsd_SOURCES = mbsegypsd.c

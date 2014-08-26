@@ -2,7 +2,7 @@
  *    The MB-system:	mb_esf.c	4/10/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2013 by
+ *    Copyright (c) 2003-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -186,6 +186,7 @@ int mb_esf_load(int verbose, char *swathfile,
 	esf->esffp = NULL;
 	esf->essfp = NULL;
 	esf->byteswapped = mb_swap_check();
+	esf->startnextsearch = 0;
 
 	/* get name of existing or new esffile, then load old edits
 		and/or open new esf file */
@@ -194,6 +195,11 @@ int mb_esf_load(int verbose, char *swathfile,
 		{
 		status = mb_esf_open(verbose, esffile,
 				load, output, esf, error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_NO_DATA_LOADED;
 		}
 
 	/* print output debug statements */
@@ -266,6 +272,7 @@ int mb_esf_open(int verbose, char *esffile,
 	esf->esffp = NULL;
 	esf->essfp = NULL;
 	esf->byteswapped = mb_swap_check();
+	esf->startnextsearch = 0;
 
 	/* load edits from existing esf file if requested */
 	if (load == MB_YES)
@@ -502,7 +509,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 	int	status = MB_SUCCESS;
 	int	firstedit, lastedit;
 	int	apply, action;
-	int	beamoffset;
+	int	beamoffset, beamoffsetmax;
 	char	beamflagorg;
 	int	ibeam;
 	int	i, j;
@@ -530,13 +537,20 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 		> 0 and the edit beam values will be augmented by
 		MB_ESF_MULTIPLICITY_FACTOR * pingmultiplicity */
 	beamoffset = MB_ESF_MULTIPLICITY_FACTOR * pingmultiplicity;
+	beamoffsetmax = beamoffset + MB_ESF_MULTIPLICITY_FACTOR;
 
-	/* find first and last edits for this ping */
-	firstedit = 0;
+	/* find first and last edits for this ping - take ping multiplicity into account */
+	if (esf->nedit > 0 && time_d < (esf->edit[esf->startnextsearch].time_d - MB_ESF_MAXTIMEDIFF)
+		&& (esf->startnextsearch > 0
+			&& time_d < (esf->edit[esf->startnextsearch-1].time_d - MB_ESF_MAXTIMEDIFF)))
+		firstedit = 0;
+	else
+		firstedit = esf->startnextsearch;
 	lastedit = firstedit - 1;
 	for (j = firstedit; j < esf->nedit && time_d >= (esf->edit[j].time_d - MB_ESF_MAXTIMEDIFF); j++)
 		{
-		if (fabs(esf->edit[j].time_d - time_d) < MB_ESF_MAXTIMEDIFF)
+		if (fabs(esf->edit[j].time_d - time_d) < MB_ESF_MAXTIMEDIFF
+		    && esf->edit[j].beam >= beamoffset && esf->edit[j].beam < beamoffsetmax)
 		    {
 		    if (lastedit < firstedit)
 			firstedit = j;
@@ -551,8 +565,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 		/* check for edits with bad beam numbers */
 		for (j=firstedit;j<=lastedit;j++)
 		    {
-		    if (esf->edit[j].beam < 0
-		    	|| (esf->edit[j].beam % MB_ESF_MULTIPLICITY_FACTOR) >= nbath)
+		    if ((esf->edit[j].beam % MB_ESF_MULTIPLICITY_FACTOR) >= nbath)
 		    	esf->edit[j].use += 10000;
 		    }
 
@@ -628,6 +641,11 @@ j, time_d, i, beamflag[i], esf->edit[j].action);*/
 			&& beamflag[i] != beamflagorg)
 		    	mb_ess_save(verbose, esf, time_d, ibeam, action, error);
 		    }
+		    
+		/* reset startnextsearch */
+		esf->startnextsearch = lastedit + 1;
+		if (esf->startnextsearch >= esf->nedit)
+			esf->startnextsearch = esf->nedit - 1;
 		}
 
 	/* print output debug statements */

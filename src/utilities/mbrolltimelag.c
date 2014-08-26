@@ -3,7 +3,7 @@
  *
  *    $Id$
  *
- *    Copyright (c) 2005-2013 by
+ *    Copyright (c) 2005-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -234,6 +234,8 @@ int main (int argc, char **argv)
 		case 'S':
 		case 's':
 			sscanf (optarg,"%d", &navchannel);
+			if (navchannel > 0)
+				kind = MB_DATA_NONE;
 			flag++;
 			break;
 		case 'T':
@@ -569,7 +571,10 @@ int main (int argc, char **argv)
 						sumsloperoll += slopeminusmean * rollminusmean;
 						}
 
-					r = sumsloperoll / sqrt(sumslopesq) / sqrt(sumrollsq);
+					if (sumslopesq > 0.0 && sumrollsq > 0.0)
+						r = sumsloperoll / sqrt(sumslopesq) / sqrt(sumrollsq);
+					else
+						r = 0.0;
 					rr[k] = r;
 
 					/* output results */

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_format.c	2/18/94
  *    $Id$
  *
- *    Copyright (c) 1993-2013 by
+ *    Copyright (c) 1993-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -664,6 +664,14 @@ int mb_format_register(int verbose,
  	else if (*format == MBF_WASSPENL)
 		{
 		status = mbr_register_wasspenl(verbose, mbio_ptr, error);
+		}
+ 	else if (*format == MBF_MGD77TXT)
+		{
+		status = mbr_register_mgd77txt(verbose, mbio_ptr, error);
+		}
+ 	else if (*format == MBF_MGD77TAB)
+		{
+		status = mbr_register_mgd77tab(verbose, mbio_ptr, error);
 		}
 	else
 		{
@@ -1625,6 +1633,28 @@ int mb_format_info(int verbose,
  	else if (*format == MBF_WASSPENL)
 		{
 		status = mbr_info_wasspenl(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error); 
+		}
+ 	else if (*format == MBF_MGD77TXT)
+		{
+		status = mbr_info_mgd77txt(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error); 
+		}
+ 	else if (*format == MBF_MGD77TAB)
+		{
+		status = mbr_info_mgd77tab(verbose, system,
 			beams_bath_max, beams_amp_max, pixels_ss_max,
 			format_name, system_name, format_description,
 			numfile, filetype,
@@ -2809,6 +2839,30 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
+	/* look for NIO Hydrosweep DS raw format suffix convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 4)
+		i = strlen(filename) - 3;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".hs")) != NULL
+	    	|| (suffix = strstr(&filename[i],".HS")) != NULL)
+		suffix_len = 3;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 3)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_HSATLRAW;
+		found = MB_YES;
+		}
+	    }
+
 	/* look for STN Atlas raw format suffix convention */
 	if (found == MB_NO)
 	    {
@@ -2857,7 +2911,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
-	/* look for MGD77 suffix convention */
+	/* look for MGD77 suffix conventions */
 	if (found == MB_NO)
 	    {
 	    if (strlen(filename) >= 7)
@@ -2869,7 +2923,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		suffix_len = 6;
 	    else
 		suffix_len = 0;
-	    if (suffix_len == 6)
+	    if (suffix_len == 4 || suffix_len == 6)
 		{
 		if (fileroot != NULL)
 		    {
@@ -2880,6 +2934,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		found = MB_YES;
 		}
 	    }
+
+	/* look for MGD77 suffix conventions */
 	if (found == MB_NO)
 	    {
 	    if (strlen(filename) >= 5)
@@ -2898,7 +2954,31 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
-		*format = MBF_MGD77DAT;
+		*format = MBF_MGD77TXT;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for MGD77T suffix conventions */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 6)
+		i = strlen(filename) - 5;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".m77t")) != NULL
+	    	|| (suffix = strstr(&filename[i],".M77T")) != NULL)
+		suffix_len = 5;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 5)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_MGD77TAB;
 		found = MB_YES;
 		}
 	    }
@@ -3297,7 +3377,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
-	/* look for HMRG MR1 format convention */
+	/* look for HMRG MR1 and BS format conventions */
 	if (found == MB_NO)
 	    {
 	    if (strlen(filename) >= 6)
@@ -3311,6 +3391,75 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	    else
 		suffix_len = 0;
 	    if (suffix_len == 5)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_MR1PRVR2;
+		found = MB_YES;
+		}
+	    }
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 7)
+		i = strlen(filename) - 6;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".BTYWT")) != NULL)
+		suffix_len = 6;
+	    else if ((suffix = strstr(&filename[i],".btywt")) != NULL)
+		suffix_len = 6;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 6)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_MR1PRVR2;
+		found = MB_YES;
+		}
+	    }
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 12)
+		i = strlen(filename) - 11;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".BTYWT-DSAN")) != NULL)
+		suffix_len = 11;
+	    else if ((suffix = strstr(&filename[i],".btywt-dsan")) != NULL)
+		suffix_len = 11;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 11)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_MR1PRVR2;
+		found = MB_YES;
+		}
+	    }
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 7)
+		i = strlen(filename) - 6;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".BSFIN")) != NULL)
+		suffix_len = 6;
+	    else if ((suffix = strstr(&filename[i],".bsfin")) != NULL)
+		suffix_len = 6;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 6)
 		{
 		if (fileroot != NULL)
 		    {
@@ -3600,7 +3749,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 				*format = pformat;
 				if (found == MB_NO)
 				    {
-				    strcpy(fileroot, filename);
+				    if (fileroot != NULL)
+					strcpy(fileroot, filename);
 				    found = MB_YES;
 				    }
 				}

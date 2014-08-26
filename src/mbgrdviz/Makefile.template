@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  7/27/2003
 #	$Id: Makefile.template 2063 2013-05-22 00:05:57Z caress $
 #
-#     Copyright (c) 2003-2013 by
+#     Copyright (c) 2003-2014 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -66,7 +66,7 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a \
 		$(GSFLIB) \
@@ -79,7 +79,7 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(LIBDIR)/libsapi.a \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbbsio.a  \
 		$(LIBDIR)/libmbxgr.a \
 		$(GSFLIB) \
 		$(GMTLIBDIR)/libgmt.a \

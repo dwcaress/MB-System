@@ -3,7 +3,7 @@
 #    The MB-system:	mbm_grdplot.perl	8/6/95
 #    $Id$
 #
-#    Copyright (c) 1993-2012 by
+#    Copyright (c) 1993-2014 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -381,10 +381,15 @@ $ncpt = 11;
 	@cptbg7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 	@cptbb7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 
-# color pallette 8 - Sealevel (above sealevel - Haxby colors used below sealevel
+# color pallette 8 - Sealevel 1 (Haxby colors used below sealevel, browns above)
 	@cptbr8 = (250, 245, 240, 235, 230, 221, 212, 211, 210, 205, 200);
 	@cptbg8 = (250, 240, 230, 221, 212, 201, 190, 180, 170, 160, 150);
 	@cptbb8 = (120, 112, 104,  96,  88,  80,  72,  64,  56,  48,  40);
+
+# color pallette 9 - Sealevel 1 (Haxby colors used below sealevel, greens to browns above)
+	@cptbr9 = (255, 210, 170, 145, 120, 120, 104,  67,  33,   0,   0);
+	@cptbg9 = (255, 200, 160, 145, 130, 100, 107, 123, 140, 160, 230);
+	@cptbb9 = (100,  75,  50,  45,  40,  30,  24,   7,   0,   0,   0);
 
 # Determine the GMT version
 @grdinfo = `grdinfo 2>&1`;
@@ -941,7 +946,7 @@ if ($color_control)
 		($color_style, $color_pallette, $ncolors)
 			= $color_control =~  /(\S+)\/(\S+)\/(\S+)/;
 		if ($color_pallette < 1
-			|| $color_pallette > 8)
+			|| $color_pallette > 9)
 			{
 			$color_pallette = 1;
 			}
@@ -955,7 +960,7 @@ if ($color_control)
 		($color_style, $color_pallette) = $color_control
 			=~  /(\S+)\/(\S+)/;
 		if ($color_pallette < 1
-			|| $color_pallette > 8)
+			|| $color_pallette > 9)
 			{
 			$color_pallette = 1;
 			}
@@ -1814,7 +1819,7 @@ elsif ($color_mode)
 if ($color_mode)
 	{
 	# deal with single colormap (not sealevel)
-	if ($color_pallette != 8)
+	if ($color_pallette < 8)
 		{
 		# set selected color pallette
 		eval "\@cptbr = \@cptbr$color_pallette;";
@@ -1836,9 +1841,18 @@ if ($color_mode)
 			$blue = $cptbb[$i1]
 				+ ($cptbb[$i2] - $cptbb[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
-			push (@cptr, $red);
-			push (@cptg, $green);
-			push (@cptb, $blue);
+			if ($i < $ncolors - 1)
+                            {
+                            push (@cptubr, $red);
+                            push (@cptubg, $green);
+                            push (@cptubb, $blue);
+                            }
+                        if ($i > 0)
+                            {
+                            push (@cptuer, $red);
+                            push (@cptueg, $green);
+                            push (@cptueb, $blue);
+                            }
 			}
 		}
 
@@ -1847,33 +1861,57 @@ if ($color_mode)
 	# colormap above sealevel
 	else
 		{
-		# Find zero break
-		$izero = int(-$color_start / $color_int);
+		# set selected color pallette
+		eval "\@cptbr = \@cptbr$color_pallette;";
+		eval "\@cptbg = \@cptbg$color_pallette;";
+		eval "\@cptbb = \@cptbb$color_pallette;";
 
-		# interpolate colors
-		for ($i = 0; $i < $ncolors - $izero; $i++)
+                if ($color_flip)
+                    {
+                    $izero = $ncolors - int($color_end / $color_int);
+                    }
+                else
+                    {
+                    $izero = $ncolors - int(-$color_start / $color_int);
+                    }
+                if ($iszero < 0)
+                    {
+                    $iszero = 0;
+                    }
+                
+		# interpolate brown colors above sealevel
+		for ($i = 0; $i <= $izero - 1; $i++)
 			{
-			$xx = ($ncpt - 1) * $i / ($ncolors - 1);
+			$xx = ($ncpt - 1) * $i / ($izero - 1);
 			$i1 = int($xx);
 			$i2 = $i1 + 1;
-			$red = $cptbr8[$i1]
-				+ ($cptbr8[$i2] - $cptbr8[$i1])
+			$red = $cptbr[$i1]
+				+ ($cptbr[$i2] - $cptbr[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
-			$green = $cptbg8[$i1]
-				+ ($cptbg8[$i2] - $cptbg8[$i1])
+			$green = $cptbg[$i1]
+				+ ($cptbg[$i2] - $cptbg[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
-			$blue = $cptbb8[$i1]
-				+ ($cptbb8[$i2] - $cptbb8[$i1])
+			$blue = $cptbb[$i1]
+				+ ($cptbb[$i2] - $cptbb[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
-			push (@cptr, $red);
-			push (@cptg, $green);
-			push (@cptb, $blue);
+			if ($i < $izero - 1)
+                            {
+                            push (@cptubr, $red);
+                            push (@cptubg, $green);
+                            push (@cptubb, $blue);
+                            }
+                        if ($i > 0)
+                            {
+                            push (@cptuer, $red);
+                            push (@cptueg, $green);
+                            push (@cptueb, $blue);
+                            }
 			}
 
-		# interpolate colors
-		for ($i = $izero; $i < $ncolors; $i++)
+		# interpolate haxby colors below sealevel
+		for ($i = $izero - 1; $i < $ncolors; $i++)
 			{
-			$xx = ($ncpt - 1) * $i / ($ncolors - 1);
+			$xx = ($ncpt - 2) * ($i - $izero + 1) / ($ncolors - $izero) + 1;
 			$i1 = int($xx);
 			$i2 = $i1 + 1;
 			$red = $cptbr1[$i1]
@@ -1885,9 +1923,18 @@ if ($color_mode)
 			$blue = $cptbb1[$i1]
 				+ ($cptbb1[$i2] - $cptbb1[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
-			push (@cptr, $red);
-			push (@cptg, $green);
-			push (@cptb, $blue);
+			if ($i < $ncolors - 1)
+                            {
+                            push (@cptubr, $red);
+                            push (@cptubg, $green);
+                            push (@cptubb, $blue);
+                            }
+                        if ($i > $izero - 1)
+                            {
+                            push (@cptuer, $red);
+                            push (@cptueg, $green);
+                            push (@cptueb, $blue);
+                            }
 			}
 		}
 	}
@@ -2258,8 +2305,8 @@ if ($color_mode && !$file_cpt)
 					}
 				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
-				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
-				$d2,@cptr[$i+1],@cptg[$i+1],@cptb[$i+1];
+				$d1,@cptubr[$i],@cptubg[$i],@cptubb[$i],
+				$d2,@cptuer[$i],@cptueg[$i],@cptueb[$i];
 			if ($zmode == 1 && $i == 0)
 				{
 				print FCMD " >";
@@ -2303,8 +2350,8 @@ if ($color_mode && !$file_cpt)
 					}
 				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
-				$d1,@cptr[$i+1],@cptg[$i+1],@cptb[$i+1],
-				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
+				$d1,@cptuer[$i],@cptueg[$i],@cptueb[$i],
+				$d2,@cptubr[$i],@cptubg[$i],@cptubb[$i];
 			if ($i == ($ncolors - 2))
 				{
 				print FCMD " >";
@@ -2349,8 +2396,8 @@ if ($color_mode && !$file_cpt)
 				}
 print "COLOR STYLE 2 WITH FLIP: $i $d1 $d2\n";
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
-				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
-				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
+				$d1,@cptubr[$i],@cptubg[$i],@cptubb[$i],
+				$d2,@cptuer[$i],@cptueg[$i],@cptueb[$i];
 			if ($i == 0)
 				{
 				print FCMD " >";
@@ -2395,8 +2442,8 @@ print "COLOR STYLE 2 WITH FLIP: $i $d1 $d2\n";
 				}
 print "COLOR STYLE 2 WITHOUT FLIP: $i $d1 $d2\n";
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
-				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
-				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
+				$d1,@cptuer[$i],@cptueg[$i],@cptueb[$i],
+				$d2,@cptubr[$i],@cptubg[$i],@cptubb[$i];
 			if ($i == ($ncolors - 1))
 				{
 				print FCMD " >";
@@ -2856,7 +2903,7 @@ if ($swathnavdatalist)
 	}
 
 # do psscale plot
-if ($color_mode && ($color_pallette < 5 || $color_pallette == 8) && $gridprojected != 2)
+if ($color_mode && ($color_pallette < 5 || $color_pallette >= 8) && $gridprojected != 2)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
@@ -3002,6 +3049,10 @@ elsif ($ps_viewer eq "ggv")
 		{
 		$view_pageflag = "--geometry=landscape";
 		}
+	}
+elsif ($ps_viewer eq "evince")
+	{
+	$view_pageflag = " ";
 	}
 if ($no_view_ps)
 	{

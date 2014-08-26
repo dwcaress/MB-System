@@ -2,7 +2,7 @@
  *    The MB-system:	mbextractsegy.c	4/18/2004
  *    $Id$
  *
- *    Copyright (c) 2004-2013 by
+ *    Copyright (c) 2004-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -271,8 +271,8 @@ int main (int argc, char **argv)
 	int	nwrite;
 	int	first;
 	int	index;
-	double	tracemin, tracemax, tracerms;
-	double	linetracemin, linetracemax;
+	double	tracemin, tracemax, tracerms, tracelength;
+	double	linetracemin, linetracemax, linetracelength, endofdata;
 	double	draft, roll, pitch, heave;
 	int	shellstatus;
 	int	i, j;
@@ -831,6 +831,13 @@ int main (int argc, char **argv)
 				    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				    ss,ssacrosstrack,ssalongtrack,
 				    comment,&error);
+		
+		/* ignore nonfatal errors */
+		if (error < 0)
+			{
+			error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
 
 		/* deal with nav and time from survey data only - not nav, sidescan, or subbottom */
 		if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
@@ -929,10 +936,11 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 
 				    /* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
 				      then make section plots using only the sweep needed for each section alone */
-				    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;
-				    sweep = (1 + (int)(sweep / 0.05)) * 0.05;
 				    delay = seafloordepthmin / 750.0;
 				    delay = ((int)(delay / 0.05)) * 0.05;
+				    endofdata = seafloordepthmax / 750.0 + linetracelength;
+				    endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
+				    sweep = endofdata - delay;
 				    if (sweep > MBES_MAX_SWEEP)
 				        recalculatesweep = MB_YES;
 				    else
@@ -952,13 +960,29 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 		    			{
 					if (recalculatesweep == MB_YES)
 						{
-						sweep = (seafloordepthmaxplot[i] - seafloordepthminplot[i]) / 750.0 + 0.1;
-						sweep = (1 + (int)(sweep / 0.05)) * 0.05;
-						delay = seafloordepthminplot[i] / 750.0;
+						seafloordepthmin = seafloordepthminplot[i];
+						seafloordepthmax = seafloordepthmaxplot[i];
+						delay = seafloordepthmin / 750.0;
 						delay = ((int)(delay / 0.05)) * 0.05;
+						endofdata = seafloordepthmax / 750.0 + linetracelength;
+						endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
+						sweep = endofdata - delay;
 						}
 
 		        		sprintf(command, "#   Section plot %d of %d\n", i + 1, nplot);
+					fprintf(stderr, "%s", command);
+					fprintf(sfp, "%s", command);
+					sprintf(command, "#     Seafloor depth min: %f (m) %f (s)  max: %f (m) %f (s)\n",
+						seafloordepthmin, seafloordepthmin / 750.0, seafloordepthmax, seafloordepthmax / 750.0);
+					fprintf(stderr, "%s", command);
+					fprintf(sfp, "%s", command);
+					sprintf(command, "#     Trace length: %f (s)\n", linetracelength);
+					fprintf(stderr, "%s", command);
+					fprintf(sfp, "%s", command);
+					sprintf(command, "#     Trace delay: %f (s)\n", delay);
+					fprintf(stderr, "%s", command);
+					fprintf(sfp, "%s", command);
+					sprintf(command, "#     Trace sweep: %f (s)\n", sweep);
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
 
@@ -1174,6 +1198,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				tracerms += segydata[i] * segydata[i];
 				}
 			tracerms = sqrt(tracerms / segytraceheader.nsamps);
+			tracelength = 0.000001 * segytraceheader.si_micros * segytraceheader.nsamps;
 
 			/* get starting and ending positions */
 			if (nwrite == 0)
@@ -1183,6 +1208,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				startshot = segytraceheader.shot_num;
 				linetracemin = tracemin;
 				linetracemax = tracemax;
+				linetracelength = tracelength;
 				}
 			else
 				{
@@ -1191,6 +1217,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				endshot = segytraceheader.shot_num;
 				linetracemin = MIN(tracemin,linetracemin);
 				linetracemax = MAX(tracemax,linetracemax);
+				linetracelength = MAX(tracelength,linetracelength);
 				}
 
 			/* check for new section plot */
@@ -1490,18 +1517,21 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		    nplot = nwrite / nshotmax;
 		    if (nwrite % nshotmax > 0)
 		    	nplot++;
-/*fprintf(stderr,"seafloordepthmin:%f seafloordepthmax:%f\n", seafloordepthmin, seafloordepthmax);*/
+/*fprintf(stderr,"seafloordepthmin:%f seafloordepthmax:%f linetracelength:%f\n", seafloordepthmin, seafloordepthmax,linetracelength);*/
 
 		    /* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
 		      then make section plots using only the sweep needed for each section alone */
-		    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;
-		    sweep = (1 + (int)(sweep / 0.05)) * 0.05;
 		    delay = seafloordepthmin / 750.0;
 		    delay = ((int)(delay / 0.05)) * 0.05;
+		    endofdata = seafloordepthmax / 750.0 + linetracelength;
+		    endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
+		    sweep = endofdata - delay;
 		    if (sweep > MBES_MAX_SWEEP)
 			recalculatesweep = MB_YES;
 		    else
+			{
 			recalculatesweep = MB_NO;
+			}
 
 		    fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
 		    fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
@@ -1517,13 +1547,29 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		    	{
 			if (recalculatesweep == MB_YES)
 				{
-				sweep = (seafloordepthmaxplot[i] - seafloordepthminplot[i]) / 750.0 + 0.1;
-				sweep = (1 + (int)(sweep / 0.05)) * 0.05;
-				delay = seafloordepthminplot[i] / 750.0;
+				seafloordepthmin = seafloordepthminplot[i];
+				seafloordepthmax = seafloordepthmaxplot[i];
+				delay = seafloordepthmin / 750.0;
 				delay = ((int)(delay / 0.05)) * 0.05;
+				endofdata = seafloordepthmax / 750.0 + linetracelength;
+				endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
+				sweep = endofdata - delay;
 				}
 
 		        sprintf(command, "#   Section plot %d of %d\n", i + 1, nplot);
+			fprintf(stderr, "%s", command);
+			fprintf(sfp, "%s", command);
+		        sprintf(command, "#     Seafloor depth min: %f (m) %f (s)  max: %f (m) %f (s)\n",
+				seafloordepthmin, seafloordepthmin / 750.0, seafloordepthmax, seafloordepthmax / 750.0);
+			fprintf(stderr, "%s", command);
+			fprintf(sfp, "%s", command);
+		        sprintf(command, "#     Trace length: %f (s)\n", linetracelength);
+			fprintf(stderr, "%s", command);
+			fprintf(sfp, "%s", command);
+		        sprintf(command, "#     Trace delay: %f (s)\n", delay);
+			fprintf(stderr, "%s", command);
+			fprintf(sfp, "%s", command);
+		        sprintf(command, "#     Trace sweep: %f (s)\n", sweep);
 			fprintf(stderr, "%s", command);
 			fprintf(sfp, "%s", command);
 

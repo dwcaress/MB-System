@@ -2,7 +2,7 @@
  *    The MB-system:	mbview.h	10/9/2002
  *    $Id$
  *
- *    Copyright (c); 2002-2013 by
+ *    Copyright (c); 2002-2014 by
  *    David W. Caress (caress@mbari.org);
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -173,7 +173,8 @@
 #define	MBV_COLORTABLE_MUTED		2
 #define	MBV_COLORTABLE_GRAY		3
 #define	MBV_COLORTABLE_FLAT		4
-#define	MBV_COLORTABLE_SEALEVEL		5
+#define	MBV_COLORTABLE_SEALEVEL1	5
+#define	MBV_COLORTABLE_SEALEVEL2	6
 
 /* individual color defines */
 #define	MBV_COLOR_BLACK			0
@@ -438,6 +439,7 @@ struct mbview_site_struct {
 struct mbview_route_struct {
 	int	color;
 	int	size;
+	int	editmode;
 	mb_path	name;
 	double	distancelateral;
 	double	distancetopo;
@@ -704,6 +706,7 @@ struct mb3dsoundings_sounding_struct {
 	int	ifile;
 	int	iping;
 	int	ibeam;
+        int     beamcolor;
 	char	beamflag;
         char	beamflagorg;
 	double	x;
@@ -739,7 +742,6 @@ struct mb3dsoundings_struct {
 	int	num_soundings_flagged;
 	int	num_soundings_alloc;
 	struct mb3dsoundings_sounding_struct *soundings;
-
 };
 
 
@@ -1117,6 +1119,7 @@ int mbview_addroute(int verbose, size_t instance,
 			int	*waypoint,
 			int	routecolor,
 			int	routesize,
+                        int     routeeditmode,
 			mb_path	routename,
 			int 	*iroute,
 			int *error);
@@ -1249,6 +1252,8 @@ int mb3dsoundings_set_dismiss_notify(int verbose, void (dismiss_notify)(), int *
 int mb3dsoundings_set_edit_notify(int verbose, void (edit_notify)(int, int, int, char, int), int *error);
 int mb3dsoundings_set_info_notify(int verbose, void (edit_notify)(int, int, int, char *), int *error);
 int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double, double), int *error);
+int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double, double), int *error);
+int mb3dsoundings_set_colorsoundings_notify(int verbose, void (colorsoundings_notify)(int), int *error);
 int mb3dsoundings_plot(int verbose, int *error);
 int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, double *timelag, int *error);
 /*--------------------------------------------------------------------*/

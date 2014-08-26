@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:13 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:42 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -268,13 +262,13 @@ F F2<ad4f>3.414 E F0 .914(option accom-)3.414 F
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 367.2 Q
 (Lamont-Doherty Earth Observ)113 379.2 Q(atory)-.25 E F1(OPTIONS)72 408
 Q F2<ad48>108 420 Q F0 .162(This "help" \215ag cause the program to pri\
-nt out a description of its operation and then e)144 420 R .162
+nt out a description of its operation and then e)22.52 F .162
 (xit immedi-)-.15 F(ately)144 432 Q(.)-.65 E F2<ad49>108 448.8 Q F3
-(\214lename)144 448.8 Q F0(Sets the input se)144 460.8 Q
+(\214lename)26.41 E F0(Sets the input se)144 460.8 Q
 (gy seismic data \214lename. Def)-.15 E(ault:)-.1 E F3(in\214le)2.5 E F0
-2.5(=")2.5 G(stdin".)-2.5 E F2<ad4c>108 477.6 Q F3(lon\215ip)144 477.6 Q
-F0 .572(Sets the range of the longitude v)144 489.6 R .572
-(alues returned.)-.25 F(If)5.572 E F3(lon\215ip)3.072 E F0 .572
+2.5(=")2.5 G(stdin".)-2.5 E F2<ad4c>108 477.6 Q F3(lon\215ip)23.63 E F0
+.572(Sets the range of the longitude v)144 489.6 R .572(alues returned.)
+-.25 F(If)5.572 E F3(lon\215ip)3.072 E F0 .572
 (=\2551 then the longitude v)B .571(alues will be in)-.25 F .488
 (the range from \255360 to 0 de)144 501.6 R .488(grees. If)-.15 F F3
 (lon\215ip)2.988 E F0 .488(=0 then the longitude v)B .489
@@ -287,8 +281,8 @@ F0 .572(Sets the range of the longitude v)144 489.6 R .572
 108 542.4 Q F0 1.256(This option causes the program output to be direct\
 ed to ".sinf" \214les rather than to stdout. Each)144 554.4 R(".sinf" \
 \214le is named using the original data \214le path with an ".sinf" suf)
-144 566.4 Q(\214x appended.)-.25 E F2<ad56>108 583.2 Q F0(Normally)144
-583.2 Q(,)-.65 E F2(mbsegyinf)3.046 E(o)-.25 E F0 .546
+144 566.4 Q(\214x appended.)-.25 E F2<ad56>108 583.2 Q F0(Normally)23.08
+E(,)-.65 E F2(mbsegyinf)3.046 E(o)-.25 E F0 .546
 (only prints out the statistics obtained by reading all of the data.)
 3.046 F .545(If the)5.545 F F2<ad56>3.045 E F0 .484(\215ag is gi)144
 595.2 R -.15(ve)-.25 G .484(n, then).15 F F2(mbsegyinf)2.984 E(o)-.25 E

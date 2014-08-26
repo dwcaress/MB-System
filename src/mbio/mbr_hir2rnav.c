@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hir2rnav.c	5/20/99
  *	$Id: mbr_hir2rnav.c 1829 2010-02-05 02:53:39Z caress $
  *
- *    Copyright (c) 1999-2013 by
+ *    Copyright (c) 1999-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -361,7 +361,7 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	char	line[MB_PATH_MAXLINE];
+	char	line[MB_COMMENT_MAXLINE];
 	char	*line_ptr;
 	int	*read_count;
 	int	nget;
@@ -410,7 +410,7 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    && line[0] == '#')
 	    {
 	    store->kind = MB_DATA_COMMENT;
-            strncpy(store->comment,&line[1],MBSYS_SINGLEBEAM_MAXLINE);
+            strncpy(store->comment,&line[1],MB_COMMENT_MAXLINE);
 	    if (store->comment[strlen(store->comment)-1] == '\n')
 		store->comment[strlen(store->comment)-1] = '\0';
 	    (*read_count)++;
@@ -515,7 +515,7 @@ int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	char	line[MB_PATH_MAXLINE];
+	char	line[MB_COMMENT_MAXLINE];
 	int	*write_count;
 	int	len;
 
@@ -576,7 +576,7 @@ int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		if (store->kind == MB_DATA_COMMENT)
 		    {
 		    line[0] = '#';
-        	    strncpy(&line[1],store->comment,MBSYS_SINGLEBEAM_MAXLINE-2);
+        	    strncpy(&line[1],store->comment,MB_COMMENT_MAXLINE-2);
         	    len = strlen(line);
 		    if (line[len-1] != '\n')
 			{

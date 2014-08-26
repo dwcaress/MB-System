@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:10 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:39 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 4
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -329,30 +323,30 @@ G(ay Aquarium Research Institute)-2.5 E
 (Suzanne H. O'Hara \(sohara@ldeo.columbia.edu\))108 144 Q
 (Lamont\255Doherty Earth Observ)113 156 Q(atory)-.25 E F1(OPTIONS)72
 184.8 Q/F2 10/Times-Bold@0 SF<ad44>108 196.8 Q/F3 10/Times-Italic@0 SF
-(of)144 196.8 Q(fset)-.18 E F0(An of)144 208.8 Q
+(of)23.08 E(fset)-.18 E F0(An of)144 208.8 Q
 (fset to be added to the calculated tidal data, in meters. Def)-.25 E
 (ault:)-.1 E F3(of)2.5 E(fset)-.18 E F0(=0.)A F2<ad48>108 225.6 Q F0
 .162(This "help" \215ag cause the program to print out a description of\
- its operation and then e)144 225.6 R .162(xit immedi-)-.15 F(ately)144
-237.6 Q(.)-.65 E F2<ad49>108 254.4 Q F3(bpr\214le)144 254.4 Q F0(Input \
-pressure data from the SBE53 pressure sensor in the Sea\255Bird *.tid f\
-ormat.)144 266.4 Q F2<ad4f>108 283.2 Q F3(tide\214le)144 283.2 Q F0
-1.334(Output tide data \214le path. The format of the tide data control\
-led by the use \(or not\) of the)144 295.2 R F2<ad54>3.834 E F0(option.)
-144 307.2 Q F2<ad52>108 324 Q F3(longitude/latitude)144 324 Q F0
+ its operation and then e)22.52 F .162(xit immedi-)-.15 F(ately)144
+237.6 Q(.)-.65 E F2<ad49>108 254.4 Q F3(bpr\214le)26.41 E F0(Input pres\
+sure data from the SBE53 pressure sensor in the Sea\255Bird *.tid forma\
+t.)144 266.4 Q F2<ad4f>108 283.2 Q F3(tide\214le)22.52 E F0 1.334(Outpu\
+t tide data \214le path. The format of the tide data controlled by the \
+use \(or not\) of the)144 295.2 R F2<ad54>3.834 E F0(option.)144 307.2 Q
+F2<ad52>108 324 Q F3(longitude/latitude)23.08 E F0
 (Sets the location of the BPR deplo)144 336 Q(yment. Here)-.1 E F3
 (longitude)2.5 E F0(and)2.5 E F3(latitude)2.5 E F0(are in decimal de)2.5
 E(grees.)-.15 E F2<ad54>108 352.8 Q F0 .298(Changes the tide data forma\
 t output. The format of the tide data are normally in the form of a te)
-144 352.8 R(xt)-.15 E(\214le with tw)144 364.8 Q 2.5(oc)-.1 G(olumns:)
--2.5 E(time_d tide)159 376.8 Q .588(where time_d are time v)144 388.8 R
-.588(alues in decimal epoch seconds \(seconds since 1970 Jan 1 00:00:00\
-\) and)-.25 F .02(the tide v)144 400.8 R .02(alues are in meters.)-.25 F
-.02(If the)5.02 F F2<ad54>2.52 E F0 .02
+23.63 F(xt)-.15 E(\214le with tw)144 364.8 Q 2.5(oc)-.1 G(olumns:)-2.5 E
+(time_d tide)159 376.8 Q .588(where time_d are time v)144 388.8 R .588(\
+alues in decimal epoch seconds \(seconds since 1970 Jan 1 00:00:00\) an\
+d)-.25 F .02(the tide v)144 400.8 R .02(alues are in meters.)-.25 F .02
+(If the)5.02 F F2<ad54>2.52 E F0 .02
 (option is speci\214ed, then the output \214le will instead ha)2.52 F
 .32 -.15(ve t)-.2 H(he).15 E(form of:)144 412.8 Q
 (year month day hour min sec tide)159 424.8 Q F2<ad56>108 441.6 Q F0
-(Causes)144 441.6 Q F2(mbm_bpr)2.5 E F0(to operate in "v)2.5 E
+(Causes)23.08 E F2(mbm_bpr)2.5 E F0(to operate in "v)2.5 E
 (erbose" mode so that it outputs more information than usual.)-.15 E F1
 (Examples)72 470.4 Q F0 .934(Suppose one has deplo)108 482.4 R .934
 (yed an SBE53 at 110 de)-.1 F 3.434(g4)-.15 G .934(0.92220'W 26de)-3.434

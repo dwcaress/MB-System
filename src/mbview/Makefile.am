@@ -25,7 +25,7 @@ libmbview_la_SOURCES = \
        mbview_route.c mbview_nav.c mbview_vector.c mbview_bxutils.c mb_glwdrawa.c Mb3dsdg.c \
        mb3dsoundings_callbacks.c MBpedit.c mbpingedit_callbacks.c
 libmbview_la_LIBADD = \
-       ${top_builddir}/src/mr1pr/libmbmr1pr.la \
+       ${top_builddir}/src/bsio/libmbbsio.la \
        ${top_builddir}/src/surf/libmbsapi.la \
        ${top_builddir}/src/mbio/libmbio.la \
        ${top_builddir}/src/mbaux/libmbaux.la \

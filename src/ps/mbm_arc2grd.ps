@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:09 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:39 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 2
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -266,16 +260,16 @@ then reformats the gridded data as xyz data, writing it to a tempo-)
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 355.2 Q
 (Lamont-Doherty Earth Observ)113 367.2 Q(atory)-.25 E F1(OPTIONS)72 396
 Q F2<ad48>108 408 Q F0 .162(This "help" \215ag cause the program to pri\
-nt out a description of its operation and then e)144 408 R .161
+nt out a description of its operation and then e)22.52 F .161
 (xit immedi-)-.15 F(ately)144 420 Q(.)-.65 E F2<ad49>108 436.8 Q F3(ar)
-144 436.8 Q(c\214le)-.37 E F0(Sets the \214lename of the input ArcV)144
+26.41 E(c\214le)-.37 E F0(Sets the \214lename of the input ArcV)144
 448.8 Q(ie)-.6 E 2.5(wA)-.25 G(SCII grid.)-2.5 E F2<ad4f>108 465.6 Q F3
-(gr)144 465.6 Q(dname)-.37 E F0(Sets the \214lename of the output GMT g\
-rid \214le. This \214le will be in the GMT NetCDF GRD format.)144 477.6
-Q F2<ad56>108 494.4 Q F0(The)144 494.4 Q F2<ad56>2.5 E F0(option causes)
-2.5 E F2(mbm_ar)2.5 E(c2grd)-.18 E F0(to print out status messages.)2.5
-E F1(EXAMPLES)72 523.2 Q F0 .1(Suppose that we ha)108 535.2 R .4 -.15
-(ve o)-.2 H .1(btained an ascii ArcV).15 F(ie)-.6 E 2.6(wg)-.25 G .1
+(gr)22.52 E(dname)-.37 E F0(Sets the \214lename of the output GMT grid \
+\214le. This \214le will be in the GMT NetCDF GRD format.)144 477.6 Q F2
+<ad56>108 494.4 Q F0(The)23.08 E F2<ad56>2.5 E F0(option causes)2.5 E F2
+(mbm_ar)2.5 E(c2grd)-.18 E F0(to print out status messages.)2.5 E F1
+(EXAMPLES)72 523.2 Q F0 .1(Suppose that we ha)108 535.2 R .4 -.15(ve o)
+-.2 H .1(btained an ascii ArcV).15 F(ie)-.6 E 2.6(wg)-.25 G .1
 (rid called k)-2.6 F(ohalab)-.1 E .1(.asc. T)-.4 F 2.6(ot)-.8 G .1
 (ranslate this \214le to a GMT grd)-2.6 F(\214le, the follo)108 547.2 Q
 (wing will suf)-.25 E(\214ce:)-.25 E(mbm_arc2grd \255I k)144 559.2 Q

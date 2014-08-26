@@ -2,7 +2,7 @@
  *    The MB-system:	mbneptune2esf.c	2004/11/11
  *    $Id$
  *
- *    Copyright (c) 2004-2013 by
+ *    Copyright (c) 2004-2014 by
  *    Gordon Keith
  *      CSIRO Marine Research
  *      Castray Esplanade

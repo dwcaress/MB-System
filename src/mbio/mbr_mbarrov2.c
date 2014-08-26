@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_mbarrov2.c	10/3/2006
  *	$Id$
  *
- *    Copyright (c) 2006-2013 by
+ *    Copyright (c) 2006-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -494,7 +494,7 @@ int mbr_rt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->ship_latitude = data->ship_latitude;
 		store->ship_heading = data->ship_heading;
 		store->qc_flag = data->qc_flag;
-		for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
+		for (i=0;i<MB_COMMENT_MAXLINE;i++)
 		    store->comment[i] = data->comment[i];
 		}
 
@@ -561,7 +561,7 @@ int mbr_wt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->ship_latitude = store->ship_latitude;
 		data->ship_heading = store->ship_heading;
 		data->qc_flag = store->qc_flag;
-		for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
+		for (i=0;i<MB_COMMENT_MAXLINE;i++)
 		    data->comment[i] = store->comment[i];
 		}
 

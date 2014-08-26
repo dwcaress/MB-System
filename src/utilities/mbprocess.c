@@ -2,7 +2,7 @@
  *    The MB-system:	mbprocess.c	3/31/93
  *    $Id$
  *
- *    Copyright (c) 2000-2013 by
+ *    Copyright (c) 2000-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -258,6 +258,8 @@
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
 #include "mbsys_reson7k.h"
+#include "gsf.h"
+#include "mbsys_gsf.h"
 
 /* define sidescan correction table structure */
 struct mbprocess_sscorr_struct
@@ -431,7 +433,7 @@ and mbedit edit save files.\n";
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
 	/* parameter controls */
 	struct mb_process_struct process;
@@ -502,17 +504,36 @@ and mbedit edit save files.\n";
 	int	degree, time_set;
 	double	dminute;
 	double	splineflag;
-	double	*ntime, *nlon, *nlat, *nheading, *nspeed;
-	double	*ndraft, *nroll, *npitch, *nheave;
-	double	*natime, *nalon, *nalat, *naz;
-	double	zoffset;
-	double	*nlonspl, *nlatspl;
-	double	*nalonspl, *nalatspl, *nazspl;
-	double	*attitudetime, *attituderoll, *attitudepitch, *attitudeheave;
-	double	*fsonardepthtime, *fsonardepth;
-	double	*tidetime, *tide, tideval;
-	int	*staticbeam;
-	double	*staticoffset;
+	double	*ntime = NULL;
+        double  *nlon = NULL;
+        double  *nlat = NULL;
+        double  *nheading = NULL;
+        double  *nspeed = NULL;
+        double  *ndraft = NULL;
+        double  *nroll = NULL;
+        double  *npitch = NULL;
+        double  *nheave = NULL;
+        double  *natime = NULL;
+        double  *nalon = NULL;
+        double  *nalat = NULL;
+        double  *naz = NULL;
+        double  zoffset;
+	double	*nlonspl = NULL;
+        double  *nlatspl = NULL;
+        double  *nalonspl = NULL;
+        double  *nalatspl = NULL;
+        double  *nazspl = NULL;
+        double  *attitudetime = NULL;
+        double  *attituderoll = NULL;
+        double  *attitudepitch = NULL;
+        double  *attitudeheave = NULL;
+	double	*fsonardepthtime = NULL;
+        double  *fsonardepth = NULL;
+	double	*tidetime = NULL;
+        double  *tide = NULL;
+        double  tideval;
+	int	*staticbeam = NULL;
+	double	*staticoffset = NULL;
 	int	itime, iatime;
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
@@ -530,7 +551,7 @@ and mbedit edit save files.\n";
 	double	*depth = NULL;
 	double	*velocity = NULL;
 	double	*velocity_sum = NULL;
-	void	*rt_svp;
+	void	*rt_svp = NULL;
 	double	ssv;
 	int	nsap = 0;
 	double	*abs_depth = NULL;
@@ -4164,9 +4185,9 @@ and mbedit edit save files.\n";
 		sprintf(comment,"MB-system Version %s",MB_VERSION);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		strncpy(date,"\0",25);
 		right_now = time((time_t *)0);
-		strncpy(date,ctime(&right_now),24);
+		strcpy(date,ctime(&right_now));
+                date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
 		if (user_ptr != NULL)
@@ -7281,7 +7302,6 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_COMMENT))
 			{
-
 			status = mb_insert(verbose,imbio_ptr,
 					store_ptr,kind,
 					time_i,time_d,

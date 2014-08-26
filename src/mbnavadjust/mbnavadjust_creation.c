@@ -147,6 +147,7 @@ extern void do_view_showsurveys(Widget, XtPointer, XtPointer);
 extern void do_view_showdata(Widget, XtPointer, XtPointer);
 extern void do_view_showsections(Widget, XtPointer, XtPointer);
 extern void do_view_showcrossings(Widget, XtPointer, XtPointer);
+extern void do_view_showmediocrecrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showgoodcrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showbettercrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showtruecrossings(Widget, XtPointer, XtPointer);
@@ -695,6 +696,30 @@ CreatemainWindow(Widget parent)
     }
 
     XtAddCallback(pushButton_showcrossings, XmNactivateCallback, do_view_showcrossings, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show >10% Overlap Crossings",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_showmediocrecrossings = XmCreatePushButton(pulldownMenu_view,
+            (char *)"pushButton_showmediocrecrossings",
+            args,
+            ac);
+        XtManageChild(pushButton_showmediocrecrossings);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(pushButton_showmediocrecrossings, XmNactivateCallback, do_view_showmediocrecrossings, (XtPointer)0);
 
     ac = 0;
     {

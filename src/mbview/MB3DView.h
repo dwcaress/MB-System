@@ -87,7 +87,8 @@ typedef struct _MB3DViewData
     Widget mbview_toggleButton_colortable_muted;
     Widget mbview_toggleButton_colortable_gray;
     Widget mbview_toggleButton_colortable_flat;
-    Widget mbview_toggleButton_colortable_sealevel;
+    Widget mbview_toggleButton_colortable_sealevel1;
+    Widget mbview_toggleButton_colortable_sealevel2;
     Widget separator1;
     Widget mbview_toggleButton_profile;
     Widget mbview_cascadeButton_controls;

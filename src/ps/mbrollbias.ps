@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:13 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:41 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -281,8 +275,8 @@ E F0(Da)108 379.2 Q(vid W)-.2 E 2.5(.C)-.92 G(aress \(caress@mbari.or)
 (ay Aquarium Research Institute)-2.5 E
 (Dale N. Chayes \(dale@ldeo.columbia.edu\))108 403.2 Q
 (Lamont-Doherty Earth Observ)113 415.2 Q(atory)-.25 E F1(OPTIONS)72 444
-Q F2<ad46>108 456 Q F3(format1/format2)144 456 Q F0 1.162(Sets the)144
-468 R F2(MBIO)3.662 E F0 1.161
+Q F2<ad46>108 456 Q F3(format1/format2)24.19 E F0 1.162(Sets the)144 468
+R F2(MBIO)3.662 E F0 1.161
 (format identi\214ers for the \214rst and second data \214les, respecti)
 3.662 F -.15(ve)-.25 G(ly).15 E 6.161(.T)-.65 G 1.161(his program)-6.161
 F .501(uses the)144 480 R F2(MBIO)3.001 E F0 .501
@@ -292,7 +286,7 @@ G .501(th sonar format supported by).1 F F2(MBIO)3.002 E F0 3.002(.Al)C
 (ath sonar data formats currently supported by)-.1 F F2(MBIO)3.157 E F0
 .657(and their identi\214er v)3.157 F .657(alues is gi)-.25 F -.15(ve)
 -.25 G(n).15 E(in the)144 504 Q F2(MBIO)2.5 E F0(manual page.)2.5 E F2
-<ad44>108 520.8 Q F3(xdim/ydim)144 520.8 Q F0 .91
+<ad44>108 520.8 Q F3(xdim/ydim)23.08 E F0 .91
 (The area speci\214ed using the)144 532.8 R F2<ad52>3.41 E F0 .91
 (option is di)3.41 F .91(vided up into a grid of rectangular re)-.25 F
 .91(gions; roll bias)-.15 F .416
@@ -305,12 +299,12 @@ G .501(th sonar format supported by).1 F F2(MBIO)3.002 E F0 3.002(.Al)C
 -2.749 F(lation for the entire area.)144 568.8 Q(Def)5 E(ault:)-.1 E F3
 (xdim)5 E F0(=)2.5 E F3(ydim)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F2<ad48>108
 585.6 Q F0 .162(This "help" \215ag cause the program to print out a des\
-cription of its operation and then e)144 585.6 R .161(xit immedi-)-.15 F
-(ately)144 597.6 Q(.)-.65 E F2<ad49>108 614.4 Q F3(\214le1)144 614.4 Q
-F0(Sets the \214lename of the \214rst data \214le to be analyzed.)144
-626.4 Q F2<ad4a>108 643.2 Q F3(\214le2)144 643.2 Q F0
+cription of its operation and then e)22.52 F .161(xit immedi-)-.15 F
+(ately)144 597.6 Q(.)-.65 E F2<ad49>108 614.4 Q F3(\214le1)26.41 E F0
+(Sets the \214lename of the \214rst data \214le to be analyzed.)144
+626.4 Q F2<ad4a>108 643.2 Q F3(\214le2)25.3 E F0
 (Sets the \214lename of the second data \214le to be analyzed.)144 655.2
-Q F2<ad4c>108 672 Q F3(lon\215ip)144 672 Q F0 .572
+Q F2<ad4c>108 672 Q F3(lon\215ip)23.63 E F0 .572
 (Sets the range of the longitude v)144 684 R .572(alues returned.)-.25 F
 (If)5.572 E F3(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
 .572(alues will be in)-.25 F .489(the range from \255360 to 0 de)144 696
@@ -328,9 +322,9 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 145.39(mbrollbias\(1\) MB-System)72 48 R 145.39
 (5.0 mbrollbias\(1\))2.5 F/F1 10/Times-Bold@0 SF<ad52>108 84 Q/F2 10
-/Times-Italic@0 SF(west/east/south/north)144 84 Q F0(Sets the longitude\
- and latitude bounds of the area of the roll bias test.)144 96 Q F1
-<ad56>108 112.8 Q F0(The)144 112.8 Q F1<ad56>2.5 E F0
+/Times-Italic@0 SF(west/east/south/north)23.08 E F0(Sets the longitude \
+and latitude bounds of the area of the roll bias test.)144 96 Q F1<ad56>
+108 112.8 Q F0(The)23.08 E F1<ad56>2.5 E F0
 (option causes the program to print out the program name and v)2.5 E
 (ersion during e)-.15 E -.15(xe)-.15 G(cution.).15 E/F3 10.95
 /Times-Bold@0 SF(EXAMPLE)72 129.6 Q F0 .807(Suppose you w)108 141.6 R

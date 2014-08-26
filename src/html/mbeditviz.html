@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>MBeditviz</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  2 June 2014 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -108,6 +108,23 @@ You can edit the soundings in the point cloud context using the left mouse butto
 editing mouse modes work just like MBedit. The View menu in the
 point cloud display lets you show, or not show, the flagged soundings (which are displayed in red).
 <P>
+<I>Changing Sounding Colors</I>
+<P>
+The [3D Soundings]:&lt;Action&gt; pulldown menu has seven buttons that allow the user to change the
+display color of all currently selected unflagged soundings. Each of these options
+(black, red, yellow, green, bluegreen, blue, purple) acts on the soundings  displayed in
+the 3D Soundings window, and these color settings are saved when the 3D Soundings window is
+dismissed or redisplayed. This feature can aid in using <B>MBeditviz</B> for patch test
+(bias parameter) analysis. For instance, if a survey includes reciprocal lines (two coincident
+survey lines collected in opposite directions), one can use a narrow strip of soundings across
+the swaths to assess the roll bias value. This analysis is easier if the soundings from the
+two reciprocal swaths can be differentiated. To accomplish this, a user can select one line using the
+[MBview]:&lt;Pick Nav&gt; mode, bringing those associated soundings up in the 3D Soundings window,
+and then set all those soundings to be colored green. The soundings of the opposite line
+can be similarly colored purple. Then, selecting a narrow area across the reciprocal lines
+will select and display soundings from both lines, and those soundings will be green or
+purple depending on which line they are part of.
+<P>
 <I>Applying the Bathyemtry Edits</I>
 <P>
 When you dismiss the gridded view, the esf files of the affected files will be updated just
@@ -201,7 +218,7 @@ This program is not done, nor is it adequately documented.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 2 June 2014</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

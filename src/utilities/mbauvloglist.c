@@ -2,7 +2,7 @@
  *    The MB-system:	mbauvloglist.c	8/14/2006
  *    $Id$
  *
- *    Copyright (c) 2006-2013 by
+ *    Copyright (c) 2006-2014 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -495,6 +495,14 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 			if (printfields[i].formatset == MB_NO)
 				{
 				strcpy(printfields[i].format, "%f");
+				}
+			}
+		else if (strcmp(printfields[i].name,"timeTag") == 0)
+			{
+			printfields[i].index = INDEX_ZERO;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.8f");
 				}
 			}
 		else if (strcmp(printfields[i].name,"mergeLon") == 0)

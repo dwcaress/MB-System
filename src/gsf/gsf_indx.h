@@ -26,7 +26,21 @@
  * References : DoDBL Generic Sensor Format Sept. 30, 1993
  *
  *
- * Copyright (C) Science Applications International Corp.
+ * copyright 2014 Leidos, Inc.
+ * There is no charge to use the library, and it may be accessed at:
+ * https://www.leidos.com/maritime/gsf.
+ * This library may be redistributed and/or modified under the terms of
+ * the GNU Lesser General Public License version 2.1, as published by the
+ * Free Software Foundation.  A copy of the LGPL 2.1 license is included with
+ * the GSF distribution and is avaialbe at: http://opensource.org/licenses/LGPL-2.1.
+ *
+ * Leidos, Inc. configuration manages GSF, and provides GSF releases. Users are
+ * strongly encouraged to communicate change requests and change proposals to Leidos, Inc.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.
+ *
  ********************************************************************/
 
 #ifndef __GSF_INDX__
@@ -44,14 +58,14 @@ extern "C" {
      * the macro definition for the version size defines the number of bytes
      * read/written for the version, so this should NOT be changed.
      */
-    #define GSF_INDEX_VERSION       "INDEX-GSF-v01.00"
+    #define GSF_INDEX_VERSION       "INDEX-GSF-v02.00"
     #define GSF_INDEX_VERSION_SIZE  16
 
     /* Typedef a structure to hold the index file header information */
     typedef struct t_gsfIndexHeader
     {
         char        version[GSF_INDEX_VERSION_SIZE+1];
-        int         gsfFileSize;
+        long long   gsfFileSize;
         int         endian;
         int         number_record_types;
         int         spare1;
@@ -69,6 +83,7 @@ extern "C" {
     int OPTLK       gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft);
     int OPTLK       gsfCloseIndex(GSF_FILE_TABLE *ft);
     void OPTLK      SwapLong(unsigned int *base, int count);
+    void OPTLK      SwapLongLong(long long *base_address, int count);
 
     void OPTLK      gsf_register_progress_callback (GSF_PROGRESS_CALLBACK progressCB);
     /*

@@ -1,10 +1,10 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.22.2
-%%CreationDate: Wed Feb 19 17:05:11 2014
+%%Creator: groff version 1.19.2
+%%CreationDate: Sun Aug 24 20:01:40 2014
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
-%%DocumentSuppliedResources: procset grops 1.22 2
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 3
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -14,7 +14,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.22 2
+%%BeginResource: procset grops 1.19 2
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -72,7 +72,6 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
-DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -138,10 +137,7 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne
-2 index/UniqueID ne
-and
-{def}{pop pop}ifelse
+1 index/FID ne{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -179,10 +175,8 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
-mark
 }bind def
 /PEND{
-cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -291,12 +285,12 @@ e standard MB-System \214le suf)108 398.4 R 1.275(\214x to the)-.25 F
 G 1.25(rall command will be achie).15 F -.15(ve)-.25 G 3.75(dw).15 G
 (hen)-3.75 E F3(npr)3.75 E(ocesses)-.45 E F0(equals the number of a)108
 482.4 Q -.25(va)-.2 G(ilable CPUs or cores.).25 E(The)108 506.4 Q F2
-<ad54>3.153 E F0 .653(option causes this macro to print out the)3.153 F
-F2(mbcopy)3.153 E F0 .653(commands it will e)3.153 F -.15(xe)-.15 G .653
-(cute without actually e).15 F -.15(xe)-.15 G(-).15 E .162
-(cuting them. This test option allo)108 518.4 R .163(ws users to check \
-the consequences of their command before actually run-)-.25 F(ning it.)
-108 530.4 Q F1 -.548(AU)72 559.2 S(THORSHIP).548 E F0
+<ad54>4.407 E F0 1.907(option causes this macro to print out the)4.407 F
+F2(mbcopy)4.407 E F0 1.907(commands it will e)4.407 F -.15(xe)-.15 G
+1.906(cute without actually).15 F -.15(exe)108 518.4 S .545
+(cuting them. This test option allo).15 F .545
+(ws users to check the consequences of their command before actually)
+-.25 F(running it.)108 530.4 Q F1 -.548(AU)72 559.2 S(THORSHIP).548 E F0
 (Christian Ferreira)108 571.2 Q(MAR)113 583.2 Q(UM, Uni)-.4 E -.15(ve)
 -.25 G(rsity of Bremen).15 E(Da)108 595.2 Q(vid W)-.2 E 2.5(.C)-.92 G
 (aress \(caress@mbari.or)-2.5 E(g\))-.18 E(Montere)113 607.2 Q 2.5(yB)
@@ -305,7 +299,7 @@ the consequences of their command before actually run-)-.25 F(ning it.)
 (Lamont-Doherty Earth Observ)113 631.2 Q(atory)-.25 E F1
 (SIMPLE DESCRIPTION OF B)72 660 Q(ASIC OPTIONS)-.329 E F2<ad48>108 672 Q
 F0 .162(This "help" \215ag cause the program to print out a description\
- of its operation and then e)144 672 R .161(xit immedi-)-.15 F(ately)144
+ of its operation and then e)22.52 F .161(xit immedi-)-.15 F(ately)144
 684 Q(.)-.65 E F2<ad43>108 700.8 Q F0 1.013(This option causes the prog\
 ram to check if each output \214le already e)144 712.8 R 1.013
 (xists, and to for)-.15 F 1.014(go cop)-.18 F(ying)-.1 E
@@ -317,7 +311,7 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbm_multicop)72 48 Q 122.15(y\(1\) MB-System)-.1
 F 122.15(5.0 mbm_multicop)2.5 F(y\(1\))-.1 E/F1 10/Times-Bold@0 SF<ad46>
-108 84 Q/F2 10/Times-Italic@0 SF(outputformat)144 84 Q F0 .009
+108 84 Q/F2 10/Times-Italic@0 SF(outputformat)24.19 E F0 .009
 (This option sets the output sw)144 96 R .008(ath format. All of the sw)
 -.1 F .008(ath data \214les referenced in the datalist speci-)-.1 F .825
 (\214ed with the)144 108 R F1<ad49>3.326 E F0 .826
@@ -326,9 +320,9 @@ F 122.15(5.0 mbm_multicop)2.5 F(y\(1\))-.1 E/F1 10/Times-Bold@0 SF<ad46>
 -3.326 E F1<ad46>3.326 E F0 .826(option is)3.326 F(not gi)144 120 Q -.15
 (ve)-.25 G
 (n, then the input \214les will be copied to their input formats.).15 E
-F1<ad49>108 136.8 Q F2(datalist)144 136.8 Q F0 .417(Sets the input data\
-list \214lename. A datalist is an ascii \214le containing a list of the\
- input sw)144 148.8 R .416(ath sonar)-.1 F 1.005
+F1<ad49>108 136.8 Q F2(datalist)26.41 E F0 .417(Sets the input datalist\
+ \214lename. A datalist is an ascii \214le containing a list of the inp\
+ut sw)144 148.8 R .416(ath sonar)-.1 F 1.005
 (data \214les to be copied and their formats.)144 160.8 R 1.005(In the)
 6.005 F F2(datalist)3.505 E F0 1.005(\214le, each sw)3.505 F 1.005
 (ath data \214le should be fol-)-.1 F(lo)144 172.8 Q
@@ -352,25 +346,24 @@ E F0 1.02(commands it will e)3.519 F -.15(xe)-.15 G 1.02(cute without)
 (cuting them. This test option allo).15 F .016
 (ws users to check the consequences of their command)-.25 F
 (before actually running it.)144 297.6 Q F1<ad56>108 314.4 Q F0(Causes)
-144 314.4 Q F1(mbm_multicopy)3.65 E F0 1.151(to operate in "v)3.65 F
-1.151(erbose" mode so that it outputs more information than)-.15 F
-(usual.)144 326.4 Q F1<ad58>108 343.2 Q F2(npr)144 343.2 Q(ocesses)-.45
-E F0(This option sets the number of parallel, simultaneous)144 355.2 Q
-F1(mbcopy)2.5 E F0(processes that may be run.)2.5 E/F3 10.95
-/Times-Bold@0 SF(EXAMPLES)72 384 Q F0(Suppose one has three ra)108 396 Q
-2.5(w\()-.15 G(format 56\) Simrad EM300 data \214les:)-2.5 E
-(0001_20020424_212920_ra)144 408 Q -.65(w.)-.15 G(all).65 E
-(0002_20020425_011607_ra)144 420 Q -.65(w.)-.15 G(all).65 E
-(0003_20020425_022926_ra)144 432 Q -.65(w.)-.15 G(all).65 E .236
-(One can generate a datalist called datalistr)108 444 R .236
-(.mb-1 referencing these three sw)-.55 F .236(ath \214les using a te)-.1
-F .235(xt editor or by)-.15 F(using)108 456 Q F1(awk)2.5 E F0(:)A
-(ls \2551 *all | a)144 468 Q(wk '{print $1" 56"}' > datalistr)-.15 E
-(.mb-1)-.55 E .47(In order to translate all three \214les in the proces\
-sing format for Simrad multibeam data \(format 57\), use the)108 480 R
-F1(mbm_multicopy)108 492 Q F0(macro:)2.5 E(mbm_multicop)144 504 Q 2.5
-<79ad>-.1 G 2.5(Id)-2.5 G(atalistr)-2.5 E
-(.mb-1 \255F 57 \255T \255X2 \255V)-.55 E
+23.08 E F1(mbm_multicopy)3.65 E F0 1.151(to operate in "v)3.65 F 1.151
+(erbose" mode so that it outputs more information than)-.15 F(usual.)144
+326.4 Q F1<ad58>108 343.2 Q F2(npr)23.08 E(ocesses)-.45 E F0
+(This option sets the number of parallel, simultaneous)144 355.2 Q F1
+(mbcopy)2.5 E F0(processes that may be run.)2.5 E/F3 10.95/Times-Bold@0
+SF(EXAMPLES)72 384 Q F0(Suppose one has three ra)108 396 Q 2.5(w\()-.15
+G(format 56\) Simrad EM300 data \214les:)-2.5 E(0001_20020424_212920_ra)
+144 408 Q -.65(w.)-.15 G(all).65 E(0002_20020425_011607_ra)144 420 Q
+-.65(w.)-.15 G(all).65 E(0003_20020425_022926_ra)144 432 Q -.65(w.)-.15
+G(all).65 E .236(One can generate a datalist called datalistr)108 444 R
+.236(.mb-1 referencing these three sw)-.55 F .236
+(ath \214les using a te)-.1 F .235(xt editor or by)-.15 F(using)108 456
+Q F1(awk)2.5 E F0(:)A(ls \2551 *all | a)144 468 Q
+(wk '{print $1" 56"}' > datalistr)-.15 E(.mb-1)-.55 E .47(In order to t\
+ranslate all three \214les in the processing format for Simrad multibea\
+m data \(format 57\), use the)108 480 R F1(mbm_multicopy)108 492 Q F0
+(macro:)2.5 E(mbm_multicop)144 504 Q 2.5<79ad>-.1 G 2.5(Id)-2.5 G
+(atalistr)-2.5 E(.mb-1 \255F 57 \255T \255X2 \255V)-.55 E
 (The macro prints out the follo)108 516 Q(wing as it translates the sw)
 -.25 E(ath data:)-.1 E(Running mbm_multicop)144 528 Q -.65(y.)-.1 G(..)
 .65 E(Getting \214le list using mbdatalist...)144 540 Q
