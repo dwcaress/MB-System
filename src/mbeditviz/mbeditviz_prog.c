@@ -2417,39 +2417,51 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);*/
 		/* get projected bounds */
 
 		/* first point */
-		mb_proj_forward(mbev_verbose, pjptr, mbev_grid_bounds[0], mbev_grid_bounds[2],
+		mb_proj_forward(5, pjptr, mbev_grid_bounds[0], mbev_grid_bounds[2],
 				&xx, &yy, &mbev_error);
 		mbev_grid_boundsutm[0] = xx;
 		mbev_grid_boundsutm[1] = xx;
 		mbev_grid_boundsutm[2] = yy;
 		mbev_grid_boundsutm[3] = yy;
+fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
+mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
+mbev_grid_boundsutm[0],mbev_grid_boundsutm[1],mbev_grid_boundsutm[2],mbev_grid_boundsutm[3]);
 
 		/* second point */
-		mb_proj_forward(mbev_verbose, pjptr, mbev_grid_bounds[1], mbev_grid_bounds[2],
+		mb_proj_forward(5, pjptr, mbev_grid_bounds[1], mbev_grid_bounds[2],
 				&xx, &yy, &mbev_error);
 		mbev_grid_boundsutm[0] = MIN(mbev_grid_boundsutm[0], xx);
 		mbev_grid_boundsutm[1] = MAX(mbev_grid_boundsutm[1], xx);
 		mbev_grid_boundsutm[2] = MIN(mbev_grid_boundsutm[2], yy);
 		mbev_grid_boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
+fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
+mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
+mbev_grid_boundsutm[0],mbev_grid_boundsutm[1],mbev_grid_boundsutm[2],mbev_grid_boundsutm[3]);
 
 		/* third point */
-		mb_proj_forward(mbev_verbose, pjptr, mbev_grid_bounds[0], mbev_grid_bounds[3],
+		mb_proj_forward(5, pjptr, mbev_grid_bounds[0], mbev_grid_bounds[3],
 				&xx, &yy, &mbev_error);
 		mbev_grid_boundsutm[0] = MIN(mbev_grid_boundsutm[0], xx);
 		mbev_grid_boundsutm[1] = MAX(mbev_grid_boundsutm[1], xx);
 		mbev_grid_boundsutm[2] = MIN(mbev_grid_boundsutm[2], yy);
 		mbev_grid_boundsutm[3] = MAX(mbev_grid_boundsutm[3], yy);
+fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
+mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
+mbev_grid_boundsutm[0],mbev_grid_boundsutm[1],mbev_grid_boundsutm[2],mbev_grid_boundsutm[3]);
 
 		/* fourth point */
-		mb_proj_forward(mbev_verbose, pjptr, mbev_grid_bounds[1], mbev_grid_bounds[3],
+		mb_proj_forward(5, pjptr, mbev_grid_bounds[1], mbev_grid_bounds[3],
 				&xx, &yy, &mbev_error);
 		mbev_grid_boundsutm[0] = MIN(mbev_grid_boundsutm[0], xx);
 		mbev_grid_boundsutm[1] = MAX(mbev_grid_boundsutm[1], xx);
 		mbev_grid_boundsutm[2] = MIN(mbev_grid_boundsutm[2], yy);
 		mbev_grid_boundsutm[3] = MAX(mbev_grid_boundsutm[3], yy);
+fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
+mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
+mbev_grid_boundsutm[0],mbev_grid_boundsutm[1],mbev_grid_boundsutm[2],mbev_grid_boundsutm[3]);
 
 		/* get grid spacing */
-/*fprintf(stderr,"altitude: %f %f\n", altitude_min, altitude_max);*/
+fprintf(stderr,"altitude: %f %f\n", altitude_min, altitude_max);
 		if (altitude_max > 0.0)
 			mbev_grid_cellsize = 0.02 * altitude_max;
 		else if (depth_max > 0.0)
@@ -2462,11 +2474,11 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);*/
 		mbev_grid_ny = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
 		mbev_grid_boundsutm[1] = mbev_grid_boundsutm[0] + (mbev_grid_nx - 1) * mbev_grid_cellsize;
 		mbev_grid_boundsutm[3] = mbev_grid_boundsutm[2] + (mbev_grid_ny - 1) * mbev_grid_cellsize;
-/*fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
+fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
 mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
 mbev_grid_boundsutm[0],mbev_grid_boundsutm[1],mbev_grid_boundsutm[2],mbev_grid_boundsutm[3]);
 fprintf(stderr,"cell size:%f dimensions: %d %d\n",
-mbev_grid_cellsize,mbev_grid_nx,mbev_grid_ny);*/
+mbev_grid_cellsize,mbev_grid_nx,mbev_grid_ny);
 
 		/* release projection */
 		mb_proj_free(mbev_verbose, &(pjptr), &mbev_error);

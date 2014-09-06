@@ -1932,6 +1932,20 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
                         mbv_contour_interval
                                 = pow(10.0, floor(log10(mbv_primary_max
                                                         - mbv_primary_min)) - 1.0);
+
+                        /* set mbview default values */
+                        status = mb_mbview_defaults(verbose,
+                                                    &mbv_primary_colortable,
+					            &mbv_primary_colortable_mode,
+					            &mbv_primary_shade_mode,
+					            &mbv_slope_colortable,
+					            &mbv_slope_colortable_mode,
+					            &mbv_secondary_colortable,
+					            &mbv_secondary_colortable_mode,
+					            &mbv_illuminate_magnitude,
+					            &mbv_illuminate_elevation,
+					            &mbv_illuminate_azimuth,
+					            &mbv_slope_magnitude);
                         }
         
                 /* set the display projection */

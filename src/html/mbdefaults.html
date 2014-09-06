@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbdefaults</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  5 September 2014 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -29,14 +29,14 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbdefaults</B> [<B>-B</B><I>fileiobuffer</I> <B>-D</B><I>psdisplay</I> <B>-F</B><I>fbtversion</I>  <B>-I</B><I>imagedisplay</I>
-<B>-L</B><I>lonflip</I> <B>-T</B><I>timegap</I> <B>-U</B><I>uselockfiles</I>
+<B>-L</B><I>lonflip</I> <B>-M</B><I>mbviewsettings</I> <B>-T</B><I>timegap</I> <B>-U</B><I>uselockfiles</I>
 <B>-W</B><I>project</I> <B>-V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
 <B>mbdefaults</B> is a utility for setting or listing the default read
-parameters used by some <B>MBIO</B> utilities such as <B>MBCOPY</B>.
+parameters used by some <B>MBIO</B> utilities such as <B>MBcopy</B> or <B>MBgrdviz</B>.
 If a user wishes to set default
 parameters different from those set by the <B>MBIO</B> library, then
 these specialized default values must be stored
@@ -146,6 +146,70 @@ the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
+<DT><B>-MP</B>
+
+<DD>
+<I>colortable/colortable_mode/shade_mode</I>
+<BR>
+
+Sets the default colortable, colortable mode, and shading mode for
+the programs <B>MBgrdviz</B> and <B>MBeditviz</B>. The <I>colortable</I> identifiers are
+similar to those used for <B>mbm_grdplot</B>:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;=&nbsp;Haxby&nbsp;colortable
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;=&nbsp;Bright&nbsp;colortable
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;=&nbsp;Muted&nbsp;colortable
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;=&nbsp;Grayscale&nbsp;colortable
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;=&nbsp;Flat&nbsp;Gray&nbsp;colortable
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;=&nbsp;Sealevel&nbsp;1&nbsp;colortable
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;=&nbsp;Sealevel&nbsp;2&nbsp;colortable
+<BR>
+
+The <I>colortable_mode</I> refers to whether low values
+are represented by &quot;cool&quot; colors (e.g. blue) and high values
+by &quot;hot&quot; colors (e.g. red), which corresponds to <I>colortable_mode</I> = 0,
+or the opposite, which corresponds to <I>colortable_mode</I> = 1.
+<P>
+The <I>shade_mode</I> value determines whether shading is off
+(<I>shade_mode</I> = 0), done by illumination(<I>shade_mode</I> = 1),
+or done using slope magnitude (<I>shade_mode</I> = 2). Shading by overlay
+cannot be a default because overlay data are not always defined.
+<DT><B>-MG</B>
+
+<DD>
+<I>slope_colortable/slope_colortable_mode</I>
+<BR>
+
+Sets the default colortable and colortable mode for displays of slope
+using the programs <B>MBgrdviz</B> and <B>MBeditviz</B>.
+The colortable and colortable mode identifiers are the same as given
+above for <B>-MP</B>.
+<DT><B>-MO</B>
+
+<DD>
+<I>secondary_colortable/secondary_colortable_mode</I>
+<BR>
+
+Sets the default colortable and colortable mode for displays of 
+overlay data using the programs <B>MBgrdviz</B> and <B>MBeditviz</B>.
+The colortable and colortable mode identifiers are the same as given
+above for <B>-MP</B>.
+<DT><B>-MI</B>
+
+<DD>
+<I>magnitude/elevation/azimuth</I>
+<BR>
+
+Sets the default parameters for shading by illumination using the
+programs <B>MBgrdviz</B> and <B>MBeditviz</B>.
+The <I>elevation</I> and <I>azimuth</I> values are in degrees.
+<DT><B>-MS</B>
+
+<DD>
+<I>magnitude</I>
+<BR>
+
+Sets the default parameter for shading by slope magnitude using the
+programs <B>MBgrdviz</B> and <B>MBeditviz</B>.
 <DT><B>-T</B>
 
 <DD>
@@ -257,7 +321,7 @@ happen to you...
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 5 September 2014</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
