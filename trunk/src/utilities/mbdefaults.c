@@ -20,71 +20,6 @@
  *
  * Author:	D. W. Caress
  * Date:	January 23, 1993
- * $Log: mbdefaults.c,v $
- * Revision 5.6  2008/12/31 08:47:38  caress
- * Updates towards release 5.1.1
- *
- * Revision 5.5  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.4  2003/04/17 21:17:10  caress
- * Release 5.0.beta30
- *
- * Revision 5.3  2001/11/20 21:50:38  caress
- * The .mbio_defaults file no longer controls format,
- * pings, bounds, btime_i, and etime_i.
- *
- * Revision 5.2  2001/06/03  07:07:34  caress
- * Release 5.0.beta01.
- *
- * Revision 5.1  2001/03/22 21:14:16  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.0  2000/12/01  22:57:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.7  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.6  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.5  1998/10/05  19:19:24  caress
- * MB-System version 4.6beta
- *
- * Revision 4.4  1997/04/21  17:19:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.3  1995/05/12  17:12:32  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.3  1995/05/12  17:12:32  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.2  1995/03/06  19:37:59  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.1  1994/10/21  13:02:31  caress
- * Release V4.0
- *
- * Revision 4.0  1994/03/06  00:13:22  caress
- * First cut at version 4.0
- *
- * Revision 4.0  1994/03/01  18:59:27  caress
- * First cut at new version. Any changes are associated with
- * support of three data types (beam bathymetry, beam amplitude,
- * and sidescan) instead of two (bathymetry and backscatter).
- *
- * Revision 3.3  1993/05/27  23:37:16  caress
- * Fixed handling of -F option.
- *
- * Revision 3.2  1993/05/15  14:48:54  caress
- * removed excess rcs_id message
- *
- * Revision 3.1  1993/05/14  23:48:05  sohara
- * *** empty log message ***
  *
  */
 
@@ -99,6 +34,25 @@
 #include "mb_status.h"
 #include "mb_define.h"
 
+/* colortable view mode defines */
+#define	MBV_COLORTABLE_HAXBY		0
+#define	MBV_COLORTABLE_BRIGHT		1
+#define	MBV_COLORTABLE_MUTED		2
+#define	MBV_COLORTABLE_GRAY		3
+#define	MBV_COLORTABLE_FLAT		4
+#define	MBV_COLORTABLE_SEALEVEL1	5
+#define	MBV_COLORTABLE_SEALEVEL2	6
+
+/* colortable view mode defines */
+#define	MBV_COLORTABLE_NORMAL		0
+#define	MBV_COLORTABLE_REVERSED		1
+
+/* shade view mode defines */
+#define	MBV_SHADE_VIEW_NONE		0
+#define	MBV_SHADE_VIEW_ILLUMINATION	1
+#define	MBV_SHADE_VIEW_SLOPE		2
+#define	MBV_SHADE_VIEW_OVERLAY		3
+
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -107,7 +61,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "MBDEFAULTS";
 	char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
-	char usage_message[] = "mbdefaults [-Bfileiobuffer -Dpsdisplay -Ffbtversion -Iimagedisplay -Llonflip\n\t-Ttimegap -Wproject -V -H]";
+	char usage_message[] = "mbdefaults [-Bfileiobuffer -Dpsdisplay -Ffbtversion -Iimagedisplay -Llonflip\n\t-Mmbviewsettings\n\t-Ttimegap -Wproject -V -H]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -126,6 +80,17 @@ int main (int argc, char **argv)
 	int	uselockfiles = 1;
 	int	fileiobuffer = 0;
 	char	*HOME = "HOME";
+	int	primary_colortable;
+	int	primary_colortable_mode;
+	int	primary_shade_mode;
+	int	slope_colortable;
+	int	slope_colortable_mode;
+	int	secondary_colortable;
+	int	secondary_colortable_mode;
+	double	illuminate_magnitude;
+	double	illuminate_elevation;
+	double	illuminate_azimuth;
+	double	slope_magnitude;
 	char	*getenv();
 
 	/* MBIO control parameters */
@@ -137,6 +102,8 @@ int main (int argc, char **argv)
 	int etime_i[7];
 	double speedmin;
 	double timegap;
+	
+	int	n;
 
 	/* get current default mbio values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -144,6 +111,20 @@ int main (int argc, char **argv)
 
 	/* now get current mb environment values */
 	status = mb_env(verbose,psdisplay,imgdisplay,mbproject);
+
+	/* now get current mbview default display values */
+	status = mb_mbview_defaults(verbose,
+					&primary_colortable,
+					&primary_colortable_mode,
+					&primary_shade_mode,
+					&slope_colortable,
+					&slope_colortable_mode,
+					&secondary_colortable,
+					&secondary_colortable_mode,
+					&illuminate_magnitude,
+					&illuminate_elevation,
+					&illuminate_azimuth,
+					&slope_magnitude);
 
 	/* now get current fbtversion value */
 	status = mb_fbtversion(verbose,&fbtversion);
@@ -155,7 +136,7 @@ int main (int argc, char **argv)
 	status = mb_fileiobuffer(verbose,&fileiobuffer);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:F:f:HhI:i:L:l:T:t:U:u:VvW:w:")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:F:f:HhI:i:L:l:M:m:T:t:U:u:VvW:w:")) != -1)
 	  switch (c)
 		{
 		case 'B':
@@ -193,6 +174,30 @@ int main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			/* default primary colortable and modes */
+			if (optarg[0] == 'P' || optarg[0] == 'p')
+				n = sscanf (&optarg[1],"%d/%d/%d", &primary_colortable, &primary_colortable_mode, &primary_shade_mode);
+				
+			/* default slope colortable and mode */
+			else if (optarg[0] == 'G' ||optarg[0] == 'g')
+				n = sscanf (&optarg[1],"%d/%d", &slope_colortable, &slope_colortable_mode);
+				
+			/* default overlay colortable and mode */
+			else if (optarg[0] == 'O' ||optarg[0] == 'o')
+				n = sscanf (&optarg[1],"%d/%d", &secondary_colortable, &secondary_colortable_mode);
+				
+			/* default illumination parameters */
+			else if (optarg[0] == 'I' ||optarg[0] == 'i')
+				n = sscanf (&optarg[1],"%lf/%lf/%lf", &illuminate_magnitude, &illuminate_elevation, &illuminate_azimuth);
+				
+			/* default slope shading magnitude */
+			else if (optarg[0] == 'S' ||optarg[0] == 'S')
+				n = sscanf (&optarg[1],"%lf", &slope_magnitude);
+
 			flag++;
 			break;
 		case 'T':
@@ -249,37 +254,48 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
-		fprintf(stderr,"dbg2       help:        %d\n",help);
-		fprintf(stderr,"dbg2       format:      %d\n",format);
-		fprintf(stderr,"dbg2       pings:       %d\n",pings);
-		fprintf(stderr,"dbg2       lonflip:     %d\n",lonflip);
-		fprintf(stderr,"dbg2       bounds[0]:   %f\n",bounds[0]);
-		fprintf(stderr,"dbg2       bounds[1]:   %f\n",bounds[1]);
-		fprintf(stderr,"dbg2       bounds[2]:    %f\n",bounds[2]);
-		fprintf(stderr,"dbg2       bounds[3]:    %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       btime_i[0]:   %d\n",btime_i[0]);
-		fprintf(stderr,"dbg2       btime_i[1]:   %d\n",btime_i[1]);
-		fprintf(stderr,"dbg2       btime_i[2]:   %d\n",btime_i[2]);
-		fprintf(stderr,"dbg2       btime_i[3]:   %d\n",btime_i[3]);
-		fprintf(stderr,"dbg2       btime_i[4]:   %d\n",btime_i[4]);
-		fprintf(stderr,"dbg2       btime_i[5]:   %d\n",btime_i[5]);
-		fprintf(stderr,"dbg2       btime_i[6]:   %d\n",btime_i[6]);
-		fprintf(stderr,"dbg2       etime_i[0]:   %d\n",etime_i[0]);
-		fprintf(stderr,"dbg2       etime_i[1]:   %d\n",etime_i[1]);
-		fprintf(stderr,"dbg2       etime_i[2]:   %d\n",etime_i[2]);
-		fprintf(stderr,"dbg2       etime_i[3]:   %d\n",etime_i[3]);
-		fprintf(stderr,"dbg2       etime_i[4]:   %d\n",etime_i[4]);
-		fprintf(stderr,"dbg2       etime_i[5]:   %d\n",etime_i[5]);
-		fprintf(stderr,"dbg2       etime_i[6]:   %d\n",etime_i[6]);
-		fprintf(stderr,"dbg2       speedmin:     %f\n",speedmin);
-		fprintf(stderr,"dbg2       timegap:      %f\n",timegap);
-		fprintf(stderr,"dbg2       psdisplay:    %s\n",psdisplay);
-		fprintf(stderr,"dbg2       imgdisplay:   %s\n",imgdisplay);
-		fprintf(stderr,"dbg2       mbproject:    %s\n",mbproject);
-		fprintf(stderr,"dbg2       fbtversion:   %d\n",fbtversion);
-		fprintf(stderr,"dbg2       uselockfiles: %d\n",uselockfiles);
-		fprintf(stderr,"dbg2       fileiobuffer: %d\n",fileiobuffer);
+		fprintf(stderr,"dbg2       verbose:                    %d\n",verbose);
+		fprintf(stderr,"dbg2       help:                       %d\n",help);
+		fprintf(stderr,"dbg2       format:                     %d\n",format);
+		fprintf(stderr,"dbg2       pings:                      %d\n",pings);
+		fprintf(stderr,"dbg2       lonflip:                    %d\n",lonflip);
+		fprintf(stderr,"dbg2       bounds[0]:                  %f\n",bounds[0]);
+		fprintf(stderr,"dbg2       bounds[1]:                  %f\n",bounds[1]);
+		fprintf(stderr,"dbg2       bounds[2]:                  %f\n",bounds[2]);
+		fprintf(stderr,"dbg2       bounds[3]:                  %f\n",bounds[3]);
+		fprintf(stderr,"dbg2       btime_i[0]:                 %d\n",btime_i[0]);
+		fprintf(stderr,"dbg2       btime_i[1]:                 %d\n",btime_i[1]);
+		fprintf(stderr,"dbg2       btime_i[2]:                 %d\n",btime_i[2]);
+		fprintf(stderr,"dbg2       btime_i[3]:                 %d\n",btime_i[3]);
+		fprintf(stderr,"dbg2       btime_i[4]:                 %d\n",btime_i[4]);
+		fprintf(stderr,"dbg2       btime_i[5]:                 %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:                 %d\n",btime_i[6]);
+		fprintf(stderr,"dbg2       etime_i[0]:                 %d\n",etime_i[0]);
+		fprintf(stderr,"dbg2       etime_i[1]:                 %d\n",etime_i[1]);
+		fprintf(stderr,"dbg2       etime_i[2]:                 %d\n",etime_i[2]);
+		fprintf(stderr,"dbg2       etime_i[3]:                 %d\n",etime_i[3]);
+		fprintf(stderr,"dbg2       etime_i[4]:                 %d\n",etime_i[4]);
+		fprintf(stderr,"dbg2       etime_i[5]:                 %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:                 %d\n",etime_i[6]);
+		fprintf(stderr,"dbg2       speedmin:                   %f\n",speedmin);
+		fprintf(stderr,"dbg2       timegap:                    %f\n",timegap);
+		fprintf(stderr,"dbg2       psdisplay:                  %s\n",psdisplay);
+		fprintf(stderr,"dbg2       imgdisplay:                 %s\n",imgdisplay);
+		fprintf(stderr,"dbg2       mbproject:                  %s\n",mbproject);
+		fprintf(stderr,"dbg2       fbtversion:                 %d\n",fbtversion);
+		fprintf(stderr,"dbg2       uselockfiles:               %d\n",uselockfiles);
+		fprintf(stderr,"dbg2       fileiobuffer:               %d\n",fileiobuffer);
+		fprintf(stderr,"dbg2       primary_colortable:         %d\n",primary_colortable);
+		fprintf(stderr,"dbg2       primary_colortable_mode:    %d\n",primary_colortable_mode);
+		fprintf(stderr,"dbg2       primary_shade_mode:         %d\n",primary_shade_mode);
+		fprintf(stderr,"dbg2       slope_colortable:           %d\n",slope_colortable);
+		fprintf(stderr,"dbg2       slope_colortable_mode:      %d\n",slope_colortable_mode);
+		fprintf(stderr,"dbg2       secondary_colortable:       %d\n",secondary_colortable);
+		fprintf(stderr,"dbg2       secondary_colortable_mode:  %d\n",secondary_colortable_mode);
+		fprintf(stderr,"dbg2       illuminate_magnitude:       %f\n",illuminate_magnitude);
+		fprintf(stderr,"dbg2       illuminate_elevation:       %f\n",illuminate_elevation);
+		fprintf(stderr,"dbg2       illuminate_azimuth:         %f\n",illuminate_azimuth);
+		fprintf(stderr,"dbg2       slope_magnitude:            %f\n",slope_magnitude);
 		}
 
 	/* if help desired then print it and exit */
@@ -310,6 +326,17 @@ int main (int argc, char **argv)
 		fprintf(fp,"fbtversion: %d\n",fbtversion);
 		fprintf(fp,"uselockfiles:%d\n",uselockfiles);
 		fprintf(fp,"fileiobuffer:%d\n",fileiobuffer);
+		fprintf(fp,"mbview_primary_colortable:        %d\n",primary_colortable);
+		fprintf(fp,"mbview_primary_colortable_mode:   %d\n",primary_colortable_mode);
+		fprintf(fp,"mbview_primary_shade_mode:        %d\n",primary_shade_mode);
+		fprintf(fp,"mbview_slope_colortable:          %d\n",slope_colortable);
+		fprintf(fp,"mbview_slope_colortable_mode:     %d\n",slope_colortable_mode);
+		fprintf(fp,"mbview_secondary_colortable:      %d\n",secondary_colortable);
+		fprintf(fp,"mbview_secondary_colortable_mode: %d\n",secondary_colortable_mode);
+		fprintf(fp,"mbview_illuminate_magnitude:      %f\n",illuminate_magnitude);
+		fprintf(fp,"mbview_illuminate_elevation:      %f\n",illuminate_elevation);
+		fprintf(fp,"mbview_illuminate_azimuth:        %f\n",illuminate_azimuth);
+		fprintf(fp,"mbview_slope_magnitude:           %f\n",slope_magnitude);
 		fclose(fp);
 
 		printf("\nNew MBIO Default Control Parameters:\n");
@@ -331,6 +358,74 @@ int main (int argc, char **argv)
 			printf("fileiobuffer: %d (use %d kB buffer for fread() & fwrite())\n",fileiobuffer,fileiobuffer);
 		else
 			printf("fileiobuffer: %d (use mmap for file i/o)\n",fileiobuffer);
+		if (primary_colortable == MBV_COLORTABLE_HAXBY)
+			printf("mbview primary colortable:    %d  (Haxby)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_BRIGHT)
+			printf("mbview primary colortable:    %d  (Bright)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_MUTED)
+			printf("mbview primary colortable:    %d  (Muted)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_GRAY)
+			printf("mbview primary colortable:    %d  (Grayscale)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_FLAT)
+			printf("mbview primary colortable:    %d  (Flat  gray)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_SEALEVEL1)
+			printf("mbview primary colortable:    %d  (Sealevel 1)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_SEALEVEL2)
+			printf("mbview primary colortable:    %d  (Sealevel 2)\n",primary_colortable);
+		if (primary_colortable_mode == MBV_COLORTABLE_NORMAL)
+			printf("mbview primary colortable mode:    %d  (Normal: Cold to Hot)\n",primary_colortable_mode);
+		else
+			printf("mbview primary colortable mode:    %d  (Reversed: Hot to Cold)\n",primary_colortable_mode);
+		if (primary_shade_mode == MBV_SHADE_VIEW_NONE)
+			printf("mbview primary shade mode:    %d  (No shading)\n",primary_shade_mode);
+		else if (primary_shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
+			printf("mbview primary shade mode:    %d  (Shading by illumination)\n",primary_shade_mode);
+		else if (primary_shade_mode == MBV_SHADE_VIEW_SLOPE)
+			printf("mbview primary shade mode:    %d  (Shading by slope magnitude)\n",primary_shade_mode);
+		else if (primary_shade_mode == MBV_SHADE_VIEW_OVERLAY)
+			printf("mbview primary shade mode:    %d  (Shading by overlay)\n",primary_shade_mode);
+
+		if (slope_colortable == MBV_COLORTABLE_HAXBY)
+			printf("mbview slope colortable:    %d  (Haxby)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_BRIGHT)
+			printf("mbview slope colortable:    %d  (Bright)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_MUTED)
+			printf("mbview slope colortable:    %d  (Muted)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_GRAY)
+			printf("mbview slope colortable:    %d  (Grayscale)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_FLAT)
+			printf("mbview slope colortable:    %d  (Flat  gray)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_SEALEVEL1)
+			printf("mbview slope colortable:    %d  (Sealevel 1)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_SEALEVEL2)
+			printf("mbview slope colortable:    %d  (Sealevel 2)\n",slope_colortable);
+		if (slope_colortable_mode == MBV_COLORTABLE_NORMAL)
+			printf("mbview slope colortable mode:    %d  (Normal: Cold to Hot)\n",slope_colortable_mode);
+		else
+			printf("mbview slope colortable mode:    %d  (Reversed: Hot to Cold)\n",slope_colortable_mode);
+
+		if (secondary_colortable == MBV_COLORTABLE_HAXBY)
+			printf("mbview overlay colortable:    %d  (Haxby)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_BRIGHT)
+			printf("mbview overlay colortable:    %d  (Bright)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_MUTED)
+			printf("mbview overlay colortable:    %d  (Muted)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_GRAY)
+			printf("mbview overlay colortable:    %d  (Grayscale)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_FLAT)
+			printf("mbview overlay colortable:    %d  (Flat  gray)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_SEALEVEL1)
+			printf("mbview overlay colortable:    %d  (Sealevel 1)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_SEALEVEL2)
+			printf("mbview overlay colortable:    %d  (Sealevel 2)\n",secondary_colortable);
+		if (secondary_colortable_mode == MBV_COLORTABLE_NORMAL)
+			printf("mbview overlay colortable mode:    %d  (Normal: Cold to Hot)\n",secondary_colortable_mode);
+		else
+			printf("mbview overlay colortable mode:    %d  (Reversed: Hot to Cold)\n",secondary_colortable_mode);
+		printf("mbview illumination magnitude:    %f\n",illuminate_magnitude);
+		printf("mbview illumination elevation:    %f degrees\n",illuminate_elevation);
+		printf("mbview illumination azimuth:      %f degrees\n",illuminate_azimuth);
+		printf("mbview slope magnitude:           %f\n",slope_magnitude);
 		}
 
 	/* else just list the current defaults */
@@ -355,6 +450,74 @@ int main (int argc, char **argv)
 			printf("fileiobuffer: %d (use %d kB buffer for fread() & fwrite())\n",fileiobuffer,fileiobuffer);
 		else
 			printf("fileiobuffer: %d (use mmap for file i/o)\n",fileiobuffer);
+		if (primary_colortable == MBV_COLORTABLE_HAXBY)
+			printf("mbview primary colortable:         %d  (Haxby)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_BRIGHT)
+			printf("mbview primary colortable:         %d  (Bright)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_MUTED)
+			printf("mbview primary colortable:         %d  (Muted)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_GRAY)
+			printf("mbview primary colortable:         %d  (Grayscale)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_FLAT)
+			printf("mbview primary colortable:         %d  (Flat  gray)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_SEALEVEL1)
+			printf("mbview primary colortable:         %d  (Sealevel 1)\n",primary_colortable);
+		else if (primary_colortable == MBV_COLORTABLE_SEALEVEL2)
+			printf("mbview primary colortable:         %d  (Sealevel 2)\n",primary_colortable);
+		if (primary_colortable_mode == MBV_COLORTABLE_NORMAL)
+			printf("mbview primary colortable mode:    %d  (Normal: Cold to Hot)\n",primary_colortable_mode);
+		else
+			printf("mbview primary colortable mode:    %d  (Reversed: Hot to Cold)\n",primary_colortable_mode);
+		if (primary_shade_mode == MBV_SHADE_VIEW_NONE)
+			printf("mbview primary shade mode:         %d  (No shading)\n",primary_shade_mode);
+		else if (primary_shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
+			printf("mbview primary shade mode:         %d  (Shading by illumination)\n",primary_shade_mode);
+		else if (primary_shade_mode == MBV_SHADE_VIEW_SLOPE)
+			printf("mbview primary shade mode:         %d  (Shading by slope magnitude)\n",primary_shade_mode);
+		else if (primary_shade_mode == MBV_SHADE_VIEW_OVERLAY)
+			printf("mbview primary shade mode:         %d  (Shading by overlay)\n",primary_shade_mode);
+
+		if (slope_colortable == MBV_COLORTABLE_HAXBY)
+			printf("mbview slope colortable:           %d  (Haxby)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_BRIGHT)
+			printf("mbview slope colortable:           %d  (Bright)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_MUTED)
+			printf("mbview slope colortable:           %d  (Muted)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_GRAY)
+			printf("mbview slope colortable:           %d  (Grayscale)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_FLAT)
+			printf("mbview slope colortable:           %d  (Flat  gray)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_SEALEVEL1)
+			printf("mbview slope colortable:           %d  (Sealevel 1)\n",slope_colortable);
+		else if (slope_colortable == MBV_COLORTABLE_SEALEVEL2)
+			printf("mbview slope colortable:           %d  (Sealevel 2)\n",slope_colortable);
+		if (slope_colortable_mode == MBV_COLORTABLE_NORMAL)
+			printf("mbview slope colortable mode:      %d  (Normal: Cold to Hot)\n",slope_colortable_mode);
+		else
+			printf("mbview slope colortable mode:      %d  (Reversed: Hot to Cold)\n",slope_colortable_mode);
+
+		if (secondary_colortable == MBV_COLORTABLE_HAXBY)
+			printf("mbview overlay colortable:         %d  (Haxby)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_BRIGHT)
+			printf("mbview overlay colortable:         %d  (Bright)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_MUTED)
+			printf("mbview overlay colortable:         %d  (Muted)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_GRAY)
+			printf("mbview overlay colortable:         %d  (Grayscale)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_FLAT)
+			printf("mbview overlay colortable:         %d  (Flat  gray)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_SEALEVEL1)
+			printf("mbview overlay colortable:         %d  (Sealevel 1)\n",secondary_colortable);
+		else if (secondary_colortable == MBV_COLORTABLE_SEALEVEL2)
+			printf("mbview overlay colortable:         %d  (Sealevel 2)\n",secondary_colortable);
+		if (secondary_colortable_mode == MBV_COLORTABLE_NORMAL)
+			printf("mbview overlay colortable mode:    %d  (Normal: Cold to Hot)\n",secondary_colortable_mode);
+		else
+			printf("mbview overlay colortable mode:    %d  (Reversed: Hot to Cold)\n",secondary_colortable_mode);
+		printf("mbview illumination magnitude:     %f\n",illuminate_magnitude);
+		printf("mbview illumination elevation:     %f degrees\n",illuminate_elevation);
+		printf("mbview illumination azimuth:       %f degrees\n",illuminate_azimuth);
+		printf("mbview slope magnitude:            %f\n",slope_magnitude);
 		}
 
 	/* print output debug statements */

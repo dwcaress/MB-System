@@ -670,7 +670,6 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	s7kr_bathymetry		*bathymetry;
 	s7kr_backscatter	*backscatter;
 	s7kr_beam		*beam;
-	s7kr_verticaldepth	*verticaldepth;
 	s7kr_image		*image;
 	s7kr_v2detection	*v2detection;
 	s7kr_v2detectionsetup	*v2detectionsetup;
@@ -920,21 +919,6 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 					error);
 		}
 
-	/* save sonardepth if 7kVerticalDepth record has been read */
-	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_DATA
-		&& store->read_verticaldepth == MB_YES)
-		{
-		/* get attitude structure */
-		verticaldepth = &(store->verticaldepth);
-
-		/* add latest depth sample if sensor depth, not water depth */
-		if (verticaldepth->vertical_depth != 0.0)
-			mb_depint_add(verbose, mbio_ptr,
-					(double)(store->time_d),
-					(double)(verticaldepth->vertical_depth),
-					error);
-		}
 #ifdef MBR_RESON7KR_DEBUG
 if (verbose > 0)
 fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, status, *error);
@@ -1117,7 +1101,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 				zz = rr * cos(DTR * theta);
 				bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 				bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-				bathymetry->depth[i] = zz + sonar_depth;
+				bathymetry->depth[i] = zz + sonar_depth - heave;
 				bathymetry->pointing_angle[i] = DTR * theta;
 				bathymetry->azimuth_angle[i] = DTR * phi;
 /*fprintf(stderr,"j:%d i:%d quality:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
@@ -1149,7 +1133,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 				zz = rr * cos(DTR * theta);
 				bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 				bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-				bathymetry->depth[i] = zz + sonar_depth;
+				bathymetry->depth[i] = zz + sonar_depth - heave;
 				bathymetry->pointing_angle[i] = DTR * theta;
 				bathymetry->azimuth_angle[i] = DTR * phi;
 /* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
@@ -1181,7 +1165,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				zz = rr * cos(DTR * theta);
 				bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 				bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-				bathymetry->depth[i] = zz + sonar_depth;
+				bathymetry->depth[i] = zz + sonar_depth - heave;
 				bathymetry->pointing_angle[i] = DTR * theta;
 				bathymetry->azimuth_angle[i] = DTR * phi;
 /* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
@@ -1212,7 +1196,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					zz = rr * cos(DTR * theta);
 					bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 					bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-					bathymetry->depth[i] = zz + sonar_depth;
+					bathymetry->depth[i] = zz + sonar_depth - heave;
 					bathymetry->pointing_angle[i] = DTR * theta;
 					bathymetry->azimuth_angle[i] = DTR * phi;
 /* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",

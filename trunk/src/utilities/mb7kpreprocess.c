@@ -200,9 +200,9 @@ int main (int argc, char **argv)
 	double	distance;
 	double	altitude;
 	double	sonardepth;
-	double	roll, rollr;
-	double	pitch, pitchr;
-	double	heave;
+	double	roll, rollr, beamroll, beamrollr;
+	double	pitch, pitchr, beampitch, beampitchr;
+	double	heave, beamheave;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -4821,6 +4821,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 									ins_time_d-1, ins_pitch-1,
 									nins, time_d, &pitch, &jins,
 									&error);
+						heave = 0.0;
 						}
 					else if (nrock > 0)
 						{
@@ -4833,6 +4834,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 									rock_time_d-1, rock_pitch-1,
 									nrock, time_d, &pitch, &jrock,
 									&error);
+						heave = 0.0;
 						}
 					else if (ndsl > 0)
 						{
@@ -4845,6 +4847,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 									dsl_time_d-1, dsl_pitch-1,
 									ndsl, time_d, &pitch, &jdsl,
 									&error);
+						heave = 0.0;
 						}
 					else if (ndat_rph > 0)
 						{
@@ -4857,11 +4860,16 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 									dat_rph_time_d-1, dat_rph_pitch-1,
 									ndat_rph, time_d, &pitch, &jdattitude,
 									&error);
+						interp_status = mb_linear_interp(verbose,
+									dat_rph_time_d-1, dat_rph_heave-1,
+									ndat_rph, time_d, &heave, &jdattitude,
+									&error);
 						}
 					else
 						{
 						roll = 0.0;
 						pitch = 0.0;
+						heave = 0.0;
 						}
 
 					/* get sonar depth */
@@ -4923,14 +4931,6 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 									ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &jdsonardepth,
 									&error);
 						}
-					else if (ndat_rph > 0)
-						{
-						interp_status = mb_linear_interp(verbose,
-									dat_rph_time_d-1, dat_rph_heave-1,
-									ndat_rph, time_d, &heave, &jdattitude,
-									&error);
-						sonardepth = heave;
-						}
 					else
 						{
 						sonardepth = 0.0;
@@ -4963,8 +4963,15 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 					bathymetry->tide = 0.0;
 					bathymetry->roll = DTR * roll;
 					bathymetry->pitch = DTR * pitch;
-					bathymetry->heave = 0.0;
-					bathymetry->vehicle_height = -sonardepth;
+					bathymetry->heave = heave;
+					if ((volatilesettings->receive_flags & 0x2) != 0)
+						{
+						bathymetry->vehicle_height = -sonardepth - heave;
+						}
+					else
+						{								
+						bathymetry->vehicle_height = -sonardepth;
+						}
 
 					/* zero alongtrack angles if requested */
 					if (kluge_zeroalongtrackangles == MB_YES)
@@ -4982,7 +4989,6 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						soundspeed = bluefin->environmental[0].sound_speed;
 					else
 						soundspeed = 1500.0;
-/* fprintf(stderr,"roll:%f pitch:%f\n",bathymetry->roll,bathymetry->pitch); */
 					rollr = DTR * roll;
 					pitchr = DTR * pitch;
 					/* zero atttitude correction if requested */
@@ -5038,7 +5044,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							zz = rr * cos(DTR * theta);
 							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-							bathymetry->depth[i] = zz + sonardepth;
+							bathymetry->depth[i] = zz + sonardepth - heave;
 /* if (i==128)fprintf(stderr,"range:%f zz:%f sonardepth:%f depth:%f\n",rr,zz,sonardepth,bathymetry->depth[i]); */
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
@@ -5080,7 +5086,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							zz = rr * cos(DTR * theta);
 							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-							bathymetry->depth[i] = zz + sonardepth;
+							bathymetry->depth[i] = zz + sonardepth - heave;
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
 /* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
@@ -5119,7 +5125,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							zz = rr * cos(DTR * theta);
 							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-							bathymetry->depth[i] = zz + sonardepth;
+							bathymetry->depth[i] = zz + sonardepth - heave;
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
 /* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
@@ -5146,9 +5152,87 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							{
 							if ((bathymetry->quality[i] & 15) > 0)
 								{
+								/* compensate for pitch if not already compensated */
+								if ((volatilesettings->transmit_flags & 0xF) != 0)
+									{
+									beampitch = 0.0;
+									}
+								else
+									{
+									beampitch = pitch;
+									}
+								beampitchr = RTD * beampitch;
+								
+								/* compensate for roll if not already compensated */
+								if ((volatilesettings->receive_flags & 0x1) != 0)
+									{
+									beamroll = 0.0;
+									}
+								else
+									{								
+									/* get roll at bottom return time for this beam */
+									if (nins > 0)
+										{
+										interp_status = mb_linear_interp(verbose,
+													ins_time_d-1, ins_roll-1,
+													nins, time_d + bathymetry->range[i], &beamroll, &jins,
+													&error);
+										}
+									else if (nrock > 0)
+										{
+										interp_status = mb_linear_interp(verbose,
+													rock_time_d-1, rock_roll-1,
+													nrock, time_d + bathymetry->range[i], &beamroll, &jrock,
+													&error);
+										}
+									else if (ndsl > 0)
+										{
+										interp_status = mb_linear_interp(verbose,
+													dsl_time_d-1, dsl_roll-1,
+													ndsl, time_d + bathymetry->range[i], &beamroll, &jdsl,
+													&error);
+										}
+									else if (ndat_rph > 0)
+										{
+										interp_status = mb_linear_interp(verbose,
+													dat_rph_time_d-1, dat_rph_roll-1,
+													ndat_rph, time_d + bathymetry->range[i], &beamroll, &jdattitude,
+													&error);
+										}
+									else
+										{
+										beamroll = roll;
+										}
+									}
+								beamrollr = RTD * beamroll;
+/* fprintf(stderr,"i:%d roll: %f beamroll: %f diff:%f",i,roll,beamroll,beamroll-roll);
+fprintf(stderr,"  pitch:%f beampitch:%f diff:%f\n",pitch,beampitch,beampitch-pitch);*/
+								
+								/* compensate for heave if not already compensated */
+								if ((volatilesettings->receive_flags & 0x2) != 0)
+									{
+									beamheave = 0.0;
+									}
+								else
+									{								
+									/* get roll at bottom return time for this beam */
+									if (ndat_rph > 0)
+										{
+										interp_status = mb_linear_interp(verbose,
+													dat_rph_time_d-1, dat_rph_heave-1,
+													ndat_rph, time_d + bathymetry->range[i], &beamheave, &jdattitude,
+													&error);
+										}
+									else
+										{
+										beamheave = heave;
+										}
+									}
+								
+								/* calculate bathymetry */
 								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr
 									       + volatilesettings->steering_vertical) + pitchbias;
-								beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - rollr) + rollbias;
+								beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - beamrollr) + rollbias;
 								mb_rollpitch_to_takeoff(
 									verbose,
 									alpha, beta,
@@ -5159,13 +5243,13 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 								zz = rr * cos(DTR * theta);
 								bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 								bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-								bathymetry->depth[i] = zz + sonardepth;
+								bathymetry->depth[i] = zz + sonardepth - beamheave;
 								bathymetry->pointing_angle[i] = DTR * theta;
 								bathymetry->azimuth_angle[i] = DTR * phi;
-/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  zz:%f sonardepth:%f heave:%f   depth:%f %f %f\n",
 i,roll, bathymetry->roll,pitch, bathymetry->pitch,
-alpha,beta,theta,phi,
-bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+alpha,beta,theta,phi,zz,sonardepth,heave,
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 								}
 							else
 								{
@@ -5428,6 +5512,14 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			time_i[0],time_i[1],time_i[2],
 			time_i[3],time_i[4],time_i[5],time_i[6],
 			header->RecordNumber);
+
+			/* output asynchronous heading and attitude */
+			for (i=0; i< customattitude->n; i++)
+				{
+				fprintf(athfp, "%0.6f\t%7.3f\n", time_d, RTD * customattitude->heading[i]);
+				fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n",
+						time_d, RTD * customattitude->roll[i], RTD * customattitude->pitch[i]);
+				}
 			}
 
 	   	/* handle tide data */
@@ -5699,6 +5791,15 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			time_i[0],time_i[1],time_i[2],
 			time_i[3],time_i[4],time_i[5],time_i[6],
 			header->RecordNumber,ctd->n);
+
+			/* output ctd data to file */
+			for (i=0; i<ctd->n; i++)
+				{
+				fprintf(tfp,"%.3f %11.6f %10.6f %.3f %.3f %.2f %.3f\n",
+					time_d, navlon, navlat, sonardepth, altitude,
+					ctd->temperature[i],
+					ctd->conductivity_salinity[i]);
+				}
 			}
 
 	   	/* handle geodesy data */
@@ -5771,6 +5872,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			time_i[0],time_i[1],time_i[2],
 			time_i[3],time_i[4],time_i[5],time_i[6],
 			header->RecordNumber);
+
+			/* output asynchronous attitude */
+			fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n",
+					time_d, RTD * rollpitchheave->roll, RTD * rollpitchheave->pitch);
 			}
 
 	   	/* handle heading data */
@@ -5821,6 +5926,9 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5],time_i[6],
 				header->RecordNumber);
+
+			/* output asynchronous heading */
+			fprintf(athfp, "%0.6f\t%7.3f\n", time_d, RTD * headingrec->heading);
 			}
 
 	   	/* handle survey line data */
@@ -5943,6 +6051,13 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			time_i[0],time_i[1],time_i[2],
 			time_i[3],time_i[4],time_i[5],time_i[6],
 			header->RecordNumber,attitude->n);
+
+			/* output asynchronous attitude */
+			for (i=0; i<attitude->n; i++)
+				{
+				fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n",
+						time_d, RTD * attitude->roll[i], RTD * attitude->pitch[i]);
+				}
 			}
 
 	   	/* handle file header data */

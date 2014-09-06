@@ -394,6 +394,116 @@ int mb_lonflip(int verbose, int *lonflip)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_mbview_defaults(int verbose,
+			int *primary_colortable,
+			int *primary_colortable_mode,
+			int *primary_shade_mode,
+			int *slope_colortable,
+			int *slope_colortable_mode,
+			int *secondary_colortable,
+			int *secondary_colortable_mode,
+			double *illuminate_magnitude,
+			double *illuminate_elevation,
+			double *illuminate_azimuth,
+			double *slope_magnitude)
+{
+	char	*function_name = "mb_mbview_defaults";
+	int	status;
+	FILE	*fp;
+	char	file[MB_PATH_MAXLINE];
+	char	string[MB_PATH_MAXLINE];
+	char	*HOME = "HOME";
+	char	*home_ptr;
+	char	*getenv();
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
+		}
+
+	/* successful no matter what happens */
+	status = MB_SUCCESS;
+
+	/* set system default values */
+	*primary_colortable = 0;
+	*primary_colortable_mode = 0;
+	*primary_shade_mode = 2;
+	*slope_colortable = 0;
+	*slope_colortable_mode = 0;
+	*secondary_colortable = 0;
+	*secondary_colortable_mode = 1;
+	*illuminate_magnitude = 2.0;
+	*illuminate_elevation = 5.0;
+	*illuminate_azimuth = 90.0;
+	*slope_magnitude = 1.0;
+
+	/* set the filename */
+	if ((home_ptr = getenv(HOME)) != NULL)
+		{
+		strcpy(file,home_ptr);
+		strcat(file,"/.mbio_defaults");
+
+		/* open and read values from file if possible */
+		if ((fp = fopen(file, "r")) != NULL)
+			{
+			while (fgets(string,sizeof(string),fp) != NULL)
+				{
+				if (strncmp(string,"mbview_primary_colortable:",25) == 0)
+					sscanf(string,"mbview_primary_colortable:%d", primary_colortable);
+				if (strncmp(string,"mbview_primary_colortable_mode:",30) == 0)
+					sscanf(string,"mbview_primary_colortable_mode:%d", primary_colortable_mode);
+				if (strncmp(string,"mbview_primary_shade_mode:",25) == 0)
+					sscanf(string,"mbview_primary_shade_mode:%d", primary_shade_mode);
+				if (strncmp(string,"mbview_slope_colortable:",23) == 0)
+					sscanf(string,"mbview_slope_colortable:%d", slope_colortable);
+				if (strncmp(string,"mbview_slope_colortable_mode:",28) == 0)
+					sscanf(string,"mbview_slope_colortable_mode:%d", slope_colortable_mode);
+				if (strncmp(string,"mbview_secondary_colortable:",27) == 0)
+					sscanf(string,"mbview_secondary_colortable:%d", secondary_colortable);
+				if (strncmp(string,"mbview_secondary_colortable_mode:",32) == 0)
+					sscanf(string,"mbview_secondary_colortable_mode:%d", secondary_colortable_mode);
+				if (strncmp(string,"mbview_illuminate_magnitude:",27) == 0)
+					sscanf(string,"mbview_illuminate_magnitude:%lf", illuminate_magnitude);
+				if (strncmp(string,"mbview_illuminate_elevation:",27) == 0)
+					sscanf(string,"mbview_illuminate_elevation:%lf", illuminate_elevation);
+				if (strncmp(string,"mbview_illuminate_azimuth:",25) == 0)
+					sscanf(string,"mbview_illuminate_azimuth:%lf", illuminate_azimuth);
+				if (strncmp(string,"mbview_slope_magnitude:",22) == 0)
+					sscanf(string,"mbview_slope_magnitude:%lf", slope_magnitude);
+				}
+ 			fclose(fp);
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       primary_colortable:         %d\n",*primary_colortable);
+		fprintf(stderr,"dbg2       primary_colortable_mode:    %d\n",*primary_colortable_mode);
+		fprintf(stderr,"dbg2       primary_shade_mode:         %d\n",*primary_shade_mode);
+		fprintf(stderr,"dbg2       slope_colortable:           %d\n",*slope_colortable);
+		fprintf(stderr,"dbg2       slope_colortable_mode:      %d\n",*slope_colortable_mode);
+		fprintf(stderr,"dbg2       secondary_colortable:       %d\n",*secondary_colortable);
+		fprintf(stderr,"dbg2       secondary_colortable_mode:  %d\n",*secondary_colortable_mode);
+		fprintf(stderr,"dbg2       illuminate_magnitude:       %f\n",*illuminate_magnitude);
+		fprintf(stderr,"dbg2       illuminate_elevation:       %f\n",*illuminate_elevation);
+		fprintf(stderr,"dbg2       illuminate_azimuth:         %f\n",*illuminate_azimuth);
+		fprintf(stderr,"dbg2       slope_magnitude:            %f\n",*slope_magnitude);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_fbtversion(int verbose, int *fbtversion)
 {
 	char	*function_name = "mb_fbtversion";

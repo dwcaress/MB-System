@@ -240,11 +240,13 @@ typedef long long	mb_s_long;
 
 /* other string length defines */
 #define MB_NAME_LENGTH		32
+#define MB_LONGNAME_LENGTH	128
 #define MB_DESCRIPTION_LENGTH	2048
 
 /* typedef for path string */
 typedef char mb_path[MB_PATH_MAXLINE];
 typedef char mb_name[MB_NAME_LENGTH];
+typedef char mb_longname[MB_LONGNAME_LENGTH];
 
 /* maximum number of asynchronous data saved */
 #define MB_ASYNCH_SAVE_MAX 10000
@@ -321,6 +323,18 @@ int mb_defaults(int verbose, int *format, int *pings,
 		double *speedmin, double *timegap);
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject);
 int mb_lonflip(int verbose, int *lonflip);
+int mb_mbview_defaults(int verbose,
+			int *primary_colortable,
+			int *primary_colortable_mode,
+			int *primary_shade_mode,
+			int *slope_colortable,
+			int *slope_colortable_mode,
+			int *secondary_colortable,
+			int *secondary_colortable_mode,
+			double *illuminate_magnitude,
+			double *illuminate_elevation,
+			double *illuminate_azimuth,
+			double *slope_magnitude);
 int mb_fbtversion(int verbose, int *fbtversion);
 int mb_uselockfiles(int verbose, int *uselockfiles);
 int mb_fileiobuffer(int verbose, int *fileiobuffer);

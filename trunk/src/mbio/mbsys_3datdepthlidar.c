@@ -1628,6 +1628,8 @@ int mbsys_3datdepthlidar_insert_nav
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
+	struct mbsys_3datdepthlidar_pulse_struct *pulse;
+	int	i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1678,6 +1680,18 @@ int mbsys_3datdepthlidar_insert_nav
 		store->sensordepth = draft - heave;
 		store->roll = roll;
 		store->pitch = pitch;
+
+		/* need to apply nav values to all pulses */
+		for (i=0;i<store->num_pulses;i++)
+			{
+			pulse = &store->pulses[i];
+			pulse->navlon = store->navlon;
+			pulse->navlat = store->navlat; 
+			pulse->sensordepth = store->sensordepth; 
+			pulse->heading = store->heading; 
+			pulse->roll = store->roll; 
+			pulse->pitch = store->pitch; 
+			}
 
 		/* done translating values */
 		*error = MB_ERROR_NO_ERROR;

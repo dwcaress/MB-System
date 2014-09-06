@@ -25,6 +25,13 @@
  * updating of the mbprocess control parameter values are done
  * using functions in mb_process.c
  *
+ * The structures holding beam edit event values associated with
+ * edit save files are given here.
+ *
+ * This file also defines the structure and parameters associated
+ * with defining the position and angular offsets between the
+ * various sensors on a survey platform (e.g. ship, launch, ROV, AUV).
+ *
  * The parameters controlling mbprocess are included in an ascii
  * parameter file. The parameter files consist of single line
  * commands and comment lines beginning with '#'. The commands
@@ -775,9 +782,7 @@
 #define MB_PR_FILE_NOT_EXIST		2
 #define MB_PR_NO_PARAMETER_FILE		3
 
-
-
-
+/* structure holding mbprocess parameters */
 struct mb_process_struct
 	{
 	/* general parameters */
