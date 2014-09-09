@@ -1,0 +1,83 @@
+#!/bin/bash -x
+
+files=$@
+
+if [ -z "$files" -a -f datalist.mb-1 ] ; then 
+	files=datalist.mb-1
+#	mbdatalist -P -I datalist.mb-1 > datalistp.mb-1
+fi 
+
+for f in $files ; do
+	if [ `basename $f mb-1` != `basename $f` ] ; then
+		 # f is a datalist
+                grep -v ^# "$f" | while read file etc ; do
+                        $0 $file
+			#$0 `dirname $f`/$file
+                done
+	else
+	if [ -f $f.mb57 ] ; then
+		g=${f}p.mb57
+		h=${f}pp.mb57
+		f=$f.mb57
+	else
+		g=`echo $f | sed 's/[.][^.]*$/p\0/'`
+		h=`echo $f | sed 's/[.][^.]*$/pp\0/'`
+	fi
+
+	if [ -f $g.inf ] ; then
+		region=`mbm_region -i $g`
+	else
+		region=`mbm_region -i $f`
+	fi
+
+	if [ -z "$region" ] ; then 
+                echo $f >> bad_region
+        else
+
+	if [ ! -z "$CLEAN" ] ; then
+		nice mbclean -S10/3/2 -D.001/1 -I$f
+		nice mbareaclean -I $f -R $region -N-30 -T1 -D1/5
+		nice mbareaclean -I $f -R $region -D2/10
+	fi
+
+	topo=`echo $region | findtopo.awk`
+
+	if [ ! $f -ot /home/acoustics_swath/topo/$topo -o ! $f.esf -ot /home/acoustics_swath/topo/$topo ] ; then
+		mbprocess -I $f
+        	export topo
+                (
+                	cd /home/acoustics_swath/topo
+                        w=`echo $topo | awk -F_ '{print $2}'`
+                        s=`echo $topo | awk -F_ '{print $4}'`
+                        ./process.sh $w $[ $w + 1 ] $s $[ $s + 1 ]
+                        cd -
+                )
+		mbset -I $f -PAMPCORRAREA:1 -PAMPSSCORRTOPOFILE:/home/acoustics_swath/topo/$topo
+        fi
+
+        if [ ! -f $f.pa2 -o ! -z "$SET" ] ; then
+                mbset -I $f -PAMPCORRMODE:0
+                mbset -I $f -PAMPCORRAREA:1 -PAMPSSCORRTOPOFILE:/home/acoustics_swath/topo/$topo
+
+		usesap=
+		for sap in CARS synTS synTS_XBTs synTS_CTDs synTS_CTDs_XBTs ; do
+			if [ -f "${f}_${sap}.asap" ] ; then
+				usesap=$sap
+			fi
+		done
+		if [ ! -z $usesap ] ; then
+                        mbset -I $f -PSAPPROFILE:${f}_${usesap}.asap -PSAPMODE:1 -PSAPSRC:2 -PSAPUSE:2
+                fi
+
+        fi
+
+
+	nice mbprocess -I $f
+	if [ $g -nt $g.aga ] ; then
+		nice mbbackangle -A1 -n181/90 -p1000 -R40 -I$g -T/home/acoustics_swath/topo/$topo
+		nice mbprocess -I $g
+		nice mbfilter -A1 -S3/3/3/1 -I $h
+	fi
+	fi
+	fi
+done
