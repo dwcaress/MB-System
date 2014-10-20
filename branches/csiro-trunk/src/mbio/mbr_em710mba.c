@@ -1769,7 +1769,8 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			|| sonarunswap == MBSYS_SIMRAD3_EM302
 			|| sonarunswap == MBSYS_SIMRAD3_EM122
 			|| sonarunswap == MBSYS_SIMRAD3_EM2040
-			|| sonarunswap == MBSYS_SIMRAD3_EM2045)
+			|| sonarunswap == MBSYS_SIMRAD3_EM2045
+			|| sonarunswap == MBSYS_SIMRAD3_M3)
 			{
 			sonarunswapgood = MB_YES;
 			}
@@ -1784,7 +1785,8 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			|| sonarswap == MBSYS_SIMRAD3_EM302
 			|| sonarswap == MBSYS_SIMRAD3_EM122
 			|| sonarswap == MBSYS_SIMRAD3_EM2040
-			|| sonarswap == MBSYS_SIMRAD3_EM2045)
+			|| sonarswap == MBSYS_SIMRAD3_EM2045
+			|| sonarswap == MBSYS_SIMRAD3_M3)
 			{
 			sonarswapgood = MB_YES;
 			}
@@ -1830,7 +1832,8 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 		&& *sonar != MBSYS_SIMRAD3_EM302
 		&& *sonar != MBSYS_SIMRAD3_EM122
 		&& *sonar != MBSYS_SIMRAD3_EM2040
-		&& *sonar != MBSYS_SIMRAD3_EM2045)
+		&& *sonar != MBSYS_SIMRAD3_EM2045
+		&& *sonar != MBSYS_SIMRAD3_M3)
 		{
 		sonargood = MB_NO;
 		}
@@ -4984,7 +4987,7 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 			    ping->png_raw_txoffset[i] = float_val;
 			mb_get_binary_float(swap, &line[12], &float_val);
 			    ping->png_raw_txcenter[i] = float_val;
-			mb_get_binary_short(swap, &line[2], &short_val);
+			mb_get_binary_short(swap, &line[16], &short_val);
 			    ping->png_raw_txabsorption[i] = (int) ((unsigned short) short_val);
 			ping->png_raw_txwaveform[i] = (int) line[18];
 			ping->png_raw_txsector[i] = (int) line[19];
@@ -8116,7 +8119,7 @@ int mbr_em710mba_wr_netattitude(int verbose, void *mbio_ptr, int swap,
 	if (write_size%2)
 		{
 		extrabyte++;
-		write_size++;
+		write_size--;
 		}
 	mb_put_binary_int(swap, (int)write_size, (void *) line);
 	write_len = 4;
@@ -8181,7 +8184,7 @@ int mbr_em710mba_wr_netattitude(int verbose, void *mbio_ptr, int swap,
 		mb_put_binary_short(swap, (unsigned short) netattitude->nat_heading[i], (void *) &line[8]);
 		line[10] = (mb_u_char) netattitude->nat_nbyte_raw[i];
 		for (j=0;j<netattitude->nat_nbyte_raw[i];j++)
-			line[i+11] = netattitude->nat_raw[i*MBSYS_SIMRAD3_BUFFER_SIZE+j];
+			line[j+11] = netattitude->nat_raw[i*MBSYS_SIMRAD3_BUFFER_SIZE+j];
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -8205,13 +8208,13 @@ int mbr_em710mba_wr_netattitude(int verbose, void *mbio_ptr, int swap,
 		/* write out data */
 		if (extrabyte)
 			{
-			write_len = 4;
-			status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
+			write_len = 3;
+			status = mb_fileio_put(verbose, mbio_ptr, &line[1], &write_len, error);
 			}
 		else
 			{
-			write_len = 3;
-			status = mb_fileio_put(verbose, mbio_ptr, &line[1], &write_len, error);
+			write_len = 4;
+			status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
 			}
 		}
 
@@ -8948,7 +8951,7 @@ int mbr_em710mba_wr_bath3_mba(int verbose, void *mbio_ptr, int swap,
 	/* print debug statements */
 	if (verbose >= 5)
 		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       type:                  %d\n",store->type);
 		fprintf(stderr,"dbg5       sonar:                 %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:                  %d\n",store->date);
@@ -9631,7 +9634,8 @@ int mbr_em710mba_wr_ss2_mba(int verbose, void *mbio_ptr, int swap,
 	/* write the record size */
 	mb_put_binary_int(swap, (int) (EM3_SS2_MBA_HEADER_SIZE
 			+ EM3_SS2_MBA_BEAM_SIZE * ping->png_nbeams_ss
-			+ ping->png_npixels - (ping->png_npixels % 2) + 8), (void *) &write_size);
+			+ sizeof(short) * (ping->png_npixels + 2 * ping->png_pixels_ss)
+			+ 8), (void *) &write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
 
@@ -9764,14 +9768,15 @@ int mbr_em710mba_wr_ss2_mba(int verbose, void *mbio_ptr, int swap,
 	/* output end of record */
 	if (status == MB_SUCCESS)
 		{
+		line[0] = 0;
 		line[1] = 0x03;
 
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
 		/* write out data */
-		write_len = 3;
-		status = mb_fileio_put(verbose, mbio_ptr, &line[1], &write_len, error);
+		write_len = 4;
+		status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
 		}
 
 	/* print output debug statements */
