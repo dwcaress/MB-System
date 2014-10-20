@@ -213,6 +213,8 @@
 #define	MBSYS_SIMRAD3_EM100	9904
 #define	MBSYS_SIMRAD3_EM1000	9905
 
+#define MBSYS_SIMRAD3_M3	30
+
 /* maximum number of beams and pixels */
 #define	MBSYS_SIMRAD3_MAXBEAMS		512
 #define	MBSYS_SIMRAD3_MAXPIXELS		1024

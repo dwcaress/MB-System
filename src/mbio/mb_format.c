@@ -4024,7 +4024,7 @@ int mb_datalist_read2(int verbose,
 		int *error)
 {
 	/* local variables */
-	char	*function_name = "mb_datalist_read";
+	char	*function_name = "mb_datalist_read2";
 	int	status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist_ptr;
 	int	has_bounds;
@@ -4376,7 +4376,7 @@ int mb_datalist_read3(int verbose,
 		int *error)
 {
 	/* local variables */
-	char	*function_name = "mb_datalist_read2";
+	char	*function_name = "mb_datalist_read3";
 	int	status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist_ptr;
 	struct mb_datalist_struct *datalist2_ptr;
