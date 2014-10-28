@@ -2666,7 +2666,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 			    	|| sonar2 == MBSYS_SIMRAD3_EM302 || sonar2swap == MBSYS_SIMRAD3_EM302
 			    	|| sonar2 == MBSYS_SIMRAD3_EM122 || sonar2swap == MBSYS_SIMRAD3_EM122
 			    	|| sonar2 == MBSYS_SIMRAD3_EM2040 || sonar2swap == MBSYS_SIMRAD3_EM2040
-			    	|| sonar2 == MBSYS_SIMRAD3_EM2045 || sonar2swap == MBSYS_SIMRAD3_EM2045)
+			    	|| sonar2 == MBSYS_SIMRAD3_EM2045 || sonar2swap == MBSYS_SIMRAD3_EM2045
+			    	|| sonar2 == MBSYS_SIMRAD3_M3 || sonar2swap == MBSYS_SIMRAD3_M3)
 				*format = MBF_EM710RAW;
 			    else if (type2 == EM_START
 				|| type2 == EM_STOP

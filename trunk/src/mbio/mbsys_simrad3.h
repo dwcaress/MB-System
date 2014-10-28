@@ -186,6 +186,8 @@
 /* sonar models */
 #define	MBSYS_SIMRAD3_UNKNOWN	0
 
+#define	MBSYS_SIMRAD3_M3	 30
+
 #define	MBSYS_SIMRAD3_EM2045	 2045
 #define	MBSYS_SIMRAD3_EM2040	 2040
 #define	MBSYS_SIMRAD3_EM710	 710
@@ -870,32 +872,32 @@ struct mbsys_simrad3_struct
                                     the most recent record came from */
 
 	/* time stamp */
-	int	date;		/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	msec;		/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
+	int	date;		        /* Date = year*10000 + month*100 + day
+                                                Feb 26, 1995 = 19950226 */
+	int	msec;		        /* Time since midnight in msec
+                                                08:12:51.234 = 29570234 */
 
 	/* processing unit status parameter values */
-	int	sts_date;	/* status date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	sts_msec;	/* status time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	sts_status_count; 	/* status datagram counter */
-	int	sts_serial;		/* system 1 or 2 serial number */
-	int	sts_pingrate;		/* ping rate (0.01 Hz) */
-	int	sts_ping_count;		/* ping counter - latest ping */
-	int	sts_load;		/* processing unit load (%) */
-	int	sts_udp_status;		/* sensor input status, UDP port 2 */
-	int	sts_serial1_status;	/* sensor input status, serial port 1 */
-	int	sts_serial2_status;	/* sensor input status, serial port 2 */
-	int	sts_serial3_status;	/* sensor input status, serial port 3 */
-	int	sts_serial4_status;	/* sensor input status, serial port 4 */
-	int	sts_pps_status;		/* sensor input status, pps, >0 ok */
-	int	sts_position_status;	/* sensor input status, position, >0 ok */
-	int	sts_attitude_status;	/* sensor input status, attitude, >0 ok */
-	int	sts_clock_status;	/* sensor input status, clock, >0 ok */
-	int	sts_heading_status;	/* sensor input status, heading, >0 ok */
-	int	sts_pu_status;		/* sensor input status, processing unit
+	int	sts_date;	        /* Status date = year*10000 + month*100 + day
+                                                Feb 26, 1995 = 19950226 */
+	int	sts_msec;	        /* Status time since midnight in msec
+                                                08:12:51.234 = 29570234 */
+	int	sts_status_count; 	/* Status datagram counter */
+	int	sts_serial;		/* System 1 or 2 serial number */
+	int	sts_pingrate;		/* Ping rate (0.01 Hz) */
+	int	sts_ping_count;		/* Ping counter - latest ping */
+	int	sts_load;		/* Processing unit load (%) */
+	int	sts_udp_status;		/* Sensor input status, UDP port 2 */
+	int	sts_serial1_status;	/* Sensor input status, serial port 1 */
+	int	sts_serial2_status;	/* Sensor input status, serial port 2 */
+	int	sts_serial3_status;	/* Sensor input status, serial port 3 */
+	int	sts_serial4_status;	/* Sensor input status, serial port 4 */
+	int	sts_pps_status;		/* Sensor input status, pps, >0 ok */
+	int	sts_position_status;	/* Sensor input status, position, >0 ok */
+	int	sts_attitude_status;	/* Sensor input status, attitude, >0 ok */
+	int	sts_clock_status;	/* Sensor input status, clock, >0 ok */
+	int	sts_heading_status;	/* Sensor input status, heading, >0 ok */
+	int	sts_pu_status;		/* Sensor input status, processing unit
 						(0=off, 1-on, 2=simulator) */
 	int	sts_last_heading;	/* last received heading (0.01 deg) */
 	int	sts_last_roll;		/* last received roll (0.01 deg) */
@@ -903,98 +905,277 @@ struct mbsys_simrad3_struct
 	int	sts_last_heave;		/* last received heave (0.01 m) */
 	int	sts_last_ssv;		/* last received sound speed (0.1 m/s) */
 	int	sts_last_depth;		/* last received depth (0.01 m) */
-	int	sts_spare;		/* spare */
+	int	sts_spare;		/* Spare */
 	int	sts_bso;		/* backscatter at oblique angle (dB) */
 	int	sts_bsn;		/* backscatter at normal incidence (dB) */
 	int	sts_gain;		/* fixed gain (dB) */
 	int	sts_dno;		/* depth to normal incidence (m) */
 	int	sts_rno;		/* range to normal incidence (m) */
 	int	sts_port;		/* port coverage (deg) */
-	int	sts_stbd;		/* starboard coverage (deg) */
-	int	sts_ssp;		/* sound speed at transducer from profile (0.1 m/s) */
+	int	sts_stbd;		/* Starboard coverage (deg) */
+	int	sts_ssp;		/* Sound speed at transducer from profile (0.1 m/s) */
 	int	sts_yaw;		/* yaw stabilization (0.01 deg) */
 	int	sts_port2;		/* port coverage for second em3002 head (deg) */
-	int	sts_stbd2;		/* starboard coverage for second em3002 head (deg) */
-	int	sts_spare2;		/* spare */
+	int	sts_stbd2;		/* Starboard coverage for second em3002 head (deg) */
+	int	sts_spare2;		/* Spare */
 
 	/* installation parameter values */
 	int	par_date;	/* installation parameter date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
 	int	par_msec;	/* installation parameter time since midnight in msec
 				    08:12:51.234 = 29570234 */
-	int	par_line_num;	/* survey line number */
-	int	par_serial_1;	/* system 1 serial number */
-	int	par_serial_2;	/* system 2 serial number */
+	int	par_line_num;	/* Survey line number */
+	int	par_serial_1;	/* System 1 serial number */
+	int	par_serial_2;	/* System 2 serial number */
 	double	par_wlz;	/* water line vertical location (m) */
-	int	par_smh;	/* system main head serial number */
-	double	par_s1z;	/* transducer 1 vertical location (m) */
-	double	par_s1x;	/* transducer 1 along location (m) */
-	double	par_s1y;	/* transducer 1 athwart location (m) */
-	double	par_s1h;	/* transducer 1 heading (deg) */
-	double	par_s1r;	/* transducer 1 roll (m) */
-	double	par_s1p;	/* transducer 1 pitch (m) */
-	int	par_s1n;	/* transducer 1 number of modules */
-	double	par_s2z;	/* transducer 2 vertical location (m) */
-	double	par_s2x;	/* transducer 2 along location (m) */
-	double	par_s2y;	/* transducer 2 athwart location (m) */
-	double	par_s2h;	/* transducer 2 heading (deg) */
-	double	par_s2r;	/* transducer 2 roll (m) */
-	double	par_s2p;	/* transducer 2 pitch (m) */
-	int	par_s2n;	/* transducer 2 number of modules */
-	double	par_go1;	/* system (sonar head 1) gain offset */
-	double	par_go2;	/* sonar head 2 gain offset */
-	char	par_tsv[16];	/* transmitter (sonar head 1) software version */
-	char	par_rsv[16];	/* receiver (sonar head 2) software version */
-	char	par_bsv[16];	/* beamformer software version */
-	char	par_psv[16];	/* processing unit software version */
-	char	par_osv[16];	/* operator station software version */
-	double	par_dsd;	/* depth sensor time delay (msec) */
-	double	par_dso;	/* depth sensor offset */
-	double	par_dsf;	/* depth sensor scale factor */
-	char	par_dsh[2];	/* depth sensor heave (IN or NI) */
-	int	par_aps;	/* active position system number */
-	int	par_p1m;	/* position system 1 motion compensation (boolean) */
-	int	par_p1t;	/* position system 1 time stamp used
+	int	par_smh;	/* System main head serial number */
+        
+        int     par_hun;        /* Hull unit (0 or 1) */
+        double  par_hut;        /* Hull unit tilt offset */
+        int     par_txs;        /* TX serial number */
+        int     par_t2x;        /* TX number 2 serial number */
+        int     par_r1s;        /* RX number 1 serial number */
+        int     par_r2s;        /* RX number 2 serial number */
+        int     par_stc;        /* System transducer configuration
+                                 *      0 = Single TX + single RX
+                                 *              EM122, EM302, EM710, EM2040-Single
+                                 *      1 = Single head
+                                 *              EM3002S, EM2040C-Single, EM2040P
+                                 *      2 = Dual Head
+                                 *              EM3002-Dual, EM2040C-Dual
+                                 *      3 = Single TX + Dual RX
+                                 *              EM2040-Dual-RX
+                                 *      4 = Dual TX + Dual RX
+                                 *              EM2040-Dual-TX
+                                 *  If present, the STC parameter can be used in
+                                 *  decoding of the transducer installation parameters:
+                                 *      STC  S0X/Y/Z/R/P/H  S1X/Y/Z/R/P/H  S2X/Y/Z/R/P/H  S3X/Y/Z/R/P/H
+                                 *      ---  -------------  -------------  -------------  -------------
+                                 *       0        ----            TX             RX           ----
+                                 *       1        ----           Head           ----          ----
+                                 *       2        ----          Head 1         Head 2         ----
+                                 *       3        ----            TX            RX 1          RX 2
+                                 *       4        TX 1           TX 2           RX 1          RX 2     */
+	double	par_s0z;	/* Transducer 0 vertical location (m) */
+	double	par_s0x;	/* Transducer 0 along location (m) */
+	double	par_s0y;	/* Transducer 0 athwart location (m) */
+	double	par_s0h;	/* Transducer 0 heading (deg) */
+	double	par_s0r;	/* Transducer 0 roll (m) */
+	double	par_s0p;	/* Transducer 0 pitch (m) */
+
+	double	par_s1z;	/* Transducer 1 vertical location (m) */
+	double	par_s1x;	/* Transducer 1 along location (m) */
+	double	par_s1y;	/* Transducer 1 athwart location (m) */
+	double	par_s1h;	/* Transducer 1 heading (deg) */
+	double	par_s1r;	/* Transducer 1 roll (m) */
+	double	par_s1p;	/* Transducer 1 pitch (m) */
+	int	par_s1n;	/* Transducer 1 number of modules */
+	double	par_s2z;	/* Transducer 2 vertical location (m) */
+	double	par_s2x;	/* Transducer 2 along location (m) */
+	double	par_s2y;	/* Transducer 2 athwart location (m) */
+	double	par_s2h;	/* Transducer 2 heading (deg) */
+	double	par_s2r;	/* Transducer 2 roll (m) */
+	double	par_s2p;	/* Transducer 2 pitch (m) */
+	int	par_s2n;	/* Transducer 2 number of modules */
+        
+	double	par_s3z;	/* Transducer 3 vertical location (m) */
+	double	par_s3x;	/* Transducer 3 along location (m) */
+	double	par_s3y;	/* Transducer 3 athwart location (m) */
+	double	par_s3h;	/* Transducer 3 heading (deg) */
+	double	par_s3r;	/* Transducer 3 roll (m) */
+	double	par_s3p;	/* Transducer 3 pitch (m) */
+
+        int     par_s1s;        /* TX array size (0=0.5 deg, 1 = 1 deg, 2 = 2 deg) */
+        int     par_s2s;        /* RX array size (1 = 1 deg, 2 = 2 deg) */
+        
+	double	par_go1;	/* System (sonar head 1) gain offset */
+	double	par_go2;	/* Sonar head 2 gain offset */
+        double  par_obo;        /* Outer beam offset */
+        double  par_fgd;        /* High/low frequency gain difference */
+        
+	char	par_tsv[16];	/* Transmitter (sonar head 1) software version */
+	char	par_rsv[16];	/* Receiver (sonar head 2) software version */
+	char	par_bsv[16];	/* Beamformer software version */
+	char	par_psv[16];	/* Processing unit software version */
+	char	par_dds[16];	/* DDS software version */
+	char	par_osv[16];	/* Operator station software version */
+	char	par_dsv[16];	/* Datagram format version */
+	double	par_dsx;	/* Depth sensor along location (m) */
+	double	par_dsy;	/* Depth sensor athwart location (m) */
+	double	par_dsz;	/* Depth sensor vertical location (m) */
+	int	par_dsd;	/* Depth sensor time delay (msec) */
+	double	par_dso;	/* Depth sensor offset */
+	double	par_dsf;	/* Depth sensor scale factor */
+	char	par_dsh[2];	/* Depth sensor heave (IN or NI) */
+	int	par_aps;	/* Active position system number */
+	int	par_p1q;	/* Position system 1 quality (boolean) */
+	int	par_p1m;	/* Position system 1 motion compensation (boolean) */
+	int	par_p1t;	/* Position system 1 time stamp used
 				    (0=system time, 1=position input time) */
-	double	par_p1z;	/* position system 1 vertical location (m) */
-	double	par_p1x;	/* position system 1 along location (m) */
-	double	par_p1y;	/* position system 1 athwart location (m) */
-	double	par_p1d;	/* position system 1 time delay (sec) */
-	char	par_p1g[16];	/* position system 1 geodetic datum */
-	int	par_p2m;	/* position system 2 motion compensation (boolean) */
-	int	par_p2t;	/* position system 2 time stamp used
+	double	par_p1z;	/* Position system 1 vertical location (m) */
+	double	par_p1x;	/* Position system 1 along location (m) */
+	double	par_p1y;	/* Position system 1 athwart location (m) */
+	double	par_p1d;	/* Position system 1 time delay (sec) */
+	char	par_p1g[16];	/* Position system 1 geodetic datum */
+	int	par_p2q;	/* Position system 2 quality (boolean) */
+	int	par_p2m;	/* Position system 2 motion compensation (boolean) */
+	int	par_p2t;	/* Position system 2 time stamp used
 				    (0=system time, 1=position input time) */
-	double	par_p2z;	/* position system 2 vertical location (m) */
-	double	par_p2x;	/* position system 2 along location (m) */
-	double	par_p2y;	/* position system 2 athwart location (m) */
-	double	par_p2d;	/* position system 2 time delay (sec) */
-	char	par_p2g[16];	/* position system 2 geodetic datum */
-	int	par_p3m;	/* position system 3 motion compensation (boolean) */
-	int	par_p3t;	/* position system 3 time stamp used
+	double	par_p2z;	/* Position system 2 vertical location (m) */
+	double	par_p2x;	/* Position system 2 along location (m) */
+	double	par_p2y;	/* Position system 2 athwart location (m) */
+	double	par_p2d;	/* Position system 2 time delay (sec) */
+	char	par_p2g[16];	/* Position system 2 geodetic datum */
+	int	par_p3q;	/* Position system 3 quality (boolean) */
+	int	par_p3m;	/* Position system 3 motion compensation (boolean) */
+	int	par_p3t;	/* Position system 3 time stamp used
 				    (0=system time, 1=position input time) */
-	double	par_p3z;	/* position system 3 vertical location (m) */
-	double	par_p3x;	/* position system 3 along location (m) */
-	double	par_p3y;	/* position system 3 athwart location (m) */
-	double	par_p3d;	/* position system 3 time delay (sec) */
-	char	par_p3g[16];	/* position system 3 geodetic datum */
-	double	par_msz;	/* motion sensor vertical location (m) */
-	double	par_msx;	/* motion sensor along location (m) */
-	double	par_msy;	/* motion sensor athwart location (m) */
-	char	par_mrp[2];	/* motion sensor roll reference plane (HO or RP) */
-	double	par_msd;	/* motion sensor time delay (sec) */
-	double	par_msr;	/* motion sensor roll offset (deg) */
-	double	par_msp;	/* motion sensor pitch offset (deg) */
-	double	par_msg;	/* motion sensor heading offset (deg) */
-	double	par_gcg;	/* gyro compass heading offset (deg) */
-	char	par_cpr[4];	/* cartographic projection */
-	char	par_rop[MBSYS_SIMRAD3_COMMENT_LENGTH];
-				/* responsible operator */
-	char	par_sid[MBSYS_SIMRAD3_COMMENT_LENGTH];
-				/* survey identifier */
-	char	par_pll[MBSYS_SIMRAD3_COMMENT_LENGTH];
-				/* survey line identifier (planned line number) */
-	char	par_com[MBSYS_SIMRAD3_COMMENT_LENGTH];
-				/* comment */
+	double	par_p3z;	/* Position system 3 vertical location (m) */
+	double	par_p3x;	/* Position system 3 along location (m) */
+	double	par_p3y;	/* Position system 3 athwart location (m) */
+	double	par_p3d;	/* Position system 3 time delay (sec) */
+	char	par_p3g[16];	/* Position system 3 geodetic datum */
+	int	par_p3s;	/* Position system 3 on serial line or ethernet (0=ethernet) */
+        
+	double	par_msz;	/* Motion sensor 1 vertical location (m) */
+	double	par_msx;	/* Motion sensor 1 along location (m) */
+	double	par_msy;	/* Motion sensor 1 athwart location (m) */
+	char	par_mrp[2];	/* Motion sensor 1 roll reference plane (HO or RP) */
+	double	par_msd;	/* Motion sensor 1 time delay (sec) */
+	double	par_msr;	/* Motion sensor 1 roll offset (deg) */
+	double	par_msp;	/* Motion sensor 1 pitch offset (deg) */
+	double	par_msg;	/* Motion sensor 1 heading offset (deg) */
+        
+	double	par_nsz;	/* Motion sensor 2 vertical location (m) */
+	double	par_nsx;	/* Motion sensor 2 along location (m) */
+	double	par_nsy;	/* Motion sensor 2 athwart location (m) */
+	char	par_nrp[2];	/* Motion sensor 2 roll reference plane (HO or RP) */
+	double	par_nsd;	/* Motion sensor 2 time delay (sec) */
+	double	par_nsr;	/* Motion sensor 2 roll offset (deg) */
+	double	par_nsp;	/* Motion sensor 2 pitch offset (deg) */
+	double	par_nsg;	/* Motion sensor 2 heading offset (deg) */
+        
+	double	par_gcg;	/* Gyro compass heading offset (deg) */
+	double	par_mas;        /* Roll scaling factor */
+	int	par_shc;        /* Transducer depth sound speed source
+                                 *   0 = transducer depth sound speed is used as
+                                 *          the initial entry the sound speed profile
+                                 *          used in the raytracing calculations
+                                 *   1 = transducer depth sound speed is not used for
+                                 *          raytracing calculations
+                                 *   Note that the source of the sound speed at the
+                                 *   transducer depth (and this sound speed is always
+                                 *   used to calculate beam pointangles if required)
+                                 *   is logged in the runtime datagram. */
+	int	par_pps;        /* 1 PPS clock synchronization
+                                 *   0 = not in use
+                                 *   1 = falling edge detect
+                                 *   2 = rising edge detect */
+	int	par_cls;        /* Clock source
+                                 *   0 = not set,
+                                 *   1 = ZDA,
+                                 *   2 = active POS,
+                                 *   3 = operator station */
+	int	par_clo;        /* Clock offset (seconds) */
+	int	par_vsn;        /* Active attitude velocity sensor
+                                 *  0 = attitude velocity sensor not used
+                                 *  1 = attitude velocity sensor 1 active
+                                 *  2 = attitude velocity sensor 2 active
+                                 *  If VSN = 0, the other VSx parameters are not
+                                 *  relevant and need not be sent.
+                                 *  It is assumed that attitude velocity sensor 1
+                                 *  and motion sensor 1 is the same physical unit
+                                 *  and share the installation parameters MSx.
+                                 *  It is also assumed that attitude  velocity
+                                 *  sensor 2 and motion sensor 2 is the same
+                                 *  physical unit and share the installation
+                                 *  parameters NSx */
+	int	par_vsu;        /* Attitude velocity sensor 1 UDP port address (UDP5)
+                                 *      Value depends on sensor type. */
+	int	par_vse;        /* Attitude velocity sensor 1 ethernet port
+                                 *      0 = Not in use
+                                 *      1 = Use the existing ethernet port used
+                                 *          for communciation to topside
+                                 *      2 = Use ethernet 2 (if available). Network address
+                                 *          and mask are set up by VSI and VSM */
+	int	par_vtu;        /* Attitude velocity sensor 2 UDP port address (UDP6)
+                                 *      Value depends on sensor type. */
+	int	par_vte;        /* Attitude velocity sensor 2 ethernet port
+                                 *      0 = Not in use
+                                 *      1 = Use the existing ethernet port used
+                                 *          for communciation to topside
+                                 *      2 = Use ethernet 2 (if available). Network address
+                                 *          and mask are set up by VSI and VSM */
+	int	par_aro;        /* Active roll/pitch sensor input port
+                                 *      2 = COM2 (motion sensor 1)
+                                 *      3 = COM3 (motion sensor 2)
+                                 *      8 = UDP5 (attitude velocity sensor 1)
+                                 *      9 = UDP6 (attitude velocity sensor 2) */
+	int	par_ahe;        /* Active heave sensor input port
+                                 *      2 = COM2 (motion sensor 1)
+                                 *      3 = COM3 (motion sensor 2)
+                                 *      8 = UDP5 (attitude velocity sensor 1)
+                                 *      9 = UDP6 (attitude velocity sensor 2) */
+	int	par_ahs;        /* Active heading sensor input port
+                                 *      0 = UDP2 (position system 3)
+                                 *      1 = COM1 (position system 1)
+                                 *      2 = COM2 (motion sensor 1)
+                                 *      3 = COM3 (motion sensor 2 or position system 2)
+                                 *      4 = COM4 (position system 3)
+                                 *      5 = Multicast 1
+                                 *      6 = Multicast 2
+                                 *      7 = Multicast 3
+                                 *      8 = UDP5 (attitude velocity sensor 1)
+                                 *      9 = UDP6 (attitude velocity sensor 2) */
+	char	par_vsi[16];    /* Ethernet 2 address */
+	char	par_vsm[16];    /* Ethernet 2 IP network mask */
+	char	par_mca1[16];   /* Multicast 1 (position sensor 1) IP address (ethernet 2) */
+	int	par_mcu1;       /* Multicast 1 (position sensor 1) UDP port number */
+	char	par_mci1[16];   /* Multicast 1 (position sensor 1) identifier */
+	int	par_mcp1;       /* Multicast 1 (position sensor 1) sensor system number
+                                 *      0 = No position will be received from multicast, default
+                                 *      1 = position system 1
+                                 *      2 = position system 2
+                                 *      3 = position system 3
+                                 *      4 = svp system */
+	char	par_mca2[16];   /* Multicast 2 (position sensor 2) IP address (ethernet 2) */
+	int	par_mcu2;       /* Multicast 2 (position sensor 2) UDP port number */
+	char	par_mci2[16];   /* Multicast 2 (position sensor 2) identifier */
+	int	par_mcp2;       /* Multicast 2 (position sensor 2) sensor system number
+                                 *      0 = No position will be received from multicast, default
+                                 *      1 = position system 1
+                                 *      2 = position system 2
+                                 *      3 = position system 3
+                                 *      4 = svp system */
+	char	par_mca3[16];   /* Multicast 3 (position sensor 3) IP address (ethernet 2) */
+	int	par_mcu3;       /* Multicast 3 (position sensor 3) UDP port number */
+	char	par_mci3[16];   /* Multicast 3 (position sensor 3) identifier */
+	int	par_mcp3;       /* Multicast 3 (position sensor 3) sensor system number
+                                 *      0 = No position will be received from multicast, default
+                                 *      1 = position system 1
+                                 *      2 = position system 2
+                                 *      3 = position system 3
+                                 *      4 = svp system */
+	char	par_mca4[16];   /* Multicast 4 (svp sensor) IP address (ethernet 2) */
+	int	par_mcu4;       /* Multicast 4 (svp sensor) UDP port number */
+	char	par_mci4[16];   /* Multicast 4 (svp sensor) identifier */
+	int	par_mcp4;       /* Multicast 4 (svp sensor) sensor system number
+                                 *      0 = No position will be received from multicast, default
+                                 *      1 = position system 1
+                                 *      2 = position system 2
+                                 *      3 = position system 3
+                                 *      4 = svp system */
+        
+	int	par_snl;        /* Ships noise level
+                                 *      0 = normal
+                                 *      1 = high
+                                 *      2 = very high */
+	char	par_cpr[4];     /* Cartographic projection */
+	char	par_rop[MBSYS_SIMRAD3_COMMENT_LENGTH];  /* Responsible operator */
+	char	par_sid[MBSYS_SIMRAD3_COMMENT_LENGTH];  /* Survey identifier */
+	char	par_rfn[MBSYS_SIMRAD3_COMMENT_LENGTH];  /* Raw file name */
+	char	par_pll[MBSYS_SIMRAD3_COMMENT_LENGTH];  /* Survey line identifier (planned line number) */
+	char	par_com[MBSYS_SIMRAD3_COMMENT_LENGTH];  /* comment */
 
 	/* runtime parameter values */
 	int	run_date;	/* runtime parameter date = year*10000 + month*100 + day
@@ -1002,9 +1183,9 @@ struct mbsys_simrad3_struct
 	int	run_msec;	/* runtime parameter time since midnight in msec
 				    08:12:51.234 = 29570234 */
 	int	run_ping_count;	/* ping counter */
-	int	run_serial;	/* system 1 or 2 serial number */
-	int	run_status;	/* system status */
-	int	run_mode;	/* system mode:
+	int	run_serial;	/* System 1 or 2 serial number */
+	int	run_status;	/* System status */
+	int	run_mode;	/* System mode:
 				    0 : nearfield (EM3000) or very shallow (EM300)
 				    1 :	normal (EM3000) or shallow (EM300)
 				    2 : medium (EM300)
@@ -1032,7 +1213,7 @@ struct mbsys_simrad3_struct
 	int	run_rec_band;	/* receiver bandwidth (50 hz) */
 	int	run_rec_gain;	/* receiver fixed gain (dB) */
 	int	run_tvg_cross;	/* TVG law crossover angle (deg) */
-	int	run_ssv_source;	/* source of sound speed at transducer:
+	int	run_ssv_source;	/* Source of sound speed at transducer:
 				    0 : from sensor
 				    1 : manual
 				    2 : from profile */
@@ -1053,13 +1234,13 @@ struct mbsys_simrad3_struct
 					11 : to manually entered heading */
 	char	run_spare[6];
 
-	/* sound velocity profile */
+	/* Sound velocity profile */
 	int	svp_use_date;	/* date at start of use
 				    date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
 	int	svp_use_msec;	/* time at start of use since midnight in msec
 				    08:12:51.234 = 29570234 */
-	int	svp_count;	/* sequential counter or input identifier */
+	int	svp_count;	/* Sequential counter or input identifier */
 	int	svp_serial;	/* system 1 serial number */
 	int	svp_origin_date;/* date at svp origin
 				    date = year*10000 + month*100 + day
