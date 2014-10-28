@@ -20,145 +20,6 @@
  * Date:	April 21, 1996
  *
  * $Log: mb_define.h,v $
- * Revision 5.40  2009/03/08 09:21:00  caress
- * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
- *
- * Revision 5.39  2009/03/02 18:51:52  caress
- * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
- *
- * Revision 5.38  2009/01/07 17:46:44  caress
- * Moved macro round() into mb_define.h as ROUND()
- *
- * Revision 5.37  2008/09/20 00:57:40  caress
- * Release 5.1.1beta23
- *
- * Revision 5.36  2008/09/13 06:08:09  caress
- * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
- *
- * Revision 5.35  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.34  2008/02/12 02:58:30  caress
- * Added mb_gains() function to MBIO.
- *
- * Revision 5.33  2007/10/08 15:59:34  caress
- * MBIO changes as of 8 October 2007.
- *
- * Revision 5.32  2006/11/10 22:36:04  caress
- * Working towards release 5.1.0
- *
- * Revision 5.31  2006/10/05 18:58:28  caress
- * Changes for 5.1.0beta4
- *
- * Revision 5.30  2006/09/11 18:55:52  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.29  2006/01/06 18:27:19  caress
- * Working towards 5.0.8
- *
- * Revision 5.28  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.27  2004/12/18 01:34:43  caress
- * Working towards release 5.0.6.
- *
- * Revision 5.26  2004/12/02 06:33:30  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.25  2004/11/06 03:55:17  caress
- * Working to support the Reson 7k format.
- *
- * Revision 5.24  2004/09/16 19:02:33  caress
- * Changes to better support segy data.
- *
- * Revision 5.23  2004/04/27 01:46:12  caress
- * Various updates of April 26, 2004.
- *
- * Revision 5.22  2003/09/23 20:56:00  caress
- * Added declaration of type mb_path.
- *
- * Revision 5.21  2003/07/26 17:59:32  caress
- * Changed beamflag handling code.
- *
- * Revision 5.20  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.19  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.18  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.17  2002/05/29 23:40:48  caress
- * Release 5.0.beta18
- *
- * Revision 5.16  2002/05/02 04:00:41  caress
- * Release 5.0.beta17
- *
- * Revision 5.15  2002/04/08 20:59:38  caress
- * Release 5.0.beta17
- *
- * Revision 5.14  2002/04/06 02:43:39  caress
- * Release 5.0.beta16
- *
- * Revision 5.13  2002/02/22 09:03:43  caress
- * Release 5.0.beta13
- *
- * Revision 5.12  2002/01/24 02:28:29  caress
- * Added DARWIN.
- *
- * Revision 5.11  2001/12/18 04:27:45  caress
- * Release 5.0.beta11.
- *
- * Revision 5.10  2001/11/15  22:36:43  caress
- * Added function mb_get_shortest_path()
- *
- * Revision 5.9  2001/10/19  00:54:37  caress
- * Now tries to use relative paths.
- *
- * Revision 5.8  2001/10/12  21:10:41  caress
- * Added interpolation of attitude data.
- *
- * Revision 5.7  2001/09/17 23:25:13  caress
- * Added format 84
- *
- * Revision 5.6  2001/07/20  00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.5  2001/06/08 21:44:01  caress
- * Version 5.0.beta01
- *
- * Revision 5.4  2001/06/01  00:14:06  caress
- * Redid support for current Simrad multibeam data.
- *
- * Revision 5.3  2001/04/30  05:14:10  caress
- * Changes to MB-System defaults.
- *
- * Revision 5.2  2001/03/22 20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.4  2000/09/30  06:29:44  caress
- * Snapshot for Dale.
- *
- * Revision 4.3  1998/12/17  23:01:15  caress
- * MB-System version 4.6beta4
- *
- * Revision 4.2  1998/10/05 17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.1  1997/09/15  19:06:40  caress
- * Real Version 4.5
- *
- * Revision 4.0  1996/08/05  15:24:55  caress
- * Initial revision.
- *
  *
  */
 
@@ -228,6 +89,19 @@ typedef signed char	mb_s_char;
 /* type definitions of signed and unsigned long int (64 bit integer) */
 typedef unsigned long long	mb_u_long;
 typedef long long	mb_s_long;
+
+/* type definitions for structures used in beam angle calculations */
+typedef struct {
+    double x;
+    double y;
+    double z;
+} mb_3D_vector;
+
+typedef struct {
+    double roll;
+    double pitch;
+    double heading;
+} mb_3D_orientation;
 
 /* declare buffer maximum */
 #define	MB_BUFFER_MAX	5000
@@ -855,6 +729,23 @@ int mb_swap_check();
 int mb_swap_float(float *a);
 int mb_swap_double(double *a);
 int mb_swap_long(mb_s_long *a);
+
+int mb_beaudoin(int verbose,
+		mb_3D_orientation tx_align,
+		mb_3D_orientation tx_orientation,
+		double tx_steer,
+		mb_3D_orientation rx_align,
+		mb_3D_orientation rx_orientation,
+		double rx_steer,
+		double reference_heading,
+		double *beamAzimuth,
+		double *beamDepression,
+		int	*error);
+int mb_beaudoin_unrotate (int verbose,
+                            mb_3D_vector orig,
+                            mb_3D_orientation rotate,
+                            mb_3D_vector *final,
+                            int *error);
 
 /* mb_rt function prototypes */
 int mb_rt_init(int verbose, int number_node,

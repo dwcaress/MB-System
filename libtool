@@ -1,8 +1,8 @@
 #! /bin/sh
 
 # libtool - Provide generalized library-building support services.
-# Generated automatically by config.status (mbsystem) 5.4.2204
-# Libtool was configured on host tharp.shore.mbari.org:
+# Generated automatically by config.status (mbsystem) 5.4.2207
+# Libtool was configured on host tharp.local:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -66,13 +66,13 @@ PATH_SEPARATOR=":"
 
 # The host system.
 host_alias=
-host=x86_64-apple-darwin13.3.0
-host_os=darwin13.3.0
+host=x86_64-apple-darwin13.4.0
+host_os=darwin13.4.0
 
 # The build system.
 build_alias=
-build=x86_64-apple-darwin13.3.0
-build_os=darwin13.3.0
+build=x86_64-apple-darwin13.4.0
+build_os=darwin13.4.0
 
 # A sed program that does not truncate output.
 SED="/usr/bin/sed"
@@ -272,7 +272,7 @@ finish_eval=""
 hardcode_into_libs=no
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/5.1  /usr/local/lib"
+sys_lib_search_path_spec="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/6.0  /usr/local/lib"
 
 # Run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/usr/local/lib /lib /usr/lib"

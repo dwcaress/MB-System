@@ -1380,7 +1380,26 @@ Have a nice day...\n");
 					}
 				done = MB_NO;
 				}
-			if (status == MB_SUCCESS)
+			if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_M3)
+				{
+				if (which_sonar == 1
+					&& store->ping1->png_bath_read == MB_YES
+					&& store->ping1->png_raw_read == MB_YES
+					&& store->ping1->png_count == store->ping1->png_raw_count)
+					{
+					done = MB_YES;
+					*reset_ping1_flag = MB_YES;
+					}
+				else if (which_sonar == 2
+					&& store->ping2->png_bath_read == MB_YES
+					&& store->ping2->png_raw_read == MB_YES
+					&& store->ping2->png_count == store->ping2->png_raw_count)
+					{
+					done = MB_YES;
+					*reset_ping2_flag = MB_YES;
+					}
+				}
+			else if (status == MB_SUCCESS)
 				{
 				if (which_sonar == 1
 					&& store->ping1->png_bath_read == MB_YES
@@ -1423,7 +1442,26 @@ Have a nice day...\n");
 					}
 				done = MB_NO;
 				}
-			if (status == MB_SUCCESS)
+			if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_M3)
+				{
+				if (which_sonar == 1
+					&& store->ping1->png_bath_read == MB_YES
+					&& store->ping1->png_raw_read == MB_YES
+					&& store->ping1->png_count == store->ping1->png_raw_count)
+					{
+					done = MB_YES;
+					*reset_ping1_flag = MB_YES;
+					}
+				else if (which_sonar == 2
+					&& store->ping2->png_bath_read == MB_YES
+					&& store->ping2->png_raw_read == MB_YES
+					&& store->ping2->png_count == store->ping2->png_raw_count)
+					{
+					done = MB_YES;
+					*reset_ping2_flag = MB_YES;
+					}
+				}
+			else if (status == MB_SUCCESS)
 				{
 				if (which_sonar == 1
 					&& store->ping1->png_bath_read == MB_YES
@@ -1466,7 +1504,26 @@ Have a nice day...\n");
 					}
 				done = MB_NO;
 				}
-			if (status == MB_SUCCESS)
+			if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_M3)
+				{
+				if (which_sonar == 1
+					&& store->ping1->png_bath_read == MB_YES
+					&& store->ping1->png_raw_read == MB_YES
+					&& store->ping1->png_count == store->ping1->png_raw_count)
+					{
+					done = MB_YES;
+					*reset_ping1_flag = MB_YES;
+					}
+				else if (which_sonar == 2
+					&& store->ping2->png_bath_read == MB_YES
+					&& store->ping2->png_raw_read == MB_YES
+					&& store->ping2->png_count == store->ping2->png_raw_count)
+					{
+					done = MB_YES;
+					*reset_ping2_flag = MB_YES;
+					}
+				}
+			else if (status == MB_SUCCESS)
 				{
 				if (which_sonar == 1
 					&& store->ping1->png_bath_read == MB_YES
@@ -1769,7 +1826,8 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			|| sonarunswap == MBSYS_SIMRAD3_EM302
 			|| sonarunswap == MBSYS_SIMRAD3_EM122
 			|| sonarunswap == MBSYS_SIMRAD3_EM2040
-			|| sonarunswap == MBSYS_SIMRAD3_EM2045)
+			|| sonarunswap == MBSYS_SIMRAD3_EM2045
+			|| sonarunswap == MBSYS_SIMRAD3_M3)
 			{
 			sonarunswapgood = MB_YES;
 			}
@@ -1784,7 +1842,8 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			|| sonarswap == MBSYS_SIMRAD3_EM302
 			|| sonarswap == MBSYS_SIMRAD3_EM122
 			|| sonarswap == MBSYS_SIMRAD3_EM2040
-			|| sonarswap == MBSYS_SIMRAD3_EM2045)
+			|| sonarswap == MBSYS_SIMRAD3_EM2045
+			|| sonarswap == MBSYS_SIMRAD3_M3)
 			{
 			sonarswapgood = MB_YES;
 			}
@@ -1830,7 +1889,8 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 		&& *sonar != MBSYS_SIMRAD3_EM302
 		&& *sonar != MBSYS_SIMRAD3_EM122
 		&& *sonar != MBSYS_SIMRAD3_EM2040
-		&& *sonar != MBSYS_SIMRAD3_EM2045)
+		&& *sonar != MBSYS_SIMRAD3_EM2045
+		&& *sonar != MBSYS_SIMRAD3_M3)
 		{
 		sonargood = MB_NO;
 		}
@@ -2140,6 +2200,35 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_wlz), &line[4], len-5);
 			else if (strncmp("SMH=", line, 4) == 0)
 			    mb_get_int(&(store->par_smh), &line[4], len-5);
+			    
+			else if (strncmp("HUN=", line, 4) == 0)
+			    mb_get_int(&(store->par_hun), &line[4], len-5);
+			else if (strncmp("HUT=", line, 4) == 0)
+			    mb_get_double(&(store->par_hut), &line[4], len-5);
+			else if (strncmp("TXS=", line, 4) == 0)
+			    mb_get_int(&(store->par_txs), &line[4], len-5);
+			else if (strncmp("T2X=", line, 4) == 0)
+			    mb_get_int(&(store->par_t2x), &line[4], len-5);
+			else if (strncmp("R1S=", line, 4) == 0)
+			    mb_get_int(&(store->par_r1s), &line[4], len-5);
+			else if (strncmp("R2S=", line, 4) == 0)
+			    mb_get_int(&(store->par_r2s), &line[4], len-5);
+			else if (strncmp("STC=", line, 4) == 0)
+			    mb_get_int(&(store->par_stc), &line[4], len-5);
+			    
+			else if (strncmp("S0Z=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0z), &line[4], len-5);
+			else if (strncmp("S0X=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0x), &line[4], len-5);
+			else if (strncmp("S0Y=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0y), &line[4], len-5);
+			else if (strncmp("S0H=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0h), &line[4], len-5);
+			else if (strncmp("S0R=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0r), &line[4], len-5);
+			else if (strncmp("S0P=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0p), &line[4], len-5);
+			    
 			else if (strncmp("S1Z=", line, 4) == 0)
 			    mb_get_double(&(store->par_s1z), &line[4], len-5);
 			else if (strncmp("S1X=", line, 4) == 0)
@@ -2154,6 +2243,7 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_s1p), &line[4], len-5);
 			else if (strncmp("S1N=", line, 4) == 0)
 			    mb_get_int(&(store->par_s1n), &line[4], len-5);
+			    
 			else if (strncmp("S2Z=", line, 4) == 0)
 			    mb_get_double(&(store->par_s2z), &line[4], len-5);
 			else if (strncmp("S2X=", line, 4) == 0)
@@ -2168,10 +2258,34 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_s2p), &line[4], len-5);
 			else if (strncmp("S2N=", line, 4) == 0)
 			    mb_get_int(&(store->par_s2n), &line[4], len-5);
+			    
+			else if (strncmp("S3Z=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3z), &line[4], len-5);
+			else if (strncmp("S3X=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3x), &line[4], len-5);
+			else if (strncmp("S3Y=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3y), &line[4], len-5);
+			else if (strncmp("S3H=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3h), &line[4], len-5);
+			else if (strncmp("S3R=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3r), &line[4], len-5);
+			else if (strncmp("S3P=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3p), &line[4], len-5);
+			    
+			else if (strncmp("S1S=", line, 4) == 0)
+			    mb_get_int(&(store->par_s1s), &line[4], len-5);
+			else if (strncmp("S2S=", line, 4) == 0)
+			    mb_get_int(&(store->par_s2s), &line[4], len-5);
+			    
 			else if (strncmp("GO1=", line, 4) == 0)
 			    mb_get_double(&(store->par_go1), &line[4], len-5);
 			else if (strncmp("GO2=", line, 4) == 0)
 			    mb_get_double(&(store->par_go2), &line[4], len-5);
+			else if (strncmp("OBO=", line, 4) == 0)
+			    mb_get_double(&(store->par_obo), &line[4], len-5);
+			else if (strncmp("FGD=", line, 4) == 0)
+			    mb_get_double(&(store->par_fgd), &line[4], len-5);
+			    
 			else if (strncmp("TSV=", line, 4) == 0)
 			    strncpy(store->par_tsv, &line[4], MIN(len-5, 15));
 			else if (strncmp("RSV=", line, 4) == 0)
@@ -2187,10 +2301,21 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 				== 3)
 				*version = i3 + 100 * i2 + 10000 * i1;
 			    }
+			else if (strncmp("DDS=", line, 4) == 0)
+			    strncpy(store->par_dds, &line[4], MIN(len-5, 15));
 			else if (strncmp("OSV=", line, 4) == 0)
 			    strncpy(store->par_osv, &line[4], MIN(len-5, 15));
+			else if (strncmp("DSV=", line, 4) == 0)
+			    strncpy(store->par_dsv, &line[4], MIN(len-5, 15));
+			else if (strncmp("DSX=", line, 4) == 0)
+			    mb_get_double(&(store->par_dsx), &line[4], len-5);
+			else if (strncmp("DSY=", line, 4) == 0)
+			    mb_get_double(&(store->par_dsy), &line[4], len-5);
+			else if (strncmp("DSZ=", line, 4) == 0)
+			    mb_get_double(&(store->par_dsz), &line[4], len-5);
+			    
 			else if (strncmp("DSD=", line, 4) == 0)
-			    mb_get_double(&(store->par_dsd), &line[4], len-5);
+			    mb_get_int(&(store->par_dsd), &line[4], len-5);
 			else if (strncmp("DSO=", line, 4) == 0)
 			    mb_get_double(&(store->par_dso), &line[4], len-5);
 			else if (strncmp("DSF=", line, 4) == 0)
@@ -2202,6 +2327,8 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 			    }
 			else if (strncmp("APS=", line, 4) == 0)
 			    mb_get_int(&(store->par_aps), &line[4], len-5);
+			else if (strncmp("P1Q=", line, 4) == 0)
+			    mb_get_int(&(store->par_p1q), &line[4], len-5);
 			else if (strncmp("P1M=", line, 4) == 0)
 			    mb_get_int(&(store->par_p1m), &line[4], len-5);
 			else if (strncmp("P1T=", line, 4) == 0)
@@ -2216,6 +2343,8 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_p1d), &line[4], len-5);
 			else if (strncmp("P1G=", line, 4) == 0)
 			    strncpy(store->par_p1g, &line[4], MIN(len-5, 15));
+			else if (strncmp("P2Q=", line, 4) == 0)
+			    mb_get_int(&(store->par_p2q), &line[4], len-5);
 			else if (strncmp("P2M=", line, 4) == 0)
 			    mb_get_int(&(store->par_p2m), &line[4], len-5);
 			else if (strncmp("P2T=", line, 4) == 0)
@@ -2230,6 +2359,8 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_p2d), &line[4], len-5);
 			else if (strncmp("P2G=", line, 4) == 0)
 			    strncpy(store->par_p2g, &line[4], MIN(len-5, 15));
+			else if (strncmp("P3Q=", line, 4) == 0)
+			    mb_get_int(&(store->par_p3q), &line[4], len-5);
 			else if (strncmp("P3M=", line, 4) == 0)
 			    mb_get_int(&(store->par_p3m), &line[4], len-5);
 			else if (strncmp("P3T=", line, 4) == 0)
@@ -2244,6 +2375,9 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_p3d), &line[4], len-5);
 			else if (strncmp("P3G=", line, 4) == 0)
 			    strncpy(store->par_p3g, &line[4], MIN(len-5, 15));
+			else if (strncmp("P3S=", line, 4) == 0)
+			    mb_get_int(&(store->par_p3s), &line[4], len-5);
+			    
 			else if (strncmp("MSZ=", line, 4) == 0)
 			    mb_get_double(&(store->par_msz), &line[4], len-5);
 			else if (strncmp("MSX=", line, 4) == 0)
@@ -2263,14 +2397,106 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_msp), &line[4], len-5);
 			else if (strncmp("MSG=", line, 4) == 0)
 			    mb_get_double(&(store->par_msg), &line[4], len-5);
+			    
+			else if (strncmp("NSZ=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsz), &line[4], len-5);
+			else if (strncmp("NSX=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsx), &line[4], len-5);
+			else if (strncmp("NSY=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsy), &line[4], len-5);
+			else if (strncmp("NRP=", line, 4) == 0)
+			    {
+			    store->par_nrp[0] = line[4];
+			    store->par_nrp[1] = line[5];
+			    }
+			else if (strncmp("NSD=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsd), &line[4], len-5);
+			else if (strncmp("NSR=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsr), &line[4], len-5);
+			else if (strncmp("NSP=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsp), &line[4], len-5);
+			else if (strncmp("NSG=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsg), &line[4], len-5);
+			    
 			else if (strncmp("GCG=", line, 4) == 0)
 			    mb_get_double(&(store->par_gcg), &line[4], len-5);
+			else if (strncmp("MAS=", line, 4) == 0)
+			    mb_get_double(&(store->par_mas), &line[4], len-5);
+			else if (strncmp("SHC=", line, 4) == 0)
+			    mb_get_int(&(store->par_shc), &line[4], len-5);
+			else if (strncmp("PPS=", line, 4) == 0)
+			    mb_get_int(&(store->par_pps), &line[4], len-5);
+			else if (strncmp("CLS=", line, 4) == 0)
+			    mb_get_int(&(store->par_cls), &line[4], len-5);
+			else if (strncmp("CLO=", line, 4) == 0)
+			    mb_get_int(&(store->par_clo), &line[4], len-5);
+			else if (strncmp("VSN=", line, 4) == 0)
+			    mb_get_int(&(store->par_vsn), &line[4], len-5);
+			else if (strncmp("VSU=", line, 4) == 0)
+			    mb_get_int(&(store->par_vsu), &line[4], len-5);
+			else if (strncmp("VSE=", line, 4) == 0)
+			    mb_get_int(&(store->par_vse), &line[4], len-5);
+			else if (strncmp("VTU=", line, 4) == 0)
+			    mb_get_int(&(store->par_vtu), &line[4], len-5);
+			else if (strncmp("VTE=", line, 4) == 0)
+			    mb_get_int(&(store->par_vte), &line[4], len-5);
+			else if (strncmp("ARO=", line, 4) == 0)
+			    mb_get_int(&(store->par_aro), &line[4], len-5);
+			else if (strncmp("AHE=", line, 4) == 0)
+			    mb_get_int(&(store->par_ahe), &line[4], len-5);
+			else if (strncmp("AHS=", line, 4) == 0)
+			    mb_get_int(&(store->par_ahs), &line[4], len-5);
+			else if (strncmp("VSI=", line, 4) == 0)
+			    strncpy(store->par_vsi, &line[4], MIN(len-5, 15));
+			else if (strncmp("VSM=", line, 4) == 0)
+			    strncpy(store->par_vsm, &line[4], MIN(len-5, 15));
+
+			else if (strncmp("MCA1=", line, 5) == 0)
+			    strncpy(store->par_mca1, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCU1=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcu1), &line[5], len-6);
+			else if (strncmp("MCI1=", line, 5) == 0)
+			    strncpy(store->par_mci1, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCP1=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcp1), &line[5], len-6);
+
+			else if (strncmp("MCA2=", line, 5) == 0)
+			    strncpy(store->par_mca2, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCU2=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcu2), &line[5], len-6);
+			else if (strncmp("MCI2=", line, 5) == 0)
+			    strncpy(store->par_mci2, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCP2=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcp2), &line[5], len-6);
+
+			else if (strncmp("MCA3=", line, 5) == 0)
+			    strncpy(store->par_mca3, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCU3=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcu3), &line[5], len-6);
+			else if (strncmp("MCI3=", line, 5) == 0)
+			    strncpy(store->par_mci3, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCP3=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcp3), &line[5], len-6);
+
+			else if (strncmp("MCA4=", line, 5) == 0)
+			    strncpy(store->par_mca4, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCU4=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcu4), &line[5], len-6);
+			else if (strncmp("MCI4=", line, 5) == 0)
+			    strncpy(store->par_mci4, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCP4=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcp4), &line[5], len-6);
+			else if (strncmp("SNL=", line, 4) == 0)
+			    mb_get_int(&(store->par_snl), &line[4], len-5);
+			    
 			else if (strncmp("CPR=", line, 4) == 0)
 			    strncpy(store->par_cpr, &line[4], MIN(len-5, 3));
 			else if (strncmp("ROP=", line, 4) == 0)
 			    strncpy(store->par_rop, &line[4], MIN(len-5, MBSYS_SIMRAD3_COMMENT_LENGTH-1));
 			else if (strncmp("SID=", line, 4) == 0)
 			    strncpy(store->par_sid, &line[4], MIN(len-5, MBSYS_SIMRAD3_COMMENT_LENGTH-1));
+			else if (strncmp("RFN=", line, 4) == 0)
+			    strncpy(store->par_rfn, &line[4], MIN(len-5, MBSYS_SIMRAD3_COMMENT_LENGTH-1));
 			else if (strncmp("PLL=", line, 4) == 0)
 			    strncpy(store->par_pll, &line[4], MIN(len-5, MBSYS_SIMRAD3_COMMENT_LENGTH-1));
 			else if (strncmp("COM=", line, 4) == 0)
@@ -2344,7 +2570,7 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 		line[2], line[2]);
 #endif
 		}
-#ifdef MBR_EM710MBA_DEBUG
+#ifdef MBR_EM71MBA_DEBUG
 	fprintf(stderr, "\n");
 #endif
 	    }
@@ -2364,6 +2590,19 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_serial_2:    %d\n",store->par_serial_2);
 		fprintf(stderr,"dbg5       par_wlz:         %f\n",store->par_wlz);
 		fprintf(stderr,"dbg5       par_smh:         %d\n",store->par_smh);
+		fprintf(stderr,"dbg5       par_hun:         %d\n",store->par_hun);
+		fprintf(stderr,"dbg5       par_hut:         %f\n",store->par_hut);
+		fprintf(stderr,"dbg5       par_txs:         %d\n",store->par_txs);
+		fprintf(stderr,"dbg5       par_t2x:         %d\n",store->par_t2x);
+		fprintf(stderr,"dbg5       par_r1s:         %d\n",store->par_r1s);
+		fprintf(stderr,"dbg5       par_r2s:         %d\n",store->par_r2s);
+		fprintf(stderr,"dbg5       par_stc:         %d\n",store->par_stc);
+		fprintf(stderr,"dbg5       par_s0z:         %f\n",store->par_s0z);
+		fprintf(stderr,"dbg5       par_s0x:         %f\n",store->par_s0x);
+		fprintf(stderr,"dbg5       par_s0y:         %f\n",store->par_s0y);
+		fprintf(stderr,"dbg5       par_s0h:         %f\n",store->par_s0h);
+		fprintf(stderr,"dbg5       par_s0r:         %f\n",store->par_s0r);
+		fprintf(stderr,"dbg5       par_s0p:         %f\n",store->par_s0p);
 		fprintf(stderr,"dbg5       par_s1z:         %f\n",store->par_s1z);
 		fprintf(stderr,"dbg5       par_s1x:         %f\n",store->par_s1x);
 		fprintf(stderr,"dbg5       par_s1y:         %f\n",store->par_s1y);
@@ -2378,19 +2617,34 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_s2r:         %f\n",store->par_s2r);
 		fprintf(stderr,"dbg5       par_s2p:         %f\n",store->par_s2p);
 		fprintf(stderr,"dbg5       par_s2n:         %d\n",store->par_s2n);
+		fprintf(stderr,"dbg5       par_s3z:         %f\n",store->par_s3z);
+		fprintf(stderr,"dbg5       par_s3x:         %f\n",store->par_s3x);
+		fprintf(stderr,"dbg5       par_s3y:         %f\n",store->par_s3y);
+		fprintf(stderr,"dbg5       par_s3h:         %f\n",store->par_s3h);
+		fprintf(stderr,"dbg5       par_s3r:         %f\n",store->par_s3r);
+		fprintf(stderr,"dbg5       par_s3p:         %f\n",store->par_s3p);
+		fprintf(stderr,"dbg5       par_s1s:         %d\n",store->par_s1s);
+		fprintf(stderr,"dbg5       par_s2s:         %d\n",store->par_s2s);
 		fprintf(stderr,"dbg5       par_go1:         %f\n",store->par_go1);
 		fprintf(stderr,"dbg5       par_go2:         %f\n",store->par_go2);
+		fprintf(stderr,"dbg5       par_obo:         %f\n",store->par_obo);
+		fprintf(stderr,"dbg5       par_fgd:         %f\n",store->par_fgd);
 		fprintf(stderr,"dbg5       par_tsv:         %s\n",store->par_tsv);
 		fprintf(stderr,"dbg5       par_rsv:         %s\n",store->par_rsv);
 		fprintf(stderr,"dbg5       par_bsv:         %s\n",store->par_bsv);
 		fprintf(stderr,"dbg5       par_psv:         %s\n",store->par_psv);
+		fprintf(stderr,"dbg5       par_dds:         %s\n",store->par_dds);
 		fprintf(stderr,"dbg5       par_osv:         %s\n",store->par_osv);
-		fprintf(stderr,"dbg5       par_dsd:         %f\n",store->par_dsd);
+		fprintf(stderr,"dbg5       par_dsv:         %s\n",store->par_dsv);
+		fprintf(stderr,"dbg5       par_dsx:         %f\n",store->par_dsx);
+		fprintf(stderr,"dbg5       par_dsy:         %f\n",store->par_dsy);
+		fprintf(stderr,"dbg5       par_dsz:         %f\n",store->par_dsz);
+		fprintf(stderr,"dbg5       par_dsd:         %d\n",store->par_dsd);
 		fprintf(stderr,"dbg5       par_dso:         %f\n",store->par_dso);
 		fprintf(stderr,"dbg5       par_dsf:         %f\n",store->par_dsf);
-		fprintf(stderr,"dbg5       par_dsh:         %c%c\n",
-			store->par_dsh[0],store->par_dsh[1]);
+		fprintf(stderr,"dbg5       par_dsh:         %c%c\n",store->par_dsh[0],store->par_dsh[1]);
 		fprintf(stderr,"dbg5       par_aps:         %d\n",store->par_aps);
+		fprintf(stderr,"dbg5       par_p1q:         %d\n",store->par_p1q);
 		fprintf(stderr,"dbg5       par_p1m:         %d\n",store->par_p1m);
 		fprintf(stderr,"dbg5       par_p1t:         %d\n",store->par_p1t);
 		fprintf(stderr,"dbg5       par_p1z:         %f\n",store->par_p1z);
@@ -2398,6 +2652,7 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p1y:         %f\n",store->par_p1y);
 		fprintf(stderr,"dbg5       par_p1d:         %f\n",store->par_p1d);
 		fprintf(stderr,"dbg5       par_p1g:         %s\n",store->par_p1g);
+		fprintf(stderr,"dbg5       par_p2q:         %d\n",store->par_p2q);
 		fprintf(stderr,"dbg5       par_p2m:         %d\n",store->par_p2m);
 		fprintf(stderr,"dbg5       par_p2t:         %d\n",store->par_p2t);
 		fprintf(stderr,"dbg5       par_p2z:         %f\n",store->par_p2z);
@@ -2405,6 +2660,7 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p2y:         %f\n",store->par_p2y);
 		fprintf(stderr,"dbg5       par_p2d:         %f\n",store->par_p2d);
 		fprintf(stderr,"dbg5       par_p2g:         %s\n",store->par_p2g);
+		fprintf(stderr,"dbg5       par_p3q:         %d\n",store->par_p3q);
 		fprintf(stderr,"dbg5       par_p3m:         %d\n",store->par_p3m);
 		fprintf(stderr,"dbg5       par_p3t:         %d\n",store->par_p3t);
 		fprintf(stderr,"dbg5       par_p3z:         %f\n",store->par_p3z);
@@ -2412,23 +2668,65 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p3y:         %f\n",store->par_p3y);
 		fprintf(stderr,"dbg5       par_p3d:         %f\n",store->par_p3d);
 		fprintf(stderr,"dbg5       par_p3g:         %s\n",store->par_p3g);
+		fprintf(stderr,"dbg5       par_p3s:         %d\n",store->par_p3s);
 		fprintf(stderr,"dbg5       par_msz:         %f\n",store->par_msz);
 		fprintf(stderr,"dbg5       par_msx:         %f\n",store->par_msx);
 		fprintf(stderr,"dbg5       par_msy:         %f\n",store->par_msy);
-		fprintf(stderr,"dbg5       par_mrp:         %c%c\n",
-			store->par_mrp[0],store->par_mrp[1]);
+		fprintf(stderr,"dbg5       par_mrp:         %c%c\n",store->par_mrp[0],store->par_mrp[1]);
 		fprintf(stderr,"dbg5       par_msd:         %f\n",store->par_msd);
 		fprintf(stderr,"dbg5       par_msr:         %f\n",store->par_msr);
 		fprintf(stderr,"dbg5       par_msp:         %f\n",store->par_msp);
 		fprintf(stderr,"dbg5       par_msg:         %f\n",store->par_msg);
+		fprintf(stderr,"dbg5       par_nsz:         %f\n",store->par_nsz);
+		fprintf(stderr,"dbg5       par_nsx:         %f\n",store->par_nsx);
+		fprintf(stderr,"dbg5       par_nsy:         %f\n",store->par_nsy);
+		fprintf(stderr,"dbg5       par_nrp:         %c%c\n",store->par_nrp[0],store->par_nrp[1]);
+		fprintf(stderr,"dbg5       par_nsd:         %f\n",store->par_nsd);
+		fprintf(stderr,"dbg5       par_nsr:         %f\n",store->par_nsr);
+		fprintf(stderr,"dbg5       par_nsp:         %f\n",store->par_nsp);
+		fprintf(stderr,"dbg5       par_nsg:         %f\n",store->par_nsg);
 		fprintf(stderr,"dbg5       par_gcg:         %f\n",store->par_gcg);
+		fprintf(stderr,"dbg5       par_mas:         %f\n",store->par_mas);
+		fprintf(stderr,"dbg5       par_shc:         %d\n",store->par_shc);
+		fprintf(stderr,"dbg5       par_pps:         %d\n",store->par_pps);
+		fprintf(stderr,"dbg5       par_cls:         %d\n",store->par_cls);
+		fprintf(stderr,"dbg5       par_clo:         %d\n",store->par_clo);
+		fprintf(stderr,"dbg5       par_vsn:         %d\n",store->par_vsn);
+		fprintf(stderr,"dbg5       par_vsu:         %d\n",store->par_vsu);
+		fprintf(stderr,"dbg5       par_vse:         %d\n",store->par_vse);
+		fprintf(stderr,"dbg5       par_vtu:         %d\n",store->par_vtu);
+		fprintf(stderr,"dbg5       par_vte:         %d\n",store->par_vte);
+		fprintf(stderr,"dbg5       par_aro:         %d\n",store->par_aro);
+		fprintf(stderr,"dbg5       par_ahe:         %d\n",store->par_ahe);
+		fprintf(stderr,"dbg5       par_ahs:         %d\n",store->par_ahs);
+		fprintf(stderr,"dbg5       par_vsi:         %s\n",store->par_vsi);
+		fprintf(stderr,"dbg5       par_vsm:         %s\n",store->par_vsm);
+		fprintf(stderr,"dbg5       par_mca1:        %s\n",store->par_mca1);
+		fprintf(stderr,"dbg5       par_mcu1:        %d\n",store->par_mcu1);
+		fprintf(stderr,"dbg5       par_mci1:        %s\n",store->par_mci1);
+		fprintf(stderr,"dbg5       par_mcp1:        %d\n",store->par_mcp1);
+		fprintf(stderr,"dbg5       par_mca2:        %s\n",store->par_mca2);
+		fprintf(stderr,"dbg5       par_mcu2:        %d\n",store->par_mcu2);
+		fprintf(stderr,"dbg5       par_mci2:        %s\n",store->par_mci2);
+		fprintf(stderr,"dbg5       par_mcp2:        %d\n",store->par_mcp2);
+		fprintf(stderr,"dbg5       par_mca3:        %s\n",store->par_mca3);
+		fprintf(stderr,"dbg5       par_mcu3:        %d\n",store->par_mcu3);
+		fprintf(stderr,"dbg5       par_mci3:        %s\n",store->par_mci3);
+		fprintf(stderr,"dbg5       par_mcp3:        %d\n",store->par_mcp3);
+		fprintf(stderr,"dbg5       par_mca4:        %s\n",store->par_mca4);
+		fprintf(stderr,"dbg5       par_mcu4:        %d\n",store->par_mcu4);
+		fprintf(stderr,"dbg5       par_mci4:        %s\n",store->par_mci4);
+		fprintf(stderr,"dbg5       par_mcp4:        %d\n",store->par_mcp4);
+		fprintf(stderr,"dbg5       par_snl:         %d\n",store->par_snl);
 		fprintf(stderr,"dbg5       par_cpr:         %s\n",store->par_cpr);
 		fprintf(stderr,"dbg5       par_rop:         %s\n",store->par_rop);
 		fprintf(stderr,"dbg5       par_sid:         %s\n",store->par_sid);
+		fprintf(stderr,"dbg5       par_rfn:         %s\n",store->par_rfn);
 		fprintf(stderr,"dbg5       par_pll:         %s\n",store->par_pll);
 		fprintf(stderr,"dbg5       par_com:         %s\n",store->par_com);
 		}
 
+		
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -3388,7 +3686,7 @@ int mbr_em710mba_rd_extraparameters(int verbose, void *mbio_ptr, int swap,
 		}
 
 	/* print debug statements */
-	if (verbose >= 0)
+	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       type:            %d\n",store->type);
@@ -4737,7 +5035,7 @@ int mbr_em710mba_rd_bath3_mba(int verbose, void *mbio_ptr, int swap,
 		mb_get_binary_int(swap, &line[44], &int_val);
 		    ping->png_spare = int_val;
 #ifdef MBR_EM710MBA_DEBUG
-fprintf(stderr,"mbr_em710mba_rd_bath2_mba:    ping->png_date:%d     ping->png_msec:%d     ping->png_count:%d     ping->png_nbeams:%d\n",
+fprintf(stderr,"mbr_em710mba_rd_bath3_mba:    ping->png_date:%d     ping->png_msec:%d     ping->png_count:%d     ping->png_nbeams:%d\n",
 ping->png_date,ping->png_msec,ping->png_count,ping->png_nbeams);
 #endif
 		}
@@ -4753,7 +5051,7 @@ ping->png_date,ping->png_msec,ping->png_count,ping->png_nbeams);
 			|| ping->png_nbeams_valid > MBSYS_SIMRAD3_MAXBEAMS)
 			{
 #ifdef MBR_EM710MBA_DEBUG
-fprintf(stderr,"mbr_em710mba_rd_bath2_mba: ERROR SET: ping->png_nbeams:%d ping->png_nbeams_valid:%d MBSYS_SIMRAD3_MAXBEAMS:%d\n",
+fprintf(stderr,"mbr_em710mba_rd_bath3_mba: ERROR SET: ping->png_nbeams:%d ping->png_nbeams_valid:%d MBSYS_SIMRAD3_MAXBEAMS:%d\n",
 ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 #endif
 			status = MB_FAILURE;
@@ -4984,7 +5282,7 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 			    ping->png_raw_txoffset[i] = float_val;
 			mb_get_binary_float(swap, &line[12], &float_val);
 			    ping->png_raw_txcenter[i] = float_val;
-			mb_get_binary_short(swap, &line[2], &short_val);
+			mb_get_binary_short(swap, &line[16], &short_val);
 			    ping->png_raw_txabsorption[i] = (int) ((unsigned short) short_val);
 			ping->png_raw_txwaveform[i] = (int) line[18];
 			ping->png_raw_txsector[i] = (int) line[19];
@@ -6221,6 +6519,19 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_serial_2:    %d\n",store->par_serial_2);
 		fprintf(stderr,"dbg5       par_wlz:         %f\n",store->par_wlz);
 		fprintf(stderr,"dbg5       par_smh:         %d\n",store->par_smh);
+		fprintf(stderr,"dbg5       par_hun:         %d\n",store->par_hun);
+		fprintf(stderr,"dbg5       par_hut:         %f\n",store->par_hut);
+		fprintf(stderr,"dbg5       par_txs:         %d\n",store->par_txs);
+		fprintf(stderr,"dbg5       par_t2x:         %d\n",store->par_t2x);
+		fprintf(stderr,"dbg5       par_r1s:         %d\n",store->par_r1s);
+		fprintf(stderr,"dbg5       par_r2s:         %d\n",store->par_r2s);
+		fprintf(stderr,"dbg5       par_stc:         %d\n",store->par_stc);
+		fprintf(stderr,"dbg5       par_s0z:         %f\n",store->par_s0z);
+		fprintf(stderr,"dbg5       par_s0x:         %f\n",store->par_s0x);
+		fprintf(stderr,"dbg5       par_s0y:         %f\n",store->par_s0y);
+		fprintf(stderr,"dbg5       par_s0h:         %f\n",store->par_s0h);
+		fprintf(stderr,"dbg5       par_s0r:         %f\n",store->par_s0r);
+		fprintf(stderr,"dbg5       par_s0p:         %f\n",store->par_s0p);
 		fprintf(stderr,"dbg5       par_s1z:         %f\n",store->par_s1z);
 		fprintf(stderr,"dbg5       par_s1x:         %f\n",store->par_s1x);
 		fprintf(stderr,"dbg5       par_s1y:         %f\n",store->par_s1y);
@@ -6235,19 +6546,34 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_s2r:         %f\n",store->par_s2r);
 		fprintf(stderr,"dbg5       par_s2p:         %f\n",store->par_s2p);
 		fprintf(stderr,"dbg5       par_s2n:         %d\n",store->par_s2n);
+		fprintf(stderr,"dbg5       par_s3z:         %f\n",store->par_s3z);
+		fprintf(stderr,"dbg5       par_s3x:         %f\n",store->par_s3x);
+		fprintf(stderr,"dbg5       par_s3y:         %f\n",store->par_s3y);
+		fprintf(stderr,"dbg5       par_s3h:         %f\n",store->par_s3h);
+		fprintf(stderr,"dbg5       par_s3r:         %f\n",store->par_s3r);
+		fprintf(stderr,"dbg5       par_s3p:         %f\n",store->par_s3p);
+		fprintf(stderr,"dbg5       par_s1s:         %d\n",store->par_s1s);
+		fprintf(stderr,"dbg5       par_s2s:         %d\n",store->par_s2s);
 		fprintf(stderr,"dbg5       par_go1:         %f\n",store->par_go1);
 		fprintf(stderr,"dbg5       par_go2:         %f\n",store->par_go2);
+		fprintf(stderr,"dbg5       par_obo:         %f\n",store->par_obo);
+		fprintf(stderr,"dbg5       par_fgd:         %f\n",store->par_fgd);
 		fprintf(stderr,"dbg5       par_tsv:         %s\n",store->par_tsv);
 		fprintf(stderr,"dbg5       par_rsv:         %s\n",store->par_rsv);
 		fprintf(stderr,"dbg5       par_bsv:         %s\n",store->par_bsv);
 		fprintf(stderr,"dbg5       par_psv:         %s\n",store->par_psv);
+		fprintf(stderr,"dbg5       par_dds:         %s\n",store->par_dds);
 		fprintf(stderr,"dbg5       par_osv:         %s\n",store->par_osv);
-		fprintf(stderr,"dbg5       par_dsd:         %f\n",store->par_dsd);
+		fprintf(stderr,"dbg5       par_dsv:         %s\n",store->par_dsv);
+		fprintf(stderr,"dbg5       par_dsx:         %f\n",store->par_dsx);
+		fprintf(stderr,"dbg5       par_dsy:         %f\n",store->par_dsy);
+		fprintf(stderr,"dbg5       par_dsz:         %f\n",store->par_dsz);
+		fprintf(stderr,"dbg5       par_dsd:         %d\n",store->par_dsd);
 		fprintf(stderr,"dbg5       par_dso:         %f\n",store->par_dso);
 		fprintf(stderr,"dbg5       par_dsf:         %f\n",store->par_dsf);
-		fprintf(stderr,"dbg5       par_dsh:         %c%c\n",
-			store->par_dsh[0],store->par_dsh[1]);
+		fprintf(stderr,"dbg5       par_dsh:         %c%c\n",store->par_dsh[0],store->par_dsh[1]);
 		fprintf(stderr,"dbg5       par_aps:         %d\n",store->par_aps);
+		fprintf(stderr,"dbg5       par_p1q:         %d\n",store->par_p1q);
 		fprintf(stderr,"dbg5       par_p1m:         %d\n",store->par_p1m);
 		fprintf(stderr,"dbg5       par_p1t:         %d\n",store->par_p1t);
 		fprintf(stderr,"dbg5       par_p1z:         %f\n",store->par_p1z);
@@ -6255,6 +6581,7 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p1y:         %f\n",store->par_p1y);
 		fprintf(stderr,"dbg5       par_p1d:         %f\n",store->par_p1d);
 		fprintf(stderr,"dbg5       par_p1g:         %s\n",store->par_p1g);
+		fprintf(stderr,"dbg5       par_p2q:         %d\n",store->par_p2q);
 		fprintf(stderr,"dbg5       par_p2m:         %d\n",store->par_p2m);
 		fprintf(stderr,"dbg5       par_p2t:         %d\n",store->par_p2t);
 		fprintf(stderr,"dbg5       par_p2z:         %f\n",store->par_p2z);
@@ -6262,6 +6589,7 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p2y:         %f\n",store->par_p2y);
 		fprintf(stderr,"dbg5       par_p2d:         %f\n",store->par_p2d);
 		fprintf(stderr,"dbg5       par_p2g:         %s\n",store->par_p2g);
+		fprintf(stderr,"dbg5       par_p3q:         %d\n",store->par_p3q);
 		fprintf(stderr,"dbg5       par_p3m:         %d\n",store->par_p3m);
 		fprintf(stderr,"dbg5       par_p3t:         %d\n",store->par_p3t);
 		fprintf(stderr,"dbg5       par_p3z:         %f\n",store->par_p3z);
@@ -6269,19 +6597,60 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p3y:         %f\n",store->par_p3y);
 		fprintf(stderr,"dbg5       par_p3d:         %f\n",store->par_p3d);
 		fprintf(stderr,"dbg5       par_p3g:         %s\n",store->par_p3g);
+		fprintf(stderr,"dbg5       par_p3s:         %d\n",store->par_p3s);
 		fprintf(stderr,"dbg5       par_msz:         %f\n",store->par_msz);
 		fprintf(stderr,"dbg5       par_msx:         %f\n",store->par_msx);
 		fprintf(stderr,"dbg5       par_msy:         %f\n",store->par_msy);
-		fprintf(stderr,"dbg5       par_mrp:         %c%c\n",
-			store->par_mrp[0],store->par_mrp[1]);
+		fprintf(stderr,"dbg5       par_mrp:         %c%c\n",store->par_mrp[0],store->par_mrp[1]);
 		fprintf(stderr,"dbg5       par_msd:         %f\n",store->par_msd);
 		fprintf(stderr,"dbg5       par_msr:         %f\n",store->par_msr);
 		fprintf(stderr,"dbg5       par_msp:         %f\n",store->par_msp);
 		fprintf(stderr,"dbg5       par_msg:         %f\n",store->par_msg);
+		fprintf(stderr,"dbg5       par_nsz:         %f\n",store->par_nsz);
+		fprintf(stderr,"dbg5       par_nsx:         %f\n",store->par_nsx);
+		fprintf(stderr,"dbg5       par_nsy:         %f\n",store->par_nsy);
+		fprintf(stderr,"dbg5       par_nrp:         %c%c\n",store->par_nrp[0],store->par_nrp[1]);
+		fprintf(stderr,"dbg5       par_nsd:         %f\n",store->par_nsd);
+		fprintf(stderr,"dbg5       par_nsr:         %f\n",store->par_nsr);
+		fprintf(stderr,"dbg5       par_nsp:         %f\n",store->par_nsp);
+		fprintf(stderr,"dbg5       par_nsg:         %f\n",store->par_nsg);
 		fprintf(stderr,"dbg5       par_gcg:         %f\n",store->par_gcg);
+		fprintf(stderr,"dbg5       par_mas:         %f\n",store->par_mas);
+		fprintf(stderr,"dbg5       par_shc:         %d\n",store->par_shc);
+		fprintf(stderr,"dbg5       par_pps:         %d\n",store->par_pps);
+		fprintf(stderr,"dbg5       par_cls:         %d\n",store->par_cls);
+		fprintf(stderr,"dbg5       par_clo:         %d\n",store->par_clo);
+		fprintf(stderr,"dbg5       par_vsn:         %d\n",store->par_vsn);
+		fprintf(stderr,"dbg5       par_vsu:         %d\n",store->par_vsu);
+		fprintf(stderr,"dbg5       par_vse:         %d\n",store->par_vse);
+		fprintf(stderr,"dbg5       par_vtu:         %d\n",store->par_vtu);
+		fprintf(stderr,"dbg5       par_vte:         %d\n",store->par_vte);
+		fprintf(stderr,"dbg5       par_aro:         %d\n",store->par_aro);
+		fprintf(stderr,"dbg5       par_ahe:         %d\n",store->par_ahe);
+		fprintf(stderr,"dbg5       par_ahs:         %d\n",store->par_ahs);
+		fprintf(stderr,"dbg5       par_vsi:         %s\n",store->par_vsi);
+		fprintf(stderr,"dbg5       par_vsm:         %s\n",store->par_vsm);
+		fprintf(stderr,"dbg5       par_mca1:        %s\n",store->par_mca1);
+		fprintf(stderr,"dbg5       par_mcu1:        %d\n",store->par_mcu1);
+		fprintf(stderr,"dbg5       par_mci1:        %s\n",store->par_mci1);
+		fprintf(stderr,"dbg5       par_mcp1:        %d\n",store->par_mcp1);
+		fprintf(stderr,"dbg5       par_mca2:        %s\n",store->par_mca2);
+		fprintf(stderr,"dbg5       par_mcu2:        %d\n",store->par_mcu2);
+		fprintf(stderr,"dbg5       par_mci2:        %s\n",store->par_mci2);
+		fprintf(stderr,"dbg5       par_mcp2:        %d\n",store->par_mcp2);
+		fprintf(stderr,"dbg5       par_mca3:        %s\n",store->par_mca3);
+		fprintf(stderr,"dbg5       par_mcu3:        %d\n",store->par_mcu3);
+		fprintf(stderr,"dbg5       par_mci3:        %s\n",store->par_mci3);
+		fprintf(stderr,"dbg5       par_mcp3:        %d\n",store->par_mcp3);
+		fprintf(stderr,"dbg5       par_mca4:        %s\n",store->par_mca4);
+		fprintf(stderr,"dbg5       par_mcu4:        %d\n",store->par_mcu4);
+		fprintf(stderr,"dbg5       par_mci4:        %s\n",store->par_mci4);
+		fprintf(stderr,"dbg5       par_mcp4:        %d\n",store->par_mcp4);
+		fprintf(stderr,"dbg5       par_snl:         %d\n",store->par_snl);
 		fprintf(stderr,"dbg5       par_cpr:         %s\n",store->par_cpr);
 		fprintf(stderr,"dbg5       par_rop:         %s\n",store->par_rop);
 		fprintf(stderr,"dbg5       par_sid:         %s\n",store->par_sid);
+		fprintf(stderr,"dbg5       par_rfn:         %s\n",store->par_rfn);
 		fprintf(stderr,"dbg5       par_pll:         %s\n",store->par_pll);
 		fprintf(stderr,"dbg5       par_com:         %s\n",store->par_com);
 		}
@@ -6313,131 +6682,244 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap,
 		mb_put_binary_short(swap, (unsigned short) store->par_serial_1, (void *) &line[18]);
 		mb_put_binary_short(swap, (unsigned short) store->par_serial_2, (void *) &line[20]);
 		}
-
-	/* construct ASCII parameter buffer */
+		
+	/* construct ascii parameter buffer */
 	buff = &line[22];
-	sprintf(&buff[0], "WLZ=%.2f,", store->par_wlz);
+	buff_len = 0;
+	
+	if (store->par_wlz != 0.0)
+		{
+		sprintf(&buff[buff_len], "WLZ=%.3f,", store->par_wlz);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_smh != 0)
+		{
+		sprintf(&buff[buff_len], "SMH=%d,", store->par_smh);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_hut != 0.0)
+		{
+		sprintf(&buff[buff_len], "HUN=%d,", store->par_hun);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "HUT=%f,", store->par_hut);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_txs != 0)
+		{
+		sprintf(&buff[buff_len], "TXS=%d,", store->par_txs);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_t2x != 0)
+		{
+		sprintf(&buff[buff_len], "T2X=%d,", store->par_t2x);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_r1s != 0)
+		{
+		sprintf(&buff[buff_len], "R1S=%d,", store->par_r1s);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_r2s != 0)
+		{
+		sprintf(&buff[buff_len], "R2S=%d,", store->par_r2s);
+		buff_len = strlen(buff);		
+		}
+	sprintf(&buff[buff_len], "STC=%d,", store->par_stc);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "SMH=%d,", store->par_smh);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1Z=%.2f,", store->par_s1z);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1X=%.2f,", store->par_s1x);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1Y=%.2f,", store->par_s1y);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1H=%.2f,", store->par_s1h);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1R=%.2f,", store->par_s1r);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1P=%.2f,", store->par_s1p);
-	buff_len = strlen(buff);
-	if (store->par_s1n > 0)
-	    {
-	    sprintf(&buff[buff_len], "S1N=%d,", store->par_s1n);
-	    buff_len = strlen(buff);
-	    }
-	sprintf(&buff[buff_len], "S2Z=%.2f,", store->par_s2z);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S2X=%.2f,", store->par_s2x);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S2Y=%.2f,", store->par_s2y);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S2H=%.2f,", store->par_s2h);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S2R=%.2f,", store->par_s2r);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S2P=%.2f,", store->par_s2p);
-	buff_len = strlen(buff);
-	if (store->par_s2n > 0)
-	    {
-	    sprintf(&buff[buff_len], "S2N=%d,", store->par_s2n);
-	    buff_len = strlen(buff);
-	    }
+	if (store->par_stc == 4)
+		{
+		sprintf(&buff[buff_len], "S0Z=%.3f,", store->par_s0z);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S0X=%.3f,", store->par_s0x);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S0Y=%.3f,", store->par_s0y);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S0H=%.3f,", store->par_s0h);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S0R=%.3f,", store->par_s0r);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S0P=%.3f,", store->par_s0p);
+		buff_len = strlen(buff);		
+		}
+	sprintf(&buff[buff_len], "S1Z=%.3f,", store->par_s1z);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1X=%.3f,", store->par_s1x);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1Y=%.3f,", store->par_s1y);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1H=%.3f,", store->par_s1h);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1R=%.3f,", store->par_s1r);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1P=%.3f,", store->par_s1p);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1S=%d,", store->par_s1s);
+	buff_len = strlen(buff);		
+	if (store->par_stc != 1)
+		{
+		sprintf(&buff[buff_len], "S2Z=%.3f,", store->par_s2z);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2X=%.3f,", store->par_s2x);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2Y=%.3f,", store->par_s2y);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2H=%.3f,", store->par_s2h);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2R=%.3f,", store->par_s2r);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2P=%.3f,", store->par_s2p);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2S=%d,", store->par_s2s);
+		buff_len = strlen(buff);
+		}
+	if (store->par_stc >= 3)
+		{
+		sprintf(&buff[buff_len], "S3Z=%.3f,", store->par_s3z);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S3X=%.3f,", store->par_s3x);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S3Y=%.3f,", store->par_s3y);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S3H=%.3f,", store->par_s3h);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S3R=%.3f,", store->par_s3r);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S3P=%.3f,", store->par_s3p);
+		buff_len = strlen(buff);		
+		}
 	if (store->par_go1 != 0.0)
-	    {
-	    sprintf(&buff[buff_len], "GO1=%.2f,", store->par_go1);
-	    buff_len = strlen(buff);
-	    }
+		{
+		sprintf(&buff[buff_len], "GO1=%.3f,", store->par_go1);
+		buff_len = strlen(buff);
+		}
 	if (store->par_go2 != 0.0)
-	    {
-	    sprintf(&buff[buff_len], "GO2=%.2f,", store->par_go2);
-	    buff_len = strlen(buff);
-	    }
-	sprintf(&buff[buff_len], "TSV=%s,", store->par_tsv);
-	buff_len = strlen(buff);
+		{
+		sprintf(&buff[buff_len], "GO2=%.3f,", store->par_go1);
+		buff_len = strlen(buff);
+		}
+	if (store->par_obo != 0.0)
+		{
+		sprintf(&buff[buff_len], "OBO=%.3f,", store->par_obo);
+		buff_len = strlen(buff);
+		}
+	if (store->par_fgd != 0.0)
+		{
+		sprintf(&buff[buff_len], "FGD=%.3f,", store->par_fgd);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_tsv) > 0)
+		{
+		sprintf(&buff[buff_len], "TSV=%s,", store->par_tsv);
+		buff_len = strlen(buff);
+		}
 	if (strlen(store->par_rsv) > 0)
-	    {
-	    sprintf(&buff[buff_len], "RSV=%s,", store->par_rsv);
-	    buff_len = strlen(buff);
-	    }
-	sprintf(&buff[buff_len], "BSV=%s,", store->par_bsv);
+		{
+		sprintf(&buff[buff_len], "RSV=%s,", store->par_rsv);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_bsv) > 0)
+		{
+		sprintf(&buff[buff_len], "BSV=%s,", store->par_bsv);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_psv) > 0)
+		{
+		sprintf(&buff[buff_len], "PSV=%s,", store->par_psv);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_dds) > 0)
+		{
+		sprintf(&buff[buff_len], "DDS=%s,", store->par_dds);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_osv) > 0)
+		{
+		sprintf(&buff[buff_len], "OSV=%s,", store->par_osv);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_dsv) > 0)
+		{
+		sprintf(&buff[buff_len], "DSV=%s,", store->par_dsv);
+		buff_len = strlen(buff);
+		}
+
+	sprintf(&buff[buff_len], "DSX=%.6f,", store->par_dsx);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "PSV=%s,", store->par_tsv);
+	sprintf(&buff[buff_len], "DSY=%.6f,", store->par_dsy);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "OSV=%s,", store->par_osv);
+	sprintf(&buff[buff_len], "DSZ=%.6f,", store->par_dsz);
 	buff_len = strlen(buff);
-	if (store->par_dsd != 0.0)
-	    {
-	    sprintf(&buff[buff_len], "DSD=%.1f,", store->par_dsd);
-	    buff_len = strlen(buff);
-	    }
-	else
-	    {
-	    sprintf(&buff[buff_len], "DSD=,");
-	    buff_len = strlen(buff);
-	    }
+	sprintf(&buff[buff_len], "DSD=%d,", store->par_dsd);
+	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "DSO=%.6f,", store->par_dso);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "DSF=%.6f,", store->par_dsf);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "DSH=%c%c,",
-		store->par_dsh[0], store->par_dsh[1]);
+	sprintf(&buff[buff_len], "DSH=%c%c,",store->par_dsh[0], store->par_dsh[1]);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "APS=%d,",store->par_aps);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1M=%d,",store->par_p1m);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1T=%d,",store->par_p1t);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1Z=%.2f,", store->par_p1z);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1X=%.2f,", store->par_p1x);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1Y=%.2f,", store->par_p1y);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1D=%.1f,", store->par_p1d);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1G=%s,", store->par_p1g);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2M=%d,",store->par_p2m);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2T=%d,",store->par_p2t);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2Z=%.2f,", store->par_p2z);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2X=%.2f,", store->par_p2x);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2Y=%.2f,", store->par_p2y);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2D=%.1f,", store->par_p2d);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2G=%s,", store->par_p2g);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3M=%d,",store->par_p3m);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3T=%d,",store->par_p3t);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3Z=%.2f,", store->par_p3z);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3X=%.2f,", store->par_p3x);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3Y=%.2f,", store->par_p3y);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3D=%.1f,", store->par_p3d);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3G=%s,", store->par_p3g);
-	buff_len = strlen(buff);
+	
+	if (store->par_p1q)
+		{
+		sprintf(&buff[buff_len], "P1Q=%d,",store->par_p1q);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1M=%d,",store->par_p1m);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1T=%d,",store->par_p1t);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1Z=%.2f,", store->par_p1z);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1X=%.2f,", store->par_p1x);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1Y=%.2f,", store->par_p1y);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1D=%.1f,", store->par_p1d);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1G=%s,", store->par_p1g);
+		buff_len = strlen(buff);
+		}
+	if (store->par_p2q)
+		{
+		sprintf(&buff[buff_len], "P2Q=%d,",store->par_p2q);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2M=%d,",store->par_p2m);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2T=%d,",store->par_p2t);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2Z=%.3f,", store->par_p2z);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2X=%.3f,", store->par_p2x);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2Y=%.3f,", store->par_p2y);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2D=%.3f,", store->par_p2d);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2G=%s,", store->par_p2g);
+		buff_len = strlen(buff);
+		}
+	if (store->par_p3q)
+		{
+		sprintf(&buff[buff_len], "P3Q=%d,",store->par_p3q);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3M=%d,",store->par_p3m);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3T=%d,",store->par_p3t);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3Z=%.3f,", store->par_p3z);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3X=%.3f,", store->par_p3x);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3Y=%.3f,", store->par_p3y);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3D=%.3f,", store->par_p3d);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3G=%s,", store->par_p3g);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3S=%d,",store->par_p3s);
+		buff_len = strlen(buff);
+		}
+	
 	sprintf(&buff[buff_len], "MSZ=%.2f,", store->par_msz);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "MSX=%.2f,", store->par_msx);
@@ -6455,8 +6937,108 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap,
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "MSG=%.2f,", store->par_msg);
 	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSZ=%.2f,", store->par_nsz);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSX=%.2f,", store->par_nsx);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSY=%.2f,", store->par_nsy);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NRP=%c%c,",
+		store->par_nrp[0], store->par_nrp[1]);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSD=%.2f,", store->par_nsd);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSR=%.2f,", store->par_nsr);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSP=%.2f,", store->par_nsp);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSG=%.2f,", store->par_nsg);
+	buff_len = strlen(buff);
+	
 	sprintf(&buff[buff_len], "GCG=%.2f,", store->par_gcg);
 	buff_len = strlen(buff);
+	if (store->par_mas != 0.0)
+	    {
+	    sprintf(&buff[buff_len], "MAS=%.2f,", store->par_mas);
+	    buff_len = strlen(buff);
+	    }
+	sprintf(&buff[buff_len], "SHC=%d,", store->par_shc);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "PPS=%d,", store->par_pps);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "CLS=%d,", store->par_cls);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "CLO=%d,", store->par_clo);
+	buff_len = strlen(buff);
+	
+	sprintf(&buff[buff_len], "VSN=%d,", store->par_vsn);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VSU=%d,", store->par_vsu);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VSE=%d,", store->par_vse);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VTU=%d,", store->par_vtu);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VTE=%d,", store->par_vte);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "ARO=%d,", store->par_aro);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "AHE=%d,", store->par_ahe);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "AHS=%d,", store->par_ahs);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VSI=%s,", store->par_vsi);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VSM=%s,", store->par_vsm);
+	buff_len = strlen(buff);
+	
+	if (store->par_mcp1 > 0)
+		{
+		sprintf(&buff[buff_len], "MCA1=%s,", store->par_mca1);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCU1=%d,", store->par_mcu1);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCI1=%s,", store->par_mci1);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCP1=%d,", store->par_mcp1);
+		buff_len = strlen(buff);
+		}
+	if (store->par_mcp2 > 0)
+		{
+		sprintf(&buff[buff_len], "MCA2=%s,", store->par_mca2);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCU2=%d,", store->par_mcu2);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCI2=%s,", store->par_mci2);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCP2=%d,", store->par_mcp2);
+		buff_len = strlen(buff);
+		}
+	if (store->par_mcp3 > 0)
+		{
+		sprintf(&buff[buff_len], "MCA3=%s,", store->par_mca3);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCU3=%d,", store->par_mcu3);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCI3=%s,", store->par_mci3);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCP3=%d,", store->par_mcp3);
+		buff_len = strlen(buff);
+		}
+	if (store->par_mcp4 > 0)
+		{
+		sprintf(&buff[buff_len], "MCA4=%s,", store->par_mca4);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCU4=%d,", store->par_mcu4);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCI4=%s,", store->par_mci4);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCP4=%d,", store->par_mcp4);
+		buff_len = strlen(buff);
+		}
+	sprintf(&buff[buff_len], "SNL=%d,", store->par_snl);
+	buff_len = strlen(buff);
+	
 	if (strlen(store->par_cpr) > 0)
 	    {
 	    sprintf(&buff[buff_len], "CPR=%s,", store->par_cpr);
@@ -6470,6 +7052,11 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap,
 	if (strlen(store->par_sid) > 0)
 	    {
 	    sprintf(&buff[buff_len], "SID=%s,", store->par_sid);
+	    buff_len = strlen(buff);
+	    }
+	if (strlen(store->par_rfn) > 0)
+	    {
+	    sprintf(&buff[buff_len], "RFN=%s,", store->par_rfn);
 	    buff_len = strlen(buff);
 	    }
 	if (strlen(store->par_pll) > 0)
@@ -8116,7 +8703,7 @@ int mbr_em710mba_wr_netattitude(int verbose, void *mbio_ptr, int swap,
 	if (write_size%2)
 		{
 		extrabyte++;
-		write_size++;
+		write_size--;
 		}
 	mb_put_binary_int(swap, (int)write_size, (void *) line);
 	write_len = 4;
@@ -8181,7 +8768,7 @@ int mbr_em710mba_wr_netattitude(int verbose, void *mbio_ptr, int swap,
 		mb_put_binary_short(swap, (unsigned short) netattitude->nat_heading[i], (void *) &line[8]);
 		line[10] = (mb_u_char) netattitude->nat_nbyte_raw[i];
 		for (j=0;j<netattitude->nat_nbyte_raw[i];j++)
-			line[i+11] = netattitude->nat_raw[i*MBSYS_SIMRAD3_BUFFER_SIZE+j];
+			line[j+11] = netattitude->nat_raw[i*MBSYS_SIMRAD3_BUFFER_SIZE+j];
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -8205,13 +8792,13 @@ int mbr_em710mba_wr_netattitude(int verbose, void *mbio_ptr, int swap,
 		/* write out data */
 		if (extrabyte)
 			{
-			write_len = 4;
-			status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
+			write_len = 3;
+			status = mb_fileio_put(verbose, mbio_ptr, &line[1], &write_len, error);
 			}
 		else
 			{
-			write_len = 3;
-			status = mb_fileio_put(verbose, mbio_ptr, &line[1], &write_len, error);
+			write_len = 4;
+			status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
 			}
 		}
 
@@ -8948,7 +9535,7 @@ int mbr_em710mba_wr_bath3_mba(int verbose, void *mbio_ptr, int swap,
 	/* print debug statements */
 	if (verbose >= 5)
 		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       type:                  %d\n",store->type);
 		fprintf(stderr,"dbg5       sonar:                 %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:                  %d\n",store->date);
@@ -9631,7 +10218,8 @@ int mbr_em710mba_wr_ss2_mba(int verbose, void *mbio_ptr, int swap,
 	/* write the record size */
 	mb_put_binary_int(swap, (int) (EM3_SS2_MBA_HEADER_SIZE
 			+ EM3_SS2_MBA_BEAM_SIZE * ping->png_nbeams_ss
-			+ ping->png_npixels - (ping->png_npixels % 2) + 8), (void *) &write_size);
+			+ sizeof(short) * (ping->png_npixels + 2 * ping->png_pixels_ss)
+			+ 8), (void *) &write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
 
@@ -9764,14 +10352,15 @@ int mbr_em710mba_wr_ss2_mba(int verbose, void *mbio_ptr, int swap,
 	/* output end of record */
 	if (status == MB_SUCCESS)
 		{
+		line[0] = 0;
 		line[1] = 0x03;
 
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
 		/* write out data */
-		write_len = 3;
-		status = mb_fileio_put(verbose, mbio_ptr, &line[1], &write_len, error);
+		write_len = 4;
+		status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
 		}
 
 	/* print output debug statements */
