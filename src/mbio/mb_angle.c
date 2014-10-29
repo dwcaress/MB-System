@@ -558,10 +558,13 @@ int mb_lever(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-
-/* Calculate multibeam beam angles for bathymetry calculation by raytracing
+/*
+ * Calculate multibeam beam angles for bathymetry calculation by raytracing
  * from the transducer array orientations and beam steering angles.
- * This code was provided by Jonathan Beaudoin and derives from the paper:
+ * This code was written by Jonathan Beaudoin and John Hughes Clarke,
+ * provided to the MB-System team by Jonathan Beaudoin, and
+ * derives from the paper:
+ * 
  * 	Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
  *          Surface Sound Speed Measurements in Post-Processing for
  *          Multi-Sector Multibeam Echosounders : International
@@ -574,38 +577,21 @@ int mb_lever(int verbose,
  * 	Receive array installation angles: roll, pitch, heading
  * 	Roll, pitch, and heading at transmit time
  * 	Roll, pitch, and heading at receive time
- * 	
- 
- 
-Here ya go.  There's a few poorly defined structs but I'm sure you can figure out what's going on.  In a nutshell, you give it 14 angles and it gives you 2 back.  The 14 input angles are:
-- R, P, Hdg install angles of TX (+ve roll is port up, +ve pitch is bow up, +ve Hdg is a turn to starboard)
-- R, P, Hdg at time of TX
-- R, P, Hdg install angles of RX
-- R, P, Hdg at time of RX
-- TX fore-aft pitch steering angle, can be unique by sector with Kongsberg systems (+ve angle is forward)
-- RX steer angle (+ve angle is to port, this is consistent with the Roll sign convention but opposite of what most people expect)
-
-  I also included the code for the poorly named "mb_beaudoin_unrotate" function just so you know how we're pre-multiplying rotations.
-
-The variable names are largely consistent with the write-up in the following document:
-
-Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of Surface Sound Speed Measurements in Post-Processing for Multi-Sector Multibeam Echosounders : International Hydrographic Review, v.5, no.3, p.26-31.  (you can download at http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
-
-If you do end up using this, I (and UNB) would appreciate a nod in the documentation by pointing folks to the reference above.
-
-As I point out in the paper, there are known limitations in that it assumes that the TX and RX are co-located.  Artifacts due to this assumption show up mainly with multisector systems that are pitch/yaw stabilizing pretty hard; you'll see edge effects between the sectors.  The deeper the water is relative to the array separation, the smaller the effects are.
-
-Also, if you use this with Kongsberg multisector systems that can be reverse mounted, you'll need to protect the math from the 180 degree installation angle:
-1) subtract 180 from the heading mount angle of the array
-2) flip the sign of the pitch and roll mount offsets of the array
-3) flip the sign of the beam steering angle from that array (reverse TX means flip sign of TX steer, reverse RX means flip sign of RX steer)
-
-The EM710 and EM2040 can have TX and RX independently mounted so one or both of the TX and RX can be reverse mounted. 
-
-Also, just so you know, I've worked on a newer algorithm with a student at UNB.  He's presented initial results at the Canadian Hydrographic Conference this past April and the paper will be available online soon.  It's not quite polished completely yet, but it aims to address the limitations associated with the array co-location assumption.
-
-Hope this helps and have fun.  Don't be shy with questions...
-jb
+ * 	Transmit fore-aft pitch steering angle, can be unique by sector
+ * 	    with Kongsberg systems (+ve angle is forward)
+ * 	RX steer angle (+ve angle is to port, this is consistent with
+ * 	    the Roll sign convention but opposite of what most people expect)
+ *
+ * The output consists of the beam azimuthal and depression angles.
+ * 
+ * Several Kongsberg multisector multibeams have arrays that can be reverse mounted.
+ * The EM710 and EM2040 can have TX and RX independently mounted so one or both of
+ * the TX and RX can be reverse mounted. If a transmit or receive array is reverse
+ * mounted, the code handles this by:
+ *      1) subtracting 180 degrees from the heading mount angle of the array
+ *      2) flipping the sign of the pitch and roll mount offsets of the array
+ *      3) flipping the sign of the beam steering angle from that array
+ *         (reverse TX means flip sign of TX steer, reverse RX means flip sign of RX steer)
  */
  
 int mb_beaudoin(int verbose,
