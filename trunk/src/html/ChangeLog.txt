@@ -16,7 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-  Version 5.4.2207       October 28, 2014
+* Version 5.4.2208       October 29, 2014
   Version 5.4.2204       September 5, 2014
 * Version 5.4.2202       August 25, 2014
   Version 5.4.2201       August 20, 2014
@@ -189,13 +189,16 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.4.2207 (October 28, 2014)
+-----> 5.4.2208 (October 29, 2014)
 
 Mbkongsbergpreprocess:  Fixed calculation of beam
 takeoff angles for raytracing from the raw range and angle data records by
 including code made available by Jonathan Beaudoin. Recalculation of
 bathymetry in current generation Kongsberg multibeam data appears to work
 now.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Support Mesotech M3
+multibeam data recorded in *.all files.
 
 Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Fixed calculation of beam
 takeoff angles for raytracing from the raw range and angle data records by

@@ -5239,7 +5239,7 @@ int mbr_em710mba_rd_rawbeam4(int verbose, void *mbio_ptr, int swap,
 		mb_get_binary_short(swap, &line[18], &short_val);
 		    ping->png_raw_detections = (int) ((unsigned short) short_val);
 		mb_get_binary_float(swap, &line[20], &float_val);
-		    ping->png_raw_sample_rate = (int) (float_val);
+		    ping->png_raw_sample_rate = float_val;
 		mb_get_binary_int(swap, &line[24], &int_val);
 		    ping->png_raw_spare = (int) (int_val);
 /*fprintf(stderr,"ping->png_raw_date:%d ping->png_raw_msec:%d ping->png_raw_count:%d ping->png_raw_nbeams:%d\n",
@@ -6868,11 +6868,11 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap,
 		buff_len = strlen(buff);
 		sprintf(&buff[buff_len], "P1T=%d,",store->par_p1t);
 		buff_len = strlen(buff);
-		sprintf(&buff[buff_len], "P1Z=%.2f,", store->par_p1z);
+		sprintf(&buff[buff_len], "P1Z=%.3f,", store->par_p1z);
 		buff_len = strlen(buff);
-		sprintf(&buff[buff_len], "P1X=%.2f,", store->par_p1x);
+		sprintf(&buff[buff_len], "P1X=%.3f,", store->par_p1x);
 		buff_len = strlen(buff);
-		sprintf(&buff[buff_len], "P1Y=%.2f,", store->par_p1y);
+		sprintf(&buff[buff_len], "P1Y=%.3f,", store->par_p1y);
 		buff_len = strlen(buff);
 		sprintf(&buff[buff_len], "P1D=%.1f,", store->par_p1d);
 		buff_len = strlen(buff);
@@ -6920,46 +6920,46 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap,
 		buff_len = strlen(buff);
 		}
 	
-	sprintf(&buff[buff_len], "MSZ=%.2f,", store->par_msz);
+	sprintf(&buff[buff_len], "MSZ=%.3f,", store->par_msz);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSX=%.2f,", store->par_msx);
+	sprintf(&buff[buff_len], "MSX=%.3f,", store->par_msx);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSY=%.2f,", store->par_msy);
+	sprintf(&buff[buff_len], "MSY=%.3f,", store->par_msy);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "MRP=%c%c,",
 		store->par_mrp[0], store->par_mrp[1]);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSD=%.2f,", store->par_msd);
+	sprintf(&buff[buff_len], "MSD=%.3f,", store->par_msd);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSR=%.2f,", store->par_msr);
+	sprintf(&buff[buff_len], "MSR=%.3f,", store->par_msr);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSP=%.2f,", store->par_msp);
+	sprintf(&buff[buff_len], "MSP=%.3f,", store->par_msp);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSG=%.2f,", store->par_msg);
+	sprintf(&buff[buff_len], "MSG=%.3f,", store->par_msg);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "NSZ=%.2f,", store->par_nsz);
+	sprintf(&buff[buff_len], "NSZ=%.3f,", store->par_nsz);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "NSX=%.2f,", store->par_nsx);
+	sprintf(&buff[buff_len], "NSX=%.3f,", store->par_nsx);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "NSY=%.2f,", store->par_nsy);
+	sprintf(&buff[buff_len], "NSY=%.3f,", store->par_nsy);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "NRP=%c%c,",
 		store->par_nrp[0], store->par_nrp[1]);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "NSD=%.2f,", store->par_nsd);
+	sprintf(&buff[buff_len], "NSD=%.3f,", store->par_nsd);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "NSR=%.2f,", store->par_nsr);
+	sprintf(&buff[buff_len], "NSR=%.3f,", store->par_nsr);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "NSP=%.2f,", store->par_nsp);
+	sprintf(&buff[buff_len], "NSP=%.3f,", store->par_nsp);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "NSG=%.2f,", store->par_nsg);
+	sprintf(&buff[buff_len], "NSG=%.3f,", store->par_nsg);
 	buff_len = strlen(buff);
 	
-	sprintf(&buff[buff_len], "GCG=%.2f,", store->par_gcg);
+	sprintf(&buff[buff_len], "GCG=%.3f,", store->par_gcg);
 	buff_len = strlen(buff);
 	if (store->par_mas != 0.0)
 	    {
-	    sprintf(&buff[buff_len], "MAS=%.2f,", store->par_mas);
+	    sprintf(&buff[buff_len], "MAS=%.3f,", store->par_mas);
 	    buff_len = strlen(buff);
 	    }
 	sprintf(&buff[buff_len], "SHC=%d,", store->par_shc);
