@@ -215,6 +215,14 @@
 #define	MBSYS_SIMRAD3_EM100	9904
 #define	MBSYS_SIMRAD3_EM1000	9905
 
+/* number of ping structures available to store data */
+#define	MBSYS_SIMRAD3_NUM_PING_STRUCTURES 4
+
+/* ping structure read status */
+#define	MBSYS_SIMRAD3_PING_NO_DATA      0
+#define	MBSYS_SIMRAD3_PING_PARTIAL      1
+#define	MBSYS_SIMRAD3_PING_COMPLETE     2
+
 /* maximum number of beams and pixels */
 #define	MBSYS_SIMRAD3_MAXBEAMS		512
 #define	MBSYS_SIMRAD3_MAXPIXELS		1024
@@ -372,6 +380,13 @@
 /* internal data structure for survey data */
 struct mbsys_simrad3_ping_struct
 	{
+        int     read_status;    /* read status for this structure:
+                                    0: no data records read
+                                    1: one or more data records read
+                                    2: ping complete */
+        int     count;          /* ping number of this ping */
+        int     serial;         /* sonar serial number of this ping */
+        
 	int	png_bath_read;	/* flag indicating actual reading of bathymetry record */
 	int	png_date;	/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
@@ -867,9 +882,8 @@ struct mbsys_simrad3_struct
 
 	/* type of sonar */
 	int	sonar;		/* Type of Kongsberg sonar */
-        int     serial;         /* Serial number of Kongsberg sonar in most recent record
-                                    - for EM2040D this is used to tell which of two sonars
-                                    the most recent record came from */
+        int     ping_index;     /* Ping index holding the most recent multibeam
+                                 * output data record */
 
 	/* time stamp */
 	int	date;		        /* Date = year*10000 + month*100 + day
@@ -1327,6 +1341,9 @@ struct mbsys_simrad3_struct
 	int	clk_1_pps_use;	/* if 1 then the internal clock is synchronized
 				    to an external 1 PPS signal, if 0 then not */
 
+	/* pointer to survey data structure */
+	struct mbsys_simrad3_ping_struct pings[MBSYS_SIMRAD3_NUM_PING_STRUCTURES];
+
         /* pointer to extra parameters data structure */
         struct mbsys_simrad3_extraparameters_struct *extraparameters;
 
@@ -1344,12 +1361,6 @@ struct mbsys_simrad3_struct
 
 	/* pointer to tilt data structure */
 	struct mbsys_simrad3_tilt_struct *tilt;
-
-	/* pointer to survey data structure */
-	struct mbsys_simrad3_ping_struct *ping1;
-
-	/* pointer to secord survey data structure */
-	struct mbsys_simrad3_ping_struct *ping2;
 
 	/* pointer to water column data structure */
 	struct mbsys_simrad3_watercolumn_struct *wc;

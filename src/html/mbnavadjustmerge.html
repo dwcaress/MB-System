@@ -29,22 +29,48 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbnavadjustmerge</B> --input=project-base --input=project-add --output=project-output --verbose
+<B>mbnavadjustmerge</B> --input=project-base [--input=project-add --output=project-output
+--add-crossing=file1:section1/file2:section2
+--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset
+--set-tie-xyz=file1:section1/file2:section2
+--set-tie-xyonly=file1:section1/file2:section2
+--set-tie-zonly=file1:section1/file2:section2
+--set-ties-xyz-with-file=file
+--set-ties-xyonly-with-file=file
+--set-ties-zonly-with-file=file
+--set-ties-xyz-by-survey=survey
+--set-ties-xyonly-by-survey=survey
+--set-ties-zonly-by-survey=survey
+--set-ties-xyz-by-block=survey1/survey2--set-ties-xyonly-by-block=survey1/survey2
+--set-ties-zonly-by-block=survey1/survey2
+--set-ties-zoffset-by-block=survey1/survey2/zoffset
+--skip-unset-crossings
+<BR>&nbsp;--verbose&nbsp;--help&nbsp;]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
 <B>MBnavadjustmerge</B> is a command line program that merges two
-existing <B>MBnavadjust</B> projects. If the user specifies two
-input projects and no output project, then the second project is
-added to the first. If an output project is specified, then the
-two projects are merged and the new combined project is output.
+existing <B>MBnavadjust</B> projects or modifies a single
+<B>MBnavadjust</B> project.
 <P>
 <B>MBnavadjust</B> is an interactive graphical program used to
 adjust swath data navigation by matching bathymetric features
 in overlapping and crossing swaths. The primary purpose of
 <B>mbnavadjust</B> is to eliminate relative navigational errors in swath
 data obtained from poorly navigated sonars.
+<P>
+With respect to the merging function, if the <B>MBnavadjustmerge</B>
+user specifies two input projects and no output project, then the
+second project is added to the first. If an output project is specified, then the
+two projects are merged and the new combined project is output.
+<P>
+In order to make use of the project modification commands, a
+single input project must be specified, along with one or more
+of the modification commands. These can include adding crossings,
+setting tie z-offset values, setting tie offsets (even if no
+corresponding crossing already exists), setting tie modes
+(xy only, z only, xyz),  and deleting ties.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -69,9 +95,10 @@ Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</
 <DD>
 <B>--input=project-add</B>
 
-This option defines either of the input, existing <B>MBnavadjust</B>
-projects. A project may be defined by a relative or absolute path
-to the project *.nvh file or the project *.dir directory. The first
+The <B>--input</B> option defines an existing, input <B>MBnavadjust</B>
+project. A project may be defined by a relative or absolute path
+to the project *.nvh file or the project *.dir directory. This option
+can be used twice to specify two input projects. The first
 use of <B>--input</B> defines the base input project, and the second
 defines the add input project. In the case where the <B>--output</B>
 option is used to define an output project, the two input projects
@@ -79,7 +106,9 @@ will both be copied to the new output project (<I>project-base</I>
 first followed by <I>project-add</I>). If the <B>output</B> option is
 not specified, then the <I>project-base</I> project is used as the
 output, and the <I>project-add</I> project is added on to the
-<I>project-base</I> project.
+<I>project-base</I> project. If only the base input project is
+specified, then that project will be modified according to one or
+more of the &quot;add&quot;, &quot;delete&quot;, &quot;skip&quot;, or &quot;set&quot; commands.
 <DT><B>--output=project-output</B>
 
 <DD>
@@ -90,15 +119,146 @@ If the <B>output</B> option is
 not specified, then the <I>project-base</I> project is used as the
 output, and the <I>project-add</I> project is added on to the
 <I>project-base</I> project.
+<DT><B>--add-crossing=file1:section1/file2:section2</B>
+
+<DD>
+This option adds the specified crossing to the <B>MBnavadjust</B> project.
+<DT><B>--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset</B>
+
+<DD>
+This option adds the specified tie to the <B>MBnavadjust</B> project.
+If the corresponding crossing does not already exist, it will be
+created.
+<DT><B>--set-tie-xyz=file1:section1/file2:section2</B>
+
+<DD>
+This option sets the mode of the existing specified tie in the
+<B>MBnavadjust</B> project to be &quot;XYZ&quot;. This means all three
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-tie-xyonly=file1:section1/file2:section2</B>
+
+<DD>
+This option sets the mode of the existing specified tie in the
+<B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-tie-zonly=file1:section1/file2:section2</B>
+
+<DD>
+This option sets the mode of the existing specified tie in the
+<B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
+coordinate of the tie will be used as a constraint in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-xyz-with-file=file</B>
+
+<DD>
+This option sets the mode of all ties involved with the specified
+file in the <B>MBnavadjust</B> project to be &quot;XYZ&quot;. This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-xyonly-with-file=file</B>
+
+<DD>
+This option sets the mode of all ties involved with the specified
+file in the <B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-zonly-with-file=file</B>
+
+<DD>
+This option sets the mode of all ties involved with the specified
+file in the <B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-xyz-with-survey=survey</B>
+
+<DD>
+This option sets the mode of all ties involved with the specified
+survey in the <B>MBnavadjust</B> project to be &quot;XYZ&quot;. This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-xyonly-with-survey=survey</B>
+
+<DD>
+This option sets the mode of all ties involved with the specified
+survey in the <B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-zonly-with-survey=survey</B>
+
+<DD>
+This option sets the mode of all ties involved with the specified
+survey in the <B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-xyz-by-survey=survey</B>
+
+<DD>
+This option sets the mode of all ties between two sections in the specified
+survey in the <B>MBnavadjust</B> project to be &quot;XYZ&quot;. This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-xyonly-by-survey=survey</B>
+
+<DD>
+This option sets the mode of all ties between two sections in the specified
+survey in the <B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-zonly-by-survey=survey</B>
+
+<DD>
+This option sets the mode of all ties between two sections in the specified
+survey in the <B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-xyz-by-block=survey1/survey2</B>
+
+<DD>
+This option sets the mode of all ties between sections of the specified
+two surveys in the <B>MBnavadjust</B> project to be &quot;XYZ&quot;. This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-xyonly-by-block=survey1/survey2</B>
+
+<DD>
+This option sets the mode of all ties between sections in the specified
+two surveys in the <B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-zonly-by-block=survey1/survey2</B>
+
+<DD>
+This option sets the mode of all ties between sections in the specified
+two surveys in the <B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-zoffset-by-block=survey1/survey2/zoffset</B>
+
+<DD>
+This option resets the zoffset value of all ties between sections in the specified
+two surveys.
+<DT><B>--skip-unset-crossings</B>
+
+<DD>
+This option sets all unset crossings in the input projects to be
+skipped. This does not apply to any new crossings between the two
+merged projects.
 <DT><B>--verbose</B>
 
 <DD>
 This option increases the verbosity of <B>MBnavadjustmerge</B>, which
 means that more information than by default is output to the stderr stream of the
 shell.
+<DT><B>--help</B>
+
+<DD>
+This option causes <B>MBnavadjustmergeP to output a list of the
+possible command line options, and then exit.
 <P>
 </DL>
-<A NAME="lbAH">&nbsp;</A>
+</B><A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
 Suppose you have two AUV survey missions, 20140515m1 and 10140515m2, that overlap
@@ -112,14 +272,17 @@ directories with a &quot;.dir&quot; suffix. To create a new <B>MBnavadjust</B> p
 combining the two existing projects, the following will suffice:
 <BR>
 
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbnavadjustmerge&nbsp;--input=Navadjust20140515m1.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input=Navadjust20140515m1.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=Navadjust20140515All.nvh
-<BR>
-
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbnavadjustmerge&nbsp;--input=Navadjust20140515m1.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input=Navadjust20140515m2.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=Navadjust20140515All.nvh
+<P>
 The new project Navadjust20140515All can be opened and analyzed further using
 <B>MBnavadjust</B>. When opening the new project, the user should first solve
 for a comprehensive navigation adjustment model by selecting the &lt;Action-&gt;Invert Navigation&gt;
 menu item, and then find the crossings between the two previously separate missions
-by selecting the &lt;Action-&gt;Check For New Crossings&gt; menu item
+by selecting the &lt;Action-&gt;Check For New Crossings&gt; menu item.
+<P>
+If the <B>--skip-unset-crossings</B> option is added to the above command, then
+all unset crossings in the two input projects will be set to &quot;skipped&quot; mode in
+the output project.
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
@@ -130,7 +293,7 @@ by selecting the &lt;Action-&gt;Check For New Crossings&gt; menu item
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
-It used to be too new to be bulletproof, now its too complicated to be bulletproof.
+It started out simple and bulletproof, but now it's too complicated to be bulletproof.
 Good luck.
 <P>
 

@@ -750,10 +750,7 @@ int main (int argc, char **argv)
 		/* count the record that was just read */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
-			if (istore->serial != 0 && istore->serial == istore->par_serial_2)
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping2;
-			else
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping1;
+			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
 
 			if (format == MBF_EM300RAW)
 				{
@@ -1672,10 +1669,7 @@ int main (int argc, char **argv)
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 			/* get survey data structure */
-			if (istore->serial != 0 && istore->serial == istore->par_serial_2)
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping2;
-			else
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping1;
+			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
 
 			nrec_0xE5_bathymetry_mbari59++;
 			if (ping->png_raw_read == MB_YES)
@@ -1755,10 +1749,7 @@ int main (int argc, char **argv)
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 			/* get survey data structure */
-			if (istore->serial != 0 && istore->serial == istore->par_serial_2)
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping2;
-			else
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping1;
+			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
 				
 			/* get transducer offsets */
 			if (istore->par_stc == 0)
