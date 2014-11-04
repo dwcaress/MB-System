@@ -138,24 +138,6 @@ int mbsys_simrad3_survey_alloc(int verbose,
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *) store_ptr;
 
-	/* allocate memory for data structure(s) if needed */
-	if (store->ping1 == NULL && store->par_serial_1 != 0)
-		{
-		status = mb_mallocd(verbose,__FILE__, __LINE__,
-			sizeof(struct mbsys_simrad3_ping_struct),
-			(void **)&(store->ping1),error);
-		if (status == MB_SUCCESS)
-			memset(store->ping1, 0, sizeof(struct mbsys_simrad3_ping_struct));
-		}
-	if (store->ping2 == NULL && store->par_serial_2 != 0)
-		{
-		status = mb_mallocd(verbose,__FILE__, __LINE__,
-			sizeof(struct mbsys_simrad3_ping_struct),
-			(void **)&(store->ping2),error);
-		if (status == MB_SUCCESS)
-			memset(store->ping2, 0, sizeof(struct mbsys_simrad3_ping_struct));
-		}
-
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -742,12 +724,6 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *) *store_ptr;
 
-	/* deallocate memory for survey data structure */
-	if (store->ping1 != NULL)
-		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->ping1),error);
-	if (store->ping2 != NULL)
-		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->ping2),error);
-
 	/* deallocate memory for extraparameters data structure */
 	if (store->extraparameters != NULL)
 		{
@@ -817,89 +793,9 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error)
 
 	/* get pointer to data descriptor */
 	store = (struct mbsys_simrad3_struct *) store_ptr;
-	if (store != NULL && store->ping1 != NULL)
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-
-		ping->png_ss_read = 0;	/* flag indicating actual reading of sidescan record */
-		ping->png_ss_date = 0;	/* date = year*10000 + month*100 + day
-					    Feb 26, 1995 = 19950226 */
-		ping->png_ss_msec = 0;	/* time since midnight in msec
-					    08:12:51.234 = 29570234 */
-		ping->png_ss_count = 0;	/* sequential counter or input identifier */
-		ping->png_ss_serial = 0;	/* system 1 or system 2 serial number */
-		ping->png_ss_sample_rate = 0.0;	/* sampling rate (Hz) */
-		ping->png_r_zero = 0;	/* range to normal incidence used in TVG
-					    (R0 predicted) in samples */
-		ping->png_bsn = 0;	/* normal incidence backscatter (BSN) (0.1 dB) */
-		ping->png_bso = 0;	/* oblique incidence backscatter (BSO) (0.1 dB) */
-		ping->png_tx = 0;		/* Tx beamwidth (0.1 deg) */
-		ping->png_tvg_crossover = 0;
-					/* TVG law crossover angle (0.1 deg) */
-		ping->png_nbeams_ss = 0;	/* number of beams with sidescan */
-		ping->png_npixels = 0;	/* number of pixels of sidescan */
-		for (i=0;i<MBSYS_SIMRAD3_MAXBEAMS;i++)
-			{
-			ping->png_sort_direction[i] = 0;
-					/* sorting direction - The first sample in a beam
-						has lowest range if 1, highest if -- 1. Note
-						that the ranges in the seabed image datagram
-						are all two-- way from time of transmit to
-						time of receive. */
-			ping->png_beam_samples[i] = 0;
-					/* number of sidescan samples derived from
-						each beam */
-			ping->png_start_sample[i] = 0;
-					/* start sample number */
-			ping->png_ssdetection[i] = 0; /* Detection info:
-								   This datagram may contain data for beams with and without a
-								   valid detection. Eight bits (0-7) gives details about the detection:
-									A) If the most significant bit (bit7) is zero, this beam has a valid
-										detection. Bit 0-3 is used to specify how the range for this beam
-										is calculated
-										0: Amplitude detect
-										1: Phase detect
-										2-15: Future use
-									B) If the most significant bit is 1, this beam has an invalid
-										detection. Bit 4-6 is used to specify how the range (and x,y,z
-										parameters) for this beam is calculated
-										0: Normal detection
-										1: Interpolated or extrapolated from neighbour detections
-										2: Estimated
-										3: Rejected candidate
-										4: No detection data is available for this beam (all parameters
-											are set to zero)
-										5-7: Future use
-									The invalid range has been used to fill in amplitude samples in
-									the seabed image datagram.
-										bit 7: 0 = good detection
-										bit 7: 1 = bad detection
-										bit 3: 0 = amplitude detect
-										bit 3: 1 = phase detect
-										bits 4-6: 0 = normal detection
-										bits 4-6: 1 = interpolated from neighbor detections
-										bits 4-6: 2 = estimated
-										bits 4-6: 3 = rejected
-										bits 4-6: 4 = no detection available
-										other bits : future use */
-			ping->png_center_sample[i] = 0;
-					/* center sample number */
-			}
-		for (i=0;i<MBSYS_SIMRAD3_MAXRAWPIXELS;i++)
-			{
-			ping->png_ssraw[i] = 0; /* the raw sidescan ordered port to starboard */
-			}
-		ping->png_pixel_size = 0.0;	/* processed sidescan pixel size (m) */
-		ping->png_pixels_ss = 0;	/* number of processed sidescan pixels stored */
-		for (i=0;i<MBSYS_SIMRAD3_MAXPIXELS;i++)
-			{
-			ping->png_ss[i] = 0; /* the processed sidescan ordered port to starboard */
-			ping->png_ssalongtrack[i] = 0; /* the processed sidescan alongtrack distances (0.01 m) */
-			}
-		}
-	if (store != NULL && store->ping2 != NULL)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[i]);
 
 		ping->png_ss_read = 0;	/* flag indicating actual reading of sidescan record */
 		ping->png_ss_date = 0;	/* date = year*10000 + month*100 + day
@@ -1028,10 +924,7 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get beam and pixel numbers */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 		*nbath = ping->png_nbeams;
 		*namp = *nbath;
 		*nss = MBSYS_SIMRAD3_MAXPIXELS;
@@ -1051,8 +944,8 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
-		fprintf(stderr,"dbg2        namp:      %d\n",*namp);
-		fprintf(stderr,"dbg2        nss:       %d\n",*nss);
+		fprintf(stderr,"dbg2       namp:      %d\n",*namp);
+		fprintf(stderr,"dbg2       nss:       %d\n",*nss);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -1087,10 +980,7 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr,
 	store = (struct mbsys_simrad3_struct *) mb_io_ptr->store_data;
 
 	/* extract data from structure */
-	if (store->serial == store->par_serial_2)
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-	else
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 	*pingnumber = ping->png_count;
 
 	/* print output debug statements */
@@ -1151,10 +1041,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* get time */
 		time_i[0] = ping->png_date / 10000;
@@ -1530,34 +1417,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
 		{
-		if (store->serial == store->par_serial_2)
-			{
-			/* allocate secondary data structure for
-				survey data if needed */
-			if (store->ping2 == NULL)
-				{
-				status = mbsys_simrad3_survey_alloc(
-						verbose,mbio_ptr,
-						store_ptr,error);
-				}
-				
-			/* get survey data structure */
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-			}
-		else
-			{
-			/* allocate secondary data structure for
-				survey data if needed */
-			if (store->ping1 == NULL)
-				{
-				status = mbsys_simrad3_survey_alloc(
-						verbose,mbio_ptr,
-						store_ptr,error);
-				}
-				
-			/* get survey data structure */
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-			}
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* get time */
 		ping->png_date = 10000 * time_i[0]
@@ -1737,7 +1597,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int	time_i[7];
 	double	ptime_d;
 	double	soundspeed;
-	double	lever_x, lever_y, lever_z, offset_x, offset_y, offset_z;
+	double	offset_y;
 	int	i;
 
 	/* print input debug statements */
@@ -1770,10 +1630,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* get ping time */
 		time_i[0] = ping->png_date / 10000;
@@ -1809,6 +1666,10 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		else if (store->par_aps == 2)
 			{
 			offset_y = store->par_p3x;
+			}
+		else
+			{
+			offset_y = store->par_p1x;
 			}
 		
 		/* special case when par_aps value is wrong */
@@ -1927,10 +1788,7 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		*nbeams = ping->png_nbeams;
 		for (j=0;j<ping->png_nbeams;j++)
@@ -2029,10 +1887,7 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		*nbeams = ping->png_nbeams;
 		for (j=0;j<ping->png_nbeams;j++)
@@ -2131,10 +1986,7 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* get transmit_gain (dB) */
 		*transmit_gain = (double)store->run_tran_pow;
@@ -2231,10 +2083,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* get transducer depth and altitude */
 		*transducer_depth = ping->png_xducer_depth;
@@ -2356,10 +2205,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* just one navigation value */
 		*n = 1;
@@ -2412,10 +2258,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		|| *kind == MB_DATA_NAV3)
 		{
  		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* just one navigation value */
 		*n = 1;
@@ -2649,10 +2492,7 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* get time */
 		time_i[0] = ping->png_date / 10000;
@@ -2703,10 +2543,7 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		{
                 /* get survey data structure */
 		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* get time */
 		time_i[0] = store->pos_date / 10000;
@@ -2858,34 +2695,7 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	/* insert data in ping structure */
 	if (store->kind == MB_DATA_DATA)
 		{
-		if (store->serial == store->par_serial_2)
-			{
-			/* allocate secondary data structure for
-				survey data if needed */
-			if (store->ping2 == NULL)
-				{
-				status = mbsys_simrad3_survey_alloc(
-						verbose,mbio_ptr,
-						store_ptr,error);
-				}
-				
-			/* get survey data structure */
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-			}
-		else
-			{
-			/* allocate secondary data structure for
-				survey data if needed */
-			if (store->ping1 == NULL)
-				{
-				status = mbsys_simrad3_survey_alloc(
-						verbose,mbio_ptr,
-						store_ptr,error);
-				}
-				
-			/* get survey data structure */
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-			}
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* get time */
 		ping->png_date = 10000 * time_i[0]
@@ -3148,12 +2958,6 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_struct *copy;
-	struct mbsys_simrad3_ping_struct *ping1_store;
-	struct mbsys_simrad3_ping_struct *ping1_copy;
-	char	*ping1_save;
-	struct mbsys_simrad3_ping_struct *ping2_store;
-	struct mbsys_simrad3_ping_struct *ping2_copy;
-	char	*ping2_save;
 	struct mbsys_simrad3_attitude_struct *attitude_store;
 	struct mbsys_simrad3_attitude_struct *attitude_copy;
 	char	*attitude_save;
@@ -3188,29 +2992,6 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr,
 	/* get data structure pointers */
 	store = (struct mbsys_simrad3_struct *) store_ptr;
 	copy = (struct mbsys_simrad3_struct *) copy_ptr;
-
-	/* check if survey data needs to be copied */
-	if (store->kind == MB_DATA_DATA
-		&& store->ping1 != NULL)
-		{
-		/* make sure a survey data structure exists to
-			be copied into */
-		if (copy->ping1 == NULL)
-			{
-			status = mbsys_simrad3_survey_alloc(
-					verbose,mbio_ptr,
-					copy_ptr,error);
-			}
-
-		/* save pointer values */
-		ping1_save = (char *)copy->ping1;
-		ping2_save = (char *)copy->ping2;
-		}
-	else
-		{
-		ping1_save = NULL;
-		ping2_save = NULL;
-		}
 
 	/* check if attitude data needs to be copied */
 	if (store->attitude != NULL)
@@ -3294,30 +3075,6 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr,
 
 	/* copy the main structure */
 	*copy = *store;
-
-	/* if needed copy the survey data structure */
-	if (store->kind == MB_DATA_DATA
-		&& status == MB_SUCCESS)
-		{
-		if (store->ping1 != NULL)
-			{
-			copy->ping1 = (struct mbsys_simrad3_ping_struct *) ping1_save;
-			ping1_store = (struct mbsys_simrad3_ping_struct *) store->ping1;
-			ping1_copy = (struct mbsys_simrad3_ping_struct *) copy->ping1;
-			*ping1_copy = *ping1_store;
-			}
-		else
-			copy->ping1 = NULL;
-		if (store->ping2 != NULL)
-			{
-			copy->ping2 = (struct mbsys_simrad3_ping_struct *) ping2_save;
-			ping2_store = (struct mbsys_simrad3_ping_struct *) store->ping2;
-			ping2_copy = (struct mbsys_simrad3_ping_struct *) copy->ping2;
-			*ping2_copy = *ping2_store;
-			}
-		else
-			copy->ping2 = NULL;
-		}
 
 	/* if needed copy the attitude data structure */
 	if (store->attitude != NULL && status == MB_SUCCESS)
@@ -3435,10 +3192,7 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get survey data structure */
-		if (store->serial == store->par_serial_2)
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		else
-			ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* zero the sidescan */
 		for (i=0;i<MBSYS_SIMRAD3_MAXPIXELS;i++)

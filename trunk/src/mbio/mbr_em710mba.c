@@ -170,25 +170,25 @@ int mbr_em710mba_rd_svp2(int verbose, void *mbio_ptr, int swap,
 		short sonar, int *goodend, int *error);
 int mbr_em710mba_rd_bath2(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int version, int *which_sonar,
+		short sonar, int version,
 		int *goodend, int *error);
 int mbr_em710mba_rd_bath2_mba(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int version, int *which_sonar,
+		short sonar, int version,
 		int *goodend, int *error);
 int mbr_em710mba_rd_bath3_mba(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int version, int *which_sonar,
+		short sonar, int version,
 		int *goodend, int *error);
 int mbr_em710mba_rd_rawbeam4(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar, int *goodend, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em710mba_rd_quality(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar, int *goodend, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em710mba_rd_ss2_mba(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar,
+		short sonar,
 		int *goodend, int *error);
 int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
@@ -580,10 +580,7 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointers to data structures */
 	store = (struct mbsys_simrad3_struct *) store_ptr;
-	if (store->serial != 0 && store->serial == store->par_serial_2)
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-	else
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 	attitude = (struct mbsys_simrad3_attitude_struct *) store->attitude;
 	netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
 	heading = (struct mbsys_simrad3_heading_struct *) store->heading;
@@ -808,14 +805,11 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	*version;
 	short	*typelast;
 	short	*sonarlast;
-	int	*reset_ping1_flag;
-	int	*reset_ping2_flag;
 	int	*nbadrec;
 	int	good_end_bytes;
 	size_t	read_len;
 	int	skip = 0;
 	int	*num_sonars;
-	int	which_sonar = 0;
 	char	junk;
 	int	i;
 
@@ -843,8 +837,6 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	label = (char *) mb_io_ptr->save_label;
 	version = (int *) (&mb_io_ptr->save3);
 	label_save_flag = (int *) &mb_io_ptr->save_label_flag;
-	reset_ping1_flag = (int *) &mb_io_ptr->save4;
-	reset_ping2_flag = (int *) &mb_io_ptr->save5;
 	typelast = (short *) &mb_io_ptr->save6;
 	sonarlast = (short *) &mb_io_ptr->save7;
 	nbadrec = (int *) &mb_io_ptr->save8;
@@ -857,22 +849,17 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* set flag to swap bytes if necessary */
 	swap =  *databyteswapped;
 	
-	/* reset ping structures if flagged */
-	if (*reset_ping1_flag == MB_YES)
+	/* if a ping structure was previously flagged as complete then reset the structure to empty */
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES;i++)
 		{
-		store->ping1->png_bath_read = MB_NO;
-		store->ping1->png_raw_read = MB_NO;
-		store->ping1->png_quality_read = MB_NO;
-		store->ping1->png_ss_read = MB_NO;
-		*reset_ping1_flag = MB_NO;
-		}
-	if (*reset_ping2_flag == MB_YES)
-		{
-		store->ping2->png_bath_read = MB_NO;
-		store->ping2->png_raw_read = MB_NO;
-		store->ping2->png_quality_read = MB_NO;
-		store->ping2->png_ss_read = MB_NO;
-		*reset_ping2_flag = MB_NO;
+		if (store->pings[i].read_status == MBSYS_SIMRAD3_PING_COMPLETE)
+			{
+			store->pings[i].read_status = MBSYS_SIMRAD3_PING_NO_DATA;
+			store->pings[i].png_bath_read = MB_NO;
+			store->pings[i].png_raw_read = MB_NO;
+			store->pings[i].png_quality_read = MB_NO;
+			store->pings[i].png_ss_read = MB_NO;
+			}
 		}
 
 	/* loop over reading data until a record is ready for return */
@@ -1039,32 +1026,6 @@ Have a nice day...\n");
 			&& store->tilt == NULL)
 			{
 			status = mbsys_simrad3_tilt_alloc(
-					verbose,mbio_ptr,
-					store_ptr,error);
-			}
-
-		/* allocate secondary data structure for
-			survey data when needed */
-		if (status == MB_SUCCESS &&
-			(type == EM3_BATH
-			|| type == EM3_BATH2
-			|| type == EM3_BATH_MBA
-			|| type == EM3_BATH2_MBA
-			|| type == EM3_BATH3_MBA
-			|| type == EM3_RAWBEAM
-			|| type == EM3_RAWBEAM2
-			|| type == EM3_RAWBEAM3
-			|| type == EM3_RAWBEAM4
-			|| type == EM3_QUALITY
-			|| type == EM3_SS
-			|| type == EM3_SS2
-			|| type == EM3_SS_MBA
-			|| type == EM3_SS2_MBA))
-			{
-			/* if the start parameter values indicate that two sonars exist (e.g. EM2040D) then
-				two ping structures will be allocated */
-			if (store->ping1 == NULL)
-			    status = mbsys_simrad3_survey_alloc(
 					verbose,mbio_ptr,
 					store_ptr,error);
 			}
@@ -1367,60 +1328,37 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710mba_rd_bath2 type %x\n",type);
 #endif
 			status = mbr_em710mba_rd_bath2(
-				verbose,mbio_ptr,swap,store,sonar,*version,&which_sonar,&good_end_bytes,error);
+				verbose,mbio_ptr,swap,store,sonar,*version,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1)
-					{
-					store->ping1->png_bath_read = MB_YES;
-					}
-				else if (which_sonar == 2)
-					{
-					store->ping2->png_bath_read = MB_YES;
-					}
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_bath_read = MB_YES;
 				done = MB_NO;
 				}
 			if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_M3)
 				{
-				if (which_sonar == 1
-					&& store->ping1->png_bath_read == MB_YES
-					&& store->ping1->png_raw_read == MB_YES
-					&& store->ping1->png_count == store->ping1->png_raw_count)
+				if (store->pings[store->ping_index].png_bath_read == MB_YES
+					&& store->pings[store->ping_index].png_raw_read == MB_YES
+					&& store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_raw_count)
 					{
+					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = MB_YES;
-					*reset_ping1_flag = MB_YES;
-					}
-				else if (which_sonar == 2
-					&& store->ping2->png_bath_read == MB_YES
-					&& store->ping2->png_raw_read == MB_YES
-					&& store->ping2->png_count == store->ping2->png_raw_count)
-					{
-					done = MB_YES;
-					*reset_ping2_flag = MB_YES;
 					}
 				}
 			else if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1
-					&& store->ping1->png_bath_read == MB_YES
-					&& store->ping1->png_ss_read == MB_YES
-					&& store->ping1->png_count == store->ping1->png_ss_count)
+				if (store->pings[store->ping_index].png_bath_read == MB_YES
+					&& store->pings[store->ping_index].png_ss_read == MB_YES
+					&& store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_ss_count)
 					{
+					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = MB_YES;
-					*reset_ping1_flag = MB_YES;
-					}
-				else if (which_sonar == 2
-					&& store->ping2->png_bath_read == MB_YES
-					&& store->ping2->png_ss_read == MB_YES
-					&& store->ping2->png_count == store->ping2->png_ss_count)
-					{
-					done = MB_YES;
-					*reset_ping2_flag = MB_YES;
 					}
 				}
 #ifdef MBR_EM710MBA_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"mbr_em710mba_rd_bath2: sonar 1 ping:%d\n",store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"mbr_em710mba_rd_bath2: sonar 2 ping:%d\n",store->ping1->png_count);
+	fprintf(stderr,"mbr_em710mba_rd_bath2: ping_index:%d ping:%d serial:%d\n",
+			store->ping_index,store->pings[store->ping_index].png_count,
+			store->pings[store->ping_index].png_serial);
 #endif
 			}
 		else if (type == EM3_BATH2_MBA)
@@ -1429,60 +1367,37 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710mba_rd_bath2_mba type %x\n",type);
 #endif
 			status = mbr_em710mba_rd_bath2_mba(
-				verbose,mbio_ptr,swap,store,sonar,*version,&which_sonar,&good_end_bytes,error);
+				verbose,mbio_ptr,swap,store,sonar,*version,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1)
-					{
-					store->ping1->png_bath_read = MB_YES;
-					}
-				else if (which_sonar == 2)
-					{
-					store->ping2->png_bath_read = MB_YES;
-					}
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_bath_read = MB_YES;
 				done = MB_NO;
 				}
 			if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_M3)
 				{
-				if (which_sonar == 1
-					&& store->ping1->png_bath_read == MB_YES
-					&& store->ping1->png_raw_read == MB_YES
-					&& store->ping1->png_count == store->ping1->png_raw_count)
+				if (store->pings[store->ping_index].png_bath_read == MB_YES
+					&& store->pings[store->ping_index].png_raw_read == MB_YES
+					&& store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_raw_count)
 					{
+					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = MB_YES;
-					*reset_ping1_flag = MB_YES;
-					}
-				else if (which_sonar == 2
-					&& store->ping2->png_bath_read == MB_YES
-					&& store->ping2->png_raw_read == MB_YES
-					&& store->ping2->png_count == store->ping2->png_raw_count)
-					{
-					done = MB_YES;
-					*reset_ping2_flag = MB_YES;
 					}
 				}
 			else if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1
-					&& store->ping1->png_bath_read == MB_YES
-					&& store->ping1->png_ss_read == MB_YES
-					&& store->ping1->png_count == store->ping1->png_ss_count)
+				if (store->pings[store->ping_index].png_bath_read == MB_YES
+					&& store->pings[store->ping_index].png_ss_read == MB_YES
+					&& store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_ss_count)
 					{
+					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = MB_YES;
-					*reset_ping1_flag = MB_YES;
-					}
-				else if (which_sonar == 2
-					&& store->ping2->png_bath_read == MB_YES
-					&& store->ping2->png_ss_read == MB_YES
-					&& store->ping2->png_count == store->ping2->png_ss_count)
-					{
-					done = MB_YES;
-					*reset_ping2_flag = MB_YES;
 					}
 				}
 #ifdef MBR_EM710MBA_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"mbr_em710mba_rd_bath2_mba: sonar 1 ping:%d\n",store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"mbr_em710mba_rd_bath2_mba: sonar 2 ping:%d\n",store->ping1->png_count);
+	fprintf(stderr,"mbr_em710mba_rd_bath2_mba: ping_index:%d ping:%d serial:%d\n",
+			store->ping_index,store->pings[store->ping_index].png_count,
+			store->pings[store->ping_index].png_serial);
 #endif
 			}
 		else if (type == EM3_BATH3_MBA)
@@ -1491,60 +1406,37 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710mba_rd_bath3_mba type %x\n",type);
 #endif
 			status = mbr_em710mba_rd_bath3_mba(
-				verbose,mbio_ptr,swap,store,sonar,*version,&which_sonar,&good_end_bytes,error);
+				verbose,mbio_ptr,swap,store,sonar,*version,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1)
-					{
-					store->ping1->png_bath_read = MB_YES;
-					}
-				else if (which_sonar == 2)
-					{
-					store->ping2->png_bath_read = MB_YES;
-					}
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_bath_read = MB_YES;
 				done = MB_NO;
 				}
 			if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_M3)
 				{
-				if (which_sonar == 1
-					&& store->ping1->png_bath_read == MB_YES
-					&& store->ping1->png_raw_read == MB_YES
-					&& store->ping1->png_count == store->ping1->png_raw_count)
+				if (store->pings[store->ping_index].png_bath_read == MB_YES
+					&& store->pings[store->ping_index].png_raw_read == MB_YES
+					&& store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_raw_count)
 					{
+					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = MB_YES;
-					*reset_ping1_flag = MB_YES;
-					}
-				else if (which_sonar == 2
-					&& store->ping2->png_bath_read == MB_YES
-					&& store->ping2->png_raw_read == MB_YES
-					&& store->ping2->png_count == store->ping2->png_raw_count)
-					{
-					done = MB_YES;
-					*reset_ping2_flag = MB_YES;
 					}
 				}
 			else if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1
-					&& store->ping1->png_bath_read == MB_YES
-					&& store->ping1->png_ss_read == MB_YES
-					&& store->ping1->png_count == store->ping1->png_ss_count)
+				if (store->pings[store->ping_index].png_bath_read == MB_YES
+					&& store->pings[store->ping_index].png_ss_read == MB_YES
+					&& store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_ss_count)
 					{
+					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = MB_YES;
-					*reset_ping1_flag = MB_YES;
-					}
-				else if (which_sonar == 2
-					&& store->ping2->png_bath_read == MB_YES
-					&& store->ping2->png_ss_read == MB_YES
-					&& store->ping2->png_count == store->ping2->png_ss_count)
-					{
-					done = MB_YES;
-					*reset_ping2_flag = MB_YES;
 					}
 				}
 #ifdef MBR_EM710MBA_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"mbr_em710mba_rd_bath3_mba: sonar 1 ping:%d\n",store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"mbr_em710mba_rd_bath3_mba: sonar 2 ping:%d\n",store->ping1->png_count);
+	fprintf(stderr,"mbr_em710mba_rd_bath3_mba: ping_index:%d ping:%d serial:%d\n",
+			store->ping_index,store->pings[store->ping_index].png_count,
+			store->pings[store->ping_index].png_serial);
 #endif
 			}
 		else if (type == EM3_RAWBEAM4)
@@ -1553,18 +1445,17 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710mba_rd_rawbeam4 type %x\n",type);
 #endif
 			status = mbr_em710mba_rd_rawbeam4(
-				verbose,mbio_ptr,swap,store,sonar,&which_sonar,&good_end_bytes,error);
+				verbose,mbio_ptr,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1)
-					store->ping1->png_raw_read = MB_YES;
-				else if (which_sonar == 2)
-					store->ping2->png_raw_read = MB_YES;
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_raw_read = MB_YES;
 				done = MB_NO;
 				}
 #ifdef MBR_EM710MBA_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"mbr_em710mba_rd_rawbeam4: sonar 1 ping:%d\n",store->ping1->png_raw_count);
-	if (which_sonar == 2) fprintf(stderr,"mbr_em710mba_rd_rawbeam4: sonar 2 ping:%d\n",store->ping1->png_raw_count);
+	fprintf(stderr,"mbr_em710raw_rd_rawbeam4: ping_index:%d ping:%d serial:%d\n",
+			store->ping_index,store->pings[store->ping_index].png_raw_count,
+			store->pings[store->ping_index].png_raw_serial);
 #endif
 			}
 		else if (type == EM3_QUALITY)
@@ -1573,18 +1464,17 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710mba_rd_quality type %x\n",type);
 #endif
 			status = mbr_em710mba_rd_quality(
-				verbose,mbio_ptr,swap,store,sonar,&which_sonar,&good_end_bytes,error);
+				verbose,mbio_ptr,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1)
-					store->ping1->png_quality_read = MB_YES;
-				else if (which_sonar == 2)
-					store->ping2->png_quality_read = MB_YES;
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_quality_read = MB_YES;
 				done = MB_NO;
 				}
 #ifdef MBR_EM710MBA_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"mbr_em710mba_rd_quality: sonar 1 ping:%d\n",store->ping1->png_quality_count);
-	if (which_sonar == 2) fprintf(stderr,"mbr_em710mba_rd_quality: sonar 2 ping:%d\n",store->ping1->png_quality_count);
+	fprintf(stderr,"mbr_em710raw_rd_quality: ping_index:%d ping:%d serial:%d\n",
+			store->ping_index,store->pings[store->ping_index].png_quality_count,
+			store->pings[store->ping_index].png_quality_serial);
 #endif
 			}
 		else if (type == EM3_SS2 || type == EM3_SS2_MBA)
@@ -1593,41 +1483,27 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710mba_rd_ss2_mba type %x\n",type);
 #endif
 			status = mbr_em710mba_rd_ss2_mba(
-				verbose,mbio_ptr,swap,store,sonar,&which_sonar,&good_end_bytes,error);
+				verbose,mbio_ptr,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1)
-					{
-					store->ping1->png_ss_read = MB_YES;
-					}
-				else if (which_sonar == 2)
-					{
-					store->ping2->png_ss_read = MB_YES;
-					}
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_ss_read = MB_YES;
 				done = MB_NO;
 				}
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1
-					&& store->ping1->png_bath_read == MB_YES
-					&& store->ping1->png_ss_read == MB_YES
-					&& store->ping1->png_count == store->ping1->png_ss_count)
+				if (store->pings[store->ping_index].png_bath_read == MB_YES
+					&& store->pings[store->ping_index].png_ss_read == MB_YES
+					&& store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_ss_count)
 					{
+					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = MB_YES;
-					*reset_ping1_flag = MB_YES;
-					}
-				else if (which_sonar == 2
-					&& store->ping2->png_bath_read == MB_YES
-					&& store->ping2->png_ss_read == MB_YES
-					&& store->ping2->png_count == store->ping2->png_ss_count)
-					{
-					done = MB_YES;
-					*reset_ping2_flag = MB_YES;
 					}
 				}
 #ifdef MBR_EM710MBA_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"mbr_em710mba_rd_ss2_mba: sonar 1 ping:%d\n",store->ping1->png_ss_count);
-	if (which_sonar == 2) fprintf(stderr,"mbr_em710mba_rd_ss2_mba: sonar 2 ping:%d\n",store->ping1->png_ss_count);
+	fprintf(stderr,"mbr_em710raw_rd_ss2: ping_index:%d ping:%d serial:%d\n",
+			store->ping_index,store->pings[store->ping_index].png_ss_count,
+			store->pings[store->ping_index].png_ss_serial);
 #endif
 			}
 		else if (type == EM3_WATERCOLUMN)
@@ -4530,7 +4406,7 @@ int mbr_em710mba_rd_svp2(int verbose, void *mbio_ptr, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_rd_bath2(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int version, int *which_sonar, int *goodend, int *error)
+		short sonar, int version, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_bath2";
 	int	status = MB_SUCCESS;
@@ -4540,6 +4416,11 @@ int mbr_em710mba_rd_bath2(int verbose, void *mbio_ptr, int swap,
 	float	float_val;
 	int	int_val;
 	size_t	read_len;
+	int	png_count;
+	int	serial;
+	int	oldest_ping;
+	int	oldest_ping_index;
+	int	found;
 	int	i;
 
 	/* print input debug statements */
@@ -4569,18 +4450,49 @@ int mbr_em710mba_rd_bath2(int verbose, void *mbio_ptr, int swap,
 	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* figure out which storage structure to use */
+	mb_get_binary_short(swap, &line[8], &short_val);
+	png_count = (int) ((unsigned short) short_val);
 	mb_get_binary_short(swap, &line[10], &short_val);
-	store->serial = (int) ((unsigned short) short_val);
-	if (store->serial != 0 && store->serial == store->par_serial_2)
+	serial = (int) ((unsigned short) short_val);
+	found = MB_NO;
+	oldest_ping = 999999999;
+	oldest_ping_index = -1;
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == MB_NO;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		*which_sonar = 2;
+		/* look for this ping by ping number and sonar serial number - if we already read
+		 * a record from this ping it has to be stored in one of the structures */
+		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial)
+			{
+			found = MB_YES;
+			store->ping_index = i;
+			}
+			
+		/* figure out which structure is holding the oldest ping in case we need to drop one
+		 * from memory to make room for the new ping. */
+		else if (store->pings[i].read_status > 0)
+			{
+			if (png_count < oldest_ping)
+				{
+				oldest_ping = png_count;
+				oldest_ping_index = i;
+				}
+			}
+			
+		/* if one of the ping structures is unused, set it to be used if we need to store
+		 * this ping */
+		else if (oldest_ping > 0)
+			{
+			oldest_ping = 0;
+			oldest_ping_index = i;
+			}
 		}
-	else
+	if (found == MB_NO)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		*which_sonar = 1;
+		store->ping_index = oldest_ping_index;
 		}
+	ping = (struct mbsys_simrad3_ping_struct *) &store->pings[store->ping_index];
+	ping->count = png_count;
+	ping->serial = serial;
 
 	/* get binary header data */
 	if (status == MB_SUCCESS)
@@ -4710,7 +4622,6 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       which_sonar:%d\n",*which_sonar);
 		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -4723,7 +4634,7 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_rd_bath2_mba(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int version, int *which_sonar, int *goodend, int *error)
+		short sonar, int version, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_bath2_mba";
 	int	status = MB_SUCCESS;
@@ -4733,6 +4644,11 @@ int mbr_em710mba_rd_bath2_mba(int verbose, void *mbio_ptr, int swap,
 	float	float_val;
 	int	int_val;
 	size_t	read_len;
+	int	png_count;
+	int	serial;
+	int	oldest_ping;
+	int	oldest_ping_index;
+	int	found;
 	int	i;
 
 	/* print input debug statements */
@@ -4760,20 +4676,51 @@ int mbr_em710mba_rd_bath2_mba(int verbose, void *mbio_ptr, int swap,
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_BATH2_MBA_HEADER_SIZE;
 	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
-	
+
 	/* figure out which storage structure to use */
+	mb_get_binary_short(swap, &line[8], &short_val);
+	png_count = (int) ((unsigned short) short_val);
 	mb_get_binary_short(swap, &line[10], &short_val);
-	store->serial = (int) ((unsigned short) short_val);
-	if (store->serial != 0 && store->serial == store->par_serial_2)
+	serial = (int) ((unsigned short) short_val);
+	found = MB_NO;
+	oldest_ping = 999999999;
+	oldest_ping_index = -1;
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == MB_NO;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		*which_sonar = 2;
+		/* look for this ping by ping number and sonar serial number - if we already read
+		 * a record from this ping it has to be stored in one of the structures */
+		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial)
+			{
+			found = MB_YES;
+			store->ping_index = i;
+			}
+			
+		/* figure out which structure is holding the oldest ping in case we need to drop one
+		 * from memory to make room for the new ping. */
+		else if (store->pings[i].read_status > 0)
+			{
+			if (png_count < oldest_ping)
+				{
+				oldest_ping = png_count;
+				oldest_ping_index = i;
+				}
+			}
+			
+		/* if one of the ping structures is unused, set it to be used if we need to store
+		 * this ping */
+		else if (oldest_ping > 0)
+			{
+			oldest_ping = 0;
+			oldest_ping_index = i;
+			}
 		}
-	else
+	if (found == MB_NO)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		*which_sonar = 1;
+		store->ping_index = oldest_ping_index;
 		}
+	ping = (struct mbsys_simrad3_ping_struct *) &store->pings[store->ping_index];
+	ping->count = png_count;
+	ping->serial = serial;
 
 	/* get binary header data */
 	if (status == MB_SUCCESS)
@@ -4932,7 +4879,6 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       which_sonar:%d\n",*which_sonar);
 		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -4945,7 +4891,7 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_rd_bath3_mba(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int version, int *which_sonar, int *goodend, int *error)
+		short sonar, int version, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_bath3_mba";
 	int	status = MB_SUCCESS;
@@ -4955,6 +4901,11 @@ int mbr_em710mba_rd_bath3_mba(int verbose, void *mbio_ptr, int swap,
 	float	float_val;
 	int	int_val;
 	size_t	read_len;
+	int	png_count;
+	int	serial;
+	int	oldest_ping;
+	int	oldest_ping_index;
+	int	found;
 	int	i;
 
 	/* print input debug statements */
@@ -4982,20 +4933,51 @@ int mbr_em710mba_rd_bath3_mba(int verbose, void *mbio_ptr, int swap,
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_BATH3_MBA_HEADER_SIZE;
 	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
-	
+
 	/* figure out which storage structure to use */
+	mb_get_binary_short(swap, &line[8], &short_val);
+	png_count = (int) ((unsigned short) short_val);
 	mb_get_binary_short(swap, &line[10], &short_val);
-	store->serial = (int) ((unsigned short) short_val);
-	if (store->serial != 0 && store->serial == store->par_serial_2)
+	serial = (int) ((unsigned short) short_val);
+	found = MB_NO;
+	oldest_ping = 999999999;
+	oldest_ping_index = -1;
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == MB_NO;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		*which_sonar = 2;
+		/* look for this ping by ping number and sonar serial number - if we already read
+		 * a record from this ping it has to be stored in one of the structures */
+		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial)
+			{
+			found = MB_YES;
+			store->ping_index = i;
+			}
+			
+		/* figure out which structure is holding the oldest ping in case we need to drop one
+		 * from memory to make room for the new ping. */
+		else if (store->pings[i].read_status > 0)
+			{
+			if (png_count < oldest_ping)
+				{
+				oldest_ping = png_count;
+				oldest_ping_index = i;
+				}
+			}
+			
+		/* if one of the ping structures is unused, set it to be used if we need to store
+		 * this ping */
+		else if (oldest_ping > 0)
+			{
+			oldest_ping = 0;
+			oldest_ping_index = i;
+			}
 		}
-	else
+	if (found == MB_NO)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		*which_sonar = 1;
+		store->ping_index = oldest_ping_index;
 		}
+	ping = (struct mbsys_simrad3_ping_struct *) &store->pings[store->ping_index];
+	ping->count = png_count;
+	ping->serial = serial;
 
 	/* get binary header data */
 	if (status == MB_SUCCESS)
@@ -5160,7 +5142,6 @@ fprintf(stderr,"png_beamflag:%d\n",ping->png_beamflag[i]); */
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       which_sonar:%d\n",*which_sonar);
 		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5173,7 +5154,7 @@ fprintf(stderr,"png_beamflag:%d\n",ping->png_beamflag[i]); */
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_rd_rawbeam4(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar, int *goodend, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_rawbeam4";
 	int	status = MB_SUCCESS;
@@ -5183,6 +5164,11 @@ int mbr_em710mba_rd_rawbeam4(int verbose, void *mbio_ptr, int swap,
 	int	int_val;
 	float	float_val;
 	size_t	read_len;
+	int	png_count;
+	int	serial;
+	int	oldest_ping;
+	int	oldest_ping_index;
+	int	found;
 	int	i;
 
 	/* print input debug statements */
@@ -5206,18 +5192,49 @@ int mbr_em710mba_rd_rawbeam4(int verbose, void *mbio_ptr, int swap,
 	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* figure out which storage structure to use */
+	mb_get_binary_short(swap, &line[8], &short_val);
+	png_count = (int) ((unsigned short) short_val);
 	mb_get_binary_short(swap, &line[10], &short_val);
-	store->serial = (int) ((unsigned short) short_val);
-	if (store->serial != 0 && store->serial == store->par_serial_2)
+	serial = (int) ((unsigned short) short_val);
+	found = MB_NO;
+	oldest_ping = 999999999;
+	oldest_ping_index = -1;
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == MB_NO;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		*which_sonar = 2;
+		/* look for this ping by ping number and sonar serial number - if we already read
+		 * a record from this ping it has to be stored in one of the structures */
+		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial)
+			{
+			found = MB_YES;
+			store->ping_index = i;
+			}
+			
+		/* figure out which structure is holding the oldest ping in case we need to drop one
+		 * from memory to make room for the new ping. */
+		else if (store->pings[i].read_status > 0)
+			{
+			if (png_count < oldest_ping)
+				{
+				oldest_ping = png_count;
+				oldest_ping_index = i;
+				}
+			}
+			
+		/* if one of the ping structures is unused, set it to be used if we need to store
+		 * this ping */
+		else if (oldest_ping > 0)
+			{
+			oldest_ping = 0;
+			oldest_ping_index = i;
+			}
 		}
-	else
+	if (found == MB_NO)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		*which_sonar = 1;
+		store->ping_index = oldest_ping_index;
 		}
+	ping = (struct mbsys_simrad3_ping_struct *) &store->pings[store->ping_index];
+	ping->count = png_count;
+	ping->serial = serial;
 
 	/* get binary header data */
 	if (status == MB_SUCCESS)
@@ -5403,7 +5420,6 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       which_sonar:%d\n",*which_sonar);
 		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5416,7 +5432,7 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_rd_quality(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar, int *goodend, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_quality";
 	int	status = MB_SUCCESS;
@@ -5425,6 +5441,11 @@ int mbr_em710mba_rd_quality(int verbose, void *mbio_ptr, int swap,
 	short	short_val;
 	float	float_val;
 	size_t	read_len;
+	int	png_count;
+	int	serial;
+	int	oldest_ping;
+	int	oldest_ping_index;
+	int	found;
 	int	i, j;
 
 	/* print input debug statements */
@@ -5451,20 +5472,51 @@ int mbr_em710mba_rd_quality(int verbose, void *mbio_ptr, int swap,
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_QUALITY_HEADER_SIZE;
 	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
-	
+
 	/* figure out which storage structure to use */
+	mb_get_binary_short(swap, &line[8], &short_val);
+	png_count = (int) ((unsigned short) short_val);
 	mb_get_binary_short(swap, &line[10], &short_val);
-	store->serial = (int) ((unsigned short) short_val);
-	if (store->serial != 0 && store->serial == store->par_serial_2)
+	serial = (int) ((unsigned short) short_val);
+	found = MB_NO;
+	oldest_ping = 999999999;
+	oldest_ping_index = -1;
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == MB_NO;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		*which_sonar = 2;
+		/* look for this ping by ping number and sonar serial number - if we already read
+		 * a record from this ping it has to be stored in one of the structures */
+		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial)
+			{
+			found = MB_YES;
+			store->ping_index = i;
+			}
+			
+		/* figure out which structure is holding the oldest ping in case we need to drop one
+		 * from memory to make room for the new ping. */
+		else if (store->pings[i].read_status > 0)
+			{
+			if (png_count < oldest_ping)
+				{
+				oldest_ping = png_count;
+				oldest_ping_index = i;
+				}
+			}
+			
+		/* if one of the ping structures is unused, set it to be used if we need to store
+		 * this ping */
+		else if (oldest_ping > 0)
+			{
+			oldest_ping = 0;
+			oldest_ping_index = i;
+			}
 		}
-	else
+	if (found == MB_NO)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		*which_sonar = 1;
+		store->ping_index = oldest_ping_index;
 		}
+	ping = (struct mbsys_simrad3_ping_struct *) &store->pings[store->ping_index];
+	ping->count = png_count;
+	ping->serial = serial;
 
 	/* get binary header data */
 	if (status == MB_SUCCESS)
@@ -5553,7 +5605,6 @@ ping->png_quality_date,ping->png_quality_msec,ping->png_quality_count,ping->png_
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       which_sonar:%d\n",*which_sonar);
 		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5566,7 +5617,7 @@ ping->png_quality_date,ping->png_quality_msec,ping->png_quality_count,ping->png_
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_rd_ss2_mba(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar, int *goodend, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_ss2_mba";
 	int	status = MB_SUCCESS;
@@ -5579,6 +5630,11 @@ int mbr_em710mba_rd_ss2_mba(int verbose, void *mbio_ptr, int swap,
 	int	done;
 	int	junk_bytes;
 	int	offset;
+	int	png_count;
+	int	serial;
+	int	oldest_ping;
+	int	oldest_ping_index;
+	int	found;
 	int	i;
 
 	/* print input debug statements */
@@ -5605,21 +5661,51 @@ int mbr_em710mba_rd_ss2_mba(int verbose, void *mbio_ptr, int swap,
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_SS2_MBA_HEADER_SIZE;
 	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
-	
+
 	/* figure out which storage structure to use */
+	mb_get_binary_short(swap, &line[8], &short_val);
+	png_count = (int) ((unsigned short) short_val);
 	mb_get_binary_short(swap, &line[10], &short_val);
-	store->serial = (int) ((unsigned short) short_val);
-	
-	if (store->serial != 0 && store->serial == store->par_serial_2)
+	serial = (int) ((unsigned short) short_val);
+	found = MB_NO;
+	oldest_ping = 999999999;
+	oldest_ping_index = -1;
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == MB_NO;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		*which_sonar = 2;
+		/* look for this ping by ping number and sonar serial number - if we already read
+		 * a record from this ping it has to be stored in one of the structures */
+		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial)
+			{
+			found = MB_YES;
+			store->ping_index = i;
+			}
+			
+		/* figure out which structure is holding the oldest ping in case we need to drop one
+		 * from memory to make room for the new ping. */
+		else if (store->pings[i].read_status > 0)
+			{
+			if (png_count < oldest_ping)
+				{
+				oldest_ping = png_count;
+				oldest_ping_index = i;
+				}
+			}
+			
+		/* if one of the ping structures is unused, set it to be used if we need to store
+		 * this ping */
+		else if (oldest_ping > 0)
+			{
+			oldest_ping = 0;
+			oldest_ping_index = i;
+			}
 		}
-	else
+	if (found == MB_NO)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		*which_sonar = 1;
+		store->ping_index = oldest_ping_index;
 		}
+	ping = (struct mbsys_simrad3_ping_struct *) &store->pings[store->ping_index];
+	ping->count = png_count;
+	ping->serial = serial;
 
 	/* get binary header data */
 	if (status == MB_SUCCESS)
@@ -5894,7 +5980,6 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       which_sonar:%d\n",*which_sonar);
 		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -6147,7 +6232,6 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
-	int	which_sonar = 0;
 	FILE	*mbfp;
 	int	swap;
 
@@ -6175,19 +6259,7 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 	
 	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		which_sonar = 2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		which_sonar = 1;
-		}
-#ifdef MBR_EM710MBA_DEBUG3
-	fprintf(stderr,"store->serial:%d store->par_serial_2:%d which_sonar:%d\n",store->serial,store->par_serial_2,which_sonar);
-#endif
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* set swap flag */
 	swap = MB_YES;
@@ -6365,8 +6437,8 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr,"call mbr_em710mba_wr_rawbeam4 kind:%d type %x\n",store->kind,store->type);
 #else
 #ifdef MBR_EM710MBA_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_rawbeam4: sonar 1 ping:%d\n",store->type,store->sonar,store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_rawbeam4: sonar 2 ping:%d\n",store->type,store->sonar,store->ping2->png_count);
+	fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_rawbeam4: sonar 1 ping:%d\n",
+		store->type,store->sonar,store->pings[store->ping_index].png_count);
 #endif
 #endif
 		    status = mbr_em710mba_wr_rawbeam4(verbose,mbio_ptr,swap,store,error);
@@ -6385,8 +6457,8 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr,"call mbr_em710mba_wr_quality kind:%d type %x\n",store->kind,store->type);
 #else
 #ifdef MBR_EM710MBA_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_quality: sonar 1 ping:%d\n",store->type,store->sonar,store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_quality: sonar 2 ping:%d\n",store->type,store->sonar,store->ping2->png_count);
+	fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_quality: sonar 1 ping:%d\n",
+		store->type,store->sonar,store->pings[store->ping_index].png_count);
 #endif
 #endif
 		    status = mbr_em710mba_wr_quality(verbose,mbio_ptr,swap,store,error);
@@ -6403,8 +6475,8 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr,"call mbr_em710mba_wr_bath3_mba kind:%d type %x\n",store->kind,store->type);
 #else
 #ifdef MBR_EM710MBA_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_bath3_mba: sonar 1 ping:%d\n",store->type,store->sonar,store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_bath3_mba: sonar 2 ping:%d\n",store->type,store->sonar,store->ping2->png_count);
+	fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_bath3_mba: sonar 1 ping:%d\n",
+		store->type,store->sonar,store->pings[store->ping_index].png_count);
 #endif
 #endif
 		status = mbr_em710mba_wr_bath3_mba(verbose,mbio_ptr,swap,store,error);
@@ -6414,8 +6486,8 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr,"call mbr_em710mba_wr_ss2_mba kind:%d type %x\n",store->kind,store->type);
 #else
 #ifdef MBR_EM710MBA_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_ss2_mba: sonar 1 ping:%d\n\n",store->type,store->sonar,store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_ss2_mba: sonar 2 ping:%d\n\n",store->type,store->sonar,store->ping2->png_count);
+	fprintf(stderr,"type:%x sonar:%d                      mbr_em710mba_wr_ss2_mba: sonar 1 ping:%d\n\n",
+		store->type,store->sonar,store->pings[store->ping_index].png_count);
 #endif
 #endif
 		    status = mbr_em710mba_wr_ss2_mba(verbose,mbio_ptr,swap,store,error);
@@ -9331,15 +9403,8 @@ int mbr_em710mba_wr_bath2(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 	
-	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		}
+	/* set which storage structure to use */
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -9522,15 +9587,8 @@ int mbr_em710mba_wr_bath3_mba(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 
-	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		}
+	/* set which storage structure to use */
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -9731,15 +9789,8 @@ int mbr_em710mba_wr_rawbeam4(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 	
-	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		}
+	/* set which storage structure to use */
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -9961,15 +10012,8 @@ int mbr_em710mba_wr_quality(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 	
-	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		}
+	/* set which storage structure to use */
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -10133,15 +10177,8 @@ int mbr_em710mba_wr_ss2_mba(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 	
-	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		}
+	/* set which storage structure to use */
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* print debug statements */
 	if (verbose >= 5)

@@ -104,8 +104,8 @@ int main (int argc, char **argv)
 				"\t--set-ties-xyz-by-block=survey1/survey2\n"
 				"\t--set-ties-xyonly-by-block=survey1/survey2\n"
 				"\t--set-ties-zonly-by-block=survey1/survey2\n"
-				"\t--set-ties-zoffset-by-block\n"
-				"\t--skip-unset-crossings\n";
+				"\t--set-ties-zoffset-by-block=survey1/survey2/zoffset\n"
+				"\t--skip-unset-crossings ]\n";
 	extern char *optarg;
 	int	option_index;
 	int	errflg = 0;
