@@ -315,6 +315,10 @@ double	raydepthmin;
 double	raydepthmax;
 struct mbvt_ping_struct	ping[MBVT_BUFFER_SIZE];
 
+/* ESF File read */
+char    esffile[MB_PATH_MAXLINE];
+struct  mb_esf_struct esf;
+
 /* depth range variables */
 double	bath_min = 0.0;
 double	bath_max = 0.0;
@@ -2612,6 +2616,13 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	sprintf(string, "MBvelocitytool: %d records loaded so far...", *numload);
 	do_message_on(string);
 
+	/* Load with ESF File if avialable */
+        if (status == MB_SUCCESS)
+        {
+                status = mb_esf_load(verbose, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
+
+        }
+
 	/* load data */
 	do
 		{
@@ -2644,6 +2655,16 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 			status = MB_FAILURE;
 			error = MB_ERROR_OTHER;
 			}
+
+		/* Apply ESF Edits if available */
+                if (esf.nedit > 0 && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
+                {
+                        status = mb_esf_apply(verbose, &esf,
+                                        ping[nbuffer].time_d, 0,
+                                        ping[nbuffer].beams_bath, beamflag, &error);
+
+                }
+
 		if (status == MB_SUCCESS
 			&& ping[nbuffer].allocated > 0
 			&& ping[nbuffer].allocated < ping[nbuffer].beams_bath)
@@ -2769,6 +2790,10 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 
 	/* close input file */
 	status = mb_close(verbose,&mbio_ptr,&error);
+
+	/* Close ESF file if avialable */
+        if (esf.nedit > 0)
+                mb_esf_close(verbose, &esf, &error);
 
 	/* define success */
 	if (nbuffer > 0)

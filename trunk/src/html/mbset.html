@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbset</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  17 September 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  10 November 2014 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -202,7 +202,7 @@ The <B>mbprocess</B> parameter file commands modified by <B>mbset</B> are:
 <BR>&nbsp;&nbsp;&nbsp;NAVADJMODE&nbsp;mode
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;merging&nbsp;from&nbsp;mbnavadjust&nbsp;[0]
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;can&nbsp;apply&nbsp;to&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;only
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  or longitude, latitude, and depth offset<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;longitude,&nbsp;latitude,&nbsp;and&nbsp;depth&nbsp;offset
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;adjusted&nbsp;navigation&nbsp;merge&nbsp;off
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;adjusted&nbsp;navigation&nbsp;merge&nbsp;on
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;adjusted&nbsp;navigation&nbsp;and&nbsp;depth&nbsp;offset&nbsp;merge&nbsp;on
@@ -390,12 +390,18 @@ The <B>mbprocess</B> parameter file commands modified by <B>mbset</B> are:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;offsetting&nbsp;of&nbsp;bathymetry&nbsp;by
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;per-beam&nbsp;statics&nbsp;[0]
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:&nbsp;static&nbsp;correction&nbsp;off
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;static&nbsp;correction&nbsp;on
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;static&nbsp;correction&nbsp;by&nbsp;beam&nbsp;number
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;static&nbsp;correction&nbsp;by&nbsp;acrosstrack&nbsp;beam&nbsp;angle
 <BR>&nbsp;&nbsp;&nbsp;STATICFILE&nbsp;filename
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;static&nbsp;per-beam&nbsp;file&nbsp;path&nbsp;[no&nbsp;default]
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;static&nbsp;files&nbsp;are&nbsp;two-column&nbsp;ascii&nbsp;tables
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;the&nbsp;beam&nbsp;#&nbsp;in&nbsp;column&nbsp;1&nbsp;and
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;depth&nbsp;offset&nbsp;in&nbsp;m&nbsp;in&nbsp;column&nbsp;2
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;if&nbsp;correction&nbsp;is&nbsp;by&nbsp;beam&nbsp;number&nbsp;then
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;beam&nbsp;#&nbsp;is&nbsp;in&nbsp;column&nbsp;1&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;depth&nbsp;offset&nbsp;is&nbsp;in&nbsp;m&nbsp;in&nbsp;column&nbsp;2
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;if&nbsp;correction&nbsp;is&nbsp;by&nbsp;beam&nbsp;angle&nbsp;then
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;beam&nbsp;angle&nbsp;(starboard&nbsp;positive)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;in&nbsp;column&nbsp;1&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;depth&nbsp;offset&nbsp;is&nbsp;in&nbsp;m&nbsp;in&nbsp;column&nbsp;2
 <P>
 <BR>&nbsp;DRAFT&nbsp;CORRECTION:
 <BR>&nbsp;&nbsp;&nbsp;DRAFTMODE&nbsp;mode
@@ -1279,7 +1285,7 @@ Oh yeah...
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 17 September 2013</P></CENTER>
+Last Updated: 10 November 2014</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

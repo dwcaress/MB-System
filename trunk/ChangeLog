@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.4.2210       November 10, 2014
 * Version 5.4.2209       November 4, 2014
 * Version 5.4.2208       October 29, 2014
   Version 5.4.2204       September 5, 2014
@@ -189,6 +190,25 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2210 (November 10, 2014)
+
+Mbkongsbergpreprocess: Changed handling of water column records. The default
+behavior is now to not write water column records to the output format 59 files.
+Users can specify -W1 to have the water column records written in the output files.
+
+Format 41 (MBF_SB2100RW): Bug fix for Seabeam format 41 so the code handles
+records without the maximum number of beams. Contributed by Bob Covill.
+
+Mbprocess: Added ability to apply static bathymetry corrections defined according
+to beam angle in addition to corrections according to beam number. Contributed
+by Bob Covill.
+
+Mbvelocitytool: When loading a swath file, mbvelocitytool will now also read in
+and apply an associated *.esf (edit save file) if it exists. This prevents
+soundings that have been identified as bad from biasing the calculations.
+
+Mbm_grdcut: Fix to the manual page. Contributed by Jenny Paduan.
 
 -----> 5.4.2209 (November 4, 2014)
 

@@ -68,6 +68,9 @@
 #define MBKONSBERGPREPROCESS_USE_SENSORDEPTH_ONLY	0
 #define MBKONSBERGPREPROCESS_USE_HEAVE_ONLY		1
 
+#define MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE		0
+#define	MBKONSBERGPREPROCESS_WATERCOLUMN_OUTPUT		1
+
 static char rcs_id[] = "$Id: mbkongsbergpreprocess.c 1938 2012-02-22 20:58:08Z caress $";
 
 /*--------------------------------------------------------------------*/
@@ -274,6 +277,9 @@ int main (int argc, char **argv)
 	FILE	*atsfp;
 	FILE	*atafp;
 	FILE	*stafp;
+	
+	/* handling water column records */
+	int	watercolumnmode = MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE;
 
 	/* processing kluge modes */
 	int	recalculate_beam_angles = MB_NO;
@@ -425,6 +431,11 @@ int main (int argc, char **argv)
 				}
 			flag++;
 			break;
+		case 'W':
+		case 'w':
+			sscanf (optarg,"%d", &watercolumnmode);
+			flag++;
+			break;			
 		case '?':
 			errflg++;
 		}
@@ -495,6 +506,7 @@ int main (int argc, char **argv)
 			}
 		fprintf(stderr,"dbg2       timelag:                %f\n",timelag);
 		fprintf(stderr,"dbg2       recalculate_beam_angles:%d\n",recalculate_beam_angles);
+		fprintf(stderr,"dbg2       watercolumnmode:        %d\n",watercolumnmode);
 		}
 
 	/* if help desired then print it and exit */
@@ -1655,6 +1667,14 @@ int main (int argc, char **argv)
 			{
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
+			}
+			
+		/* if specified set water column record to error so it will not be output */
+		if (watercolumnmode == MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE
+			&& status == MB_SUCCESS && istore->type == EM3_WATERCOLUMN)
+			{
+			error = MB_ERROR_IGNORE;
+			status = MB_FAILURE;
 			}
 
 		/* keep track of starting and ending time of sonar data for this file */

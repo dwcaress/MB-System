@@ -1729,6 +1729,7 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp,
 	  }
 
 	/* make sure the rest of the beam arrays are null */
+	/** This reads too far????
 	for (i=data->num_beams;i<MBSYS_SB2100_BEAMS;i++)
 	  {
 	  if ((status = mbr_sb2100rw_read_line(verbose,mbfp,1,line,error))
@@ -1747,6 +1748,7 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp,
 		data->quality[i] = '0';
 		}
 	  }
+	**/
 
 	/* print debug statements */
 	if (verbose >= 5)
