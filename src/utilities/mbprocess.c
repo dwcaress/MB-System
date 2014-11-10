@@ -515,6 +515,7 @@ and mbedit edit save files.\n";
         double  *tide = NULL;
         double  tideval;
 	int	*staticbeam = NULL;
+	double  *staticangle; 
 	double	*staticoffset = NULL;
 	int	itime, iatime;
 	double	headingx, headingy;
@@ -1393,9 +1394,14 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"  Raytrace angle mode:           %d\n", process.mbp_angle_mode);
 
 	    fprintf(stderr,"\nStatic Beam Bathymetry Corrections:\n");
-	    if (process.mbp_static_mode == MBP_STATIC_ON)
+	    if (process.mbp_static_mode == MBP_STATIC_BEAM_ON)
 		{
 		fprintf(stderr,"  Static beam corrections applied to bathymetry.\n");
+	    	fprintf(stderr,"  Static file:                   %s m\n", process.mbp_staticfile);
+ 		}
+ 	    else if (process.mbp_static_mode == MBP_STATIC_ANGLE_ON)
+		{
+		fprintf(stderr,"  Static angle corrections applied to bathymetry.\n");
 	    	fprintf(stderr,"  Static file:                   %s m\n", process.mbp_staticfile);
  		}
 	    else
@@ -3047,7 +3053,8 @@ and mbedit edit save files.\n";
 	  --------------------------------------------*/
 
 	/* if static correction to be done get statics */
-	if (process.mbp_static_mode == MBP_STATIC_ON)
+	/* Static file is beam number vs correction */
+	if (process.mbp_static_mode == MBP_STATIC_BEAM_ON)
 	    {
 	    /* set max number of characters to be read at a time */
 	    nchar = 128;
@@ -3150,6 +3157,113 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\n%d static beam corrections read\n",nstatic);
 		    }
 	    }
+	    
+	/* if static correction to be done get statics */
+	/* Static file is grazing angle vs correction */
+	if (process.mbp_static_mode == MBP_STATIC_ANGLE_ON)
+	    {
+	    /* set max number of characters to be read at a time */
+	    nchar = 128;
+
+	    /* count the data points in the static file */
+	    nstatic = 0;
+	    if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL)
+		    {
+		    error = MB_ERROR_OPEN_FAIL;
+		    fprintf(stderr,"\nUnable to Open Static File <%s> for reading\n",process.mbp_staticfile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
+		    nstatic++;
+	    fclose(tfp);
+
+	    /* allocate arrays for static */
+	    if (nstatic > 0)
+		{
+		size = (nstatic+1)*sizeof(double);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nstatic*sizeof(double),(void **)&staticoffset,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nstatic*sizeof(double),(void **)&staticangle,&error); 
+
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+		}
+
+	    /* if no static data then quit */
+	    else
+		{
+		error = MB_ERROR_BAD_DATA;
+		fprintf(stderr,"\nUnable to read data from static file <%s>\n",process.mbp_staticfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+
+	    /* read the data points in the static file */
+	    nstatic = 0;
+	    if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to Open Static File <%s> for reading\n",process.mbp_staticfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
+		{
+		static_ok = MB_NO;
+
+		/* deal with static in form: angle offset */
+		if (buffer[0] != '#')
+			{
+			nget = sscanf(buffer,"%lf %lf", &staticangle[nstatic],&staticoffset[nstatic]); 
+			if (nget == 2)
+				{
+				static_ok = MB_YES;
+				nstatic++;
+				}
+
+			/* output some debug values */
+			if (verbose >= 5 && static_ok == MB_YES)
+				{
+				fprintf(stderr,"\ndbg5  New static angle correction read in program <%s>\n",program_name);
+				fprintf(stderr,"dbg5       angle:%f offset:%f\n",
+					staticangle[nstatic],staticoffset[nstatic]);
+				}
+			else if (verbose >= 5)
+				{
+				fprintf(stderr,"\ndbg5  Error parsing line in static angle correction file in program <%s>\n",program_name);
+				fprintf(stderr,"dbg5       line: %s\n",buffer);
+				}
+			}
+		}
+	    fclose(tfp);
+
+
+	    /* check for good static data */
+	    if (nstatic < 1)
+		    {
+		    fprintf(stderr,"\nNo static angle corrections read from file <%s>\n",process.mbp_staticfile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+
+	    /* give the statistics */
+	    if (verbose >= 1)
+		    {
+		    fprintf(stderr,"\n%d static angle corrections read\n",nstatic);
+		    }
+	    }
+	 
 
 	/*--------------------------------------------
 	  get amplitude corrections
@@ -3763,8 +3877,10 @@ and mbedit edit save files.\n";
 	status = MB_SUCCESS;
 
 	/* allocate memory for amplitude and sidescan correction arrays */
+	/*  */
 	if (process.mbp_sscorr_mode == MBP_SSCORR_ON
-		|| process.mbp_ampcorr_mode == MBP_AMPCORR_ON)
+		|| process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+		|| process.mbp_static_mode == MBP_STATIC_ANGLE_ON)
 		{
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -4832,6 +4948,8 @@ and mbedit edit save files.\n";
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
+		
+
 		/* time gaps do not matter to mbprocess */
 		if (error == MB_ERROR_TIME_GAP)
 			{
@@ -5850,7 +5968,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 	  --------------------------------------------*/
 
 			/* apply static corrections */
-			if (process.mbp_static_mode == MBP_STATIC_ON
+			if (process.mbp_static_mode == MBP_STATIC_BEAM_ON
 			    && nstatic > 0
 			    && nstatic <= nbath)
 			    {
@@ -5864,6 +5982,72 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				    }
 				}
 			    }
+			
+	/*--------------------------------------------
+	  apply per-angle static offsets
+	  --------------------------------------------*/
+
+			/* apply static corrections */
+			if (process.mbp_static_mode == MBP_STATIC_ANGLE_ON
+			    && nstatic > 0)
+			    {
+			    mb_pr_set_bathyslope(verbose,
+						nsmooth,
+						nbath,
+						beamflag,
+						bath,
+						bathacrosstrack,
+						&ndepths,
+						depths,
+						depthacrosstrack,
+						&nslopes,
+						slopes,
+						slopeacrosstrack,
+						depthsmooth,
+						&error);
+			    for (i=0;i<nbath;i++)
+			    {
+				if (mb_beam_ok(beamflag[i]))
+			    	{
+					bathy = 0.0;
+			    		if (ndepths > 1)
+					{
+						status = mb_pr_get_bathyslope(verbose,
+									ndepths,
+				 					depths,
+				    					depthacrosstrack,
+				    					nslopes,
+				    					slopes,
+				    					slopeacrosstrack,
+				    					bathacrosstrack[i],
+				    					&bathy,&slope,&error);
+				    		if (bathy <= 0.0)
+						{
+							if (altitude > 0.0)
+								bathy = altitude + sonardepth;
+							else
+								bathy = altitude_default + sonardepth;
+							slope = 0.0;
+						}
+		    				if (bathy > 0.0)
+						{
+							altitude_use = bathy - sonardepth;
+							angle = RTD * atan(bathacrosstrack[i] / altitude_use);
+										    					
+						   	/* Get offset from SBO file */
+						   	status = mb_linear_interp(verbose,
+									staticangle-1, staticoffset-1,
+									nstatic, angle, &correction, &itime,
+									&error);
+							bath[i] -= correction;
+								
+						}
+				    	      }
+				    	}
+				    		
+				    }
+			    }
+			    
 
 			/* output some debug messages */
 			if (verbose >= 5)

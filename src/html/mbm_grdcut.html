@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_grdcut</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  9 November 2014 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -117,15 +117,15 @@ desired bounds, calculates the exact, nearest bounds
 that <B>grdcut</B> will accept, and then executes <B>grdcut</B>.
 <P>
 To obtain the desired sub-grid, the following will suffice:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbm_grdcut&nbsp;-I&nbsp;KohalaA_bath.grd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-O&nbsp;Kohala_plunge&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-R-155:31/-155:26/20:13/20:18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-V
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbm_grdcut&nbsp;-I&nbsp;KohalaA_bath.grd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-O&nbsp;Kohala_plunge.grd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-R-155:31/-155:26/20:13/20:18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-V
 <BR>
 
 The resulting output is:
 <BR>
 
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;Program&nbsp;mbm_grdcut&nbsp;status:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kohalaa.grd
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z.grd
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KohalaA_bath.grd
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kohala_plunge.grd
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;Grid&nbsp;bounds:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.72855&nbsp;-155.3192906&nbsp;&nbsp;20.09488&nbsp;20.47628103
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;grid&nbsp;dimensions:&nbsp;&nbsp;1426&nbsp;&nbsp;1329
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Grid&nbsp;cell&nbsp;sizes:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0002871995719&nbsp;&nbsp;0.0002871995719
@@ -134,7 +134,7 @@ The resulting output is:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;grid&nbsp;dimensions:&nbsp;291&nbsp;&nbsp;291
 <P>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;Running&nbsp;grdcut...
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdcut&nbsp;kohalaa.grd&nbsp;-Gz.grd&nbsp;-R-155.516884/-155.433596/20.216653/20.299940&nbsp;-V
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdcut&nbsp;KohalaA_bath.grd&nbsp;-GKohala_plunge.grd&nbsp;-R-155.516884/-155.433596/20.216653/20.299940&nbsp;-V
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;grdcut:&nbsp;File&nbsp;spec:&nbsp;&nbsp;&nbsp;&nbsp;W&nbsp;E&nbsp;S&nbsp;N&nbsp;dx&nbsp;dy&nbsp;nx&nbsp;ny:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;grdcut:&nbsp;Old:&nbsp;-155.729&nbsp;-155.319&nbsp;20.0949&nbsp;20.4763&nbsp;0.0002872&nbsp;0.0002872&nbsp;1426&nbsp;1329
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;grdcut:&nbsp;New:&nbsp;-155.517&nbsp;-155.434&nbsp;20.2167&nbsp;20.2999&nbsp;0.0002872&nbsp;0.0002872&nbsp;&nbsp;291&nbsp;&nbsp;291
@@ -169,7 +169,7 @@ Probably.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 9 November 2014</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

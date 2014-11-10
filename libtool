@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # libtool - Provide generalized library-building support services.
-# Generated automatically by config.status (mbsystem) 5.4.2209
+# Generated automatically by config.status (mbsystem) 5.4.2210
 # Libtool was configured on host tharp.local:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
@@ -75,7 +75,7 @@ build=x86_64-apple-darwin13.4.0
 build_os=darwin13.4.0
 
 # A sed program that does not truncate output.
-SED="/usr/bin/sed"
+SED="/sw/bin/sed"
 
 # Sed that helps us avoid accidentally triggering echo(1) options like -n.
 Xsed="$SED -e 1s/^X//"
@@ -1260,7 +1260,7 @@ exec_cmd=
 # Append VALUE to the end of shell variable VAR.
 func_append ()
 {
-eval "${1}+=\${2}"
+    eval "${1}+=\${2}"
 } # Extended-shell func_append implementation
 
 # func_append_quoted var value
@@ -1276,7 +1276,7 @@ func_append_quoted ()
 # func_arith arithmetic-term...
 func_arith ()
 {
-func_arith_result=$(( $* ))
+    func_arith_result=$(( $* ))
 } # Extended-shell func_arith implementation
 
 
@@ -1284,7 +1284,7 @@ func_arith_result=$(( $* ))
 # STRING may not start with a hyphen.
 func_len ()
 {
-func_len_result=${#1}
+    func_len_result=${#1}
 } # Extended-shell func_len implementation
 
 
@@ -1301,7 +1301,7 @@ func_lo2o ()
 # func_xform libobj-or-source
 func_xform ()
 {
-func_xform_result=${1%.*}.lo
+    func_xform_result=${1%.*}.lo
 } # Extended-shell func_xform implementation
 
 
