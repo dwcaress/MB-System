@@ -362,9 +362,13 @@ int main (int argc, char **argv)
 	int	jheading = 0;
 	int	jattitude = 0;
 	int	jsonardepth = 0;
+	int	nhalffilter;
+	double	sonardepth_filterweight;
+	double	dtime, dtol, weight;
+	double	factor;
 
 	int	nscan;
-	int	i;
+	int	i, j, j1, j2;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -1586,6 +1590,45 @@ int main (int argc, char **argv)
 	}
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
+
+	/* if desired apply filtering to sonardepth data */
+	if (sonardepthfilter == MB_YES)
+		{
+		/* apply filtering to sonardepth data
+			read from asynchronous records in 7k files */
+		if (ndat_sonardepth > 1)
+			{
+fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
+			dtime = (dat_sonardepth_time_d[ndat_sonardepth-1]  - dat_sonardepth_time_d[0]) / ndat_sonardepth;
+			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+			for (i=0;i<ndat_sonardepth;i++)
+				{
+				dat_sonardepth_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+				for (j=j1;j<=j2;j++)
+					{
+					dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
+					weight = exp(-dtol * dtol);
+					dat_sonardepth_sonardepthfilter[i] += weight * dat_sonardepth_sonardepth[j];
+					sonardepth_filterweight += weight;
+					}
+				if (sonardepth_filterweight > 0.0)
+					dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
+				}
+			for (i=0;i<ndat_sonardepth;i++)
+				{
+				if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(dat_sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				dat_sonardepth_sonardepth[i] = (1.0 - factor) * dat_sonardepth_sonardepth[i]
+							+ factor * dat_sonardepth_sonardepthfilter[i];
+				}
+			}
+		}
 
 	/* output asynchronous navigation and attitude data */
 	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
