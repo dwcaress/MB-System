@@ -407,9 +407,9 @@ int mbr_info_em710mba(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_NO;
-	*nav_source = MB_DATA_NAV;
+	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
-	*vru_source = MB_DATA_ATTITUDE;
+	*vru_source = MB_DATA_DATA;
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;

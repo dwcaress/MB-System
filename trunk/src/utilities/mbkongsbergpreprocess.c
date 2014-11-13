@@ -253,7 +253,6 @@ int main (int argc, char **argv)
 	int	ndat_sonardepth_alloc = 0;
 	double	*dat_sonardepth_time_d = NULL;
 	double	*dat_sonardepth_sonardepth = NULL;
-	double	*dat_sonardepth_sonardepthrate = NULL;
 	double	*dat_sonardepth_sonardepthfilter = NULL;
 
 	int	ndat_heading = 0;
@@ -1096,7 +1095,6 @@ int main (int argc, char **argv)
 				ndat_sonardepth_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
 				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
 				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthrate,&error);
 				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthfilter,&error);
 				if (error != MB_ERROR_NO_ERROR)
 					{
@@ -1112,8 +1110,7 @@ int main (int argc, char **argv)
 			if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < time_d)
 				{
 				dat_sonardepth_time_d[ndat_sonardepth] = time_d;
-				dat_sonardepth_sonardepth[ndat_sonardepth] = istore->hgt_height;
-				dat_sonardepth_sonardepthrate[ndat_sonardepth] = 0.0;
+				dat_sonardepth_sonardepth[ndat_sonardepth] = 0.01 * istore->hgt_height;
 				dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
 				
 				/* apply time lag correction if specified */
@@ -1437,7 +1434,6 @@ int main (int argc, char **argv)
 				ndat_sonardepth_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
 				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
 				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthrate,&error);
 				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthfilter,&error);
 				if (error != MB_ERROR_NO_ERROR)
 					{
@@ -1454,7 +1450,6 @@ int main (int argc, char **argv)
 				{
 				dat_sonardepth_time_d[ndat_sonardepth] = time_d;
 				dat_sonardepth_sonardepth[ndat_sonardepth] = ping->png_xducer_depth;
-				dat_sonardepth_sonardepthrate[ndat_sonardepth] = 0.0;
 				dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
 				
 				/* apply time lag correction if specified */
