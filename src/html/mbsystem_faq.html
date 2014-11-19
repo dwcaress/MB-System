@@ -54,8 +54,7 @@ References?</a></b></li>
   <li><b><a href="#MB-FAQ-future">What are the plans for future
 MB-System
 Development?</a></b></li>
-  <li><b><a href="#MB-FAQ-y2k">Is MB-System Y2K compliant?</a></b></li>
-  <li><b><a href="#MB-FAQ-whopays">Who pays for MB-System development?</a></b></li>
+   <li><b><a href="#MB-FAQ-whopays">Who pays for MB-System development?</a></b></li>
   <li><b><a href="#MB-FAQ-seamount">What seamount is shown in the
 MB-System
 logo?</a></b></li>
@@ -63,6 +62,7 @@ logo?</a></b></li>
   <li><b><a href="#MB-FAQ-credit">Who else deserves credit for
 contributions
 to MB-System?</a></b></li>
+ <li><b><a href="#MB-FAQ-y2k">Is MB-System Y2K compliant?</a></b></li>
 </ul>
 <p>
 </p>
@@ -254,16 +254,16 @@ as web pages and as a downloadable pdf document: </dt>
 References?</b></li>
   <p>Papers specifically about MB-System:</p>
   <blockquote>
-    <p>Caress, D. W., and D. N. Chayes, New software for processing
+    <p><a href="http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=528558">Caress, D. W., and D. N. Chayes, New software for processing
       sidescan
       data from sidescan-capable multibeam sonars, <i>Proceedings of the
         IEEE
-        Oceans 95 Conference</i>, 997-1000, 1995.</p>
-    <p>Caress, D. W., and D. N. Chayes, Improved processing of Hydrosweep
+        Oceans 95 Conference</i>, 997-1000, 1995.</a></p>
+    <p><a href="http://link.springer.com/article/10.1007/BF00313878">Caress, D. W., and D. N. Chayes, Improved processing of Hydrosweep
       DS
       multibeam data on the R/V Maurice Ewing, <i>Mar. Geophys. Res.</i>,
       18,
-      631-650, 1996.</p>
+      631-650, 1996.</a></p>
   </blockquote>
   <p>This paper on high-resolution autonomous mapping features some of the more recent MB-System capabilities:</p>
   <blockquote>
@@ -279,18 +279,6 @@ References?</b></li>
   <p><a href="mbsystem_future.html">Click here</a> for some notions
 regarding
 future MB-System development.</p>
-  <li><a name="MB-FAQ-y2k"></a><b>Is MB-System Y2K compliant?</b></li>
-  <p>Remember when Y2K was a buzz word? If so, you are old like us. Not that it matters anymore, but MB-System became fully Y2K 
-compliant as of the final release of version 4.6. Surprisingly,
-a number of data formats associated with current commercial products
-still use two digits to represent the year. MB-System treats two digit year
-values as being in the 1900's if the year value is greater than or equal to
-62,
-and in the 2000's if the year value is less than 62. The use of 1962
-derives
-from the invention of the multibeam sonar in that year - there are no
-digital
-swath mapping data available from an earlier time.</p>
   <li><a name="MB-FAQ-whopays"></a><b>Who pays for MB-System
 development?</b></li>
   <p>MB-System is primarily supported by the Packard Foundation and the National Science Foundation. The Marine Geology and Geophysics program of the Ocean
@@ -398,25 +386,38 @@ These include: </p>
     <li>Gordon Keith (CSIRO Marine and Atmospheric Research, Australia)</li>
     <li>Kurt Schwehr (Google, formerly University of New Hampshire)</li>
     <li>Suzanne O'Hara (Lamont-Doherty Earth Observatory) </li>
-    <li>Ammar Aljuhne (MARUM, University of Bremen, Germany)</li>
     <li>Bob Covill (Tekmap Consulting, Nova Scotia)</li>
+    <li>Peter Lemmond (Woods Hole Oceanographic Institution)</li>
+    <li>Jonathan Beaudoin (CCOM/JHC, University of New Hamphsire)</li>
+    <li>John Hughes Clarke (OMG, University of New Brunswick)</li>
     <li>Hamish Bowman (University of Otago, New Zealand)</li>
+    <li>Roger Davis (University of Hawaii) </li>
+    <li>Ammar Aljuhne (MARUM, University of Bremen, Germany)</li>
     <li>Mike McCann (MBARI) </li>
     <li>Hans Thomas (MBARI) </li>
     <li>Daniel Scheirer (USGS, formerly Brown University)</li>
     <li>Paul Cohen (formerly at SeaBeam Instruments)</li>
     <li>Steve Dzurenko (formerly at SeaBeam Instruments, more recently at University of Texas)</li>
-    <li>Peter Lemmond (Woods Hole Oceanographic Institution)</li>
-    <li>Roger Davis (University of Hawaii) </li>
     <li>David Brock (formerly with Antarctic Support Associates) </li>
     <li>Alberto Malinverno (Lamont-Doherty Earth Observatory, later at
-Schlumberger-Doll, now back at Lamont) </li>
+    Schlumberger-Doll, now back at Lamont) </li>
     <li>Russ Alexander (formerly with UCSB) </li>
   </ul>
   <p>Numerous users and vendors have provided information regarding
 data
 file formats and sonar system specific characteristics.</p>
-</ul>
+<li><a name="MB-FAQ-y2k"></a><b>Is MB-System Y2K compliant?</b></li>
+  <p>Remember when Y2K was a buzz word? If so, you are old like us. Not that it matters anymore, but MB-System became fully Y2K 
+compliant as of the final release of version 4.6. Surprisingly,
+a number of data formats associated with current commercial products
+still use two digits to represent the year. MB-System treats two digit year
+values as being in the 1900's if the year value is greater than or equal to
+62,
+and in the 2000's if the year value is less than 62. The use of 1962
+derives
+from the invention of the multibeam sonar in that year - there are no
+digital
+swath mapping data available from an earlier time.</p></ul>
 <center>
 <p><br>
 Last Updated: $Id$</p>

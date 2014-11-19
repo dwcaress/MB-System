@@ -104,7 +104,19 @@ int main (int argc, char **argv)
 	 * 		--attitude_file=file
 	 * 		--attitude_file_format=format_id
 	 * 		--attitude_async=record_kind
-	 * 		--sensor_offsets=offset_file
+	 * 		--timeshift_file=file
+	 * 		--timeshift_constant=value
+	 * 		--timeshift_apply_nav=boolean
+	 * 		--timeshift_apply_sensordepth=boolean
+	 * 		--timeshift_apply_heading=boolean
+	 * 		--timeshift_apply_attitude=boolean
+	 * 		--timeshift_apply_all_ancilliary=boolean
+	 * 		--timeshift_apply_survey=boolean
+	 * 		--timeshift_apply_all=boolean
+	 * 		--sensor_offset_file=offset_file
+	 * 		--sonar_offsets=offset_x/offset_y/offset_z/offset_heading/offset_roll/offset_pitch
+	 * 		--vru_offsets=offset_x/offset_y/offset_z/offset_heading/offset_roll/offset_pitch
+	 * 		--navigation_offsets=offset_x/offset_y/offset_z/offset_heading/offset_roll/offset_pitch
 	 * 		--no_change_survey
 	 */
 	static struct option options[] =
@@ -138,7 +150,10 @@ int main (int argc, char **argv)
 		{"timeshift_apply_all_ancilliary",	no_argument, 		NULL, 		0},
 		{"timeshift_apply_survey",	no_argument, 		NULL, 		0},
 		{"timeshift_apply_all",		no_argument, 		NULL, 		0},
-		{"sensor_offsets",		required_argument, 	NULL, 		0},
+		{"sensor_offset_file",		required_argument, 	NULL, 		0},
+		{"sonar_offsets",		required_argument, 	NULL, 		0},
+		{"vru_offsets",			required_argument, 	NULL, 		0},
+		{"navigation_offsets",		required_argument, 	NULL, 		0},
 		{"no_change_survey",		no_argument,		NULL,		0},
 		{NULL,				0, 			NULL, 		0}
 		};
@@ -202,6 +217,32 @@ int main (int argc, char **argv)
 	double	*timeshift_time_d = NULL;
 	double	*timeshift_timeshift = NULL;
 	double	timeshift_constant = 0.0;
+	
+	mb_path	offset_file;
+	
+	int	sonar_offset_mode = MB_NO;
+	double	sonar_offset_x = 0.0;
+	double	sonar_offset_y = 0.0;
+	double	sonar_offset_z = 0.0;
+	double	sonar_offset_heading = 0.0;
+	double	sonar_offset_roll = 0.0;
+	double	sonar_offset_pitch = 0.0;
+	
+	int	vru_offset_mode = MB_NO;
+	double	vru_offset_x = 0.0;
+	double	vru_offset_y = 0.0;
+	double	vru_offset_z = 0.0;
+	double	vru_offset_heading = 0.0;
+	double	vru_offset_roll = 0.0;
+	double	vru_offset_pitch = 0.0;
+	
+	int	navigation_offset_mode = MB_NO;
+	double	navigation_offset_x = 0.0;
+	double	navigation_offset_y = 0.0;
+	double	navigation_offset_z = 0.0;
+	double	navigation_offset_heading = 0.0;
+	double	navigation_offset_roll = 0.0;
+	double	navigation_offset_pitch = 0.0;
 	
 	int	no_change_survey = MB_NO;
 	
@@ -280,6 +321,8 @@ int main (int argc, char **argv)
 	double	heave_org;
 	double	depth_offset_use, depth_offset_org, depth_offset_change;
 	double	range, alphar, betar;
+	double	lever_x, lever_y, lever_z;
+	double	headingx, headingy, mtodeglon, mtodeglat;
 
 	/* arrays for asynchronous data accessed using mb_extract_nnav() */
 	int	nanavmax = MB_NAV_MAX;
@@ -584,6 +627,41 @@ int main (int argc, char **argv)
 				timeshift_apply =  MBPREPROCESS_TIMESHIFT_APPLY_ALL;
 				}
 			
+			/* sensor_offset_file */
+			else if (strcmp("sensor_offset_file", options[option_index].name) == 0)
+				{
+				}
+			
+			/* sonar_offsets */
+			else if (strcmp("sonar_offsets", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf/%lf",
+					   &sonar_offset_x,&sonar_offset_y,&sonar_offset_z,
+					   &sonar_offset_heading,&sonar_offset_roll,&sonar_offset_pitch);
+				if (n == 6)
+					sonar_offset_mode = MB_YES;
+				}
+			
+			/* vru_offsets */
+			else if (strcmp("vru_offsets", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf/%lf",
+					   &vru_offset_x,&vru_offset_y,&vru_offset_z,
+					   &vru_offset_heading,&vru_offset_roll,&vru_offset_pitch);
+				if (n == 6)
+					sonar_offset_mode = MB_YES;
+				}
+			
+			/* navigation_offsets */
+			else if (strcmp("navigation_offsets", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf/%lf",
+					   &navigation_offset_x,&navigation_offset_y,&navigation_offset_z,
+					   &navigation_offset_heading,&navigation_offset_roll,&navigation_offset_pitch);
+				if (n == 6)
+					sonar_offset_mode = MB_YES;
+				}
+			
 			/* no_change_survey */
 			else if (strcmp("no_change_survey", options[option_index].name) == 0)
 				{
@@ -646,30 +724,52 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       speedmin:                   %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:                    %f\n",timegap);
 		fprintf(stderr,"dbg2       read_file:                  %s\n",read_file);
-		fprintf(stderr,"dbg2       nav_mode:             %d\n",nav_mode);
-		fprintf(stderr,"dbg2       nav_file:             %s\n",nav_file);
-		fprintf(stderr,"dbg2       nav_file_format:           %d\n",nav_file_format);
-		fprintf(stderr,"dbg2       nav_async:            %d\n",nav_async);
-		fprintf(stderr,"dbg2       sensordepth_mode:     %d\n",sensordepth_mode);
-		fprintf(stderr,"dbg2       sensordepth_file:     %s\n",sensordepth_file);
-		fprintf(stderr,"dbg2       sensordepth_file_format:   %d\n",sensordepth_file_format);
-		fprintf(stderr,"dbg2       sensordepth_async:    %d\n",sensordepth_async);
-		fprintf(stderr,"dbg2       heading_mode:         %d\n",heading_mode);
-		fprintf(stderr,"dbg2       heading_file:         %s\n",heading_file);
-		fprintf(stderr,"dbg2       heading_file_format:       %d\n",heading_file_format);
-		fprintf(stderr,"dbg2       heading_async:        %d\n",heading_async);
-		fprintf(stderr,"dbg2       altitude_mode:        %d\n",altitude_mode);
-		fprintf(stderr,"dbg2       altitude_file:        %s\n",altitude_file);
-		fprintf(stderr,"dbg2       altitude_file_format:      %d\n",altitude_file_format);
-		fprintf(stderr,"dbg2       altitude_async:       %d\n",altitude_async);
-		fprintf(stderr,"dbg2       attitude_mode:        %d\n",attitude_mode);
-		fprintf(stderr,"dbg2       attitude_file:        %s\n",attitude_file);
-		fprintf(stderr,"dbg2       attitude_file_format:      %d\n",attitude_file_format);
-		fprintf(stderr,"dbg2       attitude_async:       %d\n",attitude_async);
-		fprintf(stderr,"dbg2       timeshift_mode:       %d\n",timeshift_mode);
-		fprintf(stderr,"dbg2       timeshift_file:       %s\n",timeshift_file);
-		fprintf(stderr,"dbg2       timeshift_format:     %d\n",timeshift_format);
-		fprintf(stderr,"dbg2       timeshift_apply:      %x\n",timeshift_apply);
+		fprintf(stderr,"dbg2       nav_mode:                   %d\n",nav_mode);
+		fprintf(stderr,"dbg2       nav_file:                   %s\n",nav_file);
+		fprintf(stderr,"dbg2       nav_file_format:            %d\n",nav_file_format);
+		fprintf(stderr,"dbg2       nav_async:                  %d\n",nav_async);
+		fprintf(stderr,"dbg2       sensordepth_mode:           %d\n",sensordepth_mode);
+		fprintf(stderr,"dbg2       sensordepth_file:           %s\n",sensordepth_file);
+		fprintf(stderr,"dbg2       sensordepth_file_format:    %d\n",sensordepth_file_format);
+		fprintf(stderr,"dbg2       sensordepth_async:          %d\n",sensordepth_async);
+		fprintf(stderr,"dbg2       heading_mode:               %d\n",heading_mode);
+		fprintf(stderr,"dbg2       heading_file:               %s\n",heading_file);
+		fprintf(stderr,"dbg2       heading_file_format:        %d\n",heading_file_format);
+		fprintf(stderr,"dbg2       heading_async:              %d\n",heading_async);
+		fprintf(stderr,"dbg2       altitude_mode:              %d\n",altitude_mode);
+		fprintf(stderr,"dbg2       altitude_file:              %s\n",altitude_file);
+		fprintf(stderr,"dbg2       altitude_file_format:       %d\n",altitude_file_format);
+		fprintf(stderr,"dbg2       altitude_async:             %d\n",altitude_async);
+		fprintf(stderr,"dbg2       attitude_mode:              %d\n",attitude_mode);
+		fprintf(stderr,"dbg2       attitude_file:              %s\n",attitude_file);
+		fprintf(stderr,"dbg2       attitude_file_format:       %d\n",attitude_file_format);
+		fprintf(stderr,"dbg2       attitude_async:             %d\n",attitude_async);
+		fprintf(stderr,"dbg2       timeshift_mode:             %d\n",timeshift_mode);
+		fprintf(stderr,"dbg2       timeshift_file:             %s\n",timeshift_file);
+		fprintf(stderr,"dbg2       timeshift_format:           %d\n",timeshift_format);
+		fprintf(stderr,"dbg2       timeshift_apply:            %x\n",timeshift_apply);
+		fprintf(stderr,"dbg2       offset_file:                %s\n",offset_file);
+		fprintf(stderr,"dbg2       sonar_offset_mode:          %d\n",sonar_offset_mode);
+		fprintf(stderr,"dbg2       sonar_offset_x:             %f\n",sonar_offset_x);
+		fprintf(stderr,"dbg2       sonar_offset_y:             %f\n",sonar_offset_y);
+		fprintf(stderr,"dbg2       sonar_offset_z:             %f\n",sonar_offset_z);
+		fprintf(stderr,"dbg2       sonar_offset_heading:       %f\n",sonar_offset_heading);
+		fprintf(stderr,"dbg2       sonar_offset_roll:          %f\n",sonar_offset_roll);
+		fprintf(stderr,"dbg2       sonar_offset_pitch:         %f\n",sonar_offset_pitch);
+		fprintf(stderr,"dbg2       vru_offset_mode:            %d\n",vru_offset_mode);
+		fprintf(stderr,"dbg2       vru_offset_x:               %f\n",vru_offset_x);
+		fprintf(stderr,"dbg2       vru_offset_y:               %f\n",vru_offset_y);
+		fprintf(stderr,"dbg2       vru_offset_z:               %f\n",vru_offset_z);
+		fprintf(stderr,"dbg2       vru_offset_heading:         %f\n",vru_offset_heading);
+		fprintf(stderr,"dbg2       vru_offset_roll:            %f\n",vru_offset_roll);
+		fprintf(stderr,"dbg2       vru_offset_pitch:           %f\n",vru_offset_pitch);
+		fprintf(stderr,"dbg2       navigation_offset_mode:     %d\n",navigation_offset_mode);
+		fprintf(stderr,"dbg2       navigation_offset_x:        %f\n",navigation_offset_x);
+		fprintf(stderr,"dbg2       navigation_offset_y:        %f\n",navigation_offset_y);
+		fprintf(stderr,"dbg2       navigation_offset_z:        %f\n",navigation_offset_z);
+		fprintf(stderr,"dbg2       navigation_offset_heading:  %f\n",navigation_offset_heading);
+		fprintf(stderr,"dbg2       navigation_offset_roll:     %f\n",navigation_offset_roll);
+		fprintf(stderr,"dbg2       navigation_offset_pitch:    %f\n",navigation_offset_pitch);
 		fprintf(stderr,"dbg2       no_change_survey:     %d\n",no_change_survey);
 		}
 
@@ -1780,6 +1880,40 @@ int main (int argc, char **argv)
 					/* reset status and error */
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
+					
+					/* if sensor offsets have been defined, apply lever arm correction */
+					if (sonar_offset_mode == MB_YES
+						|| vru_offset_mode == MB_YES
+						|| navigation_offset_mode == MB_YES)
+						{
+						/* do lever arm calculation with sensor offsets */
+						mb_lever(verbose, sonar_offset_x, sonar_offset_y, sonar_offset_z,
+								vru_offset_x, vru_offset_y, vru_offset_z,
+								navigation_offset_x, navigation_offset_y, navigation_offset_z,
+								pitch, roll,
+								&lever_x, &lever_y, &lever_z, &error);
+fprintf(stderr,"LEVER:  roll:%f pitch:%f   lever: %f %f %f\n", roll, pitch, lever_x, lever_y, lever_z);
+						
+						/* get local translation between lon lat degrees and meters */
+						mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+						headingx = sin(DTR*heading);
+						headingy = cos(DTR*heading);
+						
+						/* apply lever arc calculation */
+						if (lever_x != 0.0 || lever_y != 0.0)
+							{
+							navlon += headingy * lever_x * mtodeglon
+									+ headingx * lever_y * mtodeglon;
+							navlat+= -headingx * lever_x * mtodeglat
+									+ headingy * lever_y * mtodeglat;
+							nav_changed = MB_YES;
+							}
+						if (lever_z != 0.0)
+							{
+							sensordepth -= lever_z;
+							sensordepth_changed = MB_YES;
+							}
+						}
 					
 					/* if attitude changed apply rigid rotations to the bathymetry */
 					if (attitude_changed == MB_YES)

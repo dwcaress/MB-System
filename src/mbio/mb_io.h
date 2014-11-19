@@ -190,6 +190,81 @@
 #include "mb_config.h"
 #include "mb_define.h"
 #include "mb_status.h"
+        
+/* survey platform definition structures */
+struct mb_sensor_offsets
+        {
+        
+        int     time_latency_mode;
+        double  time_latency_static;
+        int     time_latency_n;
+        int     time_latency_nalloc;
+        double  *time_latency_time_d;
+        double  *time_latency_value;
+        
+        int     position_offset_mode;
+        double  position_offset_x;
+        double  position_offset_y;
+        double  position_offset_z;
+        
+        int     angular_offset_mode;
+        double  angular_offset_azimuth;
+        double  angular_offset_roll;
+        double  angular_offset_pitch;
+        
+        };
+
+#define MB_SENSOR_TYPE_SONAR_NONE                       0
+#define MB_SENSOR_TYPE_SONAR_ECHOSOUNDER                1
+#define MB_SENSOR_TYPE_SONAR_MULTIECHOSOUNDER           2
+#define MB_SENSOR_TYPE_SONAR_SIDESCAN                   3
+#define MB_SENSOR_TYPE_SONAR_INTERFEROMETRY             4
+#define MB_SENSOR_TYPE_SONAR_MULTIBEAM                  5
+#define MB_SENSOR_TYPE_SONAR_SUBBOTTOM                  6
+#define MB_SENSOR_TYPE_CAMERA_MONO                      21
+#define MB_SENSOR_TYPE_CAMERA_STEREO                    22
+#define MB_SENSOR_TYPE_CAMERA_VIDEO                     23
+#define MB_SENSOR_TYPE_LIDAR_SCAN                       31
+#define MB_SENSOR_TYPE_LIDAR_SWATH                      32
+#define MB_SENSOR_TYPE_POSITION                         51
+#define MB_SENSOR_TYPE_COMPASS                          61
+#define MB_SENSOR_TYPE_VRU                              71
+#define MB_SENSOR_TYPE_IMU                              81
+#define MB_SENSOR_TYPE_CTD                              91
+#define MB_SENSOR_TYPE_SOUNDSPEED                       101
+struct mb_sensor
+        {
+        int     type;
+        int     class;
+        mb_longname sensor_model;
+        mb_longname sensor_manufacturer;
+        mb_longname sensor_serialnumber;
+        int     capability;
+        int     special_capability;
+        
+        int     num_offsets;
+        int     num_offsets_alloc;
+        struct mb_sensor_offsets    *offsets;
+        
+        };
+        
+#define MB_PLATFORM_NONE                0
+#define MB_PLATFORM_SURFACE_VESSEL      1
+#define MB_PLATFORM_TOW_BODY            2
+#define MB_PLATFORM_ROV                 3
+#define MB_PLATFORM_AUV                 4
+#define MB_PLATFORM_AIRPLANE            5
+#define MB_PLATFORM_SATELLITE           6
+struct mb_platform
+        {
+        int             type;
+        mb_longname     name;
+        mb_longname     organization;
+        
+        int             num_sensors;
+        int             num_sensors_alloc;
+        struct mb_sensor       *sensors;
+        };
 
 struct mb_io_ping_struct
 	{

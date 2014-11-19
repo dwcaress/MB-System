@@ -1,4 +1,4 @@
-.TH mbprocess 1 "17 September 2013" "MB\-System 5.0" "MB\-System 5.0"
+.TH mbprocess 1 "10 November 2014" "MB\-System 5.0" "MB\-System 5.0"
 .SH NAME
 \fBmbprocess\fP \- this program performs a
 variety of swath data processing
@@ -193,7 +193,7 @@ The \fBmbprocess\fP commands found in parameter files are:
    NAVADJMODE mode
         sets navigation merging from mbnavadjust [0]
         \- can apply to longitude and latitude only
-	  or longitude, latitude, and depth offset
+          or longitude, latitude, and depth offset
           0: adjusted navigation merge off
           1: adjusted navigation merge on
           2: adjusted navigation and depth offset merge on
@@ -379,14 +379,20 @@ The \fBmbprocess\fP commands found in parameter files are:
  STATIC BEAM BATHYMETRY OFFSETS:
    STATICMODE mode
         sets offsetting of bathymetry by
-        per\-beam statics [0]
+        per-beam statics [0]
           0: static correction off
-          1: static correction on
+          1: static correction by beam number
+          2: static correction by acrosstrack beam angle
    STATICFILE filename
-        sets static per\-beam file path [no default]
-        \- static files are two\-column ascii tables
-          with the beam # in column 1 and
-          the depth offset in m in column 2
+        sets static per-beam file path [no default]
+        \- static files are two-column ascii tables
+        \- if correction is by beam number then
+          the beam # is in column 1 and
+          the depth offset is in m in column 2
+        \- if correction is by beam angle then
+          the beam angle (starboard positive)
+          is in column 1 and
+          the depth offset is in m in column 2
 
  DRAFT CORRECTION:
    DRAFTMODE mode

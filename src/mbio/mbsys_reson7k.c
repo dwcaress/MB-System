@@ -7291,9 +7291,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		else if (mb_io_ptr->nsonardepth > 0)
 			{
-			if (mb_io_ptr->nsonardepth > 0)
-				mb_depint_interp(verbose, mbio_ptr, store->time_d,
-				    draft, error);
+			mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
 			}
 		else
 			{

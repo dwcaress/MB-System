@@ -1,4 +1,4 @@
-.TH mbdefaults 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbdefaults 1 "5 September 2014" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdefaults\fP \- Set or list default mbio parameters for
 reading and writing swath sonar data
@@ -8,12 +8,12 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbdefaults\fP [\fB\-B\fP\fIfileiobuffer\fP \fB\-D\fP\fIpsdisplay\fP \fB\-F\fP\fIfbtversion\fP  \fB\-I\fP\fIimagedisplay\fP
-\fB\-L\fP\fIlonflip\fP \fB\-T\fP\fItimegap\fP \fB\-U\fP\fIuselockfiles\fP
+\fB\-L\fP\fIlonflip\fP \fB\-M\fP\fImbviewsettings\fP \fB\-T\fP\fItimegap\fP \fB\-U\fP\fIuselockfiles\fP
 \fB\-W\fP\fIproject\fP \fB\-V \-H\fP]
 
 .SH DESCRIPTION
 \fBmbdefaults\fP is a utility for setting or listing the default read
-parameters used by some \fBMBIO\fP utilities such as \fBMBCOPY\fP.
+parameters used by some \fBMBIO\fP utilities such as \fBMBcopy\fP or \fBMBgrdviz\fP.
 If a user wishes to set default
 parameters different from those set by the \fBMBIO\fP library, then
 these specialized default values must be stored
@@ -102,6 +102,59 @@ the range from \-180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
+.TP
+.B \-MP
+\fIcolortable/colortable_mode/shade_mode\fP
+.br
+Sets the default colortable, colortable mode, and shading mode for
+the programs \fBMBgrdviz\fP and \fBMBeditviz\fP. The \fIcolortable\fP identifiers are
+similar to those used for \fBmbm_grdplot\fP:
+        0 = Haxby colortable
+        1 = Bright colortable
+        2 = Muted colortable
+        3 = Grayscale colortable
+        4 = Flat Gray colortable
+        5 = Sealevel 1 colortable
+        6 = Sealevel 2 colortable
+.br
+The \fIcolortable_mode\fP refers to whether low values
+are represented by "cool" colors (e.g. blue) and high values
+by "hot" colors (e.g. red), which corresponds to \fIcolortable_mode\fP = 0,
+or the opposite, which corresponds to \fIcolortable_mode\fP = 1.
+
+The \fIshade_mode\fP value determines whether shading is off
+(\fIshade_mode\fP = 0), done by illumination(\fIshade_mode\fP = 1),
+or done using slope magnitude (\fIshade_mode\fP = 2). Shading by overlay
+cannot be a default because overlay data are not always defined.
+.TP
+.B \-MG
+\fIslope_colortable/slope_colortable_mode\fP
+.br
+Sets the default colortable and colortable mode for displays of slope
+using the programs \fBMBgrdviz\fP and \fBMBeditviz\fP.
+The colortable and colortable mode identifiers are the same as given
+above for \fB-MP\fP.
+.TP
+.B \-MO
+\fIsecondary_colortable/secondary_colortable_mode\fP
+.br
+Sets the default colortable and colortable mode for displays of 
+overlay data using the programs \fBMBgrdviz\fP and \fBMBeditviz\fP.
+The colortable and colortable mode identifiers are the same as given
+above for \fB-MP\fP.
+.TP
+.B \-MI
+\fImagnitude/elevation/azimuth\fP
+.br
+Sets the default parameters for shading by illumination using the
+programs \fBMBgrdviz\fP and \fBMBeditviz\fP.
+The \fIelevation\fP and \fIazimuth\fP values are in degrees.
+.TP
+.B \-MS
+\fImagnitude\fP
+.br
+Sets the default parameter for shading by slope magnitude using the
+programs \fBMBgrdviz\fP and \fBMBeditviz\fP.
 .TP
 .B \-T
 \fItimegap\fP

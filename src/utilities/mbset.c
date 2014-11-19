@@ -764,7 +764,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "STATICMODE", 10) == 0)
 		    {
 		    sscanf(pargv[i], "STATICMODE:%d", &process.mbp_static_mode);
-		    if (explicit == MB_NO && process.mbp_static_mode == MBP_SVP_OFF)
+		    if (explicit == MB_NO && process.mbp_static_mode == MBP_STATIC_OFF)
 			{
 			process.mbp_staticfile[0] = '\0';
 			}

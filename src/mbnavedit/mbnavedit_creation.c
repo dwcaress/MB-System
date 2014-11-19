@@ -293,7 +293,7 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 390); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -321,7 +321,7 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 180); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -921,7 +921,7 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 480); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -949,7 +949,7 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 760); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -977,7 +977,7 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 320); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -1005,7 +1005,7 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 250); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -1033,7 +1033,7 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 840); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -1061,7 +1061,7 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 920); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;

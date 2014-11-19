@@ -1,18 +1,23 @@
-.TH mbkongsbergpreprocess 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbkongsbergpreprocess 1 "12 November 2014" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbkongsbergpreprocess\fP \- performs preprocessing of data from third generation Kongsberg multibeam sonars (e.g. EM122, EM302, EM710).
+\fBmbkongsbergpreprocess\fP \- performs preprocessing of data from third generation
+Kongsberg multibeam sonars (e.g. EM122, EM302, EM710, EM2040, M3).
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbkongsbergpreprocess\fP [\fB\-A\fP \fB\-C\fP \fB\-D\fP\fIoutputdirectory\fP \fB\-F\fP\fIformat\fP
-\fB\-I\fIfile \fB\-O\fP\fIoutfile\fP \fB\-SF\fP\fIdatatype/source\fP
-\fB\-T\fP\fItimelag\fP \fB\-H \-V\fP]
+\fBmbkongsbergpreprocess\fP [\fB\-C\fP \fB\-D\fP\fIoutputdirectory\fP
+\fB\-E\fP\fIoffx/offy[/offdepth]\fP
+\fB\-F\fP\fIformat\fP
+\fB\-I\fIfile \fB\-O\fP\fIoutfile\fP \
+\fB\-P\fP\fIfilterlength/filterdepth\fP
+\fB\-S\fP\fIdatatype/source\fP
+\fB\-T\fP\fItimelag\fP \fB\-W \-H \-V\fP]
 
 .SH DESCRIPTION
 \fBmbkongsbergpreprocess\fP reads data from a third generation
-Kongsberg multibeam sonar (e.g. EM122, EM302, EM710), interpolates the
+Kongsberg multibeam sonar (e.g. EM122, EM302, EM710, EM2040, M3), interpolates the
 asynchronous navigation, heading, and attitude onto the multibeam data,
 and writes a new file with that information correctly embedded
 in the multibeam survey data. The input files may be in the vendor format
@@ -48,6 +53,10 @@ suffixes:
     asynchronous heading:			*.ath
     asynchronous sonar depth:			*.ats
     synchronous attitude (roll and pitch):	*.sta
+    
+By default, \fBmbkongsbergpreprocess\fP ignores water column records and does
+not pass these large records into the output format 59 files. The \fB-W\fP\fI1\fP
+option causes the water column records to be written in the output files.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -60,17 +69,6 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 
 .SH OPTIONS
 .TP
-.B \-A
-.br
-This option causes the program to attempt to calculate reliable beam angles
-through iterative raytracing to match the original bathymetry. This process
-is very time consuming. At present, the simple calculation of beam angles
-produces noisy values that in turn produce noisy bathymetry when the
-soundings are recalculated by raytracing. Thus, if one needs to recalculate
-bathymetry with a new model for the sound speed structure of the water
-column (often called a sound velocity profile or SVP), the data should first
-be preprocessed using the \fB\-A\fP option.
-.TP
 .B \-C
 .br
 This option causes \fBmbkongsbergpreprocess\fP to print counts of the many
@@ -82,6 +80,16 @@ counts are output for each file and as totals from all files processed.
 .br
 This option causes all format 59 output files to be placed in the specified directory
 \fIoutputdirectory\fP rather than parallel to the original "raw" files.
+.TP
+.B \-E
+\fIoffx/offz[/offdepth]\fP
+.br
+This option is for data from submerged platforms such as ROVs or AUVs.
+This sets horizontal and vertical.distance offsets between the vehicle's
+depth sensor and the multibeam receive head. If specified, these values are used
+in a lever-arm calculation to determine the sonar depth change  associated with
+vehicle pitch. The \fIoffdepth\fP value, if specified, is a static depth offset to be
+applied to the vehicle depth data.
 .TP
 .B \-F
 \fIformat\fP
@@ -121,23 +129,50 @@ specified as \fIoutfile\fP. By default, the program creates output files for
 each input file. If the \fB\-D\fP\fIoutputdirectory\fP option is also used, then
 the output file \fIoutfile\fP will be in \fIoutputdirectory\fP.
 .TP
+.B \-P
+\fIfilterlength/filterdepth\fP
+This option specifies Gaussian tapered time domain filtering of the
+sonar depth data to be merged with the survey data, regardless of source.
+The \fIfilterlength\fP value specifies
+the filter window length in seconds, and the \fIfilterdepth\fP value controls
+the depths to which filtering is applied. The filtered sonar depth is used
+to depths up to twice the \fIfilterdepth\fP value. Below that threshold, the
+value used transitions to unfiltered with an exponential taper. This filtering
+is used in two ways. First, one can apply short period smoothing of noisy
+sonar depth at all by specifying a small \fIfilterlength\fP (e.g. 2 seconds)
+and a \fIfilterdepth\fP value deeper than the vehicle's track. Second, when
+an AUV or ROV is operated at shallow depths, the pressure
+values used to determine depth are affected by waves at the sea surface. In this
+case, a longer period \fIfilterlength\fP (e.g. 10 seconds) and a shallower
+\fIfilterdepth\fP (e.g. 50 meters) may be used to lessen the artifacts due to
+surface swell.
+.TP
 .B \-S
 \fIdatatype/source\fP
 .br
 This option specifies which data records should be the source of the
-navigation (\fIdatatype\fP = 1), heading (\fIdatatype\fP = 2), and
-attitude (\fIdatatype\fP = 3) data that are interpolated onto the
+navigation (\fIdatatype\fP = 1), heading (\fIdatatype\fP = 2), 
+attitude (\fIdatatype\fP = 3), and sonar depth  (\fIdatatype\fP = 4)
+data that are interpolated onto the
 survey ping times. In each case the \fIsource\fP value specifies
 a data record type. The possibilities for Kongsberg data include:
-     MB_DATA_NAV			12	/* Simrad, Reson 7k */
-     MB_DATA_HEADING		17	/* Simrad, Hypack */
-     MB_DATA_ATTITUDE		18	/* Simrad, Hypack, Reson 7k */
-     MB_DATA_NAV1			28	/* ancillary nav system 1 */
-     MB_DATA_NAV2			29	/* ancillary nav system 2 */
-     MB_DATA_NAV3			30	/* ancillary nav system 3 */
-     MB_DATA_ATTITUDE1		55	/* ancillary attitude system 1 */
-     MB_DATA_ATTITUDE2		56      /* ancillary attitude system 2 */
-     MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
+     MB_DATA_DATA		1
+     MB_DATA_NAV		12
+     MB_DATA_HEIGHT		16
+     MB_DATA_HEADING		17
+     MB_DATA_ATTITUDE		18
+     MB_DATA_NAV1		28
+     MB_DATA_NAV2		29
+     MB_DATA_NAV3		30
+     MB_DATA_ATTITUDE1		55
+     MB_DATA_ATTITUDE2		56
+     MB_DATA_ATTITUDE3		57
+.br
+The default values are:
+     nav_source = MB_DATA_NAV
+     attitude_source = MB_DATA_ATTITUDE
+     heading_source = MB_DATA_NAV
+     sonardepth_source = MB_DATA_DATA
 .br
 .TP
 .B \-T
@@ -148,6 +183,13 @@ to the navigation and attitude data prior to it being merged with the
 bathymetry. If \fItimelag\fP is a valid path to a file containing time
 stamp and time lag pairs, then these data will be read and the time lag
 applied to particular records will be interpolated by time.
+.TP
+.B \-W
+\fImode\fP
+.br
+By default, \fBmbkongsbergpreprocess\fP ignores water column records and does
+not pass these large records into the output format 59 files. If \fB-W\fP\fI1\fP
+is specified, then the water column records will be written to the output files.
 
 .SH EXAMPLES
 Suppose that one has collected a set of three Kongsberg EM122 data files named:

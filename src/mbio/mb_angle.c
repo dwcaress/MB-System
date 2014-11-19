@@ -558,3 +558,300 @@ int mb_lever(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/*
+ * Calculate multibeam beam angles for bathymetry calculation by raytracing
+ * from the transducer array orientations and beam steering angles.
+ * This code was written by Jonathan Beaudoin and John Hughes Clarke,
+ * provided to the MB-System team by Jonathan Beaudoin, and
+ * derives from the paper:
+ * 
+ * 	Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+ *          Surface Sound Speed Measurements in Post-Processing for
+ *          Multi-Sector Multibeam Echosounders : International
+ *          Hydrographic Review, v.5, no.3, p.26-31.
+ *      (available for download at
+ *       http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+ *
+ * The input consists of 14 angles:
+ * 	Transmit array installation angles: roll, pitch, heading
+ * 	Receive array installation angles: roll, pitch, heading
+ * 	Roll, pitch, and heading at transmit time
+ * 	Roll, pitch, and heading at receive time
+ * 	Transmit fore-aft pitch steering angle, can be unique by sector
+ * 	    with Kongsberg systems (+ve angle is forward)
+ * 	RX steer angle (+ve angle is to port, this is consistent with
+ * 	    the Roll sign convention but opposite of what most people expect)
+ *
+ * The output consists of the beam azimuthal and depression angles.
+ * 
+ * Several Kongsberg multisector multibeams have arrays that can be reverse mounted.
+ * The EM710 and EM2040 can have TX and RX independently mounted so one or both of
+ * the TX and RX can be reverse mounted. If a transmit or receive array is reverse
+ * mounted, the code handles this by:
+ *      1) subtracting 180 degrees from the heading mount angle of the array
+ *      2) flipping the sign of the pitch and roll mount offsets of the array
+ *      3) flipping the sign of the beam steering angle from that array
+ *         (reverse TX means flip sign of TX steer, reverse RX means flip sign of RX steer)
+ */
+ 
+int mb_beaudoin(int verbose,
+		mb_3D_orientation tx_align,
+		mb_3D_orientation tx_orientation,
+		double tx_steer,
+		mb_3D_orientation rx_align,
+		mb_3D_orientation rx_orientation,
+		double rx_steer,
+		double reference_heading,
+		double *beamAzimuth,
+		double *beamDepression,
+		int	*error)
+{
+	char	*function_name = "mb_beaudoin";
+	int	status = MB_SUCCESS;
+	mb_3D_orientation datt;   
+	mb_3D_vector xPrime, yPrime, zPrime;
+	mb_3D_vector txIdeal;
+	mb_3D_vector txMount;
+	mb_3D_vector txGeo;
+	mb_3D_vector rxIdeal;
+	mb_3D_vector rxMount;
+	mb_3D_vector rxGeo;
+	mb_3D_vector beamVectRel;
+	mb_3D_vector beamVectGeo;
+	double non_ortho;
+	double y1, y2, radial;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n",verbose);
+		fprintf(stderr,"dbg2       tx_align.roll:           %f\n", tx_align.roll);
+		fprintf(stderr,"dbg2       tx_align.pitch:          %f\n", tx_align.pitch);
+		fprintf(stderr,"dbg2       tx_align.heading:        %f\n", tx_align.heading);
+		fprintf(stderr,"dbg2       tx_orientation.roll:     %f\n", tx_orientation.roll);
+		fprintf(stderr,"dbg2       tx_orientation.pitch:    %f\n", tx_orientation.pitch);
+		fprintf(stderr,"dbg2       tx_orientation.heading:  %f\n", tx_orientation.heading);
+		fprintf(stderr,"dbg2       tx_steer:                %f\n", tx_steer);
+		fprintf(stderr,"dbg2       rx_align.roll:           %f\n", rx_align.roll);
+		fprintf(stderr,"dbg2       rx_align.pitch:          %f\n", rx_align.pitch);
+		fprintf(stderr,"dbg2       rx_align.heading:        %f\n", rx_align.heading);
+		fprintf(stderr,"dbg2       rx_orientation.roll:     %f\n", rx_orientation.roll);
+		fprintf(stderr,"dbg2       rx_orientation.pitch:    %f\n", rx_orientation.pitch);
+		fprintf(stderr,"dbg2       rx_orientation.heading:  %f\n", rx_orientation.heading);
+		fprintf(stderr,"dbg2       rx_steer:                %f\n", rx_steer);
+		fprintf(stderr,"dbg2       reference_heading:       %f\n", reference_heading);
+		}
+    
+	txIdeal.x = 1.0;
+	txIdeal.y = 0.0;
+	txIdeal.z = 0.0;
+    
+	// All of these in degrees, these are the transmitter array mount angles.
+	datt.roll = tx_align.roll;
+	datt.pitch = tx_align.pitch;
+	datt.heading = tx_align.heading;
+	mb_beaudoin_unrotate(verbose, txIdeal, datt, &txMount, error);
+    
+	// All of these in degrees, these are the motion measurements at the time of transmit.
+	datt.roll = tx_orientation.roll;
+	datt.pitch = tx_orientation.pitch;
+	datt.heading = tx_orientation.heading;
+	mb_beaudoin_unrotate(verbose, txMount, datt, &txGeo, error);
+    
+	if (verbose >= 4)
+		printf ("dbg4      TX array x %f y %f z %f in geographic reference frame\n", txGeo.x, txGeo.y, txGeo.z);
+    
+	rxIdeal.x = 0.0;
+	rxIdeal.y = 1.0;
+	rxIdeal.z = 0.0;
+    
+	// Degrees, these are the receiver array mount angles.
+	datt.roll = rx_align.roll;
+	datt.pitch = rx_align.pitch;
+	datt.heading = rx_align.heading;
+	mb_beaudoin_unrotate(verbose, rxIdeal, datt, &rxMount, error);
+    
+	// Degrees, these are the motion measurements at the time of reception (this is unique per beam)
+	datt.roll = rx_orientation.roll;
+	datt.pitch = rx_orientation.pitch;
+	datt.heading = rx_orientation.heading;
+	mb_beaudoin_unrotate(verbose, rxMount, datt, &rxGeo, error);
+    
+	if (verbose >= 4)
+		printf ("dbg4     RX array x %f y %f z %f in geographic reference frame\n", rxGeo.x, rxGeo.y, rxGeo.z);
+    
+	/* Have to negate it so signs work out...(was 90 - acos(...) before)  */
+	/* acos of dotproduct of rxGeo and txGeo yields angle from between vectors */
+	/* ...subtract 90 to bring into required units */
+	non_ortho = acos (rxGeo.x * txGeo.x +
+	rxGeo.y * txGeo.y +
+	rxGeo.z * txGeo.z) * 180.0 / M_PI - 90.0;
+    
+	if (verbose >= 4)
+		printf ("dbg4     TX/RX are non-orthogonal by %f degrees\n", non_ortho);
+      
+	y1 = sin (-rx_steer * DTR) / cos (non_ortho * DTR);
+	y2 = sin (tx_steer * DTR) * tan (non_ortho * DTR);
+	radial = sqrt ((y1 + y2) * (y1 + y2) + sin (tx_steer * DTR) * sin (tx_steer * DTR));
+      
+	if (verbose >= 4)
+	      printf("dbg4     Got y1, y2, radial: %lf %lf %lf\n",y1, y2, radial);
+      
+	beamVectRel.x = sin (tx_steer * DTR);
+	beamVectRel.y = y1 + y2;
+	beamVectRel.z = sqrt (1.0 - radial * radial);
+      
+	/* Build ortho-normal basis */
+	xPrime = txGeo;
+      
+	/* Crossproduct of txGeo and rxGeo yields zPrime */
+	/* i.e. normal of plane containing txGeo and rxGeo */
+	zPrime.x = txGeo.y * rxGeo.z - txGeo.z * rxGeo.y;
+	zPrime.y = txGeo.z * rxGeo.x - txGeo.x * rxGeo.z;
+	zPrime.z = txGeo.x * rxGeo.y - txGeo.y * rxGeo.x;
+      
+	/* Crossproduct of zPrime and xPrime yields yPrime */
+	yPrime.x = zPrime.y * xPrime.z - zPrime.z * xPrime.y;
+	yPrime.y = zPrime.z * xPrime.x - zPrime.x * xPrime.z;
+	yPrime.z = zPrime.x * xPrime.y - zPrime.y * xPrime.x;
+      
+	if (verbose >= 4)
+		{
+		printf ("dbg4     x': %f, %f, %f\n", xPrime.x, xPrime.y, xPrime.z);
+		printf ("dbg4     y': %f, %f, %f\n", yPrime.x, yPrime.y, yPrime.z);
+		printf ("dbg4     z': %f, %f, %f\n", zPrime.x, zPrime.y, zPrime.z);
+		}
+      
+	/* Columns of equivalent rotation matrix are coordinates of */
+	/* primed unit vectors in original coordinate system */
+	/* Inverse (transpose) of this matrix will bring relative vector into */
+	/* geographic coordinates */
+	beamVectGeo.x = beamVectRel.x * xPrime.x + beamVectRel.y * yPrime.x + beamVectRel.z * zPrime.x;
+	beamVectGeo.y = beamVectRel.x * xPrime.y + beamVectRel.y * yPrime.y + beamVectRel.z * zPrime.y;
+	beamVectGeo.z = beamVectRel.x * xPrime.z + beamVectRel.y * yPrime.z + beamVectRel.z * zPrime.z;
+      
+	if (verbose >= 4)
+		{
+		printf ("dbg4     Beam vector is %f %f %f in transducer reference frame\n",
+			beamVectRel.x, beamVectRel.y, beamVectRel.z);
+		printf ("dbg4     Beam vector is %f %f %f in geographic reference frame\n",
+			beamVectGeo.x, beamVectGeo.y, beamVectGeo.z);
+		}
+      
+	*beamAzimuth = atan2 (beamVectGeo.y, beamVectGeo.x) * 180.0 / M_PI;
+      
+	/* Reduce the beam azimuth relative to the ship's heading ...  */
+	/* Hmmmm, this can do some funny stuff with multi-sector systems */
+	/* as the ship's heading in the math below is different for each beam */
+	/* but then we use the last sector as the reference azimuth -- JDB, Feb. 28, 2008 */
+      
+	// Taking care of this by now using reference_heading, which specifically
+	// is taken as the heading at the ping time associated with the first sector.
+	*beamAzimuth = *beamAzimuth - reference_heading;
+      
+	/* and then make sure she's positive, eh? */
+	if (*beamAzimuth < 0)
+		*beamAzimuth = 360.0 + *beamAzimuth;
+      
+	*beamDepression
+	      = atan (beamVectGeo.z / sqrt (beamVectGeo.x * beamVectGeo.x + beamVectGeo.y * beamVectGeo.y))
+		* 180.0 / M_PI;
+      
+	if (verbose >= 4)
+	      printf("dbg4     Got beam azimuth (re: ship's heading) and depression %.2f %.2f\n",
+		     *beamAzimuth, *beamDepression);
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       beamAzimuth:     %f\n",*beamAzimuth);
+		fprintf(stderr,"dbg2       beamDepression:  %f\n",*beamDepression);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+
+int mb_beaudoin_unrotate (int verbose,
+				mb_3D_vector orig,
+				mb_3D_orientation rotate,
+				mb_3D_vector * final,
+				int *error)
+{
+	char	*function_name = "mb_beaudoin_unrotate";
+	int	status = MB_SUCCESS;
+	double cosr, cosp, cosy;
+	double sinr, sinp, siny;
+ 
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       orig.x:          %f\n", orig.x);
+		fprintf(stderr,"dbg2       orig.y:          %f\n", orig.y);
+		fprintf(stderr,"dbg2       orig.z:          %f\n", orig.z);
+		fprintf(stderr,"dbg2       rotate.roll:     %f\n", rotate.roll);
+		fprintf(stderr,"dbg2       rotate.pitch:    %f\n", rotate.pitch);
+		fprintf(stderr,"dbg2       rotate.heading:  %f\n", rotate.heading);
+		}
+      
+	sinr = sin (rotate.roll * DTR);
+	cosr = cos (rotate.roll * DTR);
+	sinp = sin (rotate.pitch * DTR);
+	cosp = cos (rotate.pitch * DTR);
+	siny = sin (rotate.heading * DTR);
+	cosy = cos (rotate.heading * DTR);
+     
+	final->x = cosp * cosy * orig.x +
+		    (sinr * sinp * cosy - cosr * siny) * orig.y +
+		    (cosr * sinp * cosy + sinr * siny) * orig.z;
+      
+	final->y = cosp * siny * orig.x +
+		    (sinr * sinp * siny + cosr * cosy) * orig.y +
+		    (cosr * sinp * siny - sinr * cosy) * orig.z;
+      
+	final->z = -sinp * orig.x + sinr * cosp * orig.y
+		    + cosr * cosp * orig.z;
+      
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       final->x:        %f\n", final->x);
+		fprintf(stderr,"dbg2       final->y:        %f\n", final->y);
+		fprintf(stderr,"dbg2       final->z:        %f\n", final->z);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+

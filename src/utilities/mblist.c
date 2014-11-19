@@ -5883,14 +5883,7 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr,
 
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store_ptr = (struct mbsys_simrad3_struct *) mb_io_ptr->store_data;
- 	if (store_ptr->serial == store_ptr->par_serial_2)
-		{
-		ping_ptr = (struct mbsys_simrad3_ping_struct *) store_ptr->ping2;
-		}
-	else
-		{
-		ping_ptr = (struct mbsys_simrad3_ping_struct *) store_ptr->ping1;
-		}
+ 	ping_ptr = (struct mbsys_simrad3_ping_struct *) &(store_ptr->pings[store_ptr->ping_index]);
 
 	if (store_ptr->kind == MB_DATA_DATA)
 	  {

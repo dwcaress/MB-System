@@ -65,6 +65,12 @@
 #define MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX 50
 #define MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE 0
 
+#define MBKONSBERGPREPROCESS_USE_SENSORDEPTH_ONLY	0
+#define MBKONSBERGPREPROCESS_USE_HEAVE_ONLY		1
+
+#define MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE		0
+#define	MBKONSBERGPREPROCESS_WATERCOLUMN_OUTPUT		1
+
 static char rcs_id[] = "$Id: mbkongsbergpreprocess.c 1938 2012-02-22 20:58:08Z caress $";
 
 /*--------------------------------------------------------------------*/
@@ -73,7 +79,8 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mbkongsbergpreprocess";
 	char help_message[] =  "mbkongsbergpreprocess reads a Kongsberg multibeam vendor format file (or datalist of files),\ninterpolates the asynchronous navigation and attitude onto the multibeam data, \nand writes the data as one or more format 59 files.";
-	char usage_message[] = "mbkongsbergpreprocess [-C -Doutputdirectory -Iinputfile -H -V]";
+	char usage_message[] = "mbkongsbergpreprocess [-C -Doutputdirectory -Eoffx/offy[/offdepth] -Fformat -Ifile -Ooutfile \n\t\t\t-Pfilterlength/filterdepth -Sdatatype/source -Ttimelag -W -H -V]";
+
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -152,6 +159,7 @@ int main (int argc, char **argv)
 	int	nav_source = MB_DATA_NAV;
 	int	attitude_source = MB_DATA_ATTITUDE;
 	int	heading_source = MB_DATA_HEADING;
+	int	sonardepth_source = MB_DATA_DATA;
 
 	/* counting variables file */
 	int	output_counts = MB_NO;
@@ -241,6 +249,12 @@ int main (int argc, char **argv)
 	double	*dat_nav_lon = NULL;
 	double	*dat_nav_lat = NULL;
 
+	int	ndat_sonardepth = 0;
+	int	ndat_sonardepth_alloc = 0;
+	double	*dat_sonardepth_time_d = NULL;
+	double	*dat_sonardepth_sonardepth = NULL;
+	double	*dat_sonardepth_sonardepthfilter = NULL;
+
 	int	ndat_heading = 0;
 	int	ndat_heading_alloc = 0;
 	double	*dat_heading_time_d = NULL;
@@ -262,6 +276,18 @@ int main (int argc, char **argv)
 	double	*timelag_time_d = NULL;
 	double	*timelag_model = NULL;
 
+	/* depth sensor filtering */
+	int	sonardepthfilter = MB_NO;
+	double	sonardepthfilterlength = 20.0;
+	double	sonardepthfilterdepth = 20.0;
+
+	/* depth sensor offset and lever arm parameters */
+	int	sonardepthlever = MB_NO;
+	double	sonardepthoffset = 0.0; /* depth sensor offset (+ makes vehicle deeper) */
+	double	depthsensoroffx = 0.0;
+	double	depthsensoroffy = 0.0;
+	double	depthsensoroffz = 0.0;
+
 	/* output asynchronous and synchronous time series ancilliary files */
 	char	athfile[MB_PATH_MAXLINE];
 	char	atsfile[MB_PATH_MAXLINE];
@@ -271,9 +297,11 @@ int main (int argc, char **argv)
 	FILE	*atsfp;
 	FILE	*atafp;
 	FILE	*stafp;
+	
+	/* handling water column records */
+	int	watercolumnmode = MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE;
 
 	/* processing kluge modes */
-	int	recalculate_beam_angles = MB_NO;
 	int	klugemode;
 
 	int	interp_status;
@@ -288,33 +316,58 @@ int main (int argc, char **argv)
 	int	testformat;
 	int	type, source;
 	double	start_time_d, end_time_d;
-
-	double	heave_offset = 0.0;
-	double	heave_ping, heave_beam;
-	double	soundspeed;
-	double	transmit_alongtrack;
-	double	alpha, beta, theta, phi, theta_bath, phi_bath;
-	double	theta_new, theta_nadir, theta_x, theta_z, dtheta, theta_old, thetamin, thetamax;
-	int	inadir;
+	
 	double	transmit_time_d, transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
 	double	receive_time_d, receive_heading, receive_heave, receive_roll, receive_pitch;
-	mb_u_char detection_mask;
-	double	xx, zz, dx, dz, dt;
-	double	xxx, yyy;
-	double	xxcalc, zzcalc, tt, ttt, xxcalc_old, zzcalc_old;
-	double	depth_offset_use, static_shift, svpdepthstart;
-	double	weight;
+	
+	/* transmit and receive array offsets */
+	double	tx_x, tx_y, tx_z, tx_h, tx_r, tx_p;
+	double	rx_x, rx_y, rx_z, rx_h, rx_r, rx_p;
+	
+	/* depth sensor offsets - used in place of heave for underwater platforms */
+	int	depthsensor_mode;
+	double	depth_off_x, depth_off_y, depth_off_z;
+	
+	/* roll and pitch sensor offsets */
+	double	rollpitch_off_x, rollpitch_off_y, rollpitch_off_z, rollpitch_off_h, rollpitch_off_r, rollpitch_off_p;
+	
+	/* heave sensor offsets */
+	double	heave_off_x, heave_off_y, heave_off_z, heave_off_h, heave_off_r, heave_off_p;
+	
+	/* heading sensor offset */
+	double	heading_off_x, heading_off_y, heading_off_z, heading_off_h, heading_off_r, heading_off_p;
+	
+	/* position sensor offsets */
+	double	position_off_x, position_off_y, position_off_z;
+	
+	/* lever arm offsets */
 	double	lever_x, lever_y, lever_z;
-	double	offset_x, offset_y, offset_z;
-	int	ray_stat, iterx, iterz;
-	int	done;
-
+	
+	/* variables for beam angle calculation */
+	mb_3D_orientation tx_align;
+	mb_3D_orientation tx_orientation;
+	double tx_steer;
+	mb_3D_orientation rx_align;
+	mb_3D_orientation rx_orientation;
+	double rx_steer;
+	double reference_heading;
+	double beamAzimuth;
+	double beamDepression;
+	double	*pixel_size, *swath_width;
+	mb_u_char detection_mask;
+	
 	int	jtimelag = 0;
 	int	jnav = 0;
 	int	jheading = 0;
 	int	jattitude = 0;
+	int	jsonardepth = 0;
+	int	nhalffilter;
+	double	sonardepth_filterweight;
+	double	dtime, dtol, weight;
+	double	factor;
 
-	int	i;
+	int	nscan;
+	int	i, j, j1, j2;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -327,9 +380,10 @@ int main (int argc, char **argv)
 	nav_source = MB_DATA_NAV;
 	attitude_source = MB_DATA_ATTITUDE;
 	heading_source = MB_DATA_NAV;
+	sonardepth_source = MB_DATA_DATA;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaCcD:d:F:f:I:i:K:k:O:o:S:s:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "CcD:d:E:e:F:f:I:i:K:k:O:o:P:p:S:s:T:t:VvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -340,11 +394,6 @@ int main (int argc, char **argv)
 		case 'v':
 			verbose++;
 			break;
-		case 'A':
-		case 'a':
-			recalculate_beam_angles = MB_YES;
-			flag++;
-			break;
 		case 'C':
 		case 'c':
 			output_counts = MB_YES;
@@ -354,6 +403,37 @@ int main (int argc, char **argv)
 		case 'd':
 			sscanf (optarg,"%s", odir);
 			odir_set  = MB_YES;
+			flag++;
+			break;
+		case 'E':
+		case 'e':
+			nscan = sscanf (optarg,"%lf/%lf/%lf/%lf", &depthsensoroffx, &depthsensoroffy, &depthsensoroffz, &sonardepthoffset);
+			if (nscan < 4)
+				{
+				if (nscan == 3)
+					{
+					sonardepthoffset = depthsensoroffz;
+					depthsensoroffz = depthsensoroffy;
+					depthsensoroffy = depthsensoroffx;
+					depthsensoroffx = 0.0;
+					}
+				else if (nscan == 2)
+					{
+					sonardepthoffset = 0.0;
+					depthsensoroffz = depthsensoroffy;
+					depthsensoroffy = depthsensoroffx;
+					depthsensoroffx = 0.0;
+					}
+				else if (nscan == 1)
+					{
+					sonardepthoffset = 0.0;
+					depthsensoroffz = 0.0;
+					depthsensoroffy = depthsensoroffx;
+					depthsensoroffx = 0.0;
+					}
+				}
+			if (nscan > 0)
+				sonardepthlever = MB_YES;
 			flag++;
 			break;
 		case 'F':
@@ -377,6 +457,16 @@ int main (int argc, char **argv)
 			ofile_set  = MB_YES;
 			flag++;
 			break;
+		case 'P':
+		case 'p':
+			nscan = sscanf (optarg,"%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
+			if (nscan == 1)
+				sonardepthfilterdepth = 20.0;
+			if (nscan >= 1)
+				sonardepthfilter = MB_YES;
+			else
+				sonardepthfilter = MB_NO;
+			break;
 		case 'S':
 		case 's':
 			sscanf (optarg,"%d/%d", &type, &source);
@@ -386,6 +476,8 @@ int main (int argc, char **argv)
 				heading_source = source;
 			else if (type == 3)
 				attitude_source = source;
+			else if (type == 4)
+				sonardepth_source = source;
 			flag++;
 			break;
 		case 'T':
@@ -403,6 +495,11 @@ int main (int argc, char **argv)
 				}
 			flag++;
 			break;
+		case 'W':
+		case 'w':
+			sscanf (optarg,"%d", &watercolumnmode);
+			flag++;
+			break;			
 		case '?':
 			errflg++;
 		}
@@ -472,7 +569,15 @@ int main (int argc, char **argv)
 			fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
 			}
 		fprintf(stderr,"dbg2       timelag:                %f\n",timelag);
-		fprintf(stderr,"dbg2       recalculate_beam_angles:%d\n",recalculate_beam_angles);
+		fprintf(stderr,"dbg2       watercolumnmode:        %d\n",watercolumnmode);
+		fprintf(stderr,"dbg2       sonardepthfilter:       %d\n",sonardepthfilter);
+		fprintf(stderr,"dbg2       sonardepthfilterlength: %f\n",sonardepthfilterlength);
+		fprintf(stderr,"dbg2       sonardepthfilterdepth:  %f\n",sonardepthfilterdepth);
+		fprintf(stderr,"dbg2       sonardepthlever:        %d\n",sonardepthlever);
+		fprintf(stderr,"dbg2       sonardepthoffset:       %f\n",sonardepthoffset);
+		fprintf(stderr,"dbg2       depthsensoroffx:        %f\n",depthsensoroffx);
+		fprintf(stderr,"dbg2       depthsensoroffy:        %f\n",depthsensoroffy);
+		fprintf(stderr,"dbg2       depthsensoroffz:        %f\n",depthsensoroffz);
 		}
 
 	/* if help desired then print it and exit */
@@ -728,10 +833,7 @@ int main (int argc, char **argv)
 		/* count the record that was just read */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
-			if (istore->serial != 0 && istore->serial == istore->par_serial_2)
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping2;
-			else
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping1;
+			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
 
 			if (format == MBF_EM300RAW)
 				{
@@ -846,6 +948,12 @@ int main (int argc, char **argv)
 				nrec_0xE5_bathymetry_mbari59++;
 			}
 
+	   	/* handle read error */
+		else
+			{
+/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
+			}
+
 	   	/* save navigation and heading data from EM3_POS records */
 		if (status == MB_SUCCESS
 			&& istore->type == EM3_POS
@@ -862,7 +970,7 @@ int main (int argc, char **argv)
 			time_i[6] = (istore->pos_msec % 1000) * 1000;
 			mb_get_time(verbose, time_i, &time_d);
 
-			if (MBKONSBERGPREPROCESS_TIMESTAMPLIST == MB_YES)
+			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
 				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x50_pos:%d\n",
 						time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x50_pos);
 
@@ -919,7 +1027,7 @@ int main (int argc, char **argv)
 				&& istore->pos_heading != EM3_INVALID_INT)
 				{
 
-				/* allocate memory for position arrays if needed */
+				/* allocate memory for heading arrays if needed */
 				if (ndat_heading + 1 >= ndat_heading_alloc)
 					{
 					ndat_heading_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
@@ -962,6 +1070,68 @@ int main (int argc, char **argv)
 
 			}
 
+	   	/* save sonardepth data from height records */
+		if (status == MB_SUCCESS
+			&& istore->type == EM3_HEIGHT
+		    	&& istore->kind == sonardepth_source)
+			{			
+			/* get sonardepth time */
+			time_i[0] = istore->hgt_date / 10000;
+			time_i[1] = (istore->hgt_date % 10000) / 100;
+			time_i[2] = istore->hgt_date % 100;
+			time_i[3] = istore->hgt_msec / 3600000;
+			time_i[4] = (istore->hgt_msec % 3600000) / 60000;
+			time_i[5] = (istore->hgt_msec % 60000) / 1000;
+			time_i[6] = (istore->hgt_msec % 1000) * 1000;
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x68_height:%d\n",
+						time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x68_height);
+
+			/* allocate memory for sonar depth arrays if needed */
+			if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc)
+				{
+				ndat_sonardepth_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthfilter,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}
+				}
+
+			/* store the sonar depth data */
+			if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < time_d)
+				{
+				dat_sonardepth_time_d[ndat_sonardepth] = time_d;
+				dat_sonardepth_sonardepth[ndat_sonardepth] = 0.01 * istore->hgt_height;
+				dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
+				
+				/* apply time lag correction if specified */
+				if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
+					{
+					dat_sonardepth_time_d[ndat_sonardepth] -= timelagconstant;
+					}
+				else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
+					{
+					interp_status = mb_linear_interp(verbose,
+								timelag_time_d-1, timelag_model-1,
+								ntimelag, dat_sonardepth_time_d[ndat_sonardepth], &timelag, &jtimelag,
+								&error);
+					dat_sonardepth_time_d[ndat_sonardepth] -= timelag;
+					}
+
+				/* increment counter */
+				ndat_sonardepth++;
+				}
+			}
+
 	   	/* save primary attitude data from attitude records */
 		if (status == MB_SUCCESS
 			&& istore->type == EM3_ATTITUDE
@@ -980,12 +1150,12 @@ int main (int argc, char **argv)
 			time_i[6] = (attitude->att_msec % 1000) * 1000;
 			mb_get_time(verbose, time_i, &time_d);
 
-			if (MBKONSBERGPREPROCESS_TIMESTAMPLIST == MB_YES)
+			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
 				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x41_attitude:%d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x41_attitude);
 
-			/* allocate memory for position arrays if needed */
+			/* allocate memory for attitude arrays if needed */
 			if (ndat_rph + attitude->att_ndata >= ndat_rph_alloc)
 				{
 				ndat_rph_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
@@ -1051,12 +1221,12 @@ int main (int argc, char **argv)
 			time_i[6] = (netattitude->nat_msec % 1000) * 1000;
 			mb_get_time(verbose, time_i, &time_d);
 
-			if (MBKONSBERGPREPROCESS_TIMESTAMPLIST == MB_YES)
+			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
 				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x6E_network_attitude:%d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x6E_network_attitude);
 
-			/* allocate memory for position arrays if needed */
+			/* allocate memory for attitude arrays if needed */
 			if (ndat_rph + netattitude->nat_ndata >= ndat_rph_alloc)
 				{
 				ndat_rph_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
@@ -1122,12 +1292,12 @@ int main (int argc, char **argv)
 			time_i[6] = (headingr->hed_msec % 1000) * 1000;
 			mb_get_time(verbose, time_i, &time_d);
 
-			if (MBKONSBERGPREPROCESS_TIMESTAMPLIST == MB_YES)
+			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
 				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x48_heading:%d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x48_heading);
 
-			/* allocate memory for position arrays if needed */
+			/* allocate memory for heading arrays if needed */
 			if (ndat_heading + headingr->hed_ndata >= ndat_heading_alloc)
 				{
 				ndat_heading_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
@@ -1171,16 +1341,134 @@ int main (int argc, char **argv)
 				}
 			}
 
-	   	/* handle unknown data */
-		else  if (status == MB_SUCCESS)
+	   	/* save heading data from survey records */
+		if (status == MB_SUCCESS
+			&& istore->kind == MB_DATA_DATA
+		    	&& istore->kind == heading_source)
 			{
-/*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
+			/* get survey data structure */
+			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
+
+			/* get ping time */
+			time_i[0] = ping->png_date / 10000;
+			time_i[1] = (ping->png_date % 10000) / 100;
+			time_i[2] = ping->png_date % 100;
+			time_i[3] = ping->png_msec / 3600000;
+			time_i[4] = (ping->png_msec % 3600000) / 60000;
+			time_i[5] = (ping->png_msec % 60000) / 1000;
+			time_i[6] = (ping->png_msec % 1000) * 1000;
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6]);
+
+			/* allocate memory for heading arrays if needed */
+			if (ndat_heading + 1 >= ndat_heading_alloc)
+				{
+				ndat_heading_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_heading,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}
+				}
+
+			/* store the heading data */
+			if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < time_d)
+				{
+				dat_heading_time_d[ndat_heading] = (double)(time_d);
+				dat_heading_heading[ndat_heading] = (double)(0.01 * ping->png_heading);
+
+				/* apply time lag correction if specified */
+				if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
+					{
+					dat_heading_time_d[ndat_heading] -= timelagconstant;
+					}
+				else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
+					{
+					interp_status = mb_linear_interp(verbose,
+								timelag_time_d-1, timelag_model-1,
+								ntimelag, dat_heading_time_d[ndat_heading], &timelag, &jtimelag,
+								&error);
+					dat_heading_time_d[ndat_heading] -= timelag;
+					}
+
+				/* increment counter */
+				ndat_heading++;
+				}
 			}
 
-	   	/* handle read error */
-		else
-			{
-/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
+	   	/* save sonardepth data from survey records */
+		if (status == MB_SUCCESS
+			&& istore->kind == MB_DATA_DATA
+		    	&& istore->kind == sonardepth_source)
+			{			
+			/* get survey data structure */
+			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
+
+			/* get ping time */
+			time_i[0] = ping->png_date / 10000;
+			time_i[1] = (ping->png_date % 10000) / 100;
+			time_i[2] = ping->png_date % 100;
+			time_i[3] = ping->png_msec / 3600000;
+			time_i[4] = (ping->png_msec % 3600000) / 60000;
+			time_i[5] = (ping->png_msec % 60000) / 1000;
+			time_i[6] = (ping->png_msec % 1000) * 1000;
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6]);
+
+			/* allocate memory for sonar depth arrays if needed */
+			if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc)
+				{
+				ndat_sonardepth_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthfilter,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}
+				}
+
+			/* store the sonar depth data */
+			if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < time_d)
+				{
+				dat_sonardepth_time_d[ndat_sonardepth] = time_d;
+				dat_sonardepth_sonardepth[ndat_sonardepth] = ping->png_xducer_depth;
+				dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
+				
+				/* apply time lag correction if specified */
+				if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
+					{
+					dat_sonardepth_time_d[ndat_sonardepth] -= timelagconstant;
+					}
+				else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
+					{
+					interp_status = mb_linear_interp(verbose,
+								timelag_time_d-1, timelag_model-1,
+								ntimelag, dat_sonardepth_time_d[ndat_sonardepth], &timelag, &jtimelag,
+								&error);
+					dat_sonardepth_time_d[ndat_sonardepth] -= timelag;
+					}
+
+				/* increment counter */
+				ndat_sonardepth++;
+				}
 			}
 
 		/* print debug statements */
@@ -1298,6 +1586,45 @@ int main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 
+	/* if desired apply filtering to sonardepth data */
+	if (sonardepthfilter == MB_YES)
+		{
+		/* apply filtering to sonardepth data
+			read from asynchronous records in 7k files */
+		if (ndat_sonardepth > 1)
+			{
+fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
+			dtime = (dat_sonardepth_time_d[ndat_sonardepth-1]  - dat_sonardepth_time_d[0]) / ndat_sonardepth;
+			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+			for (i=0;i<ndat_sonardepth;i++)
+				{
+				dat_sonardepth_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+				for (j=j1;j<=j2;j++)
+					{
+					dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
+					weight = exp(-dtol * dtol);
+					dat_sonardepth_sonardepthfilter[i] += weight * dat_sonardepth_sonardepth[j];
+					sonardepth_filterweight += weight;
+					}
+				if (sonardepth_filterweight > 0.0)
+					dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
+				}
+			for (i=0;i<ndat_sonardepth;i++)
+				{
+				if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(dat_sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				dat_sonardepth_sonardepth[i] = (1.0 - factor) * dat_sonardepth_sonardepth[i]
+							+ factor * dat_sonardepth_sonardepthfilter[i];
+				}
+			}
+		}
+
 	/* output asynchronous navigation and attitude data */
 	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal navigation data read: %d\n", ndat_nav);
@@ -1306,6 +1633,14 @@ int main (int argc, char **argv)
 			{
 			fprintf(stdout, "  NAV: %5d %17.6f %11.6f %10.6f\n",
 				i, dat_nav_time_d[i], dat_nav_lon[i], dat_nav_lat[i]);
+			}
+	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+		fprintf(stdout, "\nTotal sonardepth data read: %d\n", ndat_sonardepth);
+	if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+		for (i=0;i<ndat_sonardepth;i++)
+			{
+			fprintf(stdout, "  DEP: %5d %17.6f %8.3f\n",
+				i, dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
 			}
 	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal heading data read: %d\n", ndat_heading);
@@ -1407,7 +1742,7 @@ int main (int argc, char **argv)
 	/* now read the data files again, this time interpolating nav and attitude
 		into the multibeam records and fixing other problems found in the
 		data */
-	if (mode == MBKONSBERGPREPROCESS_PROCESS)
+	if (mode >= MBKONSBERGPREPROCESS_PROCESS)
 	{
 
 	/* open file list */
@@ -1499,17 +1834,6 @@ int main (int argc, char **argv)
 			exit(error);
 			}
 		nfile_write++;
-
-		/* initialize asynchronous sonardepth output file */
-		sprintf(atsfile,"%s.ats",ofile);
-		if ((atsfp = fopen(atsfile, "w")) == NULL)
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr,"\nUnable to open asynchronous sonardepth data file <%s> for writing\n",atsfile);
-			fprintf(stderr,"\nProgram <%s> Terminated\n",
-				program_name);
-			exit(error);
-			}
 
 		/* initialize synchronous attitude output file */
 		sprintf(stafile,"%s.sta",ofile);
@@ -1637,6 +1961,14 @@ int main (int argc, char **argv)
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
+			
+		/* if specified set water column record to error so it will not be output */
+		if (watercolumnmode == MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE
+			&& status == MB_SUCCESS && istore->type == EM3_WATERCOLUMN)
+			{
+			error = MB_ERROR_IGNORE;
+			status = MB_FAILURE;
+			}
 
 		/* keep track of starting and ending time of sonar data for this file */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
@@ -1650,10 +1982,7 @@ int main (int argc, char **argv)
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 			/* get survey data structure */
-			if (istore->serial != 0 && istore->serial == istore->par_serial_2)
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping2;
-			else
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping1;
+			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
 
 			nrec_0xE5_bathymetry_mbari59++;
 			if (ping->png_raw_read == MB_YES)
@@ -1733,10 +2062,256 @@ int main (int argc, char **argv)
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 			/* get survey data structure */
-			if (istore->serial != 0 && istore->serial == istore->par_serial_2)
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping2;
+			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
+				
+			/* get transducer offsets */
+			if (istore->par_stc == 0)
+				{
+				tx_x = istore->par_s1x;
+				tx_y = istore->par_s1y;
+				tx_z = istore->par_s1z;
+				tx_h = istore->par_s1h;
+				tx_r = istore->par_s1r;
+				tx_p = istore->par_s1p;
+				rx_x = istore->par_s2x;
+				rx_y = istore->par_s2y;
+				rx_z = istore->par_s2z;
+				rx_h = istore->par_s2h;
+				rx_r = istore->par_s2r;
+				rx_p = istore->par_s2p;
+				}
+			else if (istore->par_stc == 1)
+				{
+				tx_x = istore->par_s1x;
+				tx_y = istore->par_s1y;
+				tx_z = istore->par_s1z;
+				tx_h = istore->par_s1h;
+				tx_r = istore->par_s1r;
+				tx_p = istore->par_s1p;
+				rx_x = istore->par_s1x;
+				rx_y = istore->par_s1y;
+				rx_z = istore->par_s1z;
+				rx_h = istore->par_s1h;
+				rx_r = istore->par_s1r;
+				rx_p = istore->par_s1p;
+				}
+			else if (istore->par_stc == 2 && ping->png_serial == istore->par_serial_1)
+				{
+				tx_x = istore->par_s1x;
+				tx_y = istore->par_s1y;
+				tx_z = istore->par_s1z;
+				tx_h = istore->par_s1h;
+				tx_r = istore->par_s1r;
+				tx_p = istore->par_s1p;
+				rx_x = istore->par_s1x;
+				rx_y = istore->par_s1y;
+				rx_z = istore->par_s1z;
+				rx_h = istore->par_s1h;
+				rx_r = istore->par_s1r;
+				rx_p = istore->par_s1p;
+				}
+			else if (istore->par_stc == 2 && ping->png_serial == istore->par_serial_2)
+				{
+				tx_x = istore->par_s2x;
+				tx_y = istore->par_s2y;
+				tx_z = istore->par_s2z;
+				tx_h = istore->par_s2h;
+				tx_r = istore->par_s2r;
+				tx_p = istore->par_s2p;
+				rx_x = istore->par_s2x;
+				rx_y = istore->par_s2y;
+				rx_z = istore->par_s2z;
+				rx_h = istore->par_s2h;
+				rx_r = istore->par_s2r;
+				rx_p = istore->par_s2p;
+				}
+			else if (istore->par_stc == 3 && ping->png_serial == istore->par_serial_1)
+				{
+				tx_x = istore->par_s1x;
+				tx_y = istore->par_s1y;
+				tx_z = istore->par_s1z;
+				tx_h = istore->par_s1h;
+				tx_r = istore->par_s1r;
+				tx_p = istore->par_s1p;
+				rx_x = istore->par_s2x;
+				rx_y = istore->par_s2y;
+				rx_z = istore->par_s2z;
+				rx_h = istore->par_s2h;
+				rx_r = istore->par_s2r;
+				rx_p = istore->par_s2p;
+				}
+			else if (istore->par_stc == 3 && ping->png_serial == istore->par_serial_2)
+				{
+				tx_x = istore->par_s1x;
+				tx_y = istore->par_s1y;
+				tx_z = istore->par_s1z;
+				tx_h = istore->par_s1h;
+				tx_r = istore->par_s1r;
+				tx_p = istore->par_s1p;
+				rx_x = istore->par_s3x;
+				rx_y = istore->par_s3y;
+				rx_z = istore->par_s3z;
+				rx_h = istore->par_s3h;
+				rx_r = istore->par_s3r;
+				rx_p = istore->par_s3p;
+				}
+			else if (istore->par_stc == 4 && ping->png_serial == istore->par_serial_1)
+				{
+				tx_x = istore->par_s0x;
+				tx_y = istore->par_s0y;
+				tx_z = istore->par_s0z;
+				tx_h = istore->par_s0h;
+				tx_r = istore->par_s0r;
+				tx_p = istore->par_s0p;
+				rx_x = istore->par_s2x;
+				rx_y = istore->par_s2y;
+				rx_z = istore->par_s2z;
+				rx_h = istore->par_s2h;
+				rx_r = istore->par_s2r;
+				rx_p = istore->par_s2p;
+				}
+			else if (istore->par_stc == 4 && ping->png_serial == istore->par_serial_2)
+				{
+				tx_x = istore->par_s1x;
+				tx_y = istore->par_s1y;
+				tx_z = istore->par_s1z;
+				tx_h = istore->par_s1h;
+				tx_r = istore->par_s1r;
+				tx_p = istore->par_s1p;
+				rx_x = istore->par_s3x;
+				rx_y = istore->par_s3y;
+				rx_z = istore->par_s3z;
+				rx_h = istore->par_s3h;
+				rx_r = istore->par_s3r;
+				rx_p = istore->par_s3p;
+				}
+				
+			/* get active sensor offsets */
+			if (istore->par_dsh[0] == 'I')
+				depthsensor_mode = MBKONSBERGPREPROCESS_USE_SENSORDEPTH_ONLY;
 			else
-				ping = (struct mbsys_simrad3_ping_struct *) istore->ping1;
+				depthsensor_mode = MBKONSBERGPREPROCESS_USE_HEAVE_ONLY;
+			depth_off_x = istore->par_dsx;
+			depth_off_y = istore->par_dsy;
+			depth_off_z = istore->par_dsz;
+			if (istore->par_aps == 0)
+				{
+				position_off_x = istore->par_p1x;
+				position_off_y = istore->par_p1y;
+				position_off_z = istore->par_p1z;
+				}
+			else if (istore->par_aps == 1)
+				{
+				position_off_x = istore->par_p2x;
+				position_off_y = istore->par_p2y;
+				position_off_z = istore->par_p2z;
+				}
+			else if (istore->par_aps == 2)
+				{
+				position_off_x = istore->par_p3x;
+				position_off_y = istore->par_p3y;
+				position_off_z = istore->par_p3z;
+				}
+			if (istore->par_aro == 2)
+				{
+				rollpitch_off_x = istore->par_msx;
+				rollpitch_off_y = istore->par_msy;
+				rollpitch_off_z = istore->par_msz;
+				rollpitch_off_h = istore->par_msg;
+				rollpitch_off_r = istore->par_msr;
+				rollpitch_off_p = istore->par_msp;
+				}
+			else if (istore->par_aro == 3)
+				{
+				rollpitch_off_x = istore->par_nsx;
+				rollpitch_off_y = istore->par_nsy;
+				rollpitch_off_z = istore->par_nsz;
+				rollpitch_off_h = istore->par_nsg;
+				rollpitch_off_r = istore->par_nsr;
+				rollpitch_off_p = istore->par_nsp;
+				}
+			if (istore->par_ahe == 2)
+				{
+				heave_off_x = istore->par_msx;
+				heave_off_y = istore->par_msy;
+				heave_off_z = istore->par_msz;
+				heave_off_h = istore->par_msg;
+				heave_off_r = istore->par_msr;
+				heave_off_p = istore->par_msp;
+				}
+			else if (istore->par_ahe == 3)
+				{
+				heave_off_x = istore->par_nsx;
+				heave_off_y = istore->par_nsy;
+				heave_off_z = istore->par_nsz;
+				heave_off_h = istore->par_nsg;
+				heave_off_r = istore->par_nsr;
+				heave_off_p = istore->par_nsp;
+				}
+			if (istore->par_ahs == 0 || istore->par_ahs == 4)
+				{
+				heading_off_x = istore->par_p3x;
+				heading_off_y = istore->par_p3y;
+				heading_off_z = istore->par_p3z;
+				heading_off_h = istore->par_gcg;
+				heading_off_r = 0.0;
+				heading_off_p = 0.0;
+				}
+			else if (istore->par_ahs == 1)
+				{
+				heading_off_x = istore->par_p1x;
+				heading_off_y = istore->par_p1y;
+				heading_off_z = istore->par_p1z;
+				heading_off_h = istore->par_gcg;
+				heading_off_r = 0.0;
+				heading_off_p = 0.0;
+				}
+			else if (istore->par_ahs == 2)
+				{
+				heading_off_x = istore->par_msx;
+				heading_off_y = istore->par_msy;
+				heading_off_z = istore->par_msz;
+				heading_off_h = istore->par_msg + istore->par_gcg;
+				heading_off_r = istore->par_msr;
+				heading_off_p = istore->par_msp;
+				}
+			else if (istore->par_ahs == 3 && istore->par_nsz != 0.0)
+				{
+				heading_off_x = istore->par_nsx;
+				heading_off_y = istore->par_nsy;
+				heading_off_z = istore->par_nsz;
+				heading_off_h = istore->par_nsg + istore->par_gcg;
+				heading_off_r = istore->par_nsr;
+				heading_off_p = istore->par_nsp;
+				}
+			else if (istore->par_ahs == 3)
+				{
+				heading_off_x = istore->par_p2x;
+				heading_off_y = istore->par_p2y;
+				heading_off_z = istore->par_p2z;
+				heading_off_h = istore->par_gcg;
+				heading_off_r = 0.0;
+				heading_off_p = 0.0;
+				}
+
+			/* merge heading from best available source */
+			if (ndat_heading > 0)
+				{
+				interp_status = mb_linear_interp_heading(verbose,
+							dat_heading_time_d-1, dat_heading_heading-1,
+							ndat_heading, time_d, &heading, &jheading,
+							&error);
+				}
+			else
+				{
+				/* if from embedded ancilliary data apply installation parameters */
+				mb_hedint_interp(verbose, imbio_ptr, time_d,
+							&heading, &error);
+				}
+			if (heading < 0.0)
+				heading += 360.0;
+			else if (heading >= 360.0)
+				heading -= 360.0;
 
 			/* merge navigation from best available source */
 			if (ndat_nav > 0)
@@ -1753,26 +2328,23 @@ int main (int argc, char **argv)
 				}
 			else
 				{
-				navlon = 0.0;
-				navlat = 0.0;
-				speed = 0.0;
+				/* if from embedded ancilliary data apply installation parameters */
+				mb_navint_interp(verbose, imbio_ptr, time_d, heading, 0.0,
+							&navlon, &navlat, &speed, &error);
 				}
-
-			/* merge heading from best available source */
-			if (ndat_heading > 0)
+			
+			/* merge sonardepth from best available source */
+			if (ndat_sonardepth > 0)
 				{
-				interp_status = mb_linear_interp_heading(verbose,
-							dat_heading_time_d-1, dat_heading_heading-1,
-							ndat_heading, time_d, &heading, &jheading,
+				interp_status = mb_linear_interp(verbose,
+							dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
+							ndat_sonardepth, time_d, &sonardepth, &jsonardepth,
 							&error);
-				if (heading < 0.0)
-					heading += 360.0;
-				else if (heading >= 360.0)
-					heading -= 360.0;
 				}
 			else
 				{
-				heading = 0.0;
+				mb_depint_interp(verbose, imbio_ptr, time_d,
+							&sonardepth, &error);
 				}
 
 			/* get attitude from best available source */
@@ -1795,8 +2367,17 @@ int main (int argc, char **argv)
 				}
 			else
 				{
-				roll = 0.0;
-				pitch = 0.0;
+				mb_attint_interp(verbose, imbio_ptr, time_d,
+							&heave, &roll, &pitch, &error);
+				}
+
+			/* apply offset between depth sensor and sonar */
+			if (sonardepthlever == MB_YES)
+				{
+				sonardepth += sonardepthoffset
+						+ depthsensoroffx * sin(DTR * roll)
+						+ depthsensoroffy * sin(DTR * pitch)
+						+ depthsensoroffz * cos(DTR * pitch);
 				}
 
 			/* insert navigation */
@@ -1806,6 +2387,9 @@ int main (int argc, char **argv)
 				navlon -= 360.0;
 			ping->png_longitude = 10000000 * navlon;
 			ping->png_latitude = 20000000 * navlat;
+			
+			/* insert sonardepth */
+			ping->png_xducer_depth = sonardepth;
 
 			/* insert heading */
 			if (heading < 0.0)
@@ -1819,489 +2403,230 @@ int main (int argc, char **argv)
 			ping->png_pitch = (int) rint(pitch / 0.01);
 			ping->png_heave = (int) rint(heave / 0.01);
 
-			/* output asynchronous sonardepth (though really synchronous for Kongsberg data) */
-			fprintf(atsfp, "%0.6f\t%0.3f\n", time_d, ping->png_xducer_depth);
-
 			/* output synchronous attitude */
 			fprintf(stafp, "%0.6f\t%0.3f\t%0.3f\n",time_d, roll, pitch);
-
-			/* recalculate beam angles if desired */
-			if (recalculate_beam_angles == MB_YES && imb_io_ptr->saveptr1 != NULL)
+	
+			/* calculate corrected ranges, angles, and bathymetry for each beam */
+			for (i=0;i<ping->png_nbeams;i++)
 				{
-				/* estimate effective heave using sonar parameters this ought to work but isn't quite right */
-				heave_ping = 0.5 * (istore->par_s1z + istore->par_s2z) - istore->par_wlz - ping->png_xducer_depth;
+				/* calculate time of transmit and receive */
+				transmit_time_d = time_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
+				receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
 
-				/* make first cut at angles */
-				/* calculate corrected ranges, angles, and bathymetry */
-				theta_nadir = 90.0;
-				inadir = 0;
-				for (i=0;i<ping->png_nbeams;i++)
+				/* merge heading from best available source */
+				if (ndat_heading > 0)
 					{
-					/* get attitude and heave at ping and receive time */
-					transmit_time_d = time_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
+					interp_status = mb_linear_interp_heading(verbose,
+								dat_heading_time_d-1, dat_heading_heading-1,
+								ndat_heading, transmit_time_d, &transmit_heading, &jheading,
+								&error);
+					interp_status = mb_linear_interp_heading(verbose,
+								dat_heading_time_d-1, dat_heading_heading-1,
+								ndat_heading, receive_time_d, &receive_heading, &jheading,
+								&error);
+					}
+				else
+					{
 					mb_hedint_interp(verbose, imbio_ptr, transmit_time_d,
 								&transmit_heading, &error);
-					mb_attint_interp(verbose, imbio_ptr, transmit_time_d,
-								&transmit_heave, &transmit_roll, &transmit_pitch, &error);
-					receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
 					mb_hedint_interp(verbose, imbio_ptr, receive_time_d,
 								&receive_heading, &error);
+					}
+				if (transmit_heading < 0.0)
+					transmit_heading += 360.0;
+				else if (transmit_heading >= 360.0)
+					transmit_heading -= 360.0;
+				if (receive_heading < 0.0)
+					receive_heading += 360.0;
+				else if (receive_heading >= 360.0)
+					receive_heading -= 360.0;
+	
+				/* get attitude from best available source */
+				if (ndat_rph > 0)
+					{
+					interp_status = mb_linear_interp(verbose,
+								dat_rph_time_d-1, dat_rph_roll-1,
+								ndat_rph, transmit_time_d, &transmit_roll, &jattitude,
+								&error);
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp(verbose,
+								dat_rph_time_d-1, dat_rph_pitch-1,
+								ndat_rph, transmit_time_d, &transmit_pitch, &jattitude,
+								&error);
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp(verbose,
+								dat_rph_time_d-1, dat_rph_heave-1,
+								ndat_rph, transmit_time_d, &transmit_heave, &jattitude,
+								&error);
+					interp_status = mb_linear_interp(verbose,
+								dat_rph_time_d-1, dat_rph_roll-1,
+								ndat_rph, receive_time_d, &receive_roll, &jattitude,
+								&error);
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp(verbose,
+								dat_rph_time_d-1, dat_rph_pitch-1,
+								ndat_rph, receive_time_d, &receive_pitch, &jattitude,
+								&error);
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp(verbose,
+								dat_rph_time_d-1, dat_rph_heave-1,
+								ndat_rph, receive_time_d, &receive_heave, &jattitude,
+								&error);
+					}
+				else
+					{
+					mb_attint_interp(verbose, imbio_ptr, transmit_time_d,
+								&transmit_heave, &transmit_roll, &transmit_pitch, &error);
 					mb_attint_interp(verbose, imbio_ptr, receive_time_d,
 								&receive_heave, &receive_roll, &receive_pitch, &error);
-
-					/* alongtrack offset distance */
-					transmit_alongtrack = (0.01 * ((double)ping->png_speed))
-								* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
-
-					/* get corrected range */
-					if (ping->png_ssv <= 0)
-						ping->png_ssv = 150;
-					soundspeed = 0.1 * ((double)ping->png_ssv);
-					ping->png_range[i] = ping->png_raw_rxrange[i];
-					heave_beam = 0.5 * (transmit_heave + receive_heave);
-					ping->png_bheave[i] = receive_heave - transmit_heave;
-					depth_offset_use = ping->png_xducer_depth - ping->png_bheave[i];
-
-					/* calculate angles */
-					alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) - transmit_pitch + istore->par_msp;
-					beta = 90.0 - ((0.01 * (double)ping->png_raw_rxpointangle[i]) + receive_roll - istore->par_msr);
-					mb_rollpitch_to_takeoff(
-						verbose,
-						alpha, beta,
-						&theta, &phi,
-						&error);
-
-					/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
-						the ping heading and the heading at sector transmit time */
-					phi -= transmit_heading - heading;
-					if (phi > 180.0) phi -= 360.0;
-					if (phi < -180.0) phi += 360.0;
-
-					/* get takeoff angles */
-					ping->png_depression[i] = theta;
-					ping->png_azimuth[i] = phi;
-
-					/* check for most nadir beam */
-					if (ping->png_clean[i] == 0 && theta < theta_nadir)
-						{
-						theta_nadir = theta;
-						inadir = i;
-						}
 					}
-
-				/* Unfortunately, the above code is not succeeding in calculating angles that, after
-					raytracing, replicate the sounding positions reported by the sonar. I am
-					probably missing some aspect of the calculation of attitude compensation, or
-					I've just got something wrong.
-					To get bathymetry recalculation close to right, I will estimate the azimuthal
-					angle phi using the originally reported beam positions. I will then estimate
-					the takeoff angle theta by the following three steps:
-						1. Iteratively raytrace the most vertical beam to find the angle
-							reproducing the original position. Then take the difference
-							between the calculated and originally reported depth and
-							treat that as an effective heave offset that is added to all beams.
-						2. For each beam iteratively raytrace to match the originally reported position.
-							Also iteratively raytrace to match the originally reported depth.
-						3. Estimate takeoff angle for the beam as a weighted average of the position
-							and depth matching takeoff angles, where the weighting for the position
-							matching estimate is cos(theta)**2 and the weighting for the depth-matching
-							estimate is (1 - cos(theta)**2). */
-
-				/* estimate effective heave by raytracing the most-vertical beam and matching the position to within
-					1 mm. Add the depth difference to all beams as an effective heave offset */
-				heave_offset = 0.0;
-				dt = 0.0;
-
-				/* get attitude and heave at ping and receive time */
-				transmit_time_d = time_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[inadir]];
-				mb_hedint_interp(verbose, imbio_ptr, transmit_time_d,
-							&transmit_heading, &error);
-				mb_attint_interp(verbose, imbio_ptr, transmit_time_d,
-							&transmit_heave, &transmit_roll, &transmit_pitch, &error);
-				receive_time_d = transmit_time_d + ping->png_raw_rxrange[inadir];
-				mb_hedint_interp(verbose, imbio_ptr, receive_time_d,
-							&receive_heading, &error);
-				mb_attint_interp(verbose, imbio_ptr, receive_time_d,
-							&receive_heave, &receive_roll, &receive_pitch, &error);
-
-				/* get range */
+	
+				/* get ssv and range */
 				if (ping->png_ssv <= 0)
 					ping->png_ssv = 150;
-				soundspeed = 0.1 * ((double)ping->png_ssv);
-				ping->png_range[inadir] = ping->png_raw_rxrange[inadir];
-				heave_beam = 0.5 * (transmit_heave + receive_heave);
-				ping->png_bheave[inadir] = receive_heave - transmit_heave;
+				ping->png_range[i] = ping->png_raw_rxrange[i];
+				
+				/* ping->png_bheave[i] is the difference between the heave at the ping timestamp time that is factored
+				 * into the ping->png_xducer_depth value and the average heave at the sector transmit time and the beam receive time */
+				ping->png_bheave[i] = 0.5 *(receive_heave + transmit_heave) - heave;
+/* fprintf(stderr,"AAA png_count:%d beam:%d heave_ping:%f i:%d transmit_heave:%f receive_heave:%f bheave:%f\n",
+ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i]); */
 
-				/* get depth_offset_use and static_shift for raytracing */
-				if (istore->svp_num > 0)
-					svpdepthstart = 0.01 * istore->svp_depth_res * istore->svp_depth[0];
-				else
-					svpdepthstart = 0.0;
-				depth_offset_use = ping->png_xducer_depth - ping->png_bheave[inadir];
-				if (depth_offset_use < svpdepthstart)
-					static_shift = depth_offset_use - svpdepthstart;
-				else
-					static_shift = 0.0;
+				/* also add in lever arm due to the offset between the motion sensor and
+				 * the sonar */
+				/* status = mb_lever(verbose,
+							rx_y,
+							rx_x,
+							rx_z,
+							position_off_y,
+							position_off_x,
+							position_off_z,
+							rollpitch_off_y,
+							rollpitch_off_x,
+							rollpitch_off_z,
+							receive_pitch,
+							receive_roll,
+							&lever_x,
+							&lever_y,
+							&lever_z,
+							&error); */
+/* fprintf(stderr,"Lever: roll:%f pitch:%f  lever: %f %f %f\n",roll,pitch,lever_x,lever_y,lever_z); */
 
-				/* calculate angles */
-				alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[inadir]]) - transmit_pitch + istore->par_msp;
-				beta = 90.0 - ((0.01 * (double)ping->png_raw_rxpointangle[inadir]) + receive_roll - istore->par_msr);
-				mb_rollpitch_to_takeoff(
-					verbose,
-					alpha, beta,
-					&theta, &phi,
-					&error);
-
-				/* obtain lever arm offset for sonar relative to the position sensor */
-				mb_lever(verbose, istore->par_s1y, istore->par_s1x, istore->par_s1z - istore->par_wlz,
-						istore->par_p1y, istore->par_p1x, istore->par_p1z,
-						istore->par_msy, istore->par_msx, istore->par_msz,
-						-transmit_pitch + istore->par_msp, -receive_roll + istore->par_msr,
-						&lever_x, &lever_y, &lever_z, &error);
-
-				/* obtain position offset for beam */
-				offset_x = istore->par_s1y - istore->par_p1y + lever_x;
-				offset_y = istore->par_s1x - istore->par_p1x + lever_y;
-				offset_z =  receive_heave - transmit_heave + lever_z;
-
-				/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
-					the ping heading and the heading at sector transmit time */
-				phi -= transmit_heading - heading;
-				if (phi > 180.0) phi -= 360.0;
-				if (phi < -180.0) phi += 360.0;
-
-				/* alongtrack offset distance */
-				transmit_alongtrack = (0.01 * ((double)ping->png_speed))
-							* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[inadir]]);
-
-				/* corrected lateral distance */
-				xxx = ping->png_acrosstrack[inadir] - offset_x;
-				yyy = ping->png_alongtrack[inadir] - offset_y - transmit_alongtrack;
-				xx = sqrt(xxx * xxx + yyy * yyy);
-				zz = ping->png_depth[inadir] + ping->png_xducer_depth;
-				mb_xyz_to_takeoff(verbose,-xxx, yyy, ping->png_depth[inadir],
-							&theta_bath,&phi_bath,&error);
-				phi = phi_bath;
-
-				/* find vertical takeoff angle that matches the position to within 1 mm */
-				iterx = 0;
-				iterz = 0;
-				theta_x = theta;
-				thetamin = 0.0;
-				thetamax = 90.0;
-				dtheta = 0.0;
-				dx = zz;
-				dz = zz;
-				zzcalc = zz;
-				zzcalc_old = 0.0;
-				done = MB_NO;
-				while (iterx < 3 || done == MB_NO)
+				/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+					Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+					Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+					Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+					p.26-31.
+					(http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+				   note complexity if transducer arrays are reverse mounted, as determined
+				   by a mount heading angle of about 180 degrees rather than about 0 degrees.
+				   If a receive array or a transmit array are reverse mounted then:
+					1) subtract 180 from the heading mount angle of the array
+					2) flip the sign of the pitch and roll mount offsets of the array
+					3) flip the sign of the beam steering angle from that array
+						(reverse TX means flip sign of TX steer, reverse RX
+						means flip sign of RX steer) */
+				if (tx_h <= 90.0 || tx_h >= 270.0)
 					{
-					theta_old = theta_x;
-					xxcalc_old = xxcalc;
-					zzcalc_old = zzcalc;
-					if (theta_x + dtheta > thetamin && theta_x + dtheta < thetamax)
-						theta_x += dtheta;
-					else if (dtheta < 0.0)
-						theta_x = theta_x - 0.5 * (theta_x - thetamin);
-					else if (dtheta > 0.0)
-						theta_x = theta_x + 0.5 * (thetamax - theta_x);
-					tt = 0.5 * ping->png_range[inadir];
-
-					mb_rt(verbose, (void *) imb_io_ptr->saveptr1,
-						depth_offset_use,
-						theta_x, tt,
-						MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE, soundspeed, 0.0,
-						0, NULL, NULL, NULL,
-						&xxcalc, &zzcalc, &ttt, &ray_stat,&error);
-					zzcalc += static_shift;
-					dx = xx - xxcalc;
-					dz = zz - zzcalc;
-					if (xxcalc > xx)
-						thetamax = MIN(thetamax, theta_x);
-					if (xxcalc < xx)
-						thetamin = MAX(thetamin, theta_x);
-					if (iterx == 0)
-						{
-						if (xxcalc > xx)
-							{
-							dtheta = -0.01;
-							thetamax = MIN(thetamax, theta_x);
-							}
-						else
-							{
-							dtheta = 0.01;
-							thetamin = MAX(thetamin, theta_x);
-							}
-						}
-					else if (fabs(dx) < MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION)
-						{
-						dtheta = 0.0;
-						done = MB_YES;
-						}
-					else if (fabs(xxcalc - xxcalc_old) < MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION)
-						{
-						dtheta = 0.0;
-						done = MB_YES;
-						}
-					else
-						{
-						dtheta = (xx - xxcalc) * (theta_x - theta_old) / (xxcalc - xxcalc_old);
-						}
-
-					iterx++;
-					if (iterx >= MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX)
-						done = MB_YES;
+					tx_align.roll = tx_r;
+					tx_align.pitch = tx_p;
+					tx_align.heading = tx_h;
+					tx_steer = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
 					}
-
-				/* set the heave offset that will be added to all beams */
-				heave_offset = -dz;
-
-				/* calculate ranges, angles, and bathymetry */
-				for (i=0;i<ping->png_nbeams;i++)
+				else
 					{
-					/* only work on beams with good travel times */
-					detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];
-					if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0)
-						{
-						ping->png_beamflag[i] = MB_FLAG_NULL;
-						}
-					else if ((detection_mask & 128) == 128)
-						{
-						ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-						}
-					else if (ping->png_clean[i] != 0)
-						{
-						ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-						}
-					else
-						{
-						ping->png_beamflag[i] = MB_FLAG_NONE;
-						}
+					tx_align.roll = -tx_r;
+					tx_align.pitch = -tx_p;
+					tx_align.heading = tx_h - 180.0;
+					tx_steer = -(0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
+					}
+				tx_orientation.roll = transmit_roll;
+				tx_orientation.pitch = transmit_pitch;
+				tx_orientation.heading = transmit_heading;
+				if (rx_h <= 90.0 || rx_h >= 270.0)
+					{
+					rx_align.roll = rx_r;
+					rx_align.pitch = rx_p;
+					rx_align.heading = rx_h;
+					rx_steer = (0.01 * (double)ping->png_raw_rxpointangle[i]);
+					}
+				else
+					{
+					rx_align.roll = -rx_r;
+					rx_align.pitch = -rx_p;
+					rx_align.heading = rx_h - 180.0;
+					rx_steer = -(0.01 * (double)ping->png_raw_rxpointangle[i]);
+					}
+				rx_orientation.roll = receive_roll;
+				rx_orientation.pitch = receive_pitch;
+				rx_orientation.heading = receive_heading;
+				reference_heading = heading;
 
-					/* handle null beams */
-					if (ping->png_beamflag[i] == MB_FLAG_NULL)
-						{
-						ping->png_depression[i] = 0.0;
-						ping->png_azimuth[i] = 0.0;
-						ping->png_range[i] = 0.0;
-						}
-
-					/* handle non-null beams */
-					else
-						{
-						/* get attitude and heave at ping and receive time */
-						transmit_time_d = time_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
-						mb_hedint_interp(verbose, imbio_ptr, transmit_time_d,
-									&transmit_heading, &error);
-						mb_attint_interp(verbose, imbio_ptr, transmit_time_d,
-									&transmit_heave, &transmit_roll, &transmit_pitch, &error);
-						receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
-						mb_hedint_interp(verbose, imbio_ptr, receive_time_d,
-									&receive_heading, &error);
-						mb_attint_interp(verbose, imbio_ptr, receive_time_d,
-									&receive_heave, &receive_roll, &receive_pitch, &error);
-
-						/* get range */
-						if (ping->png_ssv <= 0)
-							ping->png_ssv = 150;
-						soundspeed = 0.1 * ((double)ping->png_ssv);
-						ping->png_range[i] = ping->png_raw_rxrange[i];
-						heave_beam = 0.5 * (transmit_heave + receive_heave);
-						ping->png_bheave[i] = receive_heave - transmit_heave + heave_offset;
-						depth_offset_use = ping->png_xducer_depth - ping->png_bheave[i];
-
-						/* calculate angles */
-						alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) - transmit_pitch + istore->par_msp;
-						beta = 90.0 - ((0.01 * (double)ping->png_raw_rxpointangle[i]) + receive_roll - istore->par_msr);
-						mb_rollpitch_to_takeoff(
-							verbose,
-							alpha, beta,
-							&theta, &phi,
+				status = mb_beaudoin(verbose,
+							tx_align,
+							tx_orientation,
+							tx_steer,
+							rx_align,
+							rx_orientation,
+							rx_steer,
+							reference_heading,
+							&beamAzimuth,
+							&beamDepression,
 							&error);
-
-						/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
-							the ping heading and the heading at sector transmit time */
-						phi -= transmit_heading - heading;
-						if (phi > 180.0) phi -= 360.0;
-						if (phi < -180.0) phi += 360.0;
-
-						/* alongtrack offset distance */
-						transmit_alongtrack = (0.01 * ((double)ping->png_speed))
-									* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
-
-						/* corrected lateral distance */
-						xxx = ping->png_acrosstrack[i] - offset_x;
-						yyy = ping->png_alongtrack[i] - offset_y - transmit_alongtrack;
-						xx = sqrt(xxx * xxx + yyy * yyy);
-						zz = ping->png_depth[i] + ping->png_xducer_depth;
-						mb_xyz_to_takeoff(verbose,-xxx, yyy, ping->png_depth[i],
-									&theta_bath,&phi_bath,&error);
-						phi = phi_bath;
-
-						/* get depth_offset_use and static_shift for raytracing */
-						if (istore->svp_num > 0)
-							svpdepthstart = 0.01 * istore->svp_depth_res * istore->svp_depth[0];
-						else
-							svpdepthstart = 0.0;
-						depth_offset_use = ping->png_xducer_depth - ping->png_bheave[i];
-						if (depth_offset_use < svpdepthstart)
-							static_shift = depth_offset_use - svpdepthstart;
-						else
-							static_shift = 0.0;
-
-						/* find vertical takeoff angle that matches the position to within 1 mm */
-						iterx = 0;
-						iterz = 0;
-						theta_x = theta;
-						thetamin = 0.0;
-						thetamax = 90.0;
-						dtheta = 0.0;
-						dx = zz;
-						dz = zz;
-						zzcalc = zz;
-						zzcalc_old = 0.0;
-						done = MB_NO;
-						while (iterx < 3 || done == MB_NO)
-							{
-							theta_old = theta_x;
-							xxcalc_old = xxcalc;
-							zzcalc_old = zzcalc;
-							if (theta_x + dtheta > thetamin && theta_x + dtheta < thetamax)
-								theta_x += dtheta;
-							else if (dtheta < 0.0)
-								theta_x = theta_x - 0.5 * (theta_x - thetamin);
-							else if (dtheta > 0.0)
-								theta_x = theta_x + 0.5 * (thetamax - theta_x);
-							tt = 0.5 * ping->png_range[i];
-
-							mb_rt(verbose, (void *) imb_io_ptr->saveptr1,
-								(depth_offset_use - static_shift),
-								theta_x, tt,
-								MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE, soundspeed, 0.0,
-								0, NULL, NULL, NULL,
-								&xxcalc, &zzcalc, &ttt, &ray_stat,&error);
-							zzcalc += static_shift;
-							dx = xx - xxcalc;
-							dz = zz - zzcalc;
-							if (xxcalc > xx)
-								thetamax = MIN(thetamax, theta_x);
-							if (xxcalc < xx)
-								thetamin = MAX(thetamin, theta_x);
-							if (iterx == 0)
-								{
-								if (xxcalc > xx)
-									{
-									dtheta = -0.01;
-									thetamax = MIN(thetamax, theta_x);
-									}
-								else
-									{
-									dtheta = 0.01;
-									thetamin = MAX(thetamin, theta_x);
-									}
-								}
-							else if (fabs(dx) < MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION)
-								{
-								dtheta = 0.0;
-								done = MB_YES;
-								}
-							else if (fabs(xxcalc - xxcalc_old) < MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION)
-								{
-								dtheta = 0.0;
-								done = MB_YES;
-								}
-							else
-								{
-								dtheta = (xx - xxcalc) * (theta_x - theta_old) / (xxcalc - xxcalc_old);
-								}
-
-							iterx++;
-							if (iterx >= MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX)
-								done = MB_YES;
-							}
-
-						/* find vertical takeoff angle that matches the depth to within 1 mm */
-						iterx = 0;
-						iterz = 0;
-						theta_z = theta_x;
-						thetamin = 0.0;
-						thetamax = 90.0;
-						dtheta = 0.0;
-						dx = zz;
-						dz = zz;
-						zzcalc = zz;
-						zzcalc_old = 0.0;
-						done = MB_NO;
-						while (iterz < 3 || done == MB_NO)
-							{
-							theta_old = theta_z;
-							xxcalc_old = xxcalc;
-							zzcalc_old = zzcalc;
-							if (theta_z + dtheta > thetamin && theta_z + dtheta < thetamax)
-								theta_z += dtheta;
-							else if (dtheta < 0.0)
-								theta_z = theta_z - 0.5 * (theta_z - thetamin);
-							else if (dtheta > 0.0)
-								theta_z = theta_z + 0.5 * (thetamax - theta_z);
-							tt = 0.5 * ping->png_range[i];
-
-							mb_rt(verbose, (void *) imb_io_ptr->saveptr1,
-								(depth_offset_use - static_shift),
-								theta_z, tt,
-								MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE, soundspeed, 0.0,
-								0, NULL, NULL, NULL,
-								&xxcalc, &zzcalc, &ttt, &ray_stat,&error);
-							zzcalc += static_shift;
-							dx = xx - xxcalc;
-							dz = zz - zzcalc;
-							if (zzcalc < zz)
-								thetamax = MIN(thetamax, theta_z);
-							if (zzcalc > zz)
-								thetamin = MAX(thetamin, theta_z);
-							if (iterz == 0)
-								{
-								if (zzcalc < zz)
-									{
-									dtheta = -0.01;
-									thetamax = MIN(thetamax, theta_z);
-									}
-								else
-									{
-									dtheta = 0.01;
-									thetamin = MAX(thetamin, theta_z);
-									}
-								}
-							else if (fabs(dz) < MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION)
-								{
-								dtheta = 0.0;
-								done = MB_YES;
-								}
-							else if (fabs(zzcalc - zzcalc_old) < MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION)
-								{
-								dtheta = 0.0;
-								done = MB_YES;
-								}
-							else
-								{
-								dtheta = (zz - zzcalc) * (theta_z - theta_old) / (zzcalc - zzcalc_old);
-								}
-
-							iterz++;
-							if (iterz >= MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX)
-								done = MB_YES;
-							}
-
-						weight = cos(DTR * theta) * cos (DTR * theta);
-						theta_new = weight * theta_x + (1.0 - weight) * theta_z;
-
-						ping->png_depression[i] = theta_new;
-						ping->png_azimuth[i] = phi;
-						ping->png_range[i] += dt;
-						}
+				ping->png_depression[i] = 90.0 - beamDepression;
+				ping->png_azimuth[i] = 90.0 + beamAzimuth;
+				if (ping->png_azimuth[i] < 0.0)
+					ping->png_azimuth[i] += 360.0;
+/* fprintf(stderr,"i:%d %f %f     %f %f\n",
+i,beamDepression,beamAzimuth,ping->png_depression[i],ping->png_azimuth[i]);*/
+	
+				/* calculate beamflag */
+				detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];
+				if (istore->sonar == MBSYS_SIMRAD3_M3 && (ping->png_detection[i] & 128) == 128)
+					{
+					ping->png_beamflag[i] = MB_FLAG_NULL;
+					ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
 					}
-
+				else if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0)
+					{
+					ping->png_beamflag[i] = MB_FLAG_NULL;
+/* fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
+i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
+					}
+				else if ((detection_mask & 128) == 128)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+/*fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
+i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
+					}
+				else if (ping->png_clean[i] != 0)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+					}
+				else
+					{
+					ping->png_beamflag[i] = MB_FLAG_NONE;
+					}
+					
+				/* check for NaN value */
+				if (isnan(ping->png_depth[i]))
+					{
+					ping->png_beamflag[i] = MB_FLAG_NULL;
+					ping->png_depth[i] = 0.0;
+					}
 				}
+	
+			/* generate processed sidescan */
+			pixel_size = (double *) &imb_io_ptr->saved1;
+			swath_width = (double *) &imb_io_ptr->saved2;
+			ping->png_pixel_size = 0;
+			ping->png_pixels_ss = 0;
+			status = mbsys_simrad3_makess(verbose,
+					imbio_ptr, istore_ptr,
+					MB_NO, pixel_size,
+					MB_NO, swath_width,
+					1,
+					&error);
 			}
 
 	   	/* handle unknown data */
@@ -2481,6 +2806,26 @@ int main (int argc, char **argv)
 			exit(error);
 			}
 
+		/* output asynchronous sonardepth output file */
+		sprintf(atsfile,"%s.ats",ofile);
+		if ((atsfp = fopen(atsfile, "w")) != NULL)
+			{
+			for (i=0;i<ndat_sonardepth;i++)
+				{
+				if (dat_sonardepth_time_d[i] > start_time_d && dat_sonardepth_time_d[i] < end_time_d)
+					fprintf(atsfp, "%0.6f\t%7.3f\n",dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
+				}
+			fclose(atsfp);
+			}
+		else
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open asynchronous sonardepth data file <%s> for writing\n",atsfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
 		/* output asynchronous attitude output file */
 		sprintf(atafile,"%s.ata",ofile);
 		if ((atafp = fopen(atafile, "w")) != NULL)
@@ -2502,7 +2847,6 @@ int main (int argc, char **argv)
 			}
 
 		/* close ats and sta files */
-		fclose(atsfp);
 		fclose(stafp);
 
 		/* generate inf fnv and fbt files */
