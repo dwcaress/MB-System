@@ -170,17 +170,17 @@ int mbr_em710raw_rd_svp2(int verbose, void *mbio_ptr, int swap,
 		short sonar, int *goodend, int *error);
 int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int version, int *which_sonar,
+		short sonar, int version, 
 		int *goodend, int *error);
 int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar, int *goodend, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar, int *goodend, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar,
+		short sonar,
 		int *goodend, int *error);
 int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
@@ -509,12 +509,6 @@ int mbr_dem_em710raw(int verbose, void *mbio_ptr, int *error)
 	/* get pointers to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
-	/* deallocate old raytracing structure if it exists */
-	if (mb_io_ptr->saveptr1 != NULL)
-		{
-		status = mb_rt_deall(verbose, &(mb_io_ptr->saveptr1), error);
-		}
-
 	/* deallocate memory for data descriptor */
 	status = mbsys_simrad3_deall(
 			verbose,mbio_ptr,
@@ -550,23 +544,46 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	bath_time_d, ss_time_d;
 	double	rawspeed, pheading;
 	double	plon, plat, pspeed, roll, pitch, heave;
-	double	heave_ping, heave_beam;
 	double	soundspeed;
 	double	transmit_alongtrack;
-	double	alpha, beta, theta, phi;
 	double	theta_nadir;
 	int	inadir;
-	double	*pixel_size, *swath_width;
-	mb_u_char detection_mask;
 	double	att_time_d[MBSYS_SIMRAD3_MAXATTITUDE];
 	double	att_roll[MBSYS_SIMRAD3_MAXATTITUDE];
 	double	att_pitch[MBSYS_SIMRAD3_MAXATTITUDE];
 	double	att_heave[MBSYS_SIMRAD3_MAXATTITUDE];
+	
 	double	transmit_time_d, transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
 	double	receive_time_d, receive_heading, receive_heave, receive_roll, receive_pitch;
-	double	*svpdepth = NULL;
-	double	*svpvel = NULL;
-	double	depth_offset_use;
+	
+	/* transmit and receive array offsets */
+	double	tx_x, tx_y, tx_z, tx_h, tx_r, tx_p;
+	double	rx_x, rx_y, rx_z, rx_h, rx_r, rx_p;
+	
+	/* roll and pitch sensor offsets */
+	double	rollpitch_off_x, rollpitch_off_y, rollpitch_off_z, rollpitch_off_h, rollpitch_off_r, rollpitch_off_p;
+	
+	/* heave sensor offsets */
+	double	heave_off_x, heave_off_y, heave_off_z, heave_off_h, heave_off_r, heave_off_p;
+	
+	/* heading sensor offset */
+	double	heading_off_x, heading_off_y, heading_off_z, heading_off_h, heading_off_r, heading_off_p;
+	
+	/* position sensor offsets */
+	double	position_off_x, position_off_y, position_off_z;
+	
+	/* variables for beam angle calculation */
+	mb_3D_orientation tx_align;
+	mb_3D_orientation tx_orientation;
+	double tx_steer;
+	mb_3D_orientation rx_align;
+	mb_3D_orientation rx_orientation;
+	double rx_steer;
+	double reference_heading;
+	double beamAzimuth;
+	double beamDepression;
+	double	*pixel_size, *swath_width;
+	mb_u_char detection_mask;
 	int	i;
 
 	/* print input debug statements */
@@ -588,10 +605,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointers to data structures */
 	store = (struct mbsys_simrad3_struct *) store_ptr;
-	if (store->serial != 0 && store->serial == store->par_serial_2)
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-	else
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 	attitude = (struct mbsys_simrad3_attitude_struct *) store->attitude;
 	netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
 	heading = (struct mbsys_simrad3_heading_struct *) store->heading;
@@ -775,36 +789,6 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->pos_heave = (int) rint(heave / 0.01);
 		}
 
-	/* if svp read then set up for raytracing */
-	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_VELOCITY_PROFILE
-		&& store->svp_num > 1)
-		{
-		/* deallocate old raytracing structure if it exists */
-		if (mb_io_ptr->saveptr1 != NULL)
-			{
-			status = mb_rt_deall(verbose, &(mb_io_ptr->saveptr1), error);
-			}
-
-		/* allocate memory for svp data */
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->svp_num * sizeof(double),(void **)&svpdepth, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->svp_num * sizeof(double),(void **)&svpvel, error);
-
-		/* construct svp from raw values */
-		for (i=0;i<store->svp_num;i++)
-			{
-			svpdepth[i] = 0.01 * store->svp_depth_res * store->svp_depth[i];
-			svpvel[i] = 0.1 * store->svp_vel[i];
-			}
-
-		/* initialize raytracing */
-		status = mb_rt_init(verbose, store->svp_num, svpdepth, svpvel, (void **) &(mb_io_ptr->saveptr1), error);
-
-		/* deallocate arrays */
-		mb_freed(verbose, __FILE__, __LINE__, (void **)&svpvel, error);
-		mb_freed(verbose, __FILE__, __LINE__, (void **)&svpdepth, error);
-		}
-
 	/* if no sidescan read then zero sidescan data */
 	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA
@@ -844,29 +828,18 @@ ping->png_count,ping->png_raw_count,ping->png_ss_count,ping->png_nbeams,ping->pn
 		   newer than bath then set error,  if ok then
 		   check that beam ids are the same */
 		if (ping->png_ss_date == 0
-			|| ping->png_nbeams_ss == 0
-			|| bath_time_d > ss_time_d)
+			|| ping->png_nbeams_ss == 0)
 		    {
 		    status = mbsys_simrad3_zero_ss(verbose,store_ptr,error);
 		    }
-		else if (bath_time_d > ss_time_d)
+		else if (fabs(bath_time_d - ss_time_d) > 0.002)
 		    {
 		    if (verbose > 0)
-		    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan zeroed, bathtime:%f >  sstime:%f\n",
+		    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan zeroed, bathtime:%f != sstime:%f\n",
 				function_name, time_i[0], time_i[1], time_i[2],
 					time_i[3], time_i[4], time_i[5], time_i[6],
 					bath_time_d, ss_time_d);
 		    status = mbsys_simrad3_zero_ss(verbose,store_ptr,error);
-		    }
-		else if (bath_time_d < ss_time_d)
-		    {
-		    if (verbose > 0)
-		    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Ping unintelligible bathtime:%f < sstime%f\n",
-				function_name, time_i[0], time_i[1], time_i[2],
-					time_i[3], time_i[4], time_i[5], time_i[6],
-					bath_time_d, ss_time_d);
-		    *error = MB_ERROR_UNINTELLIGIBLE;
-		    status = MB_FAILURE;
 		    }
 		else
 		    {
@@ -904,6 +877,229 @@ store->run_mode,
 ping->png_max_range, ping->png_r_zero,
 ping->png_r_zero_corr, ping->png_bsn,
 ping->png_bso);*/
+			
+		/* get transducer offsets */
+		if (store->par_stc == 0)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+			}
+		else if (store->par_stc == 1)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s1x;
+			rx_y = store->par_s1y;
+			rx_z = store->par_s1z;
+			rx_h = store->par_s1h;
+			rx_r = store->par_s1r;
+			rx_p = store->par_s1p;
+			}
+		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_1)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s1x;
+			rx_y = store->par_s1y;
+			rx_z = store->par_s1z;
+			rx_h = store->par_s1h;
+			rx_r = store->par_s1r;
+			rx_p = store->par_s1p;
+			}
+		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_2)
+			{
+			tx_x = store->par_s2x;
+			tx_y = store->par_s2y;
+			tx_z = store->par_s2z;
+			tx_h = store->par_s2h;
+			tx_r = store->par_s2r;
+			tx_p = store->par_s2p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+			}
+		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_1)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+			}
+		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_2)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s3x;
+			rx_y = store->par_s3y;
+			rx_z = store->par_s3z;
+			rx_h = store->par_s3h;
+			rx_r = store->par_s3r;
+			rx_p = store->par_s3p;
+			}
+		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_1)
+			{
+			tx_x = store->par_s0x;
+			tx_y = store->par_s0y;
+			tx_z = store->par_s0z;
+			tx_h = store->par_s0h;
+			tx_r = store->par_s0r;
+			tx_p = store->par_s0p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+			}
+		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_2)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s3x;
+			rx_y = store->par_s3y;
+			rx_z = store->par_s3z;
+			rx_h = store->par_s3h;
+			rx_r = store->par_s3r;
+			rx_p = store->par_s3p;
+			}
+			
+		/* get active sensor offsets */
+		if (store->par_aps == 0)
+			{
+			position_off_x = store->par_p1x;
+			position_off_y = store->par_p1y;
+			position_off_z = store->par_p1z;
+			}
+		else if (store->par_aps == 1)
+			{
+			position_off_x = store->par_p2x;
+			position_off_y = store->par_p2y;
+			position_off_z = store->par_p2z;
+			}
+		else if (store->par_aps == 2)
+			{
+			position_off_x = store->par_p3x;
+			position_off_y = store->par_p3y;
+			position_off_z = store->par_p3z;
+			}
+		if (store->par_aro == 2)
+			{
+			rollpitch_off_x = store->par_msx;
+			rollpitch_off_y = store->par_msy;
+			rollpitch_off_z = store->par_msz;
+			rollpitch_off_h = store->par_msg;
+			rollpitch_off_r = store->par_msr;
+			rollpitch_off_p = store->par_msp;
+			}
+		else if (store->par_aro == 3)
+			{
+			rollpitch_off_x = store->par_nsx;
+			rollpitch_off_y = store->par_nsy;
+			rollpitch_off_z = store->par_nsz;
+			rollpitch_off_h = store->par_nsg;
+			rollpitch_off_r = store->par_nsr;
+			rollpitch_off_p = store->par_nsp;
+			}
+		if (store->par_ahe == 2)
+			{
+			heave_off_x = store->par_msx;
+			heave_off_y = store->par_msy;
+			heave_off_z = store->par_msz;
+			heave_off_h = store->par_msg;
+			heave_off_r = store->par_msr;
+			heave_off_p = store->par_msp;
+			}
+		else if (store->par_ahe == 3)
+			{
+			heave_off_x = store->par_nsx;
+			heave_off_y = store->par_nsy;
+			heave_off_z = store->par_nsz;
+			heave_off_h = store->par_nsg;
+			heave_off_r = store->par_nsr;
+			heave_off_p = store->par_nsp;
+			}
+		if (store->par_ahs == 0 || store->par_ahs == 4)
+			{
+			heading_off_x = store->par_p3x;
+			heading_off_y = store->par_p3y;
+			heading_off_z = store->par_p3z;
+			heading_off_h = store->par_gcg;
+			heading_off_r = 0.0;
+			heading_off_p = 0.0;
+			}
+		else if (store->par_ahs == 1)
+			{
+			heading_off_x = store->par_p1x;
+			heading_off_y = store->par_p1y;
+			heading_off_z = store->par_p1z;
+			heading_off_h = store->par_gcg;
+			heading_off_r = 0.0;
+			heading_off_p = 0.0;
+			}
+		else if (store->par_ahs == 2)
+			{
+			heading_off_x = store->par_msx;
+			heading_off_y = store->par_msy;
+			heading_off_z = store->par_msz;
+			heading_off_h = store->par_msg + store->par_gcg;
+			heading_off_r = store->par_msr;
+			heading_off_p = store->par_msp;
+			}
+		else if (store->par_ahs == 3 && store->par_nsz != 0.0)
+			{
+			heading_off_x = store->par_nsx;
+			heading_off_y = store->par_nsy;
+			heading_off_z = store->par_nsz;
+			heading_off_h = store->par_nsg + store->par_gcg;
+			heading_off_r = store->par_nsr;
+			heading_off_p = store->par_nsp;
+			}
+		else if (store->par_ahs == 3)
+			{
+			heading_off_x = store->par_p2x;
+			heading_off_y = store->par_p2y;
+			heading_off_z = store->par_p2z;
+			heading_off_h = store->par_gcg;
+			heading_off_r = 0.0;
+			heading_off_p = 0.0;
+			}
 
 		/* get ping time */
 		time_i[0] = ping->png_date / 10000;
@@ -944,25 +1140,21 @@ ping->png_bso);*/
 		ping->png_pitch = (int) rint(pitch / 0.01);
 		ping->png_heave = (int) rint(heave / 0.01);
 
-		/* estimate effective heave using sonar parameters this ought to work but isn't quite right */
-		heave_ping = 0.5 * (store->par_s1z + store->par_s2z) - store->par_wlz - ping->png_xducer_depth;
-/* fprintf(stderr,"heave_ping:%f ping->png_xducer_depth:%f store->par_s1z:%f store->par_s2z:%f store->par_wlz:%f\n",
-heave_ping,ping->png_xducer_depth,store->par_s1z,store->par_s2z,store->par_wlz); */
-
-
 		/* make first cut at angles */
 		/* calculate corrected ranges, angles, and bathymetry */
 		theta_nadir = 90.0;
 		inadir = 0;
 		for (i=0;i<ping->png_nbeams;i++)
 			{
-			/* get attitude and heave at ping and receive time */
+			/* calculate time of transmit and receive */
 			transmit_time_d = ptime_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
+			receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
+
+			/* get attitude and heave at ping and receive time */
 			mb_hedint_interp(verbose, mbio_ptr, transmit_time_d,
 				    		&transmit_heading, error);
 			mb_attint_interp(verbose, mbio_ptr, transmit_time_d,
 				    		&transmit_heave, &transmit_roll, &transmit_pitch, error);
-			receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
 			mb_hedint_interp(verbose, mbio_ptr, receive_time_d,
 				    		&receive_heading, error);
 			mb_attint_interp(verbose, mbio_ptr, receive_time_d,
@@ -977,41 +1169,86 @@ heave_ping,ping->png_xducer_depth,store->par_s1z,store->par_s2z,store->par_wlz);
 				ping->png_ssv = 150;
 			soundspeed = 0.1 * ((double)ping->png_ssv);
 			ping->png_range[i] = ping->png_raw_rxrange[i];
-			heave_beam = 0.5 * (transmit_heave + receive_heave);
-			ping->png_bheave[i] = receive_heave - transmit_heave;
-			depth_offset_use = ping->png_xducer_depth - ping->png_bheave[i];
-/* fprintf(stderr,"AAA png_count:%d beam:%d heave_ping:%f i:%d transmit_heave:%f receive_heave:%f bheave:%f\n",
-ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i]); */
+			/* ping->png_bheave[i] is the difference between the heave at the ping timestamp time that is factored
+			 * into the ping->png_xducer_depth value and the average heave at the sector transmit time and the beam receive time */
+			ping->png_bheave[i] = 0.5 *(receive_heave + transmit_heave) - heave;
 
-			/* calculate angles */
-			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) - transmit_pitch + store->par_msp;
-			beta = 90.0 - ((0.01 * (double)ping->png_raw_rxpointangle[i]) + receive_roll - store->par_msr);
-			mb_rollpitch_to_takeoff(
-				verbose,
-				alpha, beta,
-				&theta, &phi,
-				error);
-
-			/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
-				the ping heading and the heading at sector transmit time */
-			phi -= transmit_heading - pheading;
-			if (phi > 180.0) phi -= 360.0;
-			if (phi < -180.0) phi += 360.0;
-
-			/* get takeoff angles */
-			ping->png_depression[i] = theta;
-			ping->png_azimuth[i] = phi;
-
-			/* check for most nadir beam */
-			if (ping->png_clean[i] == 0 && theta < theta_nadir)
+			/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+				Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+				Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+				Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+				p.26-31.
+				(http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+			   note complexity if transducer arrays are reverse mounted, as determined
+			   by a mount heading angle of about 180 degrees rather than about 0 degrees.
+			   If a receive array or a transmit array are reverse mounted then:
+				1) subtract 180 from the heading mount angle of the array
+				2) flip the sign of the pitch and roll mount offsets of the array
+				3) flip the sign of the beam steering angle from that array
+					(reverse TX means flip sign of TX steer, reverse RX
+					means flip sign of RX steer) */
+			if (tx_h <= 90.0 || tx_h >= 270.0)
 				{
-				theta_nadir = theta;
-				inadir = i;
+				tx_align.roll = tx_r;
+				tx_align.pitch = tx_p;
+				tx_align.heading = tx_h;
+				tx_steer = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
 				}
+			else
+				{
+				tx_align.roll = -tx_r;
+				tx_align.pitch = -tx_p;
+				tx_align.heading = tx_h - 180.0;
+				tx_steer = -(0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
+				}
+			tx_orientation.roll = transmit_roll;
+			tx_orientation.pitch = transmit_pitch;
+			tx_orientation.heading = transmit_heading;
+			if (rx_h <= 90.0 || rx_h >= 270.0)
+				{
+				rx_align.roll = rx_r;
+				rx_align.pitch = rx_p;
+				rx_align.heading = rx_h;
+				rx_steer = (0.01 * (double)ping->png_raw_rxpointangle[i]);
+				}
+			else
+				{
+				rx_align.roll = -rx_r;
+				rx_align.pitch = -rx_p;
+				rx_align.heading = rx_h - 180.0;
+				rx_steer = -(0.01 * (double)ping->png_raw_rxpointangle[i]);
+				}
+			rx_orientation.roll = receive_roll;
+			rx_orientation.pitch = receive_pitch;
+			rx_orientation.heading = receive_heading;
+			reference_heading = pheading;
+
+			status = mb_beaudoin(verbose,
+						tx_align,
+						tx_orientation,
+						tx_steer,
+						rx_align,
+						rx_orientation,
+						rx_steer,
+						reference_heading,
+						&beamAzimuth,
+						&beamDepression,
+						error);
+			ping->png_depression[i] = 90.0 - beamDepression;
+			ping->png_azimuth[i] = 90.0 + beamAzimuth;
+			if (ping->png_azimuth[i] < 0.0)
+				ping->png_azimuth[i] += 360.0;
+/* fprintf(stderr,"i:%d %f %f     %f %f\n",
+i,beamDepression,beamAzimuth,ping->png_depression[i],ping->png_azimuth[i]);*/
 
 			/* calculate beamflag */
 			detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];
-			if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0)
+			if (store->sonar == MBSYS_SIMRAD3_M3 && (ping->png_detection[i] & 128) == 128)
+				{
+				ping->png_beamflag[i] = MB_FLAG_NULL;
+				ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
+				}
+			else if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0)
 				{
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 /* fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
@@ -1131,14 +1368,11 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	*version;
 	short	*typelast;
 	short	*sonarlast;
-	int	*reset_ping1_flag;
-	int	*reset_ping2_flag;
 	int	*nbadrec;
 	int	good_end_bytes;
 	size_t	read_len;
 	int	skip = 0;
 	int	*num_sonars;
-	int	which_sonar = 0;
 	char	junk;
 	int	i;
 
@@ -1166,8 +1400,6 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	label = (char *) mb_io_ptr->save_label;
 	version = (int *) (&mb_io_ptr->save3);
 	label_save_flag = (int *) &mb_io_ptr->save_label_flag;
-	reset_ping1_flag = (int *) &mb_io_ptr->save4;
-	reset_ping2_flag = (int *) &mb_io_ptr->save5;
 	typelast = (short *) &mb_io_ptr->save6;
 	sonarlast = (short *) &mb_io_ptr->save7;
 	nbadrec = (int *) &mb_io_ptr->save8;
@@ -1180,22 +1412,17 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* set flag to swap bytes if necessary */
 	swap =  *databyteswapped;
 	
-	/* reset ping structures if flagged */
-	if (*reset_ping1_flag == MB_YES)
+	/* if a ping structure was previously flagged as complete then reset the structure to empty */
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES;i++)
 		{
-		store->ping1->png_bath_read = MB_NO;
-		store->ping1->png_raw_read = MB_NO;
-		store->ping1->png_quality_read = MB_NO;
-		store->ping1->png_ss_read = MB_NO;
-		*reset_ping1_flag = MB_NO;
-		}
-	if (*reset_ping2_flag == MB_YES)
-		{
-		store->ping2->png_bath_read = MB_NO;
-		store->ping2->png_raw_read = MB_NO;
-		store->ping2->png_quality_read = MB_NO;
-		store->ping2->png_ss_read = MB_NO;
-		*reset_ping2_flag = MB_NO;
+		if (store->pings[i].read_status == MBSYS_SIMRAD3_PING_COMPLETE)
+			{
+			store->pings[i].read_status = MBSYS_SIMRAD3_PING_NO_DATA;
+			store->pings[i].png_bath_read = MB_NO;
+			store->pings[i].png_raw_read = MB_NO;
+			store->pings[i].png_quality_read = MB_NO;
+			store->pings[i].png_ss_read = MB_NO;
+			}
 		}
 
 	/* loop over reading data until a record is ready for return */
@@ -1362,22 +1589,6 @@ Have a nice day...\n");
 			&& store->tilt == NULL)
 			{
 			status = mbsys_simrad3_tilt_alloc(
-					verbose,mbio_ptr,
-					store_ptr,error);
-			}
-
-		/* allocate secondary data structure for
-			survey data when needed */
-		if (status == MB_SUCCESS &&
-			(type == EM3_BATH2
-			|| type == EM3_RAWBEAM4
-			|| type == EM3_QUALITY
-			|| type == EM3_SS2))
-			{
-			/* if the start parameter values indicate that two sonars exist (e.g. EM2040D) then
-				two ping structures will be allocated */
-			if (store->ping1 == NULL)
-			    status = mbsys_simrad3_survey_alloc(
 					verbose,mbio_ptr,
 					store_ptr,error);
 			}
@@ -1680,41 +1891,36 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710raw_rd_bath2 type %x\n",type);
 #endif
 			status = mbr_em710raw_rd_bath2(
-				verbose,mbio_ptr,swap,store,sonar,*version,&which_sonar,&good_end_bytes,error);
+				verbose,mbio_ptr,swap,store,sonar,*version,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1)
-					{
-					store->ping1->png_bath_read = MB_YES;
-					}
-				else if (which_sonar == 2)
-					{
-					store->ping2->png_bath_read = MB_YES;
-					}
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_bath_read = MB_YES;
 				done = MB_NO;
 				}
-			if (status == MB_SUCCESS)
+			if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_M3)
 				{
-				if (which_sonar == 1
-					&& store->ping1->png_bath_read == MB_YES
-					&& store->ping1->png_ss_read == MB_YES
-					&& store->ping1->png_count == store->ping1->png_ss_count)
+				if (store->pings[store->ping_index].png_bath_read == MB_YES
+					&& store->pings[store->ping_index].png_raw_read == MB_YES
+					&& store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_raw_count)
 					{
 					done = MB_YES;
-					*reset_ping1_flag = MB_YES;
 					}
-				else if (which_sonar == 2
-					&& store->ping2->png_bath_read == MB_YES
-					&& store->ping2->png_ss_read == MB_YES
-					&& store->ping2->png_count == store->ping2->png_ss_count)
+				}
+			else if (status == MB_SUCCESS)
+				{
+				if (store->pings[store->ping_index].png_bath_read == MB_YES
+					&& store->pings[store->ping_index].png_ss_read == MB_YES
+					&& store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_ss_count)
 					{
+					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = MB_YES;
-					*reset_ping2_flag = MB_YES;
 					}
 				}
 #ifdef MBR_EM710RAW_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"mbr_em710raw_rd_bath2: sonar 1 ping:%d\n",store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"mbr_em710raw_rd_bath2: sonar 2 ping:%d\n",store->ping2->png_count);
+	fprintf(stderr,"mbr_em710raw_rd_bath2: ping_index:%d ping:%d serial:%d\n",
+			store->ping_index,store->pings[store->ping_index].png_count,
+			store->pings[store->ping_index].png_serial);
 #endif
 			}
 		else if (type == EM3_RAWBEAM4)
@@ -1723,18 +1929,17 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710raw_rd_rawbeam4 type %x\n",type);
 #endif
 			status = mbr_em710raw_rd_rawbeam4(
-				verbose,mbio_ptr,swap,store,sonar,&which_sonar,&good_end_bytes,error);
+				verbose,mbio_ptr,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1)
-					store->ping1->png_raw_read = MB_YES;
-				else if (which_sonar == 2)
-					store->ping2->png_raw_read = MB_YES;
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_raw_read = MB_YES;
 				done = MB_NO;
 				}
 #ifdef MBR_EM710RAW_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"mbr_em710raw_rd_rawbeam4: sonar 1 ping:%d\n",store->ping1->png_raw_count);
-	if (which_sonar == 2) fprintf(stderr,"mbr_em710raw_rd_rawbeam4: sonar 2 ping:%d\n",store->ping2->png_raw_count);
+	fprintf(stderr,"mbr_em710raw_rd_rawbeam4: ping_index:%d ping:%d serial:%d\n",
+			store->ping_index,store->pings[store->ping_index].png_raw_count,
+			store->pings[store->ping_index].png_raw_serial);
 #endif
 			}
 		else if (type == EM3_QUALITY)
@@ -1743,18 +1948,17 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710raw_rd_quality type %x\n",type);
 #endif
 			status = mbr_em710raw_rd_quality(
-				verbose,mbio_ptr,swap,store,sonar,&which_sonar,&good_end_bytes,error);
+				verbose,mbio_ptr,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1)
-					store->ping1->png_quality_read = MB_YES;
-				else if (which_sonar == 2)
-					store->ping2->png_quality_read = MB_YES;
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_quality_read = MB_YES;
 				done = MB_NO;
 				}
 #ifdef MBR_EM710RAW_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"mbr_em710raw_rd_quality: sonar 1 ping:%d\n",store->ping1->png_quality_count);
-	if (which_sonar == 2) fprintf(stderr,"mbr_em710raw_rd_quality: sonar 2 ping:%d\n",store->ping2->png_quality_count);
+	fprintf(stderr,"mbr_em710raw_rd_quality: ping_index:%d ping:%d serial:%d\n",
+			store->ping_index,store->pings[store->ping_index].png_quality_count,
+			store->pings[store->ping_index].png_quality_serial);
 #endif
 			}
 		else if (type == EM3_SS2)
@@ -1763,41 +1967,27 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710raw_rd_ss2 type %x\n",type);
 #endif
 			status = mbr_em710raw_rd_ss2(
-				verbose,mbio_ptr,swap,store,sonar,&which_sonar,&good_end_bytes,error);
+				verbose,mbio_ptr,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1)
-					{
-					store->ping1->png_ss_read = MB_YES;
-					}
-				else if (which_sonar == 2)
-					{
-					store->ping2->png_ss_read = MB_YES;
-					}
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_ss_read = MB_YES;
 				done = MB_NO;
 				}
 			if (status == MB_SUCCESS)
 				{
-				if (which_sonar == 1
-					&& store->ping1->png_bath_read == MB_YES
-					&& store->ping1->png_ss_read == MB_YES
-					&& store->ping1->png_count == store->ping1->png_ss_count)
+				if (store->pings[store->ping_index].png_bath_read == MB_YES
+					&& store->pings[store->ping_index].png_ss_read == MB_YES
+					&& store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_ss_count)
 					{
+					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = MB_YES;
-					*reset_ping1_flag = MB_YES;
-					}
-				else if (which_sonar == 2
-					&& store->ping2->png_bath_read == MB_YES
-					&& store->ping2->png_ss_read == MB_YES
-					&& store->ping2->png_count == store->ping2->png_ss_count)
-					{
-					done = MB_YES;
-					*reset_ping2_flag = MB_YES;
 					}
 				}
 #ifdef MBR_EM710RAW_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"mbr_em710raw_rd_ss2: sonar 1 ping:%d\n",store->ping1->png_ss_count);
-	if (which_sonar == 2) fprintf(stderr,"mbr_em710raw_rd_ss2: sonar 2 ping:%d\n",store->ping2->png_ss_count);
+	fprintf(stderr,"mbr_em710raw_rd_ss2: ping_index:%d ping:%d serial:%d\n",
+			store->ping_index,store->pings[store->ping_index].png_ss_count,
+			store->pings[store->ping_index].png_ss_serial);
 #endif
 			}
 		else if (type == EM3_WATERCOLUMN)
@@ -2049,7 +2239,8 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		}
 
 #ifdef MBR_EM710RAW_DEBUG
-fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyteswapped:%d *type:%d *sonar:%d\n",typegood,mb_io_ptr->byteswapped,sonarswapgood,*databyteswapped,*type,*sonar);
+fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarunswapgood:%d sonarswapgood:%d *databyteswapped:%d *type:%d *sonar:%d\n",
+typegood,mb_io_ptr->byteswapped,sonarunswapgood,sonarswapgood,*databyteswapped,*type,*sonar);
 #endif
 
 	/* check for valid sonar */
@@ -2369,6 +2560,35 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_wlz), &line[4], len-5);
 			else if (strncmp("SMH=", line, 4) == 0)
 			    mb_get_int(&(store->par_smh), &line[4], len-5);
+			    
+			else if (strncmp("HUN=", line, 4) == 0)
+			    mb_get_int(&(store->par_hun), &line[4], len-5);
+			else if (strncmp("HUT=", line, 4) == 0)
+			    mb_get_double(&(store->par_hut), &line[4], len-5);
+			else if (strncmp("TXS=", line, 4) == 0)
+			    mb_get_int(&(store->par_txs), &line[4], len-5);
+			else if (strncmp("T2X=", line, 4) == 0)
+			    mb_get_int(&(store->par_t2x), &line[4], len-5);
+			else if (strncmp("R1S=", line, 4) == 0)
+			    mb_get_int(&(store->par_r1s), &line[4], len-5);
+			else if (strncmp("R2S=", line, 4) == 0)
+			    mb_get_int(&(store->par_r2s), &line[4], len-5);
+			else if (strncmp("STC=", line, 4) == 0)
+			    mb_get_int(&(store->par_stc), &line[4], len-5);
+			    
+			else if (strncmp("S0Z=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0z), &line[4], len-5);
+			else if (strncmp("S0X=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0x), &line[4], len-5);
+			else if (strncmp("S0Y=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0y), &line[4], len-5);
+			else if (strncmp("S0H=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0h), &line[4], len-5);
+			else if (strncmp("S0R=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0r), &line[4], len-5);
+			else if (strncmp("S0P=", line, 4) == 0)
+			    mb_get_double(&(store->par_s0p), &line[4], len-5);
+			    
 			else if (strncmp("S1Z=", line, 4) == 0)
 			    mb_get_double(&(store->par_s1z), &line[4], len-5);
 			else if (strncmp("S1X=", line, 4) == 0)
@@ -2383,6 +2603,7 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_s1p), &line[4], len-5);
 			else if (strncmp("S1N=", line, 4) == 0)
 			    mb_get_int(&(store->par_s1n), &line[4], len-5);
+			    
 			else if (strncmp("S2Z=", line, 4) == 0)
 			    mb_get_double(&(store->par_s2z), &line[4], len-5);
 			else if (strncmp("S2X=", line, 4) == 0)
@@ -2397,10 +2618,34 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_s2p), &line[4], len-5);
 			else if (strncmp("S2N=", line, 4) == 0)
 			    mb_get_int(&(store->par_s2n), &line[4], len-5);
+			    
+			else if (strncmp("S3Z=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3z), &line[4], len-5);
+			else if (strncmp("S3X=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3x), &line[4], len-5);
+			else if (strncmp("S3Y=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3y), &line[4], len-5);
+			else if (strncmp("S3H=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3h), &line[4], len-5);
+			else if (strncmp("S3R=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3r), &line[4], len-5);
+			else if (strncmp("S3P=", line, 4) == 0)
+			    mb_get_double(&(store->par_s3p), &line[4], len-5);
+			    
+			else if (strncmp("S1S=", line, 4) == 0)
+			    mb_get_int(&(store->par_s1s), &line[4], len-5);
+			else if (strncmp("S2S=", line, 4) == 0)
+			    mb_get_int(&(store->par_s2s), &line[4], len-5);
+			    
 			else if (strncmp("GO1=", line, 4) == 0)
 			    mb_get_double(&(store->par_go1), &line[4], len-5);
 			else if (strncmp("GO2=", line, 4) == 0)
 			    mb_get_double(&(store->par_go2), &line[4], len-5);
+			else if (strncmp("OBO=", line, 4) == 0)
+			    mb_get_double(&(store->par_obo), &line[4], len-5);
+			else if (strncmp("FGD=", line, 4) == 0)
+			    mb_get_double(&(store->par_fgd), &line[4], len-5);
+			    
 			else if (strncmp("TSV=", line, 4) == 0)
 			    strncpy(store->par_tsv, &line[4], MIN(len-5, 15));
 			else if (strncmp("RSV=", line, 4) == 0)
@@ -2416,10 +2661,21 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 				== 3)
 				*version = i3 + 100 * i2 + 10000 * i1;
 			    }
+			else if (strncmp("DDS=", line, 4) == 0)
+			    strncpy(store->par_dds, &line[4], MIN(len-5, 15));
 			else if (strncmp("OSV=", line, 4) == 0)
 			    strncpy(store->par_osv, &line[4], MIN(len-5, 15));
+			else if (strncmp("DSV=", line, 4) == 0)
+			    strncpy(store->par_dsv, &line[4], MIN(len-5, 15));
+			else if (strncmp("DSX=", line, 4) == 0)
+			    mb_get_double(&(store->par_dsx), &line[4], len-5);
+			else if (strncmp("DSY=", line, 4) == 0)
+			    mb_get_double(&(store->par_dsy), &line[4], len-5);
+			else if (strncmp("DSZ=", line, 4) == 0)
+			    mb_get_double(&(store->par_dsz), &line[4], len-5);
+			    
 			else if (strncmp("DSD=", line, 4) == 0)
-			    mb_get_double(&(store->par_dsd), &line[4], len-5);
+			    mb_get_int(&(store->par_dsd), &line[4], len-5);
 			else if (strncmp("DSO=", line, 4) == 0)
 			    mb_get_double(&(store->par_dso), &line[4], len-5);
 			else if (strncmp("DSF=", line, 4) == 0)
@@ -2431,6 +2687,8 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 			    }
 			else if (strncmp("APS=", line, 4) == 0)
 			    mb_get_int(&(store->par_aps), &line[4], len-5);
+			else if (strncmp("P1Q=", line, 4) == 0)
+			    mb_get_int(&(store->par_p1q), &line[4], len-5);
 			else if (strncmp("P1M=", line, 4) == 0)
 			    mb_get_int(&(store->par_p1m), &line[4], len-5);
 			else if (strncmp("P1T=", line, 4) == 0)
@@ -2445,6 +2703,8 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_p1d), &line[4], len-5);
 			else if (strncmp("P1G=", line, 4) == 0)
 			    strncpy(store->par_p1g, &line[4], MIN(len-5, 15));
+			else if (strncmp("P2Q=", line, 4) == 0)
+			    mb_get_int(&(store->par_p2q), &line[4], len-5);
 			else if (strncmp("P2M=", line, 4) == 0)
 			    mb_get_int(&(store->par_p2m), &line[4], len-5);
 			else if (strncmp("P2T=", line, 4) == 0)
@@ -2459,6 +2719,8 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_p2d), &line[4], len-5);
 			else if (strncmp("P2G=", line, 4) == 0)
 			    strncpy(store->par_p2g, &line[4], MIN(len-5, 15));
+			else if (strncmp("P3Q=", line, 4) == 0)
+			    mb_get_int(&(store->par_p3q), &line[4], len-5);
 			else if (strncmp("P3M=", line, 4) == 0)
 			    mb_get_int(&(store->par_p3m), &line[4], len-5);
 			else if (strncmp("P3T=", line, 4) == 0)
@@ -2473,6 +2735,9 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_p3d), &line[4], len-5);
 			else if (strncmp("P3G=", line, 4) == 0)
 			    strncpy(store->par_p3g, &line[4], MIN(len-5, 15));
+			else if (strncmp("P3S=", line, 4) == 0)
+			    mb_get_int(&(store->par_p3s), &line[4], len-5);
+			    
 			else if (strncmp("MSZ=", line, 4) == 0)
 			    mb_get_double(&(store->par_msz), &line[4], len-5);
 			else if (strncmp("MSX=", line, 4) == 0)
@@ -2492,14 +2757,106 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 			    mb_get_double(&(store->par_msp), &line[4], len-5);
 			else if (strncmp("MSG=", line, 4) == 0)
 			    mb_get_double(&(store->par_msg), &line[4], len-5);
+			    
+			else if (strncmp("NSZ=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsz), &line[4], len-5);
+			else if (strncmp("NSX=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsx), &line[4], len-5);
+			else if (strncmp("NSY=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsy), &line[4], len-5);
+			else if (strncmp("NRP=", line, 4) == 0)
+			    {
+			    store->par_nrp[0] = line[4];
+			    store->par_nrp[1] = line[5];
+			    }
+			else if (strncmp("NSD=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsd), &line[4], len-5);
+			else if (strncmp("NSR=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsr), &line[4], len-5);
+			else if (strncmp("NSP=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsp), &line[4], len-5);
+			else if (strncmp("NSG=", line, 4) == 0)
+			    mb_get_double(&(store->par_nsg), &line[4], len-5);
+			    
 			else if (strncmp("GCG=", line, 4) == 0)
 			    mb_get_double(&(store->par_gcg), &line[4], len-5);
+			else if (strncmp("MAS=", line, 4) == 0)
+			    mb_get_double(&(store->par_mas), &line[4], len-5);
+			else if (strncmp("SHC=", line, 4) == 0)
+			    mb_get_int(&(store->par_shc), &line[4], len-5);
+			else if (strncmp("PPS=", line, 4) == 0)
+			    mb_get_int(&(store->par_pps), &line[4], len-5);
+			else if (strncmp("CLS=", line, 4) == 0)
+			    mb_get_int(&(store->par_cls), &line[4], len-5);
+			else if (strncmp("CLO=", line, 4) == 0)
+			    mb_get_int(&(store->par_clo), &line[4], len-5);
+			else if (strncmp("VSN=", line, 4) == 0)
+			    mb_get_int(&(store->par_vsn), &line[4], len-5);
+			else if (strncmp("VSU=", line, 4) == 0)
+			    mb_get_int(&(store->par_vsu), &line[4], len-5);
+			else if (strncmp("VSE=", line, 4) == 0)
+			    mb_get_int(&(store->par_vse), &line[4], len-5);
+			else if (strncmp("VTU=", line, 4) == 0)
+			    mb_get_int(&(store->par_vtu), &line[4], len-5);
+			else if (strncmp("VTE=", line, 4) == 0)
+			    mb_get_int(&(store->par_vte), &line[4], len-5);
+			else if (strncmp("ARO=", line, 4) == 0)
+			    mb_get_int(&(store->par_aro), &line[4], len-5);
+			else if (strncmp("AHE=", line, 4) == 0)
+			    mb_get_int(&(store->par_ahe), &line[4], len-5);
+			else if (strncmp("AHS=", line, 4) == 0)
+			    mb_get_int(&(store->par_ahs), &line[4], len-5);
+			else if (strncmp("VSI=", line, 4) == 0)
+			    strncpy(store->par_vsi, &line[4], MIN(len-5, 15));
+			else if (strncmp("VSM=", line, 4) == 0)
+			    strncpy(store->par_vsm, &line[4], MIN(len-5, 15));
+
+			else if (strncmp("MCA1=", line, 5) == 0)
+			    strncpy(store->par_mca1, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCU1=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcu1), &line[5], len-6);
+			else if (strncmp("MCI1=", line, 5) == 0)
+			    strncpy(store->par_mci1, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCP1=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcp1), &line[5], len-6);
+
+			else if (strncmp("MCA2=", line, 5) == 0)
+			    strncpy(store->par_mca2, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCU2=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcu2), &line[5], len-6);
+			else if (strncmp("MCI2=", line, 5) == 0)
+			    strncpy(store->par_mci2, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCP2=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcp2), &line[5], len-6);
+
+			else if (strncmp("MCA3=", line, 5) == 0)
+			    strncpy(store->par_mca3, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCU3=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcu3), &line[5], len-6);
+			else if (strncmp("MCI3=", line, 5) == 0)
+			    strncpy(store->par_mci3, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCP3=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcp3), &line[5], len-6);
+
+			else if (strncmp("MCA4=", line, 5) == 0)
+			    strncpy(store->par_mca4, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCU4=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcu4), &line[5], len-6);
+			else if (strncmp("MCI4=", line, 5) == 0)
+			    strncpy(store->par_mci4, &line[5], MIN(len-6, 15));
+			else if (strncmp("MCP4=", line, 5) == 0)
+			    mb_get_int(&(store->par_mcp4), &line[5], len-6);
+			else if (strncmp("SNL=", line, 4) == 0)
+			    mb_get_int(&(store->par_snl), &line[4], len-5);
+			    
 			else if (strncmp("CPR=", line, 4) == 0)
 			    strncpy(store->par_cpr, &line[4], MIN(len-5, 3));
 			else if (strncmp("ROP=", line, 4) == 0)
 			    strncpy(store->par_rop, &line[4], MIN(len-5, MBSYS_SIMRAD3_COMMENT_LENGTH-1));
 			else if (strncmp("SID=", line, 4) == 0)
 			    strncpy(store->par_sid, &line[4], MIN(len-5, MBSYS_SIMRAD3_COMMENT_LENGTH-1));
+			else if (strncmp("RFN=", line, 4) == 0)
+			    strncpy(store->par_rfn, &line[4], MIN(len-5, MBSYS_SIMRAD3_COMMENT_LENGTH-1));
 			else if (strncmp("PLL=", line, 4) == 0)
 			    strncpy(store->par_pll, &line[4], MIN(len-5, MBSYS_SIMRAD3_COMMENT_LENGTH-1));
 			else if (strncmp("COM=", line, 4) == 0)
@@ -2593,6 +2950,19 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_serial_2:    %d\n",store->par_serial_2);
 		fprintf(stderr,"dbg5       par_wlz:         %f\n",store->par_wlz);
 		fprintf(stderr,"dbg5       par_smh:         %d\n",store->par_smh);
+		fprintf(stderr,"dbg5       par_hun:         %d\n",store->par_hun);
+		fprintf(stderr,"dbg5       par_hut:         %f\n",store->par_hut);
+		fprintf(stderr,"dbg5       par_txs:         %d\n",store->par_txs);
+		fprintf(stderr,"dbg5       par_t2x:         %d\n",store->par_t2x);
+		fprintf(stderr,"dbg5       par_r1s:         %d\n",store->par_r1s);
+		fprintf(stderr,"dbg5       par_r2s:         %d\n",store->par_r2s);
+		fprintf(stderr,"dbg5       par_stc:         %d\n",store->par_stc);
+		fprintf(stderr,"dbg5       par_s0z:         %f\n",store->par_s0z);
+		fprintf(stderr,"dbg5       par_s0x:         %f\n",store->par_s0x);
+		fprintf(stderr,"dbg5       par_s0y:         %f\n",store->par_s0y);
+		fprintf(stderr,"dbg5       par_s0h:         %f\n",store->par_s0h);
+		fprintf(stderr,"dbg5       par_s0r:         %f\n",store->par_s0r);
+		fprintf(stderr,"dbg5       par_s0p:         %f\n",store->par_s0p);
 		fprintf(stderr,"dbg5       par_s1z:         %f\n",store->par_s1z);
 		fprintf(stderr,"dbg5       par_s1x:         %f\n",store->par_s1x);
 		fprintf(stderr,"dbg5       par_s1y:         %f\n",store->par_s1y);
@@ -2607,19 +2977,34 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_s2r:         %f\n",store->par_s2r);
 		fprintf(stderr,"dbg5       par_s2p:         %f\n",store->par_s2p);
 		fprintf(stderr,"dbg5       par_s2n:         %d\n",store->par_s2n);
+		fprintf(stderr,"dbg5       par_s3z:         %f\n",store->par_s3z);
+		fprintf(stderr,"dbg5       par_s3x:         %f\n",store->par_s3x);
+		fprintf(stderr,"dbg5       par_s3y:         %f\n",store->par_s3y);
+		fprintf(stderr,"dbg5       par_s3h:         %f\n",store->par_s3h);
+		fprintf(stderr,"dbg5       par_s3r:         %f\n",store->par_s3r);
+		fprintf(stderr,"dbg5       par_s3p:         %f\n",store->par_s3p);
+		fprintf(stderr,"dbg5       par_s1s:         %d\n",store->par_s1s);
+		fprintf(stderr,"dbg5       par_s2s:         %d\n",store->par_s2s);
 		fprintf(stderr,"dbg5       par_go1:         %f\n",store->par_go1);
 		fprintf(stderr,"dbg5       par_go2:         %f\n",store->par_go2);
+		fprintf(stderr,"dbg5       par_obo:         %f\n",store->par_obo);
+		fprintf(stderr,"dbg5       par_fgd:         %f\n",store->par_fgd);
 		fprintf(stderr,"dbg5       par_tsv:         %s\n",store->par_tsv);
 		fprintf(stderr,"dbg5       par_rsv:         %s\n",store->par_rsv);
 		fprintf(stderr,"dbg5       par_bsv:         %s\n",store->par_bsv);
 		fprintf(stderr,"dbg5       par_psv:         %s\n",store->par_psv);
+		fprintf(stderr,"dbg5       par_dds:         %s\n",store->par_dds);
 		fprintf(stderr,"dbg5       par_osv:         %s\n",store->par_osv);
-		fprintf(stderr,"dbg5       par_dsd:         %f\n",store->par_dsd);
+		fprintf(stderr,"dbg5       par_dsv:         %s\n",store->par_dsv);
+		fprintf(stderr,"dbg5       par_dsx:         %f\n",store->par_dsx);
+		fprintf(stderr,"dbg5       par_dsy:         %f\n",store->par_dsy);
+		fprintf(stderr,"dbg5       par_dsz:         %f\n",store->par_dsz);
+		fprintf(stderr,"dbg5       par_dsd:         %d\n",store->par_dsd);
 		fprintf(stderr,"dbg5       par_dso:         %f\n",store->par_dso);
 		fprintf(stderr,"dbg5       par_dsf:         %f\n",store->par_dsf);
-		fprintf(stderr,"dbg5       par_dsh:         %c%c\n",
-			store->par_dsh[0],store->par_dsh[1]);
+		fprintf(stderr,"dbg5       par_dsh:         %c%c\n",store->par_dsh[0],store->par_dsh[1]);
 		fprintf(stderr,"dbg5       par_aps:         %d\n",store->par_aps);
+		fprintf(stderr,"dbg5       par_p1q:         %d\n",store->par_p1q);
 		fprintf(stderr,"dbg5       par_p1m:         %d\n",store->par_p1m);
 		fprintf(stderr,"dbg5       par_p1t:         %d\n",store->par_p1t);
 		fprintf(stderr,"dbg5       par_p1z:         %f\n",store->par_p1z);
@@ -2627,6 +3012,7 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p1y:         %f\n",store->par_p1y);
 		fprintf(stderr,"dbg5       par_p1d:         %f\n",store->par_p1d);
 		fprintf(stderr,"dbg5       par_p1g:         %s\n",store->par_p1g);
+		fprintf(stderr,"dbg5       par_p2q:         %d\n",store->par_p2q);
 		fprintf(stderr,"dbg5       par_p2m:         %d\n",store->par_p2m);
 		fprintf(stderr,"dbg5       par_p2t:         %d\n",store->par_p2t);
 		fprintf(stderr,"dbg5       par_p2z:         %f\n",store->par_p2z);
@@ -2634,6 +3020,7 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p2y:         %f\n",store->par_p2y);
 		fprintf(stderr,"dbg5       par_p2d:         %f\n",store->par_p2d);
 		fprintf(stderr,"dbg5       par_p2g:         %s\n",store->par_p2g);
+		fprintf(stderr,"dbg5       par_p3q:         %d\n",store->par_p3q);
 		fprintf(stderr,"dbg5       par_p3m:         %d\n",store->par_p3m);
 		fprintf(stderr,"dbg5       par_p3t:         %d\n",store->par_p3t);
 		fprintf(stderr,"dbg5       par_p3z:         %f\n",store->par_p3z);
@@ -2641,23 +3028,65 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p3y:         %f\n",store->par_p3y);
 		fprintf(stderr,"dbg5       par_p3d:         %f\n",store->par_p3d);
 		fprintf(stderr,"dbg5       par_p3g:         %s\n",store->par_p3g);
+		fprintf(stderr,"dbg5       par_p3s:         %d\n",store->par_p3s);
 		fprintf(stderr,"dbg5       par_msz:         %f\n",store->par_msz);
 		fprintf(stderr,"dbg5       par_msx:         %f\n",store->par_msx);
 		fprintf(stderr,"dbg5       par_msy:         %f\n",store->par_msy);
-		fprintf(stderr,"dbg5       par_mrp:         %c%c\n",
-			store->par_mrp[0],store->par_mrp[1]);
+		fprintf(stderr,"dbg5       par_mrp:         %c%c\n",store->par_mrp[0],store->par_mrp[1]);
 		fprintf(stderr,"dbg5       par_msd:         %f\n",store->par_msd);
 		fprintf(stderr,"dbg5       par_msr:         %f\n",store->par_msr);
 		fprintf(stderr,"dbg5       par_msp:         %f\n",store->par_msp);
 		fprintf(stderr,"dbg5       par_msg:         %f\n",store->par_msg);
+		fprintf(stderr,"dbg5       par_nsz:         %f\n",store->par_nsz);
+		fprintf(stderr,"dbg5       par_nsx:         %f\n",store->par_nsx);
+		fprintf(stderr,"dbg5       par_nsy:         %f\n",store->par_nsy);
+		fprintf(stderr,"dbg5       par_nrp:         %c%c\n",store->par_nrp[0],store->par_nrp[1]);
+		fprintf(stderr,"dbg5       par_nsd:         %f\n",store->par_nsd);
+		fprintf(stderr,"dbg5       par_nsr:         %f\n",store->par_nsr);
+		fprintf(stderr,"dbg5       par_nsp:         %f\n",store->par_nsp);
+		fprintf(stderr,"dbg5       par_nsg:         %f\n",store->par_nsg);
 		fprintf(stderr,"dbg5       par_gcg:         %f\n",store->par_gcg);
+		fprintf(stderr,"dbg5       par_mas:         %f\n",store->par_mas);
+		fprintf(stderr,"dbg5       par_shc:         %d\n",store->par_shc);
+		fprintf(stderr,"dbg5       par_pps:         %d\n",store->par_pps);
+		fprintf(stderr,"dbg5       par_cls:         %d\n",store->par_cls);
+		fprintf(stderr,"dbg5       par_clo:         %d\n",store->par_clo);
+		fprintf(stderr,"dbg5       par_vsn:         %d\n",store->par_vsn);
+		fprintf(stderr,"dbg5       par_vsu:         %d\n",store->par_vsu);
+		fprintf(stderr,"dbg5       par_vse:         %d\n",store->par_vse);
+		fprintf(stderr,"dbg5       par_vtu:         %d\n",store->par_vtu);
+		fprintf(stderr,"dbg5       par_vte:         %d\n",store->par_vte);
+		fprintf(stderr,"dbg5       par_aro:         %d\n",store->par_aro);
+		fprintf(stderr,"dbg5       par_ahe:         %d\n",store->par_ahe);
+		fprintf(stderr,"dbg5       par_ahs:         %d\n",store->par_ahs);
+		fprintf(stderr,"dbg5       par_vsi:         %s\n",store->par_vsi);
+		fprintf(stderr,"dbg5       par_vsm:         %s\n",store->par_vsm);
+		fprintf(stderr,"dbg5       par_mca1:        %s\n",store->par_mca1);
+		fprintf(stderr,"dbg5       par_mcu1:        %d\n",store->par_mcu1);
+		fprintf(stderr,"dbg5       par_mci1:        %s\n",store->par_mci1);
+		fprintf(stderr,"dbg5       par_mcp1:        %d\n",store->par_mcp1);
+		fprintf(stderr,"dbg5       par_mca2:        %s\n",store->par_mca2);
+		fprintf(stderr,"dbg5       par_mcu2:        %d\n",store->par_mcu2);
+		fprintf(stderr,"dbg5       par_mci2:        %s\n",store->par_mci2);
+		fprintf(stderr,"dbg5       par_mcp2:        %d\n",store->par_mcp2);
+		fprintf(stderr,"dbg5       par_mca3:        %s\n",store->par_mca3);
+		fprintf(stderr,"dbg5       par_mcu3:        %d\n",store->par_mcu3);
+		fprintf(stderr,"dbg5       par_mci3:        %s\n",store->par_mci3);
+		fprintf(stderr,"dbg5       par_mcp3:        %d\n",store->par_mcp3);
+		fprintf(stderr,"dbg5       par_mca4:        %s\n",store->par_mca4);
+		fprintf(stderr,"dbg5       par_mcu4:        %d\n",store->par_mcu4);
+		fprintf(stderr,"dbg5       par_mci4:        %s\n",store->par_mci4);
+		fprintf(stderr,"dbg5       par_mcp4:        %d\n",store->par_mcp4);
+		fprintf(stderr,"dbg5       par_snl:         %d\n",store->par_snl);
 		fprintf(stderr,"dbg5       par_cpr:         %s\n",store->par_cpr);
 		fprintf(stderr,"dbg5       par_rop:         %s\n",store->par_rop);
 		fprintf(stderr,"dbg5       par_sid:         %s\n",store->par_sid);
+		fprintf(stderr,"dbg5       par_rfn:         %s\n",store->par_rfn);
 		fprintf(stderr,"dbg5       par_pll:         %s\n",store->par_pll);
 		fprintf(stderr,"dbg5       par_com:         %s\n",store->par_com);
 		}
 
+		
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -3617,7 +4046,7 @@ int mbr_em710raw_rd_extraparameters(int verbose, void *mbio_ptr, int swap,
 		}
 
 	/* print debug statements */
-	if (verbose >= 0)
+	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       type:            %d\n",store->type);
@@ -4461,7 +4890,7 @@ int mbr_em710raw_rd_svp2(int verbose, void *mbio_ptr, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int version, int *which_sonar, int *goodend, int *error)
+		short sonar, int version, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710raw_rd_bath2";
 	int	status = MB_SUCCESS;
@@ -4471,6 +4900,11 @@ int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap,
 	float	float_val;
 	int	int_val;
 	size_t	read_len;
+	int	png_count;
+	int	serial;
+	int	oldest_ping;
+	int	oldest_ping_index;
+	int	found;
 	int	i;
 
 	/* print input debug statements */
@@ -4500,18 +4934,49 @@ int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap,
 	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* figure out which storage structure to use */
+	mb_get_binary_short(swap, &line[8], &short_val);
+	png_count = (int) ((unsigned short) short_val);
 	mb_get_binary_short(swap, &line[10], &short_val);
-	store->serial = (int) ((unsigned short) short_val);
-	if (store->serial != 0 && store->serial == store->par_serial_2)
+	serial = (int) ((unsigned short) short_val);
+	found = MB_NO;
+	oldest_ping = 999999999;
+	oldest_ping_index = -1;
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == MB_NO;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		*which_sonar = 2;
+		/* look for this ping by ping number and sonar serial number - if we already read
+		 * a record from this ping it has to be stored in one of the structures */
+		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial)
+			{
+			found = MB_YES;
+			store->ping_index = i;
+			}
+			
+		/* figure out which structure is holding the oldest ping in case we need to drop one
+		 * from memory to make room for the new ping. */
+		else if (store->pings[i].read_status > 0)
+			{
+			if (png_count < oldest_ping)
+				{
+				oldest_ping = png_count;
+				oldest_ping_index = i;
+				}
+			}
+			
+		/* if one of the ping structures is unused, set it to be used if we need to store
+		 * this ping */
+		else if (oldest_ping > 0)
+			{
+			oldest_ping = 0;
+			oldest_ping_index = i;
+			}
 		}
-	else
+	if (found == MB_NO)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		*which_sonar = 1;
+		store->ping_index = oldest_ping_index;
 		}
+	ping = (struct mbsys_simrad3_ping_struct *) &store->pings[store->ping_index];
+	ping->count = png_count;
+	ping->serial = serial;
 
 	/* get binary header data */
 	if (status == MB_SUCCESS)
@@ -4641,7 +5106,6 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       which_sonar:%d\n",*which_sonar);
 		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -4654,7 +5118,7 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar, int *goodend, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710raw_rd_rawbeam4";
 	int	status = MB_SUCCESS;
@@ -4664,6 +5128,11 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap,
 	int	int_val;
 	float	float_val;
 	size_t	read_len;
+	int	png_count;
+	int	serial;
+	int	oldest_ping;
+	int	oldest_ping_index;
+	int	found;
 	int	i;
 
 	/* print input debug statements */
@@ -4687,18 +5156,49 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap,
 	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* figure out which storage structure to use */
+	mb_get_binary_short(swap, &line[8], &short_val);
+	png_count = (int) ((unsigned short) short_val);
 	mb_get_binary_short(swap, &line[10], &short_val);
-	store->serial = (int) ((unsigned short) short_val);
-	if (store->serial != 0 && store->serial == store->par_serial_2)
+	serial = (int) ((unsigned short) short_val);
+	found = MB_NO;
+	oldest_ping = 999999999;
+	oldest_ping_index = -1;
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == MB_NO;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		*which_sonar = 2;
+		/* look for this ping by ping number and sonar serial number - if we already read
+		 * a record from this ping it has to be stored in one of the structures */
+		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial)
+			{
+			found = MB_YES;
+			store->ping_index = i;
+			}
+			
+		/* figure out which structure is holding the oldest ping in case we need to drop one
+		 * from memory to make room for the new ping. */
+		else if (store->pings[i].read_status > 0)
+			{
+			if (png_count < oldest_ping)
+				{
+				oldest_ping = png_count;
+				oldest_ping_index = i;
+				}
+			}
+			
+		/* if one of the ping structures is unused, set it to be used if we need to store
+		 * this ping */
+		else if (oldest_ping > 0)
+			{
+			oldest_ping = 0;
+			oldest_ping_index = i;
+			}
 		}
-	else
+	if (found == MB_NO)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		*which_sonar = 1;
+		store->ping_index = oldest_ping_index;
 		}
+	ping = (struct mbsys_simrad3_ping_struct *) &store->pings[store->ping_index];
+	ping->count = png_count;
+	ping->serial = serial;
 
 	/* get binary header data */
 	if (status == MB_SUCCESS)
@@ -4720,7 +5220,7 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap,
 		mb_get_binary_short(swap, &line[18], &short_val);
 		    ping->png_raw_detections = (int) ((unsigned short) short_val);
 		mb_get_binary_float(swap, &line[20], &float_val);
-		    ping->png_raw_sample_rate = (int) (float_val);
+		    ping->png_raw_sample_rate = float_val;
 		mb_get_binary_int(swap, &line[24], &int_val);
 		    ping->png_raw_spare = (int) (int_val);
 /*fprintf(stderr,"ping->png_raw_date:%d ping->png_raw_msec:%d ping->png_raw_count:%d ping->png_raw_nbeams:%d\n",
@@ -4884,7 +5384,6 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       which_sonar:%d\n",*which_sonar);
 		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -4897,7 +5396,7 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar, int *goodend, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710raw_rd_quality";
 	int	status = MB_SUCCESS;
@@ -4906,6 +5405,11 @@ int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap,
 	short	short_val;
 	float	float_val;
 	size_t	read_len;
+	int	png_count;
+	int	serial;
+	int	oldest_ping;
+	int	oldest_ping_index;
+	int	found;
 	int	i, j;
 
 	/* print input debug statements */
@@ -4932,20 +5436,51 @@ int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap,
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_QUALITY_HEADER_SIZE;
 	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
-	
+
 	/* figure out which storage structure to use */
+	mb_get_binary_short(swap, &line[8], &short_val);
+	png_count = (int) ((unsigned short) short_val);
 	mb_get_binary_short(swap, &line[10], &short_val);
-	store->serial = (int) ((unsigned short) short_val);
-	if (store->serial != 0 && store->serial == store->par_serial_2)
+	serial = (int) ((unsigned short) short_val);
+	found = MB_NO;
+	oldest_ping = 999999999;
+	oldest_ping_index = -1;
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == MB_NO;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		*which_sonar = 2;
+		/* look for this ping by ping number and sonar serial number - if we already read
+		 * a record from this ping it has to be stored in one of the structures */
+		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial)
+			{
+			found = MB_YES;
+			store->ping_index = i;
+			}
+			
+		/* figure out which structure is holding the oldest ping in case we need to drop one
+		 * from memory to make room for the new ping. */
+		else if (store->pings[i].read_status > 0)
+			{
+			if (png_count < oldest_ping)
+				{
+				oldest_ping = png_count;
+				oldest_ping_index = i;
+				}
+			}
+			
+		/* if one of the ping structures is unused, set it to be used if we need to store
+		 * this ping */
+		else if (oldest_ping > 0)
+			{
+			oldest_ping = 0;
+			oldest_ping_index = i;
+			}
 		}
-	else
+	if (found == MB_NO)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		*which_sonar = 1;
+		store->ping_index = oldest_ping_index;
 		}
+	ping = (struct mbsys_simrad3_ping_struct *) &store->pings[store->ping_index];
+	ping->count = png_count;
+	ping->serial = serial;
 
 	/* get binary header data */
 	if (status == MB_SUCCESS)
@@ -5034,7 +5569,6 @@ ping->png_quality_date,ping->png_quality_msec,ping->png_quality_count,ping->png_
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       which_sonar:%d\n",*which_sonar);
 		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5047,7 +5581,7 @@ ping->png_quality_date,ping->png_quality_msec,ping->png_quality_count,ping->png_
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store,
-		short sonar, int *which_sonar,
+		short sonar, 
 		int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710raw_rd_ss2";
@@ -5059,6 +5593,11 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap,
 	size_t	read_len;
 	int	done;
 	int	junk_bytes;
+	int	png_count;
+	int	serial;
+	int	oldest_ping;
+	int	oldest_ping_index;
+	int	found;
 	int	i;
 
 	/* print input debug statements */
@@ -5085,21 +5624,51 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap,
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_SS2_HEADER_SIZE;
 	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
-	
+
 	/* figure out which storage structure to use */
+	mb_get_binary_short(swap, &line[8], &short_val);
+	png_count = (int) ((unsigned short) short_val);
 	mb_get_binary_short(swap, &line[10], &short_val);
-	store->serial = (int) ((unsigned short) short_val);
-	
-	if (store->serial != 0 && store->serial == store->par_serial_2)
+	serial = (int) ((unsigned short) short_val);
+	found = MB_NO;
+	oldest_ping = 999999999;
+	oldest_ping_index = -1;
+	for (i=0;i<MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == MB_NO;i++)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		*which_sonar = 2;
+		/* look for this ping by ping number and sonar serial number - if we already read
+		 * a record from this ping it has to be stored in one of the structures */
+		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial)
+			{
+			found = MB_YES;
+			store->ping_index = i;
+			}
+			
+		/* figure out which structure is holding the oldest ping in case we need to drop one
+		 * from memory to make room for the new ping. */
+		else if (store->pings[i].read_status > 0)
+			{
+			if (png_count < oldest_ping)
+				{
+				oldest_ping = png_count;
+				oldest_ping_index = i;
+				}
+			}
+			
+		/* if one of the ping structures is unused, set it to be used if we need to store
+		 * this ping */
+		else if (oldest_ping > 0)
+			{
+			oldest_ping = 0;
+			oldest_ping_index = i;
+			}
 		}
-	else
+	if (found == MB_NO)
 		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		*which_sonar = 1;
+		store->ping_index = oldest_ping_index;
 		}
+	ping = (struct mbsys_simrad3_ping_struct *) &store->pings[store->ping_index];
+	ping->count = png_count;
+	ping->serial = serial;
 
 	/* get binary header data */
 	if (status == MB_SUCCESS)
@@ -5309,7 +5878,6 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       which_sonar:%d\n",*which_sonar);
 		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5562,7 +6130,6 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
-	int	which_sonar = 0;
 	FILE	*mbfp;
 	int	swap;
 
@@ -5590,19 +6157,7 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 	
 	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		which_sonar = 2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		which_sonar = 1;
-		}
-#ifdef MBR_EM710RAW_DEBUG3
-	fprintf(stderr,"store->serial:%d store->par_serial_2:%d which_sonar:%d\n",store->serial,store->par_serial_2,which_sonar);
-#endif
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* set swap flag */
 	swap = MB_YES;
@@ -5780,8 +6335,8 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr,"call mbr_em710raw_wr_rawbeam4 kind:%d type %x\n",store->kind,store->type);
 #else
 #ifdef MBR_EM710RAW_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_rawbeam4: sonar 1 ping:%d\n",store->type,store->sonar,store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_rawbeam4: sonar 2 ping:%d\n",store->type,store->sonar,store->ping2->png_count);
+	fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_rawbeam4: sonar 1 ping:%d\n",
+		store->type,store->sonar,store->pings[store->ping_index].png_count);
 #endif
 #endif
 		    status = mbr_em710raw_wr_rawbeam4(verbose,mbio_ptr,swap,store,error);
@@ -5800,8 +6355,8 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr,"call mbr_em710raw_wr_quality kind:%d type %x\n",store->kind,store->type);
 #else
 #ifdef MBR_EM710RAW_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_quality: sonar 1 ping:%d\n",store->type,store->sonar,store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_quality: sonar 2 ping:%d\n",store->type,store->sonar,store->ping2->png_count);
+	fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_quality: sonar 1 ping:%d\n",
+		store->type,store->sonar,store->pings[store->ping_index].png_count);
 #endif
 #endif
 		    status = mbr_em710raw_wr_quality(verbose,mbio_ptr,swap,store,error);
@@ -5818,8 +6373,8 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr,"call mbr_em710raw_wr_bath2 kind:%d type %x\n",store->kind,store->type);
 #else
 #ifdef MBR_EM710RAW_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_bath2: sonar 1 ping:%d\n",store->type,store->sonar,store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_bath2: sonar 2 ping:%d\n",store->type,store->sonar,store->ping2->png_count);
+	fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_bath2: sonar 1 ping:%d\n",
+		store->type,store->sonar,store->pings[store->ping_index].png_count);
 #endif
 #endif
 		status = mbr_em710raw_wr_bath2(verbose,mbio_ptr,swap,store,error);
@@ -5829,8 +6384,7 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr,"call mbr_em710raw_wr_ss2 kind:%d type %x\n",store->kind,store->type);
 #else
 #ifdef MBR_EM710RAW_DEBUG3
-	if (which_sonar == 1) fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_ss2: sonar 1 ping:%d\n\n",store->type,store->sonar,store->ping1->png_count);
-	if (which_sonar == 2) fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_ss2: sonar 2 ping:%d\n\n",store->type,store->sonar,store->ping2->png_count);
+	fprintf(stderr,"type:%x sonar:%d                      mbr_em710raw_wr_ss2: sonar 1 ping:%d\n\n",store->type,store->sonar,store->pings[store->ping_index].png_count);
 #endif
 #endif
 		    status = mbr_em710raw_wr_ss2(verbose,mbio_ptr,swap,store,error);
@@ -5934,6 +6488,19 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_serial_2:    %d\n",store->par_serial_2);
 		fprintf(stderr,"dbg5       par_wlz:         %f\n",store->par_wlz);
 		fprintf(stderr,"dbg5       par_smh:         %d\n",store->par_smh);
+		fprintf(stderr,"dbg5       par_hun:         %d\n",store->par_hun);
+		fprintf(stderr,"dbg5       par_hut:         %f\n",store->par_hut);
+		fprintf(stderr,"dbg5       par_txs:         %d\n",store->par_txs);
+		fprintf(stderr,"dbg5       par_t2x:         %d\n",store->par_t2x);
+		fprintf(stderr,"dbg5       par_r1s:         %d\n",store->par_r1s);
+		fprintf(stderr,"dbg5       par_r2s:         %d\n",store->par_r2s);
+		fprintf(stderr,"dbg5       par_stc:         %d\n",store->par_stc);
+		fprintf(stderr,"dbg5       par_s0z:         %f\n",store->par_s0z);
+		fprintf(stderr,"dbg5       par_s0x:         %f\n",store->par_s0x);
+		fprintf(stderr,"dbg5       par_s0y:         %f\n",store->par_s0y);
+		fprintf(stderr,"dbg5       par_s0h:         %f\n",store->par_s0h);
+		fprintf(stderr,"dbg5       par_s0r:         %f\n",store->par_s0r);
+		fprintf(stderr,"dbg5       par_s0p:         %f\n",store->par_s0p);
 		fprintf(stderr,"dbg5       par_s1z:         %f\n",store->par_s1z);
 		fprintf(stderr,"dbg5       par_s1x:         %f\n",store->par_s1x);
 		fprintf(stderr,"dbg5       par_s1y:         %f\n",store->par_s1y);
@@ -5948,19 +6515,34 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_s2r:         %f\n",store->par_s2r);
 		fprintf(stderr,"dbg5       par_s2p:         %f\n",store->par_s2p);
 		fprintf(stderr,"dbg5       par_s2n:         %d\n",store->par_s2n);
+		fprintf(stderr,"dbg5       par_s3z:         %f\n",store->par_s3z);
+		fprintf(stderr,"dbg5       par_s3x:         %f\n",store->par_s3x);
+		fprintf(stderr,"dbg5       par_s3y:         %f\n",store->par_s3y);
+		fprintf(stderr,"dbg5       par_s3h:         %f\n",store->par_s3h);
+		fprintf(stderr,"dbg5       par_s3r:         %f\n",store->par_s3r);
+		fprintf(stderr,"dbg5       par_s3p:         %f\n",store->par_s3p);
+		fprintf(stderr,"dbg5       par_s1s:         %d\n",store->par_s1s);
+		fprintf(stderr,"dbg5       par_s2s:         %d\n",store->par_s2s);
 		fprintf(stderr,"dbg5       par_go1:         %f\n",store->par_go1);
 		fprintf(stderr,"dbg5       par_go2:         %f\n",store->par_go2);
+		fprintf(stderr,"dbg5       par_obo:         %f\n",store->par_obo);
+		fprintf(stderr,"dbg5       par_fgd:         %f\n",store->par_fgd);
 		fprintf(stderr,"dbg5       par_tsv:         %s\n",store->par_tsv);
 		fprintf(stderr,"dbg5       par_rsv:         %s\n",store->par_rsv);
 		fprintf(stderr,"dbg5       par_bsv:         %s\n",store->par_bsv);
 		fprintf(stderr,"dbg5       par_psv:         %s\n",store->par_psv);
+		fprintf(stderr,"dbg5       par_dds:         %s\n",store->par_dds);
 		fprintf(stderr,"dbg5       par_osv:         %s\n",store->par_osv);
-		fprintf(stderr,"dbg5       par_dsd:         %f\n",store->par_dsd);
+		fprintf(stderr,"dbg5       par_dsv:         %s\n",store->par_dsv);
+		fprintf(stderr,"dbg5       par_dsx:         %f\n",store->par_dsx);
+		fprintf(stderr,"dbg5       par_dsy:         %f\n",store->par_dsy);
+		fprintf(stderr,"dbg5       par_dsz:         %f\n",store->par_dsz);
+		fprintf(stderr,"dbg5       par_dsd:         %d\n",store->par_dsd);
 		fprintf(stderr,"dbg5       par_dso:         %f\n",store->par_dso);
 		fprintf(stderr,"dbg5       par_dsf:         %f\n",store->par_dsf);
-		fprintf(stderr,"dbg5       par_dsh:         %c%c\n",
-			store->par_dsh[0],store->par_dsh[1]);
+		fprintf(stderr,"dbg5       par_dsh:         %c%c\n",store->par_dsh[0],store->par_dsh[1]);
 		fprintf(stderr,"dbg5       par_aps:         %d\n",store->par_aps);
+		fprintf(stderr,"dbg5       par_p1q:         %d\n",store->par_p1q);
 		fprintf(stderr,"dbg5       par_p1m:         %d\n",store->par_p1m);
 		fprintf(stderr,"dbg5       par_p1t:         %d\n",store->par_p1t);
 		fprintf(stderr,"dbg5       par_p1z:         %f\n",store->par_p1z);
@@ -5968,6 +6550,7 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p1y:         %f\n",store->par_p1y);
 		fprintf(stderr,"dbg5       par_p1d:         %f\n",store->par_p1d);
 		fprintf(stderr,"dbg5       par_p1g:         %s\n",store->par_p1g);
+		fprintf(stderr,"dbg5       par_p2q:         %d\n",store->par_p2q);
 		fprintf(stderr,"dbg5       par_p2m:         %d\n",store->par_p2m);
 		fprintf(stderr,"dbg5       par_p2t:         %d\n",store->par_p2t);
 		fprintf(stderr,"dbg5       par_p2z:         %f\n",store->par_p2z);
@@ -5975,6 +6558,7 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p2y:         %f\n",store->par_p2y);
 		fprintf(stderr,"dbg5       par_p2d:         %f\n",store->par_p2d);
 		fprintf(stderr,"dbg5       par_p2g:         %s\n",store->par_p2g);
+		fprintf(stderr,"dbg5       par_p3q:         %d\n",store->par_p3q);
 		fprintf(stderr,"dbg5       par_p3m:         %d\n",store->par_p3m);
 		fprintf(stderr,"dbg5       par_p3t:         %d\n",store->par_p3t);
 		fprintf(stderr,"dbg5       par_p3z:         %f\n",store->par_p3z);
@@ -5982,19 +6566,60 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg5       par_p3y:         %f\n",store->par_p3y);
 		fprintf(stderr,"dbg5       par_p3d:         %f\n",store->par_p3d);
 		fprintf(stderr,"dbg5       par_p3g:         %s\n",store->par_p3g);
+		fprintf(stderr,"dbg5       par_p3s:         %d\n",store->par_p3s);
 		fprintf(stderr,"dbg5       par_msz:         %f\n",store->par_msz);
 		fprintf(stderr,"dbg5       par_msx:         %f\n",store->par_msx);
 		fprintf(stderr,"dbg5       par_msy:         %f\n",store->par_msy);
-		fprintf(stderr,"dbg5       par_mrp:         %c%c\n",
-			store->par_mrp[0],store->par_mrp[1]);
+		fprintf(stderr,"dbg5       par_mrp:         %c%c\n",store->par_mrp[0],store->par_mrp[1]);
 		fprintf(stderr,"dbg5       par_msd:         %f\n",store->par_msd);
 		fprintf(stderr,"dbg5       par_msr:         %f\n",store->par_msr);
 		fprintf(stderr,"dbg5       par_msp:         %f\n",store->par_msp);
 		fprintf(stderr,"dbg5       par_msg:         %f\n",store->par_msg);
+		fprintf(stderr,"dbg5       par_nsz:         %f\n",store->par_nsz);
+		fprintf(stderr,"dbg5       par_nsx:         %f\n",store->par_nsx);
+		fprintf(stderr,"dbg5       par_nsy:         %f\n",store->par_nsy);
+		fprintf(stderr,"dbg5       par_nrp:         %c%c\n",store->par_nrp[0],store->par_nrp[1]);
+		fprintf(stderr,"dbg5       par_nsd:         %f\n",store->par_nsd);
+		fprintf(stderr,"dbg5       par_nsr:         %f\n",store->par_nsr);
+		fprintf(stderr,"dbg5       par_nsp:         %f\n",store->par_nsp);
+		fprintf(stderr,"dbg5       par_nsg:         %f\n",store->par_nsg);
 		fprintf(stderr,"dbg5       par_gcg:         %f\n",store->par_gcg);
+		fprintf(stderr,"dbg5       par_mas:         %f\n",store->par_mas);
+		fprintf(stderr,"dbg5       par_shc:         %d\n",store->par_shc);
+		fprintf(stderr,"dbg5       par_pps:         %d\n",store->par_pps);
+		fprintf(stderr,"dbg5       par_cls:         %d\n",store->par_cls);
+		fprintf(stderr,"dbg5       par_clo:         %d\n",store->par_clo);
+		fprintf(stderr,"dbg5       par_vsn:         %d\n",store->par_vsn);
+		fprintf(stderr,"dbg5       par_vsu:         %d\n",store->par_vsu);
+		fprintf(stderr,"dbg5       par_vse:         %d\n",store->par_vse);
+		fprintf(stderr,"dbg5       par_vtu:         %d\n",store->par_vtu);
+		fprintf(stderr,"dbg5       par_vte:         %d\n",store->par_vte);
+		fprintf(stderr,"dbg5       par_aro:         %d\n",store->par_aro);
+		fprintf(stderr,"dbg5       par_ahe:         %d\n",store->par_ahe);
+		fprintf(stderr,"dbg5       par_ahs:         %d\n",store->par_ahs);
+		fprintf(stderr,"dbg5       par_vsi:         %s\n",store->par_vsi);
+		fprintf(stderr,"dbg5       par_vsm:         %s\n",store->par_vsm);
+		fprintf(stderr,"dbg5       par_mca1:        %s\n",store->par_mca1);
+		fprintf(stderr,"dbg5       par_mcu1:        %d\n",store->par_mcu1);
+		fprintf(stderr,"dbg5       par_mci1:        %s\n",store->par_mci1);
+		fprintf(stderr,"dbg5       par_mcp1:        %d\n",store->par_mcp1);
+		fprintf(stderr,"dbg5       par_mca2:        %s\n",store->par_mca2);
+		fprintf(stderr,"dbg5       par_mcu2:        %d\n",store->par_mcu2);
+		fprintf(stderr,"dbg5       par_mci2:        %s\n",store->par_mci2);
+		fprintf(stderr,"dbg5       par_mcp2:        %d\n",store->par_mcp2);
+		fprintf(stderr,"dbg5       par_mca3:        %s\n",store->par_mca3);
+		fprintf(stderr,"dbg5       par_mcu3:        %d\n",store->par_mcu3);
+		fprintf(stderr,"dbg5       par_mci3:        %s\n",store->par_mci3);
+		fprintf(stderr,"dbg5       par_mcp3:        %d\n",store->par_mcp3);
+		fprintf(stderr,"dbg5       par_mca4:        %s\n",store->par_mca4);
+		fprintf(stderr,"dbg5       par_mcu4:        %d\n",store->par_mcu4);
+		fprintf(stderr,"dbg5       par_mci4:        %s\n",store->par_mci4);
+		fprintf(stderr,"dbg5       par_mcp4:        %d\n",store->par_mcp4);
+		fprintf(stderr,"dbg5       par_snl:         %d\n",store->par_snl);
 		fprintf(stderr,"dbg5       par_cpr:         %s\n",store->par_cpr);
 		fprintf(stderr,"dbg5       par_rop:         %s\n",store->par_rop);
 		fprintf(stderr,"dbg5       par_sid:         %s\n",store->par_sid);
+		fprintf(stderr,"dbg5       par_rfn:         %s\n",store->par_rfn);
 		fprintf(stderr,"dbg5       par_pll:         %s\n",store->par_pll);
 		fprintf(stderr,"dbg5       par_com:         %s\n",store->par_com);
 		}
@@ -6026,150 +6651,363 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap,
 		mb_put_binary_short(swap, (unsigned short) store->par_serial_1, (void *) &line[18]);
 		mb_put_binary_short(swap, (unsigned short) store->par_serial_2, (void *) &line[20]);
 		}
-
-	/* construct ASCII parameter buffer */
+		
+	/* construct ascii parameter buffer */
 	buff = &line[22];
-	sprintf(&buff[0], "WLZ=%.2f,", store->par_wlz);
+	buff_len = 0;
+	
+	if (store->par_wlz != 0.0)
+		{
+		sprintf(&buff[buff_len], "WLZ=%.3f,", store->par_wlz);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_smh != 0)
+		{
+		sprintf(&buff[buff_len], "SMH=%d,", store->par_smh);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_hut != 0.0)
+		{
+		sprintf(&buff[buff_len], "HUN=%d,", store->par_hun);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "HUT=%f,", store->par_hut);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_txs != 0)
+		{
+		sprintf(&buff[buff_len], "TXS=%d,", store->par_txs);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_t2x != 0)
+		{
+		sprintf(&buff[buff_len], "T2X=%d,", store->par_t2x);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_r1s != 0)
+		{
+		sprintf(&buff[buff_len], "R1S=%d,", store->par_r1s);
+		buff_len = strlen(buff);		
+		}
+	if (store->par_r2s != 0)
+		{
+		sprintf(&buff[buff_len], "R2S=%d,", store->par_r2s);
+		buff_len = strlen(buff);		
+		}
+	sprintf(&buff[buff_len], "STC=%d,", store->par_stc);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "SMH=%d,", store->par_smh);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1Z=%.2f,", store->par_s1z);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1X=%.2f,", store->par_s1x);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1Y=%.2f,", store->par_s1y);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1H=%.2f,", store->par_s1h);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1R=%.2f,", store->par_s1r);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S1P=%.2f,", store->par_s1p);
-	buff_len = strlen(buff);
-	if (store->par_s1n > 0)
-	    {
-	    sprintf(&buff[buff_len], "S1N=%d,", store->par_s1n);
-	    buff_len = strlen(buff);
-	    }
-	sprintf(&buff[buff_len], "S2Z=%.2f,", store->par_s2z);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S2X=%.2f,", store->par_s2x);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S2Y=%.2f,", store->par_s2y);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S2H=%.2f,", store->par_s2h);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S2R=%.2f,", store->par_s2r);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "S2P=%.2f,", store->par_s2p);
-	buff_len = strlen(buff);
-	if (store->par_s2n > 0)
-	    {
-	    sprintf(&buff[buff_len], "S2N=%d,", store->par_s2n);
-	    buff_len = strlen(buff);
-	    }
+	if (store->par_stc == 4)
+		{
+		sprintf(&buff[buff_len], "S0Z=%.3f,", store->par_s0z);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S0X=%.3f,", store->par_s0x);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S0Y=%.3f,", store->par_s0y);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S0H=%.3f,", store->par_s0h);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S0R=%.3f,", store->par_s0r);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S0P=%.3f,", store->par_s0p);
+		buff_len = strlen(buff);		
+		}
+	sprintf(&buff[buff_len], "S1Z=%.3f,", store->par_s1z);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1X=%.3f,", store->par_s1x);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1Y=%.3f,", store->par_s1y);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1H=%.3f,", store->par_s1h);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1R=%.3f,", store->par_s1r);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1P=%.3f,", store->par_s1p);
+	buff_len = strlen(buff);		
+	sprintf(&buff[buff_len], "S1S=%d,", store->par_s1s);
+	buff_len = strlen(buff);		
+	if (store->par_stc != 1)
+		{
+		sprintf(&buff[buff_len], "S2Z=%.3f,", store->par_s2z);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2X=%.3f,", store->par_s2x);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2Y=%.3f,", store->par_s2y);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2H=%.3f,", store->par_s2h);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2R=%.3f,", store->par_s2r);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2P=%.3f,", store->par_s2p);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S2S=%d,", store->par_s2s);
+		buff_len = strlen(buff);
+		}
+	if (store->par_stc >= 3)
+		{
+		sprintf(&buff[buff_len], "S3Z=%.3f,", store->par_s3z);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S3X=%.3f,", store->par_s3x);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S3Y=%.3f,", store->par_s3y);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S3H=%.3f,", store->par_s3h);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S3R=%.3f,", store->par_s3r);
+		buff_len = strlen(buff);		
+		sprintf(&buff[buff_len], "S3P=%.3f,", store->par_s3p);
+		buff_len = strlen(buff);		
+		}
 	if (store->par_go1 != 0.0)
-	    {
-	    sprintf(&buff[buff_len], "GO1=%.2f,", store->par_go1);
-	    buff_len = strlen(buff);
-	    }
+		{
+		sprintf(&buff[buff_len], "GO1=%.3f,", store->par_go1);
+		buff_len = strlen(buff);
+		}
 	if (store->par_go2 != 0.0)
-	    {
-	    sprintf(&buff[buff_len], "GO2=%.2f,", store->par_go2);
-	    buff_len = strlen(buff);
-	    }
-	sprintf(&buff[buff_len], "TSV=%s,", store->par_tsv);
-	buff_len = strlen(buff);
+		{
+		sprintf(&buff[buff_len], "GO2=%.3f,", store->par_go1);
+		buff_len = strlen(buff);
+		}
+	if (store->par_obo != 0.0)
+		{
+		sprintf(&buff[buff_len], "OBO=%.3f,", store->par_obo);
+		buff_len = strlen(buff);
+		}
+	if (store->par_fgd != 0.0)
+		{
+		sprintf(&buff[buff_len], "FGD=%.3f,", store->par_fgd);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_tsv) > 0)
+		{
+		sprintf(&buff[buff_len], "TSV=%s,", store->par_tsv);
+		buff_len = strlen(buff);
+		}
 	if (strlen(store->par_rsv) > 0)
-	    {
-	    sprintf(&buff[buff_len], "RSV=%s,", store->par_rsv);
-	    buff_len = strlen(buff);
-	    }
-	sprintf(&buff[buff_len], "BSV=%s,", store->par_bsv);
+		{
+		sprintf(&buff[buff_len], "RSV=%s,", store->par_rsv);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_bsv) > 0)
+		{
+		sprintf(&buff[buff_len], "BSV=%s,", store->par_bsv);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_psv) > 0)
+		{
+		sprintf(&buff[buff_len], "PSV=%s,", store->par_psv);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_dds) > 0)
+		{
+		sprintf(&buff[buff_len], "DDS=%s,", store->par_dds);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_osv) > 0)
+		{
+		sprintf(&buff[buff_len], "OSV=%s,", store->par_osv);
+		buff_len = strlen(buff);
+		}
+	if (strlen(store->par_dsv) > 0)
+		{
+		sprintf(&buff[buff_len], "DSV=%s,", store->par_dsv);
+		buff_len = strlen(buff);
+		}
+
+	sprintf(&buff[buff_len], "DSX=%.6f,", store->par_dsx);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "PSV=%s,", store->par_tsv);
+	sprintf(&buff[buff_len], "DSY=%.6f,", store->par_dsy);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "OSV=%s,", store->par_osv);
+	sprintf(&buff[buff_len], "DSZ=%.6f,", store->par_dsz);
 	buff_len = strlen(buff);
-	if (store->par_dsd != 0.0)
-	    {
-	    sprintf(&buff[buff_len], "DSD=%.1f,", store->par_dsd);
-	    buff_len = strlen(buff);
-	    }
-	else
-	    {
-	    sprintf(&buff[buff_len], "DSD=,");
-	    buff_len = strlen(buff);
-	    }
+	sprintf(&buff[buff_len], "DSD=%d,", store->par_dsd);
+	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "DSO=%.6f,", store->par_dso);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "DSF=%.6f,", store->par_dsf);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "DSH=%c%c,",
-		store->par_dsh[0], store->par_dsh[1]);
+	sprintf(&buff[buff_len], "DSH=%c%c,",store->par_dsh[0], store->par_dsh[1]);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "APS=%d,",store->par_aps);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1M=%d,",store->par_p1m);
+	
+	if (store->par_p1q)
+		{
+		sprintf(&buff[buff_len], "P1Q=%d,",store->par_p1q);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1M=%d,",store->par_p1m);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1T=%d,",store->par_p1t);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1Z=%.3f,", store->par_p1z);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1X=%.3f,", store->par_p1x);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1Y=%.3f,", store->par_p1y);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1D=%.1f,", store->par_p1d);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P1G=%s,", store->par_p1g);
+		buff_len = strlen(buff);
+		}
+	if (store->par_p2q)
+		{
+		sprintf(&buff[buff_len], "P2Q=%d,",store->par_p2q);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2M=%d,",store->par_p2m);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2T=%d,",store->par_p2t);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2Z=%.3f,", store->par_p2z);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2X=%.3f,", store->par_p2x);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2Y=%.3f,", store->par_p2y);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2D=%.3f,", store->par_p2d);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P2G=%s,", store->par_p2g);
+		buff_len = strlen(buff);
+		}
+	if (store->par_p3q)
+		{
+		sprintf(&buff[buff_len], "P3Q=%d,",store->par_p3q);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3M=%d,",store->par_p3m);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3T=%d,",store->par_p3t);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3Z=%.3f,", store->par_p3z);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3X=%.3f,", store->par_p3x);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3Y=%.3f,", store->par_p3y);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3D=%.3f,", store->par_p3d);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3G=%s,", store->par_p3g);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "P3S=%d,",store->par_p3s);
+		buff_len = strlen(buff);
+		}
+	
+	sprintf(&buff[buff_len], "MSZ=%.3f,", store->par_msz);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1T=%d,",store->par_p1t);
+	sprintf(&buff[buff_len], "MSX=%.3f,", store->par_msx);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1Z=%.2f,", store->par_p1z);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1X=%.2f,", store->par_p1x);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1Y=%.2f,", store->par_p1y);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1D=%.1f,", store->par_p1d);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P1G=%s,", store->par_p1g);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2M=%d,",store->par_p2m);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2T=%d,",store->par_p2t);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2Z=%.2f,", store->par_p2z);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2X=%.2f,", store->par_p2x);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2Y=%.2f,", store->par_p2y);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2D=%.1f,", store->par_p2d);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P2G=%s,", store->par_p2g);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3M=%d,",store->par_p3m);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3T=%d,",store->par_p3t);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3Z=%.2f,", store->par_p3z);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3X=%.2f,", store->par_p3x);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3Y=%.2f,", store->par_p3y);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3D=%.1f,", store->par_p3d);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "P3G=%s,", store->par_p3g);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSZ=%.2f,", store->par_msz);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSX=%.2f,", store->par_msx);
-	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSY=%.2f,", store->par_msy);
+	sprintf(&buff[buff_len], "MSY=%.3f,", store->par_msy);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "MRP=%c%c,",
 		store->par_mrp[0], store->par_mrp[1]);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSD=%.2f,", store->par_msd);
+	sprintf(&buff[buff_len], "MSD=%.3f,", store->par_msd);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSR=%.2f,", store->par_msr);
+	sprintf(&buff[buff_len], "MSR=%.3f,", store->par_msr);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSP=%.2f,", store->par_msp);
+	sprintf(&buff[buff_len], "MSP=%.3f,", store->par_msp);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MSG=%.2f,", store->par_msg);
+	sprintf(&buff[buff_len], "MSG=%.3f,", store->par_msg);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "GCG=%.2f,", store->par_gcg);
+	sprintf(&buff[buff_len], "NSZ=%.3f,", store->par_nsz);
 	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSX=%.3f,", store->par_nsx);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSY=%.3f,", store->par_nsy);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NRP=%c%c,",
+		store->par_nrp[0], store->par_nrp[1]);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSD=%.3f,", store->par_nsd);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSR=%.3f,", store->par_nsr);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSP=%.3f,", store->par_nsp);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "NSG=%.3f,", store->par_nsg);
+	buff_len = strlen(buff);
+	
+	sprintf(&buff[buff_len], "GCG=%.3f,", store->par_gcg);
+	buff_len = strlen(buff);
+	if (store->par_mas != 0.0)
+	    {
+	    sprintf(&buff[buff_len], "MAS=%.3f,", store->par_mas);
+	    buff_len = strlen(buff);
+	    }
+	sprintf(&buff[buff_len], "SHC=%d,", store->par_shc);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "PPS=%d,", store->par_pps);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "CLS=%d,", store->par_cls);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "CLO=%d,", store->par_clo);
+	buff_len = strlen(buff);
+	
+	sprintf(&buff[buff_len], "VSN=%d,", store->par_vsn);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VSU=%d,", store->par_vsu);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VSE=%d,", store->par_vse);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VTU=%d,", store->par_vtu);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VTE=%d,", store->par_vte);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "ARO=%d,", store->par_aro);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "AHE=%d,", store->par_ahe);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "AHS=%d,", store->par_ahs);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VSI=%s,", store->par_vsi);
+	buff_len = strlen(buff);
+	sprintf(&buff[buff_len], "VSM=%s,", store->par_vsm);
+	buff_len = strlen(buff);
+	
+	if (store->par_mcp1 > 0)
+		{
+		sprintf(&buff[buff_len], "MCA1=%s,", store->par_mca1);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCU1=%d,", store->par_mcu1);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCI1=%s,", store->par_mci1);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCP1=%d,", store->par_mcp1);
+		buff_len = strlen(buff);
+		}
+	if (store->par_mcp2 > 0)
+		{
+		sprintf(&buff[buff_len], "MCA2=%s,", store->par_mca2);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCU2=%d,", store->par_mcu2);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCI2=%s,", store->par_mci2);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCP2=%d,", store->par_mcp2);
+		buff_len = strlen(buff);
+		}
+	if (store->par_mcp3 > 0)
+		{
+		sprintf(&buff[buff_len], "MCA3=%s,", store->par_mca3);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCU3=%d,", store->par_mcu3);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCI3=%s,", store->par_mci3);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCP3=%d,", store->par_mcp3);
+		buff_len = strlen(buff);
+		}
+	if (store->par_mcp4 > 0)
+		{
+		sprintf(&buff[buff_len], "MCA4=%s,", store->par_mca4);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCU4=%d,", store->par_mcu4);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCI4=%s,", store->par_mci4);
+		buff_len = strlen(buff);
+		sprintf(&buff[buff_len], "MCP4=%d,", store->par_mcp4);
+		buff_len = strlen(buff);
+		}
+	sprintf(&buff[buff_len], "SNL=%d,", store->par_snl);
+	buff_len = strlen(buff);
+	
 	if (strlen(store->par_cpr) > 0)
 	    {
 	    sprintf(&buff[buff_len], "CPR=%s,", store->par_cpr);
@@ -6183,6 +7021,11 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap,
 	if (strlen(store->par_sid) > 0)
 	    {
 	    sprintf(&buff[buff_len], "SID=%s,", store->par_sid);
+	    buff_len = strlen(buff);
+	    }
+	if (strlen(store->par_rfn) > 0)
+	    {
+	    sprintf(&buff[buff_len], "RFN=%s,", store->par_rfn);
 	    buff_len = strlen(buff);
 	    }
 	if (strlen(store->par_pll) > 0)
@@ -8457,15 +9300,8 @@ int mbr_em710raw_wr_bath2(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 	
-	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		}
+	/* set which storage structure to use */
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -8648,15 +9484,8 @@ int mbr_em710raw_wr_rawbeam4(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 	
-	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		}
+	/* set which storage structure to use */
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -8853,7 +9682,7 @@ int mbr_em710raw_wr_rawbeam4(int verbose, void *mbio_ptr, int swap,
 int mbr_em710raw_wr_quality(int verbose, void *mbio_ptr, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
-	char	*function_name = "mbr_em710raw_rd_quality";
+	char	*function_name = "mbr_em710raw_wr_quality";
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad3_ping_struct *ping;
 	char	line[EM3_QUALITY_HEADER_SIZE];
@@ -8878,15 +9707,8 @@ int mbr_em710raw_wr_quality(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 	
-	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		}
+	/* set which storage structure to use */
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -9049,15 +9871,8 @@ int mbr_em710raw_wr_ss2(int verbose, void *mbio_ptr, int swap,
 		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
 		}
 	
-	/* figure out which storage structure to use */
-	if (store->serial == store->par_serial_2)
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping2;
-		}
-	else
-		{
-		ping = (struct mbsys_simrad3_ping_struct *) store->ping1;
-		}
+	/* set which storage structure to use */
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 	/* print debug statements */
 	if (verbose >= 5)

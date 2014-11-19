@@ -882,6 +882,20 @@ int mbview_reset(size_t instance)
 		/* profile data */
 		data->profile_view_mode = MBV_VIEW_OFF;
 
+		/* set mbview default values */
+		status = mb_mbview_defaults(mbv_verbose,
+					    &data->primary_colortable,
+					    &data->primary_colortable_mode,
+					    &data->primary_shade_mode,
+					    &data->slope_colortable,
+					    &data->slope_colortable_mode,
+					    &data->secondary_colortable,
+					    &data->secondary_colortable_mode,
+					    &data->illuminate_magnitude,
+					    &data->illuminate_elevation,
+					    &data->illuminate_azimuth,
+					    &data->slope_magnitude);
+
 		/* windows */
 		view->topLevelShell = NULL;
 		view->mainWindow = NULL;

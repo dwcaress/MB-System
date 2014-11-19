@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbvelocitytool</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  10 November 2014 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -52,7 +52,11 @@ a single editable SVP and then interactively modify this profile.
 When users load swath bathymetry data containing raw travel time and
 angle data (many but not all swath data format include this information),
 <B>MBvelocitytool</B>  recalculates the bathymetry by raytracing through
-the current SVP model. The bathymetry of each ping is fit with a line,
+the current SVP model. If the bathymetry in the input swath file has
+been edited (e.g. with <B>mbedit</B>), then the associated edit save
+file (*.esf file) will be loaded as well, and the beams flagged as
+bad will not be used by <B>MBvelocitytool</B>.
+The bathymetry of each ping is fit with a line,
 and bathymetry residuals are calculated for each good beam relative
 to the linear fit.  The average of the bathymetry residuals is displayed
 along with &quot;error bars&quot; indicating the standard deviations of the
@@ -444,7 +448,7 @@ is too large for use on screens smaller than 1024 X 768 pixels.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 10 November 2014</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

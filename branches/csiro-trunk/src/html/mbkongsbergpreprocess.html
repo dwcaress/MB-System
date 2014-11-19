@@ -11,13 +11,14 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbkongsbergpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  12 November 2014 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbkongsbergpreprocess</B> - performs preprocessing of data from third generation Kongsberg multibeam sonars (e.g. EM122, EM302, EM710).
+<B>mbkongsbergpreprocess</B> - performs preprocessing of data from third generation
+Kongsberg multibeam sonars (e.g. EM122, EM302, EM710, EM2040, M3).
 <P>
 <A NAME="lbAC">&nbsp;</A>
 <H2>VERSION</H2>
@@ -27,15 +28,18 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbkongsbergpreprocess</B> [<B>-A</B> <B>-C</B> <B>-D</B><I>outputdirectory</I> <B>-F</B><I>format</I>
-<B>-I</B><I>file </I><B>-O</B><I>outfile</I> <B>-SF</B><I>datatype/source</I>
-<B>-T</B><I>timelag</I> <B>-H -V</B>]
+<B>mbkongsbergpreprocess</B> [<B>-C</B> <B>-D</B><I>outputdirectory</I>
+<B>-E</B><I>offx/offy[/offdepth]</I>
+<B>-F</B><I>format</I>
+<B>-I</B><I>file </I><B>-O</B><I>outfile</I> <B>-P</B><I>filterlength/filterdepth</I>
+<B>-S</B><I>datatype/source</I>
+<B>-T</B><I>timelag</I> <B>-W -H -V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
 <B>mbkongsbergpreprocess</B> reads data from a third generation
-Kongsberg multibeam sonar (e.g. EM122, EM302, EM710), interpolates the
+Kongsberg multibeam sonar (e.g. EM122, EM302, EM710, EM2040, M3), interpolates the
 asynchronous navigation, heading, and attitude onto the multibeam data,
 and writes a new file with that information correctly embedded
 in the multibeam survey data. The input files may be in the vendor format
@@ -71,6 +75,10 @@ suffixes:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;asynchronous&nbsp;heading:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>*.ath<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;asynchronous&nbsp;sonar&nbsp;depth:<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>*.ats<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;synchronous&nbsp;attitude&nbsp;(roll&nbsp;and&nbsp;pitch):<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>*.sta<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+By default, <B>mbkongsbergpreprocess</B> ignores water column records and does
+not pass these large records into the output format 59 files. The <B>-W</B><I>1</I>
+option causes the water column records to be written in the output files.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -90,19 +98,6 @@ Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
-
-<DD>
-<BR>
-
-This option causes the program to attempt to calculate reliable beam angles
-through iterative raytracing to match the original bathymetry. This process
-is very time consuming. At present, the simple calculation of beam angles
-produces noisy values that in turn produce noisy bathymetry when the
-soundings are recalculated by raytracing. Thus, if one needs to recalculate
-bathymetry with a new model for the sound speed structure of the water
-column (often called a sound velocity profile or SVP), the data should first
-be preprocessed using the <B>-A</B> option.
 <DT><B>-C</B>
 
 <DD>
@@ -119,6 +114,18 @@ counts are output for each file and as totals from all files processed.
 
 This option causes all format 59 output files to be placed in the specified directory
 <I>outputdirectory</I> rather than parallel to the original &quot;raw&quot; files.
+<DT><B>-E</B>
+
+<DD>
+<I>offx/offz[/offdepth]</I>
+<BR>
+
+This option is for data from submerged platforms such as ROVs or AUVs.
+This sets horizontal and vertical.distance offsets between the vehicle's
+depth sensor and the multibeam receive head. If specified, these values are used
+in a lever-arm calculation to determine the sonar depth change  associated with
+vehicle pitch. The <I>offdepth</I> value, if specified, is a static depth offset to be
+applied to the vehicle depth data.
 <DT><B>-F</B>
 
 <DD>
@@ -165,6 +172,25 @@ This option causes <B>mbkongsbergpreprocess</B> to output all data to a single f
 specified as <I>outfile</I>. By default, the program creates output files for
 each input file. If the <B>-D</B><I>outputdirectory</I> option is also used, then
 the output file <I>outfile</I> will be in <I>outputdirectory</I>.
+<DT><B>-P</B>
+
+<DD>
+<I>filterlength/filterdepth</I>
+This option specifies Gaussian tapered time domain filtering of the
+sonar depth data to be merged with the survey data, regardless of source.
+The <I>filterlength</I> value specifies
+the filter window length in seconds, and the <I>filterdepth</I> value controls
+the depths to which filtering is applied. The filtered sonar depth is used
+to depths up to twice the <I>filterdepth</I> value. Below that threshold, the
+value used transitions to unfiltered with an exponential taper. This filtering
+is used in two ways. First, one can apply short period smoothing of noisy
+sonar depth at all by specifying a small <I>filterlength</I> (e.g. 2 seconds)
+and a <I>filterdepth</I> value deeper than the vehicle's track. Second, when
+an AUV or ROV is operated at shallow depths, the pressure
+values used to determine depth are affected by waves at the sea surface. In this
+case, a longer period <I>filterlength</I> (e.g. 10 seconds) and a shallower
+<I>filterdepth</I> (e.g. 50 meters) may be used to lessen the artifacts due to
+surface swell.
 <DT><B>-S</B>
 
 <DD>
@@ -172,19 +198,29 @@ the output file <I>outfile</I> will be in <I>outputdirectory</I>.
 <BR>
 
 This option specifies which data records should be the source of the
-navigation (<I>datatype</I> = 1), heading (<I>datatype</I> = 2), and
-attitude (<I>datatype</I> = 3) data that are interpolated onto the
+navigation (<I>datatype</I> = 1), heading (<I>datatype</I> = 2), 
+attitude (<I>datatype</I> = 3), and sonar depth  (<I>datatype</I> = 4)
+data that are interpolated onto the
 survey ping times. In each case the <I>source</I> value specifies
 a data record type. The possibilities for Kongsberg data include:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>12<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEADING<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>17<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Hypack&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>18<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Hypack,&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>28<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;1&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>29<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;2&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>30<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;3&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE1<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>55<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;1&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;2&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;3&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>12<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEIGHT<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>16<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEADING<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>17<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>18<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>28<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>29<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>30<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE1<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>55<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>56<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<BR>
+<BR>
+
+The default values are:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nav_source&nbsp;=&nbsp;MB_DATA_NAV
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attitude_source&nbsp;=&nbsp;MB_DATA_ATTITUDE
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heading_source&nbsp;=&nbsp;MB_DATA_NAV
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sonardepth_source&nbsp;=&nbsp;MB_DATA_DATA
 <BR>
 
 <DT><B>-T</B>
@@ -198,6 +234,15 @@ to the navigation and attitude data prior to it being merged with the
 bathymetry. If <I>timelag</I> is a valid path to a file containing time
 stamp and time lag pairs, then these data will be read and the time lag
 applied to particular records will be interpolated by time.
+<DT><B>-W</B>
+
+<DD>
+<I>mode</I>
+<BR>
+
+By default, <B>mbkongsbergpreprocess</B> ignores water column records and does
+not pass these large records into the output format 59 files. If <B>-W</B><I>1</I>
+is specified, then the water column records will be written to the output files.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -346,7 +391,7 @@ Not true bugs. More like arachnids.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 12 November 2014</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

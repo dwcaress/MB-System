@@ -16,6 +16,11 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.4.2213       November 13, 2014
+  Version 5.4.2210       November 10, 2014
+* Version 5.4.2209       November 4, 2014
+* Version 5.4.2208       October 29, 2014
+  Version 5.4.2204       September 5, 2014
 * Version 5.4.2202       August 25, 2014
   Version 5.4.2201       August 20, 2014
 * Version 5.4.2200       July 24, 2014
@@ -186,6 +191,83 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2213 (November 13, 2014)
+
+Mbkongsbergpreprocess: Added -E option to allow specification of offsets between
+the depth sensor and the sonar. This is relevant only to submerged platforms
+such as AUVs or ROVs. Also added -P option to enable filtering of pressure
+depth data.
+
+Format 59 (MBF_EM710MBA): Set the navigation and attitude source records to be
+survey data so that mbnavedit and mbnavlist work by default with values from the 
+survey records rather than asynchronous raw sensor data. The navigation and attitude
+sources for format 58 (MBF_EM710RAW) remain the asynchronous records.
+
+Mbnavedit: Strictly define the font definitions for pushbutton widgets
+(some X11 environments are making bad choices when given latitude).
+
+-----> 5.4.2210 (November 10, 2014)
+
+Mbkongsbergpreprocess: Changed handling of water column records. The default
+behavior is now to not write water column records to the output format 59 files.
+Users can specify -W1 to have the water column records written in the output files.
+
+Format 41 (MBF_SB2100RW): Bug fix for Seabeam format 41 so the code handles
+records without the maximum number of beams. Contributed by Bob Covill.
+
+Mbprocess: Added ability to apply static bathymetry corrections defined according
+to beam angle in addition to corrections according to beam number. Contributed
+by Bob Covill.
+
+Mbvelocitytool: When loading a swath file, mbvelocitytool will now also read in
+and apply an associated *.esf (edit save file) if it exists. This prevents
+soundings that have been identified as bad from biasing the calculations.
+Contributed by Bob Covill.
+
+Mbm_grdcut: Fix to the manual page. Contributed by Jenny Paduan.
+
+-----> 5.4.2209 (November 4, 2014)
+
+MBnavadjustmerge:  Completed the manual page for this new program that allows
+one to merge and manipulate MBnavadjust projects.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Recast the i/o architecture to
+handle the full variablity of multibeam data in these formats.
+
+-----> 5.4.2208 (October 29, 2014)
+
+Mbkongsbergpreprocess:  Fixed calculation of beam
+takeoff angles for raytracing from the raw range and angle data records by
+including code made available by Jonathan Beaudoin. Recalculation of
+bathymetry in current generation Kongsberg multibeam data appears to work
+now.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Support Mesotech M3
+multibeam data recorded in *.all files.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Fixed calculation of beam
+takeoff angles for raytracing from the raw range and angle data records by
+including code made available by Jonathan Beaudoin. Recalculation of
+bathymetry in current generation Kongsberg multibeam data appears to work
+now.
+
+-----> 5.4.2204 (September 5, 2014)
+
+Mb7kpreprocess:  Changed handling of roll, pitch, and heave compensation
+to deal with deep water Reson 7150 data.
+
+Format 88 (MBF_RESON7KR): Changed handling of roll, pitch, and heave compensation
+to deal with deep water Reson 7150 data.
+
+Mbdefaults: Added control of default color and shading settings for mbgrdviz and
+mbeditviz.
+
+Format 231 (MBF_3DDEPTHP): Fixed the mbsys_3datdepthlidar_insert_nav() function
+to apply changes to all pulses.
+
+Mbgrdviz and Mbeditviz: Default color and shading settings now can be set using
+mbdefaults.
 
 -----> 5.4.2202 (August 25, 2014)
 

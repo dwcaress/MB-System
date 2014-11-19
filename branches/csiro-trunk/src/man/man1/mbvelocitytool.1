@@ -1,4 +1,4 @@
-.TH mbvelocitytool 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbvelocitytool 1 "10 November 2014" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbvelocitytool\fP \- Interactive water sound velocity profile editor.
 
@@ -29,7 +29,11 @@ a single editable SVP and then interactively modify this profile.
 When users load swath bathymetry data containing raw travel time and
 angle data (many but not all swath data format include this information),
 \fBMBvelocitytool\fP  recalculates the bathymetry by raytracing through
-the current SVP model. The bathymetry of each ping is fit with a line,
+the current SVP model. If the bathymetry in the input swath file has
+been edited (e.g. with \fBmbedit\fP), then the associated edit save
+file (*.esf file) will be loaded as well, and the beams flagged as
+bad will not be used by \fBMBvelocitytool\fP.
+The bathymetry of each ping is fit with a line,
 and bathymetry residuals are calculated for each good beam relative
 to the linear fit.  The average of the bathymetry residuals is displayed
 along with "error bars" indicating the standard deviations of the

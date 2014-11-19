@@ -8,20 +8,47 @@ both existing projects.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavadjustmerge\fP --input=project-base --input=project-add --output=project-output --verbose
+\fBmbnavadjustmerge\fP --input=project-base [--input=project-add --output=project-output
+--add-crossing=file1:section1/file2:section2
+--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset
+--set-tie-xyz=file1:section1/file2:section2
+--set-tie-xyonly=file1:section1/file2:section2
+--set-tie-zonly=file1:section1/file2:section2
+--set-ties-xyz-with-file=file
+--set-ties-xyonly-with-file=file
+--set-ties-zonly-with-file=file
+--set-ties-xyz-by-survey=survey
+--set-ties-xyonly-by-survey=survey
+--set-ties-zonly-by-survey=survey
+--set-ties-xyz-by-block=survey1/survey2\n
+--set-ties-xyonly-by-block=survey1/survey2
+--set-ties-zonly-by-block=survey1/survey2
+--set-ties-zoffset-by-block=survey1/survey2/zoffset
+--skip-unset-crossings
+ --verbose --help ]
 
 .SH DESCRIPTION
 \fBMBnavadjustmerge\fP is a command line program that merges two
-existing \fBMBnavadjust\fP projects. If the user specifies two
-input projects and no output project, then the second project is
-added to the first. If an output project is specified, then the
-two projects are merged and the new combined project is output.
+existing \fBMBnavadjust\fP projects or modifies a single
+\fBMBnavadjust\fP project.
 
 \fBMBnavadjust\fP is an interactive graphical program used to
 adjust swath data navigation by matching bathymetric features
 in overlapping and crossing swaths. The primary purpose of
 \fBmbnavadjust\fP is to eliminate relative navigational errors in swath
 data obtained from poorly navigated sonars.
+
+With respect to the merging function, if the \fBMBnavadjustmerge\fP
+user specifies two input projects and no output project, then the
+second project is added to the first. If an output project is specified, then the
+two projects are merged and the new combined project is output.
+
+In order to make use of the project modification commands, a
+single input project must be specified, along with one or more
+of the modification commands. These can include adding crossings,
+setting tie z-offset values, setting tie offsets (even if no
+corresponding crossing already exists), setting tie modes
+(xy only, z only, xyz),  and deleting ties.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -36,9 +63,10 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .TP
 .B \--input=project-base
 .B \--input=project-add
-This option defines either of the input, existing \fBMBnavadjust\fP
-projects. A project may be defined by a relative or absolute path
-to the project *.nvh file or the project *.dir directory. The first
+The \fB--input\fP option defines an existing, input \fBMBnavadjust\fP
+project. A project may be defined by a relative or absolute path
+to the project *.nvh file or the project *.dir directory. This option
+can be used twice to specify two input projects. The first
 use of \fB--input\fP defines the base input project, and the second
 defines the add input project. In the case where the \fB--output\fP
 option is used to define an output project, the two input projects
@@ -46,7 +74,9 @@ will both be copied to the new output project (\fIproject-base\fP
 first followed by \fIproject-add\fP). If the \fBoutput\fP option is
 not specified, then the \fIproject-base\fP project is used as the
 output, and the \fIproject-add\fP project is added on to the
-\fIproject-base\fP project.
+\fIproject-base\fP project. If only the base input project is
+specified, then that project will be modified according to one or
+more of the "add", "delete", "skip", or "set" commands.
 .TP
 .B \--output=project-output
 This option defines the new \fBMBnavadjust output project. The two
@@ -57,10 +87,121 @@ not specified, then the \fIproject-base\fP project is used as the
 output, and the \fIproject-add\fP project is added on to the
 \fIproject-base\fP project.
 .TP
+.B \--add-crossing=file1:section1/file2:section2
+This option adds the specified crossing to the \fBMBnavadjust\fP project.
+.TP
+.B \--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset
+This option adds the specified tie to the \fBMBnavadjust\fP project.
+If the corresponding crossing does not already exist, it will be
+created.
+.TP
+.B \--set-tie-xyz=file1:section1/file2:section2
+This option sets the mode of the existing specified tie in the
+\fBMBnavadjust\fP project to be "XYZ". This means all three
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-tie-xyonly=file1:section1/file2:section2
+This option sets the mode of the existing specified tie in the
+\fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-tie-zonly=file1:section1/file2:section2
+This option sets the mode of the existing specified tie in the
+\fBMBnavadjust\fP project to be "Z". This means only the vertical
+coordinate of the tie will be used as a constraint in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-xyz-with-file=file
+This option sets the mode of all ties involved with the specified
+file in the \fBMBnavadjust\fP project to be "XYZ". This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-xyonly-with-file=file
+This option sets the mode of all ties involved with the specified
+file in the \fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-zonly-with-file=file
+This option sets the mode of all ties involved with the specified
+file in the \fBMBnavadjust\fP project to be "Z". This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-xyz-with-survey=survey
+This option sets the mode of all ties involved with the specified
+survey in the \fBMBnavadjust\fP project to be "XYZ". This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-xyonly-with-survey=survey
+This option sets the mode of all ties involved with the specified
+survey in the \fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-zonly-with-survey=survey
+This option sets the mode of all ties involved with the specified
+survey in the \fBMBnavadjust\fP project to be "Z". This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-xyz-by-survey=survey
+This option sets the mode of all ties between two sections in the specified
+survey in the \fBMBnavadjust\fP project to be "XYZ". This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-xyonly-by-survey=survey
+This option sets the mode of all ties between two sections in the specified
+survey in the \fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-zonly-by-survey=survey
+This option sets the mode of all ties between two sections in the specified
+survey in the \fBMBnavadjust\fP project to be "Z". This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-xyz-by-block=survey1/survey2
+This option sets the mode of all ties between sections of the specified
+two surveys in the \fBMBnavadjust\fP project to be "XYZ". This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-xyonly-by-block=survey1/survey2
+This option sets the mode of all ties between sections in the specified
+two surveys in the \fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-zonly-by-block=survey1/survey2
+This option sets the mode of all ties between sections in the specified
+two surveys in the \fBMBnavadjust\fP project to be "Z". This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-zoffset-by-block=survey1/survey2/zoffset
+This option resets the zoffset value of all ties between sections in the specified
+two surveys.
+.TP
+.B \--skip-unset-crossings
+This option sets all unset crossings in the input projects to be
+skipped. This does not apply to any new crossings between the two
+merged projects.
+.TP
 .B \--verbose
 This option increases the verbosity of \fBMBnavadjustmerge\fP, which
 means that more information than by default is output to the stderr stream of the
 shell.
+.TP
+.B \--help
+This option causes \fBMBnavadjustmerge\P to output a list of the
+possible command line options, and then exit.
 
 .SH EXAMPLES
 Suppose you have two AUV survey missions, 20140515m1 and 10140515m2, that overlap
@@ -74,19 +215,23 @@ directories with a ".dir" suffix. To create a new \fBMBnavadjust\fP project
 combining the two existing projects, the following will suffice:
 .br
      mbnavadjustmerge --input=Navadjust20140515m1.nvh \
-                      --input=Navadjust20140515m1.nvh \
+                      --input=Navadjust20140515m2.nvh \
                       --output=Navadjust20140515All.nvh
-.br
+
 The new project Navadjust20140515All can be opened and analyzed further using
 \fBMBnavadjust\fP. When opening the new project, the user should first solve
 for a comprehensive navigation adjustment model by selecting the <Action->Invert Navigation>
 menu item, and then find the crossings between the two previously separate missions
-by selecting the <Action->Check For New Crossings> menu item
+by selecting the <Action->Check For New Crossings> menu item.
+
+If the \fB--skip-unset-crossings\fP option is added to the above command, then
+all unset crossings in the two input projects will be set to "skipped" mode in
+the output project.
 
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbio\fP(1), \fBmbprocess\fP(1),
 \fBmbnavadjust\fP(1), \fBmbset\fP(1)
 
 .SH BUGS
-It used to be too new to be bulletproof, now its too complicated to be bulletproof.
+It started out simple and bulletproof, but now it's too complicated to be bulletproof.
 Good luck.
