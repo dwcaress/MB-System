@@ -19,239 +19,6 @@
  * Author:	D. W. Caress
  * Date:	Februrary 18, 1994
  *
- * $Log: mb_format.c,v $
- * Revision 5.54  2009/03/09 16:58:31  caress
- * Release 5.1.2beta01
- *
- * Revision 5.53  2009/03/02 18:51:52  caress
- * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
- *
- * Revision 5.52  2008/12/05 17:32:52  caress
- * Check-in mods 5 December 2008 including contributions from Gordon Keith.
- *
- * Revision 5.51  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.50  2008/10/17 07:30:22  caress
- * Added format 26 supporting Hydrosweep DS data used by SOPAC.
- *
- * Revision 5.49  2008/09/11 20:11:52  caress
- * Checking in updates made during cruise AT15-36.
- *
- * Revision 5.48  2008/07/19 07:41:14  caress
- * Added formats 191 and 192 to support Imagenex Delta T multibeam data.
- *
- * Revision 5.47  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.46  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.45  2008/03/14 18:32:06  caress
- * Added identifier for IFREMER Cariabes format 75.
- *
- * Revision 5.44  2008/03/01 09:12:52  caress
- * Added support for Simrad EM710 multibeam in new formats 58 and 59.
- *
- * Revision 5.43  2007/10/31 18:37:01  caress
- * MB-System programs will now recognize filename suffixes of the form
- * ".MB***" as well as ".mb***". Capitalized versions of many vendor
- * format suffixes are also supported.
- *
- * Revision 5.42  2007/10/17 20:26:03  caress
- * Release 5.1.1beta11
- *
- * Revision 5.41  2006/11/10 22:36:04  caress
- * Working towards release 5.1.0
- *
- * Revision 5.40  2006/10/05 18:58:28  caress
- * Changes for 5.1.0beta4
- *
- * Revision 5.39  2006/02/02 19:42:09  caress
- * Fixed handling of unknown datagrams on little-endian systems.
- *
- * Revision 5.38  2006/01/06 18:27:18  caress
- * Working towards 5.0.8
- *
- * Revision 5.37  2005/11/05 00:48:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.36  2005/06/04 04:15:59  caress
- * Support for Edgetech Jstar format (id 132 and 133).
- *
- * Revision 5.35  2005/03/25 04:31:23  caress
- * Minor changes to code comments.
- *
- * Revision 5.34  2004/12/18 01:34:43  caress
- * Working towards release 5.0.6.
- *
- * Revision 5.33  2004/12/02 06:33:29  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.32  2004/11/06 03:55:15  caress
- * Working to support the Reson 7k format.
- *
- * Revision 5.31  2004/04/27 01:46:11  caress
- * Various updates of April 26, 2004.
- *
- * Revision 5.30  2003/09/23 21:02:45  caress
- * Added formats 168 and 169 for reading xyt and yxt triples (topography instead of depth).
- *
- * Revision 5.29  2003/08/11 19:13:53  caress
- * Added *.gsf to recognized file suffixes.
- *
- * Revision 5.28  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.27  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.26  2003/03/10 20:02:29  caress
- * Added mr1pr library.
- *
- * Revision 5.25  2003/02/27 04:33:33  caress
- * Fixed handling of SURF format suffixes.
- *
- * Revision 5.24  2003/01/15 20:51:48  caress
- * Release 5.0.beta28
- *
- * Revision 5.23  2002/09/20 17:45:43  caress
- * Release 5.0.beta23
- *
- * Revision 5.22  2002/09/19 22:19:00  caress
- * Release 5.0.beta23
- *
- * Revision 5.21  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.20  2002/07/25 19:09:04  caress
- * Release 5.0.beta21
- *
- * Revision 5.19  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.18  2002/05/29 23:36:53  caress
- * Release 5.0.beta18
- *
- * Revision 5.17  2002/05/02 03:55:34  caress
- * Release 5.0.beta17
- *
- * Revision 5.16  2002/04/08 20:59:38  caress
- * Release 5.0.beta17
- *
- * Revision 5.15  2002/04/06 02:43:39  caress
- * Release 5.0.beta16
- *
- * Revision 5.14  2002/02/22 09:03:43  caress
- * Release 5.0.beta13
- *
- * Revision 5.13  2001/12/20  20:48:51  caress
- * Release 5.0.beta11
- *
- * Revision 5.12  2001/12/18  04:27:45  caress
- * Release 5.0.beta11.
- *
- * Revision 5.11  2001/11/16  01:30:02  caress
- * Added mb_get_shortest_path()
- *
- * Revision 5.10  2001/10/24  21:15:30  caress
- * Fixed problem finding processed files in mb_datalist_read()
- *
- * Revision 5.9  2001/10/19  00:54:37  caress
- * Added mb_get_relative_path().
- *
- * Revision 5.8  2001/09/17  23:22:51  caress
- * Added XTF format.
- *
- * Revision 5.7  2001/07/20 00:31:11  caress
- * Release 5.0.beta03
- *
- * Revision 5.6  2001/06/29  22:48:04  caress
- * Added support for HSDS2RAW
- *
- * Revision 5.5  2001/06/08  21:44:01  caress
- * Version 5.0.beta01
- *
- * Revision 5.4  2001/04/06  22:05:59  caress
- * Consolidated xse formats into one format.
- *
- * Revision 5.3  2001/03/22  20:45:56  caress
- * Trying to make 5.0.beta0...
- *
- * Revision 5.2  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.1  2000/12/10  20:26:50  caress
- * Version 5.0.alpha02
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.10  2000/09/30  06:26:58  caress
- * Snapshot for Dale.
- *
- * Revision 4.9  2000/04/19  21:06:32  caress
- * Added #include mb_io.h
- *
- * Revision 4.8  2000/04/19  20:51:58  caress
- * Added datalist parsing code.
- *
- * Revision 4.7  2000/01/25  01:45:10  caress
- * Null terminate fileroot strings.
- *
- * Revision 4.6  2000/01/20  00:09:23  caress
- * Added function mb_get_format().
- *
- * Revision 4.5  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.4  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.4  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.3  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.3  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.2  1994/10/21  12:11:53  caress
- * Release V4.0
- *
- * Revision 4.1  1994/04/22  17:49:13  caress
- * Removed output messages which went to stdout, messing up
- * Postscript output from mbswath and mbcontour.
- *
- * Revision 4.1  1994/04/22  17:49:13  caress
- * Removed output messages which went to stdout, messing up
- * Postscript output from mbswath and mbcontour.
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.5  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.4  1994/02/21  21:35:02  caress
- * Set format alias message to go to stdout if verbose == 1
- * and stderr if verbose > 1.
- *
- * Revision 4.3  1994/02/21  20:54:16  caress
- * Added verbose message for format alias events.
- *
- * Revision 4.2  1994/02/21  19:45:26  caress
- * Made it actually work and added aliasing of old format
- * id's to new format id's.
- *
- * Revision 4.1  1994/02/21  04:55:25  caress
- * Fixed some simple errors.
- *
- * Revision 4.0  1994/02/21  04:52:01  caress
- * Initial version.
- *
- *
  */
 
 /* standard include files */
@@ -672,6 +439,10 @@ int mb_format_register(int verbose,
  	else if (*format == MBF_MGD77TAB)
 		{
 		status = mbr_register_mgd77tab(verbose, mbio_ptr, error);
+		}
+ 	else if (*format == MBF_PHOTGRAM)
+		{
+		status = mbr_register_photgram(verbose, mbio_ptr, error);
 		}
 	else
 		{
@@ -1655,6 +1426,17 @@ int mb_format_info(int verbose,
  	else if (*format == MBF_MGD77TAB)
 		{
 		status = mbr_info_mgd77tab(verbose, system,
+			beams_bath_max, beams_amp_max, pixels_ss_max,
+			format_name, system_name, format_description,
+			numfile, filetype,
+			variable_beams, traveltime, beam_flagging,
+			nav_source, heading_source, vru_source, svp_source,
+			beamwidth_xtrack, beamwidth_ltrack,
+			error); 
+		}
+ 	else if (*format == MBF_PHOTGRAM)
+		{
+		status = mbr_info_photgram(verbose, system,
 			beams_bath_max, beams_amp_max, pixels_ss_max,
 			format_name, system_name, format_description,
 			numfile, filetype,
@@ -2979,7 +2761,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
-		*format = MBF_MGD77TAB;
+		*format = MBF_PHOTGRAM;
 		found = MB_YES;
 		}
 	    }

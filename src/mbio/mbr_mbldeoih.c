@@ -23,108 +23,7 @@
  *
  * Author:	D. W. Caress
  * Date:	February 2, 1993
- * $Log: mbr_mbldeoih.c,v $
- * Revision 5.14  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.13  2007/10/08 15:59:34  caress
- * MBIO changes as of 8 October 2007.
- *
- * Revision 5.12  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.11  2005/03/25 04:21:33  caress
- * Corrected problem with debug output of sidescan data.
- *
- * Revision 5.10  2004/12/02 06:33:31  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.9  2004/09/16 18:59:42  caress
- * Comment updates.
- *
- * Revision 5.8  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.7  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/09/25 20:41:04  caress
- * Fixed old DSL120 format.
- *
- * Revision 5.5  2002/04/06 02:43:39  caress
- * Release 5.0.beta16
- *
- * Revision 5.4  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.3  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.2  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.1  2000/12/10  20:26:50  caress
- * Version 5.0.alpha02
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.12  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.11  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.10  2000/07/19  03:51:38  caress
- * Fixed some things.
- *
- * Revision 4.9  1999/03/31  18:11:35  caress
- * MB-System 4.6beta7
- *
- * Revision 4.8  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.7  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.6  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.5  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.5  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.4  1995/03/22  19:44:26  caress
- * Added explicit casts to shorts divided by doubles for
- * ansi C compliance.
- *
- * Revision 4.3  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.2  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.1  1994/07/29  18:46:51  caress
- * Changes associated with supporting Lynx OS (byte swapped) and
- * using unix second time base (for time_d values).
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.1  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.0  1994/02/21  03:59:50  caress
- * First cut at new version. Altered to be consistent
- * with passing of three types of data: bathymetry,
- * amplitude, and sidescan.
- *
- * Revision 3.0  1993/05/14  22:56:57  sohara
- * initial version
- *
+ * 
  */
 /*
  * Notes on the MBF_MBLDEOIH data format:
@@ -143,6 +42,8 @@
  *           "dd" = 25700 : Version 1 survey data - 38 byte header
  *           "nn" = 28270 : Version 2 survey data - 44 byte header
  *           "DD" = 17476 : Version 3 survey data - 48 byte header
+ *           "V4" = 22068 : Version 4 survey data - 90 byte header
+ *           "V5" = 22069 : Version 5 survey data - 98 byte header
  *      In the case of data records, the header contains the time stamp,
  *      navigation, and the numbers of depth, beam amplitude, and
  *      sidescan values.  The data section contains the depth and
@@ -220,21 +121,19 @@ int mbr_dem_mbldeoih(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-/* define maximum number of beams */
-#define	MBF_MBLDEOIH_MAX_BEAMS	250
-#define	MBF_MBLDEOIH_MAX_PIXELS	10000
-
 /* define header sizes */
 #define	MBF_MBLDEOIH_V1HEADERSIZE	38
 #define	MBF_MBLDEOIH_V2HEADERSIZE	44
 #define	MBF_MBLDEOIH_V3HEADERSIZE	48
 #define	MBF_MBLDEOIH_V4HEADERSIZE	90
+#define	MBF_MBLDEOIH_V5HEADERSIZE	98
 #define	MBF_MBLDEOIH_ID_COMMENT1	8995	/* ## */
 #define	MBF_MBLDEOIH_ID_COMMENT2	25443	/* cc */
 #define	MBF_MBLDEOIH_ID_DATA1		25700	/* dd */
 #define	MBF_MBLDEOIH_ID_DATA2		28270	/* nn */
 #define	MBF_MBLDEOIH_ID_DATA3		17476	/* DD */
-#define	MBF_MBLDEOIH_ID_DATA4		13398	/* V4 */
+#define	MBF_MBLDEOIH_ID_DATA4		22068	/* V4 */
+#define	MBF_MBLDEOIH_ID_DATA5		22069	/* V5 */
 
 static char rcs_id[]="$Id$";
 
@@ -394,9 +293,9 @@ int mbr_info_mbldeoih(int verbose,
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_LDEOIH;
-	*beams_bath_max = 3003;
-	*beams_amp_max = 1440;
-	*pixels_ss_max = 10000;
+	*beams_bath_max = 0;
+	*beams_amp_max = 0;
+	*pixels_ss_max = 0;
 	strncpy(format_name, "MBLDEOIH", MB_NAME_LENGTH);
 	strncpy(system_name, "LDEOIH", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_MBLDEOIH\nInformal Description: L-DEO in-house generic multibeam\nAttributes:           Data from all sonar systems, bathymetry, \n                      amplitude and sidescan, variable beams and pixels, \n                      binary, centered, L-DEO.\n", MB_DESCRIPTION_LENGTH);
@@ -532,6 +431,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	short	*flag;
 	short	short_transducer_depth;
 	short	short_altitude;
+	short	short_beams_bath, short_beams_amp, short_pixels_ss, short_spare1;
 	int	header_length;
 	char	buffer[MBF_MBLDEOIH_V4HEADERSIZE];
 	int	index;
@@ -586,6 +486,12 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			store->kind = MB_DATA_COMMENT;
 			header_length = 2;
+			}
+		else if (*flag == MBF_MBLDEOIH_ID_DATA5)
+			{
+			store->kind = MB_DATA_DATA;
+			header_length = MBF_MBLDEOIH_V5HEADERSIZE;
+			version = 5;
 			}
 		else if (*flag == MBF_MBLDEOIH_ID_DATA4)
 			{
@@ -642,7 +548,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA)
 		{
-		if (version == 4)
+		if (version == 5)
 			{
 			index = 2;
 			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->time_d); index +=8;
@@ -657,16 +563,46 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->heave); index +=4;
 			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->beam_xwidth); index +=4;
 			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->beam_lwidth); index +=4;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beams_bath); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beams_amp); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->pixels_ss); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->spare1); index +=2;
+			mb_get_binary_int(MB_NO, (void *)  &buffer[index], &store->beams_bath); index +=4;
+			mb_get_binary_int(MB_NO, (void *)  &buffer[index], &store->beams_amp); index +=4;
+			mb_get_binary_int(MB_NO, (void *)  &buffer[index], &store->pixels_ss); index +=4;
+			mb_get_binary_int(MB_NO, (void *)  &buffer[index], &store->spare1); index +=4;
 			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=4;
 			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=4;
 			store->ss_scalepower = buffer[index]; index++;
 			store->ss_type = buffer[index]; index++;
-			store->spare3 = buffer[index]; index++;
-			store->sonartype = buffer[index]; index++;
+			store->imagery_type = buffer[index]; index++;
+			store->topo_type = buffer[index]; index++;
+			}
+		else if (version == 4)
+			{
+			index = 2;
+			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->time_d); index +=8;
+			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->longitude); index +=8;
+			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->latitude); index +=8;
+			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->sonardepth); index +=8;
+			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->altitude); index +=8;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->heading); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->speed); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->roll); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->pitch); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->heave); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->beam_xwidth); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->beam_lwidth); index +=4;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_beams_bath); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_beams_amp); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_pixels_ss); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_spare1); index +=2;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=4;
+			store->ss_scalepower = buffer[index]; index++;
+			store->ss_type = buffer[index]; index++;
+			store->imagery_type = buffer[index]; index++;
+			store->topo_type = buffer[index]; index++;
+			store->beams_bath = short_beams_bath;
+			store->beams_amp = short_beams_amp;
+			store->pixels_ss = short_pixels_ss;
+			store->spare1 = short_spare1;
 			}
 		else
 			{
@@ -769,8 +705,8 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			/* get sidescan type */
 			store->ss_scalepower = 0;
 			store->ss_type = oldstore.ss_type;
-			store->spare3 = 0;
-			store->sonartype = MB_SONARTYPE_UNKNOWN;
+			store->imagery_type = 0;
+			store->topo_type = MB_TOPOGRAPHY_TYPE_UNKNOWN;
 			}
 		}
 
@@ -835,8 +771,8 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5       distance_scale:   %f\n",store->distance_scale);
 		fprintf(stderr,"dbg5       ss_scalepower:    %d\n",store->ss_scalepower);
 		fprintf(stderr,"dbg5       ss_type:          %d\n",store->ss_type);
-		fprintf(stderr,"dbg5       spare3:           %d\n",store->spare3);
-		fprintf(stderr,"dbg5       sonartype:        %d\n",store->sonartype);
+		fprintf(stderr,"dbg5       spare3:           %d\n",store->imagery_type);
+		fprintf(stderr,"dbg5       sonartype:        %d\n",store->topo_type);
 		fprintf(stderr,"dbg5       status:           %d\n",status);
 		fprintf(stderr,"dbg5       error:            %d\n",*error);
 		}
@@ -1059,6 +995,11 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
+			
+		/* update maximum numbers of beams and pixels */
+		mb_io_ptr->beams_bath_max = MAX(mb_io_ptr->beams_bath_max, store->beams_bath);
+		mb_io_ptr->beams_amp_max = MAX(mb_io_ptr->beams_amp_max, store->beams_amp);
+		mb_io_ptr->pixels_ss_max = MAX(mb_io_ptr->pixels_ss_max, store->pixels_ss);
 
 		/* print debug messages */
 		if (verbose >= 5 && status == MB_SUCCESS)
@@ -1203,11 +1144,20 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		oldstore.ss_type = store->ss_type;
 		}
 
-	/* otherwise write curent version data */
-	else if (store->kind == MB_DATA_DATA)
+	/* otherwise write curent version data, which is version 4
+		if the number of beams and pixels is <= 32768 and version 5 if
+		it is greater than 32768 */
+	else if (store->kind == MB_DATA_DATA
+		&& store->beams_bath <= 32768
+		&& store->pixels_ss <= 32768)
 		{
 		*flag = MBF_MBLDEOIH_ID_DATA4;
 		header_length = MBF_MBLDEOIH_V4HEADERSIZE;
+		}
+	else if (store->kind == MB_DATA_DATA)
+		{
+		*flag = MBF_MBLDEOIH_ID_DATA5;
+		header_length = MBF_MBLDEOIH_V5HEADERSIZE;
 		}
 
 	/* otherwise write comment */
@@ -1246,8 +1196,8 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5       distance_scale:   %f\n",store->distance_scale);
 		fprintf(stderr,"dbg5       ss_scalepower:    %d\n",store->ss_scalepower);
 		fprintf(stderr,"dbg5       ss_type:          %d\n",store->ss_type);
-		fprintf(stderr,"dbg5       spare3:           %d\n",store->spare3);
-		fprintf(stderr,"dbg5       sonartype:        %d\n",store->sonartype);
+		fprintf(stderr,"dbg5       spare3:           %d\n",store->imagery_type);
+		fprintf(stderr,"dbg5       sonartype:        %d\n",store->topo_type);
 		fprintf(stderr,"dbg5       status:           %d\n",status);
 		fprintf(stderr,"dbg5       error:            %d\n",*error);
 		}
@@ -1331,7 +1281,37 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_put_binary_short(MB_NO, oldstore.beam_lwidth, (void *)  &buffer[index]); index +=2;
 			mb_put_binary_short(MB_NO, oldstore.ss_type, (void *)  &buffer[index]); index +=2;
 			}
-		/* otherwise write curent version file */
+
+		/* otherwise if reasonable number of beams then write version 4 record */
+		else if (*flag == MBF_MBLDEOIH_ID_DATA4)
+			{
+			/* write current version header */
+			index = 2;
+			mb_put_binary_double(MB_NO, store->time_d, (void *)  &buffer[index]); index +=8;
+			mb_put_binary_double(MB_NO, store->longitude, (void *)  &buffer[index]); index +=8;
+			mb_put_binary_double(MB_NO, store->latitude, (void *)  &buffer[index]); index +=8;
+			mb_put_binary_double(MB_NO, store->sonardepth, (void *)  &buffer[index]); index +=8;
+			mb_put_binary_double(MB_NO, store->altitude, (void *)  &buffer[index]); index +=8;
+			mb_put_binary_float(MB_NO, store->heading, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->speed, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->roll, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->pitch, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->heave, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_short(MB_NO, (short)store->beams_bath, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, (short)store->beams_amp, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, (short)store->pixels_ss, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, (short)store->spare1, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_float(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=4;
+			buffer[index] = store->ss_scalepower; index++;
+			buffer[index] = store->ss_type; index++;
+			buffer[index] = store->imagery_type; index++;
+			buffer[index] = store->topo_type; index++;
+			}
+
+		/* otherwise if unreasonable number of beams then write version 5 record */
 		else
 			{
 			/* write current version header */
@@ -1348,16 +1328,16 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_put_binary_float(MB_NO, store->heave, (void *)  &buffer[index]); index +=4;
 			mb_put_binary_float(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=4;
 			mb_put_binary_float(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=4;
-			mb_put_binary_short(MB_NO, store->beams_bath, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->beams_amp, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->pixels_ss, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->spare1, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_int(MB_NO, store->beams_bath, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_int(MB_NO, store->beams_amp, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_int(MB_NO, store->pixels_ss, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_int(MB_NO, store->spare1, (void *)  &buffer[index]); index +=4;
 			mb_put_binary_float(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=4;
 			mb_put_binary_float(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=4;
 			buffer[index] = store->ss_scalepower; index++;
 			buffer[index] = store->ss_type; index++;
-			buffer[index] = store->spare3; index++;
-			buffer[index] = store->sonartype; index++;
+			buffer[index] = store->imagery_type; index++;
+			buffer[index] = store->topo_type; index++;
 			}
 		}
 

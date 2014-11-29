@@ -17,64 +17,6 @@
  * Author:	D. W. Caress
  * Date:	October 28, 2003
  *
- * $Log: mbview_nav.c,v $
- * Revision 5.18  2008/05/16 22:59:42  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.17  2008/03/14 19:04:32  caress
- * Fixed memory problems with route editing.
- *
- * Revision 5.16  2007/10/17 20:35:05  caress
- * Release 5.1.1beta11
- *
- * Revision 5.15  2007/10/08 16:32:08  caress
- * Code status as of 8 October 2007.
- *
- * Revision 5.14  2007/06/17 23:27:30  caress
- * Added NBeditviz.
- *
- * Revision 5.13  2006/12/15 21:42:49  caress
- * Incremental CVS update.
- *
- * Revision 5.12  2006/06/16 19:30:58  caress
- * Check in after the Santa Monica Basin Mapping AUV Expedition.
- *
- * Revision 5.11  2006/04/26 22:06:39  caress
- * Improved profile view feature and enabled export of profile data.
- *
- * Revision 5.10  2006/04/11 19:17:04  caress
- * Added a profile capability.
- *
- * Revision 5.9  2006/01/24 19:21:32  caress
- * Version 5.0.8 beta.
- *
- * Revision 5.8  2005/11/05 01:11:47  caress
- * Much work over the past two months.
- *
- * Revision 5.7  2005/02/18 07:32:56  caress
- * Fixed nav display and button sensitivity.
- *
- * Revision 5.6  2005/02/17 07:35:08  caress
- * Moving towards 5.0.6 release.
- *
- * Revision 5.5  2005/02/08 22:37:41  caress
- * Heading towards 5.0.6 release.
- *
- * Revision 5.3  2004/12/02 06:36:31  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.2  2004/09/16 21:44:40  caress
- * Many changes over the summer.
- *
- * Revision 5.1  2004/02/24 22:52:28  caress
- * Added spherical projection to MBview.
- *
- * Revision 5.0  2003/12/02 20:38:33  caress
- * Making version number 5.0
- *
- * Revision 1.2  2003/11/25 01:43:19  caress
- * MBview version generated during EW0310.
- *
  *
  */
 /*------------------------------------------------------------------------------*/
@@ -1113,11 +1055,9 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 		&& which == MBV_PICK_UP
 		&& data->mouse_mode == MBV_MOUSE_NAV)
 		{
-		/* only actually select range of nav if two different points have been selected */
+		/* select range of nav if two different points have been selected */
 		if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE
-			&& shared.shareddata.nav_selected[1] != MBV_SELECT_NONE
-			&& !(shared.shareddata.nav_selected[0] == shared.shareddata.nav_selected[1]
-				&& shared.shareddata.nav_point_selected[0] == shared.shareddata.nav_point_selected[1]))
+			&& shared.shareddata.nav_selected[1] != MBV_SELECT_NONE)
 			{
 			/* get order of selected nav points */
 			inav0 = MIN(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
@@ -1159,6 +1099,20 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 					if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
 						shared.shareddata.navs[inav].nselected++;
 					}
+				}
+			}
+
+		/* else select single nav point */
+		else if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
+			{
+			inav = shared.shareddata.nav_selected[0];
+			jpt = shared.shareddata.nav_point_selected[0];
+			shared.shareddata.navs[inav].navpts[jpt].selected = select;
+			shared.shareddata.navs[inav].nselected = 0;
+			for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+				{
+				if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
+					shared.shareddata.navs[inav].nselected++;
 				}
 			}
 		}

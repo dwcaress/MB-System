@@ -373,10 +373,10 @@ object scale_cellsize : XmScale widget {
     arguments {
         arguments Style_use;
         XmNminimum = 1;
-        XmNdecimalPoints = 1;
-        XmNvalue = 10;
+        XmNdecimalPoints = 2;
+        XmNvalue = 100;
         XmNtitleString = compound_string("Grid Cell Size (m)");
-        XmNmaximum = 2500;
+        XmNmaximum = 25000;
         XmNshowArrows = TRUE;
         XmNshowValue = TRUE;
         XmNhighlightThickness = 1;

@@ -23,31 +23,6 @@
  * Author:	D. W. Caress
  * Date:	April 27, 2007
  *
- * $Log: mbeditviz_callbacks.c,v $
- * Revision 5.9  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.8  2008/05/16 22:59:42  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.7  2008/03/14 19:04:32  caress
- * Fixed memory problems with route editing.
- *
- * Revision 5.6  2007/11/16 17:26:56  caress
- * Progress on MBeditviz
- *
- * Revision 5.5  2007/10/17 20:35:05  caress
- * Release 5.1.1beta11
- *
- * Revision 5.4  2007/10/08 16:32:08  caress
- * Code status as of 8 October 2007.
- *
- * Revision 5.3  2007/07/03 17:35:54  caress
- * Working on MBeditviz.
- *
- * Revision 5.2  2007/06/18 01:16:51  caress
- * Added MBeditviz.
- *
  *
  */
 
@@ -1008,7 +983,7 @@ fprintf(stderr,"do_mbeditviz_changecellsize\n");
 	ac = 0;
         XtSetArg(args[ac], XmNvalue, &icellsize); ac++;
 	XtGetValues(scale_cellsize, args, ac);
-	mbev_grid_cellsize = 0.1 * icellsize;
+	mbev_grid_cellsize = 0.01 * icellsize;
 
 	/* get updated grid dimensions */
 	mbev_grid_nx = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
@@ -1058,7 +1033,7 @@ fprintf(stderr,"do_mbeditviz_gridparameters\n");
 
 	/* set the widgets */
 	ac = 0;
-	icellsize = (int)(10 * mbev_grid_cellsize);
+	icellsize = (int)(100 * mbev_grid_cellsize);
         XtSetArg(args[ac], XmNvalue, icellsize); ac++;
 	XtSetValues(scale_cellsize, args, ac);
 	sprintf(string,":::t\"Grid Bounds:\":t\"    Longitude: %10.5f %10.5f  | %6.3f km\":t\"    Latitude: %9.5f %9.5f | %6.3f km\":t\"Suggested Grid Parameters:\":t\"    Cell Size: %.2f m\":t\"    Dimensions: %d %d\"",

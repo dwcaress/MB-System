@@ -1,4 +1,4 @@
-.TH mbotps 1 "12 July 2014" "MB-System 5.0" "MB-System 5.0"
+.TH mbotps 1 "20 November 2014" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbotps\fP \- Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution.
 
@@ -9,7 +9,8 @@ Version 5.0
 \fBmbotps\fP [\fB\-A\fP\fItideformat\fP \fB\-B\fP\fIyear/month/day/hour/minute/second\fP
 \fB\-D\fP\fIinterval\fP \fB\-E\fP\fIyear/month/day/hour/minute/second
 \fB\-F\fP\fIformat\fP \fB\-I\fP\fIdatalist.mb-1\fP
-\fB\-M\fP \fB\-O\fP\fIoutput\fP \fB\-P\fP\fIotps_location\fP \fB\-R\fP\fIlon/lat\fP \fB\-V\fP]
+\fB\-M\fP \fB\-O\fP\fIoutput\fP \fB\-P\fP\fIotps_location\fP
+\fB\-R\fP\fIlon/lat\fP \fB\-T\fP\fImodel\fP \fB\-V\fP]
 
 .SH DESCRIPTION
 \fBMBotps\fP is a utility that predicts tides using the OTPS (OSU Tidal Prediction
@@ -180,10 +181,11 @@ Sets the longitude and latitude position at which the tidal model will be
 calculated.
 .TP
 .B \-T
-\fIfilename\fP
+\fImodel\fP
 .br
 Sets the name of the OTPSnc tidal model to be used. This model must be part of
-the local OTPSnc installation.
+the local OTPSnc installation. Examples include "tpxo7.2" and "altas".
+Default: "tpxo7.2"
 .TP
 .B \-V
 Increases the verbosity of \fBmbotps\fP.

@@ -23,71 +23,6 @@
  * Author:	D. W. Caress
  * Date:	March 5, 1998
  *
- * $Log: mbsys_gsf.c,v $
- * Revision 5.11  2009/03/13 07:05:58  caress
- * Release 5.1.2beta02
- *
- * Revision 5.10  2007/05/14 06:17:29  caress
- * Fixed bug in handling of Simrad and Reson multibeam sidescan.
- *
- * Revision 5.9  2006/03/06 21:47:48  caress
- * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
- *
- * Revision 5.8  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.7  2003/07/26 17:59:32  caress
- * Changed beamflag handling code.
- *
- * Revision 5.6  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.5  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.4  2001/08/25 00:54:13  caress
- * Adding beamwidth values to extract functions.
- *
- * Revision 5.3  2001/07/20  00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.6  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.5  2000/09/30  06:32:52  caress
- * Snapshot for Dale.
- *
- * Revision 4.4  2000/06/08  22:20:16  caress
- * Handled Reson 8101 SAIC data more properly - get angles
- * correctly even when not signed.
- *
- * Revision 4.3  2000/03/06  21:54:21  caress
- * Distribution 4.6.10
- *
- * Revision 4.2  1999/07/16  19:24:15  caress
- * Yet another version.
- *
- * Revision 4.1  1999/05/05  22:48:29  caress
- * Disabled handling of ping flags in GSF data.
- *
- * Revision 4.0  1998/10/05  18:30:03  caress
- * MB-System version 4.6beta
- *
- * Revision 1.1  1998/10/05  18:22:40  caress
- * Initial revision
- *
- * Revision 1.1  1998/10/05  17:46:15  caress
- * Initial revision
- *
  *
  */
 
@@ -354,17 +289,17 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC     /* 151 */
 		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC     /* 152 */)
 		{
-		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 		}
 	else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC    /* 136 */
 		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC   /* 137 */)
 		{
-		*sonartype = MB_SONARTYPE_INTERFEROMETRIC;
+		*sonartype = MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC;
 		}
 	else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC    /* 136 */
 		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC   /* 137 */)
 		{
-		*sonartype = MB_SONARTYPE_SIDESCAN;
+		*sonartype = MB_TOPOGRAPHY_TYPE_SIDESCAN;
 		}
 	else if (mb_ping->sensor_id == GSF_SINGLE_BEAM_SUBRECORD_ECHOTRAC_SPECIFIC     		/* 201 */
 		|| mb_ping->sensor_id == GSF_SINGLE_BEAM_SUBRECORD_BATHY2000_SPECIFIC		/* 202 */
@@ -379,11 +314,11 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC		/* 211 */
 		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SB_SUBRECORD_NAVISOUND_SPECIFIC	/* 212 */)
 		{
-		*sonartype = MB_SONARTYPE_ECHOSOUNDER;
+		*sonartype = MB_TOPOGRAPHY_TYPE_ECHOSOUNDER;
 		}
 	else
 		{
-		*sonartype = MB_SONARTYPE_UNKNOWN;
+		*sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
 		}
 
 	/* print output debug statements */

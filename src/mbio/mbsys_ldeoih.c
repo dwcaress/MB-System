@@ -21,123 +21,6 @@
  *
  * Author:	D. W. Caress
  * Date:	February 26, 1993
- * $Log: mbsys_ldeoih.c,v $
- * Revision 5.17  2009/03/02 18:51:52  caress
- * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
- *
- * Revision 5.16  2008/09/27 03:27:10  caress
- * Working towards release 5.1.1beta24
- *
- * Revision 5.15  2008/07/10 18:02:39  caress
- * Proceeding towards 5.1.1beta20.
- *
- * Revision 5.12  2007/10/08 15:59:34  caress
- * MBIO changes as of 8 October 2007.
- *
- * Revision 5.11  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.10  2005/03/25 04:26:49  caress
- * Fixed problem with occasional incorrect scaling of sonar depth in mbldeoih format (71) data.
- *
- * Revision 5.9  2004/12/02 06:33:32  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.8  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.7  2003/04/16 16:47:41  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.5  2002/05/02 03:55:34  caress
- * Release 5.0.beta17
- *
- * Revision 5.4  2002/04/06 02:43:39  caress
- * Release 5.0.beta16
- *
- * Revision 5.3  2001/08/25 00:54:13  caress
- * Adding beamwidth values to extract functions.
- *
- * Revision 5.2  2001/07/20  00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.15  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.14  2000/09/30  06:32:52  caress
- * Snapshot for Dale.
- *
- * Revision 4.13  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.12  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.11  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.10  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.10  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.9  1995/11/27  21:51:35  caress
- * New version of mb_ttimes with ssv and angles_null.
- *
- * Revision 4.8  1995/09/28  18:10:48  caress
- * Various bug fixes working toward release 4.3.
- *
- * Revision 4.7  1995/08/17  14:41:09  caress
- * Revision for release 4.3.
- *
- * Revision 4.6  1995/07/13  19:13:36  caress
- * Intermediate check-in during major bug-fixing flail.
- *
- * Revision 4.5  1995/03/22  19:44:26  caress
- * Added explicit casts to shorts divided by doubles for
- * ansi C compliance.
- *
- * Revision 4.4  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.3  1994/11/09  21:40:34  caress
- * Changed ttimes extraction routines to handle forward beam angles
- * so that alongtrack distances can be calculated.
- *
- * Revision 4.2  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.1  1994/04/11  23:34:41  caress
- * Added function to extract travel time and beam angle data
- * from multibeam data in an internal data structure.
- *
- * Revision 4.1  1994/04/11  23:34:41  caress
- * Added function to extract travel time and beam angle data
- * from multibeam data in an internal data structure.
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.1  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.0  1994/02/20  04:55:11  caress
- * First cut at new version.  Now handles both amplitude
- * and sidescan data.
- *
- * Revision 3.0  1993/05/14  23:04:29  sohara
- * initial version
  *
  */
 
@@ -209,8 +92,8 @@ int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->distance_scale = 0.0;
 	store->ss_scalepower = 0;
 	store->ss_type = 0;
-	store->spare3 = 0;
-	store->sonartype = MB_SONARTYPE_UNKNOWN;
+	store->imagery_type = MB_IMAGERY_TYPE_UNKNOWN;
+	store->topo_type = MB_TOPOGRAPHY_TYPE_UNKNOWN;
 	store->beamflag = NULL;
 	store->bath = NULL;
 	store->amp = NULL;
@@ -349,7 +232,7 @@ int mbsys_ldeoih_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_ldeoih_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sonartype, int *error)
 {
-	char	*function_name = "mbsys_ldeoih_sidescantype";
+	char	*function_name = "mbsys_ldeoih_sonartype";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
@@ -372,7 +255,7 @@ int mbsys_ldeoih_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	store = (struct mbsys_ldeoih_struct *) store_ptr;
 
 	/* get sidescan type */
-	*sonartype = store->sonartype;
+	*sonartype = store->topo_type;
 
 	/* print output debug statements */
 	if (verbose >= 2)

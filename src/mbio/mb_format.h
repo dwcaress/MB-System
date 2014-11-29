@@ -18,222 +18,6 @@
  * Author:	D. W. Caress
  * Date:	January 19, 1993
  *
- * $Log: mb_format.h,v $
- * Revision 5.27  2008/12/05 17:32:52  caress
- * Check-in mods 5 December 2008 including contributions from Gordon Keith.
- *
- * Revision 5.26  2008/10/17 07:30:22  caress
- * Added format 26 supporting Hydrosweep DS data used by SOPAC.
- *
- * Revision 5.25  2008/07/19 07:41:14  caress
- * Added formats 191 and 192 to support Imagenex Delta T multibeam data.
- *
- * Revision 5.24  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.23  2008/03/01 09:12:52  caress
- * Added support for Simrad EM710 multibeam in new formats 58 and 59.
- *
- * Revision 5.22  2007/10/17 20:26:03  caress
- * Release 5.1.1beta11
- *
- * Revision 5.21  2006/11/10 22:36:04  caress
- * Working towards release 5.1.0
- *
- * Revision 5.20  2006/10/05 18:58:28  caress
- * Changes for 5.1.0beta4
- *
- * Revision 5.19  2006/03/06 21:47:48  caress
- * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
- *
- * Revision 5.18  2005/06/04 04:15:59  caress
- * Support for Edgetech Jstar format (id 132 and 133).
- *
- * Revision 5.17  2004/11/06 03:55:15  caress
- * Working to support the Reson 7k format.
- *
- * Revision 5.16  2004/04/27 01:46:13  caress
- * Various updates of April 26, 2004.
- *
- * Revision 5.15  2003/09/23 21:02:45  caress
- * Added formats 168 and 169 for reading xyt and yxt triples (topography instead of depth).
- *
- * Revision 5.14  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.13  2003/03/10 20:04:45  caress
- * Added mr1pr library.
- *
- * Revision 5.12  2002/09/19 22:19:00  caress
- * Release 5.0.beta23
- *
- * Revision 5.11  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.10  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.9  2002/05/29 23:40:48  caress
- * Release 5.0.beta18
- *
- * Revision 5.8  2002/05/02 04:00:41  caress
- * Release 5.0.beta17
- *
- * Revision 5.7  2001/09/17 23:25:13  caress
- * Added format 84
- *
- * Revision 5.6  2001/07/20 17:00:20  caress
- * Added RCS controlled update date and revision string.
- *
- * Revision 5.5  2001/07/20  00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.4  2001/06/30 17:40:14  caress
- * Release 5.0.beta02
- *
- * Revision 5.3  2001/04/06  22:05:59  caress
- * Consolidated xse formats into one format.
- *
- * Revision 5.2  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2000/12/10  20:26:50  caress
- * Version 5.0.alpha02
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.29  2000/09/30  06:29:44  caress
- * Snapshot for Dale.
- *
- * Revision 4.28  2000/07/19  03:53:11  caress
- * Added some new formats.
- *
- * Revision 4.27  1999/10/21  22:40:10  caress
- * Added MBPRONAV format.
- *
- * Revision 4.26  1999/09/14  20:39:11  caress
- * Fixed bugs handling HSMD
- *
- * Revision 4.25  1999/08/08  04:16:03  caress
- * Added ELMK2XSE format.
- *
- * Revision 4.24  1999/07/16 19:24:15  caress
- * Yet another version.
- *
- * Revision 4.23  1999/04/02  00:54:32  caress
- * Changed nav record type for Elac data.
- *
- * Revision 4.22  1999/03/31  18:11:35  caress
- * MB-System 4.6beta7
- *
- * Revision 4.21  1999/02/04  23:52:54  caress
- * MB-System version 4.6beta7
- *
- * Revision 4.20  1999/01/01  23:41:06  caress
- * MB-System version 4.6beta6
- *
- * Revision 4.19  1998/12/17  23:01:15  caress
- * MB-System version 4.6beta4
- *
- * Revision 4.18  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.17  1997/09/15  19:06:40  caress
- * Real Version 4.5
- *
- * Revision 4.16  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.15  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.15  1997/04/17  15:07:36  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.14  1996/08/26  17:24:56  caress
- * Release 4.4 revision.
- *
- * Revision 4.13  1996/08/05  15:25:43  caress
- * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
- *
- * Revision 4.12  1996/04/22  10:59:01  caress
- * Added SBIFREMR format.
- *
- * Revision 4.11  1996/03/12  17:23:31  caress
- * Added format 63, short HMR1 processing format.
- *
- * Revision 4.10  1996/01/26  21:27:27  caress
- * Version 4.3 distribution.
- *
- * Revision 4.9  1995/09/28  18:10:48  caress
- * Various bug fixes working toward release 4.3.
- *
- * Revision 4.8  1995/07/13  19:15:09  caress
- * Intermediate check-in during major bug-fixing flail.
- *
- * Revision 4.7  1995/02/17  22:22:20  caress
- * Changed flag tables.
- *
- * Revision 4.6  1995/01/10  17:34:16  caress
- * Added fore-aft beamwidth table.
- *
- * Revision 4.5  1994/12/21  20:21:09  caress
- * Changes to support high resolution SeaBeam 2000 sidescan files
- * from R/V Melville data.
- *
- * Revision 4.4  1994/10/21  12:11:53  caress
- * Release V4.0
- *
- * Revision 4.3  1994/07/29  18:46:51  caress
- * Changes associated with supporting Lynx OS (byte swapped) and
- * using unix second time base (for time_d values).
- *
- * Revision 4.2  1994/04/11  23:22:28  caress
- * Added table of which formats have travel time data. This
- * table is called: mb_traveltime_table
- *
- * Revision 4.1  1994/04/09  15:49:21  caress
- * Altered to fit latest iteration of SeaBeam 2100 vendor format.
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.8  1994/03/05  22:51:44  caress
- * Added ability to handle Simrad EM12 system and
- * format MBF_EM12DARW.
- *
- * Revision 4.7  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.6  1994/02/22  21:49:10  caress
- * Fixed MBLDEOIH id number at 61 instead of 71.
- *
- * Revision 4.5  1994/02/21  21:00:36  caress
- * Fixed the SBSIOMRG info message.
- *
- * Revision 4.4  1994/02/21  19:50:27  caress
- * Reset some format description messages.
- *
- * Revision 4.3  1994/02/20  03:13:19  caress
- * Fixed definition of mb_amp_flag_table.
- *
- * Revision 4.2  1994/02/18  20:33:25  caress
- * Changed and added some format tables.
- *
- * Revision 4.1  1994/02/17  20:30:06  caress
- * Set maximum number of sidescan pixels for MBF_MBLDEOIH
- * format to 10000.
- *
- * Revision 3.2  1993/06/13  17:14:48  sohara
- * added 0th value to button_name list
- *
- * Revision 3.1  1993/06/13  16:01:22  sohara
- * added mb_button_name values
- *
- * Revision 3.0  1993/04/23  15:50:54  dale
- * Initial version
  *
  */
 
@@ -287,9 +71,10 @@
 #define	MB_SYS_SWATHPLUS	34
 #define MB_SYS_3DATDEPTHLIDAR   35
 #define MB_SYS_WASSP            36
+#define MB_SYS_STEREOPAIR       37
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	76
+#define	MB_FORMATS	77
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -544,6 +329,10 @@
                                         WASSP multibeams,
                                         bathymetry and amplitude,
                                         122 or 244 beams, binary, Electronic Navigation Ltd. */
+#define MBF_PHOTGRAM    251     /* Stereo Photogrammetry format,
+                                        stereo camera rigs,
+                                        bathymetry,
+                                        variable soundings, binary, MBARI. */
 
 /* format registration function prototypes */
 int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error);
@@ -627,6 +416,7 @@ int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error);
 int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mgd77txt(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mgd77tab(int verbose, void *mbio_ptr, int *error);
+int mbr_register_photgram(int verbose, void *mbio_ptr, int *error);
 int mbr_info_sbsiomrg(int verbose,
 			int *system,
 			int *beams_bath_max,
@@ -2210,6 +2000,26 @@ int mbr_info_mgd77txt(int verbose,
 			double *beamwidth_ltrack,
 			int *error);
 int mbr_info_mgd77tab(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
+int mbr_info_photgram(int verbose,
 			int *system,
 			int *beams_bath_max,
 			int *beams_amp_max,

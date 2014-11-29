@@ -25,81 +25,6 @@
  * Author:	D. W. Caress
  * Date:	March 23, 2004
  *
- * $Log: mbsys_reson7k.c,v $
- *
- *
- * Revision 2014/05/12 finlayson
- * Added support for Calibrated Snippet record (7058)
- *
- * Revision 5.21  2008/09/27 03:27:10  caress
- * Working towards release 5.1.1beta24
- *
- * Revision 5.20  2008/09/20 00:57:41  caress
- * Release 5.1.1beta23
- *
- * Revision 5.19  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.18  2008/03/01 09:14:03  caress
- * Some housekeeping changes.
- *
- * Revision 5.17  2008/01/14 18:11:28  caress
- * Fixes to handling beamflagging following upgrades to Reson 7k multibeams.
- *
- * Revision 5.16  2007/10/08 15:59:34  caress
- * MBIO changes as of 8 October 2007.
- *
- * Revision 5.15  2007/07/03 17:25:51  caress
- * Changes to handle new time lag value in bluefin nav records.
- *
- * Revision 5.14  2006/11/10 22:36:05  caress
- * Working towards release 5.1.0
- *
- * Revision 5.13  2006/09/11 18:55:53  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.12  2006/08/09 22:41:27  caress
- * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
- *
- * Revision 5.11  2006/03/14 01:48:08  caress
- * Changed log2() and exp2() calls to log() and exp() for compatitibility with non-POSIX compliant operating systems.
- *
- * Revision 5.10  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.9  2005/06/15 15:20:17  caress
- * Fixed problems with writing Bluefin records in 7k data and improved support for Edgetech Jstar data.
- *
- * Revision 5.8  2005/06/04 04:16:00  caress
- * Support for Edgetech Jstar format (id 132 and 133).
- *
- * Revision 5.7  2004/12/02 06:33:31  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.6  2004/11/08 05:47:20  caress
- * Now gets sidescan from snippet data, maybe even properly...
- *
- * Revision 5.5  2004/11/06 03:55:15  caress
- * Working to support the Reson 7k format.
- *
- * Revision 5.4  2004/09/16 19:02:34  caress
- * Changes to better support segy data.
- *
- * Revision 5.3  2004/07/15 19:25:04  caress
- * Progress in supporting Reson 7k data.
- *
- * Revision 5.2  2004/06/18 05:22:32  caress
- * Working on adding support for segy i/o and for Reson 7k format 88.
- *
- * Revision 5.1  2004/05/21 23:44:49  caress
- * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
- *
- * Revision 5.0  2004/04/27 01:50:15  caress
- * Adding support for Reson 7k sonar data, including segy extensions.
- *
- *
- *
  */
 
 /* standard include files */
@@ -4751,7 +4676,7 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose,
 	fprintf(stderr,"%s     multi_ping:                 %u\n",first,calibratedsnippet->multi_ping);
 	fprintf(stderr,"%s     number_beams:               %u\n",first,calibratedsnippet->number_beams);
 	fprintf(stderr,"%s     error_flag:                 %u\n",first,calibratedsnippet->error_flag);
-	fprintf(stderr,"%s     control_flags:              %lu\n",first,calibratedsnippet->control_flags);
+	fprintf(stderr,"%s     control_flags:              %u\n",first,calibratedsnippet->control_flags);
 	for (i=0;i<28;i++)
 		fprintf(stderr,"%s     reserved[%d]:                %u\n", first, i, calibratedsnippet->reserved[i]);
 	for (i=0;i<calibratedsnippet->number_beams;i++)
@@ -5564,7 +5489,7 @@ int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 
 	/* get sonar type */
-	*sonartype = MB_SONARTYPE_MULTIBEAM;
+	*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 
 	/* print output debug statements */
 	if (verbose >= 2)

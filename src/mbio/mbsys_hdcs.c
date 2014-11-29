@@ -21,58 +21,6 @@
  * Author:	D. W. Caress
  * Date:	March 16, 1999
  *
- * $Log: mbsys_hdcs.c,v $
- * Revision 5.13  2008/09/13 06:08:09  caress
- * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
- *
- * Revision 5.12  2008/07/10 18:02:39  caress
- * Proceeding towards 5.1.1beta20.
- *
- * Revision 5.9  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.8  2008/03/14 18:33:03  caress
- * Updated support for JHC format 151.
- *
- * Revision 5.7  2005/11/05 00:48:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.6  2004/04/27 01:46:14  caress
- * Various updates of April 26, 2004.
- *
- * Revision 5.5  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.4  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.3  2001/08/25 00:54:13  caress
- * Adding beamwidth values to extract functions.
- *
- * Revision 5.2  2001/07/20  00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.3  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.2  2000/09/30  06:32:52  caress
- * Snapshot for Dale.
- *
- * Revision 4.1  1999/08/08  04:16:03  caress
- * Added ELMK2XSE format.
- *
- * Revision 4.0  1999/03/31  18:29:20  caress
- * MB-System 4.6beta7
- *
- * Revision 1.1  1999/03/31  18:11:35  caress
- * Initial revision
- *
  *
  */
 
@@ -386,7 +334,7 @@ int mbsys_hdcs_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		|| store->toolType == MBSYS_HDCS_R2Sonic_2024		/* 43 */
 		|| store->toolType == MBSYS_HDCS_SeaBat_7150 		/* 44 */)
 		{
-		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 		}
 	else if (store->toolType == MBSYS_HDCS_FanSweep		/* 4 */
 		|| store->toolType == MBSYS_HDCS_ISIS_Submetrix		/* 14 */
@@ -395,12 +343,12 @@ int mbsys_hdcs_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		|| store->toolType == MBSYS_HDCS_ISIS_SWA		/* 20 */
 		|| store->toolType == MBSYS_HDCS_SEA_SwathPlus 		/* 39 */)
 		{
-		*sonartype = MB_SONARTYPE_INTERFEROMETRIC;
+		*sonartype = MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC;
 		}
 	else if (store->toolType == MBSYS_HDCS_Humminbird		/* 28 */
 		|| store->toolType == MBSYS_HDCS_OMG_GLORIA		/* 45 */)
 		{
-		*sonartype = MB_SONARTYPE_SIDESCAN;
+		*sonartype = MB_TOPOGRAPHY_TYPE_SIDESCAN;
 		}
 	else if (store->toolType == MBSYS_HDCS_SingleBeam		/* 0 */
 		 || store->toolType == MBSYS_HDCS_ROSS_Profiler		/* 7 */
@@ -408,11 +356,11 @@ int mbsys_hdcs_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		|| store->toolType == MBSYS_HDCS_Knudsen_320		/* 29 */
 		|| store->toolType == MBSYS_HDCS_Optech_Laser		/* 35 */)
 		{
-		*sonartype = MB_SONARTYPE_ECHOSOUNDER;
+		*sonartype = MB_TOPOGRAPHY_TYPE_ECHOSOUNDER;
 		}
 	else
 		{
-		*sonartype = MB_SONARTYPE_UNKNOWN;
+		*sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
 		}
 
 	/* print output debug statements */

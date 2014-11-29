@@ -149,6 +149,7 @@ struct mbev_file_struct
 	struct mbev_ping_struct *pings;
 	double	beamwidth_xtrack;
 	double	beamwidth_ltrack;
+        int     topo_type;
 
 	int	n_async_heading;
 	int	n_async_heading_alloc;

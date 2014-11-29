@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbgrid</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  29 November 2014 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -113,11 +113,24 @@ page), <B>mbgrid</B> can also read data from ASCII text files in
 longitude, latitude, value triples. This allows one to incorporate
 conventional echosounder bathymetry data into the gridding.
 <P>
-If the default weighted average gridding scheme is being used,
-each data point's contribution to a Gaussian weighted
+The available gridding algorithms specified with the <B>-F</B> option are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;Gaussian&nbsp;weighted&nbsp;mean&nbsp;filter
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.&nbsp;Median&nbsp;filter
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.&nbsp;Minimum&nbsp;filter
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.&nbsp;Maximum&nbsp;filter
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.&nbsp;Beam&nbsp;footprint&nbsp;with&nbsp;slope
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.&nbsp;Beam&nbsp;footprint
+<BR>
+
+Algorithms 5 and 6 can only be used to grid bathymetry data, and are
+not available for gridding amplitude or sidescan data.
+<P>
+If the default weighted average gridding scheme (<B>-F</B><I>1</I>) 
+is being used, each data point's contribution to a Gaussian weighted
 average for each nearby grid cell is calculated as the point is read
-and added to
-the grid cell sums.  The weighting function is given by:
+and added to the grid cell sums.  The weighting function is given by:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>W(r)&nbsp;=&nbsp;Aexp(-r**2/a**2)<BR>
 <BR>
 
@@ -127,23 +140,6 @@ maximum value, and A is a normalizing factor set so that the sum of all
 the weights adds to a value of 1.  Normally, the distance a is set to be
 half the average grid point spacing, but this can be varied using the <B>-W</B>
 option.
-<P>
-If the <B>-F</B><I>5</I> option is used, the gridding is performed using
-beam footprints rather than a weighting function tied to the grid
-cell spacing. In this algorithm, the beam footprints are calculated
-using the angular beamwidths and the sonar altitude above the seafloor.
-A weighting value is calculated for each grid cell which fully or
-parially lies within the beam footprint; these weighting values
-represent the fraction of the beam contained within the cell. Each
-footprint is tilted according to the local slope; the slope is estimated
-from a low resolution, first pass grid created by simple mean filtering
-the soundings. The slope grid is generated using a cell size twice that
-of the final grid. This approach allows one to sensibly grid data using
-a resolution greater than that of the raw data. Thus, if one has data
-with a large depth variation, one can generate a grid with a cell spacing
-appropriate for the high resolution, shallow data and still get
-sensible results in deep regions where the grid cells may be
-much smaller than the beam footprints.
 <P>
 If the <B>-F</B><I>2</I> option is used, the gridding is performed with a
 median filter scheme instead of a Gaussian weighted average. In this
@@ -170,6 +166,30 @@ producing grids which strongly reflect outliers in the
 data. Hydrographers often prefer to grid bathymetry using a minimum
 depth scheme because they are most interested in the
 shallowest (most dangerous) soundings in their data.
+<P>
+If the <B>-F</B><I>5</I> option is used, gridding of multibeam bathymetry
+is performed using beam footprints rather than a weighting function tied to
+the grid cell spacing. In this algorithm, the beam footprints are calculated
+using the angular beamwidths and the sonar altitude above the seafloor.
+A weighting value is calculated for each grid cell which fully or
+parially lies within the beam footprint; these weighting values
+represent the fraction of the beam contained within the cell. Each
+footprint is tilted according to the local slope; the slope is estimated
+from a low resolution, first pass grid created by simple mean filtering
+the soundings. The slope grid is generated using a cell size twice that
+of the final grid. This approach allows one to sensibly grid data using
+a resolution greater than that of the raw data. Thus, if one has data
+with a large depth variation, one can generate a grid with a cell spacing
+appropriate for the high resolution, shallow data and still get
+sensible results in deep regions where the grid cells may be
+much smaller than the beam footprints. Bathymetry data derived from
+sources other than multibeam data (e.g. xyz, lidar, photogrammetry)
+are treated as points rather than soundings with footprints; the
+full weight of each sounding is applied to the grid cell in which it
+is located.
+<P>
+The <B>-F</B><I>6</I> option results in beam footprint gridding of multibeam
+data without application of a local slope estimate.
 <P>
 Normally, all of the data which falls into the region of interest
 is used to construct the gridded data set. This means that the
@@ -366,7 +386,8 @@ Sets the gridding algorithm to be used.
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Median&nbsp;Filter<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Filter<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;4:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum&nbsp;Filter<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted&nbsp;Sonar&nbsp;Footprint<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted&nbsp;Sonar&nbsp;Footprint&nbsp;with&nbsp;slope<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;6:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted&nbsp;Sonar&nbsp;Footprint<BR>
 The default is <I>mode</I> = 1 (Gaussian Weighted Mean).
 <DT><B>-G</B>
 
@@ -8393,7 +8414,7 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 29 November 2014</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

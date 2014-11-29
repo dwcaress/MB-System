@@ -390,7 +390,7 @@ int mbsys_swathplus_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	store = (struct mbsys_swathplus_struct *)store_ptr;
 
 	/* get sonar type */
-	*sonartype = MB_SONARTYPE_INTERFEROMETRIC;
+	*sonartype = MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC;
 
 	/* print output debug statements */
 	if (verbose >= 2)

@@ -19,14 +19,6 @@
  * Author:	D. W. Caress
  * Date:	October 1, 2000
  *
- * $Log: mb_access.c,v $
- * Revision 5.17  2008/09/20 00:57:40  caress
- * Release 5.1.1beta23
- *
- * Revision 5.16  2008/03/01 09:12:52  caress
- * Added support for Simrad EM710 multibeam in new formats 58 and 59.
- *
- *
  */
 
 /* standard include files */
@@ -399,6 +391,9 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	
+	/* start off with sonartype unknown */
+	*sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
 
 	/* call the appropriate mbsys_ sonartype routine
 			mb_io_ptr->system == MB_SYS_LDEOIH
@@ -416,7 +411,17 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	/* Some systems are definitively echosounders */
 	else if (mb_io_ptr->system == MB_SYS_SINGLEBEAM)
 		{
-		*sonartype = MB_SONARTYPE_ECHOSOUNDER;
+		if (mb_io_ptr->format == MBF_ASCIIXYZ
+			|| mb_io_ptr->format == MBF_ASCIIYXZ
+			|| mb_io_ptr->format == MBF_ASCIIYXT
+			|| mb_io_ptr->format == MBF_ASCIIYXT)
+			{
+			*sonartype = MB_TOPOGRAPHY_TYPE_POINT;
+			}
+		else
+			{
+			*sonartype = MB_TOPOGRAPHY_TYPE_ECHOSOUNDER;
+			}
 		}
 
 	/* Some systems are definitively multibeams */
@@ -437,9 +442,10 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 			|| mb_io_ptr->system == MB_SYS_HS10
 			|| mb_io_ptr->system == MB_SYS_ATLAS
 			|| mb_io_ptr->system == MB_SYS_SURF
-			|| mb_io_ptr->system == MB_SYS_RESON7K)
+			|| mb_io_ptr->system == MB_SYS_RESON7K
+			|| mb_io_ptr->system == MB_SYS_WASSP)
 		{
-		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 		}
 
 	/* Some systems are definitively sidescans */
@@ -448,7 +454,7 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 			|| mb_io_ptr->system == MB_SYS_BENTHOS
 			|| mb_io_ptr->system == MB_SYS_IMAGE83P)
 		{
-		*sonartype = MB_SONARTYPE_SIDESCAN;
+		*sonartype = MB_TOPOGRAPHY_TYPE_SIDESCAN;
 		}
 
 	/* Some systems are definitively interferometric sonars */
@@ -456,13 +462,22 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 			|| mb_io_ptr->system == MB_SYS_MR1B
 			|| mb_io_ptr->system == MB_SYS_MR1V2001
 			|| mb_io_ptr->system == MB_SYS_DSL
-			|| mb_io_ptr->system == MB_SYS_OIC)
+			|| mb_io_ptr->system == MB_SYS_OIC
+			|| mb_io_ptr->system == MB_SYS_SWATHPLUS)
 		{
-		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		*sonartype = MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC;
 		}
-	else
+
+	/* Some systems are definitively lidars */
+	else if (mb_io_ptr->system == MB_SYS_3DATDEPTHLIDAR)
 		{
-		*sonartype = MB_SONARTYPE_UNKNOWN;
+		*sonartype = MB_TOPOGRAPHY_TYPE_LIDAR;
+		}
+
+	/* Some systems are definitively stereo cameras */
+	else if (mb_io_ptr->system == MB_SYS_STEREOPAIR)
+		{
+		*sonartype = MB_TOPOGRAPHY_TYPE_CAMERA;
 		}
 
 	/* print output debug statements */

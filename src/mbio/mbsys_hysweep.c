@@ -21,8 +21,6 @@
  * Author:	D. W. Caress
  * Date:	December 23, 2011
  *
- * $Log: mbsys_hysweep.c,v $
- *
  */
 
 /* standard include files */
@@ -890,7 +888,7 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SEABEAM_3020		/* SeaBeam 3020 - 71 */
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SEABEAM_3050		/* SeaBeam 3050 - 72 */)
 		{
-		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 		}
 	else if (store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_ATLAS_FANSWEEP20		/* Atlas Fansweep 20 - 2 */
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_BENTHOS_C3D		/* Benthos C3D - 3 */
@@ -900,7 +898,7 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_GEOACOUSTICS_DSS		/* Geoacoustics digital sidescan - 49 */
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_EDGETECH_4600		/* Edgetech 4600 - 61 */)
 		{
-		*sonartype = MB_SONARTYPE_INTERFEROMETRIC;
+		*sonartype = MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC;
 		}
 	else if (store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_EDGETECH_272		/* EdgeTech 272 - 5 */
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_EDGETECH_4100		/* EdgeTech 4100 - 6 */
@@ -918,7 +916,7 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_TRITECH_STARFISH		/* Tritech Starfish - 57 */
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_INNOMAR_SES		/* Innomar SES - 69 */)
 		{
-		*sonartype = MB_SONARTYPE_SIDESCAN;
+		*sonartype = MB_TOPOGRAPHY_TYPE_SIDESCAN;
 		}
 	else if (store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_CMAX_CM2			/* CMAX CM-2 - 4 */
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_IMAGENEX_SPORTSCAN	/* Imagenex Sportscan - 12 */
@@ -928,11 +926,11 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_ODOM_ES3			/* Odom ES3 - 21 */
 		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_MDL_DYNASCAN		/* MDL Dynascan - 64 */)
 		{
-		*sonartype = MB_SONARTYPE_ECHOSOUNDER;
+		*sonartype = MB_TOPOGRAPHY_TYPE_ECHOSOUNDER;
 		}
 	else
 		{
-		*sonartype = MB_SONARTYPE_UNKNOWN;
+		*sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
 		}
 
 	/* print output debug statements */
@@ -2523,7 +2521,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			}
 		if (nbathsort > 0)
-			qsort((char *)store->MSS_table_altitude_sort, nbathsort, sizeof(double),(void *)mb_double_compare);
+			qsort((char *)store->MSS_table_altitude_sort, nbathsort, sizeof(double), mb_double_compare);
 
 		/* set number of pixels */
 		store->MSS_num_pixels = MBSYS_HYSWEEP_MSS_NUM_PIXELS;
