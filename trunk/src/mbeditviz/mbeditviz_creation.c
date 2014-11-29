@@ -1234,9 +1234,9 @@ CreatemainWindow_mbeditviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNminimum, 1); ac++;
-        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
-        XtSetArg(args[ac], XmNvalue, 10); ac++;
-        XtSetArg(args[ac], XmNmaximum, 2500); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
+        XtSetArg(args[ac], XmNvalue, 100); ac++;
+        XtSetArg(args[ac], XmNmaximum, 25000); ac++;
         XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
         XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
         XtSetArg(args[ac], XmNhighlightThickness, 1); ac++;

@@ -666,10 +666,10 @@ int mb_lever(int verbose,
 		double *lever_y,
 		double *lever_z,
 		int *error);
-int mb_mergesort(void *base, size_t nmemb,register size_t size, int (*cmp) (void *, void *));
-int mb_double_compare(void *a, void *b);
-int mb_int_compare(void *a, void *b);
-int mb_edit_compare(void *a, void *b);
+int mb_mergesort(void *base, size_t nmemb,register size_t size, int (*cmp) (const void *, const void *));
+int mb_double_compare(const void *a, const void *b);
+int mb_int_compare(const void *a, const void *b);
+int mb_edit_compare(const void *a, const void *b);
 void hilbert(int n, double delta[], double kappa[]);
 void hilbert2(int n, double data[]);
 

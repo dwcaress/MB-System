@@ -22,116 +22,6 @@
  * Author:	D. W. Caress
  * Date:	March 23, 2000
  *
- * $Log: mbnavadjust_prog.c,v $
- * Revision 5.35  2008/12/22 08:32:52  caress
- * Added additional model view - survey vs survey rather than sequential.
- *
- * Revision 5.34  2008/10/17 07:52:44  caress
- * Check in on October 17, 2008.
- *
- * Revision 5.33  2008/09/27 03:27:10  caress
- * Working towards release 5.1.1beta24
- *
- * Revision 5.32  2008/09/11 20:12:43  caress
- * Checking in updates made during cruise AT15-36.
- *
- * Revision 5.31  2008/07/10 18:08:10  caress
- * Proceeding towards 5.1.1beta20.
- *
- * Revision 5.28  2008/05/16 22:42:32  caress
- * Release 5.1.1beta18 - working towards use of 3D uncertainty.
- *
- * Revision 5.27  2007/11/16 17:54:10  caress
- * Changes as of 11/16/2007
- *
- * Revision 5.26  2007/10/08 16:02:46  caress
- * MBnavadjust now performs an initial inversion for the average offsets for each independent block of data and then removes that average signal before performing the full inversion.
- *
- * Revision 5.25  2007/05/14 06:34:11  caress
- * Many changes to mbnavadjust, including adding z offsets and 3D search grids.
- *
- * Revision 5.24  2006/12/15 21:42:49  caress
- * Incremental CVS update.
- *
- * Revision 5.23  2006/11/10 22:36:05  caress
- * Working towards release 5.1.0
- *
- * Revision 5.22  2006/08/09 22:41:27  caress
- * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
- *
- * Revision 5.21  2006/07/27 18:42:52  caress
- * Working towards 5.1.0
- *
- * Revision 5.20  2006/06/16 19:30:58  caress
- * Check in after the Santa Monica Basin Mapping AUV Expedition.
- *
- * Revision 5.19  2006/01/24 19:18:42  caress
- * Version 5.0.8 beta.
- *
- * Revision 5.18  2006/01/06 18:25:21  caress
- * Working towards 5.0.8
- *
- * Revision 5.17  2005/11/05 00:57:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.16  2005/06/04 04:34:07  caress
- * Added notion of "truecrossings", so it's possible to process the data while only looking at crossing tracks and ignoring overlap points.
- *
- * Revision 5.15  2004/12/18 01:35:42  caress
- * Working towards release 5.0.6.
- *
- * Revision 5.14  2004/12/02 06:34:27  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.13  2004/05/21 23:31:27  caress
- * Moved to new version of BX GUI builder
- *
- * Revision 5.12  2003/04/17 21:07:49  caress
- * Release 5.0.beta30
- *
- * Revision 5.11  2002/08/28 01:32:45  caress
- * Finished first cut at man page.
- *
- * Revision 5.10  2002/03/26 07:43:57  caress
- * Release 5.0.beta15
- *
- * Revision 5.9  2001/10/19 00:55:42  caress
- * Now tries to use relative paths.
- *
- * Revision 5.8  2001/08/04  01:02:24  caress
- * Fixed small bugs.
- *
- * Revision 5.7  2001/08/02  01:48:30  caress
- * Fixed call to mb_pr_get_heading() and mb_pr_get_rollbias().
- *
- * Revision 5.6  2001/07/20  00:33:43  caress
- * Release 5.0.beta03
- *
- * Revision 5.5  2001/06/03 07:05:54  caress
- * Release 5.0.beta01.
- *
- * Revision 5.4  2001/03/22 21:09:11  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.3  2001/01/22  07:45:59  caress
- * Version 5.0.beta01
- *
- * Revision 5.2  2000/12/21  00:44:15  caress
- * Changed decimation from import parameter to contouring/gridding parameter.
- *
- * Revision 5.1  2000/12/10  20:29:34  caress
- * Version 5.0.alpha02
- *
- * Revision 5.0  2000/12/01  22:55:48  caress
- * First cut at Version 5.0.
- *
- * Revision 4.1  2000/10/03  21:49:28  caress
- * Fixed handling count of nav points while importing data.
- *
- * Revision 4.0  2000/09/30  07:00:06  caress
- * Snapshot for Dale.
- *
- *
  *
  */
 
@@ -289,7 +179,7 @@ time_t	right_now;
 char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
 /* local prototypes */
-int mbnavadjust_crossing_compare(void *a, void *b);
+int mbnavadjust_crossing_compare(const void *a, const void *b);
 void mbnavadjust_plot(double xx,double yy,int ipen);
 void mbnavadjust_newpen(int icolor);
 void mbnavadjust_setline(int linewidth);
@@ -3076,7 +2966,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile)
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
 
-	int	sonartype = MB_SONARTYPE_UNKNOWN;
+	int	sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
 	int	*bin_nbath = NULL;
 	double	*bin_bath = NULL;
 	double	*bin_bathacrosstrack = NULL;
@@ -3311,10 +3201,10 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile)
 			/* if sonar is interferometric, bin the bathymetry */
 			if (kind == MB_DATA_DATA)
 				{
-				if (sonartype == MB_SONARTYPE_UNKNOWN)
+				if (sonartype == MB_TOPOGRAPHY_TYPE_UNKNOWN)
 					status = mb_sonartype(mbna_verbose, imbio_ptr, istore_ptr, &sonartype, &error);
 
-				if (sonartype == MB_SONARTYPE_INTERFEROMETRIC)
+				if (sonartype == MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC)
 					{
 					/* allocate bin arrays if needed */
 					if (bin_nbath == NULL)
@@ -4238,7 +4128,7 @@ int mbnavadjust_findcrossings()
 }
 
 /*--------------------------------------------------------------------*/
-int mbnavadjust_crossing_compare(void *a, void *b)
+int mbnavadjust_crossing_compare(const void *a, const void *b)
 {
 	struct mbna_crossing	*aa, *bb;
 	int a1id, a2id, b1id, b2id;
@@ -8107,8 +7997,7 @@ mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z
 
 		if (grid_nxyzeq > 0)
 		    {
-			qsort((char *)gridmeq,grid_nxyzeq,sizeof(double),
-					(void *)mb_double_compare);
+			qsort((char *)gridmeq,grid_nxyzeq,sizeof(double),mb_double_compare);
 			dinterval = ((double) grid_nxyzeq) / ((double)(nmisfit_intervals-1));
 			if (dinterval < 1.0)
 			    {

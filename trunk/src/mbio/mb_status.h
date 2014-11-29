@@ -19,8 +19,6 @@
  * Author:	D. W. Caress
  * Date:	January 19, 1993
  *
- * $Log: mb_status.h,v $
- *
  *
  */
 
@@ -33,12 +31,27 @@
 #define	MB_NO	        0
 #define	MB_MAYBE	-1
 
-/* MBIO sonar types */
-#define	MB_SONARTYPE_UNKNOWN		0
-#define	MB_SONARTYPE_ECHOSOUNDER	1
-#define	MB_SONARTYPE_MULTIBEAM		2
-#define	MB_SONARTYPE_SIDESCAN		3
-#define	MB_SONARTYPE_INTERFEROMETRIC	4
+/* MBIO topography source types */
+#define	MB_TOPOGRAPHY_TYPE_UNKNOWN		0
+#define	MB_TOPOGRAPHY_TYPE_ECHOSOUNDER	        1
+#define	MB_TOPOGRAPHY_TYPE_MULTIBEAM		2
+#define	MB_TOPOGRAPHY_TYPE_SIDESCAN		3
+#define	MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC	4
+#define	MB_TOPOGRAPHY_TYPE_LIDAR      	        5
+#define	MB_TOPOGRAPHY_TYPE_CAMERA     	        6
+#define	MB_TOPOGRAPHY_TYPE_GRID     	        7
+#define	MB_TOPOGRAPHY_TYPE_POINT       	        8
+
+/* MBIO imagery source types */
+#define	MB_IMAGERY_TYPE_UNKNOWN		        0
+#define	MB_IMAGERY_TYPE_ECHOSOUNDER	        1
+#define	MB_IMAGERY_TYPE_MULTIBEAM		2
+#define	MB_IMAGERY_TYPE_SIDESCAN		3
+#define	MB_IMAGERY_TYPE_INTERFEROMETRIC	        4
+#define	MB_IMAGERY_TYPE_LIDAR      	        5
+#define	MB_IMAGERY_TYPE_CAMERA     	        6
+#define	MB_IMAGERY_TYPE_GRID     	        7
+#define	MB_IMAGERY_TYPE_POINT       	        8
 
 /* MBIO data type ("kind") convention */
 #define	MB_DATA_KINDS			61
@@ -448,11 +461,12 @@ static char *unknown_notice_msg[] =
 #define mb_beam_set_select_spare_2(F)		(F | 0x82)
 
 /* Bottom detect flags */
-#define MB_DETECT_TYPE_NUM	4
-#define MB_DETECT_UNKNOWN	0
-#define MB_DETECT_AMPLITUDE	1
-#define MB_DETECT_PHASE		2
-#define MB_DETECT_LIDAR		3
+#define MB_DETECT_TYPE_NUM	        5
+#define MB_DETECT_UNKNOWN	        0
+#define MB_DETECT_AMPLITUDE	        1
+#define MB_DETECT_PHASE		        2
+#define MB_DETECT_LIDAR		        3
+#define MB_DETECT_PHOTOGRAMMETRY        4
 
 /* Source pulse type flags */
 #define MB_PULSE_TYPE_NUM	5

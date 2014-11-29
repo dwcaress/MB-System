@@ -22,50 +22,6 @@
  * Author:	D. W. Caress
  * Date:	March 22, 2000
  *
- * $Log: mbnavadjust.h,v $
- * Revision 5.12  2008/12/22 08:32:52  caress
- * Added additional model view - survey vs survey rather than sequential.
- *
- * Revision 5.11  2008/09/11 20:12:43  caress
- * Checking in updates made during cruise AT15-36.
- *
- * Revision 5.10  2008/05/16 22:42:32  caress
- * Release 5.1.1beta18 - working towards use of 3D uncertainty.
- *
- * Revision 5.9  2007/10/08 16:02:46  caress
- * MBnavadjust now performs an initial inversion for the average offsets for each independent block of data and then removes that average signal before performing the full inversion.
- *
- * Revision 5.8  2007/05/14 06:34:11  caress
- * Many changes to mbnavadjust, including adding z offsets and 3D search grids.
- *
- * Revision 5.7  2006/06/16 19:30:58  caress
- * Check in after the Santa Monica Basin Mapping AUV Expedition.
- *
- * Revision 5.6  2005/06/04 04:34:07  caress
- * Added notion of "truecrossings", so it's possible to process the data while only looking at crossing tracks and ignoring overlap points.
- *
- * Revision 5.5  2004/12/02 06:34:27  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.4  2004/05/21 23:31:28  caress
- * Moved to new version of BX GUI builder
- *
- * Revision 5.3  2002/03/26 07:43:57  caress
- * Release 5.0.beta15
- *
- * Revision 5.2  2001/10/19 00:55:42  caress
- * Now tries to use relative paths.
- *
- * Revision 5.1  2001/07/20  00:33:43  caress
- * Release 5.0.beta03
- *
- * Revision 5.0  2000/12/01  22:55:48  caress
- * First cut at Version 5.0.
- *
- * Revision 4.0  2000/09/30  07:00:06  caress
- * Snapshot for Dale.
- *
- *
  *
  */
 
@@ -547,7 +503,7 @@ int	mbnavadjust_modelplot_pick_sequential(int x, int y);
 int	mbnavadjust_modelplot_middlepick(int x, int y);
 int	mbnavadjust_modelplot_setzoom();
 int	mbnavadjust_modelplot_clearblock();
-int	mbnavadjust_crossing_compare(void *a, void *b);
+int	mbnavadjust_crossing_compare(const void *a, const void *b);
 
 void	do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_cont_expose( Widget w, XtPointer client_data, XtPointer call_data);

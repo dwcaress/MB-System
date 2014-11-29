@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2215       November 29, 2014
 * Version 5.4.2213       November 13, 2014
   Version 5.4.2210       November 10, 2014
 * Version 5.4.2209       November 4, 2014
@@ -191,6 +192,55 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2215 (November 29, 2014)
+
+Format 251 (MBF_PHOTGRAM): We have added a new data format and associated data
+system supporting photogrammetric topography calculated from stereo pair
+photographs. This format includes navigation and attitude data. Each 2D group
+of bathymetry values is derived with a single stereo pair. A file consists of a
+sequence of stereo pair bathymetry, each set of which has a timestamp, navigation
+and attitude as well as bathymetry values. The format 251 files are generated
+from stereo pairs (and navigation and attitude data) by a set of tools that
+are not currently in MB-System, but which will be added to MB-System in the
+future. 
+
+Mbeditviz and Mbgrdviz: Now allow selection of a single navigation point.
+
+Mbeditviz and mbgrid: Now handle point topography data (e.g. xyz soundings, lidar
+soundings, photogrammetry topography) differently than multibeam soundings even
+when the footprint algorithm is specified. Point data are now treated as such,
+and no longer are associated with nonsensical beam footprints.
+
+Format 71 (MBF_MBLDEOIH) and fbt files: We have defined a new data record header (version 5)
+that represents the number of bathymetry beams, amplitude beams, and sidescan
+pixels as four-byte int values rather than two-byte short values. This supports
+data constructs that have more than 32768 bathymetry values, as can be the case
+for dense photogrammetry data derived from stereo-pair photography. The i/o module
+only uses the version 5 header when there are more than 32768 bathymetry values
+in the associated sonar ping, lidar scan, or photographic stereo pair. Otherwise,
+the previously existing version 4 header is used. Consequently, for all previously
+supported data types there will be no change to the MBF_MBLDEOIH format or to
+fbt files.
+
+General: MB-System now defines several types of bathymetry data:
+      MB_TOPOGRAPHY_TYPE_UNKNOWN		0
+      MB_TOPOGRAPHY_TYPE_ECHOSOUNDER	        1
+      MB_TOPOGRAPHY_TYPE_MULTIBEAM		2
+      MB_TOPOGRAPHY_TYPE_SIDESCAN		3
+      MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC	4
+      MB_TOPOGRAPHY_TYPE_LIDAR      	        5
+      MB_TOPOGRAPHY_TYPE_CAMERA     	        6
+      MB_TOPOGRAPHY_TYPE_GRID     	        7
+      MB_TOPOGRAPHY_TYPE_POINT       	        8
+The immediate utility of differentiating between data types is to
+allow gridding algorithms to handle data appropriately. As discussed
+above, the footprint gridding algorithms are now only applied by
+mbgrid or mbeditviz to multibeam bathymetry. Other differences in
+data processing will be added in the future.
+
+General: The sort function and related comparison function declarations
+in MB-System have been corrected to be consistent with qsort() from stdlib.
 
 -----> 5.4.2213 (November 13, 2014)
 

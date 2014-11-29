@@ -803,10 +803,11 @@ int mbeditviz_load_file(int ifile)
 				}
  			}
 
-		/* set the beamwidths */
+		/* set the topo_type and beamwidths */
 		imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
 		file->beamwidth_xtrack = imb_io_ptr->beamwidth_xtrack;
 		file->beamwidth_ltrack = imb_io_ptr->beamwidth_ltrack;
+		mbev_status = mb_sonartype(mbev_verbose, imbio_ptr, imb_io_ptr->store_data, &file->topo_type, &mbev_error);
 
 		/* read the data */
 		if (mbev_status == MB_SUCCESS)
@@ -2864,7 +2865,8 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 	if (i >= 0 && i < mbev_grid.nx && j >= 0 && j < mbev_grid.ny)
 		{
 		/* simple gridding mode */
-		if (mbev_grid_algorithm == MBEV_GRID_ALGORITH_SIMPLE)
+		if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM
+			|| mbev_grid_algorithm == MBEV_GRID_ALGORITH_SIMPLE)
 			{
 			/* get location in grid arrays */
 			kk = i * mbev_grid.ny + j;

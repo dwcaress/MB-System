@@ -20,61 +20,6 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1993
  *
- * $Log: mbsys_ldeoih.h,v $
- * Revision 5.6  2007/10/08 15:59:34  caress
- * MBIO changes as of 8 October 2007.
- *
- * Revision 5.5  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.4  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.3  2002/04/06 02:43:39  caress
- * Release 5.0.beta16
- *
- * Revision 5.2  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.5  2000/09/30  06:31:19  caress
- * Snapshot for Dale.
- *
- * Revision 4.4  1999/03/31  18:11:35  caress
- * MB-System 4.6beta7
- *
- * Revision 4.3  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.2  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.1  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.1  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.0  1994/02/17  20:42:20  caress
- * First cut at new version.  Recast format to include both
- * beam amplitude and sidescan data.  I hope noone has used
- * the old version of this format, as the files will be
- * orphaned!!!
- *
- * Revision 3.0  1993/05/14  23:04:50  sohara
- * initial version
- *
  */
 /*
  * Notes on the MBSYS_LDEOIH data structure:
@@ -129,36 +74,49 @@ struct mbsys_ldeoih_struct
 	float	beam_lwidth;	/* degrees */
 
 	/* numbers of beams */
-	short	beams_bath;	/* number of depth values */
-	short	beams_amp;	/* number of amplitude values */
-	short	pixels_ss;	/* number of sidescan pixels */
-	short	spare1;
-	short	beams_bath_alloc;	/* number of depth values allocated */
-	short	beams_amp_alloc;	/* number of amplitude values allocated */
-	short	pixels_ss_alloc;	/* number of sidescan pixels allocated */
+	int	beams_bath;	/* number of depth values */
+	int	beams_amp;	/* number of amplitude values */
+	int	pixels_ss;	/* number of sidescan pixels */
+	int	spare1;
+	int	beams_bath_alloc;	/* number of depth values allocated */
+	int	beams_amp_alloc;	/* number of amplitude values allocated */
+	int	pixels_ss_alloc;	/* number of sidescan pixels allocated */
 
 	/* scaling */
 	float	depth_scale;	/* depth[i] = (bath[i] * depth_scale) + transducer_depth */
 	float	distance_scale;	/* acrosstrackdistance[i] = acrosstrack[i] * distance_scale
 					alongtrackdistance[i] = alongtrack[i] * distance_scale */
 
-	/* sidescan type */
+	/* data type parameters */
         mb_s_char       ss_scalepower;  /* gives scaling factor for sidescan values in powers of 10:
-                                 *      ss_scalepower = 0: ss = ss_stored * 1
-                                 *      ss_scalepower = 1: ss = ss_stored * 10
-                                 *      ss_scalepower = 2: ss = ss_stored * 100
-                                 *      ss_scalepower = 3: ss = ss_stored * 1000 */
+                                                ss_scalepower = 0: ss = ss_stored * 1
+                                                ss_scalepower = 1: ss = ss_stored * 10
+                                                ss_scalepower = 2: ss = ss_stored * 100
+                                                ss_scalepower = 3: ss = ss_stored * 1000 */
 	mb_u_char	ss_type;	/* indicates if sidescan values are logarithmic or linear
-					ss_type = 0: logarithmic (dB)
-					ss_type = 1: linear (voltage) */
-	mb_u_char	spare3;
-	mb_u_char	sonartype;      /* indicates type of sonar from which data originated:
-                                        0	MB_SONARTYPE_NONE
-                                        1	MB_SONARTYPE_ECHOSOUNDER
-                                        2	MB_SONARTYPE_MULTIBEAM
-                                        3	MB_SONARTYPE_SIDESCAN
-                                        4	MB_SONARTYPE_INTERFEROMETRIC */
+                                                ss_type = 0: logarithmic (dB)
+                                                ss_type = 1: linear (voltage) */
+	mb_u_char	imagery_type;   /* MBIO imagery source types defined in mb_status.h
+                                                MB_IMAGERY_TYPE_UNKNOWN		        0
+                                                MB_IMAGERY_TYPE_ECHOSOUNDER	        1
+                                                MB_IMAGERY_TYPE_MULTIBEAM		2
+                                                MB_IMAGERY_TYPE_SIDESCAN		3
+                                                MB_IMAGERY_TYPE_INTERFEROMETRIC	        4
+                                                MB_IMAGERY_TYPE_LIDAR      	        5
+                                                MB_IMAGERY_TYPE_CAMERA     	        6
+                                                MB_IMAGERY_TYPE_GRID     	        7
+                                                MB_IMAGERY_TYPE_POINT       	        8 */
 
+	mb_u_char	topo_type;      /* MBIO topography source types
+                                                MB_TOPOGRAPHY_TYPE_UNKNOWN		0
+                                                MB_TOPOGRAPHY_TYPE_ECHOSOUNDER	        1
+                                                MB_TOPOGRAPHY_TYPE_MULTIBEAM		2
+                                                MB_TOPOGRAPHY_TYPE_SIDESCAN		3
+                                                MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC	4
+                                                MB_TOPOGRAPHY_TYPE_LIDAR      	        5
+                                                MB_TOPOGRAPHY_TYPE_CAMERA     	        6
+                                                MB_TOPOGRAPHY_TYPE_GRID     	        7
+                                                MB_TOPOGRAPHY_TYPE_POINT       	        8 */
 
 	/* pointers to arrays */
 	unsigned char *beamflag;

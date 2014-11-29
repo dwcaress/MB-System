@@ -82,9 +82,9 @@
 
 /* local prototypes */
 void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t size,
-	int (*cmp) (void *, void *));
+	int (*cmp) (const void *, const void *));
 void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size,
-	int (*cmp)(void *, void *));
+	int (*cmp)(const void *, const void *));
 
 static char rcs_id[]="$Id$";
 
@@ -982,7 +982,7 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
  * Arguments are as for qsort.
  */
 int mb_mergesort(void *base, size_t nmemb,register size_t size,
-	int (*cmp) (void *, void *))
+	int (*cmp) (const void *, const void *))
 {
 	register int i, sense;
 	int big, iflag;
@@ -1138,7 +1138,7 @@ COPY:	    			b = t;
  * is defined.  Otherwise simple pairwise merging is used.)
  */
 void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t size,
-	int (*cmp) (void *, void *))
+	int (*cmp) (const void *, const void *))
 {
 	int i, length, size2, tmp, sense;
 	mb_u_char *f1, *f2, *s, *l2, *last, *p2;
@@ -1209,7 +1209,7 @@ void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t siz
  * last 4 elements.
  */
 void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size,
-	int (*cmp)(void *, void *))
+	int (*cmp)(const void *, const void *))
 {
 	mb_u_char *ai, *s, *t, *u, tmp;
 	int i;

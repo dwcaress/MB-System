@@ -37,362 +37,6 @@
  * Rerewrite:	April 25, 1995
  * Rererewrite:	January 2, 1996
  *
- * $Log: mbgrid.c,v $
- * Revision 5.51  2009/03/13 07:05:58  caress
- * Release 5.1.2beta02
- *
- * Revision 5.50  2009/03/08 09:21:00  caress
- * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
- *
- * Revision 5.49  2009/01/15 17:37:28  caress
- * Update on 15 Jan 2009 - fix to mbm_grd2arc and mbm_arc2grd
- *
- * Revision 5.48  2008/12/22 08:36:18  caress
- * Check in of 22 Dec 2008.
- *
- * Revision 5.47  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.46  2008/10/17 07:52:44  caress
- * Check in on October 17, 2008.
- *
- * Revision 5.45  2008/09/27 03:27:11  caress
- * Working towards release 5.1.1beta24
- *
- * Revision 5.44  2008/06/26 07:15:46  caress
- * Fixed problem reading xyz files.
- *
- * Revision 5.43  2008/05/24 19:39:39  caress
- * Changed some commenting.
- *
- * Revision 5.42  2008/05/16 22:44:37  caress
- * Release 5.1.1beta18
- *
- * Revision 5.41  2008/01/14 18:27:01  caress
- * Fixed minor bug.
- *
- * Revision 5.40  2007/10/17 20:33:25  caress
- * Release 5.1.1beta11
- * Added new handling of datalists.
- *
- * Revision 5.39  2007/10/08 16:48:07  caress
- * State of the code on 8 October 2007.
- *
- * Revision 5.38  2007/05/12 19:34:37  caress
- * Fixed -G4 option.
- *
- * Revision 5.37  2006/08/09 22:41:27  caress
- * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
- *
- * Revision 5.36  2006/06/22 04:45:43  caress
- * Working towards 5.1.0
- *
- * Revision 5.35  2006/06/16 19:30:58  caress
- * Check in after the Santa Monica Basin Mapping AUV Expedition.
- *
- * Revision 5.34  2006/03/06 21:44:56  caress
- * Fixed bug.
- *
- * Revision 5.33  2006/02/06 06:33:40  caress
- * Fixed interpolation of background grid data.
- *
- * Revision 5.32  2006/02/02 19:40:57  caress
- * Increased resolution of grid bin size passed to grdsample and grd2xyz.
- *
- * Revision 5.31  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.30  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.29  2005/08/17 17:25:36  caress
- * Moved back to zgrid algorithm, but left it possible to use surface through a preprocessor define statement.
- *
- * Revision 5.28  2005/03/25 04:41:30  caress
- * Fixed a problem with the beam footprint gridding algorithm in mbgrid that caused beam footprints to be miscalculated for submerged sonars.
- *
- * Revision 5.27  2005/02/17 07:37:10  caress
- * Improved the background data capability. Moved interpolation back to surface algorithm.
- *
- * Revision 5.26  2004/12/02 06:38:50  caress
- * Fix suggested by Gordon Keith
- *
- * Revision 5.25  2004/05/24 22:37:02  caress
- * Augmented the -Kbackground option by making it possible to obtain background data from GMT grids using grd2xyz as well as from raster datasets using grdraster.
- *
- * Revision 5.24  2003/12/12 01:45:11  caress
- * Fixed setting output stream to stdout or stderr.
- *
- * Revision 5.23  2003/11/25 00:54:44  caress
- * Now generates datalist of all swath files actually contributing to the grid.
- *
- * Revision 5.22  2003/08/28 18:36:49  caress
- * Fixed problems with interpolating background data extracted with grdraster.
- *
- * Revision 5.21  2003/04/17 21:17:10  caress
- * Release 5.0.beta30
- *
- * Revision 5.20  2003/03/22 03:09:09  caress
- * Added mode parameter to -C option.
- *
- * Revision 5.19  2003/03/16 18:05:40  caress
- * Added -K option for underlaying background data on grids.
- *
- * Revision 5.18  2003/03/06 00:13:29  caress
- * Fixed use of footprint algorithm with projected coordinate grids.
- *
- * Revision 5.17  2003/01/15 20:52:13  caress
- * Release 5.0.beta28
- *
- * Revision 5.16  2002/11/14 03:52:25  caress
- * Release 5.0.beta27
- *
- * Revision 5.15  2002/11/12 07:23:58  caress
- * Added mb_memory_clear() calls.
- *
- * Revision 5.14  2002/11/04 21:26:55  caress
- * Fixed memory leak using proj.
- *
- * Revision 5.13  2002/10/15 18:20:12  caress
- * Release 5.0.beta25
- *
- * Revision 5.12  2002/10/04 21:22:02  caress
- * Now resets lonflip to specified bounds. Release 5.0.beta24.
- *
- * Revision 5.11  2002/10/02 23:56:06  caress
- * Release 5.0.beta24
- *
- * Revision 5.10  2002/09/25 20:12:30  caress
- * Have it use fbt files again for footprint gridding algorithm.
- *
- * Revision 5.9  2002/09/20 22:30:45  caress
- * Made interpolation only fill in data gaps.
- *
- * Revision 5.8  2002/09/19 00:28:12  caress
- * Release 5.0.beta23
- *
- * Revision 5.7  2002/08/02 01:00:25  caress
- * Release 5.0.beta22
- *
- * Revision 5.6  2002/07/25 19:07:17  caress
- * Release 5.0.beta21
- *
- * Revision 5.5  2002/04/06 02:53:45  caress
- * Release 5.0.beta16
- *
- * Revision 5.4  2001/07/20 00:34:38  caress
- * Release 5.0.beta03
- *
- * Revision 5.3  2001/06/29 22:50:23  caress
- * Atlas Hydrosweep DS2 raw data and SURF data formats.
- *
- * Revision 5.2  2001/06/03  07:07:34  caress
- * Release 5.0.beta01.
- *
- * Revision 5.1  2001/03/22 21:15:49  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.0  2000/12/01  22:57:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.50  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.49  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.48  2000/09/11  20:10:02  caress
- * Linked to new datalist parsing functions. Now supports recursive datalists
- * and comments in datalists.
- *
- * Revision 4.47  2000/06/20  21:00:19  caress
- * Moved execution of mbm_grdplot to after deallocation of array memory.
- *
- * Revision 4.46  1999/12/29  00:35:11  caress
- * Release 4.6.8
- *
- * Revision 4.45  1999/10/05  22:04:18  caress
- * Improved the facility for outputting ArcView grids.
- *
- * Revision 4.44  1999/09/24  23:11:07  caress
- * Altered grid interval parameter handling
- *
- * Revision 4.43  1999/09/14  21:28:50  caress
- * Fixed memory allocation errors relating to median filter gridding.
- *
- * Revision 4.42  1999/08/08  04:17:40  caress
- * Unknown changes.
- *
- * Revision 4.41  1999/04/16  01:29:39  caress
- * Version 4.6 final release?
- *
- * Revision 4.40  1999/02/04  23:55:08  caress
- * MB-System version 4.6beta7
- *
- * Revision 4.39  1999/01/01  23:34:40  caress
- * MB-System version 4.6beta6
- *
- * Revision 4.38  1998/12/17  22:50:20  caress
- * MB-System version 4.6beta4
- *
- * Revision 4.37  1998/10/07  19:33:56  caress
- * Removed ddmmss_to_degree function as it is included in gmt_init.c
- *
- * Revision 4.36  1998/10/05  19:19:24  caress
- * MB-System version 4.6beta
- *
- * Revision 4.35  1997/09/15  19:11:06  caress
- * Real Version 4.5
- *
- * Revision 4.34  1997/04/21  17:19:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.34  1997/04/17  15:14:38  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.33  1997/02/19  17:58:15  caress
- * mbgrid will now ignore datalist entries beginning with '#'.
- *
- * Revision 4.32  1997/02/18  20:39:56  caress
- * Fixed bugs where error value was not passed to functions as a pointer.
- *
- * Revision 4.31  1996/09/05  13:07:47  caress
- * Added feature that checks ".inf" files for lon lat bounds.
- *
- * Revision 4.30  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.29  1996/04/15  19:34:32  caress
- * Now mbgrid does not attempt to spline interpolate an empty grid.
- *
- * Revision 4.28  1996/01/26  21:25:58  caress
- * Version 4.3 distribution
- *
- * Revision 4.26  1995/11/28  21:03:36  caress
- * Fixed scaling for meters to feet.
- *
- * Revision 4.25  1995/11/22  22:21:36  caress
- * Now handles bathymetry in feet with -Q option.
- *
- * Revision 4.24  1995/08/17  15:04:52  caress
- * Revision for release 4.3.
- *
- * Revision 4.23  1995/08/09  13:27:57  caress
- * Adapted to GMT version 3.
- *
- * Revision 4.22  1995/05/17  21:51:20  caress
- * Stopped checking status of write_grd, as it seems nonsensical.
- *
- * Revision 4.21  1995/05/12  17:15:38  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.20  1995/04/25  19:09:03  caress
- * Now use C version of zgrid for thin plate spline interpolation.
- *
- * Revision 4.19  1995/03/22  19:52:56  caress
- * Fixed some ANSI C compliance details.
- *
- * Revision 4.18  1995/03/15  14:16:25  caress
- * Fixed trivia.
- *
- * Revision 4.17  1995/03/06  19:37:59  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.16  1995/03/02  13:16:36  caress
- * Fixed bugs related to fatal error messages.
- *
- * Revision 4.15  1995/03/01  12:46:10  caress
- * Fixed typo in outputing shellscript.
- *
- * Revision 4.14  1995/02/22  21:53:14  caress
- * Added capability to ignore overlapping parts of swaths.
- *
- * Revision 4.13  1995/01/23  14:17:13  caress
- * Fixed output shellscripts to use postscript viewer specified
- * in the .mbio_defaults file.
- *
- * Revision 4.12  1994/10/21  13:02:31  caress
- * Release V4.0
- *
- * Revision 4.11  1994/06/21  22:53:08  caress
- * Changes to support PCs running Lynx OS.
- *
- * Revision 4.10  1994/06/17  01:23:38  caress
- * Fixed bug where null pointers in
- *    double **data;
- * were passed to free(). This was not a problem on Suns,
- * but caused core dumps on SGI's.
- *
- * Revision 4.9  1994/06/13  14:52:52  caress
- * Added capability to do median filter gridding.
- *
- * Revision 4.8  1994/06/05  22:30:01  caress
- * Added option to set grid spacing and revised info output.
- *
- * Revision 4.7  1994/06/04  02:02:01  caress
- * Fixed several bugs and made some stylistic changes to
- * the output.  Changed the data input bounds to be much
- * larger than the working grid bounds.
- *
- * Revision 4.6  1994/06/01  21:56:22  caress
- * Added ability to output topography (positive upwards) grids.
- *
- * Revision 4.5  1994/05/05  20:26:28  caress
- * Major revision. Now uses spline interpolation written in C
- * derived from GMT program surface rather than old Fortran
- * subroutine zgrid.  Also now does data processing at read
- * time, thus requiring less memory.
- *
- * Revision 4.4  1994/05/02  03:00:21  caress
- * Set output stream to stderr.
- *
- * Revision 4.3  1994/04/22  21:39:29  caress
- * Added initialization of array sgrid using memset as
- * suggested by David Brock of ASA.
- *
- * Revision 4.2  1994/04/12  18:53:44  caress
- * Added #ifdef IRIX statements for compatibility with
- * IRIX operating system. The following includes must be
- * added when compiling under IRIX: <time.h> <stdlib.h>
- *
- * Revision 4.1  1994/03/12  01:44:37  caress
- * Added declarations of ctime and/or getenv for compatability
- * with SGI compilers.
- *
- * Revision 4.0  1994/03/06  00:13:22  caress
- * First cut at version 4.0
- *
- * Revision 4.1  1994/03/03  03:45:43  caress
- * Fixed copyright message.
- *
- * Revision 4.0  1994/03/01  18:59:27  caress
- * First cut at new version. Any changes are associated with
- * support of three data types (beam bathymetry, beam amplitude,
- * and sidescan) instead of two (bathymetry and backscatter).
- *
- * Revision 3.4  1993/08/31  19:58:21  caress
- * Added -N option to allow NaN flagging of grid cells with
- * no data.  Flagging with -99999.9 is still the default.
- *
- * Revision 3.3  1993/05/16  20:21:21  caress
- * Changed the plot labeling a little bit more.
- *
- * Revision 3.2  1993/05/16  20:08:47  caress
- * Fixed bug where cfile variable was overwritten, causing the
- * output shellscript to not be executable.
- * Set clipping flag value to 99999.9 so that default gmt
- * will use white for no-data areas instead of black.
- * Changed labeling of standard deviation plots.
- *
- * Revision 3.1  1993/05/16  07:04:09  caress
- * Replaced use of NaN values as clipping flags with -99999.9 value.
- * Replaced old color table with Haxby color table.
- * Added ability to plot data distribution and standard deviation grids
- * with netcdf grd output.
- *
- * Revision 3.0  1993/05/04  22:38:46  dale
- * Inital version.
  *
  */
 
@@ -543,6 +187,7 @@ int main (int argc, char **argv)
 	int	file_in_bounds;
 	void	*mbio_ptr = NULL;
 	struct mb_io_struct *mb_io_ptr = NULL;
+        int     topo_type;
 
 	/* mbgrid control variables */
 	char	filelist[MB_PATH_MAXLINE];
@@ -2064,6 +1709,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 
 		    /* get mb_io_ptr */
 		    mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+                    
+                    /* get topography type */
+                    status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
 
 		    /* allocate memory for reading data arrays */
 		    if (error == MB_ERROR_NO_ERROR)
@@ -2477,6 +2125,9 @@ status = write_cdfgrd(verbose,ofile,output,sxdim,sydim,
 
 		    /* get mb_io_ptr */
 		    mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+                    
+                    /* get topography type */
+                    status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
 
 		    /* allocate memory for reading data arrays */
 		    if (error == MB_ERROR_NO_ERROR)
@@ -2578,244 +2229,10 @@ status = write_cdfgrd(verbose,ofile,output,sxdim,sydim,
 /*fprintf(outfp, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n",
 ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 
-			      /* get slope from low resolution grid */
-			      isx = (bathlon[ib] - wbnd[0] + 0.5 * sdx)/sdx;
-			      isy = (bathlat[ib] - wbnd[2] + 0.5 * sdy)/sdy;
-			      isx = MIN( MAX(isx, 0), sxdim - 1);
-			      isy = MIN( MAX(isy, 0), sydim - 1);
-			      if (isx == 0)
-			      	{
-				k1 = isx * sydim + isy;
-				k2 = (isx + 1) * sydim + isy;
-			      	dzdx = (gridsmall[k2] - gridsmall[k1]) / sdx;
-				}
-			      else if (isx == sxdim - 1)
-			      	{
-				k1 = (isx - 1) * sydim + isy;
-				k2 = isx * sydim + isy;
-			      	dzdx = (gridsmall[k2] - gridsmall[k1]) / sdx;
-				}
-			      else
-			      	{
-				k1 = (isx - 1) * sydim + isy;
-				k2 = (isx + 1) * sydim + isy;
-			      	dzdx = (gridsmall[k2] - gridsmall[k1]) / (2.0 * sdx);
-				}
-			      if (isy == 0)
-			      	{
-				k1 = isx * sydim + isy;
-				k2 = isx * sydim + (isy + 1);
-			      	dzdy = (gridsmall[k2] - gridsmall[k1]) / sdy;
-				}
-			      else if (isy == sydim - 1)
-			      	{
-				k1 = isx * sydim + (isy - 1);
-				k2 = isx * sydim + isy;
-			      	dzdy = (gridsmall[k2] - gridsmall[k1]) / sdy;
-				}
-			      else
-			      	{
-				k1 = isx * sydim + (isy - 1);
-				k2 = isx * sydim + (isy + 1);
-			      	dzdy = (gridsmall[k2] - gridsmall[k1]) / (2.0 * sdy);
-				}
-
-			      /* check if within allowed time */
-			      if (check_time == MB_YES)
-			        {
-				/* if in region of interest
-				   check if time is ok */
+			      /* deal with point data without footprint */
+                              if (topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM)
+                                {
 				if (ix >= 0 && ix < gxdim
-				  && iy >= 0 && iy < gydim)
-				  {
-			          kgrid = ix*gydim + iy;
-				  if (firsttime[kgrid] <= 0.0)
-				    {
-				    firsttime[kgrid] = time_d;
-				    time_ok = MB_YES;
-				    }
-				  else if (fabs(time_d - firsttime[kgrid])
-				    > timediff)
-				    {
-				    if (first_in_stays == MB_YES)
-					time_ok = MB_NO;
-				    else
-					{
-					time_ok = MB_YES;
-					firsttime[kgrid] = time_d;
-					ndata = ndata - cnt[kgrid];
-					ndatafile = ndatafile - cnt[kgrid];
-					norm[kgrid] = 0.0;
-					grid[kgrid] = 0.0;
-					sigma[kgrid] = 0.0;
-					num[kgrid] = 0;
-					cnt[kgrid] = 0;
-					}
-				    }
-			          else
-				    time_ok = MB_YES;
-				  }
-				else
-				  time_ok = MB_YES;
-				}
-			      else
-				time_ok = MB_YES;
-
-			      /* process if in region of interest */
-			      if (ix >= -xtradim
-				&& ix < gxdim + xtradim
-				&& iy >= -xtradim
-				&& iy < gydim + xtradim
-				&& time_ok == MB_YES)
-			        {
-				/* calculate footprint - this is a kluge assuming
-				   sonar at surface - also assumes lon lat grid
-				   - to be generalized in later version
-				   DWC 11/16/99 */
-				/* calculate footprint - now uses sonar altitude
-				   - still assumes lon lat grid
-				   - to be generalized in later version
-				   DWC 1/29/2001 */
-				/* now handles projected grids
-				   DWC 3/5/2003 */
-			  	if (use_projection == MB_YES)
-			  	  {
-				  foot_dx = (bathlon[ib] - navlon);
-				  foot_dy = (bathlat[ib] - navlat);
-				  }
-			  	else
-			  	  {
-				  foot_dx = (bathlon[ib] - navlon) / mtodeglon;
-				  foot_dy = (bathlat[ib] - navlat) / mtodeglat;
-				  }
-				foot_lateral = sqrt(foot_dx * foot_dx + foot_dy * foot_dy);
-				if (foot_lateral > 0.0)
-				    {
-				    foot_dxn = foot_dx / foot_lateral;
-				    foot_dyn = foot_dy / foot_lateral;
-				    }
-				else
-				    {
-				    foot_dxn = 1.0;
-				    foot_dyn = 0.0;
-				    }
-				foot_range = sqrt(foot_lateral * foot_lateral + altitude * altitude);
-				if (foot_range > 0.0)
-				    {
-				    foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
-				    foot_dtheta = 0.5 * scale * mb_io_ptr->beamwidth_xtrack;
-				    foot_dphi = 0.5 * scale * mb_io_ptr->beamwidth_ltrack;
-				    if (foot_dtheta <= 0.0)
-					foot_dtheta = 1.0;
-				    if (foot_dphi <= 0.0)
-					foot_dphi = 1.0;
-				    foot_hwidth =(bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta))
-							- foot_lateral;
-				    foot_hlength = foot_range * tan(DTR * foot_dphi);
-/* fprintf(outfp, "bath:%f sonardepth:%f dx:%f dy:%f lateral:%f range:%f theta:%f dtheta:%f dphi:%f fhwidth:%f fhlength:%f\n",
-bath[ib],sonardepth,foot_dx, foot_dy, foot_lateral, foot_range, foot_theta,foot_dtheta,foot_dphi,foot_hwidth,foot_hlength);*/
-
-				    /* get range of bins around footprint to examine */
-			  	    if (use_projection == MB_YES)
-			  	      {
-				      foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
-				      foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
-				      foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
-				      foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / dy);
-				      }
-			  	    else
-			  	      {
-				      foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
-				      foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
-				      foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
-				      foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
-				      }
-				    foot_dix = 2 * MAX(foot_wix, foot_lix);
-				    foot_diy = 2 * MAX(foot_wiy, foot_liy);
-/*fprintf(outfp, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
-fprintf(outfp, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d foot_diy:%d\n",
-foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
-			            ix1 = MAX(ix - foot_dix, 0);
-			            ix2 = MIN(ix + foot_dix, gxdim - 1);
-			            iy1 = MAX(iy - foot_diy, 0);
-			            iy2 = MIN(iy + foot_diy, gydim - 1);
-/*fprintf(outfp, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
-
-				    /* loop over neighborhood of bins */
-			            for (ii=ix1;ii<=ix2;ii++)
-			             for (jj=iy1;jj<=iy2;jj++)
-				       {
-				       /* find center of bin in lon lat degrees from sounding center */
-				       kgrid = ii * gydim + jj;
-				       xx = (wbnd[0] + ii*dx + 0.5*dx - bathlon[ib]);
-				       yy = (wbnd[2] + jj*dy + 0.5*dy - bathlat[ib]);
-
-				       /* get depth or topo value at this point using slope estimate */
-				       sbath = topofactor * bath[ib] + dzdx * xx + dzdy * yy;
-/*fprintf(stderr,"ib:%d ii:%d jj:%d bath:%f %f   diff:%f   xx:%f yy:%f dzdx:%f dzdy:%f\n",
-ib,ii,jj,topofactor * bath[ib],sbath,topofactor * bath[ib]-sbath,xx,yy,dzdx,dzdy);*/
-
-				       /* get center and corners of bin in meters from sounding center */
-			  	      if (use_projection == MB_YES)
-			  		{
-					 xx0 = xx;
-					 yy0 = yy;
-					 bdx = 0.5 * dx;
-					 bdy = 0.5 * dy;
-					 }
-			  	      else
-			  		{
-					 xx0 = xx / mtodeglon;
-					 yy0 = yy / mtodeglat;
-					 bdx = 0.5 * dx/ mtodeglon;
-					 bdy = 0.5 * dy/ mtodeglat;
-					 }
-				       xx1 = xx0 - bdx;
-				       xx2 = xx0 + bdx;
-				       yy1 = yy0 - bdy;
-				       yy2 = yy0 + bdy;
-/*fprintf(outfp, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy, xx, yy);
-fprintf(outfp, "p0: %f %f   p1: %f %f   p2: %f %f\n",
-xx0, yy0, xx1, yy1, xx2, yy2);*/
-
-				       /* rotate center and corners of bin to footprint coordinates */
-				       prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
-				       pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
-				       prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
-				       pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
-				       prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
-				       pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
-				       prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
-				       pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
-				       prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
-				       pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
-
-				       /* get weight integrated over bin */
-				       mbgrid_weight(verbose, foot_hwidth, foot_hlength,
-						    prx[0], pry[0], bdx, bdy,
-						    &prx[1], &pry[1],
-						    &weight, &use_weight, &error);
-
-				       if (use_weight != MBGRID_USE_NO && weight > 0.000001)
-					    {
-					    weight *= file_weight;
-					    norm[kgrid] = norm[kgrid] + weight;
-					    grid[kgrid] = grid[kgrid] + weight * sbath;
-					    sigma[kgrid] = sigma[kgrid] + weight * sbath * sbath;
-					    if (use_weight == MBGRID_USE_YES)
-						{
-						num[kgrid]++;
-						if (ii == ix && jj == iy)
-							cnt[kgrid]++;
-						}
-					    }
-				       }
-				    ndata++;
-				    ndatafile++;
-				    }
-
-				/* else for xyz data without footprint */
-				else if (ix >= 0 && ix < gxdim
 					  && iy >= 0 && iy < gydim)
 				    {
 			            kgrid = ix*gydim + iy;
@@ -2830,8 +2247,267 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				    ndata++;
 				    ndatafile++;
 				    }
-				}
-			      }
+                                }
+                                
+                              /* else deal with multibeam data that have beam footprints */
+                              else
+                                {
+  
+                                /* get slope from low resolution grid */
+                                isx = (bathlon[ib] - wbnd[0] + 0.5 * sdx)/sdx;
+                                isy = (bathlat[ib] - wbnd[2] + 0.5 * sdy)/sdy;
+                                isx = MIN( MAX(isx, 0), sxdim - 1);
+                                isy = MIN( MAX(isy, 0), sydim - 1);
+                                if (isx == 0)
+                                  {
+                                  k1 = isx * sydim + isy;
+                                  k2 = (isx + 1) * sydim + isy;
+                                  dzdx = (gridsmall[k2] - gridsmall[k1]) / sdx;
+                                  }
+                                else if (isx == sxdim - 1)
+                                  {
+                                  k1 = (isx - 1) * sydim + isy;
+                                  k2 = isx * sydim + isy;
+                                  dzdx = (gridsmall[k2] - gridsmall[k1]) / sdx;
+                                  }
+                                else
+                                  {
+                                  k1 = (isx - 1) * sydim + isy;
+                                  k2 = (isx + 1) * sydim + isy;
+                                  dzdx = (gridsmall[k2] - gridsmall[k1]) / (2.0 * sdx);
+                                  }
+                                if (isy == 0)
+                                  {
+                                  k1 = isx * sydim + isy;
+                                  k2 = isx * sydim + (isy + 1);
+                                  dzdy = (gridsmall[k2] - gridsmall[k1]) / sdy;
+                                  }
+                                else if (isy == sydim - 1)
+                                  {
+                                  k1 = isx * sydim + (isy - 1);
+                                  k2 = isx * sydim + isy;
+                                  dzdy = (gridsmall[k2] - gridsmall[k1]) / sdy;
+                                  }
+                                else
+                                  {
+                                  k1 = isx * sydim + (isy - 1);
+                                  k2 = isx * sydim + (isy + 1);
+                                  dzdy = (gridsmall[k2] - gridsmall[k1]) / (2.0 * sdy);
+                                  }
+  
+                                /* check if within allowed time */
+                                if (check_time == MB_YES)
+                                  {
+                                  /* if in region of interest
+                                     check if time is ok */
+                                  if (ix >= 0 && ix < gxdim
+                                    && iy >= 0 && iy < gydim)
+                                    {
+                                    kgrid = ix*gydim + iy;
+                                    if (firsttime[kgrid] <= 0.0)
+                                      {
+                                      firsttime[kgrid] = time_d;
+                                      time_ok = MB_YES;
+                                      }
+                                    else if (fabs(time_d - firsttime[kgrid])
+                                      > timediff)
+                                      {
+                                      if (first_in_stays == MB_YES)
+                                          time_ok = MB_NO;
+                                      else
+                                          {
+                                          time_ok = MB_YES;
+                                          firsttime[kgrid] = time_d;
+                                          ndata = ndata - cnt[kgrid];
+                                          ndatafile = ndatafile - cnt[kgrid];
+                                          norm[kgrid] = 0.0;
+                                          grid[kgrid] = 0.0;
+                                          sigma[kgrid] = 0.0;
+                                          num[kgrid] = 0;
+                                          cnt[kgrid] = 0;
+                                          }
+                                      }
+                                    else
+                                      time_ok = MB_YES;
+                                    }
+                                  else
+                                    time_ok = MB_YES;
+                                  }
+                                else
+                                  time_ok = MB_YES;
+  
+                                /* process if in region of interest */
+                                if (ix >= -xtradim
+                                  && ix < gxdim + xtradim
+                                  && iy >= -xtradim
+                                  && iy < gydim + xtradim
+                                  && time_ok == MB_YES)
+                                  {
+                                  /* calculate footprint - this is a kluge assuming
+                                     sonar at surface - also assumes lon lat grid
+                                     - to be generalized in later version
+                                     DWC 11/16/99 */
+                                  /* calculate footprint - now uses sonar altitude
+                                     - still assumes lon lat grid
+                                     - to be generalized in later version
+                                     DWC 1/29/2001 */
+                                  /* now handles projected grids
+                                     DWC 3/5/2003 */
+                                  if (use_projection == MB_YES)
+                                    {
+                                    foot_dx = (bathlon[ib] - navlon);
+                                    foot_dy = (bathlat[ib] - navlat);
+                                    }
+                                  else
+                                    {
+                                    foot_dx = (bathlon[ib] - navlon) / mtodeglon;
+                                    foot_dy = (bathlat[ib] - navlat) / mtodeglat;
+                                    }
+                                  foot_lateral = sqrt(foot_dx * foot_dx + foot_dy * foot_dy);
+                                  if (foot_lateral > 0.0)
+                                      {
+                                      foot_dxn = foot_dx / foot_lateral;
+                                      foot_dyn = foot_dy / foot_lateral;
+                                      }
+                                  else
+                                      {
+                                      foot_dxn = 1.0;
+                                      foot_dyn = 0.0;
+                                      }
+                                  foot_range = sqrt(foot_lateral * foot_lateral + altitude * altitude);
+                                  if (foot_range > 0.0)
+                                      {
+                                      foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
+                                      foot_dtheta = 0.5 * scale * mb_io_ptr->beamwidth_xtrack;
+                                      foot_dphi = 0.5 * scale * mb_io_ptr->beamwidth_ltrack;
+                                      if (foot_dtheta <= 0.0)
+                                          foot_dtheta = 1.0;
+                                      if (foot_dphi <= 0.0)
+                                          foot_dphi = 1.0;
+                                      foot_hwidth =(bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta))
+                                                          - foot_lateral;
+                                      foot_hlength = foot_range * tan(DTR * foot_dphi);
+  /* fprintf(outfp, "bath:%f sonardepth:%f dx:%f dy:%f lateral:%f range:%f theta:%f dtheta:%f dphi:%f fhwidth:%f fhlength:%f\n",
+  bath[ib],sonardepth,foot_dx, foot_dy, foot_lateral, foot_range, foot_theta,foot_dtheta,foot_dphi,foot_hwidth,foot_hlength);*/
+  
+                                      /* get range of bins around footprint to examine */
+                                      if (use_projection == MB_YES)
+                                        {
+                                        foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
+                                        foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
+                                        foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
+                                        foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / dy);
+                                        }
+                                      else
+                                        {
+                                        foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
+                                        foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
+                                        foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
+                                        foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
+                                        }
+                                      foot_dix = 2 * MAX(foot_wix, foot_lix);
+                                      foot_diy = 2 * MAX(foot_wiy, foot_liy);
+  /*fprintf(outfp, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
+  fprintf(outfp, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d foot_diy:%d\n",
+  foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
+                                      ix1 = MAX(ix - foot_dix, 0);
+                                      ix2 = MIN(ix + foot_dix, gxdim - 1);
+                                      iy1 = MAX(iy - foot_diy, 0);
+                                      iy2 = MIN(iy + foot_diy, gydim - 1);
+  /*fprintf(outfp, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
+  
+                                      /* loop over neighborhood of bins */
+                                      for (ii=ix1;ii<=ix2;ii++)
+                                       for (jj=iy1;jj<=iy2;jj++)
+                                         {
+                                         /* find center of bin in lon lat degrees from sounding center */
+                                         kgrid = ii * gydim + jj;
+                                         xx = (wbnd[0] + ii*dx + 0.5*dx - bathlon[ib]);
+                                         yy = (wbnd[2] + jj*dy + 0.5*dy - bathlat[ib]);
+  
+                                         /* get depth or topo value at this point using slope estimate */
+                                         sbath = topofactor * bath[ib] + dzdx * xx + dzdy * yy;
+  /*fprintf(stderr,"ib:%d ii:%d jj:%d bath:%f %f   diff:%f   xx:%f yy:%f dzdx:%f dzdy:%f\n",
+  ib,ii,jj,topofactor * bath[ib],sbath,topofactor * bath[ib]-sbath,xx,yy,dzdx,dzdy);*/
+  
+                                         /* get center and corners of bin in meters from sounding center */
+                                        if (use_projection == MB_YES)
+                                          {
+                                           xx0 = xx;
+                                           yy0 = yy;
+                                           bdx = 0.5 * dx;
+                                           bdy = 0.5 * dy;
+                                           }
+                                        else
+                                          {
+                                           xx0 = xx / mtodeglon;
+                                           yy0 = yy / mtodeglat;
+                                           bdx = 0.5 * dx/ mtodeglon;
+                                           bdy = 0.5 * dy/ mtodeglat;
+                                           }
+                                         xx1 = xx0 - bdx;
+                                         xx2 = xx0 + bdx;
+                                         yy1 = yy0 - bdy;
+                                         yy2 = yy0 + bdy;
+  /*fprintf(outfp, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy, xx, yy);
+  fprintf(outfp, "p0: %f %f   p1: %f %f   p2: %f %f\n",
+  xx0, yy0, xx1, yy1, xx2, yy2);*/
+  
+                                         /* rotate center and corners of bin to footprint coordinates */
+                                         prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
+                                         pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
+                                         prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
+                                         pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
+                                         prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
+                                         pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
+                                         prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
+                                         pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
+                                         prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
+                                         pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
+  
+                                         /* get weight integrated over bin */
+                                         mbgrid_weight(verbose, foot_hwidth, foot_hlength,
+                                                      prx[0], pry[0], bdx, bdy,
+                                                      &prx[1], &pry[1],
+                                                      &weight, &use_weight, &error);
+  
+                                         if (use_weight != MBGRID_USE_NO && weight > 0.000001)
+                                              {
+                                              weight *= file_weight;
+                                              norm[kgrid] = norm[kgrid] + weight;
+                                              grid[kgrid] = grid[kgrid] + weight * sbath;
+                                              sigma[kgrid] = sigma[kgrid] + weight * sbath * sbath;
+                                              if (use_weight == MBGRID_USE_YES)
+                                                  {
+                                                  num[kgrid]++;
+                                                  if (ii == ix && jj == iy)
+                                                          cnt[kgrid]++;
+                                                  }
+                                              }
+                                         }
+                                      ndata++;
+                                      ndatafile++;
+                                      }
+  
+                                  /* else for xyz data without footprint */
+                                  else if (ix >= 0 && ix < gxdim
+                                            && iy >= 0 && iy < gydim)
+                                      {
+                                      kgrid = ix*gydim + iy;
+                                      norm[kgrid] = norm[kgrid] + file_weight;
+                                      grid[kgrid] = grid[kgrid]
+                                              + file_weight*topofactor*bath[ib];
+                                      sigma[kgrid] = sigma[kgrid]
+                                              + file_weight*topofactor*topofactor
+                                              *bath[ib]*bath[ib];
+                                      num[kgrid]++;
+                                      cnt[kgrid]++;
+                                      ndata++;
+                                      ndatafile++;
+                                      }
+                                  }
+                                }
+                              }
 			  }
 			}
 		    status = mb_close(verbose,&mbio_ptr,&error);
@@ -2984,6 +2660,9 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 
 		    /* get mb_io_ptr */
 		    mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+                    
+                    /* get topography type */
+                    status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
 
 		    /* allocate memory for reading data arrays */
 		    if (error == MB_ERROR_NO_ERROR)
@@ -3133,168 +2812,188 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				&& iy < gydim + xtradim
 				&& time_ok == MB_YES)
 			        {
-				/* calculate footprint - this is a kluge assuming
-				   sonar at surface - also assumes lon lat grid
-				   - to be generalized in later version
-				   DWC 11/16/99 */
-				/* calculate footprint - now uses sonar altitude
-				   - still assumes lon lat grid
-				   - to be generalized in later version
-				   DWC 1/29/2001 */
-				/* now handles projected grids
-				   DWC 3/5/2003 */
-			  	if (use_projection == MB_YES)
-			  	  {
-				  foot_dx = (bathlon[ib] - navlon);
-				  foot_dy = (bathlat[ib] - navlat);
-				  }
-			  	else
-			  	  {
-				  foot_dx = (bathlon[ib] - navlon) / mtodeglon;
-				  foot_dy = (bathlat[ib] - navlat) / mtodeglat;
-				  }
-				foot_lateral = sqrt(foot_dx * foot_dx + foot_dy * foot_dy);
-				if (foot_lateral > 0.0)
-				    {
-				    foot_dxn = foot_dx / foot_lateral;
-				    foot_dyn = foot_dy / foot_lateral;
-				    }
-				else
-				    {
-				    foot_dxn = 1.0;
-				    foot_dyn = 0.0;
-				    }
-				foot_range = sqrt(foot_lateral * foot_lateral + altitude * altitude);
-				if (foot_range > 0.0)
-				    {
-				    foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
-				    foot_dtheta = 0.5 * scale * mb_io_ptr->beamwidth_xtrack;
-				    foot_dphi = 0.5 * scale * mb_io_ptr->beamwidth_ltrack;
-				    if (foot_dtheta <= 0.0)
-					foot_dtheta = 1.0;
-				    if (foot_dphi <= 0.0)
-					foot_dphi = 1.0;
-				    foot_hwidth =(bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta))
-							- foot_lateral;
-				    foot_hlength = foot_range * tan(DTR * foot_dphi);
-/* fprintf(outfp, "bath:%f sonardepth:%f dx:%f dy:%f lateral:%f range:%f theta:%f dtheta:%f dphi:%f fhwidth:%f fhlength:%f\n",
-bath[ib],sonardepth,foot_dx, foot_dy, foot_lateral, foot_range, foot_theta,foot_dtheta,foot_dphi,foot_hwidth,foot_hlength);*/
-
-				    /* get range of bins around footprint to examine */
-			  	    if (use_projection == MB_YES)
-			  	      {
-				      foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
-				      foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
-				      foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
-				      foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / dy);
-				      }
-			  	    else
-			  	      {
-				      foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
-				      foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
-				      foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
-				      foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
-				      }
-				    foot_dix = 2 * MAX(foot_wix, foot_lix);
-				    foot_diy = 2 * MAX(foot_wiy, foot_liy);
-/*fprintf(outfp, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
-fprintf(outfp, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d foot_diy:%d\n",
-foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
-			            ix1 = MAX(ix - foot_dix, 0);
-			            ix2 = MIN(ix + foot_dix, gxdim - 1);
-			            iy1 = MAX(iy - foot_diy, 0);
-			            iy2 = MIN(iy + foot_diy, gydim - 1);
-/*fprintf(outfp, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
-
-				    /* loop over neighborhood of bins */
-			            for (ii=ix1;ii<=ix2;ii++)
-			             for (jj=iy1;jj<=iy2;jj++)
-				       {
-				       /* find center of bin in lon lat degrees from sounding center */
-				       kgrid = ii * gydim + jj;
-				       xx = (wbnd[0] + ii*dx + 0.5*dx - bathlon[ib]);
-				       yy = (wbnd[2] + jj*dy + 0.5*dy - bathlat[ib]);
-
-				       /* get depth or topo value at this point */
-				       sbath = topofactor * bath[ib];
-/*fprintf(stderr,"ib:%d ii:%d jj:%d bath:%f %f   diff:%f   xx:%f yy:%f\n",
-ib,ii,jj,topofactor * bath[ib],sbath,topofactor * bath[ib]-sbath,xx,yy);*/
-
-				       /* get center and corners of bin in meters from sounding center */
-			  	      if (use_projection == MB_YES)
-			  		{
-					 xx0 = xx;
-					 yy0 = yy;
-					 bdx = 0.5 * dx;
-					 bdy = 0.5 * dy;
-					 }
-			  	      else
-			  		{
-					 xx0 = xx / mtodeglon;
-					 yy0 = yy / mtodeglat;
-					 bdx = 0.5 * dx/ mtodeglon;
-					 bdy = 0.5 * dy/ mtodeglat;
-					 }
-				       xx1 = xx0 - bdx;
-				       xx2 = xx0 + bdx;
-				       yy1 = yy0 - bdy;
-				       yy2 = yy0 + bdy;
-/*fprintf(outfp, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy, xx, yy);
-fprintf(outfp, "p0: %f %f   p1: %f %f   p2: %f %f\n",
-xx0, yy0, xx1, yy1, xx2, yy2);*/
-
-				       /* rotate center and corners of bin to footprint coordinates */
-				       prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
-				       pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
-				       prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
-				       pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
-				       prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
-				       pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
-				       prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
-				       pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
-				       prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
-				       pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
-
-				       /* get weight integrated over bin */
-				       mbgrid_weight(verbose, foot_hwidth, foot_hlength,
-						    prx[0], pry[0], bdx, bdy,
-						    &prx[1], &pry[1],
-						    &weight, &use_weight, &error);
-
-				       if (use_weight != MBGRID_USE_NO && weight > 0.000001)
-					    {
-					    weight *= file_weight;
-					    norm[kgrid] = norm[kgrid] + weight;
-					    grid[kgrid] = grid[kgrid] + weight * sbath;
-					    sigma[kgrid] = sigma[kgrid] + weight * sbath * sbath;
-					    if (use_weight == MBGRID_USE_YES)
-						{
-						num[kgrid]++;
-						if (ii == ix && jj == iy)
-							cnt[kgrid]++;
-						}
-					    }
-				       }
-				    ndata++;
-				    ndatafile++;
-				    }
-
-				/* else for xyz data without footprint */
-				else if (ix >= 0 && ix < gxdim
-					  && iy >= 0 && iy < gydim)
-				    {
-			            kgrid = ix*gydim + iy;
-				    norm[kgrid] = norm[kgrid] + file_weight;
-				    grid[kgrid] = grid[kgrid]
-					    + file_weight*topofactor*bath[ib];
-				    sigma[kgrid] = sigma[kgrid]
-					    + file_weight*topofactor*topofactor
-					    *bath[ib]*bath[ib];
-				    num[kgrid]++;
-				    cnt[kgrid]++;
-				    ndata++;
-				    ndatafile++;
-				    }
+                                /* deal with point data without footprint */
+                                if (topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM)
+                                    {
+                                    kgrid = ix*gydim + iy;
+                                    norm[kgrid] = norm[kgrid] + file_weight;
+                                    grid[kgrid] = grid[kgrid]
+                                            + file_weight*topofactor*bath[ib];
+                                    sigma[kgrid] = sigma[kgrid]
+                                            + file_weight*topofactor*topofactor
+                                            *bath[ib]*bath[ib];
+                                    num[kgrid]++;
+                                    cnt[kgrid]++;
+                                    ndata++;
+                                    ndatafile++;
+                                    }
+                                  
+                                /* else deal with multibeam data that have beam footprints */
+                                else
+                                    {
+                                    /* calculate footprint - this is a kluge assuming
+                                       sonar at surface - also assumes lon lat grid
+                                       - to be generalized in later version
+                                       DWC 11/16/99 */
+                                    /* calculate footprint - now uses sonar altitude
+                                       - still assumes lon lat grid
+                                       - to be generalized in later version
+                                       DWC 1/29/2001 */
+                                    /* now handles projected grids
+                                       DWC 3/5/2003 */
+                                    if (use_projection == MB_YES)
+                                      {
+                                      foot_dx = (bathlon[ib] - navlon);
+                                      foot_dy = (bathlat[ib] - navlat);
+                                      }
+                                    else
+                                      {
+                                      foot_dx = (bathlon[ib] - navlon) / mtodeglon;
+                                      foot_dy = (bathlat[ib] - navlat) / mtodeglat;
+                                      }
+                                    foot_lateral = sqrt(foot_dx * foot_dx + foot_dy * foot_dy);
+                                    if (foot_lateral > 0.0)
+                                        {
+                                        foot_dxn = foot_dx / foot_lateral;
+                                        foot_dyn = foot_dy / foot_lateral;
+                                        }
+                                    else
+                                        {
+                                        foot_dxn = 1.0;
+                                        foot_dyn = 0.0;
+                                        }
+                                    foot_range = sqrt(foot_lateral * foot_lateral + altitude * altitude);
+                                    if (foot_range > 0.0)
+                                        {
+                                        foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
+                                        foot_dtheta = 0.5 * scale * mb_io_ptr->beamwidth_xtrack;
+                                        foot_dphi = 0.5 * scale * mb_io_ptr->beamwidth_ltrack;
+                                        if (foot_dtheta <= 0.0)
+                                            foot_dtheta = 1.0;
+                                        if (foot_dphi <= 0.0)
+                                            foot_dphi = 1.0;
+                                        foot_hwidth =(bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta))
+                                                            - foot_lateral;
+                                        foot_hlength = foot_range * tan(DTR * foot_dphi);
+    /* fprintf(outfp, "bath:%f sonardepth:%f dx:%f dy:%f lateral:%f range:%f theta:%f dtheta:%f dphi:%f fhwidth:%f fhlength:%f\n",
+    bath[ib],sonardepth,foot_dx, foot_dy, foot_lateral, foot_range, foot_theta,foot_dtheta,foot_dphi,foot_hwidth,foot_hlength);*/
+    
+                                        /* get range of bins around footprint to examine */
+                                        if (use_projection == MB_YES)
+                                          {
+                                          foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
+                                          foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
+                                          foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
+                                          foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / dy);
+                                          }
+                                        else
+                                          {
+                                          foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
+                                          foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
+                                          foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
+                                          foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
+                                          }
+                                        foot_dix = 2 * MAX(foot_wix, foot_lix);
+                                        foot_diy = 2 * MAX(foot_wiy, foot_liy);
+    /*fprintf(outfp, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
+    fprintf(outfp, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d foot_diy:%d\n",
+    foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
+                                        ix1 = MAX(ix - foot_dix, 0);
+                                        ix2 = MIN(ix + foot_dix, gxdim - 1);
+                                        iy1 = MAX(iy - foot_diy, 0);
+                                        iy2 = MIN(iy + foot_diy, gydim - 1);
+    /*fprintf(outfp, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
+    
+                                        /* loop over neighborhood of bins */
+                                        for (ii=ix1;ii<=ix2;ii++)
+                                         for (jj=iy1;jj<=iy2;jj++)
+                                           {
+                                           /* find center of bin in lon lat degrees from sounding center */
+                                           kgrid = ii * gydim + jj;
+                                           xx = (wbnd[0] + ii*dx + 0.5*dx - bathlon[ib]);
+                                           yy = (wbnd[2] + jj*dy + 0.5*dy - bathlat[ib]);
+    
+                                           /* get depth or topo value at this point */
+                                           sbath = topofactor * bath[ib];
+    /*fprintf(stderr,"ib:%d ii:%d jj:%d bath:%f %f   diff:%f   xx:%f yy:%f\n",
+    ib,ii,jj,topofactor * bath[ib],sbath,topofactor * bath[ib]-sbath,xx,yy);*/
+    
+                                           /* get center and corners of bin in meters from sounding center */
+                                          if (use_projection == MB_YES)
+                                            {
+                                             xx0 = xx;
+                                             yy0 = yy;
+                                             bdx = 0.5 * dx;
+                                             bdy = 0.5 * dy;
+                                             }
+                                          else
+                                            {
+                                             xx0 = xx / mtodeglon;
+                                             yy0 = yy / mtodeglat;
+                                             bdx = 0.5 * dx/ mtodeglon;
+                                             bdy = 0.5 * dy/ mtodeglat;
+                                             }
+                                           xx1 = xx0 - bdx;
+                                           xx2 = xx0 + bdx;
+                                           yy1 = yy0 - bdy;
+                                           yy2 = yy0 + bdy;
+    /*fprintf(outfp, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy, xx, yy);
+    fprintf(outfp, "p0: %f %f   p1: %f %f   p2: %f %f\n",
+    xx0, yy0, xx1, yy1, xx2, yy2);*/
+    
+                                           /* rotate center and corners of bin to footprint coordinates */
+                                           prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
+                                           pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
+                                           prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
+                                           pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
+                                           prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
+                                           pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
+                                           prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
+                                           pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
+                                           prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
+                                           pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
+    
+                                           /* get weight integrated over bin */
+                                           mbgrid_weight(verbose, foot_hwidth, foot_hlength,
+                                                        prx[0], pry[0], bdx, bdy,
+                                                        &prx[1], &pry[1],
+                                                        &weight, &use_weight, &error);
+    
+                                           if (use_weight != MBGRID_USE_NO && weight > 0.000001)
+                                                {
+                                                weight *= file_weight;
+                                                norm[kgrid] = norm[kgrid] + weight;
+                                                grid[kgrid] = grid[kgrid] + weight * sbath;
+                                                sigma[kgrid] = sigma[kgrid] + weight * sbath * sbath;
+                                                if (use_weight == MBGRID_USE_YES)
+                                                    {
+                                                    num[kgrid]++;
+                                                    if (ii == ix && jj == iy)
+                                                            cnt[kgrid]++;
+                                                    }
+                                                }
+                                           }
+                                        ndata++;
+                                        ndatafile++;
+                                        }
+    
+                                    /* else for xyz data without footprint */
+                                    else if (ix >= 0 && ix < gxdim
+                                              && iy >= 0 && iy < gydim)
+                                        {
+                                        kgrid = ix*gydim + iy;
+                                        norm[kgrid] = norm[kgrid] + file_weight;
+                                        grid[kgrid] = grid[kgrid]
+                                                + file_weight*topofactor*bath[ib];
+                                        sigma[kgrid] = sigma[kgrid]
+                                                + file_weight*topofactor*topofactor
+                                                *bath[ib]*bath[ib];
+                                        num[kgrid]++;
+                                        cnt[kgrid]++;
+                                        ndata++;
+                                        ndatafile++;
+                                        }
+                                    }
 				}
 			      }
 			  }

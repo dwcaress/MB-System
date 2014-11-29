@@ -495,7 +495,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	size_t	read_len;
 	size_t	index;
 	unsigned short magic_number;
-	unsigned short unused;
 	unsigned int *newscancheck, newscancheckvalue;
 	int	done;
 	int	i;
