@@ -42,8 +42,8 @@
  *           "dd" = 25700 : Version 1 survey data - 38 byte header
  *           "nn" = 28270 : Version 2 survey data - 44 byte header
  *           "DD" = 17476 : Version 3 survey data - 48 byte header
- *           "V4" = 22068 : Version 4 survey data - 90 byte header
- *           "V5" = 22069 : Version 5 survey data - 98 byte header
+ *           "V4" = 22068 : Version 4 survey data - 90 byte header (13398 little-endian)
+ *           "V5" = 22069 : Version 5 survey data - 98 byte header (13654 little-endian)
  *      In the case of data records, the header contains the time stamp,
  *      navigation, and the numbers of depth, beam amplitude, and
  *      sidescan values.  The data section contains the depth and
@@ -132,8 +132,8 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 #define	MBF_MBLDEOIH_ID_DATA1		25700	/* dd */
 #define	MBF_MBLDEOIH_ID_DATA2		28270	/* nn */
 #define	MBF_MBLDEOIH_ID_DATA3		17476	/* DD */
-#define	MBF_MBLDEOIH_ID_DATA4		22068	/* V4 */
-#define	MBF_MBLDEOIH_ID_DATA5		22069	/* V5 */
+#define	MBF_MBLDEOIH_ID_DATA4		22068	/* V4 big endian, 13398 little endian*/
+#define	MBF_MBLDEOIH_ID_DATA5		22069	/* V5 bin endian, 13654 little endian */
 
 static char rcs_id[]="$Id$";
 
@@ -477,6 +477,9 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if (status == MB_SUCCESS)
 		{
 		flag = (short *) buffer;
+#ifdef BYTESWAPPED
+		*flag = mb_swap_short(*flag);
+#endif
 		if (*flag == MBF_MBLDEOIH_ID_COMMENT1)
 			{
 			store->kind = MB_DATA_COMMENT;
@@ -1076,9 +1079,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store = (struct mbsys_ldeoih_struct *) store_ptr;
 
-	/* set data flag pointer
-		(data: flag='DD'=13398 = MBF_MBLDEOIH_ID_DATA4
-			or comment:flag='cc'=25443 = MBF_MBLDEOIH_ID_COMMENT2) */
+	/* set data flag pointer */
 	flag = (short *) buffer;
 
 	/* set version pointer */
@@ -1166,6 +1167,9 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		*flag = MBF_MBLDEOIH_ID_COMMENT2;
 		header_length = 2;
 		}
+#ifdef BYTESWAPPED
+	*flag = mb_swap_short(*flag);
+#endif
 
 	/* print debug statements */
 	if (verbose >= 5)
