@@ -1,4 +1,4 @@
-.TH mbclean 1 "16 September 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean 1 "1 December 2014" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP \- Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -9,10 +9,11 @@ Version 5.0
 \fBmbclean\fP [\fB\-A\fImax\fP \fB\-B\fIlow/high\fP \fB\-C\fIslope/units\fP
 \fB\-D\fImin/max\fP \fB\-F\fIformat\fP
 \fB\-G\fIfraction_low/fraction_high\fP
-\fB\-I\fIinfile\fP \fB\-L\fIlonflip\fP \fB\-O\fIoutfile\fP
-\fB\-M\fImode\fP \fB\-Q\fIbackup\fP \fB\-R\fImaxheadingrate\fP \fB\-S\fIslope/mode/units\fP
-\fB\-T\fItolerance\fP \fB\-U\fInmin\fP \fB\-X\fIbeamsleft/beamsright\fP
-\fB\-Y\fIdistanceleft/distanceright\fP \fB\-V \-H\fP]
+\fB\-I\fIinfile\fP \fB\-K\fIrange_min\fP \fB\-L\fIlonflip\fP
+\fB\-M\fImode\fP \fB\-O\fIoutfile\fP \fB\-P\fImin_speed/max_speed\fP \fB\-Q\fIbackup\fP
+\fB\-R\fImaxheadingrate\fP \fB\-S\fIslope/mode/units\fP
+\fB\-T\fItolerance\fP \fB\-U\fInmin\fP \fB\-W\fIwest/east/south/north\fP \fB\-X\fIbeamsleft/beamsright\fP
+\fB\-Y\fIdistanceleft/distanceright\fP \fB\-Z \-V \-H\fP]
 
 .SH DESCRIPTION
 \fBmbclean\fP identifies and flags artifacts in swath sonar bathymetry data.
@@ -40,21 +41,32 @@ as follows:
  		(\fB\-X\fP option).
  	2. Flag outer beams by acrosstrack distance
  		(\fB\-Y\fP option).
- 	3. Flag soundings outside specified acceptable
+	3. Flag all beams in pings outside specified
+		acceptable speed range (\fB\-P\fP option).
+	4. Flag all beams in pings outside specified
+		acceptable position bounds (\fB\-W\fP option).
+	5. Flag all beams in pings with zero
+		longitude and latitude values (\fB\-Z\fP option).
+ 	6. Flag soundings outside specified acceptable
  		depth range (\fB\-B\fP option).
- 	4. Flag pings with excessive heading change rate
+ 	7. Flag soundings with ranges less than
+ 		specified minimum value (\fB\-B\fP option).
+ 	8. Flag pings with excessive heading change rate
 	        (\fB\-R\fP option).
- 	5. Zap "rails" (\fB\-Q\fP option).
- 	6. Flag soundings outside acceptable depth range
+ 	9. Zap "rails" (\fB\-Q\fP option).
+ 	10. Flag soundings with acrosstrack distances 
+ 		greater than specified maximum value
+ 		(\fB\-B\fP option).
+ 	11. Flag soundings outside acceptable depth range
  		using fractions of local median depth
  		(\fB\-G\fP option).
- 	7. Flag soundings outside acceptable depth range
+ 	12. Flag soundings outside acceptable depth range
  		using deviation from local median depth
  		(\fB\-A\fP option).
- 	8. Flag soundings associated with spikes (\fB\-S\fP option).
- 	9. Flag soundings associated with excessive slopes
+ 	13. Flag soundings associated with spikes (\fB\-S\fP option).
+ 	14. Flag soundings associated with excessive slopes
  		(\fB\-C\fP option or default).
- 	10. Flag all soundings in pings with too few
+ 	15. Flag all soundings in pings with too few
  		good soundings (\fB\-U\fP option).
 
 This program flags beams by outputting the flags as
@@ -191,6 +203,13 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .TP
+.B \-K
+\fIrange_min\fP
+.br
+This option causes all unflagged beams with ranges less than
+\fIrange_min\fP to be flagged as bad. The value \fIrange_min\fP
+is specified in meters.
+.TP
 .B \-L
 \fIlonflip\fP
 .br
@@ -219,6 +238,14 @@ are handled.
 If the data format of the input file
 prohibits storage of negative depths, an error message will be output
 and the program will exit. Default: \fImode\fP = 1.
+.TP
+.B \-P
+\fIspeed_low/speed_high\fP
+.br
+This option causes \fBmbclean\fP to flag as bad all beams in pings
+associated with platform speed outside the acceptable range from
+\fIspeed_low\fP to \fIspeed_high\fP. The speed values are specified
+in km/hour.
 .TP
 .B \-Q
 \fIbackup\fP
@@ -283,6 +310,19 @@ halves of pings which contain fewer than \fInmin\fP good bathymetry
 values. All bathymetry values in the affected half-pings are
 flagged.
 .TP
+.B \-V
+Normally, \fBmbclean\fP works "silently" without outputting
+anything to the stderr stream.  If the
+\fB\-V\fP flag is given, then \fBmbclean\fP works in a "verbose" mode and
+outputs the program version being used, all error status messages,
+and the number of beams flagged as bad.
+.TP
+.B \-W
+\fIwest/east/south/north\fP
+.br
+This option causes \fBmbclean\fP to flag as bad all beams in pings
+with navigation outside the specified acceptable bounds. 
+.TP
 .B \-X
 \fIzap_beams\fP
 .br
@@ -290,12 +330,19 @@ If this option is used, the outermost \fIzap_beams\fP at both ends
 of the swath are flagged as bad; this is useful if the outer beams
 are known to be unreliable. Default: \fIzap_beams\fP = 0.
 .TP
-.B \-V
-Normally, \fBmbclean\fP works "silently" without outputting
-anything to the stderr stream.  If the
-\fB\-V\fP flag is given, then \fBmbclean\fP works in a "verbose" mode and
-outputs the program version being used, all error status messages,
-and the number of beams flagged as bad.
+.B \-Y
+\fIdistanceleft/distanceright\fP
+.br
+This option causes \fBmbclean\fP to flag as bad all beams with
+acrosstrack distances more to port than \fIdistanceleft\fP
+and more to starboard than \fIdistanceright\fP. The distances
+are defined in meters, and distances to port of nadir are
+negative.
+.TP
+.B \-Z
+.br
+This option causes \fBmbclean\fP to flag as bad all beams in pings
+with zero longitude and latitude values. 
 
 .SH EXAMPLES
 Suppose one wishes to do a first pass edit of

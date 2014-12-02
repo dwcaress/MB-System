@@ -1287,7 +1287,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 
 		/* otherwise if reasonable number of beams then write version 4 record */
-		else if (*flag == MBF_MBLDEOIH_ID_DATA4)
+		else if (header_length == MBF_MBLDEOIH_V4HEADERSIZE)
 			{
 			/* write current version header */
 			index = 2;

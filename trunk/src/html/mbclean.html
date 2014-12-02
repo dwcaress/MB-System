@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbclean</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  16 September 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  1 December 2014 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -30,10 +30,11 @@ Version 5.0
 <B>mbclean</B> [<B>-A</B><I>max</I> <B>-B</B><I>low/high</I> <B>-C</B><I>slope/units</I>
 <B>-D</B><I>min/max</I> <B>-F</B><I>format</I>
 <B>-G</B><I>fraction_low/fraction_high</I>
-<B>-I</B><I>infile</I> <B>-L</B><I>lonflip</I> <B>-O</B><I>outfile</I>
-<B>-M</B><I>mode</I> <B>-Q</B><I>backup</I> <B>-R</B><I>maxheadingrate</I> <B>-S</B><I>slope/mode/units</I>
-<B>-T</B><I>tolerance</I> <B>-U</B><I>nmin</I> <B>-X</B><I>beamsleft/beamsright</I>
-<B>-Y</B><I>distanceleft/distanceright</I> <B>-V -H</B>]
+<B>-I</B><I>infile</I> <B>-K</B><I>range_min</I> <B>-L</B><I>lonflip</I>
+<B>-M</B><I>mode</I> <B>-O</B><I>outfile</I> <B>-P</B><I>min_speed/max_speed</I> <B>-Q</B><I>backup</I>
+<B>-R</B><I>maxheadingrate</I> <B>-S</B><I>slope/mode/units</I>
+<B>-T</B><I>tolerance</I> <B>-U</B><I>nmin</I> <B>-W</B><I>west/east/south/north</I> <B>-X</B><I>beamsleft/beamsright</I>
+<B>-Y</B><I>distanceleft/distanceright</I> <B>-Z -V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -64,21 +65,32 @@ as follows:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-X</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2.&nbsp;Flag&nbsp;outer&nbsp;beams&nbsp;by&nbsp;acrosstrack&nbsp;distance<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-Y</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;specified&nbsp;acceptable<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3. Flag all beams in pings outside specified<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>acceptable speed range (<B>-P</B> option).<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4. Flag all beams in pings outside specified<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>acceptable position bounds (<B>-W</B> option).<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5. Flag all beams in pings with zero<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>longitude and latitude values (<B>-Z</B> option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>6.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;specified&nbsp;acceptable<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>depth&nbsp;range&nbsp;(<B>-B</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4.&nbsp;Flag&nbsp;pings&nbsp;with&nbsp;excessive&nbsp;heading&nbsp;change&nbsp;rate<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7.&nbsp;Flag&nbsp;soundings&nbsp;with&nbsp;ranges&nbsp;less&nbsp;than<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>specified&nbsp;minimum&nbsp;value&nbsp;(<B>-B</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>8.&nbsp;Flag&nbsp;pings&nbsp;with&nbsp;excessive&nbsp;heading&nbsp;change&nbsp;rate<BR>
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>        (<B>-R</B> option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5.&nbsp;Zap&nbsp;&quot;rails&quot;&nbsp;(<B>-Q</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>6.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>9.&nbsp;Zap&nbsp;&quot;rails&quot;&nbsp;(<B>-Q</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>10.&nbsp;Flag&nbsp;soundings&nbsp;with&nbsp;acrosstrack&nbsp;distances&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>greater&nbsp;than&nbsp;specified&nbsp;maximum&nbsp;value<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-B</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>11.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>using&nbsp;fractions&nbsp;of&nbsp;local&nbsp;median&nbsp;depth<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-G</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>12.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>using&nbsp;deviation&nbsp;from&nbsp;local&nbsp;median&nbsp;depth<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-A</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>8.&nbsp;Flag&nbsp;soundings&nbsp;associated&nbsp;with&nbsp;spikes&nbsp;(<B>-S</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>9.&nbsp;Flag&nbsp;soundings&nbsp;associated&nbsp;with&nbsp;excessive&nbsp;slopes<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>13.&nbsp;Flag&nbsp;soundings&nbsp;associated&nbsp;with&nbsp;spikes&nbsp;(<B>-S</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>14.&nbsp;Flag&nbsp;soundings&nbsp;associated&nbsp;with&nbsp;excessive&nbsp;slopes<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-C</B>&nbsp;option&nbsp;or&nbsp;default).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>10.&nbsp;Flag&nbsp;all&nbsp;soundings&nbsp;in&nbsp;pings&nbsp;with&nbsp;too&nbsp;few<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>15.&nbsp;Flag&nbsp;all&nbsp;soundings&nbsp;in&nbsp;pings&nbsp;with&nbsp;too&nbsp;few<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>good&nbsp;soundings&nbsp;(<B>-U</B>&nbsp;option).<BR>
 <P>
 This program flags beams by outputting the flags as
@@ -240,6 +252,15 @@ This program uses the <B>MBIO</B> library and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-K</B>
+
+<DD>
+<I>range_min</I>
+<BR>
+
+This option causes all unflagged beams with ranges less than
+<I>range_min</I> to be flagged as bad. The value <I>range_min</I>
+is specified in meters.
 <DT><B>-L</B>
 
 <DD>
@@ -273,6 +294,16 @@ are handled.
 If the data format of the input file
 prohibits storage of negative depths, an error message will be output
 and the program will exit. Default: <I>mode</I> = 1.
+<DT><B>-P</B>
+
+<DD>
+<I>speed_low/speed_high</I>
+<BR>
+
+This option causes <B>mbclean</B> to flag as bad all beams in pings
+associated with platform speed outside the acceptable range from
+<I>speed_low</I> to <I>speed_high</I>. The speed values are specified
+in km/hour.
 <DT><B>-Q</B>
 
 <DD>
@@ -346,6 +377,22 @@ This flag causes <B>mbclean</B> to search for port or starboard
 halves of pings which contain fewer than <I>nmin</I> good bathymetry
 values. All bathymetry values in the affected half-pings are
 flagged.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbclean</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbclean</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used, all error status messages,
+and the number of beams flagged as bad.
+<DT><B>-W</B>
+
+<DD>
+<I>west/east/south/north</I>
+<BR>
+
+This option causes <B>mbclean</B> to flag as bad all beams in pings
+with navigation outside the specified acceptable bounds. 
 <DT><B>-X</B>
 
 <DD>
@@ -355,14 +402,24 @@ flagged.
 If this option is used, the outermost <I>zap_beams</I> at both ends
 of the swath are flagged as bad; this is useful if the outer beams
 are known to be unreliable. Default: <I>zap_beams</I> = 0.
-<DT><B>-V</B>
+<DT><B>-Y</B>
 
 <DD>
-Normally, <B>mbclean</B> works &quot;silently&quot; without outputting
-anything to the stderr stream.  If the
-<B>-V</B> flag is given, then <B>mbclean</B> works in a &quot;verbose&quot; mode and
-outputs the program version being used, all error status messages,
-and the number of beams flagged as bad.
+<I>distanceleft/distanceright</I>
+<BR>
+
+This option causes <B>mbclean</B> to flag as bad all beams with
+acrosstrack distances more to port than <I>distanceleft</I>
+and more to starboard than <I>distanceright</I>. The distances
+are defined in meters, and distances to port of nadir are
+negative.
+<DT><B>-Z</B>
+
+<DD>
+<BR>
+
+This option causes <B>mbclean</B> to flag as bad all beams in pings
+with zero longitude and latitude values. 
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -535,7 +592,7 @@ bathymetry data (e.g. <B>mbedit</B>).
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 16 September 2013</P></CENTER>
+Last Updated: 1 December 2014</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

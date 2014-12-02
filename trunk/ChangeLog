@@ -16,7 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-  Version 5.4.2216       November 29, 2014
+  Version 5.4.2217       December 1, 2014
 * Version 5.4.2213       November 13, 2014
   Version 5.4.2210       November 10, 2014
 * Version 5.4.2209       November 4, 2014
@@ -192,6 +192,17 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2217 (December 1, 2014)
+
+Mbclean: Implemented additional flagging tests contributed by Suzanne O'Hara,
+including speed range (-Pspeed_min/speed_max), ping navigation bounds
+(-Rwest/east/south/north), and zero longitude and latitude values (-Z).
+Also, a minimum depth at nadir test embedded by Dana Yoerger for all data
+(circa 2010) has been recast into a minimum range test option (-Krange_min). 
+
+Format 71 (MBF_MBLDEOIH) and fbt files: fixed a problem with the i/o module
+as updated in 5.4.2216.
 
 -----> 5.4.2216 (November 30, 2014)
 
