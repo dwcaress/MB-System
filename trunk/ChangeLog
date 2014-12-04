@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2218       December 4, 2014
   Version 5.4.2217       December 1, 2014
 * Version 5.4.2213       November 13, 2014
   Version 5.4.2210       November 10, 2014
@@ -192,6 +193,11 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2218 (December 4, 2014)
+
+Mbinfo: Fixed JSON format output to file (previously missed final closing bracket).
+
 
 -----> 5.4.2217 (December 1, 2014)
 
