@@ -25,196 +25,6 @@
  * Author:	D. W. Caress
  * Date:	February 1, 1993
  *
- * $Log: mbinfo.c,v $
- * Revision 5.30  2009/03/02 18:54:40  caress
- * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
- *
- * Revision 5.29  2008/10/17 07:52:44  caress
- * Check in on October 17, 2008.
- *
- * Revision 5.28  2008/07/10 18:16:33  caress
- * Proceeding towards 5.1.1beta20.
- *
- * Revision 5.26  2008/05/16 22:44:37  caress
- * Release 5.1.1beta18
- *
- * Revision 5.25  2007/10/08 16:48:07  caress
- * State of the code on 8 October 2007.
- *
- * Revision 5.24  2006/02/03 21:10:39  caress
- * Working on supporting water column datagrams in Simrad formats.
- *
- * Revision 5.23  2006/01/20 19:34:48  caress
- * Working towards 5.0.8
- *
- * Revision 5.22  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.21  2006/01/06 18:19:59  caress
- * Working towards 5.0.8
- *
- * Revision 5.20  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.19  2005/03/25 04:43:01  caress
- * Standardized the string lengths used for filenames and comment data.
- *
- * Revision 5.18  2004/12/02 06:38:09  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.17  2004/09/16 00:59:15  caress
- * Fixed good-nav-only mode.
- *
- * Revision 5.16  2004/07/15 19:33:57  caress
- * Improvements to support for Reson 7k data.
- *
- * Revision 5.15  2004/04/27 02:59:48  caress
- * Added support for subbottom data.
- *
- * Revision 5.14  2003/04/17 21:18:57  caress
- * Release 5.0.beta30
- *
- * Revision 5.13  2002/10/02 23:56:06  caress
- * Release 5.0.beta24
- *
- * Revision 5.12  2002/09/19 00:28:12  caress
- * Release 5.0.beta23
- *
- * Revision 5.11  2002/07/20 20:56:55  caress
- * Release 5.0.beta20
- *
- * Revision 5.10  2002/05/29 23:43:09  caress
- * Release 5.0.beta18
- *
- * Revision 5.9  2002/02/22 09:07:08  caress
- * Release 5.0.beta13
- *
- * Revision 5.8  2001/11/20  20:41:55  caress
- * Reset output of comments to not use ##.
- *
- * Revision 5.7  2001/11/20  02:00:19  caress
- * Now prints ## before comments when -C option used.
- *
- * Revision 5.6  2001/10/25  16:02:55  caress
- * Fixed bug in parsing DRAFT metadata tag.
- *
- * Revision 5.5  2001/09/17  23:21:14  caress
- * Fixed metadata support.
- *
- * Revision 5.4  2001/08/10  22:42:50  dcaress
- * Release 5.0.beta07
- *
- * Revision 5.3  2001-07-19 17:34:38-07  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/06/03 07:07:34  caress
- * Release 5.0.beta01.
- *
- * Revision 5.1  2001/03/22 21:15:49  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.0  2000/12/01  22:57:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.21  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.20  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.19  2000/09/11  20:10:02  caress
- * Linked to new datalist parsing functions. Now supports recursive datalists
- * and comments in datalists.
- *
- * Revision 4.18  1999/03/31 18:33:06  caress
- * MB-System 4.6beta7
- *
- * Revision 4.17  1998/10/05  19:19:24  caress
- * MB-System version 4.6beta
- *
- * Revision 4.16  1997/04/21  17:19:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.16  1997/04/17  15:14:38  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.15  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.14  1995/11/28  21:03:36  caress
- * Fixed scaling for meters to feet.
- *
- * Revision 4.13  1995/11/22  22:21:36  caress
- * Now handles bathymetry in feet with -W option.
- *
- * Revision 4.12  1995/07/18  17:14:55  caress
- * Added -G option to try to exclude bad nav from min max results.
- *
- * Revision 4.11  1995/05/12  17:12:32  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.10  1995/05/08  21:32:34  caress
- * Fixed ability to read from stdin.
- *
- * Revision 4.9  1995/03/06  19:37:59  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.8  1995/03/02  13:49:21  caress
- * Fixed bug related to error messages.
- *
- * Revision 4.7  1995/02/27  14:43:18  caress
- * Fixed bug regarding closing a text input file.
- *
- * Revision 4.6  1995/01/06  00:06:41  caress
- * Can now read from either single data files or from multiple
- * data files specified in a datalist.
- *
- * Revision 4.5  1994/11/03  18:33:41  caress
- * Embellished the output a bit, with speed in knots for
- * the "units impaired".
- *
- * Revision 4.4  1994/11/03  13:28:44  caress
- * Added percentages to data quality statistics.
- *
- * Revision 4.3  1994/10/21  13:02:31  caress
- * Release V4.0
- *
- * Revision 4.2  1994/04/28  01:32:57  caress
- * Changed mb_get to mb_read so that min/max of longitude can
- * be calculated using both navigation and beam data.
- *
- * Revision 4.1  1994/03/12  01:44:37  caress
- * Added declarations of ctime and/or getenv for compatability
- * with SGI compilers.
- *
- * Revision 4.0  1994/03/06  00:13:22  caress
- * First cut at version 4.0
- *
- * Revision 4.1  1994/03/02  22:45:03  caress
- * Fixed calculations of mean and variance values for
- * amplitude and sidescan data.
- *
- * Revision 4.0  1994/03/01  18:59:27  caress
- * First cut at new version. Any changes are associated with
- * support of three data types (beam bathymetry, beam amplitude,
- * and sidescan) instead of two (bathymetry and backscatter).
- *
- * Revision 3.3  1993/06/29  23:57:14  caress
- * Made NOT printing out comments the default, with -C
- * instead of -N now the comment printing toggle.
- * Added julian day to the begin and end time strings.
- *
- * Revision 3.2  1993/06/17  16:14:13  caress
- * Initialized several variables so that the programs does
- * not print out trash if no data is found.
- *
- * Revision 3.1  1993/06/12  04:29:33  caress
- * Added -N option which prevents mbinfo from listing out
- * comments encountered in the input data file.
- *
- * Revision 3.0  1993/05/04  22:38:24  dale
- * Inital version.
  *
  */
 
@@ -736,10 +546,10 @@ int main (int argc, char **argv)
 
 	/* Open output file if requested */
 	if (output_usefile == MB_YES)
-	    {
-	    strcpy(output_file, read_file);
-		switch (output_format)
 		{
+		strcpy(output_file, read_file);
+		switch (output_format)
+			{
 			case FREE_TEXT:
 				strcat(output_file, ".inf");
 				break;
@@ -751,16 +561,16 @@ int main (int argc, char **argv)
 				break;
 			case '?':
 				break;
+			}
+		if ((output = fopen(output_file, "w")) == NULL)
+			output = stream;
 		}
-	    if ((output = fopen(output_file, "w")) == NULL)
-		output = stream;
-	    }
 	else
-	    {
-	    output = stream;
-	    }
+		{
+		output = stream;
+		}
 	switch (output_format)
-    {
+		{
 		case FREE_TEXT:
 			break;
 		case JSON:
@@ -772,7 +582,7 @@ int main (int argc, char **argv)
 			break;
 		case '?':
 			break;
-	}
+		}
 	/* read only once unless coverage mask requested */
 	pass = 0;
 	done = MB_NO;
@@ -2385,7 +2195,7 @@ int main (int argc, char **argv)
 	mb_get_jtime(verbose,timend_i,timend_j);
 
 	switch (output_format)
-	{
+		{
 		case FREE_TEXT:
 			fprintf(output,"\nData Totals:\n");
 			fprintf(output,"Number of Records:                    %8d\n",irec);
@@ -2709,7 +2519,7 @@ int main (int argc, char **argv)
 			break;
 		case '?':
 			break;
-	}
+		}
 	if (pings_read > 2 && beams_bath_max > 0
 		&& (ngdbeams > 0 || verbose >= 1))
 		{
@@ -2733,14 +2543,14 @@ int main (int argc, char **argv)
 				fprintf(output,"\"columns\" : \"#beam,N,mean,variance,sigma\",\n");
 				fprintf(output,"\"values\": [\n");
 				for (i=0;i<beams_bath_max;i++)
-				{
+					{
 					if(i>0) fprintf(output,",\n");
 					sigma=bathy_scale*sqrt(bathvartot[i]);
 					if (isnan(sigma)) sigma=0;
 					fprintf(output,"{\"row\":\"%d,%d,%.2f,%.2f,%.2f\"}",
 						i,nbathvartot[i],bathy_scale*bathmeantot[i],
 						bathy_scale*bathy_scale*bathvartot[i], sigma);
-				}
+					}
 				fprintf(output,"]}");
 				break;
 			case XML:
@@ -2749,14 +2559,14 @@ int main (int argc, char **argv)
                 fprintf(output,"\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
 				fprintf(output,"\t\t<values>\n");
 				for (i=0;i<beams_bath_max;i++)
-				{
+					{
 					if(i>0)
 					sigma=bathy_scale*sqrt(bathvartot[i]);
 					if(isnan(sigma)) sigma=0;
                     fprintf(output,"\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n",
 						i,nbathvartot[i],bathy_scale*bathmeantot[i],
 						bathy_scale*bathy_scale*bathvartot[i], sigma);
-				}
+					}
 				fprintf(output,"\t\t</values>\n");
 				fprintf(output,"\t</beam_bathymetry_variances>\n");
 				break;
@@ -2786,30 +2596,30 @@ int main (int argc, char **argv)
 				fprintf(output,"\"columns\":\"beam,N,mean,variance,sigma\",\n");
 				fprintf(output,"\"values\": [\n");
 				for (i=0;i<beams_amp_max;i++)
-				{
+					{
 					if(i>0) fprintf(output,",\n");
 					sigma=sqrt(ampvartot[i]);
 					if (isnan(sigma)) sigma=0;
 					fprintf(output,"{\"row\" : \"%d,%d,%.2f,%.2f,%.2f\"}",
 						i,nampvartot[i],ampmeantot[i],
 						ampvartot[i],sigma);
-				}
+					}
 				fprintf(output,"\n]}");
 				break;
 			case XML:
 				fprintf(output,"\t<beam_amplitude_variances>\n");
 				fprintf(output,"\t\t<pings_averaged>%d</pings_averaged>\n",pings_read);
-                fprintf(output,"\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
+				fprintf(output,"\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
 				fprintf(output,"\t\t<values>\n");
 				for (i=0;i<beams_amp_max;i++)
-				{
+					{
 					if(i>0)
-					sigma=sqrt(ampvartot[i]);
+						sigma=sqrt(ampvartot[i]);
 					if(isnan(sigma)) sigma=0;
-                    fprintf(output,"\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n",
+						fprintf(output,"\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n",
 						i,nampvartot[i],ampmeantot[i],
 						ampvartot[i],sigma);
-				}
+					}
 				fprintf(output,"\t\t</values>\n");
 				fprintf(output,"\t</beam_amplitude_variances>\n");
 				break;
@@ -2836,33 +2646,33 @@ int main (int argc, char **argv)
 			case JSON:
 				fprintf(output,",\n\"pixel_sidescan_variances\":{\n");
 				fprintf(output,"\"pings_averaged\": \"%d\",\n",pings_read);
-                fprintf(output,"\"columns\":\"pixel,N,mean,variance,sigma\",\n");
+				fprintf(output,"\"columns\":\"pixel,N,mean,variance,sigma\",\n");
 				fprintf(output,"\"values\": [\n");
 				for (i=0;i<pixels_ss_max;i++)
-				{
+					{
 					if(i>0) fprintf(output,",\n");
 					sigma=sqrt(ssvartot[i]);
 					if(isnan(sigma)) sigma=0;
-                    fprintf(output,"{\"row\":\"%d,%d,%.2f,%.2f,%.2f\"}",
+					fprintf(output,"{\"row\":\"%d,%d,%.2f,%.2f,%.2f\"}",
 						i,nssvartot[i],ssmeantot[i],
 						ssvartot[i],sigma);
-				}
+					}
 				fprintf(output,"\n]\n}");
 				break;
 			case XML:
 				fprintf(output,"\t<pixel_sidescan_variances>\n");
 				fprintf(output,"\t\t<pings_averaged>%d</pings_averaged>\n",pings_read);
-                fprintf(output,"\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
+				fprintf(output,"\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
 				fprintf(output,"\t\t<values>\n");
 				for (i=0;i<pixels_ss_max;i++)
-				{
+					{
 					if(i>0)
-					sigma=sqrt(ssvartot[i]);
+						sigma=sqrt(ssvartot[i]);
 					if(isnan(sigma)) sigma=0;
-                    fprintf(output,"\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n",
+					fprintf(output,"\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n",
 						i,nssvartot[i],ssmeantot[i],
 						ssvartot[i],sigma);
-				}
+					}
 				fprintf(output,"\t\t</values>\n");
 				fprintf(output,"\t</pixel_sidescan_variances>\n");
 				break;
@@ -2994,64 +2804,65 @@ int main (int argc, char **argv)
 				break;
 			}
 		}
-		if (coverage_mask == MB_YES)
+	if (coverage_mask == MB_YES)
 		{
-			switch (output_format)
+		switch (output_format)
 			{
-				case FREE_TEXT:
-					fprintf(output,"\nCoverage Mask:\nCM dimensions: %d %d\n", mask_nx, mask_ny);
-					for (j=mask_ny-1;j>=0;j--)
-		    			{
-		    			fprintf(output, "CM:  ");
-		    			for (i=0;i<mask_nx;i++)
-						{
-						k = i + j * mask_nx;
-						fprintf(output, " %1d", mask[k]);
-						}
-		    			fprintf(output, "\n");
-		    			}
-					break;
-				case JSON:
-					fprintf(output,",\n\"coverage_mask\": {\n");
-					fprintf(output,"\"dimensions_nx\": \"%d\",\n\"dimensions_ny\": \"%d\",\n", mask_nx, mask_ny);
-		    			fprintf(output, "\"mask\": \" ");
-					for (j=mask_ny-1;j>=0;j--)
-		    			{
-		    			for (i=0;i<mask_nx;i++)
+			case FREE_TEXT:
+				fprintf(output,"\nCoverage Mask:\nCM dimensions: %d %d\n", mask_nx, mask_ny);
+				for (j=mask_ny-1;j>=0;j--)
+				{
+				fprintf(output, "CM:  ");
+				for (i=0;i<mask_nx;i++)
+					{
+					k = i + j * mask_nx;
+					fprintf(output, " %1d", mask[k]);
+					}
+				fprintf(output, "\n");
+				}
+				break;
+			case JSON:
+				fprintf(output,",\n\"coverage_mask\": {\n");
+				fprintf(output,"\"dimensions_nx\": \"%d\",\n\"dimensions_ny\": \"%d\",\n", mask_nx, mask_ny);
+				fprintf(output, "\"mask\": \" ");
+				for (j=mask_ny-1;j>=0;j--)
+					{
+					for (i=0;i<mask_nx;i++)
 						{
 						k = i + j * mask_nx;
 						if (i>0) fprintf(output,",");
-						fprintf(output, "%1d", mask[k]);
+							fprintf(output, "%1d", mask[k]);
 						}
-						fprintf(output,"\n");
-		    			}
-		    			fprintf(output, "\"}");
-					break;
-				case '?':
-					break;
+					fprintf(output,"\n");
+					}
+				fprintf(output, "\"}");
+				break;
+			case '?':
+				break;
 			}
 		}
 
 	/* close root element for XML export */
 	switch (output_format)
-	{
+		{
 		case FREE_TEXT:
 			break;
 		case JSON:
+			fprintf(output,"}\n");
 			break;
 		case XML:
 			fprintf(output,"</mbinfo>\n");
 			break;
 		case '?':
 			break;
-	}
+		}
 
 	/* close output file */
 	if (output_usefile == MB_YES
 	    && output != NULL)
-	    {
-	    fclose(output);
-	    }
+		{
+		fclose(output);
+		}
 
 	/* deallocate memory used for data arrays */
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathmeantot,&error);
@@ -3081,7 +2892,6 @@ int main (int argc, char **argv)
 		fprintf(stream,"dbg2       status:  %d\n",status);
 		}
 
-	if (output_format == JSON) fprintf(output,"}\n");
 	/* end it all */
 	exit(error);
 }
