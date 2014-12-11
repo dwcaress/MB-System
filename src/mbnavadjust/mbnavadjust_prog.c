@@ -6947,6 +6947,13 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 							(void **)&(ping->bathlon),&error);
 					status = mb_reallocd(mbna_verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
 							(void **)&(ping->bathlat),&error);
+                                        if (mbna_contour_algorithm == MB_CONTOUR_OLD)
+                                            {
+                                            status = mb_reallocd(mbna_verbose,__FILE__,__LINE__,beams_bath*sizeof(int),
+                                                            (void **)&(ping->bflag[0]),&error);
+                                            status = mb_reallocd(mbna_verbose,__FILE__,__LINE__,beams_bath*sizeof(int),
+                                                            (void **)&(ping->bflag[1]),&error);
+                                            }
 					ping->beams_bath_alloc = beams_bath;
 					}
 

@@ -770,7 +770,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       navigation_offset_heading:  %f\n",navigation_offset_heading);
 		fprintf(stderr,"dbg2       navigation_offset_roll:     %f\n",navigation_offset_roll);
 		fprintf(stderr,"dbg2       navigation_offset_pitch:    %f\n",navigation_offset_pitch);
-		fprintf(stderr,"dbg2       no_change_survey:     %d\n",no_change_survey);
+		fprintf(stderr,"dbg2       no_change_survey:           %d\n",no_change_survey);
 		}
 
 	/* if help desired then print it and exit */
@@ -1892,14 +1892,35 @@ int main (int argc, char **argv)
 								navigation_offset_x, navigation_offset_y, navigation_offset_z,
 								pitch, roll,
 								&lever_x, &lever_y, &lever_z, &error);
-fprintf(stderr,"LEVER:  roll:%f pitch:%f   lever: %f %f %f\n", roll, pitch, lever_x, lever_y, lever_z);
+//fprintf(stderr,"LEVER:  roll:%f pitch:%f   lever: %f %f %f\n", roll, pitch, lever_x, lever_y, lever_z);
 						
 						/* get local translation between lon lat degrees and meters */
 						mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
 						headingx = sin(DTR*heading);
-						headingy = cos(DTR*heading);
-						
-						/* apply lever arc calculation */
+						headingy = cos(DTR*heading);	
+	
+						/* apply position offsets */
+						if (sonar_offset_x != 0.0 || sonar_offset_y != 0.0)
+							{
+							navlon += headingy * sonar_offset_x * mtodeglon
+									+ headingx * sonar_offset_y * mtodeglon;
+							navlat+= -headingx * sonar_offset_x * mtodeglat
+									+ headingy * sonar_offset_y * mtodeglat;
+							nav_changed = MB_YES;
+fprintf(stderr,"HEADING: %f  %f %f POSITION OFFSET: meters: %f %f   lonlat: %f %f ",
+heading, headingx, headingy,
+sonar_offset_x, sonar_offset_y,
+headingy * sonar_offset_x * mtodeglon + headingx * sonar_offset_y * mtodeglon,
+-headingx * sonar_offset_x * mtodeglat + headingy * sonar_offset_y * mtodeglat);
+							}
+						if (sonar_offset_z != 0.0)
+							{
+							sensordepth -= sonar_offset_z;
+							sensordepth_changed = MB_YES;
+fprintf(stderr,"SENSORDEPTH OFFSET: %f ",-sonar_offset_z);
+							}
+
+						/* apply lever arm calculation */
 						if (lever_x != 0.0 || lever_y != 0.0)
 							{
 							navlon += headingy * lever_x * mtodeglon
@@ -1907,12 +1928,20 @@ fprintf(stderr,"LEVER:  roll:%f pitch:%f   lever: %f %f %f\n", roll, pitch, leve
 							navlat+= -headingx * lever_x * mtodeglat
 									+ headingy * lever_y * mtodeglat;
 							nav_changed = MB_YES;
+fprintf(stderr,"LEVER ARM XY OFFSET: meters: %f %f   lonlat: %f %f ",
+lever_x, lever_y,
+headingy * lever_x * mtodeglon + headingx * lever_y * mtodeglon,
+-headingx * lever_x * mtodeglat + headingy * lever_y * mtodeglat);
 							}
 						if (lever_z != 0.0)
 							{
 							sensordepth -= lever_z;
 							sensordepth_changed = MB_YES;
-							}
+fprintf(stderr,"LEVER ARM Z OFFSET: %f ",-lever_z);
+							}						
+if (sonar_offset_x != 0.0 || sonar_offset_y != 0.0 || sonar_offset_z != 0.0
+|| lever_x != 0.0 || lever_y != 0.0 || lever_z != 0.0)
+fprintf(stderr,"\n");
 						}
 					
 					/* if attitude changed apply rigid rotations to the bathymetry */

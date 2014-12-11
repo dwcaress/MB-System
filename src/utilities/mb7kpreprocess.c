@@ -437,6 +437,30 @@ int main (int argc, char **argv)
 	double	depthsensoroffx = 0.0;
 	double	depthsensoroffy = 0.0;
 	double	depthsensoroffz = 0.0;
+	
+	int	sonar_offset_mode = MB_NO;
+	double	sonar_offset_x = 0.0;
+	double	sonar_offset_y = 0.0;
+	double	sonar_offset_z = 0.0;
+	double	sonar_offset_heading = 0.0;
+	double	sonar_offset_roll = 0.0;
+	double	sonar_offset_pitch = 0.0;
+	
+	int	vru_offset_mode = MB_NO;
+	double	vru_offset_x = 0.0;
+	double	vru_offset_y = 0.0;
+	double	vru_offset_z = 0.0;
+	double	vru_offset_heading = 0.0;
+	double	vru_offset_roll = 0.0;
+	double	vru_offset_pitch = 0.0;
+	
+	int	navigation_offset_mode = MB_NO;
+	double	navigation_offset_x = 0.0;
+	double	navigation_offset_y = 0.0;
+	double	navigation_offset_z = 0.0;
+	double	navigation_offset_heading = 0.0;
+	double	navigation_offset_roll = 0.0;
+	double	navigation_offset_pitch = 0.0;
 
 	/* depth sensor time lag parameters */
 	int	sonardepthlagfix = MB_NO;
@@ -491,7 +515,8 @@ int main (int argc, char **argv)
 	double	soundspeed;
 	double	alpha, beta, theta, phi;
 	double	rr, xx, zz;
-	double	mtodeglon, mtodeglat;
+	double	lever_x, lever_y, lever_z;
+	double	headingx, headingy, mtodeglon, mtodeglat;
 	double	dx, dy, dist, dt, v;
 	double	longitude_offset, latitude_offset;
 	int	j1, j2;
@@ -543,6 +568,7 @@ int main (int argc, char **argv)
 	int	year, month, day, hour, minute;
 	double	second, id;
 	char	sensor[24];
+	int	n;
 	int	i, j;
 
 	/* get current default values */
@@ -553,7 +579,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:C:c:D:d:F:f:I:i:K:k:LlM:m:N:n:O:o:P:p:R:r:S:s:T:t:W:w:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:C:c:D:d:F:f:I:i:K:k:LlM:m:N:n:O:o:P:p:R:r:S:s:T:t:W:w:Z:z:VvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -753,6 +779,39 @@ int main (int argc, char **argv)
 			dsldata  = MB_YES;
 			flag++;
 			break;
+		case 'Z':
+		case 'z':
+			/* sonar_offsets */
+			if (strncmp("sonar_offsets=", optarg, 14) == 0)
+				{
+				n = sscanf(optarg, "sonar_offsets=%lf/%lf/%lf/%lf/%lf/%lf",
+					   &sonar_offset_x,&sonar_offset_y,&sonar_offset_z,
+					   &sonar_offset_heading,&sonar_offset_roll,&sonar_offset_pitch);
+				if (n == 6)
+					sonar_offset_mode = MB_YES;
+				}
+			
+			/* vru_offsets */
+			else if (strncmp("vru_offsets=", optarg, 12) == 0)
+				{
+				n = sscanf(optarg, "vru_offsets=%lf/%lf/%lf/%lf/%lf/%lf",
+					   &vru_offset_x,&vru_offset_y,&vru_offset_z,
+					   &vru_offset_heading,&vru_offset_roll,&vru_offset_pitch);
+				if (n == 6)
+					sonar_offset_mode = MB_YES;
+				}
+			
+			/* navigation_offsets */
+			else if (strncmp("navigation_offsets=", optarg, 19) == 0)
+				{
+				n = sscanf(optarg, "navigation_offsets=%lf/%lf/%lf/%lf/%lf/%lf",
+					   &navigation_offset_x,&navigation_offset_y,&navigation_offset_z,
+					   &navigation_offset_heading,&navigation_offset_roll,&navigation_offset_pitch);
+				if (n == 6)
+					sonar_offset_mode = MB_YES;
+				}
+			flag++;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -850,6 +909,27 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       depthsensoroffx:        %f\n",depthsensoroffx);
 		fprintf(stderr,"dbg2       depthsensoroffy:        %f\n",depthsensoroffy);
 		fprintf(stderr,"dbg2       depthsensoroffz:        %f\n",depthsensoroffz);
+		fprintf(stderr,"dbg2       sonar_offset_mode:          %d\n",sonar_offset_mode);
+		fprintf(stderr,"dbg2       sonar_offset_x:             %f\n",sonar_offset_x);
+		fprintf(stderr,"dbg2       sonar_offset_y:             %f\n",sonar_offset_y);
+		fprintf(stderr,"dbg2       sonar_offset_z:             %f\n",sonar_offset_z);
+		fprintf(stderr,"dbg2       sonar_offset_heading:       %f\n",sonar_offset_heading);
+		fprintf(stderr,"dbg2       sonar_offset_roll:          %f\n",sonar_offset_roll);
+		fprintf(stderr,"dbg2       sonar_offset_pitch:         %f\n",sonar_offset_pitch);
+		fprintf(stderr,"dbg2       vru_offset_mode:            %d\n",vru_offset_mode);
+		fprintf(stderr,"dbg2       vru_offset_x:               %f\n",vru_offset_x);
+		fprintf(stderr,"dbg2       vru_offset_y:               %f\n",vru_offset_y);
+		fprintf(stderr,"dbg2       vru_offset_z:               %f\n",vru_offset_z);
+		fprintf(stderr,"dbg2       vru_offset_heading:         %f\n",vru_offset_heading);
+		fprintf(stderr,"dbg2       vru_offset_roll:            %f\n",vru_offset_roll);
+		fprintf(stderr,"dbg2       vru_offset_pitch:           %f\n",vru_offset_pitch);
+		fprintf(stderr,"dbg2       navigation_offset_mode:     %d\n",navigation_offset_mode);
+		fprintf(stderr,"dbg2       navigation_offset_x:        %f\n",navigation_offset_x);
+		fprintf(stderr,"dbg2       navigation_offset_y:        %f\n",navigation_offset_y);
+		fprintf(stderr,"dbg2       navigation_offset_z:        %f\n",navigation_offset_z);
+		fprintf(stderr,"dbg2       navigation_offset_heading:  %f\n",navigation_offset_heading);
+		fprintf(stderr,"dbg2       navigation_offset_roll:     %f\n",navigation_offset_roll);
+		fprintf(stderr,"dbg2       navigation_offset_pitch:    %f\n",navigation_offset_pitch);
 		fprintf(stderr,"dbg2       rollbias:               %f\n",rollbias);
 		fprintf(stderr,"dbg2       pitchbias:              %f\n",pitchbias);
 		for (i=0;i<nrangeoffset;i++)
@@ -4866,6 +4946,65 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							+ depthsensoroffx * sin(DTR * roll)
 							+ depthsensoroffy * sin(DTR * pitch)
 							+ depthsensoroffz * cos(DTR * pitch);
+					
+					/* if sensor offsets have been defined, apply lever arm correction */
+					if (sonar_offset_mode == MB_YES
+						|| vru_offset_mode == MB_YES
+						|| navigation_offset_mode == MB_YES)
+						{
+						/* do lever arm calculation with sensor offsets */
+						mb_lever(verbose, sonar_offset_x, sonar_offset_y, sonar_offset_z,
+								vru_offset_x, vru_offset_y, vru_offset_z,
+								navigation_offset_x, navigation_offset_y, navigation_offset_z,
+								pitch, roll,
+								&lever_x, &lever_y, &lever_z, &error);
+//fprintf(stderr,"LEVER:  roll:%f pitch:%f   lever: %f %f %f\n", roll, pitch, lever_x, lever_y, lever_z);
+						
+						/* get local translation between lon lat degrees and meters */
+						mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+						headingx = sin(DTR*heading);
+						headingy = cos(DTR*heading);	
+	
+						/* apply position offsets */
+						if (sonar_offset_x != 0.0 || sonar_offset_y != 0.0)
+							{
+							navlon += headingy * sonar_offset_x * mtodeglon
+									+ headingx * sonar_offset_y * mtodeglon;
+							navlat+= -headingx * sonar_offset_x * mtodeglat
+									+ headingy * sonar_offset_y * mtodeglat;
+//fprintf(stderr,"HEADING: %f  %f %f POSITION OFFSET: meters: %f %f   lonlat: %f %f ",
+//heading, headingx, headingy,
+//sonar_offset_x, sonar_offset_y,
+//headingy * sonar_offset_x * mtodeglon + headingx * sonar_offset_y * mtodeglon,
+//-headingx * sonar_offset_x * mtodeglat + headingy * sonar_offset_y * mtodeglat);
+							}
+						if (sonar_offset_z != 0.0)
+							{
+							sonardepth -= sonar_offset_z;
+//fprintf(stderr,"SONARDEPTH OFFSET: %f ",-sonar_offset_z);
+							}
+
+						/* apply lever arm calculation */
+						if (lever_x != 0.0 || lever_y != 0.0)
+							{
+							navlon += headingy * lever_x * mtodeglon
+									+ headingx * lever_y * mtodeglon;
+							navlat+= -headingx * lever_x * mtodeglat
+									+ headingy * lever_y * mtodeglat;
+//fprintf(stderr,"LEVER ARM XY OFFSET: meters: %f %f   lonlat: %f %f ",
+//lever_x, lever_y,
+//headingy * lever_x * mtodeglon + headingx * lever_y * mtodeglon,
+//-headingx * lever_x * mtodeglat + headingy * lever_y * mtodeglat);
+							}
+						if (lever_z != 0.0)
+							{
+							sonardepth -= lever_z;
+//fprintf(stderr,"LEVER ARM Z OFFSET: %f ",-lever_z);
+							}						
+//if (sonar_offset_x != 0.0 || sonar_offset_y != 0.0 || sonar_offset_z != 0.0
+//|| lever_x != 0.0 || lever_y != 0.0 || lever_z != 0.0)
+//fprintf(stderr,"\n");
+						}
 
 					/* if the optional data are not all available, this ping
 						is not useful, and is discarded by setting
