@@ -22,61 +22,6 @@
  *
  * $Log: mbsys_reson7k.h,v $
  *
- * Revision 2014/05/12 finlayson
- * Added support for Calibrated Snippet record (7058)
- *
- * Revision 5.16  2008/09/27 03:27:10  caress
- * Working towards release 5.1.1beta24
- *
- * Revision 5.15  2008/09/20 00:57:41  caress
- * Release 5.1.1beta23
- *
- * Revision 5.14  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.13  2008/03/01 09:14:03  caress
- * Some housekeeping changes.
- *
- * Revision 5.12  2007/07/03 17:25:50  caress
- * Changes to handle new time lag value in bluefin nav records.
- *
- * Revision 5.11  2006/11/10 22:36:05  caress
- * Working towards release 5.1.0
- *
- * Revision 5.10  2006/09/11 18:55:53  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.9  2006/04/11 19:14:46  caress
- * Various fixes.
- *
- * Revision 5.8  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.7  2004/12/02 06:33:29  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.6  2004/11/08 05:47:20  caress
- * Now gets sidescan from snippet data, maybe even properly...
- *
- * Revision 5.5  2004/11/06 03:55:15  caress
- * Working to support the Reson 7k format.
- *
- * Revision 5.4  2004/09/16 19:02:34  caress
- * Changes to better support segy data.
- *
- * Revision 5.3  2004/07/15 19:25:05  caress
- * Progress in supporting Reson 7k data.
- *
- * Revision 5.2  2004/06/18 05:22:33  caress
- * Working on adding support for segy i/o and for Reson 7k format 88.
- *
- * Revision 5.1  2004/05/21 23:44:50  caress
- * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
- *
- * Revision 5.0  2004/04/27 01:50:16  caress
- * Adding support for Reson 7k sonar data, including segy extensions.
- *
  *
  */
 /*
@@ -181,6 +126,7 @@
 #define R7KRECID_7kBackscatterImageData			7007
 #define R7KRECID_7kBeamData				7008
 #define R7KRECID_7kVerticalDepth			7009
+#define R7KRECID_7kTVGData       			7010
 #define R7KRECID_7kImageData				7011
 #define R7KRECID_7kV2PingMotion				7012
 #define R7KRECID_7kV2DetectionSetup			7017
@@ -277,6 +223,7 @@
 #define R7KHDRSIZE_7kBackscatterImageData			64
 #define R7KHDRSIZE_7kBeamData					30
 #define R7KHDRSIZE_7kVerticalDepth				42
+#define R7KHDRSIZE_7kTVGData    				50
 #define R7KHDRSIZE_7kImageData					20
 #define R7KHDRSIZE_7kV2PingMotion				28
 #define R7KHDRSIZE_7kV2DetectionSetup				116
@@ -1564,6 +1511,24 @@ typedef struct s7kr_verticaldepth_struct
 }
 s7kr_verticaldepth;
 
+/* Reson 7k tvg data (record 7010) */
+typedef struct s7kr_tvg_struct
+{
+	s7k_header	header;
+	mb_u_long	serial_number;		/* Sonar serial number */
+	unsigned int	ping_number;		/* Sequential number */
+	unsigned short	multi_ping;		/* Flag to indicate multi-ping mode
+							0 = no multi-ping
+							>0 = sequence number of ping
+								in the multi-ping
+								sequence */
+	unsigned int	n;			/* number of samples */
+	unsigned int	reserved[8];		/*  */
+	unsigned int	nalloc;			/* Number of bytes allocated to tvg array */
+	void		*tvg;			/* Array of tvg data */
+}
+s7kr_tvg;
+
 /* Reson 7k image data (record 7011) */
 typedef struct s7kr_image_struct
 {
@@ -2281,6 +2246,7 @@ struct mbsys_reson7k_struct
 	int		read_backscatter;
 	int		read_beam;
 	int		read_verticaldepth;
+	int		read_tvg;
 	int		read_image;
 	int		read_v2pingmotion;
 	int		read_v2detectionsetup;
@@ -2394,6 +2360,9 @@ struct mbsys_reson7k_struct
 
 	/* Reson 7k vertical depth (record 7009) */
 	s7kr_verticaldepth	verticaldepth;
+
+	/* Reson 7k tvg data (record 7011) */
+	s7kr_tvg		tvg;
 
 	/* Reson 7k image data (record 7011) */
 	s7kr_image		image;
@@ -2696,6 +2665,9 @@ int mbsys_reson7k_print_beam(int verbose,
 			int *error);
 int mbsys_reson7k_print_verticaldepth(int verbose,
 			s7kr_verticaldepth *verticaldepth,
+			int *error);
+int mbsys_reson7k_print_tvg(int verbose,
+			s7kr_tvg *tvg,
 			int *error);
 int mbsys_reson7k_print_image(int verbose,
 			s7kr_image *image,

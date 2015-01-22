@@ -25,78 +25,6 @@
  * Date:	April 4,2004
  * $Log: mbr_reson7kr.c,v $
  *
- * Revision 2014/05/12 finlayson
- * Added support for Calibrated Snippet record (7058)
- *
- * Revision 5.21  2008/09/27 03:27:10  caress
- * Working towards release 5.1.1beta24
- *
- * Revision 5.20  2008/09/20 00:57:41  caress
- * Release 5.1.1beta23
- *
- * Revision 5.19  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.18  2008/03/01 09:14:03  caress
- * Some housekeeping changes.
- *
- * Revision 5.17  2008/01/14 18:11:55  caress
- * Fixes to handling beamflagging following upgrades to Reson 7k multibeams.
- *
- * Revision 5.16  2007/07/03 17:25:51  caress
- * Changes to handle new time lag value in bluefin nav records.
- *
- * Revision 5.15  2006/11/10 22:36:05  caress
- * Working towards release 5.1.0
- *
- * Revision 5.14  2006/09/11 18:55:53  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.13  2006/04/11 19:14:46  caress
- * Various fixes.
- *
- * Revision 5.12  2006/03/14 01:44:02  caress
- * Added test for reasonable altitude value derived from Bluefin records.
- *
- * Revision 5.11  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.10  2005/06/15 15:20:16  caress
- * Fixed problems with writing Bluefin records in 7k data and improved support for Edgetech Jstar data.
- *
- * Revision 5.9  2005/06/04 04:15:59  caress
- * Support for Edgetech Jstar format (id 132 and 133).
- *
- * Revision 5.8  2005/04/07 04:24:33  caress
- * 5.0.7 Release.
- *
- * Revision 5.7  2005/03/25 04:33:30  caress
- * Improved handling of interpolated asynchronous data, particularly sonar depth.
- *
- * Revision 5.6  2004/12/02 06:33:31  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.5  2004/11/08 05:47:19  caress
- * Now gets sidescan from snippet data, maybe even properly...
- *
- * Revision 5.4  2004/11/06 03:55:16  caress
- * Working to support the Reson 7k format.
- *
- * Revision 5.3  2004/07/15 19:25:05  caress
- * Progress in supporting Reson 7k data.
- *
- * Revision 5.2  2004/06/18 05:22:32  caress
- * Working on adding support for segy i/o and for Reson 7k format 88.
- *
- * Revision 5.1  2004/05/21 23:44:49  caress
- * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
- *
- * Revision 5.0  2004/04/27 01:50:16  caress
- * Adding support for Reson 7k sonar data, including segy extensions.
- *
- *
- *
  */
 
 /* standard include files */
@@ -115,8 +43,8 @@
 #include "mb_swap.h"
 
 /* turn on debug statements here */
-/* #define MBR_RESON7KR_DEBUG 1 */
-/* #define MBR_RESON7KR_DEBUG2 1 */
+#define MBR_RESON7KR_DEBUG 1
+#define MBR_RESON7KR_DEBUG2 1
 
 /* essential function prototypes */
 int mbr_register_reson7kr(int verbose, void *mbio_ptr,
@@ -191,6 +119,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr, int *error);
@@ -252,6 +181,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
@@ -1512,6 +1442,7 @@ skip, *recordid, *recordid,
 				|| *recordid == R7KRECID_7kBackscatterImageData
 				|| *recordid == R7KRECID_7kBeamData
 				|| *recordid == R7KRECID_7kVerticalDepth
+				|| *recordid == R7KRECID_7kTVGData
 				|| *recordid == R7KRECID_7kImageData
 				|| *recordid == R7KRECID_7kV2PingMotion
 				|| *recordid == R7KRECID_7kV2DetectionSetup
@@ -1527,7 +1458,7 @@ skip, *recordid, *recordid,
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"called mbr_reson7kr_chk_pingnumber recordid:%d last_ping:%d new_ping:%d\n",
 *recordid,*last_ping,*new_ping);
-fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
 	store->current_ping_number,
 	store->read_volatilesettings,
 	store->read_matchfilter,
@@ -1537,6 +1468,7 @@ fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %
 	store->read_backscatter,
 	store->read_beam,
 	store->read_verticaldepth,
+	store->read_tvg,
 	store->read_image,
 	store->read_v2pingmotion,
 	store->read_v2detectionsetup,
@@ -1663,6 +1595,7 @@ fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %
 					store->read_backscatter = MB_NO;
 					store->read_beam = MB_NO;
 					store->read_verticaldepth = MB_NO;
+					store->read_tvg = MB_NO;
 					store->read_image = MB_NO;
 					store->read_v2pingmotion = MB_NO;
 					store->read_v2detectionsetup = MB_NO;
@@ -1730,6 +1663,7 @@ if (*recordid == R7KRECID_7kBathymetricData) fprintf(stderr," R7KRECID_7kBathyme
 if (*recordid == R7KRECID_7kBackscatterImageData) fprintf(stderr," R7KRECID_7kBackscatterImageData %d\n",*recordid);
 if (*recordid == R7KRECID_7kBeamData) fprintf(stderr," R7KRECID_7kBeamData %d\n",*recordid);
 if (*recordid == R7KRECID_7kVerticalDepth) fprintf(stderr," R7KRECID_7kVerticalDepth %d\n",*recordid);
+if (*recordid == R7KRECID_7kTVGData) fprintf(stderr," R7KRECID_7kTVGData %d\n",*recordid);
 if (*recordid == R7KRECID_7kImageData) fprintf(stderr," R7KRECID_7kImageData %d\n",*recordid);
 if (*recordid == R7KRECID_7kV2PingMotion) fprintf(stderr," R7KRECID_7kV2PingMotion %d\n",*recordid);
 if (*recordid == R7KRECID_7kV2DetectionSetup) fprintf(stderr," R7KRECID_7kV2DetectionSetup %d\n",*recordid);
@@ -2231,6 +2165,14 @@ header->RecordNumber,beam->ping_number);
 				if (status == MB_SUCCESS)
 					store->read_verticaldepth = MB_YES;
 				}
+			else if (*recordid == R7KRECID_7kTVGData)
+				{
+				status = mbr_reson7kr_rd_tvg(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					{
+					store->read_tvg = MB_YES;
+					}
+				}
 			else if (*recordid == R7KRECID_7kImageData)
 				{
 				status = mbr_reson7kr_rd_image(verbose, buffer, store_ptr, error);
@@ -2402,6 +2344,7 @@ header->RecordNumber,image->ping_number);
 					&& store->read_backscatter == MB_YES
 					&& store->read_beam == MB_YES
 					&& store->read_verticaldepth == MB_YES
+					/* && store->read_tvg == MB_YES */
 					&& store->read_image == MB_YES
 					&& store->read_v2pingmotion == MB_YES
 					&& store->read_v2detectionsetup == MB_YES
@@ -2456,11 +2399,11 @@ fprintf(stderr,"end of mbr_reson7kr_rd_data loop:\n\n");
 if (*save_flag == MB_YES)
 fprintf(stderr,"RECORD SAVED\n");
 else
-fprintf(stderr,"status:%d recordid:%d ping_record:%d current:%d last:%d new:%d  done:%d recs:%d %d %d %d %d %d %d %d\n",
+fprintf(stderr,"status:%d recordid:%d ping_record:%d current:%d last:%d new:%d  done:%d recs:%d %d %d %d %d %d %d %d %d\n",
 status,*recordid,ping_record,*current_ping,*last_ping,*new_ping,done,
 store->read_volatilesettings,store->read_matchfilter,
 store->read_beamgeometry,store->read_bathymetry,store->read_backscatter,
-store->read_beam,store->read_verticaldepth,store->read_image);
+store->read_beam,store->read_verticaldepth,store->read_tvg,store->read_image);
 }*/
 #endif
 		}
@@ -2578,6 +2521,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 			&& *recordid != R7KRECID_7kBackscatterImageData
 			&& *recordid != R7KRECID_7kBeamData
 			&& *recordid != R7KRECID_7kVerticalDepth
+			&& *recordid != R7KRECID_7kTVGData
 			&& *recordid != R7KRECID_7kImageData
 			&& *recordid != R7KRECID_7kV2PingMotion
 			&& *recordid != R7KRECID_7kV2DetectionSetup
@@ -2651,6 +2595,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 			if (*recordid == R7KRECID_7kBackscatterImageData) fprintf(stderr," R7KRECID_7kBackscatterImageData\n");
 			if (*recordid == R7KRECID_7kBeamData) fprintf(stderr," R7KRECID_7kBeamData\n");
 			if (*recordid == R7KRECID_7kVerticalDepth) fprintf(stderr," R7KRECID_7kVerticalDepth\n");
+			if (*recordid == R7KRECID_7kTVGData) fprintf(stderr," R7KRECID_7kTVGData\n");
 			if (*recordid == R7KRECID_7kImageData) fprintf(stderr," R7KRECID_7kImageData\n");
 			if (*recordid == R7KRECID_7kV2PingMotion) fprintf(stderr," R7KRECID_7kV2PingMotion\n");
 			if (*recordid == R7KRECID_7kV2DetectionSetup) fprintf(stderr," R7KRECID_7kV2DetectionSetup\n");
@@ -2758,6 +2703,12 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer,
 	else if (recordid == R7KRECID_7kVerticalDepth)
 		{
 		index = offset + 8;
+		mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+		status = MB_SUCCESS;
+		}
+	else if (recordid == R7KRECID_7kTVGData)
+		{
+		index = offset + 4;
 		mb_get_binary_int(MB_YES, &buffer[index], ping_number);
 		status = MB_SUCCESS;
 		}
@@ -7583,6 +7534,116 @@ header->RecordNumber,verticaldepth->ping_number);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error)
+{
+	char	*function_name = "mbr_reson7kr_rd_tvg";
+	int	status = MB_SUCCESS;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_tvg *tvg;
+	int	index;
+	int	time_j[5];
+	int	nalloc;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+	tvg = &(store->tvg);
+	header = &(tvg->header);
+
+	/* extract the header */
+	index = 0;
+	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
+
+	/* extract the data */
+	index = header->Offset + 4;
+	mb_get_binary_long(MB_YES, &buffer[index], &(tvg->serial_number)); index += 8;
+	mb_get_binary_int(MB_YES, &buffer[index], &(tvg->ping_number)); index += 4;
+	mb_get_binary_short(MB_YES, &buffer[index], &(tvg->multi_ping)); index += 2;
+	mb_get_binary_int(MB_YES, &buffer[index], &(tvg->n)); index += 4;
+	for (i=0;i<8;i++)
+		{
+		mb_get_binary_int(MB_YES, &buffer[index], &(tvg->reserved[i])); index += 4;
+		}
+
+	/* allocate memory for tvg if needed */
+	nalloc = tvg->n * sizeof(float);
+	if (status == MB_SUCCESS
+		&& tvg->nalloc < nalloc)
+		{
+		tvg->nalloc = nalloc;
+		if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, tvg->nalloc,
+					(void **)&(tvg->tvg), error);
+		if (status != MB_SUCCESS)
+			{
+			tvg->nalloc = 0;
+			}
+		}
+
+	/* extract tvg data */
+	memcpy((void *)tvg->tvg, (const void *)&buffer[index], (size_t)(tvg->n * sizeof(float)));
+
+	/* set kind */
+	if (status == MB_SUCCESS)
+		{
+		/* set kind */
+		store->kind = MB_DATA_DATA;
+		store->type = R7KRECID_7kTVGData;
+
+		/* get the time */
+		time_j[0] = header->s7kTime.Year;
+		time_j[1] = header->s7kTime.Day;
+		time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+		time_j[3] = (int) header->s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, store->time_i);
+		mb_get_time(verbose, store->time_i, &(store->time_d));
+		}
+	else
+		{
+		store->kind = MB_DATA_NONE;
+		}
+
+	/* print out the results */
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"R7KRECID_7kTVGData:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,tvg->ping_number);
+#endif
+#ifdef MBR_RESON7KR_DEBUG
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_tvg(verbose, tvg, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_reson7kr_rd_image";
@@ -10127,6 +10188,20 @@ fprintf(stderr," R7KRECID_7kVerticalDepth\n");
 			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
 
+		/* Reson 7k tvg data (record 7010) */
+		if (status == MB_SUCCESS && store->read_tvg == MB_YES)
+			{
+			store->type = R7KRECID_7kTVGData;
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kTVGData, R7KRECID_7kTVGData);
+fprintf(stderr," R7KRECID_7kTVGData\n");
+#endif
+			status = mbr_reson7kr_wr_tvg(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+			buffer = (char *) *bufferptr;
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+			}
+
 		/* Reson 7k image data (record 7011) */
 		if (status == MB_SUCCESS && store->read_image == MB_YES)
 			{
@@ -10283,6 +10358,7 @@ if (store->type == R7KRECID_7kBathymetricData) fprintf(stderr," R7KRECID_7kBathy
 if (store->type == R7KRECID_7kBackscatterImageData) fprintf(stderr," R7KRECID_7kBackscatterImageData\n");
 if (store->type == R7KRECID_7kBeamData) fprintf(stderr," R7KRECID_7kBeamData\n");
 if (store->type == R7KRECID_7kVerticalDepth) fprintf(stderr," R7KRECID_7kVerticalDepth\n");
+if (store->type == R7KRECID_7kTVGData) fprintf(stderr," R7KRECID_7kTVGData\n");
 if (store->type == R7KRECID_7kImageData) fprintf(stderr," R7KRECID_7kImageData\n");
 if (store->type == R7KRECID_7kV2PingMotion) fprintf(stderr," R7KRECID_7kV2PingMotion\n");
 if (store->type == R7KRECID_7kV2DetectionSetup) fprintf(stderr," R7KRECID_7kV2DetectionSetup\n");
@@ -15181,6 +15257,123 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 		mb_put_binary_float(MB_YES, verticaldepth->alongtrack, &buffer[index]); index += 4;
 		mb_put_binary_float(MB_YES, verticaldepth->acrosstrack, &buffer[index]); index += 4;
 		mb_put_binary_float(MB_YES, verticaldepth->vertical_depth, &buffer[index]); index += 4;
+
+		/* reset the header size value */
+		mb_put_binary_int(MB_YES, ((unsigned int)(index + 4)), &buffer[8]);
+
+		/* now add the checksum */
+		checksum = 0;
+		for (i=0;i<index;i++)
+			checksum += (unsigned char) buffer[i];
+		mb_put_binary_int(MB_YES, checksum, &buffer[index]); index += 4;
+
+		/* check size */
+		if (*size != index)
+			{
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_DATA;
+			*size = 0;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
+		fprintf(stderr,"dbg2       size:       %d\n",*size);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error)
+{
+	char	*function_name = "mbr_reson7kr_wr_tvg";
+	int	status = MB_SUCCESS;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_tvg *tvg;
+	unsigned int checksum;
+	int	index;
+	char	*buffer;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+	tvg = &(store->tvg);
+	header = &(tvg->header);
+
+	/* print out the data to be output */
+#ifdef MBR_RESON7KR_DEBUG
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_tvg(verbose, tvg, error);
+
+	/* figure out size of output record */
+	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
+	*size += R7KHDRSIZE_7kTVGData;
+	*size += tvg->n * sizeof(float);
+
+	/* allocate memory to write rest of record if necessary */
+	if (*bufferalloc < *size)
+		{
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
+		if (status != MB_SUCCESS)
+			{
+			*bufferalloc = 0;
+			}
+		else
+			{
+			*bufferalloc = *size;
+			}
+		}
+
+	/* proceed to write if buffer allocated */
+	if (status == MB_SUCCESS)
+		{
+		/* get buffer for writing */
+		buffer = (char *) *bufferptr;
+
+		/* insert the header */
+		index = 0;
+		status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
+
+		/* insert the data */
+		index = header->Offset + 4;
+		mb_put_binary_long(MB_YES, tvg->serial_number, &buffer[index]); index += 8;
+		mb_put_binary_int(MB_YES, tvg->ping_number, &buffer[index]); index += 4;
+		mb_put_binary_short(MB_YES, tvg->multi_ping, &buffer[index]); index += 2;
+		mb_put_binary_int(MB_YES, tvg->n, &buffer[index]); index += 4;
+		for (i=0;i<8;i++)
+			{
+			mb_put_binary_int(MB_YES, tvg->reserved[i], &buffer[index]); index += 4;
+			}
+
+		/* insert tvg data */
+		memcpy((void *)&buffer[index], (const void *)tvg->tvg, (size_t)(tvg->n * sizeof(float)));
+		index += tvg->n * sizeof(float);
 
 		/* reset the header size value */
 		mb_put_binary_int(MB_YES, ((unsigned int)(index + 4)), &buffer[8]);
