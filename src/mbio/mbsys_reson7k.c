@@ -147,6 +147,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	s7kr_backscatter	*backscatter;
 	s7kr_beam		*beam;
 	s7kr_verticaldepth	*verticaldepth;
+	s7kr_tvg		*tvg;
 	s7kr_image		*image;
 	s7kr_v2pingmotion	*v2pingmotion;
 	s7kr_v2detectionsetup	*v2detectionsetup;
@@ -203,6 +204,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->read_backscatter = MB_NO;
 	store->read_beam = MB_NO;
 	store->read_verticaldepth = MB_NO;
+	store->read_tvg = MB_NO;
 	store->read_image = MB_NO;
 	store->read_v2pingmotion = MB_NO;
 	store->read_v2detectionsetup = MB_NO;
@@ -829,6 +831,18 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	verticaldepth->alongtrack = 0.0;
 	verticaldepth->acrosstrack = 0.0;
 	verticaldepth->vertical_depth = 0;
+
+	/* Reson 7k tvg data (record 7010) */
+	tvg = &store->tvg;
+	mbsys_reson7k_zero7kheader(verbose, &tvg->header, error);
+	tvg->serial_number = 0;
+	tvg->ping_number = 0;
+	tvg->multi_ping = 0;
+	tvg->n = 0;
+	for (i=0;i<8;i++)
+		tvg->reserved[i] = 0;
+	tvg->nalloc = 0;
+	tvg->tvg = NULL;
 
 	/* Reson 7k image data (record 7011) */
 	image = &store->image;
@@ -3923,6 +3937,67 @@ int mbsys_reson7k_print_verticaldepth(int verbose,
 	fprintf(stderr,"%s     alongtrack:                 %f\n",first,verticaldepth->alongtrack);
 	fprintf(stderr,"%s     acrosstrack:                %f\n",first,verticaldepth->acrosstrack);
 	fprintf(stderr,"%s     vertical_depth:             %f\n",first,verticaldepth->vertical_depth);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_tvg(int verbose,
+			s7kr_tvg *tvg,
+			int *error)
+{
+	char	*function_name = "mbsys_reson7k_print_tvg";
+	int	status = MB_SUCCESS;
+	char	*debug_str = "dbg2  ";
+	char	*nodebug_str = "  ";
+	char	*first;
+	float	*tvg_float;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       tvg:               %p\n",(void *)tvg);
+		}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &tvg->header, error);
+
+	/* print Reson 7k tvg data (record 7010) */
+	if (verbose >= 2)
+		first = debug_str;
+	else
+		{
+		first = nodebug_str;
+		fprintf(stderr,"\n%sMBIO function <%s> called\n",
+			first,function_name);
+		}
+	fprintf(stderr,"%sStructure Contents:\n", first);
+	fprintf(stderr,"%s     serial_number:              %llu\n",first,tvg->serial_number);
+	fprintf(stderr,"%s     ping_number:                %u\n",first,tvg->ping_number);
+	fprintf(stderr,"%s     multi_ping:                 %u\n",first,tvg->multi_ping);
+	fprintf(stderr,"%s     n:                          %d\n",first,tvg->n);
+	for (i=0;i<8;i++)
+		fprintf(stderr,"%s     reserved[%d]:                %d\n",first,i,tvg->reserved[i]);
+	for (i=0;i<tvg->n;i++)
+		{
+		tvg_float = (float *)tvg->tvg;
+		fprintf(stderr,"%s     tvg[%d]:  %f\n", first,i,tvg_float[i]);
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -9211,6 +9286,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 	s7kr_configuration *configuration;
 	s7kr_backscatter *backscatter;
 	s7kr_beam		*beam;
+	s7kr_tvg		*tvg;
 	s7kr_image		*image;
 	s7kr_systemeventmessage *systemeventmessage;
 	int	nalloc;
@@ -9660,6 +9736,36 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 				copycharptr[j] = charptr[j];
 			}
 
+		}
+
+	/* Reson 7k vertical depth (record 7009) */
+	copy->verticaldepth = store->verticaldepth;
+
+	/* Reson 7k tvg data (record 7010) */
+	tvg = &copy->tvg;
+	copy->tvg = store->tvg;
+	copy->tvg.nalloc = tvg->nalloc;
+	copy->tvg.tvg = tvg->tvg;
+	nalloc = tvg->n * sizeof(float);
+	if (status == MB_SUCCESS
+		&& copy->tvg.nalloc < nalloc)
+		{
+		copy->tvg.nalloc = nalloc;
+		if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->tvg.nalloc,
+					(void **)&(copy->tvg.tvg), error);
+		if (status != MB_SUCCESS)
+			{
+			copy->tvg.nalloc = 0;
+			copy->tvg.n = 0;
+			}
+		}
+	if (status == MB_SUCCESS)
+		{
+		copycharptr = (char *)(copy->tvg.tvg);
+		charptr = (char *)(store->tvg.tvg);
+		for (j=0;j<nalloc;j++)
+			copycharptr[j] = charptr[j];
 		}
 
 	/* Reson 7k image data (record 7011) */
