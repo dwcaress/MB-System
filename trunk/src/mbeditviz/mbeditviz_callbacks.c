@@ -48,31 +48,15 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
-
-/* GMT include files */
-#include "gmt.h"
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mbsys_singlebeam.h"
-
-/* get NaN detector */
-#if defined(isnanf)
-#define check_fnan(x) isnanf((x))
-#elif defined(isnan)
-#define check_fnan(x) isnan((double)(x))
-#elif HAVE_ISNANF == 1
-#define check_fnan(x) isnanf(x)
-extern int isnanf(float x);
-#elif HAVE_ISNAN == 1
-#define check_fnan(x) isnan((double)(x))
-#elif HAVE_ISNAND == 1
-#define check_fnan(x) isnand((double)(x))
-#else
-#define check_fnan(x) ((x) != (x))
-#endif
 
 /* mbview include file */
 #include "mbview.h"

@@ -104,7 +104,6 @@ am__DEPENDENCIES_1 =
 mbeditviz_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la \
 	${top_builddir}/src/mbaux/libmbxgr.la \
-	${top_builddir}/src/mbaux/libmbps.la \
 	${top_builddir}/src/mbview/libmbview.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -291,8 +290,6 @@ libfftw_LIBS = @libfftw_LIBS@
 libgmt_CFLAGS = @libgmt_CFLAGS@
 libgmt_CPPFLAGS = @libgmt_CPPFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
-libgmtps_CFLAGS = @libgmtps_CFLAGS@
-libgmtps_LIBS = @libgmtps_LIBS@
 libnetcdf_CFLAGS = @libnetcdf_CFLAGS@
 libnetcdf_CPPFLAGS = @libnetcdf_CPPFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
@@ -334,7 +331,6 @@ mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_callbacks.c mbeditviz_prog.c mbed
 mbeditviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \
 		  ${top_builddir}/src/mbaux/libmbaux.la \
 		  ${top_builddir}/src/mbaux/libmbxgr.la \
-		  ${top_builddir}/src/mbaux/libmbps.la \
 		  ${top_builddir}/src/mbview/libmbview.la \
 		  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
 		  ${motif_LIBS} ${GL_LIBS} \

@@ -2,54 +2,54 @@ if BUILD_FFTW
  FFTW_PROG = mbsegypsd
 endif
 
-bin_PROGRAMS = mbhsdump \
-        mbformat \
-        mbdefaults \
-        mbdatalist \
-        mbinfo \
-        mbset \
-        mbprocess \
-        mbcopy \
-        mblist \
-        mbnavlist \
-        mbsvplist \
+bin_PROGRAMS = mb7k2jstar \
+        mb7k2ss \
+        mb7kpreprocess \
+        mbabsorption \
+        mbareaclean \
+        mbauvloglist \
+        mbauvnavusbl \
         mbbackangle \
         mbclean \
-        mbareaclean \
-        mbhistogram \
-        mbgrid \
-        mbmosaic \
-        mblevitus \
-        mbextractsegy \
-        mbsegylist \
-        mbsegyinfo \
-        mbsegygrid \
-        mbauvnavusbl \
-        mbgetesf \
-        mbneptune2esf \
-        mbps \
-        mbstripnan \
-        mbrollbias \
-        mbrphsbias \
-        mb7k2jstar \
-        mb7kpreprocess \
-        mbrolltimelag \
-        mbauvloglist \
-        mb7k2ss \
-	mbsslayout \
-        mbabsorption \
-        mbdumpesf \
-        mbtime \
+        mbcopy \
         mbctdlist \
+        mbdatalist \
+        mbdefaults \
+        mbdumpesf \
+        mbextractsegy \
         mbfilter \
-        mbroutetime \
+        mbformat \
+        mbgetesf \
+        mbgrid \
+        mbhistogram \
+        mbhsdump \
         mbhysweeppreprocess \
+        mbinfo \
+        mbinsreprocess \
         mbkongsbergpreprocess \
-        mbswplspreprocess \
+        mblevitus \
+        mblist \
+        mbmosaic \
+        mbnavlist \
+        mbneptune2esf \
         mbpreprocess \
-	mbsvpselect \
-	mbinsreprocess \
+        mbprocess \
+        mbrollbias \
+        mbrolltimelag \
+        mbroutetime \
+        mbrphsbias \
+        mbsegygrid \
+        mbsegyinfo \
+        mbsegylist \
+        mbset \
+        mbsslayout \
+        mbstripnan \
+        mbsvplist \
+        mbsvpselect \
+        mbswplspreprocess \
+        mbtime \
         $(FFTW_PROG)
+
 
 include_HEADERS = levitus.h
 
@@ -70,129 +70,79 @@ LIBS =  ${top_builddir}/src/mbio/libmbio.la \
        	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
         $(LIBM)
 
-mbhsdump_SOURCES = mbhsdump.c
-
-mbformat_SOURCES = mbformat.c
-
-mbdefaults_SOURCES = mbdefaults.c
-
+mb7k2jstar_SOURCES = mb7k2jstar.c
+mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mb7k2ss_SOURCES = mb7k2ss.c
+mb7kpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mb7kpreprocess_SOURCES = mb7kpreprocess.c
+mbabsorption_SOURCES = mbabsorption.c
+mbareaclean_SOURCES = mbareaclean.c
+mbauvloglist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbauvloglist_SOURCES = mbauvloglist.c
+mbauvnavusbl_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbauvnavusbl_SOURCES = mbauvnavusbl.c
+mbbackangle_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbbackangle_SOURCES = mbbackangle.c
+mbclean_SOURCES = mbclean.c
+if BUILD_GSF
+  mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
+endif
+mbcopy_SOURCES = mbcopy.c
+mbctdlist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbctdlist_SOURCES = mbctdlist.c
 mbdatalist_SOURCES = mbdatalist.c
-
+mbdefaults_SOURCES = mbdefaults.c
+mbdumpesf_SOURCES = mbdumpesf.c
+mbextractsegy_SOURCES = mbextractsegy.c
+mbfilter_SOURCES = mbfilter.c
+mbformat_SOURCES = mbformat.c
+mbgetesf_SOURCES = mbgetesf.c
+mbgrid_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbgrid_SOURCES = mbgrid.c
+mbhistogram_SOURCES = mbhistogram.c
+mbhsdump_SOURCES = mbhsdump.c
+mbhysweeppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbhysweeppreprocess_SOURCES = mbhysweeppreprocess.c
 mbinfo_SOURCES = mbinfo.c
-
-mbset_SOURCES = mbset.c
-
-mbprocess_SOURCES = mbprocess.c
+mbinsreprocess_SOURCES = mbinsreprocess.c
+mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
+mblevitus_SOURCES = mblevitus.c
+mblist_SOURCES = mblist.c
+mbmosaic_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbmosaic_SOURCES = mbmosaic.c
+mbnavlist_SOURCES = mbnavlist.c
+mbneptune2esf_SOURCES = mbneptune2esf.c
+mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbpreprocess_SOURCES = mbpreprocess.c
 if BUILD_GSF
   mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
 else
   mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 endif
-
-mbcopy_SOURCES = mbcopy.c
-if BUILD_GSF
-  mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
-endif
-
-mblist_SOURCES = mblist.c
-
-mbnavlist_SOURCES = mbnavlist.c
-
-mbsvplist_SOURCES = mbsvplist.c
-
-mbbackangle_SOURCES = mbbackangle.c
-mbbackangle_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mbclean_SOURCES = mbclean.c
-
-mbareaclean_SOURCES = mbareaclean.c
-
-mbhistogram_SOURCES = mbhistogram.c
-
-mbgrid_SOURCES = mbgrid.c
-mbgrid_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mbmosaic_SOURCES = mbmosaic.c
-mbmosaic_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mblevitus_SOURCES = mblevitus.c
-
-mbrphsbias_SOURCES = mbrphsbias.c
-
+mbprocess_SOURCES = mbprocess.c
 mbrollbias_SOURCES = mbrollbias.c
-
-mbextractsegy_SOURCES = mbextractsegy.c
-
-mbsegylist_SOURCES = mbsegylist.c
-
-mbsegyinfo_SOURCES = mbsegyinfo.c
-
-mbsegygrid_SOURCES = mbsegygrid.c
-mbsegygrid_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mbauvnavusbl_SOURCES = mbauvnavusbl.c
-mbauvnavusbl_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mbgetesf_SOURCES = mbgetesf.c
-
-mbneptune2esf_SOURCES = mbneptune2esf.c
-
-mbps_SOURCES = mbps.c
-mbps_LDADD = ${top_builddir}/src/mbaux/libmbps.la ${libgmt_LIBS} -lpsl -lgmtps
-
-mbstripnan_SOURCES = mbstripnan.c
-
-mb7k2jstar_SOURCES = mb7k2jstar.c
-
-mb7kpreprocess_SOURCES = mb7kpreprocess.c
-mb7kpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
 mbrolltimelag_SOURCES = mbrolltimelag.c
-
-mbauvloglist_SOURCES = mbauvloglist.c
-mbauvloglist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mb7k2ss_SOURCES = mb7k2ss.c
-mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mbsslayout_SOURCES = mbsslayout.c
-mbsslayout_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mbabsorption_SOURCES = mbabsorption.c
-
-mbdumpesf_SOURCES = mbdumpesf.c
-
-mbtime_SOURCES = mbtime.c
-
-mbctdlist_SOURCES = mbctdlist.c
-mbctdlist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mbfilter_SOURCES = mbfilter.c
-
 mbroutetime_SOURCES = mbroutetime.c
-
-mbhysweeppreprocess_SOURCES = mbhysweeppreprocess.c
-mbhysweeppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
-mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mbswplspreprocess_SOURCES = mbswplspreprocess.c
-mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
-mbpreprocess_SOURCES = mbpreprocess.c
-mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-
+mbrphsbias_SOURCES = mbrphsbias.c
+mbsegygrid_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbsegygrid_SOURCES = mbsegygrid.c
+mbsegyinfo_SOURCES = mbsegyinfo.c
+mbsegylist_SOURCES = mbsegylist.c
+mbset_SOURCES = mbset.c
+mbsslayout_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbsslayout_SOURCES = mbsslayout.c
+mbstripnan_SOURCES = mbstripnan.c
+mbsvplist_SOURCES = mbsvplist.c
 mbsvpselect_SOURCES = mbsvpselect.c geodesic.c
-
-mbinsreprocess_SOURCES = mbinsreprocess.c
-
+mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbswplspreprocess_SOURCES = mbswplspreprocess.c
+mbtime_SOURCES = mbtime.c
 if BUILD_FFTW
-mbsegypsd_SOURCES = mbsegypsd.c
-mbsegypsd_LDFLAGS =
-
 mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
                   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${libfftw_LIBS}
+mbsegypsd_SOURCES = mbsegypsd.c
+mbsegypsd_LDFLAGS =
 endif
 
 BUILT_SOURCES = levitus.h

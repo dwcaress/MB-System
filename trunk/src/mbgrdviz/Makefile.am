@@ -19,7 +19,6 @@ mbgrdviz_SOURCES =  mbgrdviz_main.c mbgrdviz_callbacks.c  mbgrdviz_creation.c
 mbgrdviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \
 		 ${top_builddir}/src/mbaux/libmbaux.la \
 		 ${top_builddir}/src/mbaux/libmbxgr.la \
-		 ${top_builddir}/src/mbaux/libmbps.la \
         	 ${top_builddir}/src/mbview/libmbview.la \
 		 ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
 		 ${motif_LIBS} ${GL_LIBS} \

@@ -400,19 +400,15 @@ fi
 dnl Done linking with external PROJ
 
 dnl Check for Generic Mapping Tools (GMT) libs
-dnl - these are libgmt, libpsl, and libgmtps
+dnl - these are libgmt, libpsl
 dnl Would certainly be nice if GMT had pkg-config file (gmt.pc)...
 AS_ECHO(["Check for Generic Mapping Tools (GMT)"])
 GOT_GMTPKG=no
 dnl first check for package
 PKG_CHECK_MODULES([libgmt], [gmt], [GOT_LIBGMT=yes], [GOT_LIBGMT=no])
-PKG_CHECK_MODULES([libgmtps], [gmt], [GOT_LIBGMTPS=yes], [GOT_LIBGMTPS=no])
 PKG_CHECK_MODULES([libpsl], [gmt], [GOT_LIBPSL=yes], [GOT_LIBPSL=no])
 if test "$GOT_LIBGMT" = "yes" ; then
 	GOT_GMTPKG=yes
-fi
-if test "$GOT_GMTPS" = "no" ; then
-	GOT_GMTPKG=no
 fi
 if test "$GOT_PSL" = "no" ; then
 	GOT_GMTPKG=no
@@ -423,7 +419,7 @@ if test "$GOT_GMTPKG" = "no" ; then
 
 	GMT_SETTING=no
 	GOT_GMTLIBS=no
-	libgmt_LIBS="-lgmt -lgmtps -lpsl"
+	libgmt_LIBS="-lgmt -lpsl"
 	dnl arg for command line
 	AC_ARG_WITH(gmt-lib, [  --with-gmt-lib=DIR	Location of GMT libraries],
 	       [gmt_libdir="${withval}"] [GOT_GMTLIBS=yes], [GOT_GMTLIBS=no])

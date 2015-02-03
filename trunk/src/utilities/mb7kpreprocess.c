@@ -1311,9 +1311,9 @@ rock_heading[nrock]);*/
 			    		&year, &month, &day, &hour, &minute, &second,
 					sensor, &dsl_lat[ndsl], &dsl_lon[ndsl], &dsl_sonardepth[ndsl],
 					&dsl_heading[ndsl], &dsl_pitch[ndsl], &dsl_roll[ndsl], &id);
-/*fprintf(stderr,"nscan:%d year:%d month:%d day:%d hour:%d minute:%d second:%f sensor:%s %f %f %f %f %f %f %f\n",
+/* fprintf(stderr,"nscan:%d year:%d month:%d day:%d hour:%d minute:%d second:%f sensor:%s %f %f %f %f %f %f %f\n",
 nscan,year,month,day,hour,minute,second,sensor,dsl_lat[ndsl], dsl_lon[ndsl], dsl_sonardepth[ndsl],
-dsl_heading[ndsl], dsl_pitch[ndsl], dsl_roll[ndsl], id);*/
+dsl_heading[ndsl], dsl_pitch[ndsl], dsl_roll[ndsl], id); */
 			    if (nscan == 14)
 			    	{
 				time_i[0] = year;
@@ -1324,7 +1324,7 @@ dsl_heading[ndsl], dsl_pitch[ndsl], dsl_roll[ndsl], id);*/
 				time_i[5] = (int)second;
 				time_i[6] = (int)((second - time_i[5]) * 1000000);
 				mb_get_time(verbose, time_i, &dsl_time_d[ndsl]);
-/*fprintf(stderr,"dsl DATA: %f %f %f %f %f %f\n",
+/* fprintf(stderr,"dsl DATA: %f %f %f %f %f %f %f %f\n",
 dsl_time_d[ndsl],
 dsl_lon[ndsl],
 dsl_lat[ndsl],
@@ -1332,7 +1332,7 @@ dsl_sonardepth[ndsl],
 dsl_heading[ndsl],
 dsl_roll[ndsl],
 dsl_pitch[ndsl],
-dsl_heading[ndsl]);*/
+dsl_heading[ndsl]); */
 			    	ndsl++;
 				}
 			    }
@@ -4675,15 +4675,15 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 									rock_time_d-1, rock_lat-1,
 									nrock, time_d, &navlat, &jrock,
 									&error);
-						if (j > 1)
+						if (jrock > 1)
 							{
-							j1 = j - 2;
-							j2 = j - 1;
+							j1 = jrock - 2;
+							j2 = jrock - 1;
 							}
 						else
 							{
-							j1 = j - 1;
-							j2 = j;
+							j1 = jrock - 1;
+							j2 = jrock;
 							}
 						mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
 						dx = (rock_lon[j2] - rock_lon[j1])/mtodeglon;
@@ -4704,15 +4704,15 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 									dsl_time_d-1, dsl_lat-1,
 									ndsl, time_d, &navlat, &jdsl,
 									&error);
-						if (j > 1)
+						if (jdsl > 1)
 							{
-							j1 = j - 2;
-							j2 = j - 1;
+							j1 = jdsl - 2;
+							j2 = jdsl - 1;
 							}
 						else
 							{
-							j1 = j - 1;
-							j2 = j;
+							j1 = jdsl - 1;
+							j2 = jdsl;
 							}
 						mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
 						dx = (dsl_lon[j2] - dsl_lon[j1])/mtodeglon;
@@ -5112,10 +5112,10 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 /* if (i==128)fprintf(stderr,"range:%f zz:%f sonardepth:%f depth:%f\n",rr,zz,sonardepth,bathymetry->depth[i]); */
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
-/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+/*fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
 i,roll, bathymetry->roll,pitch, bathymetry->pitch,
 alpha,beta,theta,phi,
-bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 							}
 						}
 			
@@ -5225,7 +5225,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 									{
 									beampitch = pitch;
 									}
-								beampitchr = RTD * beampitch;
+								beampitchr = DTR * beampitch;
 								
 								/* compensate for roll if not already compensated */
 								if ((volatilesettings->receive_flags & 0x1) != 0)
@@ -5268,9 +5268,12 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 										beamroll = roll;
 										}
 									}
-								beamrollr = RTD * beamroll;
-/* fprintf(stderr,"i:%d roll: %f beamroll: %f diff:%f",i,roll,beamroll,beamroll-roll);
-fprintf(stderr,"  pitch:%f beampitch:%f diff:%f\n",pitch,beampitch,beampitch-pitch);*/
+								beamrollr = DTR * beamroll;
+/* fprintf(stderr,"receive_flags: %d %x %d %x     ",
+	volatilesettings->receive_flags,volatilesettings->receive_flags,
+	volatilesettings->receive_flags & 0x1,volatilesettings->receive_flags & 0x1);
+fprintf(stderr,"i:%d roll: %f beamroll: %f diff:%f",i,roll,beamroll,beamroll-roll);
+fprintf(stderr,"  pitch:%f beampitch:%f diff:%f\n",pitch,beampitch,beampitch-pitch); */
 								
 								/* compensate for heave if not already compensated */
 								if ((volatilesettings->receive_flags & 0x2) != 0)

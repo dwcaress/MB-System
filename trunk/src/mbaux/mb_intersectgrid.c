@@ -69,7 +69,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 	/* read in the data */
 	strcpy(topogrid->file, topogridfile);
 	topogrid->data = NULL;
-	status = mb_readgrd(verbose, topogrid->file, &topogrid->projection_mode, topogrid->projection_id, &topogrid->nodatavalue,
+	status = mb_read_gmt_grd(verbose, topogrid->file, &topogrid->projection_mode, topogrid->projection_id, &topogrid->nodatavalue,
 				&topogrid->nxy, &topogrid->nx, &topogrid->ny, &topogrid->min, &topogrid->max,
 				&topogrid->xmin, &topogrid->xmax, &topogrid->ymin, &topogrid->ymax,
 				&topogrid->dx, &topogrid->dy, &topogrid->data, NULL, NULL, error);

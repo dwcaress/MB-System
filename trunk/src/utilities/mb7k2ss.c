@@ -21,26 +21,6 @@
  * Date:	August 15, 2007
  *              R/V Atlantis, Axial Seamount
  *
- * $Log: mb7k2ss.c,v $
- * Revision 5.4  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.3  2008/09/27 03:27:11  caress
- * Working towards release 5.1.1beta24
- *
- * Revision 5.2  2008/09/11 20:20:14  caress
- * Checking in updates made during cruise AT15-36.
- *
- * Revision 5.1  2008/05/16 22:44:37  caress
- * Release 5.1.1beta18
- *
- * Revision 5.0  2007/10/08 17:04:13  caress
- * Update version number.
- *
- * Revision 1.1  2007/10/08 16:51:01  caress
- * Initial version of a program to extract Edgetech sidescan from MBARI Mapping AUV data into format 71.
- *
- *
  *
  */
 

@@ -183,6 +183,22 @@ typedef char mb_longname[MB_LONGNAME_LENGTH];
 #define	ROUND(X)	X < 0.0 ? ceil(X - 0.5) : floor(X + 0.5)
 #endif
 
+/* NaN defines */
+#ifdef NO_IEEE
+#define MB_MAKE_FNAN(x) (x = FLT_MAX)
+#define MB_MAKE_DNAN(x) (x = DBL_MAX)
+#define MB_IS_FNAN(x) ((x) == FLT_MAX)
+#define MB_IS_DNAN(x) ((x) == DBL_MAX)
+#else
+#define MB_MAKE_FNAN(x) (x = (float) NAN)
+#define MB_MAKE_DNAN(x) (x = NAN)
+#define MB_IS_FNAN isnan
+#define MB_IS_DNAN isnan
+#endif
+
+/* default grid no data value define */
+#define	MB_DEFAULT_GRID_NODATA		-9999999.9
+
 /* safe square root define - sets argument to zero if negative */
 #define SAFESQRT(X) sqrt(MAX(0.0, X))
 

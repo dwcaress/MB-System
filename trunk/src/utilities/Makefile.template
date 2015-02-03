@@ -86,7 +86,6 @@ all:	$(BINDIR)/mb7k2jstar \
 	$(BINDIR)/mbnavlist \
 	$(BINDIR)/mbneptune2esf \
 	$(BINDIR)/mbprocess \
-	$(BINDIR)/mbps \
 	$(BINDIR)/mbrollbias \
 	$(BINDIR)/mbrolltimelag \
 	$(BINDIR)/mbroutetime \
@@ -159,10 +158,6 @@ $(BINDIR)/mbgetesf:	mbgetesf.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR
 $(BINDIR)/mbneptune2esf:	mbneptune2esf.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbneptune2esf.o $(LIBDIR)/libmbio.a $(LFLAGS) $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
 		-o $(BINDIR)/mbneptune2esf
-$(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
-		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmtps.a \
-		$(LFLAGS) -o $(BINDIR)/mbps
 $(BINDIR)/mbstripnan:	mbstripnan.o
 	$(CC) $(CFLAGS) mbstripnan.o $(LFLAGS) -o $(BINDIR)/mbstripnan
 $(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmbbsio.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
@@ -296,8 +291,6 @@ mbgetesf.o:	mbgetesf.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define
 	$(CC) -c $(CFLAGS) -I../mbio mbgetesf.c
 mbneptune2esf.o:	mbneptune2esf.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
 	$(CC) -c $(CFLAGS) -I../mbio mbneptune2esf.c
-mbps.o:	mbps.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h
-	$(CC) -c $(CFLAGS) -I../mbio -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbps.c
 mbstripnan.o:	mbstripnan.c
 	$(CC) -c $(CFLAGS) -I../mbio mbstripnan.c
 mbhistogram.o:	mbhistogram.c ../mbio/mb_format.h ../mbio/mb_status.h ../mbio/mb_define.h

@@ -1021,6 +1021,15 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->year += 1900;
 				store->month++;
 				}
+
+			store->time_d = 0.0;
+			store->navlon = 0.0;
+			store->navlat = 0.0;
+			store->sensordepth = 0.0;
+			store->heading = 0.0;
+			store->roll = 0.0;
+			store->pitch = 0.0;
+			store->speed = 0.0;
 			}
 			
 		/* read all of the pulses */

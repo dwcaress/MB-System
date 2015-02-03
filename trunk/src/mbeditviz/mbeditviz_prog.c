@@ -23,51 +23,17 @@
  * Author:	D. W. Caress
  * Date:	May 1, 2007
  *
- * $Log: mbeditviz_prog.c,v $
- * Revision 5.9  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.8  2008/05/16 22:59:42  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.7  2008/03/14 19:04:32  caress
- * Fixed memory problems with route editing.
- *
- * Revision 5.6  2008/01/14 18:20:13  caress
- * Improved ability to identify raw vs processed data files regardless of source datalist.
- *
- * Revision 5.5  2007/11/16 17:26:56  caress
- * Progress on MBeditviz
- *
- * Revision 5.4  2007/10/17 20:35:05  caress
- * Release 5.1.1beta11
- *
- * Revision 5.3  2007/10/08 16:32:08  caress
- * Code status as of 8 October 2007.
- *
- * Revision 5.2  2007/07/05 19:53:37  caress
- * Added sys/stat.h include.
- *
- * Revision 5.1  2007/07/03 17:35:54  caress
- * Working on MBeditviz.
- *
- * Revision 5.0  2007/06/17 23:25:57  caress
- * Added NBeditviz.
- *
- *
  */
 
 /* Standard includes */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
-/* GMT include files */
-#include "gmt.h"
 
 /* MBIO include files */
 #include "mb_status.h"

@@ -655,8 +655,6 @@ libfftw_CFLAGS
 libgmt_CPPFLAGS
 libpsl_LIBS
 libpsl_CFLAGS
-libgmtps_LIBS
-libgmtps_CFLAGS
 libgmt_LIBS
 libgmt_CFLAGS
 libproj_CPPFLAGS
@@ -845,8 +843,6 @@ libproj_CFLAGS
 libproj_LIBS
 libgmt_CFLAGS
 libgmt_LIBS
-libgmtps_CFLAGS
-libgmtps_LIBS
 libpsl_CFLAGS
 libpsl_LIBS
 libfftw_CFLAGS
@@ -1535,10 +1531,6 @@ Some influential environment variables:
   libgmt_CFLAGS
               C compiler flags for libgmt, overriding pkg-config
   libgmt_LIBS linker flags for libgmt, overriding pkg-config
-  libgmtps_CFLAGS
-              C compiler flags for libgmtps, overriding pkg-config
-  libgmtps_LIBS
-              linker flags for libgmtps, overriding pkg-config
   libpsl_CFLAGS
               C compiler flags for libpsl, overriding pkg-config
   libpsl_LIBS linker flags for libpsl, overriding pkg-config
@@ -13699,77 +13691,6 @@ $as_echo "yes" >&6; }
 fi
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libgmtps" >&5
-$as_echo_n "checking for libgmtps... " >&6; }
-
-if test -n "$libgmtps_CFLAGS"; then
-    pkg_cv_libgmtps_CFLAGS="$libgmtps_CFLAGS"
- elif test -n "$PKG_CONFIG"; then
-    if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gmt\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "gmt") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-  pkg_cv_libgmtps_CFLAGS=`$PKG_CONFIG --cflags "gmt" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
-else
-  pkg_failed=yes
-fi
- else
-    pkg_failed=untried
-fi
-if test -n "$libgmtps_LIBS"; then
-    pkg_cv_libgmtps_LIBS="$libgmtps_LIBS"
- elif test -n "$PKG_CONFIG"; then
-    if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gmt\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "gmt") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-  pkg_cv_libgmtps_LIBS=`$PKG_CONFIG --libs "gmt" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
-else
-  pkg_failed=yes
-fi
- else
-    pkg_failed=untried
-fi
-
-
-
-if test $pkg_failed = yes; then
-   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
-if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
-        _pkg_short_errors_supported=yes
-else
-        _pkg_short_errors_supported=no
-fi
-        if test $_pkg_short_errors_supported = yes; then
-	        libgmtps_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gmt" 2>&1`
-        else
-	        libgmtps_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gmt" 2>&1`
-        fi
-	# Put the nasty error message in config.log where it belongs
-	echo "$libgmtps_PKG_ERRORS" >&5
-
-	GOT_LIBGMTPS=no
-elif test $pkg_failed = untried; then
-     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-	GOT_LIBGMTPS=no
-else
-	libgmtps_CFLAGS=$pkg_cv_libgmtps_CFLAGS
-	libgmtps_LIBS=$pkg_cv_libgmtps_LIBS
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-	GOT_LIBGMTPS=yes
-fi
-
-pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libpsl" >&5
 $as_echo_n "checking for libpsl... " >&6; }
 
@@ -13842,9 +13763,6 @@ fi
 if test "$GOT_LIBGMT" = "yes" ; then
 	GOT_GMTPKG=yes
 fi
-if test "$GOT_GMTPS" = "no" ; then
-	GOT_GMTPKG=no
-fi
 if test "$GOT_PSL" = "no" ; then
 	GOT_GMTPKG=no
 fi
@@ -13853,7 +13771,7 @@ if test "$GOT_GMTPKG" = "no" ; then
 
 	GMT_SETTING=no
 	GOT_GMTLIBS=no
-	libgmt_LIBS="-lgmt -lgmtps -lpsl"
+	libgmt_LIBS="-lgmt -lpsl"
 
 # Check whether --with-gmt-lib was given.
 if test "${with_gmt_lib+set}" = set; then :

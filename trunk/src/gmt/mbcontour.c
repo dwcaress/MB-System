@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbcontour.c	6/4/93
+ *    The MB-system:	mbcontour.c	5/30/93
  *    $Id$
  *
- *    Copyright (c) 1993-2014 by
+ *    Copyright (c) 1993-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,193 +14,34 @@
  *--------------------------------------------------------------------*/
 /*
  * MBCONTOUR is a GMT compatible utility which creates a color postscript
- * contour map of multibeam swath bathymetry.
- * Complete maps are made by using MBCONTOUR in conjunction with the
- * usual GMT programs.  The contour levels and colors can be controlled
- * directly or set implicitly using contour and color change intervals.
- * Contours can also be set to have ticks pointing downhill.
+ * image of swath bathymetry or backscatter data.  The image
+ * may be shaded relief as well.  Complete maps are made by using
+ * MBCONTOUR in conjunction with the usual GMT programs.  The modes
+ * of operation are:
+ *   Mode 1:  Bathymetry
+ *   Mode 2:  Bathymetry shaded by illumination
+ *   Mode 3:  Bathymetry shaded by amplitude
+ *   Mode 4:  amplitude
+ *   Mode 5:  sidescan
+ *   Mode 6:  Bathymetry shaded by amplitude using cpt gray data
  *
  * Author:	D. W. Caress
- * Date:	June 4, 1993
- *
- * $Log: mbcontour.c,v $
- * Revision 5.15  2009/03/02 18:59:05  caress
- * Moving towards 5.1.2beta1.
- *
- * Revision 5.14  2008/09/13 06:08:09  caress
- * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
- *
- * Revision 5.13  2007/03/02 18:17:38  caress
- * Fixed problems plotting ping/shot number annotation.
- *
- * Revision 5.12  2006/11/10 22:05:37  caress
- * Added ping number/shot number navigation track annotation.
- *
- * Revision 5.11  2006/01/18 07:27:01  caress
- * Fixed to work with GMT4.1
- *
- * Revision 5.10  2005/11/04 20:50:19  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.9  2005/03/25 04:03:10  caress
- * Added control on filename annotation direction.
- *
- * Revision 5.8  2004/12/18 01:26:43  caress
- * Added filename annotation.
- *
- * Revision 5.7  2003/04/17 20:43:37  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/10/02 23:52:37  caress
- * Release 5.0.beta24
- *
- * Revision 5.5  2002/04/06 02:45:59  caress
- * Release 5.0.beta16
- *
- * Revision 5.4  2001/08/10 22:40:02  dcaress
- * Release 5.0.beta07
- *
- * Revision 5.3  2001-07-19 17:29:41-07  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/03/22 21:03:31  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.1  2001/01/22  05:03:25  caress
- * Release 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:52:16  caress
- * First cut at Version 5.0.
- *
- * Revision 4.24  2000/10/11  00:53:45  caress
- * Converted to ANSI C
- *
- * Revision 4.23  2000/09/30  06:52:17  caress
- * Snapshot for Dale.
- *
- * Revision 4.22  2000/09/11  20:09:14  caress
- * Linked to new datalist parsing functions. Now supports recursive datalists
- * and comments in datalists.
- *
- * Revision 4.21  1998/10/28  21:32:29  caress
- * Fixed handling of data with variable numbers of beams.
- *
- * Revision 4.20  1998/10/04  04:18:07  caress
- * MB-System version 4.6beta
- *
- * Revision 4.19  1997/10/07  20:10:51  caress
- * Fixed tick flag for contours read from file.
- *
- * Revision 4.18  1997/04/21  16:53:56  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.18  1997/04/17  15:05:49  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.17  1996/09/05  13:58:27  caress
- * Added feature to check data bounds in ".inf" files.
- *
- * Revision 4.16  1996/04/22  13:18:44  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.15  1995/11/28  21:06:16  caress
- * Fixed scaling for meters to feet.
- *
- * Revision 4.14  1995/11/22  22:13:02  caress
- * Now handles bathymetry in feet with -W option.
- *
- * Revision 4.13  1995/11/02  19:24:45  caress
- * Fixed mb_error calls.
- *
- * Revision 4.12  1995/09/29  18:09:17  caress
- * Enabled mbio using larger bounds than plot bounds.
- *
- * Revision 4.11  1995/08/07  17:31:39  caress
- * Moved to GMT V3.
- *
- * Revision 4.10  1995/06/05  12:41:03  caress
- * Now checks navlon != navlon_old || navlat != navlat_old instead
- * of doing &
- *
- * Revision 4.9  1995/05/12  17:19:02  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.8  1995/03/06  19:39:52  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.7  1995/01/05  23:59:20  caress
- * Made it possible to read data from a single file or
- * from datalists.
- *
- * Revision 4.6  1994/12/21  20:23:30  caress
- * Allows plotting in triangle mode when ship's lon and lat
- * doesn't change.
- *
- * Revision 4.5  1994/10/21  11:34:20  caress
- * Release V4.0
- *
- * Revision 4.5  1994/10/21  11:34:20  caress
- * Release V4.0
- *
- * Revision 4.4  1994/07/29  19:04:31  caress
- * Changes associated with supporting byte swapped Lynx OS and
- * >> using unix second time base.
- *
- * Revision 4.3  1994/06/13  19:01:13  caress
- * Fixed typos in info messages.
- *
- * Revision 4.2  1994/06/13  18:39:15  caress
- * Made it possible to read data from stdin.
- *
- * Revision 4.1  1994/05/16  22:15:16  caress
- * First cut at new contouring scheme.  Additional major changes
- * include adding annotated ship track plot and isolation
- * of plot initialization.
- *
- * Revision 4.1  1994/05/16  22:15:16  caress
- * First cut at new contouring scheme.  Additional major changes
- * include adding annotated ship track plot and isolation
- * of plot initialization.
- *
- * Revision 4.0  1994/03/05  23:46:48  caress
- * First cut at version 4.0
- *
- * Revision 4.0  1994/03/05  23:46:48  caress
- * First cut at version 4.0
- *
- * Revision 4.1  1994/03/03  03:48:58  caress
- * Fixed copyright message.
- *
- * Revision 4.0  1994/02/26  23:07:51  caress
- * First cut at new version.
- *
- * Revision 3.3  1993/11/03  21:09:10  caress
- * Changed ps_plotinit call to agree with current version
- * of GMT (v2.1.4).
- *
- * Revision 3.2  1993/08/16  22:57:49  caress
- * Changed ad hoc string justification.  Used to assume letter width
- * is 0.5 letter height, but now assumes letter width is 0.37 letter
- * height.
- *
- * Revision 3.1  1993/06/21  00:04:52  caress
- * Fixed help message.
- *
- * Revision 3.0  1993/06/19  01:17:26  caress
- * Initial version
- * ls
- *
+ * Date:	May 30, 1993 (original standalone program for GMT3 and GMT4)
+ *                           (also originally served to drive Calcomp style pen 
+ *                              plotters in real time)
+ * Date:	January 27, 2015 (recast as GMT5 module, code supporting pen
+ *                                  plotters removed)
  *
  */
 
-/* standard include files */
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
-#include <string.h>
-#include <time.h>
+#define THIS_MODULE_NAME	"mbcontour"
+#define THIS_MODULE_LIB		"mbgmt"
+#define THIS_MODULE_PURPOSE	"Plot swath bathymetry, amplitude, or backscatter"
+
+/* GMT5 header file */
+#include "gmt_dev.h"
+
+#define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
 /* MBIO include files */
 #include "mb_status.h"
@@ -208,37 +49,413 @@
 #include "mb_define.h"
 #include "mb_aux.h"
 
-/* GMT argument handling define */
-#define MBCONTOUR_GMT_ARG_MAX 128
+/* Control structure for mbcontour */
+struct MBCONTOUR_CTRL {
 
-/* label and contour line length */
-#define MBCONTOUR_LABEL_LEN 128
+	struct mbcontour_A {	/* -A<cont_int>/<col_int>/<tick_int>/<label_int>/<tick_len>/<label_hgt>/<label_spacing> */
+		bool active;
+		double cont_int;
+		double col_int;
+		double tick_int;
+		double label_int;
+		double tick_len;
+		double label_hgt;
+                double label_spacing;
+ 	} A;
+	struct mbcontour_b {	/* -b<year>/<month>/<day>/<hour>/<minute>/<second> */
+		bool active;
+		int time_i[7];
+	} b;
+	struct mbcontour_C {	/* -C<contourfile> */
+		bool active;
+		char *contourfile;
+	} C;
+	struct mbcontour_D {	/* -D<time_tick_int>/<time_annot_int>/<date_annot_int>/<time_tick_len> */
+		bool active;
+		double time_tick_int;
+		double time_annot_int;
+		double date_annot_int;
+		double time_tick_len;
+	} D;
+	struct mbcontour_e {	/* -e<year>/<month>/<day>/<hour>/<minute>/<second> */
+		bool active;
+		int time_i[7];
+	} e;
+	struct mbcontour_F {	/* -F<format> */
+		bool active;
+		int format;
+	} F;
+	struct mbcontour_G {	/* -G<name_hgt>/<name_perp> */
+		bool active;
+		double name_hgt;
+                int name_perp;
+	} G;
+	struct mbcontour_I {	/* -I<inputfile> */
+		bool active;
+		char *inputfile;
+	} I;
+	struct mbcontour_L {	/* -L<lonflip> */
+		bool active;
+                int lonflip;
+	} L;
+	struct mbcontour_M {	/* -M<pingnumber_tick_int>/<pingnumber_annot_int>/<pingnumber_tick_len> */
+		bool active;
+                double pingnumber_tick_int;
+                double pingnumber_annot_int;
+                double pingnumber_tick_len;
+	} M;
+	struct mbcontour_N {	/* -N<nplot> */
+		bool active;
+                int nplot;
+	} N;
+	struct mbcontour_Q {	/* -Q */
+		bool active;
+	} Q;
+	struct mbcontour_S {	/* -S<speedmin> */
+		bool active;
+		double speedmin;
+	} S;
+	struct mbcontour_T {	/* -T<timegap> */
+		bool active;
+		double timegap;
+	} T;
+	struct mbcontour_W {	/* -W */
+		bool active;
+	} W;
+	struct mbcontour_Z {	/* -Z<algorithm> */
+		bool active;
+                int contour_algorithm;
+	} Z;
+};
 
-int ping_copy(int verbose, int one, int two, struct swath *swath, int *error);
+/*--------------------------------------------------------------------*/
+/* Global variables */
+        
+/* GMT and PSlib control */
+struct PSL_CTRL *PSL = NULL;	/* General PSL interal parameters */
+struct GMT_CTRL *GMT = NULL;	/* General GMT interal parameters */
 
-static char rcs_id[] = "$Id$";
+/* pen variables */
+int	ncolor;
+int	nlevel;
+double	*level = NULL;
+int	*red = NULL;
+int	*green = NULL;
+int	*blue = NULL;
+int	*label = NULL;
+int	*tick = NULL;
+
+/* inch to map scale */
+double	inchtolon;
+
+/* line plotting variables */
+#define MBCONTOUR_PLOT_ALLOC_INC        1024
+#define MBCONTOUR_PLOT_MOVE 	3
+#define MBCONTOUR_PLOT_DRAW 	2
+#define MBCONTOUR_PLOT_STROKE   -2
+#define MBCONTOUR_PLOT_OR 	-3
+int     ncontour_plot = 0;
+int     ncontour_plot_alloc = 0;
+double  *contour_x = NULL;
+double  *contour_y = NULL;
+
+int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int *error);
+void mbcontour_plot(double x, double y, int ipen);
+void mbcontour_setline(int linewidth);
+void mbcontour_newpen(int ipen);
+void mbcontour_justify_string(double height, char *string, double *s);
+void mbcontour_plot_string(double x, double y, double hgt, double angle, char *label);
+
+static char svn_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
-int main (int argc, char **argv)
-{
-#ifdef MBCONTOURFILTER
-	char program_name[] = "MBCONTOURFILTER";
-	char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	char usage_message[] = "mbcontourfilter -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt/label_spacing \n\t-Btickinfo -byr/mon/day/hour/min/sec -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len -Eyr/mon/day/hour/min/sec \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O -Nnplot \n\t-P -ppings -Q -Ttimegap -U -Xx-shift -Yy-shift -Zalgorithm -#copies -V -H]";
-#else
-	char program_name[] = "MBCONTOUR";
-	char help_message[] =  "MBCONTOUR is a GMT compatible utility which creates a color postscript \ncontour map of multibeam swath bathymetry.  \nComplete maps are made by using MBCONTOUR in conjunction with the  \nusual GMT programs.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	char usage_message[] = "mbcontour -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt/label_spacing \n\t-Btickinfo -byr/mon/day/hour/min/sec -Ccontourfile -ccopies \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-Eyr/mon/day/hour/min/sec \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -Nnplot -O \n\t-P -ppings -U -Xx-shift -Yy-shift -Zalgorithm -V -H]";
-#endif
+void *New_mbcontour_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
+	struct MBCONTOUR_CTRL *Ctrl;
+        int     status;
+        int     verbose = 0;
+        double  dummybounds[4];
+        int     dummyformat;
+        int     dummypings;
 
-	extern char *optarg;
-	int     argc_gmt = 0;
-	char    *argv_gmt[MBCONTOUR_GMT_ARG_MAX];
-	int	errflg = 0;
-	int	c;
-	int	help = 0;
-	int	flag = 0;
+	Ctrl = GMT_memory (GMT, NULL, 1, struct MBCONTOUR_CTRL);
+
+	/* Initialize values whose defaults are not 0/false/NULL */
+
+	/* get current mb default values */
+	status = mb_defaults(verbose, &dummyformat, &dummypings, &Ctrl->L.lonflip, dummybounds,
+		Ctrl->b.time_i, Ctrl->e.time_i, &Ctrl->S.speedmin, &Ctrl->T.timegap);
+
+	Ctrl->A.active = MB_NO;
+	Ctrl->A.cont_int = 25.;
+	Ctrl->A.col_int = 100.;
+	Ctrl->A.tick_int = 100.;
+	Ctrl->A.label_int = 100.;
+	Ctrl->A.tick_len = 0.05;
+	Ctrl->A.label_hgt = 0.1;
+        Ctrl->A.label_spacing = 0.0;
+	Ctrl->b.active = MB_NO;
+	Ctrl->C.active = MB_NO;
+	Ctrl->C.contourfile = NULL;
+	Ctrl->D.active = MB_NO;
+	Ctrl->D.time_tick_int = 0.25;
+	Ctrl->D.time_annot_int = 1.0;
+	Ctrl->D.date_annot_int = 4.0;
+	Ctrl->D.time_tick_len = 0.1;
+	Ctrl->e.active = MB_NO;
+	Ctrl->F.active = MB_NO;
+	Ctrl->F.format = 0;
+	Ctrl->G.active = MB_NO;
+	Ctrl->G.name_hgt = 0.1;
+        Ctrl->G.name_perp = MB_NO;
+	Ctrl->I.active = MB_NO;
+	Ctrl->I.inputfile = NULL;
+	Ctrl->L.active = MB_NO;
+	Ctrl->M.active = MB_NO;
+        Ctrl->M.pingnumber_tick_int = 50;
+        Ctrl->M.pingnumber_annot_int = 100;
+        Ctrl->M.pingnumber_tick_len = 0.1;
+	Ctrl->N.active = MB_NO;
+        Ctrl->N.nplot = 0;
+	Ctrl->Q.active = MB_NO;
+	Ctrl->S.active = MB_NO;
+	Ctrl->T.active = MB_NO;
+	Ctrl->W.active = MB_NO;
+	Ctrl->Z.active = MB_NO;
+        Ctrl->Z.contour_algorithm = MB_CONTOUR_OLD;
+
+	return (Ctrl);
+}
+
+void Free_mbcontour_Ctrl (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl) {	/* Deallocate control structure */
+	if (!Ctrl) return;
+	if (Ctrl->C.contourfile) free (Ctrl->C.contourfile);
+	if (Ctrl->I.inputfile) free (Ctrl->I.inputfile);
+	GMT_free (GMT, Ctrl);
+}
+
+int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level)
+{
+//	char help_message[] =  "mbcontour is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBCONTOUR in conjunction with the usual GMT programs.";
+//	char usage_message[] = "mbcontour -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode[F] -V -H]";
+
+	GMT_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
+	GMT_Message (API, GMT_TIME_NONE, "usage: mbcontour -I<inputfile> %s [%s]\n", GMT_J_OPT, GMT_B_OPT);
+	GMT_Message (API, GMT_TIME_NONE, "\t[-A<factor>/<mode>/<depth>]\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t[-b<year>/<month>/<day>/<hour>/<minute>/<second>]\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t[-C<cptfile>] [-D<mode>/<ampscale>/<ampmin>/<ampmax>] [-Ei|<dpi>]\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t[-e<year>/<month>/<day>/<hour>/<minute>/<second>]\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t[-F<format>] [-G<magnitude>/<azimuth | median>]\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t[-I<inputfile>] [-L<lonflip>] [-N<cptfile>]\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
+	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", 
+			GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT, GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+
+	if (level == GMT_SYNOPSIS) return (EXIT_FAILURE);
+
+	GMT_Message (API, GMT_TIME_NONE, "\t<inputfile> is an MB-System datalist referencing the swath data to be plotted.\n");
+	GMT_Option (API, "J-");
+	GMT_Message (API, GMT_TIME_NONE, "\n\tOPTIONS:\n");
+	GMT_Option (API, "B-");
+	GMT_Message (API, GMT_TIME_NONE, "\t-C Contour file. Defines contour levels, style, and colors.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t   to automatically assign 16 continuous colors over the data range [rainbow].\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-E Set dpi for the projected output Postscript image\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t   if -Jx or -Jm is not selected.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t   Give i to do the interpolation in PostScript at device resolution.\n");
+	GMT_rgb_syntax (API->GMT, 'G', "Set transparency color for images that otherwise would result in 1-bit images.\n\t  ");
+	GMT_Option (API, "K");
+	GMT_Option (API, "O,P");
+	GMT_Option (API, "R");
+	GMT_Option (API, "U,V,X,c,f,n,p,t,.");
+
+	return (EXIT_FAILURE);
+}
+
+int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struct GMT_OPTION *options)
+{
+	/* This parses the options provided to mbcontour and sets parameters in Ctrl.
+	 * Note Ctrl has already been initialized and non-zero default values set.
+	 * Any GMT common options will override values set previously by other commands.
+	 * It also replaces any file names specified as input or output with the data ID
+	 * returned when registering these sources/destinations with the API.
+	 */
+
+	unsigned int n_errors = 0, n_files = 0;
+	struct GMT_OPTION *opt = NULL;
+	struct GMTAPI_CTRL *API = GMT->parent;
+        int     n;
+
+	for (opt = options; opt; opt = opt->next) {	/* Process all the options given */
+
+		switch (opt->option) {
+			case '<':	/* Input file (only one or three is accepted) */
+				Ctrl->I.active = true;
+				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN))
+					{
+                                        Ctrl->I.inputfile = strdup (opt->arg);
+                                        n_files = 1;
+                                        }
+				else
+					n_errors++;
+				break;
+
+			/* Processes program-specific parameters */
+
+			case 'A':	/* contour controls */
+				n = sscanf(opt->arg, "%lf/%lf/%lf/%lf/%lf/%lf/%lf",
+                                           &(Ctrl->A.cont_int), &(Ctrl->A.col_int), &(Ctrl->A.tick_int),
+                                           &(Ctrl->A.label_int), &(Ctrl->A.tick_len), &(Ctrl->A.label_hgt),
+                                           &(Ctrl->A.label_spacing));
+                                if (n > 0)
+                                        Ctrl->A.active = true;
+                                else
+                                        n_errors++;
+ 				break;
+			case 'b':	/* btime_i */
+				n = sscanf(opt->arg, "%d/%d/%d/%d/%d/%d",
+                                           &(Ctrl->b.time_i[0]), &(Ctrl->b.time_i[1]), &(Ctrl->b.time_i[2]),
+                                           &(Ctrl->b.time_i[3]), &(Ctrl->b.time_i[4]), &(Ctrl->b.time_i[5]));
+                                Ctrl->b.time_i[6] = 0;
+                                if (n == 6)
+                                        Ctrl->b.active = true;
+                                else
+                                        n_errors++;
+				break;
+			case 'C':	/* contour file */
+				Ctrl->C.active = true;
+				if (Ctrl->C.contourfile) free (Ctrl->C.contourfile);
+				Ctrl->C.contourfile = strdup (opt->arg);
+				break;
+			case 'D':	/* track annotation */
+				n = sscanf(opt->arg, "%lf/%lf/%lf/%lf",
+                                           &(Ctrl->D.time_tick_int), &(Ctrl->D.time_annot_int),
+                                           &(Ctrl->D.date_annot_int), &(Ctrl->D.time_tick_len));
+                                if (n > 0)
+                                        Ctrl->D.active = true;
+                                else
+                                        n_errors++;
+ 				break;
+			case 'e':	/* etime_i */
+				n = sscanf(opt->arg, "%d/%d/%d/%d/%d/%d",
+                                           &(Ctrl->e.time_i[0]), &(Ctrl->e.time_i[1]), &(Ctrl->e.time_i[2]),
+                                           &(Ctrl->e.time_i[3]), &(Ctrl->e.time_i[4]), &(Ctrl->e.time_i[5]));
+                                Ctrl->e.time_i[6] = 0;
+                                if (n == 6)
+                                        Ctrl->e.active = true;
+                                else
+                                        n_errors++;
+				break;
+			case 'f':	/* format */
+			case 'F':	/* format */
+				n = sscanf(opt->arg, "%d", &(Ctrl->F.format));
+                                if (n == 1)
+                                        Ctrl->F.active = true;
+                                else
+                                        n_errors++;
+				break;
+			case 'G':	/* file annotation */
+				n = sscanf(opt->arg, "%lf/%d", &(Ctrl->G.name_hgt), &(Ctrl->G.name_perp));
+                                if (n == 1)
+                                        Ctrl->G.active = true;
+                                else
+                                        n_errors++;
+				break;
+
+			case 'I':	/* -I<inputfile> */
+				Ctrl->I.active = true;
+				if (!GMT_access (GMT, opt->arg, R_OK))	/* Got a file */
+					{
+                                        Ctrl->I.inputfile = strdup (opt->arg);
+                                        n_files = 1;
+                                        }
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -I: Requires a valid file\n");
+					n_errors++;
+				}
+				break;
+			case 'L':	/* -L<lonflip> */
+				n = sscanf(opt->arg, "%d", &(Ctrl->L.lonflip));
+                                if (n == 1)
+                                        Ctrl->L.active = true;
+                                else
+                                        n_errors++;
+				break;
+			case 'M':	/* ping number annotation */
+				n = sscanf(opt->arg, "%lf/%lf/%lf",
+                                           &(Ctrl->M.pingnumber_tick_int), &(Ctrl->M.pingnumber_annot_int),
+                                           &(Ctrl->M.pingnumber_tick_len));
+                                if (n > 0)
+                                        Ctrl->M.active = true;
+                                else
+                                        n_errors++;
+ 				break;
+			case 'N':	/* nplot */
+				n = sscanf(opt->arg, "%d",
+                                           &(Ctrl->N.nplot));
+                                if (n > 0)
+                                        Ctrl->N.active = true;
+                                else
+                                        n_errors++;
+ 				break;
+			case 'Q':	/* plot triangles */
+                                Ctrl->Q.active = true;
+ 				break;
+			case 'S':	/* -S<speed> */
+				n = sscanf(opt->arg, "%lf", &(Ctrl->S.speedmin));
+                                if (n == 1)
+                                        Ctrl->S.active = true;
+                                else
+                                        n_errors++;
+				break;
+			case 'T':	/* -T<timegap> */
+				n = sscanf(opt->arg, "%lf", &(Ctrl->T.timegap));
+                                if (n == 1)
+                                        Ctrl->T.active = true;
+                                else
+                                        n_errors++;
+				break;
+			case 'W':	/* -W */
+				Ctrl->W.active = true;
+				break;
+			case 'Z':	/* contour algorithm */
+				n = sscanf(opt->arg, "%d", &(Ctrl->Z.contour_algorithm));
+                                if (n == 1)
+                                       Ctrl->Z.active = true;
+                                else
+                                        n_errors++;
+				break;
+
+			default:	/* Report bad options */
+				n_errors += GMT_default_error (GMT, opt->option);
+				break;
+		}
+	}
+
+	n_errors += GMT_check_condition (GMT, !GMT->common.R.active, "Syntax error: Must specify -R option\n");
+	n_errors += GMT_check_condition (GMT, !GMT->common.J.active, "Syntax error: Must specify a map projection with the -J option\n");
+	n_errors += GMT_check_condition (GMT, n_files != 1, 
+					"Syntax error: Must specify one input file(s)\n");
+	n_errors += GMT_check_condition (GMT, Ctrl->I.active && !Ctrl->I.inputfile, 
+					"Syntax error -I option: Must specify input file\n");
+
+	return (n_errors ? GMT_PARSE_ERROR : GMT_OK);
+}
+
+#define bailout(code) {GMT_Free_Options (mode); return (code);}
+#define Return(code) {Free_mbcontour_Ctrl (GMT, Ctrl); GMT_end_module (GMT, GMT_cpy); bailout (code);}
+
+int GMT_mbcontour (void *V_API, int mode, void *args)
+{
+
+	char program_name[] = "mbcontour";
+
+	struct GMT_PALETTE *CPTcolor = NULL;
+	struct GMT_CTRL *GMT_cpy = NULL;	/* General GMT interal parameters */
+	struct GMT_OPTION *options = NULL;
+	struct GMTAPI_CTRL *API = GMT_get_API_ptr (V_API);	/* Cast from void to GMTAPI_CTRL pointer */
+        struct MBCONTOUR_CTRL *Ctrl = NULL;
 
 	/* MBIO status variables */
 	int	status = MB_SUCCESS;
@@ -247,9 +464,9 @@ int main (int argc, char **argv)
 	char	*message = NULL;
 
 	/* MBIO read control parameters */
-	char	read_file[MBCONTOUR_LABEL_LEN];
-        int     read_datalist;
-	int	read_data;
+	mb_path	read_file;
+        int     read_datalist = MB_NO;
+	int	read_data = MB_NO;
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
@@ -259,15 +476,14 @@ int main (int argc, char **argv)
 	int	lonflip;
 	int	lonflip_set = MB_NO;
 	double	bounds[4];
-	double	mb_bounds[4];
 	int	btime_i[7];
 	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	file[MB_PATH_MAXLINE];
-	int	file_in_bounds;
+	mb_path	file;
+	int	file_in_bounds = MB_NO;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -295,11 +511,11 @@ int main (int argc, char **argv)
 	double	*ss = NULL;
 	double	*sslon = NULL;
 	double	*sslat = NULL;
-	char	comment[256];
+	mb_path	comment;
 	int	pingnumber;
 
 	/* plot control variables */
-	int	contour_algorithm;
+	int	contour_algorithm = MB_CONTOUR_OLD;
 	char	contourfile[MB_PATH_MAXLINE];
 	int	plot;
 	int	done;
@@ -307,10 +523,10 @@ int main (int argc, char **argv)
 	int	save_new;
 	int	*npings = NULL;
 	int	nping_read;
-	int	nplot;
-	int	plot_contours;
-	int	plot_triangles;
-	int	set_contours;
+	int	nplot = 0;
+	int	plot_contours = MB_NO;
+	int	plot_triangles = MB_NO;
+	int	set_contours = MB_NO;
 	double	cont_int;
 	double	col_int;
 	double	tick_int;
@@ -321,9 +537,9 @@ int main (int argc, char **argv)
 	double	tick_len_map;
 	double	label_hgt_map;
 	double	label_spacing_map;
-	int 	plot_name;
-	int	plotted_name;
-	int	plot_track;
+	int 	plot_name = MB_NO;
+	int	plotted_name = MB_NO;
+	int	plot_track = MB_NO;
 	double	time_tick_int;
 	double	time_annot_int;
 	double	date_annot_int;
@@ -331,284 +547,131 @@ int main (int argc, char **argv)
 	double	time_tick_len_map;
 	double	name_hgt;
 	double	name_hgt_map;
-	int	name_perp;
-	double	scale;
-	int	bathy_in_feet;
-	int	plot_pingnumber;
-	int	pingnumber_tick_int;
-	int	pingnumber_annot_int;
-	double	pingnumber_tick_len;
+	int	name_perp = MB_NO;
+	int	bathy_in_feet = MB_NO;
+	int	plot_pingnumber = MB_NO;
+	int	pingnumber_tick_int = 50;
+	int	pingnumber_annot_int = 100;
+	double	pingnumber_tick_len = 0.1;
 	double	pingnumber_tick_len_map;
 
-	/* pen variables */
-	int	ncolor;
-	int	nlevel;
-	double	*level = NULL;
-	int	*red = NULL;
-	int	*green = NULL;
-	int	*blue = NULL;
-	int	*label = NULL;
-	int	*tick = NULL;
-
-	/* inch to map scale */
-	double	inchtolon;
-
 	/* other variables */
-	char	line[MBCONTOUR_LABEL_LEN];
-	char	labelstr[MBCONTOUR_LABEL_LEN], tickstr[MBCONTOUR_LABEL_LEN];
+	mb_path	line;
+	mb_path	labelstr, tickstr;
 	int	count;
 	int	setcolors;
 	double	navlon_old;
 	double	navlat_old;
-	int	i1, i2;
-	double	d1, d2, d3, d4, d5, d6, d7;
-	int	nscan;
+        double  clipx[4], clipy[4];
 	int	i;
+
+	/*----------------------- Standard module initialization and parsing ----------------------*/
+
+	if (API == NULL) return (GMT_NOT_A_SESSION);
+	if (mode == GMT_MODULE_PURPOSE) return (GMT_mbcontour_usage (API, GMT_MODULE_PURPOSE));	/* Return the purpose of program */
+	options = GMT_Create_Options (API, mode, args);	if (API->error) return (API->error);	/* Set or get option list */
+
+	if (!options || options->option == GMT_OPT_USAGE) bailout (GMT_mbcontour_usage (API, GMT_USAGE));	/* Return the usage message */
+	if (options->option == GMT_OPT_SYNOPSIS) bailout (GMT_mbcontour_usage (API, GMT_SYNOPSIS));	/* Return the synopsis */
+
+	/* Parse the command-line arguments */
+
+	GMT = GMT_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options))
+                Return (API->error);
+               
+	Ctrl = (struct MBCONTOUR_CTRL *) New_mbcontour_Ctrl (GMT);	/* Allocate and initialize a new control structure */
+	if ((error = GMT_mbcontour_parse (GMT, Ctrl, options)))
+                Return (error);
+
+	/*-------------------------------- Variable initialization --------------------------------*/
 
 	/* get current mb default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
 
-	/* set default input to stdin */
-	strcpy (read_file, "stdin");
-
-	/* initialize some values */
-	format = -1;
-        read_datalist = MB_NO;
-	contour_algorithm = MB_CONTOUR_OLD;
-	strcpy (contourfile,"\0");
-	set_contours = MB_NO;
-	bounds[0] = 0.0;
-	bounds[1] = 0.0;
-	bounds[2] = 0.0;
-	bounds[3] = 0.0;
-	scale = 0.0;
-	nplot = 0;
-	cont_int = 25.;
-	col_int = 100.;
-	tick_int = 100.;
-	label_int = 100.;
-	label_hgt = 0.1;
-	label_spacing = 0.0;
-	tick_len = 0.05;
-	plot_name = MB_NO;
-	plot_track = MB_NO;
-	time_tick_int = 0.25;
-	time_annot_int = 1.0;
-	date_annot_int = 4.0;
-	time_tick_len = 0.1;
-	name_hgt = 0.1;
-	name_perp = MB_NO;
-	ncolor = 4;
-	nlevel = 0;
-	plot_contours = MB_NO;
-	plot_triangles = MB_NO;
-	bathy_in_feet = MB_NO;
-	plot_pingnumber = MB_NO;
-	pingnumber_tick_int = 50;
-	pingnumber_annot_int = 100;
-	pingnumber_tick_len = 0.1;
-
-	/* get GMT options into separate argv */
-	argv_gmt[0] = argv[0];
-	argc_gmt = 1;
-	for (i=1;i<argc;i++)
-	  {
-	  if (argv[i][0] == '-')
-	    {
-	    switch (argv[i][1])
-	        {
-		case 'B':
-		case 'F':
-		case 'J':
-		case 'j':
-		case 'K':
-		case 'k':
-		case 'O':
-		case 'o':
-		case 'P':
-		case 'R':
-		case 'r':
-		case 'U':
-		case 'u':
-		case 'V':
-		case 'v':
-		case 'X':
-		case 'x':
-		case 'Y':
-		case 'y':
-		case '#':
-		        if (argc_gmt < MBCONTOUR_GMT_ARG_MAX)
-			  {
-			  argv_gmt[argc_gmt] = argv[i];
-			  argc_gmt++;
-			  break;
-			  }
-		}
-	    }
-	  }
-
-	/* deal with mb options */
-	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:I:i:J:j:KkL:l:M:m:N:n:OoPp:QqR:r:S:s:T:t:UuWwX:x:Y:y:Z:z:")) != -1)
-	  switch (c)
-		{
-		case 'A':
-		case 'a':
-			nscan = sscanf (optarg, "%lf/%lf/%lf/%lf/%lf/%lf/%lf",
-					&d1,&d2,&d3,&d4,&d5,&d6,&d7);
-			if (nscan >= 1)
-			    cont_int = d1;
-			if (nscan >= 2)
-			    col_int = d2;
-			if (nscan >= 3)
-			    tick_int = d3;
-			if (nscan >= 4)
-			    label_int = d4;
-			if (nscan >= 5)
-			    tick_len = d5;
-			if (nscan >= 6)
-			    label_hgt = d6;
-			if (nscan >= 7)
-			    label_spacing = d7;
-			if (nscan >= 1)
-			    plot_contours = MB_YES;
-			break;
-		case 'b':
-			sscanf (optarg, "%d/%d/%d/%d/%d/%d",
-				&btime_i[0],&btime_i[1],&btime_i[2],
-				&btime_i[3],&btime_i[4],&btime_i[5]);
-			btime_i[6] = 0;
-			break;
-		case 'C':
-			sscanf (optarg,"%s", contourfile);
-			plot_contours = MB_YES;
-			set_contours = MB_YES;
-			break;
-		case 'D':
-		case 'd':
-			sscanf (optarg, "%lf/%lf/%lf/%lf",
-				&time_tick_int,&time_annot_int,
-				&date_annot_int,&time_tick_len);
-			plot_track = MB_YES;
-			break;
-		case 'E':
-		case 'e':
-			sscanf (optarg, "%d/%d/%d/%d/%d/%d",
-				&etime_i[0],&etime_i[1],&etime_i[2],
-				&etime_i[3],&etime_i[4],&etime_i[5]);
-			etime_i[6] = 0;
-			break;
-                case 'f':
-                        sscanf (optarg, "%d",&format);
-                        break;
-		case 'G':
-		case 'g':
-			nscan = sscanf (optarg, "%lf/%d", &name_hgt, &name_perp);
-			plot_name = MB_YES;
-			if (nscan < 1)
-			    name_hgt = 0.1;
-			if (nscan < 2)
-			    name_perp = MB_NO;
-			break;
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf (optarg,"%s", read_file);
-			flag++;
-			break;
-		case 'J':
-			if (optarg[0] == 'm')
-				sscanf (&optarg[1],"%lf", &scale);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf (optarg,"%d", &lonflip);
-			lonflip_set = MB_YES;
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			nscan = sscanf (optarg, "%d/%d/%lf",
-					&i1,&i2,&d3);
-			if (nscan >= 1)
-			    pingnumber_tick_int = i1;
-			if (nscan >= 2)
-			    pingnumber_annot_int = i2;
-			if (nscan >= 3)
-			    pingnumber_tick_len = d3;
-			if (nscan >= 1)
-			    plot_pingnumber = MB_YES;
-			break;
-		case 'N':
-		case 'n':
-			sscanf (optarg,"%d", &nplot);
-			if (nplot < 3) nplot = 3;
-			break;
-		case 'p':
-			sscanf (optarg,"%d", &pings);
-			flag++;
-			break;
-		case 'Q':
-		case 'q':
-			plot_triangles = MB_YES;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg,"%lf/%lf/%lf/%lf",
-				&bounds[0],&bounds[1],
-				&bounds[2],&bounds[3]);
-			break;
-		case 'S':
-		case 's':
-			sscanf (optarg, "%lf", &speedmin);
-			break;
-		case 'T':
-		case 't':
-			sscanf (optarg,"%lf", &timegap);
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'W':
-		case 'w':
-			bathy_in_feet = MB_YES;
-			break;
-		case 'Z':
-		case 'z':
-			sscanf (optarg,"%d", &contour_algorithm);
-			flag++;
-			break;
-		case 'B':
-		case 'F':
-		case 'K':
-		case 'O':
-		case 'P':
-		case 'U':
-		case 'X':
-		case 'x':
-		case 'Y':
-		case 'y':
-		case '#':
-			break;
-		case '?':
-			errflg++;
-		}
-
-	/* if error flagged then print it and exit */
-	if (errflg)
-		{
-		fprintf(stderr,"usage: %s\n", usage_message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-		}
+	/* set default input to datalist.mb-1 */
+	strcpy (read_file, "datalist.mb-1");
+                        
+        /* set modes */
+        if (Ctrl->A.active)
+            {
+            plot_contours = MB_YES;
+            cont_int = Ctrl->A.cont_int;
+            col_int = Ctrl->A.col_int;
+            tick_int = Ctrl->A.tick_int;
+            label_int = Ctrl->A.label_int;
+            tick_len = Ctrl->A.tick_len;
+            label_hgt = Ctrl->A.label_hgt;
+            label_spacing = Ctrl->A.label_spacing;
+            }
+        if (Ctrl->b.active)
+            {
+            for (i=0;i<7;i++)
+                {
+                btime_i[i] = Ctrl->b.time_i[i];
+                }
+            }
+        if (Ctrl->C.active)
+            {
+            plot_contours = MB_YES;
+            set_contours = MB_YES;
+            strcpy(contourfile, Ctrl->C.contourfile);
+            }
+        if (Ctrl->D.active)
+            {
+            plot_track = MB_YES;
+            time_tick_int = Ctrl->D.time_tick_int;
+            time_annot_int = Ctrl->D.time_annot_int;
+            date_annot_int = Ctrl->D.date_annot_int;
+            time_tick_len = Ctrl->D.time_tick_len;
+            }
+        if (Ctrl->e.active)
+            {
+            for (i=0;i<7;i++)
+                {
+                etime_i[i] = Ctrl->e.time_i[i];
+                }
+            }
+        if (Ctrl->F.active)
+            format = Ctrl->F.format;
+        if (Ctrl->G.active)
+            {
+            plot_name = MB_YES;
+            name_hgt = Ctrl->G.name_hgt;
+            name_perp = Ctrl->G.name_perp;
+            }
+        if (Ctrl->I.active)
+            {
+            strcpy(read_file, Ctrl->I.inputfile);
+            }
+        if (Ctrl->L.active)
+            {
+            lonflip_set = MB_YES;
+            lonflip = Ctrl->L.lonflip;
+            }
+        if (Ctrl->M.active)
+            {
+            plot_pingnumber = MB_YES;
+            pingnumber_tick_int = Ctrl->M.pingnumber_tick_int;
+            pingnumber_annot_int = Ctrl->M.pingnumber_annot_int;
+            pingnumber_tick_len = Ctrl->M.pingnumber_tick_len;
+            }
+        if (Ctrl->N.active)
+                nplot = Ctrl->N.nplot;
+        if (Ctrl->Q.active)
+                plot_triangles = MB_YES;
+        if (Ctrl->S.active)
+                speedmin = Ctrl->S.speedmin;
+        if (Ctrl->T.active)
+                timegap = Ctrl->T.timegap;
+        if (Ctrl->W.active)
+                bathy_in_feet = MB_YES;
+        if (Ctrl->Z.active)
+                contour_algorithm = Ctrl->Z.contour_algorithm;
+        
+        /* set verbosity */
+        verbose = GMT->common.V.active;
 
 	/* set number of pings to be plotted if not set */
 	if (nplot == 0 && contour_algorithm == MB_CONTOUR_TRIANGLES)
@@ -638,111 +701,14 @@ int main (int argc, char **argv)
 		}
 
 	/* print starting message */
-	if (verbose == 1 || help)
+	if (verbose == 1)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
-		fprintf(stderr,"Version %s\n",rcs_id);
+		fprintf(stderr,"Version %s\n",svn_id);
 		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
 		}
 
-	/* if help desired then print it and exit */
-	if (help)
-		{
-		fprintf(stderr,"\n%s\n",help_message);
-		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(error);
-		}
-
-	/* initialize plotting */
-	status = mb_plot_init(verbose,argc_gmt,argv_gmt,bounds,&scale,&inchtolon,&error);
-
-	/* if error flagged then print it and exit */
-	if (status == MB_FAILURE)
-		{
-		fprintf(stderr,"usage: %s\n", usage_message);
-		fprintf(stderr,"GMT option error\n");
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-		}
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  Program <%s>\n",program_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
-		fprintf(stderr,"dbg2       help:                 %d\n",help);
-		fprintf(stderr,"dbg2       format:               %d\n",format);
-		fprintf(stderr,"dbg2       pings:                %d\n",pings);
-		fprintf(stderr,"dbg2       lonflip:              %d\n",lonflip);
-		fprintf(stderr,"dbg2       btime_i[0]:           %d\n",btime_i[0]);
-		fprintf(stderr,"dbg2       btime_i[1]:           %d\n",btime_i[1]);
-		fprintf(stderr,"dbg2       btime_i[2]:           %d\n",btime_i[2]);
-		fprintf(stderr,"dbg2       btime_i[3]:           %d\n",btime_i[3]);
-		fprintf(stderr,"dbg2       btime_i[4]:           %d\n",btime_i[4]);
-		fprintf(stderr,"dbg2       btime_i[5]:           %d\n",btime_i[5]);
-		fprintf(stderr,"dbg2       btime_i[6]:           %d\n",btime_i[6]);
-		fprintf(stderr,"dbg2       etime_i[0]:           %d\n",etime_i[0]);
-		fprintf(stderr,"dbg2       etime_i[1]:           %d\n",etime_i[1]);
-		fprintf(stderr,"dbg2       etime_i[2]:           %d\n",etime_i[2]);
-		fprintf(stderr,"dbg2       etime_i[3]:           %d\n",etime_i[3]);
-		fprintf(stderr,"dbg2       etime_i[4]:           %d\n",etime_i[4]);
-		fprintf(stderr,"dbg2       etime_i[5]:           %d\n",etime_i[5]);
-		fprintf(stderr,"dbg2       etime_i[6]:           %d\n",etime_i[6]);
-		fprintf(stderr,"dbg2       speedmin:             %f\n",speedmin);
-		fprintf(stderr,"dbg2       timegap:              %f\n",timegap);
-		fprintf(stderr,"dbg2       read file:            %s\n",read_file);
-		fprintf(stderr,"dbg2       bounds[0]:            %f\n",bounds[0]);
-		fprintf(stderr,"dbg2       bounds[1]:            %f\n",bounds[1]);
-		fprintf(stderr,"dbg2       bounds[2]:            %f\n",bounds[2]);
-		fprintf(stderr,"dbg2       bounds[3]:            %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       contour algorithm:    %d\n",contour_algorithm);
-		fprintf(stderr,"dbg2       plot contours:        %d\n",plot_contours);
-		fprintf(stderr,"dbg2       plot triangles:       %d\n",plot_triangles);
-		fprintf(stderr,"dbg2       plot track:           %d\n",plot_track);
-		fprintf(stderr,"dbg2       plot_pingnumber:      %d\n",plot_pingnumber);
-		fprintf(stderr,"dbg2       plot name:            %d\n",plot_name);
-		fprintf(stderr,"dbg2       contour interval:     %f\n",cont_int);
-		fprintf(stderr,"dbg2       color interval:       %f\n",col_int);
-		fprintf(stderr,"dbg2       tick interval:        %f\n",tick_int);
-		fprintf(stderr,"dbg2       label interval:       %f\n",label_int);
-		fprintf(stderr,"dbg2       tick length:          %f\n",tick_len);
-		fprintf(stderr,"dbg2       label height:         %f\n",label_hgt);
-		fprintf(stderr,"dbg2       label spacing:        %f\n",label_spacing);
-		fprintf(stderr,"dbg2       number contoured:     %d\n",nplot);
-		fprintf(stderr,"dbg2       time tick int:        %f\n",time_tick_int);
-		fprintf(stderr,"dbg2       time interval:        %f\n",time_annot_int);
-		fprintf(stderr,"dbg2       date interval:        %f\n",date_annot_int);
-		fprintf(stderr,"dbg2       time tick length:     %f\n",time_tick_len);
-		fprintf(stderr,"dbg2       name height:          %f\n",name_hgt);
-		fprintf(stderr,"dbg2       pingnumber tick int:  %d\n",pingnumber_tick_int);
-		fprintf(stderr,"dbg2       pingnumber annot int: %d\n",pingnumber_annot_int);
-		fprintf(stderr,"dbg2       pingnumber tick len:  %f\n",pingnumber_tick_len);
-		fprintf(stderr,"dbg2       bathy_in_feet:        %d\n\n",bathy_in_feet);
-		}
-
-	/* if bounds not specified then quit */
-	if (bounds[0] >= bounds[1] || bounds[2] >= bounds[3]
-		|| bounds[2] <= -90.0 || bounds[3] >= 90.0)
-		{
-		fprintf(stderr,"\nRegion bounds not properly specified:\n\t%f %f %f %f\n",bounds[0],bounds[1],bounds[2],bounds[3]);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		error = MB_ERROR_BAD_PARAMETER;
-		exit(error);
-		}
-
-	/* scale label and tick sizes */
-	label_hgt_map = inchtolon * label_hgt;
-	label_spacing_map = inchtolon * label_spacing;
-	tick_len_map = inchtolon * tick_len;
-	time_tick_len_map = inchtolon * time_tick_len;
-	name_hgt_map = inchtolon * name_hgt;
-	pingnumber_tick_len_map = inchtolon * pingnumber_tick_len;
+	/*---------------------------- This is the mbcontour main code ----------------------------*/
 
 	/* read contours from file */
 	if (set_contours == MB_YES)
@@ -760,7 +726,7 @@ int main (int argc, char **argv)
 
 		/* count lines in file */
 		nlevel = 0;
-		while (fgets(line,MBCONTOUR_LABEL_LEN,fp) != NULL)
+		while (fgets(line,MB_PATH_MAXLINE,fp) != NULL)
 			nlevel++;
 		fclose(fp);
 
@@ -788,7 +754,7 @@ int main (int argc, char **argv)
 
 		/* read contour levels from file */
 		nlevel = 0;
-		while (fgets(line,MBCONTOUR_LABEL_LEN,fp) != NULL)
+		while (fgets(line,MB_PATH_MAXLINE,fp) != NULL)
 			{
 			count = sscanf(line,"%lf %s %s %d %d %d",
 				&level[nlevel],labelstr,tickstr,
@@ -845,25 +811,61 @@ int main (int argc, char **argv)
 	/* set colors */
 	mb_set_colors(ncolor,red,green,blue);
 
-	/* set bounds for multibeam reading larger than
-		map borders */
-	mb_bounds[0] = bounds[0] - 0.25*(bounds[1] - bounds[0]);
-	mb_bounds[1] = bounds[1] + 0.25*(bounds[1] - bounds[0]);
-	mb_bounds[2] = bounds[2] - 0.25*(bounds[3] - bounds[2]);
-	mb_bounds[3] = bounds[3] + 0.25*(bounds[3] - bounds[2]);
+        /* set bounds for data reading larger than map borders */
+	bounds[0] = GMT->common.R.wesn[0]
+		- 0.25*(GMT->common.R.wesn[1] - GMT->common.R.wesn[0]);
+	bounds[1] = GMT->common.R.wesn[1]
+		+ 0.25*(GMT->common.R.wesn[1] - GMT->common.R.wesn[0]);
+	bounds[2] = GMT->common.R.wesn[2]
+		- 0.25*(GMT->common.R.wesn[3] - GMT->common.R.wesn[2]);
+	bounds[3] = GMT->common.R.wesn[3]
+		+ 0.25*(GMT->common.R.wesn[3] - GMT->common.R.wesn[2]);
+
+//	/* get scaling from degrees to km */
+//	mb_coor_scale(verbose, 0.5*(bounds[2] + bounds[3]), &mtodeglon, &mtodeglat);
 
 	/* set lonflip if possible */
 	if (lonflip_set == MB_NO)
 		{
-		if (mb_bounds[0] < -180.0)
+		if (bounds[0] < -180.0)
 			lonflip = -1;
-		else if (mb_bounds[1] > 180.0)
+		else if (bounds[1] > 180.0)
 			lonflip = 1;
-		else if (lonflip == -1 && mb_bounds[1] > 0.0)
+		else if (lonflip == -1 && bounds[1] > 0.0)
 			lonflip = 0;
-		else if (lonflip == 1 && mb_bounds[0] < 0.0)
+		else if (lonflip == 1 && bounds[0] < 0.0)
 			lonflip = 0;
 		}
+
+	/* Start the postscript plot */
+	GMT_err_fail (GMT, GMT_map_setup (GMT, GMT->common.R.wesn), "");
+	PSL = GMT_plotinit (GMT, options);
+	GMT_plane_perspective (GMT, GMT->current.proj.z_project.view_plane, GMT->current.proj.z_level);
+	GMT_plotcanvas (GMT);	/* Fill canvas if requested */
+	GMT_map_clip_on (GMT, GMT->session.no_rgb, 3);
+                
+        /* Set particulars of output image for the postscript plot */
+	GMT_geo_to_xy(GMT, GMT->common.R.wesn[0], GMT->common.R.wesn[2], &clipx[0], &clipy[0]);
+	GMT_geo_to_xy(GMT, GMT->common.R.wesn[1], GMT->common.R.wesn[2], &clipx[1], &clipy[1]);
+	GMT_geo_to_xy(GMT, GMT->common.R.wesn[1], GMT->common.R.wesn[3], &clipx[2], &clipy[2]);
+	GMT_geo_to_xy(GMT, GMT->common.R.wesn[0], GMT->common.R.wesn[3], &clipx[3], &clipy[3]);
+//	x_inch = clipx[1] - clipx[0];
+//	y_inch = clipy[2] - clipy[1];
+//	x0 = GMT->common.R.wesn[0];
+//	y0 = GMT->common.R.wesn[2];
+        inchtolon = (GMT->common.R.wesn[1] - GMT->common.R.wesn[0]) / (clipx[1] - clipx[0]);
+        
+	/* scale label and tick sizes */
+	label_hgt_map = inchtolon * label_hgt;
+	label_spacing_map = inchtolon * label_spacing;
+	tick_len_map = inchtolon * tick_len;
+	time_tick_len_map = inchtolon * time_tick_len;
+	name_hgt_map = inchtolon * name_hgt;
+	pingnumber_tick_len_map = inchtolon * pingnumber_tick_len;
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
@@ -928,7 +930,7 @@ int main (int argc, char **argv)
 
 		/* call mb_read_init() */
 		if ((status = mb_read_init(
-		    verbose,file,format,pings,lonflip,mb_bounds,
+		    verbose,file,format,pings,lonflip,bounds,
 		    btime_i,etime_i,speedmin,timegap,
 		    &mbio_ptr,&btime_d,&etime_d,
 		    &beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
@@ -989,11 +991,11 @@ int main (int argc, char **argv)
 				    date_annot_int,time_tick_len_map,name_hgt_map,
 				    pingnumber_tick_int,pingnumber_annot_int,
 				    pingnumber_tick_len_map,
-                                    &mb_plot,
-                                    &mb_newpen,
-                                    &mb_setline,
-                                    &mb_justify_string,
-                                    &mb_plot_string,
+                                    &mbcontour_plot,
+                                    &mbcontour_newpen,
+                                    &mbcontour_setline,
+                                    &mbcontour_justify_string,
+                                    &mbcontour_plot_string,
 				    &error);
 		swath_plot->beams_bath = beams_bath;
 
@@ -1124,18 +1126,10 @@ int main (int argc, char **argv)
 		    /* update bookkeeping */
 		    if (error == MB_ERROR_NO_ERROR)
 			    {
-			    /*if (*npings == 0 ||
-				    (*npings > 0
-				    && contour_algorithm == MB_CONTOUR_TRIANGLES)
-				    || (*npings > 0
-				    && (navlon != navlon_old
-				    || navlat != navlat_old)))*/
-				    {
-				    nping_read += pings_read;
-				    (*npings)++;
-				    navlon_old = navlon;
-				    navlat_old = navlat;
-				    }
+                            nping_read += pings_read;
+                            (*npings)++;
+                            navlon_old = navlon;
+                            navlat_old = navlat;
 			    }
 
 		    /* decide whether to plot, whether to
@@ -1207,7 +1201,7 @@ int main (int argc, char **argv)
 			    /* reorganize data */
 			    if (flush == MB_YES && save_new == MB_YES)
 				    {
-				    status = ping_copy(verbose,0,*npings,
+				    status = mbcontour_ping_copy(verbose,0,*npings,
 					    swath_plot,&error);
 				    *npings = 1;
 				    }
@@ -1217,11 +1211,10 @@ int main (int argc, char **argv)
 				    }
 			    else if (*npings > 1)
 				    {
-				    status = ping_copy(verbose,0,*npings-1,
+				    status = mbcontour_ping_copy(verbose,0,*npings-1,
 						    swath_plot,&error);
 				    *npings = 1;
 				    }
-
 			    }
 		    }
 		status = mb_close(verbose,&mbio_ptr,&error);
@@ -1250,8 +1243,11 @@ int main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 
-	/* end plot */
-	mb_plot_end(verbose,&error);
+	GMT_map_clip_off (GMT);
+
+	GMT_map_basemap (GMT);
+	GMT_plane_perspective (GMT, -1, 0.0);
+	GMT_plotend (GMT);
 
 	/* deallocate memory for data arrays */
 	mb_freed(verbose,__FILE__, __LINE__, (void **)&level,&error);
@@ -1279,14 +1275,17 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
 
-	/* end it all */
-	mb_plot_exit(argc,argv);
-	exit(status);
+	if (!Ctrl->C.active && GMT_Destroy_Data (API, &CPTcolor) != GMT_OK)
+                {
+		Return (API->error);
+                }
+	Return (EXIT_SUCCESS);
 }
-/*--------------------------------------------------------------------*/
-int ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
+
+/*--------------------------------------------------------------------------*/
+int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
 {
-	char	*function_name = "ping_copy";
+	char	*function_name = "mbcontour_ping_copy";
 	int	status = MB_SUCCESS;
 
 	struct ping	*ping1;
@@ -1372,4 +1371,109 @@ int ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
 	/* return status */
 	return(status);
 }
-/*--------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------*/
+void mb_set_colors(int ncolor, int *red, int *green, int *blue)
+{
+	return;
+}
+/*--------------------------------------------------------------------------*/
+void mbcontour_plot(double x, double y, int ipen)
+{
+	double	xx, yy;
+        int i;
+
+        /* make sure contour arrays are large enough */
+	if (ncontour_plot >= ncontour_plot_alloc)
+	    {
+	    ncontour_plot_alloc += MBCONTOUR_PLOT_ALLOC_INC;
+	    contour_x = (double *) realloc(contour_x,
+			sizeof(double) * (ncontour_plot_alloc));
+	    contour_y = (double *) realloc(contour_y,
+			sizeof(double) * (ncontour_plot_alloc));
+	    if (contour_x == NULL)
+		ncontour_plot_alloc = 0;
+	    }
+            
+        /* convert to map units */
+        GMT_geo_to_xy(GMT, x, y, &xx, &yy);
+        
+        /* if command is move then start new contour */
+        if (ipen == MBCONTOUR_PLOT_MOVE)
+            {
+            ncontour_plot = 0;
+            contour_x[ncontour_plot] = xx;
+            contour_y[ncontour_plot] = yy;
+            ncontour_plot++;
+            }
+            
+        /* else if command is to draw then add the point to the list */
+        else if (ipen == MBCONTOUR_PLOT_DRAW)
+            {
+            contour_x[ncontour_plot] = xx;
+            contour_y[ncontour_plot] = yy;
+            ncontour_plot++;
+            }
+            
+        /* else if command is to areokw then add the point to the list
+            and call PSL_plotline() */
+        else if (ipen == MBCONTOUR_PLOT_STROKE)
+            {
+            contour_x[ncontour_plot] = xx;
+            contour_y[ncontour_plot] = yy;
+            ncontour_plot++;
+
+            PSL_plotline(PSL, contour_x, contour_y, ncontour_plot, PSL_MOVE + PSL_STROKE);
+            
+            ncontour_plot = 0;
+            }
+
+	return;
+}
+/*--------------------------------------------------------------------------*/
+void mbcontour_setline(int linewidth)
+{
+        //PSL_setlinewidth(PSL, (double)linewidth);
+        return;
+}
+/*--------------------------------------------------------------------------*/
+void mbcontour_newpen(int ipen)
+{
+        double rgb[4];
+        
+	if (ipen > -1 && ipen < ncolor)
+		{
+		rgb[0] = ((double)red[ipen]) / 255.0;
+		rgb[1] = ((double)green[ipen]) / 255.0;
+		rgb[2] = ((double)blue[ipen]) / 255.0;
+                PSL_setcolor(PSL, rgb, PSL_IS_STROKE);
+		}
+	return;
+}
+/*--------------------------------------------------------------------------*/
+void mbcontour_justify_string(double height, char *string, double *s)
+{
+	int	len;
+
+	len = strlen(string);
+	s[0] = 0.0;
+	s[1] = 0.185*height*len;
+	s[2] = 0.37*len*height;
+	s[3] = 0.37*len*height;
+
+	return;
+}
+/*--------------------------------------------------------------------------*/
+void mbcontour_plot_string(double x, double y, double hgt, double angle, char *label)
+{
+	double	fontsize;
+	double	xx, yy;
+        int     justify = 5;
+        int     mode = 0;
+
+	fontsize = 72.0 * hgt / inchtolon;
+	GMT_geo_to_xy(GMT, x, y, &xx, &yy);
+        PSL_plottext (PSL, xx, yy, fontsize, label, angle, justify, mode);
+	return;
+}
+/*--------------------------------------------------------------------------*/

@@ -24,118 +24,6 @@
  * Author:	D. W. Caress
  * Date:	January 6, 1995
  *
- * $Log: mbbackangle.c,v $
- * Revision 5.22  2008/07/10 18:16:33  caress
- * Proceeding towards 5.1.1beta20.
- *
- * Revision 5.20  2008/01/14 18:25:52  caress
- * Fixed bug in handling pixel acrosstrack distances.
- *
- * Revision 5.19  2007/10/08 16:48:07  caress
- * State of the code on 8 October 2007.
- *
- * Revision 5.18  2006/08/09 22:41:27  caress
- * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
- *
- * Revision 5.17  2006/04/26 22:05:26  caress
- * Changes to handle MBARI Mapping AUV data better.
- *
- * Revision 5.16  2006/04/19 18:29:04  caress
- * Added output of global correction table.
- *
- * Revision 5.15  2006/03/14 02:35:45  caress
- * Altered mbbackangle so that it outputs at least one table, even if there are no survey pings in a file.
- *
- * Revision 5.14  2006/03/14 01:59:24  caress
- * A minor change to mbbackangle to output the status of slope correction (-Q)
- * in the coments in the output file.
- *
- * Revision 5.13  2006/02/01 07:31:06  caress
- * Modifications suggested by Gordon Keith
- *
- * Revision 5.12  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.11  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.10  2005/08/17 17:28:54  caress
- * Improved how the best altitude value is obtained for sidescan and amplitude data correction.
- *
- * Revision 5.9  2005/03/25 04:43:00  caress
- * Standardized the string lengths used for filenames and comment data.
- *
- * Revision 5.8  2004/10/06 19:10:52  caress
- * Release 5.0.5 update.
- *
- * Revision 5.7  2003/04/17 21:17:10  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/09/19 00:28:12  caress
- * Release 5.0.beta23
- *
- * Revision 5.5  2002/09/07 04:49:23  caress
- * Added slope mode option to mb_process.
- *
- * Revision 5.4  2002/07/25 19:07:17  caress
- * Release 5.0.beta21
- *
- * Revision 5.3  2002/07/20 20:56:55  caress
- * Release 5.0.beta20
- *
- * Revision 5.2  2001/07/20 00:34:38  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/03/22 21:14:16  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.0  2000/12/01  22:57:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.12  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.11  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.10  2000/09/11  20:10:02  caress
- * Linked to new datalist parsing functions. Now supports recursive datalists
- * and comments in datalists.
- *
- * Revision 4.9  2000/06/06  20:32:46  caress
- * Now handles amplitude flagging using beamflags.
- *
- * Revision 4.8  1998/10/05  19:19:24  caress
- * MB-System version 4.6beta
- *
- * Revision 4.7  1997/07/25  14:28:10  caress
- * Version 4.5beta2
- *
- * Revision 4.6  1997/04/21  17:19:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.5  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.5  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.4  1995/05/12  17:12:32  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.3  1995/03/06  19:37:59  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.2  1995/03/02  13:49:21  caress
- * Fixed bug related to error messages.
- *
- * Revision 4.1  1995/02/27  14:43:18  caress
- * Fixed bug regarding closing a text input file.
- *
- * Revision 4.0  1995/02/14  21:17:15  caress
- * Version 4.2
- *
  */
 
 /* standard include files */
@@ -147,31 +35,12 @@
 #include <sys/stat.h>
 #include <time.h>
 
-/* GMT include files */
-#include "gmt.h"
-
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_process.h"
 #include "mb_aux.h"
-
-/* get NaN detector */
-#if defined(isnanf)
-#define check_fnan(x) isnanf((x))
-#elif defined(isnan)
-#define check_fnan(x) isnan((double)(x))
-#elif HAVE_ISNANF == 1
-#define check_fnan(x) isnanf(x)
-extern int isnanf(float x);
-#elif HAVE_ISNAN == 1
-#define check_fnan(x) isnan((double)(x))
-#elif HAVE_ISNAND == 1
-#define check_fnan(x) isnand((double)(x))
-#else
-#define check_fnan(x) ((x) != (x))
-#endif
 
 /* mode defines */
 #define	MBBACKANGLE_AMP	1
@@ -213,13 +82,6 @@ int output_model(int verbose, FILE *tfp,
 	int nangles, double angle_max, double dangle, int symmetry,
 	int *nmean, double *mean, double *sigma,
 	int *error);
-int write_cdfgrd(int verbose, char *outfile, float *grid,
-		int nx, int ny,
-		double xmin, double xmax, double ymin, double ymax,
-		double zmin, double zmax, double dx, double dy,
-		char *xlab, char *ylab, char *zlab, char *titl,
-		char *projection, int argc, char **argv,
-		int *error);
 
 static char rcs_id[] = "$Id$";
 char program_name[] = "mbbackangle";
@@ -791,7 +653,7 @@ by MBprocess.";
 	if (corr_topogrid == MB_YES)
 		{
 		grid.data = NULL;
-		status = mb_readgrd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue,
+		status = mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue,
 					&grid.nxy, &grid.nx, &grid.ny, &grid.min, &grid.max,
 					&grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
 					&grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
@@ -1692,7 +1554,8 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 		strcpy(title, "Beam Amplitude vs. Grazing Angle PDF");
 
 		/* output the grid */
-		write_cdfgrd(verbose, gridfile, gridamphist,
+		mb_write_gmt_grd(verbose, gridfile, gridamphist,
+				MB_DEFAULT_GRID_NODATA, 
 				gridampnx, gridampny,
 				(double)(-gridampangle), gridampangle,
 				gridampmin, gridampmax,
@@ -1746,7 +1609,8 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 		strcpy(title, "Sidescan Amplitude vs. Grazing Angle PDF");
 
 		/* output the grid */
-		write_cdfgrd(verbose, gridfile, gridsshist,
+		mb_write_gmt_grd(verbose, gridfile, gridsshist,
+				MB_DEFAULT_GRID_NODATA, 
 				gridssnx, gridssny,
 				(double)(-gridssangle), gridssangle,
 				gridssmin, gridssmax,
@@ -2190,164 +2054,6 @@ int output_model(int verbose, FILE *tfp,
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function write_cdfgrd writes output grid to a
- * GMT version 2 netCDF grd file
- */
-int write_cdfgrd(int verbose, char *outfile, float *grid,
-		int nx, int ny,
-		double xmin, double xmax, double ymin, double ymax,
-		double zmin, double zmax, double dx, double dy,
-		char *xlab, char *ylab, char *zlab, char *titl,
-		char *projection, int argc, char **argv,
-		int *error)
-{
-	char	*function_name = "write_cdfgrd";
-	int	status = MB_SUCCESS;
-	struct GRD_HEADER grd;
-	double	w, e, s, n;
-#ifdef GMT_MINOR_VERSION
-	GMT_LONG	pad[4];
-#else
-	int	pad[4];
-#endif
-	float	*a;
-	time_t	right_now;
-	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	char	remark[MB_PATH_MAXLINE];
-	int	i, j, kg, ka;
-	char	*message;
-	char	*ctime();
-	char	*getenv();
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  Function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %p\n",(void *)grid);
-		fprintf(stderr,"dbg2       nx:         %d\n",nx);
-		fprintf(stderr,"dbg2       ny:         %d\n",ny);
-		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
-		fprintf(stderr,"dbg2       xmax:       %f\n",xmax);
-		fprintf(stderr,"dbg2       ymin:       %f\n",ymin);
-		fprintf(stderr,"dbg2       ymax:       %f\n",ymax);
-		fprintf(stderr,"dbg2       zmin:       %f\n",zmin);
-		fprintf(stderr,"dbg2       zmax:       %f\n",zmax);
-		fprintf(stderr,"dbg2       dx:         %f\n",dx);
-		fprintf(stderr,"dbg2       dy:         %f\n",dy);
-		fprintf(stderr,"dbg2       xlab:       %s\n",xlab);
-		fprintf(stderr,"dbg2       ylab:       %s\n",ylab);
-		fprintf(stderr,"dbg2       zlab:       %s\n",zlab);
-		fprintf(stderr,"dbg2       titl:       %s\n",titl);
-		fprintf(stderr,"dbg2       argc:       %d\n",argc);
-		fprintf(stderr,"dbg2       *argv:      %p\n",(void *)*argv);
-		}
-
-	/* inititialize grd header */
-	GMT_program = program_name;
-	GMT_grd_init (&grd, 1, argv, FALSE);
-	GMT_io_init ();
-	GMT_grdio_init ();
-	GMT_make_fnan (GMT_f_NaN);
-	GMT_make_dnan (GMT_d_NaN);
-
-	/* copy values to grd header */
-	grd.nx = nx;
-	grd.ny = ny;
-	grd.node_offset = 0;
-	grd.x_min = xmin;
-	grd.x_max = xmax;
-	grd.y_min = ymin;
-	grd.y_max = ymax;
-	grd.z_min = zmin;
-	grd.z_max = zmax;
-	grd.x_inc = dx;
-	grd.y_inc = dy;
-	grd.z_scale_factor = 1.0;
-	grd.z_add_offset = 0.0;
-	strcpy(grd.x_units,xlab);
-	strcpy(grd.y_units,ylab);
-	strcpy(grd.z_units,zlab);
-	strcpy(grd.title,titl);
-	strcpy(grd.command,"\0");
-	right_now = time((time_t *)0);
-	strcpy(date,ctime(&right_now));
-        date[strlen(date)-1] = '\0';
-	if ((user_ptr = getenv("USER")) == NULL)
-		user_ptr = getenv("LOGNAME");
-	if (user_ptr != NULL)
-		strcpy(user,user_ptr);
-	else
-		strcpy(user, "unknown");
-	gethostname(host,MB_PATH_MAXLINE);
-	sprintf(remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
-		projection,program_name,MB_VERSION,user,host,date);
-	strncpy(grd.remark, remark, 159);
-
-	/* set extract wesn,pad and complex */
-	w = 0.0;
-	e = 0.0;
-	s = 0.0;
-	n = 0.0;
-	for (i=0;i<4;i++)
-		pad[i] = 0;
-
-	/* allocate memory for output array */
-	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
-	if (*error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
-		fprintf(stderr,"\nMBIO Error allocating output arrays.\n%s\n",
-			message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		mb_memory_clear(verbose, error);
-		exit(status);
-		}
-
-	/* copy grid to new array and write it to GMT netCDF grd file */
-	if (status == MB_SUCCESS)
-		{
-		/* copy grid to new array */
-		for (i=0;i<grd.nx;i++)
-			for (j=0;j<grd.ny;j++)
-				{
-				kg = i*grd.ny+j;
-				ka = (grd.ny-1-j)*grd.nx+i;
-				a[ka] = grid[kg];
-				}
-
-		/* write the GMT netCDF grd file */
-		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, FALSE);
-
-		/* free memory for output array */
-		mb_freed(verbose,__FILE__, __LINE__, (void **) &a, error);
-		}
-
-	/* free GMT memory */
-	GMT_free ((void *)GMT_io.skip_if_NaN);
-	GMT_free ((void *)GMT_io.in_col_type);
-	GMT_free ((void *)GMT_io.out_col_type);
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */

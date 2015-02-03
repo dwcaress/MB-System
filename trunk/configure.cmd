@@ -256,7 +256,7 @@ CFLAGS="-g -Wall -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
     --with-netcdf-lib=/sw/lib \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
-    --with-gmt-include=/sw/include \
+    --with-gmt-include=/sw/include/gmt5 \
     --with-gmt-lib=/sw/lib \
     --with-fftw-include=/sw/include \
     --with-fftw-lib=/sw/lib \

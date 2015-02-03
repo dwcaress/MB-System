@@ -67,7 +67,6 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		$(PROJLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbbsio.a  \
-		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a \
 		$(GSFLIB) \
 		$(GMTLIBDIR)/libpsl.a

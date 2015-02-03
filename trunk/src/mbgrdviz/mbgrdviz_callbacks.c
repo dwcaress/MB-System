@@ -31,34 +31,17 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
-
-/* GMT include files */
-#include "gmt.h"
 
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
+#include "mb_aux.h"
 #include "mbsys_singlebeam.h"
-
-/* get NaN detector */
-#if defined(isnanf)
-#define check_fnan(x) isnanf((x))
-#elif defined(isnan)
-#define check_fnan(x) isnan((double)(x))
-#elif HAVE_ISNANF == 1
-#define check_fnan(x) isnanf(x)
-extern int isnanf(float x);
-#elif HAVE_ISNAN == 1
-#define check_fnan(x) isnan((double)(x))
-#elif HAVE_ISNAND == 1
-#define check_fnan(x) isnand((double)(x))
-#else
-#define check_fnan(x) ((x) != (x))
-#endif
 
 /* mbview include file */
 #include "mbview.h"
@@ -1851,7 +1834,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 		/* read in the grd file */
 		if (status == MB_SUCCESS
 			&& input_file_ptr != NULL)
-		status = do_mbgrdviz_readgrd(instance, input_file_ptr,
+		status = mb_read_gmt_grd(verbose, input_file_ptr,
 			&mbv_primary_grid_projection_mode,
 			mbv_primary_grid_projection_id,
 			&mbv_primary_nodatavalue,
@@ -1866,7 +1849,10 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 			&mbv_primary_ymax,
 			&mbv_primary_dx,
 			&mbv_primary_dy,
-			&mbv_primary_data);
+			&mbv_primary_data,
+                        NULL,
+                        NULL,
+                        &error);
 
 		else if (status == MB_SUCCESS)
 		status = do_mbgrdviz_opentest(instance,
@@ -2249,7 +2235,7 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr)
 		/* read in the grd file */
 		if (status == MB_SUCCESS
 			&& input_file_ptr != NULL)
-		status = do_mbgrdviz_readgrd(instance, input_file_ptr,
+		status = mb_read_gmt_grd(verbose, input_file_ptr,
 			&mbv_secondary_grid_projection_mode,
 			mbv_secondary_grid_projection_id,
 			&mbv_secondary_nodatavalue,
@@ -2264,7 +2250,10 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr)
 			&mbv_secondary_ymax,
 			&mbv_secondary_dx,
 			&mbv_secondary_dy,
-			&mbv_secondary_data);
+			&mbv_secondary_data,
+                        NULL,
+                        NULL,
+                        &error);
 
 		else if (status == MB_SUCCESS)
 		status = do_mbgrdviz_opentest(instance,
@@ -4984,342 +4973,6 @@ fprintf(stderr,"    Skipping %s because of 0 nav points read\n",name);
 	/* all done */
 	return(status);
 
-}
-/*---------------------------------------------------------------------------------------*/
-
-int do_mbgrdviz_readgrd(size_t instance, char *grdfile,
-			int	*grid_projection_mode,
-			char	*grid_projection_id,
-			float	*nodatavalue,
-			int	*nxy,
-			int	*nx,
-			int	*ny,
-			double	*min,
-			double	*max,
-			double	*xmin,
-			double	*xmax,
-			double	*ymin,
-			double	*ymax,
-			double	*dx,
-			double	*dy,
-			float	**data)
-{
-	char function_name[] = "do_mbgrdviz_readgrd";
-	int	status = MB_SUCCESS;
-	struct GRD_HEADER header;
-	int	modeltype;
-	int	projectionid;
-        char    projectionname[MB_PATH_MAXLINE];
-	int	off;
-#ifdef GMT_MINOR_VERSION
-	GMT_LONG	pad[4];
-#else
-	int	pad[4];
-#endif
-	int	nscan;
-	int	utmzone;
-	char	NorS;
-	float	*rawdata;
-	float	*usedata;
-	int	i,j,k,kk;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       grdfile:         %s\n",grdfile);
-		}
-
-	/* do required initialization */
-/*	GMT_begin (pargc, pargv);
-	GMT_put_history(pargc, pargv);
-	GMT_get_common_args (projection, xmin, xmax, ymin, ymax);*/
-	project_info.degree[0] = 0;
-	project_info.degree[1] = 0;
-	GMT_program = program_name;
-	GMT_grd_init (&header, 1, pargv, FALSE);
-	GMT_io_init ();
-	GMT_grdio_init ();
-	GMT_make_fnan (GMT_f_NaN);
-	GMT_make_dnan (GMT_d_NaN);
-
-	/* read input grd file header */
-	if (GMT_read_grd_info (grdfile, &header))
-	    {
-	    error = MB_ERROR_OPEN_FAIL;
-	    fprintf(stderr,"\nUnable to open grd file: %s\n",
-		    grdfile);
-	    fprintf(stderr,"\nProgram <%s> Terminated\n",
-	    		program_name);
-	    exit(error);
-	    }
-
-	/* try to get projection from the grd file remark */
-	if (strncmp(&(header.remark[2]), "Projection: ", 12) == 0)
-		{
-		if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%d%c", &utmzone, &NorS)) == 2)
-			{
-			if (NorS == 'N')
-				{
-				projectionid = 32600 + utmzone;
-				}
-			else /* if (NorS == 'S') */
-				{
-				projectionid = 32700 + utmzone;
-				}
-			modeltype = ModelTypeProjected;
-			sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
-			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
-			sprintf(grid_projection_id, "epsg%d", projectionid);
-
-			project_info.degree[0] = FALSE;
-			}
-		else if ((nscan = sscanf(&(header.remark[2]), "Projection: epsg%d", &projectionid)) == 1)
-			{
-			sprintf(projectionname, "epsg%d", projectionid);
-			modeltype = ModelTypeProjected;
-			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
-			sprintf(grid_projection_id, "epsg%d", projectionid);
-
-			project_info.degree[0] = FALSE;
-			}
-		else if ((nscan = sscanf(&(header.remark[2]), "Projection: %s", projectionname)) == 1)
-			{
-			if (strncmp(projectionname, "Geographic", 10) == 0)
-				{
-				strcpy(projectionname, "Geographic WGS84");
-				modeltype = ModelTypeGeographic;
-				projectionid = GCS_WGS_84;
-				*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-				sprintf(grid_projection_id, "epsg%d", projectionid);
-
-				project_info.degree[0] = TRUE;
-				GMT_io.in_col_type[0] = GMT_IS_LON;
-				GMT_io.in_col_type[1] = GMT_IS_LAT;
-				}
-			else
-				{
-				modeltype = ModelTypeProjected;
-				*grid_projection_mode = MBV_PROJECTION_PROJECTED;
-				strcpy(grid_projection_id, projectionname);
-
-				project_info.degree[0] = FALSE;
-				}
-			}
-		else
-			{
-			strcpy(projectionname, "Geographic WGS84");
-			modeltype = ModelTypeGeographic;
-			projectionid = GCS_WGS_84;
-			*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-			sprintf(grid_projection_id, "epsg%d", projectionid);
-
-			project_info.degree[0] = TRUE;
-			GMT_io.in_col_type[0] = GMT_IS_LON;
-			GMT_io.in_col_type[1] = GMT_IS_LAT;
-			}
-		}
-	else if (strncmp(&(header.remark[0]), "Projection: ", 12) == 0)
-		{
-		if ((nscan = sscanf(&(header.remark[0]), "Projection: UTM%d%c", &utmzone, &NorS)) == 2)
-			{
-			if (NorS == 'N')
-				{
-				projectionid = 32600 + utmzone;
-				}
-			else /* if (NorS == 'S') */
-				{
-				projectionid = 32700 + utmzone;
-				}
-			modeltype = ModelTypeProjected;
-			sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
-			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
-			sprintf(grid_projection_id, "epsg%d", projectionid);
-
-			project_info.degree[0] = FALSE;
-			}
-		else if ((nscan = sscanf(&(header.remark[0]), "Projection: epsg%d", &projectionid)) == 1)
-			{
-			sprintf(projectionname, "epsg%d", projectionid);
-			modeltype = ModelTypeProjected;
-			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
-			sprintf(grid_projection_id, "epsg%d", projectionid);
-
-			project_info.degree[0] = FALSE;
-			}
-		else if ((nscan = sscanf(&(header.remark[0]), "Projection: %s", projectionname)) == 1)
-			{
-			if (strncmp(projectionname, "Geographic", 10) == 0)
-				{
-				strcpy(projectionname, "Geographic WGS84");
-				modeltype = ModelTypeGeographic;
-				projectionid = GCS_WGS_84;
-				*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-				sprintf(grid_projection_id, "epsg%d", projectionid);
-
-				project_info.degree[0] = TRUE;
-				GMT_io.in_col_type[0] = GMT_IS_LON;
-				GMT_io.in_col_type[1] = GMT_IS_LAT;
-				}
-			else
-				{
-				modeltype = ModelTypeProjected;
-				*grid_projection_mode = MBV_PROJECTION_PROJECTED;
-				strcpy(grid_projection_id, projectionname);
-
-				project_info.degree[0] = FALSE;
-				}
-			}
-		else
-			{
-			strcpy(projectionname, "Geographic WGS84");
-			modeltype = ModelTypeGeographic;
-			projectionid = GCS_WGS_84;
-			*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-			sprintf(grid_projection_id, "epsg%d", projectionid);
-
-			project_info.degree[0] = TRUE;
-			GMT_io.in_col_type[0] = GMT_IS_LON;
-			GMT_io.in_col_type[1] = GMT_IS_LAT;
-			}
-		}
-	else
-		{
-		strcpy(projectionname, "Geographic WGS84");
-		modeltype = ModelTypeGeographic;
-		projectionid = GCS_WGS_84;
-		*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-		sprintf(grid_projection_id, "epsg%d", projectionid);
-
-		project_info.degree[0] = TRUE;
-		GMT_io.in_col_type[0] = GMT_IS_LON;
-		GMT_io.in_col_type[1] = GMT_IS_LAT;
-		}
-
-	/* set up internal arrays */
-    	*nodatavalue = MIN(MBV_DEFAULT_NODATA, header.z_min - 10 * (header.z_max - header.z_min));
-    	*nxy = header.nx * header.ny;
-    	*nx = header.nx;
-    	*ny = header.ny;
-    	*xmin = header.x_min;
-    	*xmax = header.x_max;
-    	*ymin = header.y_min;
-    	*ymax = header.y_max;
-    	*dx = header.x_inc;
-    	*dy = header.y_inc;
-    	*min = header.z_min;
-    	*max = header.z_max;
-
-    	status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * (*nxy),
-    				(void **)&rawdata,&error);
-    	if (status == MB_SUCCESS)
-            {
-            status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * (*nxy),
-    				(void **)&usedata,&error);
-            *data = usedata;
-            }
-	else
-	    {
-	    fprintf(stderr,"\nUnable to allocate memory to store data from grd file: %s\n",
-		    grdfile);
-	    fprintf(stderr,"\nProgram <%s> Terminated\n",
-		    program_name);
-	    exit(error);
-	    }
-
-	/* Determine the wesn to be used to read the grdfile */
-	off = (header.node_offset) ? 0 : 1;
-	GMT_map_setup (*xmin, *xmax, *ymin, *ymax);
-#ifdef GMT_MINOR_VERSION
-	GMT_grd_setregion (&header, xmin,  xmax, ymin, ymax, BCR_BILINEAR);
-#else
-	GMT_grd_setregion (&header, xmin,  xmax, ymin, ymax);
-#endif
-
-	/* read the grid */
-	pad[0] = 0;
-	pad[1] = 0;
-	pad[2] = 0;
-	pad[3] = 0;
-	if (GMT_read_grd (grdfile, &header, rawdata,
-			    *xmin, *xmax, *ymin, *ymax,
-			    pad, FALSE))
-	    {
-	    error = MB_ERROR_OPEN_FAIL;
-	    fprintf(stderr,"\nUnable to read grd file: %s\n",
-		    grdfile);
-	    fprintf(stderr,"\nProgram <%s> Terminated\n",
-		    program_name);
-	    exit(error);
-	    }
-
-	/* free GMT memory */
-	GMT_free ((void *)GMT_io.skip_if_NaN);
-	GMT_free ((void *)GMT_io.in_col_type);
-	GMT_free ((void *)GMT_io.out_col_type);
-
-	/* reorder grid to internal convention */
-	for (i=0;i<*nx;i++)
-	for (j=0;j<*ny;j++)
-		{
-		k = i * *ny + j;
-		kk = (*ny - 1 - j) * *nx + i;
-		if (check_fnan(rawdata[kk]))
-			usedata[k] = *nodatavalue;
-		else
-			usedata[k] = rawdata[kk];
-		}
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&rawdata, &error);
-
-	/* print debug info */
-	if (verbose > 0)
-	    {
-	    fprintf(stderr,"Grid read:\n");
-	    fprintf(stderr,"  Dimensions: %d %d\n", header.nx, header.ny);
-	    if (modeltype == ModelTypeProjected)
-	    	{
-		fprintf(stderr,"  Projected Coordinate System Name: %s\n", projectionname);
-		fprintf(stderr,"  Projected Coordinate System ID:   %d\n", projectionid);
-	    	fprintf(stderr,"  Easting:    %f %f  %f\n",
-		  	header.x_min, header.x_max, header.x_inc);
-	    	fprintf(stderr,"  Northing:   %f %f  %f\n",
-		  	header.y_min, header.y_max, header.y_inc);
-		}
-	    else
-		{
-		fprintf(stderr,"  Geographic Coordinate System Name: %s\n", projectionname);
-		fprintf(stderr,"  Geographic Coordinate System ID:   %d\n", projectionid);
-	    	fprintf(stderr,"  Longitude:  %f %f  %f\n",
-		  	header.x_min, header.x_max, header.x_inc);
-	    	fprintf(stderr,"  Latitude:   %f %f  %f\n",
-		  	header.y_min, header.y_max, header.y_inc);
-		}
-	    fprintf(stderr,"  Internal Grid Projection Mode:         %d\n",
-	    			*grid_projection_mode);
-	    fprintf(stderr,"  Internal Grid Projection ID:           %s\n",
-	    			grid_projection_id);
-
-	    fprintf(stderr,"Data Read:\n");
-	    fprintf(stderr,"  grid_projection_mode:     %d\n", *grid_projection_mode);
-	    fprintf(stderr,"  grid_projection_id:       %s\n", grid_projection_id);
-	    fprintf(stderr,"  nodatavalue:              %f\n", *nodatavalue);
-	    fprintf(stderr,"  nx:                       %d\n", *nx);
-	    fprintf(stderr,"  ny:                       %d\n", *ny);
-	    fprintf(stderr,"  min:                      %f\n", *min);
-	    fprintf(stderr,"  max:                      %f\n", *max);
-	    fprintf(stderr,"  xmin:                     %f\n", *xmin);
-	    fprintf(stderr,"  xmax:                     %f\n", *xmax);
-	    fprintf(stderr,"  ymin:                     %f\n", *ymin);
-	    fprintf(stderr,"  ymax:                     %f\n", *ymax);
-	    fprintf(stderr,"  dx:                       %f\n", *dx);
-	    fprintf(stderr,"  dy:                       %f\n", *dy);
-	    fprintf(stderr,"  data:                     %p\n", *data);
-	    }
-
-	/* all done */
-	return(status);
 }
 /*---------------------------------------------------------------------------------------*/
 

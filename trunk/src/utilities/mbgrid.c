@@ -48,9 +48,6 @@
 #include <string.h>
 #include <time.h>
 
-/* GMT include files */
-#include "gmt.h"
-
 /* mbio include files */
 #include "mb_status.h"
 #include "mb_format.h"
@@ -128,13 +125,6 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 		int nx, int ny,
 		double xmin, double xmax, double ymin, double ymax,
 		double dx, double dy, int *error);
-int write_cdfgrd(int verbose, char *outfile, float *grid,
-		int nx, int ny,
-		double xmin, double xmax, double ymin, double ymax,
-		double zmin, double zmax, double dx, double dy,
-		char *xlab, char *ylab, char *zlab, char *titl,
-		char *projection, int argc, char **argv,
-		int *error);
 int mbgrid_weight(int verbose, double foot_a, double foot_b,
 		    double pcx, double pcy, double dx, double dy,
 		    double *px, double *py,
@@ -737,7 +727,7 @@ int main (int argc, char **argv)
 	/* define NaN in case it's needed */
 	if (use_NaN == MB_YES)
 		{
-		GMT_make_fnan(NaN);
+		MB_MAKE_FNAN(NaN);
 		outclipvalue = NaN;
 		}
 
@@ -5076,22 +5066,36 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		{
 		strcpy(ofile,fileroot);
 		strcat(ofile,".grd");
-		status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
-			gbnd[0],gbnd[1],gbnd[2],gbnd[3],
-			zmin,zmax,dx,dy,
-			xlabel,ylabel,zlabel,title,projection_id,
-			argc,argv,&error);
+		status = mb_write_gmt_grd(verbose,
+                                        ofile,
+                                        output,
+                                        outclipvalue,
+                                        xdim,ydim,
+                                        gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+                                        zmin,zmax,
+                                        dx,dy,
+                                        xlabel,ylabel,zlabel,title,
+                                        projection_id,
+                                        argc,argv,
+                                        &error);
 		}
 	else if (gridkind == MBGRID_GMTGRD)
 		{
 		strcpy(ofile,fileroot);
 		strcat(ofile,".grd");
 		sprintf(ofile,"%s.grd%s", fileroot, gridkindstring);
-		status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
-			gbnd[0],gbnd[1],gbnd[2],gbnd[3],
-			zmin,zmax,dx,dy,
-			xlabel,ylabel,zlabel,title,projection_id,
-			argc,argv,&error);
+		status = mb_write_gmt_grd(verbose,
+                                        ofile,
+                                        output,
+                                        outclipvalue,
+                                        xdim,ydim,
+                                        gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+                                        zmin,zmax,
+                                        dx,dy,
+                                        xlabel,ylabel,zlabel,title,
+                                        projection_id,
+                                        argc,argv,
+                                        &error);
 		}
 	if (status != MB_SUCCESS)
 		{
@@ -5148,20 +5152,34 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 			{
 			strcpy(ofile,fileroot);
 			strcat(ofile,"_num.grd");
-			status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
-				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
-				zmin,zmax,dx,dy,
-				xlabel,ylabel,nlabel,title,projection_id,
-				argc,argv,&error);
+                        status = mb_write_gmt_grd(verbose,
+                                        ofile,
+                                        output,
+                                        outclipvalue,
+                                        xdim,ydim,
+                                        gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+                                        zmin,zmax,
+                                        dx,dy,
+                                        xlabel,ylabel,zlabel,title,
+                                        projection_id,
+                                        argc,argv,
+                                        &error);
 			}
 		else if (gridkind == MBGRID_GMTGRD)
 			{
 			sprintf(ofile,"%s_num.grd%s", fileroot, gridkindstring);
-			status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
-				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
-				zmin,zmax,dx,dy,
-				xlabel,ylabel,zlabel,title,projection_id,
-				argc,argv,&error);
+                        status = mb_write_gmt_grd(verbose,
+                                        ofile,
+                                        output,
+                                        outclipvalue,
+                                        xdim,ydim,
+                                        gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+                                        zmin,zmax,
+                                        dx,dy,
+                                        xlabel,ylabel,zlabel,title,
+                                        projection_id,
+                                        argc,argv,
+                                        &error);
 			}
 		if (status != MB_SUCCESS)
 			{
@@ -5216,20 +5234,34 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 			{
 			strcpy(ofile,fileroot);
 			strcat(ofile,"_sd.grd");
-			status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
-				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
-				zmin,zmax,dx,dy,
-				xlabel,ylabel,sdlabel,title,projection_id,
-				argc,argv,&error);
+                        status = mb_write_gmt_grd(verbose,
+                                        ofile,
+                                        output,
+                                        outclipvalue,
+                                        xdim,ydim,
+                                        gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+                                        zmin,zmax,
+                                        dx,dy,
+                                        xlabel,ylabel,zlabel,title,
+                                        projection_id,
+                                        argc,argv,
+                                        &error);
 			}
 		else if (gridkind == MBGRID_GMTGRD)
 			{
 			sprintf(ofile,"%s_sd.grd%s", fileroot, gridkindstring);
-			status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
-				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
-				zmin,zmax,dx,dy,
-				xlabel,ylabel,zlabel,title,projection_id,
-				argc,argv,&error);
+                        status = mb_write_gmt_grd(verbose,
+                                        ofile,
+                                        output,
+                                        outclipvalue,
+                                        xdim,ydim,
+                                        gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+                                        zmin,zmax,
+                                        dx,dy,
+                                        xlabel,ylabel,zlabel,title,
+                                        projection_id,
+                                        argc,argv,
+                                        &error);
 			}
 		if (status != MB_SUCCESS)
 			{
@@ -5564,162 +5596,6 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 		fwrite ((char *)grid, nx*ny, 4, fp);
 		fclose(fp);
 		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(outfp,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(outfp,"dbg2  Return values:\n");
-		fprintf(outfp,"dbg2       error:      %d\n",*error);
-		fprintf(outfp,"dbg2  Return status:\n");
-		fprintf(outfp,"dbg2       status:     %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function write_cdfgrd writes output grid to a
- * GMT version 2 netCDF grd file
- */
-int write_cdfgrd(int verbose, char *outfile, float *grid,
-		int nx, int ny,
-		double xmin, double xmax, double ymin, double ymax,
-		double zmin, double zmax, double dx, double dy,
-		char *xlab, char *ylab, char *zlab, char *titl,
-		char *projection, int argc, char **argv,
-		int *error)
-{
-	char	*function_name = "write_cdfgrd";
-	int	status = MB_SUCCESS;
-	struct GRD_HEADER grd;
-	double	w, e, s, n;
-#ifdef GMT_MINOR_VERSION
-	GMT_LONG	pad[4];
-#else
-	int	pad[4];
-#endif
-	float	*a;
-	time_t	right_now;
-	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	char	remark[MB_PATH_MAXLINE];
-	int	i, j, kg, ka;
-	char	*message;
-	char	*ctime();
-	char	*getenv();
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(outfp,"\ndbg2  Function <%s> called\n",
-			function_name);
-		fprintf(outfp,"dbg2  Input arguments:\n");
-		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
-		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %p\n",(void *)grid);
-		fprintf(outfp,"dbg2       nx:         %d\n",nx);
-		fprintf(outfp,"dbg2       ny:         %d\n",ny);
-		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
-		fprintf(outfp,"dbg2       xmax:       %f\n",xmax);
-		fprintf(outfp,"dbg2       ymin:       %f\n",ymin);
-		fprintf(outfp,"dbg2       ymax:       %f\n",ymax);
-		fprintf(outfp,"dbg2       dx:         %f\n",dx);
-		fprintf(outfp,"dbg2       dy:         %f\n",dy);
-		fprintf(outfp,"dbg2       xlab:       %s\n",xlab);
-		fprintf(outfp,"dbg2       ylab:       %s\n",ylab);
-		fprintf(outfp,"dbg2       zlab:       %s\n",zlab);
-		fprintf(outfp,"dbg2       titl:       %s\n",titl);
-		fprintf(outfp,"dbg2       argc:       %d\n",argc);
-		fprintf(outfp,"dbg2       *argv:      %p\n",(void *)*argv);
-		}
-
-	/* inititialize grd header */
-	GMT_program = program_name;
-	GMT_grd_init (&grd, 1, argv, FALSE);
-	GMT_io_init ();
-	GMT_grdio_init ();
-	GMT_make_fnan (GMT_f_NaN);
-	GMT_make_dnan (GMT_d_NaN);
-
-	/* copy values to grd header */
-	grd.nx = nx;
-	grd.ny = ny;
-	grd.node_offset = 0;
-	grd.x_min = xmin;
-	grd.x_max = xmax;
-	grd.y_min = ymin;
-	grd.y_max = ymax;
-	grd.z_min = zmin;
-	grd.z_max = zmax;
-	grd.x_inc = dx;
-	grd.y_inc = dy;
-	grd.z_scale_factor = 1.0;
-	grd.z_add_offset = 0.0;
-	strcpy(grd.x_units,xlab);
-	strcpy(grd.y_units,ylab);
-	strcpy(grd.z_units,zlab);
-	strcpy(grd.title,titl);
-	strcpy(grd.command,"\0");
-	right_now = time((time_t *)0);
-	strcpy(date,ctime(&right_now));
-        date[strlen(date)-1] = '\0';
-	if ((user_ptr = getenv("USER")) == NULL)
-		user_ptr = getenv("LOGNAME");
-	if (user_ptr != NULL)
-		strcpy(user,user_ptr);
-	else
-		strcpy(user, "unknown");
-	gethostname(host,MB_PATH_MAXLINE);
-	sprintf(remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
-		projection,program_name,MB_VERSION,user,host,date);
-	strncpy(grd.remark, remark, 159);
-
-	/* set extract wesn,pad */
-	w = 0.0;
-	e = 0.0;
-	s = 0.0;
-	n = 0.0;
-	for (i=0;i<4;i++)
-		pad[i] = 0;
-
-	/* allocate memory for output array */
-	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
-	if (*error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
-		fprintf(outfp,"\nMBIO Error allocating output arrays.\n%s\n",
-			message);
-		fprintf(outfp,"\nProgram <%s> Terminated\n",
-			program_name);
-		mb_memory_clear(verbose, error);
-		exit(status);
-		}
-
-	/* copy grid to new array and write it to GMT netCDF grd file */
-	if (status == MB_SUCCESS)
-		{
-		/* copy grid to new array */
-		for (i=0;i<grd.nx;i++)
-			for (j=0;j<grd.ny;j++)
-				{
-				kg = i*grd.ny+j;
-				ka = (grd.ny-1-j)*grd.nx+i;
-				a[ka] = grid[kg];
-				}
-
-		/* write the GMT netCDF grd file */
-		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, FALSE);
-
-		/* free memory for output array */
-		mb_freed(verbose,__FILE__,__LINE__,(void **) &a, error);
-		}
-
-	/* free GMT memory */
-	GMT_free ((void *)GMT_io.skip_if_NaN);
-	GMT_free ((void *)GMT_io.in_col_type);
-	GMT_free ((void *)GMT_io.out_col_type);
 
 	/* print output debug statements */
 	if (verbose >= 2)

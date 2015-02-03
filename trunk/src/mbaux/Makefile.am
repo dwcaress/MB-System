@@ -1,7 +1,7 @@
 if BUILD_MOTIF
   XGRLIB = libmbxgr.la
 endif
-lib_LTLIBRARIES = libmbps.la libmbaux.la $(XGRLIB)
+lib_LTLIBRARIES = libmbaux.la $(XGRLIB)
 
 if BUILD_MOTIF
   XGRINC = mb_xgraphics.h
@@ -13,16 +13,12 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	      ${libnetcdf_CPPFLAGS}
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-libmbps_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libmbps_la_SOURCES = mb_pslibface.c
-libmbps_la_LIBADD = ${libgmt_LIBS} ${libnetcdf_LIBS} 
-
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbaux_la_SOURCES = \
 		      mb_spline.c mb_zgrid.c mb_surface.c mb_cheb.c \
-		      mb_delaun.c mb_track.c mb_truecont.c mb_readgrd.c \
+		      mb_delaun.c mb_track.c mb_truecont.c mb_readwritegrd.c \
 		      mb_intersectgrid.c
-libmbaux_la_LIBADD =  ${top_builddir}/src/mbio/libmbio.la libmbps.la \
+libmbaux_la_LIBADD =  ${top_builddir}/src/mbio/libmbio.la \
 			${libgmt_LIBS} ${libnetcdf_LIBS}
 
 if BUILD_MOTIF

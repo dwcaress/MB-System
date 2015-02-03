@@ -20,7 +20,6 @@ mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_callbacks.c mbeditviz_prog.c mbed
 mbeditviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \
 		  ${top_builddir}/src/mbaux/libmbaux.la \
 		  ${top_builddir}/src/mbaux/libmbxgr.la \
-		  ${top_builddir}/src/mbaux/libmbps.la \
 		  ${top_builddir}/src/mbview/libmbview.la \
 		  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
 		  ${motif_LIBS} ${GL_LIBS} \
