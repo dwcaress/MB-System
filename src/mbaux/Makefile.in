@@ -124,10 +124,10 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libmbaux_la_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
-	libmbps.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_libmbaux_la_OBJECTS = mb_spline.lo mb_zgrid.lo mb_surface.lo \
 	mb_cheb.lo mb_delaun.lo mb_track.lo mb_truecont.lo \
-	mb_readgrd.lo mb_intersectgrid.lo
+	mb_readwritegrd.lo mb_intersectgrid.lo
 libmbaux_la_OBJECTS = $(am_libmbaux_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -136,12 +136,6 @@ am__v_lt_1 =
 libmbaux_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libmbaux_la_LDFLAGS) $(LDFLAGS) -o $@
-libmbps_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-am_libmbps_la_OBJECTS = mb_pslibface.lo
-libmbps_la_OBJECTS = $(am_libmbps_la_OBJECTS)
-libmbps_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(libmbps_la_LDFLAGS) $(LDFLAGS) -o $@
 @BUILD_MOTIF_TRUE@libmbxgr_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__libmbxgr_la_SOURCES_DIST = mb_xgraphics.c
 @BUILD_MOTIF_TRUE@am_libmbxgr_la_OBJECTS = mb_xgraphics.lo
@@ -184,10 +178,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libmbaux_la_SOURCES) $(libmbps_la_SOURCES) \
-	$(libmbxgr_la_SOURCES)
-DIST_SOURCES = $(libmbaux_la_SOURCES) $(libmbps_la_SOURCES) \
-	$(am__libmbxgr_la_SOURCES_DIST)
+SOURCES = $(libmbaux_la_SOURCES) $(libmbxgr_la_SOURCES)
+DIST_SOURCES = $(libmbaux_la_SOURCES) $(am__libmbxgr_la_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -332,8 +324,6 @@ libfftw_LIBS = @libfftw_LIBS@
 libgmt_CFLAGS = @libgmt_CFLAGS@
 libgmt_CPPFLAGS = @libgmt_CPPFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
-libgmtps_CFLAGS = @libgmtps_CFLAGS@
-libgmtps_LIBS = @libgmtps_LIBS@
 libnetcdf_CFLAGS = @libnetcdf_CFLAGS@
 libnetcdf_CPPFLAGS = @libnetcdf_CPPFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
@@ -365,7 +355,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_MOTIF_TRUE@XGRLIB = libmbxgr.la
-lib_LTLIBRARIES = libmbps.la libmbaux.la $(XGRLIB)
+lib_LTLIBRARIES = libmbaux.la $(XGRLIB)
 @BUILD_MOTIF_TRUE@XGRINC = mb_xgraphics.h
 include_HEADERS = mb_aux.h $(XGRINC)
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
@@ -373,16 +363,13 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	      ${libnetcdf_CPPFLAGS}
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
-libmbps_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libmbps_la_SOURCES = mb_pslibface.c
-libmbps_la_LIBADD = ${libgmt_LIBS} ${libnetcdf_LIBS} 
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbaux_la_SOURCES = \
 		      mb_spline.c mb_zgrid.c mb_surface.c mb_cheb.c \
-		      mb_delaun.c mb_track.c mb_truecont.c mb_readgrd.c \
+		      mb_delaun.c mb_track.c mb_truecont.c mb_readwritegrd.c \
 		      mb_intersectgrid.c
 
-libmbaux_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la libmbps.la \
+libmbaux_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
 			${libgmt_LIBS} ${libnetcdf_LIBS}
 
 @BUILD_MOTIF_TRUE@libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0
@@ -461,9 +448,6 @@ clean-libLTLIBRARIES:
 libmbaux.la: $(libmbaux_la_OBJECTS) $(libmbaux_la_DEPENDENCIES) $(EXTRA_libmbaux_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libmbaux_la_LINK) -rpath $(libdir) $(libmbaux_la_OBJECTS) $(libmbaux_la_LIBADD) $(LIBS)
 
-libmbps.la: $(libmbps_la_OBJECTS) $(libmbps_la_DEPENDENCIES) $(EXTRA_libmbps_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libmbps_la_LINK) -rpath $(libdir) $(libmbps_la_OBJECTS) $(libmbps_la_LIBADD) $(LIBS)
-
 libmbxgr.la: $(libmbxgr_la_OBJECTS) $(libmbxgr_la_DEPENDENCIES) $(EXTRA_libmbxgr_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libmbxgr_la_LINK) $(am_libmbxgr_la_rpath) $(libmbxgr_la_OBJECTS) $(libmbxgr_la_LIBADD) $(LIBS)
 
@@ -476,8 +460,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_cheb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_delaun.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_intersectgrid.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_pslibface.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_readgrd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_readwritegrd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_spline.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_surface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_track.Plo@am__quote@

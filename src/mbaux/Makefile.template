@@ -58,7 +58,7 @@ $(LIBDIR)/libmbaux.a:	\
 		mb_delaun.o \
 		mb_track.o \
 		mb_truecont.o \
-		mb_readgrd.o \
+		mb_readwritegrd.o \
 		mb_intersectgrid.o
 	$(ARCHIVE) $(LIBDIR)/libmbaux.a \
 		mb_spline.o \
@@ -68,14 +68,9 @@ $(LIBDIR)/libmbaux.a:	\
 		mb_delaun.o \
 		mb_track.o \
 		mb_truecont.o \
-		mb_readgrd.o \
+		mb_readwritegrd.o \
 		mb_intersectgrid.o
 	ranlib $(LIBDIR)/libmbaux.a
-$(LIBDIR)/libmbps.a:	\
-		mb_pslibface.o
-	$(ARCHIVE) $(LIBDIR)/libmbps.a \
-		mb_pslibface.o
-	ranlib $(LIBDIR)/libmbps.a
 $(LIBDIR)/libmbxgr.a:	\
 		mb_xgraphics.o
 	$(ARCHIVE) $(LIBDIR)/libmbxgr.a \
@@ -93,14 +88,12 @@ mb_cheb.o:	mb_cheb.c ../mbio/mb_status.h mb_aux.h
 	$(CC) -c $(CFLAGS) -I../mbio mb_cheb.c
 mb_delaun.o:	mb_delaun.c ../mbio/mb_status.h mb_aux.h
 	$(CC) -c $(CFLAGS) -I../mbio mb_delaun.c
-mb_pslibface.o:	mb_pslibface.c  ../mbio/mb_status.h  ../mbio/mb_define.h mb_aux.h
-	$(CC) -c $(CFLAGS) -I../mbio -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_pslibface.c
 mb_track.o:	mb_track.c ../mbio/mb_status.h mb_aux.h
 	$(CC) -c $(CFLAGS) -I../mbio mb_track.c
 mb_truecont.o:	mb_truecont.c ../mbio/mb_status.h mb_aux.h
 	$(CC) -c $(CFLAGS) -I../mbio mb_truecont.c
-mb_readgrd.o:	mb_readgrd.c ../mbio/mb_status.h ../mbio/mb_define.h mb_aux.h
-	$(CC) -c $(CFLAGS) -I../mbio -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_readgrd.c
+mb_readwritegrd.o:	mb_readwritegrd.c ../mbio/mb_status.h ../mbio/mb_define.h mb_aux.h
+	$(CC) -c $(CFLAGS) -I../mbio -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_readwritegrd.c
 mb_xgraphics.o:	mb_xgraphics.c ../mbio/mb_status.h mb_xgraphics.h
 	$(CC) -c $(CFLAGS) -I../mbio mb_xgraphics.c
 mb_intersectgrid.o:	mb_intersectgrid.c ../mbio/mb_status.h mb_aux.h

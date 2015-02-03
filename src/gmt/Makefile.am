@@ -1,22 +1,15 @@
-bin_PROGRAMS = mbcontour mbgrdtiff mbswath
+lib_LTLIBRARIES = libmbgmt.la
 
-AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+include_HEADERS = 
 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	      -I${top_srcdir}/src/mbaux \
 	      ${libgmt_CPPFLAGS} \
 	      ${libnetcdf_CPPFLAGS}
+AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_LDFLAGS = 
-
-LIBS = $(top_builddir)/src/mbio/libmbio.la \
-	${libgmt_LIBS} ${libnetcdf_LIBS} \
-	$(LIBM)
-
-mbcontour_SOURCES = mbcontour.c
-mbcontour_LDADD = $(top_builddir)/src/mbaux/libmbaux.la $(top_builddir)/src/mbaux/libmbps.la
-
-mbgrdtiff_SOURCES = mbgrdtiff.c
-
-mbswath_SOURCES = mbswath.c
-mbswath_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
+libmbgmt_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libmbgmt_la_SOURCES = mbswath.c mbcontour.c mbgrdtiff.c
+libmbgmt_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
+			${top_builddir}/src/mbaux/libmbaux.la \
+			${libgmt_LIBS} ${libnetcdf_LIBS}

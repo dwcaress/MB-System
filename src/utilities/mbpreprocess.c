@@ -1907,17 +1907,17 @@ int main (int argc, char **argv)
 							navlat+= -headingx * sonar_offset_x * mtodeglat
 									+ headingy * sonar_offset_y * mtodeglat;
 							nav_changed = MB_YES;
-fprintf(stderr,"HEADING: %f  %f %f POSITION OFFSET: meters: %f %f   lonlat: %f %f ",
-heading, headingx, headingy,
-sonar_offset_x, sonar_offset_y,
-headingy * sonar_offset_x * mtodeglon + headingx * sonar_offset_y * mtodeglon,
--headingx * sonar_offset_x * mtodeglat + headingy * sonar_offset_y * mtodeglat);
+//fprintf(stderr,"HEADING: %f  %f %f POSITION OFFSET: meters: %f %f   lonlat: %f %f ",
+//heading, headingx, headingy,
+//sonar_offset_x, sonar_offset_y,
+//headingy * sonar_offset_x * mtodeglon + headingx * sonar_offset_y * mtodeglon,
+//-headingx * sonar_offset_x * mtodeglat + headingy * sonar_offset_y * mtodeglat);
 							}
 						if (sonar_offset_z != 0.0)
 							{
 							sensordepth -= sonar_offset_z;
 							sensordepth_changed = MB_YES;
-fprintf(stderr,"SENSORDEPTH OFFSET: %f ",-sonar_offset_z);
+//fprintf(stderr,"SENSORDEPTH OFFSET: %f ",-sonar_offset_z);
 							}
 
 						/* apply lever arm calculation */
@@ -1928,25 +1928,29 @@ fprintf(stderr,"SENSORDEPTH OFFSET: %f ",-sonar_offset_z);
 							navlat+= -headingx * lever_x * mtodeglat
 									+ headingy * lever_y * mtodeglat;
 							nav_changed = MB_YES;
-fprintf(stderr,"LEVER ARM XY OFFSET: meters: %f %f   lonlat: %f %f ",
-lever_x, lever_y,
-headingy * lever_x * mtodeglon + headingx * lever_y * mtodeglon,
--headingx * lever_x * mtodeglat + headingy * lever_y * mtodeglat);
+//fprintf(stderr,"LEVER ARM XY OFFSET: meters: %f %f   lonlat: %f %f ",
+//lever_x, lever_y,
+//headingy * lever_x * mtodeglon + headingx * lever_y * mtodeglon,
+//-headingx * lever_x * mtodeglat + headingy * lever_y * mtodeglat);
 							}
 						if (lever_z != 0.0)
 							{
 							sensordepth -= lever_z;
 							sensordepth_changed = MB_YES;
-fprintf(stderr,"LEVER ARM Z OFFSET: %f ",-lever_z);
+//fprintf(stderr,"LEVER ARM Z OFFSET: %f ",-lever_z);
 							}						
-if (sonar_offset_x != 0.0 || sonar_offset_y != 0.0 || sonar_offset_z != 0.0
-|| lever_x != 0.0 || lever_y != 0.0 || lever_z != 0.0)
-fprintf(stderr,"\n");
+//if (sonar_offset_x != 0.0 || sonar_offset_y != 0.0 || sonar_offset_z != 0.0
+//|| lever_x != 0.0 || lever_y != 0.0 || lever_z != 0.0)
+//fprintf(stderr,"\n");
 						}
 					
 					/* if attitude changed apply rigid rotations to the bathymetry */
 					if (attitude_changed == MB_YES)
-						{
+						{				
+						/* add heave and draft */
+						depth_offset_use = heave + draft;
+						depth_offset_org = heave + draft_org;
+
 						/* loop over the beams */
 						for (i=0;i<beams_bath;i++)
 							{
@@ -1962,10 +1966,6 @@ fprintf(stderr,"\n");
 									fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
 									fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
 									}
-				
-								/* add heave and draft */
-								depth_offset_use = heave + draft;
-								depth_offset_org = heave + draft_org;
 				
 								/* strip off heave + draft */
 								bath[i] -= depth_offset_org;

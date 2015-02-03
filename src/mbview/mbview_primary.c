@@ -20,35 +20,6 @@
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
  *
- * $Log: mbview_primary.c,v $
- * Revision 5.8  2008/05/16 22:59:42  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.7  2007/10/08 16:32:08  caress
- * Code status as of 8 October 2007.
- *
- * Revision 5.6  2007/06/17 23:27:30  caress
- * Added NBeditviz.
- *
- * Revision 5.5  2006/01/24 19:21:32  caress
- * Version 5.0.8 beta.
- *
- * Revision 5.4  2005/11/05 01:11:47  caress
- * Much work over the past two months.
- *
- * Revision 5.3  2005/02/18 07:32:55  caress
- * Fixed nav display and button sensitivity.
- *
- * Revision 5.2  2005/02/08 22:37:42  caress
- * Heading towards 5.0.6 release.
- *
- * Revision 5.0  2003/12/02 20:38:33  caress
- * Making version number 5.0
- *
- * Revision 1.2  2003/11/25 01:43:18  caress
- * MBview version generated during EW0310.
- *
- *
  */
 /*------------------------------------------------------------------------------*/
 
@@ -251,7 +222,7 @@ int mbview_updateprimarygrid(int verbose, size_t instance,
 
 {
 	/* local variables */
-	char	*function_name = "mbview_setprimarygrid";
+	char	*function_name = "mbview_updateprimarygrid";
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -342,7 +313,7 @@ int mbview_updateprimarygridcell(int verbose, size_t instance,
 
 {
 	/* local variables */
-	char	*function_name = "mbview_setprimarygrid";
+	char	*function_name = "mbview_updateprimarygridcell";
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;

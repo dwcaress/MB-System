@@ -714,44 +714,47 @@ $xoffset = ($width - $plot_width
 $yoffset = ($height - $plot_height
 	- $space_bottom - $space_top) / 2 + $space_bottom;
 
+# if length scale bar requested check to see if map center needs to be defined
+if ($length_scale && $length_scale =~ /\S+center\S+/)
+        {
+        # add map lon lat (or x y) center to the length scale argument
+        ($a, $c) = $length_scale =~ /(\S+)center(\S+)/;
+        $xcen = 0.5 * ($xmin + $xmax);
+        $ycen = 0.5 * ($ymin + $ymax);
+        $b = "$xcen/$ycen";
+        $length_scale = "$a$b$c";
+        }
+
 # come up with the filenames
 $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
-$gmtfile = "gmtdefaults4\$\$";
+$gmtfile = "gmt.conf\$\$";
 
 # set some gmtisms
 $first = "-X\$X_OFFSET -Y\$Y_OFFSET -V >! \$PS_FILE";
 
 # set macro gmt default settings
-$gmt_def = "MEASURE_UNIT/inch";
+$gmt_def = "PROJ_LENGTH_UNIT/inch";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}+";
+$gmt_def = "PS_MEDIA/$page_gmt_name{$pagesize}";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "ANOT_FONT/Helvetica";
+$gmt_def = "FONT_ANNOT_PRIMARY/$page_anot_font{$pagesize},Helvetica,black";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "LABEL_FONT/Helvetica";
+$gmt_def = "FONT_ANNOT_SECONDARY/$page_anot_font{$pagesize},Helvetica,black";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "HEADER_FONT/Helvetica";
+$gmt_def = "FONT_LABEL/$page_anot_font{$pagesize},Helvetica,black";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "ANOT_FONT_SIZE/$page_anot_font{$pagesize}";
+$gmt_def = "FONT_TITLE/$page_header_font{$pagesize},Helvetica,black";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "LABEL_FONT_SIZE/$page_anot_font{$pagesize}";
+$gmt_def = "PS_PAGE_ORIENTATION/LANDSCAPE";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "HEADER_FONT_SIZE/$page_header_font{$pagesize}";
+$gmt_def = "COLOR_BACKGROUND/black";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "FRAME_WIDTH/$frame_size";
+$gmt_def = "COLOR_FOREGROUND/white";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "TICK_LENGTH/$tick_size";
+$gmt_def = "COLOR_NAN/white";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "PAGE_ORIENTATION/LANDSCAPE";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "COLOR_BACKGROUND/0/0/0";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "COLOR_FOREGROUND/255/255/255";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "COLOR_NAN/255/255/255";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "PLOT_DEGREE_FORMAT/ddd:mm";
+$gmt_def = "FORMAT_GEO_MAP/$degree_format";
 push(@gmt_macro_defs, $gmt_def);
 
 # open the shellscript file
@@ -781,12 +784,12 @@ printf FCMD "set Y_OFFSET        = %1.5g\n", $yoffset;
 # Reset GMT defaults, saving old defaults
 print FCMD "#\n# Save existing GMT defaults\n";
 print FCMD "echo Saving GMT defaults...\n";
-print FCMD "gmtdefaults -L >! $gmtfile\n";
+print FCMD "gmt gmtdefaults >! $gmtfile\n";
 print FCMD "#\n# Set new GMT defaults\n";
 print FCMD "echo Setting new GMT defaults...\n";
 foreach $gmt_def (@gmt_macro_defs) {
 	($gmt_par, $gmt_var) = $gmt_def =~ /^([^\/]+)\/(.+)/;
-	print FCMD "gmtset $gmt_par $gmt_var\n";
+	print FCMD "gmt gmtset $gmt_par $gmt_var\n";
 	}
 
 # Reset GMT defaults as per user commands
@@ -796,7 +799,7 @@ if (@gmt_defs)
 	print FCMD "echo Setting user defined GMT defaults...\n";
 	foreach $gmt_def (@gmt_defs) {
 		($gmt_par, $gmt_var) = $gmt_def =~ /^([^\/]+)\/(.+)/;
-		print FCMD "gmtset $gmt_par $gmt_var\n";
+		print FCMD "gmt gmtset $gmt_par $gmt_var\n";
 		}
 	}
 
@@ -838,32 +841,32 @@ if ($nlabels < 3)
 # set basemap axes annotation
 if ($tick_info)
 	{
-	$axes = $tick_info;
-	if (!($tick_info =~ /.*:\..*/))
-		{
-		$axes = "$axes:.\"$tlabel\":";
-		}
+	$axes = "-B$tick_info";
 	}
 elsif ($projection =~ /^[Xx].*/ && !$geographic)
 	{
 	# figure out some reasonable tick intervals for the basemap
 	&GetBaseTickLinear;
-	$axes = "$base_tick_x:\"$xlabel\":/$base_tick_y:\"$ylabel\"::.\"$tlabel\":";
+	$axes = "-Bx$base_tick_x+l\"$xlabel\" -By$base_tick_y+l\"$ylabel\"";
 	}
 else
 	{
 	# figure out some reasonable tick intervals for the basemap
 	&GetBaseTick;
-	$axes = "$base_tick:\"$xlabel\":/$base_tick:\"$ylabel\"::.\"$tlabel\":";
+	$axes = "-B$base_tick";
+	}
+if ($tlabel)
+	{
+	$axes = "$axes -B+t\"$tlabel\"";
 	}
 
 # do histogram plot
 printf FCMD "#\n# Make histogram\n";
 printf FCMD "echo Running pshistogram...\n";
-printf FCMD "pshistogram $file_data \\\n\t";
+printf FCMD "gmt pshistogram $file_data \\\n\t";
 printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 printf FCMD "-R\$MAP_REGION \\\n\t";
-printf FCMD "-B$axes \\\n\t";
+printf FCMD "$axes \\\n\t";
 printf FCMD "-W$cellwidth -Z1 \\\n\t";
 if ($pen)
 	{
@@ -909,7 +912,7 @@ if (! $save_temp_files) {
 # reset GMT defaults
 print FCMD "#\n# Reset GMT default fonts\n";
 print FCMD "echo Resetting GMT fonts...\n";
-print FCMD "/bin/mv $gmtfile .gmtdefaults4\n";
+print FCMD "/bin/mv $gmtfile gmt.conf\n";
 
 # display image on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";
@@ -1203,16 +1206,6 @@ $width_max_portrait = $page_width_in{$pagesize}
 		- $space_left - $space_right;
 $height_max_portrait = $page_height_in{$pagesize}
 		- $space_bottom - $space_top;
-$frame_size = 0.075;
-if (($frame_size / $height_max_portrait) > 0.01)
-	{
-	$frame_size = 0.01 * $height_max_portrait;
-	}
-$tick_size = 0.075;
-if (($tick_size / $height_max_portrait) > 0.01)
-	{
-	$tick_size = 0.01 * $height_max_portrait;
-	}
 }
 #-----------------------------------------------------------------------
 sub GetProjection {

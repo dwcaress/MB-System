@@ -68,7 +68,6 @@ $(BINDIR)/mbeditviz: mbeditviz_main.o \
 		$(PROJLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbbsio.a  \
-		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a \
 		$(GSFLIB) \
 		$(GMTLIBDIR)/libgmt.a \

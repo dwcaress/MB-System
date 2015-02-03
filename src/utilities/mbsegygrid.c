@@ -20,61 +20,6 @@
  * Author:	D. W. Caress
  * Date:	June 12, 2004
  *
- * $Log: mbsegygrid.c,v $
- * Revision 5.16  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.15  2008/09/11 20:20:14  caress
- * Checking in updates made during cruise AT15-36.
- *
- * Revision 5.14  2007/10/08 16:48:07  caress
- * State of the code on 8 October 2007.
- *
- * Revision 5.13  2006/12/15 21:42:49  caress
- * Incremental CVS update.
- *
- * Revision 5.12  2006/08/09 22:41:27  caress
- * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
- *
- * Revision 5.11  2006/06/22 04:45:43  caress
- * Working towards 5.1.0
- *
- * Revision 5.10  2006/06/16 19:30:58  caress
- * Check in after the Santa Monica Basin Mapping AUV Expedition.
- *
- * Revision 5.9  2006/04/19 18:30:34  caress
- * Fixed application of gain below seafloor.
- *
- * Revision 5.8  2006/04/11 19:19:30  caress
- * Various fixes.
- *
- * Revision 5.7  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.6  2005/06/15 15:35:01  caress
- * Added capability to scale shot to distance and time to depth. Also added -MGQ100 to the mbm_grdplot arguments so that the seismic image is more nicely displayed by grdimage.
- *
- * Revision 5.5  2005/06/04 05:59:26  caress
- * Added a time-varying gain option.
- *
- * Revision 5.4  2004/11/08 05:49:17  caress
- * Fixed problem with decimation.
- *
- * Revision 5.3  2004/10/06 19:10:52  caress
- * Release 5.0.5 update.
- *
- * Revision 5.2  2004/09/16 01:01:12  caress
- * Fixed many things.
- *
- * Revision 5.1  2004/07/15 19:33:56  caress
- * Improvements to support for Reson 7k data.
- *
- * Revision 5.0  2004/06/18 04:06:05  caress
- * Adding support for segy i/o and working on support for Reson 7k format 88.
- *
- *
- *
- *
  */
 
 /* standard include files */
@@ -87,14 +32,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/* GMT include files */
-#include "gmt.h"
-
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_define.h"
 #include "mb_segy.h"
+#include "mb_aux.h"
 
 /* local options */
 #define MBSEGYGRID_USESHOT		0
@@ -117,13 +60,6 @@
 /* NaN value */
 float	NaN;
 
-int write_cdfgrd(int verbose, char *outfile, float *grid,
-		int nx, int ny,
-		double xmin, double xmax, double ymin, double ymax,
-		double zmin, double zmax, double dx, double dy,
-		char *xlab, char *ylab, char *zlab, char *titl,
-		char *projection, int argc, char **argv,
-		int *error);
 int get_segy_limits(int verbose,
 		char	*segyfile,
 		int	*tracemode,
@@ -291,7 +227,7 @@ int main (int argc, char **argv)
 	segyfile[0] = '\0';
 
 	/* get NaN value */
-	GMT_make_fnan(NaN);
+	MB_MAKE_FNAN(NaN);
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:F:f:G:g:I:i:O:o:R:r:S:s:T:t:VvW:w:Hh")) != -1)
@@ -1099,7 +1035,8 @@ igainstart,igainend,tmax,factor);*/
 		}
 	strcpy(zlabel, "Trace Signal");
 	sprintf(title, "Seismic Grid from %s", segyfile);
-	status = write_cdfgrd(verbose, gridfile, grid,
+	status = mb_write_gmt_grd(verbose, gridfile, grid,
+		NaN, 
 		ngridx, ngridy,
 		xmin, xmax, ymin, ymax,
 		gridmintot, gridmaxtot, dx, dy,
@@ -1311,139 +1248,6 @@ int get_segy_limits(int verbose,
 		fprintf(outfp,"dbg2       startlat:   %f\n",*startlat);
 		fprintf(outfp,"dbg2       endlon:     %f\n",*endlon);
 		fprintf(outfp,"dbg2       endlat:     %f\n",*endlat);
-		fprintf(outfp,"dbg2       error:      %d\n",*error);
-		fprintf(outfp,"dbg2  Return status:\n");
-		fprintf(outfp,"dbg2       status:     %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function write_cdfgrd writes output grid to a
- * GMT version 2 netCDF grd file
- */
-int write_cdfgrd(int verbose, char *outfile, float *grid,
-		int nx, int ny,
-		double xmin, double xmax, double ymin, double ymax,
-		double zmin, double zmax, double dx, double dy,
-		char *xlab, char *ylab, char *zlab, char *titl,
-		char *projection, int argc, char **argv,
-		int *error)
-{
-	char	*function_name = "write_cdfgrd";
-	int	status = MB_SUCCESS;
-	struct GRD_HEADER grd;
-	double	w, e, s, n;
-#ifdef GMT_MINOR_VERSION
-	GMT_LONG	pad[4];
-#else
-	int	pad[4];
-#endif
-	time_t	right_now;
-	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	char	remark[MB_PATH_MAXLINE];
-	char	*ctime();
-	char	*getenv();
-	int	i;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(outfp,"\ndbg2  Function <%s> called\n",
-			function_name);
-		fprintf(outfp,"dbg2  Input arguments:\n");
-		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
-		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %p\n",(void *)grid);
-		fprintf(outfp,"dbg2       nx:         %d\n",nx);
-		fprintf(outfp,"dbg2       ny:         %d\n",ny);
-		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
-		fprintf(outfp,"dbg2       xmax:       %f\n",xmax);
-		fprintf(outfp,"dbg2       ymin:       %f\n",ymin);
-		fprintf(outfp,"dbg2       ymax:       %f\n",ymax);
-		fprintf(outfp,"dbg2       zmin:       %f\n",zmin);
-		fprintf(outfp,"dbg2       zmax:       %f\n",zmax);
-		fprintf(outfp,"dbg2       dx:         %f\n",dx);
-		fprintf(outfp,"dbg2       dy:         %f\n",dy);
-		fprintf(outfp,"dbg2       xlab:       %s\n",xlab);
-		fprintf(outfp,"dbg2       ylab:       %s\n",ylab);
-		fprintf(outfp,"dbg2       zlab:       %s\n",zlab);
-		fprintf(outfp,"dbg2       titl:       %s\n",titl);
-		fprintf(outfp,"dbg2       argc:       %d\n",(int)argc);
-		fprintf(outfp,"dbg2       *argv:      %p\n",(void *)*argv);
-		}
-
-	/* inititialize grd header */
-	GMT_program = program_name;
-	GMT_grd_init (&grd, 1, argv, FALSE);
-	GMT_io_init ();
-	GMT_grdio_init ();
-	GMT_make_fnan (GMT_f_NaN);
-	GMT_make_dnan (GMT_d_NaN);
-
-	/* copy values to grd header */
-	grd.nx = nx;
-	grd.ny = ny;
-	grd.node_offset = 1; /* pixel registration */
-	grd.x_min = xmin;
-	grd.x_max = xmax;
-	grd.y_min = ymin;
-	grd.y_max = ymax;
-	grd.z_min = zmin;
-	grd.z_max = zmax;
-	grd.x_inc = dx;
-	grd.y_inc = dy;
-	grd.z_scale_factor = 1.0;
-	grd.z_add_offset = 0.0;
-	strcpy(grd.x_units,xlab);
-	strcpy(grd.y_units,ylab);
-	strcpy(grd.z_units,zlab);
-	strcpy(grd.title,titl);
-	strcpy(grd.command,"\0");
-	right_now = time((time_t *)0);
-	strcpy(date,ctime(&right_now));
-        date[strlen(date)-1] = '\0';
-	if ((user_ptr = getenv("USER")) == NULL)
-		user_ptr = getenv("LOGNAME");
-	if (user_ptr != NULL)
-		strcpy(user,user_ptr);
-	else
-		strcpy(user, "unknown");
-	gethostname(host,MB_PATH_MAXLINE);
-	sprintf(remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
-		projection,program_name,MB_VERSION,user,host,date);
-	strncpy(grd.remark, remark, 159);
-
-	/* set extract wesn,pad */
-	w = 0.0;
-	e = 0.0;
-	s = 0.0;
-	n = 0.0;
-	for (i=0;i<4;i++)
-		pad[i] = 0;
-
-	/* write grid to GMT netCDF grd file */
-/*for (i=0;i<nx;i++)
-for (j=0;j<ny;j++)
-{
-k = j * nx + i;
-fprintf(outfp,"%d %d %d %f\n",i,j,k,grid[k]);
-}*/
-	GMT_write_grd(outfile, &grd, grid, w, e, s, n, pad, FALSE);
-
-	/* free GMT memory */
-	GMT_free ((void *)GMT_io.skip_if_NaN);
-	GMT_free ((void *)GMT_io.in_col_type);
-	GMT_free ((void *)GMT_io.out_col_type);
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(outfp,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(outfp,"dbg2  Return values:\n");
 		fprintf(outfp,"dbg2       error:      %d\n",*error);
 		fprintf(outfp,"dbg2  Return status:\n");
 		fprintf(outfp,"dbg2       status:     %d\n",status);

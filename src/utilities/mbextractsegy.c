@@ -20,70 +20,6 @@
  * Author:	D. W. Caress
  * Date:	April 18, 2004
  *
- * $Log: mbextractsegy.c,v $
- * Revision 5.20  2009/03/13 07:05:58  caress
- * Release 5.1.2beta02
- *
- * Revision 5.19  2009/03/02 18:54:40  caress
- * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
- *
- * Revision 5.18  2008/05/16 22:44:37  caress
- * Release 5.1.1beta18
- *
- * Revision 5.17  2007/11/16 17:53:03  caress
- * Fixes applied.
- *
- * Revision 5.16  2007/10/08 16:48:07  caress
- * State of the code on 8 October 2007.
- *
- * Revision 5.15  2007/03/02 18:22:54  caress
- * When extracting lines using a route file, now omits data between where a waypoint is crossed and the sonar comes onto the next line, thus eliminating data during turns.
- *
- * Revision 5.14  2006/12/15 21:42:49  caress
- * Incremental CVS update.
- *
- * Revision 5.13  2006/11/26 09:42:01  caress
- * Making distribution 5.1.0.
- *
- * Revision 5.12  2006/11/10 22:36:05  caress
- * Working towards release 5.1.0
- *
- * Revision 5.11  2006/08/09 22:41:27  caress
- * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
- *
- * Revision 5.10  2006/06/22 04:45:43  caress
- * Working towards 5.1.0
- *
- * Revision 5.9  2006/06/16 19:30:58  caress
- * Check in after the Santa Monica Basin Mapping AUV Expedition.
- *
- * Revision 5.8  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.7  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.6  2005/06/04 06:07:02  caress
- * Fixed output of a single segy file deriving from a list
- * of input swath files.
- *
- * Revision 5.5  2004/10/06 19:10:52  caress
- * Release 5.0.5 update.
- *
- * Revision 5.4  2004/09/16 01:01:12  caress
- * Fixed many things.
- *
- * Revision 5.3  2004/07/27 19:48:35  caress
- * Working on handling subbottom data.
- *
- * Revision 5.2  2004/07/15 19:33:57  caress
- * Improvements to support for Reson 7k data.
- *
- * Revision 5.1  2004/06/18 05:20:05  caress
- * Working on adding support for segy i/o and for Reson 7k format 88.
- *
- * Revision 5.0  2004/05/21 23:50:44  caress
- * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
  *
  */
 
@@ -242,7 +178,7 @@ int main (int argc, char **argv)
 	double	linebearing;
 	int	nshot;
 	int	nshotmax;
-	int	nplot;
+	int	nplot = 0;
 	double	xscale = 0.01;
 	double	yscale = 50.0;
 	double	maxwidth = 30.0;
@@ -933,7 +869,7 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				    nplot = nwrite / nshotmax;
 				    if (nwrite % nshotmax > 0)
 		    			nplot++;
-
+//fprintf(stderr,"nwrite:%d nshotmax:%d nplot:%d\n",nwrite,nshotmax,nplot);
 				    /* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
 				      then make section plots using only the sweep needed for each section alone */
 				    delay = seafloordepthmin / 750.0;
@@ -1038,7 +974,7 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				}
 			else
 				rangelast = range;
-			if (verbose > 0)
+			if (verbose > 0 && nroutepoint > 0)
 				fprintf(stderr,"> activewaypoint:%d linenumber:%d time_d:%f range:%f   lon: %f %f   lat: %f %f oktowrite:%d rangeok:%d kind:%d\n",
 					activewaypoint, linenumber, time_d, range, navlon,
 					routelon[activewaypoint], navlat, routelat[activewaypoint],
@@ -1248,6 +1184,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					seafloordepthmaxplot[nplot] = MAX(seafloordepthmaxplot[nplot], 0.01 * ((double) segytraceheader.src_wbd));
 					}
 				}
+
 			/* output info */
 			nread++;
 			if (nread % 10 == 0 && verbose > 0)
@@ -1327,6 +1264,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					    error = MB_ERROR_WRITE_FAIL;
 					    }
 				    }
+//fprintf(stderr,"J\n");
 
 				/* insert segy header data into output buffer */
 				index = 0;
