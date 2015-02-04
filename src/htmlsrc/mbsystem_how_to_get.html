@@ -339,27 +339,36 @@ The configure command line options controlling the locations of prerequisites ar
 --with-otps-dir		Location of OTPS installation (optional)
 </pre>
 </ul>
-<p>The MB-System distribution includes the source code for the GSF and the PROJ4 packages. By default, the configure script seeks to build the GSF library as libmbgsf and seeks to link with a libproj built external to MB-System. Configure accepts commands to build MB-System without GSF or to use the included PROJ4 source.</p>
+<p>The MB-System distribution includes the source code for the PROJ4 package. By default, the configure script seeks to link with a libproj built external to MB-System. Configure accepts the command --enable-bundledproj to build MB-System using the included PROJ4 source.</p>
 <ul>
 <pre>
---without-gsf			Build without including or supporting GSF
-						The default is to build the bundled 
-						gsf library as libmbgsf and link with it
 --enable-bundledproj	Build using bundled proj package - the
 						default is to link with libproj
 </pre>
 </ul>
 <p>Note that specification of FFTW3, Motif, and OpenGL is optional. If the configure script does not find these packages and the user does not specify their locations, then some MB-System programs will not be built. Lack of FFTW3 means that mbsegypsd is not built. No OpenGL results in the visualization programs mbgrdviz and mbeditviz not being built. Lack of Motif means that no graphical programs of any type are built. </p>
+<p>Regardless of where the MB-System programs are installed, users must have that location included in their path environment variable in order to execute the programs from a command line. If MB-System has been installed using a package manager or installed manually into a common location (e.g. /usr/local/bin), the user path probably already references the needed location. If altering the user path variable is required, it can be accomplished by editing the initialization files hidden in the user's home directory. Which files need to be edited depends on which command line shell is being used. If the user works with <em>csh</em>, then the <em>.cshrc</em> and <em>.login </em>files need to be changed. If the shell is <em>bash</em>, then the <em>.bashrc</em> and <em>.profile</em> files must be altered. See the manual pages for the relevant shell program to determine how to set the user environment. The
+executable
+<em>perl</em> must also be available in the user's path for most of the macros
+to
+work.</p>
+<p>Most users will also wish to specify which program they generally
+use
+to view Postscript plots on their screen. This parameter is set
+
+with the mbdefaults program (see the mbdefaults manual page for
+details).
+Popular open source options for Postscript display include ghostview and gv (gv is recommended). The postscript plots can also be imported into proprietary tools like Adobe Illustrator, Adobe Acrobat, or Preview on MacOs X. If one is working in a Unix museum, pageview works well on Sun workstations running Solaris, and xpsview is great on on Silicon Graphics machines running Irix.</p>
 
 <strong>Mac OS X</strong>
-<p>Many MacOsX users have their NetCDF, GMT, FFTW3, and OpenMotif installations through the Fink package manager, which installs packages in /sw. The configure script fails to find packages in /sw, and so the user must explicitly specify those packages. The OTPS tide modeling software used by mbotps is not packaged in Fink, and so must be manually installed by a user if mbotps is to work correctly. Installation of MB-System on a Mac running MacOsX 10.9 will likely use a configure command that looks something like:</p>
+<p>Many MacOsX users have their NetCDF, GMT5, FFTW3, and OpenMotif installations through the Fink package manager, which installs packages in /sw. The configure script fails to find packages in /sw, and so the user must explicitly specify those packages. The OTPS tide modeling software used by mbotps is not packaged in Fink, and so must be manually installed by a user if mbotps is to work correctly. Installation of MB-System on a Mac running MacOsX 10.9 or 10.10 will likely use a configure command that looks something like:</p>
 <ul>
 <pre>
 sudo CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 ./configure \
     --with-netcdf-include=/sw/include \
     --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/sw/include \
+    --with-gmt-include=/sw/include/gmt5 \
     --with-gmt-lib=/sw/lib \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
@@ -367,7 +376,7 @@ sudo CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib \
-    --with-otps-dir=/usr/local/tides/OTPS2
+    --with-otps-dir=/usr/local/OTPS2
 </pre>
 </ul>
 <p>As shown here, one can also add to the commands seen by the compiler ("CFLAGS") and linker ("LDFLAGS") if desired or necessary by prefacing the configure command with arguments setting the environment variables CFLAGS and LDFLAGS. Here the current location of X11 header files and libraries must be specified because the new (to MacOsX) location of X11 in /opt is not known to the configure script. Another example is that in order to compile MB-System for user with a debugger, all compiler commands must include the "-g" argument. So, to enable use of the gdb debugger, the configure command becomes:</p>
@@ -377,7 +386,7 @@ sudo CFLAGS="-g -I/opt/X11/include -L/opt/X11/lib" \
 ./configure \
     --with-netcdf-include=/sw/include \
     --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/sw/include \
+    --with-gmt-include=/sw/include/gmt5 \
     --with-gmt-lib=/sw/lib \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
@@ -385,7 +394,7 @@ sudo CFLAGS="-g -I/opt/X11/include -L/opt/X11/lib" \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib \
-    --with-otps-dir=/usr/local/tides/OTPS2
+    --with-otps-dir=/usr/local/OTPS2
 </pre>
 </ul>
 
@@ -463,108 +472,6 @@ install MB-System in /usr/local, then only a simple call to configure is require
 sudo ./configure
 </pre></ul>
 
-<center>
-  <p></p>
-<hr width="67%">
-</center>
-<center>
-<p><a name="MB-install-old"></a><b><font size="+2">How to Install MB-System Using the Install_makefiles Script</font></b></p>
-</center>
-<p>For over two decades, the only means to build MB-System distributions was a crude Perl script called install_makefiles that needed to be edited to set the operating system and the locations of prerequisite packages. Although a autoconf-type configure script is now provided, as described above, the old install_makefiles script is still included in the MB-System distribution and remains an alternative means to build and install MB-System.</p>
-<p>In order to
-use this alternative build system, you must edit the perl script
-mbsystem/install_makefiles, and set a number of parameters to reflect the system architecture, the location of the installation, and the locations of certain required libraries.
-This script will read template makefiles in the MB-System
-source
-directories and create makefiles with the correct dependencies, compile flags, and link flags. The important parameters to be set in install_makefiles are listed below. The install_makefiles script includes comments suggesting parameters to use for many common computer systems.</p>
-<p>These parameters must be set for all installations:</p>
-<ul>
-  <li> MBSYSTEM_HOME	- Absolute path to the directory containing install_makefiles.</li>
-  <li>OS		- Operating system (Recognized options are: DARWIN, LINUX, CYGWIN, SUN, IRIX, IRIX64, SOLARIS, HPUX, LYNX, CYGWIN or OTHER).</li>
-  <li>CFLAGS		- Compile flags for C source files. These vary with different operating systems and installations.</li>
-  <li>LFLAGS		- Load flags for all object files.</li>
-  <li>NETCDFLIBDIR	- Location of NetCDF library libnetcdf.a</li>
-  <li>NETCDFINCDIR	- Location of NetCDF include file netcdf.h</li>
-  <li>GMTLIBDIR-	Location of GMT libraries libgmt.a and libpsl.a</li>
-  <li>GMTINCDIR	- Location of GMT include files gmt.h, grd.h, and pslib.h</li>
-  <li>LEVITUS		- Path of Levitus global water properties data file. This is usually $MBSYSTEM_HOME/share/annual.</li>
-  <li>PROJECTIONS	- Path of PROJ4 projections database. This is usually $MBSYSTEM_HOME/share/Projections.dat.<br>
-  </li>
-</ul>
-<p>These two parameters are required to build the graphical tools mbedit, mbnavedit, mbvelocitytool, mbnavadjust,                                mbgrdviz, and mbeditviz. If these parameters are not both set, no graphical tools will be built.</p>
-<ul>
-  <li>MOTIFINCDIR	- Location of Motif include files.</li>
-  <li>MOTIFLIBS	- X11 and Motif libraries required for graphical tools.<br>
-  </li>
-</ul>
-<p>This parameter must be set to build the  openGL tools mbgrdviz and mbeditviz:</p>
-<ul>
-  <li>OPENGLLIBS	- OpenGL libraries required for new graphical tools, including mbgrdviz and mbeditviz. If this parameter is not set, mbgrdviz and mbeditviz will not be built<br>
-  </li>
-</ul>
-<p>This parameter must be set to build the sonogram calculation program mbsegypsd:</p>
-<ul>
-  <li>FFTWLIBDIR	- location of FFTW library providing fast Fourier transform.</li>
-  <li>FFTWINCDIR - location of FFTW include files</li>
-</ul>
-<p>This parameter must be set for the tidal modeling program mbotps to work:</p>
-<ul>
-  <li>OTPSDIR	- location of OTPSnc tide prediction program predict_tide.</li>
-</ul>
-<p>This optional parameter can be used to specify a  non-default C compiler:</p>
-<ul>
-  <li>CC		- C compiler to be used.<br>
-  </li>
-</ul>
-<p>These optional parameters can be used to  specify linking with an independent installation of the PROJ4 library. In this case, the PROJ4 library included with MB-System will not be built.</p>
-<ul>
-  <li>PROJLIB         - Path to PROJ4 library (usually libproj.a)</li>
-  <li>PROJINCDIR      - Location of PROJ4 include file proj_api.h<br>
-  </li>
-</ul>
-<p>These optional parameters can be used to  specify linking with an independent installation of the GSF library. In this case, the GSF library included with MB-System will not be built.</p>
-<ul>
-  <li>GSFLIB          - Path to GSF library (usually libgsf.a)</li>
-  <li>GSFINCDIR       - Location of GSF include file gsf.h</li>
-</ul>
-<p>To
-  execute
-  install_makefiles, do the following:</p>
-<ul>
-  <pre>% cd mbsystem-5.3.1955 </pre>
-  <pre>% install_makefiles</pre>
-</ul>
-<p>Because install_makefiles is a perl script, the executable perl must
-be available in the installer's path. Once install_makefiles has been
-correctly
-configured and run, give the command "make all" to generate the
-executable programs:</p>
-<ul>
-  <pre>% make all</pre>
-</ul>
-<p>The make command will descend recursively down through the directory
-structure, compiling source files, linking object files, and copying
-executables
-and manual pages to the appropriate directories. The executables will
-be
-placed in mbsystem-5.1.3/bin, the libraries in mbsystem-5.1.3/lib, and
-the manual pages
-in mbsystem-5.1.3/man/man1.</p>
-<p>Naturally, in order for users to use the MB-System utilities, the
-directory
-containing the executables must be included in their path. Altering the user path variable is generally accomplished by editing the initialization files hidden in the user's home directory. Which files need to be edited depends on which command line shell is being used. If the user works with <em>csh</em>, then the <em>.cshrc</em> and <em>.login </em>files need to be changed. If the shell is <em>bash</em>, then the <em>.bashrc</em> and <em>.profile</em> files must be altered. See the manual pages for the relevant shell program to determine how to set the user environment. The
-executable
-<em>perl</em> must also be available in the user's path for most of the macros
-to
-work.</p>
-<p>Most users will also wish to specify which program they generally
-use
-to view Postscript plots on their screen. This parameter is set
-
-with the mbdefaults program (see the mbdefaults manual page for
-details).
-Popular open source options for Postscript display include ghostview and gv. The postscript plots can also be imported into proprietary tools like Adobe Illustrator, Adobe Acrobat, or Preview on MacOs X. On old Unix machines,  pageview worked well on Sun workstations running Solaris, and xpsview on on Silicon
-Graphics machines running Irix.</p>
 <center>
 <p><br>
 Last Updated: $Id$</p>

@@ -10,6 +10,21 @@
 </HEAD>
 <BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
 
+<H1 ALIGN=CENTER>What's New in MB-System Version 5.5</H1>
+
+<P>The version 5.5.x releases of MB-System includes a number of changes and
+improvements relative to the earlier version 5 releases. The most significant change is integration with GMT 5 in place of the deprecated GMT versions. A detailed listing of bug fixes and other changes is found in the <a href="ChangeLog.txt">ChangeLog</a> file. The most prominent particulars follow: </P>
+
+<UL>
+  <LI>Integration with GMT 5</LI>
+  
+  <UL>
+  <LI>The GMT-compatible MB-System programs mbcontour, mbswath, and mbgrdtiff are now plug-in GMT modules built as a shared library rather than stand-alone MB-System programs.</LI>
+  <LI>The MB-System plot macros mbm_plot, mbm_grdplot, mbm_grd3dplot, mbm_xyplot, and mbm_histplot now generate plotting scripts that work with GMT5 but will not work with GMT 4.</LI>
+  <LI>There is no backward compatibility with GMT 4.</LI>
+  <LI>The old &quot;install_makefiles&quot; build system has been removed; the configure script introduced with the 5.4 versions is now the only option for building MB-System.</LI>
+  </UL>
+</UL>  
 <H1 ALIGN=CENTER>What's New in MB-System Version 5.4</H1>
 
 <P>The version 5.4.x releases of MB-System includes a number of changes and
@@ -32,6 +47,7 @@ improvements relative to the earlier version 5 releases. The most significant ch
   <LI>3DatDepth lidar data format is supported as format 231 (MBF_3DDEPTHP).</LI>
   <LI>Electronic Navigation Ltd. WASSP multibeam sonar data format supported as format 241 (MBF_WASSPENL).</LI>
   <LI>NGDC MGD77T data format for tab delimited underway marine geophysical data is supported as format 174 (MBF_MGD77TAB).</LI>
+  <LI>Photogrammetric topography from stereo pair photography supported as format 251 (MBF_PHOTGRAM).</LI>
   </UL>
 </UL>
 <UL>

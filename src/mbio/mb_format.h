@@ -2,7 +2,7 @@
  *    The MB-system:	mb_format.h	1/19/93
  *    $Id$
  *
- *    Copyright (c) 1993-2014 by
+ *    Copyright (c) 1993-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -379,9 +379,7 @@ int mbr_register_hsmdaraw(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error);
 int mbr_register_dsl120pf(int verbose, void *mbio_ptr, int *error);
 int mbr_register_dsl120sf(int verbose, void *mbio_ptr, int *error);
-#ifdef WITH_GSF
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error);
-#endif
 int mbr_register_mstiffss(int verbose, void *mbio_ptr, int *error);
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error);
 int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error);
@@ -1317,7 +1315,6 @@ int mbr_info_dsl120sf(int verbose,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
 			int *error);
-#ifdef WITH_GSF
 int mbr_info_gsfgenmb(int verbose,
 			int *system,
 			int *beams_bath_max,
@@ -1338,7 +1335,6 @@ int mbr_info_gsfgenmb(int verbose,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
 			int *error);
-#endif
 int mbr_info_mstiffss(int verbose,
 			int *system,
 			int *beams_bath_max,
