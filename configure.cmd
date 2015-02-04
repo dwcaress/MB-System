@@ -72,9 +72,6 @@ make uninstall (to remove a previously installed version)
 #------------------------
 #   Installation option:
 #------------------------
-#    --without-gsf         - build without including or supporting GSF
-#                            The default is to build the bundled 
-#                                gsf library as libmbgsf and link with it
 #    --enable-bundledproj  - build using bundled proj package - the
 #				default is to link with libproj
 #                                
@@ -82,28 +79,17 @@ make uninstall (to remove a previously installed version)
 # Configure script command line examples:
 #------------------------------------------------------------------------------
 
-# Build in place on a Mac 10.9 with prerequisites installed through Fink in /sw:
-sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
-./configure \
-    --prefix=/Users/caress/sandbox/mbsystem \
-    --with-netcdf-include=/sw/include \
-    --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/sw/include \
-    --with-gmt-lib=/sw/lib \
-    --with-fftw-include=/sw/include \
-    --with-fftw-lib=/sw/lib \
-    --with-motif-include=/sw/include \
-    --with-motif-lib=/sw/lib
+# Build in /usr/local on a Mac 10.9 or 10.10 with most prerequisites installed
+# through Fink in /sw, and the OTPS program predict_time located
+# in /usr/local/OTPS2.
+# Prerequisite Fink packages include gmt, netcdf, proj, fftw3, and gv:
 
-#------------------------------------------------------------------------------
-
-# Build in /usr/local on a Mac 10.9 with prerequisites installed through Fink in /sw:
 sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/usr/local \
     --with-netcdf-include=/sw/include \
     --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/sw/include \
+    --with-gmt-include=/sw/include/gmt5 \
     --with-gmt-lib=/sw/lib \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
@@ -111,22 +97,7 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib \
-    --with-otps-dir=/usr/local/tides/OTPS2
-
-#------------------------------------------------------------------------------
-
-# Build in ~/buildtest on a Mac 10.9 with prerequisites installed through Fink in /sw:
-sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
-./configure \
-    --prefix=/Users/caress/buildtest \
-    --with-netcdf-include=/sw/include \
-    --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/sw/include \
-    --with-gmt-lib=/sw/lib \
-    --with-fftw-include=/sw/include \
-    --with-fftw-lib=/sw/lib \
-    --with-motif-include=/sw/include \
-    --with-motif-lib=/sw/lib
+    --with-otps-dir=/usr/local/OTPS2
 
 #------------------------------------------------------------------------------
 
@@ -263,8 +234,6 @@ CFLAGS="-g -Wall -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib \
     --with-otps-dir=/usr/local/OTPS2
-#    --without-gsf \
-#    --enable-bundledproj
 
 make -j
 

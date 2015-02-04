@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.4.2222       February 3, 2015
   Version 5.4.2219       December 11, 2014
   Version 5.4.2218       December 4, 2014
   Version 5.4.2217       December 1, 2014
@@ -194,6 +195,27 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2222 (February 3, 2014)
+
+Install_makefiles: the old install_makefiles build system no longer 
+functions and has been removed.
+
+Mbgrid: When using the two-step weighted footprint slope algorithm, mbgrid
+only reads files on the second pass through the input datalist that contained
+useful data in the first pass.
+
+Major changes made to integrate MB-System with GMT5:
+  The code will no longer compile or work with GMT4.5.
+  Changes include:
+    -updating functions in libmbaux  that read and write GMT grids
+    -deletion of src/mbaux/mb_pslibface.c
+    -changes to all programs that read or write GMT grids,
+    -the former programs mbcontour, mbswath, and mbgrdtiff are now GMT5
+      modules built as part of a shared library.
+    -changes to all of the plot macros (e.g. mbm_grdplot) that make use of GMT
+
+Format 88 (MBF_RESON7KR): Update Reson 7k i/o module to handle TVG records.
 
 -----> 5.4.2219 (December 11, 2014)
 
