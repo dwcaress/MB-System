@@ -17,6 +17,7 @@ include_HEADERS = mb_config.h \
         mbsys_singlebeam.h mbsys_xse.h \
         mbsys_hs10.h \
         mbsys_atlas.h mbsys_surf.h \
+	mbsys_gsf.h mbf_gsfgenmb.h \
         mbsys_reson8k.h \
         mbsys_netcdf.h mbsys_navnetcdf.h \
         mbsys_reson7k.h mbsys_jstar.h \
@@ -44,23 +45,18 @@ include_HEADERS = mb_config.h \
         mbf_omghdcsj.h mbf_mgd77dat.h \
         mbf_mbarirov.h mbf_mbarrov2.h \
         mbf_mbpronav.h mbf_xtfr8101.h
-if BUILD_GSF
-  include_HEADERS += mbsys_gsf.h mbf_gsfgenmb.h
-endif
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS = -I@top_srcdir@/src/bsio \
 	-I@top_srcdir@/src/surf \
+	-I@top_srcdir@/src/gsf \
 	${libgmt_CPPFLAGS} \
 	${libnetcdf_CPPFLAGS}
 if BUILD_PROJ
   AM_CPPFLAGS += -I@top_srcdir@/src/proj
 else
   AM_CPPFLAGS += ${libproj_CPPFLAGS}
-endif
-if BUILD_GSF
-  AM_CPPFLAGS += -I@top_srcdir@/src/gsf
 endif
 
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
@@ -92,6 +88,7 @@ libmbio_la_SOURCES = \
                 mbsys_singlebeam.c mbsys_xse.c \
                 mbsys_hs10.c mbsys_atlas.c \
                 mbsys_surf.c mbsys_reson8k.c \
+		mbsys_gsf.c mbr_gsfgenmb.c \
                 mbsys_netcdf.c mbsys_navnetcdf.c \
                 mbsys_reson7k.c mbsys_jstar.c \
                 mbsys_image83p.c mbsys_hysweep.c \
@@ -136,16 +133,11 @@ libmbio_la_SOURCES = \
                 mbr_swplssxp.c mbr_3ddepthp.c \
 		mbr_wasspenl.c mbr_mgd77txt.c \
 		mbr_mgd77tab.c mbr_photgram.c
-if BUILD_GSF
-  libmbio_la_SOURCES += mbsys_gsf.c mbr_gsfgenmb.c
-endif
 
 libmbio_la_LIBADD = $(top_builddir)/src/bsio/libmbbsio.la \
                    $(top_builddir)/src/surf/libmbsapi.la \
+		   $(top_builddir)/src/gsf/libmbgsf.la \
 		   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${XDR_LIB}
-if BUILD_GSF
-  libmbio_la_LIBADD += $(top_builddir)/src/gsf/libmbgsf.la
-endif
 
 nodist_libmbio_la_SOURCES = projections.h
 

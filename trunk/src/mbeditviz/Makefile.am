@@ -7,12 +7,10 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	-I${top_srcdir}/src/mbview \
 	-I${top_srcdir}/src/mr1pr \
 	-I${top_srcdir}/src/surf \
+	-I${top_srcdir}/src/gsf \
 	${libgmt_CPPFLAGS} \
 	${libnetcdf_CPPFLAGS} \
 	${motif_CPPFLAGS} ${GL_CPPFLAGS}
-if BUILD_GSF
-  AM_CPPFLAGS += -I@top_srcdir@/src/gsf
-endif
 
 AM_LDFLAGS = 
 

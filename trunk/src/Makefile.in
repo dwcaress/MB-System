@@ -144,7 +144,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = gsf proj surf bsio mbio mbaux utilities gmt otps macros \
+DIST_SUBDIRS = proj gsf surf bsio mbio mbaux utilities gmt otps macros \
 	mbedit mbnavedit mbvelocitytool mbnavadjust mbview mbgrdviz \
 	mbeditviz man html ps share
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -322,9 +322,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_MOTIF_TRUE@XBUILD_SUB_MOTIF = mbedit mbnavedit mbvelocitytool mbnavadjust
 @BUILD_GL_TRUE@XBUILD_SUB_GL = mbview mbgrdviz mbeditviz
-@BUILD_GSF_TRUE@XBUILD_SUB_GSF = gsf
 @BUILD_PROJ_TRUE@XBUILD_SUB_PROJ = proj
-SUBDIRS = $(XBUILD_SUB_GSF) $(XBUILD_SUB_PROJ) surf bsio mbio mbaux \
+SUBDIRS = $(XBUILD_SUB_PROJ) gsf surf bsio mbio mbaux \
 	utilities gmt otps macros \
 	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL) \
 	man html ps share

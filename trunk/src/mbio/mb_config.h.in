@@ -103,9 +103,6 @@
 /* Turned on WIN32 define in config */
 #undef WIN32
 
-/* Build with GSF */
-#undef WITH_GSF
-
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
 #if defined AC_APPLE_UNIVERSAL_BUILD

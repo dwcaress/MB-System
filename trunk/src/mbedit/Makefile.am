@@ -4,17 +4,11 @@ AM_CFLAGS = ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	      -I${top_srcdir}/src/mbaux \
+	      -I${top_srcdir}/src/gsf \
 	      ${libnetcdf_CPPFLAGS} \
 	      ${motif_CPPFLAGS}
-if BUILD_GSF
-  AM_CPPFLAGS += -I@top_srcdir@/src/gsf
-endif
 
-AM_LDFLAGS = 
-
-if BUILD_GSF
-  AM_LDFLAGS += -L$(top_builddir)/src/gsf
-endif
+AM_LDFLAGS = -L$(top_builddir)/src/gsf
 
 LIBS = $(top_builddir)/src/mbio/libmbio.la \
        $(top_builddir)/src/mbaux/libmbaux.la \

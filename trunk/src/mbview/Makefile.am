@@ -8,13 +8,11 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
        -I${top_srcdir}/src/mbaux \
        -I${top_srcdir}/src/mr1pr \
        -I${top_srcdir}/src/surf \
+       -I${top_srcdir}/src/gsf \
        ${libgmt_CPPFLAGS} \
        ${libnetcdf_CPPFLAGS} \
        ${motif_CPPFLAGS} \
        ${GL_CPPFLAGS}
-if BUILD_GSF
-  AM_CPPFLAGS += -I${top_srcdir}/src/gsf
-endif
 
 libmbview_la_CFLAGS = -DMBVIEW_LIBRARY
 libmbview_la_LDFLAGS = -no-undefined -version-info 0:0:0

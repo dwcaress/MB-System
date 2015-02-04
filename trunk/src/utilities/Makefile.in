@@ -97,7 +97,6 @@ bin_PROGRAMS = mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
 	mbsegylist$(EXEEXT) mbset$(EXEEXT) mbsslayout$(EXEEXT) \
 	mbstripnan$(EXEEXT) mbsvplist$(EXEEXT) mbsvpselect$(EXEEXT) \
 	mbswplspreprocess$(EXEEXT) mbtime$(EXEEXT) $(am__EXEEXT_1)
-@BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/utilities
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp $(include_HEADERS)
@@ -148,8 +147,7 @@ mbclean_OBJECTS = $(am_mbclean_OBJECTS)
 mbclean_LDADD = $(LDADD)
 am_mbcopy_OBJECTS = mbcopy.$(OBJEXT)
 mbcopy_OBJECTS = $(am_mbcopy_OBJECTS)
-@BUILD_GSF_TRUE@mbcopy_DEPENDENCIES =  \
-@BUILD_GSF_TRUE@	${top_builddir}/src/gsf/libmbgsf.la
+mbcopy_DEPENDENCIES = ${top_builddir}/src/gsf/libmbgsf.la
 am_mbctdlist_OBJECTS = mbctdlist.$(OBJEXT)
 mbctdlist_OBJECTS = $(am_mbctdlist_OBJECTS)
 mbctdlist_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -217,11 +215,8 @@ mbpreprocess_OBJECTS = $(am_mbpreprocess_OBJECTS)
 mbpreprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbprocess_OBJECTS = mbprocess.$(OBJEXT)
 mbprocess_OBJECTS = $(am_mbprocess_OBJECTS)
-@BUILD_GSF_FALSE@mbprocess_DEPENDENCIES =  \
-@BUILD_GSF_FALSE@	${top_builddir}/src/mbaux/libmbaux.la
-@BUILD_GSF_TRUE@mbprocess_DEPENDENCIES =  \
-@BUILD_GSF_TRUE@	${top_builddir}/src/gsf/libmbgsf.la \
-@BUILD_GSF_TRUE@	${top_builddir}/src/mbaux/libmbaux.la
+mbprocess_DEPENDENCIES = ${top_builddir}/src/gsf/libmbgsf.la \
+	${top_builddir}/src/mbaux/libmbaux.la
 am_mbrollbias_OBJECTS = mbrollbias.$(OBJEXT)
 mbrollbias_OBJECTS = $(am_mbrollbias_OBJECTS)
 mbrollbias_LDADD = $(LDADD)
@@ -558,9 +553,13 @@ top_srcdir = @top_srcdir@
 @BUILD_FFTW_TRUE@FFTW_PROG = mbsegypsd
 include_HEADERS = levitus.h
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
-	${libgmt_CPPFLAGS} ${libnetcdf_CPPFLAGS} ${libfftw_CPPFLAGS} \
-	$(am__append_1)
+AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
+	      -I${top_srcdir}/src/mbaux \
+	      -I${top_srcdir}/src/gsf \
+	      ${libgmt_CPPFLAGS} \
+	      ${libnetcdf_CPPFLAGS} \
+	      ${libfftw_CPPFLAGS}
+
 AM_LDFLAGS = 
 mb7k2jstar_SOURCES = mb7k2jstar.c
 mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
@@ -576,7 +575,7 @@ mbauvnavusbl_SOURCES = mbauvnavusbl.c
 mbbackangle_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbbackangle_SOURCES = mbbackangle.c
 mbclean_SOURCES = mbclean.c
-@BUILD_GSF_TRUE@mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
+mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
 mbcopy_SOURCES = mbcopy.c
 mbctdlist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbctdlist_SOURCES = mbctdlist.c
@@ -605,8 +604,7 @@ mbnavlist_SOURCES = mbnavlist.c
 mbneptune2esf_SOURCES = mbneptune2esf.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbpreprocess_SOURCES = mbpreprocess.c
-@BUILD_GSF_FALSE@mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-@BUILD_GSF_TRUE@mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
+mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
 mbprocess_SOURCES = mbprocess.c
 mbrollbias_SOURCES = mbrollbias.c
 mbrolltimelag_SOURCES = mbrolltimelag.c
