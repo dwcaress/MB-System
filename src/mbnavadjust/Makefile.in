@@ -79,7 +79,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = mbnavadjust$(EXEEXT) mbnavadjustmerge$(EXEEXT)
-@BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/mbnavadjust
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -323,8 +322,11 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CFLAGS = 
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
-	${motif_CPPFLAGS} $(am__append_1)
+AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
+	      -I${top_srcdir}/src/mbaux \
+	      -I${top_srcdir}/src/gsf \
+	      ${motif_CPPFLAGS}
+
 AM_LDFLAGS = 
 mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust_callbacks.c mbnavadjust_creation.c \
 	mbnavadjust_prog.c mbnavadjust_util.c mbnavadjust_creation.h \

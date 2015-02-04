@@ -79,16 +79,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@BUILD_GSF_TRUE@am__append_1 = mbsys_gsf.h mbf_gsfgenmb.h
-@BUILD_PROJ_TRUE@am__append_2 = -I@top_srcdir@/src/proj
-@BUILD_PROJ_FALSE@am__append_3 = ${libproj_CPPFLAGS}
-@BUILD_GSF_TRUE@am__append_4 = -I@top_srcdir@/src/gsf
-@BUILD_GSF_TRUE@am__append_5 = mbsys_gsf.c mbr_gsfgenmb.c
-@BUILD_GSF_TRUE@am__append_6 = $(top_builddir)/src/gsf/libmbgsf.la
+@BUILD_PROJ_TRUE@am__append_1 = -I@top_srcdir@/src/proj
+@BUILD_PROJ_FALSE@am__append_2 = ${libproj_CPPFLAGS}
 subdir = src/mbio
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/mb_config.h.in $(top_srcdir)/depcomp \
-	$(am__include_HEADERS_DIST)
+	$(include_HEADERS)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -131,45 +127,10 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libmbio_la_DEPENDENCIES = $(top_builddir)/src/bsio/libmbbsio.la \
-	$(top_builddir)/src/surf/libmbsapi.la $(am__DEPENDENCIES_1) \
+	$(top_builddir)/src/surf/libmbsapi.la \
+	$(top_builddir)/src/gsf/libmbgsf.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__append_6)
-am__libmbio_la_SOURCES_DIST = mb_format.c mb_error.c mb_swap.c \
-	mb_compare.c mb_navint.c mb_read_init.c mb_write_init.c \
-	mb_close.c mb_fileio.c mb_mem.c mb_coor_scale.c \
-	mb_check_info.c mb_time.c mb_angle.c mb_absorption.c mb_proj.c \
-	mb_get_value.c mb_defaults.c mb_process.c mb_esf.c mb_get.c \
-	mb_get_all.c mb_read.c mb_put_all.c mb_put_comment.c \
-	mb_buffer.c mb_read_ping.c mb_write_ping.c mb_access.c \
-	mb_segy.c mb_rt.c mbsys_sb.c mbsys_hsds.c mbsys_sb2100.c \
-	mbsys_simrad.c mbsys_simrad2.c mbsys_simrad3.c mbsys_mr1.c \
-	mbsys_mr1b.c mbsys_mr1v2001.c mbsys_ldeoih.c mbsys_reson.c \
-	mbsys_elac.c mbsys_elacmk2.c mbsys_sb2000.c mbsys_hsmd.c \
-	mbsys_dsl.c mbsys_mstiff.c mbsys_oic.c mbsys_hdcs.c \
-	mbsys_singlebeam.c mbsys_xse.c mbsys_hs10.c mbsys_atlas.c \
-	mbsys_surf.c mbsys_reson8k.c mbsys_netcdf.c mbsys_navnetcdf.c \
-	mbsys_reson7k.c mbsys_jstar.c mbsys_image83p.c mbsys_hysweep.c \
-	mbsys_benthos.c mbsys_swathplus.c mbsys_3datdepthlidar.c \
-	mbsys_wassp.c mbsys_stereopair.c mbr_sbsiomrg.c mbr_sbsiocen.c \
-	mbr_sbsiolsi.c mbr_sburicen.c mbr_sburivax.c mbr_sbifremr.c \
-	mbr_hsatlraw.c mbr_hsldedmb.c mbr_hsuricen.c mbr_hsurivax.c \
-	mbr_hsldeoih.c mbr_hsunknwn.c mbr_sb2100rw.c mbr_sb2100bi.c \
-	mbr_emoldraw.c mbr_em12darw.c mbr_em12ifrm.c mbr_em300raw.c \
-	mbr_em300mba.c mbr_em710raw.c mbr_em710mba.c mbr_mr1prhig.c \
-	mbr_mr1aldeo.c mbr_mr1bldeo.c mbr_mr1prvr2.c mbr_mbldeoih.c \
-	mbr_cbat9001.c mbr_cbat8101.c mbr_hypc8101.c mbr_bchrtunb.c \
-	mbr_elmk2unb.c mbr_bchrxunb.c mbr_l3xseraw.c mbr_sbsioswb.c \
-	mbr_sb2000sb.c mbr_sb2000ss.c mbr_hsmdaraw.c mbr_hsmdldih.c \
-	mbr_dsl120pf.c mbr_dsl120sf.c mbr_mstiffss.c mbr_oicgeoda.c \
-	mbr_oicmbari.c mbr_omghdcsj.c mbr_mgd77dat.c mbr_asciixyz.c \
-	mbr_hydrob93.c mbr_mbarirov.c mbr_mbarrov2.c mbr_mbpronav.c \
-	mbr_hs10jams.c mbr_hsds2raw.c mbr_hsds2lam.c mbr_xtfr8101.c \
-	mbr_mbnetcdf.c mbr_nvnetcdf.c mbr_samesurf.c mbr_reson7kr.c \
-	mbr_edgjstar.c mbr_segysegy.c mbr_image83p.c mbr_imagemba.c \
-	mbr_hir2rnav.c mbr_hysweep1.c mbr_xtfb1624.c mbr_swplssxi.c \
-	mbr_swplssxp.c mbr_3ddepthp.c mbr_wasspenl.c mbr_mgd77txt.c \
-	mbr_mgd77tab.c mbr_photgram.c mbsys_gsf.c mbr_gsfgenmb.c
-@BUILD_GSF_TRUE@am__objects_1 = mbsys_gsf.lo mbr_gsfgenmb.lo
+	$(am__DEPENDENCIES_1)
 am_libmbio_la_OBJECTS = mb_format.lo mb_error.lo mb_swap.lo \
 	mb_compare.lo mb_navint.lo mb_read_init.lo mb_write_init.lo \
 	mb_close.lo mb_fileio.lo mb_mem.lo mb_coor_scale.lo \
@@ -184,34 +145,35 @@ am_libmbio_la_OBJECTS = mb_format.lo mb_error.lo mb_swap.lo \
 	mbsys_sb2000.lo mbsys_hsmd.lo mbsys_dsl.lo mbsys_mstiff.lo \
 	mbsys_oic.lo mbsys_hdcs.lo mbsys_singlebeam.lo mbsys_xse.lo \
 	mbsys_hs10.lo mbsys_atlas.lo mbsys_surf.lo mbsys_reson8k.lo \
-	mbsys_netcdf.lo mbsys_navnetcdf.lo mbsys_reson7k.lo \
-	mbsys_jstar.lo mbsys_image83p.lo mbsys_hysweep.lo \
-	mbsys_benthos.lo mbsys_swathplus.lo mbsys_3datdepthlidar.lo \
-	mbsys_wassp.lo mbsys_stereopair.lo mbr_sbsiomrg.lo \
-	mbr_sbsiocen.lo mbr_sbsiolsi.lo mbr_sburicen.lo \
-	mbr_sburivax.lo mbr_sbifremr.lo mbr_hsatlraw.lo \
-	mbr_hsldedmb.lo mbr_hsuricen.lo mbr_hsurivax.lo \
-	mbr_hsldeoih.lo mbr_hsunknwn.lo mbr_sb2100rw.lo \
-	mbr_sb2100bi.lo mbr_emoldraw.lo mbr_em12darw.lo \
-	mbr_em12ifrm.lo mbr_em300raw.lo mbr_em300mba.lo \
-	mbr_em710raw.lo mbr_em710mba.lo mbr_mr1prhig.lo \
-	mbr_mr1aldeo.lo mbr_mr1bldeo.lo mbr_mr1prvr2.lo \
-	mbr_mbldeoih.lo mbr_cbat9001.lo mbr_cbat8101.lo \
-	mbr_hypc8101.lo mbr_bchrtunb.lo mbr_elmk2unb.lo \
-	mbr_bchrxunb.lo mbr_l3xseraw.lo mbr_sbsioswb.lo \
-	mbr_sb2000sb.lo mbr_sb2000ss.lo mbr_hsmdaraw.lo \
-	mbr_hsmdldih.lo mbr_dsl120pf.lo mbr_dsl120sf.lo \
-	mbr_mstiffss.lo mbr_oicgeoda.lo mbr_oicmbari.lo \
-	mbr_omghdcsj.lo mbr_mgd77dat.lo mbr_asciixyz.lo \
-	mbr_hydrob93.lo mbr_mbarirov.lo mbr_mbarrov2.lo \
-	mbr_mbpronav.lo mbr_hs10jams.lo mbr_hsds2raw.lo \
-	mbr_hsds2lam.lo mbr_xtfr8101.lo mbr_mbnetcdf.lo \
-	mbr_nvnetcdf.lo mbr_samesurf.lo mbr_reson7kr.lo \
-	mbr_edgjstar.lo mbr_segysegy.lo mbr_image83p.lo \
-	mbr_imagemba.lo mbr_hir2rnav.lo mbr_hysweep1.lo \
-	mbr_xtfb1624.lo mbr_swplssxi.lo mbr_swplssxp.lo \
-	mbr_3ddepthp.lo mbr_wasspenl.lo mbr_mgd77txt.lo \
-	mbr_mgd77tab.lo mbr_photgram.lo $(am__objects_1)
+	mbsys_gsf.lo mbr_gsfgenmb.lo mbsys_netcdf.lo \
+	mbsys_navnetcdf.lo mbsys_reson7k.lo mbsys_jstar.lo \
+	mbsys_image83p.lo mbsys_hysweep.lo mbsys_benthos.lo \
+	mbsys_swathplus.lo mbsys_3datdepthlidar.lo mbsys_wassp.lo \
+	mbsys_stereopair.lo mbr_sbsiomrg.lo mbr_sbsiocen.lo \
+	mbr_sbsiolsi.lo mbr_sburicen.lo mbr_sburivax.lo \
+	mbr_sbifremr.lo mbr_hsatlraw.lo mbr_hsldedmb.lo \
+	mbr_hsuricen.lo mbr_hsurivax.lo mbr_hsldeoih.lo \
+	mbr_hsunknwn.lo mbr_sb2100rw.lo mbr_sb2100bi.lo \
+	mbr_emoldraw.lo mbr_em12darw.lo mbr_em12ifrm.lo \
+	mbr_em300raw.lo mbr_em300mba.lo mbr_em710raw.lo \
+	mbr_em710mba.lo mbr_mr1prhig.lo mbr_mr1aldeo.lo \
+	mbr_mr1bldeo.lo mbr_mr1prvr2.lo mbr_mbldeoih.lo \
+	mbr_cbat9001.lo mbr_cbat8101.lo mbr_hypc8101.lo \
+	mbr_bchrtunb.lo mbr_elmk2unb.lo mbr_bchrxunb.lo \
+	mbr_l3xseraw.lo mbr_sbsioswb.lo mbr_sb2000sb.lo \
+	mbr_sb2000ss.lo mbr_hsmdaraw.lo mbr_hsmdldih.lo \
+	mbr_dsl120pf.lo mbr_dsl120sf.lo mbr_mstiffss.lo \
+	mbr_oicgeoda.lo mbr_oicmbari.lo mbr_omghdcsj.lo \
+	mbr_mgd77dat.lo mbr_asciixyz.lo mbr_hydrob93.lo \
+	mbr_mbarirov.lo mbr_mbarrov2.lo mbr_mbpronav.lo \
+	mbr_hs10jams.lo mbr_hsds2raw.lo mbr_hsds2lam.lo \
+	mbr_xtfr8101.lo mbr_mbnetcdf.lo mbr_nvnetcdf.lo \
+	mbr_samesurf.lo mbr_reson7kr.lo mbr_edgjstar.lo \
+	mbr_segysegy.lo mbr_image83p.lo mbr_imagemba.lo \
+	mbr_hir2rnav.lo mbr_hysweep1.lo mbr_xtfb1624.lo \
+	mbr_swplssxi.lo mbr_swplssxp.lo mbr_3ddepthp.lo \
+	mbr_wasspenl.lo mbr_mgd77txt.lo mbr_mgd77tab.lo \
+	mbr_photgram.lo
 nodist_libmbio_la_OBJECTS =
 libmbio_la_OBJECTS = $(am_libmbio_la_OBJECTS) \
 	$(nodist_libmbio_la_OBJECTS)
@@ -257,33 +219,12 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libmbio_la_SOURCES) $(nodist_libmbio_la_SOURCES)
-DIST_SOURCES = $(am__libmbio_la_SOURCES_DIST)
+DIST_SOURCES = $(libmbio_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__include_HEADERS_DIST = mb_config.h mb_format.h mb_status.h mb_io.h \
-	mb_swap.h mb_define.h mb_process.h mb_segy.h mb_info.h \
-	mbsys_sb.h mbsys_hsds.h mbsys_sb2100.h mbsys_simrad.h \
-	mbsys_simrad2.h mbsys_simrad3.h mbsys_mr1.h mbsys_mr1b.h \
-	mbsys_mr1v2001.h mbsys_ldeoih.h mbsys_reson.h mbsys_sb2000.h \
-	mbsys_hsmd.h mbsys_dsl.h mbsys_mstiff.h mbsys_oic.h \
-	mbsys_hdcs.h mbsys_singlebeam.h mbsys_xse.h mbsys_hs10.h \
-	mbsys_atlas.h mbsys_surf.h mbsys_reson8k.h mbsys_netcdf.h \
-	mbsys_navnetcdf.h mbsys_reson7k.h mbsys_jstar.h \
-	mbsys_image83p.h mbsys_hysweep.h mbsys_benthos.h \
-	mbsys_swathplus.h mbsys_3datdepthlidar.h mbsys_wassp.h \
-	mbsys_stereopair.h mbf_sbsiomrg.h mbf_sbsiocen.h \
-	mbf_sbsiolsi.h mbf_sburicen.h mbf_sbifremr.h mbf_hsatlraw.h \
-	mbf_hsldedmb.h mbf_hsuricen.h mbf_hsldeoih.h mbf_sb2100rw.h \
-	mbf_em12darw.h mbf_em12ifrm.h mbf_mr1prhig.h mbf_mr1aldeo.h \
-	mbf_mr1bldeo.h mbf_cbat9001.h mbf_cbat8101.h mbf_hypc8101.h \
-	mbf_bchrtunb.h mbf_elmk2unb.h mbf_bchrxunb.h mbf_sbsioswb.h \
-	mbf_hsmdaraw.h mbf_hsmdldih.h mbf_dsl120pf.h mbf_dsl120sf.h \
-	mbf_mstiffss.h mbf_oicgeoda.h mbf_oicmbari.h mbf_omghdcsj.h \
-	mbf_mgd77dat.h mbf_mbarirov.h mbf_mbarrov2.h mbf_mbpronav.h \
-	mbf_xtfr8101.h mbsys_gsf.h mbf_gsfgenmb.h
 HEADERS = $(include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
 	$(LISP)mb_config.h.in
@@ -454,70 +395,135 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libmbio.la
-include_HEADERS = mb_config.h mb_format.h mb_status.h mb_io.h \
-	mb_swap.h mb_define.h mb_process.h mb_segy.h mb_info.h \
-	mbsys_sb.h mbsys_hsds.h mbsys_sb2100.h mbsys_simrad.h \
-	mbsys_simrad2.h mbsys_simrad3.h mbsys_mr1.h mbsys_mr1b.h \
-	mbsys_mr1v2001.h mbsys_ldeoih.h mbsys_reson.h mbsys_sb2000.h \
-	mbsys_hsmd.h mbsys_dsl.h mbsys_mstiff.h mbsys_oic.h \
-	mbsys_hdcs.h mbsys_singlebeam.h mbsys_xse.h mbsys_hs10.h \
-	mbsys_atlas.h mbsys_surf.h mbsys_reson8k.h mbsys_netcdf.h \
-	mbsys_navnetcdf.h mbsys_reson7k.h mbsys_jstar.h \
-	mbsys_image83p.h mbsys_hysweep.h mbsys_benthos.h \
-	mbsys_swathplus.h mbsys_3datdepthlidar.h mbsys_wassp.h \
-	mbsys_stereopair.h mbf_sbsiomrg.h mbf_sbsiocen.h \
-	mbf_sbsiolsi.h mbf_sburicen.h mbf_sbifremr.h mbf_hsatlraw.h \
-	mbf_hsldedmb.h mbf_hsuricen.h mbf_hsldeoih.h mbf_sb2100rw.h \
-	mbf_em12darw.h mbf_em12ifrm.h mbf_mr1prhig.h mbf_mr1aldeo.h \
-	mbf_mr1bldeo.h mbf_cbat9001.h mbf_cbat8101.h mbf_hypc8101.h \
-	mbf_bchrtunb.h mbf_elmk2unb.h mbf_bchrxunb.h mbf_sbsioswb.h \
-	mbf_hsmdaraw.h mbf_hsmdldih.h mbf_dsl120pf.h mbf_dsl120sf.h \
-	mbf_mstiffss.h mbf_oicgeoda.h mbf_oicmbari.h mbf_omghdcsj.h \
-	mbf_mgd77dat.h mbf_mbarirov.h mbf_mbarrov2.h mbf_mbpronav.h \
-	mbf_xtfr8101.h $(am__append_1)
+include_HEADERS = mb_config.h \
+        mb_format.h mb_status.h \
+        mb_io.h mb_swap.h \
+        mb_define.h mb_process.h \
+        mb_segy.h mb_info.h \
+        mbsys_sb.h mbsys_hsds.h \
+        mbsys_sb2100.h mbsys_simrad.h \
+        mbsys_simrad2.h mbsys_simrad3.h \
+        mbsys_mr1.h mbsys_mr1b.h mbsys_mr1v2001.h \
+        mbsys_ldeoih.h \
+        mbsys_reson.h mbsys_sb2000.h \
+        mbsys_hsmd.h mbsys_dsl.h \
+        mbsys_mstiff.h \
+        mbsys_oic.h mbsys_hdcs.h \
+        mbsys_singlebeam.h mbsys_xse.h \
+        mbsys_hs10.h \
+        mbsys_atlas.h mbsys_surf.h \
+	mbsys_gsf.h mbf_gsfgenmb.h \
+        mbsys_reson8k.h \
+        mbsys_netcdf.h mbsys_navnetcdf.h \
+        mbsys_reson7k.h mbsys_jstar.h \
+        mbsys_image83p.h mbsys_hysweep.h \
+        mbsys_benthos.h mbsys_swathplus.h \
+	mbsys_3datdepthlidar.h mbsys_wassp.h \
+	mbsys_stereopair.h \
+        mbf_sbsiomrg.h mbf_sbsiocen.h \
+        mbf_sbsiolsi.h mbf_sburicen.h \
+        mbf_sbifremr.h mbf_hsatlraw.h \
+        mbf_hsldedmb.h mbf_hsuricen.h \
+        mbf_hsldeoih.h \
+        mbf_sb2100rw.h \
+        mbf_em12darw.h mbf_em12ifrm.h \
+        mbf_mr1prhig.h mbf_mr1aldeo.h \
+        mbf_mr1bldeo.h mbf_cbat9001.h \
+        mbf_cbat8101.h mbf_hypc8101.h \
+        mbf_bchrtunb.h mbf_elmk2unb.h \
+        mbf_bchrxunb.h \
+        mbf_sbsioswb.h \
+        mbf_hsmdaraw.h mbf_hsmdldih.h \
+        mbf_dsl120pf.h mbf_dsl120sf.h \
+        mbf_mstiffss.h \
+        mbf_oicgeoda.h mbf_oicmbari.h \
+        mbf_omghdcsj.h mbf_mgd77dat.h \
+        mbf_mbarirov.h mbf_mbarrov2.h \
+        mbf_mbpronav.h mbf_xtfr8101.h
+
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I@top_srcdir@/src/bsio -I@top_srcdir@/src/surf \
-	${libgmt_CPPFLAGS} ${libnetcdf_CPPFLAGS} $(am__append_2) \
-	$(am__append_3) $(am__append_4)
+	-I@top_srcdir@/src/gsf ${libgmt_CPPFLAGS} \
+	${libnetcdf_CPPFLAGS} $(am__append_1) $(am__append_2)
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libmbio_la_SOURCES = mb_format.c mb_error.c mb_swap.c mb_compare.c \
-	mb_navint.c mb_read_init.c mb_write_init.c mb_close.c \
-	mb_fileio.c mb_mem.c mb_coor_scale.c mb_check_info.c mb_time.c \
-	mb_angle.c mb_absorption.c mb_proj.c mb_get_value.c \
-	mb_defaults.c mb_process.c mb_esf.c mb_get.c mb_get_all.c \
-	mb_read.c mb_put_all.c mb_put_comment.c mb_buffer.c \
-	mb_read_ping.c mb_write_ping.c mb_access.c mb_segy.c mb_rt.c \
-	mbsys_sb.c mbsys_hsds.c mbsys_sb2100.c mbsys_simrad.c \
-	mbsys_simrad2.c mbsys_simrad3.c mbsys_mr1.c mbsys_mr1b.c \
-	mbsys_mr1v2001.c mbsys_ldeoih.c mbsys_reson.c mbsys_elac.c \
-	mbsys_elacmk2.c mbsys_sb2000.c mbsys_hsmd.c mbsys_dsl.c \
-	mbsys_mstiff.c mbsys_oic.c mbsys_hdcs.c mbsys_singlebeam.c \
-	mbsys_xse.c mbsys_hs10.c mbsys_atlas.c mbsys_surf.c \
-	mbsys_reson8k.c mbsys_netcdf.c mbsys_navnetcdf.c \
-	mbsys_reson7k.c mbsys_jstar.c mbsys_image83p.c mbsys_hysweep.c \
-	mbsys_benthos.c mbsys_swathplus.c mbsys_3datdepthlidar.c \
-	mbsys_wassp.c mbsys_stereopair.c mbr_sbsiomrg.c mbr_sbsiocen.c \
-	mbr_sbsiolsi.c mbr_sburicen.c mbr_sburivax.c mbr_sbifremr.c \
-	mbr_hsatlraw.c mbr_hsldedmb.c mbr_hsuricen.c mbr_hsurivax.c \
-	mbr_hsldeoih.c mbr_hsunknwn.c mbr_sb2100rw.c mbr_sb2100bi.c \
-	mbr_emoldraw.c mbr_em12darw.c mbr_em12ifrm.c mbr_em300raw.c \
-	mbr_em300mba.c mbr_em710raw.c mbr_em710mba.c mbr_mr1prhig.c \
-	mbr_mr1aldeo.c mbr_mr1bldeo.c mbr_mr1prvr2.c mbr_mbldeoih.c \
-	mbr_cbat9001.c mbr_cbat8101.c mbr_hypc8101.c mbr_bchrtunb.c \
-	mbr_elmk2unb.c mbr_bchrxunb.c mbr_l3xseraw.c mbr_sbsioswb.c \
-	mbr_sb2000sb.c mbr_sb2000ss.c mbr_hsmdaraw.c mbr_hsmdldih.c \
-	mbr_dsl120pf.c mbr_dsl120sf.c mbr_mstiffss.c mbr_oicgeoda.c \
-	mbr_oicmbari.c mbr_omghdcsj.c mbr_mgd77dat.c mbr_asciixyz.c \
-	mbr_hydrob93.c mbr_mbarirov.c mbr_mbarrov2.c mbr_mbpronav.c \
-	mbr_hs10jams.c mbr_hsds2raw.c mbr_hsds2lam.c mbr_xtfr8101.c \
-	mbr_mbnetcdf.c mbr_nvnetcdf.c mbr_samesurf.c mbr_reson7kr.c \
-	mbr_edgjstar.c mbr_segysegy.c mbr_image83p.c mbr_imagemba.c \
-	mbr_hir2rnav.c mbr_hysweep1.c mbr_xtfb1624.c mbr_swplssxi.c \
-	mbr_swplssxp.c mbr_3ddepthp.c mbr_wasspenl.c mbr_mgd77txt.c \
-	mbr_mgd77tab.c mbr_photgram.c $(am__append_5)
+libmbio_la_SOURCES = \
+		mb_format.c mb_error.c \
+                mb_swap.c mb_compare.c mb_navint.c \
+                mb_read_init.c mb_write_init.c mb_close.c \
+                mb_fileio.c mb_mem.c \
+                mb_coor_scale.c mb_check_info.c \
+                mb_time.c mb_angle.c \
+                mb_absorption.c mb_proj.c \
+                mb_get_value.c mb_defaults.c \
+                mb_process.c mb_esf.c \
+                mb_get.c mb_get_all.c mb_read.c \
+                mb_put_all.c mb_put_comment.c \
+                mb_buffer.c \
+                mb_read_ping.c mb_write_ping.c \
+                mb_access.c mb_segy.c mb_rt.c \
+                mbsys_sb.c mbsys_hsds.c \
+                mbsys_sb2100.c mbsys_simrad.c \
+                mbsys_simrad2.c mbsys_simrad3.c \
+                mbsys_mr1.c mbsys_mr1b.c mbsys_mr1v2001.c \
+                mbsys_ldeoih.c mbsys_reson.c \
+                mbsys_elac.c mbsys_elacmk2.c \
+                mbsys_sb2000.c mbsys_hsmd.c mbsys_dsl.c \
+                mbsys_mstiff.c \
+                mbsys_oic.c mbsys_hdcs.c \
+                mbsys_singlebeam.c mbsys_xse.c \
+                mbsys_hs10.c mbsys_atlas.c \
+                mbsys_surf.c mbsys_reson8k.c \
+		mbsys_gsf.c mbr_gsfgenmb.c \
+                mbsys_netcdf.c mbsys_navnetcdf.c \
+                mbsys_reson7k.c mbsys_jstar.c \
+                mbsys_image83p.c mbsys_hysweep.c \
+                mbsys_benthos.c mbsys_swathplus.c \
+		mbsys_3datdepthlidar.c mbsys_wassp.c \
+		mbsys_stereopair.c \
+                mbr_sbsiomrg.c mbr_sbsiocen.c \
+                mbr_sbsiolsi.c mbr_sburicen.c \
+                mbr_sburivax.c mbr_sbifremr.c \
+                mbr_hsatlraw.c mbr_hsldedmb.c \
+                mbr_hsuricen.c mbr_hsurivax.c \
+                mbr_hsldeoih.c mbr_hsunknwn.c \
+                mbr_sb2100rw.c mbr_sb2100bi.c \
+                mbr_emoldraw.c mbr_em12darw.c \
+                mbr_em12ifrm.c \
+                mbr_em300raw.c mbr_em300mba.c \
+                mbr_em710raw.c mbr_em710mba.c \
+                mbr_mr1prhig.c mbr_mr1aldeo.c \
+                mbr_mr1bldeo.c mbr_mr1prvr2.c \
+                mbr_mbldeoih.c mbr_cbat9001.c \
+                mbr_cbat8101.c mbr_hypc8101.c \
+                mbr_bchrtunb.c mbr_elmk2unb.c \
+                mbr_bchrxunb.c mbr_l3xseraw.c \
+                mbr_sbsioswb.c \
+                mbr_sb2000sb.c mbr_sb2000ss.c \
+                mbr_hsmdaraw.c mbr_hsmdldih.c \
+                mbr_dsl120pf.c mbr_dsl120sf.c \
+                mbr_mstiffss.c \
+                mbr_oicgeoda.c mbr_oicmbari.c \
+                mbr_omghdcsj.c mbr_mgd77dat.c \
+                mbr_asciixyz.c mbr_hydrob93.c \
+                mbr_mbarirov.c mbr_mbarrov2.c \
+                mbr_mbpronav.c mbr_hs10jams.c \
+                mbr_hsds2raw.c mbr_hsds2lam.c \
+                mbr_xtfr8101.c \
+                mbr_mbnetcdf.c mbr_nvnetcdf.c \
+                mbr_samesurf.c mbr_reson7kr.c \
+                mbr_edgjstar.c mbr_segysegy.c \
+                mbr_image83p.c mbr_imagemba.c \
+                mbr_hir2rnav.c mbr_hysweep1.c \
+                mbr_xtfb1624.c mbr_swplssxi.c \
+                mbr_swplssxp.c mbr_3ddepthp.c \
+		mbr_wasspenl.c mbr_mgd77txt.c \
+		mbr_mgd77tab.c mbr_photgram.c
+
 libmbio_la_LIBADD = $(top_builddir)/src/bsio/libmbbsio.la \
-	$(top_builddir)/src/surf/libmbsapi.la ${libgmt_LIBS} \
-	${libnetcdf_LIBS} ${libproj_LIBS} ${XDR_LIB} $(am__append_6)
+                   $(top_builddir)/src/surf/libmbsapi.la \
+		   $(top_builddir)/src/gsf/libmbgsf.la \
+		   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${XDR_LIB}
+
 nodist_libmbio_la_SOURCES = projections.h
 BUILT_SOURCES = projections.h
 CLEANFILES = projections.h

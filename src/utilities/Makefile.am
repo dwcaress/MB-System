@@ -57,12 +57,10 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	      -I${top_srcdir}/src/mbaux \
+	      -I${top_srcdir}/src/gsf \
 	      ${libgmt_CPPFLAGS} \
 	      ${libnetcdf_CPPFLAGS} \
 	      ${libfftw_CPPFLAGS}
-if BUILD_GSF
-  AM_CPPFLAGS += -I${top_srcdir}/src/gsf
-endif
 
 AM_LDFLAGS =
 
@@ -84,9 +82,7 @@ mbauvnavusbl_SOURCES = mbauvnavusbl.c
 mbbackangle_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbbackangle_SOURCES = mbbackangle.c
 mbclean_SOURCES = mbclean.c
-if BUILD_GSF
-  mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
-endif
+mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
 mbcopy_SOURCES = mbcopy.c
 mbctdlist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbctdlist_SOURCES = mbctdlist.c
@@ -115,11 +111,7 @@ mbnavlist_SOURCES = mbnavlist.c
 mbneptune2esf_SOURCES = mbneptune2esf.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbpreprocess_SOURCES = mbpreprocess.c
-if BUILD_GSF
-  mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
-else
-  mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-endif
+mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
 mbprocess_SOURCES = mbprocess.c
 mbrollbias_SOURCES = mbrollbias.c
 mbrolltimelag_SOURCES = mbrolltimelag.c

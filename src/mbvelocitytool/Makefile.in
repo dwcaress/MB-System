@@ -79,7 +79,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = mbvelocitytool$(EXEEXT)
-@BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/mbvelocitytool
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -320,8 +319,12 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CFLAGS = ${libnetcdf_CFLAGS}
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
-	${libnetcdf_CPPFLAGS} ${motif_CPPFLAGS} $(am__append_1)
+AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
+	      -I${top_srcdir}/src/mbaux \
+	      -I${top_srcdir}/src/gsf \
+	      ${libnetcdf_CPPFLAGS} \
+	      ${motif_CPPFLAGS}
+
 AM_LDFLAGS = 
 mbvelocitytool_SOURCES = mbvelocity_bxutils.c mbvelocity.c mbvelocity_callbacks.c \
         mbvelocity_creation.c mbvelocity_prog.c mbvelocity_creation.h mbvelocity.h
