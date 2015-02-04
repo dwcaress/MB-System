@@ -2,7 +2,7 @@
  *    The MB-system:	mb_format.c	2/18/94
  *    $Id$
  *
- *    Copyright (c) 1993-2014 by
+ *    Copyright (c) 1993-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -298,12 +298,10 @@ int mb_format_register(int verbose,
 		{
 		status = mbr_register_dsl120sf(verbose, mbio_ptr, error);
 		}
-#ifdef WITH_GSF
 	else if (*format == MBF_GSFGENMB)
 		{
 		status = mbr_register_gsfgenmb(verbose, mbio_ptr, error);
 		}
-#endif
 	else if (*format == MBF_MSTIFFSS)
 		{
 		status = mbr_register_mstiffss(verbose, mbio_ptr, error);
@@ -1058,7 +1056,6 @@ int mb_format_info(int verbose,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
-#ifdef WITH_GSF
 	else if (*format == MBF_GSFGENMB)
 		{
 		status = mbr_info_gsfgenmb(verbose, system,
@@ -1070,7 +1067,6 @@ int mb_format_info(int verbose,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
-#endif
 	else if (*format == MBF_MSTIFFSS)
 		{
 		status = mbr_info_mstiffss(verbose, system,
@@ -3254,7 +3250,6 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
-#ifdef WITH_GSF
 	/* look for a CARIS GSF export *.gsf format convention */
 	if (found == MB_NO)
 	    {
@@ -3279,9 +3274,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		found = MB_YES;
 		}
 	    }
-#endif
 
-#ifdef WITH_GSF
 	/* look for a SAIC GSF *.d0X format convention */
 	if (found == MB_NO)
 	    {
@@ -3304,7 +3297,6 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		found = MB_YES;
 		}
 	    }
-#endif
 
 	/* look for a Reson 7K multibeam *.s7k format convention */
 	if (found == MB_NO)

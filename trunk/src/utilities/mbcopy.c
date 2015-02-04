@@ -2,7 +2,7 @@
  *    The MB-system:	mbcopy.c	2/4/93
  *    $Id$
  *
- *    Copyright (c) 1993-2014 by
+ *    Copyright (c) 1993-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,166 +23,6 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1993
  *
- * $Log: mbcopy.c,v $
- * Revision 5.28  2009/03/02 18:54:40  caress
- * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
- *
- * Revision 5.27  2008/12/05 17:32:52  caress
- * Check-in mods 5 December 2008 including contributions from Gordon Keith.
- *
- * Revision 5.26  2008/07/10 18:16:33  caress
- * Proceeding towards 5.1.1beta20.
- *
- * Revision 5.24  2007/11/16 17:53:02  caress
- * Fixes applied.
- *
- * Revision 5.23  2007/10/31 18:41:42  caress
- * Fixed handling of null sidescan values.
- *
- * Revision 5.22  2007/10/17 20:32:26  caress
- * Release 5.1.1beta11
- * Added Gordon Keith mods to merge bathy from third file.
- *
- * Revision 5.21  2007/05/21 16:15:11  caress
- * Fixed translation to and from XSE format.
- *
- * Revision 5.20  2006/09/11 18:55:53  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.19  2006/03/06 21:47:02  caress
- * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
- *
- * Revision 5.18  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.17  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.16  2005/03/25 04:42:59  caress
- * Standardized the string lengths used for filenames and comment data.
- *
- * Revision 5.15  2004/09/16 01:00:01  caress
- * Fixed copyright.
- *
- * Revision 5.14  2003/12/10 02:18:04  caress
- * Fixed bug in which pings could not be found inbounds when a timegap error occurred.
- *
- * Revision 5.13  2003/11/24 22:56:20  caress
- * Added inbounds check so that ancillary data records are only output when the last survey record was within the specified or default time and space bounds. This should allow time and space windowing for data formats containing large numbers of ancillary records.
- *
- * Revision 5.12  2003/04/17 21:17:10  caress
- * Release 5.0.beta30
- *
- * Revision 5.11  2002/07/20 20:56:55  caress
- * Release 5.0.beta20
- *
- * Revision 5.10  2002/05/29 23:43:09  caress
- * Release 5.0.beta18
- *
- * Revision 5.9  2002/05/02 04:01:37  caress
- * Release 5.0.beta17
- *
- * Revision 5.8  2002/04/06 02:53:45  caress
- * Release 5.0.beta16
- *
- * Revision 5.7  2001/08/25 00:58:08  caress
- * Fixed problem with simrad to simrad2 function.
- *
- * Revision 5.6  2001/07/20  00:34:38  caress
- * Release 5.0.beta03
- *
- * Revision 5.5  2001/06/30  17:42:04  caress
- * Release 5.0.beta02
- *
- * Revision 5.4  2001/06/29  22:50:23  caress
- * Atlas Hydrosweep DS2 raw data and SURF data formats.
- *
- * Revision 5.3  2001/06/08  21:45:46  caress
- * Version 5.0.beta01
- *
- * Revision 5.2  2001/06/03  07:07:34  caress
- * Release 5.0.beta01.
- *
- * Revision 5.1  2001/03/22 21:14:16  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.0  2000/12/01  22:57:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.15  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.14  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.13  1999/08/16  23:13:42  caress
- * Fixed pointer casting bug in elac data copying.
- *
- * Revision 4.12  1999/08/08  04:17:40  caress
- * Added ability to copy between old and new Elac formats.
- *
- * Revision 4.11  1999/04/21 05:44:42  caress
- * Fixed error printing.
- *
- * Revision 4.10  1998/10/05  19:19:24  caress
- * MB-System version 4.6beta
- *
- * Revision 4.9  1997/04/21  17:19:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.9  1997/04/17  15:14:38  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.8  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.7  1996/01/26  21:25:58  caress
- * Version 4.3 distribution
- *
- * Revision 4.6  1995/05/12  17:12:32  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.5  1995/03/06  19:37:59  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.4  1995/03/02  13:49:21  caress
- * Fixed bug related to error messages.
- *
- * Revision 4.3  1994/10/21  13:02:31  caress
- * Release V4.0
- *
- * Revision 4.2  1994/07/29  19:02:56  caress
- * Changes associated with supporting byte swapped Lynx OS and
- * using unix second time base.
- *
- * Revision 4.1  1994/03/12  01:44:37  caress
- * Added declarations of ctime and/or getenv for compatability
- * with SGI compilers.
- *
- * Revision 4.1  1994/03/12  01:44:37  caress
- * Added declarations of ctime and/or getenv for compatability
- * with SGI compilers.
- *
- * Revision 4.0  1994/03/06  00:13:22  caress
- * First cut at version 4.0
- *
- * Revision 4.1  1994/03/05  22:49:18  caress
- * Fixed significant bug - output arrays were allocated to
- * size of input arrays.  Also added zeroing of beam/pixel
- * values not set in copying from one system to another.
- *
- * Revision 4.0  1994/03/01  18:59:27  caress
- * First cut at new version. Any changes are associated with
- * support of three data types (beam bathymetry, beam amplitude,
- * and sidescan) instead of two (bathymetry and backscatter).
- *
- * Revision 3.1  1993/06/14  17:53:29  caress
- * Fixed stripcomments option so it does what the man page says.
- *
- * Revision 3.0  1993/05/04  22:25:09  dale
- * Initial version.
  *
  */
 
@@ -204,9 +44,7 @@
 #include "mbsys_simrad.h"
 #include "mbsys_simrad2.h"
 #include "mbsys_ldeoih.h"
-#ifdef WITH_GSF
-#  include "mbsys_gsf.h"
-#endif
+#include "mbsys_gsf.h"
 #include "mbsys_hsds.h"
 #include "mbsys_reson8k.h"
 
@@ -217,9 +55,7 @@
 #define	MBCOPY_XSE_TO_ELACMK2		3
 #define	MBCOPY_SIMRAD_TO_SIMRAD2	4
 #define	MBCOPY_ANY_TO_MBLDEOIH		5
-#ifdef WITH_GSF
-#  define	MBCOPY_RESON8K_TO_GSF		6
-#endif
+#define	MBCOPY_RESON8K_TO_GSF		6
 
 /* function prototypes */
 int setup_transfer_rules(int verbose, int ibeams, int obeams,
@@ -256,12 +92,10 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		char *comment,
 		void *ombio_ptr, void *ostore_ptr,
 		int *error);
-#ifdef WITH_GSF
 int mbcopy_reson8k_to_gsf(int verbose,
 		void *imbio_ptr,
 		void *ombio_ptr,
 		int *error);
-#endif
 
 static char rcs_id[] = "$Id$";
 
@@ -739,16 +573,13 @@ int main (int argc, char **argv)
 	else if (pings == 1
 		&& omb_io_ptr->format == MBF_MBLDEOIH)
 		copymode = MBCOPY_ANY_TO_MBLDEOIH;
-#ifdef WITH_GSF
 	else if (pings == 1
 		&& imb_io_ptr->format == MBF_XTFR8101
 		&& omb_io_ptr->format ==  MBF_GSFGENMB )
 		copymode = MBCOPY_RESON8K_TO_GSF;
-#endif
 	else
 		copymode = MBCOPY_PARTIAL;
 
-#ifdef WITH_GSF
 	/* quit if an unsupported copy to GSF is requested */
 	if (omb_io_ptr->format == MBF_GSFGENMB && copymode == MBCOPY_PARTIAL)
 		{
@@ -758,7 +589,6 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\tand contributing it to the MB-System community\n");
 		exit(error);
 		}
-#endif
 
 	/* print debug statements */
 	if (verbose >= 2)
@@ -1320,7 +1150,6 @@ int main (int argc, char **argv)
 			status = mbcopy_simrad_to_simrad2(verbose,
 				    istore_ptr, ostore_ptr, &error);
 			}
-#ifdef WITH_GSF
 		else if (copymode == MBCOPY_RESON8K_TO_GSF
 			&& error == MB_ERROR_NO_ERROR)
 			{
@@ -1329,7 +1158,6 @@ int main (int argc, char **argv)
 			status = mbcopy_reson8k_to_gsf(verbose,
 				    imbio_ptr, ombio_ptr, &error);
 			}
-#endif
 		else if (copymode == MBCOPY_ANY_TO_MBLDEOIH
 			&& error == MB_ERROR_NO_ERROR)
 			{
@@ -1426,9 +1254,7 @@ int main (int argc, char **argv)
 		    case MBCOPY_SIMRAD_TO_SIMRAD2:
 		    case MBCOPY_ELACMK2_TO_XSE:
 		    case MBCOPY_XSE_TO_ELACMK2:
-#ifdef WITH_GSF
 		    case MBCOPY_RESON8K_TO_GSF:
-#endif
 		      status = mb_insert(verbose, ombio_ptr, ostore_ptr,
 						kind, time_i, time_d,
 						navlon, navlat, speed, heading,
@@ -3086,7 +2912,6 @@ int mbcopy_any_to_mbldeoih(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-#ifdef WITH_GSF
 int mbcopy_reson8k_to_gsf(int verbose,
 		void *imbio_ptr,
 		void *ombio_ptr,
@@ -3448,5 +3273,4 @@ int mbcopy_reson8k_to_gsf(int verbose,
 	/* return status */
 	return(status);
 }
-#endif
 /*--------------------------------------------------------------------*/
