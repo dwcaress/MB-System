@@ -2,7 +2,7 @@ dnl--------------------------------------------------------------------
 dnl    The MB-system:	configure.ac	12/7/2011
 dnl    $Id$
 dnl
-dnl    Copyright (c) 2011-2014 by
+dnl    Copyright (c) 2011-2015 by
 dnl    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 dnl    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 dnl    Lamont-Doherty Earth Observatory
@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.4.2219],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2222],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "11 December 2014", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "3 February 2015", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -33,7 +33,7 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO(["    The MB-system:	configure	12/7/2011"])
 AS_ECHO(["    $Id$"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2014 by"])
+AS_ECHO(["    Copyright (c) 2011-2015 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -106,7 +106,6 @@ AS_ECHO(["        --with-motif-include  - location of Motif headers (optional)"]
 AS_ECHO(["        --with-opengl-lib     - location of OpenGL libs (optional)"])
 AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"])
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
-AS_ECHO(["        --without-gsf         - build without including or supporting GSF"])
 AS_ECHO(["        --enable-bundledproj  - build using bundled proj package - default is to link with libproj"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
@@ -212,13 +211,6 @@ OTPS_DIR="/usr/local/OTPSnc"
 dnl check for command line option and reset
 AC_ARG_WITH(otps_dir, [  --with-otps_dir=DIR        Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
 AC_SUBST(OTPS_DIR)
-
-AC_MSG_CHECKING([whether to build with Generic Sensor Format (GSF)])
-AC_ARG_WITH([gsf], AS_HELP_STRING([--without-gsf], [Disable unlicensed SAIC Generic Sensor Format (GSF)]), [ ], [with_gsf=yes])
-AC_MSG_RESULT([$with_gsf])
-
-AS_IF([test x"$with_gsf" = xyes], [AC_DEFINE(WITH_GSF, 1, [Build with GSF])])
-AM_CONDITIONAL([BUILD_GSF], [test x"$with_gsf" = xyes])
 
 dnl Check for NetCDF lib
 AS_ECHO(["Check for NetCDF"])
@@ -812,6 +804,7 @@ AS_ECHO(["About to create Makefiles..."])
 AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
 	  src/surf/Makefile \
 	  src/bsio/Makefile \
+          src/gsf/Makefile \
           src/mbaux/Makefile \
 	  src/utilities/Makefile src/gmt/Makefile \
 	  src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile \
@@ -822,9 +815,6 @@ AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
 	  src/html/Makefile src/ps/Makefile src/share/Makefile])
 if test "$bundledproj" = "yes" ; then
 AC_CONFIG_FILES([src/proj/Makefile])
-fi
-if test "$with_gsf" = "yes" ; then
-AC_CONFIG_FILES([src/gsf/Makefile])
 fi
 AC_OUTPUT
 
@@ -866,9 +856,6 @@ else
 	AS_ECHO(["OpenGL Support: Disabled"])
 fi
 AS_ECHO(["Using $OTPS_DIR for OSU Tidal Prediction Software"])
-
-AS_ECHO(["Build with Generic Sensor Format (GSF) Support: $with_gsf"])
-
 
 if test "$bundledproj" = "yes" ; then
 	AS_ECHO(["Building using bundled proj package"])

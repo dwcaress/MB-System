@@ -1453,7 +1453,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		/* extract points with preprocessing if that will help */
 		if (use_projection == MB_NO)
 			{
-			sprintf(plot_cmd, "grd2xyz tmpgrdsample%d.grd -S -bo | blockmean -bi -bo -C -R%f/%f/%f/%f -I%.12f/%.12f",
+			sprintf(plot_cmd, "grd2xyz tmpgrdsample%d.grd -s -bo | blockmean -bi -bo -C -R%f/%f/%f/%f -I%.12f/%.12f",
 				pid, bounds[0], bounds[1], bounds[2], bounds[3], dx, dy);
 			}
 		else
@@ -1827,6 +1827,17 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%d data points processed in %s\n",
 				ndatafile,rfile);
+
+		/* add to datalist if data actually contributed */
+		if (ndatafile > 0 && dfp != NULL)
+			{
+			if (pstatus == MB_PROCESSED_USE)
+				fprintf(dfp, "P:");
+			else
+				fprintf(dfp, "R:");
+			fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+			fflush(dfp);
+			}
 		} /* end if (format > 0) */
 
 		}
@@ -1834,6 +1845,13 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 		mb_datalist_close(verbose,&datalist,&error);
 	if (verbose > 0)
 		fprintf(outfp,"\n%d total data points processed\n",ndata);
+
+	/* close datalist if necessary */
+	if (dfp != NULL)
+		{
+		fclose(dfp);
+		dfp = NULL;
+		}
 
 	/* now loop over all points in the low resolution grid */
 	if (verbose >= 1)
@@ -2050,7 +2068,7 @@ status = write_cdfgrd(verbose,ofile,output,sxdim,sydim,
 	fprintf(outfp,"\nDoing second pass to generate final grid...\n");
 	ndata = 0;
 	if ((status = mb_datalist_open(verbose,&datalist,
-					filelist,look_processed,&error)) != MB_SUCCESS)
+					dfile,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -2509,17 +2527,6 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%d data points processed in %s\n",
 				ndatafile,rfile);
-
-		/* add to datalist if data actually contributed */
-		if (ndatafile > 0 && dfp != NULL)
-			{
-			if (pstatus == MB_PROCESSED_USE)
-				fprintf(dfp, "P:");
-			else
-				fprintf(dfp, "R:");
-			fprintf(dfp, "%s %d %f\n", path, format, file_weight);
-			fflush(dfp);
-			}
 		} /* end if (format > 0) */
 
 		}
@@ -2582,7 +2589,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 			}
 
 	/* read in data */
-	fprintf(outfp,"\nDoing second pass to generate final grid...\n");
+	fprintf(outfp,"\nDoing single pass to generate grid...\n");
 	ndata = 0;
 	if ((status = mb_datalist_open(verbose,&datalist,
 					filelist,look_processed,&error)) != MB_SUCCESS)
@@ -3015,6 +3022,13 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 		mb_datalist_close(verbose,&datalist,&error);
 	if (verbose > 0)
 		fprintf(outfp,"\n%d total data points processed\n",ndata);
+
+	/* close datalist if necessary */
+	if (dfp != NULL)
+		{
+		fclose(dfp);
+		dfp = NULL;
+		}
 
 	/* now loop over all points in the output grid */
 	if (verbose >= 1)
@@ -3741,6 +3755,13 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]); */
 	if (verbose > 0)
 		fprintf(outfp,"\n%d total data points processed\n",ndata);
 
+	/* close datalist if necessary */
+	if (dfp != NULL)
+		{
+		fclose(dfp);
+		dfp = NULL;
+		}
+
 	/* now loop over all points in the output grid */
 	if (verbose >= 1)
 		fprintf(outfp,"\nMaking raw grid...\n");
@@ -4338,6 +4359,13 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]); */
 	if (verbose > 0)
 		fprintf(outfp,"\n%d total data points processed\n",ndata);
 
+	/* close datalist if necessary */
+	if (dfp != NULL)
+		{
+		fclose(dfp);
+		dfp = NULL;
+		}
+
 	/* now loop over all points in the output grid */
 	if (verbose >= 1)
 		fprintf(outfp,"\nMaking raw grid...\n");
@@ -4397,10 +4425,6 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]); */
 
 	/***** end of median filter gridding *****/
 	}
-
-	/* close datalist if necessary */
-	if (dfp != NULL)
-		fclose(dfp);
 
 	/* if clip set do smooth interpolation */
 	if (clipmode != MBGRID_INTERP_NONE && clip > 0 && nbinset > 0)
