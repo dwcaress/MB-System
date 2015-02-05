@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
  *	$Id$
  *
- *    Copyright (c) 2004-2014 by
+ *    Copyright (c) 2004-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -43,8 +43,8 @@
 #include "mb_swap.h"
 
 /* turn on debug statements here */
-#define MBR_RESON7KR_DEBUG 1
-#define MBR_RESON7KR_DEBUG2 1
+//#define MBR_RESON7KR_DEBUG 1
+//#define MBR_RESON7KR_DEBUG2 1
 
 /* essential function prototypes */
 int mbr_register_reson7kr(int verbose, void *mbio_ptr,

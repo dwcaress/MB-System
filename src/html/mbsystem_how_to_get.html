@@ -26,7 +26,7 @@
     <li><a href="#MB-required">Other required and suggested software and data</a></li>
     <li><a href="#MB-unpack">How to unpack an MB-System source code distribution</a></li>
     <li><a href="#MB-install">How to install MB-System using the configure script</a></li>
-    <li><a href="#MB-install-old">How to install MB-System using the install_makefiles script</a></li>
+</li>
 </ul>
 </ul>
 </ul>
@@ -183,16 +183,7 @@ Software Foundation</a>.</li>
     Most current Unix/Linux operating systems include the required Motif
     libraries, either in the original proprietary form (Motif), or the not-quite-open-source form (OpenMotif). If you do not have these libraries, the OpenMotif 2 source is available through
     <a href="http://www.openmotif.org/">Motifzone</a>. An old alternative open source Motif-compatible
-    distribution called <a href="http://www.lesstif.org">LessTif </a>does not work with the new OpenGL based MB-System programs (MBgrdviz, MBeditviz) and should be avoided. </li>
-  <li><b>Levitus Database</b>: The MB-System program mblevitus depends
-on
-a 16 MByte data file that is not included in the MB-System tarfile.
-Click
-    <a href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/annual.gz">here</a>
-to ftp this file. Be sure to uncompress the file and to set the
-"LEVITUS"
-flag in the install_makefiles appropriately, as described below in the
-installation section.</li>
+    distribution called LessTif does not work with the current OpenGL based MB-System programs (MBgrdviz, MBeditviz) and should be avoided. </li>
   <li><strong>FFTW</strong>: The "Fastest Fourier Transform in the West" package is used by the sonagram calculation program MBbsegypsd to calculate, well, Fast Fourier Transforms. <a href="http://www.fftw.org/">FFTW</a> is commonly used and thus available on or for most current Unix operating systems.</li>
   <li><strong>OTPSnc</strong>: The Oregon State Ocean Tide Prediction Software package is required for the tidal modeling program MBotps (which in fact is just a convenient front end for the old-style-batch interface of OTPS). The OTPSnc package can be obtained from the<a href="http://www.oce.orst.edu/research/po/research/tide/"> tidal modeling group</a> at <a href="http://www.oce.orst.edu/">Oregon State University</a>.</li>
 </ul>
@@ -352,10 +343,24 @@ executable
 <em>perl</em> must also be available in the user's path for most of the macros
 to
 work.</p>
+<p>The GMT version 5 plug-in modules mbcontour, mbswath, and mbgrdtiff are invoked as
+modules of the program gmt:
+<ul>
+<pre>
+gmt mbcontour (....various arguments.....)
+gmt mbswath (....various arguments.....)
+gmt mbgrdtiff (....various arguments.....)
+</pre>
+</ul>
+In order for GMT to successfully execute the MB-System modules, the
+location of the shared library containing these modules must be known to
+GMT. This can be accomplished by either setting the GMT_CUSTOM_LIBS parameter
+in the file gmt.conf that is part of the GMT installation, by setting
+this parameter in the file gmt.conf in the user's home directory, or by using
+the GMT module gmtset to modify this parameter in the current working directory. If, for instance, the mbgmt shared library has been installed in the file /usr/lib/libmbgmt.dylib, then the GMT_CUSTOM_LIBS parameter in a gmt.conf file can be set to:
+<ul><pre>GMT_CUSTOM_LIBS = /usr/lib/libmbgmt.dylib</pre></ul></p>
 <p>Most users will also wish to specify which program they generally
-use
-to view Postscript plots on their screen. This parameter is set
-
+use to view Postscript plots on their screen. This parameter is set
 with the mbdefaults program (see the mbdefaults manual page for
 details).
 Popular open source options for Postscript display include ghostview and gv (gv is recommended). The postscript plots can also be imported into proprietary tools like Adobe Illustrator, Adobe Acrobat, or Preview on MacOs X. If one is working in a Unix museum, pageview works well on Sun workstations running Solaris, and xpsview is great on on Silicon Graphics machines running Irix.</p>

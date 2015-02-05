@@ -11,14 +11,14 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbgrdtiff</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  28 September 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  5 February 2015 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbgrdtiff</B> - generates a geographically located TIFF image from
-a GMT grid file.
+<B>mbgrdtiff</B> - <B>GMT</B> plug-in module for generating a geographically
+located GeoTIFF image from a GMT grid file.
 <P>
 <A NAME="lbAC">&nbsp;</A>
 <H2>VERSION</H2>
@@ -28,14 +28,19 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbgrdtiff</B> <B>-C</B><I>cptfile</I> <B>-I</B><I>grdfile</I>
+<B>gmt mbgrdtiff</B> <B>-C</B><I>cptfile</I> <B>-I</B><I>grdfile</I>
 <B>-O</B><I>tiff_file</I> [<B>-H</B> <B>-K</B><I>intensfile</I> <B>-V -W</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbgrdtiff</B> generates a TIFF image from a <B>GMT</B> grid. The
-image generation is similar to that of the <B>GMT</B> program
+<B>mbgrdtiff</B> is a plug-in module to generate a Geographically located
+GeoTiff image from a <B>GMT</B> grid file using <B>GMT</B> (Generic Mapping Tools).
+Like <B>mbcontour</B> and <B>mbswath</B>, <B>mbgrdtiff</B>
+is fully compatible with the <B>GMT</B> package version 5.
+A GeoTIFF image file includes location, projection and scaling information.
+The image generation used by <B>mbgrdtiff</B> is identical to
+that of the Postscript-producing <B>GMT</B> program
 <B>grdimage</B>. In particular, the color map is applied from
 a <B>GMT</B> CPT file, and shading overlay grids may be applied.
 The image is 8 bits
@@ -56,6 +61,18 @@ may used in grid generation. Some software packages (e.g. Winfrog) do not
 recognize the embedded coordinate system information, and install require
 a parallel &quot;world&quot; file to specify the bounds and resolution. The <B>-W</B>
 option causes a world file to be generated with a &quot;.tfw&quot; suffix.
+<P>
+In order for <B>GMT</B> to successfully execute <B>mbgrdtiff</B>, the
+location of the shared library <I>libmbgmt</I> containing this module must be known to <B>GMT</B>.
+This can be accomplished by either setting the GMT_CUSTOM_LIBS parameter
+in the file gmt.conf that is part of the GMT installation, by setting
+this parameter in the file gmt.conf in the user's home directory, or by
+using the GMT module <B>gmtset</B> to modify this parameter in the
+current working directory. If, for instance, the <I>libmbgmt</I> shared library
+has been installed in the file /usr/lib/libmbgmt.dylib, then the
+GMT_CUSTOM_LIBS parameter in a gmt.conf file can be set to:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GMT_CUSTOM_LIBS&nbsp;=&nbsp;/usr/lib/libmbgmt.dylib
+<P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
 
@@ -94,16 +111,18 @@ of its operation and then exit immediately.
 <I>grdfile</I>
 <BR>
 
-Sets the name of the gridded data file to be plotted.
+The first invocation of the <B>-I</B><I>grdfile</I> option sets
+the name of the gridded data file to be plotted.
 The data must be in a form acceptable to <B>GMT</B> version 3
 programs (see the <B>GMT</B> Cookbook &amp; Technical Reference).
-<DT><B>-K</B>
+<DT><B>-I</B>
 
 <DD>
 <I>intensity_file</I>
 <BR>
 
-Sets the name of the gridded data file containing
+The second invocation of the <B>-I</B><I>grdfile</I> option sets
+the name of a gridded data file containing
 intensity values to be used for shading the map.
 Alternatively, <I>grdfile</I> may be a list of grid files
 (one filename on each line) to be used together. If a
@@ -145,7 +164,7 @@ ranging from 0 to 128 dB). In order to generate
 a 24 bit color TIFF image of the seafloor topography, we use:
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbgrdtiff&nbsp;-I&nbsp;PunaA_bath.grd&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;PunaA_bath.tif&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-C&nbsp;bath.cpt&nbsp;-V<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>gmt&nbsp;mbgrdtiff&nbsp;-I&nbsp;PunaA_bath.grd&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;PunaA_bath.tif&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-C&nbsp;bath.cpt&nbsp;-V<BR>
 <BR>
 
 where the color is controlled by a GMT cpt file bath.cpt
@@ -168,7 +187,7 @@ In order to generate
 an 8 bit grayscale TIFF image of the sidescan mosaic, we use:
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbgrdtiff&nbsp;-I&nbsp;PunaA_ss.grd&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;PunaA_ss.tif&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-C&nbsp;ss.cpt&nbsp;-V<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>gmt&nbsp;mbgrdtiff&nbsp;-I&nbsp;PunaA_ss.grd&nbsp;&nbsp;<TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;PunaA_ss.tif&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-C&nbsp;ss.cpt&nbsp;-V<BR>
 <BR>
 
 where the grayscale is controlled by a GMT cpt file ss.cpt
@@ -219,7 +238,7 @@ Let us know.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 28 September 2013</P></CENTER>
+Last Updated: 5 February 2015</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

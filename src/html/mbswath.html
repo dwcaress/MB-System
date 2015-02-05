@@ -11,13 +11,13 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbswath</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  5 February 2015 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbswath</B> - GMT compatible utility for color fill or color shaded relief
+<B>mbswath</B> - <B>GMT</B> plug-in module for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
 <P>
 <A NAME="lbAC">&nbsp;</A>
@@ -28,7 +28,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbswath</B> <B>-C</B><I>cptfile</I> <B>-J</B><I>parameters</I>
+<B>gmt mbswath</B> <B>-C</B><I>cptfile</I> <B>-J</B><I>parameters</I>
 <B>-R</B><I>west/east/south/north</I> [<B>-A</B><I>factor/mode/depth</I>
 <B>-B</B><I>tickinfo</I> <B>-b</B><I>yr/mo/da/hr/mn/sc</I>
 <B>-c</B><I>copies</I> <B>-D</B><I>mode/scale/min/max</I>
@@ -43,16 +43,17 @@ Version 5.0
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbswath</B> is a utility for plotting swath sonar data in color fill
-or color shaded relief using Postscript.  Like <B>mbcontour</B>, <B>mbswath</B>
-is fully compatible with the GMT package version 3, including the use
+<B>mbswath</B> is a plug-in module for plotting swath sonar data in color fill
+or color shaded relief using <B>GMT</B> (Generic Mapping Tools).
+Like <B>mbcontour</B>, <B>mbswath</B>
+is fully compatible with the <B>GMT</B> package version 5, including the use
 of GMT style color pallete (cpt) files to control the color table.
 A 24-bit true color <I>PostScript</I> file is output using one of
 three methods. Unless individual polygon fills are used (<B>-1</B> option),
 only one call to <B>mbswath</B> can be made for each plot because the
 color image produced covers the entire plot space.
-The program can read data from stdin (the default) or from one
-or more swath sonar files.
+The program can read data from a single swath sonar file or from
+multiple files as referenced by an MB-System datalist file.
 <P>
 Before opening an input swath data file, <B>mbmbswath</B> checks for
 an ascii file in the same directory having the same name except
@@ -68,12 +69,23 @@ of data files for use in all plotting without the performance penalty
 of <B>mbswath</B> reading through all the data files, even those
 with no relevent data. We recommend that users maintain a &quot;.inf&quot;
 file for each swath data file used for gridding or plotting. The
-programs <B>mbcontour</B> and <B>mbgrid</B> also use &quot;.inf&quot; files
+<B>GMT</B> modules <B>mbcontour</B> and <B>mbgrid</B> also use &quot;.inf&quot; files
 in the same fashion.
 <P>
 If <B>mbfilter</B> has been used to filter amplitude and/or sidescan
 data in the desired input, then the <B>-Z</B> option can be used
 to specify plotting the filtered rather than unfiltered data.
+<P>
+In order for <B>GMT</B> to successfully execute <B>mbswath</B>, the
+location of the shared library <I>libmbgmt</I> containing this module must be known to <B>GMT</B>.
+This can be accomplished by either setting the GMT_CUSTOM_LIBS parameter
+in the file gmt.conf that is part of the GMT installation, by setting
+this parameter in the file gmt.conf in the user's home directory, or by
+using the GMT module <B>gmtset</B> to modify this parameter in the
+current working directory. If, for instance, the <I>libmbgmt</I> shared library
+has been installed in the file /usr/lib/libmbgmt.dylib, then the
+GMT_CUSTOM_LIBS parameter in a gmt.conf file can be set to:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GMT_CUSTOM_LIBS&nbsp;=&nbsp;/usr/lib/libmbgmt.dylib
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -258,9 +270,6 @@ generating a plot containing only bathymetry
 (<B>-Z</B><I>1</I> and <B>-Z</B><I>2</I>).
 the program
 will attempt to read an &quot;fbt&quot; file in lieu of the original data.
-<BR>
-
-Default: <I>infile</I> = &quot;stdin&quot;.
 <DT><B>-J</B>
 
 <DD>
@@ -513,7 +522,7 @@ Suppose the user has a Hydrosweep data file in the L-DEO in-house
 binary format (<B>MBIO</B> format id 24) called hs_ew9302_157_mn.mb24
 which lies in the region w/s/e/n = -32.1874/-26.6236/54.6349/56.7536.
 The following will suffice to generate a color fill plot:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbswath&nbsp;-Idatalist&nbsp;-Jm1.46578&nbsp;-R-32.1874/-26.6236/54.6349/56.7536<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>gmt&nbsp;mbswath&nbsp;-Idatalist&nbsp;-Jm1.46578&nbsp;-R-32.1874/-26.6236/54.6349/56.7536<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-B1/1&nbsp;-Ccolor.cpt&nbsp;-p1&nbsp;-A1&nbsp;-Q100&nbsp;-Z2<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-X1&nbsp;-Y1.75&nbsp;-V&nbsp;&gt;&nbsp;mbswath.ps<BR>
 <BR>
@@ -525,8 +534,7 @@ where the file datalist contains:
 A more complicated plot including a navigation track and a color scale
 can be created using <B>mbswath</B> in conjunction with other GMT
 and GMT-compatible utilities.  The following is an example of a shellscript
-which generates such a plot and then displays it on the screen (assuming
-you have a Sun workstation):
+which generates such a plot and then displays it on the screen:
 <P>
 <BR>&nbsp;#
 <BR>&nbsp;#&nbsp;Shellscript&nbsp;to&nbsp;create&nbsp;Postscript&nbsp;plot&nbsp;of&nbsp;swath&nbsp;sonar&nbsp;data
@@ -555,7 +563,7 @@ you have a Sun workstation):
 <BR>&nbsp;#
 <BR>&nbsp;#&nbsp;Run&nbsp;mbswath
 <BR>&nbsp;echo&nbsp;Running&nbsp;mbswath...
-<BR>&nbsp;mbswath&nbsp;-Idatalist&nbsp;-Jm1.46578&nbsp;-R-32.1874/-26.6236/54.6349/56.7536&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>-B1.1128/1.1128&quot;:.Data&nbsp;File&nbsp;hs_ew9302_157_bmn.mb24:&quot;&nbsp;&nbsp;-Chs_ew9302_157_bmn.mb24.cpt&nbsp;-p1&nbsp;-A1&nbsp;-Q100&nbsp;-G5/0&nbsp;-Z2&nbsp;-X1&nbsp;&nbsp;-Y1.75&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;hs_ew9302_157_bmn.mb24.ps<BR>
+<BR>&nbsp;gmt&nbsp;mbswath&nbsp;-Idatalist&nbsp;-Jm1.46578&nbsp;-R-32.1874/-26.6236/54.6349/56.7536&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-B1.1128/1.1128&quot;:.Data&nbsp;File&nbsp;hs_ew9302_157_bmn.mb24:&quot;&nbsp;&nbsp;-Chs_ew9302_157_bmn.mb24.cpt&nbsp;-p1&nbsp;-A1&nbsp;-Q100&nbsp;-G5/0&nbsp;-Z2&nbsp;-X1&nbsp;&nbsp;-Y1.75&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;hs_ew9302_157_bmn.mb24.ps<BR>
 <BR>&nbsp;#
 <BR>&nbsp;#&nbsp;Run&nbsp;mblist
 <BR>&nbsp;echo&nbsp;Running&nbsp;mblist...
@@ -563,11 +571,11 @@ you have a Sun workstation):
 <BR>&nbsp;#
 <BR>&nbsp;#&nbsp;Run&nbsp;pstrack
 <BR>&nbsp;echo&nbsp;Running&nbsp;pstrack...
-<BR>&nbsp;pstrack&nbsp;hs_ew9302_157_bmn.mb24.nav&nbsp;-Jm1.46578&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-32.1874/-26.6236/54.6349/56.7536&nbsp;-B1.1128/1.1128&quot;:.Data&nbsp;File&nbsp;&nbsp;hs_ew9302_157_bmn.mb24:&quot;&nbsp;-W1p&nbsp;-Mt15ma1h&nbsp;-O&nbsp;-K&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.ps<BR>
+<BR>&nbsp;gmt&nbsp;pstrack&nbsp;hs_ew9302_157_bmn.mb24.nav&nbsp;-Jm1.46578&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-32.1874/-26.6236/54.6349/56.7536&nbsp;-B1.1128/1.1128&quot;:.Data&nbsp;File&nbsp;&nbsp;hs_ew9302_157_bmn.mb24:&quot;&nbsp;-W1p&nbsp;-Mt15ma1h&nbsp;-O&nbsp;-K&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.ps<BR>
 <BR>&nbsp;#
 <BR>&nbsp;#&nbsp;Run&nbsp;psscale
 <BR>&nbsp;echo&nbsp;Running&nbsp;psscale...
-<BR>&nbsp;psscale&nbsp;&nbsp;-Chs_ew9302_157_bmn.mb24.cpt&nbsp;-D4.0777/-0.5000/6.5242/0.1500h
+<BR>&nbsp;gmt&nbsp;psscale&nbsp;&nbsp;-Chs_ew9302_157_bmn.mb24.cpt&nbsp;-D4.0777/-0.5000/6.5242/0.1500h
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-B&quot;:.Depth&nbsp;(meters):&quot;&nbsp;-O&nbsp;-V&nbsp;&gt;&gt;&nbsp;hs_ew9302_157_bmn.mb24.ps<BR>
 <BR>&nbsp;#
 <BR>&nbsp;#&nbsp;Delete&nbsp;surplus&nbsp;files
@@ -575,8 +583,8 @@ you have a Sun workstation):
 <BR>&nbsp;rm&nbsp;-f&nbsp;hs_ew9302_157_bmn.mb24.cpt&nbsp;datalist&nbsp;hs_ew9302_157_bmn.mb24.nav
 <BR>&nbsp;#
 <BR>&nbsp;#&nbsp;Run&nbsp;pageview
-<BR>&nbsp;echo&nbsp;Running&nbsp;pageview&nbsp;in&nbsp;background...
-<BR>&nbsp;pageview&nbsp;hs_ew9302_157_bmn.mb24.ps&nbsp;&amp;
+<BR>&nbsp;echo&nbsp;Running&nbsp;gv&nbsp;in&nbsp;background...
+<BR>&nbsp;gv&nbsp;hs_ew9302_157_bmn.mb24.ps&nbsp;&amp;
 <BR>&nbsp;#
 <BR>&nbsp;#&nbsp;All&nbsp;done!
 <BR>&nbsp;echo&nbsp;All&nbsp;done!
@@ -610,7 +618,7 @@ Let us know.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 5 February 2015</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

@@ -1,18 +1,23 @@
-.TH mbgrdtiff 1 "28 September 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrdtiff 1 "5 February 2015" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbgrdtiff\fP \- generates a geographically located TIFF image from
-a GMT grid file.
+\fBmbgrdtiff\fP \- \fBGMT\fP plug-in module for generating a geographically
+located GeoTIFF image from a GMT grid file.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbgrdtiff\fP \fB\-C\fIcptfile\fP \fB\-I\fIgrdfile\fP
+\fBgmt mbgrdtiff\fP \fB\-C\fIcptfile\fP \fB\-I\fIgrdfile\fP
 \fB\-O\fItiff_file\fP [\fB\-H\fP \fB\-K\fIintensfile\fP \fB\-V -W\fP]
 
 .SH DESCRIPTION
-\fBmbgrdtiff\fP generates a TIFF image from a \fBGMT\fP grid. The
-image generation is similar to that of the \fBGMT\fP program
+\fBmbgrdtiff\fP is a plug-in module to generate a Geographically located
+GeoTiff image from a \fBGMT\fP grid file using \fBGMT\fP (Generic Mapping Tools).
+Like \fBmbcontour\fP and \fBmbswath\fP, \fBmbgrdtiff\fP
+is fully compatible with the \fBGMT\fP package version 5.
+A GeoTIFF image file includes location, projection and scaling information.
+The image generation used by \fBmbgrdtiff\fP is identical to
+that of the Postscript-producing \fBGMT\fP program
 \fBgrdimage\fP. In particular, the color map is applied from
 a \fBGMT\fP CPT file, and shading overlay grids may be applied.
 The image is 8 bits
@@ -33,6 +38,18 @@ may used in grid generation. Some software packages (e.g. Winfrog) do not
 recognize the embedded coordinate system information, and install require
 a parallel "world" file to specify the bounds and resolution. The \fB-W\fP
 option causes a world file to be generated with a ".tfw" suffix.
+
+In order for \fBGMT\fP to successfully execute \fBmbgrdtiff\fP, the
+location of the shared library \fIlibmbgmt\fP containing this module must be known to \fBGMT\fP.
+This can be accomplished by either setting the GMT_CUSTOM_LIBS parameter
+in the file gmt.conf that is part of the GMT installation, by setting
+this parameter in the file gmt.conf in the user's home directory, or by
+using the GMT module \fBgmtset\fP to modify this parameter in the
+current working directory. If, for instance, the \fIlibmbgmt\fP shared library
+has been installed in the file /usr/lib/libmbgmt.dylib, then the
+GMT_CUSTOM_LIBS parameter in a gmt.conf file can be set to:
+        GMT_CUSTOM_LIBS = /usr/lib/libmbgmt.dylib
+
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
 .br
@@ -59,14 +76,16 @@ of its operation and then exit immediately.
 .B \-I
 \fIgrdfile\fP
 .br
-Sets the name of the gridded data file to be plotted.
+The first invocation of the \fB-I\fP\fIgrdfile\fP option sets
+the name of the gridded data file to be plotted.
 The data must be in a form acceptable to \fBGMT\fP version 3
 programs (see the \fBGMT\fP Cookbook & Technical Reference).
 .TP
-.B \-K
+.B \-I
 \fIintensity_file\fP
 .br
-Sets the name of the gridded data file containing
+The second invocation of the \fB-I\fP\fIgrdfile\fP option sets
+the name of a gridded data file containing
 intensity values to be used for shading the map.
 Alternatively, \fIgrdfile\fP may be a list of grid files
 (one filename on each line) to be used together. If a
@@ -100,7 +119,7 @@ contains a sidescan mosaic (reflectivity values
 ranging from 0 to 128 dB). In order to generate
 a 24 bit color TIFF image of the seafloor topography, we use:
 .br
- 	mbgrdtiff \-I PunaA_bath.grd \
+ 	gmt mbgrdtiff \-I PunaA_bath.grd \
  		-O PunaA_bath.tif \
  		-C bath.cpt \-V
 .br
@@ -121,7 +140,7 @@ containing:
 In order to generate
 an 8 bit grayscale TIFF image of the sidescan mosaic, we use:
 .br
- 	mbgrdtiff \-I PunaA_ss.grd \
+ 	gmt mbgrdtiff \-I PunaA_ss.grd \
  		-O PunaA_ss.tif \
  		-C ss.cpt \-V
 .br

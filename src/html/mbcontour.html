@@ -11,13 +11,13 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbcontour</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  5 February 2015 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbcontour</B> - GMT compatible utility for color fill or color shaded relief
+<B>mbcontour</B> - <B>GMT</B> plug-in module for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
 <P>
 <A NAME="lbAC">&nbsp;</A>
@@ -28,7 +28,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbcontour</B> <B>-J</B><I>parameters</I> <B>-R</B><I>west/east/south/north
+<B>gmt mbcontour</B> <B>-J</B><I>parameters</I> <B>-R</B><I>west/east/south/north
 </I>[<B>-A</B><I>cont_int/col_int/tic_int/lab_int/tic_int/lab_hgt/lab_spacing</I>
 <B>-B</B><I>tickinfo</I> <B>-b</B><I>yr/mo/da/hr/mn/sc</I>
 <B>-C</B><I>contourfile</I> <B>-c</B><I>copies</I>
@@ -45,9 +45,10 @@ Version 5.0
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbcontour</B> is a utility for swath contouring of swath bathymetry
-data using Postscript.  Like <B>mbswath</B>, <B>mbcontour</B>
-is fully compatible with the GMT package version 4. Two contouring
+<B>mbcontour</B> is a plug-in module for plotting bathymetry contours
+from swath sonar data using <B>GMT</B> (Generic Mapping Tools). Like
+<B>mbswath</B>, <B>mbcontour</B> is fully compatible with the <B>GMT</B>
+package version 5. Two contouring
 algorithms are available; the <B>-Z</B> option specifies which is used.
 The first, default approach draws contours between successive pings;
 this algorithm is simple and therefore fast but produces poor
@@ -82,8 +83,19 @@ of data files for use in all plotting without the performance penalty
 of <B>mbcontour</B> reading through all the data files, even those
 with no relevent data. We recommend that users maintain a &quot;.inf&quot;
 file for each swath data file used for gridding or plotting. The
-programs <B>mbswath</B> and <B>mbgrid</B> also use &quot;.inf&quot; files
+<B>GMT</B> modules <B>mbswath</B> and <B>mbgrid</B> also use &quot;.inf&quot; files
 in the same fashion.
+<P>
+In order for <B>GMT</B> to successfully execute <B>mbcontour</B>, the
+location of the shared library <I>libmbgmt</I> containing this module must be known to <B>GMT</B>.
+This can be accomplished by either setting the GMT_CUSTOM_LIBS parameter
+in the file gmt.conf that is part of the GMT installation, by setting
+this parameter in the file gmt.conf in the user's home directory, or by
+using the GMT module <B>gmtset</B> to modify this parameter in the
+current working directory. If, for instance, the <I>libmbgmt</I> shared library
+has been installed in the file /usr/lib/libmbgmt.dylib, then the
+GMT_CUSTOM_LIBS parameter in a gmt.conf file can be set to:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GMT_CUSTOM_LIBS&nbsp;=&nbsp;/usr/lib/libmbgmt.dylib
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -271,9 +283,7 @@ An &quot;fnv&quot; file contains only navigation information in a compact
 ASCII format (format 166), and is thus even quicker to read.
 When <B>mbcontour</B> is only generating a shiptrack plot, it will
 attempt to read an &quot;fnv&quot; file in lieu of the original data.
-<BR>
-
-Default: <I>infile</I> = &quot;stdin&quot;.
+<P>
 <DT><B>-J</B>
 
 <DD>
@@ -527,7 +537,7 @@ Suppose the user has a Hydrosweep data file in the L-DEO in-house
 binary format (<B>MBIO</B> format id 24) called hs_ew9302_161_mn.mb24
 which lies in the region w/s/e/n = -32.1874/-26.6236/54.6349/56.7536.
 The following will suffice to generate a traditional four-color contour plot:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-R-25.7252/-23.0683/59.7415/61.0699
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;gmt&nbsp;mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-R-25.7252/-23.0683/59.7415/61.0699
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Ba0.5314g0.5314&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-A50.0/250.0/250.0/250.0/0.01/0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;mbcontour.ps
 <BR>
 
@@ -539,7 +549,7 @@ A plot including a navigation track can also be created using
 <B>mbcontour</B>.  Here the <B>-D</B> flag is used to add a plot
 of the ship track annotated with time marks every 0.25 hours,
 annotated time marks every hour, and day annotations every four hours:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-R-25.7252/-23.0683/59.7415/61.0699&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Ba0.5314g0.5314&quot;:.File&nbsp;hs_ew9302_161_bmn.mb24:&quot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-D0.25/1/4/0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-A50.0/250.0/250.0/250.0/0.01/0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;hs_ew9302_161_bmn.mb24.ps
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;gmt&nbsp;mbcontour&nbsp;-Idatalist&nbsp;-Jm2.44652&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-R-25.7252/-23.0683/59.7415/61.0699&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Ba0.5314g0.5314&quot;:.File&nbsp;hs_ew9302_161_bmn.mb24:&quot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-D0.25/1/4/0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-A50.0/250.0/250.0/250.0/0.01/0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-p1&nbsp;-P&nbsp;-X1&nbsp;-Y1&nbsp;-K&nbsp;-V&nbsp;&gt;&nbsp;hs_ew9302_161_bmn.mb24.ps
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
@@ -570,7 +580,7 @@ Please let us know.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 5 February 2015</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

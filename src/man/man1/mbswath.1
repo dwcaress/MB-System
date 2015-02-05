@@ -1,13 +1,13 @@
-.TH mbswath 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbswath 1 "5 February 2015" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbswath\fP \- GMT compatible utility for color fill or color shaded relief
+\fBmbswath\fP \- \fBGMT\fP plug-in module for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbswath\fP \fB\-C\fIcptfile\fP \fB\-J\fIparameters\fP
+\fBgmt mbswath\fP \fB\-C\fIcptfile\fP \fB\-J\fIparameters\fP
 \fB\-R\fIwest/east/south/north\fP [\fB\-A\fIfactor/mode/depth\fP
 \fB\-B\fItickinfo\fP \fB\-b\fIyr/mo/da/hr/mn/sc\fP
 \fB\-c\fIcopies\fP \fB\-D\fImode/scale/min/max\fP
@@ -20,16 +20,17 @@ Version 5.0
 \fB\-V \-H\fP]
 
 .SH DESCRIPTION
-\fBmbswath\fP is a utility for plotting swath sonar data in color fill
-or color shaded relief using Postscript.  Like \fBmbcontour\fP, \fBmbswath\fP
-is fully compatible with the GMT package version 3, including the use
+\fBmbswath\fP is a plug-in module for plotting swath sonar data in color fill
+or color shaded relief using \fBGMT\fP (Generic Mapping Tools).
+Like \fBmbcontour\fP, \fBmbswath\fP
+is fully compatible with the \fBGMT\fP package version 5, including the use
 of GMT style color pallete (cpt) files to control the color table.
 A 24-bit true color \fIPostScript\fP file is output using one of
 three methods. Unless individual polygon fills are used (\fB\-1\fP option),
 only one call to \fBmbswath\fP can be made for each plot because the
 color image produced covers the entire plot space.
-The program can read data from stdin (the default) or from one
-or more swath sonar files.
+The program can read data from a single swath sonar file or from
+multiple files as referenced by an MB-System datalist file.
 
 Before opening an input swath data file, \fBmbmbswath\fP checks for
 an ascii file in the same directory having the same name except
@@ -45,12 +46,23 @@ of data files for use in all plotting without the performance penalty
 of \fBmbswath\fP reading through all the data files, even those
 with no relevent data. We recommend that users maintain a ".inf"
 file for each swath data file used for gridding or plotting. The
-programs \fBmbcontour\fP and \fBmbgrid\fP also use ".inf" files
+\fBGMT\fP modules \fBmbcontour\fP and \fBmbgrid\fP also use ".inf" files
 in the same fashion.
 
 If \fBmbfilter\fP has been used to filter amplitude and/or sidescan
 data in the desired input, then the \fB\-Z\fP option can be used
 to specify plotting the filtered rather than unfiltered data.
+
+In order for \fBGMT\fP to successfully execute \fBmbswath\fP, the
+location of the shared library \fIlibmbgmt\fP containing this module must be known to \fBGMT\fP.
+This can be accomplished by either setting the GMT_CUSTOM_LIBS parameter
+in the file gmt.conf that is part of the GMT installation, by setting
+this parameter in the file gmt.conf in the user's home directory, or by
+using the GMT module \fBgmtset\fP to modify this parameter in the
+current working directory. If, for instance, the \fIlibmbgmt\fP shared library
+has been installed in the file /usr/lib/libmbgmt.dylib, then the
+GMT_CUSTOM_LIBS parameter in a gmt.conf file can be set to:
+        GMT_CUSTOM_LIBS = /usr/lib/libmbgmt.dylib
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -201,8 +213,6 @@ generating a plot containing only bathymetry
 (\fB\-Z\fP\fI1\fP and \fB\-Z\fP\fI2\fP).
 the program
 will attempt to read an "fbt" file in lieu of the original data.
-.br
-Default: \fIinfile\fP = "stdin".
 .TP
 .B \-J
 Selects the map projection. Scale is inch/degree, 1:xxxxx.
@@ -395,7 +405,7 @@ Suppose the user has a Hydrosweep data file in the L-DEO in-house
 binary format (\fBMBIO\fP format id 24) called hs_ew9302_157_mn.mb24
 which lies in the region w/s/e/n = \-32.1874/-26.6236/54.6349/56.7536.
 The following will suffice to generate a color fill plot:
- 	mbswath \-Idatalist \-Jm1.46578 \-R-32.1874/-26.6236/54.6349/56.7536
+ 	gmt mbswath \-Idatalist \-Jm1.46578 \-R-32.1874/-26.6236/54.6349/56.7536
  		-B1/1 \-Ccolor.cpt \-p1 \-A1 \-Q100 \-Z2
  		-X1 \-Y1.75 \-V > mbswath.ps
 .br
@@ -405,8 +415,7 @@ where the file datalist contains:
 A more complicated plot including a navigation track and a color scale
 can be created using \fBmbswath\fP in conjunction with other GMT
 and GMT-compatible utilities.  The following is an example of a shellscript
-which generates such a plot and then displays it on the screen (assuming
-you have a Sun workstation):
+which generates such a plot and then displays it on the screen:
 
  #
  # Shellscript to create Postscript plot of swath sonar data
@@ -435,7 +444,7 @@ you have a Sun workstation):
  #
  # Run mbswath
  echo Running mbswath...
- mbswath \-Idatalist \-Jm1.46578 \-R-32.1874/-26.6236/54.6349/56.7536 \
+ gmt mbswath \-Idatalist \-Jm1.46578 \-R-32.1874/-26.6236/54.6349/56.7536 \
  	-B1.1128/1.1128":.Data File hs_ew9302_157_bmn.mb24:" \
  	-Chs_ew9302_157_bmn.mb24.cpt \-p1 \-A1 \-Q100 \-G5/0 \-Z2 \-X1 \
  	-Y1.75 \-K \-V > hs_ew9302_157_bmn.mb24.ps
@@ -446,13 +455,13 @@ you have a Sun workstation):
  #
  # Run pstrack
  echo Running pstrack...
- pstrack hs_ew9302_157_bmn.mb24.nav \-Jm1.46578 \
+ gmt pstrack hs_ew9302_157_bmn.mb24.nav \-Jm1.46578 \
  	-R-32.1874/-26.6236/54.6349/56.7536 \-B1.1128/1.1128":.Data File \
  	hs_ew9302_157_bmn.mb24:" \-W1p \-Mt15ma1h \-O \-K >> hs_ew9302_157_bmn.mb24.ps
  #
  # Run psscale
  echo Running psscale...
- psscale  \-Chs_ew9302_157_bmn.mb24.cpt \-D4.0777/-0.5000/6.5242/0.1500h
+ gmt psscale  \-Chs_ew9302_157_bmn.mb24.cpt \-D4.0777/-0.5000/6.5242/0.1500h
  	-B":.Depth (meters):" \-O \-V >> hs_ew9302_157_bmn.mb24.ps
  #
  # Delete surplus files
@@ -460,8 +469,8 @@ you have a Sun workstation):
  rm \-f hs_ew9302_157_bmn.mb24.cpt datalist hs_ew9302_157_bmn.mb24.nav
  #
  # Run pageview
- echo Running pageview in background...
- pageview hs_ew9302_157_bmn.mb24.ps &
+ echo Running gv in background...
+ gv hs_ew9302_157_bmn.mb24.ps &
  #
  # All done!
  echo All done!
