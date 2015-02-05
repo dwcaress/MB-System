@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_3datdepthlidar.h	11/29/2013
  *	$Id$
  *
- *    Copyright (c) 2013-2014 by
+ *    Copyright (c) 2013-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

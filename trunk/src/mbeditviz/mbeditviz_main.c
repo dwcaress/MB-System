@@ -4,7 +4,7 @@
  *    The MB-system:	mbeditviz_main.c		4/27/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2014 by
+ *    Copyright (c) 2007-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

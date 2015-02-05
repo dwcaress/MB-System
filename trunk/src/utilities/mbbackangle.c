@@ -2,7 +2,7 @@
  *    The MB-system:	mbbackangle.c	1/6/95
  *    $Id$
  *
- *    Copyright (c) 1995-2014 by
+ *    Copyright (c) 1995-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_sbifremr.h	3/29/96
  *	$Id$
  *
- *    Copyright (c) 1996-2014 by
+ *    Copyright (c) 1996-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

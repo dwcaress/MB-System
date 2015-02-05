@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_cbat9001.c	8/8/94
  *	$Id$
  *
- *    Copyright (c) 1994-2014 by
+ *    Copyright (c) 1994-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

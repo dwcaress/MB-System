@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_mr1v2001.h	3/6/2003
  *	$Id$
  *
- *    Copyright (c) 2003-2014 by
+ *    Copyright (c) 2003-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

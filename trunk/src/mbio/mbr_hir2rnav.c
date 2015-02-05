@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hir2rnav.c	5/20/99
  *	$Id: mbr_hir2rnav.c 1829 2010-02-05 02:53:39Z caress $
  *
- *    Copyright (c) 1999-2014 by
+ *    Copyright (c) 1999-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
