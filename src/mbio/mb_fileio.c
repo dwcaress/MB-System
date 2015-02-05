@@ -2,7 +2,7 @@
  *    The MB-system:	mb_fileio.c	5/23/2012
  *    $Id:  $
  *
- *    Copyright (c) 2012-2014 by
+ *    Copyright (c) 2012-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

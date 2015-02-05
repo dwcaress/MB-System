@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_mstiffss.c	4/7/98
  *	$Id$
  *
- *    Copyright (c) 1998-2014 by
+ *    Copyright (c) 1998-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

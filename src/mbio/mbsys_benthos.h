@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_benthos.h	3/29/2011
  *	$Id$
  *
- *    Copyright (c) 2012-2014 by
+ *    Copyright (c) 2012-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
