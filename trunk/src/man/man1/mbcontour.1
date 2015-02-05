@@ -1,13 +1,13 @@
-.TH mbcontour 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbcontour 1 "5 February 2015" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbcontour\fP \- GMT compatible utility for color fill or color shaded relief
+\fBmbcontour\fP \- \fBGMT\fP plug-in module for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbcontour\fP \fB\-J\fIparameters\fP \fB\-R\fIwest/east/south/north
+\fBgmt mbcontour\fP \fB\-J\fIparameters\fP \fB\-R\fIwest/east/south/north
 \fP[\fB\-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt/lab_spacing\fP
 \fB\-B\fItickinfo\fP \fB\-b\fIyr/mo/da/hr/mn/sc\fP
 \fB\-C\fIcontourfile\fP \fB\-c\fIcopies\fP
@@ -22,9 +22,10 @@ Version 5.0
 \fB\-V \-H\fP]
 
 .SH DESCRIPTION
-\fBmbcontour\fP is a utility for swath contouring of swath bathymetry
-data using Postscript.  Like \fBmbswath\fP, \fBmbcontour\fP
-is fully compatible with the GMT package version 4. Two contouring
+\fBmbcontour\fP is a plug-in module for plotting bathymetry contours
+from swath sonar data using \fBGMT\fP (Generic Mapping Tools). Like
+\fBmbswath\fP, \fBmbcontour\fP is fully compatible with the \fBGMT\fP
+package version 5. Two contouring
 algorithms are available; the \fB\-Z\fP option specifies which is used.
 The first, default approach draws contours between successive pings;
 this algorithm is simple and therefore fast but produces poor
@@ -59,8 +60,19 @@ of data files for use in all plotting without the performance penalty
 of \fBmbcontour\fP reading through all the data files, even those
 with no relevent data. We recommend that users maintain a ".inf"
 file for each swath data file used for gridding or plotting. The
-programs \fBmbswath\fP and \fBmbgrid\fP also use ".inf" files
+\fBGMT\fP modules \fBmbswath\fP and \fBmbgrid\fP also use ".inf" files
 in the same fashion.
+
+In order for \fBGMT\fP to successfully execute \fBmbcontour\fP, the
+location of the shared library \fIlibmbgmt\fP containing this module must be known to \fBGMT\fP.
+This can be accomplished by either setting the GMT_CUSTOM_LIBS parameter
+in the file gmt.conf that is part of the GMT installation, by setting
+this parameter in the file gmt.conf in the user's home directory, or by
+using the GMT module \fBgmtset\fP to modify this parameter in the
+current working directory. If, for instance, the \fIlibmbgmt\fP shared library
+has been installed in the file /usr/lib/libmbgmt.dylib, then the
+GMT_CUSTOM_LIBS parameter in a gmt.conf file can be set to:
+        GMT_CUSTOM_LIBS = /usr/lib/libmbgmt.dylib
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -216,8 +228,7 @@ An "fnv" file contains only navigation information in a compact
 ASCII format (format 166), and is thus even quicker to read.
 When \fBmbcontour\fP is only generating a shiptrack plot, it will
 attempt to read an "fnv" file in lieu of the original data.
-.br
-Default: \fIinfile\fP = "stdin".
+
 .TP
 .B \-J
 Selects the map projection. Scale is inch/degree, 1:xxxxx.
@@ -413,7 +424,7 @@ Suppose the user has a Hydrosweep data file in the L-DEO in-house
 binary format (\fBMBIO\fP format id 24) called hs_ew9302_161_mn.mb24
 which lies in the region w/s/e/n = \-32.1874/-26.6236/54.6349/56.7536.
 The following will suffice to generate a traditional four-color contour plot:
-    mbcontour \-Idatalist \-Jm2.44652 \
+    gmt mbcontour \-Idatalist \-Jm2.44652 \
         -R-25.7252/-23.0683/59.7415/61.0699
         -Ba0.5314g0.5314 \
         -A50.0/250.0/250.0/250.0/0.01/0.1 \
@@ -426,7 +437,7 @@ A plot including a navigation track can also be created using
 \fBmbcontour\fP.  Here the \fB\-D\fP flag is used to add a plot
 of the ship track annotated with time marks every 0.25 hours,
 annotated time marks every hour, and day annotations every four hours:
-    mbcontour \-Idatalist \-Jm2.44652 \
+    gmt mbcontour \-Idatalist \-Jm2.44652 \
         -R-25.7252/-23.0683/59.7415/61.0699 \
         -Ba0.5314g0.5314":.File hs_ew9302_161_bmn.mb24:" \
         -D0.25/1/4/0.1 \
