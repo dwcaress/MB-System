@@ -162,11 +162,7 @@ int mb_read_init(int verbose, char *file,
 	mb_io_ptr->file3_pos = 0;
 	mb_io_ptr->file3_bytes = 0;
 	mb_io_ptr->ncid = 0;
-#ifdef WITH_GSF
 	mb_io_ptr->gsfid = 0;
-#else
-        /* TODO: possibly set to -666 */
-#endif
 	mb_io_ptr->xdrs = NULL;
 	mb_io_ptr->xdrs2 = NULL;
 	mb_io_ptr->xdrs3 = NULL;
@@ -474,7 +470,6 @@ int mb_read_init(int verbose, char *file,
 	    status = mb_fileio_open(verbose, *mbio_ptr, error);
 	    }
 
-#ifdef WITH_GSF
 	/* else handle gsf files to be opened with gsflib */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF)
 	    {
@@ -492,9 +487,6 @@ int mb_read_init(int verbose, char *file,
 		*error = MB_ERROR_OPEN_FAIL;
 		}
 	    }
-#else
-        /* TODO: should issue an error */
-#endif
 
 	/* else handle netcdf files to be opened with libnetcdf */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF)

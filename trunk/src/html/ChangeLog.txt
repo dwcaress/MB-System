@@ -196,7 +196,7 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2225 (February 5, 2014)
+-----> 5.5.2226 (February 5, 2014)
 
 Install_makefiles: the old install_makefiles build system no longer 
 functions and has been removed.
