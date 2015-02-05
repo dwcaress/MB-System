@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_gsfgenmb.h	2/27/98
  *	$Id$
  *
- *    Copyright (c) 1998-2014 by
+ *    Copyright (c) 1998-2015 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,31 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	February 27, 1998
- * $Log: mbf_gsfgenmb.h,v $
- * Revision 5.3  2009/03/13 07:05:58  caress
- * Release 5.1.2beta02
- *
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.1  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  1998/10/05  19:16:02  caress
- * MB-System version 4.6beta
- *
- * Revision 1.1  1998/10/05  18:32:27  caress
- * Initial revision
- *
- * Revision 1.1  1998/10/05  17:46:15  caress
- * Initial revision
- *
  *
  */
 /*
