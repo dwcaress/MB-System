@@ -1,2 +1,2 @@
-MB-System Version:  "5.5.2227"
-MB-System Release Date:  "5 February 2015"
+MB-System Version:  "5.5.2228"
+MB-System Release Date:  "6 February 2015"
