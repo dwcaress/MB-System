@@ -2994,27 +2994,27 @@ sub GetBaseTick {
 	$base_tick = &min($base_tick_x, $base_tick_y);
 	if ($base_tick < 0.0002777777)
 		{
-		$base_tick = "1c";
+		$base_tick = "1s";
 		}
 	elsif ($base_tick < 0.0005555555)
 		{
-		$base_tick = "2c";
+		$base_tick = "2s";
 		}
 	elsif ($base_tick < 0.0013888889)
 		{
-		$base_tick = "5c";
+		$base_tick = "5s";
 		}
 	elsif ($base_tick < 0.0027777778)
 		{
-		$base_tick = "10c";
+		$base_tick = "10s";
 		}
 	elsif ($base_tick < 0.0041666667)
 		{
-		$base_tick = "15c";
+		$base_tick = "15s";
 		}
 	elsif ($base_tick < 0.0083333333)
 		{
-		$base_tick = "30c";
+		$base_tick = "30s";
 		}
 	elsif ($base_tick < 0.0166667)
 		{

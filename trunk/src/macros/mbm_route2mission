@@ -39,73 +39,6 @@
 # $Id$
 #
 # Revisions:
-#   $Log: mbm_route2mission.perl,v $
-#   Revision 5.21  2008/12/05 17:32:51  caress
-#   Check-in mods 5 December 2008 including contributions from Gordon Keith.
-#
-#   Revision 5.20  2008/11/16 21:51:18  caress
-#   Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
-#
-#   Revision 5.19  2008/10/17 07:52:44  caress
-#   Check in on October 17, 2008.
-#
-#   Revision 5.18  2008/09/27 03:27:10  caress
-#   Working towards release 5.1.1beta24
-#
-#   Revision 5.17  2008/09/11 20:06:46  caress
-#   Checking in updates made during cruise AT15-36.
-#
-#   Revision 5.16  2008/05/16 22:36:21  caress
-#   Release 5.1.1beta18
-#
-#   Revision 5.15  2008/02/12 02:51:51  caress
-#   Changes in preparation for 2008 MBARI Mapping AUV operations.
-#
-#   Revision 5.14  2007/10/08 05:45:46  caress
-#   Added zero point setpoint to descent sequences and can output WPL files.
-#
-#   Revision 5.13  2007/05/14 17:10:12  caress
-#   Mods during May 2007 Lucia Canyon cruise.
-#
-#   Revision 5.12  2007/03/02 20:33:37  caress
-#   Fixed informational output.
-#
-#   Revision 5.11  2006/11/26 09:42:01  caress
-#   Making distribution 5.1.0.
-#
-#   Revision 5.10  2006/11/10 22:36:04  caress
-#   Working towards release 5.1.0
-#
-#   Revision 5.9  2006/09/11 18:55:52  caress
-#   Changes during Western Flyer and Thomas Thompson cruises, August-September
-#   2006.
-#
-#   Revision 5.8  2006/07/27 18:42:51  caress
-#   Working towards 5.1.0
-#
-#   Revision 5.7  2006/06/16 19:30:58  caress
-#   Check in after the Santa Monica Basin Mapping AUV Expedition.
-#
-#   Revision 5.6  2006/04/11 19:12:53  caress
-#   Updates during Mapping AUV test operations.
-#
-#   Revision 5.5  2005/11/05 01:34:20  caress
-#   Much work over the past two months.
-#
-#   Revision 5.4  2005/06/04 04:28:43  caress
-#   Added support for new waypoint_depth AUV behavior.
-#
-#   Revision 5.3  2005/04/07 04:14:12  caress
-#   Added mission speed and mapping sonar options.
-#
-#   Revision 5.2  2004/12/02 06:27:45  caress
-#   Fixes to support MBARI AUV program.
-#
-#   Revision 5.1  2004/09/16 19:29:11  caress
-#   Development to support for MBARI Mapping AUV.
-#
-#   Revision 5.0  2004/07/27 19:56:43  caress
-#   Macro to translate MBgrdviz route file into MBARI AUV mission file.
 #
 #
 $program_name = "mbm_route2mission";
@@ -464,11 +397,11 @@ if ($sensor && !$sensorarg)
 	}
 if ($mappingsonar && $beamdata)
 	{
-	$logmode = 3;
+	$logmode = 2;
 	}
 elsif ($mappingsonar)
 	{
-	$logmode = 3;
+	$logmode = 2;
 	}
 elsif ($deltat)
 	{

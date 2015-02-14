@@ -44,6 +44,7 @@
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_define.h"
+#include "mb_io.h"
 
 /* MBSWATH MODE DEFINES */
 #define	MBSWATH_BATH		1
@@ -71,12 +72,12 @@
 
 /* global structure definitions */
 #define MAXPINGS 50
-struct	footprint
+struct footprint
 	{
 	double	x[4];
 	double	y[4];
 	};
-struct	ping
+struct ping
 	{
 	int	pings;
 	int	kind;
@@ -1205,10 +1206,12 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error)
 	double	ddlonx, ddlaty, rfactor;
 	static double	dddepth = 0.0;
 	int	setprint;
+        struct mb_io_struct *mb_io_ptr;
 	int	i, j, k;
                 
         /* get swath */
         swath = Ctrl->swath_plot;
+        mb_io_ptr = (struct mb_io_struct *) Ctrl->mbio_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2)

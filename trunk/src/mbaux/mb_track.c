@@ -18,65 +18,6 @@
  * Author:	D. W. Caress
  * Date:	August, 1993
  *
- * $Log: mb_track.c,v $
- * Revision 5.5  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.4  2008/05/26 04:43:15  caress
- * Getting ready for release 5.1.1beta19.
- *
- * Revision 5.3  2006/11/10 22:36:04  caress
- * Working towards release 5.1.0
- *
- * Revision 5.2  2005/03/25 04:10:52  caress
- * Control over the filename annotation orientation has been added and the orientation itself has been fixed.
- *
- * Revision 5.1  2004/12/18 01:32:50  caress
- * Added filename annotation.
- *
- * Revision 5.0  2000/12/01 22:53:59  caress
- * First cut at Version 5.0.
- *
- * Revision 4.8  2000/10/11  00:54:20  caress
- * Converted to ANSI C
- *
- * Revision 4.7  2000/09/30  06:52:17  caress
- * Snapshot for Dale.
- *
- * Revision 4.6  1998/10/04  04:18:07  caress
- * MB-System version 4.6beta
- *
- * Revision 4.5  1997/04/21  16:53:56  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.4  1996/04/22  13:18:44  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.4  1996/04/22  13:18:44  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.3  1995/03/06  19:39:52  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.2  1994/10/21  11:34:20  caress
- * Release V4.0
- *
- * Revision 4.1  1994/07/29  19:04:31  caress
- * Changes associated with supporting byte swapped Lynx OS and
- * >> using unix second time base.
- *
- * Revision 4.0  1994/05/16  22:09:29  caress
- * First cut at new contouring scheme
- *
- * Revision 4.0  1994/03/01  20:50:45  caress
- * First cut at new version.
- *
- * Revision 3.1  1993/11/05  18:58:09  caress
- * Not sure if there are any changes.
- *
- * Revision 3.0  1993/08/26  00:59:59  caress
- * Initial version.
- *
  *
  */
 

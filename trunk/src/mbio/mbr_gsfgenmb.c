@@ -28,6 +28,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -500,6 +501,22 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    mb_io_ptr->beamwidth_ltrack = 0.0;
 		    mb_io_ptr->beamwidth_xtrack = 0.0;
+		    }
+		    
+		/* if needed create array for beam flags */
+		if (mb_ping->number_beams > 0 && mb_ping->beam_flags == NULL)
+		    {
+		    mb_ping->beam_flags = (unsigned char *) malloc(mb_ping->number_beams * sizeof(char));
+		    for (i=0;i<mb_ping->number_beams;i++)
+			mb_ping->beam_flags[i] = MB_FLAG_NONE;
+		    }
+		    
+		/* if needed create array for along_track */
+		if (mb_ping->number_beams > 0 && mb_ping->along_track == NULL)
+		    {
+		    mb_ping->along_track = (double *) malloc(mb_ping->number_beams * sizeof(double));
+		    for (i=0;i<mb_ping->number_beams;i++)
+			mb_ping->along_track[i] = 0.0;
 		    }
 		}
 
