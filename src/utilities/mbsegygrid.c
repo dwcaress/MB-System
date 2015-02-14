@@ -956,8 +956,8 @@ igainstart,igainend,tmax,factor);*/
 						{
 						for (i=0;i<traceheader.nsamps;i++)
 							{
-							iy = iys + i / decimatey;
-							k = iy * ngridx + ix;
+							iy = (ngridy - 1) - (iys + i / decimatey);
+							k = ix * ngridy + iy;
 							if (iy >= iystart && iy <= iyend)
 								{
 								grid[k] += trace[i];
@@ -979,7 +979,8 @@ igainstart,igainend,tmax,factor);*/
 							/* get the index of the sample location */
 							if (iyc >= iystart && iyc <= iyend)
 								{
-								k = iyc * ngridx + ix;
+								iy = (ngridy - 1) - iyc;
+								k = ix * ngridy + iy;
 								grid[k] += trace[i];
 								gridweight[k] += 1.0;
 								}

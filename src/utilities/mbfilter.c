@@ -31,100 +31,6 @@
  * Author:	D. W. Caress
  * Date:	January 16, 1995
  *
- * $Log: mbfilter.c,v $
- * Revision 5.9  2009/03/02 18:54:40  caress
- * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
- *
- * Revision 5.8  2008/09/13 06:08:09  caress
- * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
- *
- * Revision 5.7  2007/10/08 16:48:07  caress
- * State of the code on 8 October 2007.
- *
- * Revision 5.6  2006/08/09 22:41:27  caress
- * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
- *
- * Revision 5.5  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.4  2005/03/25 04:43:00  caress
- * Standardized the string lengths used for filenames and comment data.
- *
- * Revision 5.3  2003/04/17 21:17:10  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2001/07/20 00:34:38  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/03/22 21:14:16  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.0  2000/12/01  22:57:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.18  2000/10/28  00:40:19  caress
- * Applied fix from Gordon Keith to calculation of pings to be
- * updated and dumped.
- *
- * Revision 4.17  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.16  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.15  1999/12/28  00:28:40  caress
- * Fixed bug in calculating data records to hold in buffer.
- *
- * Revision 4.14  1999/12/28  00:23:32  caress
- * Fixed bug in calculating data records to hold in buffer.
- *
- * Revision 4.13  1999/02/04  23:55:08  caress
- * MB-System version 4.6beta7
- *
- * Revision 4.12  1998/12/18  19:44:23  caress
- * MB-System version 4.6beta5
- *
- * Revision 4.11  1998/12/17  22:50:20  caress
- * MB-System version 4.6beta4
- *
- * Revision 4.10  1998/10/05  19:19:24  caress
- * MB-System version 4.6beta
- *
- * Revision 4.9  1997/10/03  18:59:04  caress
- * Fixed problem with sort call.
- *
- * Revision 4.8  1997/07/25  14:28:10  caress
- * Version 4.5beta2
- *
- * Revision 4.7  1997/04/21  17:19:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.7  1997/04/17  15:14:38  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.6  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.5  1995/11/17  22:33:12  caress
- * Fixed bug using bath data when no amp present.
- * Bug fix provided by Dan Scheirer.
- *
- * Revision 4.4  1995/08/17  15:04:52  caress
- * Revision for release 4.3.
- *
- * Revision 4.3  1995/05/12  17:12:32  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.2  1995/03/06  19:37:59  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.1  1995/03/02  13:49:21  caress
- * Fixed bug related to error messages.
- *
- * Revision 4.0  1995/02/14  21:17:15  caress
- * Version 4.2
- *
  *
  */
 
@@ -757,7 +663,7 @@ The default input and output streams are stdin and stdout.\n";
 	status = mb_format_system(verbose,&format,&system,&error);
 	status = mb_format_dimensions(verbose,&format,
 			&beams_bath,&beams_amp,&pixels_ss,&error);
-	if (datakind == MBFILTER_BATH
+	/* if (datakind == MBFILTER_BATH
 		&& beams_bath <= 0)
 		{
 		fprintf(stderr,"\nProgram <%s> is in bathymetry mode.\n",program_name);
@@ -786,7 +692,7 @@ The default input and output streams are stdin and stdout.\n";
 			program_name);
 		error = MB_ERROR_BAD_FORMAT;
 		exit(error);
-		}
+		}*/
 
 	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(

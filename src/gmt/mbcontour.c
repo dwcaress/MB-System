@@ -357,8 +357,15 @@ int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, stru
 				break;
 			case 'G':	/* file annotation */
 				n = sscanf(opt->arg, "%lf/%d", &(Ctrl->G.name_hgt), &(Ctrl->G.name_perp));
-                                if (n == 1)
+                                if (n == 2)
+                                        {
                                         Ctrl->G.active = true;
+                                        }
+                                else if (n == 1)
+                                        {
+                                        Ctrl->G.active = true;
+                                        Ctrl->G.name_perp = false;
+                                        }
                                 else
                                         n_errors++;
 				break;
@@ -578,11 +585,17 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 
 	GMT = GMT_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
 	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options))
+                {
+                fprintf(stderr,"Error from GMT_Parse_common():%d\n",API->error);
                 Return (API->error);
+                }
                
 	Ctrl = (struct MBCONTOUR_CTRL *) New_mbcontour_Ctrl (GMT);	/* Allocate and initialize a new control structure */
 	if ((error = GMT_mbcontour_parse (GMT, Ctrl, options)))
+                {
+                fprintf(stderr,"Error from GMT_mbcontour_parse():%d\n",error);
                 Return (error);
+                }
 
 	/*-------------------------------- Variable initialization --------------------------------*/
 

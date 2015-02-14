@@ -396,6 +396,7 @@ int mb_write_gmt_grd(int verbose,
 	double	min = 0.0;
 	double	max = 0.0;
 	double	NaN;
+	int	nx_node_registration;
 	int	i, j, k, kk;
 	char	*ctime();
 	char	*getenv();
@@ -435,7 +436,21 @@ int mb_write_gmt_grd(int verbose,
 		}
 	
 	/* set grid creation control values */
-	registration = GMT_GRID_NODE_REG;	/* GMT_GRID_NODE_REG (0) for node grids, GMT_GRID_PIXEL_REG (1) for pixel grids */
+	/* GMT_GRID_NODE_REG (0) for node grids, GMT_GRID_PIXEL_REG (1) for pixel grids */
+	nx_node_registration = lround((xmax - xmin) / dx + 1);
+	if (nx == nx_node_registration)
+		{
+		registration = GMT_GRID_NODE_REG;
+		}
+	else if (nx == nx_node_registration - 1)
+		{
+		registration = GMT_GRID_PIXEL_REG;
+		}
+	else
+		{
+		registration = GMT_GRID_DEFAULT_REG;
+		}
+
 	wesn[0] = xmin;                   	/* Min/max x and y coordinates */
 	wesn[1] = xmax;                   	/* Min/max x and y coordinates */
 	wesn[2] = ymin;                   	/* Min/max x and y coordinates */
@@ -446,7 +461,7 @@ int mb_write_gmt_grd(int verbose,
 	
 	/* create structure for the grid */
 	if ((G = GMT_Create_Data (API, GMT_IS_GRID, GMT_IS_SURFACE, GMT_GRID_ALL, NULL, wesn, inc,
-				     GMT_GRID_DEFAULT_REG, pad, grid)) == NULL)
+				     registration, pad, grid)) == NULL)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
