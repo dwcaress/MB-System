@@ -22,13 +22,6 @@
  * Date:	August 14, 2006
  * Location:	R/V Western Flyer hove to in a gale offshore British Columbia
  *
- * $Log: mbauvloglist.c,v $
- * Revision 5.1  2006/11/26 09:42:01  caress
- * Making distribution 5.1.0.
- *
- * Revision 5.0  2006/11/20 19:59:21  caress
- * Added program to CVS.
- *
  *
  */
 
@@ -63,6 +56,10 @@
 #define INDEX_MERGE_ROLL	-7
 #define INDEX_MERGE_PITCH	-8
 #define INDEX_MERGE_HEAVE	-9
+
+#define OUTPUT_MODE_TAB		0
+#define OUTPUT_MODE_CSV		1
+#define OUTPUT_MODE_BINARY	2
 
 static char rcs_id[] = "$Id$";
 
@@ -139,6 +136,9 @@ int main (int argc, char **argv)
 	double	*nav_roll = NULL;
 	double	*nav_pitch = NULL;
 	double	*nav_heave = NULL;
+	
+	/* output control */
+	int	output_mode = OUTPUT_MODE_TAB;
 
 	double	time_d = 0.0;
 	int	time_i[7];
@@ -193,6 +193,11 @@ int main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			sscanf (optarg,"%d", &output_mode);
 			flag++;
 			break;
 		case 'N':
@@ -282,6 +287,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
 		fprintf(stderr,"dbg2       nav_file:       %s\n",nav_file);
+		fprintf(stderr,"dbg2       output_mode:    %d\n",output_mode);
 		fprintf(stderr,"dbg2       printheader:    %d\n",printheader);
 		fprintf(stderr,"dbg2       angles_in_degrees:%d\n",angles_in_degrees);
 		fprintf(stderr,"dbg2       nprintfields:   %d\n",nprintfields);
@@ -616,7 +622,10 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 			if (index == INDEX_ZERO)
 				{
 				dvalue = 0.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (index == INDEX_MERGE_LON)
 				{
@@ -626,7 +635,10 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 							&error);
 				if (jinterp < 2 || jinterp > nav_num-2)
 					dvalue = 0.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (index == INDEX_MERGE_LAT)
 				{
@@ -636,7 +648,10 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 							&error);
 				if (jinterp < 2 || jinterp > nav_num-2)
 					dvalue = 0.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (index == INDEX_MERGE_HEADING)
 				{
@@ -646,7 +661,10 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 							&error);
 				if (jinterp < 2 || jinterp > nav_num-2)
 					dvalue = 0.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (index == INDEX_MERGE_SPEED)
 				{
@@ -656,7 +674,10 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 							&error);
 				if (jinterp < 2 || jinterp > nav_num-2)
 					dvalue = 0.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (index == INDEX_MERGE_SENSORDEPTH)
 				{
@@ -666,7 +687,10 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 							&error);
 				if (jinterp < 2 || jinterp > nav_num-2)
 					dvalue = 0.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (index == INDEX_MERGE_ROLL)
 				{
@@ -676,7 +700,10 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 							&error);
 				if (jinterp < 2 || jinterp > nav_num-2)
 					dvalue = 0.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (index == INDEX_MERGE_PITCH)
 				{
@@ -686,7 +713,10 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 							&error);
 				if (jinterp < 2 || jinterp > nav_num-2)
 					dvalue = 0.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (index == INDEX_MERGE_HEAVE)
 				{
@@ -696,7 +726,10 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 							&error);
 				if (jinterp < 2 || jinterp > nav_num-2)
 					dvalue = 0.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (fields[index].type == TYPE_DOUBLE)
 				{
@@ -707,12 +740,18 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 					&& angles_in_degrees == MB_YES
 					&& dvalue < 0.0)
 					dvalue += 360.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (fields[index].type == TYPE_INTEGER)
 				{
 				mb_get_binary_int(MB_YES, &buffer[fields[index].index], &ivalue);
-				fprintf(stdout, printfields[i].format, ivalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&ivalue, sizeof(int), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, ivalue);
 				}
 			else if (fields[index].type == TYPE_TIMETAG)
 				{
@@ -721,18 +760,42 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 				if (strcmp(printfields[i].format, "time_i") == 0)
 					{
 					mb_get_date(verbose,time_d,time_i);
-					fprintf(stdout,"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d",
-						time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
+					if (output_mode == OUTPUT_MODE_BINARY)
+						{
+						fwrite(time_i, sizeof(int), 7, stdout);
+						}
+					else
+						{
+						fprintf(stdout,"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d",
+							time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
+						}
 					}
 				else if (strcmp(printfields[i].format, "time_j") == 0)
 					{
 					mb_get_date(verbose,time_d,time_i);
 					mb_get_jtime(verbose,time_i,time_j);
-					fprintf(stdout,"%4.4d %3.3d %2.2d %2.2d %2.2d.%6.6d",
-						time_i[0],time_j[1],time_i[3],time_i[4],time_i[5],time_i[6]);
+					if (output_mode == OUTPUT_MODE_BINARY)
+						{
+						fwrite(&time_i[0], sizeof(int), 1, stdout);
+						fwrite(&time_j[1], sizeof(int), 1, stdout);
+						fwrite(&time_i[3], sizeof(int), 1, stdout);
+						fwrite(&time_i[4], sizeof(int), 1, stdout);
+						fwrite(&time_i[5], sizeof(int), 1, stdout);
+						fwrite(&time_i[6], sizeof(int), 1, stdout);
+						}
+					else
+						{
+						fprintf(stdout,"%4.4d %3.3d %2.2d %2.2d %2.2d.%6.6d",
+							time_i[0],time_j[1],time_i[3],time_i[4],time_i[5],time_i[6]);
+						}
 					}
 				else
-					fprintf(stdout, printfields[i].format, time_d);
+					{
+					if (output_mode == OUTPUT_MODE_BINARY)
+						fwrite(&dvalue, sizeof(double), 1, stdout);
+					else
+						fprintf(stdout, printfields[i].format, time_d);
+					}
 				}
 			else if (fields[index].type == TYPE_ANGLE)
 				{
@@ -742,12 +805,25 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 					&& angles_in_degrees == MB_YES
 					&& dvalue < 0.0)
 					dvalue += 360.0;
-				fprintf(stdout, printfields[i].format, dvalue);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
 				}
-			if (i < nprintfields - 1)
-				fprintf(stdout, "\t");
-			else
-				fprintf(stdout, "\n");
+			if (output_mode == OUTPUT_MODE_TAB)
+				{
+				if (i < nprintfields - 1)
+					fprintf(stdout, "\t");
+				else
+					fprintf(stdout, "\n");
+				}
+			else if (output_mode == OUTPUT_MODE_CSV)
+				{
+				if (i < nprintfields - 1)
+					fprintf(stdout, ",");
+				else
+					fprintf(stdout, "\n");
+				}
 			}
 		nrecord++;
 		}

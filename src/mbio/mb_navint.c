@@ -20,52 +20,6 @@
  * Date:	October 30, 2000
  *
  * $Log: mb_navint.c,v $
- * Revision 5.14  2008/09/27 03:27:10  caress
- * Working towards release 5.1.1beta24
- *
- * Revision 5.13  2006/03/14 01:41:52  caress
- * Improved debug messages.
- *
- * Revision 5.12  2005/06/15 15:17:51  caress
- * Added some useful debug statements.
- *
- * Revision 5.11  2005/03/25 04:31:23  caress
- * Minor changes to code comments.
- *
- * Revision 5.10  2004/07/15 19:25:04  caress
- * Progress in supporting Reson 7k data.
- *
- * Revision 5.9  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.8  2003/01/15 20:51:48  caress
- * Release 5.0.beta28
- *
- * Revision 5.7  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.6  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.5  2002/02/22 09:03:43  caress
- * Release 5.0.beta13
- *
- * Revision 5.4  2001/10/12 21:08:37  caress
- * Added interpolation of attitude data.
- *
- * Revision 5.3  2001/08/10 22:41:19  dcaress
- * Release 5.0.beta07
- *
- * Revision 5.2  2001-07-19 17:31:11-07  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/06/08 21:44:01  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- *
  *
  */
 
@@ -81,11 +35,11 @@
 #include "mb_io.h"
 #include "mb_process.h"
 
-/*  #define MB_NAVINT_DEBUG 1
-    #define MB_ATTINT_DEBUG 1
-    #define MB_HEDINT_DEBUG 1
-    #define MB_DEPINT_DEBUG 1
-    #define MB_ALTINT_DEBUG 1 */
+//    #define MB_NAVINT_DEBUG 1
+//    #define MB_ATTINT_DEBUG 1
+//    #define MB_HEDINT_DEBUG 1
+//    #define MB_DEPINT_DEBUG 1
+//    #define MB_ALTINT_DEBUG 1
 
 static char rcs_id[]="$Id$";
 

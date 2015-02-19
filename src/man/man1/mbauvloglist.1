@@ -1,4 +1,4 @@
-.TH mbauvloglist 1 "21 October 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbauvloglist 1 "16 February 2015" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbauvloglist\fP \- Lists table data from an MBARI AUV mission log file.
 
@@ -7,7 +7,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbauvloglist\fP \fB\-I\fP\fIfile\fP [\fB\-F\fP\fIprintformat\fP \fB\-L\fP\fIlonflip\fP
-\fB\-O\fP\fIlist\fP \fB\-P \-S\fP \fB\-V \-H\fP ]
+\fB\-M\fP\fImode\fP \fB\-N\fP\fInavfile\fP \fB\-O\fP\fIlist\fP \fB\-P \-S\fP \fB\-V \-H\fP ]
 
 .SH DESCRIPTION
 MBauvloglist reads an MBARI AUV mission log file and lists specified
@@ -50,6 +50,15 @@ to print out a list of the contents. Then run \fBmbauvloglist\fP again using the
 to specify each of the desired values in the desired order of columns. The \fB\-F\fP option
 can be used to set the printing format. Otherwise, the default format specified in the
 log header will be used.
+
+The \fB-M\fP\fImode\fP option sets the output mode. By default, the output will be ASCII
+text with tab characters between fields, which is equivalent to \fB-M\fP\fI0\fP. If
+f\Imode\fP = 1, then the output will be ASCII text with comma delimiters. If \fImode\fP = 1,
+then the output will binary values (8-btye double or 4-byte int values) with nothing between
+the desired fields.
+
+For log files that do not include navigation, an external navigation file in the "fnv"
+format may be specified using the \fB-N\fP option. 
 
 As of August 2009, the contents of the MBARI Mapping AUV missions logs are:
 
@@ -301,11 +310,55 @@ the range from 0 to 360 degrees.
 Default: \fBmbauvloglist\fP uses the user default \fIlonflip\fP set using
 \fBmbdefaults\fP.
 .TP
+.B \-M
+\fImode\fP
+.br
+Specifies the output mode. If \fImode\fP = 0, then the output is
+ASCII text with tab delimiters between fields. If \fImode\fP = 0,
+then the output is ASCII text with comma delimiters between fields.
+If \fImode\fP = 0, then the output is binary with no values or breaks
+between fields. Default: ASCII text with tab delimiters.
+.TP
+.B \-N
+\fInavfile\fP
+.br
+Specifies a navigation file in the "fnv" format that contains position,
+heading, sensor depth, and attitude data. Values merged (interpolated)
+from these data can be specified for output using the
+     mergeLon
+     mergeLat
+     mergeHeading
+     mergeSpeed
+     mergeDraft
+     mergeSensordepth
+     mergeRoll
+     mergePitch
+     mergeHeave
+.br
+valuenames in the \fB-O\fP option.
+.TP
 .B \-O
 \fIvaluename\fP
 .br
 Causes \fBmbauvloglist\fP to output the specified value. This option can be
 given multiple times, and the values will be output in the order specified.
+The valid valuename strings consist of those defined in the header of the
+log file being parsed, plus the following:
+     zero
+     timeTag
+     mergeLon
+     mergeLat
+     mergeHeading
+     mergeSpeed
+     mergeDraft
+     mergeSensordepth
+     mergeRoll
+     mergePitch
+     mergeHeave
+.br
+All of the special values are double values. Those beginning with "merge"
+derive from interpolation of data from an external navigation file
+specified using the \fB-N\fP option.
 .TP
 .B \-P
 .br

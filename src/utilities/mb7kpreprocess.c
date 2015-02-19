@@ -5019,7 +5019,19 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 
 				/* if the optional data are available, then proceed */
 				if (status == MB_SUCCESS)
-					{
+					{		
+					/* initialize all of the beams */
+					for (i=0;i<bathymetry->number_beams;i++)
+						{
+						bathymetry->quality[i] = 0;
+						bathymetry->depth[i] = 0.0;
+						bathymetry->acrosstrack[i] = 0.0;
+						bathymetry->alongtrack[i] = 0.0;
+						bathymetry->pointing_angle[i] = 0.0;
+						bathymetry->azimuth_angle[i] = 0.0;
+						}
+
+					/* set ping values */
 					bathymetry->longitude = DTR * navlon;
 					bathymetry->latitude = DTR * navlat;
 					bathymetry->heading = DTR * heading;
@@ -5037,15 +5049,6 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						bathymetry->vehicle_height = -sonardepth;
 						}
 
-					/* zero alongtrack angles if requested */
-					if (kluge_zeroalongtrackangles == MB_YES)
-						{
-						for (i=0;i<bathymetry->number_beams;i++)
-							{
-							beamgeometry->angle_alongtrack[i] = 0.0;
-							}
-						}
-
 					/* get ready to calculate bathymetry */
 					if (volatilesettings->sound_velocity > 0.0)
 						soundspeed = volatilesettings->sound_velocity;
@@ -5055,11 +5058,53 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						soundspeed = 1500.0;
 					rollr = DTR * roll;
 					pitchr = DTR * pitch;
+					
 					/* zero atttitude correction if requested */
 					if (kluge_zeroattitudecorrection == MB_YES)
 						{
 						rollr = 0.0;
 						pitchr = 0.0;
+						}
+
+					/* zero alongtrack angles if requested */
+					if (kluge_zeroalongtrackangles == MB_YES)
+						{
+						for (i=0;i<bathymetry->number_beams;i++)
+							{
+							beamgeometry->angle_alongtrack[i] = 0.0;
+							}
+						}
+
+					/* if requested apply kluge scaling of rx beam angles */
+					if (kluge_beampatterntweak == MB_YES)
+						{
+						/* case of v2rawdetection record */
+						if (istore->read_v2rawdetection == MB_YES)
+							{
+							for (i=0;i<v2rawdetection->number_beams;i++)
+								{
+								v2rawdetection->rx_angle[i] *= kluge_beampatternfactor;
+								}
+							}
+						
+						/* case of v2detection record with or without v2detectionsetup */
+						else if (istore->read_v2detection == MB_YES)
+							{
+							for (i=0;i<v2detection->number_beams;i++)
+								{
+								v2detection->angle_x[i] *= kluge_beampatternfactor;
+								}
+							}
+
+
+						/* else default case of beamgeometry record */
+						else
+							{
+							for (i=0;i<bathymetry->number_beams;i++)
+								{
+								beamgeometry->angle_acrosstrack[i] *= kluge_beampatternfactor;
+								}
+							}
 						}
 
 					/* loop over detections as available - the 7k format has used several
@@ -5069,35 +5114,73 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 					/* case of v2rawdetection record */
 					if (istore->read_v2rawdetection == MB_YES)
 						{
-						/* if requested apply kluge scaling of rx beam angles */
-						if (kluge_beampatterntweak == MB_YES)
-							{
-							for (j=0;j<v2rawdetection->number_beams;j++)
-								{
-								v2rawdetection->rx_angle[j] *= kluge_beampatternfactor;
-								}
-							}
-							
-						/* initialize all of the beams */
-						for (i=0;i<bathymetry->number_beams;i++)
-							{
-							bathymetry->quality[i] = 0;
-							bathymetry->depth[i] = 0.0;
-							bathymetry->acrosstrack[i] = 0.0;
-							bathymetry->alongtrack[i] = 0.0;
-							bathymetry->pointing_angle[i] = 0.0;
-							bathymetry->azimuth_angle[i] = 0.0;
-							}
-
-						/* now loop over the detects */
 						for (j=0;j<v2rawdetection->number_beams;j++)
 							{
+							/* beam id */
 							i = v2rawdetection->beam_descriptor[j];
+							
+							/* get range and quality */
 							bathymetry->range[i] = v2rawdetection->detection_point[j]
 										/ v2rawdetection->sampling_rate;
 							bathymetry->quality[i] = v2rawdetection->quality[j];
-							alpha = RTD * (pitchr + v2rawdetection->tx_angle) + pitchbias;
-							beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - rollr) + rollbias;
+							
+							/* compensate for pitch if not already compensated */
+							if ((volatilesettings->transmit_flags & 0xF) != 0)
+								{
+								beampitch = 0.0;
+								}
+							else
+								{
+								beampitch = pitch;
+								}
+							beampitchr = DTR * beampitch;
+							
+							/* compensate for roll if not already compensated */
+							if ((volatilesettings->receive_flags & 0x1) != 0)
+								{
+								beamroll = 0.0;
+								}
+							else
+								{								
+								/* get roll at bottom return time for this beam */
+								if (nins > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												ins_time_d-1, ins_roll-1,
+												nins, time_d + bathymetry->range[i], &beamroll, &jins,
+												&error);
+									}
+								else if (nrock > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												rock_time_d-1, rock_roll-1,
+												nrock, time_d + bathymetry->range[i], &beamroll, &jrock,
+												&error);
+									}
+								else if (ndsl > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												dsl_time_d-1, dsl_roll-1,
+												ndsl, time_d + bathymetry->range[i], &beamroll, &jdsl,
+												&error);
+									}
+								else if (ndat_rph > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												dat_rph_time_d-1, dat_rph_roll-1,
+												ndat_rph, time_d + bathymetry->range[i], &beamroll, &jdattitude,
+												&error);
+									}
+								else
+									{
+									beamroll = roll;
+									}
+								}
+							beamrollr = DTR * beamroll;
+							
+							/* calculate bathymetry */
+							alpha = RTD * (beampitchr + v2rawdetection->tx_angle) + pitchbias;
+							beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - beamrollr) + rollbias;
 							mb_rollpitch_to_takeoff(
 								verbose,
 								alpha, beta,
@@ -5109,34 +5192,76 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
 							bathymetry->depth[i] = zz + sonardepth - heave;
-/* if (i==128)fprintf(stderr,"range:%f zz:%f sonardepth:%f depth:%f\n",rr,zz,sonardepth,bathymetry->depth[i]); */
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
-/*fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
-i,roll, bathymetry->roll,pitch, bathymetry->pitch,
-alpha,beta,theta,phi,
-bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 							}
 						}
-			
+
 					/* case of v2detection record with v2detectionsetup */
 					else if (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES)
 						{
-						/* if requested apply kluge scaling of rx beam angles */
-						if (kluge_beampatterntweak == MB_YES)
-							{
-							for (j=0;j<v2detection->number_beams;j++)
-								{
-								v2detection->angle_x[j] *= kluge_beampatternfactor;
-								}
-							}
-
-						/* now loop over the detects */
 						for (j=0;j<v2detection->number_beams;j++)
 							{
 							i = v2detectionsetup->beam_descriptor[j];
 			
 							bathymetry->range[i] = v2detection->range[j];
+							bathymetry->quality[i] = v2detectionsetup->quality[j];
+							
+							/* compensate for pitch if not already compensated */
+							if ((volatilesettings->transmit_flags & 0xF) != 0)
+								{
+								beampitch = 0.0;
+								}
+							else
+								{
+								beampitch = pitch;
+								}
+							beampitchr = DTR * beampitch;
+							
+							/* compensate for roll if not already compensated */
+							if ((volatilesettings->receive_flags & 0x1) != 0)
+								{
+								beamroll = 0.0;
+								}
+							else
+								{								
+								/* get roll at bottom return time for this beam */
+								if (nins > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												ins_time_d-1, ins_roll-1,
+												nins, time_d + bathymetry->range[i], &beamroll, &jins,
+												&error);
+									}
+								else if (nrock > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												rock_time_d-1, rock_roll-1,
+												nrock, time_d + bathymetry->range[i], &beamroll, &jrock,
+												&error);
+									}
+								else if (ndsl > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												dsl_time_d-1, dsl_roll-1,
+												ndsl, time_d + bathymetry->range[i], &beamroll, &jdsl,
+												&error);
+									}
+								else if (ndat_rph > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												dat_rph_time_d-1, dat_rph_roll-1,
+												ndat_rph, time_d + bathymetry->range[i], &beamroll, &jdattitude,
+												&error);
+									}
+								else
+									{
+									beamroll = roll;
+									}
+								}
+							beamrollr = DTR * beamroll;
+								
+							/* calculate bathymetry */
 							alpha = RTD * (v2detection->angle_y[j] + pitchr
 									+ volatilesettings->steering_vertical) + pitchbias;
 							beta = 90.0 - RTD * (v2detection->angle_x[j] - rollr) + rollbias;
@@ -5153,32 +5278,76 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 							bathymetry->depth[i] = zz + sonardepth - heave;
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
-/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
-i,roll, rollr, pitchr, bathymetry->pitch,
-alpha,beta,theta,phi,
-bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							}
 						}
 
 					/* case of v2detection record */
 					else if (istore->read_v2detection == MB_YES)
 						{
-						/* if requested apply kluge scaling of rx beam angles */
-						if (kluge_beampatterntweak == MB_YES)
-							{
-							for (i=0;i<v2detection->number_beams;i++)
-								{
-								v2detection->angle_x[i] *= kluge_beampatternfactor;
-								}
-							}
-
 						/* now loop over the detects */
 						for (i=0;i<v2detection->number_beams;i++)
 							{
 							bathymetry->range[i] = v2detection->range[i];
-							alpha = RTD * (v2detection->angle_y[i] + pitchr
+							/* bathymetry->quality[i] set in bathymetry record */
+							
+							/* compensate for pitch if not already compensated */
+							if ((volatilesettings->transmit_flags & 0xF) != 0)
+								{
+								beampitch = 0.0;
+								}
+							else
+								{
+								beampitch = pitch;
+								}
+							beampitchr = DTR * beampitch;
+							
+							/* compensate for roll if not already compensated */
+							if ((volatilesettings->receive_flags & 0x1) != 0)
+								{
+								beamroll = 0.0;
+								}
+							else
+								{								
+								/* get roll at bottom return time for this beam */
+								if (nins > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												ins_time_d-1, ins_roll-1,
+												nins, time_d + bathymetry->range[i], &beamroll, &jins,
+												&error);
+									}
+								else if (nrock > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												rock_time_d-1, rock_roll-1,
+												nrock, time_d + bathymetry->range[i], &beamroll, &jrock,
+												&error);
+									}
+								else if (ndsl > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												dsl_time_d-1, dsl_roll-1,
+												ndsl, time_d + bathymetry->range[i], &beamroll, &jdsl,
+												&error);
+									}
+								else if (ndat_rph > 0)
+									{
+									interp_status = mb_linear_interp(verbose,
+												dat_rph_time_d-1, dat_rph_roll-1,
+												ndat_rph, time_d + bathymetry->range[i], &beamroll, &jdattitude,
+												&error);
+									}
+								else
+									{
+									beamroll = roll;
+									}
+								}
+							beamrollr = DTR * beamroll;
+								
+							/* calculate bathymetry */
+							alpha = RTD * (v2detection->angle_y[i] + beampitchr
 									+ volatilesettings->steering_vertical) + pitchbias;
-							beta = 90.0 - RTD * (v2detection->angle_x[i] - rollr) + rollbias;
+							beta = 90.0 - RTD * (v2detection->angle_x[i] - beamrollr) + rollbias;
 							mb_rollpitch_to_takeoff(
 								verbose,
 								alpha, beta,
@@ -5192,28 +5361,17 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							bathymetry->depth[i] = zz + sonardepth - heave;
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
-/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
-i,roll, bathymetry->roll,pitch, bathymetry->pitch,
-alpha,beta,theta,phi,
-bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							}
 						}
 
 					/* else default case of beamgeometry record */
 					else
 						{
-						/* if requested apply kluge scaling of rx beam angles */
-						if (kluge_beampatterntweak == MB_YES)
-							{
-							for (i=0;i<bathymetry->number_beams;i++)
-								{
-								beamgeometry->angle_acrosstrack[i] *= kluge_beampatternfactor;
-								}
-							}
-
 						/* loop over all beams */
 						for (i=0;i<bathymetry->number_beams;i++)
 							{
+							/* bathymetry->range[i] set */
+							/* bathymetry->quality[i] set */
 							if ((bathymetry->quality[i] & 15) > 0)
 								{
 								/* compensate for pitch if not already compensated */
@@ -5269,11 +5427,6 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 										}
 									}
 								beamrollr = DTR * beamroll;
-/* fprintf(stderr,"receive_flags: %d %x %d %x     ",
-	volatilesettings->receive_flags,volatilesettings->receive_flags,
-	volatilesettings->receive_flags & 0x1,volatilesettings->receive_flags & 0x1);
-fprintf(stderr,"i:%d roll: %f beamroll: %f diff:%f",i,roll,beamroll,beamroll-roll);
-fprintf(stderr,"  pitch:%f beampitch:%f diff:%f\n",pitch,beampitch,beampitch-pitch); */
 								
 								/* compensate for heave if not already compensated */
 								if ((volatilesettings->receive_flags & 0x2) != 0)
@@ -5313,19 +5466,6 @@ fprintf(stderr,"  pitch:%f beampitch:%f diff:%f\n",pitch,beampitch,beampitch-pit
 								bathymetry->depth[i] = zz + sonardepth - beamheave;
 								bathymetry->pointing_angle[i] = DTR * theta;
 								bathymetry->azimuth_angle[i] = DTR * phi;
-/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  zz:%f sonardepth:%f heave:%f   depth:%f %f %f\n",
-i,roll, bathymetry->roll,pitch, bathymetry->pitch,
-alpha,beta,theta,phi,zz,sonardepth,heave,
-bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
-								}
-							else
-								{
-								bathymetry->quality[i] = 0;
-								bathymetry->depth[i] = 0.0;
-								bathymetry->acrosstrack[i] = 0.0;
-								bathymetry->alongtrack[i] = 0.0;
-								bathymetry->pointing_angle[i] = 0.0;
-								bathymetry->azimuth_angle[i] = 0.0;
 								}
 							}
 						}

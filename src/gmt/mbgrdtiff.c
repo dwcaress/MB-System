@@ -782,14 +782,6 @@ int GMT_mbgrdtiff (void *V_API, int mode, void *args)
 		nx = GMT_get_n (GMT, wesn[XLO], wesn[XHI], Grid_orig[0]->header->inc[GMT_X], Grid_orig[0]->header->registration);
 		ny = GMT_get_n (GMT, wesn[YLO], wesn[YHI], Grid_orig[0]->header->inc[GMT_Y], Grid_orig[0]->header->registration);
 	}
-fprintf(stderr,"Grid header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n",
-Grid_orig[0]->header->nx,Grid_orig[0]->header->ny,Grid_orig[0]->header->registration,
-Grid_orig[0]->header->wesn[XLO],Grid_orig[0]->header->wesn[XHI],Grid_orig[0]->header->wesn[YLO],Grid_orig[0]->header->wesn[YHI],
-Grid_orig[0]->header->inc[0],Grid_orig[0]->header->inc[1]);
-fprintf(stderr,"Work header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n",
-header_work->nx,header_work->ny,header_work->registration,
-header_work->wesn[XLO],header_work->wesn[XHI],header_work->wesn[YLO],header_work->wesn[YHI],
-header_work->inc[0],header_work->inc[1]);
 
 //	if (!Ctrl->A.active) {	/* Otherwise we are not writting any postscript */
 //		PSL = GMT_plotinit (GMT, options);
@@ -823,10 +815,6 @@ header_work->inc[0],header_work->inc[1]);
 
 
 	}
-fprintf(stderr,"a Work header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n",
-header_work->nx,header_work->ny,header_work->registration,
-header_work->wesn[XLO],header_work->wesn[XHI],header_work->wesn[YLO],header_work->wesn[YHI],
-header_work->inc[0],header_work->inc[1]);
 
 	if (need_to_project) {	/* Need to resample the grd file */
 		int nx_proj = 0, ny_proj = 0;
@@ -891,11 +879,6 @@ header_work->inc[0],header_work->inc[1]);
 	ny = header_work->ny;
 
 	/* Get/calculate a color palette file */
-fprintf(stderr,"b Work header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n",
-header_work->nx,header_work->ny,header_work->registration,
-header_work->wesn[XLO],header_work->wesn[XHI],header_work->wesn[YLO],header_work->wesn[YHI],
-header_work->inc[0],header_work->inc[1]);
-
 	if (!Ctrl->I.do_rgb) {
 		if (Ctrl->C.active) {		/* Read palette file */
 			if ((P = GMT_Get_CPT (GMT, Ctrl->C.file, GMT_CPT_OPTIONAL, header_work->z_min, header_work->z_max)) == NULL) {
@@ -935,7 +918,8 @@ header_work->inc[0],header_work->inc[1]);
 	}
 	normal_x = !(GMT->current.proj.projection == GMT_LINEAR && !GMT->current.proj.xyz_pos[0] && !resampled);
 	normal_y = !(GMT->current.proj.projection == GMT_LINEAR && !GMT->current.proj.xyz_pos[1] && !resampled);
-
+        normal_x = true;
+        normal_y = true;
 	for (try = 0, done = false; !done && try < 2; try++) {	/* Evaluate colors at least once, or twice if -Q and we need to select another NaN color */
 		for (row = 0, byte = colormask_offset; row < ny; row++) {
 			actual_row = (normal_y) ? row : ny - row - 1;
@@ -1088,14 +1072,6 @@ header_work->inc[0],header_work->inc[1]);
 	}
 
 	/*------------------------- Write out the GeoTiff and world files -------------------------*/
-fprintf(stderr,"2 Grid header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n",
-Grid_orig[0]->header->nx,Grid_orig[0]->header->ny,Grid_orig[0]->header->registration,
-Grid_orig[0]->header->wesn[XLO],Grid_orig[0]->header->wesn[XHI],Grid_orig[0]->header->wesn[YLO],Grid_orig[0]->header->wesn[YHI],
-Grid_orig[0]->header->inc[0],Grid_orig[0]->header->inc[1]);
-fprintf(stderr,"2 Work header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n",
-header_work->nx,header_work->ny,header_work->registration,
-header_work->wesn[XLO],header_work->wesn[XHI],header_work->wesn[YLO],header_work->wesn[YHI],
-header_work->inc[0],header_work->inc[1]);
         
 	/* try to get projection from the grd file remark */
 	if (strncmp(&(header_work->remark[2]), "Projection: ", 12) == 0)

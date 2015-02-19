@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2230       February 18, 2015
   Version 5.5.2229       February 14, 2015
   Version 5.5.2228       February 6, 2015
   Version 5.4.2219       December 11, 2014
@@ -196,6 +197,23 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2230 (February 18, 2014)
+
+Mbgrdtiff: Fixed ordering of rows and columns in the output image.
+
+Mbm_route2mission: Added output of a mission alititude profile plot.
+
+Mbauvloglist: Added capability of binary output.
+
+Mb7kpreprocess: Fixed so that bathymetry calculation uses roll merged at
+the bottom detect time for all of the possible combinations of Reson 7k
+data record types.
+
+Mbpreprocess: Fixed to exclude zero longitude or lattitude values from the
+tables used for interpolation onto ping times.
+
+Mbrolltimelag: Fixed automatically generated roll-slope correlation plot.
 
 -----> 5.5.2229 (February 14, 2014)
 

@@ -386,7 +386,7 @@ else
 # either of two mechanisms. The first method is to specify multiple
 # input file flags and associated arguments ( e.g. mbm_xyplot
 # -i[fileargs]:file -i[fileargs]:file ...). The second method is to
-# use the utilize the multi-segemnt feature psxy. The -M flag allows
+# use the utilize the multi-segemnt feature psxy. The program allows
 # multiple "segments" of x,y pairs to be listed in a single file each
 # separated by a single line having a special character. The default
 # character is ">", and indeed that is the ONLY character supported
