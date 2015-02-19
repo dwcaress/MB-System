@@ -20,8 +20,6 @@
  * Author:	D. W. Caress
  * Date:	March 3, 2004
  *
- * $Log: mbsys_reson7k.h,v $
- *
  *
  */
 /*

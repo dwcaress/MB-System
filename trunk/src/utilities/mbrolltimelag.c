@@ -736,7 +736,7 @@ int main (int argc, char **argv)
 	/* generate plot shellscript for cross correlation file */
 	if (read_datalist == MB_YES)
 		{
-		sprintf(cmdfile, "mbm_xyplot -I%s -N", xcorfiletot);
+		sprintf(cmdfile, "mbm_xyplot -I%s -N -L\"Roll Correlation With Acrosstrack Slope:Time Lag (sec):Correlation:\"", xcorfiletot);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		shellstatus = system(cmdfile);
 		}

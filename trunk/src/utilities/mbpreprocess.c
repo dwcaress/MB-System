@@ -1079,11 +1079,14 @@ int main (int argc, char **argv)
 					{
 					for (i=0;i<nanav;i++)
 						{
-						nav_time_d[nav_num] = atime_d[i];
-						nav_navlon[nav_num] = alon[i];
-						nav_navlat[nav_num] = alat[i];
-						nav_speed[nav_num] = aspeed[i];
-						nav_num++;
+						if (atime_d[i] > 0.0 && alon[i] != 0.0 && alat[i] != 0.0)
+							{
+							nav_time_d[nav_num] = atime_d[i];
+							nav_navlon[nav_num] = alon[i];
+							nav_navlat[nav_num] = alat[i];
+							nav_speed[nav_num] = aspeed[i];
+							nav_num++;
+							}
 						}
 					}
 				}
@@ -1466,7 +1469,11 @@ int main (int argc, char **argv)
 		}
 	
 	/*-------------------------------------------------------------------*/
-	
+
+//for (i=0;i<nav_num;i++)
+//fprintf(stderr,"NAV %d %f %f %f\n",i,nav_time_d[i],nav_navlon[i],nav_navlat[i]);
+//fprintf(stderr," \n");
+
 	/* Do second pass through the data reading everything,
 		correcting survey data, and outputting everything */
 				

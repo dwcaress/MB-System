@@ -1394,7 +1394,6 @@ void mb_set_colors(int ncolor, int *red, int *green, int *blue)
 void mbcontour_plot(double x, double y, int ipen)
 {
 	double	xx, yy;
-        int i;
 
         /* make sure contour arrays are large enough */
 	if (ncontour_plot >= ncontour_plot_alloc)

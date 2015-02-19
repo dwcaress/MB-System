@@ -2521,10 +2521,18 @@ print "Behavior: delta_t (start, reset, logMode = 0)\r\n";
 		}
 	close(TFILE);
 	$topodatafile = "$root" . "_mission.xy";
-	open(TFILE,">$topodatafile") || die "Cannot open output distance vs topo file: $topodatafile\r\n$program_name aborted.\r\n";
+	open(TFILE,">$topodatafile") || die "Cannot open output distance vs auv depth file: $topodatafile\r\n$program_name aborted.\r\n";
 	for ($i = 0; $i < $nmissionpoints-1; $i++)
 		{
 		printf TFILE "%f %f\r\n", $mdistances[$i], -$mmissiondepths[$i];
+		}
+	close(TFILE);
+	$topodatafile = "$root" . "_altitude.xy";
+	open(TFILE,">$topodatafile") || die "Cannot open output distance vs altitude file: $topodatafile\r\n$program_name aborted.\r\n";
+	for ($i = 0; $i < $nmissionpoints-1; $i++)
+		{
+		$altitude = -$mmissiondepths[$i] - $mtopos[$i];
+		printf TFILE "%f %f\r\n", $mdistances[$i], $altitude;
 		}
 	close(TFILE);
 	}
