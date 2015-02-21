@@ -179,47 +179,6 @@
  * Author:	D. W. Caress
  * Date:	December 30, 1998
  *
- * $Log: mb_angle.c,v $
- * Revision 5.9  2009/02/06 19:12:43  caress
- * Fixed description in mb_angle.c and angle extraction in mb_simrad3.c
- *
- * Revision 5.8  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.7  2006/12/15 21:35:31  caress
- * Fixed longstanding bug in coordinate translation code. Previously, the application of roll and pitch angles was done in the wrong order (pitch first). The errors due to this bug only became significant with large pitch values. The rotations are now done properly.
- *
- * Revision 5.6  2006/09/11 18:55:52  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.5  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.4  2003/01/15 20:51:48  caress
- * Release 5.0.beta28
- *
- * Revision 5.3  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.2  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.1  2002/04/06 02:43:39  caress
- * Release 5.0.beta16
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.2  2000/10/11  01:02:30  caress
- * Convert to ANSI C
- *
- * Revision 4.1  2000/09/30  06:26:58  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  1999/01/01  23:38:01  caress
- * MB-System version 4.6beta6
- *
  *
  */
 

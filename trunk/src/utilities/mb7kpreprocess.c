@@ -121,10 +121,10 @@ int main (int argc, char **argv)
 	double	navlon;
 	double	navlat;
 	double	speed;
-	double	heading;
 	double	distance;
 	double	altitude;
 	double	sonardepth;
+	double	heading, beamheading, beamheadingr;
 	double	roll, rollr, beamroll, beamrollr;
 	double	pitch, pitchr, beampitch, beampitchr;
 	double	heave, beamheave;
@@ -498,6 +498,17 @@ int main (int argc, char **argv)
 
 	/* MBARI data flag */
 	int	MBARIdata = MB_NO;
+	
+	/* variables for beam angle calculation */
+	mb_3D_orientation tx_align;
+	mb_3D_orientation tx_orientation;
+	double tx_steer;
+	mb_3D_orientation rx_align;
+	mb_3D_orientation rx_orientation;
+	double rx_steer;
+	double reference_heading;
+	double beamAzimuth;
+	double beamDepression;
 
 	int	jtimedelay = 0;
 	int	jtimelag = 0;
@@ -3281,7 +3292,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 
 	/* close time delay file */
 	if (tfp != NULL)
+		{
 		fclose(tfp);
+		tfp = NULL;
+		}
 
 	/* apply time lag to all relevant data
 		timelag value calculated either from model imported from file (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
@@ -5106,6 +5120,14 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 								}
 							}
 						}
+				
+					/* get transducer offsets */
+					tx_align.roll = 0.00;
+					tx_align.pitch = 0.00;
+					tx_align.heading = 0.00;
+					rx_align.roll = 0.00;
+					rx_align.pitch = 0.00;
+					rx_align.heading = 0.00;
 
 					/* loop over detections as available - the 7k format has used several
 					   different records over the years, so there are several different
@@ -5124,10 +5146,69 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 										/ v2rawdetection->sampling_rate;
 							bathymetry->quality[i] = v2rawdetection->quality[j];
 							
-							/* compensate for pitch if not already compensated */
-							if ((volatilesettings->transmit_flags & 0xF) != 0)
+							/* get roll at bottom return time for this beam */
+							if (nins > 0)
 								{
-								beampitch = 0.0;
+								interp_status = mb_linear_interp(verbose,
+											ins_time_d-1, ins_roll-1,
+											nins, time_d + bathymetry->range[i], &beamroll, &jins,
+											&error);
+								}
+							else if (nrock > 0)
+								{
+								interp_status = mb_linear_interp(verbose,
+											rock_time_d-1, rock_roll-1,
+											nrock, time_d + bathymetry->range[i], &beamroll, &jrock,
+											&error);
+								}
+							else if (ndsl > 0)
+								{
+								interp_status = mb_linear_interp(verbose,
+											dsl_time_d-1, dsl_roll-1,
+											ndsl, time_d + bathymetry->range[i], &beamroll, &jdsl,
+											&error);
+								}
+							else if (ndat_rph > 0)
+								{
+								interp_status = mb_linear_interp(verbose,
+											dat_rph_time_d-1, dat_rph_roll-1,
+											ndat_rph, time_d + bathymetry->range[i], &beamroll, &jdattitude,
+											&error);
+								}
+							else
+								{
+								beamroll = roll;
+								}
+							beamrollr = DTR * beamroll;
+							
+							/* get pitch at bottom return time for this beam */
+							if (nins > 0)
+								{
+								interp_status = mb_linear_interp(verbose,
+											ins_time_d-1, ins_pitch-1,
+											nins, time_d + bathymetry->range[i], &beampitch, &jins,
+											&error);
+								}
+							else if (nrock > 0)
+								{
+								interp_status = mb_linear_interp(verbose,
+											rock_time_d-1, rock_pitch-1,
+											nrock, time_d + bathymetry->range[i], &beampitch, &jrock,
+											&error);
+								}
+							else if (ndsl > 0)
+								{
+								interp_status = mb_linear_interp(verbose,
+											dsl_time_d-1, dsl_pitch-1,
+											ndsl, time_d + bathymetry->range[i], &beampitch, &jdsl,
+											&error);
+								}
+							else if (ndat_rph > 0)
+								{
+								interp_status = mb_linear_interp(verbose,
+											dat_rph_time_d-1, dat_rph_pitch-1,
+											ndat_rph, time_d + bathymetry->range[i], &beampitch, &jdattitude,
+											&error);
 								}
 							else
 								{
@@ -5135,51 +5216,43 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 								}
 							beampitchr = DTR * beampitch;
 							
-							/* compensate for roll if not already compensated */
-							if ((volatilesettings->receive_flags & 0x1) != 0)
+							/* get heading at bottom return time for this beam */
+							if (nins > 0)
 								{
-								beamroll = 0.0;
+								interp_status = mb_linear_interp(verbose,
+											ins_time_d-1, ins_heading-1,
+											nins, time_d + bathymetry->range[i], &beamheading, &jins,
+											&error);
+								}
+							else if (nrock > 0)
+								{
+								interp_status = mb_linear_interp(verbose,
+											rock_time_d-1, rock_heading-1,
+											nrock, time_d + bathymetry->range[i], &beamheading, &jrock,
+											&error);
+								}
+							else if (ndsl > 0)
+								{
+								interp_status = mb_linear_interp(verbose,
+											dsl_time_d-1, dsl_heading-1,
+											ndsl, time_d + bathymetry->range[i], &beamheading, &jdsl,
+											&error);
+								}
+							else if (ndat_heading > 0)
+								{
+								interp_status = mb_linear_interp_heading(verbose,
+											dat_heading_time_d-1, dat_heading_heading-1,
+											ndat_heading, time_d + bathymetry->range[i], &beamheading, &jdheading,
+											&error);
 								}
 							else
-								{								
-								/* get roll at bottom return time for this beam */
-								if (nins > 0)
-									{
-									interp_status = mb_linear_interp(verbose,
-												ins_time_d-1, ins_roll-1,
-												nins, time_d + bathymetry->range[i], &beamroll, &jins,
-												&error);
-									}
-								else if (nrock > 0)
-									{
-									interp_status = mb_linear_interp(verbose,
-												rock_time_d-1, rock_roll-1,
-												nrock, time_d + bathymetry->range[i], &beamroll, &jrock,
-												&error);
-									}
-								else if (ndsl > 0)
-									{
-									interp_status = mb_linear_interp(verbose,
-												dsl_time_d-1, dsl_roll-1,
-												ndsl, time_d + bathymetry->range[i], &beamroll, &jdsl,
-												&error);
-									}
-								else if (ndat_rph > 0)
-									{
-									interp_status = mb_linear_interp(verbose,
-												dat_rph_time_d-1, dat_rph_roll-1,
-												ndat_rph, time_d + bathymetry->range[i], &beamroll, &jdattitude,
-												&error);
-									}
-								else
-									{
-									beamroll = roll;
-									}
+								{
+								beamheading = heading;
 								}
-							beamrollr = DTR * beamroll;
-							
+							beamheadingr = DTR * beamheading;
+														
 							/* calculate bathymetry */
-							alpha = RTD * (beampitchr + v2rawdetection->tx_angle) + pitchbias;
+							/*alpha = RTD * (beampitchr + v2rawdetection->tx_angle) + pitchbias;
 							beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - beamrollr) + rollbias;
 							mb_rollpitch_to_takeoff(
 								verbose,
@@ -5193,7 +5266,69 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
 							bathymetry->depth[i] = zz + sonardepth - heave;
 							bathymetry->pointing_angle[i] = DTR * theta;
+							bathymetry->azimuth_angle[i] = DTR * phi;*/
+							
+							/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+								Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+								Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+								Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+								p.26-31.
+								(http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+							   note complexity if transducer arrays are reverse mounted, as determined
+							   by a mount heading angle of about 180 degrees rather than about 0 degrees.
+							   If a receive array or a transmit array are reverse mounted then:
+								1) subtract 180 from the heading mount angle of the array
+								2) flip the sign of the pitch and roll mount offsets of the array
+								3) flip the sign of the beam steering angle from that array
+									(reverse TX means flip sign of TX steer, reverse RX
+									means flip sign of RX steer) */
+							tx_steer = RTD * v2rawdetection->tx_angle;
+							tx_orientation.roll = roll;
+							tx_orientation.pitch = pitch;
+							tx_orientation.heading = heading;
+							rx_steer = -RTD * v2rawdetection->rx_angle[j];
+							rx_orientation.roll = beamroll;
+							rx_orientation.pitch = beampitch;
+							rx_orientation.heading = beamheading;
+							reference_heading = heading;
+			
+							status = mb_beaudoin(verbose,
+										tx_align,
+										tx_orientation,
+										tx_steer,
+										rx_align,
+										rx_orientation,
+										rx_steer,
+										reference_heading,
+										&beamAzimuth,
+										&beamDepression,
+										&error);
+//fprintf(stderr,"\ni:%d tx: %f %f %f %f  rx: %f %f %f %f  refh:%f\n",
+//i, tx_orientation.roll, tx_orientation.pitch, tx_orientation.heading, tx_steer,
+// rx_orientation.roll, rx_orientation.pitch, rx_orientation.heading, rx_steer, reference_heading);
+
+// BD    -90   0    +90
+// MB    180  90     0
+// MB = -BD + X
+// 180 = 90 + X ==> X = 90
+// 90 = -0 + X ==> X = 90
+// 0 = -90 + X ==> X = 90
+ 
+ 
+							theta = 90.0 - beamDepression;
+							phi = 90.0 - beamAzimuth;
+							if (phi < 0.0)
+								phi += 360.0;
+							rr = 0.5 * soundspeed * bathymetry->range[i];
+							xx = rr * sin(DTR * theta);
+							zz = rr * cos(DTR * theta);
+							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+							bathymetry->depth[i] = zz + sonardepth - heave;
+							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
+//fprintf(stderr,"i:%d beamAzimuth:%f beamDepression:%f theta:%f phi:%f  bath: %f %f %f\n",
+//i, beamAzimuth, beamDepression, theta, phi, bathymetry->acrosstrack[i], bathymetry->alongtrack[i], zz);
 							}
 						}
 
