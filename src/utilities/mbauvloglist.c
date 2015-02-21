@@ -169,7 +169,7 @@ int main (int argc, char **argv)
 	strcpy(printformat, "default");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:I:i:L:l:N:n:O:o:PpSsVvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "F:f:I:i:L:l:M:m:N:n:O:o:PpSsVvWwHh")) != -1)
 	  switch (c)
 		{
 		case 'H':

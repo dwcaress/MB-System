@@ -33,9 +33,6 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: mbm_bpr.perl,v $
-#   Initial revision.
 #
 use Getopt::Std;
 
@@ -269,10 +266,10 @@ if ($tmode == 0) {
   }
   $tidemax *= 1.1;
   if ($ntide > 0) {
-    $cmd = "mbm_xyplot -R$time_ds[0]/$time_ds[$count-1]/-$tidemax/$tidemax -IW0/0/0:$ofile -IW255/0/0:$modelfile -O$plotfile -L\"Tide Data from BPR <$ofile> (black) & Tide Model (red):Seconds:Tide (meters)\" -V";
+    $cmd = "mbm_xyplot -R$time_ds[0]/$time_ds[$count-1]/-$tidemax/$tidemax -IWblack:$ofile -IWred:$modelfile -O$plotfile -L\"Tide Data from BPR <$ofile> (black) & Tide Model (red):Seconds:Tide (meters)\" -V";
   }
   else {
-    $cmd = "mbm_xyplot -R$time_ds[0]/$time_ds[$count-1]/-$tidemax/$tidemax -IW0/0/0:$ofile -O$plotfile -L\"Tide Data from BPR <$ofile>:Seconds:Tide (meters)\" -V";
+    $cmd = "mbm_xyplot -R$time_ds[0]/$time_ds[$count-1]/-$tidemax/$tidemax -IWblack:$ofile -O$plotfile -L\"Tide Data from BPR <$ofile>:Seconds:Tide (meters)\" -V";
   }
   print "  Executing $cmd\n\n";
   $line = `$cmd`;
