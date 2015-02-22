@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2232       February 21, 2015
   Version 5.5.2231       February 20, 2015
   Version 5.5.2230       February 18, 2015
   Version 5.5.2229       February 14, 2015
@@ -199,12 +200,23 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2231 (February 21, 2014)
+
+Mbm_plot, mbm_grdplot, mbm_grd3dplot, mbhistplot: Changed handling of gmt defaults
+so that any local gmt.conf file is deleted before any gmtset calls are made, and
+the resulting gmt.conf file is deleted before the plot script ends.
+
+Mbswath: fixed calculation of beam or pixel footprints in mode requesting real
+footprint plotting.
+
 -----> 5.5.2231 (February 20, 2014)
 
 Mb7kpreprocess: Switched beam angle calculation to the mb_beaudoin() function
 already used by mbkongsbergpreprocess (contributed by Jonathan Beaudoin).
 
 Mbm_bpr: Made compatible with GMT5.
+
+-----> 5.5.2230 (February 18, 2014)
 
 Mbgrdtiff: Fixed ordering of rows and columns in the output image.
 

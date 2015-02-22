@@ -728,7 +728,6 @@ if ($length_scale && $length_scale =~ /\S+center\S+/)
 # come up with the filenames
 $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
-$gmtfile = "gmt.conf\$\$";
 
 # set some gmtisms
 $first = "-X\$X_OFFSET -Y\$Y_OFFSET -V >! \$PS_FILE";
@@ -781,12 +780,14 @@ print FCMD "set MAP_REGION      = $bounds_plot\n";
 printf FCMD "set X_OFFSET        = %1.5g\n", $xoffset;
 printf FCMD "set Y_OFFSET        = %1.5g\n", $yoffset;
 
-# Reset GMT defaults, saving old defaults
-print FCMD "#\n# Save existing GMT defaults\n";
-print FCMD "echo Saving GMT defaults...\n";
-print FCMD "gmt gmtdefaults >! $gmtfile\n";
-print FCMD "#\n# Set new GMT defaults\n";
-print FCMD "echo Setting new GMT defaults...\n";
+# Set temporary GMT defaults
+print FCMD "#\n# Delete any existing gmt.conf file\n";
+print FCMD "if (-e gmt.conf) then\n";
+print FCMD "echo Deleting gmt.conf...\n";
+print FCMD "/bin/rm gmt.conf\n";
+print FCMD "endif\n";
+print FCMD "#\n# Set temporary GMT defaults\n";
+print FCMD "echo Setting temporary GMT defaults...\n";
 foreach $gmt_def (@gmt_macro_defs) {
 	($gmt_par, $gmt_var) = $gmt_def =~ /^([^\/]+)\/(.+)/;
 	print FCMD "gmt gmtset $gmt_par $gmt_var\n";
@@ -893,6 +894,7 @@ printf FCMD "$first\n";
 # delete surplus files
 print FCMD "#\n# Delete surplus files\n";
 print FCMD "echo Deleting surplus files...\n";
+print FCMD "/bin/rm -f gmt.conf\n";
 if (!$file_cpt)
 	{
 	print FCMD "/bin/rm -f \$CPT_FILE\n";
@@ -907,12 +909,6 @@ if (! $save_temp_files) {
 	printf FCMD "/bin/rm -f $file \n";
     }
 }
-
-
-# reset GMT defaults
-print FCMD "#\n# Reset GMT default fonts\n";
-print FCMD "echo Resetting GMT fonts...\n";
-print FCMD "/bin/mv $gmtfile gmt.conf\n";
 
 # display image on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";

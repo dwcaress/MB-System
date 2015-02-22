@@ -267,7 +267,7 @@ void *New_mbswath_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new
 
         Ctrl->A.factor = 1.0;
 	Ctrl->A.mode = MBSWATH_FOOTPRINT_REAL;
-        Ctrl->A.depth = 3000.0;
+        Ctrl->A.depth = 0.0;
         Ctrl->C.cptfile = NULL;
         Ctrl->D.mode = 1;
         Ctrl->D.ampscale = 1.0;
@@ -1388,8 +1388,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error)
 
 			/* do it using fore-aft beam width */
 			if (setprint == MB_YES
-				&& Ctrl->A.mode == MBSWATH_FOOTPRINT_REAL
-				&& Ctrl->A.depth <= 0.0)
+				&& Ctrl->A.mode == MBSWATH_FOOTPRINT_REAL)
 				{
 				print = &pingcur->bathfoot[j];
 				pingcur->bathflag[j] = MB_YES;
