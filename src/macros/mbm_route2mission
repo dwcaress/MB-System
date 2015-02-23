@@ -161,12 +161,12 @@ $descendrate = 0.417; # m/s
 
 #$forwarddist = 0;
 $waypointdist = 200.0;
-$maxslopedeg = 25;
+$maxclimbrate = 25;
 $DTR  = 3.1415926 / 180.0;
-$maxslope = sin($DTR * $maxslopedeg) / cos($DTR * $maxslopedeg);
+$maxslope = sin($DTR * $maxclimbrate) / cos($DTR * $maxclimbrate);
 
 # Deal with command line arguments
-&MBGetopts('A:a:B:b:C:c:D:d:F:f:G:g:HhI:i:J:j:L%l%M%mN%n%O:o:P:p:R:r:S:s:T:t:W:w:V*v*Zz');
+&MBGetopts('A:a:B:b:C:c:D:d:F:f:G:g:HhI:i:J:j:L%l%M%mN%n%O:o:P:p:R:r:S:s:T:t:U:u:W:w:V*v*Zz');
 $altitudearg =		($opt_A || $opt_a);
 $behaviorarg =		($opt_B || $opt_b);
 $aborttime = 		($opt_C || $opt_c);
@@ -186,6 +186,7 @@ $startposition =	($opt_P || $opt_p);
 $multibeamsettings =	($opt_R || $opt_r);
 $speedarg =		($opt_S || $opt_s);
 $starttime =		($opt_T || $opt_t);
+$maxclimbrate =		($opt_U || $opt_u || $maxclimbrate);
 $waypointdist =		($opt_W || $opt_w || $waypointdist);
 $verbose =		($opt_V || $opt_v);
 $outputoff =		($opt_Z || $opt_z);
@@ -202,9 +203,9 @@ if ($help) {
     print "\t\t-Bbehavior1[/behavior2[/behavior3[/behavior4[/behavior5]]]] \r\n";
     print "\t\t-Caborttime -Ddepthconstant[/depthconstant2] -Fforwarddistance -Ggpsmode \r\n";
     print "\t\t-Jdepthprofilefile -Lapproachdepth -M[sonarlist] -N \r\n";
-    print "-Omissionfile \r\n\t\t-P[startlon/startlat | startdistance] \r\n";
+    print "\t\t-Omissionfile -P[startlon/startlat | startdistance] \r\n";
     print "\t\t-Rtransmitpower/receivegain[/rangeminfraction[/pulsewidth]] \r\n";
-    print "\t\t-Tstarttime -Wwaypointspacing -Z -V -H]\r\n";
+    print "\t\t-Tstarttime -Umaxclimbrate -Wwaypointspacing -Z -V -H]\r\n";
     exit 0;
 }
 
@@ -606,6 +607,7 @@ if ($debug)
 # vehicle a safe distance above the bottom.
 $nmissionpoints = 0;
 $lastmode = 0;
+$maxslope = sin($DTR * $maxclimbrate) / cos($DTR * $maxclimbrate);
 for ($i = 0; $i < $npoints; $i++)
 	{
 	# process points of interest
@@ -1034,7 +1036,7 @@ elsif ($verbose)
 		printf "    Forward Looking Distance: $forwarddist (m)\r\n";
 		}
 	printf "    Waypoint Spacing:         $waypointdist (m)\r\n";
-	printf "    Maximum upward slope:     %f degrees  %f ratio\r\n", $maxslopedeg, $maxslope;
+	printf "    Maximum climb rate:       %f degrees  %f ratio\r\n", $maxclimbrate, $maxslope;
 	if ($starttime)
 		{
 		printf "    Time to First Waypoint:   %d (s)\r\n", $starttime;
@@ -1188,6 +1190,7 @@ if (!$outputoff)
 		printf MFILE "#     Forward Looking Distance:   $forwarddist (m)\r\n";
 		}
 	printf MFILE "#     Waypoint Spacing:           $waypointdist (m)\r\n";
+	printf MFILE "#     Maximum climb rate:         $maxclimbrate (degrees)\r\n";
 	if ($starttime)
 		{
 		printf MFILE "#     Time to First Waypoint:     %d (s)\r\n", $starttime;
