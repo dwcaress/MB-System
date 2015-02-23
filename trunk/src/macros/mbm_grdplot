@@ -1973,10 +1973,20 @@ $gmt_def = "FONT_TITLE/$page_header_font{$pagesize},Helvetica,black";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "PS_PAGE_ORIENTATION/LANDSCAPE";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "COLOR_BACKGROUND/black";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "COLOR_FOREGROUND/white";
-push(@gmt_macro_defs, $gmt_def);
+if ($color_flip)
+    {
+    $gmt_def = "COLOR_BACKGROUND/white";
+    push(@gmt_macro_defs, $gmt_def);
+    $gmt_def = "COLOR_FOREGROUND/black";
+    push(@gmt_macro_defs, $gmt_def);
+    }
+else
+    {
+    $gmt_def = "COLOR_BACKGROUND/black";
+    push(@gmt_macro_defs, $gmt_def);
+    $gmt_def = "COLOR_FOREGROUND/white";
+    push(@gmt_macro_defs, $gmt_def);
+    }
 $gmt_def = "COLOR_NAN/white";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "FORMAT_GEO_MAP/$degree_format";

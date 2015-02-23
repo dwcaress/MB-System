@@ -821,11 +821,21 @@ else
 $gmtfile = "gmt.conf\$\$";
 
 # set macro gmt default settings
-$gmt_def = "COLOR_BACKGROUND/0/0/0";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "COLOR_FOREGROUND/255/255/255";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "COLOR_NAN/255/255/255";
+if ($color_flip)
+    {
+    $gmt_def = "COLOR_BACKGROUND/white";
+    push(@gmt_macro_defs, $gmt_def);
+    $gmt_def = "COLOR_FOREGROUND/black";
+    push(@gmt_macro_defs, $gmt_def);
+    }
+else
+    {
+    $gmt_def = "COLOR_BACKGROUND/black";
+    push(@gmt_macro_defs, $gmt_def);
+    $gmt_def = "COLOR_FOREGROUND/white";
+    push(@gmt_macro_defs, $gmt_def);
+    }
+$gmt_def = "COLOR_NAN/white";
 push(@gmt_macro_defs, $gmt_def);
 
 # open the shellscript file
