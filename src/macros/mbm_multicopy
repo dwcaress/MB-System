@@ -53,11 +53,11 @@ $command_line = "@ARGV";
 &MBGetopts('CcF:f:HhI:i:X:x:TtVv');
 $oformat = 		($opt_F || $opt_f);
 $help =    		($opt_H || $opt_h);
-$datalist =    		($opt_I || $opt_i);
+$datalist =    		($opt_I || $opt_i || datalist.mb-1);
 $check =    		($opt_C || $opt_c);
 $test =    		($opt_T || $opt_t);
 $verbose = 		($opt_V || $opt_v);
-$nprocesses =        	($opt_X || $opt_x);
+$nprocesses =        	($opt_X || $opt_x || 4);
 
 # print out help message if required
 if ($help)
@@ -72,16 +72,18 @@ if ($help)
 	exit 0;
 	}
 
-# check for input file
-if (!$datalist)
+# exiting if CPU number is lower than 1
+if ($cpu < 1)
 	{
-	print "\a";
-	die "No input datalist specified - $program_name aborted\n";
+	print "\nExiting $program_name, CPU(s) number(s) should be\n equal or bigger than one...\n\n";
+	exit 0;
 	}
-elsif (! -e $datalist)
+	
+# make sure that the input file exists
+if (! -f $datalist)
 	{
-	print "\a";
-	die "Specified input datalist cannot be opened - $program_name aborted\n";
+	print "\nExiting $program_name, Input file $datalist does not exist...\n\n";
+	exit 0;
 	}
 
 # tell the world we got started

@@ -527,17 +527,12 @@ and mbedit edit save files.\n";
 		exit(error);
 		}
 
-	/* print starting message */
-	if (verbose == 1 || help)
-		{
-		fprintf(stderr,"\nProgram %s\n",program_name);
-		fprintf(stderr,"Version %s\n",rcs_id);
-		fprintf(stderr,"MB-System Version %s\n",MB_VERSION);
-		}
-
 	/* if help desired then print it and exit */
 	if (help)
 	    {
+	    fprintf(stderr,"\nProgram %s\n",program_name);
+	    fprintf(stderr,"Version %s\n",rcs_id);
+	    fprintf(stderr,"MB-System Version %s\n",MB_VERSION);
 	    fprintf(stderr,"\n%s\n",help_message);
 	    fprintf(stderr,"\nusage: %s\n", usage_message);
 	    exit(error);
@@ -643,7 +638,7 @@ and mbedit edit save files.\n";
 	    }
 
 	/* print starting info statements */
-	else
+	else if (verbose > 0)
 	    {
 	    fprintf(stderr,"\nProgram <%s>\n",program_name);
 	    fprintf(stderr,"Version %s\n",rcs_id);
