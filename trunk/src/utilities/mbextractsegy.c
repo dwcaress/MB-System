@@ -936,12 +936,12 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
 
-					sprintf(command, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
+					sprintf(command, "%s_%4.4d_%2.2d_sectionplot.cmd $1\n\n",
 							lineroot, linenumber, i + 1);
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
 
-					sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -quality 75 %s_%4.4d_%2.2d_sectionplot.jpg\n\n",
+					sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -trim -quality 75 %s_%4.4d_%2.2d_sectionplot.jpg\n\n",
 							lineroot, linenumber, i + 1, lineroot, linenumber, i + 1);
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
@@ -1525,12 +1525,12 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 			fprintf(stderr, "%s", command);
 			fprintf(sfp, "%s", command);
 
-			sprintf(command, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
+			sprintf(command, "%s_%4.4d_%2.2d_sectionplot.cmd $1\n\n",
 					lineroot, linenumber, i + 1);
 			fprintf(stderr, "%s", command);
 			fprintf(sfp, "%s", command);
 
-			sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -quality 75 %s_%4.4d_%2.2d_sectionplot.jpg\n\n",
+			sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -trim -quality 75 %s_%4.4d_%2.2d_sectionplot.jpg\n\n",
 					lineroot, linenumber, i + 1, lineroot, linenumber, i + 1);
 			fprintf(stderr, "%s", command);
 			fprintf(sfp, "%s", command);

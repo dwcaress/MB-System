@@ -2150,6 +2150,10 @@ if ($data_scale)
 	{
 	printf FCMD "/bin/rm -f $file_use\n";
 	}
+if ($file_slope)
+	{
+	printf FCMD "/bin/rm -f $file_slope\n";
+	}
 
 # display image on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";
@@ -2224,13 +2228,17 @@ elsif ($ps_viewer eq "evince")
 	}
 if ($no_view_ps)
 	{
+        print FCMD "#if (!(\$#argv > 0 && (\"\$1\" == \"-N\" || \"\$1\" == \"-n\"))) then\n";
 	print FCMD "#echo Running $ps_viewer in background...\n";
 	print FCMD "#$ps_viewer $view_pageflag \$PS_FILE &\n";
+        print FCMD "#endif\n";
 	}
 else
 	{
+        print FCMD "if (!(\$#argv > 0 && (\"\$1\" == \"-N\" || \"\$1\" == \"-n\"))) then\n";
 	print FCMD "echo Running $ps_viewer in background...\n";
 	print FCMD "$ps_viewer $view_pageflag \$PS_FILE &\n";
+        print FCMD "endif\n";
 	}
 
 # claim it's all over

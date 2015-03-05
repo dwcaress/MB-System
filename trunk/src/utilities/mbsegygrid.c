@@ -369,7 +369,7 @@ int main (int argc, char **argv)
 		}
 
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(outfp,"\ndbg2  Program <%s>\n",program_name);
 		fprintf(outfp,"dbg2  Version %s\n",rcs_id);

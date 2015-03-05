@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2233       March 5, 2015
 * Version 5.5.2233       February 23, 2015
   Version 5.5.2232       February 21, 2015
   Version 5.5.2231       February 20, 2015
@@ -200,6 +201,28 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2234 (March 5, 2014)
+
+Plot macros (mbm_grdplot, mbm_grd3dplot, mbm_grdtiff, mbm_histplot, mbm_plot,
+mbm_xyplot): Now generate plotting scripts that will not attempt to display the
+plot on the screen if invoked with a "-N" command line argument.
+
+Format 64 (MBF_MR1PRVR2): Added include of <sys/time.h> in mbbs_defines.h to
+facilitate building under cygwin.
+
+Multi-macros (mbm_multiprocess, mbm_multicopy, mbm_multidatalist): Changed to
+use datalist.mb-1 as default input and to use 4 as the default number of CPUs.
+
+Mbedit: Added fast scroll through a file if the forward or back mouse buttons
+are held down more than 0.5 second.
+
+Mbextractsegy, mbsslayout: Changed output section/line plotting script so that
+it will not attempt to display the plot on the screen if invoked with a "-N"
+command line argument.
+
+Mbprocess: Reduced informational output when not in verbose mode to make the
+output from use of mbm_multiprocess cleaner.
 
 -----> 5.5.2233 (February 23, 2014)
 

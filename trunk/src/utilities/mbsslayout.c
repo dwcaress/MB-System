@@ -2453,7 +2453,8 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 						fprintf(sfp, "# Generate swath plot of sidescan file: %s\n", output_file);
 						fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n",
 							output_file, output_file);
-						fprintf(sfp, "%s_ssrawplot.cmd\n\n", output_file);
+						fprintf(sfp, "%s_ssrawplot.cmd $1\n\n", output_file);
+						fprintf(sfp, "convert -density 100 %s_ssrawplot.ps -trim -quality 75 %s_ssrawplot.jpg", output_file, output_file);
 						}
 		
 					/* define the filename */
@@ -3051,7 +3052,8 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 		fprintf(sfp, "# Generate swath plot of sidescan file: %s\n", output_file);
 		fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n",
 			output_file, output_file);
-		fprintf(sfp, "%s_ssrawplot.cmd\n\n", output_file);
+		fprintf(sfp, "%s_ssrawplot.cmd $1\n\n", output_file);
+		fprintf(sfp, "convert -density 100 %s_ssrawplot.ps -trim -quality 75 %s_ssrawplot.jpg", output_file, output_file);
 		}
 
 	/* close plotting script file */

@@ -38,6 +38,7 @@
 #define __MBBS_DEFINES__
 
 #include <time.h>
+#include <sys/time.h>
 
 /* The preprocessor code inserted here to insure access to
  * XDR definitions is changed from the HMRG codebase */

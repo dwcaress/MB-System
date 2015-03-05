@@ -2054,6 +2054,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
     unsigned int mask_return;
     int doit;
     int	grab_mode;
+    time_t start_time_t;
 
     /* check for data file loaded at startup */
     if (startup_file)
@@ -2086,6 +2087,44 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
       /* process events */
       switch (buffer[0])
 	    {
+	    case 'F':
+	    case 'f':
+                    if (key_g_down == 0)
+                        {
+                        status = mbedit_action_step(step,mplot_width,mexager,
+                                        mx_interval,my_interval,
+                                        mplot_size,mshow_beammode,mshow_flagged,mshow_time,
+                                        &nbuffer,&ngood,&icurrent,&mnplot);
+                        if (status == 0) XBell(theDisplay,100);
+                        }
+                    else
+                        {
+                        status = mbedit_action_step(nbuffer-icurrent-1,mplot_width,mexager,
+                                        mx_interval,my_interval,
+                                        mplot_size,mshow_beammode,mshow_flagged,mshow_time,
+                                        &nbuffer,&ngood,&icurrent,&mnplot);
+                        if (status == 0) XBell(theDisplay,100);
+                        }
+                    break;
+	    case 'V':
+	    case 'v':
+                    if (key_g_down == 0)
+                       {
+                           status = mbedit_action_step(-step,mplot_width,mexager,
+                                           mx_interval,my_interval,
+                                           mplot_size,mshow_beammode,mshow_flagged,mshow_time,
+                                           &nbuffer,&ngood,&icurrent,&mnplot);
+                           if (status == 0) XBell(theDisplay,100);
+                       }
+                    else
+                       {
+                           status = mbedit_action_step(-icurrent,mplot_width,mexager,
+                                           mx_interval,my_interval,
+                                           mplot_size,mshow_beammode,mshow_flagged,mshow_time,
+                                           &nbuffer,&ngood,&icurrent,&mnplot);
+                           if (status == 0) XBell(theDisplay,100);
+                       }
+ 		    break;
 	    case 'G':
 	    case 'g':
 		    key_g_down = 1;
@@ -2565,47 +2604,82 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 
 	    } /* end of left button events */
 
-	    /* If middle mouse button is pushed then scroll in reverse. */
-	    if(event->xbutton.button == 2)
+	/* If middle mouse button is pushed then scroll in reverse. */
+	if(event->xbutton.button == 2)
 	    {
-	    if (key_g_down == 0)
-	    	{
-		    status = mbedit_action_step(-step,mplot_width,mexager,
-				    mx_interval,my_interval,
-				    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
-				    &nbuffer,&ngood,&icurrent,&mnplot);
-		    if (status == 0) XBell(theDisplay,100);
-		}
-	    else
-	    	{
-		    status = mbedit_action_step(-icurrent,mplot_width,mexager,
-				    mx_interval,my_interval,
-				    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
-				    &nbuffer,&ngood,&icurrent,&mnplot);
-		    if (status == 0) XBell(theDisplay,100);
-		}
+            time(&start_time_t);
+	    doit = 1;
+	    while (doit)
+		{
+                if (doit == 1 || difftime(time(NULL), start_time_t) > 2.0)
+                    {
+                    if (key_g_down == 0)
+                        {
+                            status = mbedit_action_step(-step,mplot_width,mexager,
+                                            mx_interval,my_interval,
+                                            mplot_size,mshow_beammode,mshow_flagged,mshow_time,
+                                            &nbuffer,&ngood,&icurrent,&mnplot);
+                            if (status == 0) XBell(theDisplay,100);
+                        }
+                    else
+                        {
+                            status = mbedit_action_step(-icurrent,mplot_width,mexager,
+                                            mx_interval,my_interval,
+                                            mplot_size,mshow_beammode,mshow_flagged,mshow_time,
+                                            &nbuffer,&ngood,&icurrent,&mnplot);
+                            if (status == 0) XBell(theDisplay,100);
+                        }
+                    }
+
+		/* If a scroll button is still pressed then scroll again */
+		status = XQueryPointer(theDisplay,can_xid,
+                                        &root_return,&child_return,&root_x_return,
+                                        &root_y_return, &win_x, &win_y, &mask_return);
+		if (mask_return & 512)
+		    doit++;
+		else
+                    doit = 0;
+                }
 	    } /* end of middle button events */
 
-	    /* If right mouse button is pushed then scroll forward. */
-	  if ((event->xbutton.button == 3 && mode_reverse_mouse == MB_NO)
+	/* If right mouse button is pushed then scroll forward. */
+	if ((event->xbutton.button == 3 && mode_reverse_mouse == MB_NO)
 		|| (event->xbutton.button == 1 && mode_reverse_mouse == MB_YES))
 	    {
-	    if (key_g_down == 0)
-	    	{
-		    status = mbedit_action_step(step,mplot_width,mexager,
-				    mx_interval,my_interval,
-				    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
-				    &nbuffer,&ngood,&icurrent,&mnplot);
-		    if (status == 0) XBell(theDisplay,100);
-		}
-	    else
-	    	{
-		    status = mbedit_action_step(nbuffer-icurrent-1,mplot_width,mexager,
-				    mx_interval,my_interval,
-				    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
-				    &nbuffer,&ngood,&icurrent,&mnplot);
-		    if (status == 0) XBell(theDisplay,100);
-		}
+            time(&start_time_t);
+	    doit = 1;
+	    while (doit)
+		{
+                if (doit == 1 || difftime(time(NULL), start_time_t) > 2.0)
+                    {
+                    if (key_g_down == 0)
+                        {
+                        status = mbedit_action_step(step,mplot_width,mexager,
+                                        mx_interval,my_interval,
+                                        mplot_size,mshow_beammode,mshow_flagged,mshow_time,
+                                        &nbuffer,&ngood,&icurrent,&mnplot);
+                        if (status == 0) XBell(theDisplay,100);
+                        }
+                    else
+                        {
+                        status = mbedit_action_step(nbuffer-icurrent-1,mplot_width,mexager,
+                                        mx_interval,my_interval,
+                                        mplot_size,mshow_beammode,mshow_flagged,mshow_time,
+                                        &nbuffer,&ngood,&icurrent,&mnplot);
+                        if (status == 0) XBell(theDisplay,100);
+                        }
+                    }
+
+		/* If a scroll button is still pressed then scroll again */
+		status = XQueryPointer(theDisplay,can_xid,
+                                        &root_return,&child_return,&root_x_return,
+                                        &root_y_return, &win_x, &win_y, &mask_return);
+		if ((mode_reverse_mouse == MB_YES && (mask_return & 256))
+                    || (mode_reverse_mouse == MB_NO && (mask_return & 1024)))
+		    doit++;
+		else
+                    doit = 0;
+               }
 	    } /* end of right button events */
       } /* end of button pressed events */
     } /* end of inputs from window */
