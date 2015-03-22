@@ -2388,7 +2388,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-$as_echo "#define VERSION_DATE \"4 March 2015\"" >>confdefs.h
+$as_echo "#define VERSION_DATE \"22 March 2015\"" >>confdefs.h
 
 
 ac_aux_dir=

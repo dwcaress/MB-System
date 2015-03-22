@@ -1,4 +1,4 @@
-.TH mbnavadjustmerge 1 "28 May 2014" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjustmerge 1 "21 March 2015" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjustmerge\fP \- Tool to merge two MBnavadjust projects,
 either adding one to the first or outputting a new project combining
@@ -9,6 +9,10 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbnavadjustmerge\fP --input=project-base [--input=project-add --output=project-output
+--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
+--set-global-tie-xyz=file:section[:snav]
+--set-global-tie-xyonly=file:section[:snav]
+--set-global-tie-zonly=file:section[:snav]
 --add-crossing=file1:section1/file2:section2
 --set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset
 --set-tie-xyz=file1:section1/file2:section2
@@ -25,7 +29,8 @@ Version 5.0
 --set-ties-zonly-by-block=survey1/survey2
 --set-ties-zoffset-by-block=survey1/survey2/zoffset
 --skip-unset-crossings
- --verbose --help ]
+--insert-discontinuity=file:section
+--verbose --help ]
 
 .SH DESCRIPTION
 \fBMBnavadjustmerge\fP is a command line program that merges two
@@ -86,6 +91,33 @@ If the \fBoutput\fP option is
 not specified, then the \fIproject-base\fP project is used as the
 output, and the \fIproject-add\fP project is added on to the
 \fIproject-base\fP project.
+.TP
+.B \--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
+This options sets a global tie for a navigation point in the project. Global ties are
+ties to the global reference frame, which generally means GPS positions (e.g. WGS84).
+The file and section id's must be specified, along with the x (east-west), y (north-south),
+and z (vertical postive up) offset values in meters. If the snav id (navigation point id)
+is not specified, it is assumed to be 0, the first navigation point in the
+specified section. If the uncertainties in the global tie (xsigma, ysigma, zsigma)
+are not specified, then xsigma = ysigma = 10 m and zsigma = 0.5 m are assumed.
+.TP
+.B \--set-global-tie-xyz=file:section[:snav]
+This option sets the mode of the existing specified global tie in the
+\fBMBnavadjust\fP project to be "XYZ". This means all three
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-global-tie-xyonly=file:section[:snav]
+This option sets the mode of the existing specified global tie in the
+\fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-global-tie-zonly=file:section[:snav]
+This option sets the mode of the existing specified global tie in the
+\fBMBnavadjust\fP project to be "Z". This means only the vertical
+coordinate of the tie will be used as a constraint in the inversion
+for an optimal navigation model.
 .TP
 .B \--add-crossing=file1:section1/file2:section2
 This option adds the specified crossing to the \fBMBnavadjust\fP project.

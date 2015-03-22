@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavadjustmerge</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  28 May 2014 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  21 March 2015 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -30,6 +30,10 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbnavadjustmerge</B> --input=project-base [--input=project-add --output=project-output
+--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
+--set-global-tie-xyz=file:section[:snav]
+--set-global-tie-xyonly=file:section[:snav]
+--set-global-tie-zonly=file:section[:snav]
 --add-crossing=file1:section1/file2:section2
 --set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset
 --set-tie-xyz=file1:section1/file2:section2
@@ -45,7 +49,8 @@ Version 5.0
 --set-ties-zonly-by-block=survey1/survey2
 --set-ties-zoffset-by-block=survey1/survey2/zoffset
 --skip-unset-crossings
-<BR>&nbsp;--verbose&nbsp;--help&nbsp;]
+--insert-discontinuity=file:section
+--verbose --help ]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -119,6 +124,37 @@ If the <B>output</B> option is
 not specified, then the <I>project-base</I> project is used as the
 output, and the <I>project-add</I> project is added on to the
 <I>project-base</I> project.
+<DT><B>--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]</B>
+
+<DD>
+This options sets a global tie for a navigation point in the project. Global ties are
+ties to the global reference frame, which generally means GPS positions (e.g. WGS84).
+The file and section id's must be specified, along with the x (east-west), y (north-south),
+and z (vertical postive up) offset values in meters. If the snav id (navigation point id)
+is not specified, it is assumed to be 0, the first navigation point in the
+specified section. If the uncertainties in the global tie (xsigma, ysigma, zsigma)
+are not specified, then xsigma = ysigma = 10 m and zsigma = 0.5 m are assumed.
+<DT><B>--set-global-tie-xyz=file:section[:snav]</B>
+
+<DD>
+This option sets the mode of the existing specified global tie in the
+<B>MBnavadjust</B> project to be &quot;XYZ&quot;. This means all three
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-global-tie-xyonly=file:section[:snav]</B>
+
+<DD>
+This option sets the mode of the existing specified global tie in the
+<B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-global-tie-zonly=file:section[:snav]</B>
+
+<DD>
+This option sets the mode of the existing specified global tie in the
+<B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
+coordinate of the tie will be used as a constraint in the inversion
+for an optimal navigation model.
 <DT><B>--add-crossing=file1:section1/file2:section2</B>
 
 <DD>
@@ -314,7 +350,7 @@ Good luck.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 28 May 2014</P></CENTER>
+Last Updated: 21 March 2015</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
