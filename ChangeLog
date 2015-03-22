@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.5.2235       March 22, 2015
   Version 5.5.2234       March 5, 2015
 * Version 5.5.2233       February 23, 2015
   Version 5.5.2232       February 21, 2015
@@ -201,6 +202,23 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2235 (March 22, 2014)
+
+Mbnavadjust, mbnavadjustmerge: Added a new type of constraint referred to as a
+global tie. Each data section can have one of its navigation points tied to
+the fixed global frame of reference with a specified x, y, z offset (or just x
+and y, or just z) and x, y, and z uncertainties in the offset values. These
+global ties are set using mbnavadjustmerge. The relevant mbnavadjustmerge
+commands are:
+    --set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
+    --set-global-tie-xyz=file:section[:snav]
+    --set-global-tie-xyonly=file:section[:snav]
+    --set-global-tie-zonly=file:section[:snav]
+
+Mbsslayout: fixed automatically generated plottin script.
+
+Mbm_route2mission: Added multibeam maximum range value.
 
 -----> 5.5.2234 (March 5, 2014)
 

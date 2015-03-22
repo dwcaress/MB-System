@@ -50,6 +50,7 @@
 #define	MBNA_FILE_FIXEDNAV		3
 #define	MBNA_FILE_FIXEDXYNAV		4
 #define	MBNA_FILE_FIXEDZNAV		5
+#define	MBNA_TIE_NONE			0
 #define	MBNA_TIE_XYZ			1
 #define	MBNA_TIE_XY			2
 #define	MBNA_TIE_Z			3
@@ -166,6 +167,16 @@ struct mbna_section {
 	int	show_in_modelplot;
 	int	modelplot_start_count;
 	int	contoursuptodate;
+	int	global_tie_status;
+	int	global_tie_snav;
+	double	global_tie_offset_x;
+	double	global_tie_offset_y;
+	double	global_tie_offset_x_m;
+	double	global_tie_offset_y_m;
+	double	global_tie_offset_z_m;
+	double	global_tie_xsigma;
+	double	global_tie_ysigma;
+	double	global_tie_zsigma;
 };
 struct mbna_file {
 	int	status;

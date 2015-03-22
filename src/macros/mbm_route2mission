@@ -122,6 +122,7 @@ $mb_pingrate = 3.0;
 $mb_transmitgain = 220.0;
 $mb_receivegain = 75.0;
 $mb_minrangefraction = 0.2;
+$mb_maxrangefraction = 3.5;
 $mb_pulsewidth = 0.000060;
 $resongainsetcount = 0;
 $mb_snippetmode = 1;
@@ -418,8 +419,14 @@ elsif ($spiraldescent)
 	}
 if ($multibeamsettings =~ /\S+\/\S+\/\S+\/\S+/)
 	{
-	($mb_transmitgain,$mb_receivegain,$mb_minrangefraction,$pulsewidth) = $multibeamsettings =~ /(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+	($mb_transmitgain,$mb_receivegain,$mb_minrangefraction,$mb_maxrangefraction,$pulsewidth)
+			= $multibeamsettings =~ /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 	$mb_pulsewidth = $pulsewidth / 1000000.0;
+	}
+elsif ($multibeamsettings =~ /\S+\/\S+\/\S+\/\S+/)
+	{
+	($mb_transmitgain,$mb_receivegain,$mb_minrangefraction,$mb_maxrangefraction)
+			= $multibeamsettings =~ /(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 	}
 elsif ($multibeamsettings =~ /\S+\/\S+\/\S+/)
 	{
@@ -969,9 +976,10 @@ elsif ($verbose)
 		printf "                                 Multibeam transmit gain:          $mb_transmitgain dB\r\n";
 		printf "                                 Multibeam pulse width:            $mb_pulsewidth usec\r\n";
 		printf "                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
+		printf "                                 Multibeam maximum range fraction: $mb_maxrangefraction\r\n";
 		if ($beamdata)
 			{
-			printf "                                 Multibeam beam data collection enabled (100 m range)\r\n";
+			printf "                               Multibeam beam data collection enabled (100 m range)\r\n";
 			}
 		if ($subbottom)
 			{
@@ -1123,9 +1131,10 @@ if (!$outputoff)
 		printf MFILE "#                                 Multibeam transmit gain:          $mb_transmitgain dB\r\n";
 		printf MFILE "#                                 Multibeam pulse width:            $mb_pulsewidth usec\r\n";
 		printf MFILE "#                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
+		printf MFILE "#                                 Multibeam maximum range fraction: $mb_maxrangefraction\r\n";
 		if ($beamdata)
 			{
-			printf MFILE "#                                 Multibeam beam data collection enabled (100 m range)\r\n";
+			printf MFILE "#                               Multibeam beam data collection enabled (100 m range)\r\n";
 			}
 		if ($subbottom)
 			{
@@ -1391,9 +1400,9 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 			$sonaraltitudeuse = $sonaraltitude;
 			}
 
-		# sonar range allows for 150 degree swath on flat bottom
+		# if $mb_maxrangefraction = 3.5 then sonar range allows for 150 degree swath on flat bottom
 		# sonar range cut off at 100 m for recorded full beamformed data
-		$mb_range = 3.5 * $sonaraltitudeuse;
+		$mb_range = $mb_maxrangefraction * $sonaraltitudeuse;
 		if ($mb_range > 200.0)
 			{
 			$mb_range = 200.0;
@@ -1416,7 +1425,6 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 			{
 			$sbp_duration = 300.0;
 			}
-
 
 		# do ascend, gps, descend at line starts and ends if specified
 		if (($iwaypoint != $nwaypoints - 1)
@@ -2355,10 +2363,10 @@ print "Behavior: gps\r\n";
 		#  $sslo_range & $sbp_duration calculated near start of program
 		# from ping rate
 		$sonaraltitudeuse = $altitudedesired;
-		$mb_range = 4.0 * $sonaraltitudeuse;
-		if ($mb_range > 350.0)
+		$mb_range = $mb_maxrangefraction * $sonaraltitudeuse;
+		if ($mb_range > 200.0)
 			{
-			$mb_range = 350.0;
+			$mb_range = 200.0;
 			}
 		if ($beamdata && $mb_range > 100.0)
 			{
