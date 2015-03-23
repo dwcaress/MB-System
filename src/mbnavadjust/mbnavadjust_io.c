@@ -703,6 +703,10 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
 									&section->global_tie_xsigma,
 									&section->global_tie_ysigma,
 									&section->global_tie_zsigma);
+							mb_coor_scale(verbose,0.5 * (section->latmin + section->latmax),
+									&mtodeglon,&mtodeglat);
+							section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
+							section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
 							}
 						else if (100*versionmajor + versionminor == 304)
 							{
@@ -721,6 +725,10 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
 								section->global_tie_status = MBNA_TIE_XYZ;
 							else
 								section->global_tie_status = MBNA_TIE_NONE;
+							mb_coor_scale(verbose,0.5 * (section->latmin + section->latmax),
+									&mtodeglon,&mtodeglat);
+							section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
+							section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
 							}
 						else
 							{
@@ -728,6 +736,8 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
 							section->global_tie_snav = MBNA_SELECT_NONE;
 							section->global_tie_offset_x = 0.0;
 							section->global_tie_offset_y = 0.0;
+							section->global_tie_offset_x_m = 0.0;
+							section->global_tie_offset_y_m = 0.0;
 							section->global_tie_offset_z_m = 0.0;
 							section->global_tie_xsigma = 0.0;
 							section->global_tie_ysigma = 0.0;

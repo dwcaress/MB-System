@@ -2010,6 +2010,7 @@ int mbnavadjust_read_project()
 	char	*result;
 	int	versionmajor, versionminor;
 	double	dummy;
+	double	mtodeglon, mtodeglat;
 	int	nscan, idummy, jdummy;
 	int	s1id, s2id;
 	int	shellstatus;
@@ -2398,6 +2399,10 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
 							&section->global_tie_xsigma,
 							&section->global_tie_ysigma,
 							&section->global_tie_zsigma);
+					mb_coor_scale(mbna_verbose,0.5 * (section->latmin + section->latmax),
+							&mtodeglon,&mtodeglat);
+					section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
+					section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
 if (section->global_tie_status != MBNA_TIE_NONE)
 fprintf(stderr,"READ GLOBALTIE: %d %d %lf %lf %lf %lf %lf %lf\n",
 section->global_tie_status,
@@ -2422,6 +2427,10 @@ section->global_tie_zsigma);
 							&section->global_tie_xsigma,
 							&section->global_tie_ysigma,
 							&section->global_tie_zsigma);
+					mb_coor_scale(mbna_verbose,0.5 * (section->latmin + section->latmax),
+							&mtodeglon,&mtodeglat);
+					section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
+					section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
 					if (section->global_tie_snav != MBNA_SELECT_NONE)
 						section->global_tie_status = MBNA_TIE_XYZ;
 					else

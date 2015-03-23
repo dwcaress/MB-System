@@ -34,11 +34,13 @@ Version 5.0
 --set-global-tie-xyz=file:section[:snav]
 --set-global-tie-xyonly=file:section[:snav]
 --set-global-tie-zonly=file:section[:snav]
+--unset-global-tie=file:section
 --add-crossing=file1:section1/file2:section2
 --set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset
 --set-tie-xyz=file1:section1/file2:section2
 --set-tie-xyonly=file1:section1/file2:section2
 --set-tie-zonly=file1:section1/file2:section2
+--unset-tie=file1:section1/file2:section2
 --set-ties-xyz-with-file=file
 --set-ties-xyonly-with-file=file
 --set-ties-zonly-with-file=file
@@ -155,6 +157,11 @@ This option sets the mode of the existing specified global tie in the
 <B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
 coordinate of the tie will be used as a constraint in the inversion
 for an optimal navigation model.
+<DT><B>--unset-global-tie=file:section</B>
+
+<DD>
+This option unsets (deletes) the specified global tie in the
+<B>MBnavadjust</B> project. 
 <DT><B>--add-crossing=file1:section1/file2:section2</B>
 
 <DD>
@@ -186,6 +193,11 @@ This option sets the mode of the existing specified tie in the
 <B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
 coordinate of the tie will be used as a constraint in the inversion
 for an optimal navigation model.
+<DT><B>--unset-tie=file1:section1/file2:section2</B>
+
+<DD>
+This option unsets (deletes) the specified tie in the
+<B>MBnavadjust</B> project. 
 <DT><B>--set-ties-xyz-with-file=file</B>
 
 <DD>

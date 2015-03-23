@@ -55,23 +55,25 @@ static char version_id[] = "$Id$";
 #define MOD_MODE_SET_GLOBAL_TIE_XYZ	2
 #define MOD_MODE_SET_GLOBAL_TIE_XY	3
 #define MOD_MODE_SET_GLOBAL_TIE_Z	4
-#define MOD_MODE_ADD_CROSSING 		5
-#define MOD_MODE_SET_TIE 		6
-#define MOD_MODE_SET_TIE_XYZ		7
-#define MOD_MODE_SET_TIE_XY		8
-#define MOD_MODE_SET_TIE_Z		9
-#define MOD_MODE_SET_TIES_XYZ_FILE	10
-#define MOD_MODE_SET_TIES_XY_FILE	11
-#define MOD_MODE_SET_TIES_Z_FILE	12
-#define MOD_MODE_SET_TIES_XYZ_SURVEY	13
-#define MOD_MODE_SET_TIES_XY_SURVEY	14
-#define MOD_MODE_SET_TIES_Z_SURVEY	15
-#define MOD_MODE_SET_TIES_XYZ_BLOCK	16
-#define MOD_MODE_SET_TIES_XY_BLOCK	17
-#define MOD_MODE_SET_TIES_Z_BLOCK	18
-#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK	19
-#define MOD_MODE_SKIP_UNSET_CROSSINGS	20
-#define MOD_MODE_INSERT_DISCONTINUITY   21
+#define MOD_MODE_UNSET_GLOBAL_TIE	5
+#define MOD_MODE_ADD_CROSSING 		6
+#define MOD_MODE_SET_TIE 		7
+#define MOD_MODE_SET_TIE_XYZ		8
+#define MOD_MODE_SET_TIE_XY		9
+#define MOD_MODE_SET_TIE_Z		10
+#define MOD_MODE_UNSET_TIE		11
+#define MOD_MODE_SET_TIES_XYZ_FILE	12
+#define MOD_MODE_SET_TIES_XY_FILE	13
+#define MOD_MODE_SET_TIES_Z_FILE	14
+#define MOD_MODE_SET_TIES_XYZ_SURVEY	15
+#define MOD_MODE_SET_TIES_XY_SURVEY	16
+#define MOD_MODE_SET_TIES_Z_SURVEY	17
+#define MOD_MODE_SET_TIES_XYZ_BLOCK	18
+#define MOD_MODE_SET_TIES_XY_BLOCK	19
+#define MOD_MODE_SET_TIES_Z_BLOCK	20
+#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK	21
+#define MOD_MODE_SKIP_UNSET_CROSSINGS	22
+#define MOD_MODE_INSERT_DISCONTINUITY   23
 
 struct mbnavadjust_mod
 	{
@@ -104,6 +106,7 @@ int main (int argc, char **argv)
 				"\t--set-global-tie-xyz=file:section[:snav]\n"
 				"\t--set-global-tie-xyonly=file:section[:snav]\n"
 				"\t--set-global-tie-zonly=file:section[:snav]\n"
+				"\t--unset-global-tie=file:section\n"
 				"\t--add-crossing=file1:section1/file2:section2\n"
 				"\t--set-tie=file1/file2/xoffset/yoffset/zoffset\n"
 				"\t--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset\n"
@@ -111,6 +114,7 @@ int main (int argc, char **argv)
 				"\t--set-tie-xyz=file1:section1/file2:section2\n"
 				"\t--set-tie-xyonly=file1:section1/file2:section2\n"
 				"\t--set-tie-zonly=file1:section1/file2:section2\n"
+				"\t--unset-tie=file1:section1/file2:section2\n"
 				"\t--set-ties-xyz-with-file=file\n"
 				"\t--set-ties-xyonly-with-file=file\n"
 				"\t--set-ties-zonly-with-file=file\n"
@@ -150,11 +154,13 @@ int main (int argc, char **argv)
 		{"set-global-tie-xyz",		required_argument, 	NULL, 		0},
 		{"set-global-tie-xyonly",	required_argument, 	NULL, 		0},
 		{"set-global-tie-zonly",	required_argument, 	NULL, 		0},
+		{"unset-global-tie",		required_argument, 	NULL, 		0},
 		{"add-crossing",		required_argument, 	NULL, 		0},
 		{"set-tie",			required_argument, 	NULL, 		0},
 		{"set-tie-xyz",			required_argument, 	NULL, 		0},
 		{"set-tie-xyonly",		required_argument, 	NULL, 		0},
 		{"set-tie-zonly",		required_argument, 	NULL, 		0},
+		{"unset-tie",			required_argument, 	NULL, 		0},
 		{"set-ties-xyz-with-file",	required_argument, 	NULL, 		0},
 		{"set-ties-xyonly-with-file",	required_argument, 	NULL, 		0},
 		{"set-ties-zonly-with-file",	required_argument, 	NULL, 		0},
@@ -345,7 +351,8 @@ int main (int argc, char **argv)
 			 * set global tie mode
 				--set-global-tie-xyz=file:section:snav
 				--set-global-tie-xyonly=file:section:snav
-				--set-global-tie-zonly=file:section:snav  */
+				--set-global-tie-zonly=file:section:snav  
+				--unset-global-tie=file:section  */
 			else if (strcmp("set-global-tie-xyz", options[option_index].name) == 0)
 				{
 				if (num_mods < NUMBER_MODS_MAX)
@@ -428,6 +435,29 @@ int main (int argc, char **argv)
 						{
 						mods[num_mods].snav1 = 0;
 						mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_Z;
+						num_mods++;
+						}
+					else
+						{
+						fprintf(stderr,"Failure to parse --set-global-tie-z=%s\n\tmod command ignored\n\n",
+							optarg);	
+						}
+					}
+				else
+					{
+					fprintf(stderr,"Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n",
+							optarg);	
+					}
+				}
+			else if (strcmp("unset-global-tie", options[option_index].name) == 0)
+				{
+				if (num_mods < NUMBER_MODS_MAX)
+					{
+					if ((nscan = sscanf(optarg, "%d:%d",
+						       &mods[num_mods].file1,
+						       &mods[num_mods].section1)) == 2)
+						{
+						mods[num_mods].mode = MOD_MODE_UNSET_GLOBAL_TIE;
 						num_mods++;
 						}
 					else
@@ -639,6 +669,31 @@ int main (int argc, char **argv)
 						mods[num_mods].section1 = 0;
 						mods[num_mods].section2 = 0;
 						mods[num_mods].mode = MOD_MODE_SET_TIE_Z;
+						num_mods++;
+						}
+					else
+						{
+						fprintf(stderr,"Failure to parse --set-tie-z=%s\n\tmod command ignored\n\n",
+							optarg);	
+						}
+					}
+				else
+					{
+					fprintf(stderr,"Maximum number of mod commands reached:\n\t--set-tie-z=%s command ignored\n\n",
+							optarg);	
+					}
+				}
+			else if (strcmp("unset-tie", options[option_index].name) == 0)
+				{
+				if (num_mods < NUMBER_MODS_MAX)
+					{
+					if ((nscan = sscanf(optarg, "%d:%d/%d:%d",
+						       &mods[num_mods].file1,
+						       &mods[num_mods].section1,
+						       &mods[num_mods].file2,
+						       &mods[num_mods].section2)) == 4)
+						{
+						mods[num_mods].mode = MOD_MODE_UNSET_TIE;
 						num_mods++;
 						}
 					else
@@ -1430,6 +1485,8 @@ mods[imod].xsigma,mods[imod].ysigma,mods[imod].zsigma);
 					if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections)
 						{
 						section1 = (struct mbna_section *) &file1->sections[mods[imod].section1];
+						mb_coor_scale(verbose,0.5 * (section1->latmin + section1->latmax),
+								&mtodeglon,&mtodeglat);
 						if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav)
 							{
 							section1->global_tie_status = MBNA_TIE_XYZ;
@@ -1540,6 +1597,23 @@ mods[imod].file1,mods[imod].section1,mods[imod].snav2);
 							section1->global_tie_status = MBNA_TIE_NONE;
 							section1->global_tie_snav = MBNA_SELECT_NONE;
 							}
+						}
+					}
+				break;
+				
+			case MOD_MODE_UNSET_GLOBAL_TIE:
+fprintf(stderr,"\nCommand unset-global-tie=%4.4d:%4.4d\n",
+mods[imod].file1,mods[imod].section1);
+
+				
+				/* if this file and section exists unset the global tie */
+				if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files)
+					{
+					file1 = (struct mbna_file *) &project_output.files[mods[imod].file1];
+					if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections)
+						{
+						section1 = (struct mbna_section *) &file1->sections[mods[imod].section1];
+						section1->global_tie_status = MBNA_TIE_NONE;
 						}
 					}
 				break;
@@ -1881,6 +1955,44 @@ file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
 file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2,
 tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
 						}
+					}
+					
+				break;
+			
+			case MOD_MODE_UNSET_TIE:
+fprintf(stderr,"\nCommand unset-tie=%4.4d:%4.4d/%4.4d:%4.4d\n",
+mods[imod].file1,mods[imod].section1,mods[imod].file2,mods[imod].section2);
+				
+				/* check to see if this crossing already exists */
+				found = MB_NO;
+				for (icrossing=0;icrossing<project_output.num_crossings && found == MB_NO;icrossing++)
+					{
+					crossing = &(project_output.crossings[icrossing]);
+					file1 = (struct mbna_file *) &project_output.files[crossing->file_id_1];
+					file2 = (struct mbna_file *) &project_output.files[crossing->file_id_2];
+					if (crossing->file_id_2 == mods[imod].file1 && crossing->file_id_1 == mods[imod].file2
+						&& crossing->section_2 == mods[imod].section1 && crossing->section_1 == mods[imod].section2)
+						{
+						found = MB_YES;
+						current_crossing = icrossing;
+						}
+					else if (crossing->file_id_1 == mods[imod].file1 && crossing->file_id_2 == mods[imod].file2
+						&& crossing->section_1 == mods[imod].section1 && crossing->section_2 == mods[imod].section2)
+						{
+						found = MB_YES;
+						current_crossing = icrossing;
+						}
+					}
+					
+				/* unset the ties associated with this crossing */
+				if (found == MB_YES && crossing->num_ties > 0)
+					{
+					crossing->num_ties = 0;
+
+fprintf(stderr,"Unset tie:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n",
+current_crossing,
+file1->block, crossing->file_id_1, crossing->section_1,
+file2->block, crossing->file_id_2, crossing->section_2);
 					}
 					
 				break;
