@@ -16,7 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-* Version 5.5.2235       March 22, 2015
+* Version 5.5.2236       March 23, 2015
   Version 5.5.2234       March 5, 2015
 * Version 5.5.2233       February 23, 2015
   Version 5.5.2232       February 21, 2015
@@ -203,7 +203,7 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2234 (March 5, 2014)
+-----> 5.5.2235 (March 22, 2014)
 
 Mbnavadjust, mbnavadjustmerge: Added a new type of constraint referred to as a
 global tie. Each data section can have one of its navigation points tied to
@@ -215,6 +215,18 @@ commands are:
     --set-global-tie-xyz=file:section[:snav]
     --set-global-tie-xyonly=file:section[:snav]
     --set-global-tie-zonly=file:section[:snav]
+
+Mbnavadjustmerge: Added ability to unset (delete) global ties and crossing ties.
+The relevant mbnavadjustmerge commands are:
+    --unset-global-tie=file:section
+    --unset-tie=file1:section1/file2:section2
+
+Mbnavadjust, mbnavadjustmerge: Explicitly added references to libgmt and libpsl in
+the src/mbnavadjust/Makefile.am file so that the mbnavadjust and mbnavadjustmerge
+executables are linked to those libraries. This is to solve a mysterious dependency
+of mbnavadjust on libgmt on CentOs6 - the program was failing due inability to find
+libgmt.so.5 even though the code does not reference any GMT or GMT5 function or header
+file. Presumably this change will go away when the mystery is solved.
 
 Mbsslayout: fixed automatically generated plottin script.
 
