@@ -16,7 +16,8 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-* Version 5.5.2237       March 23, 2015
+  Version 5.5.2238       March 23, 2015
+  Version 5.5.2237       March 23, 2015
   Version 5.5.2234       March 5, 2015
 * Version 5.5.2233       February 23, 2015
   Version 5.5.2232       February 21, 2015
@@ -203,12 +204,27 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2237 (March 23, 2014)
+-----> 5.5.2237 (April 15, 2015)
+
+Mbnavadjust: Recast and improved the inversion. Added a "perturbation" model
+display which does not include the average offsets between the individual surveys
+in projects involving multiple surveys.
+
+Mbcontour, mbswath, mbgrdtiff: Included fixes suggested by Joaquim Luis for
+compatibility with the next GMT5 release.
+
+Mbclean: Removed -M3 and -M4 options that previously caused the program to null
+(or zero) rather than flag bad soundings. This is an obsolete feature that only
+made sense prior to existence of mbprocess.
+
+Mbbackangle: Fixed mbm_grdplot call to no longer use an obsolete option.
+
+-----> 5.5.2237 (March 23, 2015)
 
 Mbnavadjust, mbnavedit: Removed references to GMT and netCDF in the Makefile.am
 file in both source directories.
 
------> 5.5.2236 (March 23, 2014)
+-----> 5.5.2236 (March 23, 2015)
 
 Mbnavadjust, mbnavadjustmerge: Added a new type of constraint referred to as a
 global tie. Each data section can have one of its navigation points tied to
@@ -237,7 +253,7 @@ Mbsslayout: fixed automatically generated plottin script.
 
 Mbm_route2mission: Added multibeam maximum range value.
 
------> 5.5.2234 (March 5, 2014)
+-----> 5.5.2234 (March 5, 2015)
 
 Plot macros (mbm_grdplot, mbm_grd3dplot, mbm_grdtiff, mbm_histplot, mbm_plot,
 mbm_xyplot): Now generate plotting scripts that will not attempt to display the
@@ -259,7 +275,7 @@ command line argument.
 Mbprocess: Reduced informational output when not in verbose mode to make the
 output from use of mbm_multiprocess cleaner.
 
------> 5.5.2233 (February 23, 2014)
+-----> 5.5.2233 (February 23, 2015)
 
 Release 5.5.2233
 
@@ -269,7 +285,7 @@ colors based on the -D option.
 Mbmroute2mission: Now allows the maximum planned climb rate of the AUV to be
 specified with the -U option
 
------> 5.5.2232 (February 21, 2014)
+-----> 5.5.2232 (February 21, 2015)
 
 Mbm_plot, mbm_grdplot, mbm_grd3dplot, mbhistplot: Changed handling of gmt defaults
 so that any local gmt.conf file is deleted before any gmtset calls are made, and
@@ -278,14 +294,14 @@ the resulting gmt.conf file is deleted before the plot script ends.
 Mbswath: fixed calculation of beam or pixel footprints in mode requesting real
 footprint plotting.
 
------> 5.5.2231 (February 20, 2014)
+-----> 5.5.2231 (February 20, 2015)
 
 Mb7kpreprocess: Switched beam angle calculation to the mb_beaudoin() function
 already used by mbkongsbergpreprocess (contributed by Jonathan Beaudoin).
 
 Mbm_bpr: Made compatible with GMT5.
 
------> 5.5.2230 (February 18, 2014)
+-----> 5.5.2230 (February 18, 2015)
 
 Mbgrdtiff: Fixed ordering of rows and columns in the output image.
 
@@ -302,7 +318,7 @@ tables used for interpolation onto ping times.
 
 Mbrolltimelag: Fixed automatically generated roll-slope correlation plot.
 
------> 5.5.2229 (February 14, 2014)
+-----> 5.5.2229 (February 14, 2015)
 
 Format 121 (MBF_GSFGENMB): The i/o module will now allocate and initialize arrays
 of beamflags and alongtrack distance when those are not included in the input file.
@@ -318,7 +334,7 @@ Mbm_route2mission: Compatibility with GMT5.
 
 Mbcontour, mbswath: More changes for compatibility with GMT5.
 
------> 5.5.2228 (February 6, 2014)
+-----> 5.5.2228 (February 6, 2015)
 
 Install_makefiles: the old install_makefiles build system no longer 
 functions and has been removed.

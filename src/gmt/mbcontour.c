@@ -49,6 +49,8 @@
 #include "mb_define.h"
 #include "mb_aux.h"
 
+EXTERN_MSC int GMT_mbcontour(void *API, int mode, void *args);
+
 /* Control structure for mbcontour */
 struct MBCONTOUR_CTRL {
 
@@ -292,7 +294,11 @@ int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, stru
 		switch (opt->option) {
 			case '<':	/* Input file (only one or three is accepted) */
 				Ctrl->I.active = true;
+#if GMT_MINOR_VERSION == 1
 				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN))
+#else
+				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET))
+#endif
 					{
                                         Ctrl->I.inputfile = strdup (opt->arg);
                                         n_files = 1;

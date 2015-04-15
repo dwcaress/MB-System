@@ -2068,7 +2068,8 @@ if ($color_mode && !$file_cpt)
 		{
 		if ($verbose)
 			{
-			print "Running gmt module grdhisteq...\n";
+			print "Running gmt module grdhisteq:\n";
+                        print "\tgmt grdhisteq $files_data[0] -C$ncolors -D\n";
 			}
 		@grdhisteq = `gmt grdhisteq $files_data[0] -C$ncolors -D`;
 		foreach $d (@grdhisteq) {

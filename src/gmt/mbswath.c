@@ -38,6 +38,8 @@
 /* GMT5 header file */
 #include "gmt_dev.h"
 
+EXTERN_MSC int GMT_mbswath(void *API, int mode, void *args);
+
 #define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
 /* MBIO include files */
@@ -391,11 +393,15 @@ int GMT_mbswath_parse (struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl, struct G
 		switch (opt->option) {
 			case '<':	/* Input file (only one or three is accepted) */
 				Ctrl->I.active = true;
-				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN))
+#if GMT_MINOR_VERSION == 1
+ 				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN))
+#else
+				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET))
+#endif
 					{
-                                        Ctrl->I.inputfile = strdup (opt->arg);
-                                        n_files = 1;
-                                        }
+					Ctrl->I.inputfile = strdup (opt->arg);
+					n_files = 1;
+					}
 				else
 					n_errors++;
 				break;
