@@ -104,8 +104,9 @@
 #define MBNA_GOODOVERLAP_THRESHOLD		25
 #define MBNA_BETTEROVERLAP_THRESHOLD		50
 
-#define	MBNA_MODELPLOT_SEQUENTIAL	0
-#define	MBNA_MODELPLOT_SURVEY		1
+#define	MBNA_MODELPLOT_TIMESERIES	0
+#define	MBNA_MODELPLOT_PERTURBATION	1
+#define	MBNA_MODELPLOT_TIEOFFSETS	2
 #define	MBNA_MODELPLOT_LEFT_WIDTH	25
 #define	MBNA_MODELPLOT_LEFT_HEIGHT	65
 #define	MBNA_MODELPLOT_X_SPACE		10
@@ -379,6 +380,7 @@ MBNAVADJUST_EXTERNAL int	mbna_zoom_x2;
 MBNAVADJUST_EXTERNAL int	mbna_zoom_y2;
 MBNAVADJUST_EXTERNAL double mbna_smoothweight;
 MBNAVADJUST_EXTERNAL double mbna_offsetweight;
+MBNAVADJUST_EXTERNAL double mbna_zweightfactor;
 MBNAVADJUST_EXTERNAL int	mbna_bias_mode;
 MBNAVADJUST_EXTERNAL int	mbna_allow_set_tie;
 
@@ -506,11 +508,13 @@ int	mbnavadjust_applynav();
 int	mbnavadjust_interpolatesolution();
 int	mbnavadjust_modelplot_plot();
 int	mbnavadjust_set_modelplot_graphics(void *modp_xgid, int *modp_borders);
-int	mbnavadjust_modelplot_plot_sequential();
-int	mbnavadjust_modelplot_plot_tielist();
+int	mbnavadjust_modelplot_plot_timeseries();
+int	mbnavadjust_modelplot_plot_perturbation();
+int	mbnavadjust_modelplot_plot_tieoffsets();
 int	mbnavadjust_modelplot_pick(int x, int y);
-int	mbnavadjust_modelplot_pick_tielist(int x, int y);
-int	mbnavadjust_modelplot_pick_sequential(int x, int y);
+int	mbnavadjust_modelplot_pick_timeseries(int x, int y);
+int	mbnavadjust_modelplot_pick_perturbation(int x, int y);
+int	mbnavadjust_modelplot_pick_tieoffsets(int x, int y);
 int	mbnavadjust_modelplot_middlepick(int x, int y);
 int	mbnavadjust_modelplot_setzoom();
 int	mbnavadjust_modelplot_clearblock();

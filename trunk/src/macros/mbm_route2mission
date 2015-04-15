@@ -1099,6 +1099,9 @@ if (!$outputoff)
 	printf MFILE "# by the MB-System program $program_name run by\r\n";
 	printf MFILE "# user <$user> on cpu <$host> at <$date>\r\n";
 	printf MFILE "# \r\n";
+	printf MFILE "# Program mbm_route2mission version:\r\n";
+	printf MFILE "#     $Id$\r\n";
+	printf MFILE "# \r\n";
 	printf MFILE "# Mission Summary:\r\n";
 	printf MFILE "#     Route File:               $routefile\r\n";
 	printf MFILE "#     Mission File:             $missionfile\r\n";

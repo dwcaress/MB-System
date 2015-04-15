@@ -321,12 +321,13 @@ int              tiff_offset[] =
 /*--------------------------------------------------------------------*/
 
 #define THIS_MODULE_NAME	"mbgrdtiff"
-#define THIS_MODULE_LIB		"core"
+#define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Project grids or images and plot them on maps"
 
 #include "gmt_dev.h"
 
-//#define GMT_PROG_OPTIONS "->BJKOPRUVXYcfnptxy" GMT_OPT("S")
+EXTERN_MSC int GMT_mbgrdtiff(void *API, int mode, void *args);
+
 #define GMT_PROG_OPTIONS "->JRVn" GMT_OPT("S")
 
 /* Control structure for mbgrdtiff */
@@ -461,7 +462,11 @@ int GMT_mbgrdtiff_parse (struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, stru
 			case '<':	/* Input file (only one or three is accepted) */
 				Ctrl->I.active = true;
 				if (n_files >= 3) break;
-				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN))
+#if GMT_MINOR_VERSION == 1
+ 				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN))
+#else
+				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET))
+#endif
 					Ctrl->I.file[n_files++] = strdup (opt->arg);
 				else
 					n_errors++;
@@ -516,25 +521,25 @@ int GMT_mbgrdtiff_parse (struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, stru
 				break;
 			case 'I':	/* Input file (only one or three is accepted) */
 				/* if no grid file specified yet then first -Ifile sets
-                                 * the primary grid file, and second -Ifile will be the
-                                 * intensity file */
-                                if (n_files == 0) {
-                                        Ctrl->I.active = true;
+				 * the primary grid file, and second -Ifile will be the
+				 * intensity file */
+				if (n_files == 0) {
+					Ctrl->I.active = true;
 					Ctrl->I.file[n_files++] = strdup (opt->arg);
-                                }
-                                else {
-                                        Ctrl->Intensity.active = true;
-                                        if (!GMT_access (GMT, opt->arg, R_OK))	/* Got a file */
-                                                Ctrl->Intensity.file = strdup (opt->arg);
-                                        else if (opt->arg[0] && !GMT_not_numeric (GMT, opt->arg)) {	/* Looks like a constant value */
-                                                Ctrl->Intensity.value = atof (opt->arg);
-                                                Ctrl->Intensity.constant = true;
-                                        }
-                                        else {
-                                                GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -I: Requires a valid grid file or a constant\n");
-                                                n_errors++;
-                                        }
-                                }
+				}
+				else {
+					Ctrl->Intensity.active = true;
+					if (!GMT_access (GMT, opt->arg, R_OK))	/* Got a file */
+						Ctrl->Intensity.file = strdup (opt->arg);
+					else if (opt->arg[0] && !GMT_not_numeric (GMT, opt->arg)) {	/* Looks like a constant value */
+						Ctrl->Intensity.value = atof (opt->arg);
+						Ctrl->Intensity.constant = true;
+					}
+					else {
+						GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -I: Requires a valid grid file or a constant\n");
+						n_errors++;
+					}
+				}
 				break;
 			case 'M':	/* Monochrome image */
 				Ctrl->M.active = true;
@@ -543,8 +548,8 @@ int GMT_mbgrdtiff_parse (struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, stru
 				Ctrl->N.active = true;
 				break;
 			case 'O':	/* Output file */
-                                Ctrl->O.active = true;
-                                Ctrl->O.file = strdup (opt->arg);
+				Ctrl->O.active = true;
+				Ctrl->O.file = strdup (opt->arg);
 				break;
 			case 'Q':	/* PS3 colormasking */
 				Ctrl->Q.active = true;
@@ -571,6 +576,8 @@ int GMT_mbgrdtiff_parse (struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, stru
 					"Syntax error -G option: Only one of fore/back-ground can be transparent for 1-bit images\n");
 	n_errors += GMT_check_condition (GMT, Ctrl->M.active && Ctrl->Q.active,
 					"Syntax error -Q option:  Cannot use -M when doing colormasking\n");
+	n_errors += GMT_check_condition (GMT, !Ctrl->O.active || !Ctrl->O.file,
+					"Syntax error -O option: Must specify the output file name.\n");
 
 	return (n_errors ? GMT_PARSE_ERROR : GMT_OK);
 }

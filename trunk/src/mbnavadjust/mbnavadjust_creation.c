@@ -98,8 +98,9 @@ extern void do_modelplot_input(Widget, XtPointer, XtPointer);
 extern void do_modelplot_expose(Widget, XtPointer, XtPointer);
 extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
 extern void do_modelplot_dismiss(Widget, XtPointer, XtPointer);
-extern void do_modelplot_sequential(Widget, XtPointer, XtPointer);
-extern void do_modelplot_block(Widget, XtPointer, XtPointer);
+extern void do_modelplot_timeseries(Widget, XtPointer, XtPointer);
+extern void do_modelplot_perturbation(Widget, XtPointer, XtPointer);
+extern void do_modelplot_tieoffsets(Widget, XtPointer, XtPointer);
 extern void do_scale_controls_zoffset(Widget, XtPointer, XtPointer);
 extern void do_scale_controls_smoothing(Widget, XtPointer, XtPointer);
 extern void do_scale_controls_sectionlength(Widget, XtPointer, XtPointer);
@@ -4098,7 +4099,7 @@ CreatemainWindow(Widget parent)
         tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"Clear Block",
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 360); ac++;
+        XtSetArg(args[ac], XmNx, 480); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
@@ -4123,7 +4124,7 @@ CreatemainWindow(Widget parent)
     XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
     XtSetArg(args[ac], XmNx, 80); ac++;
     XtSetArg(args[ac], XmNy, 10); ac++;
-    XtSetArg(args[ac], XmNwidth, 185); ac++;
+    XtSetArg(args[ac], XmNwidth, 270); ac++;
     XtSetArg(args[ac], XmNheight, 32); ac++;
     XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
     radioBox = XmCreateRadioBox(bulletinBoard_modelplot,
@@ -4136,7 +4137,7 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
 
-        tmp0 = (XmString) BX_CONVERT(radioBox, (char *)"Sequential",
+        tmp0 = (XmString) BX_CONVERT(radioBox, (char *)"Time Series",
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNwidth, 88); ac++;
@@ -4144,11 +4145,11 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNfontList,
             BX_CONVERT(radioBox, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_modelplot_sequential = XmCreateToggleButton(radioBox,
-            (char *)"toggleButton_modelplot_sequential",
+        toggleButton_modelplot_timeseries = XmCreateToggleButton(radioBox,
+            (char *)"toggleButton_modelplot_timeseries",
             args,
             ac);
-        XtManageChild(toggleButton_modelplot_sequential);
+        XtManageChild(toggleButton_modelplot_timeseries);
 
         /**
          * Free any memory allocated for resources.
@@ -4156,13 +4157,13 @@ CreatemainWindow(Widget parent)
         XmStringFree((XmString)tmp0);
     }
 
-    XtAddCallback(toggleButton_modelplot_sequential, XmNvalueChangedCallback, do_modelplot_sequential, (XtPointer)0);
+    XtAddCallback(toggleButton_modelplot_timeseries, XmNvalueChangedCallback, do_modelplot_timeseries, (XtPointer)0);
 
     ac = 0;
     {
         XmString    tmp0;
 
-        tmp0 = (XmString) BX_CONVERT(radioBox, (char *)"Block",
+        tmp0 = (XmString) BX_CONVERT(radioBox, (char *)"Perturbation",
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNwidth, 88); ac++;
@@ -4170,11 +4171,11 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNfontList,
             BX_CONVERT(radioBox, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_modelplot_block = XmCreateToggleButton(radioBox,
-            (char *)"toggleButton_modelplot_block",
+        toggleButton_modelplot_perturbation = XmCreateToggleButton(radioBox,
+            (char *)"toggleButton_modelplot_perturbation",
             args,
             ac);
-        XtManageChild(toggleButton_modelplot_block);
+        XtManageChild(toggleButton_modelplot_perturbation);
 
         /**
          * Free any memory allocated for resources.
@@ -4182,7 +4183,33 @@ CreatemainWindow(Widget parent)
         XmStringFree((XmString)tmp0);
     }
 
-    XtAddCallback(toggleButton_modelplot_block, XmNvalueChangedCallback, do_modelplot_block, (XtPointer)0);
+    XtAddCallback(toggleButton_modelplot_perturbation, XmNvalueChangedCallback, do_modelplot_perturbation, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(radioBox, (char *)"Tie Offsets",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 88); ac++;
+        XtSetArg(args[ac], XmNheight, 26); ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(radioBox, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_modelplot_tieoffsets = XmCreateToggleButton(radioBox,
+            (char *)"toggleButton_modelplot_tieoffsets",
+            args,
+            ac);
+        XtManageChild(toggleButton_modelplot_tieoffsets);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(toggleButton_modelplot_tieoffsets, XmNvalueChangedCallback, do_modelplot_tieoffsets, (XtPointer)0);
 
     ac = 0;
     {
@@ -4191,7 +4218,7 @@ CreatemainWindow(Widget parent)
         tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"Full Size",
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 270); ac++;
+        XtSetArg(args[ac], XmNx, 390); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
@@ -4221,7 +4248,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 450); ac++;
+        XtSetArg(args[ac], XmNx, 570); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
         XtSetArg(args[ac], XmNwidth, 550); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;

@@ -173,7 +173,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath,
                         project->zoffsetwidth = zoffsetwidth;
                         project->inversion = MBNA_INVERSION_NONE;
                         project->modelplot = MB_NO;
-                        project->modelplot_style = MBNA_MODELPLOT_SEQUENTIAL;
+                        project->modelplot_style = MBNA_MODELPLOT_TIMESERIES;
                         project->logfp = NULL;
                         
                         project->inversion = MBNA_INVERSION_NONE;
@@ -246,7 +246,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
 	char	obuffer[BUFFER_MAX];
 	char	command[MB_PATH_MAXLINE];
 	char	*result;
-	int	versionmajor, versionminor;
+	int	versionmajor, versionminor, version_id;
 	double	dummy;
 	int	nscan, idummy, jdummy;
 	int	s1id, s2id;
@@ -362,8 +362,9 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
                                                 || strcmp(label,"FILE_VERSION") != 0))
                                         status = MB_FAILURE;
                 if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+				version_id = 100 * versionmajor + versionminor;
                 
-                                if (versionmajor > 3 || (versionmajor == 3 && versionminor > 2))
+                                if (version_id >= 302)
                                         {
                                         if (status == MB_SUCCESS
                                                 && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
@@ -408,6 +409,20 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
                                         status = MB_FAILURE;
                 if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
                 
+				if (version_id >= 306)
+					{
+					if (status == MB_SUCCESS
+						&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+							|| (nscan = sscanf(buffer,"%s %d",label,&project->num_blocks)) != 2
+							|| strcmp(label,"NUMBLOCKS") != 0))
+						status = MB_FAILURE;
+					}
+				else
+					{
+					project->num_blocks = 0;
+					}
+		if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+
                                 if (status == MB_SUCCESS
                                         && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
                                                 || (nscan = sscanf(buffer,"%s %d",label,&project->num_crossings)) != 2
@@ -423,7 +438,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
                 if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
                 
                                 if (status == MB_SUCCESS
-                                        && ((100*versionmajor + versionminor) > 100)
+                                        && version_id >= 101
                                         && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
                                                 || (nscan = sscanf(buffer,"%s %d",label,&project->section_soundings)) != 2
                                                 || strcmp(label,"SECTIONSOUNDINGS") != 0))
@@ -467,7 +482,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
                 
                                 if (status == MB_SUCCESS)
                                         {
-                                        if (versionmajor > 3 || (versionmajor == 3 && versionminor > 0))
+                                        if (version_id >= 301)
                                                 {
                                                 if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
                                                         || (nscan = sscanf(buffer,"%s %lf",label,&project->smoothing)) != 2
@@ -475,7 +490,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
                                                         status = MB_FAILURE;
                                                 project->precision = SIGMA_MINIMUM;
                                                 }
-                                        else if (versionmajor > 1 || (versionmajor == 1 && versionminor > 2))
+                                        else if (version_id >= 103)
                                                 {
                                                 if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
                                                         || (nscan = sscanf(buffer,"%s %lf",label,&project->precision)) != 2
@@ -493,7 +508,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
                 
                                 if (status == MB_SUCCESS)
                                         {
-                                        if ((versionmajor > 1 || (versionmajor == 1 && versionminor > 4))
+                                        if (version_id >= 105
                                                 && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
                                                         || (nscan = sscanf(buffer,"%s %lf",label,&project->zoffsetwidth)) != 2
                                                         || strcmp(label,"ZOFFSETWIDTH") != 0))
@@ -549,21 +564,50 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
                                         file->num_snavs = 0;
                                         file->num_pings = 0;
                                         file->num_beams = 0;
-                                        if (status == MB_SUCCESS
-                                                && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                        || (nscan = sscanf(buffer,"FILE %d %d %d %d %lf %lf %lf %lf %d %d %s",
-                                                        &idummy,
-                                                        &(file->status),
-                                                        &(file->id),
-                                                        &(file->format),
-                                                        &(file->heading_bias_import),
-                                                        &(file->roll_bias_import),
-                                                        &(file->heading_bias),
-                                                        &(file->roll_bias),
-                                                        &(file->num_sections),
-                                                        &(file->output_id),
-                                                        file->file)) != 11))
-                                                status = MB_FAILURE;
+					if (version_id >= 306)
+						{
+						if (status == MB_SUCCESS
+							&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+								|| (nscan = sscanf(buffer,"FILE %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %s",
+								&idummy,
+								&(file->status),
+								&(file->id),
+								&(file->format),
+								&(file->block),
+								&(file->block_offset_x),
+								&(file->block_offset_y),
+								&(file->block_offset_z),
+								&(file->heading_bias_import),
+								&(file->roll_bias_import),
+								&(file->heading_bias),
+								&(file->roll_bias),
+								&(file->num_sections),
+								&(file->output_id),
+								file->file)) != 15))
+							status = MB_FAILURE;
+						}
+					else
+						{
+						if (status == MB_SUCCESS
+							&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+								|| (nscan = sscanf(buffer,"FILE %d %d %d %d %lf %lf %lf %lf %d %d %s",
+								&idummy,
+								&(file->status),
+								&(file->id),
+								&(file->format),
+								&(file->heading_bias_import),
+								&(file->roll_bias_import),
+								&(file->heading_bias),
+								&(file->roll_bias),
+								&(file->num_sections),
+								&(file->output_id),
+								file->file)) != 11))
+							status = MB_FAILURE;
+						file->block = 0;
+						file->block_offset_x = 0.0;
+						file->block_offset_y = 0.0;
+						file->block_offset_z = 0.0;
+						}
                 
                                         /* set file->path as absolute path
                                             - file->file may be a relative path */
@@ -680,7 +724,7 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
                                                         }
                 
                                                     /* reverse offset values if older values */
-                                                    if (versionmajor < 3)
+                                                    if (version_id < 300)
                                                         {
                                                         section->snav_lon_offset[k] *= -1.0;
                                                         section->snav_lat_offset[k] *= -1.0;
@@ -689,7 +733,7 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
                                                     }
 						
 						/* global fixed frame tie, whether defined or not */
-						if (100*versionmajor + versionminor >= 305)
+						if (version_id >= 305)
 							{
 							if (status == MB_SUCCESS)
 								result = fgets(buffer,BUFFER_MAX,hfp);
@@ -708,7 +752,7 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
 							section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
 							section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
 							}
-						else if (100*versionmajor + versionminor == 304)
+						else if (version_id == 304)
 							{
 							if (status == MB_SUCCESS)
 								result = fgets(buffer,BUFFER_MAX,hfp);
@@ -746,19 +790,22 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
 						}
 					}
                 
-                                /* count the number of blocks */
-                                project->num_blocks = 0;
-                                for (i=0;i<project->num_files;i++)
+				/* count the number of blocks */
+				if (version_id < 306)
 					{
-					file = &project->files[i];
-					if (i==0 || file->sections[0].continuity == MB_NO)
+					project->num_blocks = 0;
+					for (i=0;i<project->num_files;i++)
 						{
-						project->num_blocks++;
+						file = &project->files[i];
+						if (i==0 || file->sections[0].continuity == MB_NO)
+							{
+							project->num_blocks++;
+							}
+						file->block = project->num_blocks - 1;
+						file->block_offset_x = 0.0;
+						file->block_offset_y = 0.0;
+						file->block_offset_z = 0.0;
 						}
-					file->block = project->num_blocks - 1;
-					file->block_offset_x = 0.0;
-					file->block_offset_y = 0.0;
-					file->block_offset_z = 0.0;
 					}
 		    
                                 /* read crossings */
@@ -772,7 +819,7 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
                                         /* read each crossing */
                                         crossing = &project->crossings[i];
                                         if (status == MB_SUCCESS
-                                                && ((100*versionmajor + versionminor) >= 106))
+                                                && version_id >= 106)
                                                 {
                                                 if (status == MB_SUCCESS
                                                         && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
@@ -792,7 +839,7 @@ fprintf(stderr, "read failed on crossing: %s\n", buffer);
                                                                 }
                                                 }
                                         else if (status == MB_SUCCESS
-                                                && ((100*versionmajor + versionminor) >= 102))
+                                                && version_id >= 102)
                                                 {
                                                 crossing->overlap = 0;
                                                 if (status == MB_SUCCESS
@@ -843,7 +890,7 @@ fprintf(stderr, "read failed on old format crossing: %s\n", buffer);
                 
                                         /* reorder crossing to be early file first older file second if
                                                 file version prior to 3.00 */
-                                        if (versionmajor < 3)
+                                        if (version_id < 300)
                                                 {
                                                 idummy = crossing->file_id_1;
                                                 jdummy = crossing->section_1;
@@ -859,7 +906,7 @@ fprintf(stderr, "read failed on old format crossing: %s\n", buffer);
                                                 {
                                                 /* read each tie */
                                                 tie = &crossing->ties[j];
-                                                if (status == MB_SUCCESS && ((100*versionmajor + versionminor) > 301))
+                                                if (status == MB_SUCCESS && version_id >= 302)
                                                         {
                                                         if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
                                                                 || (nscan = sscanf(buffer,"TIE %d %d %d %lf %d %lf %lf %lf %lf %d %lf %lf %lf",
@@ -881,7 +928,7 @@ fprintf(stderr, "read failed on old format crossing: %s\n", buffer);
 fprintf(stderr, "read failed on tie: %s\n", buffer);
                                                                 }
                                                         }
-                                                else if (status == MB_SUCCESS && ((100*versionmajor + versionminor) > 103))
+                                                else if (status == MB_SUCCESS && version_id >= 104)
                                                         {
                                                         if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
                                                                 || (nscan = sscanf(buffer,"TIE %d %d %lf %d %lf %lf %lf %lf %d %lf %lf %lf",
@@ -928,7 +975,7 @@ fprintf(stderr, "read failed on tie: %s\n", buffer);
                 
                                                 /* reorder crossing to be early file first older file second if
                                                         file version prior to 3.00 */
-                                                if (versionmajor < 3)
+                                                if (version_id < 300)
                                                         {
                                                         idummy = tie->snav_1;
                                                         dummy = tie->snav_1_time_d;
@@ -945,7 +992,7 @@ fprintf(stderr, "read failed on tie: %s\n", buffer);
                                                         }
                 
                                                 /* for version 2.0 or later read covariance */
-                                                if (status == MB_SUCCESS && ((100*versionmajor + versionminor) >= 200))
+                                                if (status == MB_SUCCESS && version_id >= 200)
                                                         {
                                                         if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
                                                                 || (nscan = sscanf(buffer,"COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
@@ -1308,13 +1355,14 @@ fprintf(stderr,"Writing project %s\n", project->name);
 		fprintf(hfp,"##MBNAVADJUST PROJECT\n");
 		fprintf(hfp,"MB-SYSTEM_VERSION\t%s\n",MB_VERSION);
 		fprintf(hfp,"PROGRAM_VERSION\t%s\n",version_id);
-		fprintf(hfp,"FILE_VERSION\t3.05\n");
+		fprintf(hfp,"FILE_VERSION\t3.06\n");
 		fprintf(hfp,"ORIGIN\tGenerated by user <%s> on cpu <%s> at <%s>\n", user,host,date);
 		fprintf(hfp,"NAME\t%s\n",project->name);
 		fprintf(hfp,"PATH\t%s\n",project->path);
 		fprintf(hfp,"HOME\t%s\n",project->home);
 		fprintf(hfp,"DATADIR\t%s\n",project->datadir);
 		fprintf(hfp,"NUMFILES\t%d\n",project->num_files);
+		fprintf(hfp,"NUMBLOCKS\t%d\n",project->num_blocks);
 		fprintf(hfp,"NUMCROSSINGS\t%d\n",project->num_crossings);
 		fprintf(hfp,"SECTIONLENGTH\t%f\n",project->section_length);
 		fprintf(hfp,"SECTIONSOUNDINGS\t%d\n",project->section_soundings);
@@ -1329,11 +1377,15 @@ fprintf(stderr,"Writing project %s\n", project->name);
 			{
 			/* write out basic file info */
 			file = &project->files[i];
-			fprintf(hfp,"FILE %4d %4d %4d %4d %4.1f %4.1f %4.1f %4.1f %4d %4d %s\n",
+			fprintf(hfp,"FILE %4d %4d %4d %4d %4d %13.8f %13.8f %13.8f %4.1f %4.1f %4.1f %4.1f %4d %4d %s\n",
 				i,
 				file->status,
 				file->id,
 				file->format,
+				file->block,
+				file->block_offset_x,
+				file->block_offset_y,
+				file->block_offset_z,
 				file->heading_bias_import,
 				file->roll_bias_import,
 				file->heading_bias,

@@ -1,4 +1,4 @@
-.TH mbclean 1 "1 December 2014" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean 1 "14 April 2015" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP \- Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -231,13 +231,7 @@ are handled.
  			The flagged beam is the one furthest from the local
  			median depth.
  	\fImode\fP = 2:	Flags both beams associated with each outlier slope.
- 	\fImode\fP = 3:	Zeros one beam associated with each outlier slope.
- 			The zeroed beam is the one furthest from the local
- 			median depth.
- 	\fImode\fP = 4:	Zeros both beams associated with each outlier slope.
-If the data format of the input file
-prohibits storage of negative depths, an error message will be output
-and the program will exit. Default: \fImode\fP = 1.
+Default: \fImode\fP = 1.
 .TP
 .B \-P
 \fIspeed_low/speed_high\fP
@@ -382,7 +376,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	1665 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	Processing 0002_20020425_011607.mb57
  	259 bathymetry data records processed
@@ -396,7 +389,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	242 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	Processing 0003_20020425_022926.mb57
  	65 bathymetry data records processed
@@ -410,7 +402,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	506 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	Processing 0004_20020425_024336.mb57
  	410 bathymetry data records processed
@@ -424,7 +415,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	148 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	Processing 0005_20020425_034057.mb57
  	252 bathymetry data records processed
@@ -438,7 +428,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	100 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	Processing 0006_20020425_045013.mb57
  	562 bathymetry data records processed
@@ -452,7 +441,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	41 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	MBclean Processing Totals:
  	-------------------------
@@ -471,7 +459,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 total excessive spikes identified
  	2702 total beams flagged
  	0 total beams unflagged
- 	0 total beams zeroed
 
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbedit\fP(1),
