@@ -68,7 +68,7 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error)
 	/* open the file for reading */
 	if (mb_io_ptr->filemode == MB_FILEMODE_READ)
 		{
-		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "r")) == NULL)
+		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "rb")) == NULL)
 			 {
 			 *error = MB_ERROR_OPEN_FAIL;
 			 status = MB_FAILURE;

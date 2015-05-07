@@ -4614,21 +4614,21 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						{
 						for (i=0;i<bathymetry->number_beams;i++)
 							{
-/* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
+//fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]);
 							bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
 							/* phase or amplitude picks */
 							if (bathymetry->quality[i] & 8)
 								{
-/* fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]); */
+//fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);
 								bathymetry->quality[i] += 32;
-/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
+//fprintf(stderr," %d\n",bathymetry->quality[i]);
 								}
 							else if (bathymetry->quality[i] & 4)
 								{
-/* fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]); */
+//fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);
 								bathymetry->quality[i] += 16;
-/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
+//fprintf(stderr," %d\n",bathymetry->quality[i]);
 								}
 
 							/* flagged by sonar */
@@ -4643,7 +4643,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 								{
 								bathymetry->quality[i] += 64;
 								}
-/* fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]); */
+//fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]);
 							}
 						}
 
@@ -5037,7 +5037,9 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 					/* initialize all of the beams */
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
-						bathymetry->quality[i] = 0;
+						if (istore->read_v2rawdetection == MB_YES
+						    || (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES))
+							bathymetry->quality[i] = 0;
 						bathymetry->depth[i] = 0.0;
 						bathymetry->acrosstrack[i] = 0.0;
 						bathymetry->alongtrack[i] = 0.0;

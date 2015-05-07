@@ -19,27 +19,6 @@
  * Author:	D. W. Caress
  * Date:	May 20, 1999
  *
- * $Log: mbf_mbpronav.h,v $
- * Revision 5.3  2006/10/05 18:58:28  caress
- * Changes for 5.1.0beta4
- *
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.1  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  1999/10/21  22:39:24  caress
- * Added MBPRONAV format.
- *
- *
- *
  */
 /*
  * Notes on the MBF_MBPRONAV data format:
@@ -67,7 +46,7 @@ struct mbf_mbpronav_struct
 	/* navigation */
 	double	longitude;
 	double	latitude;
-        double  heading;
+	double  heading;
 	double  speed;
 	double  sonardepth;
 	double  roll;

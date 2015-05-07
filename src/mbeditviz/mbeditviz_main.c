@@ -78,6 +78,11 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 #include <stdio.h>
 #include <stdlib.h>
 
+/* Avoid conflict due to BOOL redefinitions (Xm vs Win headers) */
+#ifdef WIN32
+#	undef BOOL
+#endif
+
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_define.h"

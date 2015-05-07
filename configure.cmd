@@ -182,7 +182,7 @@ autoreconf --force --install --warnings=all
 # Reset the autotools version to 2.65 to accomodate some Linux distributions
 sed -i.bak s/2\.69/2\.65/ configure.ac
 
-# When you run ./configure, a number of configure options are saved  to a
+# When you run ./configure, a number of configure options are saved to a
 # header file:
 #     ./src/mbio/mb_config.h
 # This file has a template:
@@ -190,11 +190,6 @@ sed -i.bak s/2\.69/2\.65/ configure.ac
 # This file is conditionally included by:
 #     ./src/mbio/mb_define.h
 # which is in turn included by essentially every MB-System C source file.
-# The condition under which mb_config.h is used is simply the use of the
-# configure script to generate the makefiles. If one uses the alternate
-# "install_makefiles" build system, then an alternate header file named
-#     ./src/mbio/mb_config2.h
-# is used instead.
 #
 #------------------------------------------------------------------------------
 #

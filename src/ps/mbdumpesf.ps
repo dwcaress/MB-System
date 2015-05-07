@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
 %%Creator: groff version 1.19.2
-%%CreationDate: Tue Apr 14 22:59:49 2015
+%%CreationDate: Wed May  6 17:50:51 2015
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
@@ -231,75 +231,112 @@ BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 140.95(mbdumpesf\(1\) MB-System)72 48 R 140.95
 (5.0 mbdumpesf\(1\))2.5 F/F1 10.95/Times-Bold@0 SF -.219(NA)72 84 S(ME)
-.219 E/F2 10/Times-Bold@0 SF(mbmask)108 96 Q F0(,)A F2(mbdumpesf)2.5 E
-F0 2.5<ad4f>2.5 G(utput te)-2.5 E(xt v)-.15 E
-(ersion of beam edits from a binary edit sa)-.15 E .3 -.15(ve \214)-.2 H
-(le.).15 E F1(VERSION)72 124.8 Q F0 -1.11(Ve)108 136.8 S(rsion 5.0)1.11
-E F1(SYNOPSIS)72 165.6 Q F2(mbdumpesf \255I)108 177.6 Q F0(\214le [)A F2
-<ad5620ad48>A F0(])A F1(DESCRIPTION)72 206.4 Q F0(Sw)108 218.4 Q .821
-(ath bath)-.1 F .821
+.219 E/F2 10/Times-Bold@0 SF(mbdumpesf)108 96 Q F0 2.776<ad4f>2.776 G
+.276(utput beam edits from a binary edit sa)-2.776 F .576 -.15(ve \214)
+-.2 H .276(le, either in the binary form or as an ASCII te).15 F(xt)-.15
+E(dump.)108 108 Q F1(VERSION)72 136.8 Q F0 -1.11(Ve)108 148.8 S
+(rsion 5.0)1.11 E F1(SYNOPSIS)72 177.6 Q F2 .888
+(mbdumpesf \255\255input=)108 189.6 R/F3 10/Times-Italic@0 SF(\214le)A
+F0([)3.388 E F2(\255\255output=)A F3(\214le)A F2(\255\255ignor)3.388 E
+.888(e-un\215ag \255\255ignor)-.18 F .889(e-\215ag \255\255ignor)-.18 F
+.889(e-\214lter \255\255ignor)-.18 F(e-zer)-.18 E(o)-.18 E<adad76>108
+201.6 Q(erbose \255\255help)-.1 E F0(])A F1(DESCRIPTION)72 230.4 Q F0
+(Sw)108 242.4 Q .821(ath bath)-.1 F .821
 (ymetry data is typically edited either with interacti)-.05 F 1.121 -.15
 (ve t)-.25 H .821(ools such as).15 F F2(mbedit)3.32 E F0 .82
-(or automatic \214lters)3.32 F .83(such as)108 230.4 R F2(mbclean)3.33 E
+(or automatic \214lters)3.32 F .83(such as)108 254.4 R F2(mbclean)3.33 E
 F0 5.83(.I)C(n)-5.83 E F2(MB-System)3.33 E F0 3.33(,t)C .831
 (he beam \215ags are stored in binary "edit sa)-3.33 F 1.131 -.15
 (ve \214)-.2 H .831(les" \(\214le suf).15 F .831(\214x ".esf"\).)-.25 F
-(The program)108 242.4 Q F2(mbdumpesf)2.5 E F0
-(reads esf \214les and outputs each of the edit e)2.5 E -.15(ve)-.25 G
-(nts as a te).15 E(xt line to stdout.)-.15 E F1 -.548(AU)72 271.2 S
-(THORSHIP).548 E F0(Da)108 283.2 Q(vid W)-.2 E 2.5(.C)-.92 G
-(aress \(caress@mbari.or)-2.5 E(g\))-.18 E(Montere)113 295.2 Q 2.5(yB)
--.15 G(ay Aquarium Research Institute)-2.5 E
-(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 307.2 Q
-(Lamont-Doherty Earth Observ)113 319.2 Q(atory)-.25 E F1
-(MBDUMPESF OPTIONS)72 348 Q F2<ad48>108 360 Q F0 .391(This "help" \215a\
-g causes the program to print out a description of its operation and th\
-en e)22.52 F .39(xit imme-)-.15 F(diately)144 372 Q(.)-.65 E F2<ad49>108
-388.8 Q/F3 10/Times-Italic@0 SF(\214le)26.41 E F0("Edit sa)144 400.8 Q
-.3 -.15(ve \214)-.2 H(le" from which the edit e).15 E -.15(ve)-.25 G
-(nts will be read.).15 E F2<ad56>108 417.6 Q F0(Normally)23.08 E(,)-.65
-E F2(mbdumpesf)3.147 E F0 .648(outputs one line for each edit e)3.147 F
--.15(ve)-.25 G .648(nt in the input esf \214le.).15 F .648(If the)5.648
-F F2<ad56>3.148 E F0 .648(\215ag is)3.148 F(gi)144 429.6 Q -.15(ve)-.25
-G .55(n, then).15 F F2(mbdumpesf)3.05 E F0 .55
-(also outputs the total number of each type of edit e)3.05 F -.15(ve)
--.25 G .55(nt at the end of the).15 F(listing.)144 441.6 Q F1(EXAMPLES)
-72 470.4 Q F0 5.142(Suppose one has edited a sw)108 482.4 R 5.142
-(ath \214le 20080422_222636.mb88, resulting in an esf \214le named)-.1 F
-(20080422_222636.mb88.esf. T)108 494.4 Q 2.5(od)-.8 G(ump the edit e)
--2.5 E -.15(ve)-.25 G(nts as a te).15 E(xt stream, use)-.15 E F2
-(mbdumpesf)2.5 E F0(:)A(mbdumpesf \255I 20080422_222636.mb88.esf)144
-506.4 Q(The output will look something lik)108 518.4 Q(e:)-.1 E(EDITS R\
-EAD: i:0 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:21 acti\
-on:1)108 542.4 Q(EDITS READ: i:1 time: 947562291.799000 2008/04/22 22:2\
-6:36.799000 beam:22 action:1)108 554.4 Q(EDITS READ: i:2 time: 94756229\
-1.799000 2008/04/22 22:26:36.799000 beam:23 action:1)108 566.4 Q(EDITS \
-READ: i:3 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:24 act\
-ion:1)108 578.4 Q(EDITS READ: i:4 time: 947562291.799000 2008/04/22 22:\
-26:36.799000 beam:25 action:1)108 590.4 Q(EDITS READ: i:5 time: 9475622\
-91.799000 2008/04/22 22:26:36.799000 beam:26 action:1)108 602.4 Q(EDITS\
- READ: i:6 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:27 ac\
-tion:1)108 614.4 Q(EDITS READ: i:7 time: 947562291.799000 2008/04/22 22\
-:26:36.799000 beam:28 action:1)108 626.4 Q(Here the lar)108 650.4 Q
-(ge time v)-.18 E
-(alue is epoch seconds \(seconds since 1/1/1970\), and the edit e)-.25 E
--.15(ve)-.25 G(nt action v).15 E(alues are:)-.25 E
-(action=1: \215ag manually)144 662.4 Q(action=2: un\215ag)144 674.4 Q
-(action=3: zero \255 mak)144 686.4 Q 2.5(eb)-.1 G(eam null)-2.5 E
-(action=4: \215ag by auto\214lter)144 698.4 Q(MB-System 5.0)72 768 Q 2.5
-(3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0 Cg EP
+1.133(The program)108 266.4 R F2(mbdumpesf)3.633 E F0 1.132(reads and o\
+utputs esf \214les. If no output \214le is speci\214ed, then each of th\
+e edit)3.633 F -2.15 -.25(ev e)108 278.4 T .12
+(nts is written in ASCII te).25 F .12(xt as a single line to stdout. If\
+ an output \214le is speci\214ed with the)-.15 F F2(\255\255output=)2.62
+E F3(\214le)A F0(option, then the edit sa)108 290.4 Q .3 -.15(ve d)-.2 H
+(ata will be written to that \214le in binary form.).15 E
+(The four types of edit e)108 314.4 Q -.15(ve)-.25 G
+(nts supported by esf \214les are:).15 E(action=1: \215ag manually)144
+326.4 Q(action=2: un\215ag)144 338.4 Q(action=3: zero \255 mak)144 350.4
+Q 2.5(eb)-.1 G(eam null)-2.5 E(action=4: \215ag by auto\214lter)144
+362.4 Q .988(This program can be forced to ignore \(e)108 374.4 R .987
+(xclude from the output\) an)-.15 F 3.487(yo)-.15 G 3.487(ft)-3.487 G
+.987(he e)-3.487 F -.15(ve)-.25 G .987(nt types using the options).15 F
+F2(\255\255ignor)108 386.4 Q(e-un\215ag)-.18 E F0(,)A F2(\255\255ignor)
+2.5 E(e-\215ag)-.18 E F0(,)A F2(\255\255ignor)2.5 E(e-\214lter)-.18 E F0
+2.5(,a)C(nd)-2.5 E F2(\255\255ignor)2.5 E(e-zer)-.18 E(o)-.18 E F0(.)A
+F1 -.548(AU)72 415.2 S(THORSHIP).548 E F0(Da)108 427.2 Q(vid W)-.2 E 2.5
+(.C)-.92 G(aress \(caress@mbari.or)-2.5 E(g\))-.18 E(Montere)113 439.2 Q
+2.5(yB)-.15 G(ay Aquarium Research Institute)-2.5 E
+(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 451.2 Q
+(Lamont-Doherty Earth Observ)113 463.2 Q(atory)-.25 E F1
+(MBDUMPESF OPTIONS)72 492 Q F2(\255\255input=)108 504 Q F3(\214le)A F0
+("Edit sa)144 516 Q .3 -.15(ve \214)-.2 H
+(le" \(esf \214le\) from which the edit e).15 E -.15(ve)-.25 G
+(nts will be read.).15 E F2(\255\255output=)108 532.8 Q F3(\214le)A F0
+.381(Speci\214es output esf \214le. If this option is not used, then th\
+e edit e)144 544.8 R -.15(ve)-.25 G .381
+(nt stream will be output to std-).15 F(out as a sequence of ASCII te)
+144 556.8 Q(xt lines.)-.15 E F2(\255\255ignor)108 573.6 Q(e-un\215ag)
+-.18 E F0(Causes)144 585.6 Q F2(mbdumpesf)2.5 E F0(to not output an)2.5
+E 2.5(yu)-.15 G(n\215ag edit e)-2.5 E -.15(ve)-.25 G
+(nts read from the input.).15 E F2(\255\255ignor)108 602.4 Q(e-\215ag)
+-.18 E F0(Causes)144 614.4 Q F2(mbdumpesf)2.5 E F0(to not output an)2.5
+E 2.5<798d>-.15 G(ag edit e)-2.5 E -.15(ve)-.25 G
+(nts read from the input.).15 E F2(\255\255ignor)108 631.2 Q(e-\214lter)
+-.18 E F0(Causes)144 643.2 Q F2(mbdumpesf)2.5 E F0(to not output an)2.5
+E 2.5<798c>-.15 G(lter edit e)-2.5 E -.15(ve)-.25 G
+(nts read from the input.).15 E F2(\255\255ignor)108 660 Q(e-zer)-.18 E
+(o)-.18 E F0(Causes)144 672 Q F2(mbdumpesf)2.5 E F0(to not output an)2.5
+E 2.5(yz)-.15 G(ero edit e)-2.5 E -.15(ve)-.25 G
+(nts read from the input.).15 E F2<adad76>108 688.8 Q(erbose)-.1 E F0
+(Normally)144 700.8 Q(,)-.65 E F2(mbdumpesf)3.064 E F0 .564
+(outputs one line for each edit e)3.064 F -.15(ve)-.25 G .564
+(nt in the input esf \214le.).15 F .563(If the \255\255v)5.563 F(erbose)
+-.15 E .487(\215ag is gi)144 712.8 R -.15(ve)-.25 G .487(n, then).15 F
+F2(mbdumpesf)2.987 E F0 .488
+(also outputs the total number of each type of edit e)2.988 F -.15(ve)
+-.25 G .488(nt at the end).15 F(of the listing.)144 724.8 Q
+(MB-System 5.0)72 768 Q 2.5(3M)146.495 G(ay 2015)-2.5 E(1)204.835 E 0 Cg
+EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 140.95(mbdumpesf\(1\) MB-System)72 48 R 140.95
-(5.0 mbdumpesf\(1\))2.5 F/F1 10.95/Times-Bold@0 SF(SEE ALSO)72 84 Q/F2
-10/Times-Bold@0 SF(mbsystem)108 96 Q F0(\(1\),)A F2(mbedit)2.5 E F0
-(\(1\),)A F2(mbeditviz)2.5 E F0(\(1\), fBmbclean)A F2(\(1\), mb)A
-(unclean\(1\))-.2 E F1 -.11(BU)72 124.8 S(GS).11 E F0 -.8(To)108 136.8 S
-2.5(os).8 G(imple to ha)-2.5 E .3 -.15(ve a)-.2 H .3 -.15(ny i).15 H
-(nteresting problems.).15 E(MB-System 5.0)72 768 Q 2.5(3J)146.495 G
-(une 2013)-2.5 E(2)204.835 E 0 Cg EP
+(5.0 mbdumpesf\(1\))2.5 F/F1 10/Times-Bold@0 SF(\255\255help)108 84 Q F0
+.391(This "help" \215ag causes the program to print out a description o\
+f its operation and then e)6.26 F .39(xit imme-)-.15 F(diately)144 96 Q
+(.)-.65 E/F2 10.95/Times-Bold@0 SF(EXAMPLES)72 124.8 Q F0 5.142
+(Suppose one has edited a sw)108 136.8 R 5.142
+(ath \214le 20080422_222636.mb88, resulting in an esf \214le named)-.1 F
+(20080422_222636.mb88.esf. T)108 148.8 Q 2.5(od)-.8 G(ump the edit e)
+-2.5 E -.15(ve)-.25 G(nts as a te).15 E(xt stream, use)-.15 E F1
+(mbdumpesf)2.5 E F0(:)A(mbdumpesf \255I 20080422_222636.mb88.esf)144
+160.8 Q(The output will look something lik)108 172.8 Q(e:)-.1 E(EDITS R\
+EAD: i:0 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:21 acti\
+on:1)108 196.8 Q(EDITS READ: i:1 time: 947562291.799000 2008/04/22 22:2\
+6:36.799000 beam:22 action:1)108 208.8 Q(EDITS READ: i:2 time: 94756229\
+1.799000 2008/04/22 22:26:36.799000 beam:23 action:1)108 220.8 Q(EDITS \
+READ: i:3 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:24 act\
+ion:1)108 232.8 Q(EDITS READ: i:4 time: 947562291.799000 2008/04/22 22:\
+26:36.799000 beam:25 action:1)108 244.8 Q(EDITS READ: i:5 time: 9475622\
+91.799000 2008/04/22 22:26:36.799000 beam:26 action:1)108 256.8 Q(EDITS\
+ READ: i:6 time: 947562291.799000 2008/04/22 22:26:36.799000 beam:27 ac\
+tion:1)108 268.8 Q(EDITS READ: i:7 time: 947562291.799000 2008/04/22 22\
+:26:36.799000 beam:28 action:1)108 280.8 Q(Here the lar)108 304.8 Q
+(ge time v)-.18 E
+(alue is epoch seconds \(seconds since 1/1/1970\), and the edit e)-.25 E
+-.15(ve)-.25 G(nt action v).15 E(alues are:)-.25 E
+(action=1: \215ag manually)144 316.8 Q(action=2: un\215ag)144 328.8 Q
+(action=3: zero \255 mak)144 340.8 Q 2.5(eb)-.1 G(eam null)-2.5 E
+(action=4: \215ag by auto\214lter)144 352.8 Q F2(SEE ALSO)72 381.6 Q F1
+(mbsystem)108 393.6 Q F0(\(1\),)A F1(mbedit)2.5 E F0(\(1\),)A F1
+(mbeditviz)2.5 E F0(\(1\), fBmbclean)A F1(\(1\), mb)A(unclean\(1\))-.2 E
+F2 -.11(BU)72 422.4 S(GS).11 E F0 -.8(To)108 434.4 S 2.5(os).8 G
+(imple to ha)-2.5 E .3 -.15(ve a)-.2 H .3 -.15(ny i).15 H
+(nteresting problems.).15 E(MB-System 5.0)72 768 Q 2.5(3M)146.495 G
+(ay 2015)-2.5 E(2)204.835 E 0 Cg EP
 %%Trailer
 end
 %%EOF

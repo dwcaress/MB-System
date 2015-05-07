@@ -357,7 +357,7 @@ int mb_read_init(int verbose, char *file,
 	    if (strncmp(file,stdin_string,5) == 0)
 		mb_io_ptr->mbfp = stdin;
 	    else
-		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "r")) == NULL)
+		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "rb")) == NULL)
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
@@ -367,7 +367,7 @@ int mb_read_init(int verbose, char *file,
 	    if (status == MB_SUCCESS
 		&& mb_io_ptr->numfile >= 2)
 		{
-		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r")) == NULL)
+		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "rb")) == NULL)
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
@@ -381,14 +381,14 @@ int mb_read_init(int verbose, char *file,
 		if ((fstat = stat(mb_io_ptr->file2, &file_status)) == 0
 		    && (file_status.st_mode & S_IFMT) != S_IFDIR
 		    && file_status.st_size > 0)
-			mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r");
+			mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "rb");
 		}
 
 	    /* open the third file if required */
 	    if (status == MB_SUCCESS
 		&& mb_io_ptr->numfile >= 3)
 		{
-		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r")) == NULL)
+		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "rb")) == NULL)
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
@@ -402,7 +402,7 @@ int mb_read_init(int verbose, char *file,
 		if ((fstat = stat(mb_io_ptr->file2, &file_status)) == 0
 		    && (file_status.st_mode & S_IFMT) != S_IFDIR
 		    && file_status.st_size > 0)
-			mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r");
+			mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "rb");
 		}
 
 	    /* if needed, initialize XDR stream */

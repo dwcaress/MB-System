@@ -53,6 +53,8 @@
 #define	MBNA_INVERSION_NONE		0
 #define	MBNA_INVERSION_OLD		1
 #define	MBNA_INVERSION_CURRENT		2
+#define MBNA_INVERT_ZFULL		0
+#define MBNA_INVERT_ZISOLATED		1
 #define	MBNA_FILE_POORNAV		1
 #define	MBNA_FILE_GOODNAV		2
 #define	MBNA_FILE_FIXEDNAV		3
@@ -296,6 +298,7 @@ MBNAVADJUST_EXTERNAL int	mbna_verbose;
 MBNAVADJUST_EXTERNAL int	mbna_status;
 MBNAVADJUST_EXTERNAL int	mbna_view_list;
 MBNAVADJUST_EXTERNAL int	mbna_view_mode;
+MBNAVADJUST_EXTERNAL int	mbna_invert_mode;
 MBNAVADJUST_EXTERNAL int	mbna_color_foreground;
 MBNAVADJUST_EXTERNAL int	mbna_color_background;
 MBNAVADJUST_EXTERNAL int	mbna_survey_select;

@@ -169,6 +169,19 @@
 #define OPTLK
 #endif
 
+#ifdef WIN32
+#	define R_OK 04
+#	define W_OK 02
+#	define X_OK 01
+#	define F_OK 00
+#	ifndef __WINDOWS__              /* I, Joaquim Luis, understand nothing of this mess on the ways to detect if we are on Windows */
+#		define __WINDOWS__
+#	endif
+#	ifndef _WIN32
+#		define _WIN32
+#	endif
+#endif
+
 #ifdef __cplusplus
 extern          "C"
 {
@@ -2853,6 +2866,24 @@ int gsfStat (const char *filename, long long *sz);
  * Error Conditions :
  *     GSF_FOPEN_ERROR
  *     GSF_UNRECOGNIZED_FILE
+ *
+ ********************************************************************/
+
+int gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping);
+/********************************************************************
+ *
+ * Function Name : gsfSetDefaultScaleFactor
+ *
+ * Description : This function is used to estimate and set scale
+ *               factors for a ping record
+ *
+ * Inputs :
+ *    mb_ping - a pointer to a ping record.  The scale factors
+ *              will be set in this record.
+ *
+ * Returns : This function returns 0.
+ *
+ * Error Conditions : none
  *
  ********************************************************************/
 

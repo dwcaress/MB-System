@@ -507,6 +507,8 @@ do_mbeditviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPoin
 {
 	char function_name[] = "do_mbeditviz_fileSelectionBox_openswath";
 	XmAnyCallbackStruct *acs;
+    XmString	tmp0;
+	Boolean	argok;
 	acs = (XmAnyCallbackStruct*)call_data;
 
 	/* print input debug statements */
@@ -521,8 +523,6 @@ do_mbeditviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPoin
 
 if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_fileSelectionBox_openswath\n");
-        XmString	tmp0;
-	Boolean	argok;
 
 	/* set title to open swath data */
 	ac = 0;

@@ -37,7 +37,9 @@
 /* maximum allocation size allowed (0 => no limit) */
 static unsigned long mem_maxallocsz= 0;
 
+#ifndef WIN32
 static key_t mem_key= (key_t) IPC_PRIVATE;
+#endif
 static int mem_shmflag= 0666;
 
 void
@@ -79,6 +81,7 @@ mbbs_memalloc(MemType **buf, unsigned int *bufsz, unsigned int nobj, size_t objs
 	return MEM_SUCCESS;
 }
 
+#ifndef WIN32
 int
 mbbs_memallocsh(MemType **buf, int *shmid, unsigned int *bufsz, unsigned int nobj, size_t objsz)
 {
@@ -128,3 +131,4 @@ mbbs_memallocsh(MemType **buf, int *shmid, unsigned int *bufsz, unsigned int nob
 
 	return MEM_SUCCESS;
 }
+#endif

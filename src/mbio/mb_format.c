@@ -3500,6 +3500,29 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
+	/* look for a WASSP *nwsf file format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 6)
+		i = strlen(filename) - 5;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".nwsf")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_WASSPENL;
+		found = MB_YES;
+		}
+	    }
+
 	/* finally check for parameter file */
 	sprintf(parfile, "%s.par", filename);
 	if (stat(parfile, &statbuf) == 0)
@@ -4202,6 +4225,8 @@ int mb_datalist_read2(int verbose,
 						istart = 2;
 						processedspecified = MB_YES;
 						}
+					else
+						istart = 0;
 					}
 				else
 					istart = 0;
@@ -4424,6 +4449,20 @@ int mb_datalist_read2(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int cvt_to_nix_path(char *path)
+{
+	/* Replace back slashes by slashes and trim first two chars in paths like "C:/path" */
+	size_t k, len = strlen(path);
+	for (k = 0; k < len; k++)
+		if (path[k] == '\\') path[k] = '/';
+
+	if (path[1] == ':')
+		for (k = 0; k < len-2; k++)
+			path[k] = path[k+2];
+
+	return(0);
+}
+/*--------------------------------------------------------------------*/
 int mb_get_relative_path(int verbose,
 		char *path,
 		char *ipwd,
@@ -4432,8 +4471,8 @@ int mb_get_relative_path(int verbose,
 	/* local variables */
 	char	*function_name = "mb_get_relative_path";
 	int	status = MB_SUCCESS;
-	char	relativepath[MB_PATH_MAXLINE];
-	char	pwd[MB_PATH_MAXLINE];
+	char	relativepath[MB_PATH_MAXLINE] = {""};
+	char	pwd[MB_PATH_MAXLINE] = {""};
 	int	pathlen;
 	int	pwdlen;
 	int	same, isame, ndiff;
@@ -4456,11 +4495,25 @@ int mb_get_relative_path(int verbose,
 	pathlen = strlen(path);
 	pwdlen = strlen(ipwd);
 
+#ifdef WIN32
+	/* The approximation here is to try to make a Windows path like a unix one and expect that
+	   the same algorithm still applies. Off course, there probably many ways this can go wrong
+	   because we trim the first 2 chars in strings like C:\blabla and don't put it back. But
+	   test have shown that it was maybe not necessary.
+	*/
+	cvt_to_nix_path(path);
+	cvt_to_nix_path(ipwd);
+#endif
+
 	/* if path doesn't start with '/' not an absolute path */
 	if (pathlen > 0 && path[0] != '/' )
 	    {
 	    strncpy(relativepath,path,MB_PATH_MAXLINE);
 	    bufptr = getcwd(path, MB_PATH_MAXLINE);
+#ifdef WIN32
+		cvt_to_nix_path(path);
+		cvt_to_nix_path(bufptr);
+#endif
 	    if (bufptr == NULL || strlen(path) + pathlen + 1 >= MB_PATH_MAXLINE)
 	        {
 	        strcpy(path,relativepath);
@@ -4482,6 +4535,10 @@ int mb_get_relative_path(int verbose,
 	else
 	    {
 	    bufptr = getcwd(pwd, MB_PATH_MAXLINE);
+#ifdef WIN32
+		cvt_to_nix_path(pwd);
+		cvt_to_nix_path(bufptr);
+#endif
 	    if (bufptr == NULL || strlen(pwd) + pwdlen + 1 >= MB_PATH_MAXLINE)
 	        {
 	        strncpy(pwd,ipwd,MB_PATH_MAXLINE);

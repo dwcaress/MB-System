@@ -183,7 +183,11 @@ struct mbview_world_struct
     Window		xid;
     XVisualInfo 	*vi;
     int			glx_init;
+#ifdef WIN32
+    HGLRC		glx_context;
+#else
     GLXContext		glx_context;
+#endif
     int			message_on;
     int			plot_recursion;
     int			plot_done;
@@ -194,7 +198,11 @@ struct mbview_world_struct
     Widget		prglwmda;
     XVisualInfo 	*prvi;
     int			prglx_init;
+#ifdef WIN32
+    HGLRC		prglx_context;
+#else
     GLXContext		prglx_context;
+#endif
     float 		praspect_ratio;
 
     /* cursors */

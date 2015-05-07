@@ -60,6 +60,11 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  */
 extern void BxExitCB(Widget, XtPointer, XtPointer);
 
+/* Avoid conflict due to BOOL redefinitions (Xm vs Win headers) */
+#ifdef WIN32
+#	undef BOOL
+#endif
+
 /* Begin user code block <globals> */
 
 #include "mb_define.h"

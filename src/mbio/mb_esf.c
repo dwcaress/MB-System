@@ -19,50 +19,6 @@
  * Author:	D. W. Caress
  * Date:	April 10, 2003
  *
- * $Log: mb_esf.c,v $
- * Revision 5.13  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.12  2007/07/03 17:33:07  caress
- * A couple of debug statements added.
- *
- * Revision 5.11  2007/06/18 01:19:48  caress
- * Changes as of 17 June 2007.
- *
- * Revision 5.10  2006/01/24 19:11:17  caress
- * Version 5.0.8 beta.
- *
- * Revision 5.9  2006/01/06 18:27:19  caress
- * Working towards 5.0.8
- *
- * Revision 5.8  2005/04/07 04:24:33  caress
- * 5.0.7 Release.
- *
- * Revision 5.7  2005/03/26 22:05:18  caress
- * Release 5.0.7.
- *
- * Revision 5.6  2004/12/02 06:33:30  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.5  2004/04/27 01:46:12  caress
- * Various updates of April 26, 2004.
- *
- * Revision 5.4  2004/02/24 22:29:02  caress
- * Fixed errors in handling Simrad datagrams and edit save files on byteswapped machines (e.g. Intel or AMD processors).
- *
- * Revision 5.3  2003/07/30 16:19:20  caress
- * Changes during iSSP meeting July 2003.
- *
- * Revision 5.2  2003/07/27 21:58:57  caress
- * Added mb_mergesort function for 5.0.0
- *
- * Revision 5.1  2003/07/26 17:59:32  caress
- * Changed beamflag handling code.
- *
- * Revision 5.0  2003/04/16 16:45:50  caress
- * Initial Version.
- *
- *
  *
  */
 

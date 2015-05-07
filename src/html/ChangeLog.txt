@@ -16,7 +16,8 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-  Version 5.5.2238       March 23, 2015
+  Version 5.5.2239       May 6, 2015
+  Version 5.5.2238       April 14, 2015
   Version 5.5.2237       March 23, 2015
   Version 5.5.2234       March 5, 2015
 * Version 5.5.2233       February 23, 2015
@@ -204,7 +205,31 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2237 (April 15, 2015)
+-----> 5.5.2239 (April 14, 2015)
+
+Format 241 (MBF_WASSPENL): Now supports WASSP multibeam data conforming to
+the WASSP ICD 2.4. MB-System is storing beam flags in unused bytes in the
+existing CORBATHY data records (specifically the "empty" field in the
+CORBATHY beam data specified in ICD 2.4).
+
+Many source files: changes to precompiler directives suggested by Joaquim Luis
+in order to enable building under Windows.
+
+Mbnavadjust: Modified the inversion to separate the vertical and lateral
+covariance so that lateral offsets do not bleed into the vertical offset
+model.
+
+Mb7kpreprocess: Fixed bug that treated null soundings as good for datasets
+without detection records.
+
+Mbdumpesf: Added capability to output in the edit save file format in addition
+to ASCII text, and to ignore specified types of edit events (e.g. copy an esf
+file while removing all beam null events).
+
+Build system: Fixed bug that caused configure to fail if netCDF has a pkg-config
+installation while GMT5 is in a specified but nonstandard location.
+
+-----> 5.5.2238 (April 15, 2015)
 
 Mbnavadjust: Recast and improved the inversion. Added a "perturbation" model
 display which does not include the average offsets between the individual surveys

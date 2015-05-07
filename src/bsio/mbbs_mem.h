@@ -32,7 +32,9 @@
 #define __MBBS_MEM__
 
 #include <sys/types.h>
+#ifndef WIN32
 #include <sys/shm.h>
+#endif
 
 #define MEM_SUCCESS	(0)
 #define MEM_BADARG	(1)

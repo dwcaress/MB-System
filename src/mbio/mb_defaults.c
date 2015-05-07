@@ -586,6 +586,14 @@ int mb_uselockfiles(int verbose, int *uselockfiles)
 	/* successful no matter what happens */
 	status = MB_SUCCESS;
 
+#ifdef WIN32
+	/* It would crash because the lock file is attempted to be created with the new "wx"
+	   that VC12 does not know and we don't have any use for this anyway.
+	*/
+	*uselockfiles = 0;
+	return(status);
+#endif
+
 	/* set system default values */
 	*uselockfiles = 1;
 
