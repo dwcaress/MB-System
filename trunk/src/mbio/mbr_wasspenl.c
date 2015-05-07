@@ -80,6 +80,8 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *error);
@@ -89,11 +91,11 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-
-int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
 static char rcs_id[]="$Id$";
 
@@ -456,7 +458,7 @@ int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr->new_kind = store->kind;
 
 #ifdef MBR_WASSPENLDEBUG
-	fprintf(stderr,"Done with mbr_wasspenl_rd_data: status:%d error:%d record kind:%d\n", status, *error, store->kind);
+	fprintf(stderr,"Done with mbr_wasspenl_rd_data: status:%d error:%d record kind:%d\n\n", status, *error, store->kind);
 #endif
 
 	/* print output debug statements */
@@ -534,6 +536,8 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	char	**bufferptr;
@@ -544,8 +548,9 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	size_t	read_len;
 	int	skip;
 	unsigned int *record_size;
+	int	reset_beamflags;
 	int	done;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -569,6 +574,8 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -583,6 +590,7 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* loop over reading data until a record is ready for return */
 	done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
+	memset((void *)recordid, 0 , (size_t)12);
 	while (done == MB_NO)
 		{
 		/* read next record header into buffer */
@@ -607,7 +615,6 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    
 		/* get record id string */
 		memcpy((void *)recordid, (void *)&buffer[8], (size_t)8);
-		recordid[9] = '\0';
 #ifdef MBR_WASSPENLDEBUG
 	fprintf(stderr,"Found sync - skip:%d record:%s\n", skip,recordid);
 #endif
@@ -670,7 +677,28 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				if (status == MB_SUCCESS)
 					{
 					if (genbathy->ping_number == corbathy->ping_number)
+						{
 						done = MB_YES;
+						
+						/* reset beam flags if necessary */
+						reset_beamflags = MB_NO;
+						for (i=0;i<corbathy->num_beams;i++)
+							{
+							if (corbathy->z[i] == 0 && corbathy->empty[i] != MB_FLAG_NULL)
+								reset_beamflags = MB_YES;
+							}
+						if (reset_beamflags == MB_YES)
+						for (i=0;i<corbathy->num_beams;i++)
+							{
+							j = corbathy->beam_index[i];
+							if (corbathy->z[i] == 0)
+								corbathy->empty[i] = MB_FLAG_NULL;
+							else if (genbathy->flags[j] & 0x01)
+								corbathy->empty[i] = MB_FLAG_NONE;
+							else
+								corbathy->empty[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+							}
+						}
 					else
 						{
 						status = MB_FAILURE;
@@ -708,6 +736,22 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			else if (strncmp(recordid, "WCD_NAVI", 8) == 0)
 				{
 				status = mbr_wasspenl_rd_wcd_navi(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+				}
+
+			/* read SENSPROP record */
+			else if (strncmp(recordid, "SENSPROP", 8) == 0)
+				{
+				status = mbr_wasspenl_rd_sensprop(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+				}
+
+			/* read SYS_PROP record */
+			else if (strncmp(recordid, "SYS_PROP", 8) == 0)
+				{
+				status = mbr_wasspenl_rd_sys_prop(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
 					done = MB_YES;
 				}
@@ -842,6 +886,24 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	else if (store->kind == MB_DATA_WC_PICKS)
 		{
 		status = mbr_wasspenl_wr_wcd_navi(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *) *bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+		}
+
+	/* write SENSPROP record */
+	else if (store->kind == MB_DATA_SENSOR_PARAMETERS)
+		{
+		status = mbr_wasspenl_wr_sensprop(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *) *bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+		}
+
+	/* write SYS_PROP record */
+	else if (store->kind == MB_DATA_INSTALLATION)
+		{
+		status = mbr_wasspenl_wr_sys_prop(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *) *bufferptr;
 		write_len = (size_t)size;
 		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
@@ -1508,6 +1570,211 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 
+int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *error)
+{
+	char	*function_name = "mbr_wasspenl_rd_sensprop";
+	int	status = MB_SUCCESS;
+	struct mbsys_wassp_struct *store;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+	int	index;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_wassp_struct *) store_ptr;
+	sensprop = &(store->sensprop);
+
+	/* extract the data */
+	index = 16;
+	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->version)); index += 4;
+	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->flags)); index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sea_level_reference)); index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->element_spacing)); index += 4;
+	for (i=0;i<8;i++)
+		{
+		mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->spare[i])); index += 4;
+		}
+	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->n)); index += 4;
+	if (sensprop->n_alloc < sensprop->n)
+		{
+		status = mb_reallocd(verbose, __FILE__, __LINE__, sensprop->n * sizeof(struct mbsys_wassp_sensor_struct),
+						(void **)&(sensprop->sensors), error);
+		if (status != MB_SUCCESS)
+			sensprop->n_alloc = 0;
+		else
+			sensprop->n_alloc = sensprop->n;
+		}
+	for (i=0;i<sensprop->n;i++)
+		{
+		mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->sensors[i].sensor_type)); index += 4;
+		mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->sensors[i].flags)); index += 4;
+		sensprop->sensors[i].port_number = buffer[index]; index++;
+		sensprop->sensors[i].device = buffer[index]; index++;
+		sensprop->sensors[i].sentence = buffer[index]; index++;
+		sensprop->sensors[i].sensor_model = buffer[index]; index++;
+		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].latency)); index += 4;
+		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].roll_bias)); index += 4;
+		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].pitch_bias)); index += 4;
+		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].yaw_bias)); index += 4;
+		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].offset_x)); index += 4;
+		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].offset_y)); index += 4;
+		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].offset_z)); index += 4;
+		}
+	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->checksum)); index += 4;
+
+	/* set kind */
+	if (status == MB_SUCCESS)
+		{
+		/* set kind */
+		store->kind = MB_DATA_SENSOR_PARAMETERS;
+		}
+	else
+		{
+		store->kind = MB_DATA_NONE;
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       sensprop->version:                    %u\n",sensprop->version);
+		fprintf(stderr,"dbg5       sensprop->flags:                      %u\n",sensprop->flags);
+		fprintf(stderr,"dbg5       sensprop->sea_level_reference:        %f\n",sensprop->sea_level_reference);
+		fprintf(stderr,"dbg5       sensprop->element_spacing:            %f\n",sensprop->element_spacing);
+		for (i=0;i<8;i++)
+			fprintf(stderr,"dbg5       sensprop->spare[%d]:                   %d\n",i,sensprop->spare[i]);
+		fprintf(stderr,"dbg5       sensprop->n:                          %d\n",sensprop->n);
+		for (i=0;i<sensprop->n;i++)
+			{
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].sensor_type:    %u\n",i,sensprop->sensors[i].sensor_type);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].flags:          %u\n",i,sensprop->sensors[i].flags);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].port_number:    %u\n",i,sensprop->sensors[i].port_number);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].device:         %u\n",i,sensprop->sensors[i].device);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].sentence:       %u\n",i,sensprop->sensors[i].sentence);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].sensor_model:   %u\n",i,sensprop->sensors[i].sensor_model);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].latency:        %f\n",i,sensprop->sensors[i].latency);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].roll_bias:      %f\n",i,sensprop->sensors[i].roll_bias);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].pitch_bias:     %f\n",i,sensprop->sensors[i].pitch_bias);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].yaw_bias:       %f\n",i,sensprop->sensors[i].yaw_bias);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].offset_x:       %f\n",i,sensprop->sensors[i].offset_x);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].offset_y:       %f\n",i,sensprop->sensors[i].offset_y);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].offset_z:       %f\n",i,sensprop->sensors[i].offset_z);	
+			}
+		fprintf(stderr,"dbg5       sensprop->checksum:                   %u\n",sensprop->checksum);	
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+
+int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *error)
+{
+	char	*function_name = "mbr_wasspenl_rd_sys_prop";
+	int	status = MB_SUCCESS;
+	struct mbsys_wassp_struct *store;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
+	int	index;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       buffer:     %p\n",(void *)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_wassp_struct *) store_ptr;
+	sys_prop = &(store->sys_prop);
+
+	/* extract the data */
+	index = 16;
+	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->version)); index += 4;
+	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->product_type)); index += 4;
+	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->protocol_version)); index += 4;
+	for (i=0;i<4;i++)
+		{
+		mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->sw_version[i])); index += 4;
+		}
+	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->fw_version)); index += 4;
+	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->hw_version)); index += 4;
+	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->transducer_sn)); index += 4;
+	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->transceiver_sn)); index += 4;
+	for (i=0;i<8;i++)
+		{
+		mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->spare[i])); index += 4;
+		}
+	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->checksum)); index += 4;
+
+	/* set kind */
+	if (status == MB_SUCCESS)
+		{
+		/* set kind */
+		store->kind = MB_DATA_INSTALLATION;
+		}
+	else
+		{
+		store->kind = MB_DATA_NONE;
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       sys_prop->version:                    %u\n",sys_prop->version);
+		fprintf(stderr,"dbg5       sys_prop->product_type:               %u\n",sys_prop->product_type);
+		fprintf(stderr,"dbg5       sys_prop->protocol_version:           %u\n",sys_prop->protocol_version);
+		for (i=0;i<4;i++)
+			fprintf(stderr,"dbg5       sys_prop->sw_version[%d]:             %u\n",i,sys_prop->sw_version[i]);
+		fprintf(stderr,"dbg5       sys_prop->fw_version:                 %u\n",sys_prop->fw_version);
+		fprintf(stderr,"dbg5       sys_prop->hw_version:                 %u\n",sys_prop->hw_version);
+		fprintf(stderr,"dbg5       sys_prop->transducer_sn:              %u\n",sys_prop->transducer_sn);
+		fprintf(stderr,"dbg5       sys_prop->transceiver_sn:             %u\n",sys_prop->transceiver_sn);
+		for (i=0;i<8;i++)
+			fprintf(stderr,"dbg5       sys_prop->spare[%d]:                  %u\n",i,sys_prop->spare[i]);
+		fprintf(stderr,"dbg5       sys_prop->checksum:                   %u\n",sys_prop->checksum);	
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+
 int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wasspenl_rd_sys_cfg1";
@@ -1753,6 +2020,8 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* get pointer to raw data structure */
 	store = (struct mbsys_wassp_struct *) store_ptr;
 	genbathy = &(store->genbathy);
+	genbathy->version = 3;
+	genbathy->checksum = 0x8806CBA5;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -1838,9 +2107,6 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 			}
 
 		/* now add the checksum */
-		genbathy->checksum = 0;
-		for (i=0;i<index;i++)
-			genbathy->checksum += (unsigned char) buffer[i];
 		mb_put_binary_int(MB_YES, genbathy->checksum, &buffer[index]); index += 4;
 		}
 
@@ -1883,6 +2149,8 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* get pointer to raw data structure */
 	store = (struct mbsys_wassp_struct *) store_ptr;
 	corbathy = &(store->corbathy);
+	corbathy->version = 4;
+	corbathy->checksum = 0x8806CBA5;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -1976,9 +2244,6 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 			}
 
 		/* now add the checksum */
-		corbathy->checksum = 0;
-		for (i=0;i<index;i++)
-			corbathy->checksum += (unsigned char) buffer[i];
 		mb_put_binary_int(MB_YES, corbathy->checksum, &buffer[index]); index += 4;
 		}
 
@@ -2022,6 +2287,8 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* get pointer to raw data structure */
 	store = (struct mbsys_wassp_struct *) store_ptr;
 	rawsonar = &(store->rawsonar);
+	rawsonar->version = 2;
+	rawsonar->checksum = 0x8806CBA5;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2107,9 +2374,6 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 		memcpy(&buffer[index], rawsonar->rawdata, rawdata_len); index += rawdata_len;
 
 		/* now add the checksum */
-		rawsonar->checksum = 0;
-		for (i=0;i<index;i++)
-			rawsonar->checksum += (unsigned char) buffer[i];
 		mb_put_binary_int(MB_YES, rawsonar->checksum, &buffer[index]); index += 4;
 		}
 
@@ -2135,7 +2399,6 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
         struct mbsys_wassp_gen_sens_struct *gen_sens;
 	char	*buffer;
 	int	index;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2152,6 +2415,8 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* get pointer to raw data structure */
 	store = (struct mbsys_wassp_struct *) store_ptr;
 	gen_sens = &(store->gen_sens);
+	gen_sens->version = 2;
+	gen_sens->checksum = 0x8806CBA5;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2197,9 +2462,6 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
 		memcpy(&buffer[index], gen_sens->message, (size_t)gen_sens->message_length); index += gen_sens->message_length;
 
 		/* now add the checksum */
-		gen_sens->checksum = 0;
-		for (i=0;i<index;i++)
-			gen_sens->checksum += (unsigned char) buffer[i];
 		mb_put_binary_int(MB_YES, gen_sens->checksum, &buffer[index]); index += 4;
 		}
 
@@ -2226,7 +2488,6 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
         struct mbsys_wassp_nvupdate_struct *nvupdate;
 	char	*buffer;
 	int	index;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2243,6 +2504,8 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* get pointer to raw data structure */
 	store = (struct mbsys_wassp_struct *) store_ptr;
 	nvupdate = &(store->nvupdate);
+	nvupdate->version = 4;
+	nvupdate->checksum = 0x8806CBA5;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2298,9 +2561,6 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
 		mb_put_binary_float(MB_YES, nvupdate->nadir_depth, &buffer[index]); index += 4;
 
 		/* now add the checksum */
-		nvupdate->checksum = 0;
-		for (i=0;i<index;i++)
-			nvupdate->checksum += (unsigned char) buffer[i];
 		mb_put_binary_int(MB_YES, nvupdate->checksum, &buffer[index]); index += 4;
 		}
 
@@ -2344,6 +2604,8 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* get pointer to raw data structure */
 	store = (struct mbsys_wassp_struct *) store_ptr;
 	wcd_navi = &(store->wcd_navi);
+	wcd_navi->version = 4;
+	wcd_navi->checksum = 0x8806CBA5;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2407,10 +2669,241 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 			}
 
 		/* now add the checksum */
-		wcd_navi->checksum = 0;
-		for (i=0;i<index;i++)
-			wcd_navi->checksum += (unsigned char) buffer[i];
 		mb_put_binary_int(MB_YES, wcd_navi->checksum, &buffer[index]); index += 4;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+
+int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error)
+{
+	char	*function_name = "mbr_wasspenl_wr_sensprop";
+	int	status = MB_SUCCESS;
+	struct mbsys_wassp_struct *store;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+	char	*buffer;
+	int	index;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_wassp_struct *) store_ptr;
+	sensprop = &(store->sensprop);
+	sensprop->version = 1;
+	sensprop->checksum = 0x8806CBA5;
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       sensprop->version:                    %u\n",sensprop->version);
+		fprintf(stderr,"dbg5       sensprop->flags:                      %u\n",sensprop->flags);
+		fprintf(stderr,"dbg5       sensprop->sea_level_reference:        %f\n",sensprop->sea_level_reference);
+		fprintf(stderr,"dbg5       sensprop->element_spacing:            %f\n",sensprop->element_spacing);
+		for (i=0;i<8;i++)
+			fprintf(stderr,"dbg5       sensprop->spare[%d]:                   %d\n",i,sensprop->spare[i]);
+		fprintf(stderr,"dbg5       sensprop->n:                          %d\n",sensprop->n);
+		for (i=0;i<sensprop->n;i++)
+			{
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].sensor_type:    %u\n",i,sensprop->sensors[i].sensor_type);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].flags:          %u\n",i,sensprop->sensors[i].flags);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].port_number:    %u\n",i,sensprop->sensors[i].port_number);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].device:         %u\n",i,sensprop->sensors[i].device);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].sentence:       %u\n",i,sensprop->sensors[i].sentence);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].sensor_model:   %u\n",i,sensprop->sensors[i].sensor_model);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].latency:        %f\n",i,sensprop->sensors[i].latency);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].roll_bias:      %f\n",i,sensprop->sensors[i].roll_bias);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].pitch_bias:     %f\n",i,sensprop->sensors[i].pitch_bias);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].yaw_bias:       %f\n",i,sensprop->sensors[i].yaw_bias);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].offset_x:       %f\n",i,sensprop->sensors[i].offset_x);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].offset_y:       %f\n",i,sensprop->sensors[i].offset_y);	
+			fprintf(stderr,"dbg5       sensprop->sensors[%d].offset_z:       %f\n",i,sensprop->sensors[i].offset_z);	
+			}
+		fprintf(stderr,"dbg5       sensprop->checksum:                   %u\n",sensprop->checksum);	
+		}
+
+	/* figure out size of output record */
+	*size = 72 + 40 * sensprop->n;
+
+	/* allocate memory to write rest of record if necessary */
+	if (*bufferalloc < *size)
+		{
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
+		if (status != MB_SUCCESS)
+			*bufferalloc = 0;
+		else
+			*bufferalloc = *size;
+		}
+
+	/* proceed to write if buffer allocated */
+	if (status == MB_SUCCESS)
+		{
+		/* get buffer for writing */
+		buffer = (char *) *bufferptr;
+
+		/* insert the data */
+		index = 0;
+		mb_put_binary_int(MB_YES, MBSYS_WASSP_SYNC, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, *size, &buffer[index]); index += 4;
+		strncpy(&buffer[index], "SENSPROP", 8); index += 8;
+		mb_put_binary_int(MB_YES, sensprop->version, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, sensprop->flags, &buffer[index]); index += 4;
+		mb_put_binary_float(MB_YES, sensprop->sea_level_reference, &buffer[index]); index += 4;
+		mb_put_binary_float(MB_YES, sensprop->element_spacing, &buffer[index]); index += 4;
+		for (i=0;i<8;i++)
+			{
+			mb_put_binary_int(MB_YES, sensprop->spare[i], &buffer[index]); index += 4;
+			}
+		mb_put_binary_int(MB_YES, sensprop->n, &buffer[index]); index += 4;
+		for (i=0;i<sensprop->n;i++)
+			{
+			mb_put_binary_int(MB_YES, sensprop->sensors[i].sensor_type, &buffer[index]); index += 4;
+			mb_put_binary_int(MB_YES, sensprop->sensors[i].flags, &buffer[index]); index += 4;
+			buffer[index] = sensprop->sensors[i].port_number; index++;
+			buffer[index] = sensprop->sensors[i].device; index++;
+			buffer[index] = sensprop->sensors[i].sentence; index++;
+			buffer[index] = sensprop->sensors[i].sensor_model; index++;
+			mb_put_binary_float(MB_YES, sensprop->sensors[i].latency, &buffer[index]); index += 4;
+			mb_put_binary_float(MB_YES, sensprop->sensors[i].roll_bias, &buffer[index]); index += 4;
+			mb_put_binary_float(MB_YES, sensprop->sensors[i].pitch_bias, &buffer[index]); index += 4;
+			mb_put_binary_float(MB_YES, sensprop->sensors[i].yaw_bias, &buffer[index]); index += 4;
+			mb_put_binary_float(MB_YES, sensprop->sensors[i].offset_x, &buffer[index]); index += 4;
+			mb_put_binary_float(MB_YES, sensprop->sensors[i].offset_y, &buffer[index]); index += 4;
+			mb_put_binary_float(MB_YES, sensprop->sensors[i].offset_z, &buffer[index]); index += 4;
+			}
+
+		/* now add the checksum */
+		mb_put_binary_int(MB_YES, sensprop->checksum, &buffer[index]); index += 4;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+
+int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error)
+{
+	char	*function_name = "mbr_wasspenl_wr_sys_prop";
+	int	status = MB_SUCCESS;
+	struct mbsys_wassp_struct *store;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
+	char	*buffer;
+	int	index;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
+		fprintf(stderr,"dbg2       bufferptr:  %p\n",(void *)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_wassp_struct *) store_ptr;
+	sys_prop = &(store->sys_prop);
+	sys_prop->version = 1;
+	sys_prop->checksum = 0x8806CBA5;
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       sys_prop->version:                    %u\n",sys_prop->version);
+		fprintf(stderr,"dbg5       sys_prop->product_type:               %u\n",sys_prop->product_type);
+		fprintf(stderr,"dbg5       sys_prop->protocol_version:           %u\n",sys_prop->protocol_version);
+		for (i=0;i<4;i++)
+			fprintf(stderr,"dbg5       sys_prop->sw_version[%d]:             %u\n",i,sys_prop->sw_version[i]);
+		fprintf(stderr,"dbg5       sys_prop->fw_version:                 %u\n",sys_prop->fw_version);
+		fprintf(stderr,"dbg5       sys_prop->hw_version:                 %u\n",sys_prop->hw_version);
+		fprintf(stderr,"dbg5       sys_prop->transducer_sn:              %u\n",sys_prop->transducer_sn);
+		fprintf(stderr,"dbg5       sys_prop->transceiver_sn:             %u\n",sys_prop->transceiver_sn);
+		for (i=0;i<8;i++)
+			fprintf(stderr,"dbg5       sys_prop->spare[%d]:                  %u\n",i,sys_prop->spare[i]);
+		fprintf(stderr,"dbg5       sys_prop->checksum:                   %u\n",sys_prop->checksum);	
+		}
+
+	/* figure out size of output record */
+	*size = 96;
+
+	/* allocate memory to write rest of record if necessary */
+	if (*bufferalloc < *size)
+		{
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
+		if (status != MB_SUCCESS)
+			*bufferalloc = 0;
+		else
+			*bufferalloc = *size;
+		}
+
+	/* proceed to write if buffer allocated */
+	if (status == MB_SUCCESS)
+		{
+		/* get buffer for writing */
+		buffer = (char *) *bufferptr;
+
+		/* insert the data */
+		index = 0;
+		mb_put_binary_int(MB_YES, MBSYS_WASSP_SYNC, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, *size, &buffer[index]); index += 4;
+		strncpy(&buffer[index], "SYS_PROP", 8); index += 8;
+		mb_put_binary_int(MB_YES, sys_prop->version, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, sys_prop->product_type, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, sys_prop->protocol_version, &buffer[index]); index += 4;
+		for (i=0;i<4;i++)
+			{
+			mb_put_binary_int(MB_YES, sys_prop->sw_version[i], &buffer[index]); index += 4;
+			}
+		mb_put_binary_int(MB_YES, sys_prop->fw_version, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, sys_prop->hw_version, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, sys_prop->transducer_sn, &buffer[index]); index += 4;
+		mb_put_binary_int(MB_YES, sys_prop->transceiver_sn, &buffer[index]); index += 4;
+		for (i=0;i<8;i++)
+			{
+			mb_put_binary_int(MB_YES, sys_prop->spare[i], &buffer[index]); index += 4;
+			}
+
+		/* now add the checksum */
+		mb_put_binary_int(MB_YES, sys_prop->checksum, &buffer[index]); index += 4;
 		}
 
 	/* print output debug statements */
@@ -2510,7 +3003,6 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
         struct mbsys_wassp_mcomment_struct *mcomment;
 	char	*buffer;
 	int	index;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2527,6 +3019,7 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* get pointer to raw data structure */
 	store = (struct mbsys_wassp_struct *) store_ptr;
 	mcomment = &(store->mcomment);
+	mcomment->checksum = 0x8806CBA5;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2566,9 +3059,6 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
 		memcpy(&buffer[index], mcomment->comment_message, (size_t)mcomment->comment_length); index += mcomment->comment_length;
 
 		/* now add the checksum */
-		mcomment->checksum = 0;
-		for (i=0;i<index;i++)
-			mcomment->checksum += (unsigned char) buffer[i];
 		mb_put_binary_int(MB_YES, mcomment->checksum, &buffer[index]); index += 4;
 		}
 

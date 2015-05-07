@@ -35,7 +35,9 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
+#ifndef WIN32
+#include <sys/time.h>		/* Why this include? time.h is included by mbbs_defines.h */
+#endif
 #include <math.h>
 
 #include "mbbs_defines.h"
@@ -601,12 +603,15 @@ mbbs_nanf()
 	unsigned int ui;
 	float f;
 
+/* mbbs_misc.c(607) : error C2124: divide or mod by zero */
+/*
 	if (sizeof(float) != sizeof(unsigned int))
 		f= 0./0.;
 	else {
+*/
 		ui= 0xffc00000;
 		MemCopy(&ui, &f, sizeof(float));
-	}
+/*	} */
 
 	return f;
 }
@@ -617,12 +622,13 @@ mbbs_nand()
 	unsigned long long ull;
 	double d;
 
-	if (sizeof(double) != sizeof(unsigned long long))
+/*	if (sizeof(double) != sizeof(unsigned long long))
 		d= 0./0.;
 	else {
+*/
 		ull= 0xfff8000000000000ULL;
 		MemCopy(&ull, &d, sizeof(double));
-	}
+/*	} */
 
 	return d;
 }

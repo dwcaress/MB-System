@@ -19,9 +19,6 @@
  * Author:	D. W. Caress
  * Date:	September 3, 2007
  *
- * Renamed from mb_readgrd.c to mb_grdio.c and write function added.
- * Date:	December 31, 2014
- * 
  */
 
 /* standard include files */
@@ -433,6 +430,7 @@ int mb_write_gmt_grd(int verbose,
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
+		return(status);
 		}
 	
 	/* set grid creation control values */
@@ -461,10 +459,11 @@ int mb_write_gmt_grd(int verbose,
 	
 	/* create structure for the grid */
 	if ((G = GMT_Create_Data (API, GMT_IS_GRID, GMT_IS_SURFACE, GMT_GRID_ALL, NULL, wesn, inc,
-				     registration, pad, grid)) == NULL)
+				     registration, pad, NULL)) == NULL)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
+		return(status);
 		}
 		
 	/* Get some projection and user info needed for the grid remark field */

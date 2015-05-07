@@ -100,8 +100,8 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mbnavadjustmerge";
 	char help_message[] =  "mbnavadjustmerge merges two existing mbnavadjust projects.\n";
-	char usage_message[] = "mbnavadjustmerge --verbose --help\n"
-				"\t--input=project_path [--input=project_path --output=project_path\n"
+	char usage_message[] = "mbnavadjustmerge --input=project_path \n"
+				"\t[--input=project_path --output=project_path\n"
 				"\t--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]\n"
 				"\t--set-global-tie-xyz=file:section[:snav]\n"
 				"\t--set-global-tie-xyonly=file:section[:snav]\n"
@@ -126,7 +126,8 @@ int main (int argc, char **argv)
 				"\t--set-ties-zonly-by-block=survey1/survey2\n"
 				"\t--set-ties-zoffset-by-block=survey1/survey2/zoffset\n"
 				"\t--skip-unset-crossings\n"
-				"\t--insert-discontinuity=file:section]\n";
+				"\t--insert-discontinuity=file:section\n"
+				"\t--verbose --help]\n";
 	extern char *optarg;
 	int	option_index;
 	int	errflg = 0;

@@ -70,7 +70,11 @@
 #include "mb_glwdrawa.h"
 
 typedef struct _mbGLwDrawingAreaClassPart {
+#ifdef WIN32
+  char* extension;
+#else
   caddr_t extension;
+#endif
   } mbGLwDrawingAreaClassPart;
 
 

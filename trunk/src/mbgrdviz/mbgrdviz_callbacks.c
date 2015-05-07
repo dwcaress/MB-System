@@ -1794,7 +1794,11 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 		/* get button name */
 		if (input_file_ptr != NULL)
 			{
+#ifdef WIN32
+			button_name_ptr = strrchr(input_file_ptr, '/');		/* This one should work for gcc as well */
+#else
 			button_name_ptr = (char *) rindex(input_file_ptr, '/');
+#endif
 			if (button_name_ptr == NULL)
 				button_name_ptr = input_file_ptr;
 			else

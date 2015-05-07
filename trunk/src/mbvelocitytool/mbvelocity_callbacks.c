@@ -25,56 +25,6 @@
  * Date:	April 8, 1993
  * Date:	April 7, 1997  GUI recast
  *
- * $Log: mbvelocity_callbacks.c,v $
- * Revision 5.7  2006/01/24 19:20:45  caress
- * Version 5.0.8 beta.
- *
- * Revision 5.6  2003/04/17 21:11:18  caress
- * Release 5.0.beta30
- *
- * Revision 5.5  2002/08/21 00:51:54  caress
- * Fixed label displays for command line loading.
- *
- * Revision 5.4  2002/04/06 02:53:15  caress
- * Release 5.0.beta16
- *
- * Revision 5.3  2001/06/02 00:10:04  caress
- * Now use mb_get_format()
- *
- * Revision 5.2  2001/03/22  21:12:42  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.1  2001/01/22  07:51:19  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:56:47  caress
- * First cut at Version 5.0.
- *
- * Revision 4.6  2000/10/11  01:06:03  caress
- * Convert to ANSI C
- *
- * Revision 4.5  2000/09/30  07:05:18  caress
- * Snapshot for Dale.
- *
- * Revision 4.4  1999/09/15  21:01:47  caress
- * Version label now set from mb_format.h
- *
- * Revision 4.3  1998/10/05  19:18:58  caress
- * MB-System version 4.6beta
- *
- * Revision 4.2  1997/09/15  19:10:50  caress
- * Real Version 4.5
- *
- * Revision 4.1  1997/04/22  19:25:26  caress
- * Fixed startup mode.
- *
- * Revision 4.0  1997/04/21  17:16:20  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.0  1997/04/16  21:36:42  caress
- * Complete rewrite of mbvelocitytool without uid file.
- *
- *
  */
 /*
  * README: This file is appended to at file generation time.

@@ -27,11 +27,7 @@
 #ifndef MB_DEFINE_DEF
 #define MB_DEFINE_DEF
 
-#ifdef HAVE_CONFIG_H
 #include "mb_config.h"
-#else
-#include "mb_config2.h"
-#endif
 
 /* include for mb_s_char types */
 #if HAVE_STDINT_H
@@ -68,6 +64,9 @@
 #define fseeko fseek
 #	ifndef isnan
 #		define isnan(x) _isnan(x)
+#	endif
+#	ifndef inline
+#		define inline __inline
 #	endif
 #endif
 

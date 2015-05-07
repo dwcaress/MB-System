@@ -256,7 +256,7 @@ gsfStat (const char *filename, long long *sz)
     struct stat stbuf;
     rc = stat(filename, &stbuf);
 #else
-#ifdef (defined __WINDOWS__) || (defined __MINGW32__)
+#if defined(__WINDOWS__) || defined(__MINGW32__)
     struct _stati64    stbuf;
     rc = _stati64(filename, &stbuf);
 #else

@@ -11,13 +11,13 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbdumpesf</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 May 2015 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbmask</B>, <B>mbdumpesf</B> - Output text version of beam edits from a binary edit save file.
+<B>mbdumpesf</B> - Output beam edits from a binary edit save file, either in the binary form or as an ASCII text dump.
 <P>
 <A NAME="lbAC">&nbsp;</A>
 <H2>VERSION</H2>
@@ -27,7 +27,9 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbdumpesf</B> <B>-I</B>file [<B>-V -H</B>]
+<B>mbdumpesf</B> <B>--input=</B><I>file</I>
+[<B>--output=</B><I>file</I> <B>--ignore-unflag</B> <B>--ignore-flag</B>
+<B>--ignore-filter</B> <B>--ignore-zero</B> <B>--verbose</B> <B>--help</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -35,8 +37,23 @@ Version 5.0
 Swath bathymetry data is typically edited either with interactive
 tools such as <B>mbedit</B> or automatic filters such as <B>mbclean</B>.
 In <B>MB-System</B>, the beam flags are stored in binary &quot;edit save files&quot;
-(file suffix &quot;.esf&quot;). The program <B>mbdumpesf</B> reads esf files and
-outputs each of the edit events as a text line to stdout.
+(file suffix &quot;.esf&quot;). The program <B>mbdumpesf</B> reads and outputs esf files. If
+no output file is specified, then each of the edit events is written in ASCII text
+as a single line to stdout. If an output file is specified with the <B>--output=</B><I>file</I>
+option, then the edit save data will be written to that file in binary form.
+<P>
+The four types of edit events supported by esf files are:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>action=1:&nbsp;flag&nbsp;manually<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>action=2:&nbsp;unflag<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>action=3:&nbsp;zero&nbsp;-&nbsp;make&nbsp;beam&nbsp;null<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>action=4:&nbsp;flag&nbsp;by&nbsp;autofilter<BR>
+<BR>
+
+This program can be forced to ignore (exclude from the output) any of the event
+types using the options <B>--ignore-unflag</B>, <B>--ignore-flag</B>,
+<B>--ignore-filter</B>, and <B>--ignore-zero</B>.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
@@ -56,25 +73,31 @@ Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</
 <H2>MBDUMPESF OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-H</B>
-
-<DD>
-This &quot;help&quot; flag causes the program to print out a description
-of its operation and then exit immediately.
-<DT><B>-I</B>
-
-<DD>
-<I>file</I>
-<BR>
-
-&quot;Edit save file&quot; from which the edit events will be read.
-<DT><B>-V</B>
-
-<DD>
+<DT><B>--input=</B><I>file</I><DD>
+&quot;Edit save file&quot; (esf file) from which the edit events will be read.
+<DT><B>--output=</B><I>file</I><DD>
+Specifies output esf file. If this option is not used, then the edit
+event stream will be output to stdout as a sequence of ASCII text lines.
+<DT><B>--ignore-unflag</B><DD>
+Causes <B>mbdumpesf</B> to not output any unflag edit events read from
+the input.
+<DT><B>--ignore-flag</B><DD>
+Causes <B>mbdumpesf</B> to not output any flag edit events read from
+the input.
+<DT><B>--ignore-filter</B><DD>
+Causes <B>mbdumpesf</B> to not output any filter edit events read from
+the input.
+<DT><B>--ignore-zero</B><DD>
+Causes <B>mbdumpesf</B> to not output any zero edit events read from
+the input.
+<DT><B>--verbose</B><DD>
 Normally, <B>mbdumpesf</B> outputs one line for each edit event in
 the input esf file.  If the
-<B>-V</B> flag is given, then <B>mbdumpesf</B> also outputs the
+--verbose flag is given, then <B>mbdumpesf</B> also outputs the
 total number of each type of edit event at the end of the listing.
+<DT><B>--help</B><DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -158,7 +181,7 @@ Too simple to have any interesting problems.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 3 May 2015</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

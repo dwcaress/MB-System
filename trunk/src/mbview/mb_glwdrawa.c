@@ -76,7 +76,15 @@
  */
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
-#include <GL/glx.h>
+
+#ifdef WIN32
+#undef BOOL		/* It was defined by a chain of inclusions in the (patched) X11/Xmd.h */
+#include <windows.h>
+#endif
+
+#ifndef WIN32
+#	include <GL/glx.h>
+#endif
 #include <GL/gl.h>
 #include <Xm/PrimitiveP.h>
 #include "mb_glwdrawap.h"
@@ -359,6 +367,24 @@ static void warning(Widget w,char* string){
   }
 
 
+#ifdef WIN32
+#	define GLX_BUFFER_SIZE 2
+#	define GLX_LEVEL 3
+#	define GLX_RGBA 4
+#	define GLX_DOUBLEBUFFER 5
+#	define GLX_STEREO 6
+#	define GLX_AUX_BUFFERS 7
+#	define GLX_RED_SIZE 8
+#	define GLX_GREEN_SIZE 9
+#	define GLX_BLUE_SIZE 10
+#	define GLX_ALPHA_SIZE 11
+#	define GLX_DEPTH_SIZE 12
+#	define GLX_STENCIL_SIZE 13
+#	define GLX_ACCUM_RED_SIZE 14
+#	define GLX_ACCUM_GREEN_SIZE 15
+#	define GLX_ACCUM_BLUE_SIZE 16
+#	define GLX_ACCUM_ALPHA_SIZE 17
+#endif
 
 /* Initialize the attribList based on the attributes */
 static void createAttribList(mbGLwDrawingAreaWidget w){

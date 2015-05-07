@@ -67,7 +67,9 @@
 #ifndef _mbGLwDrawA_h
 #define _mbGLwDrawA_h
 
-#include <GL/glx.h>
+#ifndef WIN32
+#	include <GL/glx.h>
+#endif
 #include <GL/gl.h>
 
 /****************************************************************
@@ -162,7 +164,7 @@
 
 #define mbglwMDrawingAreaWidgetClass    mbglwM2DrawingAreaWidgetClass
 #define mbglwMDrawingAreaClassRec   mbglwM2DrawingAreaClassRec
-#define mbGLwCreateMDrawingArea     mbGLwCreateM2DrawingArea
+//#define mbGLwCreateMDrawingArea     mbGLwCreateM2DrawingArea
 
 typedef struct _mbGLwMDrawingAreaClassRec	*mbGLwMDrawingAreaWidgetClass;
 typedef struct _mbGLwMDrawingAreaRec	*mbGLwMDrawingAreaWidget;
@@ -185,13 +187,25 @@ typedef struct
   mbGLwDrawingAreaCallbackStruct;
 
 /* front ends to glXMakeCurrent and glXSwapBuffers */
+#ifdef WIN32
+extern void mbGLwDrawingAreaMakeCurrent(Widget w,HGLRC hglrc);
+#else
 extern void mbGLwDrawingAreaMakeCurrent(Widget w,GLXContext ctx);
+#endif
 extern void mbGLwDrawingAreaSwapBuffers(Widget w);
 
-#ifdef _NO_PROTO
-GLAPI Widget mbGLwCreateMDrawingArea();
+#ifdef WIN32
+#	ifdef _NO_PROTO
+	//WINGDIAPI Widget mbGLwCreateMDrawingArea();	/* It's defined in mb_glwdrawa.c */
+#	else
+	//WINGDIAPI Widget mbGLwCreateMDrawingArea(Widget parent,char *name,ArgList arglist,Cardinal argcount);
+#	endif
 #else
-GLAPI Widget mbGLwCreateMDrawingArea(Widget parent,char *name,ArgList arglist,Cardinal argcount);
+#	ifdef _NO_PROTO
+	GLAPI Widget mbGLwCreateMDrawingArea();
+#	else
+	GLAPI Widget mbGLwCreateMDrawingArea(Widget parent,char *name,ArgList arglist,Cardinal argcount);
+#	endif
 #endif
 
 #endif

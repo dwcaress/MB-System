@@ -37,6 +37,9 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#ifdef WIN32
+#include <stdint.h>		/* To get INT32_MIN, INT32_MAX, etc ... */
+#endif
 
 #include "mbbs_defines.h"
 #include "mbbs_mem.h"

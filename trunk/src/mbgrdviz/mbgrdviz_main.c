@@ -80,6 +80,11 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 #include <stdlib.h>
 #include <unistd.h>
 
+/* Avoid conflict due to BOOL redefinitions (Xm vs Win headers) */
+#ifdef WIN32
+#	undef BOOL
+#endif
+
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_define.h"
@@ -250,6 +255,8 @@ int main( int argc, char **argv)
 	int	ifileflag = 0;
 	int	jfileflag = 0;
 	int	testflag = 0;
+	//sessionShellWidgetClass widget_class;
+	//widget_class.core_class.class_inited = NULL;
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhI:i:J:j:Tt")) != -1)

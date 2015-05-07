@@ -42,6 +42,14 @@
 
 #include "mbbs_defines.h"
 
+/* Ugly patch because Windows has no fchdir() function */ 
+#ifdef WIN32
+#define fchdir(lixo) chdir(".")
+#	ifndef F_OK
+#		define F_OK 00
+	#endif
+#endif
+
 extern int	mbbs_appendstr(char **, char *);
 extern int	mbbs_copypng(int, XDR *, XDR *, int);
 extern int	mbbs_freebsfmem(BSFile *);

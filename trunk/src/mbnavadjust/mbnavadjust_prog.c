@@ -225,6 +225,7 @@ int mbnavadjust_init_globals()
  	mbna_status = MBNA_STATUS_GUI;
  	mbna_view_list = MBNA_VIEW_LIST_FILES;
  	mbna_view_mode = MBNA_VIEW_MODE_ALL;
+	mbna_invert_mode = MBNA_INVERT_ZISOLATED;
 	mbna_color_foreground = BLACK;
 	mbna_color_background = WHITE;
  	project.section_length = 0.14;
@@ -659,7 +660,11 @@ int mbnavadjust_file_new(char *projectname)
 				project.zoffsetwidth = 5.0;
 
 				/* create data directory */
+#ifdef WIN32
+				if (_mkdir(project.datadir) != 0)
+#else
 				if (mkdir(project.datadir,00775) != 0)
+#endif
 					{
 					strcpy(error1,"Unable to create new project!");
 					strcpy(error2,"Error creating data directory.");
@@ -2218,8 +2223,6 @@ if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__F
 					|| (nscan = sscanf(buffer,"%s %lf",label,&project.zoffsetwidth)) != 2
 					|| strcmp(label,"ZOFFSETWIDTH") != 0))
 				status = MB_FAILURE;
-			else
-				project.zoffsetwidth = 5.0;
 			}
 
 		/* allocate memory for files array */
@@ -5193,7 +5196,7 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie)
 			    mbna_snav_2_time_d = tie->snav_2_time_d;
 			    mbna_offset_x = tie->offset_x;
 			    mbna_offset_y = tie->offset_y;
-			    mbna_offset_z = tie->offset_y_m;
+			    mbna_offset_z = tie->offset_z_m;
 /* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
 			    }
 			else
@@ -11587,9 +11590,13 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				- weight inversely by size of error for that component */
 
 			    /* deal with long axis */
-			    projected_offset = offsetx * tie->sigmax1[0]
-			    		+ offsety * tie->sigmax1[1]
-					+ offsetz * tie->sigmax1[2];
+			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+				projected_offset = offsetx * tie->sigmax1[0]
+						+ offsety * tie->sigmax1[1]
+						+ offsetz * tie->sigmax1[2];
+			    else
+				projected_offset = offsetx * tie->sigmax1[0]
+						+ offsety * tie->sigmax1[1];
 			    if (fabs(tie->sigmar1) > 0.0)
 			    	{
 				xyweight = sqrt(mbna_offsetweight / tie->sigmar1);
@@ -11609,10 +11616,12 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    {
 				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
 				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];				    
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];				    
 				    }
 				else if (file1->status == MBNA_FILE_FIXEDXYNAV)
 				    {
@@ -11620,19 +11629,22 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
 				    */
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    */
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file1->status == MBNA_FILE_FIXEDZNAV)
 				    {
 				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
 				    /*
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    */
 				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
@@ -11647,16 +11659,19 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    {
 				    xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax1[2];
 				    xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
@@ -11667,18 +11682,21 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    {
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    */
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
 				    {
 				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
 				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
 				    /*
@@ -11692,16 +11710,19 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    {
 				    xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax1[2];
 				    xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
@@ -11712,18 +11733,21 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    {
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax1[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    */
-				    xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
 				    {
 				    xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
 				    xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax1[1];
 				    /*
@@ -11738,29 +11762,34 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    /*
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    */
 				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
 				    {
 				    /*
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    */
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
 				    {
 				    /*
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    */
 				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
@@ -11777,10 +11806,12 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
 				    */
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
 				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file2->status == MBNA_FILE_POORNAV)
 				    {
@@ -11788,10 +11819,12 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
 				    */
-				    xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax1[2];
 				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
@@ -11799,7 +11832,8 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
 				    */
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
@@ -11812,7 +11846,8 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
 				    */
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
 				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
 				    /*
@@ -11827,29 +11862,34 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
 				    /*
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    */
 				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file2->status == MBNA_FILE_POORNAV)
 				    {
 				    xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax1[1];
 				    /*
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    */
 				    xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax1[1];
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
 				    /*
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    xs[3*nc2+2] +=  0.0;
@@ -11860,27 +11900,35 @@ fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
 				    /*
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    */
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
 				    }
 				}
 			    xw[3*nc1]   += xyweight;
 			    xw[3*nc1+1] += xyweight;
-			    xw[3*nc1+2] += zweight;
+			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+				xw[3*nc1+2] += zweight;
 			    xw[3*nc2]   += xyweight;
 			    xw[3*nc2+1] += xyweight;
-			    xw[3*nc2+2] += zweight;
+			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+				xw[3*nc2+2] += zweight;
 /* fprintf(stderr,"long axis:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xs[3*nc1],xs[3*nc1+1],xs[3*nc1+2],
 nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 
 			    /* deal with horizontal axis */
-			    projected_offset = offsetx * tie->sigmax2[0]
-			    		+ offsety * tie->sigmax2[1]
-					+ offsetz * tie->sigmax2[2];
+			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+				projected_offset = offsetx * tie->sigmax2[0]
+						+ offsety * tie->sigmax2[1]
+						+ offsetz * tie->sigmax2[2];
+			    else
+				projected_offset = offsetx * tie->sigmax2[0]
+						+ offsety * tie->sigmax2[1];
 			    if (fabs(tie->sigmar2) > 0.0)
 			    	{
 				xyweight = sqrt(mbna_offsetweight / tie->sigmar2);
@@ -11900,10 +11948,12 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    {
 				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
 				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file1->status == MBNA_FILE_FIXEDXYNAV)
 				    {
@@ -11911,24 +11961,28 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
 				    */
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    */
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file1->status == MBNA_FILE_FIXEDZNAV)
 				    {
 				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
 				    /*
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    */
 				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
 				    /*
-				    xs[3*nc2+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				}
@@ -11938,42 +11992,50 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    {
 				    xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax2[2];
 				    xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
-				    xs[3*nc2+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
 				    {
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    */
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
 				    {
 				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
 				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
 				    /*
-				    xs[3*nc2+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				}
@@ -11983,42 +12045,50 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    {
 				    xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax2[2];
 				    xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
-				    xs[3*nc2+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
 				    {
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax2[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    */
-				    xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
 				    {
 				    xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
 				    xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax2[1];
 				    /*
-				    xs[3*nc2+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				}
@@ -12029,34 +12099,40 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    /*
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    */
 				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
 				    {
 				    /*
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    */
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
 				    {
 				    /*
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    */
 				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
 				    /*
-				    xs[3*nc2+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				}
@@ -12068,10 +12144,12 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
 				    */
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
 				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file2->status == MBNA_FILE_POORNAV)
 				    {
@@ -12079,10 +12157,12 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
 				    */
-				    xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax2[2];
 				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
@@ -12090,11 +12170,13 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
 				    */
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
 				    /*
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
-				    xs[3*nc2+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
@@ -12103,11 +12185,13 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    xs[3*nc1]   +=  0.0;
 				    xs[3*nc1+1] +=  0.0;
 				    */
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
 				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
 				    /*
-				    xs[3*nc2+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				}
@@ -12118,32 +12202,38 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
 				    /*
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    */
 				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file2->status == MBNA_FILE_POORNAV)
 				    {
 				    xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax2[1];
 				    /*
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    */
 				    xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax2[1];
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
 				    /*
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
-				    xs[3*nc2+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
@@ -12151,27 +12241,34 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
 				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
 				    /*
-				    xs[3*nc1+2] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc1+2] +=  0.0;
 				    xs[3*nc2]   +=  0.0;
 				    xs[3*nc2+1] +=  0.0;
 				    */
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
 				    }
 				}
 			    xw[3*nc1]   += xyweight;
 			    xw[3*nc1+1] += xyweight;
-			    xw[3*nc1+2] += zweight;
+			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+				xw[3*nc1+2] += zweight;
 			    xw[3*nc2]   += xyweight;
 			    xw[3*nc2+1] += xyweight;
-			    xw[3*nc2+2] += zweight;
+			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+				xw[3*nc2+2] += zweight;
 /* fprintf(stderr,"horizontal:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xs[3*nc1],xs[3*nc1+1],xs[3*nc1+2],
 nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 
 			    /* deal with semi-vertical axis */
-			    projected_offset = offsetx * tie->sigmax3[0]
-			    		+ offsety * tie->sigmax3[1]
-					+ offsetz * tie->sigmax3[2];
+			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+				projected_offset = offsetx * tie->sigmax3[0]
+						+ offsety * tie->sigmax3[1]
+						+ offsetz * tie->sigmax3[2];
+			    else
+				projected_offset = offsetz * tie->sigmax3[2];
 			    if (fabs(tie->sigmar3) > 0.0)
 			    	{
 				xyweight = sqrt(mbna_offsetweight / tie->sigmar3);
@@ -12190,35 +12287,53 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 			    	{
 				if (file1->status == MBNA_FILE_GOODNAV || file1->status == MBNA_FILE_POORNAV)
 				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file1->status == MBNA_FILE_FIXEDXYNAV)
 				    {
 				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc1]   +=  0.0;
+				        xs[3*nc1+1] +=  0.0;
+				        }
 				    */
 				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
 				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc2]   +=  0.0;
+				        xs[3*nc2+1] +=  0.0;
+				        }
 				    */
 				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file1->status == MBNA_FILE_FIXEDZNAV)
 				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    /*
 				    xs[3*nc1+2] +=  0.0;
 				    */
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    /*
 				    xs[3*nc2+2] +=  0.0;
 				    */
@@ -12228,42 +12343,66 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 			    	{
 				if (file2->status == MBNA_FILE_POORNAV)
 				    {
-				    xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax3[2];
-				    xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
 				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc2]   +=  0.0;
+				        xs[3*nc2+1] +=  0.0;
+				        }
 				    xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
 				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
 				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc2]   +=  0.0;
+				        xs[3*nc2+1] +=  0.0;
+				        }
 				    */
 				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
 				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    /*
 				    xs[3*nc2+2] +=  0.0;
 				    */
@@ -12273,42 +12412,66 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 			    	{
 				if (file2->status == MBNA_FILE_GOODNAV)
 				    {
-				    xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax3[2];
-				    xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
 				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc2]   +=  0.0;
+				        xs[3*nc2+1] +=  0.0;
+				        }
 				    xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
 				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax3[2];
 				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc2]   +=  0.0;
+				        xs[3*nc2+1] +=  0.0;
+				        }
 				    */
 				    xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
 				    {
-				    xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
-				    xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    /*
 				    xs[3*nc2+2] +=  0.0;
 				    */
@@ -12319,34 +12482,52 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				if (file2->status == MBNA_FILE_GOODNAV || file2->status == MBNA_FILE_POORNAV)
 				    {
 				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc1]   +=  0.0;
+				        xs[3*nc1+1] +=  0.0;
+				        }
 				    xs[3*nc1+2] +=  0.0;
 				    */
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
 				    {
 				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc1]   +=  0.0;
+				        xs[3*nc1+1] +=  0.0;
+				        }
 				    xs[3*nc1+2] +=  0.0;
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc2]   +=  0.0;
+				        xs[3*nc2+1] +=  0.0;
+				        }
 				    */
 				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
 				    {
 				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc1]   +=  0.0;
+				        xs[3*nc1+1] +=  0.0;
+				        }
 				    xs[3*nc1+2] +=  0.0;
 				    */
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    /*
 				    xs[3*nc2+2] +=  0.0;
 				    */
@@ -12357,47 +12538,71 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 				if (file2->status == MBNA_FILE_GOODNAV)
 				    {
 				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc1]   +=  0.0;
+				        xs[3*nc1+1] +=  0.0;
+				        }
 				    */
 				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file2->status == MBNA_FILE_POORNAV)
 				    {
 				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc1]   +=  0.0;
+				        xs[3*nc1+1] +=  0.0;
+				        }
 				    */
 				    xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax3[2];
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
 				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc1]   +=  0.0;
+				        xs[3*nc1+1] +=  0.0;
+				        }
 				    */
 				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
 				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc2]   +=  0.0;
+				        xs[3*nc2+1] +=  0.0;
+				        }
 				    xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDZNAV)
 				    {
 				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc1]   +=  0.0;
+				        xs[3*nc1+1] +=  0.0;
+				        }
 				    */
 				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    /*
 				    xs[3*nc2+2] +=  0.0;
 				    */
@@ -12407,54 +12612,84 @@ nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 			    	{
 				if (file2->status == MBNA_FILE_GOODNAV)
 				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    /*
 				    xs[3*nc1+2] +=  0.0;
 				    */
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file2->status == MBNA_FILE_POORNAV)
 				    {
-				    xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    /*
 				    xs[3*nc1+2] +=  0.0;
 				    */
-				    xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDNAV)
 				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    /*
 				    xs[3*nc1+2] +=  0.0;
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc2]   +=  0.0;
+				        xs[3*nc2+1] +=  0.0;
+				        }
 				    xs[3*nc2+2] +=  0.0;
 				    */
 				    }
 				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
 				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax3[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax3[1];
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+					}
 				    /*
 				    xs[3*nc1+2] +=  0.0;
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
+				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					{
+				        xs[3*nc2]   +=  0.0;
+				        xs[3*nc2+1] +=  0.0;
+				        }
 				    */
 				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
 				    }
 				}
-			    xw[3*nc1]   += xyweight;
-			    xw[3*nc1+1] += xyweight;
+			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+				{
+				xw[3*nc1]   += xyweight;
+				xw[3*nc1+1] += xyweight;
+				}
 			    xw[3*nc1+2] += zweight;
-			    xw[3*nc2]   += xyweight;
-			    xw[3*nc2+1] += xyweight;
+			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+				{
+				xw[3*nc2]   += xyweight;
+				xw[3*nc2+1] += xyweight;
+				}
 			    xw[3*nc2+2] += zweight;
 /* fprintf(stderr,"semi-vertical:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xs[3*nc1],xs[3*nc1+1],xs[3*nc1+2],

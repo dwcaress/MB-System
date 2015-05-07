@@ -48,9 +48,16 @@
 #include "MB3DNavList.h"
 
 /* OpenGL include files */
+#ifdef WIN32
+#undef BOOL		/* It was defined by a chain of inclusions in the (patched) X11/Xmd.h */
+#include <windows.h>
+#endif
+
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glx.h>
+#ifndef WIN32
+#	include <GL/glx.h>
+#endif
 #include "mb_glwdrawa.h"
 
 /* MBIO include files */

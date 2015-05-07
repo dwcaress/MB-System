@@ -53,6 +53,8 @@ int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
@@ -87,6 +89,8 @@ int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -117,6 +121,8 @@ int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
         
@@ -139,6 +145,8 @@ int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 	
@@ -154,6 +162,11 @@ int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(wcd_navi->wcdata_y), error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(wcd_navi->wcdata_mag), error);
 		wcd_navi->wcdata_alloc = 0;
+		}
+	if (sensprop->n_alloc > 0)
+		{
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(sensprop->sensors), error);
+		sensprop->n_alloc = 0;
 		}
 	if (sys_cfg1->sys_cfg1_data_alloc > 0)
 		{
@@ -192,6 +205,8 @@ int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
@@ -217,6 +232,8 @@ int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 	
@@ -270,6 +287,8 @@ int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
@@ -294,6 +313,8 @@ int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -328,6 +349,8 @@ int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
@@ -353,6 +376,8 @@ int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -394,6 +419,8 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	double	headingx, headingy;
@@ -421,6 +448,8 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -710,6 +739,8 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	double	headingx, headingy;
@@ -780,6 +811,8 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -884,6 +917,8 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	double	alpha, beta, theta, phi;
@@ -917,6 +952,8 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -1017,6 +1054,8 @@ int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	int	i;
@@ -1044,6 +1083,8 @@ int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -1132,6 +1173,8 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
@@ -1157,6 +1200,8 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -1237,6 +1282,8 @@ int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
@@ -1262,6 +1309,8 @@ int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -1335,6 +1384,8 @@ int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	int	i;
@@ -1361,6 +1412,8 @@ int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 
@@ -1499,6 +1552,8 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
         struct mbsys_wassp_gen_sens_struct *gen_sens;
         struct mbsys_wassp_nvupdate_struct *nvupdate;
         struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+        struct mbsys_wassp_sensprop_struct *sensprop;
+        struct mbsys_wassp_sys_prop_struct *sys_prop;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	int	i;
@@ -1541,6 +1596,8 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
         gen_sens = (struct mbsys_wassp_gen_sens_struct *) &(store->gen_sens);
         nvupdate = (struct mbsys_wassp_nvupdate_struct *) &(store->nvupdate);
         wcd_navi = (struct mbsys_wassp_wcd_navi_struct *) &(store->wcd_navi);
+        sensprop = (struct mbsys_wassp_sensprop_struct *) &(store->sensprop);
+        sys_prop = (struct mbsys_wassp_sys_prop_struct *) &(store->sys_prop);
         sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *) &(store->sys_cfg1);
         mcomment = (struct mbsys_wassp_mcomment_struct *) &(store->mcomment);
 

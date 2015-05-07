@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2238],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2239],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "15 April 2015", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "6 May 2015", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -72,7 +72,7 @@ AS_ECHO([" "])
 AS_ECHO(["        # Reset the autotools version to 2.65 to accomodate some Linux distributions"])
 AS_ECHO(["        sed -i.bak s/2\.69/2\.65/ configure.ac"])
 AS_ECHO([" "])
-AS_ECHO(["    When you run ./configure, a number of configure options are saved  to a"])
+AS_ECHO(["    When you run ./configure, a number of configure options are saved to a"])
 AS_ECHO(["    header file:"])
 AS_ECHO(["        ./src/mbio/mb_config.h"])
 AS_ECHO(["    This file has a template:"])
@@ -80,11 +80,6 @@ AS_ECHO(["        ./src/mbio/mb_config.h.in"])
 AS_ECHO(["    This file is conditionally included by:"])
 AS_ECHO(["        ./src/mbio/mb_define.h"])
 AS_ECHO(["    which is in turn included by essentially every MB-System C source file."])
-AS_ECHO(["    The condition under which mb_config.h is used is simply the use of the"])
-AS_ECHO(["    configure script to generate the makefiles. If one uses the alternate"])
-AS_ECHO(["    install_makefiles build system, then an alternate header file named"])
-AS_ECHO(["        ./src/mbio/mb_config2.h"])
-AS_ECHO(["    is used instead."])
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    To use the build system..."])
@@ -203,95 +198,88 @@ AC_CHECK_FUNC(xdrmem_create, XDR_LIB=, [
 ], -lws2_32 )])])])])
 AC_SUBST(XDR_LIB)
 
-dnl check for OTPS arg
-dnl TODO add actual check and disable if not found
-AS_ECHO(["Check for OSU Tidal Prediction Software"])
-dnl initialize with defaut
+dnl Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps_dir, use default otherwise
+AS_ECHO(["Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps_dir, use default otherwise"])
 OTPS_DIR="/usr/local/OTPSnc"
-dnl check for command line option and reset
 AC_ARG_WITH(otps_dir, [  --with-otps_dir=DIR        Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
 AC_SUBST(OTPS_DIR)
 
-dnl Check for NetCDF lib
-AS_ECHO(["Check for NetCDF"])
+dnl Check for netCDF library
+AS_ECHO(["Check for netCDF library libnetcdf"])
 GOT_CDF=no
 CDF_SETTING=no
-dnl first check for package
-PKG_CHECK_MODULES([libnetcdf], [netcdf], [GOT_CDF=yes], [GOT_CDF=no])
-
-dnl Package check failed so check manually
-if test "$GOT_CDF" = "no" ; then
-
-libnetcdf_LIBS="-lnetcdf"
-libnetcdf_LDFLAGS=
-
-dnl arg for command line
+dnl First check if netcdf location specified on the command line
 AC_ARG_WITH(netcdf-lib, [  --with-netcdf-lib=DIR	Location of NetCDF library],
 	[netcdf_libdir="${withval}"] [GOT_CDF=yes], [GOT_CDF=no])
-dnl First check if lib installed
-if test "$GOT_CDF" = "no" ; then
- AC_CHECK_LIB([netcdf], [nc_open], [CDF_SETTING=yes], [CDF_SETTING=no],)
-fi
- if test "$CDF_SETTING" = "yes" ; then
-    GOT_CDF=yes
-    AS_ECHO(["Using pre-installed libcdf."])
- else
-    if test "$GOT_CDF" = "no" ; then
-	AC_MSG_ERROR([Did not find libnetcdf, use --with-netcdf-lib])
-    else
-	AS_ECHO(["Looking for libnetcdf in $netcdf_libdir ..."])
-	save_LDFLAGS=$LDFLAGS
-	LDFLAGS="$LDFLAGS -L$netcdf_libdir"
-	AC_CHECK_LIB([netcdf], [nc_open], [CDF_SETTING=yes], [CDF_SETTING=no], )
-	LDFLAGS="$save_LDFLAGS"
-	if test "$CDF_SETTING" = "no"; then
-	   AC_MSG_ERROR([Did not find libnetcdf, use --with-netcdf-lib or check installation])
-	fi
-	libnetcdf_LIBS="-L$netcdf_libdir -R $netcdf_libdir $libnetcdf_LIBS"
-#
-#       Save the netcdf library path for later gmt tests
-#
-	libnetcdf_LDFLAGS="-L$netcdf_libdir"
+if test "$GOT_CDF" = "yes" ; then
+    dnl NetCDF library location specified: $netcdf_libdir - check if libnetcdf is there...
+    AS_ECHO(["NetCDF library location specified: $netcdf_libdir - check if libnetcdf is there..."])
+    save_LDFLAGS=$LDFLAGS
+    LDFLAGS="$LDFLAGS -L$netcdf_libdir"
+    AC_CHECK_LIB([netcdf], [nc_open], [CDF_SETTING=yes], [CDF_SETTING=no], )
+    LDFLAGS="$save_LDFLAGS"
+    if test "$CDF_SETTING" = "no"; then
+	AC_MSG_ERROR([Did not find libnetcdf according to --with-netcdf-lib - check the installation!])
     fi
- fi
- dnl Use ac_subst to set vars that would be set by pkg_check
- AC_SUBST([libnetcdf_LIBS], ["$libnetcdf_LIBS"])
+    libnetcdf_LIBS="-L$netcdf_libdir -R $netcdf_libdir -lnetcdf"
+    libnetcdf_LDFLAGS="-L$netcdf_libdir"
+else
+    dnl Look for pkg-config netCDF package...
+    AS_ECHO(["Look for pkg-config netCDF package..."])
+    PKG_CHECK_MODULES([libnetcdf], [netcdf], [GOT_CDF=yes], [GOT_CDF=no])
+    libnetcdf_LIBS="-lnetcdf"
+    libnetcdf_LDFLAGS=""
 fi
-dnl done with CDF lib
+if test "$GOT_CDF" = "no" ; then
+    dnl Did not find netCDF library pkg-config package, looking in the usual places...
+    AS_ECHO(["Did not find netCDF library pkg-config package, looking in the usual places..."])
+    AC_CHECK_LIB([netcdf], [nc_open], [CDF_SETTING=yes], [CDF_SETTING=no],)
+    if test "$CDF_SETTING" = "yes" ; then
+        GOT_CDF=yes
+        AS_ECHO(["Using pre-installed libnetcdf..."])
+        libnetcdf_LIBS="-lnetcdf"
+        libnetcdf_LDFLAGS=""
+    else
+        AS_ECHO(["Did not find netCDF library anywhere, use --with-netcdf-lib to set the location"])
+        AC_MSG_ERROR([Did not find netCDF library anywhere, use --with-netcdf-lib to set the location])
+    fi
+fi
+dnl Done checking for netCDF library libnetcdf
 
-dnl Now check CDF headers
+dnl Check for netCDF headers
+AS_ECHO(["Check for netCDF headers"])
 GOT_CDF=no
 CDF_SETTING=no
-dnl add command line option
+dnl First check if netcdf location specified on the command line
 AC_ARG_WITH(netcdf-include, [  --with-netcdf-include=DIR	Location of NetCDF headers],
 	[libnetcdf_CPPFLAGS="-I${withval}"] [GOT_CDF=yes], [GOT_CDF=no])
-dnl First check if cdf headers installed
-if test "$GOT_CDF" = "no" ; then
- AC_CHECK_HEADER(netcdf.h, [CDF_SETTING=yes], [CDF_SETTING=no])
-fi
- if test "$CDF_SETTING" = "yes" ; then
-    GOT_CDF=yes
-    AS_ECHO(["Using pre-installed NetCDF headers."])
- else
-    if test "$GOT_CDF" = "no" ; then
-	AC_MSG_ERROR([Did not find required NetCDF headers, use --with-netcdf-include])
-    else
-	AS_ECHO(["Checking netcdf.h in $libnetcdf_CPPFLAGS..."])
-	save_CPPFLAGS=$CPPFLAGS
-	save_CFLAGS=$CFLAGS
-	CPPFLAGS="$CPPFLAGS $libnetcdf_CPPFLAGS"
-	CFLAGS="$CFLAGS $libnetcdf_CPPFLAGS"
-	AC_CHECK_HEADER(netcdf.h, [CDF_SETTING=yes], [CDF_SETTING=no],)
-	CPPFLAGS=$save_CPPFLAGS
-	CFLAGS=$save_CFLAGS
-	if test "$CDF_SETTING" = "no"; then
-	   AC_MSG_ERROR([Did not find required NetCDF headers, use --with-netcdf-include])
-	fi
+if test "$GOT_CDF" = "yes" ; then
+    dnl NetCDF header location specified: $libnetcdf_CPPFLAGS - check if netcdf.h is there...
+    AS_ECHO(["NetCDF header location specified: $libnetcdf_CPPFLAGS - check if netcdf.h is there..."])
+    save_CPPFLAGS=$CPPFLAGS
+    save_CFLAGS=$CFLAGS
+    CPPFLAGS="$CPPFLAGS $libnetcdf_CPPFLAGS"
+    CFLAGS="$CFLAGS $libnetcdf_CPPFLAGS"
+    AC_CHECK_HEADER(netcdf.h, [CDF_SETTING=yes], [CDF_SETTING=no],)
+    CPPFLAGS=$save_CPPFLAGS
+    CFLAGS=$save_CFLAGS
+    if test "$CDF_SETTING" = "no"; then
+	AC_MSG_ERROR([Did not find netcdf.h according to --with-netcdf-include - check the installation!])
     fi
- fi
+else
+    dnl Looking for netCDF headers in the usual places...
+    AS_ECHO(["Looking for netCDF headers in the usual places..."])
+    AC_CHECK_HEADER(netcdf.h, [CDF_SETTING=yes], [CDF_SETTING=no])
+    if test "$CDF_SETTING" = "yes" ; then
+        GOT_CDF=yes
+        AS_ECHO(["Using pre-installed netCDF headers..."])
+    else
+        AS_ECHO(["Did not find netCDF headers anywhere, use --with-netcdf-include to set the location"])
+        AC_MSG_ERROR([Did not find netCDF headers anywhere, use --with-netcdf-include to set the location])
+    fi
+fi
 AC_SUBST([libnetcdf_CPPFLAGS], [$libnetcdf_CPPFLAGS])
-dnl done with CDF headers
-
+dnl Done checking for netCDF headers
 
 dnl check whether to use bundled proj package or link with external libproj
 AC_ARG_ENABLE(bundledproj, [AS_HELP_STRING([--enable-bundledproj], [build and use the bundled proj package])],
@@ -344,9 +332,6 @@ else
                AC_MSG_ERROR([Did not find libproj, use --with-proj-lib or check installation])
             fi
             libproj_LIBS="-L$proj_libdir -R $proj_libdir $libproj_LIBS"
-    #
-    #       Save the proj library path for later gmt tests
-    #
             libproj_LDFLAGS="-L$proj_libdir"
         fi
      fi
