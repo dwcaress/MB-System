@@ -3500,7 +3500,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
-	/* look for a WASSP *nwsf file format convention*/
+	/* look for a WASSP *.nwsf file format convention*/
 	if (found == MB_NO)
 	    {
 	    if (strlen(filename) >= 6)
@@ -3508,10 +3508,10 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	    else
 		i = 0;
 	    if ((suffix = strstr(&filename[i],".nwsf")) != NULL)
-		suffix_len = 4;
+		suffix_len = 5;
 	    else
 		suffix_len = 0;
-	    if (suffix_len == 4)
+	    if (suffix_len == 5)
 		{
 		if (fileroot != NULL)
 		    {

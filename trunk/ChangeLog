@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2240       May 8, 2015
   Version 5.5.2239       May 6, 2015
   Version 5.5.2238       April 14, 2015
   Version 5.5.2237       March 23, 2015
@@ -205,7 +206,13 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2239 (April 14, 2015)
+-----> 5.5.2240 (May 8, 2015)
+
+Format 241 (MBF_WASSPENL): Fixed recognition of *.nwsf suffix.
+
+Mbclean: fixed bug in beam position calculation identified by Joaquim Luis.
+
+-----> 5.5.2239 (May 6, 2015)
 
 Format 241 (MBF_WASSPENL): Now supports WASSP multibeam data conforming to
 the WASSP ICD 2.4. MB-System is storing beam flags in unused bytes in the

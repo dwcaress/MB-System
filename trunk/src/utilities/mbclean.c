@@ -942,24 +942,27 @@ int main (int argc, char **argv)
 						    &mtodeglon,&mtodeglat);
 				headingx = sin(ping[nrec].heading*DTR);
 				headingy = cos(ping[nrec].heading*DTR);
-				for (i=0;i<ping[nrec].beams_bath;i++)
+				for (j=0;j<=nrec;j++)
 					{
-					ping[nrec].bathx[i] = (ping[nrec].navlon
-							    - ping[nrec].navlon) / mtodeglon
-							+ headingy * ping[nrec].bathacrosstrack[i];
-					ping[nrec].bathy[i] = (ping[nrec].navlat
-							    - ping[nrec].navlat) / mtodeglat
-							- headingx * ping[nrec].bathacrosstrack[i];
+					for (i=0;i<ping[j].beams_bath;i++)
+						{
+						ping[j].bathx[i] = (ping[j].navlon - ping[0].navlon) / mtodeglon
+							+ headingy * ping[j].bathacrosstrack[i]
+							+ headingx * ping[j].bathalongtrack[i];
+						ping[j].bathy[i] = (ping[j].navlat - ping[0].navlat) / mtodeglat
+							- headingx * ping[j].bathacrosstrack[i]
+							+ headingy * ping[j].bathalongtrack[i];
+						}
 					}
 				if (verbose >= 2)
 					{
-					fprintf(stderr,"\ndbg2  center beam locations:\n");
-					for (j=0;j<nrec;j++)
-						{
-						fprintf(stderr,"dbg2    ping[%d] x:%f    y:%f\n",
-								j,ping[j].bathx[ping[j].beams_bath/2],
-								ping[j].bathy[ping[j].beams_bath/2]);
-						}
+					fprintf(stderr,"\ndbg2  beam locations (ping:beam xxx.xxx yyy.yyy)\n");
+					for (j=0;j<=nrec;j++)
+						for (i=0;i<ping[j].beams_bath;i++)
+							{
+							fprintf(stderr,"dbg2    %d:%3.3d %10.3f %10.3f\n",
+									j, i, ping[j].bathx[i], ping[j].bathy[i]);
+							}
 					}
 
 				/* if requested set all edit timestamps within tolerance of
@@ -1849,16 +1852,13 @@ int main (int argc, char **argv)
 				    ping[j].beams_bath = ping[j+1].beams_bath;
 				    for (i=0;i<ping[j].beams_bath;i++)
 					{
-					ping[j].beamflag[i] =
-						ping[j+1].beamflag[i];
-					ping[j].beamflagorg[i] =
-						ping[j+1].beamflagorg[i];
-					ping[j].bath[i] =
-						ping[j+1].bath[i];
-					ping[j].bathacrosstrack[i] =
-						ping[j+1].bathacrosstrack[i];
-					ping[j].bathalongtrack[i] =
-						ping[j+1].bathalongtrack[i];
+					ping[j].beamflag[i] = ping[j+1].beamflag[i];
+					ping[j].beamflagorg[i] = ping[j+1].beamflagorg[i];
+					ping[j].bath[i] = ping[j+1].bath[i];
+					ping[j].bathacrosstrack[i] = ping[j+1].bathacrosstrack[i];
+					ping[j].bathalongtrack[i] = ping[j+1].bathalongtrack[i];
+					ping[j].bathx[i] = ping[j+1].bathx[i];
+					ping[j].bathy[i] = ping[j+1].bathy[i];
 					}
 				    }
 				}
