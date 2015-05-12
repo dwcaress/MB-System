@@ -21,141 +21,6 @@
  * Author:	D. W. Caress
  * Date:	September 11, 2000
  *
- * $Log: mb_process.c,v $
- * Revision 5.40  2009/03/09 16:58:31  caress
- * Release 5.1.2beta01
- *
- * Revision 5.39  2009/03/02 18:51:52  caress
- * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
- *
- * Revision 5.38  2008/09/11 20:11:52  caress
- * Checking in updates made during cruise AT15-36.
- *
- * Revision 5.37  2008/05/26 04:43:15  caress
- * Getting ready for release 5.1.1beta19.
- *
- * Revision 5.36  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.35  2007/10/08 15:59:34  caress
- * MBIO changes as of 8 October 2007.
- *
- * Revision 5.34  2006/01/06 18:27:19  caress
- * Working towards 5.0.8
- *
- * Revision 5.33  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.32  2005/03/25 04:16:41  caress
- * Added sonar depth merging to mbprocess.
- *
- * Revision 5.31  2005/02/08 22:37:38  caress
- * Heading towards 5.0.6 release.
- *
- * Revision 5.30  2004/12/18 01:34:43  caress
- * Working towards release 5.0.6.
- *
- * Revision 5.29  2004/12/02 06:33:30  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.28  2004/10/06 19:04:24  caress
- * Release 5.0.5 update.
- *
- * Revision 5.27  2004/09/16 01:11:48  caress
- * Fixed how esf file path is determined.
- *
- * Revision 5.26  2003/04/18 00:35:42  caress
- * Added capability to look for svp files with lookforfiles=2.
- *
- * Revision 5.25  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.24  2003/04/16 16:47:41  caress
- * Release 5.0.beta30
- *
- * Revision 5.23  2002/09/07 04:48:34  caress
- * Added slope mode option to mb_process.
- *
- * Revision 5.22  2002/07/25 19:09:04  caress
- * Release 5.0.beta21
- *
- * Revision 5.21  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.20  2002/05/29 23:36:53  caress
- * Release 5.0.beta18
- *
- * Revision 5.19  2002/05/02 03:55:34  caress
- * Release 5.0.beta17
- *
- * Revision 5.18  2002/04/06 02:43:39  caress
- * Release 5.0.beta16
- *
- * Revision 5.17  2001/12/20 21:03:18  caress
- * Release 5.0.beta11
- *
- * Revision 5.16  2001/12/18  04:27:45  caress
- * Release 5.0.beta11.
- *
- * Revision 5.15  2001/11/16  01:30:02  caress
- * Fixed handling of paths.
- *
- * Revision 5.14  2001/11/04  00:14:41  caress
- * Fixed handling of angle_mode
- *
- * Revision 5.13  2001/10/19 19:41:09  caress
- * Now uses relative paths.
- *
- * Revision 5.12  2001/10/19  00:54:37  caress
- * Now tries to use relative paths.
- *
- * Revision 5.11  2001/09/17  23:22:51  caress
- * Fixed metadata support.
- *
- * Revision 5.10  2001/08/10  22:41:19  dcaress
- * Release 5.0.beta07
- *
-\ * Revision 5.9  2001-08-03 18:00:02-07  caress
- * Added cut by speed.
- *
- * Revision 5.8  2001/07/31  00:40:52  caress
- * Added data cutting capability.
- *
- * Revision 5.7  2001/07/27  19:07:16  caress
- * Added data cutting.
- *
- * Revision 5.6  2001/07/20 00:31:11  caress
- * Release 5.0.beta03
- *
- * Revision 5.5  2001/06/08  21:44:01  caress
- * Version 5.0.beta01
- *
- * Revision 5.4  2001/06/03  06:54:56  caress
- * Improved handling of lever calculation.
- *
- * Revision 5.3  2001/06/01  00:14:06  caress
- * Added support for metadata insertion.
- *
- * Revision 5.2  2001/03/22  20:45:56  caress
- * Trying to make 5.0.beta0...
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.2  2000/10/11  01:02:30  caress
- * Convert to ANSI C
- *
- * Revision 4.1  2000/10/03  21:46:59  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  2000/09/30  06:28:42  caress
- * Snapshot for Dale.
- *
- *
- *
  */
 
 /* standard include files */
@@ -534,11 +399,14 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		{
 		if (buffer[0] != '#')
 		    {
-		    if (strlen(buffer) > 0)
-			    {
-			    if (buffer[strlen(buffer)-1] == '\n')
-				    buffer[strlen(buffer)-1] = '\0';
-			    }
+		    len = strlen(buffer);
+		    if (len > 0)
+			{
+			if (buffer[len-1] == '\n')
+			    buffer[len-1] = '\0';
+			if (buffer[len-2] == '\r')
+			    buffer[len-2] = '\0';
+			}
 
 		    /* general parameters */
 		    if (strncmp(buffer, "EXPLICIT", 8) == 0)
@@ -1225,7 +1093,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 
 	/* Now make input file global if local */
 	process->mbp_ifile_specified = MB_YES;
-	if (file[0] != '/')
+	if (file[0] != '/' && file[1] != ':')
 	    {
 	    bufptr = getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
 	    strcat(process->mbp_ifile, "/");
@@ -1243,7 +1111,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    }
 
 	/* Make output file global if local */
-	if (process->mbp_ofile[0] != '/')
+	if (process->mbp_ofile[0] != '/' && process->mbp_ofile[1] != ':')
 	    {
 	    lastslash = strrchr(process->mbp_ifile, '/');
 	    if (lastslash != NULL)
@@ -1440,7 +1308,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset navadj file */
 	if (len > 1
 	    && strlen(process->mbp_navadjfile) > 1
-	    && process->mbp_navadjfile[0] != '/')
+	    && process->mbp_navadjfile[0] != '/' && process->mbp_navadjfile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_navadjfile);
 	    strncpy(process->mbp_navadjfile, process->mbp_ifile, len);
@@ -1451,7 +1319,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset nav file */
 	if (len > 1
 	    && strlen(process->mbp_navfile) > 1
-	    && process->mbp_navfile[0] != '/')
+	    && process->mbp_navfile[0] != '/' && process->mbp_navfile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_navfile);
 	    strncpy(process->mbp_navfile, process->mbp_ifile, len);
@@ -1462,7 +1330,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset attitude file */
 	if (len > 1
 	    && strlen(process->mbp_attitudefile) > 1
-	    && process->mbp_attitudefile[0] != '/')
+	    && process->mbp_attitudefile[0] != '/' && process->mbp_attitudefile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_attitudefile);
 	    strncpy(process->mbp_attitudefile, process->mbp_ifile, len);
@@ -1473,7 +1341,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset sonardepth file */
 	if (len > 1
 	    && strlen(process->mbp_sonardepthfile) > 1
-	    && process->mbp_sonardepthfile[0] != '/')
+	    && process->mbp_sonardepthfile[0] != '/' && process->mbp_sonardepthfile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_sonardepthfile);
 	    strncpy(process->mbp_sonardepthfile, process->mbp_ifile, len);
@@ -1484,7 +1352,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset svp file */
 	if (len > 1
 	    && strlen(process->mbp_svpfile) > 1
-	    && process->mbp_svpfile[0] != '/')
+	    && process->mbp_svpfile[0] != '/' && process->mbp_svpfile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_svpfile);
 	    strncpy(process->mbp_svpfile, process->mbp_ifile, len);
@@ -1495,7 +1363,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset edit file */
 	if (len > 1
 	    && strlen(process->mbp_editfile) > 1
-	    && process->mbp_editfile[0] != '/')
+	    && process->mbp_editfile[0] != '/' && process->mbp_editfile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_editfile);
 	    strncpy(process->mbp_editfile, process->mbp_ifile, len);
@@ -1506,7 +1374,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset static file */
 	if (len > 1
 	    && strlen(process->mbp_staticfile) > 1
-	    && process->mbp_staticfile[0] != '/')
+	    && process->mbp_staticfile[0] != '/' && process->mbp_staticfile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_staticfile);
 	    strncpy(process->mbp_staticfile, process->mbp_ifile, len);
@@ -1517,7 +1385,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset tide file */
 	if (len > 1
 	    && strlen(process->mbp_tidefile) > 1
-	    && process->mbp_tidefile[0] != '/')
+	    && process->mbp_tidefile[0] != '/' && process->mbp_tidefile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_tidefile);
 	    strncpy(process->mbp_tidefile, process->mbp_ifile, len);
@@ -1528,7 +1396,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset amplitude correction file */
 	if (len > 1
 	    && strlen(process->mbp_ampcorrfile) > 1
-	    && process->mbp_ampcorrfile[0] != '/')
+	    && process->mbp_ampcorrfile[0] != '/' && process->mbp_ampcorrfile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_ampcorrfile);
 	    strncpy(process->mbp_ampcorrfile, process->mbp_ifile, len);
@@ -1539,7 +1407,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset sidescan correction file */
 	if (len > 1
 	    && strlen(process->mbp_sscorrfile) > 1
-	    && process->mbp_sscorrfile[0] != '/')
+	    && process->mbp_sscorrfile[0] != '/' && process->mbp_sscorrfile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_sscorrfile);
 	    strncpy(process->mbp_sscorrfile, process->mbp_ifile, len);
@@ -1550,7 +1418,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* reset mbp_ampsscorr_topo file */
 	if (len > 1
 	    && strlen(process->mbp_ampsscorr_topofile) > 1
-	    && process->mbp_ampsscorr_topofile[0] != '/')
+	    && process->mbp_ampsscorr_topofile[0] != '/' && process->mbp_ampsscorr_topofile[1] != ':')
 	    {
 	    strcpy(dummy, process->mbp_ampsscorr_topofile);
 	    strncpy(process->mbp_ampsscorr_topofile, process->mbp_ifile, len);

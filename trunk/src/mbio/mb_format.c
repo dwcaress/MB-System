@@ -4453,12 +4453,17 @@ int cvt_to_nix_path(char *path)
 {
 	/* Replace back slashes by slashes and trim first two chars in paths like "C:/path" */
 	size_t k, len = strlen(path);
+	
+	if (len == 0) return(0);
 	for (k = 0; k < len; k++)
 		if (path[k] == '\\') path[k] = '/';
 
 	if (path[1] == ':')
-		for (k = 0; k < len-2; k++)
-			path[k] = path[k+2];
+		{
+		for (k = 0; k < len - 2; k++)
+			path[k] = path[k + 2];
+		path[len - 2] = '\0';	/* Make sure it's null terminated */
+		}
 
 	return(0);
 }
@@ -4662,6 +4667,11 @@ int mb_get_shortest_path(int verbose,
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       path:          %s\n",path);
 		}
+
+#ifdef WIN32
+	/* No path hammerings here. Too dangerous */
+	//return(status);
+#endif
 
 	/* loop until no changes are made */
 	done = MB_NO;
