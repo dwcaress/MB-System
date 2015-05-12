@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2241       May 12, 2015
   Version 5.5.2240       May 8, 2015
   Version 5.5.2239       May 6, 2015
   Version 5.5.2238       April 14, 2015
@@ -205,6 +206,14 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2241 (May 12, 2015)
+
+Format 59 (MBF_EM710MBA): Fixed flag causing erroneous warning that beam flags
+are not supported for this format (beam flags are supported).
+
+Many source files: further changes to precompiler directives suggested by Joaquim Luis
+in order to enable building under Windows.
 
 -----> 5.5.2240 (May 8, 2015)
 

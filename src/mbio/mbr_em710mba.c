@@ -406,7 +406,7 @@ int mbr_info_em710mba(int verbose,
 	*filetype = MB_FILETYPE_SINGLE;
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
-	*beam_flagging = MB_NO;
+	*beam_flagging = MB_YES;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;

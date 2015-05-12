@@ -34,6 +34,7 @@
 #define THIS_MODULE_NAME	"mbswath"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Plot swath bathymetry, amplitude, or backscatter"
+#define THIS_MODULE_KEYS	""
 
 /* GMT5 header file */
 #include "gmt_dev.h"
@@ -127,32 +128,32 @@ struct swath
 struct MBSWATH_CTRL {
 
         /* mbswath variables */
-        double  bounds[4];
-        int     image_type;
-        double  mtodeglon;
-        double  mtodeglat;
-        double  clipx[4];
-        double  clipy[4];
+	double  bounds[4];
+	int     image_type;
+	double  mtodeglon;
+	double  mtodeglat;
+	double  clipx[4];
+	double  clipy[4];
 	double  x_inc;
 	double  y_inc;
 	double  x_side;
 	double  y_side;
-        double  x0;
-        double  y0;
+	double  x0;
+	double  y0;
 	double  x_inch;
 	double  y_inch;
-         int     nx;
-        int     ny;
-        int     nm;
-        int     nm2;
+	int     nx;
+	int     ny;
+	int     nm;
+	int     nm2;
 	unsigned char *bitimage;
-        int     format;
+	int     format;
 	double	beamwidth_xtrack;
 	double	beamwidth_ltrack;
-        double  footprint_factor;
+	double  footprint_factor;
 	double	btime_d;
 	double	etime_d;
-        int     read_datalist;
+	int     read_datalist;
 	int	read_data;
 	void	*datalist;
 	double	file_weight;
@@ -167,8 +168,8 @@ struct MBSWATH_CTRL {
 	struct mbswath_A {	/* -A<factor>/<mode>/<depth> */
 		bool active;
 		double factor;
-                int mode;
-                double depth;
+		int mode;
+		double depth;
 	} A;
 	struct mbswath_b {	/* -b<year>/<month>/<day>/<hour>/<minute>/<second> */
 		bool active;
@@ -201,7 +202,7 @@ struct MBSWATH_CTRL {
 	struct mbswath_G {	/* -G<magnitude>/<azimuth | median> */
 		bool active;
 		double magnitude;
-                double azimuth;
+		double azimuth;
 	} G;
 	struct mbswath_I {	/* -I<inputfile> */
 		bool active;
@@ -209,12 +210,16 @@ struct MBSWATH_CTRL {
 	} I;
 	struct mbswath_L {	/* -L<lonflip> */
 		bool active;
-                int lonflip;
+		int lonflip;
 	} L;
 	struct mbswath_N {	/* -N<cptfile> */
 		bool active;
-                char *cptfile;
+		char *cptfile;
 	} N;
+	struct mswath_p {	/* -p<pings> */
+		bool active;
+		int pings;
+	} p;
 	struct mbswath_S {	/* -S<speed> */
 		bool active;
 		double speed;
@@ -228,9 +233,9 @@ struct MBSWATH_CTRL {
 	} W;
 	struct mbswath_Z {	/* -Z<mode> */
 		bool active;
-                int mode;
-                int filter;
-                int usefiltered;
+		int mode;
+		int filter;
+		int usefiltered;
 	} Z;
 };
 
@@ -252,12 +257,12 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 
 void *New_mbswath_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct MBSWATH_CTRL *Ctrl;
-        int     status;
-        int     verbose = 0;
-        double  dummybounds[4];
-        int     dummyformat;
-        int     dummypings;
-        int     i;
+	int     status;
+	int     verbose = 0;
+	double  dummybounds[4];
+	int     dummyformat;
+	int     dummypings;
+	int     i;
 
 	Ctrl = GMT_memory (GMT, NULL, 1, struct MBSWATH_CTRL);
 
@@ -267,26 +272,27 @@ void *New_mbswath_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new
 	status = mb_defaults(verbose, &dummyformat, &dummypings, &Ctrl->L.lonflip, dummybounds,
 		Ctrl->b.time_i, Ctrl->e.time_i, &Ctrl->S.speed, &Ctrl->T.timegap);
 
-        Ctrl->A.factor = 1.0;
+	Ctrl->A.factor = 1.0;
 	Ctrl->A.mode = MBSWATH_FOOTPRINT_REAL;
-        Ctrl->A.depth = 0.0;
-        Ctrl->C.cptfile = NULL;
-        Ctrl->D.mode = 1;
-        Ctrl->D.ampscale = 1.0;
-        Ctrl->D.ampmin = 0.0;
-        Ctrl->D.ampmax = 1.0;
-        Ctrl->E.device_dpi = 0;
-        Ctrl->E.dpi = 100;
-        Ctrl->F.format = 0;
-        Ctrl->G.magnitude = 1.0;
-        Ctrl->G.azimuth = 270.0;
-        Ctrl->I.inputfile = NULL;
-        Ctrl->N.cptfile = NULL;
-        Ctrl->S.speed = 0.0;
-        Ctrl->T.timegap = 1.0;
+	Ctrl->A.depth = 0.0;
+	Ctrl->C.cptfile = NULL;
+	Ctrl->D.mode = 1;
+	Ctrl->D.ampscale = 1.0;
+	Ctrl->D.ampmin = 0.0;
+	Ctrl->D.ampmax = 1.0;
+	Ctrl->E.device_dpi = 0;
+	Ctrl->E.dpi = 100;
+	Ctrl->F.format = 0;
+	Ctrl->G.magnitude = 1.0;
+	Ctrl->G.azimuth = 270.0;
+	Ctrl->I.inputfile = NULL;
+	Ctrl->N.cptfile = NULL;
+	Ctrl->p.pings = 1;
+	Ctrl->S.speed = 0.0;
+	Ctrl->T.timegap = 1.0;
 	Ctrl->Z.mode = MBSWATH_BATH;
-        Ctrl->Z.filter = 0;
-        Ctrl->Z.usefiltered = MB_NO;
+	Ctrl->Z.filter = 0;
+	Ctrl->Z.usefiltered = MB_NO;
         
         /* mbswath variables */
         for (i=0;i<4;i++)
@@ -295,31 +301,31 @@ void *New_mbswath_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new
                 Ctrl->clipx[i] = 0.0;
                 Ctrl->clipy[i] = 0.0;
                 }
-        Ctrl->image_type = MBSWATH_IMAGE_24;
-        Ctrl->mtodeglon = 0.0;
-        Ctrl->mtodeglat = 0.0;
-        Ctrl->x_inch = 0.0;
-        Ctrl->y_inch = 0.0;
+	Ctrl->image_type = MBSWATH_IMAGE_24;
+	Ctrl->mtodeglon = 0.0;
+	Ctrl->mtodeglat = 0.0;
+	Ctrl->x_inch = 0.0;
+	Ctrl->y_inch = 0.0;
 	Ctrl->x_inc = 0.0;
 	Ctrl->y_inc = 0.0;
 	Ctrl->x_side = 0.0;
 	Ctrl->y_side = 0.0;
-        Ctrl->x0 = 0.0;
-        Ctrl->y0 = 0.0;
-        Ctrl->nx = 0;
-        Ctrl->ny = 0;
-        Ctrl->nm = 0;
+	Ctrl->x0 = 0.0;
+	Ctrl->y0 = 0.0;
+	Ctrl->nx = 0;
+	Ctrl->ny = 0;
+	Ctrl->nm = 0;
 	Ctrl->bitimage = NULL;
-        Ctrl->format = 0;
+	Ctrl->format = 0;
 	Ctrl->beamwidth_xtrack = 0.0;
 	Ctrl->beamwidth_ltrack = 0.0;
 	Ctrl->btime_d = 0.0;
 	Ctrl->etime_d = 0.0;
-        Ctrl->read_datalist = MB_NO;
+	Ctrl->read_datalist = MB_NO;
 	Ctrl->read_data = 0;
 	Ctrl->datalist = NULL;
 	Ctrl->file_weight = 0.0;
-        Ctrl->file[0] = '\0';
+	Ctrl->file[0] = '\0';
 	Ctrl->filtermode = MBSWATH_FILTER_NONE;
 	Ctrl->beams_bath_max = 0;
 	Ctrl->beams_amp_max = 0;
@@ -352,7 +358,7 @@ int GMT_mbswath_usage (struct GMTAPI_CTRL *API, int level)
 	GMT_Message (API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", 
-			GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT, GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+	                                  GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT, GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
 
 	if (level == GMT_SYNOPSIS) return (EXIT_FAILURE);
 
@@ -368,8 +374,9 @@ int GMT_mbswath_usage (struct GMTAPI_CTRL *API, int level)
 	GMT_rgb_syntax (API->GMT, 'G', "Set transparency color for images that otherwise would result in 1-bit images.\n\t  ");
 	GMT_Option (API, "K");
 	GMT_Option (API, "O,P");
+	GMT_Message (API, GMT_TIME_NONE, "\t-p<pings> Sets the ping averaging of the input data [Default = 1, i.e. no ping average].\n");
 	GMT_Option (API, "R");
-	GMT_Option (API, "U,V,X,c,f,n,p,t,.");
+	GMT_Option (API, "U,V,X,c,.");
 
 	return (EXIT_FAILURE);
 }
@@ -393,37 +400,42 @@ int GMT_mbswath_parse (struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl, struct G
 		switch (opt->option) {
 			case '<':	/* Input file (only one or three is accepted) */
 				Ctrl->I.active = true;
-#if GMT_MINOR_VERSION == 1
- 				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN))
+#if GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
+ 				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN)) {
 #else
-				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET))
+				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET)) {
 #endif
-					{
 					Ctrl->I.inputfile = strdup (opt->arg);
 					n_files = 1;
-					}
-				else
+				}
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error: only one input file is allowed.\n");
 					n_errors++;
+				}
 				break;
 
 			/* Processes program-specific parameters */
 
 			case 'A':	/* footprint controls */
 				n = sscanf(opt->arg, "%lf/%d/%lf", &(Ctrl->A.factor), &(Ctrl->A.mode), &(Ctrl->A.depth));
-                                if (n > 0)
-                                        Ctrl->A.active = true;
-                                else
-                                        n_errors++;
+				if (n > 0)
+					Ctrl->A.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -A option: \n");
+					n_errors++;
+				}
  				break;
 			case 'b':	/* btime_i */
 				n = sscanf(opt->arg, "%d/%d/%d/%d/%d/%d",
-                                           &(Ctrl->b.time_i[0]), &(Ctrl->b.time_i[1]), &(Ctrl->b.time_i[2]),
-                                           &(Ctrl->b.time_i[3]), &(Ctrl->b.time_i[4]), &(Ctrl->b.time_i[5]));
-                                Ctrl->b.time_i[6] = 0;
-                                if (n == 6)
-                                        Ctrl->b.active = true;
-                                else
-                                        n_errors++;
+				           &(Ctrl->b.time_i[0]), &(Ctrl->b.time_i[1]), &(Ctrl->b.time_i[2]),
+				           &(Ctrl->b.time_i[3]), &(Ctrl->b.time_i[4]), &(Ctrl->b.time_i[5]));
+				Ctrl->b.time_i[6] = 0;
+				if (n == 6)
+					Ctrl->b.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -b option: \n");
+					n_errors++;
+				}
 				break;
 			case 'C':	/* CPT file */
 				Ctrl->C.active = true;
@@ -432,61 +444,67 @@ int GMT_mbswath_parse (struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl, struct G
 				break;
 			case 'D':	/* amplitude scaling */
 				n = sscanf(opt->arg, "%d/%lf/%lf/%lf",
-                                           &(Ctrl->D.mode), &(Ctrl->D.ampscale),
-                                           &(Ctrl->D.ampmin), &(Ctrl->D.ampmax));
-                                if (n > 0)
-                                        Ctrl->A.active = true;
-                                else
-                                        n_errors++;
+				           &(Ctrl->D.mode), &(Ctrl->D.ampscale),
+				           &(Ctrl->D.ampmin), &(Ctrl->D.ampmax));
+				if (n > 0)
+					Ctrl->D.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -D option: \n");
+					n_errors++;
+				}
  				break;
 			case 'E':	/* dpi */
-				if (strcmp(opt->arg, "i") == 0)
-                                        {
-                                        Ctrl->E.device_dpi = true;
-                                        Ctrl->E.active = true;
-                                        }
-                                else
-                                        {
-                                        n = sscanf(opt->arg, "%d", &(Ctrl->E.dpi));
-                                        if (n == 1)
-                                                Ctrl->E.active = true;
-                                        else
-                                                n_errors++;
-                                        }
+				if (strcmp(opt->arg, "i") == 0) {
+					Ctrl->E.device_dpi = true;
+					Ctrl->E.active = true;
+				}
+				else {
+					n = sscanf(opt->arg, "%d", &(Ctrl->E.dpi));
+					if (n == 1)
+						Ctrl->E.active = true;
+					else {
+						GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -E option: \n");
+						n_errors++;
+					}
+				}
 				break;
 			case 'e':	/* etime_i */
 				n = sscanf(opt->arg, "%d/%d/%d/%d/%d/%d",
-                                           &(Ctrl->e.time_i[0]), &(Ctrl->e.time_i[1]), &(Ctrl->e.time_i[2]),
-                                           &(Ctrl->e.time_i[3]), &(Ctrl->e.time_i[4]), &(Ctrl->e.time_i[5]));
-                                Ctrl->e.time_i[6] = 0;
-                                if (n == 6)
-                                        Ctrl->e.active = true;
-                                else
-                                        n_errors++;
+				           &(Ctrl->e.time_i[0]), &(Ctrl->e.time_i[1]), &(Ctrl->e.time_i[2]),
+				           &(Ctrl->e.time_i[3]), &(Ctrl->e.time_i[4]), &(Ctrl->e.time_i[5]));
+				Ctrl->e.time_i[6] = 0;
+				if (n == 6)
+					Ctrl->e.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -e option: \n");
+					n_errors++;
+				}
 				break;
 			case 'f':	/* format */
 			case 'F':	/* format */
 				n = sscanf(opt->arg, "%d", &(Ctrl->F.format));
-                                if (n == 1)
-                                        Ctrl->F.active = true;
-                                else
-                                        n_errors++;
+				if (n == 1)
+					Ctrl->F.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -F option: \n");
+					n_errors++;
+				}
 				break;
 			case 'G':	/* -G<magnitude>/<azimuth | median> */
 				n = sscanf(opt->arg, "%lf/%lf", &(Ctrl->G.magnitude), &(Ctrl->G.azimuth));
-                                if (n >= 1)
-                                        Ctrl->G.active = true;
-                                else
-                                        n_errors++;
+				if (n >= 1)
+					Ctrl->G.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -G option: \n");
+					n_errors++;
+				}
 				break;
-
 			case 'I':	/* -I<inputfile> */
 				Ctrl->I.active = true;
-				if (!GMT_access (GMT, opt->arg, R_OK))	/* Got a file */
-					{
-                                        Ctrl->I.inputfile = strdup (opt->arg);
-                                        n_files = 1;
-                                        }
+				if (!GMT_access (GMT, opt->arg, R_OK)) {	/* Got a file */
+					Ctrl->I.inputfile = strdup (opt->arg);
+					n_files = 1;
+				}
 				else {
 					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -I: Requires a valid file\n");
 					n_errors++;
@@ -494,47 +512,61 @@ int GMT_mbswath_parse (struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl, struct G
 				break;
 			case 'L':	/* -L<lonflip> */
 				n = sscanf(opt->arg, "%d", &(Ctrl->L.lonflip));
-                                if (n == 1)
-                                        Ctrl->L.active = true;
-                                else
-                                        n_errors++;
+				if (n == 1)
+					Ctrl->L.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -L option: \n");
+					n_errors++;
+				}
 				break;
 			case 'N':	/* -N<cptfile> */
 				Ctrl->N.active = true;
 				if (Ctrl->N.cptfile) free (Ctrl->N.cptfile);
 				Ctrl->N.cptfile = strdup (opt->arg);
 				break;
+			case 'p':	/* Sets the ping averaging */
+				Ctrl->p.active = true;
+				Ctrl->p.pings = atoi(opt->arg);
+				if (Ctrl->p.pings < 0) {
+					GMT_Report (API, GMT_MSG_NORMAL, "Error -p option: Don't invent, number of pings must be >= 0\n");
+					Ctrl->p.pings = 1;
+				}
+ 				break;
 			case 'S':	/* -S<speed> */
 				n = sscanf(opt->arg, "%lf", &(Ctrl->S.speed));
-                                if (n == 1)
-                                        Ctrl->S.active = true;
-                                else
-                                        n_errors++;
+				if (n == 1)
+					Ctrl->S.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -S option: \n");
+					n_errors++;
+				}
 				break;
 			case 'T':	/* -T<timegap> */
 				n = sscanf(opt->arg, "%lf", &(Ctrl->T.timegap));
-                                if (n == 1)
-                                        Ctrl->T.active = true;
-                                else
-                                        n_errors++;
+				if (n == 1)
+					Ctrl->T.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -T option: \n");
+					n_errors++;
+				}
 				break;
 			case 'W':	/* -W */
 				Ctrl->W.active = true;
 				break;
 			case 'Z':	/* -Z<mode> */
 				n = sscanf(opt->arg, "%d", &(Ctrl->Z.mode));
-                                if (n == 1)
-                                        {
-                                        Ctrl->Z.active = true;
-                                        if (opt->arg[1] == 'f' || opt->arg[1] == 'F')
-                                                Ctrl->Z.usefiltered = MB_YES;
-                                        else
-                                                Ctrl->Z.usefiltered = MB_NO;
-                                        }
-                                else
-                                        n_errors++;
+				if (n == 1) {
+					Ctrl->Z.active = true;
+					if (opt->arg[1] == 'f' || opt->arg[1] == 'F')
+							Ctrl->Z.usefiltered = MB_YES;
+					else
+						Ctrl->Z.usefiltered = MB_NO;
+				}
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -Z option: \n");
+					n_errors++;
+				}
 				break;
-
 			default:	/* Report bad options */
 				n_errors += GMT_default_error (GMT, opt->option);
 				break;
@@ -591,7 +623,7 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 	struct GMT_OPTION *options = NULL;
 	struct PSL_CTRL *PSL = NULL;	/* General PSL interal parameters */
 	struct GMTAPI_CTRL *API = GMT_get_API_ptr (V_API);	/* Cast from void to GMTAPI_CTRL pointer */
-        struct MBSWATH_CTRL *Ctrl = NULL;
+	struct MBSWATH_CTRL *Ctrl = NULL;
 
 	/* MBIO status variables */
 	int	status = MB_SUCCESS;
@@ -599,19 +631,20 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 	int	error = MB_ERROR_NO_ERROR;
 	char	*message = NULL;
 
-        mb_path file;
-        int     format;
-        int     file_in_bounds;
-        int     read_data;
+	mb_path file;
+	int     format;
+	int     file_in_bounds;
+	int     read_data;
 	struct ping *pingcur;
-        double  amplog;
-        int     *npings;
-        int     nping_read = 0;
-        int     start, done, first, nplot;
-        int     plot;
-        int     flush;
-        int     save_new;
-        int     i;
+	double  amplog;
+	int     *npings;
+	int     nping_read = 0;
+	int     start, done, first, nplot;
+	int     plot;
+	int     flush;
+	int     save_new;
+	int     i;
+	int     pings;
 
 	/*----------------------- Standard module initialization and parsing ----------------------*/
 
@@ -632,9 +665,11 @@ int GMT_mbswath (void *V_API, int mode, void *args)
                 Return (error);
 
 	/*---------------------------- This is the mbswath main code ----------------------------*/
-        
-        /* set verbosity */
-        verbose = GMT->common.V.active;
+
+	pings = Ctrl->p.pings;		/* If pings were set by user, prefer it */
+	/* set verbosity */
+
+	verbose = GMT->common.V.active;
 
         /* set bounds for data reading larger than map borders */
 	Ctrl->bounds[0] = GMT->common.R.wesn[0]
@@ -698,26 +733,24 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 	Ctrl->y_inch = Ctrl->clipy[2] - Ctrl->clipy[1];
 	Ctrl->x0 = Ctrl->clipx[0];
 	Ctrl->y0 = Ctrl->clipy[0];
-	Ctrl->nx = Ctrl->x_inch * Ctrl->E.dpi;
-	Ctrl->ny = Ctrl->y_inch * Ctrl->E.dpi;
-        Ctrl->x_inc = (GMT->common.R.wesn[1] - GMT->common.R.wesn[0]) / (Ctrl->nx - 1);
-        Ctrl->y_inc = (GMT->common.R.wesn[3] - GMT->common.R.wesn[2]) / (Ctrl->ny - 1);
-        Ctrl->x_side = Ctrl->x_inc * Ctrl->nx;
-        Ctrl->y_side = Ctrl->y_inc * Ctrl->ny;
+	Ctrl->nx = (int)(Ctrl->x_inch * Ctrl->E.dpi);
+	Ctrl->ny = (int)(Ctrl->y_inch * Ctrl->E.dpi);
+	Ctrl->x_inc = (GMT->common.R.wesn[1] - GMT->common.R.wesn[0]) / (Ctrl->nx - 1);
+	Ctrl->y_inc = (GMT->common.R.wesn[3] - GMT->common.R.wesn[2]) / (Ctrl->ny - 1);
+	Ctrl->x_side = Ctrl->x_inc * Ctrl->nx;
+	Ctrl->y_side = Ctrl->y_inc * Ctrl->ny;
 	Ctrl->nm = Ctrl->nx * Ctrl->ny;
 	Ctrl->nm2 = 2 * Ctrl->nm;
 
         /* allocate and initialize the output image */
-        if (Ctrl->image_type == MBSWATH_IMAGE_8)
-		{
+	if (Ctrl->image_type == MBSWATH_IMAGE_8) {
                 Ctrl->bitimage = GMT_memory (GMT, NULL, Ctrl->nm, unsigned char);
                 memset(Ctrl->bitimage, 255, Ctrl->nm);
-                }
-	else if (Ctrl->image_type == MBSWATH_IMAGE_24)
-		{
+	}
+	else if (Ctrl->image_type == MBSWATH_IMAGE_24) {
                 Ctrl->bitimage = GMT_memory (GMT, NULL, 3 * Ctrl->nm, unsigned char);
                 memset(Ctrl->bitimage, 255, 3 * Ctrl->nm);
-                }
+	}
                 
 	/* get format if required */
 	if (Ctrl->F.format == 0)
@@ -816,7 +849,7 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 		    }
 
 		/* call mb_read_init() */
-		if ((status = mb_read_init(verbose, file, format, 1, Ctrl->L.lonflip, Ctrl->bounds,
+		if ((status = mb_read_init(verbose, file, format, pings, Ctrl->L.lonflip, Ctrl->bounds,
                                             Ctrl->b.time_i, Ctrl->e.time_i, Ctrl->S.speed, Ctrl->T.timegap,
                                             &Ctrl->mbio_ptr, &Ctrl->btime_d, &Ctrl->etime_d,
                                             &Ctrl->beams_bath_max, &Ctrl->beams_amp_max, &Ctrl->pixels_ss_max, &error)) != MB_SUCCESS)
@@ -2408,8 +2441,8 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl,
 		/* get bounds of box in pixels */
 		for (i=0;i<4;i++)
 			{
-			ix[i] = Ctrl->nx * x[i] / Ctrl->x_inch;
-			iy[i] = Ctrl->ny * y[i] / Ctrl->y_inch;
+			ix[i] = (int)(Ctrl->nx * x[i] / Ctrl->x_inch);
+			iy[i] = (int)(Ctrl->ny * y[i] / Ctrl->y_inch);
 			}
 		ix[4] = ix[0];
 		iy[4] = iy[0];
@@ -2562,8 +2595,8 @@ int mbswath_plot_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *
 	else
 		{
 		/* get pixel */
-		ix = Ctrl->nx * x / Ctrl->x_inch;
-		iy = Ctrl->ny * y / Ctrl->y_inch;
+		ix = (int)(Ctrl->nx * x / Ctrl->x_inch);
+		iy = (int)(Ctrl->ny * y / Ctrl->y_inch);
 
 		/* plot pixel */
 		if (Ctrl->image_type == MBSWATH_IMAGE_8)

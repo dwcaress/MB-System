@@ -37,6 +37,7 @@
 #define THIS_MODULE_NAME	"mbcontour"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Plot swath bathymetry, amplitude, or backscatter"
+#define THIS_MODULE_KEYS	""
 
 /* GMT5 header file */
 #include "gmt_dev.h"
@@ -62,7 +63,7 @@ struct MBCONTOUR_CTRL {
 		double label_int;
 		double tick_len;
 		double label_hgt;
-                double label_spacing;
+		double label_spacing;
  	} A;
 	struct mbcontour_b {	/* -b<year>/<month>/<day>/<hour>/<minute>/<second> */
 		bool active;
@@ -90,7 +91,7 @@ struct MBCONTOUR_CTRL {
 	struct mbcontour_G {	/* -G<name_hgt>/<name_perp> */
 		bool active;
 		double name_hgt;
-                int name_perp;
+		int name_perp;
 	} G;
 	struct mbcontour_I {	/* -I<inputfile> */
 		bool active;
@@ -98,18 +99,22 @@ struct MBCONTOUR_CTRL {
 	} I;
 	struct mbcontour_L {	/* -L<lonflip> */
 		bool active;
-                int lonflip;
+		int lonflip;
 	} L;
 	struct mbcontour_M {	/* -M<pingnumber_tick_int>/<pingnumber_annot_int>/<pingnumber_tick_len> */
 		bool active;
-                double pingnumber_tick_int;
-                double pingnumber_annot_int;
-                double pingnumber_tick_len;
+		double pingnumber_tick_int;
+		double pingnumber_annot_int;
+		double pingnumber_tick_len;
 	} M;
 	struct mbcontour_N {	/* -N<nplot> */
 		bool active;
-                int nplot;
+		int nplot;
 	} N;
+	struct mbcontour_p {	/* -p<pings> */
+		bool active;
+		int pings;
+	} p;
 	struct mbcontour_Q {	/* -Q */
 		bool active;
 	} Q;
@@ -126,7 +131,7 @@ struct MBCONTOUR_CTRL {
 	} W;
 	struct mbcontour_Z {	/* -Z<algorithm> */
 		bool active;
-                int contour_algorithm;
+		int contour_algorithm;
 	} Z;
 };
 
@@ -186,7 +191,7 @@ void *New_mbcontour_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 
 	/* get current mb default values */
 	status = mb_defaults(verbose, &dummyformat, &dummypings, &Ctrl->L.lonflip, dummybounds,
-		Ctrl->b.time_i, Ctrl->e.time_i, &Ctrl->S.speedmin, &Ctrl->T.timegap);
+	                     Ctrl->b.time_i, Ctrl->e.time_i, &Ctrl->S.speedmin, &Ctrl->T.timegap);
 
 	Ctrl->A.active = MB_NO;
 	Ctrl->A.cont_int = 25.;
@@ -195,7 +200,7 @@ void *New_mbcontour_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 	Ctrl->A.label_int = 100.;
 	Ctrl->A.tick_len = 0.05;
 	Ctrl->A.label_hgt = 0.1;
-        Ctrl->A.label_spacing = 0.0;
+	Ctrl->A.label_spacing = 0.0;
 	Ctrl->b.active = MB_NO;
 	Ctrl->C.active = MB_NO;
 	Ctrl->C.contourfile = NULL;
@@ -209,22 +214,22 @@ void *New_mbcontour_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 	Ctrl->F.format = 0;
 	Ctrl->G.active = MB_NO;
 	Ctrl->G.name_hgt = 0.1;
-        Ctrl->G.name_perp = MB_NO;
+	Ctrl->G.name_perp = MB_NO;
 	Ctrl->I.active = MB_NO;
 	Ctrl->I.inputfile = NULL;
 	Ctrl->L.active = MB_NO;
 	Ctrl->M.active = MB_NO;
-        Ctrl->M.pingnumber_tick_int = 50;
-        Ctrl->M.pingnumber_annot_int = 100;
-        Ctrl->M.pingnumber_tick_len = 0.1;
+	Ctrl->M.pingnumber_tick_int = 50;
+	Ctrl->M.pingnumber_annot_int = 100;
+	Ctrl->M.pingnumber_tick_len = 0.1;
 	Ctrl->N.active = MB_NO;
-        Ctrl->N.nplot = 0;
+	Ctrl->N.nplot = 0;
 	Ctrl->Q.active = MB_NO;
 	Ctrl->S.active = MB_NO;
 	Ctrl->T.active = MB_NO;
 	Ctrl->W.active = MB_NO;
 	Ctrl->Z.active = MB_NO;
-        Ctrl->Z.contour_algorithm = MB_CONTOUR_OLD;
+	Ctrl->Z.contour_algorithm = MB_CONTOUR_OLD;
 
 	return (Ctrl);
 }
@@ -253,7 +258,7 @@ int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level)
 	GMT_Message (API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", 
-			GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT, GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+	                                  GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT, GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
 
 	if (level == GMT_SYNOPSIS) return (EXIT_FAILURE);
 
@@ -269,8 +274,9 @@ int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level)
 	GMT_rgb_syntax (API->GMT, 'G', "Set transparency color for images that otherwise would result in 1-bit images.\n\t  ");
 	GMT_Option (API, "K");
 	GMT_Option (API, "O,P");
+	GMT_Message (API, GMT_TIME_NONE, "\t-p<pings> Sets the ping averaging of the input data [Default = 1, i.e. no ping average].\n");
 	GMT_Option (API, "R");
-	GMT_Option (API, "U,V,X,c,f,n,p,t,.");
+	GMT_Option (API, "U,V,X,c,.");
 
 	return (EXIT_FAILURE);
 }
@@ -285,49 +291,54 @@ int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, stru
 	 */
 
 	unsigned int n_errors = 0, n_files = 0;
+	int    n;
 	struct GMT_OPTION *opt = NULL;
 	struct GMTAPI_CTRL *API = GMT->parent;
-        int     n;
 
 	for (opt = options; opt; opt = opt->next) {	/* Process all the options given */
 
 		switch (opt->option) {
 			case '<':	/* Input file (only one or three is accepted) */
 				Ctrl->I.active = true;
-#if GMT_MINOR_VERSION == 1
-				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN))
+#if GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
+				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN)) {
 #else
-				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET))
+				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET)) {
 #endif
-					{
-                                        Ctrl->I.inputfile = strdup (opt->arg);
-                                        n_files = 1;
-                                        }
-				else
+					Ctrl->I.inputfile = strdup (opt->arg);
+					n_files = 1;
+				}
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error: only one input file is allowed.\n");
 					n_errors++;
+				}
 				break;
 
 			/* Processes program-specific parameters */
 
 			case 'A':	/* contour controls */
 				n = sscanf(opt->arg, "%lf/%lf/%lf/%lf/%lf/%lf/%lf",
-                                           &(Ctrl->A.cont_int), &(Ctrl->A.col_int), &(Ctrl->A.tick_int),
-                                           &(Ctrl->A.label_int), &(Ctrl->A.tick_len), &(Ctrl->A.label_hgt),
-                                           &(Ctrl->A.label_spacing));
-                                if (n > 0)
-                                        Ctrl->A.active = true;
-                                else
-                                        n_errors++;
+				           &(Ctrl->A.cont_int), &(Ctrl->A.col_int), &(Ctrl->A.tick_int),
+				           &(Ctrl->A.label_int), &(Ctrl->A.tick_len), &(Ctrl->A.label_hgt),
+				           &(Ctrl->A.label_spacing));
+				if (n > 0)
+					Ctrl->A.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -A option: \n");
+					n_errors++;
+				}
  				break;
 			case 'b':	/* btime_i */
 				n = sscanf(opt->arg, "%d/%d/%d/%d/%d/%d",
-                                           &(Ctrl->b.time_i[0]), &(Ctrl->b.time_i[1]), &(Ctrl->b.time_i[2]),
-                                           &(Ctrl->b.time_i[3]), &(Ctrl->b.time_i[4]), &(Ctrl->b.time_i[5]));
-                                Ctrl->b.time_i[6] = 0;
-                                if (n == 6)
-                                        Ctrl->b.active = true;
-                                else
-                                        n_errors++;
+				           &(Ctrl->b.time_i[0]), &(Ctrl->b.time_i[1]), &(Ctrl->b.time_i[2]),
+				           &(Ctrl->b.time_i[3]), &(Ctrl->b.time_i[4]), &(Ctrl->b.time_i[5]));
+				Ctrl->b.time_i[6] = 0;
+				if (n == 6)
+					Ctrl->b.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -b option: \n");
+					n_errors++;
+				}
 				break;
 			case 'C':	/* contour file */
 				Ctrl->C.active = true;
@@ -336,53 +347,57 @@ int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, stru
 				break;
 			case 'D':	/* track annotation */
 				n = sscanf(opt->arg, "%lf/%lf/%lf/%lf",
-                                           &(Ctrl->D.time_tick_int), &(Ctrl->D.time_annot_int),
-                                           &(Ctrl->D.date_annot_int), &(Ctrl->D.time_tick_len));
-                                if (n > 0)
-                                        Ctrl->D.active = true;
-                                else
-                                        n_errors++;
+				           &(Ctrl->D.time_tick_int), &(Ctrl->D.time_annot_int),
+				           &(Ctrl->D.date_annot_int), &(Ctrl->D.time_tick_len));
+				if (n > 0)
+					Ctrl->D.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -D option: \n");
+					n_errors++;
+				}
  				break;
 			case 'e':	/* etime_i */
 				n = sscanf(opt->arg, "%d/%d/%d/%d/%d/%d",
-                                           &(Ctrl->e.time_i[0]), &(Ctrl->e.time_i[1]), &(Ctrl->e.time_i[2]),
-                                           &(Ctrl->e.time_i[3]), &(Ctrl->e.time_i[4]), &(Ctrl->e.time_i[5]));
-                                Ctrl->e.time_i[6] = 0;
-                                if (n == 6)
-                                        Ctrl->e.active = true;
-                                else
-                                        n_errors++;
+				           &(Ctrl->e.time_i[0]), &(Ctrl->e.time_i[1]), &(Ctrl->e.time_i[2]),
+				           &(Ctrl->e.time_i[3]), &(Ctrl->e.time_i[4]), &(Ctrl->e.time_i[5]));
+				Ctrl->e.time_i[6] = 0;
+				if (n == 6)
+					Ctrl->e.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -e option: \n");
+					n_errors++;
+				}
 				break;
 			case 'f':	/* format */
 			case 'F':	/* format */
 				n = sscanf(opt->arg, "%d", &(Ctrl->F.format));
-                                if (n == 1)
-                                        Ctrl->F.active = true;
-                                else
-                                        n_errors++;
+				if (n == 1)
+					Ctrl->F.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -F option: \n");
+					n_errors++;
+				}
 				break;
 			case 'G':	/* file annotation */
 				n = sscanf(opt->arg, "%lf/%d", &(Ctrl->G.name_hgt), &(Ctrl->G.name_perp));
-                                if (n == 2)
-                                        {
-                                        Ctrl->G.active = true;
-                                        }
-                                else if (n == 1)
-                                        {
-                                        Ctrl->G.active = true;
-                                        Ctrl->G.name_perp = false;
-                                        }
-                                else
-                                        n_errors++;
+				if (n == 2)
+					Ctrl->G.active = true;
+				else if (n == 1) {
+					Ctrl->G.active = true;
+					Ctrl->G.name_perp = false;
+				}
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -G option: \n");
+					n_errors++;
+				}
 				break;
 
 			case 'I':	/* -I<inputfile> */
 				Ctrl->I.active = true;
-				if (!GMT_access (GMT, opt->arg, R_OK))	/* Got a file */
-					{
-                                        Ctrl->I.inputfile = strdup (opt->arg);
-                                        n_files = 1;
-                                        }
+				if (!GMT_access (GMT, opt->arg, R_OK)) {	/* Got a file */
+					Ctrl->I.inputfile = strdup (opt->arg);
+					n_files = 1;
+				}
 				else {
 					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -I: Requires a valid file\n");
 					n_errors++;
@@ -390,56 +405,74 @@ int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, stru
 				break;
 			case 'L':	/* -L<lonflip> */
 				n = sscanf(opt->arg, "%d", &(Ctrl->L.lonflip));
-                                if (n == 1)
-                                        Ctrl->L.active = true;
-                                else
-                                        n_errors++;
+				if (n == 1)
+					Ctrl->L.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -L option: \n");
+					n_errors++;
+				}
 				break;
 			case 'M':	/* ping number annotation */
 				n = sscanf(opt->arg, "%lf/%lf/%lf",
-                                           &(Ctrl->M.pingnumber_tick_int), &(Ctrl->M.pingnumber_annot_int),
-                                           &(Ctrl->M.pingnumber_tick_len));
-                                if (n > 0)
-                                        Ctrl->M.active = true;
-                                else
-                                        n_errors++;
+				           &(Ctrl->M.pingnumber_tick_int), &(Ctrl->M.pingnumber_annot_int),
+				           &(Ctrl->M.pingnumber_tick_len));
+				if (n > 0)
+					Ctrl->M.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -M option: \n");
+					n_errors++;
+				}
  				break;
 			case 'N':	/* nplot */
-				n = sscanf(opt->arg, "%d",
-                                           &(Ctrl->N.nplot));
-                                if (n > 0)
-                                        Ctrl->N.active = true;
-                                else
-                                        n_errors++;
+				n = sscanf(opt->arg, "%d", &(Ctrl->N.nplot));
+				if (n > 0)
+					Ctrl->N.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -N option: \n");
+					n_errors++;
+				}
+ 				break;
+			case 'p':	/* Sets the ping averaging */
+				Ctrl->p.active = true;
+				Ctrl->p.pings = atoi(opt->arg);
+				if (Ctrl->p.pings < 0) {
+					GMT_Report (API, GMT_MSG_NORMAL, "Error -p option: Don't invent, number of pings must be >= 0\n");
+					Ctrl->p.pings = 1;
+				}
  				break;
 			case 'Q':	/* plot triangles */
-                                Ctrl->Q.active = true;
+				Ctrl->Q.active = true;
  				break;
 			case 'S':	/* -S<speed> */
 				n = sscanf(opt->arg, "%lf", &(Ctrl->S.speedmin));
-                                if (n == 1)
-                                        Ctrl->S.active = true;
-                                else
-                                        n_errors++;
+				if (n == 1)
+					Ctrl->S.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -S option: \n");
+					n_errors++;
+				}
 				break;
 			case 'T':	/* -T<timegap> */
 				n = sscanf(opt->arg, "%lf", &(Ctrl->T.timegap));
-                                if (n == 1)
-                                        Ctrl->T.active = true;
-                                else
-                                        n_errors++;
+				if (n == 1)
+					Ctrl->T.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -T option: \n");
+					n_errors++;
+				}
 				break;
 			case 'W':	/* -W */
 				Ctrl->W.active = true;
 				break;
 			case 'Z':	/* contour algorithm */
 				n = sscanf(opt->arg, "%d", &(Ctrl->Z.contour_algorithm));
-                                if (n == 1)
-                                       Ctrl->Z.active = true;
-                                else
-                                        n_errors++;
+				if (n == 1)
+					Ctrl->Z.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -Z option: \n");
+					n_errors++;
+				}
 				break;
-
 			default:	/* Report bad options */
 				n_errors += GMT_default_error (GMT, opt->option);
 				break;
@@ -447,11 +480,11 @@ int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, stru
 	}
 
 	n_errors += GMT_check_condition (GMT, !GMT->common.R.active, "Syntax error: Must specify -R option\n");
-	n_errors += GMT_check_condition (GMT, !GMT->common.J.active, "Syntax error: Must specify a map projection with the -J option\n");
-	n_errors += GMT_check_condition (GMT, n_files != 1, 
-					"Syntax error: Must specify one input file(s)\n");
+	n_errors += GMT_check_condition (GMT, !GMT->common.J.active,
+	                                 "Syntax error: Must specify a map projection with the -J option\n");
+	n_errors += GMT_check_condition (GMT, n_files != 1, "Syntax error: Must specify one input file(s)\n");
 	n_errors += GMT_check_condition (GMT, Ctrl->I.active && !Ctrl->I.inputfile, 
-					"Syntax error -I option: Must specify input file\n");
+	                                 "Syntax error -I option: Must specify input file\n");
 
 	return (n_errors ? GMT_PARSE_ERROR : GMT_OK);
 }
@@ -468,7 +501,7 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 	struct GMT_CTRL *GMT_cpy = NULL;	/* General GMT interal parameters */
 	struct GMT_OPTION *options = NULL;
 	struct GMTAPI_CTRL *API = GMT_get_API_ptr (V_API);	/* Cast from void to GMTAPI_CTRL pointer */
-        struct MBCONTOUR_CTRL *Ctrl = NULL;
+	struct MBCONTOUR_CTRL *Ctrl = NULL;
 
 	/* MBIO status variables */
 	int	status = MB_SUCCESS;
@@ -478,7 +511,7 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 
 	/* MBIO read control parameters */
 	mb_path	read_file;
-        int     read_datalist = MB_NO;
+	int     read_datalist = MB_NO;
 	int	read_data = MB_NO;
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
@@ -575,7 +608,7 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 	int	setcolors;
 	double	navlon_old;
 	double	navlat_old;
-        double  clipx[4], clipy[4];
+	double  clipx[4], clipy[4];
 	int	i;
 
 	/*----------------------- Standard module initialization and parsing ----------------------*/
@@ -590,24 +623,24 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 	/* Parse the command-line arguments */
 
 	GMT = GMT_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
-	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options))
-                {
-                fprintf(stderr,"Error from GMT_Parse_common():%d\n",API->error);
-                Return (API->error);
-                }
+	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) {
+		fprintf(stderr,"Error from GMT_Parse_common():%d\n",API->error);
+		Return (API->error);
+	}
                
 	Ctrl = (struct MBCONTOUR_CTRL *) New_mbcontour_Ctrl (GMT);	/* Allocate and initialize a new control structure */
-	if ((error = GMT_mbcontour_parse (GMT, Ctrl, options)))
-                {
-                fprintf(stderr,"Error from GMT_mbcontour_parse():%d\n",error);
-                Return (error);
-                }
+	if ((error = GMT_mbcontour_parse (GMT, Ctrl, options))) {
+		fprintf(stderr,"Error from GMT_mbcontour_parse():%d\n",error);
+		Return (error);
+	}
 
 	/*-------------------------------- Variable initialization --------------------------------*/
 
 	/* get current mb default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
+
+	if (Ctrl->p.active) pings = Ctrl->p.pings;		/* If pings were set by user, prefer it */
 
 	/* set default input to datalist.mb-1 */
 	strcpy (read_file, "datalist.mb-1");
@@ -627,9 +660,7 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
         if (Ctrl->b.active)
             {
             for (i=0;i<7;i++)
-                {
                 btime_i[i] = Ctrl->b.time_i[i];
-                }
             }
         if (Ctrl->C.active)
             {
@@ -648,9 +679,7 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
         if (Ctrl->e.active)
             {
             for (i=0;i<7;i++)
-                {
                 etime_i[i] = Ctrl->e.time_i[i];
-                }
             }
         if (Ctrl->F.active)
             format = Ctrl->F.format;
@@ -672,9 +701,9 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
         if (Ctrl->M.active)
             {
             plot_pingnumber = MB_YES;
-            pingnumber_tick_int = Ctrl->M.pingnumber_tick_int;
-            pingnumber_annot_int = Ctrl->M.pingnumber_annot_int;
-            pingnumber_tick_len = Ctrl->M.pingnumber_tick_len;
+            pingnumber_tick_int  = (int)Ctrl->M.pingnumber_tick_int;
+            pingnumber_annot_int = (int)Ctrl->M.pingnumber_annot_int;
+            pingnumber_tick_len  = Ctrl->M.pingnumber_tick_len;
             }
         if (Ctrl->N.active)
                 nplot = Ctrl->N.nplot;
@@ -1457,7 +1486,8 @@ void mbcontour_setline(int linewidth)
 /*--------------------------------------------------------------------------*/
 void mbcontour_newpen(int ipen)
 {
-        double rgb[4];
+	double rgb[4];
+	rgb[3] = 0;		/* To not fall into the transparency case of pslib.c/psl_putcolor()  */
         
 	if (ipen > -1 && ipen < ncolor)
 		{

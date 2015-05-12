@@ -679,7 +679,7 @@ and mbedit edit save files.\n";
 	/* make output file path global if needed */
 	if (status == MB_SUCCESS
 	    && mbp_ofile_specified == MB_NO
-	    && process.mbp_ofile[0] != '/'
+	    && process.mbp_ofile[0] != '/' && process.mbp_ofile[1] != ':'
 	    && strrchr(process.mbp_ifile,'/') != NULL
 	    && (len = strrchr(process.mbp_ifile,'/')
 			- process.mbp_ifile + 1) > 1)

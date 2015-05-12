@@ -33,86 +33,6 @@
  * Date:	April 15, 1993
  * Rewrite:	March 26, 1997
  *
- * $Log: mblevitus.c,v $
- * Revision 5.3  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.2  2003/04/17 21:18:57  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2001/03/22 21:15:49  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.0  2000/12/01  22:57:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.10  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.9  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.8  1998/10/05  19:19:24  caress
- * MB-System version 4.6beta
- *
- * Revision 4.7  1997/04/21  17:19:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.7  1997/04/17  15:14:38  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.6  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.5  1995/05/12  17:12:32  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.4  1995/03/06  19:37:59  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.3  1994/10/21  13:02:31  caress
- * Release V4.0
- *
- * Revision 4.2  1994/07/29  19:02:56  caress
- * Changes associated with supporting byte swapped Lynx OS and
- * using unix second time base.
- *
- * Revision 4.1  1994/03/12  01:44:37  caress
- * Added declarations of ctime and/or getenv for compatability
- * with SGI compilers.
- *
- * Revision 4.0  1994/03/06  00:13:22  caress
- * First cut at version 4.0
- *
- * Revision 4.0  1994/03/01  18:59:27  caress
- * First cut at new version. Any changes are associated with
- * support of three data types (beam bathymetry, beam amplitude,
- * and sidescan) instead of two (bathymetry and backscatter).
- *
- * Revision 3.5  1993/11/05  16:13:40  caress
- * Now the location of the Levitus annual database file is set
- * at compile time from a variable in the Makefile.  This is
- * accomplished by creating an include file each time Make is
- * run which is referenced in mblevitus.c.
- *
- * Revision 3.4  1993/06/30  21:50:13  caress
- * Set for LDEO location of Levitus annual database.
- *
- * Revision 3.3  1993/06/30  02:53:06  caress
- * *** empty log message ***
- *
- * Revision 3.2  1993/06/30  02:52:06  caress
- * Changed location of levitus database to
- * /home/hs/packages/Levitus/levitus.annual
- * This is another temporary fix.
- *
- * Revision 3.1  1993/05/16  18:18:10  caress
- * Changed location of Levitus annual file to
- * /usr/local/lib - this is a temporary fix.
- *
- * Revision 3.0  1993/05/04  22:38:44  dale
- * Inital version.
  *
  */
 
@@ -135,6 +55,16 @@
 
 static char rcs_id[] = "$Id$";
 
+/* Windows header file */
+#ifdef WIN32
+#include <windows.h>
+#endif
+
+/* Windows implementation of GMT_runtime_bindir */
+#ifdef WIN32
+char *GMT_runtime_bindir_win32 (char *result);
+#endif
+
 /*--------------------------------------------------------------------*/
 
 int main (int argc, char **argv)
@@ -152,7 +82,12 @@ int main (int argc, char **argv)
 	int	error = MB_ERROR_NO_ERROR;
 
 	/* input file set in include file */
-#include "levitus.h"
+#ifndef WIN32
+#	include "levitus.h"
+#else
+	/* But on Windows get it from the bin dir */
+	char *pch, ifile[PATH_MAX+1];
+#endif
 
 	/* control parameters */
 	char	ofile[128];
@@ -245,6 +180,14 @@ int main (int argc, char **argv)
 	else
 		outfp = stderr;
 
+#ifdef WIN32
+	/* Find the path to the bin directory and from it, the location of the Levitus file */
+	GMT_runtime_bindir_win32 (ifile);
+	pch = strrchr(ifile, '\\');
+	pch[0] = '\0';
+	strcat(ifile, "\\share\\mbsystem\\LevitusAnnual82.dat");
+#endif
+
 	/* print starting message */
 	if (verbose == 1 || help)
 		{
@@ -277,7 +220,7 @@ int main (int argc, char **argv)
 		}
 
 	/* open the data file */
-	if ((ifp = fopen(ifile, "r")) == NULL)
+	if ((ifp = fopen(ifile, "rb")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open Levitus database file <%s> for reading\n",ifile);
@@ -529,4 +472,34 @@ int main (int argc, char **argv)
 	/* end it all */
 	exit(error);
 }
+
+/*--------------------------------------------------------------------*/
+
+/* Windows implementation of GMT_runtime_bindir */
+#ifdef WIN32
+char *GMT_runtime_bindir_win32 (char *result) {
+	TCHAR path[PATH_MAX+1];
+	char *c;
+
+	/* Get absolute path of executable */
+	if (GetModuleFileName (NULL, path, PATH_MAX) == PATH_MAX)
+		/* Path to long */
+		return NULL;
+
+	/* Convert to cstring */
+#ifdef _UNICODE
+	/* TCHAR is wchar_t* */
+	wcstombs (result, path, PATH_MAX);
+#else
+	/* TCHAR is char * */
+	strncpy (result, path, PATH_MAX);
+#endif
+
+	/* Truncate full path to dirname */
+	if ((c = strrchr (result, '\\')) && c != result)
+		*c = '\0';
+
+	return result;
+}
+#endif
 /*--------------------------------------------------------------------*/

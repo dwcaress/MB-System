@@ -323,6 +323,7 @@ int              tiff_offset[] =
 #define THIS_MODULE_NAME	"mbgrdtiff"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Project grids or images and plot them on maps"
+#define THIS_MODULE_KEYS	""
 
 #include "gmt_dev.h"
 
@@ -437,7 +438,7 @@ int GMT_mbgrdtiff_usage (struct GMTAPI_CTRL *API, int level)
 	GMT_Option (API, "O,P");
 	GMT_Message (API, GMT_TIME_NONE, "\t-Q Use PS Level 3 colormasking to make nodes with z = NaN transparent.\n");
 	GMT_Option (API, "R");
-	GMT_Option (API, "U,V,X,c,f,n,p,t,.");
+	GMT_Option (API, "U,V,X,c,n,t,.");
 
 	return (EXIT_FAILURE);
 }
@@ -462,8 +463,8 @@ int GMT_mbgrdtiff_parse (struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, stru
 			case '<':	/* Input file (only one or three is accepted) */
 				Ctrl->I.active = true;
 				if (n_files >= 3) break;
-#if GMT_MINOR_VERSION == 1
- 				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN))
+#if GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
+				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN))
 #else
 				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET))
 #endif

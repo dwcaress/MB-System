@@ -265,19 +265,19 @@ int mb_esf_open(int verbose, char *esffile,
 			}
 
 		    /* open and read the old edit file */
-		    if (status == MB_SUCCESS
-	    		&& esf->nedit > 0
-			&& (esffp = fopen(esffile,"rw")) == NULL)
+#ifdef WIN32
+		    strcpy(fmode,"r+b");
+#else
+		    strcpy(fmode,"rw");
+#endif
+		    if (status == MB_SUCCESS && esf->nedit > 0 && (esffp = fopen(esffile,fmode)) == NULL)
 			{
-			fprintf(stderr, "\nnedit:%d\n",
-			    esf->nedit);
+			fprintf(stderr, "\nnedit:%d\n", esf->nedit);
 			esf->nedit = 0;
 			*error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr, "\nUnable to open edit save file %s\n",
-			    esffile);
+			fprintf(stderr, "\nUnable to open edit save file %s\n", esffile);
 			}
-		    else if (status == MB_SUCCESS
-	    		&& esf->nedit > 0)
+		    else if (status == MB_SUCCESS && esf->nedit > 0)
 			{
 			/* reset message */
 			if (verbose > 0)
