@@ -23,18 +23,18 @@
 #define GMT_VERSION_H_
 
 /* for manpages only */
-#define MANDATE "07 January 2015"
+#define MANDATE "15 May 2015"
 
 #define GMT_MAJOR_VERSION 5
 #define GMT_MINOR_VERSION 1
-#define GMT_RELEASE_VERSION 1
-#define GMT_VERSION_YEAR 2014
+#define GMT_RELEASE_VERSION 2
+#define GMT_VERSION_YEAR 2015
 
-#define GMT_SOURCE_CODE_CONTROL_VERSION_STRING "12968"
+#define GMT_SOURCE_CODE_CONTROL_VERSION_STRING "14256"
 #ifdef GMT_SOURCE_CODE_CONTROL_VERSION_STRING
-#	define GMT_STRING "5.1.1 (r12968)"
+#	define GMT_STRING "5.1.2 (r14256)"
 #else /* if HAVE_SVN_VERSION or if unversioned */
-#	define GMT_STRING "5.1.1"
+#	define GMT_STRING "5.1.2"
 #endif
 
 #ifdef __x86_64__

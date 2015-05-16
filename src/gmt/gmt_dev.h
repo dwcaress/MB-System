@@ -51,20 +51,20 @@ extern "C" {
  * can be passed, even though in some cases not all arguments are used.  These will result in compiler
  * warnings [-Wunused-variable]. To suppress those (and only those), we can define GMT_UNUSED as this:
  */
-#ifdef __GNUC__
-#define GMT_UNUSED __attribute__ ((unused))
-#else
-#define GMT_UNUSED
-#endif
-/* and then add UNUSED after all such variables.  For GNU compilers the warning is then suppressed.
- * Other compilers will not see anything and give whatever harmless warnings they normally do.
+
+#define GMT_UNUSED(x) (void)(x)
+
+/* and then call GMT_UNUSED() on all such variables at the beginning of a routine. For example:
+ * bool func (int x) { GMT_UNUSED(x); return(true); }
+ * This should work for all compilers, GCC and others.
+ * Just grep for GMT_UNUSED to see where these situations occur.
  */
 
 /* CMake definitions: This must be first! */
 //#include "gmt_config.h"
 
 /* Declaration modifiers for DLL support (MSC et al) */
-//#include "declspec.h"
+#include "declspec.h"
 
 /* Declaration for PSL */
 #include "pslib.h"
@@ -76,7 +76,6 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <float.h>
 #include <math.h>

@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.5.2242       May 16, 2015
   Version 5.5.2241       May 12, 2015
   Version 5.5.2240       May 8, 2015
   Version 5.5.2239       May 6, 2015
@@ -204,8 +205,13 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
   Version 5.0.beta00     April 6, 2001
 
 -------------------------------------------------------------------------------
-MB-SYSTEM VERSION 5.4 RELEASE NOTES:
+MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2242 (May 15, 2015)
+
+Mbswath, mbcontour, mbgrdtiff: Updated files in src/gmt for compatibility with
+GMT 5.1.2.
 
 -----> 5.5.2241 (May 12, 2015)
 
@@ -293,6 +299,10 @@ file. Presumably this change will go away when the mystery is solved.
 Mbsslayout: fixed automatically generated plottin script.
 
 Mbm_route2mission: Added multibeam maximum range value.
+
+-------------------------------------------------------------------------------
+MB-SYSTEM VERSION 5.4 RELEASE NOTES:
+-------------------------------------------------------------------------------
 
 -----> 5.5.2234 (March 5, 2015)
 

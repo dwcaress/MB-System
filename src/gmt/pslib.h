@@ -72,25 +72,29 @@ extern "C" {
 /* PSL codes for vector attributes - mirroring similar codes and macros in GMT */
 
 /* Note: If changes are made to PSL_enum_vecattr you must also change gmt_plot.h: GMT_enum_vecattr */
-enum PSL_enum_vecattr {PSL_VEC_LEFT = 1,	/* Only draw left half of vector head */
-	PSL_VEC_RIGHT		= 2,		/* Only draw right half of vector head */
-	PSL_VEC_BEGIN		= 4,		/* Place vector head at beginning of vector */
-	PSL_VEC_END		= 8,		/* Place vector head at end of vector */
-	PSL_VEC_JUST_B		= 0,		/* Align vector beginning at (x,y) */
-	PSL_VEC_JUST_C		= 16,		/* Align vector center at (x,y) */
-	PSL_VEC_JUST_E		= 32,		/* Align vector end at (x,y) */
-	PSL_VEC_JUST_S		= 64,		/* Align vector center at (x,y) */
-	PSL_VEC_ANGLES		= 128,		/* Got start/stop angles instead of az, length */
-	PSL_VEC_POLE		= 256,		/* Got pole of small/great circle */
-	PSL_VEC_OUTLINE		= 512,		/* Draw vector head outline using default pen */
-	PSL_VEC_OUTLINE2	= 1024,		/* Draw vector head outline using supplied v_pen */
-	PSL_VEC_FILL		= 2048,		/* Fill vector head using default fill */
-	PSL_VEC_FILL2		= 4096,		/* Fill vector head using supplied v_fill) */
-	PSL_VEC_MARC90		= 8192};	/* Matharc only: if angles subtend 90, draw straight angle symbol */
 
-#define PSL_vec_justify(status) ((status>>4)&3)			/* Return justification as 0-3 */
-#define PSL_vec_head(status) ((status>>2)&3)			/* Return head selection as 0-3 */
-#define PSL_vec_side(status) ((status&3) ? 2*(status&3)-3 : 0)	/* Return side selection as 0,-1,+1 */
+enum PSL_enum_vecattr {PSL_VEC_BEGIN = 1,	/* Place vector head at beginning of vector. Add PSL_VEC_BEGIN_L for left only, PSL_VEC_BEGIN_R for right only */
+	PSL_VEC_END		= 2,		/* Place vector head at end of vector.  Add PSL_VEC_END_L for left only, and PSL_VEC_END_R for right only */
+	PSL_VEC_HEADS		= 3,		/* Mask for either head end */
+	PSL_VEC_BEGIN_L		= 4,		/* Left-half head at beginning */
+	PSL_VEC_BEGIN_R		= 8,		/* Right-half head at beginning */
+	PSL_VEC_END_L		= 16,		/* Left-half head at end */
+	PSL_VEC_END_R		= 32,		/* Right-half head at end */
+	PSL_VEC_JUST_B		= 0,		/* Align vector beginning at (x,y) */
+	PSL_VEC_JUST_C		= 64,		/* Align vector center at (x,y) */
+	PSL_VEC_JUST_E		= 128,		/* Align vector end at (x,y) */
+	PSL_VEC_JUST_S		= 256,		/* Align vector center at (x,y) */
+	PSL_VEC_ANGLES		= 512,		/* Got start/stop angles instead of az, length */
+	PSL_VEC_POLE		= 1024,		/* Got pole of small/great circle */
+	PSL_VEC_OUTLINE		= 2048,		/* Draw vector head outline using default pen */
+	PSL_VEC_OUTLINE2	= 4096,		/* Draw vector head outline using supplied v_pen */
+	PSL_VEC_FILL		= 8192,		/* Fill vector head using default fill */
+	PSL_VEC_FILL2		= 16384,	/* Fill vector head using supplied v_fill) */
+	PSL_VEC_MARC90		= 32768};	/* Matharc only: if angles subtend 90, draw straight angle symbol */
+	
+#define PSL_vec_justify(status) ((status>>6)&3)			/* Return justification as 0-3 */
+#define PSL_vec_head(status) ((status)&3)			/* Return head selection as 0-3 */
+#define PSL_vec_side(status,head) (((status>>(2+2*head))&3) ? 2*((status>>(2+2*head))&3)-3 : 0)	/* Return side selection for this head as 0,-1,+1 */
 
 /* PSL codes for arguments of PSL_beginplot and other routines */
 
@@ -156,6 +160,18 @@ enum PSL_enum_line {PSL_BUTT_CAP	= 0,
 	PSL_ROUND_JOIN			= 1,
 	PSL_BEVEL_JOIN			= 2,
 	PSL_MITER_DEFAULT		= 35};
+
+/* PSL codes for text clipping (PSL_plottextline) */
+
+enum PSL_enum_txt {PSL_TXT_INIT	= 1,
+	PSL_TXT_SHOW		= 2,
+	PSL_TXT_CLIP_ON		= 4,
+	PSL_TXT_DRAW		= 8,
+	PSL_TXT_CLIP_OFF	= 16,
+	PSL_TXT_ROUND		= 32,
+	PSL_TXT_CURVED		= 64,
+	PSL_TXT_FILLBOX		= 128,
+	PSL_TXT_DRAWBOX		= 256};
 
 /* Verbosity levels */
 
@@ -223,6 +239,11 @@ struct PSL_CTRL {
 		double rgb[3][4];		/* Current stroke, fill, and fs fill rgb	*/
 		double offset;			/* Current setdash offset			*/
 		double fontsize;		/* Current font size				*/
+		double subsupsize;		/* Fractional size of super/sub-scripts		*/
+		double scapssize;		/* Fractional size of small caps		*/
+		double sub_down;		/* Fractional fontsize shift down for subscript */
+		double sup_up[2];		/* Fractional fontsize shift up for superscript */
+						/* [0] is for lower-case, [1] is for uppercase  */
 		int nclip;			/* Clip depth 					*/
 		int font_no;		/* Current font number				*/
 		int outline;		/* Current outline				*/
@@ -251,13 +272,12 @@ struct PSL_CTRL {
 		int image_format;		/* 0 writes images in ascii, 2 uses binary	*/
 		int N_FONTS;		/* Total no of fonts;  To add more, modify the file CUSTOM_font_info.d */
 		int compress;		/* Compresses images with (1) RLE or (2) LZW (3) DEFLATE or (0) None */
-		unsigned deflate_level; /* Compression level for DEFLATE (1-9, default 0) */
+		int deflate_level; /* Compression level for DEFLATE (1-9, default 0) */
 		int color_mode;		/* 0 = rgb, 1 = cmyk, 2 = hsv (only 1-2 for images)	*/
 		int line_cap;		/* 0, 1, or 2 for butt, round, or square [butt]	*/
 		int line_join;		/* 0, 1, or 2 for miter, arc, or bevel [miter]	*/
 		int miter_limit;		/* Acute angle threshold 0-180; 0 means PS default [0] */
 		int ix, iy;		/* Absolute coordinates of last point		*/
-		int length;		/* Image row output byte counter		*/
 		int n_userimages;		/* Number of specified custom patterns		*/
 		int x0, y0;		/* x,y PS offsets				*/
 		FILE *fp;			/* PS output file pointer. NULL = stdout	*/
@@ -327,14 +347,14 @@ EXTERN_MSC int PSL_plotsegment (struct PSL_CTRL *PSL, double x0, double y0, doub
 EXTERN_MSC int PSL_plotsymbol (struct PSL_CTRL *PSL, double x, double y, double param[], int symbol);
 EXTERN_MSC int PSL_plottext (struct PSL_CTRL *PSL, double x, double y, double fontsize, char *text, double angle, int justify, int mode);
 EXTERN_MSC int PSL_plottextbox (struct PSL_CTRL *PSL, double x, double y, double fontsize, char *text, double angle, int justify, double offset[], int mode);
-EXTERN_MSC int PSL_plottextclip (struct PSL_CTRL *PSL, double x[], double y[], int m, double fontsize, char *label[], double angle[], int justify, double offset[], int mode);
-EXTERN_MSC int PSL_plottextpath (struct PSL_CTRL *PSL, double x[], double y[], int n, int node[], double fontsize, char *label[], int m, double angle[], int justify, double offset[], int mode);
+EXTERN_MSC int PSL_plottextline (struct PSL_CTRL *PSL, double x[], double y[], int np[], int n_segments, void *arg1, void *arg2, char *label[], double angle[], int nlabel_per_seg[], double fontsize, int justify, double offset[], int mode);
 EXTERN_MSC int PSL_loadimage (struct PSL_CTRL *PSL, char *file, struct imageinfo *header, unsigned char **image);
 EXTERN_MSC int PSL_setcolor (struct PSL_CTRL *PSL, double rgb[], int mode);
 EXTERN_MSC int PSL_setdefaults (struct PSL_CTRL *PSL, double xyscales[], double page_rgb[], char *encoding);
 EXTERN_MSC int PSL_setdash (struct PSL_CTRL *PSL, char *pattern, double offset);
 EXTERN_MSC int PSL_setfill (struct PSL_CTRL *PSL, double rgb[], int outline);
 EXTERN_MSC int PSL_setfont (struct PSL_CTRL *PSL, int font_no);
+EXTERN_MSC int PSL_setfontdims (struct PSL_CTRL *PSL, double supsub, double scaps, double sup_lc, double sup_uc, double sdown);
 EXTERN_MSC int PSL_setformat (struct PSL_CTRL *PSL, int n_decimals);
 EXTERN_MSC int PSL_setlinecap (struct PSL_CTRL *PSL, int cap);
 EXTERN_MSC int PSL_setlinejoin (struct PSL_CTRL *PSL, int join);
@@ -351,12 +371,17 @@ EXTERN_MSC int PSL_defcolor (struct PSL_CTRL *PSL, const char *param, double rgb
 EXTERN_MSC int PSL_deftextdim (struct PSL_CTRL *PSL, const char *dim, double fontsize, char *text);
 EXTERN_MSC int PSL_defunits (struct PSL_CTRL *PSL, const char *param, double value);
 EXTERN_MSC unsigned char *psl_gray_encode (struct PSL_CTRL *PSL, int *nbytes, unsigned char *input);
+EXTERN_MSC char * PSL_makepen (struct PSL_CTRL *PSL, double linewidth, double rgb[], char *pattern, double offset);
 
-/* Other deep level routines that could be useful */
+/* Other deep level routines that are useful */
 EXTERN_MSC int psl_ix (struct PSL_CTRL *PSL, double value);
 EXTERN_MSC int psl_iy (struct PSL_CTRL *PSL, double value);
 EXTERN_MSC int psl_iz (struct PSL_CTRL *PSL, double value);
 EXTERN_MSC int psl_ip (struct PSL_CTRL *PSL, double value);
+EXTERN_MSC void psl_set_txt_array (struct PSL_CTRL *PSL, const char *param, char *array[], int n);
+EXTERN_MSC int psl_encodefont (struct PSL_CTRL *PSL, int font_no);
+EXTERN_MSC void psl_set_int_array (struct PSL_CTRL *PSL, const char *param, int *array, int n);
+EXTERN_MSC char *psl_putcolor (struct PSL_CTRL *PSL, double rgb[]);
 
 /* Used indirectly by macro PSL_free and FORTRAN wrapper PSL_free_ . */
 EXTERN_MSC int PSL_free_nonmacro (void *addr);

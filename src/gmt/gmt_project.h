@@ -30,7 +30,7 @@
 #define HALF_DBL_MAX (DBL_MAX/2.0)
 
 /* GMT_180 is used to see if a value really is exceeding it (beyond roundoff) */
-#define GMT_180	(180.0 + GMT_CONV_LIMIT)
+#define GMT_180	(180.0 + GMT_CONV8_LIMIT)
 /* GMT_WIND_LON will remove central meridian value and adjust so lon fits between -180/+180 */
 #define GMT_WIND_LON(C,lon) {lon -= C->current.proj.central_meridian; while (lon < -GMT_180) lon += 360.0; while (lon > +GMT_180) lon -= 360.0;}
 
@@ -141,7 +141,7 @@ enum GMT_enum_units {GMT_IS_METER = 0,
 #define GMT_360_RANGE(w,e) (doubleAlmostEqual (fabs((e) - (w)), 360.0))
 #define GMT_180_RANGE(s,n) (doubleAlmostEqual (fabs((n) - (s)), 180.0))
 #define GMT_IS_POLE(y) (doubleAlmostEqual (fabs(y), 90.0))
-#define GMT_IS_ZERO(x) (fabs (x) < GMT_CONV_LIMIT)
+#define GMT_IS_ZERO(x) (fabs (x) < GMT_CONV8_LIMIT)
 
 #ifndef D2R
 #define D2R (M_PI / 180.0)
@@ -387,7 +387,8 @@ struct GMT_PROJ {
 
         unsigned int g_debug;
         int g_box, g_outside, g_longlat_set, g_sphere, g_radius, g_auto_twist;
-
+	bool windowed;
+	
 	/* Polar (cylindrical) projection */
 
 	double p_base_angle;
@@ -438,7 +439,8 @@ struct GMT_PLOT_AXIS_ITEM {		/* Information for one type of tick/annotation */
 	double interval;		/* Distance between ticks in user units */
 	unsigned int parent;		/* Id of axis this item belongs to (0,1,2) */
 	bool active;			/* true if we want to use this item */
-	bool special;		/* true if custom interval annotations */
+	bool generated;			/* true if this is an auto-generated interval */
+	bool special;			/* true if custom interval annotations */
 	unsigned int flavor;		/* Index into month/day name abbreviation array (0-2) */
 	bool upper_case;		/* true if we want upper case text (used with flavor) */
 	char type;			/* One of a, A, i, I, f, F, g, G */
@@ -462,7 +464,8 @@ struct GMT_PLOT_FRAME {		/* Various parameters for plotting of time axis boundar
 	char header[GMT_LEN256];	/* Plot title */
 	struct GMT_FILL fill;		/* Fill for the basemap inside, if paint == true */
 	bool plotted_header;		/* true if header has been plotted */
-	bool init;			/* true if -B was used */
+	bool init;			/* true if -B was used at all */
+	bool set;			/* true if -B was used to set any increments */
 	bool draw;			/* true if -B<int> was used, even -B0, as sign to draw axes */
 	bool paint;			/* true if -B +g<fill> was used */
 	bool draw_box;			/* true is a 3-D Z-box is desired */

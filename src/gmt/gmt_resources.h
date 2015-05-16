@@ -1,8 +1,7 @@
 /*--------------------------------------------------------------------
  *	$Id$
  *
- *	Copyright (c) 1991-2014
- *	P. Wessel, W. H. F. Smith, R. Scharroo, J. Luis and F. Wobbe
+ *	Copyright (c) 2012-2015 by P. Wessel, W. H. F. Smith, R. Scharroo, J. Luis and F. Wobbe
  *	See LICENSE.TXT file for copying and redistribution conditions.
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -207,8 +206,8 @@ enum GMT_enum_gridindex {
 enum GMT_enum_dimindex {
         GMT_TBL = 0U,	/* Index for number of tables in dimension array */
         GMT_SEG,	/* Index for number of segments in dimension array */
-        GMT_ROW,	/* Index for number of tables in dimension array */
-        GMT_COL		/* Index for number of tables in dimension array [DATASET only] */
+        GMT_ROW,	/* Index for number of rows in dimension array */
+        GMT_COL		/* Index for number of columns in dimension array [DATASET only] */
 };
 
 enum GMT_enum_gridio {
@@ -420,7 +419,7 @@ struct GMT_DATASEGMENT {		/* For holding segment lines in memory */
 	enum GMT_enum_pol pol_mode;	/* Either GMT_IS_PERIMETER  [-Pp] or GMT_IS_HOLE [-Ph] (for polygons only) */
 	uint64_t id;			/* The internal number of the segment */
 	size_t n_alloc;			/* The current allocation length of each coord */
-	int range;			/* 0 = use default lon adjustment, -1 = negative longs, +1 = positive lons */
+	unsigned int range;		/* Longitude reporting scheme, e.g. GMT_IS_GIVEN_RANGE [0] */
 	int pole;			/* Spherical polygons only: If it encloses the S (-1) or N (+1) pole, or none (0) */
 	double dist;			/* Distance from a point to this feature */
 	double lat_limit;		/* For polar caps: the latitude of the point closest to the pole */

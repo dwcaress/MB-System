@@ -89,7 +89,7 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
     --prefix=/usr/local \
     --with-netcdf-include=/sw/include \
     --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/sw/include/gmt5 \
+    --with-gmt-include=/sw/include/gmt \
     --with-gmt-lib=/sw/lib \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
@@ -222,7 +222,7 @@ CFLAGS="-g -Wall -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
     --with-netcdf-lib=/sw/lib \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
-    --with-gmt-include=/sw/include/gmt5 \
+    --with-gmt-include=/sw/include/gmt \
     --with-gmt-lib=/sw/lib \
     --with-fftw-include=/sw/include \
     --with-fftw-lib=/sw/lib \
