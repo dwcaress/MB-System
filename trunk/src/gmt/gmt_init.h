@@ -38,7 +38,8 @@
 
 /* Extern functions */
 
-EXTERN_MSC bool GMT_check_filearg (struct GMT_CTRL *GMT, char option, char *file, unsigned int direction);
+EXTERN_MSC int GMT_get_V (char arg);
+EXTERN_MSC bool GMT_check_filearg (struct GMT_CTRL *GMT, char option, char *file, unsigned int direction, unsigned int family);
 EXTERN_MSC int GMT_parse_dash_option (struct GMT_CTRL *GMT, char *text);
 EXTERN_MSC struct GMT_CTRL * GMT_begin (struct GMTAPI_CTRL *API, char *session, unsigned int pad);
 EXTERN_MSC void GMT_end (struct GMT_CTRL *GMT);
@@ -103,13 +104,15 @@ EXTERN_MSC void GMT_setmode (struct GMT_CTRL *GMT, int direction);
 
 /* Inline functions */
 
-///* Wrapper around GMT_begin_module for internally registered GMT modules */
-//static inline struct GMT_CTRL* GMT_begin_gmt_module (struct GMTAPI_CTRL *api_ctrl, const char *lib, const char *module, struct GMT_CTRL **gmt_ctrl_copy)
-//{
-//	/* Init module with NULL-name */
-//	struct GMT_CTRL *gmt_ctrl = GMT_begin_module (api_ctrl, lib, module, gmt_ctrl_copy);
-//	/* Return GMT_CTRL */
-//	return gmt_ctrl;
-//}
+#if 0
+/* Wrapper around GMT_begin_module for internally registered GMT modules */
+static inline struct GMT_CTRL* GMT_begin_gmt_module (struct GMTAPI_CTRL *api_ctrl, const char *lib, const char *module, struct GMT_CTRL **gmt_ctrl_copy)
+{
+	/* Init module with NULL-name */
+	struct GMT_CTRL *gmt_ctrl = GMT_begin_module (api_ctrl, lib, module, gmt_ctrl_copy);
+	/* Return GMT_CTRL */
+	return gmt_ctrl;
+}
+#endif
 
 #endif /* GMT_INIT_H */

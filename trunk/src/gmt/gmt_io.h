@@ -31,6 +31,21 @@
 #ifndef _GMT_IO_H
 #define _GMT_IO_H
 
+#ifdef HAVE_SETLOCALE
+#	include <locale.h>
+#endif
+
+static inline const char* __gmt_token_separators (void) {
+	static const char separators[] = ",; \t";
+#ifdef HAVE_SETLOCALE
+	struct lconv *lc = localeconv();
+	if ( (strcmp (lc->decimal_point, ",") == 0) )
+		return separators + 1; /* Omit comma */
+#endif
+	return separators;
+}
+#define GMT_TOKEN_SEPARATORS __gmt_token_separators() /* Data columns may be separated by any of these characters */
+
 /* Must add M, m, E, Z, and/or S to the common option processing list */
 #define GMT_OPT(opt) opt
 
@@ -177,7 +192,7 @@ struct GMT_CLOCK_IO {
 
 struct GMT_DATE_IO {
 	bool skip;			/* Only true if a format string was pass as NULL */
-	unsigned int T_pos;		/* String position of the expected 'T' marker (INPUT only) */
+	bool watch;			/* Only true if input format has month last and is monthname */
 	int item_order[4];		/* The sequence year, month, day, day-of-year in input calendar string (-ve if unused) */
 	int item_pos[4];		/* Which position year, month, day, day-of-year has in calendar string (-ve if unused) */
 	bool Y2K_year;		/* true if we have 2-digit years */

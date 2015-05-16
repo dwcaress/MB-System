@@ -67,13 +67,13 @@ EXTERN_MSC void DOS_path_fix (char *dir);
 # define DOS_path_fix(e) ((void)0) /* dummy function */
 #endif
 
-//#if !defined(HAVE_STRTOK_R) && !defined(HAVE_STRTOK_S)
-//EXTERN_MSC char *strtok_r (char *s, const char *delim, char **save_ptr);
-//#endif
+#if !defined(HAVE_STRTOK_R) && !defined(HAVE_STRTOK_S)
+EXTERN_MSC char *strtok_r (char *s, const char *delim, char **save_ptr);
+#endif
 
-//#ifndef DECLARED_STRSEP
-//EXTERN_MSC char *strsep (char **stringp, const char *delim);
-//#endif
+#ifndef DECLARED_STRSEP
+EXTERN_MSC char *strsep (char **stringp, const char *delim);
+#endif
 EXTERN_MSC char *strsepz (char **stringp, const char *delim);
 EXTERN_MSC char *stresep (char **stringp, const char *delim, int esc);
 
