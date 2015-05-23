@@ -24,5 +24,5 @@ libmbaux_la_LIBADD =  ${top_builddir}/src/mbio/libmbio.la \
 if BUILD_MOTIF
  libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0
  libmbxgr_la_SOURCES = mb_xgraphics.c
- libmbxgr_la_LIBADD = ${motif_LIBS}
+ libmbxgr_la_LIBADD = ${libmotif_LIBS}
 endif

@@ -11,8 +11,8 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
        -I${top_srcdir}/src/gsf \
        ${libgmt_CPPFLAGS} \
        ${libnetcdf_CPPFLAGS} \
-       ${motif_CPPFLAGS} \
-       ${GL_CPPFLAGS}
+       ${libmotif_CPPFLAGS} \
+       ${libopengl_CPPFLAGS}
 
 libmbview_la_CFLAGS = -DMBVIEW_LIBRARY
 libmbview_la_LDFLAGS = -no-undefined -version-info 0:0:0
@@ -28,5 +28,5 @@ libmbview_la_LIBADD = \
        ${top_builddir}/src/mbio/libmbio.la \
        ${top_builddir}/src/mbaux/libmbaux.la \
        ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-       ${motif_LIBS} ${GL_LIBS} \
+       ${libmotif_LIBS} ${libopengl_LIBS} \
        ${XDR_LIB}

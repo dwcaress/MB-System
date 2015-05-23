@@ -29,6 +29,7 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
   Version 5.5.2230       February 18, 2015
   Version 5.5.2229       February 14, 2015
   Version 5.5.2228       February 6, 2015
+* Version 5.4.2220       January 22, 2015 (Last GMT4-compatible archive revision, released February 27, 2015)
   Version 5.4.2219       December 11, 2014
   Version 5.4.2218       December 4, 2014
   Version 5.4.2217       December 1, 2014
@@ -300,10 +301,6 @@ Mbsslayout: fixed automatically generated plottin script.
 
 Mbm_route2mission: Added multibeam maximum range value.
 
--------------------------------------------------------------------------------
-MB-SYSTEM VERSION 5.4 RELEASE NOTES:
--------------------------------------------------------------------------------
-
 -----> 5.5.2234 (March 5, 2015)
 
 Plot macros (mbm_grdplot, mbm_grd3dplot, mbm_grdtiff, mbm_histplot, mbm_plot,
@@ -405,6 +402,10 @@ Major changes made to integrate MB-System with GMT5:
     -changes to all of the plot macros (e.g. mbm_grdplot) that make use of GMT
 
 Format 88 (MBF_RESON7KR): Update Reson 7k i/o module to handle TVG records.
+
+-------------------------------------------------------------------------------
+MB-SYSTEM VERSION 5.4 RELEASE NOTES:
+-------------------------------------------------------------------------------
 
 -----> 5.4.2219 (December 11, 2014)
 

@@ -200,8 +200,6 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
-GL_CPPFLAGS = @GL_CPPFLAGS@
-GL_LIBS = @GL_LIBS@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -282,17 +280,26 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
+libGLU_CFLAGS = @libGLU_CFLAGS@
+libGLU_LIBS = @libGLU_LIBS@
+libXm_CFLAGS = @libXm_CFLAGS@
+libXm_LIBS = @libXm_LIBS@
 libdir = @libdir@
 libexecdir = @libexecdir@
-libfftw_CFLAGS = @libfftw_CFLAGS@
+libfftw3_CFLAGS = @libfftw3_CFLAGS@
+libfftw3_LIBS = @libfftw3_LIBS@
 libfftw_CPPFLAGS = @libfftw_CPPFLAGS@
 libfftw_LIBS = @libfftw_LIBS@
 libgmt_CFLAGS = @libgmt_CFLAGS@
 libgmt_CPPFLAGS = @libgmt_CPPFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
+libmotif_CPPFLAGS = @libmotif_CPPFLAGS@
+libmotif_LIBS = @libmotif_LIBS@
 libnetcdf_CFLAGS = @libnetcdf_CFLAGS@
 libnetcdf_CPPFLAGS = @libnetcdf_CPPFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
+libopengl_CPPFLAGS = @libopengl_CPPFLAGS@
+libopengl_LIBS = @libopengl_LIBS@
 libproj_CFLAGS = @libproj_CFLAGS@
 libproj_CPPFLAGS = @libproj_CPPFLAGS@
 libproj_LIBS = @libproj_LIBS@
@@ -305,8 +312,6 @@ mbsystemdatadir = @mbsystemdatadir@
 mbsystemhtmldir = @mbsystemhtmldir@
 mbsystempsdir = @mbsystempsdir@
 mkdir_p = @mkdir_p@
-motif_CPPFLAGS = @motif_CPPFLAGS@
-motif_LIBS = @motif_LIBS@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
 prefix = @prefix@
@@ -329,7 +334,7 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	-I${top_srcdir}/src/gsf \
 	${libgmt_CPPFLAGS} \
 	${libnetcdf_CPPFLAGS} \
-	${motif_CPPFLAGS} ${GL_CPPFLAGS}
+	${libmotif_CPPFLAGS} ${libopengl_CPPFLAGS}
 
 AM_LDFLAGS = 
 mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_callbacks.c mbeditviz_prog.c mbeditviz_creation.c
@@ -338,7 +343,7 @@ mbeditviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \
 		  ${top_builddir}/src/mbaux/libmbxgr.la \
 		  ${top_builddir}/src/mbview/libmbview.la \
 		  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-		  ${motif_LIBS} ${GL_LIBS} \
+		  ${libmotif_LIBS} ${libopengl_LIBS} \
 		  $(LIBM)
 
 all: all-am

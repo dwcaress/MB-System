@@ -9,20 +9,8 @@
 /* Turned on OpenGL define in config */
 #undef GOT_GL
 
-/* Turned on Motif define in config */
-#undef GOT_MOTIF
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
-
-/* Define to 1 if you have the <GL/glu.h> header file. */
-#undef HAVE_GL_GLU_H
-
-/* Define to 1 if you have the <GL/glx.h> header file. */
-#undef HAVE_GL_GLX_H
-
-/* Define to 1 if you have the <GL/gl.h> header file. */
-#undef HAVE_GL_GL_H
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
