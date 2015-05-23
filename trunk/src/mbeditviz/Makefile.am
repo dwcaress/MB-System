@@ -10,7 +10,7 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	-I${top_srcdir}/src/gsf \
 	${libgmt_CPPFLAGS} \
 	${libnetcdf_CPPFLAGS} \
-	${motif_CPPFLAGS} ${GL_CPPFLAGS}
+	${libmotif_CPPFLAGS} ${libopengl_CPPFLAGS}
 
 AM_LDFLAGS = 
 
@@ -20,5 +20,5 @@ mbeditviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \
 		  ${top_builddir}/src/mbaux/libmbxgr.la \
 		  ${top_builddir}/src/mbview/libmbview.la \
 		  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-		  ${motif_LIBS} ${GL_LIBS} \
+		  ${libmotif_LIBS} ${libopengl_LIBS} \
 		  $(LIBM)
