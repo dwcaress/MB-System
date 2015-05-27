@@ -16,7 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-* Version 5.5.2244       May 27, 2015
+* Version 5.5.2245       May 27, 2015
 * Version 5.5.2243       May 22, 2015
 * Version 5.5.2242       May 16, 2015
   Version 5.5.2241       May 12, 2015
@@ -211,10 +211,14 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2244 (May 27, 2015)
+-----> 5.5.2245 (May 27, 2015)
 
 Mbswath, mbcontour, mbgrdtiff: Updated GMT5 header files in src/gmt to enable
-building on Linux and CygWin while maintaining compatibility with GMT 5.1.2.
+building on Ubuntu Linux, CentOs Linux, and CygWin while maintaining
+compatibility with GMT 5.1.2.
+
+Mbedit, mbnavedit, mbvelocitytool, mbgrdviz, mbeditviz: Incomplete tweaks to
+font handling to enable use of fonts other than Helvetica, Times, and Courier.
 
 -----> 5.5.2243 (May 22, 2015)
 
