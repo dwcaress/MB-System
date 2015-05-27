@@ -64,7 +64,7 @@ extern "C" {
 //#include "gmt_config.h"
 
 /* Declaration modifiers for DLL support (MSC et al) */
-#include "declspec.h"
+//#include "declspec.h"
 
 /* Declaration for PSL */
 #include "pslib.h"
@@ -75,8 +75,8 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <float.h>
 #include <math.h>

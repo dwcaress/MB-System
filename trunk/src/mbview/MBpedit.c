@@ -14,6 +14,21 @@
  * Code Generator Xcessory 6.1.3 (08/19/04) CGX Scripts 6.1 Motif 2.1
  *
  */
+
+/* Begin user code block <file_comments> */
+
+#ifdef __APPLE__
+#define HELVETICA "helvetica"
+#define TIMES "times"
+#define COURIER "courier"
+#else
+#define HELVETICA "helvetica"
+#define TIMES "times"
+#define COURIER "courier"
+#endif
+
+/* End user code block <file_comments> */
+
 #include <Xm/Xm.h>
 #include <Xm/Form.h>
 #include <Xm/BulletinB.h>
@@ -211,7 +226,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 120); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_flag_view = XmCreatePushButton(class_in->mbpingedit_controls,
             (char *)"mbpingedit_pushButton_flag_view",
@@ -251,7 +266,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 48); ac++;
         XtSetArg(args[ac], XmNheight, 24); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_menuBar_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_menuBar_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_cascadeButton_view = XmCreateCascadeButton(class_in->mbpingedit_menuBar_view,
             (char *)"mbpingedit_cascadeButton_view",
@@ -284,7 +299,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_view_waterfall = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_view_waterfall",
@@ -308,7 +323,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_view_alongtrack = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_view_alongtrack",
@@ -332,7 +347,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_view_acrosstrack = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_view_acrosstrack",
@@ -364,7 +379,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_flagged_on = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_flagged_on",
@@ -389,7 +404,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_detects = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_detects",
@@ -421,7 +436,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_wideplot = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_wideplot",
@@ -446,7 +461,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_time = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_time",
@@ -470,7 +485,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_interval = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_interval",
@@ -494,7 +509,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_lon = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_lon",
@@ -518,7 +533,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_latitude = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_latitude",
@@ -543,7 +558,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_heading = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_heading",
@@ -567,7 +582,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_speed = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_speed",
@@ -591,7 +606,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_depth = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_depth",
@@ -615,7 +630,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_altitude = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_altitude",
@@ -639,7 +654,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_sonardepth = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_sonardepth",
@@ -663,7 +678,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_roll = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_roll",
@@ -687,7 +702,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_pitch = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_pitch",
@@ -711,7 +726,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_show_heave = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_view,
             (char *)"mbpingedit_toggleButton_show_heave",
@@ -743,7 +758,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 120); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_unflag_all = XmCreatePushButton(class_in->mbpingedit_controls,
             (char *)"mbpingedit_pushButton_unflag_all",
@@ -771,7 +786,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 120); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_unflag_view = XmCreatePushButton(class_in->mbpingedit_controls,
             (char *)"mbpingedit_pushButton_unflag_view",
@@ -810,7 +825,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 77); ac++;
         XtSetArg(args[ac], XmNheight, 24); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_menuBar_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_menuBar_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_cascadeButton_controls = XmCreateCascadeButton(class_in->mbpingedit_menuBar_controls,
             (char *)"mbpingedit_cascadeButton_controls",
@@ -843,7 +858,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_goto = XmCreatePushButton(class_in->mbpingedit_pulldownMenu_controls,
             (char *)"mbpingedit_pushButton_goto",
@@ -867,7 +882,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_buffer = XmCreatePushButton(class_in->mbpingedit_pulldownMenu_controls,
             (char *)"mbpingedit_pushButton_buffer",
@@ -891,7 +906,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_annotation = XmCreatePushButton(class_in->mbpingedit_pulldownMenu_controls,
             (char *)"mbpingedit_pushButton_annotation",
@@ -915,7 +930,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_filters = XmCreatePushButton(class_in->mbpingedit_pulldownMenu_controls,
             (char *)"mbpingedit_pushButton_filters",
@@ -947,7 +962,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_reverse_keys = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_controls,
             (char *)"mbpingedit_toggleButton_reverse_keys",
@@ -972,7 +987,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_reverse_mouse = XmCreateToggleButton(class_in->mbpingedit_pulldownMenu_controls,
             (char *)"mbpingedit_toggleButton_reverse_mouse",
@@ -1004,7 +1019,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_next = XmCreatePushButton(class_in->mbpingedit_controls,
             (char *)"mbpingedit_pushButton_next",
@@ -1032,7 +1047,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_dismiss = XmCreatePushButton(class_in->mbpingedit_controls,
             (char *)"mbpingedit_pushButton_dismiss",
@@ -1060,7 +1075,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_forward = XmCreatePushButton(class_in->mbpingedit_controls,
             (char *)"mbpingedit_pushButton_forward",
@@ -1088,7 +1103,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_reverse = XmCreatePushButton(class_in->mbpingedit_controls,
             (char *)"mbpingedit_pushButton_reverse",
@@ -1116,7 +1131,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNy, 50); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_mbpingedit_scale_x_label = XmCreateLabel(class_in->mbpingedit_controls,
             (char *)"mbpingedit_slider_mbpingedit_scale_x_label",
@@ -1145,7 +1160,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
     XtSetArg(args[ac], XmNwidth, 260); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbpingedit_slider_mbpingedit_scale_x = XmCreateScale(class_in->mbpingedit_controls,
         (char *)"mbpingedit_slider_mbpingedit_scale_x",
@@ -1167,7 +1182,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 60); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_mbpingedit_scale_x_max_label = XmCreateLabel(class_in->mbpingedit_controls,
             (char *)"mbpingedit_slider_mbpingedit_scale_x_max_label",
@@ -1194,7 +1209,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNy, 90); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_mbpingedit_scale_y_label = XmCreateLabel(class_in->mbpingedit_controls,
             (char *)"mbpingedit_slider_mbpingedit_scale_y_label",
@@ -1224,7 +1239,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
     XtSetArg(args[ac], XmNwidth, 260); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbpingedit_slider_mbpingedit_scale_y = XmCreateScale(class_in->mbpingedit_controls,
         (char *)"mbpingedit_slider_mbpingedit_scale_y",
@@ -1246,7 +1261,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 65); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_mbpingedit_scale_y_max_label = XmCreateLabel(class_in->mbpingedit_controls,
             (char *)"mbpingedit_slider_mbpingedit_scale_y_max_label",
@@ -1273,7 +1288,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNy, 50); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_number_pings_label = XmCreateLabel(class_in->mbpingedit_controls,
             (char *)"mbpingedit_slider_number_pings_label",
@@ -1302,7 +1317,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
     XtSetArg(args[ac], XmNwidth, 290); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbpingedit_slider_number_pings = XmCreateScale(class_in->mbpingedit_controls,
         (char *)"mbpingedit_slider_number_pings",
@@ -1324,7 +1339,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 50); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_num_pings_max_label = XmCreateLabel(class_in->mbpingedit_controls,
             (char *)"mbpingedit_slider_num_pings_max_label",
@@ -1351,7 +1366,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNy, 90); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_number_step_label = XmCreateLabel(class_in->mbpingedit_controls,
             (char *)"mbpingedit_slider_number_step_label",
@@ -1380,7 +1395,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
     XtSetArg(args[ac], XmNwidth, 290); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbpingedit_slider_number_step = XmCreateScale(class_in->mbpingedit_controls,
         (char *)"mbpingedit_slider_number_step",
@@ -1402,7 +1417,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 50); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_number_max_step_label = XmCreateLabel(class_in->mbpingedit_controls,
             (char *)"mbpingedit_slider_number_max_step_label",
@@ -1429,7 +1444,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNy, 120); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_setting_mode_label = XmCreateLabel(class_in->mbpingedit_controls,
             (char *)"mbpingedit_setting_mode_label",
@@ -1470,7 +1485,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 75); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_togglebutton_toggle = XmCreateToggleButton(class_in->mbpingedit_setting_mode,
             (char *)"mbpingedit_togglebutton_toggle",
@@ -1494,7 +1509,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_togglebutton_pick = XmCreateToggleButton(class_in->mbpingedit_setting_mode,
             (char *)"mbpingedit_togglebutton_pick",
@@ -1518,7 +1533,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_togglebutton_erase = XmCreateToggleButton(class_in->mbpingedit_setting_mode,
             (char *)"mbpingedit_togglebutton_erase",
@@ -1542,7 +1557,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_togglebutton_restore = XmCreateToggleButton(class_in->mbpingedit_setting_mode,
             (char *)"mbpingedit_togglebutton_restore",
@@ -1568,7 +1583,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 62); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_togglebutton_grab = XmCreateToggleButton(class_in->mbpingedit_setting_mode,
             (char *)"mbpingedit_togglebutton_grab",
@@ -1594,7 +1609,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 54); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_togglebutton_info = XmCreateToggleButton(class_in->mbpingedit_setting_mode,
             (char *)"mbpingedit_togglebutton_info",
@@ -1663,7 +1678,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 77); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_annotation_dismiss = XmCreatePushButton(class_in->mbpingedit_form_annotation,
             (char *)"mbpingedit_pushButton_annotation_dismiss",
@@ -1691,7 +1706,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 65); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_y_max_interval_label = XmCreateLabel(class_in->mbpingedit_form_annotation,
             (char *)"mbpingedit_slider_y_max_interval_label",
@@ -1720,7 +1735,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
     XtSetArg(args[ac], XmNwidth, 270); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbpingedit_slider_y_interval = XmCreateScale(class_in->mbpingedit_form_annotation,
         (char *)"mbpingedit_slider_y_interval",
@@ -1741,7 +1756,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNy, 50); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_y_interval_label = XmCreateLabel(class_in->mbpingedit_form_annotation,
             (char *)"mbpingedit_slider_y_interval_label",
@@ -1769,7 +1784,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 65); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_x_max_interval_label = XmCreateLabel(class_in->mbpingedit_form_annotation,
             (char *)"mbpingedit_slider_x_max_interval_label",
@@ -1798,7 +1813,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
     XtSetArg(args[ac], XmNwidth, 270); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbpingedit_slider_x_interval = XmCreateScale(class_in->mbpingedit_form_annotation,
         (char *)"mbpingedit_slider_x_interval",
@@ -1819,7 +1834,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNy, 10); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_slider_x_interval_label = XmCreateLabel(class_in->mbpingedit_form_annotation,
             (char *)"mbpingedit_slider_x_interval_label",
@@ -1911,7 +1926,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_scale_median_local_ltrack = XmCreateScale(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_scale_median_local_ltrack",
@@ -1945,7 +1960,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_scale_median_local_xtrack = XmCreateScale(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_scale_median_local_xtrack",
@@ -1991,7 +2006,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_scale_filters_cutangleend = XmCreateScale(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_scale_filters_cutangleend",
@@ -2025,7 +2040,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_scale_filters_cutanglestart = XmCreateScale(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_scale_filters_cutanglestart",
@@ -2053,7 +2068,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 60); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_filters_cutangle = XmCreateToggleButton(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_toggleButton_filters_cutangle",
@@ -2098,7 +2113,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_scale_filters_cutdistanceend = XmCreateScale(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_scale_filters_cutdistanceend",
@@ -2132,7 +2147,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_scale_filters_cutdistancestart = XmCreateScale(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_scale_filters_cutdistancestart",
@@ -2160,7 +2175,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_filters_cutdistance = XmCreateToggleButton(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_toggleButton_filters_cutdistance",
@@ -2203,7 +2218,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_scale_filters_cutbeamend = XmCreateScale(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_scale_filters_cutbeamend",
@@ -2235,7 +2250,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_scale_filters_cutbeamstart = XmCreateScale(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_scale_filters_cutbeamstart",
@@ -2263,7 +2278,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 60); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_filters_cutbeam = XmCreateToggleButton(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_toggleButton_filters_cutbeam",
@@ -2306,7 +2321,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_scale_filters_wrongside = XmCreateScale(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_scale_filters_wrongside",
@@ -2334,7 +2349,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 60); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_filters_wrongside = XmCreateToggleButton(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_toggleButton_filters_wrongside",
@@ -2367,7 +2382,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_scale_filters_medianspike = XmCreateScale(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_scale_filters_medianspike",
@@ -2395,7 +2410,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 60); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_toggleButton_filters_medianspike = XmCreateToggleButton(class_in->mbpingedit_bulletinBoard_scrollfilters,
             (char *)"mbpingedit_toggleButton_filters_medianspike",
@@ -2422,7 +2437,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_filters_reset = XmCreatePushButton(class_in->mbpingedit_form_filters,
             (char *)"mbpingedit_pushButton_filters_reset",
@@ -2450,7 +2465,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_filters_apply = XmCreatePushButton(class_in->mbpingedit_form_filters,
             (char *)"mbpingedit_pushButton_filters_apply",
@@ -2478,7 +2493,7 @@ MBpeditCreate ( MBpeditDataPtr class_in, Widget parent, String name, ArgList arg
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbpingedit_pushButton_filters_dismiss = XmCreatePushButton(class_in->mbpingedit_form_filters,
             (char *)"mbpingedit_pushButton_filters_dismiss",
