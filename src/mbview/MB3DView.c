@@ -14,6 +14,21 @@
  * Code Generator Xcessory 6.1.3 (08/19/04) CGX Scripts 6.1 Motif 2.1
  *
  */
+
+/* Begin user code block <file_comments> */
+
+#ifdef __APPLE__
+#define HELVETICA "helvetica"
+#define TIMES "times"
+#define COURIER "courier"
+#else
+#define HELVETICA "helvetica"
+#define TIMES "times"
+#define COURIER "courier"
+#endif
+
+/* End user code block <file_comments> */
+
 #include <Xm/Xm.h>
 #include <Xm/BulletinB.h>
 #include <Xm/PushB.h>
@@ -214,7 +229,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 60); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DView, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_clearpicks = XmCreatePushButton(class_in->MB3DView,
             (char *)"mbview_pushButton_clearpicks",
@@ -242,7 +257,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 50); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DView, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_reset = XmCreatePushButton(class_in->MB3DView,
             (char *)"mbview_pushButton_reset",
@@ -283,7 +298,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_rmove = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
             (char *)"mbview_toggleButton_mode_rmove",
@@ -309,7 +324,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
         XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_rrotate = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
             (char *)"mbview_toggleButton_mode_rrotate",
@@ -335,7 +350,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
         XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_rviewpoint = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
             (char *)"mbview_toggleButton_mode_rviewpoint",
@@ -361,7 +376,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
         XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_rshade = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
             (char *)"mbview_toggleButton_mode_rshade",
@@ -387,7 +402,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
         XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_rarea = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
             (char *)"mbview_toggleButton_mode_rarea",
@@ -415,7 +430,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 125); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_rsite = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
             (char *)"mbview_toggleButton_mode_rsite",
@@ -443,7 +458,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 125); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_rroute = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
             (char *)"mbview_toggleButton_mode_rroute",
@@ -471,7 +486,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 125); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_rnav = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
             (char *)"mbview_toggleButton_mode_rnav",
@@ -499,7 +514,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 125); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_rnavfile = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
             (char *)"mbview_toggleButton_mode_rnavfile",
@@ -533,7 +548,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 160); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DView, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_status = XmCreateLabel(class_in->MB3DView,
             (char *)"mbview_label_status",
@@ -560,7 +575,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 50); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DView, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_fullrez = XmCreatePushButton(class_in->MB3DView,
             (char *)"mbview_pushButton_fullrez",
@@ -594,7 +609,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 160); ac++;
         XtSetArg(args[ac], XmNheight, 160); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DView, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_pickinfo = XmCreateLabel(class_in->MB3DView,
             (char *)"mbview_label_pickinfo",
@@ -633,7 +648,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 77); ac++;
         XtSetArg(args[ac], XmNheight, 24); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_cascadeButton_view = XmCreateCascadeButton(class_in->mbview_menuBar_mbview,
             (char *)"mbview_cascadeButton_view",
@@ -666,7 +681,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_display_2D = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_display_2D",
@@ -690,7 +705,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_display_3D = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_display_3D",
@@ -721,7 +736,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_data_primary = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_data_primary",
@@ -745,7 +760,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_data_primaryslope = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_data_primaryslope",
@@ -769,7 +784,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_data_secondary = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_data_secondary",
@@ -800,7 +815,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_histogram = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_histogram",
@@ -831,7 +846,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_overlay_none = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_overlay_none",
@@ -855,7 +870,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_overlay_illumination = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_overlay_illumination",
@@ -879,7 +894,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_overlay_slope = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_overlay_slope",
@@ -903,7 +918,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_overlay_secondary = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_overlay_secondary",
@@ -934,7 +949,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_overlay_contour = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_overlay_contour",
@@ -958,7 +973,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_site = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_site",
@@ -982,7 +997,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_route = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_route",
@@ -1006,7 +1021,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_nav = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_nav",
@@ -1030,7 +1045,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_navdrape = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_navdrape",
@@ -1054,7 +1069,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_vector = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_vector",
@@ -1085,7 +1100,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_colortable_haxby = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_colortable_haxby",
@@ -1109,7 +1124,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_colortable_bright = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_colortable_bright",
@@ -1133,7 +1148,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_colortable_muted = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_colortable_muted",
@@ -1157,7 +1172,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_colortable_gray = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_colortable_gray",
@@ -1181,7 +1196,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_colortable_flat = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_colortable_flat",
@@ -1205,7 +1220,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_colortable_sealevel1 = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_colortable_sealevel1",
@@ -1229,7 +1244,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_colortable_sealevel2 = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_colortable_sealevel2",
@@ -1260,7 +1275,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_profile = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
             (char *)"mbview_toggleButton_profile",
@@ -1292,7 +1307,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 77); ac++;
         XtSetArg(args[ac], XmNheight, 24); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_cascadeButton_controls = XmCreateCascadeButton(class_in->mbview_menuBar_mbview,
             (char *)"mbview_cascadeButton_controls",
@@ -1325,7 +1340,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_colorbounds = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
             (char *)"mbview_pushButton_colorbounds",
@@ -1349,7 +1364,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_2dview = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
             (char *)"mbview_pushButton_2dview",
@@ -1373,7 +1388,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_3dview = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
             (char *)"mbview_pushButton_3dview",
@@ -1397,7 +1412,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_shadeparms = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
             (char *)"mbview_pushButton_shadeparms",
@@ -1421,7 +1436,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_resolution = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
             (char *)"mbview_pushButton_resolution",
@@ -1445,7 +1460,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_projections = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
             (char *)"mbview_pushButton_projections",
@@ -1469,7 +1484,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_sitelist = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
             (char *)"mbview_pushButton_sitelist",
@@ -1493,7 +1508,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_routelist = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
             (char *)"mbview_pushButton_routelist",
@@ -1517,7 +1532,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_navlist = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
             (char *)"mbview_pushButton_navlist",
@@ -1549,7 +1564,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 77); ac++;
         XtSetArg(args[ac], XmNheight, 24); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_cascadeButton_mouse = XmCreateCascadeButton(class_in->mbview_menuBar_mbview,
             (char *)"mbview_cascadeButton_mouse",
@@ -1583,7 +1598,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_move = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
             (char *)"mbview_toggleButton_mode_move",
@@ -1608,7 +1623,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_rotate = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
             (char *)"mbview_toggleButton_mode_rotate",
@@ -1633,7 +1648,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_viewpoint = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
             (char *)"mbview_toggleButton_mode_viewpoint",
@@ -1658,7 +1673,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_shade = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
             (char *)"mbview_toggleButton_mode_shade",
@@ -1683,7 +1698,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_area = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
             (char *)"mbview_toggleButton_mode_area",
@@ -1707,7 +1722,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_site = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
             (char *)"mbview_toggleButton_mode_site",
@@ -1731,7 +1746,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_route = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
             (char *)"mbview_toggleButton_mode_route",
@@ -1755,7 +1770,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_nav = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
             (char *)"mbview_toggleButton_mode_nav",
@@ -1779,7 +1794,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_mode_navfile = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
             (char *)"mbview_toggleButton_mode_navfile",
@@ -1811,7 +1826,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 77); ac++;
         XtSetArg(args[ac], XmNheight, 24); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_cascadeButton_action = XmCreateCascadeButton(class_in->mbview_menuBar_mbview,
             (char *)"mbview_cascadeButton_action",
@@ -1844,7 +1859,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_action, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_help_about = XmCreatePushButton(class_in->mbview_pulldownMenu_action,
             (char *)"mbview_pushButton_help_about",
@@ -1876,7 +1891,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 77); ac++;
         XtSetArg(args[ac], XmNheight, 24); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_cascadeButton_dismiss = XmCreateCascadeButton(class_in->mbview_menuBar_mbview,
             (char *)"mbview_cascadeButton_dismiss",
@@ -1909,7 +1924,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_dismiss, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_pulldownMenu_dismiss, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_dismiss = XmCreatePushButton(class_in->mbview_pulldownMenu_dismiss,
             (char *)"mbview_pushButton_dismiss",
@@ -1947,7 +1962,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 160); ac++;
         XtSetArg(args[ac], XmNheight, 80); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DView, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_mouse = XmCreateLabel(class_in->MB3DView,
             (char *)"mbview_label_mouse",
@@ -2035,7 +2050,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 270); ac++;
         XtSetArg(args[ac], XmNheight, 62); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_scale_profile_width = XmCreateScale(class_in->mbview_form_profile,
             (char *)"mbview_scale_profile_width",
@@ -2072,7 +2087,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 270); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_scale_profile_slope = XmCreateScale(class_in->mbview_form_profile,
             (char *)"mbview_scale_profile_slope",
@@ -2131,7 +2146,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 270); ac++;
         XtSetArg(args[ac], XmNheight, 130); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_profile_label_info = XmCreateLabel(class_in->mbview_form_profile,
             (char *)"mbview_profile_label_info",
@@ -2163,7 +2178,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 270); ac++;
         XtSetArg(args[ac], XmNheight, 60); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_scale_profile_exager = XmCreateScale(class_in->mbview_form_profile,
             (char *)"mbview_scale_profile_exager",
@@ -2192,7 +2207,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 110); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_profile_pushButton_dismiss = XmCreatePushButton(class_in->mbview_form_profile,
             (char *)"mbview_profile_pushButton_dismiss",
@@ -2244,7 +2259,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 150); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_displayprojection = XmCreateLabel(class_in->mbview_bulletinBoard_projection,
             (char *)"mbview_label_displayprojection",
@@ -2281,7 +2296,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_geographic = XmCreateToggleButton(class_in->mbview_radioBox_projection,
             (char *)"mbview_toggleButton_geographic",
@@ -2307,7 +2322,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_utm = XmCreateToggleButton(class_in->mbview_radioBox_projection,
             (char *)"mbview_toggleButton_utm",
@@ -2333,7 +2348,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_spheroid = XmCreateToggleButton(class_in->mbview_radioBox_projection,
             (char *)"mbview_toggleButton_spheroid",
@@ -2366,7 +2381,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 190); ac++;
         XtSetArg(args[ac], XmNheight, 220); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_projection = XmCreateLabel(class_in->mbview_bulletinBoard_projection,
             (char *)"mbview_label_projection",
@@ -2393,7 +2408,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 130); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_projection_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_projection,
             (char *)"mbview_pushButton_projection_dismiss",
@@ -2452,7 +2467,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_view_2dzoom = XmCreateTextField(class_in->mbview_bulletinBoard_2dparms,
         (char *)"mbview_textField_view_2dzoom",
@@ -2473,7 +2488,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 60); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_view_2dzoom = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
             (char *)"mbview_label_view_2dzoom",
@@ -2494,7 +2509,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_view_2doffsety = XmCreateTextField(class_in->mbview_bulletinBoard_2dparms,
         (char *)"mbview_textField_view_2doffsety",
@@ -2515,7 +2530,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 50); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_view_2doffsety = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
             (char *)"mbview_label_view_2doffsety",
@@ -2547,7 +2562,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_view_2doffsetx = XmCreateTextField(class_in->mbview_bulletinBoard_2dparms,
         (char *)"mbview_textField_view_2doffsetx",
@@ -2568,7 +2583,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 50); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_view_2doffsetx = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
             (char *)"mbview_label_view_2doffsetx",
@@ -2596,7 +2611,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_2d_offset = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
             (char *)"mbview_label_2d_offset",
@@ -2623,7 +2638,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 70); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_view_2d_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_2dparms,
             (char *)"mbview_pushButton_view_2d_apply",
@@ -2651,7 +2666,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 70); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_view_2d_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_2dparms,
             (char *)"mbview_pushButton_view_2d_dismiss",
@@ -2710,7 +2725,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_model_3dzoom = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
         (char *)"mbview_textField_model_3dzoom",
@@ -2731,7 +2746,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_model_3dzoom = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_model_3dzoom",
@@ -2763,7 +2778,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_view_3dzoom = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
         (char *)"mbview_textField_view_3dzoom",
@@ -2784,7 +2799,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_view_3dzoom = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_view_3dzoom",
@@ -2805,7 +2820,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_view_3doffsety = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
         (char *)"mbview_textField_view_3doffsety",
@@ -2826,7 +2841,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_view_3doffsety = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_view_3doffsety",
@@ -2858,7 +2873,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_view_3doffsetx = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
         (char *)"mbview_textField_view_3doffsetx",
@@ -2879,7 +2894,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 60); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_view_3doffsetx = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_view_3doffsetx",
@@ -2907,7 +2922,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_view_offset = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_view_offset",
@@ -2928,7 +2943,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_view_elevation = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
         (char *)"mbview_textField_view_elevation",
@@ -2949,7 +2964,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 150); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_view_elevation = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_view_elevation",
@@ -2981,7 +2996,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_view_azimuth = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
         (char *)"mbview_textField_view_azimuth",
@@ -3002,7 +3017,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 150); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_view_azimuth = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_view_azimuth",
@@ -3030,7 +3045,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 200); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_view = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_view",
@@ -3051,7 +3066,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_model_elevation = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
         (char *)"mbview_textField_model_elevation",
@@ -3065,7 +3080,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_model_azimuth = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
         (char *)"mbview_textField_model_azimuth",
@@ -3086,7 +3101,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 150); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_model_elevation = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_model_elevation",
@@ -3114,7 +3129,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 140); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_model_azimuth = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_model_azimuth",
@@ -3142,7 +3157,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 200); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_model = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_model",
@@ -3180,7 +3195,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_view_3d_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_pushButton_view_3d_apply",
@@ -3209,7 +3224,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 150); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_exager = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_label_exager",
@@ -3230,7 +3245,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_exageration = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
         (char *)"mbview_textField_exageration",
@@ -3250,7 +3265,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_view_3d_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_3dparms,
             (char *)"mbview_pushButton_view_3d_dismiss",
@@ -3320,7 +3335,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_overlay_center = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
         (char *)"mbview_textField_overlay_center",
@@ -3341,7 +3356,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_overlay_center = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_label_overlay_center",
@@ -3369,7 +3384,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 200); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_overlayshade = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_label_overlayshade",
@@ -3407,7 +3422,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_overlay_shade_ctoh = XmCreateToggleButton(class_in->mbview_radioBox_overlay_shade,
             (char *)"mbview_toggleButton_overlay_shade_ctoh",
@@ -3432,7 +3447,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_overlay_shade_htoc = XmCreateToggleButton(class_in->mbview_radioBox_overlay_shade,
             (char *)"mbview_toggleButton_overlay_shade_htoc",
@@ -3453,7 +3468,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_overlay_amp = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
         (char *)"mbview_textField_overlay_amp",
@@ -3474,7 +3489,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_overlay_amp = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_label_overlay_amp",
@@ -3506,7 +3521,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_slope_amp = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
         (char *)"mbview_textField_slope_amp",
@@ -3527,7 +3542,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 110); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_slope_amp = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_label_slope_amp",
@@ -3555,7 +3570,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 200); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_slopeshade = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_label_slopeshade",
@@ -3576,7 +3591,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_illum_azi = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
         (char *)"mbview_textField_illum_azi",
@@ -3590,7 +3605,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_illum_amp = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
         (char *)"mbview_textField_illum_amp",
@@ -3611,7 +3626,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 140); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_illum_azi = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_label_illum_azi",
@@ -3639,7 +3654,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 150); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_illum_amp = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_label_illum_amp",
@@ -3667,7 +3682,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 180); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_illumination = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_label_illumination",
@@ -3705,7 +3720,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_shadeparms_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_pushButton_shadeparms_apply",
@@ -3734,7 +3749,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 150); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_illum_elev = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_label_illum_elev",
@@ -3755,7 +3770,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_illum_elev = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
         (char *)"mbview_textField_illum_elev",
@@ -3775,7 +3790,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_shadeparms_dismiss2 = XmCreatePushButton(class_in->mbview_bulletinBoard_shadeparms,
             (char *)"mbview_pushButton_shadeparms_dismiss2",
@@ -3835,7 +3850,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14",
+            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
@@ -3863,7 +3878,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12",
+            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 280); ac++;
@@ -3890,7 +3905,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12",
+            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 70); ac++;
         XtSetArg(args[ac], XmNy, 340); ac++;
@@ -3917,7 +3932,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
+            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 230); ac++;
         XtSetArg(args[ac], XmNy, 340); ac++;
@@ -3955,7 +3970,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
+            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 120); ac++;
@@ -3993,7 +4008,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-180-*-*-*-*-iso8859-1=TimesBold18,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
+            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-180-*-*-*-*-iso8859-1=TimesBold18,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -4024,7 +4039,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 120); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_about_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_about,
             (char *)"mbview_pushButton_about_dismiss",
@@ -4090,7 +4105,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 400); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_message = XmCreateLabel(class_in->mbview_bulletinBoard_message,
             (char *)"mbview_label_message",
@@ -4118,7 +4133,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 400); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_thanks = XmCreateLabel(class_in->mbview_bulletinBoard_message,
             (char *)"mbview_label_thanks",
@@ -4190,7 +4205,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 60); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_scale_navmediumresolution = XmCreateScale(class_in->mbview_bulletinBoard_resolution,
             (char *)"mbview_scale_navmediumresolution",
@@ -4225,7 +4240,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 60); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_scale_navlowresolution = XmCreateScale(class_in->mbview_bulletinBoard_resolution,
             (char *)"mbview_scale_navlowresolution",
@@ -4264,7 +4279,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 270); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_navrenderdecimation = XmCreateLabel(class_in->mbview_bulletinBoard_resolution,
             (char *)"mbview_label_navrenderdecimation",
@@ -4291,7 +4306,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 270); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_gridrenderres = XmCreateLabel(class_in->mbview_bulletinBoard_resolution,
             (char *)"mbview_label_gridrenderres",
@@ -4325,7 +4340,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_scale_mediumresolution = XmCreateScale(class_in->mbview_bulletinBoard_resolution,
             (char *)"mbview_scale_mediumresolution",
@@ -4360,7 +4375,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_scale_lowresolution = XmCreateScale(class_in->mbview_bulletinBoard_resolution,
             (char *)"mbview_scale_lowresolution",
@@ -4388,7 +4403,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_resolution_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_resolution,
             (char *)"mbview_pushButton_resolution_dismiss",
@@ -4476,7 +4491,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_overlay_ctoh = XmCreateToggleButton(class_in->mbview_radioBox_overlaymode,
             (char *)"mbview_toggleButton_overlay_ctoh",
@@ -4501,7 +4516,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_overlay_htoc = XmCreateToggleButton(class_in->mbview_radioBox_overlaymode,
             (char *)"mbview_toggleButton_overlay_htoc",
@@ -4522,7 +4537,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_overlaymax = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
         (char *)"mbview_textField_overlaymax",
@@ -4543,7 +4558,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_overlaymax = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_label_overlaymax",
@@ -4564,7 +4579,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_overlaymin = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
         (char *)"mbview_textField_overlaymin",
@@ -4585,7 +4600,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_overlaymin = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_label_overlaymin",
@@ -4613,7 +4628,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 200); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_overlaybounds = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_label_overlaybounds",
@@ -4662,7 +4677,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_slope_ctoh = XmCreateToggleButton(class_in->mbview_radioBox_slopemode,
             (char *)"mbview_toggleButton_slope_ctoh",
@@ -4687,7 +4702,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_slope_htoc = XmCreateToggleButton(class_in->mbview_radioBox_slopemode,
             (char *)"mbview_toggleButton_slope_htoc",
@@ -4708,7 +4723,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_slopemax = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
         (char *)"mbview_textField_slopemax",
@@ -4729,7 +4744,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_slopemax = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_label_slopemax",
@@ -4750,7 +4765,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_slopemin = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
         (char *)"mbview_textField_slopemin",
@@ -4771,7 +4786,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_slopemin = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_label_slopemin",
@@ -4799,7 +4814,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 200); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_slopebounds = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_label_slopebounds",
@@ -4837,7 +4852,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_data_ctoh = XmCreateToggleButton(class_in->mbview_radioBox_colormode,
             (char *)"mbview_toggleButton_data_ctoh",
@@ -4862,7 +4877,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 109); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_toggleButton_data_htoc = XmCreateToggleButton(class_in->mbview_radioBox_colormode,
             (char *)"mbview_toggleButton_data_htoc",
@@ -4883,7 +4898,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_datamax = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
         (char *)"mbview_textField_datamax",
@@ -4897,7 +4912,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_datamin = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
         (char *)"mbview_textField_datamin",
@@ -4918,7 +4933,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_colormax = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_label_colormax",
@@ -4946,7 +4961,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_colormin = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_label_colormin",
@@ -4974,7 +4989,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 180); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_colorbounds = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_label_colorbounds",
@@ -5012,7 +5027,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_colorbounds_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_pushButton_colorbounds_apply",
@@ -5041,7 +5056,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 230); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_label_contour = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_label_contour",
@@ -5062,7 +5077,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNwidth, 110); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_textField_contours = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
         (char *)"mbview_textField_contours",
@@ -5082,7 +5097,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNwidth, 110); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_colorbounds_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_colorbounds,
             (char *)"mbview_pushButton_colorbounds_dismiss",

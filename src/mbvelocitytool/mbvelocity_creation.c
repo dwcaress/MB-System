@@ -17,6 +17,17 @@
 
 
 /* Begin user code block <file_comments> */
+
+#ifdef __APPLE__
+#define HELVETICA "helvetica"
+#define TIMES "times"
+#define COURIER "courier"
+#else
+#define HELVETICA "helvetica"
+#define TIMES "times"
+#define COURIER "courier"
+#endif
+
 /* End user code block <file_comments> */
 
 #include <Xm/Xm.h>
@@ -214,7 +225,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(input_screen, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(input_screen, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_mode = XmCreatePushButton(input_screen,
             (char *)"pushButton_mode",
@@ -242,7 +253,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(input_screen, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(input_screen, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_plotscaling = XmCreatePushButton(input_screen,
             (char *)"pushButton_plotscaling",
@@ -292,7 +303,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 73); ac++;
         XtSetArg(args[ac], XmNheight, 24); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(menuBar_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(menuBar_file, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         cascadeButton_file = XmCreateCascadeButton(menuBar_file,
             (char *)"cascadeButton_file",
@@ -325,7 +336,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(pulldownMenu_file, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_open_svp_display = XmCreatePushButton(pulldownMenu_file,
             (char *)"pushButton_open_svp_display",
@@ -353,7 +364,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(pulldownMenu_file, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_open_svp_edit = XmCreatePushButton(pulldownMenu_file,
             (char *)"pushButton_open_svp_edit",
@@ -381,7 +392,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(pulldownMenu_file, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_new_svp_edit = XmCreatePushButton(pulldownMenu_file,
             (char *)"pushButton_new_svp_edit",
@@ -405,7 +416,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(pulldownMenu_file, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_save_svp = XmCreatePushButton(pulldownMenu_file,
             (char *)"pushButton_save_svp",
@@ -440,7 +451,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(pulldownMenu_file, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_open_mb = XmCreatePushButton(pulldownMenu_file,
             (char *)"pushButton_open_mb",
@@ -476,7 +487,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNsensitive, False); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(pulldownMenu_file, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_save_svpfile = XmCreatePushButton(pulldownMenu_file,
             (char *)"pushButton_save_svpfile",
@@ -500,7 +511,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(pulldownMenu_file, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_save_residuals = XmCreatePushButton(pulldownMenu_file,
             (char *)"pushButton_save_residuals",
@@ -532,7 +543,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(input_screen, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(input_screen, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_about = XmCreatePushButton(input_screen,
             (char *)"pushButton_about",
@@ -560,7 +571,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(input_screen, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(input_screen, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_quit = XmCreatePushButton(input_screen,
             (char *)"pushButton_quit",
@@ -588,7 +599,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(input_screen, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(input_screen, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_process = XmCreatePushButton(input_screen,
             (char *)"pushButton_process",
@@ -633,7 +644,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNy, 40); ac++;
         XtSetArg(args[ac], XmNwidth, 1010); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(input_screen, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(input_screen, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_status_display = XmCreateLabel(input_screen,
             (char *)"label_status_display",
@@ -660,7 +671,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNy, 60); ac++;
         XtSetArg(args[ac], XmNwidth, 1010); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(input_screen, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(input_screen, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_status_edit = XmCreateLabel(input_screen,
             (char *)"label_status_edit",
@@ -687,7 +698,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNy, 80); ac++;
         XtSetArg(args[ac], XmNwidth, 1010); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(input_screen, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(input_screen, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_status_mb = XmCreateLabel(input_screen,
             (char *)"label_status_mb",
@@ -732,7 +743,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 260); ac++;
@@ -770,7 +781,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 200); ac++;
         XtSetArg(args[ac], XmNy, 410); ac++;
@@ -798,7 +809,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 240); ac++;
@@ -825,7 +836,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 250); ac++;
         XtSetArg(args[ac], XmNy, 280); ac++;
@@ -852,7 +863,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 70); ac++;
         XtSetArg(args[ac], XmNy, 280); ac++;
@@ -879,7 +890,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 120); ac++;
@@ -906,7 +917,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 160); ac++;
@@ -933,7 +944,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 90); ac++;
@@ -960,7 +971,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 190); ac++;
@@ -998,7 +1009,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-medium-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
@@ -1026,7 +1037,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-180-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-180-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 40); ac++;
@@ -1053,7 +1064,7 @@ Createwindow_mbvelocity(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-"TIMES"-bold-r-*-*-*-240-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -1110,7 +1121,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 360); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_message, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_message, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_pleasewait = XmCreateLabel(bulletinBoard_message,
             (char *)"label_pleasewait",
@@ -1138,7 +1149,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 360); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_message, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_message, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_message = XmCreateLabel(bulletinBoard_message,
             (char *)"label_message",
@@ -1186,7 +1197,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNy, 490); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_fileselect, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_fileselect, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_mbformat = XmCreateLabel(bulletinBoard_fileselect,
             (char *)"label_mbformat",
@@ -1217,7 +1228,7 @@ Createwindow_mbvelocity(Widget parent)
     XtSetArg(args[ac], XmNy, 490); ac++;
     XtSetArg(args[ac], XmNheight, 30); ac++;
     XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(bulletinBoard_fileselect, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        BX_CONVERT(bulletinBoard_fileselect, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
     textField_mbformat = XmCreateTextField(bulletinBoard_fileselect,
         (char *)"textField_mbformat",
@@ -1277,7 +1288,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 290); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_error, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_error, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_error_two = XmCreateLabel(bulletinBoard_error,
             (char *)"label_error_two",
@@ -1305,7 +1316,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 290); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_error, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_error, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_error_one = XmCreateLabel(bulletinBoard_error,
             (char *)"label_error_one",
@@ -1333,7 +1344,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 290); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_error, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_error, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_error_three = XmCreateLabel(bulletinBoard_error,
             (char *)"label_error_three",
@@ -1360,7 +1371,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_error, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_error, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_error = XmCreatePushButton(bulletinBoard_error,
             (char *)"pushButton_error",
@@ -1409,7 +1420,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 50); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_vel_center_max = XmCreateLabel(bulletinBoard_scaling,
             (char *)"label_vel_center_max",
@@ -1434,7 +1445,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 90); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_velcenter = XmCreateLabel(bulletinBoard_scaling,
             (char *)"label_velcenter",
@@ -1464,7 +1475,7 @@ Createwindow_mbvelocity(Widget parent)
     XtSetArg(args[ac], XmNwidth, 270); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
     slider_velcenter = XmCreateScale(bulletinBoard_scaling,
         (char *)"slider_velcenter",
@@ -1485,7 +1496,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_scaling_dismiss = XmCreatePushButton(bulletinBoard_scaling,
             (char *)"pushButton_scaling_dismiss",
@@ -1514,7 +1525,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 50); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_res_range_max = XmCreateLabel(bulletinBoard_scaling,
             (char *)"label_res_range_max",
@@ -1551,7 +1562,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 270); ac++;
         XtSetArg(args[ac], XmNheight, 39); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         slider_residual_range = XmCreateScale(bulletinBoard_scaling,
             (char *)"slider_residual_range",
@@ -1577,7 +1588,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 130); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_residual_range = XmCreateLabel(bulletinBoard_scaling,
             (char *)"label_residual_range",
@@ -1605,7 +1616,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 50); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_vel_range_max = XmCreateLabel(bulletinBoard_scaling,
             (char *)"label_vel_range_max",
@@ -1635,7 +1646,7 @@ Createwindow_mbvelocity(Widget parent)
     XtSetArg(args[ac], XmNwidth, 270); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
     slider_velrange = XmCreateScale(bulletinBoard_scaling,
         (char *)"slider_velrange",
@@ -1654,7 +1665,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 50); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_velrange = XmCreateLabel(bulletinBoard_scaling,
             (char *)"label_velrange",
@@ -1682,7 +1693,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 50); ac++;
         XtSetArg(args[ac], XmNheight, 20); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_max_depth_max = XmCreateLabel(bulletinBoard_scaling,
             (char *)"label_max_depth_max",
@@ -1712,7 +1723,7 @@ Createwindow_mbvelocity(Widget parent)
     XtSetArg(args[ac], XmNwidth, 270); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
     slider_maxdepth = XmCreateScale(bulletinBoard_scaling,
         (char *)"slider_maxdepth",
@@ -1731,7 +1742,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scaling, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         label_max_depth = XmCreateLabel(bulletinBoard_scaling,
             (char *)"label_max_depth",
@@ -1803,7 +1814,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 287); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(radioBox_mode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(radioBox_mode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         toggleButton_mode_ok = XmCreateToggleButton(radioBox_mode,
             (char *)"toggleButton_mode_ok",
@@ -1829,7 +1840,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 287); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(radioBox_mode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(radioBox_mode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         toggleButton_mode_snell = XmCreateToggleButton(radioBox_mode,
             (char *)"toggleButton_mode_snell",
@@ -1855,7 +1866,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 287); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(radioBox_mode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(radioBox_mode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         toggleButton_mode_null = XmCreateToggleButton(radioBox_mode,
             (char *)"toggleButton_mode_null",
@@ -1883,7 +1894,7 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_mode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_mode, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         pushButton_mode_dismiss = XmCreatePushButton(bulletinBoard_mode,
             (char *)"pushButton_mode_dismiss",

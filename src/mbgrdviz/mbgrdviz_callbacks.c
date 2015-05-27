@@ -35,6 +35,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <time.h>
 
 /* MBIO include files */
 #include "mb_status.h"

@@ -17,6 +17,17 @@
 
 
 /* Begin user code block <file_comments> */
+
+#ifdef __APPLE__
+#define HELVETICA "helvetica"
+#define TIMES "times"
+#define COURIER "courier"
+#else
+#define HELVETICA "helvetica"
+#define TIMES "times"
+#define COURIER "courier"
+#endif
+
 /* End user code block <file_comments> */
 
 #include <Xm/Xm.h>

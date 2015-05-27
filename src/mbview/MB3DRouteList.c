@@ -14,6 +14,21 @@
  * Code Generator Xcessory 6.1.3 (08/19/04) CGX Scripts 6.1 Motif 2.1
  *
  */
+
+/* Begin user code block <file_comments> */
+
+#ifdef __APPLE__
+#define HELVETICA "helvetica"
+#define TIMES "times"
+#define COURIER "courier"
+#else
+#define HELVETICA "helvetica"
+#define TIMES "times"
+#define COURIER "courier"
+#endif
+
+/* End user code block <file_comments> */
+
 #include <Xm/Xm.h>
 #include <Xm/Form.h>
 #include <Xm/Label.h>
@@ -128,7 +143,7 @@ MB3DRouteListCreate ( MB3DRouteListDataPtr class_in, Widget parent, String name,
         XtSetArg(args[ac], XmNwidth, 390); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DRouteList, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DRouteList, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_routelist_label = XmCreateLabel(class_in->MB3DRouteList,
             (char *)"mbview_routelist_label",
@@ -155,7 +170,7 @@ MB3DRouteListCreate ( MB3DRouteListDataPtr class_in, Widget parent, String name,
         XtSetArg(args[ac], XmNwidth, 170); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DRouteList, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DRouteList, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_routelist_delete = XmCreatePushButton(class_in->MB3DRouteList,
             (char *)"mbview_pushButton_routelist_delete",
@@ -183,7 +198,7 @@ MB3DRouteListCreate ( MB3DRouteListDataPtr class_in, Widget parent, String name,
         XtSetArg(args[ac], XmNwidth, 110); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DRouteList, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DRouteList, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_routelist_dismiss = XmCreatePushButton(class_in->MB3DRouteList,
             (char *)"mbview_pushButton_routelist_dismiss",
@@ -216,7 +231,7 @@ MB3DRouteListCreate ( MB3DRouteListDataPtr class_in, Widget parent, String name,
     XtSetArg(args[ac], XmNwidth, 390); ac++;
     XtSetArg(args[ac], XmNheight, 150); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_scrolledWindow_routelist, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_scrolledWindow_routelist, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_list_routelist = XmCreateList(class_in->mbview_scrolledWindow_routelist,
         (char *)"mbview_list_routelist",
