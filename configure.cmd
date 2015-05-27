@@ -1,6 +1,7 @@
+#-------------------------------------------------------------------------
+# Version: $Id$
 #------------------------------------------------------------------------------
-# Notes on using an autotools based build system with the MB-System source
-# code archive.
+# Notes on using the MB-System autotools based build system 
 #------------------------------------------------------------------------------
 #
 # David W. Caress
@@ -15,9 +16,16 @@
 #------------------------------------------------------------------------------
 # To use the build system...
 #------------------------------------------------------------------------------
-# To generate the makefiles needed to build MB-System, run ./configure
-# with the options appropriate for your situation. Some examples are
-# given below.
+#
+# Obtain the MB-System source tree by either downloading and unpacking an
+# MB-System source distribution tarball (e.g. mbsystem-5.5.2245.tar.gz) from:
+#   ftp://ftp.ldeo.columbia.edu/pub/mbsystem/
+# or by downloading directly from the source code archive at:
+#   http://svn.mb-system.org/listing.php?repname=MB-System
+#
+# To generate the makefiles needed to build MB-System, in a shell cd to the
+# top of the MB-System source tree and run ./configure with the options
+# appropriate for your situation. Some examples are given below.
 #
 # After configure you can run the make utility in the usual fashion
 make
@@ -27,7 +35,7 @@ make install
 make clean (to clean up compiled code)
 make distclean (to clean up compiled code and configure output)
 make uninstall (to remove a previously installed version)
-
+#
 #------------------------------------------------------------------------------
 # Configure script command line options:
 #------------------------------------------------------------------------------
@@ -76,14 +84,14 @@ make uninstall (to remove a previously installed version)
 #				default is to link with libproj
 #                                
 #------------------------------------------------------------------------------
-# Configure script command line examples:
+# Mac Os X configure script command line examples:
 #------------------------------------------------------------------------------
-
+#
 # Build in /usr/local on a Mac 10.9 or 10.10 with most prerequisites installed
 # through Fink in /sw, and the OTPS program predict_time located
 # in /usr/local/OTPS2.
 # Prerequisite Fink packages include gmt, netcdf, proj, fftw3, and gv:
-
+#
 sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/usr/local \
@@ -98,10 +106,13 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib \
     --with-otps-dir=/usr/local/OTPS2
-
+#
+#------------------------------------------------------------------------------
+# Ubuntu Linux configure script command line examples:
 #------------------------------------------------------------------------------
 
-# Install on Ubuntu 12.04.02LTS using only apt-get for prerequisites
+# Install on Ubuntu (12.04.02LTS or 14.04LTS) using only apt-get for all
+# prerequisites including GMT 5.1.2
 
 # Required environment variables to be set in ~/.bashrc
 export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
@@ -147,17 +158,61 @@ sudo ./configure --prefix=/usr/local \
 # into /usr/local/bin, /usr/local/lib, etc with the simple make commands:
 sudo make
 sudo make install
+
 #------------------------------------------------------------------------------
 
-# Install on CentOs 6 using only yum for prerequisites
+# Install on Ubuntu (12.04.02LTS or 14.04LTS) using apt-get for all
+# prerequisites except GMT 5.1.2, which is built locally from source and
+# installed into /usr/local
+
+# Prerequisites excluding GMT
+sudo apt-get install xorg-dev libmotif-dev libmotif4 libxp-dev mesa-common-dev \
+    libsdl1.2-dev libsdl-image1.2-dev build-essential gfortran \
+    nautilus-open-terminal libfftw3-3 libfftw3-dev \
+    libnetcdf-dev netcdf-bin gdal-bin gdal1-dev gv
+    
+# GMT 5.1.2 is built from source using cmake and by default installs into
+# /usr/local in Ubuntu. Follow the directions in the GMT Wiki.
+# The specific installation points of the libraries and the header files will
+# vary according to the architecture. On a machine with a 32-bit processor,
+# the following configure options are required to build MB-System:
+sudo ./configure --prefix=/usr/local \
+    --with-gmt-include=/usr/local/include/gmt \
+    --with-gmt-lib=/usr/local/lib/i386-linux-gnu
+
+# Once configure has been run, build and install MB-System into /usr/local/bin,
+# /usr/local/lib, etc with the simple make commands:
+sudo make
+sudo make install
+
+#------------------------------------------------------------------------------
+# CentOs configure script command line examples:
+#------------------------------------------------------------------------------
+
+# Install on CentOs 6 or 7 using only yum for prerequisites
 
 # Prerequisites
 sudo yum install openmotif openmotif-devel fftw fftw-devel netcdf netcdf-devel \
-		proj proj-devel gdal-devel gmt gmt-devel gv nedit
+		proj proj-devel gdal-devel gmt gmt-devel gv
 
 # If the prerequisites have all been installed with yum and it is desired to
 # install MB-System in /usr/local, then only a simple call to configure is required:
 sudo ./configure
+#
+#------------------------------------------------------------------------------
+
+# Install on CentOs 6 or 7 using yum for prerequisites other than GMT
+#
+# Prerequisites
+sudo yum install openmotif openmotif-devel fftw fftw-devel netcdf netcdf-devel \
+		proj proj-devel gdal-devel gv
+
+# If GMT 5.1.2 has been installed from source into /usr/local, and it is desired to
+# install MB-System in /usr/local, then only the call to configure must specify
+# the location of the GMT libraries and header files:
+sudo ./configure --prefix=/usr/local \
+    --with-gmt-include=/usr/local/include/gmt \
+    --with-gmt-lib=/usr/local/lib64
 #
 #------------------------------------------------------------------------------
 # To modify the build system...
