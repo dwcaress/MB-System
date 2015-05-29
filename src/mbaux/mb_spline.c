@@ -26,25 +26,6 @@
  * Author:	D. W. Caress
  * Date:	October 11, 2000
  *
- * $Log: mb_spline.c,v $
- * Revision 5.3  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.2  2006/09/11 18:55:52  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.1  2004/12/02 06:29:26  caress
- * Fixes while working to support Reson 7k data.
- *
- * Revision 5.0  2000/12/01 22:53:59  caress
- * First cut at Version 5.0.
- *
- * Revision 4.0  2000/10/11  21:49:27  caress
- * Initial revision - code derived from functions previously
- * found in mbmerge.c, mbtide.c, and mbprocess.c.
- *
- *
  */
 
 /* standard global include files */
@@ -55,6 +36,7 @@
 /* mbio include files */
 #include "mb_status.h"
 #include "mb_define.h"
+#include "mb_aux.h"
 
 static char rcs_id[]="$Id$";
 

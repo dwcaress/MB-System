@@ -250,6 +250,7 @@ void mid_point(long double lat1,
 	long double lon2,
 	long double *lat3,
 	long double *lon3);
+void pause_screen(void);
 
 /* global variables */
 int counter_i_i2=0;

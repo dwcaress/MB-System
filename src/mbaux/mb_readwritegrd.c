@@ -34,6 +34,7 @@
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_define.h"
+#include "mb_aux.h"
 
 /* Projection defines */
 #define ModelTypeProjected	     1

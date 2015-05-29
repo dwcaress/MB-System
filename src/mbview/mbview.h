@@ -17,84 +17,6 @@
  * Author:	D. W. Caress
  * Date:	October 10,  2002
  *
- * $Log: mbview.h,v $
- * Revision 5.23  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.22  2008/09/11 20:17:33  caress
- * Checking in updates made during cruise AT15-36.
- *
- * Revision 5.21  2008/03/14 19:04:32  caress
- * Fixed memory problems with route editing.
- *
- * Revision 5.20  2007/11/16 17:26:56  caress
- * Progress on MBeditviz
- *
- * Revision 5.19  2007/10/17 20:35:05  caress
- * Release 5.1.1beta11
- *
- * Revision 5.18  2007/10/08 16:32:08  caress
- * Code status as of 8 October 2007.
- *
- * Revision 5.17  2007/07/03 17:35:54  caress
- * Working on MBeditviz.
- *
- * Revision 5.16  2007/06/17 23:27:31  caress
- * Added NBeditviz.
- *
- * Revision 5.15  2006/09/11 18:55:53  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.14  2006/06/16 19:30:58  caress
- * Check in after the Santa Monica Basin Mapping AUV Expedition.
- *
- * Revision 5.13  2006/04/26 22:06:39  caress
- * Improved profile view feature and enabled export of profile data.
- *
- * Revision 5.12  2006/04/11 19:17:04  caress
- * Added a profile capability.
- *
- * Revision 5.11  2005/11/05 01:11:47  caress
- * Much work over the past two months.
- *
- * Revision 5.10  2005/08/09 16:32:59  caress
- * Working on portability and on survey planning.
- *
- * Revision 5.9  2005/02/18 07:32:56  caress
- * Fixed nav display and button sensitivity.
- *
- * Revision 5.8  2005/02/17 07:35:08  caress
- * Moving towards 5.0.6 release.
- *
- * Revision 5.7  2005/02/08 22:37:40  caress
- * Heading towards 5.0.6 release.
- *
- * Revision 5.5  2004/09/16 21:44:40  caress
- * Many changes over the summer.
- *
- * Revision 5.4  2004/07/27 19:50:28  caress
- * Improving route planning capability.
- *
- * Revision 5.3  2004/05/21 23:40:40  caress
- * Moved to new version of BX GUI builder
- *
- * Revision 5.2  2004/02/24 22:52:29  caress
- * Added spherical projection to MBview.
- *
- * Revision 5.1  2004/01/06 21:11:03  caress
- * Added pick region capability.
- *
- * Revision 5.0  2003/12/02 20:38:31  caress
- * Making version number 5.0
- *
- * Revision 1.3  2003/11/25 01:43:18  caress
- * MBview version generated during EW0310.
- *
- * Revision 1.1  2003/09/23 21:29:00  caress
- * Adding first cut on mbview to cvs.
- *
- *
  */
 
 /*--------------------------------------------------------------------*/
@@ -547,7 +469,7 @@ struct mbview_struct {
 	void (*mbview_pickroute_notify)(size_t id);
 	void (*mbview_picknav_notify)(size_t id);
 	void (*mbview_pickvector_notify)(size_t id);
-	void (*mbview_sensitivity_notify)();
+	void (*mbview_sensitivity_notify)(void);
 
 	/* active flag */
 	int	active;
@@ -1063,7 +985,7 @@ int mbview_addvector(int verbose, size_t instance,
 			int *error);
 int mbview_enableviewvectors(int verbose, size_t instance,
 			int *error);
-int mbview_pick_vec_select(size_t instance, int select, int which, int xpixel, int ypixel);
+int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel, int ypixel);
 int mbview_vector_delete(size_t instance, int ivec);
 int mbview_drawvectorpick(size_t instance);
 int mbview_drawvector(size_t instance, int rez);

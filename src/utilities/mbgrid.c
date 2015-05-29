@@ -110,8 +110,8 @@
 /* #define USESURFACE */
 
 /* approximate complementary error function */
-double erfcc();
-double mbgrid_erf();
+double erfcc(double x);
+double mbgrid_erf(double x);
 
 int write_ascii(int verbose, char *outfile, float *grid,
 		int nx, int ny,

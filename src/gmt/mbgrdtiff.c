@@ -381,6 +381,14 @@ struct MBGRDTIFF_CTRL {
 		bool active;
 	} Q;
 };
+
+
+void *New_mbgrdtiff_Ctrl (struct GMT_CTRL *GMT);
+void Free_mbgrdtiff_Ctrl (struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl);
+int GMT_mbgrdtiff_usage (struct GMTAPI_CTRL *API, int level);
+int GMT_mbgrdtiff_parse (struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, struct GMT_OPTION *options);
+void GMT_mbgrdtiff_set_proj_limits (struct GMT_CTRL *GMT, struct GMT_GRID_HEADER *r, struct GMT_GRID_HEADER *g, bool projected);
+
 /*--------------------------------------------------------------------*/
 
 void *New_mbgrdtiff_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
@@ -649,7 +657,7 @@ void GMT_mbgrdtiff_set_proj_limits (struct GMT_CTRL *GMT, struct GMT_GRID_HEADER
 
 int GMT_mbgrdtiff (void *V_API, int mode, void *args)
 {
-	char program_name[] = "mbswath";
+	char program_name[] = "mbgrdtiff";
 
 	/* TIFF arrays */
         mb_path world_file;
@@ -665,7 +673,6 @@ int GMT_mbgrdtiff (void *V_API, int mode, void *args)
 	int	nscan;
 	int	utmzone;
         int     keyindex;
-	char	*projection = "-Jx1.0";
         
         short   value_short;
         int     value_int;

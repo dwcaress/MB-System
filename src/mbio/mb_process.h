@@ -1233,6 +1233,13 @@ int mb_pr_set_bathyslope(int verbose,
 			int *nslopes, double *slopes, double *slopeacrosstrack,
 			double *depthsmooth,
 			int *error);
+int mb_pr_set_bathyslopenew(int verbose,
+                        int nsmooth,
+                        int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+                        int *ndepths, double *depths, double *depthacrosstrack,
+                        int *nslopes, double *slopes, double *slopeacrosstrack,
+                        double *depthsmooth,
+                        int *error);
 int mb_pr_get_bathyslope(int verbose,
 			int ndepths, double *depths, double *depthacrosstrack,
 			int nslopes, double *slopes, double *slopeacrosstrack,

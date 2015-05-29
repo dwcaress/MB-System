@@ -27,62 +27,6 @@
  * Author:	D. W. Caress
  * Date:	July 6, 1994
  *
- * $Log: mb_swap.c,v $
- * Revision 5.7  2008/08/12 05:31:54  caress
- * Fixed swapping of 8 byte values. Fix suggested by Jeremy Robst of NERC.
- *
- * Revision 5.6  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.5  2006/02/12 04:28:09  caress
- * For 5.0.9.
- *
- * Revision 5.4  2006/01/06 18:27:18  caress
- * Working towards 5.0.8
- *
- * Revision 5.3  2004/11/06 03:55:15  caress
- * Working to support the Reson 7k format.
- *
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.6  2000/10/11  01:02:30  caress
- * Convert to ANSI C
- *
- * Revision 4.5  2000/09/30  06:32:11  caress
- * Snapshot for Dale.
- *
- * Revision 4.4  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.3  1997/09/15  19:06:40  caress
- * Real Version 4.5
- *
- * Revision 4.2  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1994/10/21  12:11:53  caress
- * Release V4.0
- *
- * Revision 4.1  1994/10/21  12:11:53  caress
- * Release V4.0
- *
- * Revision 4.0  1994/07/29  18:58:22  caress
- * Initial Revision
- *
- * Revision 1.1  1994/07/29  18:46:51  caress
- * Initial revision
- *
- * Revision 1.1  1994/07/29  18:46:51  caress
- * Initial revision
- *
- *
  *
  */
 

@@ -55,6 +55,13 @@ static int format_alias_table[] =
 	71,	/* MBF_MBLDEOIH */
 	};
 
+/* local prototypes not found in mb_define.h */
+int mb_datalist_readorg(int verbose,
+		void *datalist,
+		char *path, int *format, double *weight,
+		int *error);
+int cvt_to_nix_path(char *path);
+
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -3820,7 +3827,7 @@ int mb_datalist_readorg(int verbose,
 		int *error)
 {
 	/* local variables */
-	char	*function_name = "mb_datalist_read";
+	char	*function_name = "mb_datalist_readorg";
 	int	status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist_ptr;
 	struct mb_datalist_struct *datalist2_ptr;

@@ -17,22 +17,6 @@
  * Author:	D. W. Caress
  * Date:	May 25,  2007
  *
- * $Log: mb3dsoundingsprivate.h,v $
- * Revision 5.4  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.3  2007/11/16 17:26:56  caress
- * Progress on MBeditviz
- *
- * Revision 5.2  2007/10/08 16:32:08  caress
- * Code status as of 8 October 2007.
- *
- * Revision 5.1  2007/07/03 17:35:54  caress
- * Working on MBeditviz.
- *
- * Revision 5.0  2007/06/17 23:16:14  caress
- * Added MBeditviz.
- *
  *
  */
 
@@ -102,7 +86,7 @@ struct mb3dsoundings_world_struct
     int			init;
 
     /* function pointers */
-    void (*mb3dsoundings_dismiss_notify)();
+    void (*mb3dsoundings_dismiss_notify)(void);
     void (*mb3dsoundings_edit_notify)(int ifile, int iping, int ibeam, char beamflag, int flush);
     void (*mb3dsoundings_info_notify)(int ifile, int iping, int ibeam, char *infostring);
     void (*mb3dsoundings_bias_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
@@ -261,10 +245,11 @@ extern char	*mb3dsoundings_colorname[MBS_NUM_COLORS];
 /*--------------------------------------------------------------------*/
 
 int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *error);
-int mb3dsoundings_updategui();
-int mb3dsoundings_updatestatus();
-int mb3dsoundings_reset();
-int mb3dsoundings_reset_glx();
+int mb3dsoundings_updatecursor(void);
+int mb3dsoundings_updategui(void);
+int mb3dsoundings_updatestatus(void);
+int mb3dsoundings_reset(void);
+int mb3dsoundings_reset_glx(void);
 void do_mb3dsdg_resize( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_pick( Widget w, XtPointer client_data, XtPointer call_data);
@@ -292,6 +277,7 @@ void do_mb3dsdg_view_flagged( Widget w, XtPointer client_data, XtPointer call_da
 void do_mb3dsdg_view_noprofile( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_goodprofile( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_allprofile( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_resetview( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_applybias( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_colorsoundingsblack( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_colorsoundingsred( Widget w, XtPointer client_data, XtPointer call_data);
@@ -305,13 +291,20 @@ void do_mb3dsdg_view_scalewithflagged( Widget w, XtPointer client_data, XtPointe
 void do_mb3dsdg_view_reset( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_panzoom( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_rotate( Widget w, XtPointer client_data, XtPointer call_data);
-int mb3dsoundings_updatemodetoggles();
-int mb3dsoundings_bad_ping();
-int mb3dsoundings_good_ping();
-int mb3dsoundings_left_ping();
-int mb3dsoundings_right_ping();
-int mb3dsoundings_flag_view();
-int mb3dsoundings_unflag_view();
-int mb3dsoundings_zero_ping();
+int mb3dsoundings_updatemodetoggles(void);
+int mb3dsoundings_bad_ping(void);
+int mb3dsoundings_good_ping(void);
+int mb3dsoundings_left_ping(void);
+int mb3dsoundings_right_ping(void);
+int mb3dsoundings_flag_view(void);
+int mb3dsoundings_unflag_view(void);
+int mb3dsoundings_zero_ping(void);
+
+void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
+void BxManageCB(Widget w, XtPointer client, XtPointer call);
+void BxPopupCB(Widget w, XtPointer client, XtPointer call);
+XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
+void BxExitCB(Widget w, XtPointer client, XtPointer call);
+void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
 /*--------------------------------------------------------------------*/

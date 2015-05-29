@@ -166,6 +166,11 @@ int     ncontour_plot_alloc = 0;
 double  *contour_x = NULL;
 double  *contour_y = NULL;
 
+void *New_mbcontour_Ctrl (struct GMT_CTRL *GMT);
+void Free_mbcontour_Ctrl (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl);
+int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level);
+int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struct GMT_OPTION *options);
+
 int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int *error);
 void mbcontour_plot(double x, double y, int ipen);
 void mbcontour_setline(int linewidth);
@@ -1343,7 +1348,7 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBSWATH function <%s> called\n",
+		fprintf(stderr,"\ndbg2  MBCONTOUR function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
@@ -1408,7 +1413,7 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBSWATH function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBCONTOUR function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);

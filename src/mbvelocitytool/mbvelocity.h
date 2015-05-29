@@ -71,7 +71,7 @@ struct mbvt_ping_struct
 
 /* function prototypes */
 void do_mbvelocity_init(int argc, char **argv);
-void do_set_controls();
+void do_set_controls(void);
 void do_velrange( Widget w, XtPointer client_data, XtPointer call_data);
 void do_velcenter( Widget w, XtPointer client_data, XtPointer call_data);
 void do_process_mb( Widget w, XtPointer client_data, XtPointer call_data);
@@ -93,14 +93,14 @@ void do_io_mode_open_svp_edit( Widget w, XtPointer client_data, XtPointer call_d
 void do_expose( Widget w, XtPointer client_data, XtPointer call_data);
 int do_wait_until_viewed(XtAppContext app);
 int do_message_on(char *message);
-int do_message_off();
+int do_message_off(void);
 int do_error_dialog(char *s1, char *s2, char *s3);
 void set_label_string(Widget w, String str);
 void set_label_multiline_string(Widget w, String str);
 void get_text_string(Widget w, String str);
 
 int mbvt_init(int argc, char **argv);
-int mbvt_quit();
+int mbvt_quit(void);
 int mbvt_set_graphics(void *xgid, int *brdr, int ncol, unsigned int *pixels);
 int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
 	double *s_velrange, double *s_velcenter, double *s_resrange,
@@ -109,14 +109,14 @@ int mbvt_set_values(int s_edit, int s_ndisplay,
 		double s_maxdepth, double s_velrange, double s_velcenter,
 		double s_resrange, int s_anglemode);
 int mbvt_open_edit_profile(char *file);
-int mbvt_new_edit_profile();
+int mbvt_new_edit_profile(void);
 int mbvt_save_edit_profile(char *file);
 int mbvt_save_swath_profile(char *file);
 int mbvt_save_residuals(char *file);
 int mbvt_open_display_profile(char *file);
 int mbvt_get_display_names(int *nlist, char *list[MAX_PROFILES]);
 int mbvt_delete_display_profile(int select);
-int mbvt_plot();
+int mbvt_plot(void);
 int mbvt_action_select_node(int x, int y);
 int mbvt_action_mouse_up(int x, int y);
 int mbvt_action_drag_node(int x, int y);
@@ -124,9 +124,15 @@ int mbvt_action_add_node(int x, int y);
 int mbvt_action_delete_node(int x, int y);
 int mbvt_get_format(char *file, int *form);
 int mbvt_open_swath_file(char *file, int form, int *numload);
-int mbvt_deallocate_swath();
-int mbvt_process_multibeam();
+int mbvt_deallocate_swath(void);
+int mbvt_process_multibeam(void);
 
-XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
+
+void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
+void BxManageCB(Widget w, XtPointer client, XtPointer call);
+void BxPopupCB(Widget w, XtPointer client, XtPointer call);
+XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
+void BxExitCB(Widget w, XtPointer client, XtPointer call);
+void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
 /*--------------------------------------------------------------------*/

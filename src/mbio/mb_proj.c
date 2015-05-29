@@ -32,33 +32,6 @@
  * Author:	D. W. Caress
  * Date:	July 16, 2002
  *
- * $Log: mb_proj.c,v $
- * Revision 5.7  2009/03/13 07:05:58  caress
- * Release 5.1.2beta02
- *
- * Revision 5.6  2007/05/14 06:20:09  caress
- * Added more useful error message for inability to open the projection database.
- *
- * Revision 5.5  2006/06/16 19:30:58  caress
- * Check in after the Santa Monica Basin Mapping AUV Expedition.
- *
- * Revision 5.4  2004/02/24 22:17:05  caress
- * Added mb_proj_transform() function.
- *
- * Revision 5.3  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.1  2002/08/02 01:01:10  caress
- * 5.0.beta22
- *
- * Revision 5.0  2002/07/20 20:41:59  caress
- * Initial Revision
- * l
- *
- *
  *
  */
 

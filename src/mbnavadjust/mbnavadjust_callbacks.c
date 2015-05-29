@@ -6128,8 +6128,7 @@ do_error_dialog(char *s1, char *s2, char *s3)
 
 /*--------------------------------------------------------------------*/
 void
-do_bell(length)
-int	length;
+do_bell(int length)
 {
 	XBell(display,length);
 }

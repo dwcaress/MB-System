@@ -270,7 +270,7 @@ autoreconf --force --install --warnings=all
 # Force configure.ac to reduce the automake version requirement from 2.69 to 2.65
 sed -i.bak s/2\.69/2\.65/ configure.ac
 
-CFLAGS="-g -Wall -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
+CFLAGS="-g -Wall -Wmissing-prototypes -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
     --with-netcdf-include=/sw/include \

@@ -267,13 +267,13 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
-//int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr,
-//			int *kind, int *nbeams, int *detects, int *error);
+int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 //int mbsys_stereopair_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 //                        int *kind, int *nbeams, int *pulses, int *error);
-//int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr,
-//			int *kind, double *transmit_gain, double *pulse_length,
-//			double *receive_gain, int *error);
+int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, double *transmit_gain, double *pulse_length,
+			double *receive_gain, int *error);
 //int mbsys_stereopair_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 //			int *kind, int *nrawss,
 //			double *rawss,

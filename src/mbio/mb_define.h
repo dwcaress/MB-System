@@ -638,7 +638,7 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
                 double **merge_timeshift_time_d, double **merge_timeshift_timeshift,
                 int *error);
 
-int mb_swap_check();
+int mb_swap_check(void);
 int mb_get_double(double *, char *, int);
 int mb_get_int(int *, char *, int);
 int mb_get_binary_short(int, void *, void *);
@@ -738,6 +738,12 @@ int mb_proj_inverse(int verbose,
 		void *pjptr,
 		double easting, double northing,
 		double *lon, double *lat,
+		int *error);
+int mb_proj_transform(int verbose,
+		void *pjsrcptr,
+		void *pjdstptr,
+		int npoint,
+		double *x, double *y, double *z,
 		int *error);
 
 int mb_swap_check();

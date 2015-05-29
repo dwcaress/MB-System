@@ -81,29 +81,6 @@ static Cardinal ac;
 static Arg      args[256];
 static char	value_text[MB_PATH_MAXLINE];
 
-/* function prototypes */
-void do_mbeditviz_update_gui();
-void do_mbeditviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbeditviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbeditviz_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data);
-void get_text_string(Widget w, String str);
-void set_label_multiline_string(Widget w, String str);
-int do_mbeditviz_mbview_dismiss_notify(size_t instance);
-void do_mbeditviz_viewgrid();
-void do_mbeditviz_pickonepoint_notify(size_t instance);
-void do_mbeditviz_picktwopoint_notify(size_t instance);
-void do_mbeditviz_pickarea_notify(size_t instance);
-void do_mbeditviz_pickregion_notify(size_t instance);
-void do_mbeditviz_picksite_notify(size_t instance);
-void do_mbeditviz_pickroute_notify(size_t instance);
-void do_mbeditviz_picknav_notify(size_t instance);
-void do_mbeditviz_regrid_notify( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbeditviz_gridparameters( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbeditviz_changecellsize( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbeditviz_updategrid( Widget w, XtPointer client_data, XtPointer call_data);
-
-XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
-
 /*
  * Motif required Headers
  */

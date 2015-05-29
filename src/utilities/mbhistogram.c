@@ -22,75 +22,6 @@
  * Author:	D. W. Caress
  * Date:	December 28, 1994
  *
- * $Log: mbhistogram.c,v $
- * Revision 5.8  2008/09/13 06:08:09  caress
- * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
- *
- * Revision 5.7  2007/10/08 16:48:07  caress
- * State of the code on 8 October 2007.
- *
- * Revision 5.6  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.5  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.4  2005/03/25 04:42:59  caress
- * Standardized the string lengths used for filenames and comment data.
- *
- * Revision 5.3  2003/04/17 21:18:57  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2001/07/20 00:34:38  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/03/22 21:15:49  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.0  2000/12/01  22:57:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.12  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.11  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.10  2000/09/11  20:10:02  caress
- * Linked to new datalist parsing functions. Now supports recursive datalists
- * and comments in datalists.
- *
- * Revision 4.9  1998/10/05  19:19:24  caress
- * MB-System version 4.6beta
- *
- * Revision 4.8  1997/04/21  17:19:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.7  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.7  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.6  1995/08/11  18:51:37  caress
- * Added Gaussian distribution option.
- *
- * Revision 4.5  1995/05/12  17:12:32  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.4  1995/03/06  19:37:59  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.3  1995/03/02  13:49:21  caress
- * Fixed bug related to error messages.
- *
- * Revision 4.2  1995/02/27  14:43:18  caress
- * Fixed bug regarding closing a text input file.
- *
- * Revision 4.1  1995/01/06  00:06:41  caress
- * Can now read from either single data files or from multiple
- * data files specified in a datalist.
  *
  *
  */
@@ -110,6 +41,8 @@
 #define	MBHISTOGRAM_BATH	0
 #define	MBHISTOGRAM_AMP		1
 #define	MBHISTOGRAM_SS		2
+
+double	qsnorm(double p);
 
 static char rcs_id[] = "$Id$";
 
@@ -209,7 +142,6 @@ int main (int argc, char **argv)
 	int	nrectot = 0;
 	int	nvaluetot = 0;
 	int	i, j;
-	double	qsnorm();
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
