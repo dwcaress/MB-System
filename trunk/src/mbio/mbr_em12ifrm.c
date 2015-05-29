@@ -23,55 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	December 4, 2000
- * $Log: mbr_em12ifrm.c,v $
- * Revision 5.15  2008/03/01 09:14:03  caress
- * Some housekeeping changes.
- *
- * Revision 5.14  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.13  2004/10/18 04:15:46  caress
- * Minor change.
- *
- * Revision 5.12  2003/12/04 23:10:22  caress
- * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
- *
- * Revision 5.11  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.10  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.9  2002/10/02 23:55:42  caress
- * Release 5.0.beta24
- *
- * Revision 5.8  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.7  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.6  2002/02/22 09:03:43  caress
- * Release 5.0.beta13
- *
- * Revision 5.5  2001/12/18  04:27:45  caress
- * Release 5.0.beta11.
- *
- * Revision 5.4  2001/08/10  22:41:19  dcaress
- * Release 5.0.beta07
- *
- * Revision 5.3  2001-07-19 17:31:11-07  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/03/22  20:45:56  caress
- * Trying to make 5.0.beta0...
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/10  20:24:25  caress
- * Initial revision.
- *
  *
  */
 
@@ -129,6 +80,7 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error);
 int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error);
+int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error);
 
 static char rcs_id[]="$Id$";
 

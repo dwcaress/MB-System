@@ -17,17 +17,6 @@
  * Author:	D. W. Caress
  * Date:	November 11,  2007
  *
- * $Log: mbpingeditprivate.h,v $
- * Revision 5.1  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.0  2007/11/16 17:48:07  caress
- * Working to add an MBedit-like ping edit interface to MBeditviz
- *
- * Revision 1.1  2007/11/16 17:47:31  caress
- * Working to add an MBedit-like ping edit interface to MBeditviz
- *
- *
  */
 
 /*--------------------------------------------------------------------*/
@@ -96,7 +85,7 @@ struct mbpingedit_world_struct
     int			init;
 
     /* function pointers */
-    void (*mbpingedit_dismiss_notify)();
+    void (*mbpingedit_dismiss_notify)(void);
     void (*mbpingedit_edit_notify)(int ifile, int iping, int ibeam, char beamflag, int flush);
     void (*mbpingedit_info_notify)(int ifile, int iping, int ibeam, char *infostring);
 
@@ -249,5 +238,34 @@ void do_mbpingedit_reverse_mouse( Widget w, XtPointer client_data, XtPointer cal
 void do_mbpingedit_mode_pick( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbpingedit_expose( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbpingedit_unflag_view( Widget w, XtPointer client_data, XtPointer call_data);
+int mbpingedit_startup(int verbose, Widget parent, XtAppContext app, int *error);
+void do_mbpingedit_mode_toggle( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_show_detects( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_next_buffer( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_scale_x( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_scale_y( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_check_median_ltrack( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_check_median_xtrack( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_mode_grab( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_mode_erase( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_show_flagged( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_reverse( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_number_step( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_set_filters( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_view_mode( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_reset_filters( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_x_interval( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_y_interval( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_mode_info( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_unflag_all( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbpingedit_flag_view( Widget w, XtPointer client_data, XtPointer call_data);
+
+void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
+void BxManageCB(Widget w, XtPointer client, XtPointer call);
+void BxPopupCB(Widget w, XtPointer client, XtPointer call);
+XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
+void BxExitCB(Widget w, XtPointer client, XtPointer call);
+void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
 /*------------------------------------------------------------------------------*/

@@ -236,6 +236,7 @@ int mbmosaic_get_footprint(
 		double	acrosstrack_spacing,
 		struct footprint *footprint,
 		int	*error);
+int double_compare(double *a, double *b);
 
 /* program identifiers */
 static char rcs_id[] = "$Id$";

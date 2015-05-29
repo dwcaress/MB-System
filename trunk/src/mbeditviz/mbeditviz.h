@@ -254,13 +254,13 @@ void do_mbeditviz_regrid( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_updategrid( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_changecellsize( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_gridparameters( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbeditviz_viewgrid();
+void do_mbeditviz_viewgrid(void);
 int do_mbeditviz_mbview_dismiss_notify(size_t instance);
 void do_mbeditviz_deleteselected( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_changeoutputmode( Widget w, XtPointer client_data, XtPointer call_data);
 int do_mbeditviz_opendata(char *input_file_ptr, int format);
-void do_mbeditviz_update_gui( );
-void do_mbeditviz_update_filelist( );
+void do_mbeditviz_update_gui(void);
+void do_mbeditviz_update_filelist(void);
 void do_mbeditviz_pickonepoint_notify(size_t instance);
 void do_mbeditviz_picktwopoint_notify(size_t instance);
 void do_mbeditviz_pickarea_notify(size_t instance);
@@ -270,13 +270,13 @@ void do_mbeditviz_pickroute_notify(size_t instance);
 void do_mbeditviz_picknav_notify(size_t instance);
 void do_mbeditviz_regrid_notify( Widget w, XtPointer client_data, XtPointer call_data);
 int do_mbeditviz_message_on(char *message);
-int do_mbeditviz_message_off();
+int do_mbeditviz_message_off(void);
 int do_error_dialog(char *s1, char *s2, char *s3);
 void set_label_string(Widget w, String str);
 void set_label_multiline_string(Widget w, String str);
 void get_text_string(Widget w, String str);
-int do_wait_until_viewed();
-int do_mbeditviz_settimer();
+int do_wait_until_viewed(void);
+int do_mbeditviz_settimer(void);
 int do_mbeditviz_workfunction(XtPointer client_data);
 
 int mbeditviz_init(int argc,char **argv);
@@ -301,23 +301,30 @@ int mbeditviz_bin_weight(double foot_a, double foot_b, double scale,
 		    double pcx, double pcy, double dx, double dy,
 		    double *px, double *py,
 		    double *weight, int *use);
-int mbeditviz_get_grid_bounds();
-int mbeditviz_setup_grid();
-int mbeditviz_project_soundings();
-int mbeditviz_make_grid();
+int mbeditviz_get_grid_bounds(void);
+int mbeditviz_setup_grid(void);
+int mbeditviz_project_soundings(void);
+int mbeditviz_make_grid(void);
 int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *ping, int ibeam, int beam_ok, int apply_now);
-int mbeditviz_make_grid_simple();
-int mbeditviz_destroy_grid();
+int mbeditviz_make_grid_simple(void);
+int mbeditviz_destroy_grid(void);
 int mbeditviz_selectregion(size_t instance);
 int mbeditviz_selectarea(size_t instance);
 int mbeditviz_selectnav(size_t instance);
-void mbeditviz_mb3dsoundings_dismiss();
+void mbeditviz_mb3dsoundings_dismiss(void);
 void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag, int flush);
 void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostring);
 void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag);
 void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag);
 void mbeditviz_mb3dsoundings_colorsoundings(int color);
 int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double, double), int *error);
+
+void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
+void BxManageCB(Widget w, XtPointer client, XtPointer call);
+void BxPopupCB(Widget w, XtPointer client, XtPointer call);
+XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
+void BxExitCB(Widget w, XtPointer client, XtPointer call);
+void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
 /* end this include */
 #endif

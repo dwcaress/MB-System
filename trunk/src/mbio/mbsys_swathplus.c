@@ -45,6 +45,14 @@ static int get_sxp_heave(int verbose, swpls_sxpping *sxp_sxpping, double *heave,
 	int *error);
 static int set_sxp_height(int verbose, double heave, swpls_sxpping *sxp_ping,
 	int *error);
+int swpls_angles_to_quat(int verbose, const swpls_angles *orientation,
+	swpls_quaternion *q, int *error);
+int swpls_quat_to_angles(int verbose, const swpls_quaternion *q,
+	swpls_angles *orientation, int *error);
+int swpls_slerp(int verbose, const swpls_quaternion *q0,
+	const swpls_quaternion *q1, double t, swpls_quaternion *q,
+	int *error);
+static double wrap_pi(double theta);
 
 static char rcs_id[] =
 	"$Id$";

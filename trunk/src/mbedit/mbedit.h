@@ -380,11 +380,11 @@ int mbedit_action_filter_all(
 int mbedit_filter_ping(int iping);
 int mbedit_get_format(char *file, int *form);
 int mbedit_open_file(char *file, int form, int savemode);
-int mbedit_close_file();
+int mbedit_close_file(void);
 int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer);
 int mbedit_load_data(int buffer_size,
 		int *nloaded, int *nbuffer, int *ngood, int *icurrent);
-int mbedit_clear_screen();
+int mbedit_clear_screen(void);
 int mbedit_plot_all(
 		int	plwd,
 		int	exgr,
@@ -399,10 +399,10 @@ int mbedit_plot_all(
 int mbedit_plot_beam(int iping, int jbeam);
 int mbedit_plot_ping(int iping);
 int mbedit_plot_ping_label(int iping, int save);
-int mbedit_plot_info();
+int mbedit_plot_info(void);
 int mbedit_unplot_beam(int iping, int jbeam);
 int mbedit_unplot_ping(int iping);
-int mbedit_unplot_info();
+int mbedit_unplot_info(void);
 int mbedit_action_goto(
 		int	ttime_i[7],
 		int	hold_size,
@@ -427,11 +427,13 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 int mbedit_xtrackslope(int iping, double *slope);
 
 void do_mbedit_init(int argc, char **argv);
-void do_editlistselection( Widget w, XtPointer client_data, XtPointer call_data);
 void do_parse_datalist( char *file, int form);
-int do_setup_data();
-void do_build_filelist();
-void do_get_filters();
+void do_editlistselection( Widget w, XtPointer client_data, XtPointer call_data);
+void do_filelist_remove( Widget w, XtPointer client_data, XtPointer call_data);
+void do_load_specific_file(int i_file);
+int do_setup_data(void);
+void do_build_filelist(void);
+void do_get_filters(void);
 void do_file_selection_cancel( Widget w, XtPointer client_data, XtPointer call_data);
 void do_expose( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mode_toggle( Widget w, XtPointer client_data, XtPointer call_data);
@@ -446,18 +448,23 @@ void do_scale_x( Widget w, XtPointer client_data, XtPointer call_data);
 int do_reset_scale_x(int pwidth, int maxx, int xntrvl, int yntrvl);
 void do_output_edit( Widget w, XtPointer client_data, XtPointer call_data);
 void do_output_browse( Widget w, XtPointer client_data, XtPointer call_data);
+void do_output_edit_filelist( Widget w, XtPointer client_data, XtPointer call_data);
+void do_output_browse_filelist( Widget w, XtPointer client_data, XtPointer call_data);
 void do_x_interval( Widget w, XtPointer client_data, XtPointer call_data);
 void do_y_interval( Widget w, XtPointer client_data, XtPointer call_data);
 void do_load(int save_mode);
+void do_load_ok( Widget w, XtPointer client_data, XtPointer call_data);
+void do_load_ok_with_save( Widget w, XtPointer client_data, XtPointer call_data);
 void do_load_check( Widget w, XtPointer client_data, XtPointer call_data);
-void do_load_specific_file(int i_file);
-void do_checkuseprevious( );
-void do_filebutton_on();
-void do_filebutton_off();
-void do_nextbutton_on();
-void do_nextbutton_off();
+void do_checkuseprevious(void);
+void do_filebutton_on(void);
+void do_filebutton_off(void);
+void do_nextbutton_on(void);
+void do_nextbutton_off(void);
+void do_end( Widget w, XtPointer client_data, XtPointer call_data);
 void do_forward( Widget w, XtPointer client_data, XtPointer call_data);
 void do_reverse( Widget w, XtPointer client_data, XtPointer call_data);
+void do_start( Widget w, XtPointer client_data, XtPointer call_data);
 void do_quit( Widget w, XtPointer client_data, XtPointer call_data);
 void do_event( Widget w, XtPointer client_data, XtPointer call_data);
 void do_flag_view( Widget w, XtPointer client_data, XtPointer call_data);
@@ -470,7 +477,9 @@ void do_view_mode( Widget w, XtPointer client_data, XtPointer call_data);
 void do_show_time( Widget w, XtPointer client_data, XtPointer call_data);
 void do_reverse_mouse( Widget w, XtPointer client_data, XtPointer call_data);
 void do_reverse_keys( Widget w, XtPointer client_data, XtPointer call_data);
+void do_show_flags( Widget w, XtPointer client_data, XtPointer call_data);
 void do_show_detects( Widget w, XtPointer client_data, XtPointer call_data);
+void do_show_pulsetypes( Widget w, XtPointer client_data, XtPointer call_data);
 void do_buffer_hold( Widget w, XtPointer client_data, XtPointer call_data);
 void do_buffer_size( Widget w, XtPointer client_data, XtPointer call_data);
 void do_done( Widget w, XtPointer client_data, XtPointer call_data);
@@ -481,15 +490,18 @@ void do_reset_filters( Widget w, XtPointer client_data, XtPointer call_data);
 void do_check_median_xtrack( Widget w, XtPointer client_data, XtPointer call_data);
 void do_check_median_ltrack( Widget w, XtPointer client_data, XtPointer call_data);
 int do_wait_until_viewed(XtAppContext app);
-int do_mbedit_settimer();
+int do_mbedit_settimer(void);
 int do_mbedit_workfunction(XtPointer client_data);
 int do_message_on(char *message);
-int do_message_off();
+int do_message_off(void);
 int do_error_dialog(char *s1, char *s2, char *s3);
 void set_label_string(Widget w, String str);
 void set_label_multiline_string(Widget w, String str);
 void get_text_string(Widget w, String str);
 
-XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
+void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
+void BxManageCB(Widget w, XtPointer client, XtPointer call);
+void BxPopupCB(Widget w, XtPointer client, XtPointer call);
+XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
 
 /*--------------------------------------------------------------------*/

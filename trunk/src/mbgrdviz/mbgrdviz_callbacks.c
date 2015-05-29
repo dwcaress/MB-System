@@ -125,7 +125,7 @@ static Widget	fileSelectionText;
 
 /* function prototypes */
 int do_mbgrdviz_init(int argc, char **argv, int verbosity);
-void do_mbgrdviz_sensitivity();
+void do_mbgrdviz_sensitivity(void);
 int do_mbgrdviz_dismiss_notify(size_t instance);
 void do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPointer call_data);
@@ -140,7 +140,12 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_dat
 void do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_savedegdecmin( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_savelnw( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_saveprofile( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_realtime( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_close( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_quit( Widget w, XtPointer client_data, XtPointer call_data);
 int do_mbgrdviz_openprimary(char *input_file_ptr);
 int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr);
@@ -219,7 +224,13 @@ void do_mbgrdviz_realtimesetup_updaterate( Widget w, XtPointer client_data, XtPo
 void do_mbgrdviz_realtimesetup_path_test( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_realtimesetup_pathmode( Widget w, XtPointer client_data, XtPointer call_data);
 
-XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
+void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
+void BxManageCB(Widget w, XtPointer client, XtPointer call);
+void BxPopupCB(Widget w, XtPointer client, XtPointer call);
+void BxPopdownCB(Widget w, XtPointer client, XtPointer call);
+XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
+void BxExitCB(Widget w, XtPointer client, XtPointer call);
+void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
 /*
  * Motif required Headers
@@ -1547,6 +1558,15 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 	else
 		instance = 0;
 
+	/* print debug statements */
+	if (verbose >= 4)
+		{
+		fprintf(stderr,"\ndbg2  Extracted user data from widget fileSelectionBox:\n");
+		fprintf(stderr,"dbg2       fileSelectionBox:    %p\n",fileSelectionBox);
+		fprintf(stderr,"dbg2       actionid:            %d\n",actionid);
+		fprintf(stderr,"dbg2       mode:                %d\n",mode);
+		}
+
 	/* read the input file name */
 	XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET,
 			&file_ptr);
@@ -1554,6 +1574,17 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 		XtFree(file_ptr);
 		file_ptr = NULL;
+		}
+
+	/* print debug statements */
+	if (verbose >= 4)
+		{
+		fprintf(stderr,"\ndbg2  Extracted input file name from call_data:\n");
+		fprintf(stderr,"dbg2       call_data:           %p\n",call_data);
+		fprintf(stderr,"dbg2       acs:                 %p\n",acs);
+		fprintf(stderr,"dbg2       acs->value:          %p\n",acs->value);
+		fprintf(stderr,"dbg2       file_ptr:            %p\n",file_ptr);
+		fprintf(stderr,"dbg2       file_ptr:            %s\n",file_ptr);
 		}
 
 	/* open primary grid */

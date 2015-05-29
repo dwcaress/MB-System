@@ -17,56 +17,6 @@
  * Author:	D. W. Caress
  * Date:	September 24,  2003
  *
- * $Log: mbviewprivate.h,v $
- * Revision 5.14  2008/03/14 19:04:32  caress
- * Fixed memory problems with route editing.
- *
- * Revision 5.13  2007/10/08 16:32:08  caress
- * Code status as of 8 October 2007.
- *
- * Revision 5.12  2007/06/17 23:27:31  caress
- * Added NBeditviz.
- *
- * Revision 5.11  2006/06/16 19:30:58  caress
- * Check in after the Santa Monica Basin Mapping AUV Expedition.
- *
- * Revision 5.10  2006/04/11 19:17:04  caress
- * Added a profile capability.
- *
- * Revision 5.9  2005/11/05 01:11:47  caress
- * Much work over the past two months.
- *
- * Revision 5.8  2005/08/09 16:33:00  caress
- * Working on portability and on survey planning.
- *
- * Revision 5.7  2005/02/18 07:32:57  caress
- * Fixed nav display and button sensitivity.
- *
- * Revision 5.6  2005/02/08 22:37:43  caress
- * Heading towards 5.0.6 release.
- *
- * Revision 5.4  2004/07/15 19:26:45  caress
- * Improvements to survey planning.
- *
- * Revision 5.3  2004/05/21 23:40:40  caress
- * Moved to new version of BX GUI builder
- *
- * Revision 5.2  2004/02/24 22:52:30  caress
- * Added spherical projection to MBview.
- *
- * Revision 5.1  2004/01/06 21:11:04  caress
- * Added pick region capability.
- *
- * Revision 5.0  2003/12/02 20:38:34  caress
- * Making version number 5.0
- *
- * Revision 1.3  2003/11/25 22:14:03  caress
- * Fixed problem with display of mouse mode buttons.
- *
- * Revision 1.2  2003/11/25 02:52:55  caress
- * MBview version generated during EW0310.
- *
- *
  *
  */
 
@@ -545,7 +495,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
 int mbview_open(int verbose, size_t instance, int *error);
 int mbview_update(int verbose, size_t instance, int *error);
 int mbview_update_sensitivity(int verbose, size_t instance, int *error);
-int mbview_action_sensitivityall();
+int mbview_action_sensitivityall(void);
 int mbview_action_sensitivity(size_t instance);
 int mbview_set_widgets(int verbose, size_t instance, int *error);
 int mbview_addaction(int verbose, size_t instance,
@@ -658,9 +608,9 @@ int do_mbview_message_off(size_t instance);
 void set_mbview_label_string(Widget w, String str);
 void set_mbview_label_multiline_string(Widget w, String str);
 void get_mbview_text_string(Widget w, String str);
-void do_mbview_xevents();
+void do_mbview_xevents(void);
 int do_mbview_setbackgroundwork(size_t instance);
-int do_mbview_settimer();
+int do_mbview_settimer(void);
 int do_mbview_workfunction(XtPointer client_data);
 
 /* mbview_primary.c function prototypes */
@@ -973,7 +923,7 @@ int mbview_nav_delete(size_t instance, int inav);
 int mbview_navpicksize(size_t instance);
 int mbview_drawnavpick(size_t instance);
 int mbview_drawnav(size_t instance, int rez);
-int mbview_updatenavlist();
+int mbview_updatenavlist(void);
 
 /* mbview_route.c function prototypes */
 int mbview_getroutecount(int verbose, size_t instance,
@@ -1063,7 +1013,7 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 int mbview_route_delete(size_t instance, int iroute, int ipoint);
 int mbview_route_setdistance(size_t instance, int working_route);
 int mbview_drawroute(size_t instance, int rez);
-int mbview_updateroutelist();
+int mbview_updateroutelist(void);
 
 /* mbview_site.c function prototypes */
 int mbview_getsitecount(int verbose, size_t instance,
@@ -1113,7 +1063,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel);
 int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel);
 int mbview_site_delete(size_t instance, int isite);
 int mbview_drawsite(size_t instance, int rez);
-int mbview_updatesitelist();
+int mbview_updatesitelist(void);
 
 /* mbview_profile.c function prototypes */
 int mbview_getprofilecount(int verbose, size_t instance,
@@ -1167,6 +1117,11 @@ int mbview_destroy_prglx(size_t instance);
 int mbview_plotprofile(size_t instance);
 int mbview_profile_text(size_t instance);
 
-XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
+void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
+void BxManageCB(Widget w, XtPointer client, XtPointer call);
+void BxPopupCB(Widget w, XtPointer client, XtPointer call);
+XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
+void BxExitCB(Widget w, XtPointer client, XtPointer call);
+void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
 /*--------------------------------------------------------------------*/

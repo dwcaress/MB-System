@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.5.2247       May 29, 2015
 * Version 5.5.2246       May 27, 2015
 * Version 5.5.2243       May 22, 2015
 * Version 5.5.2242       May 16, 2015
@@ -210,6 +211,12 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2247 (May 29, 2015)
+
+General: Cleaned up missing function prototypes through much of the codebase
+(excepting externally written libraries gsf, sapi, bsio) in an effort to fix
+crashes of mbgrdviz and other programs.
 
 -----> 5.5.2246 (May 27, 2015)
 

@@ -2433,6 +2433,8 @@ struct mbsys_reson7k_struct
 int mbsys_reson7k_checkheader(s7k_header header);
 
 /* system specific function prototypes */
+int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header,
+			int *error);
 int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_reson7k_survey_alloc(int verbose,

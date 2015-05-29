@@ -20,38 +20,6 @@
  * Author:	D. W. Caress
  * Date:	March 16, 1999
  *
- * $Log: mbsys_hdcs.h,v $
- * Revision 5.6  2008/03/14 18:33:03  caress
- * Updated support for JHC format 151.
- *
- * Revision 5.5  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.4  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.3  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.2  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.1  2000/09/30  06:31:19  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  1999/03/31  18:29:20  caress
- * MB-System 4.6beta7
- *
- * Revision 1.1  1999/03/31  18:11:35  caress
- * Initial revision
- *
- *
  */
 /*
  * Notes on the MBSYS_HDCS data structure:
@@ -463,6 +431,10 @@ int mbsys_hdcs_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_hdcs_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_hdcs_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+                        int *sonartype, int *error);
+int mbsys_hdcs_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
+                        int *ss_type, int *error);
 int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

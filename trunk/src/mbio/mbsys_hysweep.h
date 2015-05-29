@@ -23,7 +23,6 @@
  * Author:	D. W. Caress (MBARI)
  * Date:	December 23, 2011
  *
- * $Log: mbsys_hysweep.h,v $
  *
  */
 /*
@@ -859,6 +858,10 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+                        int *sonartype, int *error);
+int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
+                        int *ss_type, int *error);
 int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr,
 		int *pingnumber, int *error);
 int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,

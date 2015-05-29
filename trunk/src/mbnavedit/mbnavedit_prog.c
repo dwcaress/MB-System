@@ -23,157 +23,6 @@
  * Date:	June 23,  1995
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
- * $Log: mbnavedit_prog.c,v $
- * Revision 5.24  2009/03/10 05:11:22  caress
- * Added Gaussian mean smoothing to MBnavedit.
- *
- * Revision 5.23  2009/03/09 16:58:31  caress
- * Release 5.1.2beta01
- *
- * Revision 5.22  2008/07/20 15:32:14  caress
- * Lengthened filename char arrays to prevent possible overflows.
- *
- * Revision 5.21  2008/05/16 23:05:05  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.20  2007/10/08 16:17:00  caress
- * Repeated positions are now automatically flagged for modeling or smooth inversion.
- *
- * Revision 5.19  2006/02/16 21:15:07  caress
- * Made smooth inversion weights work as small as 0.01 in the interface. Redimensioned some strings too.
- *
- * Revision 5.18  2006/01/24 19:19:24  caress
- * Version 5.0.8 beta.
- *
- * Revision 5.17  2006/01/06 18:24:13  caress
- * Working towards 5.0.8
- *
- * Revision 5.16  2005/11/05 00:58:10  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.15  2005/06/04 04:45:50  caress
- * Added feature to apply longitude and latitude offsets to the navigation.
- *
- * Revision 5.14  2005/03/25 04:35:55  caress
- * Added capability to interpolate over repeated values.
- *
- * Revision 5.13  2004/12/18 01:36:40  caress
- * Working towards release 5.0.6.
- *
- * Revision 5.12  2004/05/21 23:33:03  caress
- * Moved to new version of BX GUI builder
- *
- * Revision 5.11  2003/07/02 18:13:13  caress
- * Release 5.0.0
- *
- * Revision 5.10  2003/04/17 21:09:06  caress
- * Release 5.0.beta30
- *
- * Revision 5.9  2002/10/02 23:54:07  caress
- * Release 5.0.beta24
- *
- * Revision 5.8  2001/08/02 01:51:39  caress
- * Fixed call to mb_pr_ function.
- *
- * Revision 5.7  2001/07/20  00:34:00  caress
- * Release 5.0.beta03
- *
- * Revision 5.6  2001/06/30 17:41:04  caress
- * Release 5.0.beta01
- *
- * Revision 5.5  2001/06/03  07:06:25  caress
- * Release 5.0.beta01
- *
- * Revision 5.4  2001/04/06 22:16:01  caress
- * Fixed unflagging.
- *
- * Revision 5.3  2001/03/22  21:10:37  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.2  2001/01/22  07:47:40  caress
- * Version 5.0.beta01
- *
- * Revision 5.1  2000/12/10  20:30:08  caress
- * Version 5.0.alpha02
- *
- * Revision 5.0  2000/12/01  22:56:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.22  2000/10/11  01:05:17  caress
- * Convert to ANSI C
- *
- * Revision 4.21  2000/09/30  07:03:14  caress
- * Snapshot for Dale.
- *
- * Revision 4.20  2000/09/30  07:02:34  caress
- * Snapshot for Dale.
- *
- * Revision 4.19  2000/08/28  22:45:11  caress
- * About to kick off new version.
- *
- * Revision 4.18  1999/12/11 04:42:03  caress
- * Moved xgraphics.c to src/xgraphics
- *
- * Revision 4.17  1999/11/12  21:25:21  caress
- * Fixed start date shown below plots
- *
- * Revision 4.16  1999/07/16  19:22:56  caress
- * Smaller window with new dialogs for Linux.
- *
- * Revision 4.15  1999/04/14 04:33:10  caress
- * Final (?) version 4.6 release
- *
- * Revision 4.14  1999/04/09  22:34:08  caress
- * Added time interval plot.
- *
- * Revision 4.13  1999/02/04  23:54:13  caress
- * MB-System version 4.6beta7
- *
- * Revision 4.12  1998/12/18  01:40:25  caress
- * MB-System version 4.6beta5
- *
- * Revision 4.11  1998/10/09  18:43:08  caress
- * MB-System version 4.6beta.
- *
- * Revision 4.10  1997/09/15  19:10:20  caress
- * Real Version 4.5
- *
- * Revision 4.9  1997/04/22  19:25:57  caress
- * Fixed startup mode.
- *
- * Revision 4.8  1997/04/21  17:07:38  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.8  1997/04/16  21:40:29  caress
- * Version for MB-System 4.5.
- *
- * Revision 4.7  1996/08/26  17:33:15  caress
- * Release 4.4 revision.
- *
- * Revision 4.6  1996/04/22  13:22:24  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.5  1996/04/05  20:07:02  caress
- * Added GUI mode so done means quit for real. Also changed done and
- * quit handling in browse mode so that the program doesn't read the
- * entire data file before closing it.
- *
- * Revision 4.4  1995/11/02  19:22:45  caress
- *  Fixed mb_error calls.
- *
- * Revision 4.3  1995/09/28  18:01:01  caress
- * Improved handling of .mbxxx file suffix convention.
- *
- * Revision 4.2  1995/09/18  22:40:44  caress
- * Fixed bug that caused "select all" function to miss last data
- * point on plots of entire data set.
- *
- * Revision 4.1  1995/08/17  14:58:12  caress
- * Revision for release 4.3.
- *
- * Revision 4.0  1995/08/07  18:33:22  caress
- * First cut.
- *
  *
  */
 
@@ -3134,7 +2983,7 @@ int mbnavedit_action_use_smg()
 		/* recalculate model */
 		if (speedheading_change == MB_YES
 			&& model_mode == MODEL_MODE_DR)
-			mbnavedit_get_model(i);
+			mbnavedit_get_model();
 
 		/* clear the screen */
 		status = mbnavedit_clear_screen();
@@ -3212,7 +3061,7 @@ int mbnavedit_action_use_cmg()
 		/* recalculate model */
 		if (speedheading_change == MB_YES
 			&& model_mode == MODEL_MODE_DR)
-			mbnavedit_get_model(i);
+			mbnavedit_get_model();
 
 		/* clear the screen */
 		status = mbnavedit_clear_screen();

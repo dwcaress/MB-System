@@ -95,43 +95,6 @@
  * Author:	D. W. Caress
  * Date:	April, 1994
  *
- * $Log: mb_delaun.c,v $
- * Revision 5.1  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.0  2000/12/01 22:53:59  caress
- * First cut at Version 5.0.
- *
- * Revision 4.8  2000/10/11  01:00:12  caress
- * Convert to ANSI C
- *
- * Revision 4.7  2000/09/30  06:54:58  caress
- * Snapshot for Dale.
- *
- * Revision 4.6  1997/09/15  19:03:27  caress
- * Real Version 4.5
- *
- * Revision 4.5  1997/04/21  16:53:56  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.4  1996/04/22  13:18:44  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.4  1996/04/22  13:18:44  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.3  1995/03/06  19:39:52  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.2  1994/10/21  11:34:20  caress
- * Release V4.0
- *
- * Revision 4.1  1994/05/24  03:11:40  caress
- * Fixed include.
- *
- * Revision 4.0  1994/05/16  22:09:29  caress
- * First cut at new contouring scheme
- *
  *
  */
 
@@ -143,6 +106,7 @@
 /* mbio include files */
 #include "mb_status.h"
 #include "mb_define.h"
+#include "mb_aux.h"
 
 /* some defines */
 #define	LARGE	1.0e10

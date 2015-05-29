@@ -239,6 +239,11 @@ struct MBSWATH_CTRL {
 	} Z;
 };
 
+void *New_mbswath_Ctrl (struct GMT_CTRL *GMT);
+void Free_mbswath_Ctrl (struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl);
+int GMT_mbswath_usage (struct GMTAPI_CTRL *API, int level);
+int GMT_mbswath_parse (struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl, struct GMT_OPTION *options);
+
 int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error);
 int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl,
                         struct GMT_CTRL *GMT, struct GMT_PALETTE *CPT, int *error);
