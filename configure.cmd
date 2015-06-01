@@ -273,6 +273,8 @@ sed -i.bak s/2\.69/2\.65/ configure.ac
 CFLAGS="-g -Wall -Wmissing-prototypes -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
+    --disable-static \
+    --enable-shared \
     --with-netcdf-include=/sw/include \
     --with-netcdf-lib=/sw/lib \
     --with-proj-include=/sw/include \
