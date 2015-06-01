@@ -5053,7 +5053,7 @@ do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
-if (mbv_verbose >= 0)
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_dismiss: instance:%zu\n", instance);
 
 	/* get view */

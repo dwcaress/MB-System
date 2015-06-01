@@ -774,7 +774,7 @@ do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_da
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -787,7 +787,7 @@ do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPoi
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -818,7 +818,7 @@ do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPoi
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_OPENOVERLAY * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -831,7 +831,7 @@ do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointe
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -862,7 +862,7 @@ do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointe
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -875,7 +875,7 @@ do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPoint
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -906,7 +906,7 @@ do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPoint
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_OPENROUTE * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -919,7 +919,7 @@ do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -950,7 +950,7 @@ do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_OPENNAV * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -963,7 +963,7 @@ do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPoint
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -994,7 +994,7 @@ do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPoint
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_OPENSWATH * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1007,7 +1007,7 @@ do_mbgrdviz_fileSelectionBox_openvector( Widget w, XtPointer client_data, XtPoin
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -1038,7 +1038,7 @@ do_mbgrdviz_fileSelectionBox_openvector( Widget w, XtPointer client_data, XtPoin
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_OPENVECTOR * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1051,7 +1051,7 @@ do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointe
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -1082,7 +1082,7 @@ do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointe
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_SAVESITE * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1095,7 +1095,7 @@ do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPoint
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -1126,7 +1126,7 @@ do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPoint
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_SAVEROUTE * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1139,7 +1139,7 @@ do_mbgrdviz_fileSelectionBox_saverisiscript( Widget w, XtPointer client_data, Xt
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -1170,7 +1170,7 @@ do_mbgrdviz_fileSelectionBox_saverisiscript( Widget w, XtPointer client_data, Xt
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_SAVERISISCRIPT * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1183,7 +1183,7 @@ do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, Xt
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -1214,7 +1214,7 @@ do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, Xt
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_SAVEWINFROGPTS * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1227,7 +1227,7 @@ do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, Xt
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -1258,7 +1258,7 @@ do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, Xt
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_SAVEWINFROGWPT * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1271,7 +1271,7 @@ do_mbgrdviz_fileSelectionBox_savedegdecmin( Widget w, XtPointer client_data, XtP
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -1302,7 +1302,7 @@ do_mbgrdviz_fileSelectionBox_savedegdecmin( Widget w, XtPointer client_data, XtP
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_SAVEDEGDECMIN * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1315,7 +1315,7 @@ do_mbgrdviz_fileSelectionBox_savelnw( Widget w, XtPointer client_data, XtPointer
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -1346,7 +1346,7 @@ do_mbgrdviz_fileSelectionBox_savelnw( Widget w, XtPointer client_data, XtPointer
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_SAVELNW * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1359,7 +1359,7 @@ do_mbgrdviz_fileSelectionBox_saveprofile( Widget w, XtPointer client_data, XtPoi
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -1390,7 +1390,7 @@ do_mbgrdviz_fileSelectionBox_saveprofile( Widget w, XtPointer client_data, XtPoi
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_SAVEPROFILE * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1403,7 +1403,7 @@ do_mbgrdviz_fileSelectionBox_realtime( Widget w, XtPointer client_data, XtPointe
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
-	int	actionid;
+	size_t	actionid;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -1434,7 +1434,7 @@ do_mbgrdviz_fileSelectionBox_realtime( Widget w, XtPointer client_data, XtPointe
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_REALTIME * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
 
@@ -1463,8 +1463,14 @@ void
 do_mbgrdviz_quit( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	char function_name[] = "do_mbgrdviz_quit";
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+	int status = MB_SUCCESS;
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct*)call_data;
+	
+	/* close any active mbview instances */
+	status = mbview_quit(verbose, &error);
+	
+	XtUnmanageChild(XtParent(mainWindow));
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1527,8 +1533,8 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	char function_name[] = "do_mbgrdviz_openfile";
 	int	status = MB_SUCCESS;
-	int	actionid;
-	int	mode;
+	size_t	actionid;
+	size_t	mode;
 	size_t	instance;
 	char    *file_ptr;
         Cardinal ac = 0;
@@ -1546,6 +1552,26 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
 		}
 
+	/* read the input file name */
+	XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET,
+			&file_ptr);
+	if (strlen(file_ptr) <= 0 && file_ptr != NULL)
+		{
+		XtFree(file_ptr);
+		file_ptr = NULL;
+		}
+
+	/* print debug statements */
+	if (verbose >= 4)
+		{
+		fprintf(stderr,"\ndbg4  Extracted input file name from call_data:\n");
+		fprintf(stderr,"dbg4       call_data:           %p\n",call_data);
+		fprintf(stderr,"dbg4       acs:                 %p\n",acs);
+		fprintf(stderr,"dbg4       acs->value:          %p\n",acs->value);
+		fprintf(stderr,"dbg4       file_ptr:            %p\n",file_ptr);
+		fprintf(stderr,"dbg4       file_ptr:            %s\n",file_ptr);
+		}
+
     	/* figure out what kind of file is to be opened */
 
 	ac = 0;
@@ -1561,30 +1587,10 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 	/* print debug statements */
 	if (verbose >= 4)
 		{
-		fprintf(stderr,"\ndbg2  Extracted user data from widget fileSelectionBox:\n");
-		fprintf(stderr,"dbg2       fileSelectionBox:    %p\n",fileSelectionBox);
-		fprintf(stderr,"dbg2       actionid:            %d\n",actionid);
-		fprintf(stderr,"dbg2       mode:                %d\n",mode);
-		}
-
-	/* read the input file name */
-	XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET,
-			&file_ptr);
-	if (strlen(file_ptr) <= 0 && file_ptr != NULL)
-		{
-		XtFree(file_ptr);
-		file_ptr = NULL;
-		}
-
-	/* print debug statements */
-	if (verbose >= 4)
-		{
-		fprintf(stderr,"\ndbg2  Extracted input file name from call_data:\n");
-		fprintf(stderr,"dbg2       call_data:           %p\n",call_data);
-		fprintf(stderr,"dbg2       acs:                 %p\n",acs);
-		fprintf(stderr,"dbg2       acs->value:          %p\n",acs->value);
-		fprintf(stderr,"dbg2       file_ptr:            %p\n",file_ptr);
-		fprintf(stderr,"dbg2       file_ptr:            %s\n",file_ptr);
+		fprintf(stderr,"\ndbg4  Extracted user data from widget fileSelectionBox:\n");
+		fprintf(stderr,"dbg4       fileSelectionBox:    %p\n",fileSelectionBox);
+		fprintf(stderr,"dbg4       actionid:            %zu\n",actionid);
+		fprintf(stderr,"dbg4       mode:                %zu\n",mode);
 		}
 
 	/* open primary grid */
