@@ -906,7 +906,7 @@ int main (int argc, char **argv)
 			  }
 
 			/* solve the normal equations */
-			gauss(matrix,vector,nmatrix,nmatrix,1.0e-08,&error,1);
+			gauss((double *)matrix,vector,nmatrix,nmatrix,1.0e-08,&error,1);
 
 			/* get the solution */
 			iaa = vector[0];
@@ -958,7 +958,7 @@ int main (int argc, char **argv)
 			  }
 
 			/* solve the normal equations */
-			gauss(matrix,vector,nmatrix,nmatrix,1.0e-08,&error,1);
+			gauss((double *)matrix,vector,nmatrix,nmatrix,1.0e-08,&error,1);
 			if (error != 0)
 				{
 				fprintf(outfp,"matrix inversion error: %d\n",error);

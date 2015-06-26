@@ -494,6 +494,38 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 int mb_copyrecord(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);
 
+int mb_platform_init(int verbose, int type, char *name, char *organization,
+		int source_swathbathymetry, int source_position,
+		int source_depth, int source_heave, int source_heading,
+		int source_rollpitch, 
+		void **platform_ptr, int *error);
+int mb_platform_add_sensor(int verbose, void **platform_ptr,
+		int type, mb_longname model,
+		mb_longname manufacturer,
+		mb_longname serialnumber,
+		int capability, int special_capability,
+		int num_offsets, int num_time_latency,
+		int *error);
+int mb_platform_add_sensor_offset(int verbose, void **platform_ptr,
+		int isensor, int ioffset,
+		int time_latency_mode,
+		double time_latency_static,
+		int num_time_latency,
+		double *time_latency_time_d,
+		double *time_latency_value,
+		int position_offset_mode,
+		double position_offset_x,
+		double position_offset_y,
+		double position_offset_z,   
+		int attitude_offset_mode,
+		double attitude_offset_azimuth,
+		double attitude_offset_roll,
+		double attitude_offset_pitch,
+		int *error);
+int mb_platform_deall(int verbose, void **platform_ptr, int *error);
+int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int *error);
+int mb_platform_write(int verbose, char *platform_file, void **platform_ptr, int *error);
+
 int mb_buffer_init(int verbose, void **buff_ptr, int *error);
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr,
 		int *error);

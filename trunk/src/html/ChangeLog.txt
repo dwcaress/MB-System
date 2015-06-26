@@ -16,7 +16,9 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-* Version 5.5.2247       May 29, 2015
+  Version 5.5.2249       June 26, 2015
+* Version 5.5.2248       May 31, 2015
+  Version 5.5.2247       May 29, 2015
 * Version 5.5.2246       May 27, 2015
 * Version 5.5.2243       May 22, 2015
 * Version 5.5.2242       May 16, 2015
@@ -211,6 +213,28 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2249 (June 26, 2015)
+
+Format 121 (MBF_GSFGENMB): Kluge added to the GSF format i/o module to handle
+beam angles incorrectly constructed so that angles from vertical are negative
+for port side beams when all aziumuthal angles are uniformaly zero (=starboard).
+
+General: Added platform, sensor, and sensor offset definitions to mb_io.h for
+use in flexibly defining a platform consisting of many sensors with relative
+positional and angular offsets. Also added functions to read and write
+platform files using these definitions. Have not completed the function to perform
+lever arm calculations using this platform definition. Initially these functions
+will be used in mb7kpreprocess, but ultimately these will be used generally
+in MB-System.
+
+Mb7kpreprocess: initial implementation using the new platform file and structure
+definitions.
+
+-----> 5.5.2248 (May 31, 2015)
+
+Mbgrdviz and mbview: Fixed casts between int and pointer that seem to be
+responsible for mbgrdviz crashes.
 
 -----> 5.5.2247 (May 29, 2015)
 
