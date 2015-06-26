@@ -1135,6 +1135,13 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			ttimes[i] = mb_ping->travel_time[i];
 			angles[i] = fabs(mb_ping->beam_angle[i]);
 			angles_forward[i] = mb_ping->beam_angle_forward[i];
+			if (mb_ping->beam_angle[i] < 0.0
+				&& mb_ping->across_track[i] < 0.0
+				&& (fabs(mb_ping->beam_angle_forward[i]) < 90.0
+				    || fabs(mb_ping->beam_angle_forward[i]) > 270.0))
+				{
+				angles_forward[i] += 180.0;
+				}
 			heave[i] = mb_ping->heave;
 			alongtrack_offset[i] = 0.0;
 			}

@@ -621,7 +621,7 @@ int mb_beaudoin(int verbose,
 	mb_beaudoin_unrotate(verbose, txMount, datt, &txGeo, error);
     
 	if (verbose >= 4)
-		printf ("dbg4      TX array x %f y %f z %f in geographic reference frame\n", txGeo.x, txGeo.y, txGeo.z);
+		fprintf(stderr, "dbg4      TX array x %f y %f z %f in geographic reference frame\n", txGeo.x, txGeo.y, txGeo.z);
     
 	rxIdeal.x = 0.0;
 	rxIdeal.y = 1.0;
@@ -640,7 +640,7 @@ int mb_beaudoin(int verbose,
 	mb_beaudoin_unrotate(verbose, rxMount, datt, &rxGeo, error);
     
 	if (verbose >= 4)
-		printf ("dbg4     RX array x %f y %f z %f in geographic reference frame\n", rxGeo.x, rxGeo.y, rxGeo.z);
+		fprintf(stderr, "dbg4     RX array x %f y %f z %f in geographic reference frame\n", rxGeo.x, rxGeo.y, rxGeo.z);
     
 	/* Have to negate it so signs work out...(was 90 - acos(...) before)  */
 	/* acos of dotproduct of rxGeo and txGeo yields angle from between vectors */
@@ -650,18 +650,29 @@ int mb_beaudoin(int verbose,
 	rxGeo.z * txGeo.z) * 180.0 / M_PI - 90.0;
     
 	if (verbose >= 4)
-		printf ("dbg4     TX/RX are non-orthogonal by %f degrees\n", non_ortho);
+		fprintf(stderr, "dbg4     TX/RX are non-orthogonal by %f degrees\n", non_ortho);
       
 	y1 = sin (-rx_steer * DTR) / cos (non_ortho * DTR);
 	y2 = sin (tx_steer * DTR) * tan (non_ortho * DTR);
 	radial = sqrt ((y1 + y2) * (y1 + y2) + sin (tx_steer * DTR) * sin (tx_steer * DTR));
       
-	if (verbose >= 4)
-	      printf("dbg4     Got y1, y2, radial: %lf %lf %lf\n",y1, y2, radial);
-      
-	beamVectRel.x = sin (tx_steer * DTR);
-	beamVectRel.y = y1 + y2;
-	beamVectRel.z = sqrt (1.0 - radial * radial);
+	if (radial <= 1.0)
+		{
+		beamVectRel.x = sin (tx_steer * DTR);
+		beamVectRel.y = y1 + y2;
+		beamVectRel.z = sqrt (1.0 - radial * radial);
+		}
+	else
+		{
+		beamVectRel.x = sin (tx_steer * DTR);
+		beamVectRel.y = sqrt(1.0 - beamVectRel.x * beamVectRel.x);
+		beamVectRel.z = 0.0;
+		}
+	      
+	//if (verbose >= 4)
+	if (radial > 1.0)
+	      fprintf(stderr, "dbg4     Got y1, y2, radial: %lf %lf %lf     beamVectRel:%f %f %f\n",
+		      y1, y2, radial, beamVectRel.x, beamVectRel.y, beamVectRel.z);
       
 	/* Build ortho-normal basis */
 	xPrime = txGeo;
@@ -679,9 +690,9 @@ int mb_beaudoin(int verbose,
       
 	if (verbose >= 4)
 		{
-		printf ("dbg4     x': %f, %f, %f\n", xPrime.x, xPrime.y, xPrime.z);
-		printf ("dbg4     y': %f, %f, %f\n", yPrime.x, yPrime.y, yPrime.z);
-		printf ("dbg4     z': %f, %f, %f\n", zPrime.x, zPrime.y, zPrime.z);
+		fprintf(stderr, "dbg4     x': %f, %f, %f\n", xPrime.x, xPrime.y, xPrime.z);
+		fprintf(stderr, "dbg4     y': %f, %f, %f\n", yPrime.x, yPrime.y, yPrime.z);
+		fprintf(stderr, "dbg4     z': %f, %f, %f\n", zPrime.x, zPrime.y, zPrime.z);
 		}
       
 	/* Columns of equivalent rotation matrix are coordinates of */
@@ -694,9 +705,9 @@ int mb_beaudoin(int verbose,
       
 	if (verbose >= 4)
 		{
-		printf ("dbg4     Beam vector is %f %f %f in transducer reference frame\n",
+		fprintf(stderr, "dbg4     Beam vector is %f %f %f in transducer reference frame\n",
 			beamVectRel.x, beamVectRel.y, beamVectRel.z);
-		printf ("dbg4     Beam vector is %f %f %f in geographic reference frame\n",
+		fprintf(stderr, "dbg4     Beam vector is %f %f %f in geographic reference frame\n",
 			beamVectGeo.x, beamVectGeo.y, beamVectGeo.z);
 		}
       
@@ -720,7 +731,7 @@ int mb_beaudoin(int verbose,
 		* 180.0 / M_PI;
       
 	if (verbose >= 4)
-	      printf("dbg4     Got beam azimuth (re: ship's heading) and depression %.2f %.2f\n",
+	      fprintf(stderr, "dbg4     Got beam azimuth (re: ship's heading) and depression %.2f %.2f\n",
 		     *beamAzimuth, *beamDepression);
 
 	/* assume success */

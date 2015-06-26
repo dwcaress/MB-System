@@ -111,72 +111,42 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 # Ubuntu Linux configure script command line examples:
 #------------------------------------------------------------------------------
 
-# Install on Ubuntu (12.04.02LTS or 14.04LTS) using only apt-get for all
-# prerequisites including GMT 5.1.2
+# Install on Ubuntu (12.04.02LTS or 14.04LTS) 
+#
+# At present (June 2015), GMT 5 is not available on Ubuntu as a standard package.
+# Consequently, one can use apt-get for all prerequisites except GMT 5.1.2,
+# which must be built locally from source and installed into /usr/local
 
-# Required environment variables to be set in ~/.bashrc
-export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-export PATH=/usr/lib/gmt/bin:$PATH
-
-# Prerequisites
+# Prerequisites for 64-bit installation excluding GMT
+# (for 32-bit replace libgdal-dev with gdal1-dev)
 sudo apt-get install xorg-dev libmotif-dev libmotif4 libxp-dev mesa-common-dev \
     libsdl1.2-dev libsdl-image1.2-dev build-essential gfortran \
     nautilus-open-terminal libfftw3-3 libfftw3-dev \
-    libnetcdf-dev netcdf-bin gdal-bin gdal1-dev gmt libgmt-dev gv
-
-# The GMT installation does not include a pkg-config *.pc file, but it is
-# simple to construct one. On Ubuntu pkg-config looks in /usr/lib/pkgconfig,
-# so one can put a file there called gmt.pc with the contents:
-#---------------
-# <start gmt.pc>
-prefix=/usr
-exec_prefix=${prefix}
-libdir=${exec_prefix}/lib
-includedir=${prefix}/include/gmt
-ccompiler=gcc
-cppcompiler=g++
-
-Name: gmt
-Description: GMT Libraries
-Version: 4.5.6
-Libs: -L${libdir} -lgmt -lgmtps -lpsl
-Cflags: -I${includedir}
-# <end gmt.pc>
-#---------------
-
-# If the GMT installation has been augmented with a /usr/lib/pkgconfig/gmt.pc
-# file so that pkg-config knows about GMT, then the configure call is just:
-sudo ./configure --prefix=/usr/local
-
-# If the GMT installation is not known to pkg-config, then the installation
-# points of the libraries and the header files must be specified:
-sudo ./configure --prefix=/usr/local \
-    --with-gmt-include=/usr/include/gmt \
-    --with-gmt-lib=/usr/lib
-
-# Either way, once configure has been run, build and install MB-System
-# into /usr/local/bin, /usr/local/lib, etc with the simple make commands:
-sudo make
-sudo make install
-
-#------------------------------------------------------------------------------
-
-# Install on Ubuntu (12.04.02LTS or 14.04LTS) using apt-get for all
-# prerequisites except GMT 5.1.2, which is built locally from source and
-# installed into /usr/local
-
-# Prerequisites excluding GMT
-sudo apt-get install xorg-dev libmotif-dev libmotif4 libxp-dev mesa-common-dev \
-    libsdl1.2-dev libsdl-image1.2-dev build-essential gfortran \
-    nautilus-open-terminal libfftw3-3 libfftw3-dev \
-    libnetcdf-dev netcdf-bin gdal-bin gdal1-dev gv
+    libnetcdf-dev netcdf-bin gdal-bin libgdal-dev libproj-dev libproj0 \
+    gv cmake
     
 # GMT 5.1.2 is built from source using cmake and by default installs into
 # /usr/local in Ubuntu. Follow the directions in the GMT Wiki.
 # The specific installation points of the libraries and the header files will
-# vary according to the architecture. On a machine with a 32-bit processor,
+# vary according to the architecture.
+
+# In order for the shared libraries to work, one must either set the 
+# LD_LIBRARY_PATH environment variable in ~/.profile or ~/.bashrc
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+# or one must set the CFLAGS environment variable during building to include
+# "-Wl,-rpath -Wl,LIBDIR"
+
+# On a machine with a 64-bit processor,
 # the following configure options are required to build MB-System:
-sudo ./configure --prefix=/usr/local \
+sudo CFLAGS="-Wl,-rpath -Wl,/usr/local/lib" \
+    ./configure --prefix=/usr/local \
+    --with-gmt-include=/usr/local/include/gmt \
+    --with-gmt-lib=/usr/local/lib/x86_64-linux-gnu
+
+# On a machine with a 32-bit processor,
+# the following configure options are required to build MB-System:
+sudo CFLAGS="-Wl,-rpath -Wl,/usr/local/lib" \
+    ./configure --prefix=/usr/local \
     --with-gmt-include=/usr/local/include/gmt \
     --with-gmt-lib=/usr/local/lib/i386-linux-gnu
 

@@ -31,13 +31,19 @@
 #include "mb_status.h"
         
 /* survey platform definition structures */
-struct mb_sensor_offsets
+#define MB_SENSOR_TIME_LATENCY_NONE                     0
+#define MB_SENSOR_TIME_LATENCY_STATIC                   1
+#define MB_SENSOR_TIME_LATENCY_MODEL                    2
+#define MB_SENSOR_POSITION_OFFSET_NONE                  0
+#define MB_SENSOR_POSITION_OFFSET_STATIC                1
+#define MB_SENSOR_ATTITUDE_OFFSET_NONE                   0
+#define MB_SENSOR_ATTITUDE_OFFSET_STATIC                 1
+struct mb_sensor_offset_struct
         {
-        
         int     time_latency_mode;
         double  time_latency_static;
-        int     time_latency_n;
-        int     time_latency_nalloc;
+        int     num_time_latency;
+        int     num_time_latency_alloc;
         double  *time_latency_time_d;
         double  *time_latency_value;
         
@@ -46,14 +52,13 @@ struct mb_sensor_offsets
         double  position_offset_y;
         double  position_offset_z;
         
-        int     angular_offset_mode;
-        double  angular_offset_azimuth;
-        double  angular_offset_roll;
-        double  angular_offset_pitch;
-        
+        int     attitude_offset_mode;
+        double  attitude_offset_azimuth;
+        double  attitude_offset_roll;
+        double  attitude_offset_pitch;
         };
 
-#define MB_SENSOR_TYPE_SONAR_NONE                       0
+#define MB_SENSOR_TYPE_NONE                             0
 #define MB_SENSOR_TYPE_SONAR_ECHOSOUNDER                1
 #define MB_SENSOR_TYPE_SONAR_MULTIECHOSOUNDER           2
 #define MB_SENSOR_TYPE_SONAR_SIDESCAN                   3
@@ -69,21 +74,21 @@ struct mb_sensor_offsets
 #define MB_SENSOR_TYPE_COMPASS                          61
 #define MB_SENSOR_TYPE_VRU                              71
 #define MB_SENSOR_TYPE_IMU                              81
+#define MB_SENSOR_TYPE_INS                              82
 #define MB_SENSOR_TYPE_CTD                              91
+#define MB_SENSOR_TYPE_PRESSURE                         92
 #define MB_SENSOR_TYPE_SOUNDSPEED                       101
-struct mb_sensor
+struct mb_sensor_struct
         {
         int     type;
-        int     sensor_class;
-        mb_longname sensor_model;
-        mb_longname sensor_manufacturer;
-        mb_longname sensor_serialnumber;
+        mb_longname model;
+        mb_longname manufacturer;
+        mb_longname serialnumber;
         int     capability;
         int     special_capability;
-        
         int     num_offsets;
         int     num_offsets_alloc;
-        struct mb_sensor_offsets    *offsets;
+        struct mb_sensor_offset_struct *offsets;
         
         };
         
@@ -94,15 +99,22 @@ struct mb_sensor
 #define MB_PLATFORM_AUV                 4
 #define MB_PLATFORM_AIRPLANE            5
 #define MB_PLATFORM_SATELLITE           6
-struct mb_platform
+struct mb_platform_struct
         {
         int             type;
         mb_longname     name;
         mb_longname     organization;
         
+        int             source_swathbathymetry;
+        int             source_position;
+        int             source_depth;
+        int             source_heave;
+        int             source_heading;
+        int             source_rollpitch;
+        
         int             num_sensors;
         int             num_sensors_alloc;
-        struct mb_sensor       *sensors;
+        struct mb_sensor_struct *sensors;
         };
 
 struct mb_io_ping_struct
