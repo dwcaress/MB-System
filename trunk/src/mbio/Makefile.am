@@ -73,7 +73,7 @@ libmbio_la_SOURCES = \
                 mb_process.c mb_esf.c \
                 mb_get.c mb_get_all.c mb_read.c \
                 mb_put_all.c mb_put_comment.c \
-                mb_buffer.c \
+                mb_buffer.c mb_platform.c \
                 mb_read_ping.c mb_write_ping.c \
                 mb_access.c mb_segy.c mb_rt.c \
                 mbsys_sb.c mbsys_hsds.c \

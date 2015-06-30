@@ -525,6 +525,17 @@ int mb_platform_add_sensor_offset(int verbose, void **platform_ptr,
 int mb_platform_deall(int verbose, void **platform_ptr, int *error);
 int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int *error);
 int mb_platform_write(int verbose, char *platform_file, void **platform_ptr, int *error);
+int mb_platform_lever(int verbose, void **platform_ptr,
+                int targetsensor, int targetsensoroffset,
+		double heading, double roll, double pitch,
+		double *lever_x, double *lever_y, double *lever_z,
+                int *error);
+int mb_platform_position(int verbose, void **platform_ptr,
+                int targetsensor, int targetsensoroffset,
+		double navlon, double navlat, double sensordepth,
+		double heading, double roll, double pitch,
+		double *targetlon, double *targetlat, double *targetz,
+                int *error);
 
 int mb_buffer_init(int verbose, void **buff_ptr, int *error);
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr,

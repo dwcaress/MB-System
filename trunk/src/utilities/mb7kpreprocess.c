@@ -5240,76 +5240,12 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 
 					if (platform != NULL)
 						{
-						sensor_swathbathymetry = &platform->sensors[platform->source_swathbathymetry];
-						sensor_rollpitch = &platform->sensors[platform->source_rollpitch];
-						sensor_heading = &platform->sensors[platform->source_heading];
-						sensor_position = &platform->sensors[platform->source_position];
-						sensor_depth = &platform->sensors[platform->source_depth];
-						
-						position_offset_x = 0.0;
-						position_offset_y = 0.0;
-						position_offset_z = 0.0;
-						if (sensor_swathbathymetry->offsets[0].position_offset_mode == MB_SENSOR_POSITION_OFFSET_STATIC)
-							{
-							position_offset_x = sensor_swathbathymetry->offsets[0].position_offset_x;
-							position_offset_y = sensor_swathbathymetry->offsets[0].position_offset_y;
-							position_offset_z = sensor_swathbathymetry->offsets[0].position_offset_z;
-							}
-						if (sensor_depth->offsets[0].position_offset_mode == MB_SENSOR_POSITION_OFFSET_STATIC)
-							{
-							position_offset_x -= sensor_depth->offsets[0].position_offset_x;
-							position_offset_y -= sensor_depth->offsets[0].position_offset_y;
-							position_offset_z -= sensor_depth->offsets[0].position_offset_z;
-							}
-						sonardepth += sonardepthoffset
-								+ sin(DTR * roll) * position_offset_x
-								- sin(DTR * pitch) * position_offset_y
-								+ cos(DTR * pitch) * position_offset_z;
-//fprintf(stderr,"Positionoffset applied 1: sonardepthoffset:%f position_offset:%f %f %f sonardepth:%f\n",
-//sonardepthoffset,position_offset_x,position_offset_y,position_offset_z,sonardepth);
-
-						position_offset_x = 0.0;
-						position_offset_y = 0.0;
-						position_offset_z = 0.0;
-						if (sensor_swathbathymetry->offsets[0].position_offset_mode == MB_SENSOR_POSITION_OFFSET_STATIC)
-							{
-							position_offset_x = sensor_swathbathymetry->offsets[0].position_offset_x;
-							position_offset_y = sensor_swathbathymetry->offsets[0].position_offset_y;
-							position_offset_z = sensor_swathbathymetry->offsets[0].position_offset_z;
-							}
-						if (sensor_position->offsets[0].position_offset_mode == MB_SENSOR_POSITION_OFFSET_STATIC)
-							{
-							position_offset_x -= sensor_position->offsets[0].position_offset_x;
-							position_offset_y -= sensor_position->offsets[0].position_offset_y;
-							position_offset_z -= sensor_position->offsets[0].position_offset_z;
-							}
-
-						/* apply position offsets */
-						navlon += headingy * position_offset_x * mtodeglon
-								+ headingx * position_offset_y * mtodeglon;
-						navlat+= -headingx * position_offset_x * mtodeglat
-								+ headingy * position_offset_y * mtodeglat;
-							
-						/* do lever arm calculation with sensor offsets */
-						mb_lever(verbose,
-								sensor_swathbathymetry->offsets[0].position_offset_x,
-								sensor_swathbathymetry->offsets[0].position_offset_y,
-								sensor_swathbathymetry->offsets[0].position_offset_z,
-								sensor_rollpitch->offsets[0].position_offset_x,
-								sensor_rollpitch->offsets[0].position_offset_y,
-								sensor_rollpitch->offsets[0].position_offset_z,
-								sensor_position->offsets[0].position_offset_x,
-								sensor_position->offsets[0].position_offset_y,
-								sensor_position->offsets[0].position_offset_z,
-								pitch, roll,
-								&lever_x, &lever_y, &lever_z, &error);
-
-						/* apply lever arm calculation */
-						navlon += headingy * lever_x * mtodeglon + headingx * lever_y * mtodeglon;
-						navlat+= -headingx * lever_x * mtodeglat + headingy * lever_y * mtodeglat;
-						sonardepth -= lever_z;
-//fprintf(stderr,"Lever applied: lever_z:%f sonardepth:%f\n",
-//lever_z,sonardepth);
+						status = mb_platform_position(verbose, (void **)&platform,
+										platform->source_swathbathymetry, 0,
+										navlon, navlat, sonardepth,
+										heading, roll, pitch,
+										&navlon, &navlat, &sonardepth,
+										&error);
 						}			
 
 					/* if the optional data are not all available, this ping
