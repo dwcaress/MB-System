@@ -93,7 +93,7 @@ int main( int argc, char **argv)
      * Initialize Xt.
      */
 
-    XtSetLanguageProc(NULL, (XtLanguageProc) NULL, NULL);
+    // XtSetLanguageProc(NULL, (XtLanguageProc) NULL, NULL);
 
     /*
      * The applicationShell is created as an unrealized

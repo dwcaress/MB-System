@@ -5146,6 +5146,24 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 		    }
 
 	/*--------------------------------------------
+	  apply tide correction
+	  --------------------------------------------*/
+
+		/* apply tide corrections */
+		if (process.mbp_tide_mode == MBP_TIDE_ON
+			&& ntide > 0)
+		    {
+		    /* interpolate tide */
+		    intstat = mb_linear_interp(verbose,
+				tidetime-1, tide-1,
+				ntide, time_d, &tideval, &itime,
+				&error);
+
+		    /* apply tide to to draft / sonar depth */
+		    draft -= tideval;
+		    }
+
+	/*--------------------------------------------
 	  handle lever arm correction
 	  --------------------------------------------*/
 
@@ -5733,28 +5751,6 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					bath[i] = zz * vavg / 1500.0 + depth_offset_use;
 
 				    }
-				}
-			    }
-
-	/*--------------------------------------------
-	  apply tide correction
-	  --------------------------------------------*/
-
-			/* apply tide corrections */
-			if (process.mbp_tide_mode == MBP_TIDE_ON
-				&& ntide > 0)
-			    {
-			    /* interpolate tide */
-			    intstat = mb_linear_interp(verbose,
-					tidetime-1, tide-1,
-					ntide, time_d, &tideval, &itime,
-					&error);
-
-			    /* apply tide to all valid beams */
-			    for (i=0;i<nbath;i++)
-				{
-				if (beamflag[i] != MB_FLAG_NULL)
-					bath[i] -= tideval;
 				}
 			    }
 

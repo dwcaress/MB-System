@@ -137,7 +137,7 @@ am_libmbio_la_OBJECTS = mb_format.lo mb_error.lo mb_swap.lo \
 	mb_check_info.lo mb_time.lo mb_angle.lo mb_absorption.lo \
 	mb_proj.lo mb_get_value.lo mb_defaults.lo mb_process.lo \
 	mb_esf.lo mb_get.lo mb_get_all.lo mb_read.lo mb_put_all.lo \
-	mb_put_comment.lo mb_buffer.lo mb_read_ping.lo \
+	mb_put_comment.lo mb_buffer.lo mb_platform.lo mb_read_ping.lo \
 	mb_write_ping.lo mb_access.lo mb_segy.lo mb_rt.lo mbsys_sb.lo \
 	mbsys_hsds.lo mbsys_sb2100.lo mbsys_simrad.lo mbsys_simrad2.lo \
 	mbsys_simrad3.lo mbsys_mr1.lo mbsys_mr1b.lo mbsys_mr1v2001.lo \
@@ -464,7 +464,7 @@ libmbio_la_SOURCES = \
                 mb_process.c mb_esf.c \
                 mb_get.c mb_get_all.c mb_read.c \
                 mb_put_all.c mb_put_comment.c \
-                mb_buffer.c \
+                mb_buffer.c mb_platform.c \
                 mb_read_ping.c mb_write_ping.c \
                 mb_access.c mb_segy.c mb_rt.c \
                 mbsys_sb.c mbsys_hsds.c \
@@ -647,6 +647,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_get_value.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_mem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_navint.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_platform.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_process.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_proj.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_put_all.Plo@am__quote@
