@@ -66,6 +66,16 @@
 #include "mb_xgraphics.h"
 #include "mbedit.h"
 
+#ifndef SANS
+#define SANS "helvetica"
+#endif
+#ifndef SERIF
+#define SERIF "times"
+#endif
+#ifndef MONO
+#define MONO "courier"
+#endif
+
 /*
  * Macros to make code look nicer between ANSI and K&R.
  */
@@ -103,7 +113,7 @@ Widget	fileSelectionText;
 
 /* global defines and variables */
 #define EV_MASK (ButtonPressMask | KeyPressMask | KeyReleaseMask | ExposureMask )
-#define xgfont "-misc-fixed-bold-r-normal-*-13-*-75-75-c-70-iso8859-1"
+#define xgfont "-*-"MONO"-bold-r-normal-*-13-*-75-75-c-70-iso8859-1"
 
 /* Mode value defines */
 #define	MODE_TOGGLE	0
@@ -407,8 +417,7 @@ do_mbedit_init(int argc, char **argv)
 	     | GCLineWidth, &xgcv);
 
     /* Setup the font for just the "canvas" screen. */
-    fontStruct = XLoadQueryFont(theDisplay,
-	     "-misc-fixed-bold-r-normal-*-13-*-75-75-c-70-iso8859-1");
+    fontStruct = XLoadQueryFont(theDisplay, xgfont);
     XSetFont(theDisplay,gc,fontStruct->fid);
 
     XSelectInput(theDisplay, can_xid, EV_MASK );
@@ -478,6 +487,12 @@ do_mbedit_init(int argc, char **argv)
 
     /* finally allow expose plots */
     expose_plot_ok = True;
+    
+#ifdef USE_LIBERATION_FONTS
+fprintf(stderr,"USING LIBERATION FONTS!\n");
+#else
+fprintf(stderr,"NOT USING LIBERATION FONTS!\n");
+#endif
 }
 
 /*--------------------------------------------------------------------*/

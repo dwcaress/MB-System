@@ -84,11 +84,21 @@
 #endif
 #endif
 
+#ifndef SANS
+#define SANS "helvetica"
+#endif
+#ifndef SERIF
+#define SERIF "times"
+#endif
+#ifndef MONO
+#define MONO "courier"
+#endif
+
 Widget		BxFindTopShell PROTOTYPE((Widget));
 WidgetList	BxWidgetIdsFromNames PROTOTYPE((Widget, char*, char*));
 
 /*--------------------------------------------------------------------*/
-#define xgfont "-misc-fixed-bold-r-normal-*-13-*-75-75-c-70-iso8859-1"
+#define xgfont "-*-"MONO"-bold-r-normal-*-13-*-75-75-c-70-iso8859-1"
 #define EV_MASK (ButtonPressMask | KeyPressMask | KeyReleaseMask | ExposureMask)
 
 /* XG variable declarations */

@@ -188,6 +188,7 @@ int main (int argc, char **argv)
 	int	first_u = MB_YES;
 	time_t	time_u;
 	time_t	time_u_ref;
+	double	seconds;
 
 	/* course calculation variables */
 	double	dlon, dlat, minutes;
@@ -895,12 +896,13 @@ int main (int argc, char **argv)
 									break;
 								case 'J': /* time string */
 									mb_get_jtime(verbose,time_i,time_j);
+									seconds = time_i[5] + 0.000001 * time_i[6];
 									if (ascii == MB_YES)
 									    {
-									    printf("%.4d %.3d %.2d %.2d %.2d.%6.6d",
+									    printf("%.4d %.3d %.2d %.2d %9.6f",
 										time_j[0],time_j[1],
 										time_i[3],time_i[4],
-										time_i[5],time_i[6]);
+										seconds);
 									    }
 									else
 									    {
@@ -920,11 +922,12 @@ int main (int argc, char **argv)
 									break;
 								case 'j': /* time string */
 									mb_get_jtime(verbose,time_i,time_j);
+									seconds = time_i[5] + 0.000001 * time_i[6];
 									if (ascii == MB_YES)
 									    {
-									    printf("%.4d %.3d %.4d %.2d.%6.6d",
+									    printf("%.4d %.3d %.4d %9.6f",
 										time_j[0],time_j[1],
-										time_j[2],time_j[3],time_j[4]);
+										time_j[2],seconds);
 									    }
 									else
 									    {
@@ -1005,11 +1008,11 @@ int main (int argc, char **argv)
 										}
 									break;
 								case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
+									seconds = time_i[5] + 1e-6 * time_i[6];
 									if (ascii == MB_YES)
-									    printf("%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
+									    printf("%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f",
 										time_i[0],time_i[1],time_i[2],
-										time_i[3],time_i[4],time_i[5],
-										time_i[6]);
+										time_i[3],time_i[4],seconds);
 									else
 									    {
 									    b = time_i[0];
@@ -1022,16 +1025,16 @@ int main (int argc, char **argv)
 									    fwrite(&b, sizeof(double), 1, stdout);
 									    b = time_i[4];
 									    fwrite(&b, sizeof(double), 1, stdout);
-									    b = time_i[5] + 1e-6 * time_i[6];
+									    b = seconds;
 									    fwrite(&b, sizeof(double), 1, stdout);
 									    }
 									break;
 								case 't': /* yyyy mm dd hh mm ss time string */
+									seconds = time_i[5] + 1e-6 * time_i[6];
 									if (ascii == MB_YES)
-									    printf("%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+									    printf("%.4d %.2d %.2d %.2d %.2d %9.6f",
 										time_i[0],time_i[1],time_i[2],
-										time_i[3],time_i[4],time_i[5],
-										time_i[6]);
+										time_i[3],time_i[4],seconds);
 									else
 									    {
 									    b = time_i[0];
@@ -1044,7 +1047,7 @@ int main (int argc, char **argv)
 									    fwrite(&b, sizeof(double), 1, stdout);
 									    b = time_i[4];
 									    fwrite(&b, sizeof(double), 1, stdout);
-									    b = time_i[5] + 1e-6 * time_i[6];
+									    b = seconds;
 									    fwrite(&b, sizeof(double), 1, stdout);
 									    }
 									break;

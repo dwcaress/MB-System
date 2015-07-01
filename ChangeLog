@@ -16,7 +16,8 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-* Version 5.5.2250       June 29, 2015
+* Version 5.5.2251       June 30, 2015
+  Version 5.5.2250       June 29, 2015
   Version 5.5.2249       June 26, 2015
 * Version 5.5.2248       May 31, 2015
   Version 5.5.2247       May 29, 2015
@@ -214,6 +215,16 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2251 (June 30, 2015)
+
+Mblist, mbnavlist, mbctdlist: Changed time outputs so that decimal second
+values will be formatted according to the locale (e.g. decimal delineation by
+commas in Europe).
+
+Mbedit, mbnavedit, mbnavadjust, mbvelocitytool, mbgrdviz, mbeditviz: Set up
+preprocessor defines to allow fonts to be defined using the CFLAGS
+environment variable.
 
 -----> 5.5.2250 (June 29, 2015)
 

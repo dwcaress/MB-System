@@ -35,14 +35,14 @@
 
 /* Begin user code block <file_comments> */
 
-#ifdef __APPLE__
-#define HELVETICA "helvetica"
-#define TIMES "times"
-#define COURIER "courier"
-#else
-#define HELVETICA "helvetica"
-#define TIMES "times"
-#define COURIER "courier"
+#ifndef SANS
+#define SANS "helvetica"
+#endif
+#ifndef SERIF
+#define SERIF "times"
+#endif
+#ifndef MONO
+#define MONO "courier"
 #endif
 
 /* End user code block <file_comments> */
@@ -3002,7 +3002,7 @@ int mbview_addaction(int verbose, size_t instance,
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(view->mb3dview.mbview_pulldownMenu_action, "-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(view->mb3dview.mbview_pulldownMenu_action, "-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)instance); ac++;
         view->pushButton_action[view->naction] = (Widget) XmCreatePushButton(view->mb3dview.mbview_pulldownMenu_action,
