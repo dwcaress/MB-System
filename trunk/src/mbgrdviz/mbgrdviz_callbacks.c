@@ -47,6 +47,16 @@
 /* mbview include file */
 #include "mbview.h"
 
+#ifndef SANS
+#define SANS "helvetica"
+#endif
+#ifndef SERIF
+#define SERIF "times"
+#endif
+#ifndef MONO
+#define MONO "courier"
+#endif
+
 /* fileSelectionBox modes */
 #define MBGRDVIZ_OPENGRID		0
 #define MBGRDVIZ_OPENOVERLAY		1

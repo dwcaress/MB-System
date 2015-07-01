@@ -17,14 +17,14 @@
 
 /* Begin user code block <file_comments> */
 
-#ifdef __APPLE__
-#define HELVETICA "helvetica"
-#define TIMES "times"
-#define COURIER "courier"
-#else
-#define HELVETICA "helvetica"
-#define TIMES "times"
-#define COURIER "courier"
+#ifndef SANS
+#define SANS "helvetica"
+#endif
+#ifndef SERIF
+#define SERIF "times"
+#endif
+#ifndef MONO
+#define MONO "courier"
 #endif
 
 /* End user code block <file_comments> */
@@ -143,7 +143,7 @@ MB3DSiteListCreate ( MB3DSiteListDataPtr class_in, Widget parent, String name, A
         XtSetArg(args[ac], XmNwidth, 110); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DSiteList, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DSiteList, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_sitelist_dismiss = XmCreatePushButton(class_in->MB3DSiteList,
             (char *)"mbview_pushButton_sitelist_dismiss",
@@ -171,7 +171,7 @@ MB3DSiteListCreate ( MB3DSiteListDataPtr class_in, Widget parent, String name, A
         XtSetArg(args[ac], XmNwidth, 170); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DSiteList, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DSiteList, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_sitelist_delete = XmCreatePushButton(class_in->MB3DSiteList,
             (char *)"mbview_pushButton_sitelist_delete",
@@ -200,7 +200,7 @@ MB3DSiteListCreate ( MB3DSiteListDataPtr class_in, Widget parent, String name, A
         XtSetArg(args[ac], XmNwidth, 390); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DSiteList, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DSiteList, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_sitelist_label = XmCreateLabel(class_in->MB3DSiteList,
             (char *)"mbview_sitelist_label",
@@ -232,7 +232,7 @@ MB3DSiteListCreate ( MB3DSiteListDataPtr class_in, Widget parent, String name, A
     XtSetArg(args[ac], XmNwidth, 390); ac++;
     XtSetArg(args[ac], XmNheight, 180); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_scrolledWindow_sitelist, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_scrolledWindow_sitelist, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_list_sitelist = XmCreateList(class_in->mbview_scrolledWindow_sitelist,
         (char *)"mbview_list_sitelist",

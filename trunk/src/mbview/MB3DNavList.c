@@ -17,14 +17,14 @@
 
 /* Begin user code block <file_comments> */
 
-#ifdef __APPLE__
-#define HELVETICA "helvetica"
-#define TIMES "times"
-#define COURIER "courier"
-#else
-#define HELVETICA "helvetica"
-#define TIMES "times"
-#define COURIER "courier"
+#ifndef SANS
+#define SANS "helvetica"
+#endif
+#ifndef SERIF
+#define SERIF "times"
+#endif
+#ifndef MONO
+#define MONO "courier"
 #endif
 
 /* End user code block <file_comments> */
@@ -143,7 +143,7 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
         XtSetArg(args[ac], XmNwidth, 390); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DNavList, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DNavList, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_navlist_label = XmCreateLabel(class_in->MB3DNavList,
             (char *)"mbview_navlist_label",
@@ -170,7 +170,7 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
         XtSetArg(args[ac], XmNwidth, 210); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DNavList, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DNavList, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_navlist_delete = XmCreatePushButton(class_in->MB3DNavList,
             (char *)"mbview_pushButton_navlist_delete",
@@ -198,7 +198,7 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
         XtSetArg(args[ac], XmNwidth, 110); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DNavList, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            BX_CONVERT(class_in->MB3DNavList, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
         class_in->mbview_pushButton_navlist_dismiss = XmCreatePushButton(class_in->MB3DNavList,
             (char *)"mbview_pushButton_navlist_dismiss",
@@ -231,7 +231,7 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
     XtSetArg(args[ac], XmNwidth, 390); ac++;
     XtSetArg(args[ac], XmNheight, 150); ac++;
     XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_scrolledWindow_navlist, (char *)"-*-"HELVETICA"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+        BX_CONVERT(class_in->mbview_scrolledWindow_navlist, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
         XmRFontList, 0, &argok)); if (argok) ac++;
     class_in->mbview_list_navlist = XmCreateList(class_in->mbview_scrolledWindow_navlist,
         (char *)"mbview_list_navlist",

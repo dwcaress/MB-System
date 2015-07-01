@@ -82,7 +82,21 @@ make uninstall (to remove a previously installed version)
 #------------------------
 #    --enable-bundledproj  - build using bundled proj package - the
 #				default is to link with libproj
-#                                
+#
+#------------------------------------------------------------------------------
+# Setting X11 fonts used by mbgrdviz, mbeditviz, mbedit, mbnavedit, mbnavadjust
+# and mbvelocitytool:
+#------------------------------------------------------------------------------
+# By default the graphical utilities use three fonts: Helvetica, Times New
+# Roman, and Courier. This can be set in the CFLAGS environment variable by
+# including options of the form:
+#       -DSANS='\"helvetica\"' -DSERIF='\"times\"' -DMONO='\"courier\"'
+# In the examples below, the CFLAGS environment value is set for the configure
+# script by setting it on the same command line as ./configure. To set the
+# fonts to Lucida, one might add:
+#       -DSANS='\"lucida\"' -DSERIF='\"lucida\"' -DMONO='\"lucidatypewriter\"'
+# to the CFLAGS definition
+#
 #------------------------------------------------------------------------------
 # Mac Os X configure script command line examples:
 #------------------------------------------------------------------------------
@@ -240,7 +254,7 @@ autoreconf --force --install --warnings=all
 # Force configure.ac to reduce the automake version requirement from 2.69 to 2.65
 sed -i.bak s/2\.69/2\.65/ configure.ac
 
-CFLAGS="-g -Wall -Wmissing-prototypes -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
+CFLAGS="-g -Wall -Wmissing-prototypes -I/opt/X11/include " LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/Users/caress/sandbox/mbsystem \
     --disable-static \

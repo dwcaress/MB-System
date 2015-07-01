@@ -22,68 +22,6 @@
  * Date:	November 11, 1999
  *
  *
- * $Log: mbnavlist.c,v $
- * Revision 5.12  2007/10/17 20:34:00  caress
- * Release 5.1.1beta11
- * Added decimation option.
- *
- * Revision 5.11  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.10  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.9  2004/12/02 06:37:42  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.8  2003/07/30 16:41:06  caress
- * Fixed handling of time gap errors in data .
- *
- * Revision 5.7  2003/07/02 18:14:19  caress
- * Release 5.0.0
- *
- * Revision 5.6  2003/04/17 21:18:57  caress
- * Release 5.0.beta30
- *
- * Revision 5.5  2002/05/29 23:43:09  caress
- * Release 5.0.beta18
- *
- * Revision 5.4  2001/07/24 17:40:54  caress
- * Fixed typo.
- *
- * Revision 5.3  2001/07/20 00:34:38  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/03/22  21:15:49  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.1  2000/12/10  20:30:44  caress
- * Version 5.0.alpha02
- *
- * Revision 5.0  2000/12/01  22:57:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.4  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.3  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.2  2000/09/11  20:10:02  caress
- * Linked to new datalist parsing functions. Now supports recursive datalists
- * and comments in datalists.
- *
- * Revision 4.1  2000/03/08  00:03:45  caress
- * Release 4.6.10
- *
- * Revision 4.0  1999/12/29  00:58:18  caress
- * Release 4.6.8
- *
- * Revision 1.1  1999/12/29  00:35:11  caress
- * Initial revision
- *
- *
- *
  */
 
 /* standard include files */
@@ -219,6 +157,7 @@ int main (int argc, char **argv)
 	int	first_u = MB_YES;
 	time_t	time_u;
 	time_t	time_u_ref;
+	double	seconds;
 
 	/* course calculation variables */
 	double	dlon, dlat, minutes;
@@ -653,10 +592,13 @@ int main (int argc, char **argv)
 				heave = aheave[inav];
 				sonardepth = draft - heave;
 
-/*fprintf(stdout, "kind:%d error:%d %d of %d: time:%4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+/*
+seconds = time_i[5] + 1e-6 * time_i[6];
+fprintf(stdout, "kind:%d error:%d %d of %d: time:%4d/%2d/%2d %2.2d:%2.2d:%9.6f\n",
 kind, error, i, n,
 time_i[0],  time_i[1],  time_i[2],
-time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
+time_i[3],  time_i[4],  seconds);
+*/
 
 				/* calculate course made good and distance */
 				mb_coor_scale(verbose,navlat, &mtodeglon, &mtodeglat);
@@ -727,12 +669,13 @@ time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 							break;
 						case 'J': /* time string */
 							mb_get_jtime(verbose,time_i,time_j);
+							seconds = time_i[5] + 0.000001 * time_i[6];
 							if (ascii == MB_YES)
 							    {
-							    printf("%.4d %.3d %.2d %.2d %.2d.%6.6d",
+							    printf("%.4d %.3d %.2d %.2d %9.6f",
 								time_j[0],time_j[1],
 								time_i[3],time_i[4],
-								time_i[5],time_i[6]);
+								seconds);
 							    }
 							else
 							    {
@@ -752,11 +695,12 @@ time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 							break;
 						case 'j': /* time string */
 							mb_get_jtime(verbose,time_i,time_j);
+							seconds = time_i[5] + 0.000001 * time_i[6];
 							if (ascii == MB_YES)
 							    {
-							    printf("%.4d %.3d %.4d %.2d.%6.6d",
+							    printf("%.4d %.3d %.4d %9.6f",
 								time_j[0],time_j[1],
-								time_j[2],time_j[3],time_j[4]);
+								time_j[2],seconds);
 							    }
 							else
 							    {
@@ -831,11 +775,11 @@ time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 									    &signflip_next_value, &error);
 							break;
 						case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
+							seconds = time_i[5] + 1e-6 * time_i[6];
 							if (ascii == MB_YES)
-							    printf("%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
+							    printf("%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f",
 								time_i[0],time_i[1],time_i[2],
-								time_i[3],time_i[4],time_i[5],
-								time_i[6]);
+								time_i[3],time_i[4],seconds);
 							else
 							    {
 							    b = time_i[0];
@@ -848,16 +792,16 @@ time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 							    fwrite(&b, sizeof(double), 1, stdout);
 							    b = time_i[4];
 							    fwrite(&b, sizeof(double), 1, stdout);
-							    b = time_i[5] + 1e-6 * time_i[6];
+							    b = seconds;
 							    fwrite(&b, sizeof(double), 1, stdout);
 							    }
 							break;
 						case 't': /* yyyy mm dd hh mm ss time string */
+							seconds = time_i[5] + 1e-6 * time_i[6];
 							if (ascii == MB_YES)
-							    printf("%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+							    printf("%.4d %.2d %.2d %.2d %.2d %9.6f",
 								time_i[0],time_i[1],time_i[2],
-								time_i[3],time_i[4],time_i[5],
-								time_i[6]);
+								time_i[3],time_i[4],seconds);
 							else
 							    {
 							    b = time_i[0];
@@ -870,7 +814,7 @@ time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 							    fwrite(&b, sizeof(double), 1, stdout);
 							    b = time_i[4];
 							    fwrite(&b, sizeof(double), 1, stdout);
-							    b = time_i[5] + 1e-6 * time_i[6];
+							    b = seconds;
 							    fwrite(&b, sizeof(double), 1, stdout);
 							    }
 							break;

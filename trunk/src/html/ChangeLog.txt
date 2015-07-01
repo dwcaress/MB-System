@@ -16,6 +16,8 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.5.2251       June 30, 2015
+  Version 5.5.2250       June 29, 2015
   Version 5.5.2249       June 26, 2015
 * Version 5.5.2248       May 31, 2015
   Version 5.5.2247       May 29, 2015
@@ -213,6 +215,37 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2251 (June 30, 2015)
+
+Mblist, mbnavlist, mbctdlist: Changed time outputs so that decimal second
+values will be formatted according to the locale (e.g. decimal delineation by
+commas in Europe).
+
+Mbedit, mbnavedit, mbnavadjust, mbvelocitytool, mbgrdviz, mbeditviz: Set up
+preprocessor defines to allow fonts to be defined using the CFLAGS
+environment variable.
+
+-----> 5.5.2250 (June 29, 2015)
+
+Mbedit, mbnavedit, mbvelocitytool, mbgrdviz, mbeditviz: Removed call to X11
+function XtSetLanguageProc() in all graphical tools. This call apparently
+causes the program locale to be reset according system defaults, even if the
+program implicitly begins in the standard C locale. If the system locale uses
+"," rather than "." as the decimal point marker (e.g. a normal European locale),
+then a GMT 5 initialization will probably fail on reading fonts, at least on
+many if not all Linux distributions. Thanks to Giancarlo Troni for figuring this
+one out.
+
+General: Added mbio/mb_platform.c to the archive. This source file includes the
+functions to read, write, and use platform, sensor, and sensor offset definitions.
+At this time the mb_platform_*() functions are only used in mb7kpreprocess, but
+they will soon be used in mbprocess and all the preprocess programs.
+
+Mbprocess: changed application of tide corrections so that these corrections are
+applied to the platform depth values rather than the bathymetry values. The result
+is the same, but now the navigation (or trajectory) of the processed files is
+corrected in addition to the bathymetry.
 
 -----> 5.5.2249 (June 26, 2015)
 

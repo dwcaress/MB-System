@@ -299,6 +299,7 @@ int main (int argc, char **argv)
 	int	first_u = MB_YES;
 	time_t	time_u;
 	time_t	time_u_ref;
+	double	seconds;
 
 	/* crosstrack slope values */
 	double	avgslope;
@@ -2892,6 +2893,7 @@ int main (int argc, char **argv)
 					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
+					seconds = time_i[5] + 1e-6 * time_i[6];
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES)
@@ -2900,10 +2902,10 @@ int main (int argc, char **argv)
 						time_i[3],time_i[4],
 						time_i[5],time_i[6]);
 					    else
-					    fprintf(output[i],"%.4d %.3d %.2d %.2d %.2d.%6.6d",
+					    fprintf(output[i],"%.4d %.3d %.2d %.2d %9.6f",
 						time_j[0],time_j[1],
 						time_i[3],time_i[4],
-						time_i[5],time_i[6]);
+						seconds);
 
 					    }
 					else
@@ -2924,6 +2926,7 @@ int main (int argc, char **argv)
 					break;
 				case 'j': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
+					seconds = time_i[5] + 1e-6 * time_i[6];
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES)
@@ -2931,9 +2934,9 @@ int main (int argc, char **argv)
 						time_j[0],time_j[1],
 						time_j[2],time_j[3],time_j[4]);
 					    else
-					    fprintf(output[i],"%.4d %.3d %.4d %.2d.%6.6d",
+					    fprintf(output[i],"%.4d %.3d %.4d %9.6f",
 						time_j[0],time_j[1],
-						time_j[2],time_j[3],time_j[4]);
+						time_j[2],seconds);
 					    }
 					else
 					    {
@@ -3056,14 +3059,14 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
+					seconds = time_i[5] + 1e-6 * time_i[6];
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 
-					    fprintf(output[i],"%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
+					    fprintf(output[i],"%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f",
 						time_i[0],time_i[1],time_i[2],
-						time_i[3],time_i[4],time_i[5],
-						time_i[6]);
+						time_i[3],time_i[4],seconds);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
 					else
@@ -3078,11 +3081,12 @@ int main (int argc, char **argv)
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[4];
 					    fwrite(&b, sizeof(double), 1, outfile);
-					    b = time_i[5] + 1e-6 * time_i[6];
+					    b = seconds;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 't': /* yyyy mm dd hh mm ss time string */
+					seconds = time_i[5] + 1e-6 * time_i[6];
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES)
@@ -3091,10 +3095,9 @@ int main (int argc, char **argv)
 						time_i[3],time_i[4],time_i[5],
 						time_i[6]);
 					    else
-					    fprintf(output[i],"%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+					    fprintf(output[i],"%.4d %.2d %.2d %.2d %.2d %9.6f",
 						time_i[0],time_i[1],time_i[2],
-						time_i[3],time_i[4],time_i[5],
-						time_i[6]);
+						time_i[3],time_i[4],seconds);
 					    }
 					else
 					    {
@@ -3108,7 +3111,7 @@ int main (int argc, char **argv)
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[4];
 					    fwrite(&b, sizeof(double), 1, outfile);
-					    b = time_i[5] + 1e-6 * time_i[6];
+					    b = seconds;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
@@ -3754,6 +3757,7 @@ int main (int argc, char **argv)
 					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
+					seconds = time_i[5] + 1e-6 * time_i[6];
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES)
@@ -3762,10 +3766,10 @@ int main (int argc, char **argv)
 						time_i[3],time_i[4],
 						time_i[5],time_i[6]);
 					    else
-					    fprintf(output[i],"%.4d %.3d %.2d %.2d %.2d.%6.6d",
+					    fprintf(output[i],"%.4d %.3d %.2d %.2d %9.6f",
 						time_j[0],time_j[1],
 						time_i[3],time_i[4],
-						time_i[5],time_i[6]);
+						seconds);
 					    }
 					else
 					    {
@@ -3785,6 +3789,7 @@ int main (int argc, char **argv)
 					break;
 				case 'j': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
+					seconds = time_i[5] + 1e-6 * time_i[6];
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES)
@@ -3792,9 +3797,9 @@ int main (int argc, char **argv)
 						time_j[0],time_j[1],
 						time_j[2],time_j[3],time_j[4]);
 					    else
-					    fprintf(output[i],"%.4d %.3d %.4d %.2d.%6.6d",
+					    fprintf(output[i],"%.4d %.3d %.4d %9.6f",
 						time_j[0],time_j[1],
-						time_j[2],time_j[3],time_j[4]);
+						time_j[2],seconds);
 					    }
 					else
 					    {
@@ -3892,13 +3897,13 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
+					seconds = time_i[5] + 1e-6 * time_i[6];
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
+					    fprintf(output[i],"%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f",
 						time_i[0],time_i[1],time_i[2],
-						time_i[3],time_i[4],time_i[5],
-						time_i[6]);
+						time_i[3],time_i[4],seconds);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
 					else
@@ -3913,11 +3918,12 @@ int main (int argc, char **argv)
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[4];
 					    fwrite(&b, sizeof(double), 1, outfile);
-					    b = time_i[5] + 1e-6 * time_i[6];
+					    b = seconds;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 't': /* yyyy mm dd hh mm ss time string */
+					seconds = time_i[5] + 1e-6 * time_i[6];
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES)
@@ -3926,10 +3932,9 @@ int main (int argc, char **argv)
 						time_i[3],time_i[4],time_i[5],
 						time_i[6]);
 					    else
-					    fprintf(output[i],"%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+					    fprintf(output[i],"%.4d %.2d %.2d %.2d %.2d %9.6f",
 						time_i[0],time_i[1],time_i[2],
-						time_i[3],time_i[4],time_i[5],
-						time_i[6]);
+						time_i[3],time_i[4],seconds);
 					    }
 					else
 					    {
@@ -3943,7 +3948,7 @@ int main (int argc, char **argv)
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[4];
 					    fwrite(&b, sizeof(double), 1, outfile);
-					    b = time_i[5] + 1e-6 * time_i[6];
+					    b = seconds;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
