@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.5.2252       July 1, 2015
 * Version 5.5.2251       June 30, 2015
   Version 5.5.2250       June 29, 2015
   Version 5.5.2249       June 26, 2015
@@ -215,6 +216,11 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2252 (July 1, 2015)
+
+Mbedit, mbnavedit, mbnavadjust, mbvelocitytool: Fix X11 font initialization
+problem created in the 2251 commit.
 
 -----> 5.5.2251 (June 30, 2015)
 

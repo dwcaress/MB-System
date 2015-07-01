@@ -23,55 +23,6 @@
  * Author:	D. W. Caress
  * Date:	August 3, 1994
  *
- * $Log: xgraphics.c,v $
- * Revision 5.6  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.5  2007/10/08 05:48:26  caress
- * Added function prototypes.
- *
- * Revision 5.4  2006/01/24 19:17:13  caress
- * Version 5.0.8 beta.
- *
- * Revision 5.3  2006/01/11 07:33:01  caress
- * Working towards 5.0.8
- *
- * Revision 5.2  2003/04/17 20:45:10  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2003/03/10 19:56:16  caress
- * Expanded the libraries ability to deal with various screen types.
- *
- * Revision 5.0  2000/12/01 22:53:59  caress
- * First cut at Version 5.0.
- *
- * Revision 4.6  2000/10/11  00:54:20  caress
- * Converted to ANSI C
- *
- * Revision 4.5  2000/09/30  06:54:58  caress
- * Snapshot for Dale.
- *
- * Revision 4.4  1999/12/29  00:59:34  caress
- * Release 4.6.8
- *
- * Revision 4.3  1998/10/05  17:45:32  caress
- * MB-System version 4.6beta
- *
- * Revision 4.2  1997/04/21  16:56:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.2  1997/04/16  21:29:30  caress
- * Complete rewrite without uid file.
- *
- * Revision 4.1  1994/12/28  14:46:05  caress
- * Added support for TrueColor displays as per Peter Lemmond's mods.
- *
- * Revision 4.1  1994/12/28  14:46:05  caress
- * Added support for TrueColor displays as per Peter Lemmond's mods.
- *
- * Revision 4.0  1994/10/21  11:55:41  caress
- * Release V4.0
- *
  *
  */
 /*--------------------------------------------------------------------*/
@@ -85,6 +36,9 @@
 
 /* mbaux includes */
 #include "mb_xgraphics.h"
+
+/* id variable */
+static char svn_id[] = "$Id$";
 
 /**********************************************************************
  *	XG_INIT
@@ -194,7 +148,9 @@ DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));*/
 	if ((graphic->font_info = XLoadQueryFont(graphic->dpy, fontname))
 		== NULL)
 		{
-		printf("X Error: Cannot load font: %s\n",fontname);
+		fprintf(stderr,"\nFailure to load font using XLoadQueryFont: %s\n", fontname);
+		fprintf(stderr,"\tSource file: %s\n\tSource line: %d\n\tSource version: %s", __FILE__, __LINE__, svn_id);
+		fprintf(stderr,"Program Terminated\n");
 		exit(-1);
 		}
 

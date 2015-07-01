@@ -93,14 +93,8 @@
 #endif
 #endif
 
-#ifndef SANS
-#define SANS "helvetica"
-#endif
-#ifndef SERIF
-#define SERIF "times"
-#endif
-#ifndef MONO
-#define MONO "courier"
+#ifndef FIXED
+#define FIXED "fixed"
 #endif
 
 Widget		BxFindTopShell PROTOTYPE((Widget));
@@ -109,13 +103,17 @@ WidgetList	BxWidgetIdsFromNames PROTOTYPE((Widget, char*, char*));
 
 /*--------------------------------------------------------------------*/
 
+/* id variables */
+static char svn_id[] = "$Id$";
+static char program_name[] = "MBvelocitytool";
+
 /* additional widgets */
 Widget	fileSelectionList;
 Widget	fileSelectionText;
 
 /* global defines and variables */
 #define EV_MASK (ButtonPressMask | KeyPressMask | KeyReleaseMask | ExposureMask )
-#define xgfont "-*-"MONO"-bold-r-normal-*-13-*-75-75-c-70-iso8859-1"
+#define xgfont "-*-"FIXED"-bold-r-normal-*-13-*-75-75-c-70-iso8859-1"
 
 XtAppContext	app_context;
 Display		*display;
@@ -509,6 +507,13 @@ do_mbvelocity_init(int argc, char **argv)
 
     /* Setup the font for just the "canvas" screen. */
     fontStruct = XLoadQueryFont(display, xgfont);
+    if (fontStruct == NULL)
+        {
+	fprintf(stderr,"\nFailure to load font using XLoadQueryFont: %s\n", xgfont);
+        fprintf(stderr,"\tSource file: %s\n\tSource line: %d\n\tSource version: %s", __FILE__, __LINE__, svn_id);
+	fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+	exit(-1);
+        }
     XSetFont(display,gc,fontStruct->fid);
 
     XSelectInput(display, can_xid, EV_MASK );
