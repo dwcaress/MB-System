@@ -109,8 +109,7 @@ struct mb_platform_struct
         int             source_position;
         int             source_depth;
         int             source_heave;
-        int             source_heading;
-        int             source_rollpitch;
+        int             source_attitude;
         
         int             num_sensors;
         int             num_sensors_alloc;

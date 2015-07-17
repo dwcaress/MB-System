@@ -42,8 +42,7 @@ static char svn_id[]="$Id$";
 /*--------------------------------------------------------------------*/
 int mb_platform_init(int verbose, int type, char *name, char *organization,
 			int source_swathbathymetry, int source_position,
-			int source_depth, int source_heave, int source_heading,
-			int source_rollpitch, 
+			int source_depth, int source_heave, int source_attitude,
 			void **platform_ptr, int *error)
 {
 	char	*function_name = "mb_platform_init";
@@ -64,8 +63,7 @@ int mb_platform_init(int verbose, int type, char *name, char *organization,
 		fprintf(stderr,"dbg2       source_position:	     %d\n", source_position);
 		fprintf(stderr,"dbg2       source_depth:	     %d\n", source_depth);
 		fprintf(stderr,"dbg2       source_heave:	     %d\n", source_heave);
-		fprintf(stderr,"dbg2       source_heading:	     %d\n", source_heading);
-		fprintf(stderr,"dbg2       source_rollpitch:	     %d\n", source_rollpitch);
+		fprintf(stderr,"dbg2       source_attitude:	     %d\n", source_attitude);
 		fprintf(stderr,"dbg2       platform_ptr:             %p\n", platform_ptr);
 		fprintf(stderr,"dbg2       *platform_ptr:            %p\n", *platform_ptr);
 		}
@@ -98,8 +96,7 @@ int mb_platform_init(int verbose, int type, char *name, char *organization,
 	platform->source_position = source_position;
 	platform->source_depth = source_depth;
 	platform->source_heave = source_heave;
-	platform->source_heading = source_heading;
-	platform->source_rollpitch = source_rollpitch;
+	platform->source_attitude = source_attitude;
 	platform->num_sensors = 0;
 	
 	/* print output debug statements */
@@ -117,8 +114,7 @@ int mb_platform_init(int verbose, int type, char *name, char *organization,
 		fprintf(stderr,"dbg2       platform->source_position:	     %d\n", platform->source_position);
 		fprintf(stderr,"dbg2       platform->source_depth:	     %d\n", platform->source_depth);
 		fprintf(stderr,"dbg2       platform->source_heave:	     %d\n", platform->source_heave);
-		fprintf(stderr,"dbg2       platform->source_heading:	     %d\n", platform->source_heading);
-		fprintf(stderr,"dbg2       platform->source_rollpitch:	     %d\n", platform->source_rollpitch);
+		fprintf(stderr,"dbg2       platform->source_attitude:	     %d\n", platform->source_attitude);
 		fprintf(stderr,"dbg2       platform->num_sensors:	     %d\n", platform->num_sensors);
 		fprintf(stderr,"dbg2       error:			     %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -130,7 +126,7 @@ int mb_platform_init(int verbose, int type, char *name, char *organization,
 }
 /*--------------------------------------------------------------------*/
 int mb_platform_add_sensor(int verbose, void **platform_ptr,
-			           int type, mb_longname model,
+					   int type, mb_longname model,
 				   mb_longname manufacturer,
 				   mb_longname serialnumber,
 				   int capability, int special_capability,
@@ -191,7 +187,7 @@ int mb_platform_add_sensor(int verbose, void **platform_ptr,
 		if (status == MB_SUCCESS)
 			{
 			memset(&platform->sensors[platform->num_sensors_alloc],
-			       0, (platform->num_sensors - platform->num_sensors_alloc) * sizeof(struct mb_sensor_struct));
+				   0, (platform->num_sensors - platform->num_sensors_alloc) * sizeof(struct mb_sensor_struct));
 			platform->num_sensors_alloc = platform->num_sensors;
 			}
 		else
@@ -273,8 +269,7 @@ int mb_platform_add_sensor(int verbose, void **platform_ptr,
 		fprintf(stderr,"dbg2       platform->source_position:	     %d\n", platform->source_position);
 		fprintf(stderr,"dbg2       platform->source_depth:	     %d\n", platform->source_depth);
 		fprintf(stderr,"dbg2       platform->source_heave:	     %d\n", platform->source_heave);
-		fprintf(stderr,"dbg2       platform->source_heading:	     %d\n", platform->source_heading);
-		fprintf(stderr,"dbg2       platform->source_rollpitch:	     %d\n", platform->source_rollpitch);
+		fprintf(stderr,"dbg2       platform->source_attitude:	     %d\n", platform->source_attitude);
 		fprintf(stderr,"dbg2       platform->num_sensors:	     %d\n", platform->num_sensors);
 		for (i=0;i<platform->num_sensors;i++)
 			{
@@ -453,17 +448,16 @@ int mb_platform_add_sensor_offset(int verbose, void **platform_ptr,
 		}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
-		fprintf(stderr,"dbg2       *platform_ptr:		     %p\n", *platform_ptr);
-		fprintf(stderr,"dbg2       platform->type:		     %d\n", platform->type);
-		fprintf(stderr,"dbg2       platform->name:		     %s\n", platform->name);
-		fprintf(stderr,"dbg2       platform->organization:	     %s\n", platform->organization);
-		fprintf(stderr,"dbg2       platform->source_swathbathymetry: %d\n", platform->source_swathbathymetry);
-		fprintf(stderr,"dbg2       platform->source_position:	     %d\n", platform->source_position);
-		fprintf(stderr,"dbg2       platform->source_depth:	     %d\n", platform->source_depth);
-		fprintf(stderr,"dbg2       platform->source_heave:	     %d\n", platform->source_heave);
-		fprintf(stderr,"dbg2       platform->source_heading:	     %d\n", platform->source_heading);
-		fprintf(stderr,"dbg2       platform->source_rollpitch:	     %d\n", platform->source_rollpitch);
-		fprintf(stderr,"dbg2       platform->num_sensors:	     %d\n", platform->num_sensors);
+		fprintf(stderr,"dbg2       *platform_ptr:				%p\n", *platform_ptr);
+		fprintf(stderr,"dbg2       platform->type:				%d\n", platform->type);
+		fprintf(stderr,"dbg2       platform->name:				%s\n", platform->name);
+		fprintf(stderr,"dbg2       platform->organization:		%s\n", platform->organization);
+		fprintf(stderr,"dbg2       platform->source_swathbathymetry:	%d\n", platform->source_swathbathymetry);
+		fprintf(stderr,"dbg2       platform->source_position:	%d\n", platform->source_position);
+		fprintf(stderr,"dbg2       platform->source_depth:		%d\n", platform->source_depth);
+		fprintf(stderr,"dbg2       platform->source_heave:		%d\n", platform->source_heave);
+		fprintf(stderr,"dbg2       platform->source_attitude:	%d\n", platform->source_attitude);
+		fprintf(stderr,"dbg2       platform->num_sensors:		%d\n", platform->num_sensors);
 		for (i=0;i<platform->num_sensors;i++)
 			{
 			fprintf(stderr,"dbg2       platform->sensors[%2d].type:                 %d\n", i, platform->sensors[i].type);
@@ -650,7 +644,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 					if (buffer[len-2] == '\r')
 						buffer[len-2] = '\0';
 					}
-	    
+		
 				/* general parameters */
 				if (strncmp(buffer, "PLATFORM_TYPE", 13) == 0)
 					{
@@ -680,13 +674,9 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 					{
 					sscanf(buffer, "%s %d", dummy, &platform->source_heave);
 					}
-				else if (strncmp(buffer, "SOURCE_HEADING", 14) == 0)
+				else if (strncmp(buffer, "SOURCE_ATTITUDE", 14) == 0)
 					{
-					sscanf(buffer, "%s %d", dummy, &platform->source_heading);
-					}
-				else if (strncmp(buffer, "SOURCE_ROLLPITCH", 16) == 0)
-					{
-					sscanf(buffer, "%s %d", dummy, &platform->source_rollpitch);
+					sscanf(buffer, "%s %d", dummy, &platform->source_attitude);
 					}
 				else if (strncmp(buffer, "PLATFORM_NUM_SENSORS", 20) == 0)
 					{
@@ -776,7 +766,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 					{
 					sscanf(buffer, "%s %d %d %lf", dummy, &isensor, &ioffset, &dvalue);
 					if (isensor >= 0 && isensor < platform->num_sensors
-					    && ioffset >= 0 && ioffset < platform->sensors[isensor].num_offsets)
+						&& ioffset >= 0 && ioffset < platform->sensors[isensor].num_offsets)
 						{
 						platform->sensors[isensor].offsets[ioffset].time_latency_static = dvalue;
 						platform->sensors[isensor].offsets[ioffset].time_latency_mode = MB_SENSOR_TIME_LATENCY_STATIC;
@@ -786,12 +776,12 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 					{
 					sscanf(buffer, "%s %d %d %d", dummy, &isensor, &ioffset, &ivalue);
 					if (isensor >= 0 && isensor < platform->num_sensors
-					    && ioffset >= 0 && ioffset < platform->sensors[isensor].num_offsets)
+						&& ioffset >= 0 && ioffset < platform->sensors[isensor].num_offsets)
 						{
 						platform->sensors[isensor].offsets[ioffset].num_time_latency = ivalue;
 						platform->sensors[isensor].offsets[ioffset].time_latency_mode = MB_SENSOR_TIME_LATENCY_MODEL;
 						if (platform->sensors[isensor].offsets[ioffset].num_time_latency
-						    < platform->sensors[isensor].offsets[ioffset].num_time_latency_alloc)
+							< platform->sensors[isensor].offsets[ioffset].num_time_latency_alloc)
 							{
 							size = platform->sensors[isensor].offsets[ioffset].num_time_latency * sizeof(double);
 							status = mb_mallocd(verbose,__FILE__, __LINE__, size,
@@ -887,8 +877,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 		fprintf(stderr,"dbg2       platform->source_position:	     %d\n", platform->source_position);
 		fprintf(stderr,"dbg2       platform->source_depth:	     %d\n", platform->source_depth);
 		fprintf(stderr,"dbg2       platform->source_heave:	     %d\n", platform->source_heave);
-		fprintf(stderr,"dbg2       platform->source_heading:	     %d\n", platform->source_heading);
-		fprintf(stderr,"dbg2       platform->source_rollpitch:	     %d\n", platform->source_rollpitch);
+		fprintf(stderr,"dbg2       platform->source_attitude:	 %d\n", platform->source_attitude);
 		fprintf(stderr,"dbg2       platform->num_sensors:	     %d\n", platform->num_sensors);
 		for (i=0;i<platform->num_sensors;i++)
 			{
@@ -965,8 +954,7 @@ int mb_platform_write(int verbose, char *platform_file, void **platform_ptr, int
 		fprintf(stderr,"dbg2       platform->source_position:	     %d\n", platform->source_position);
 		fprintf(stderr,"dbg2       platform->source_depth:	     %d\n", platform->source_depth);
 		fprintf(stderr,"dbg2       platform->source_heave:	     %d\n", platform->source_heave);
-		fprintf(stderr,"dbg2       platform->source_heading:	     %d\n", platform->source_heading);
-		fprintf(stderr,"dbg2       platform->source_rollpitch:	     %d\n", platform->source_rollpitch);
+		fprintf(stderr,"dbg2       platform->source_attitude:	     %d\n", platform->source_attitude);
 		fprintf(stderr,"dbg2       platform->num_sensors:	     %d\n", platform->num_sensors);
 		for (i=0;i<platform->num_sensors;i++)
 			{
@@ -1004,7 +992,7 @@ int mb_platform_write(int verbose, char *platform_file, void **platform_ptr, int
 		{
 		right_now = time((time_t *)0);
 		strcpy(date,ctime(&right_now));
-                date[strlen(date)-1] = '\0';
+				date[strlen(date)-1] = '\0';
 		if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
 		if (user_ptr != NULL)
@@ -1026,8 +1014,7 @@ int mb_platform_write(int verbose, char *platform_file, void **platform_ptr, int
 		fprintf(stderr, "SOURCE_POSITION\t%d\n", platform->source_position);
 		fprintf(stderr, "SOURCE_DEPTH\t%d\n", platform->source_depth);
 		fprintf(stderr, "SOURCE_HEAVE\t%d\n", platform->source_heave);
-		fprintf(stderr, "SOURCE_HEADING\t%d\n", platform->source_heading);
-		fprintf(stderr, "SOURCE_ROLLPITCH\t%d\n", platform->source_rollpitch);
+		fprintf(stderr, "SOURCE_ATTITUDE\t%d\n", platform->source_attitude);
 		fprintf(stderr, "PLATFORM_NUM_SENSORS\t%d\n", platform->num_sensors);
 		for (isensor=0;isensor<platform->num_sensors;isensor++)
 			{
@@ -1096,27 +1083,28 @@ int mb_platform_write(int verbose, char *platform_file, void **platform_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mb_platform_lever(int verbose, void **platform_ptr,
-                      int targetsensor, int targetsensoroffset,
-		      double heading, double roll, double pitch,
-		      double *lever_x, double *lever_y, double *lever_z,
-                      int *error)
+					  int targetsensor, int targetsensoroffset,
+					  double heading, double roll, double pitch,
+					  double *lever_x, double *lever_y, double *lever_z,
+					  int *error)
 {
 	char	*function_name = "mb_platform_lever";
 	int	status = MB_SUCCESS;
 	struct mb_platform_struct *platform;
 	struct mb_sensor_struct *sensor_target = NULL;
 	struct mb_sensor_struct *sensor_swathbathymetry = NULL;
-	struct mb_sensor_struct *sensor_rollpitch = NULL;
-	struct mb_sensor_struct *sensor_heading = NULL;
+	struct mb_sensor_struct *sensor_attitude = NULL;
 	struct mb_sensor_struct *sensor_position = NULL;
 	struct mb_sensor_struct *sensor_depth = NULL;
 	double	xx, yy, zz;
-	double	croll, cpitch, cheading;
-	double	headingx, headingy;
+	double	proll, ppitch, pheading;
+	double	croll, sroll;
+	double	cpitch, spitch;
+	double	cheading, sheading;
 	int	i, j, k;
 		
-        /* reset error */
-        *error = MB_ERROR_NO_ERROR;
+	/* reset error */
+	*error = MB_ERROR_NO_ERROR;
 
 	/* get platform structure */
 	platform = (struct mb_platform_struct *) *platform_ptr;
@@ -1127,14 +1115,14 @@ int mb_platform_lever(int verbose, void **platform_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr,"dbg2       verbose:				%d\n", verbose);
 		fprintf(stderr,"dbg2       platform_ptr:		%p\n", platform_ptr);
 		fprintf(stderr,"dbg2       *platform_ptr:		%p\n", *platform_ptr);
 		fprintf(stderr,"dbg2       targetsensor:		%d\n", targetsensor);
-		fprintf(stderr,"dbg2       targetsensoroffset:		%d\n", targetsensoroffset);
-		fprintf(stderr,"dbg2       heading:		        %f\n", heading);
-		fprintf(stderr,"dbg2       roll:		        %f\n", roll);
-		fprintf(stderr,"dbg2       pitch:		        %f\n", pitch);
+		fprintf(stderr,"dbg2       targetsensoroffset:	%d\n", targetsensoroffset);
+		fprintf(stderr,"dbg2       heading:				%f\n", heading);
+		fprintf(stderr,"dbg2       roll:				%f\n", roll);
+		fprintf(stderr,"dbg2       pitch:				%f\n", pitch);
 		}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
@@ -1146,8 +1134,7 @@ int mb_platform_lever(int verbose, void **platform_ptr,
 		fprintf(stderr,"dbg2       platform->source_position:	     %d\n", platform->source_position);
 		fprintf(stderr,"dbg2       platform->source_depth:	     %d\n", platform->source_depth);
 		fprintf(stderr,"dbg2       platform->source_heave:	     %d\n", platform->source_heave);
-		fprintf(stderr,"dbg2       platform->source_heading:	     %d\n", platform->source_heading);
-		fprintf(stderr,"dbg2       platform->source_rollpitch:	     %d\n", platform->source_rollpitch);
+		fprintf(stderr,"dbg2       platform->source_attitude:	     %d\n", platform->source_attitude);
 		fprintf(stderr,"dbg2       platform->num_sensors:	     %d\n", platform->num_sensors);
 		for (i=0;i<platform->num_sensors;i++)
 			{
@@ -1179,44 +1166,62 @@ int mb_platform_lever(int verbose, void **platform_ptr,
 				}
 			}
 		}
-        
-        /* check that all sensor id's are sensible for this platform */
-        if (targetsensor < 0 || targetsensor >= platform->num_sensors
-                || platform->source_swathbathymetry < 0 || platform->source_swathbathymetry >= platform->num_sensors
-                || platform->source_rollpitch < 0 || platform->source_rollpitch >= platform->num_sensors
-                || platform->source_heading < 0 || platform->source_heading >= platform->num_sensors
-                || platform->source_position < 0 || platform->source_position >= platform->num_sensors
-                || platform->source_depth < 0 || platform->source_depth >= platform->num_sensors)
-                {
-                status = MB_FAILURE;
-                *error = MB_ERROR_BAD_PARAMETER;
-                }
-        
-        /* else proceed */
-        else
-                {
-                /* get sensor structures */
-                sensor_target = &platform->sensors[targetsensor];
-                sensor_swathbathymetry = &platform->sensors[platform->source_swathbathymetry];
-                sensor_rollpitch = &platform->sensors[platform->source_rollpitch];
-                sensor_heading = &platform->sensors[platform->source_heading];
-                sensor_position = &platform->sensors[platform->source_position];
-                sensor_depth = &platform->sensors[platform->source_depth];
-                
-                /* start with zero lever */
-                *lever_x = 0.0;
-                *lever_y = 0.0;
-                *lever_z = 0.0;
-                
-                /* apply change in z due to offset between the depth sensor and the target sensor
-			using roll and pitch values corrected for the offsets between the
-			attitude sensor and the target sensor */
+		
+	/* check that all sensor id's are sensible for this platform */
+	if (targetsensor < 0 || targetsensor >= platform->num_sensors
+			|| platform->source_swathbathymetry < 0 || platform->source_swathbathymetry >= platform->num_sensors
+			|| platform->source_attitude < 0 || platform->source_attitude >= platform->num_sensors
+			|| platform->source_position < 0 || platform->source_position >= platform->num_sensors
+			|| platform->source_depth < 0 || platform->source_depth >= platform->num_sensors)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_PARAMETER;
+		}
+		
+	/* else proceed */
+	else
+		{
+		/* get sensor structures */
+		sensor_target   = &platform->sensors[targetsensor];
+		sensor_swathbathymetry = &platform->sensors[platform->source_swathbathymetry];
+		sensor_attitude = &platform->sensors[platform->source_attitude];
+		sensor_position = &platform->sensors[platform->source_position];
+		sensor_depth    = &platform->sensors[platform->source_depth];
+		
+		/* start with zero lever */
+		*lever_x = 0.0;
+		*lever_y = 0.0;
+		*lever_z = 0.0;
+		
+		/* get platform attitude*/
+		if (sensor_attitude->offsets[0].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC)
+			{			
+			mb_platform_math_attitude_platform (roll, pitch, heading,
+				                            	sensor_attitude->offsets[0].attitude_offset_roll,
+				                            	sensor_attitude->offsets[0].attitude_offset_pitch,
+				                            	sensor_attitude->offsets[0].attitude_offset_azimuth,
+				                            	&proll, &ppitch, &pheading);
+			}
+		else
+			{
+			proll    = roll;
+			ppitch   = pitch;
+			pheading = heading;			
+			}
+
+		/* Convenient calculations for later coordinate operations */
+		croll    = cos(DTR * proll);
+		sroll    = sin(DTR * proll);
+		cpitch   = cos(DTR * ppitch);
+		spitch   = sin(DTR * ppitch);
+		cheading = cos(DTR * pheading);
+		sheading = sin(DTR * pheading);
+
+		/* apply change in z due to offset between the depth sensor and the target sensor
+		using roll add pitch values corrected for the attitude sensor offset */
 		xx = 0.0;
 		yy = 0.0;
 		zz = 0.0;
-		cheading = heading;
-		croll = roll;
-		cpitch = pitch;
 		if (sensor_target->offsets[targetsensoroffset].position_offset_mode == MB_SENSOR_POSITION_OFFSET_STATIC)
 			{
 			xx += sensor_target->offsets[targetsensoroffset].position_offset_x;
@@ -1229,30 +1234,20 @@ int mb_platform_lever(int verbose, void **platform_ptr,
 			yy -= sensor_depth->offsets[0].position_offset_y;
 			zz -= sensor_depth->offsets[0].position_offset_z;
 			}
-		if (sensor_target->offsets[targetsensoroffset].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC)
-			{
-			cheading += sensor_target->offsets[targetsensoroffset].attitude_offset_azimuth;
-			croll += sensor_target->offsets[targetsensoroffset].attitude_offset_roll;
-			cpitch += sensor_target->offsets[targetsensoroffset].attitude_offset_pitch;
-			}
-		if (sensor_rollpitch->offsets[0].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC)
-			{
-			cheading -= sensor_rollpitch->offsets[0].attitude_offset_azimuth;
-			croll -= sensor_rollpitch->offsets[0].attitude_offset_roll;
-			cpitch -= sensor_rollpitch->offsets[0].attitude_offset_pitch;
-			}
+
+		*lever_z = cpitch * sroll * xx
+				 - spitch         * yy
+				 + cpitch * croll * zz;
+
 		*lever_z = sin(DTR * croll) * xx
 				- sin(DTR * cpitch) * yy
 				+ cos(DTR * cpitch) * zz;
-                
-                /* apply change in x and y due to offset between the position sensor and the target sensor
-			using heading corrected for the offset between the heading sensor and the target sensor */
+				
+		/* apply change in x and y due to offset between the position sensor and the target sensor
+		using roll, pitch and heading corrected for the attitude sensor offset and the target sensor */
 		xx = 0.0;
 		yy = 0.0;
 		zz = 0.0;
-		cheading = heading;
-		croll = roll;
-		cpitch = pitch;
 		if (sensor_target->offsets[targetsensoroffset].position_offset_mode == MB_SENSOR_POSITION_OFFSET_STATIC)
 			{
 			xx += sensor_target->offsets[targetsensoroffset].position_offset_x;
@@ -1265,23 +1260,16 @@ int mb_platform_lever(int verbose, void **platform_ptr,
 			yy -= sensor_depth->offsets[0].position_offset_y;
 			zz -= sensor_depth->offsets[0].position_offset_z;
 			}
-		if (sensor_target->offsets[targetsensoroffset].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC)
-			{
-			cheading += sensor_target->offsets[targetsensoroffset].attitude_offset_azimuth;
-			croll += sensor_target->offsets[targetsensoroffset].attitude_offset_roll;
-			cpitch += sensor_target->offsets[targetsensoroffset].attitude_offset_pitch;
-			}
-		if (sensor_heading->offsets[0].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC)
-			{
-			cheading -= sensor_heading->offsets[0].attitude_offset_azimuth;
-			croll -= sensor_heading->offsets[0].attitude_offset_roll;
-			cpitch -= sensor_heading->offsets[0].attitude_offset_pitch;
-			}
-		headingx = sin(DTR * cheading);
-		headingy = cos(DTR * cheading);	
-		*lever_x = headingy * xx + headingx * yy;
-		*lever_y = -headingx * xx + headingy * yy;
-                }
+
+		*lever_x = (cheading*croll + sheading*spitch*sroll) * xx + 
+					cpitch*sheading                         * yy +
+				   (croll*sheading*spitch - cheading*sroll) * zz;
+
+
+		*lever_y = (cheading*spitch*sroll - croll*sheading) * xx +
+					cheading*cpitch                         * yy +
+				   (sheading*sroll + cheading*croll*spitch) * zz;
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1302,11 +1290,11 @@ int mb_platform_lever(int verbose, void **platform_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_platform_position(int verbose, void **platform_ptr,
-                      int targetsensor, int targetsensoroffset,
-		      double navlon, double navlat, double sensordepth,
-		      double heading, double roll, double pitch,
-		      double *targetlon, double *targetlat, double *targetz,
-                      int *error)
+						int targetsensor, int targetsensoroffset,
+						double navlon, double navlat, double sensordepth,
+						double heading, double roll, double pitch,
+						double *targetlon, double *targetlat, double *targetz,
+						int *error)
 {
 	char	*function_name = "mb_platform_position";
 	int	status = MB_SUCCESS;
@@ -1346,8 +1334,7 @@ int mb_platform_position(int verbose, void **platform_ptr,
 		fprintf(stderr,"dbg2       platform->source_position:	     %d\n", platform->source_position);
 		fprintf(stderr,"dbg2       platform->source_depth:	     %d\n", platform->source_depth);
 		fprintf(stderr,"dbg2       platform->source_heave:	     %d\n", platform->source_heave);
-		fprintf(stderr,"dbg2       platform->source_heading:	     %d\n", platform->source_heading);
-		fprintf(stderr,"dbg2       platform->source_rollpitch:	     %d\n", platform->source_rollpitch);
+		fprintf(stderr,"dbg2       platform->source_attitude:	     %d\n", platform->source_attitude);
 		fprintf(stderr,"dbg2       platform->num_sensors:	     %d\n", platform->num_sensors);
 		for (i=0;i<platform->num_sensors;i++)
 			{
@@ -1380,13 +1367,21 @@ int mb_platform_position(int verbose, void **platform_ptr,
 			}
 		}
 
+	// /* call mb_platform_orientation to get platform orientation */
+	// status = mb_platform_orientation(verbose, platform_ptr,
+	// 								 // targetsensor, targetsensoroffset,
+	// 								 heading, roll, pitch,
+	// 								 &pheading, &proll, &ppitch,
+	// 								 error);
+
+
 	/* call mb_platform lever to get relative lever offsets */
 	status = mb_platform_lever(verbose, platform_ptr,
-                      targetsensor, targetsensoroffset,
-		      heading, roll, pitch,
-		      &lever_x, &lever_y, &lever_z,
-                      error);
-	
+								targetsensor, targetsensoroffset,
+								heading, roll, pitch,
+								&lever_x, &lever_y, &lever_z,
+								error);
+
 	/* get local translation between lon lat degrees and meters */
 	mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
 	
@@ -1394,6 +1389,7 @@ int mb_platform_position(int verbose, void **platform_ptr,
 	*targetlon = navlon + lever_x * mtodeglon;
 	*targetlat = navlat + lever_y * mtodeglat;
 	*targetz = sensordepth + lever_z;
+	
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1401,10 +1397,140 @@ int mb_platform_position(int verbose, void **platform_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       targetlon:		        %f\n", *targetlon);
-		fprintf(stderr,"dbg2       targetlat:		        %f\n", *targetlat);
-		fprintf(stderr,"dbg2       targetz:		        %f\n", *targetz);
-		fprintf(stderr,"dbg2       error:			%d\n",*error);
+		fprintf(stderr,"dbg2       targetlon:		%f\n", *targetlon);
+		fprintf(stderr,"dbg2       targetlat:		%f\n", *targetlat);
+		fprintf(stderr,"dbg2       targetz:		    %f\n", *targetz);
+		fprintf(stderr,"dbg2       error:			%d\n", *error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:			%d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_platform_orientation_offset (int verbose, void **platform_ptr,
+							int targetsensor, int targetsensoroffset,
+							double heading, double roll, double pitch,
+							double *target_hdg_offset, 
+							double *target_roll_offset, 
+							double *target_pitch_offset,
+							int *error)
+{
+	char	*function_name = "mb_platform_orientation_offset";
+	int	status = MB_SUCCESS;
+	struct mb_platform_struct *platform;
+	struct mb_sensor_struct *sensor_target = NULL;
+	struct mb_sensor_struct *sensor_attitude = NULL;
+	int	i, j, k;
+		
+	/* get platform structure */
+	platform = (struct mb_platform_struct *) *platform_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr,"dbg2       platform_ptr:		%p\n", platform_ptr);
+		fprintf(stderr,"dbg2       *platform_ptr:		%p\n", *platform_ptr);
+		fprintf(stderr,"dbg2       targetsensor:		%d\n", targetsensor);
+		fprintf(stderr,"dbg2       targetsensoroffset:	%d\n", targetsensoroffset);
+		fprintf(stderr,"dbg2       heading:		        %f\n", heading);
+		fprintf(stderr,"dbg2       roll:		        %f\n", roll);
+		fprintf(stderr,"dbg2       pitch:		        %f\n", pitch);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       *platform_ptr:		     %p\n", *platform_ptr);
+		fprintf(stderr,"dbg2       platform->type:		     %d\n", platform->type);
+		fprintf(stderr,"dbg2       platform->name:		     %s\n", platform->name);
+		fprintf(stderr,"dbg2       platform->organization:	     %s\n", platform->organization);
+		fprintf(stderr,"dbg2       platform->source_swathbathymetry: %d\n", platform->source_swathbathymetry);
+		fprintf(stderr,"dbg2       platform->source_position:	     %d\n", platform->source_position);
+		fprintf(stderr,"dbg2       platform->source_depth:	     %d\n", platform->source_depth);
+		fprintf(stderr,"dbg2       platform->source_heave:	     %d\n", platform->source_heave);
+		fprintf(stderr,"dbg2       platform->source_attitude:	     %d\n", platform->source_attitude);
+		fprintf(stderr,"dbg2       platform->num_sensors:	     %d\n", platform->num_sensors);
+		for (i=0;i<platform->num_sensors;i++)
+			{
+			fprintf(stderr,"dbg2       platform->sensors[%2d].type:                 %d\n", i, platform->sensors[i].type);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].model:                %s\n", i, platform->sensors[i].model);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].manufacturer:         %s\n", i, platform->sensors[i].manufacturer);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].serialnumber:         %s\n", i, platform->sensors[i].serialnumber);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].capability:           %d\n", i, platform->sensors[i].capability);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].special_capability:   %d\n", i, platform->sensors[i].special_capability);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].num_offsets:          %d\n", i, platform->sensors[i].num_offsets);
+			for (j=0;j<platform->sensors[i].num_offsets;j++)
+				{
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].time_latency_mode:	%d\n", i, j, platform->sensors[i].offsets[j].time_latency_mode);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].time_latency_static:	%f\n", i, j, platform->sensors[i].offsets[j].time_latency_static);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].num_time_latency:		%d\n", i, j, platform->sensors[i].offsets[j].num_time_latency);
+				for (k=0;k<platform->sensors[i].offsets[j].num_time_latency;k++)
+					{
+					fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].time_latency[%2d]:		%16.6f %8.6f\n", i, j, k,
+						platform->sensors[i].offsets[j].time_latency_time_d[k],platform->sensors[i].offsets[j].time_latency_value[k]);
+					}
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_mode:	%d\n", i, j, platform->sensors[i].offsets[j].position_offset_mode);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_x:	%f\n", i, j, platform->sensors[i].offsets[j].position_offset_x);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_y:	%f\n", i, j, platform->sensors[i].offsets[j].position_offset_y);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_z:	%f\n", i, j, platform->sensors[i].offsets[j].position_offset_z);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_mode:	%d\n", i, j, platform->sensors[i].offsets[j].attitude_offset_mode);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_azimuth:	%f\n", i, j, platform->sensors[i].offsets[j].attitude_offset_azimuth);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_roll:	%f\n", i, j, platform->sensors[i].offsets[j].attitude_offset_roll);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_pitch:	%f\n", i, j, platform->sensors[i].offsets[j].attitude_offset_pitch);
+				}
+			}
+		}
+
+	/* check that all sensor id's are sensible for this platform */
+	if (targetsensor < 0 || targetsensor >= platform->num_sensors
+			|| platform->source_swathbathymetry < 0 || platform->source_swathbathymetry >= platform->num_sensors
+			|| platform->source_attitude < 0 || platform->source_attitude >= platform->num_sensors
+			|| platform->source_position < 0 || platform->source_position >= platform->num_sensors
+			|| platform->source_depth < 0 || platform->source_depth >= platform->num_sensors)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_PARAMETER;
+		}
+		
+	/* else proceed */
+	else
+		{
+		/* get sensor structures */
+		sensor_target   = &platform->sensors[targetsensor];
+		sensor_attitude = &platform->sensors[platform->source_attitude];
+		
+		/* start with zero attitude offset */
+		*target_roll_offset = 0.0;
+		*target_pitch_offset = 0.0;
+		*target_hdg_offset = 0.0;
+		
+		/* calculate attitude offset for target sensor */
+		mb_platform_math_attitude_offset (sensor_target->offsets[targetsensoroffset].attitude_offset_roll,          
+										  sensor_target->offsets[targetsensoroffset].attitude_offset_pitch, 
+										  sensor_target->offsets[targetsensoroffset].attitude_offset_azimuth,
+										  sensor_attitude->offsets[0].attitude_offset_roll,
+										  sensor_attitude->offsets[0].attitude_offset_pitch,
+										  sensor_attitude->offsets[0].attitude_offset_azimuth,
+										  target_roll_offset, 
+										  target_pitch_offset, 
+										  target_hdg_offset);
+
+		}	
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       target_roll_offset:		%f\n", *target_roll_offset);
+		fprintf(stderr,"dbg2       target_pitch_offset:		%f\n", *target_pitch_offset);
+		fprintf(stderr,"dbg2       target_hdg_offset:		%f\n", *target_hdg_offset);
+		fprintf(stderr,"dbg2       error:			%d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:			%d\n",status);
 		}
