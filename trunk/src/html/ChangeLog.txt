@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2253       July 16, 2015
 * Version 5.5.2252       July 1, 2015
 * Version 5.5.2251       June 30, 2015
   Version 5.5.2250       June 29, 2015
@@ -216,6 +217,13 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2253 (July 16, 2015)
+
+General: Improved the way to handle sensor offsets on mbio/mb_platform.c and
+changed the way is currently used in mb7kpreprocess. Added
+mbio/mb_platform_math.c to the archive. This source file includes math
+functions to calculate angular offsets.
 
 -----> 5.5.2252 (July 1, 2015)
 

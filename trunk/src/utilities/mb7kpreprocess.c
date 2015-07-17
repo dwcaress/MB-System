@@ -113,8 +113,7 @@ int main (int argc, char **argv)
 	int	use_platform_file = MB_NO;
 	struct mb_platform_struct *platform = NULL;
 	struct mb_sensor_struct *sensor_swathbathymetry = NULL;
-	struct mb_sensor_struct *sensor_rollpitch = NULL;
-	struct mb_sensor_struct *sensor_heading = NULL;
+	struct mb_sensor_struct *sensor_attitude = NULL;
 	struct mb_sensor_struct *sensor_position = NULL;
 	struct mb_sensor_struct *sensor_depth = NULL;
 
@@ -1555,7 +1554,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	else if (use_depthsensoroff == MB_YES || sonar_offset_mode == MB_YES)
 		{
 		status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL,
-						0, 1, 2, 3, 3, 3, 
+						0, 1, 2, 3, 3, 
 						(void **)&platform, &error);
 			
 		/* set sensor 0 (multibeam) */
@@ -2890,7 +2889,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			if (platform == NULL)
 				{
 				status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL,
-								0, 1, 1, 2, 2, 2, 
+								0, 1, 1, 2, 2, 
 								(void **)&platform, &error);
 					
 				/* set sensor 0 (multibeam) */
@@ -5357,39 +5356,21 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 						}
 
 					/* get transducer angular offsets */
-					tx_align.roll = 0.0;
-					tx_align.pitch = 0.0;
-					tx_align.heading = 0.0;
-					rx_align.roll = 0.0;
-					rx_align.pitch = 0.0;
-					rx_align.heading = 0.0;
 					if (platform != NULL)
 						{
-						sensor_swathbathymetry = &platform->sensors[platform->source_swathbathymetry];
-						sensor_rollpitch = &platform->sensors[platform->source_rollpitch];
-						sensor_heading = &platform->sensors[platform->source_heading];
-						
-						if (sensor_swathbathymetry->offsets[0].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC
-							&& sensor_rollpitch->offsets[0].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC)
-							{
-							tx_align.roll = sensor_swathbathymetry->offsets[0].attitude_offset_roll
-									- sensor_rollpitch->offsets[0].attitude_offset_roll;
-							tx_align.pitch = sensor_swathbathymetry->offsets[0].attitude_offset_pitch
-									- sensor_rollpitch->offsets[0].attitude_offset_pitch;
-							rx_align.roll = sensor_swathbathymetry->offsets[0].attitude_offset_roll
-									- sensor_rollpitch->offsets[0].attitude_offset_roll;
-							rx_align.pitch = sensor_swathbathymetry->offsets[0].attitude_offset_pitch
-									- sensor_rollpitch->offsets[0].attitude_offset_pitch;
-							}
-						if (sensor_swathbathymetry->offsets[0].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC
-							&& sensor_heading->offsets[0].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC)
-							{
-							tx_align.heading = sensor_swathbathymetry->offsets[0].attitude_offset_azimuth
-									- sensor_heading->offsets[0].attitude_offset_azimuth;
-							rx_align.heading = sensor_swathbathymetry->offsets[0].attitude_offset_azimuth
-									- sensor_heading->offsets[0].attitude_offset_azimuth;
-							}
-						}			
+						status = mb_platform_orientation_offset(verbose, (void **)&platform,
+										platform->source_swathbathymetry, 0,
+										heading, roll, pitch,
+										&(tx_align.heading), &(tx_align.roll), &(tx_align.pitch),
+										&error);
+
+						status = mb_platform_orientation_offset(verbose, (void **)&platform,
+										platform->source_swathbathymetry, 0,
+										heading, roll, pitch,
+										&(rx_align.heading), &(rx_align.roll), &(rx_align.pitch),
+										&error);
+
+						}
 
 					/* loop over detections as available - the 7k format has used several
 					   different records over the years, so there are several different

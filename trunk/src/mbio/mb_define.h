@@ -496,8 +496,7 @@ int mb_copyrecord(int verbose, void *mbio_ptr,
 
 int mb_platform_init(int verbose, int type, char *name, char *organization,
 		int source_swathbathymetry, int source_position,
-		int source_depth, int source_heave, int source_heading,
-		int source_rollpitch, 
+		int source_depth, int source_heave, int source_attitude,
 		void **platform_ptr, int *error);
 int mb_platform_add_sensor(int verbose, void **platform_ptr,
 		int type, mb_longname model,
@@ -536,6 +535,45 @@ int mb_platform_position(int verbose, void **platform_ptr,
 		double heading, double roll, double pitch,
 		double *targetlon, double *targetlat, double *targetz,
                 int *error);
+int mb_platform_orientation_offset (int verbose, void **platform_ptr,
+							int targetsensor, int targetsensoroffset,
+							double heading, double roll, double pitch,
+							double *target_hdg_offset, 
+							double *target_roll_offset, 
+							double *target_pitch_offset,
+							int *error);
+
+void mb_platform_math_matrix_times_matrix_3x3 (double* A, double* B, double* AB);
+void mb_platform_math_matrix_transpose_3x3 (double* R, double* R_T);
+void mb_platform_math_rph2rot (double* rph, double* R);
+void mb_platform_math_rot2rph (double* R, double* rph);
+void mb_platform_math_attitude_offset (double  target_offset_roll,          
+									   double  target_offset_pitch, 
+									   double  target_offset_heading,
+									   double  source_offset_roll,        
+									   double  source_offset_pitch, 
+									   double  source_offset_heading,
+									   double* target2source_offset_roll, 
+									   double* target2source_offset_pitch, 
+									   double* target2source_offset_heading);
+void mb_platform_math_attitude_platform (double  nav_attitude_roll,    
+									double  nav_attitude_pitch, 
+									double  nav_attitude_heading,
+									double  attitude_offset_roll,          
+									double  attitude_offset_pitch, 
+									double  attitude_offset_heading,
+									double* platform_roll, 
+									double* platform_pitch, 
+									double* platform_heading);
+void mb_platform_math_attitude_target   (double  source_attitude_roll,    
+									double  source_attitude_pitch, 
+									double  source_attitude_heading,
+									double  target_offset_to_source_roll,          
+									double  target_offset_to_source_pitch, 
+									double  target_offset_to_source_heading,
+									double* target_roll, 
+									double* target_pitch, 
+									double* target_heading);
 
 int mb_buffer_init(int verbose, void **buff_ptr, int *error);
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr,
