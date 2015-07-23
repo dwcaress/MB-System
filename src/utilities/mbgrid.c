@@ -874,6 +874,11 @@ int main (int argc, char **argv)
 			gbnd[3] = MAX(gbnd[3], yy);
 			}
 
+		/* get local scaling of lon lat */
+		mb_coor_scale(verbose,0.5*(obnd[2]+obnd[3]),&mtodeglon,&mtodeglat);
+		deglontokm = 0.001/mtodeglon;
+		deglattokm = 0.001/mtodeglat;
+
 		/* calculate grid properties */
 		if (set_spacing == MB_YES)
 			{
@@ -908,11 +913,12 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 	/* deal with no projection */
 	else
 		{
-
-		/* calculate grid properties */
+		/* get local scaling of lon lat */
 		mb_coor_scale(verbose,0.5*(gbnd[2]+gbnd[3]),&mtodeglon,&mtodeglat);
 		deglontokm = 0.001/mtodeglon;
 		deglattokm = 0.001/mtodeglat;
+
+		/* calculate grid properties */
 		if (set_spacing == MB_YES
 			&& (units[0] == 'M' || units[0] == 'm'))
 			{
@@ -1019,8 +1025,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 	else
 		{
 		/* do first point */
-		xx = wbnd[0] - (wbnd[1] - wbnd[0]);
-		yy = wbnd[2] - (wbnd[3] - wbnd[2]);
+		xx = wbnd[0] - 0.05 * (wbnd[1] - wbnd[0]);
+		yy = wbnd[2] - 0.05 * (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr,
 					xx, yy,
 					&xlon, &ylat,
@@ -1032,8 +1038,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		bounds[3] = ylat;
 
 		/* do second point */
-		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
-		yy = wbnd[2] - (wbnd[3] - wbnd[2]);
+		xx = wbnd[1] + 0.05 * (wbnd[1] - wbnd[0]);
+		yy = wbnd[2] - 0.05 * (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr,
 					xx, yy,
 					&xlon, &ylat,
@@ -1045,8 +1051,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		bounds[3] = MAX(bounds[3], ylat);
 
 		/* do third point */
-		xx = wbnd[0] - (wbnd[1] - wbnd[0]);
-		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
+		xx = wbnd[0] - 0.05 * (wbnd[1] - wbnd[0]);
+		yy = wbnd[3] + 0.05 * (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr,
 					xx, yy,
 					&xlon, &ylat,
@@ -1058,8 +1064,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		bounds[3] = MAX(bounds[3], ylat);
 
 		/* do fourth point */
-		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
-		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
+		xx = wbnd[1] + 0.05 * (wbnd[1] - wbnd[0]);
+		yy = wbnd[3] + 0.05 * (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr,
 					xx, yy,
 					&xlon, &ylat,
@@ -1437,8 +1443,12 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			}
 
 		/* resample extracted grid to have similar resolution as working grid */
-		sprintf(plot_cmd, "grdsample %s -Gtmpgrdsample%d.grd -R%.12f/%.12f/%.12f/%.12f -I%.12f/%.12f",
-				backgroundfileuse, pid,bounds[0],bounds[1],bounds[2],bounds[3], dx, dy);
+		if (use_projection == MB_YES)
+			sprintf(plot_cmd, "gmt grdsample %s -Gtmpgrdsample%d.grd -R%.12f/%.12f/%.12f/%.12f -I%.12f/%.12f",
+					backgroundfileuse, pid, bounds[0], bounds[1], bounds[2], bounds[3], dx*mtodeglon, dy*mtodeglat);
+		else
+			sprintf(plot_cmd, "gmt grdsample %s -Gtmpgrdsample%d.grd -R%.12f/%.12f/%.12f/%.12f -I%.12f/%.12f",
+					backgroundfileuse, pid, bounds[0], bounds[1], bounds[2], bounds[3], dx, dy);
 		fprintf(stderr, "Executing: %s\n", plot_cmd);
 		fork_status = system(plot_cmd);
 		if (fork_status != 0)
@@ -1451,15 +1461,15 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			}
 
 		/* extract points with preprocessing if that will help */
-		if (use_projection == MB_NO)
+		if (use_projection == MB_YES)
 			{
-			sprintf(plot_cmd, "grd2xyz tmpgrdsample%d.grd -s -bo | blockmean -bi -bo -C -R%f/%f/%f/%f -I%.12f/%.12f",
-				pid, bounds[0], bounds[1], bounds[2], bounds[3], dx, dy);
+			sprintf(plot_cmd, "gmt grd2xyz tmpgrdsample%d.grd -s -bo | gmt blockmean -bi -bo -C -R%f/%f/%f/%f -I%.12f/%.12f",
+				pid, bounds[0], bounds[1], bounds[2], bounds[3], dx*mtodeglon, dy*mtodeglat);
 			}
 		else
 			{
-			sprintf(plot_cmd, "grd2xyz tmpgrdsample%d.grd -S -bo",
-				pid);
+			sprintf(plot_cmd, "gmt grd2xyz tmpgrdsample%d.grd -s -bo | gmt blockmean -bi -bo -C -R%f/%f/%f/%f -I%.12f/%.12f",
+				pid, bounds[0], bounds[1], bounds[2], bounds[3], dx, dy);
 			}
 		fprintf(stderr, "Executing: %s\n", plot_cmd);
 		if ((rfp = popen(plot_cmd,"r")) != NULL)
@@ -1495,8 +1505,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 						mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
 						fprintf(outfp,"\nMBIO Error reallocating background data array:\n%s\n",
 							message);
-						fprintf(outfp,"\nProgram <%s> Terminated\n",
-							program_name);
+						fprintf(outfp,"\nProgram <%s> Terminated at line %d in source file %s\n",
+							program_name, __LINE__, __FILE__);
 						mb_memory_clear(verbose, &error);
 						exit(error);
 						}
@@ -1514,8 +1524,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 						mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
 						fprintf(outfp,"\nMBIO Error allocating background interpolation work arrays:\n%s\n",
 							message);
-						fprintf(outfp,"\nProgram <%s> Terminated\n",
-							program_name);
+						fprintf(outfp,"\nProgram <%s> Terminated at line %d in source file %s\n",
+							program_name, __LINE__, __FILE__);
 						mb_memory_clear(verbose, &error);
 						exit(error);
 						}
@@ -4931,7 +4941,7 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 #endif
 
 		/* do the interpolation */
-		fprintf(outfp,"\nDoing spline interpolation with %d data points from background...\n",nbackground);
+		fprintf(outfp,"\nDoing spline interpolation with %d background points...\n",nbackground);
 #ifdef USESURFACE
 		mb_surface(verbose, nbackground, bxdata, bydata, bzdata,
 			(float)(wbnd[0] - bdata_origin_x), (float)(wbnd[1] - bdata_origin_x),
@@ -4946,7 +4956,7 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		ddy = (float)dy;
 		clip = MAX(gxdim,gydim);
 		fprintf(outfp,"\nDoing Zgrid spline interpolation with %d background points...\n",nbackground);
-		mb_zgrid2(sgrid,&gxdim,&gydim,&xmin,&ymin,
+		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,bdata,&nbackground,
 			work1,work2,work3,&cay,&clip);
 #endif

@@ -9,7 +9,6 @@ if BUILD_PROJ
 endif
 
 SUBDIRS = $(XBUILD_SUB_PROJ) gsf surf bsio mbio mbaux \
-	utilities gmt otps macros \
-	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL) \
-	man html ps share
+	utilities gmt otps macros share \
+	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL)
 

@@ -16,7 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-  Version 5.5.2253       July 16, 2015
+  Version 5.5.2254       July 23, 2015
 * Version 5.5.2252       July 1, 2015
 * Version 5.5.2251       June 30, 2015
   Version 5.5.2250       June 29, 2015
@@ -218,10 +218,21 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2253 (July 16, 2015)
+-----> 5.5.2254 (July 23, 2015)
 
-General: Improved the way to handle sensor offsets on mbio/mb_platform.c and
-changed the way is currently used in mb7kpreprocess. Added
+Autotools build system: Disabled dist and distclean targets in the makefiles
+produced by the configure script. We do not use the autotools system to
+generate production distributions, so the existence of these targets defined
+by default caused some confusion.
+
+Mbset and mbprocess: Added NAVSHIFTX and NAVSHIFTY options to the mbprocess
+parameter file definition.
+
+Mbgrid: Fixed the -Kbackground option for the case of producing grids in
+projected coordinate systems.
+
+General: Improved the way to handle sensor offsets on mbio/mb_platform.c
+and changed the way is currently used in mb7kpreprocess. Added
 mbio/mb_platform_math.c to the archive. This source file includes math
 functions to calculate angular offsets.
 

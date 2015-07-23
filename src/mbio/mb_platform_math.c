@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_platform_math.c	11/1/00
- *    $Id: mb_platform_math.c 2253 2015-07-16 02:12:26Z gtroni $
+ *    $Id$
  *
  *    Copyright (c) 2015-2015 by
  *    David W. Caress (caress@mbari.org)
@@ -29,8 +29,10 @@
 #include <string.h>
 
 /* mbio include files */
+#include <mb_status.h>
+#include <mb_define.h>
 
-static char svn_id[]="$Id: mb_platform_math.c 2253 2015-07-16 02:12:26Z gtroni $";
+static char svn_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 void
@@ -108,8 +110,9 @@ mb_platform_math_rot2rph (double* R, double* rph)
 #undef R
 }
 /*--------------------------------------------------------------------*/
-void
-mb_platform_math_attitude_offset (double  target_offset_roll,          
+int
+mb_platform_math_attitude_offset (int     verbose,
+								  double  target_offset_roll,          
 								  double  target_offset_pitch, 
 								  double  target_offset_heading,
 								  double  source_offset_roll,        
@@ -117,8 +120,11 @@ mb_platform_math_attitude_offset (double  target_offset_roll,
 								  double  source_offset_heading,
 								  double* target2source_offset_roll, 
 								  double* target2source_offset_pitch, 
-								  double* target2source_offset_heading)
+								  double* target2source_offset_heading,
+								  int*    error)
 {
+	char	*function_name = "mb_platform_math_attitude_offset";
+	int	status = MB_SUCCESS;
 	double rph_target_offset[3];
 	double rph_source_offset[3];
 	double rph_offset_target_to_source[3];
@@ -126,6 +132,21 @@ mb_platform_math_attitude_offset (double  target_offset_roll,
 	double R1[9];
 	double R1T[9];
 	double R2[9];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		fprintf(stderr,"dbg2       target_offset_roll:      %f\n", target_offset_roll);
+		fprintf(stderr,"dbg2       target_offset_pitch:     %f\n", target_offset_pitch);
+		fprintf(stderr,"dbg2       target_offset_heading:   %f\n", target_offset_heading);
+		fprintf(stderr,"dbg2       source_offset_roll:      %f\n", source_offset_roll);
+		fprintf(stderr,"dbg2       source_offset_pitch:     %f\n", source_offset_pitch);
+		fprintf(stderr,"dbg2       source_offset_heading:   %f\n", source_offset_heading);
+		}
 	double R1T2[9];
 
 	/* Check trivial case */
@@ -133,9 +154,9 @@ mb_platform_math_attitude_offset (double  target_offset_roll,
 		source_offset_pitch == 0.0 && 
 		source_offset_heading == 0.0 )
 	{
-		*target2source_offset_roll    = source_offset_roll;
-		*target2source_offset_pitch   = source_offset_pitch;
-		*target2source_offset_heading = source_offset_heading;
+		*target2source_offset_roll    = target_offset_roll;
+		*target2source_offset_pitch   = target_offset_pitch;
+		*target2source_offset_heading = target_offset_heading;
 	}
 	else
 	{
@@ -158,10 +179,28 @@ mb_platform_math_attitude_offset (double  target_offset_roll,
 		*target2source_offset_heading = rph_offset_target_to_source[2];
 	}
 
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       target2source_offset_roll:      %f\n", *target2source_offset_roll);
+		fprintf(stderr,"dbg2       target2source_offset_pitch:     %f\n", *target2source_offset_pitch);
+		fprintf(stderr,"dbg2       target2source_offset_heading:   %f\n", *target2source_offset_heading);
+		fprintf(stderr,"dbg2       error:			               %d\n", *error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:			               %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+
 }
 /*--------------------------------------------------------------------*/
-void
-mb_platform_math_attitude_platform (double  nav_attitude_roll,    
+int
+mb_platform_math_attitude_platform (int     verbose,
+								    double  nav_attitude_roll,    
 									double  nav_attitude_pitch, 
 									double  nav_attitude_heading,
 									double  attitude_offset_roll,          
@@ -169,8 +208,11 @@ mb_platform_math_attitude_platform (double  nav_attitude_roll,
 									double  attitude_offset_heading,
 									double* platform_roll, 
 									double* platform_pitch, 
-									double* platform_heading)
+									double* platform_heading,
+									int*    error)
 {
+	char	*function_name = "mb_platform_math_attitude_platform";
+	int	status = MB_SUCCESS;
 	double rph_nav_attitude[3];
 	double rph_attitude_offset[3];
 	double rph_platform_attitude[3];
@@ -179,6 +221,21 @@ mb_platform_math_attitude_platform (double  nav_attitude_roll,
 	double R2[9];
 	double R2T[9];
 	double R12T[9];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		fprintf(stderr,"dbg2       nav_attitude_roll:       %f\n", nav_attitude_roll);
+		fprintf(stderr,"dbg2       nav_attitude_pitch:      %f\n", nav_attitude_pitch);
+		fprintf(stderr,"dbg2       nav_attitude_heading:    %f\n", nav_attitude_heading);
+		fprintf(stderr,"dbg2       attitude_offset_roll:    %f\n", attitude_offset_roll);
+		fprintf(stderr,"dbg2       attitude_offset_pitch:   %f\n", attitude_offset_pitch);
+		fprintf(stderr,"dbg2       attitude_offset_heading: %f\n", attitude_offset_heading);
+		}
 
 	rph_nav_attitude[0]  = nav_attitude_roll;
 	rph_nav_attitude[1]  = nav_attitude_pitch;
@@ -198,10 +255,28 @@ mb_platform_math_attitude_platform (double  nav_attitude_roll,
 	*platform_pitch   = rph_platform_attitude[1];
 	*platform_heading = rph_platform_attitude[2];
 
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       platform_roll:      %f\n", *platform_roll);
+		fprintf(stderr,"dbg2       platform_pitch:     %f\n", *platform_pitch);
+		fprintf(stderr,"dbg2       platform_heading:   %f\n", *platform_heading);
+		fprintf(stderr,"dbg2       error:			   %d\n", *error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:			   %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+
 }
 /*--------------------------------------------------------------------*/
-void
-mb_platform_math_attitude_target   (double  source_attitude_roll,    
+int
+mb_platform_math_attitude_target   (int     verbose,
+									double  source_attitude_roll,    
 									double  source_attitude_pitch, 
 									double  source_attitude_heading,
 									double  target_offset_to_source_roll,          
@@ -209,8 +284,11 @@ mb_platform_math_attitude_target   (double  source_attitude_roll,
 									double  target_offset_to_source_heading,
 									double* target_roll, 
 									double* target_pitch, 
-									double* target_heading)
+									double* target_heading,
+									int*    error)
 {
+	char	*function_name = "mb_platform_math_attitude_target";
+	int	status = MB_SUCCESS;
 	double rph_source_attitude[3];
 	double rph_target_offset[3];
 	double rph_target_attitude[3];
@@ -218,6 +296,21 @@ mb_platform_math_attitude_target   (double  source_attitude_roll,
 	double R1[9];
 	double R2[9];
 	double R12[9];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                           %d\n", verbose);
+		fprintf(stderr,"dbg2       source_attitude_roll:              %f\n", source_attitude_roll);
+		fprintf(stderr,"dbg2       source_attitude_pitch:             %f\n", source_attitude_pitch);
+		fprintf(stderr,"dbg2       source_attitude_heading:           %f\n", source_attitude_heading);
+		fprintf(stderr,"dbg2       target_offset_to_source_roll:      %f\n", target_offset_to_source_roll);
+		fprintf(stderr,"dbg2       target_offset_to_source_pitch:     %f\n", target_offset_to_source_pitch);
+		fprintf(stderr,"dbg2       target_offset_to_source_heading:   %f\n", target_offset_to_source_heading);
+		}
 
 	rph_source_attitude[0]  = source_attitude_roll;
 	rph_source_attitude[1]  = source_attitude_pitch;
@@ -236,4 +329,22 @@ mb_platform_math_attitude_target   (double  source_attitude_roll,
 	*target_pitch   = rph_target_attitude[1];
 	*target_heading = rph_target_attitude[2];
 
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       target_roll:      %f\n", *target_roll);
+		fprintf(stderr,"dbg2       target_pitch:     %f\n", *target_pitch);
+		fprintf(stderr,"dbg2       target_heading:   %f\n", *target_heading);
+		fprintf(stderr,"dbg2       error:			 %d\n", *error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:			 %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+
 }
+/*--------------------------------------------------------------------*/

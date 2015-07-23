@@ -238,7 +238,6 @@ mbsegyinfo_LDADD = $(LDADD)
 am_mbsegylist_OBJECTS = mbsegylist.$(OBJEXT)
 mbsegylist_OBJECTS = $(am_mbsegylist_OBJECTS)
 mbsegylist_LDADD = $(LDADD)
-am__mbsegypsd_SOURCES_DIST = mbsegypsd.c
 @BUILD_FFTW_TRUE@am_mbsegypsd_OBJECTS = mbsegypsd.$(OBJEXT)
 mbsegypsd_OBJECTS = $(am_mbsegypsd_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -326,27 +325,6 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbsslayout_SOURCES) $(mbstripnan_SOURCES) \
 	$(mbsvplist_SOURCES) $(mbsvpselect_SOURCES) \
 	$(mbswplspreprocess_SOURCES) $(mbtime_SOURCES)
-DIST_SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
-	$(mb7kpreprocess_SOURCES) $(mbabsorption_SOURCES) \
-	$(mbareaclean_SOURCES) $(mbauvloglist_SOURCES) \
-	$(mbauvnavusbl_SOURCES) $(mbbackangle_SOURCES) \
-	$(mbclean_SOURCES) $(mbcopy_SOURCES) $(mbctdlist_SOURCES) \
-	$(mbdatalist_SOURCES) $(mbdefaults_SOURCES) \
-	$(mbdumpesf_SOURCES) $(mbextractsegy_SOURCES) \
-	$(mbfilter_SOURCES) $(mbformat_SOURCES) $(mbgetesf_SOURCES) \
-	$(mbgrid_SOURCES) $(mbhistogram_SOURCES) $(mbhsdump_SOURCES) \
-	$(mbhysweeppreprocess_SOURCES) $(mbinfo_SOURCES) \
-	$(mbinsreprocess_SOURCES) $(mbkongsbergpreprocess_SOURCES) \
-	$(mblevitus_SOURCES) $(mblist_SOURCES) $(mbmosaic_SOURCES) \
-	$(mbnavlist_SOURCES) $(mbneptune2esf_SOURCES) \
-	$(mbpreprocess_SOURCES) $(mbprocess_SOURCES) \
-	$(mbrollbias_SOURCES) $(mbrolltimelag_SOURCES) \
-	$(mbroutetime_SOURCES) $(mbrphsbias_SOURCES) \
-	$(mbsegygrid_SOURCES) $(mbsegyinfo_SOURCES) \
-	$(mbsegylist_SOURCES) $(am__mbsegypsd_SOURCES_DIST) \
-	$(mbset_SOURCES) $(mbsslayout_SOURCES) $(mbstripnan_SOURCES) \
-	$(mbsvplist_SOURCES) $(mbsvpselect_SOURCES) \
-	$(mbswplspreprocess_SOURCES) $(mbtime_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -399,7 +377,6 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -1064,37 +1041,6 @@ cscopelist-am: $(am__tagged_files)
 
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
-
-distdir: $(DISTFILES)
-	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
-	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
-	list='$(DISTFILES)'; \
-	  dist_files=`for file in $$list; do echo $$file; done | \
-	  sed -e "s|^$$srcdirstrip/||;t" \
-	      -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
-	case $$dist_files in \
-	  */*) $(MKDIR_P) `echo "$$dist_files" | \
-			   sed '/\//!d;s|^|$(distdir)/|;s,/[^/]*$$,,' | \
-			   sort -u` ;; \
-	esac; \
-	for file in $$dist_files; do \
-	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
-	  if test -d $$d/$$file; then \
-	    dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
-	    if test -d "$(distdir)/$$file"; then \
-	      find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
-	    fi; \
-	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
-	      cp -fpR $(srcdir)/$$file "$(distdir)$$dir" || exit 1; \
-	      find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
-	    fi; \
-	    cp -fpR $$d/$$file "$(distdir)$$dir" || exit 1; \
-	  else \
-	    test -f "$(distdir)/$$file" \
-	    || cp -p $$d/$$file "$(distdir)/$$file" \
-	    || exit 1; \
-	  fi; \
-	done
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
@@ -1212,10 +1158,10 @@ uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS
 .PHONY: CTAGS GTAGS TAGS all all-am check check-am clean \
 	clean-binPROGRAMS clean-generic clean-libtool cscopelist-am \
 	ctags ctags-am distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
+	distclean-libtool distclean-tags dvi dvi-am html html-am info \
+	info-am install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am \
 	install-includeHEADERS install-info install-info-am \
 	install-man install-pdf install-pdf-am install-ps \
 	install-ps-am install-strip installcheck installcheck-am \
