@@ -716,6 +716,8 @@ struct mb_process_struct
 	double	mbp_nav_offsetz;
 	double	mbp_nav_shiftlon;
 	double	mbp_nav_shiftlat;
+	double	mbp_nav_shiftx;
+	double	mbp_nav_shifty;
 
 	/* adjusted navigation merging */
 	int	mbp_navadj_mode;
@@ -988,6 +990,8 @@ int mb_pr_update_navshift(int verbose, char *file,
 			double	mbp_nav_offsetz,
 			double	mbp_nav_shiftlon,
 			double	mbp_nav_shiftlat,
+			double	mbp_nav_shiftx,
+			double	mbp_nav_shifty,
 			int *error);
 int mb_pr_update_heading(int verbose, char *file,
 			int	mbp_heading_mode,
@@ -1154,6 +1158,8 @@ int mb_pr_get_navshift(int verbose, char *file,
 			double	*mbp_nav_offsetz,
 			double	*mbp_nav_shiftlon,
 			double	*mbp_nav_shiftlat,
+			double	*mbp_nav_shiftx,
+			double	*mbp_nav_shifty,
 			int *error);
 int mb_pr_get_heading(int verbose, char *file,
 			int	*mbp_heading_mode,

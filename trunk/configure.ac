@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2253],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2254],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "16 July 2015", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "23 July 2015", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -118,7 +118,7 @@ AS_ECHO(["MB-System Version $PACKAGE_VERSION"])
 AS_ECHO(["HOST System Type: ${host}"])
 AS_ECHO([" "])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([no-dist])
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADERS([src/mbio/mb_config.h])
 

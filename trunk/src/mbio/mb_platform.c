@@ -1196,11 +1196,13 @@ int mb_platform_lever(int verbose, void **platform_ptr,
 		/* get platform attitude*/
 		if (sensor_attitude->offsets[0].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC)
 			{			
-			mb_platform_math_attitude_platform (roll, pitch, heading,
+			mb_platform_math_attitude_platform (verbose,
+												roll, pitch, heading,
 				                            	sensor_attitude->offsets[0].attitude_offset_roll,
 				                            	sensor_attitude->offsets[0].attitude_offset_pitch,
 				                            	sensor_attitude->offsets[0].attitude_offset_azimuth,
-				                            	&proll, &ppitch, &pheading);
+				                            	&proll, &ppitch, &pheading,
+												error);
 			}
 		else
 			{
@@ -1238,10 +1240,6 @@ int mb_platform_lever(int verbose, void **platform_ptr,
 		*lever_z = cpitch * sroll * xx
 				 - spitch         * yy
 				 + cpitch * croll * zz;
-
-		*lever_z = sin(DTR * croll) * xx
-				- sin(DTR * cpitch) * yy
-				+ cos(DTR * cpitch) * zz;
 				
 		/* apply change in x and y due to offset between the position sensor and the target sensor
 		using roll, pitch and heading corrected for the attitude sensor offset and the target sensor */
@@ -1509,7 +1507,8 @@ int mb_platform_orientation_offset (int verbose, void **platform_ptr,
 		*target_hdg_offset = 0.0;
 		
 		/* calculate attitude offset for target sensor */
-		mb_platform_math_attitude_offset (sensor_target->offsets[targetsensoroffset].attitude_offset_roll,          
+		mb_platform_math_attitude_offset (verbose,
+										  sensor_target->offsets[targetsensoroffset].attitude_offset_roll,          
 										  sensor_target->offsets[targetsensoroffset].attitude_offset_pitch, 
 										  sensor_target->offsets[targetsensoroffset].attitude_offset_azimuth,
 										  sensor_attitude->offsets[0].attitude_offset_roll,
@@ -1517,7 +1516,8 @@ int mb_platform_orientation_offset (int verbose, void **platform_ptr,
 										  sensor_attitude->offsets[0].attitude_offset_azimuth,
 										  target_roll_offset, 
 										  target_pitch_offset, 
-										  target_hdg_offset);
+										  target_hdg_offset,
+										  error);
 
 		}	
 

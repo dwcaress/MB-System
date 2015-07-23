@@ -2973,7 +2973,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 					{
 					nget = sscanf(buffer,"%lf %lf",
 						&n_time_d[nrecord],&n_soundspeed[nrecord]);
-					if (nget == 4)
+					if (nget == 2)
 						soundspeed_ok = MB_YES;
 					}
 		
@@ -2988,7 +2988,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 					time_i[6] = 1000000*(sec - time_i[5]);
 					mb_get_time(verbose,time_i,&time_d);
 					n_time_d[nrecord] = time_d;
-					if (nget == 9)
+					if (nget == 7)
 						soundspeed_ok = MB_YES;
 					}
 		
@@ -3005,7 +3005,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 					mb_get_itime(verbose,time_j,time_i);
 					mb_get_time(verbose,time_i,&time_d);
 					n_time_d[nrecord] = time_d;
-					if (nget == 8)
+					if (nget == 6)
 						soundspeed_ok = MB_YES;
 					}
 		
@@ -3020,7 +3020,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 					mb_get_itime(verbose,time_j,time_i);
 					mb_get_time(verbose,time_i,&time_d);
 					n_time_d[nrecord] = time_d;
-					if (nget == 7)
+					if (nget == 5)
 						soundspeed_ok = MB_YES;
 					}
 		

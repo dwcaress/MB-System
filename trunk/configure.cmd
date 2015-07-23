@@ -259,10 +259,10 @@ CFLAGS="-g -Wall -Wmissing-prototypes -I/opt/X11/include " LDFLAGS="-L/opt/X11/l
     --prefix=/Users/caress/sandbox/mbsystem \
     --disable-static \
     --enable-shared \
-    --with-netcdf-include=/sw/include \
-    --with-netcdf-lib=/sw/lib \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
+    --with-netcdf-include=/sw/include \
+    --with-netcdf-lib=/sw/lib \
     --with-gmt-include=/sw/include/gmt \
     --with-gmt-lib=/sw/lib \
     --with-fftw-include=/sw/include \
@@ -270,7 +270,7 @@ CFLAGS="-g -Wall -Wmissing-prototypes -I/opt/X11/include " LDFLAGS="-L/opt/X11/l
     --with-motif-include=/sw/include \
     --with-motif-lib=/sw/lib \
     --with-otps-dir=/usr/local/OTPS2
-
+    
 make -j
 
 make -j install

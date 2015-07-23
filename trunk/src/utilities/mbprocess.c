@@ -5050,12 +5050,14 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 					    * process.mbp_nav_offsetx
 			    	    + headingx * mtodeglon
 					    * process.mbp_nav_offsety
-				    - process.mbp_nav_shiftlon);
+						- mtodeglon * process.mbp_nav_shiftx
+						- process.mbp_nav_shiftlon);
 			navlat -= (-headingx * mtodeglat
 					    * process.mbp_nav_offsetx
 			    	    + headingy * mtodeglat
 					    * process.mbp_nav_offsety
-				    - process.mbp_nav_shiftlat);
+			    	    - mtodeglat * process.mbp_nav_shifty
+						- process.mbp_nav_shiftlat);
 			}
 
 	/*--------------------------------------------

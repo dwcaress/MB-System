@@ -495,6 +495,16 @@ the manual pages for mbprocess and mbset. \n\n";
 		    sscanf(pargv[i], "NAVSHIFTLAT:%lf", &process.mbp_nav_shiftlat);
 		    process.mbp_nav_shift = MBP_NAV_ON;
 		    }
+		else if (strncmp(pargv[i], "NAVSHIFTX", 9) == 0)
+		    {
+		    sscanf(pargv[i], "NAVSHIFTX:%lf", &process.mbp_nav_shiftx);
+		    process.mbp_nav_shift = MBP_NAV_ON;
+		    }
+		else if (strncmp(pargv[i], "NAVSHIFTY", 9) == 0)
+		    {
+		    sscanf(pargv[i], "NAVSHIFTY:%lf", &process.mbp_nav_shifty);
+		    process.mbp_nav_shift = MBP_NAV_ON;
+		    }
 		else if (strncmp(pargv[i], "NAVSHIFT", 8) == 0)
 		    {
 		    sscanf(pargv[i], "NAVSHIFT:%d", &process.mbp_nav_shift);
@@ -1334,11 +1344,13 @@ the manual pages for mbprocess and mbset. \n\n";
 	    if (process.mbp_nav_shift == MBP_NAV_ON)
 		    {
 		    fprintf(stderr,"  Navigation positions shifted.\n");
-		    fprintf(stderr,"  Navigation offset x:       %f\n", process.mbp_nav_offsetx);
-		    fprintf(stderr,"  Navigation offset y:       %f\n", process.mbp_nav_offsety);
-		    fprintf(stderr,"  Navigation offset z:       %f\n", process.mbp_nav_offsetz);
-		    fprintf(stderr,"  Navigation longitude shift:%f\n", process.mbp_nav_shiftlon);
-		    fprintf(stderr,"  Navigation latitude shift: %f\n", process.mbp_nav_shiftlat);
+		    fprintf(stderr,"  Navigation offset x:                  %f\n", process.mbp_nav_offsetx);
+		    fprintf(stderr,"  Navigation offset y:                  %f\n", process.mbp_nav_offsety);
+		    fprintf(stderr,"  Navigation offset z:                  %f\n", process.mbp_nav_offsetz);
+		    fprintf(stderr,"  Navigation longitude shift (degrees): %f\n", process.mbp_nav_shiftlon);
+		    fprintf(stderr,"  Navigation latitude shift (degrees):  %f\n", process.mbp_nav_shiftlat);
+		    fprintf(stderr,"  Navigation longitude shift (meters):  %f\n", process.mbp_nav_shiftx);
+		    fprintf(stderr,"  Navigation latitude shift (meters):   %f\n", process.mbp_nav_shifty);
 		    }
 	    else
 		    fprintf(stderr,"  Navigation positions not shifted.\n");
