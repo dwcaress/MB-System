@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2255       August 11, 2015
   Version 5.5.2254       July 23, 2015
 * Version 5.5.2252       July 1, 2015
 * Version 5.5.2251       June 30, 2015
@@ -217,6 +218,17 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2255 (August 11, 2015)
+
+Mbnavadjust: Set limits on application of smoothing via penalizing the first
+and second derivatives of the navigation pertuturbation (particularly the
+second derivative) in the inversion algorithm. This change has been implemented
+to prevent the inversion from becoming unstable as the smoothing parameter is
+made larger.
+
+Mbprocess: Fixed problem with handling of sensor depth changes due to tide
+correction or lever arm correction.
 
 -----> 5.5.2254 (July 23, 2015)
 
