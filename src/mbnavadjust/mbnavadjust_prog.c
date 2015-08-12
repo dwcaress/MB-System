@@ -12784,7 +12784,6 @@ fprintf(stderr,"\n");*/
 			    }
 			}
 
-
 		    /* now loop over all points applying smoothing to the xx[] vector */
 		    nseq = 0;
 		    ndx = 0;
@@ -12807,78 +12806,78 @@ fprintf(stderr,"\n");*/
 				    /* get ids for tied nav points */
 				    if (nseq > 1)
 				    	{
-					nc1 = nc2;
-					time_d1 = time_d2;
-					}
+						nc1 = nc2;
+						time_d1 = time_d2;
+						}
 				    if (nseq > 0)
 				    	{
-					nc2 = nc3;
-					time_d2 = time_d3;
-					}
+						nc2 = nc3;
+						time_d2 = time_d3;
+						}
 				    nc3 = section->snav_invert_id[isnav];
 				    time_d3 = section->snav_time_d[isnav];
 
 				    /* add first derivative constraint if nseq > 1 AND dtime_d > 0.0 */
 				    dtime_d = time_d3 - time_d2;
 				    if (nseq > 0 && dtime_d > 0.0)
-					{
+						{
 			    		/* get current offset vector */
-					offsetx = (x[3*nc3]   - x[3*nc2]);
-					offsety = (x[3*nc3+1] - x[3*nc2+1]);
-					offsetz = (x[3*nc3+2] - x[3*nc2+2]);
+						offsetx = (x[3*nc3]   - x[3*nc2]);
+						offsety = (x[3*nc3+1] - x[3*nc2+1]);
+						offsetz = (x[3*nc3+2] - x[3*nc2+2]);
 
-					/* add remaining offsets to both points */
-					xyweight = mbna_smoothweight / dtime_d;
-					zweight = mbna_smoothweight / dtime_d;
-					xs[3*nc2]   +=  0.5 * xyweight * offsetx;
-					xs[3*nc2+1] +=  0.5 * xyweight * offsety;
-					xs[3*nc2+2] +=  0.5 * zweight * offsetz;
-					xs[3*nc3]   += -0.5 * xyweight * offsetx;
-					xs[3*nc3+1] += -0.5 * xyweight * offsety;
-					xs[3*nc3+2] += -0.5 * zweight * offsetz;
-					xw[3*nc2]   += xyweight;
-					xw[3*nc2+1] += xyweight;
-					xw[3*nc2+2] += zweight;
-					xw[3*nc3]   += xyweight;
-					xw[3*nc3+1] += xyweight;
-					xw[3*nc3+2] += zweight;
-
-					ndx++;
-					}
+						/* add remaining offsets to both points */
+						xyweight = MIN(mbna_smoothweight / dtime_d, 0.5);
+						zweight = MIN(mbna_smoothweight / dtime_d, 0.5);
+						xs[3*nc2]   +=  0.5 * xyweight * offsetx;
+						xs[3*nc2+1] +=  0.5 * xyweight * offsety;
+						xs[3*nc2+2] +=  0.5 * zweight * offsetz;
+						xs[3*nc3]   += -0.5 * xyweight * offsetx;
+						xs[3*nc3+1] += -0.5 * xyweight * offsety;
+						xs[3*nc3+2] += -0.5 * zweight * offsetz;
+						xw[3*nc2]   += xyweight;
+						xw[3*nc2+1] += xyweight;
+						xw[3*nc2+2] += zweight;
+						xw[3*nc3]   += xyweight;
+						xw[3*nc3+1] += xyweight;
+						xw[3*nc3+2] += zweight;
+	
+						ndx++;
+						}
 
 				    /* add second derivative constraint if nseq > 2  AND dtime_d > 0.0 */
 				    dtime_d = time_d3 - time_d1;
 				    if (nseq > 1 && dtime_d > 0.0)
-					{
-			    		/* get current offset vector */
-					offsetx = x[3*nc1]   - 2.0 * x[3*nc2]   + x[3*nc3];
-					offsety = x[3*nc1+1] - 2.0 * x[3*nc2+1] + x[3*nc3+1];
-					offsetz = x[3*nc1+2] - 2.0 * x[3*nc2+2] + x[3*nc3+2];
-
-					/* add remaining offsets to both points, or just one if one is fixed (weight 2nd derivative 1/4th of first derivative)*/
-					xyweight = mbna_smoothweight / dtime_d / dtime_d;
-					zweight = mbna_smoothweight / dtime_d / dtime_d;
-					xs[3*nc1]   += -xyweight * offsetx;
-					xs[3*nc1+1] += -xyweight * offsety;
-					xs[3*nc1+2] += -zweight * offsetz;
-					xs[3*nc2]   +=  2.0 * xyweight * offsetx;
-					xs[3*nc2+1] +=  2.0 * xyweight * offsety;
-					xs[3*nc2+2] +=  2.0 * zweight * offsetz;
-					xs[3*nc3]   += -xyweight * offsetx;
-					xs[3*nc3+1] += -xyweight * offsety;
-					xs[3*nc3+2] += -zweight * offsetz;
-					xw[3*nc1]   += xyweight;
-					xw[3*nc1+1] += xyweight;
-					xw[3*nc1+2] += zweight;
-					xw[3*nc2]   += xyweight;
-					xw[3*nc2+1] += xyweight;
-					xw[3*nc2+2] += zweight;
-					xw[3*nc3]   += xyweight;
-					xw[3*nc3+1] += xyweight;
-					xw[3*nc3+2] += zweight;
-
-					ndx2++;
-					}
+						{
+							/* get current offset vector */
+						offsetx = x[3*nc1]   - 2.0 * x[3*nc2]   + x[3*nc3];
+						offsety = x[3*nc1+1] - 2.0 * x[3*nc2+1] + x[3*nc3+1];
+						offsetz = x[3*nc1+2] - 2.0 * x[3*nc2+2] + x[3*nc3+2];
+	
+						/* add remaining offsets to both points, or just one if one is fixed (weight 2nd derivative 1/4th of first derivative)*/
+						xyweight = MIN(mbna_smoothweight / dtime_d / dtime_d, 0.05);
+						zweight = MIN(mbna_smoothweight / dtime_d / dtime_d, 0.05);
+						xs[3*nc1]   += -xyweight * offsetx;
+						xs[3*nc1+1] += -xyweight * offsety;
+						xs[3*nc1+2] += -zweight * offsetz;
+						xs[3*nc2]   +=  2.0 * xyweight * offsetx;
+						xs[3*nc2+1] +=  2.0 * xyweight * offsety;
+						xs[3*nc2+2] +=  2.0 * zweight * offsetz;
+						xs[3*nc3]   += -xyweight * offsetx;
+						xs[3*nc3+1] += -xyweight * offsety;
+						xs[3*nc3+2] += -zweight * offsetz;
+						xw[3*nc1]   += xyweight;
+						xw[3*nc1+1] += xyweight;
+						xw[3*nc1+2] += zweight;
+						xw[3*nc2]   += xyweight;
+						xw[3*nc2+1] += xyweight;
+						xw[3*nc2+2] += zweight;
+						xw[3*nc3]   += xyweight;
+						xw[3*nc3+1] += xyweight;
+						xw[3*nc3+2] += zweight;
+	
+						ndx2++;
+						}
 
 				    /* increment sequence counter */
 				    nseq++;

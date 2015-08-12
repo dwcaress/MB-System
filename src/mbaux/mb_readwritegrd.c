@@ -367,7 +367,7 @@ int mb_write_gmt_grd(int verbose,
 			char **argv,
 			int *error)
 {
-	char	*function_name = "write_cdfgrd";
+	char	*function_name = "mb_write_gmt_grd";
 	int	status = MB_SUCCESS;
 	
 	double	wesn[4];

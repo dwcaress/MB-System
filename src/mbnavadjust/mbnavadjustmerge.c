@@ -74,6 +74,8 @@ static char version_id[] = "$Id$";
 #define MOD_MODE_SET_TIES_ZOFFSET_BLOCK	21
 #define MOD_MODE_SKIP_UNSET_CROSSINGS	22
 #define MOD_MODE_INSERT_DISCONTINUITY   23
+#define MOD_MODE_REIMPORT_FILE   24
+#define MOD_MODE_REIMPORT_ALL_FILES   25
 
 struct mbnavadjust_mod
 	{
@@ -127,6 +129,8 @@ int main (int argc, char **argv)
 				"\t--set-ties-zoffset-by-block=survey1/survey2/zoffset\n"
 				"\t--skip-unset-crossings\n"
 				"\t--insert-discontinuity=file:section\n"
+				"\t--reimport-file=file\n"
+				"\t--reimport-all-files\n"
 				"\t--verbose --help]\n";
 	extern char *optarg;
 	int	option_index;
@@ -174,6 +178,8 @@ int main (int argc, char **argv)
 		{"set-ties-zoffset-by-block",	required_argument, 	NULL, 		0},
 		{"skip-unset-crossings",	no_argument, 		NULL, 		0},
 		{"insert-discontinuity",	required_argument, 	NULL, 		0},
+		{"reimport-file",	required_argument, 	NULL, 		0},
+		{"reimport-all-files",	no_argument, 	NULL, 		0},
 		{NULL,				0, 			NULL, 		0}
 		};
 		
@@ -205,7 +211,7 @@ int main (int argc, char **argv)
 	mb_path	command;
 	double	mtodeglon, mtodeglat;
 	int	found, current_crossing;
-	int	imod, icrossing, itie;
+	int	imod, ifile, icrossing, itie;
 	int	i, j, k;
 	
 	memset(project_inputbase_path, 0, sizeof(mb_path));
@@ -981,6 +987,39 @@ int main (int argc, char **argv)
 						mods[num_mods].mode = MOD_MODE_INSERT_DISCONTINUITY;
 						num_mods++;
 						}
+					}
+				else
+					{
+					fprintf(stderr,"Maximum number of mod commands reached:\n\tskip-unset-crossings command ignored\n\n");	
+					}
+				}
+				
+			/*-------------------------------------------------------
+			 * Reimport file (or files)
+				--reimport-file 
+				--reimport-all-files */
+			else if (strcmp("reimport-file", options[option_index].name) == 0)
+				{
+				if (num_mods < NUMBER_MODS_MAX)
+					{
+					if ((nscan = sscanf(optarg, "%d",
+						       &mods[num_mods].file1)) == 2)
+						{
+						mods[num_mods].mode = MOD_MODE_REIMPORT_FILE;
+						num_mods++;
+						}
+					}
+				else
+					{
+					fprintf(stderr,"Maximum number of mod commands reached:\n\tskip-unset-crossings command ignored\n\n");	
+					}
+				}
+			else if (strcmp("reimport-all-files", options[option_index].name) == 0)
+				{
+				if (num_mods < NUMBER_MODS_MAX)
+					{
+				    mods[num_mods].mode = MOD_MODE_REIMPORT_ALL_FILES;
+				    num_mods++;
 					}
 				else
 					{
@@ -2302,6 +2341,31 @@ fprintf(stderr,"\nCommand insert-discontinuity=%2.2d:%2.2d\n", mods[imod].file1,
 						section1->continuity = MB_NO;
 fprintf(stderr,"Set discontinuity before survey:file:section :   %2.2d:%4.4d:%4.4d\n",
 file1->block, mods[imod].file1, mods[imod].section1);
+						}
+					}
+				break;
+
+			case MOD_MODE_REIMPORT_FILE:
+			case MOD_MODE_REIMPORT_ALL_FILES:
+if (mods[imod].mode == MOD_MODE_REIMPORT_FILE)
+fprintf(stderr,"\nCommand reimport-file=%2.2d\n", mods[imod].file1);
+else
+fprintf(stderr,"\nCommand reimport-all-files\n");
+				
+				/* identify the file or files to be reimported */
+				for (ifile=0;ifile<project_output.num_files;ifile++)
+				    {
+				    /* either reimport a specific file or all the files */
+				    if (mods[imod].mode == MOD_MODE_REIMPORT_ALL_FILES
+						|| ifile == mods[imod].file1)
+						{
+						file1 = &(project_output.files[ifile]);
+						
+						/* load and copy the pre-adjusted navigation */
+						
+						/* open the processed data and read to the end
+						 * using existing section breaks unless and until the
+						 * input data extends later in time */
 						}
 					}
 				break;

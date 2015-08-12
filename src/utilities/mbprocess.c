@@ -429,7 +429,7 @@ and mbedit edit save files.\n";
 
 	/* reset all defaults */
 	pings = 1;
-	lonflip = 0;
+	//lonflip = 0;
 	bounds[0] = -360.;
 	bounds[1] = 360.;
 	bounds[2] = -90.;
@@ -1412,6 +1412,49 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"  Kluge009:                      %d\n",process.mbp_kluge009);
 	    fprintf(stderr,"  Kluge010:                      %d\n",process.mbp_kluge010);
 	    }
+
+	/*--------------------------------------------
+	  get topography grid
+	  - do this first if needed in case it forces
+	    a reset of the lonflip
+	  --------------------------------------------*/
+	if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+			&& (process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPO
+				|| process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPOSLOPE))
+		|| (process.mbp_sscorr_mode == MBP_SSCORR_ON
+			&& (process.mbp_sscorr_slope == MBP_SSCORR_USETOPO
+				|| process.mbp_sscorr_slope == MBP_SSCORR_USETOPOSLOPE)))
+		{
+		grid.data = NULL;
+		strcpy(grid.file, process.mbp_ampsscorr_topofile);
+		status = mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue,
+					&grid.nxy, &grid.nx, &grid.ny, &grid.min, &grid.max,
+					&grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
+					&grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
+		if (status == MB_FAILURE)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to read topography grid file: %s\n",
+			    grid.file);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+			exit(error);
+			}
+
+		/* rationalize grid bounds and lonflip */
+		if (grid.xmax > 180.0)
+			{
+			lonflip = 1;
+			}
+		else if (grid.xmin < -180.0)
+			{
+			lonflip = -1;
+			}
+		else
+			{
+			lonflip = 0;
+			}
+		}
 
 	/*--------------------------------------------
 	  get svp
@@ -3363,77 +3406,6 @@ and mbedit edit save files.\n";
 		    		nsscorrtable, nsscorrangle);
 		    }
 	    }
-
-	/*--------------------------------------------
-	  get topography grid
-	  --------------------------------------------*/
-	if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
-			&& (process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPO
-				|| process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPOSLOPE))
-		|| (process.mbp_sscorr_mode == MBP_SSCORR_ON
-			&& (process.mbp_sscorr_slope == MBP_SSCORR_USETOPO
-				|| process.mbp_sscorr_slope == MBP_SSCORR_USETOPOSLOPE)))
-		{
-		grid.data = NULL;
-		strcpy(grid.file, process.mbp_ampsscorr_topofile);
-		status = mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue,
-					&grid.nxy, &grid.nx, &grid.ny, &grid.min, &grid.max,
-					&grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
-					&grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
-		if (status == MB_FAILURE)
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr,"\nUnable to read topography grid file: %s\n",
-			    grid.file);
-			fprintf(stderr,"\nProgram <%s> Terminated\n",
-			    program_name);
-			exit(error);
-			}
-
-		/* rationalize grid bounds and lonflip */
-		if (lonflip == -1)
-			{
-			if (grid.xmax > 180.0)
-				{
-				grid.xmin -= 360.0;
-				grid.xmax -= 360.0;
-				}
-			}
-		else if (lonflip == 0)
-			{
-			if (grid.xmin > 180.0)
-				{
-				grid.xmin -= 360.0;
-				grid.xmax -= 360.0;
-				}
-			else if (grid.xmax < -180.0)
-				{
-				grid.xmin += 360.0;
-				grid.xmax += 360.0;
-				}
-			}
-		else if (lonflip == 1)
-			{
-			if (grid.xmin < -180.0)
-				{
-				grid.xmin += 360.0;
-				grid.xmax += 360.0;
-				}
-			}
-		if (grid.xmax > 180.0)
-			{
-			lonflip = 1;
-			}
-		else if (grid.xmin < -180.0)
-			{
-			lonflip = -1;
-			}
-		else
-			{
-			lonflip = 0;
-			}
-		}
-
 
 	/*--------------------------------------------
 	  now open the swath files
@@ -5669,6 +5641,8 @@ bath[i]-zz); */
 
 			/* recalculate bathymetry by changes to transducer depth  */
 			else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET
+				|| process.mbp_tide_mode == MBP_TIDE_ON
+				|| process.mbp_lever_mode == MBP_LEVER_ON
 				|| process.mbp_navadj_mode == MBP_NAVADJ_LLZ)
 			    {
 			    /* get draft change */
