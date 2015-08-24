@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2256       August 24, 2015
   Version 5.5.2255       August 11, 2015
   Version 5.5.2254       July 23, 2015
 * Version 5.5.2252       July 1, 2015
@@ -218,6 +219,16 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2256 (August 24, 2015)
+
+Mbeditviz: Improved the way to handle sensor offsets. Improved
+mbeditviz_apply_timelag the way to handle angles corrections. Cleaned
+mbeditviz_beam_position to make it more clear. 
+
+mbio/mb_platform_math.c: Added new math functions
+mb_platform_math_attitude_offset_corrected_by_nav and
+mb_platform_math_attitude_rotate_beam to handle sensor offset corrections.
 
 -----> 5.5.2255 (August 11, 2015)
 

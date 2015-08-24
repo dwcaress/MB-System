@@ -543,6 +543,7 @@ int mb_platform_orientation_offset (int verbose, void **platform_ptr,
 							double *target_pitch_offset,
 							int *error);
 
+void mb_platform_math_matrix_times_vector_3x1 (double* A, double* b, double* Ab);
 void mb_platform_math_matrix_times_matrix_3x3 (double* A, double* B, double* AB);
 void mb_platform_math_matrix_transpose_3x3 (double* R, double* R_T);
 void mb_platform_math_rph2rot (double* rph, double* R);
@@ -580,6 +581,31 @@ int mb_platform_math_attitude_target(int verbose,
 							double* target_pitch, 
 							double* target_heading,
 							int*    error);
+int mb_platform_math_attitude_offset_corrected_by_nav (int verbose,
+							double  prev_attitude_roll,
+							double  prev_attitude_pitch,
+							double  prev_attitude_heading,
+							double  target_offset_to_source_roll,
+							double  target_offset_to_source_pitch,
+							double  target_offset_to_source_heading,
+							double  new_attitude_roll,
+							double  new_attitude_pitch,
+							double  new_attitude_heading,
+							double* corrected_offset_roll,
+							double* corrected_offset_pitch,
+							double* corrected_offset_heading,
+							int*    error);
+int mb_platform_math_attitude_rotate_beam ( int verbose,
+											double  beam_acrosstrack, 
+											double  beam_alongtrack, 
+											double  beam_bath,
+											double  attitude_roll, 
+											double  attitude_pitch, 
+											double  attitude_heading,
+											double* newbeam_easting, 
+											double* newbeam_northing, 
+											double* newbeam_bath,
+											int*    error);
 
 int mb_buffer_init(int verbose, void **buff_ptr, int *error);
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr,
