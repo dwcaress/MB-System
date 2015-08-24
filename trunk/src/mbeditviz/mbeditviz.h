@@ -286,14 +286,14 @@ int mbeditviz_import_file(char *path, int format);
 int mbeditviz_load_file(int ifile);
 int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping,
 				double rollbias, double pitchbias, double headingbias, double timelag,
-				double *heading, double *sonardepth,
+				double *headingdelta, double *sonardepth,
 				double *rolldelta, double *pitchdelta);
-int mbeditviz_beam_position(double navlon, double navlat, double headingx, double headingy,
-				double mtodeglon, double mtodeglat,
-				double bath, double acrosstrack, double alongtrack,
-				double sonardepth,
-				double rollbias, double pitchbias,
-				double *bathcorr, double *lon, double *lat);
+int mbeditviz_beam_position (double navlon, double navlat,
+							double mtodeglon, double mtodeglat,
+							double bath, double acrosstrack, double alongtrack,
+							double sonardepth,
+							double rolldelta, double pitchdelta, double heading,
+							double *bathcorr, double *lon, double *lat);
 int mbeditviz_unload_file(int ifile);
 int mbeditviz_delete_file(int ifile);
 double mbeditviz_erf(double x);

@@ -579,7 +579,6 @@ int mbeditviz_load_file(int ifile)
 
 	double	mtodeglon, mtodeglat;
 	double	heading, sonardepth;
-	double	headingx, headingy;
 	double	rolldelta, pitchdelta;
 	int	swathbounds;
 	int	icenter, iport, istbd;
@@ -958,8 +957,6 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 								&heading, &sonardepth,
 								&rolldelta, &pitchdelta);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-					headingx = sin(heading * DTR);
-					headingy = cos(heading * DTR);
 
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
@@ -968,8 +965,8 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 						ping->beamcolor[ibeam] = MBV_COLOR_BLACK;
 						if (!mb_beam_check_flag_null(ping->beamflag[ibeam])
 							&& (isnan(bath[ibeam] || isnan(bathacrosstrack[ibeam] || isnan(bathalongtrack[ibeam])))))
-							{
-							ping->beamflag[ibeam] = MB_FLAG_NULL;
+							
+{							ping->beamflag[ibeam] = MB_FLAG_NULL;
 fprintf(stderr,"\nEncountered NaN value in swath data from file: %s\n",swathfile);
 fprintf(stderr,"     Ping time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
 	ping->time_i[0],ping->time_i[1],ping->time_i[2],ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6]);
@@ -983,11 +980,11 @@ fprintf(stderr,"     Beam bathymetry: %d %f %f %f\n",ibeam,ping->bath[ibeam],pin
 							ping->bathalongtrack[ibeam] = bathalongtrack[ibeam];
 
 							/* apply rotations and calculate position */
-							mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
+							mbeditviz_beam_position (ping->navlon, ping->navlat,
 										mtodeglon, mtodeglat,
 										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 										sonardepth,
-										rolldelta, pitchdelta,
+										rolldelta, pitchdelta, heading,
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 							}
 						}
@@ -1067,8 +1064,6 @@ fprintf(stderr,"     Beam bathymetry: %d %f %f %f\n",ibeam,ping->bath[ibeam],pin
 							}
 
 						mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-						headingx = sin(ping->heading * DTR);
-						headingy = cos(ping->heading * DTR);
 						if (icenter >= 0)
 							{
 							ping->portlon = ping->bathlon[iport];
@@ -1674,8 +1669,7 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 	int	iheading = 0;
 	int	isonardepth = 0;
 	int	iattitude = 0;
-	double	rollsync, pitchsync;
-	double	rollasync, pitchasync;
+	double	rollasync, pitchasync, headingasync;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -1697,24 +1691,6 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 		/* get adjusted time for interpolation in asyncronous time series */
 		time_d = ping->time_d + timelag;
 
-		/* if asyncronous heading available, interpolate new value */
-		if (file->n_async_heading > 0)
-			{
-			intstat = mb_linear_interp_heading(mbev_verbose,
-					file->async_heading_time_d-1, file->async_heading_heading-1,
-					file->n_async_heading, time_d, heading, &iheading,
-					&mbev_error);
-			*heading += headingbias;
-			if (*heading >= 360.0)
-				*heading -= 360.0;
-			else if (*heading < 0.0)
-				*heading += 360.0;
-			}
-		else
-			{
-			*heading = ping->heading + headingbias;
-			}
-
 		/* if asyncronous sonardepth available, interpolate new value */
 		if (file->n_async_sonardepth > 0)
 			{
@@ -1728,17 +1704,23 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 			*sonardepth = ping->sonardepth;
 			}
 
-		/* if both synchronous and asyncronous attitude available, interpolate new values */
-		if (file->n_sync_attitude > 0 && file->n_async_attitude > 0)
+		/* if asyncronous heading available, interpolate new value */
+		if (file->n_async_heading > 0)
 			{
-			intstat = mb_linear_interp(mbev_verbose,
-					file->sync_attitude_time_d-1, file->sync_attitude_roll-1,
-					file->n_sync_attitude, ping->time_d, &rollsync, &iattitude,
+			intstat = mb_linear_interp_heading(mbev_verbose,
+					file->async_heading_time_d-1, file->async_heading_heading-1,
+					file->n_async_heading, time_d, &headingasync, &iheading,
 					&mbev_error);
-			intstat = mb_linear_interp(mbev_verbose,
-					file->sync_attitude_time_d-1, file->sync_attitude_pitch-1,
-					file->n_sync_attitude, ping->time_d, &pitchsync, &iattitude,
-					&mbev_error);
+			}
+		else
+			{
+			headingasync = ping->heading;
+			}
+
+
+		/* if asynchronous roll and pitch available, interpolate new values */
+		if (file->n_async_attitude > 0)
+			{
 			intstat = mb_linear_interp(mbev_verbose,
 					file->async_attitude_time_d-1, file->async_attitude_roll-1,
 					file->n_async_attitude, time_d, &rollasync, &iattitude,
@@ -1747,18 +1729,38 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 					file->async_attitude_time_d-1, file->async_attitude_pitch-1,
 					file->n_async_attitude, time_d, &pitchasync, &iattitude,
 					&mbev_error);
-			*rolldelta = rollasync - rollsync + rollbias;
-			*pitchdelta = pitchasync - pitchsync + pitchbias;
 			}
 		else
 			{
-			*rolldelta = rollbias;
-			*pitchdelta = pitchbias;
+			rollasync  = ping->roll;
+			pitchasync = ping->pitch;
 			}
-/*fprintf(stderr,"heading: %f %f   %f %d\n", *heading, ping->heading, *heading-ping->heading, iheading);
+
+		/* Calculate attitude delta altogether */
+		mb_platform_math_attitude_offset_corrected_by_nav(
+			mbev_verbose,
+			DTR * ping->roll, DTR * ping->pitch, 0.0,                // In: Old Pitch and Roll applied
+			DTR * rollbias,   DTR * pitchbias,   DTR * headingbias,  // In: New Bias to apply
+			DTR * rollasync,  DTR * pitchasync,  DTR * headingasync, // In: New nav attitude to apply
+			rolldelta, pitchdelta, heading,                          // Out: Calculated rolldelta, pitchdelta and heading
+			&mbev_error);
+
+		*rolldelta  = RTD * *rolldelta;
+		*pitchdelta = RTD * *pitchdelta;
+		*heading    = RTD * *heading;
+
+		if (*heading >= 360.0)
+			*heading -= 360.0;
+		else if (*heading < 0.0)
+			*heading += 360.0;
+
+
+/*
 fprintf(stderr,"sonardepth: %f %f   %f %d\n", *sonardepth, ping->sonardepth,*sonardepth-ping->sonardepth, isonardepth);
-fprintf(stderr,"rolldelta:  %f %f    roll:%f %f   %d\n", *rolldelta, rollbias, rollasync, rollsync, iattitude);
-fprintf(stderr,"pitchdelta: %f %f    pitch:%f %f   %d\n", *pitchdelta, pitchbias, pitchasync, pitchsync, iattitude);*/
+fprintf(stderr,"heading:    %f %f   %f  %f %d\n", *heading, headingasync, ping->heading, *heading-ping->heading, iheading);
+fprintf(stderr,"rolldelta:  %f %f   roll:%f %f   %d\n", *rolldelta, rollbias, rollasync, ping->roll, iattitude);
+fprintf(stderr,"pitchdelta: %f %f   pitch:%f %f   %d\n", *pitchdelta, pitchbias, pitchasync, ping->pitch, iattitude);*/
+
 		}
 
 	/* print output debug statements */
@@ -1780,19 +1782,19 @@ fprintf(stderr,"pitchdelta: %f %f    pitch:%f %f   %d\n", *pitchdelta, pitchbias
 	return(mbev_status);
 }
 /*--------------------------------------------------------------------*/
-int mbeditviz_beam_position(double navlon, double navlat, double headingx, double headingy,
-				double mtodeglon, double mtodeglat,
-				double bath, double acrosstrack, double alongtrack,
-				double sonardepth,
-				double rollbias, double pitchbias,
-				double *bathcorr, double *lon, double *lat)
+int mbeditviz_beam_position (double navlon, double navlat,
+							double mtodeglon, double mtodeglat,
+							double bath, double acrosstrack, double alongtrack,
+							double sonardepth,
+							double rolldelta, double pitchdelta, double heading,
+							double *bathcorr, double *lon, double *lat)
 {
 	/* local variables */
 	char	*function_name = "mbeditviz_beam_position";
 	double	bathuse;
 	double	range;
 	double	alpha, beta;
-	double	newbath, newacrosstrack, newalongtrack;
+	double	newbath, neweasting, newnorthing;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -1804,58 +1806,37 @@ int mbeditviz_beam_position(double navlon, double navlat, double headingx, doubl
 		fprintf(stderr,"dbg2       navlat:      %f\n",navlat);
 		fprintf(stderr,"dbg2       mtodeglon:   %f\n",mtodeglon);
 		fprintf(stderr,"dbg2       mtodeglat:   %f\n",mtodeglat);
-		fprintf(stderr,"dbg2       headingx:    %f\n",headingx);
-		fprintf(stderr,"dbg2       headingy:    %f\n",headingy);
 		fprintf(stderr,"dbg2       bath:        %f\n",bath);
 		fprintf(stderr,"dbg2       acrosstrack: %f\n",acrosstrack);
 		fprintf(stderr,"dbg2       alongtrack:  %f\n",alongtrack);
 		fprintf(stderr,"dbg2       sonardepth:  %f\n",sonardepth);
-		fprintf(stderr,"dbg2       rollbias:    %f\n",rollbias);
-		fprintf(stderr,"dbg2       pitchbias:   %f\n",pitchbias);
+		fprintf(stderr,"dbg2       rolldelta:   %f\n",rolldelta);
+		fprintf(stderr,"dbg2       pitchdelta:  %f\n",pitchdelta);
+		fprintf(stderr,"dbg2       heading:     %f\n",heading);
 		}
 
 	/* strip off heave + draft */
 	bathuse = bath - sonardepth;
 
-	/* get range and angles in
-	    roll-pitch frame */
-	range = sqrt(bathuse * bathuse
-		    + acrosstrack
-			* acrosstrack
-		    + alongtrack
-			* alongtrack);
-	if (fabs(range) < 0.001)
-		{
-		alpha = 0.0;
-		beta = 0.5 * M_PI;
-		}
-	else
-		{
-		alpha = asin(MAX(-1.0, MIN(1.0, (alongtrack / range))));
-		beta = acos(MAX(-1.0, MIN(1.0, (acrosstrack / range / cos(alpha)))));
-		}
-	if (bathuse < 0.0)
-		beta = 2.0 * M_PI - beta;
+	/* rotate beam by 
+	   rolldelta:  Roll relative to previous correction and bias included
+	   pitchdelta: Pitch relative to previous correction and bias included
+	   heading:    Heading absolute (bias included) */
+	mb_platform_math_attitude_rotate_beam (
+			mbev_verbose,
+			acrosstrack, alongtrack, bathuse,
+			DTR * rolldelta, DTR * pitchdelta, DTR * heading,
+			&neweasting, &newnorthing, &newbath,
+			&mbev_error);
 
-	/* apply roll pitch corrections */
-	alpha += DTR * pitchbias;
-	beta += DTR * rollbias;
-
-	/* recalculate bathymetry */
-	newbath = range * cos(alpha) * sin(beta);
-	newalongtrack = range * sin(alpha);
-	newacrosstrack = range * cos(alpha) * cos(beta);
 
 	/* add heave and draft back in */
 	*bathcorr = newbath + sonardepth;
 
 	/* locate lon lat position */
-	*lon = navlon
-		+ headingy * mtodeglon * newacrosstrack
-		+ headingx * mtodeglon * newalongtrack;
-	*lat = navlat
-		- headingx * mtodeglat * newacrosstrack
-		+ headingy * mtodeglat * newalongtrack;
+	*lon = navlon + mtodeglon * neweasting;
+	*lat = navlat + mtodeglat * newnorthing;
+
 if (isnan(*bathcorr))
 {
 fprintf(stderr,"\nFunction mbeditviz_beam_position(): Calculated NaN bathcorr\n");
@@ -1863,14 +1844,13 @@ fprintf(stderr,"     navlon:      %f\n",navlon);
 fprintf(stderr,"     navlat:      %f\n",navlat);
 fprintf(stderr,"     mtodeglon:   %f\n",mtodeglon);
 fprintf(stderr,"     mtodeglat:   %f\n",mtodeglat);
-fprintf(stderr,"     headingx:    %f\n",headingx);
-fprintf(stderr,"     headingy:    %f\n",headingy);
 fprintf(stderr,"     bath:        %f\n",bath);
 fprintf(stderr,"     acrosstrack: %f\n",acrosstrack);
 fprintf(stderr,"     alongtrack:  %f\n",alongtrack);
 fprintf(stderr,"     sonardepth:  %f\n",sonardepth);
-fprintf(stderr,"     rollbias:    %f\n",rollbias);
-fprintf(stderr,"     pitchbias:   %f\n",pitchbias);
+fprintf(stderr,"     rolldelta:   %f\n",rolldelta);
+fprintf(stderr,"     pitchdelta:  %f\n",pitchdelta);
+fprintf(stderr,"     heading:     %f\n",heading);
 fprintf(stderr,"     bathuse:     %f\n",bathuse);
 fprintf(stderr,"     range:       %f\n",range);
 fprintf(stderr,"     alpha:       %f\n",alpha);
@@ -3462,7 +3442,6 @@ int mbeditviz_selectregion(size_t instance)
 	double	xx, yy;
 	double	heading, sonardepth;
 	double	rolldelta, pitchdelta;
-	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	int	i, ifile, iping, ibeam;
 
@@ -3537,13 +3516,11 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 				for (iping=0;iping<file->num_pings;iping++)
 					{
 					ping = &(file->pings[iping]);
-					mbeditviz_apply_timelag(file, ping,
+					mbeditviz_apply_timelag (file, ping,
 								mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,
 								&heading, &sonardepth,
 								&rolldelta, &pitchdelta);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-					headingx = sin(heading * DTR);
-					headingy = cos(heading * DTR);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
 						if (!mb_beam_check_flag_null(ping->beamflag[ibeam]))
@@ -3571,11 +3548,11 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
 
 								/* apply rotations and recalculate position */
-								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
+								mbeditviz_beam_position (ping->navlon, ping->navlat,
 										mtodeglon, mtodeglat,
 										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 										sonardepth,
-										rolldelta, pitchdelta,
+										rolldelta, pitchdelta, heading,
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 								mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
@@ -3664,7 +3641,6 @@ int mbeditviz_selectarea(size_t instance)
 	double	zmin, zmax, dz;
 	double	heading, sonardepth;
 	double	rolldelta, pitchdelta;
-	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	int	i;
 
@@ -3725,8 +3701,6 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 								&heading, &sonardepth,
 								&rolldelta, &pitchdelta);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-					headingx = sin(heading * DTR);
-					headingy = cos(heading * DTR);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
 						if (!mb_beam_check_flag_null(ping->beamflag[ibeam]))
@@ -3758,11 +3732,11 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
 
 								/* apply rotations and recalculate position */
-								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
+								mbeditviz_beam_position (ping->navlon, ping->navlat,
 										mtodeglon, mtodeglat,
 										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 										sonardepth,
-										rolldelta, pitchdelta,
+										rolldelta, pitchdelta, heading, 
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 								mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
@@ -3847,7 +3821,6 @@ int mbeditviz_selectnav(size_t instance)
 	double	xmin, xmax, ymin, ymax, zmin, zmax;
 	double	heading, sonardepth;
 	double	rolldelta, pitchdelta;
-	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	int	i;
 
@@ -3896,8 +3869,6 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 								  	&heading, &sonardepth,
 								  	&rolldelta, &pitchdelta);
 						mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-						headingx = sin(heading * DTR);
-						headingy = cos(heading * DTR);
 						for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 							{
 							if (!mb_beam_check_flag_null(ping->beamflag[ibeam]))
@@ -3920,11 +3891,11 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
 
 								/* apply rotations and recalculate position */
-								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
+								mbeditviz_beam_position (ping->navlon, ping->navlat,
 										mtodeglon, mtodeglat,
 										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 										sonardepth,
-										rolldelta, pitchdelta,
+										rolldelta, pitchdelta, heading, 
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 								mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
@@ -4215,7 +4186,6 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 	double	zmin, zmax, dz;
 	double	heading, sonardepth;
 	double	rolldelta, pitchdelta;
-	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	int	ifilelast, ipinglast;
 	int	i;
@@ -4260,18 +4230,16 @@ rollbias, pitchbias, headingbias, timelag);
 					&heading, &sonardepth,
 					&rolldelta, &pitchdelta);
 			mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-			headingx = sin(heading * DTR);
-			headingy = cos(heading * DTR);
 			ifilelast = ifile;
 			ipinglast = iping;
 			}
 
 		/* apply rotations and recalculate position */
-		mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
+		mbeditviz_beam_position (ping->navlon, ping->navlat,
 				mtodeglon, mtodeglat,
 				ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 				sonardepth,
-				rolldelta, pitchdelta,
+				rolldelta, pitchdelta, heading, 
 				&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 		mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 			ping->bathlon[ibeam], ping->bathlat[ibeam],
@@ -4327,7 +4295,6 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 	int	ifile, iping, ibeam;
 	double	heading, sonardepth;
 	double	rolldelta, pitchdelta;
-	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 
 if (mbev_verbose > 0)
@@ -4371,16 +4338,14 @@ rollbias, pitchbias, headingbias, timelag);
 							&heading, &sonardepth,
 							&rolldelta, &pitchdelta);
 				mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-				headingx = sin(heading * DTR);
-				headingy = cos(heading * DTR);
 				for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 					{
 					/* apply rotations and recalculate position */
-					mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
+					mbeditviz_beam_position (ping->navlon, ping->navlat,
 							mtodeglon, mtodeglat,
 							ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 							sonardepth,
-							rolldelta, pitchdelta,
+							rolldelta, pitchdelta, heading, 
 							&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 					mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 						ping->bathlon[ibeam], ping->bathlat[ibeam],

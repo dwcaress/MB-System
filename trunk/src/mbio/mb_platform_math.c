@@ -36,6 +36,14 @@ static char svn_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 void
+mb_platform_math_matrix_times_vector_3x1 (double* A, double* b, double* Ab)
+{
+    Ab[0] = (A[0]*b[0]) + (A[3]*b[1]) + (A[6]*b[2]);
+    Ab[1] = (A[1]*b[0]) + (A[4]*b[1]) + (A[7]*b[2]);
+    Ab[2] = (A[2]*b[0]) + (A[5]*b[1]) + (A[8]*b[2]);
+}
+/*--------------------------------------------------------------------*/
+void
 mb_platform_math_matrix_times_matrix_3x3 (double* A, double* B, double* AB)
 {
 #define A(i,j) (A[j*3+i])
@@ -348,3 +356,165 @@ mb_platform_math_attitude_target   (int     verbose,
 
 }
 /*--------------------------------------------------------------------*/
+int
+mb_platform_math_attitude_offset_corrected_by_nav (int verbose,
+										double  prev_attitude_roll,
+										double  prev_attitude_pitch,
+										double  prev_attitude_heading,
+										double  target_offset_to_source_roll,
+										double  target_offset_to_source_pitch,
+										double  target_offset_to_source_heading,
+										double  updated_attitude_roll,
+										double  updated_attitude_pitch,
+										double  updated_attitude_heading,
+										double* corrected_offset_roll,
+										double* corrected_offset_pitch,
+										double* corrected_offset_heading,
+										int*    error)
+{
+	char	*function_name = "mb_platform_math_attitude_offset_corrected_by_nav";
+	int	status = MB_SUCCESS;
+	double rph_prev_attitude[3];
+	double rph_target_offset[3];
+	double rph_updated_attitude[3];
+	double rph_corrected_offset_attitude[3];
+
+	double R1[9];
+	double R2[9];
+	double R3[9];
+	double R3T[9];
+	double R12[9];
+	double R123T[9];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                           %d\n", verbose);
+		fprintf(stderr,"dbg2       prev_attitude_roll:                %f\n", prev_attitude_roll);
+		fprintf(stderr,"dbg2       prev_attitude_pitch:               %f\n", prev_attitude_pitch);
+		fprintf(stderr,"dbg2       prev_attitude_heading:             %f\n", prev_attitude_heading);
+		fprintf(stderr,"dbg2       target_offset_to_source_roll:      %f\n", target_offset_to_source_roll);
+		fprintf(stderr,"dbg2       target_offset_to_source_pitch:     %f\n", target_offset_to_source_pitch);
+		fprintf(stderr,"dbg2       target_offset_to_source_heading:   %f\n", target_offset_to_source_heading);
+		fprintf(stderr,"dbg2       updated_attitude_roll:             %f\n", updated_attitude_roll);
+		fprintf(stderr,"dbg2       updated_attitude_pitch:            %f\n", updated_attitude_pitch);
+		fprintf(stderr,"dbg2       updated_attitude_heading:          %f\n", updated_attitude_heading);
+		}
+
+	rph_prev_attitude[0]  = prev_attitude_roll;
+	rph_prev_attitude[1]  = prev_attitude_pitch;
+	rph_prev_attitude[2]  = prev_attitude_heading;
+
+	rph_target_offset[0]  = target_offset_to_source_roll;
+	rph_target_offset[1]  = target_offset_to_source_pitch;
+	rph_target_offset[2]  = target_offset_to_source_heading;
+
+	rph_updated_attitude[0]  = updated_attitude_roll;
+	rph_updated_attitude[1]  = updated_attitude_pitch;
+	rph_updated_attitude[2]  = updated_attitude_heading;
+
+	mb_platform_math_rph2rot (rph_prev_attitude, R3);
+	mb_platform_math_rph2rot (rph_target_offset, R2);
+	mb_platform_math_rph2rot (rph_updated_attitude,  R1);
+	mb_platform_math_matrix_times_matrix_3x3 (R1, R2, R12);
+	mb_platform_math_matrix_transpose_3x3 (R3, R3T);
+	mb_platform_math_matrix_times_matrix_3x3 (R12, R3T, R123T);
+	mb_platform_math_rot2rph (R123T, rph_corrected_offset_attitude);
+
+	*corrected_offset_roll    = rph_corrected_offset_attitude[0];
+	*corrected_offset_pitch   = rph_corrected_offset_attitude[1];
+	*corrected_offset_heading = rph_corrected_offset_attitude[2];
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       corrected_offset_roll:      %f\n", *corrected_offset_roll);
+		fprintf(stderr,"dbg2       corrected_offset_pitch:     %f\n", *corrected_offset_pitch);
+		fprintf(stderr,"dbg2       corrected_offset_heading:   %f\n", *corrected_offset_heading);
+		fprintf(stderr,"dbg2       error:			 %d\n", *error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:			 %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+
+}
+/*--------------------------------------------------------------------*/
+int
+mb_platform_math_attitude_rotate_beam ( int verbose,
+										double  beam_acrosstrack, 
+										double  beam_alongtrack, 
+										double  beam_bath,
+										double  attitude_roll, 
+										double  attitude_pitch, 
+										double  attitude_heading,
+										double* newbeam_easting, 
+										double* newbeam_northing, 
+										double* newbeam_bath,
+										int*    error)
+{
+	char	*function_name = "mb_platform_math_attitude_rotate_beam";
+	int	status = MB_SUCCESS;
+
+	double beam[3];
+	double rph_attitude[3];
+	double newbeam[3];
+	double R[9];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                           %d\n", verbose);
+		fprintf(stderr,"dbg2       beam_acrosstrack:                  %f\n", beam_acrosstrack);
+		fprintf(stderr,"dbg2       beam_alongtrack:                   %f\n", beam_alongtrack);
+		fprintf(stderr,"dbg2       beam_bath:                         %f\n", beam_bath);
+ 		fprintf(stderr,"dbg2       attitude_roll:                     %f\n", attitude_roll);
+		fprintf(stderr,"dbg2       attitude_pitc:                     %f\n", attitude_pitch);
+		fprintf(stderr,"dbg2       attitude_heading:                  %f\n", attitude_heading);
+		}
+
+	beam[0]  = beam_alongtrack;   // Local X-axis (along track)
+	beam[1]  = beam_acrosstrack;  // Local Y-axis (across track)
+	beam[2]  = beam_bath;         // Local Z-axis (down)
+
+	rph_attitude[0]  = attitude_roll;
+	rph_attitude[1]  = attitude_pitch;
+	rph_attitude[2]  = attitude_heading;
+
+	mb_platform_math_rph2rot (rph_attitude, R);
+	mb_platform_math_matrix_times_vector_3x1 (R, beam, newbeam);
+
+	*newbeam_northing   = newbeam[0]; // Local X-axis (North)
+	*newbeam_easting    = newbeam[1]; // Local Y-axis (East)
+	*newbeam_bath       = newbeam[2]; // Local Z-axis (Down)
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       newbeam_easting:  %f\n", *newbeam_easting);
+		fprintf(stderr,"dbg2       newbeam_northing: %f\n", *newbeam_northing);
+		fprintf(stderr,"dbg2       newbeam_bath:     %f\n", *newbeam_bath);
+		fprintf(stderr,"dbg2       error:			 %d\n", *error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:			 %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+
+}
+
+
