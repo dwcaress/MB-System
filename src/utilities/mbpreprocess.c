@@ -113,7 +113,8 @@ int main (int argc, char **argv)
 	 * 		--timeshift_apply_all_ancilliary=boolean
 	 * 		--timeshift_apply_survey=boolean
 	 * 		--timeshift_apply_all=boolean
-	 * 		--sensor_offset_file=offset_file
+	 * 		--platform_file=platform_file
+	 * 		--sensordepth_offsets=offset_x/offset_y/offset_z
 	 * 		--sonar_offsets=offset_x/offset_y/offset_z/offset_heading/offset_roll/offset_pitch
 	 * 		--vru_offsets=offset_x/offset_y/offset_z/offset_heading/offset_roll/offset_pitch
 	 * 		--navigation_offsets=offset_x/offset_y/offset_z/offset_heading/offset_roll/offset_pitch
@@ -150,7 +151,8 @@ int main (int argc, char **argv)
 		{"timeshift_apply_all_ancilliary",	no_argument, 		NULL, 		0},
 		{"timeshift_apply_survey",	no_argument, 		NULL, 		0},
 		{"timeshift_apply_all",		no_argument, 		NULL, 		0},
-		{"sensor_offset_file",		required_argument, 	NULL, 		0},
+		{"platform_file",		required_argument, 	NULL, 		0},
+		{"sensordepth_offsets",		required_argument, 	NULL, 		0},
 		{"sonar_offsets",		required_argument, 	NULL, 		0},
 		{"vru_offsets",			required_argument, 	NULL, 		0},
 		{"navigation_offsets",		required_argument, 	NULL, 		0},
@@ -218,8 +220,21 @@ int main (int argc, char **argv)
 	double	*timeshift_timeshift = NULL;
 	double	timeshift_constant = 0.0;
 	
-	mb_path	offset_file;
+	/* platform definition file */
+	mb_path	platform_file;
+	int	use_platform_file = MB_NO;
+	struct mb_platform_struct *platform = NULL;
+	struct mb_sensor_struct *sensor_swathbathymetry = NULL;
+	struct mb_sensor_struct *sensor_attitude = NULL;
+	struct mb_sensor_struct *sensor_position = NULL;
+	struct mb_sensor_struct *sensor_depth = NULL;
 	
+	/* individual lever arm parameter */
+	int	sensordepth_offset_mode = MB_NO;
+	double	sensordepth_offset_x = 0.0;
+	double	sensordepth_offset_y = 0.0;
+	double	sensordepth_offset_z = 0.0;
+
 	int	sonar_offset_mode = MB_NO;
 	double	sonar_offset_x = 0.0;
 	double	sonar_offset_y = 0.0;
@@ -319,11 +334,8 @@ int main (int argc, char **argv)
 	double	roll_org;
 	double	pitch_org;
 	double	heave_org;
-	double	depth_offset_use, depth_offset_org, depth_offset_change;
-	double	range, alphar, betar;
-	double	lever_x, lever_y, lever_z;
-	double	headingx, headingy, mtodeglon, mtodeglat;
-
+	double	depth_offset_change;
+	
 	/* arrays for asynchronous data accessed using mb_extract_nnav() */
 	int	nanavmax = MB_NAV_MAX;
 	int	nanav;
@@ -627,9 +639,39 @@ int main (int argc, char **argv)
 				timeshift_apply =  MBPREPROCESS_TIMESHIFT_APPLY_ALL;
 				}
 			
-			/* sensor_offset_file */
-			else if (strcmp("sensor_offset_file", options[option_index].name) == 0)
+			/* platform_file */
+			else if (strcmp("platform_file", options[option_index].name) == 0)
 				{
+				n = sscanf (optarg,"%s", platform_file);
+				if (n == 1)
+					use_platform_file = MB_YES;
+				}
+			
+			/* depth sensor_offsets */
+			else if (strcmp("sensordepth_offsets", options[option_index].name) == 0)
+				{
+				n = sscanf (optarg,"%lf/%lf/%lf", 
+					&sensordepth_offset_x, 
+					&sensordepth_offset_y, 
+					&sensordepth_offset_z);
+				if (n < 3)
+					{
+					if (n == 2)
+						{
+						sensordepth_offset_z = sensordepth_offset_y;
+						sensordepth_offset_y = sensordepth_offset_x;
+						sensordepth_offset_x = 0.0;
+						}
+					else if (n == 1)
+						{
+						sensordepth_offset_z = 0.0;
+						sensordepth_offset_y = sensordepth_offset_x;
+						sensordepth_offset_x = 0.0;
+						}
+					}
+				if (n > 0)
+					sensordepth_offset_mode = MB_YES;
+
 				}
 			
 			/* sonar_offsets */
@@ -748,7 +790,12 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       timeshift_file:             %s\n",timeshift_file);
 		fprintf(stderr,"dbg2       timeshift_format:           %d\n",timeshift_format);
 		fprintf(stderr,"dbg2       timeshift_apply:            %x\n",timeshift_apply);
-		fprintf(stderr,"dbg2       offset_file:                %s\n",offset_file);
+		fprintf(stderr,"dbg2       use_platform_file:          %d\n",use_platform_file);
+		fprintf(stderr,"dbg2       platform_file:              %s\n",platform_file);
+		fprintf(stderr,"dbg2       sensordepth_offset_mode:    %d\n",sensordepth_offset_mode);
+		fprintf(stderr,"dbg2       sensordepth_offset_x:       %f\n",sensordepth_offset_x);
+		fprintf(stderr,"dbg2       sensordepth_offset_y:       %f\n",sensordepth_offset_y);
+		fprintf(stderr,"dbg2       sensordepth_offset_z:       %f\n",sensordepth_offset_z);
 		fprintf(stderr,"dbg2       sonar_offset_mode:          %d\n",sonar_offset_mode);
 		fprintf(stderr,"dbg2       sonar_offset_x:             %f\n",sonar_offset_x);
 		fprintf(stderr,"dbg2       sonar_offset_y:             %f\n",sonar_offset_y);
@@ -835,6 +882,147 @@ int main (int argc, char **argv)
 		
 		if (verbose > 0)
 			fprintf(stderr,"%d timeshift records loaded from file %s\n", heading_num, heading_file);
+		}
+
+	/*-------------------------------------------------------------------*/
+	/* load platform definition if specified or if offsets otherwise specified create a platform structure */
+	if (use_platform_file == MB_YES)
+		{
+		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
+		if (status == MB_FAILURE)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open and parse platform file: %s\n", platform_file);
+			fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+			exit(error);				
+			}
+		}
+	else if (sensordepth_offset_mode == MB_YES || sonar_offset_mode == MB_YES)
+		{
+		status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL,
+						0, 1, 2, 3, 3, 
+						(void **)&platform, &error);
+			
+		/* set sensor 0 (multibeam) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose, (void **)&platform,
+					MB_SENSOR_TYPE_SONAR_MULTIBEAM,
+					NULL,
+					NULL,
+					NULL,
+					0, 0,
+					1, 0,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
+					0, 0,
+					MBPREPROCESS_TIMESHIFT_OFF,
+					0.0,
+					0,
+					NULL,
+					NULL,
+					sonar_offset_mode,
+					sonar_offset_x,
+					sonar_offset_y,
+					sonar_offset_z,   
+					sonar_offset_mode,
+					sonar_offset_heading,
+					sonar_offset_roll,
+					sonar_offset_pitch,
+					&error);
+			
+		/* set sensor 1 (position) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose, (void **)&platform,
+					MB_SENSOR_TYPE_POSITION,
+					NULL,
+					NULL,
+					NULL,
+					0, 0,
+					1, timeshift_num,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
+					1, 0,
+					timeshift_mode,
+					timeshift_constant,
+					timeshift_num,
+					timeshift_time_d,
+					timeshift_timeshift,
+					navigation_offset_mode,
+					navigation_offset_x,
+					navigation_offset_y,
+					navigation_offset_z,   
+					navigation_offset_mode,
+					navigation_offset_heading,
+					navigation_offset_roll,
+					navigation_offset_pitch,
+					&error);
+			
+		/* set sensor 2 (sensor depth) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose, (void **)&platform,
+					MB_SENSOR_TYPE_POSITION,
+					NULL,
+					NULL,
+					NULL,
+					0, 0,
+					1, timeshift_num,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
+					2, 0,
+					timeshift_mode,
+					timeshift_constant,
+					timeshift_num,
+					timeshift_time_d,
+					timeshift_timeshift,
+					sensordepth_offset_mode,
+					sensordepth_offset_x,
+					sensordepth_offset_y,
+					sensordepth_offset_z,   
+					0,
+					0.0,
+					0.0,
+					0.0,
+					&error);
+			
+		/* set sensor 3 (attitude) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose, (void **)&platform,
+					MB_SENSOR_TYPE_VRU,
+					NULL,
+					NULL,
+					NULL,
+					0, 0,
+					1, timeshift_num,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
+					3, 0,
+					timeshift_mode,
+					timeshift_constant,
+					timeshift_num,
+					timeshift_time_d,
+					timeshift_timeshift,
+					vru_offset_mode,
+					vru_offset_x,
+					vru_offset_y,
+					vru_offset_z,   
+					vru_offset_mode,
+					vru_offset_heading,
+					vru_offset_roll,
+					vru_offset_pitch,
+					&error);
+		
+		/* deal with error */
+		if (status == MB_FAILURE)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to initialize platform offset structure\n");
+			fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+			exit(error);				
+			}
 		}
 
 	/*-------------------------------------------------------------------*/
@@ -1887,174 +2075,73 @@ int main (int argc, char **argv)
 					/* reset status and error */
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
-					
-					/* if sensor offsets have been defined, apply lever arm correction */
-					if (sonar_offset_mode == MB_YES
-						|| vru_offset_mode == MB_YES
-						|| navigation_offset_mode == MB_YES)
+		
+					if (platform != NULL)
 						{
-						/* do lever arm calculation with sensor offsets */
-						mb_lever(verbose, sonar_offset_x, sonar_offset_y, sonar_offset_z,
-								vru_offset_x, vru_offset_y, vru_offset_z,
-								navigation_offset_x, navigation_offset_y, navigation_offset_z,
-								pitch, roll,
-								&lever_x, &lever_y, &lever_z, &error);
-//fprintf(stderr,"LEVER:  roll:%f pitch:%f   lever: %f %f %f\n", roll, pitch, lever_x, lever_y, lever_z);
-						
-						/* get local translation between lon lat degrees and meters */
-						mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
-						headingx = sin(DTR*heading);
-						headingy = cos(DTR*heading);	
-	
-						/* apply position offsets */
-						if (sonar_offset_x != 0.0 || sonar_offset_y != 0.0)
-							{
-							navlon += headingy * sonar_offset_x * mtodeglon
-									+ headingx * sonar_offset_y * mtodeglon;
-							navlat+= -headingx * sonar_offset_x * mtodeglat
-									+ headingy * sonar_offset_y * mtodeglat;
-							nav_changed = MB_YES;
-//fprintf(stderr,"HEADING: %f  %f %f POSITION OFFSET: meters: %f %f   lonlat: %f %f ",
-//heading, headingx, headingy,
-//sonar_offset_x, sonar_offset_y,
-//headingy * sonar_offset_x * mtodeglon + headingx * sonar_offset_y * mtodeglon,
-//-headingx * sonar_offset_x * mtodeglat + headingy * sonar_offset_y * mtodeglat);
-							}
-						if (sonar_offset_z != 0.0)
-							{
-							sensordepth -= sonar_offset_z;
-							sensordepth_changed = MB_YES;
-//fprintf(stderr,"SENSORDEPTH OFFSET: %f ",-sonar_offset_z);
-							}
 
-						/* apply lever arm calculation */
-						if (lever_x != 0.0 || lever_y != 0.0)
-							{
-							navlon += headingy * lever_x * mtodeglon
-									+ headingx * lever_y * mtodeglon;
-							navlat+= -headingx * lever_x * mtodeglat
-									+ headingy * lever_y * mtodeglat;
-							nav_changed = MB_YES;
-//fprintf(stderr,"LEVER ARM XY OFFSET: meters: %f %f   lonlat: %f %f ",
-//lever_x, lever_y,
-//headingy * lever_x * mtodeglon + headingx * lever_y * mtodeglon,
-//-headingx * lever_x * mtodeglat + headingy * lever_y * mtodeglat);
-							}
-						if (lever_z != 0.0)
-							{
-							sensordepth -= lever_z;
-							sensordepth_changed = MB_YES;
-//fprintf(stderr,"LEVER ARM Z OFFSET: %f ",-lever_z);
-							}						
-//if (sonar_offset_x != 0.0 || sonar_offset_y != 0.0 || sonar_offset_z != 0.0
-//|| lever_x != 0.0 || lever_y != 0.0 || lever_z != 0.0)
-//fprintf(stderr,"\n");
+						/* Update swathsensor position (note: no longer vehicle position) */
+						status = mb_platform_position (verbose, (void **)&platform,
+										platform->source_swathbathymetry, 0,
+										navlon, navlat, sensordepth,
+										heading, roll, pitch,
+										&navlon, &navlat, &sensordepth,
+										&error);
+						draft = sensordepth - heave;
+						nav_changed = MB_YES;
+						sensordepth_changed = MB_YES;
+
+						/* Update swathsensor attitude (note: no longer vehicle attitude) */
+						status = mb_platform_orientation_target (verbose, (void **)&platform,
+										platform->source_swathbathymetry, 0,
+										heading, roll, pitch,
+										&heading, &roll, &pitch,
+										&error);
+						attitude_changed = MB_YES;
+
 						}
-					
+
 					/* if attitude changed apply rigid rotations to the bathymetry */
 					if (attitude_changed == MB_YES)
-						{				
-						/* add heave and draft */
-						depth_offset_use = heave + draft;
-						depth_offset_org = heave + draft_org;
-
+						{
 						/* loop over the beams */
 						for (i=0;i<beams_bath;i++)
 							{
 							if (beamflag[i] != MB_FLAG_NULL)
-								{
-								/* output some debug messages */
-								if (verbose >= 5)
-									{
-									fprintf(stderr,"\ndbg5  Depth value to be calculated in program <%s>:\n",program_name);
-									fprintf(stderr,"dbg5       kind:  %d\n",kind);
-									fprintf(stderr,"dbg5       beam:  %d\n",i);
-									fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
-									fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
-									fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
-									}
-				
+								{	
 								/* strip off heave + draft */
-								bath[i] -= depth_offset_org;
-				
-								/* get range and angles in
-								    roll-pitch frame */
-								range = sqrt(bath[i] * bath[i]
-									    + bathacrosstrack[i]
-										* bathacrosstrack[i]
-									    + bathalongtrack[i]
-										* bathalongtrack[i]);
-								if (fabs(range) < 0.001)
-									{
-									alphar = 0.0;
-									betar = 0.5 * M_PI;
-									}
-								else
-									{
-									alphar = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
-									betar = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alphar)))));
-									}
-								if (bath[i] < 0.0)
-									betar = 2.0 * M_PI - betar;
-				
-								/* apply roll pitch corrections */
-								betar += DTR * (roll - roll_org);
-								alphar += DTR * (pitch - pitch_org);
-				
-								/* recalculate bathymetry */
-								bath[i] = range * cos(alphar) * sin(betar);
-								bathalongtrack[i] = range * sin(alphar);
-								bathacrosstrack[i] = range * cos(alphar) * cos(betar);
-				
+								bath[i] -= sensordepth_org;
+
+								/* rotate beam by 
+								   rolldelta:  Roll relative to previous correction and bias included
+								   pitchdelta: Pitch relative to previous correction and bias included
+								   heading:    Heading absolute (bias included) */
+								mb_platform_math_attitude_rotate_beam (
+										verbose,
+										bathacrosstrack[i], bathalongtrack[i], bath[i],
+										roll,  pitch,  0.0,
+										&(bathacrosstrack[i]), &(bathalongtrack[i]), &(bath[i]),
+										&error);
+								}
 								/* add heave and draft back in */
-								bath[i] += depth_offset_use;
-								
-								/* output some debug messages */
-								if (verbose >= 5)
-									{
-									fprintf(stderr,"\ndbg5  Depth value calculated in program <%s>:\n",program_name);
-									fprintf(stderr,"dbg5       kind:  %d\n",kind);
-									fprintf(stderr,"dbg5       beam:  %d\n",i);
-									fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
-									fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
-									fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
-									}
+								bath[i] += sensordepth_org;
 								}
 							}
-						}
-		    
+
 					/* recalculate bathymetry by changes to sensor depth  */
-					else if (sensordepth_changed == MB_YES)
+					if (sensordepth_changed == MB_YES)
 						{
 						/* get draft change */
 						depth_offset_change = draft - draft_org;
-/* fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  depth_offset_change:%f\n",
-time_d, draft, draft_org, lever_heave, depth_offset_change);*/
-			    
+
 						/* loop over the beams */
 						for (i=0;i<beams_bath;i++)
 							{
 							if (beamflag[i] != MB_FLAG_NULL)
 								{
 								/* apply transducer depth change to depths */
-								bath[i] += depth_offset_change;
-/* fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);*/
-				
-								/* output some debug messages */
-								if (verbose >= 5)
-									{
-									fprintf(stderr,"\ndbg5  Depth value calculated in program <%s>:\n",program_name);
-									fprintf(stderr,"dbg5       kind:  %d\n",kind);
-									fprintf(stderr,"dbg5       beam:  %d\n",i);
-									fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
-									fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
-									fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
-									}
+								bath[i] += depth_offset_change;			
 								}
 							}
-/*fprintf(stderr, "time:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d draft:%f depth_offset_change:%f\n",
-time_i[0], time_i[1], time_i[2], time_i[3],
-time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 						}
 
 					/* insert navigation */
@@ -2293,6 +2380,12 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 		{
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&timeshift_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&timeshift_timeshift,&error);
+		}
+
+	/* deallocate platform structure */
+	if (platform != NULL)
+		{
+		status = mb_platform_deall(verbose, (void **)&platform, &error);
 		}
 
 	/* check memory */

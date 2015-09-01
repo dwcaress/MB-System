@@ -1739,20 +1739,11 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 		/* Calculate attitude delta altogether */
 		mb_platform_math_attitude_offset_corrected_by_nav(
 			mbev_verbose,
-			DTR * ping->roll, DTR * ping->pitch, 0.0,                // In: Old Pitch and Roll applied
-			DTR * rollbias,   DTR * pitchbias,   DTR * headingbias,  // In: New Bias to apply
-			DTR * rollasync,  DTR * pitchasync,  DTR * headingasync, // In: New nav attitude to apply
-			rolldelta, pitchdelta, heading,                          // Out: Calculated rolldelta, pitchdelta and heading
+			ping->roll, ping->pitch, 0.0,          // In: Old Pitch and Roll applied
+			rollbias,   pitchbias,   headingbias,  // In: New Bias to apply
+			rollasync,  pitchasync,  headingasync, // In: New nav attitude to apply
+			rolldelta, pitchdelta, heading,        // Out: Calculated rolldelta, pitchdelta and heading
 			&mbev_error);
-
-		*rolldelta  = RTD * *rolldelta;
-		*pitchdelta = RTD * *pitchdelta;
-		*heading    = RTD * *heading;
-
-		if (*heading >= 360.0)
-			*heading -= 360.0;
-		else if (*heading < 0.0)
-			*heading += 360.0;
 
 
 /*
@@ -1825,7 +1816,7 @@ int mbeditviz_beam_position (double navlon, double navlat,
 	mb_platform_math_attitude_rotate_beam (
 			mbev_verbose,
 			acrosstrack, alongtrack, bathuse,
-			DTR * rolldelta, DTR * pitchdelta, DTR * heading,
+			rolldelta, pitchdelta, heading,
 			&neweasting, &newnorthing, &newbath,
 			&mbev_error);
 

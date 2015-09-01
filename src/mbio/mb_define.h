@@ -535,12 +535,24 @@ int mb_platform_position(int verbose, void **platform_ptr,
 		double heading, double roll, double pitch,
 		double *targetlon, double *targetlat, double *targetz,
                 int *error);
+int mb_platform_orientation (int verbose, void **platform_ptr,
+							double heading, double roll, double pitch,
+							double *platform_heading, 
+							double *platform_roll, 
+							double *platform_pitch,
+							int *error);
 int mb_platform_orientation_offset (int verbose, void **platform_ptr,
 							int targetsensor, int targetsensoroffset,
-							double heading, double roll, double pitch,
 							double *target_hdg_offset, 
 							double *target_roll_offset, 
 							double *target_pitch_offset,
+							int *error);
+int mb_platform_orientation_target (int verbose, void **platform_ptr,
+							int targetsensor, int targetsensoroffset,
+							double heading, double roll, double pitch,
+							double *target_heading, 
+							double *target_roll, 
+							double *target_pitch,
 							int *error);
 
 void mb_platform_math_matrix_times_vector_3x1 (double* A, double* b, double* Ab);

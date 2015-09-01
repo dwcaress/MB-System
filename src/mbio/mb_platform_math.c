@@ -86,12 +86,12 @@ mb_platform_math_rph2rot (double* rph, double* R)
 {
 #define R(i,j) (R[j*3+i])
 	double sr, sp, sh, cr, cp, ch;
-	sr = sin (rph[0]);
-	sp = sin (rph[1]);
-	sh = sin (rph[2]);
-	cr = cos (rph[0]);
-	cp = cos (rph[1]);
-	ch = cos (rph[2]);
+	sr = sin (DTR*rph[0]);
+	sp = sin (DTR*rph[1]);
+	sh = sin (DTR*rph[2]);
+	cr = cos (DTR*rph[0]);
+	cp = cos (DTR*rph[1]);
+	ch = cos (DTR*rph[2]);
 
 	R(0,0) = ch*cp; R(0,1) = -sh*cr + ch*sp*sr; R(0,2) = sh*sr + ch*sp*cr;
 	R(1,0) = sh*cp; R(1,1) = ch*cr + sh*sp*sr; R(1,2) = -ch*sr + sh*sp*cr;
@@ -105,16 +105,16 @@ mb_platform_math_rot2rph (double* R, double* rph)
 #define R(i,j) (R[j*3+i])
 	
 	/* Calculate heading */
-	rph[2] = atan2 (R(1,0), R(0,0));
+	rph[2] = RTD*atan2 (R(1,0), R(0,0));
 	double sh, ch;
-	sh = sin (rph[2]);
-	ch = cos (rph[2]);
+	sh = sin (DTR*rph[2]);
+	ch = cos (DTR*rph[2]);
 
 	/* Calculate pitch */
-	rph[1] = atan2 (-R(2,0), R(0,0)*ch + R(1,0)*sh);
+	rph[1] = RTD*atan2 (-R(2,0), R(0,0)*ch + R(1,0)*sh);
 
 	/* Calculate roll */
-	rph[0] = atan2 (R(0,2)*sh - R(1,2)*ch, -R(0,1)*sh + R(1,1)*ch);
+	rph[0] = RTD*atan2 (R(0,2)*sh - R(1,2)*ch, -R(0,1)*sh + R(1,1)*ch);
 #undef R
 }
 /*--------------------------------------------------------------------*/
@@ -263,8 +263,13 @@ mb_platform_math_attitude_platform (int     verbose,
 	*platform_pitch   = rph_platform_attitude[1];
 	*platform_heading = rph_platform_attitude[2];
 
+	if (*platform_heading < 0.0)
+		*platform_heading += 360.0;
+	else if (*platform_heading >= 360.0)
+		*platform_heading -= 360.0;
+
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 1)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
@@ -336,6 +341,11 @@ mb_platform_math_attitude_target   (int     verbose,
 	*target_roll    = rph_target_attitude[0];
 	*target_pitch   = rph_target_attitude[1];
 	*target_heading = rph_target_attitude[2];
+
+	if (*target_heading < 0.0)
+		*target_heading += 360.0;
+	else if (*target_heading >= 360.0)
+		*target_heading -= 360.0;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -427,6 +437,11 @@ mb_platform_math_attitude_offset_corrected_by_nav (int verbose,
 	*corrected_offset_roll    = rph_corrected_offset_attitude[0];
 	*corrected_offset_pitch   = rph_corrected_offset_attitude[1];
 	*corrected_offset_heading = rph_corrected_offset_attitude[2];
+
+	if (*corrected_offset_heading >= 360.0)
+		*corrected_offset_heading -= 360.0;
+	else if (*corrected_offset_heading < 0.0)
+		*corrected_offset_heading += 360.0;
 
 	/* print output debug statements */
 	if (verbose >= 2)

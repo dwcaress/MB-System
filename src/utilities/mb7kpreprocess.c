@@ -5360,13 +5360,11 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 						{
 						status = mb_platform_orientation_offset(verbose, (void **)&platform,
 										platform->source_swathbathymetry, 0,
-										heading, roll, pitch,
 										&(tx_align.heading), &(tx_align.roll), &(tx_align.pitch),
 										&error);
 
 						status = mb_platform_orientation_offset(verbose, (void **)&platform,
 										platform->source_swathbathymetry, 0,
-										heading, roll, pitch,
 										&(rx_align.heading), &(rx_align.roll), &(rx_align.pitch),
 										&error);
 
