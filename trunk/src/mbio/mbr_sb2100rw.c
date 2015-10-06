@@ -23,158 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	March 3, 1994
- * $Log: mbr_sb2100rw.c,v $
- * Revision 5.13  2008/03/01 09:14:03  caress
- * Some housekeeping changes.
- *
- * Revision 5.12  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.11  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.10  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.9  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.8  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.7  2002/04/30 17:41:29  caress
- * Fixed writing of number of pixels.
- *
- * Revision 5.6  2001/12/18 04:27:45  caress
- * Release 5.0.beta11.
- *
- * Revision 5.5  2001/07/27  19:07:16  caress
- * Added data cutting.
- *
- * Revision 5.4  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.3  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.2  2001/01/23  01:16:54  caress
- * Fixed passing of bathymetry when sidescan records don't
- * have range scale value.
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.29  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.28  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.27  1999/09/14  20:39:11  caress
- * Fixed bugs handling HSMD
- *
- * Revision 4.26  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.25  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.24  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.24  1997/04/17  15:07:36  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.23  1996/06/05  21:06:27  caress
- * Fixed problem handling gain of sidescan and amplitude data.
- * Previously transmit attenuation was treated as a gain value
- * (positive) rather than an attenuation value.
- *
- * Revision 4.22  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.21  1996/01/26  21:23:30  caress
- * Version 4.3 distribution
- *
- * Revision 4.20  1995/09/28  18:10:48  caress
- * Various bug fixes working toward release 4.3.
- *
- * Revision 4.19  1995/08/17  14:42:45  caress
- * Revision for release 4.3.
- *
- * Revision 4.18  1995/07/18  15:38:29  caress
- * Added rounding to calculation of output navigation.
- *
- * Revision 4.17  1995/07/13  19:13:36  caress
- * Intermediate check-in during major bug-fixing flail.
- *
- * Revision 4.16  1995/06/06  13:28:49  caress
- * Explicit cast to int on line 1298 fixes warning under Solaris 2.4
- *
- * Revision 4.15  1995/06/03  03:25:13  caress
- * Fixes to handling of changes to vendor SB2100 format
- *
- * Revision 4.14  1995/05/08  21:26:28  caress
- * Made changes consistent with new i/o spec for SB2100 data.
- *
- * Revision 4.13  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.12  1995/02/15  14:37:51  caress
- * Changed "signed short" declarations to "short" in order to
- * placate the SunOS 4.1 compiler.
- *
- * Revision 4.11  1995/02/14  21:59:53  caress
- * Version 4.2
- *
- * Revision 4.10  1995/01/17  23:19:57  caress
- * Fixed bug where fractional seconds were set to zero
- * when writing data.
- *
- * Revision 4.9  1995/01/16  12:32:15  caress
- * Changed output of transmit_attenuation values so they
- * are not prepended with a "+", as Dale Chayes found
- * this was breaking Palmer data.
- *
- * Revision 4.8  1994/12/21  20:18:10  caress
- * Not sure what changes have been made.
- *
- * Revision 4.7  1994/11/07  14:04:33  caress
- * Fixed data flagging.
- *
- * Revision 4.6  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.5  1994/07/29  18:46:51  caress
- * Changes associated with supporting Lynx OS (byte swapped) and
- * using unix second time base (for time_d values).
- *
- * Revision 4.4  1994/06/21  22:54:21  caress
- * Added #ifdef statements to handle byte swapping.
- *
- * Revision 4.3  1994/04/09  15:49:21  caress
- * Altered to fit latest iteration of SeaBeam 2100 vendor format.
- *
- * Revision 4.2  1994/03/25  14:02:38  caress
- * Made changes in accordance with latest iteration of
- * SeaBeam 2100 vendor format.
- *
- * Revision 4.1  1994/03/13  04:48:05  caress
- * Changed order in which parameters are read and written.
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.0  1994/03/05  02:13:52  caress
- * First cut for MBF_SB2100RW format.
- *
- * Revision 1.1  1994/03/05  02:09:29  caress
- * Initial revision
- *
  *
  */
 
@@ -212,6 +60,7 @@ int mbr_info_sb2100rw(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -276,6 +125,7 @@ int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -324,6 +174,7 @@ int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -372,6 +223,7 @@ int mbr_info_sb2100rw(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -407,6 +259,7 @@ int mbr_info_sb2100rw(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -431,6 +284,7 @@ int mbr_info_sb2100rw(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

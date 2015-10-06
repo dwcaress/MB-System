@@ -91,10 +91,6 @@
  *              Note: as I was writing this code the Flyer was refloated
  *              and successfully backed off the reef.
  *
- * $Log: mb_absorption.c,v $
- * Revision 5.0  2008/03/01 09:19:29  caress
- * Added function to calculate sound absoprtion in water from water properties parameters.
- *
  *
  */
 

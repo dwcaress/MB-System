@@ -23,101 +23,6 @@
  *
  * Author:	R. B. Owens
  * Date:	January 24, 1994
- * $Log: mbr_em12darw.c,v $
- * Revision 5.12  2008/03/01 09:14:02  caress
- * Some housekeeping changes.
- *
- * Revision 5.11  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.10  2003/12/04 23:10:22  caress
- * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
- *
- * Revision 5.9  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.8  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.7  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.6  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.5  2002/02/26 07:50:41  caress
- * Release 5.0.beta14
- *
- * Revision 5.4  2001/07/20 00:31:11  caress
- * Release 5.0.beta03
- *
- * Revision 5.3  2001/03/22  20:45:56  caress
- * Trying to make 5.0.beta0...
- *
- * Revision 5.2  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.1  2000/12/10  20:26:50  caress
- * Version 5.0.alpha02
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.14  2000/10/11  01:02:30  caress
- * Convert to ANSI C
- *
- * Revision 4.13  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.12  1999/03/31  18:11:35  caress
- * MB-System 4.6beta7
- *
- * Revision 4.11  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.10  1997/09/15  19:06:40  caress
- * Real Version 4.5
- *
- * Revision 4.9  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.8  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.7  1996/08/26  20:05:02  caress
- * Changed "signed char" to "char".
- *
- * Revision 4.7  1996/08/26  20:05:02  caress
- * Changed "signed char" to "char".
- *
- * Revision 4.6  1996/08/05  15:21:58  caress
- * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
- *
- * Revision 4.5  1996/07/26  21:09:33  caress
- * Version after first cut of handling em12s and em121 data.
- *
- * Revision 4.4  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.3  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.2  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.1  1994/07/29  18:46:51  caress
- * Changes associated with supporting Lynx OS (byte swapped) and
- * using unix second time base (for time_d values).
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.0  1994/03/05  22:54:09  caress
- * First cut.
- *
- * Revision 3.0  1993/05/14  22:56:29  sohara
- * initial version
  *
  */
 
@@ -155,6 +60,7 @@ int mbr_info_em12darw(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -203,6 +109,7 @@ int mbr_register_em12darw(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -251,6 +158,7 @@ int mbr_register_em12darw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -299,6 +207,7 @@ int mbr_info_em12darw(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -334,6 +243,7 @@ int mbr_info_em12darw(int verbose,
 	*variable_beams = MB_NO;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -358,6 +268,7 @@ int mbr_info_em12darw(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

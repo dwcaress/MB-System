@@ -312,20 +312,6 @@ int mb_write_gmt_grd(int verbose,
 			char **argv,
 			int *error);
 
-/* mb_spline function prototypes */
-int mb_spline_init(int verbose, double *x, double *y,
-	int n, double yp1, double ypn, double *y2, int *error);
-int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
-	int n, double x, double *y, int *i, int *error);
-int mb_linear_interp(int verbose, double *xa, double *ya,
-		int n, double x, double *y, int *i, int *error);
-int mb_linear_interp_longitude(int verbose, double *xa, double *ya,
-		int n, double x, double *y, int *i, int *error);
-int mb_linear_interp_latitude(int verbose, double *xa, double *ya,
-		int n, double x, double *y, int *i, int *error);
-int mb_linear_interp_heading(int verbose, double *xa, double *ya,
-		int n, double x, double *y, int *i, int *error);
-
 /* mb_cheb function prototypes */
 void lsqup(
     double  *a,

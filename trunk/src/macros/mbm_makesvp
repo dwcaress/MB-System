@@ -36,8 +36,6 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: mbm_makesvp.perl,v $
 #
 $program_name = "mbm_makesvp";
 

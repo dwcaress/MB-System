@@ -160,6 +160,8 @@ double	bath_max = 0.0;
 
 /* residual variables */
 double	*angle = NULL;
+double	*residual_acrosstrack = NULL;
+double	*residual_altitude = NULL;
 double	*residual = NULL;
 double	*res_sd = NULL;
 int	*nresidual = NULL;
@@ -1033,6 +1035,7 @@ int mbvt_save_residuals(char *file)
 	FILE	*fp;
 	int	oldmode;
 	mb_path	oldfile;
+	double	rr, xx, dangle;
 	int	i;
 
 	/* time, user, host variables */
@@ -1053,7 +1056,7 @@ int mbvt_save_residuals(char *file)
 	if (profile_edit.n > 2 && nbuffer > 0)
 	    {
 
-	    /* open the file if possible */
+	    /* open the *.sbo file if possible */
 	    sprintf(file, "%s.sbo", swathfile);
 	    if ((fp = fopen(file, "w")) == NULL)
 		{
@@ -1100,6 +1103,51 @@ int mbvt_save_residuals(char *file)
 	    /* check success */
 	    if (status == MB_SUCCESS)
 		edit = MB_YES;
+
+	    /* open the *.sbao file if possible */
+	    sprintf(file, "%s.sbao", swathfile);
+	    if ((fp = fopen(file, "w")) == NULL)
+		{
+		status = MB_FAILURE;
+		fprintf(stderr,"\nUnable to Open Output Static Beam Angle Offset File <%s> for writing\n",file);
+		do_error_dialog("Unable to open output file.",
+				"You may not have write",
+				"permission in this directory!");
+		return(status);
+		}
+
+	    /* write the sbo file */
+	    fprintf(fp, "## Static Beam Angle Offset (SBAO)\n");
+	    fprintf(fp, "## Output by Program %s\n", program_name);
+	    fprintf(fp, "## Program Version %s\n", rcs_id);
+	    fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
+	    right_now = time((time_t *)0);
+	    strcpy(date,ctime(&right_now));
+            date[strlen(date)-1] = '\0';
+	    if ((user_ptr = getenv("USER")) == NULL)
+		    user_ptr = getenv("LOGNAME");
+	    if (user_ptr != NULL)
+		    strcpy(user, user_ptr);
+	    else
+		    strcpy(user, "unknown");
+	    gethostname(host,MB_PATH_MAXLINE);
+	    fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n",
+		    user, host, date);
+	    fprintf(fp, "## Swath File: %s\n", swathfile);
+	    fprintf(fp, "## Number of Static Beam Angle Offset Points: %d\n", nbeams);
+	    for (i=0;i<nbeams;i++)
+			{
+			rr = sqrt(residual_acrosstrack[i] * residual_acrosstrack[i]
+					  + (residual_altitude[i] + residual[i]) * (residual_altitude[i] + residual[i]));
+			xx = copysign(sqrt(rr * rr - residual_altitude[i] * residual_altitude[i]), residual_acrosstrack[i]);
+			dangle = asin(residual_acrosstrack[i] / rr) - asin(xx / rr);
+		    fprintf(fp," %4d  %9.3f  %9.3f\n",
+				i, angle[i], dangle);
+			}
+
+	    /* close the file */
+	    fclose(fp);
+
 	    }
 
 	/* print output debug statements */
@@ -2645,6 +2693,8 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&depth,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&acrosstrack,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&angle,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&residual_acrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&residual_altitude,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&residual,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&res_sd,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),(void **)&nresidual,&error);
@@ -2826,6 +2876,8 @@ int mbvt_deallocate_swath()
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&depth,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&acrosstrack,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&angle,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&residual_acrosstrack,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&residual_altitude,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&residual,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&res_sd,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&nresidual,&error);
@@ -2835,6 +2887,8 @@ int mbvt_deallocate_swath()
                 depth = NULL;
                 acrosstrack = NULL;
                 angle = NULL;
+                residual_acrosstrack = NULL;
+                residual_altitude = NULL;
                 residual = NULL;
                 res_sd = NULL;
                 nresidual = NULL;
@@ -2932,6 +2986,8 @@ int mbvt_process_multibeam()
 	for (i=0;i<beams_bath;i++)
 		{
 		angle[i] = 0.0;
+		residual_altitude[i] = 0.0;
+		residual_acrosstrack[i] = 0.0;
 		residual[i] = 0.0;
 		res_sd[i] = 0.0;
 		nresidual[i] = 0;
@@ -3093,6 +3149,8 @@ int mbvt_process_multibeam()
 			depth_predict = a + b*acrosstrack[i];
 			res = depth[i] - depth_predict;
 			angle[i] += ping[k].angles[i];
+			residual_altitude[i] += depth[i] - sonardepth;
+			residual_acrosstrack[i] += acrosstrack[i];
 			residual[i] += res;
 			res_sd[i] += res * res;
 			nresidual[i]++;
@@ -3117,6 +3175,8 @@ int mbvt_process_multibeam()
 		if (nresidual[i] > 0)
 			{
 			angle[i] = angle[i]/nresidual[i];
+			residual_acrosstrack[i] = residual_acrosstrack[i]/nresidual[i];
+			residual_altitude[i] = residual_altitude[i]/nresidual[i];
 			residual[i] = residual[i]/nresidual[i];
 			res_sd[i] = sqrt(res_sd[i]/nresidual[i]
 					    - residual[i] * residual[i]);
@@ -3133,10 +3193,11 @@ int mbvt_process_multibeam()
 		fprintf(stderr,"\tminimum depth: %f\n",bath_min);
 		fprintf(stderr,"\tmaximum depth: %f\n",bath_max);
 		fprintf(stderr,"\nSwath Bathymetry Beam Residuals:\n");
-			fprintf(stderr," beam   angle   residual     sigma  calculations\n");
+			fprintf(stderr," beam   angle   acrosstrack   altitude   residual     sigma  calculations\n");
 		for (i=0;i<nbeams;i++)
-			fprintf(stderr," %4d  %7.3f  %9.3f  %9.3f  %5d\n",
-				i,angle[i], residual[i], res_sd[i], nresidual[i]);
+			fprintf(stderr," %4d  %7.3f  %9.3f   %9.3f  %9.3f  %9.3f  %5d\n",
+				i,angle[i], residual_acrosstrack[i], residual_altitude[i],
+				residual[i], res_sd[i], nresidual[i]);
 		}
 	/* turn message off */
 	do_message_off();

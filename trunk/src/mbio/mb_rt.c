@@ -21,30 +21,6 @@
  * Author:	D. W. Caress
  * Date:	November 14, 1994
  *
- * $Log: mb_rt.c,v $
- * Revision 5.2  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.1  2007/10/08 06:10:15  caress
- * Added function prototypes.
- *
- * Revision 5.0  2000/12/01 22:53:59  caress
- * First cut at Version 5.0.
- *
- * Revision 4.10  2000/10/11  00:54:20  caress
- * Converted to ANSI C
- *
- * Revision 4.9  2000/09/30  06:54:58  caress
- * Snapshot for Dale.
- *
- * Revision 4.8  1999/02/04  23:54:34  caress
- * MB-System version 4.6beta7
- *
- * Revision 4.7  1998/10/05  19:18:30  caress
- * MB-System version 4.6beta
- *
- * Revision 4.6  1997/09/12  18:51:10  caress
- * Moved mb_rt.c to own directory.
  *
  *
  */

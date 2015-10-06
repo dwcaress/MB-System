@@ -19,10 +19,6 @@
  * Author:	D. W. Caress
  * Date:	October 3, 2006
  *
- * $Log: mbf_mbarrov2.h,v $
- * Revision 5.0  2006/10/05 18:56:44  caress
- * New files for 5.1.0
- *
  */
 /*
  * Notes on the MBF_MBARROV2 data format:

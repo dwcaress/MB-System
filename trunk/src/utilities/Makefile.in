@@ -89,8 +89,8 @@ bin_PROGRAMS = mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
 	mbgrid$(EXEEXT) mbhistogram$(EXEEXT) mbhsdump$(EXEEXT) \
 	mbhysweeppreprocess$(EXEEXT) mbinfo$(EXEEXT) \
 	mbinsreprocess$(EXEEXT) mbkongsbergpreprocess$(EXEEXT) \
-	mblevitus$(EXEEXT) mblist$(EXEEXT) mbmosaic$(EXEEXT) \
-	mbnavlist$(EXEEXT) mbneptune2esf$(EXEEXT) \
+	mblevitus$(EXEEXT) mblist$(EXEEXT) mbmakeplatform$(EXEEXT) \
+	mbmosaic$(EXEEXT) mbnavlist$(EXEEXT) mbneptune2esf$(EXEEXT) \
 	mbpreprocess$(EXEEXT) mbprocess$(EXEEXT) mbrollbias$(EXEEXT) \
 	mbrolltimelag$(EXEEXT) mbroutetime$(EXEEXT) \
 	mbrphsbias$(EXEEXT) mbsegygrid$(EXEEXT) mbsegyinfo$(EXEEXT) \
@@ -201,6 +201,9 @@ mblevitus_LDADD = $(LDADD)
 am_mblist_OBJECTS = mblist.$(OBJEXT)
 mblist_OBJECTS = $(am_mblist_OBJECTS)
 mblist_LDADD = $(LDADD)
+am_mbmakeplatform_OBJECTS = mbmakeplatform.$(OBJEXT)
+mbmakeplatform_OBJECTS = $(am_mbmakeplatform_OBJECTS)
+mbmakeplatform_LDADD = $(LDADD)
 am_mbmosaic_OBJECTS = mbmosaic.$(OBJEXT)
 mbmosaic_OBJECTS = $(am_mbmosaic_OBJECTS)
 mbmosaic_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -315,7 +318,8 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbgrid_SOURCES) $(mbhistogram_SOURCES) $(mbhsdump_SOURCES) \
 	$(mbhysweeppreprocess_SOURCES) $(mbinfo_SOURCES) \
 	$(mbinsreprocess_SOURCES) $(mbkongsbergpreprocess_SOURCES) \
-	$(mblevitus_SOURCES) $(mblist_SOURCES) $(mbmosaic_SOURCES) \
+	$(mblevitus_SOURCES) $(mblist_SOURCES) \
+	$(mbmakeplatform_SOURCES) $(mbmosaic_SOURCES) \
 	$(mbnavlist_SOURCES) $(mbneptune2esf_SOURCES) \
 	$(mbpreprocess_SOURCES) $(mbprocess_SOURCES) \
 	$(mbrollbias_SOURCES) $(mbrolltimelag_SOURCES) \
@@ -581,6 +585,7 @@ mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
 mblevitus_SOURCES = mblevitus.c
 mblist_SOURCES = mblist.c
+mbmakeplatform_SOURCES = mbmakeplatform.c
 mbmosaic_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbmosaic_SOURCES = mbmosaic.c
 mbnavlist_SOURCES = mbnavlist.c
@@ -807,6 +812,10 @@ mblist$(EXEEXT): $(mblist_OBJECTS) $(mblist_DEPENDENCIES) $(EXTRA_mblist_DEPENDE
 	@rm -f mblist$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mblist_OBJECTS) $(mblist_LDADD) $(LIBS)
 
+mbmakeplatform$(EXEEXT): $(mbmakeplatform_OBJECTS) $(mbmakeplatform_DEPENDENCIES) $(EXTRA_mbmakeplatform_DEPENDENCIES) 
+	@rm -f mbmakeplatform$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mbmakeplatform_OBJECTS) $(mbmakeplatform_LDADD) $(LIBS)
+
 mbmosaic$(EXEEXT): $(mbmosaic_OBJECTS) $(mbmosaic_DEPENDENCIES) $(EXTRA_mbmosaic_DEPENDENCIES) 
 	@rm -f mbmosaic$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbmosaic_OBJECTS) $(mbmosaic_LDADD) $(LIBS)
@@ -921,6 +930,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbkongsbergpreprocess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mblevitus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mblist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbmakeplatform.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbmosaic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbneptune2esf.Po@am__quote@

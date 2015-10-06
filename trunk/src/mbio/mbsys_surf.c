@@ -26,32 +26,6 @@
  * Author:	D. N. Chayes
  * Date:	June 20, 2002
  *
- * $Log: mbsys_surf.c,v $
- * Revision 5.15  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.14  2003/12/04 23:10:24  caress
- * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
- *
- * Revision 5.13  2003/11/24 21:09:09  caress
- * Implement Reinhard Holtkamp's suggested mods for better SURF format support.
- *
- * Revision 5.12  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.11  2003/03/06 00:14:52  caress
- * Put in Reinhard Holtkamp's mod's to support SVP data.
- *
- * Revision 5.10  2003/02/27 04:33:33  caress
- * Fixed handling of SURF format data.
- *
- * Revision 5.9  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.8  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- *
  *
  *
  */

@@ -20,42 +20,6 @@
  * Author:	D. W. Caress
  * Date:	October 10, 2001
  *
- * $Log: mbdatalist.c,v $
- * Revision 5.11  2007/07/05 19:16:19  caress
- * Added file copy function.
- *
- * Revision 5.10  2006/01/06 18:19:58  caress
- * Working towards 5.0.8
- *
- * Revision 5.9  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.8  2004/10/06 19:10:52  caress
- * Release 5.0.5 update.
- *
- * Revision 5.7  2003/04/17 21:17:10  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/05/29 23:43:09  caress
- * Release 5.0.beta18
- *
- * Revision 5.5  2002/04/08 21:01:04  caress
- * Release 5.0.beta17
- *
- * Revision 5.4  2002/04/06 02:53:45  caress
- * Release 5.0.beta16
- *
- * Revision 5.3  2002/03/26 07:45:14  caress
- * Release 5.0.beta15
- *
- * Revision 5.2  2002/02/22 09:07:08  caress
- * Release 5.0.beta13
- *
- * Revision 5.1  2001/10/19  00:56:17  caress
- * Now tries to use relative paths.
- *
- * Revision 5.0  2001/10/12  21:07:31  caress
- * Initial revision.
  *
  *
  */

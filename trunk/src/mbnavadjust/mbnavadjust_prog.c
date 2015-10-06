@@ -1006,6 +1006,7 @@ int mbnavadjust_write_project()
 	char	status_char, truecrossing_char;
 	int	routecolor = 1;
 	char	*unknown = "Unknown";
+	int	isurvey;
 
 	int	i, j, k, l;
 
@@ -1954,6 +1955,208 @@ fprintf(stderr,"Output %d (expected %d) unfixed tie locations to %s\n", nroute, 
 			}
 		fclose(hfp);
 fprintf(stderr,"Output %d (expected %d) fixed tie locations to %s\n", nroute, nties_fixed, routefile);
+		}
+
+	/* write mbgrdviz route files for all unfixed ties in each survey */
+	for (isurvey=0;isurvey<project.num_blocks;isurvey++)
+		{
+		sprintf(routefile,"%s%s_unfixedties_survey%2.2d.rte",project.path,project.name,isurvey);
+		if ((hfp = fopen(routefile,"w")) == NULL)
+			{
+			fclose(hfp);
+			status = MB_FAILURE;
+			error = MB_ERROR_OPEN_FAIL;
+			sprintf(message, " > Unable to open output unfixed ties route file %s\n", routefile);
+			do_info_add(message, MB_NO);
+			if (mbna_verbose == 0)
+				fprintf(stderr,"%s",message);
+			}
+		else
+			{
+			/* write the route file header */
+			fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
+			fprintf(hfp, "## Output by Program %s\n",program_name);
+			fprintf(hfp, "## Program Version %s\n",rcs_id);
+			fprintf(hfp, "## MB-System Version %s\n",MB_VERSION);
+			strncpy(date,"\0",25);
+			right_now = time((time_t *)0);
+			strcpy(date,ctime(&right_now));
+					date[strlen(date)-1] = '\0';
+			if ((user_ptr = getenv("USER")) == NULL)
+				if ((user_ptr = getenv("LOGNAME")) == NULL)
+					user_ptr = unknown;
+			gethostname(host,MB_PATH_MAXLINE);
+			fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n",
+				user_ptr,host,date);
+			fprintf(hfp, "## Number of routes: %d\n",nties_unfixed);
+			fprintf(hfp, "## Route point format:\n");
+			fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
+			routecolor = ROUTE_COLOR_BLUEGREEN;
+		
+			/* loop over all crossings */
+			nroute = 0;
+			for (i=0;i<project.num_crossings;i++)
+				{
+				crossing = &project.crossings[i];
+		
+				/* output only unfixed ties */
+				if (crossing->status == MBNA_CROSSING_STATUS_SET
+					&& project.files[crossing->file_id_1].block == isurvey
+					&& project.files[crossing->file_id_2].block == isurvey
+					&& !(project.files[crossing->file_id_1].status == MBNA_FILE_FIXEDNAV
+						|| project.files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV))
+					{
+					for (j=0;j<crossing->num_ties;j++)
+						{
+						file_1 = (struct mbna_file *) &project.files[crossing->file_id_1];
+						file_2 = (struct mbna_file *) &project.files[crossing->file_id_2];
+						section_1 = (struct mbna_section *) &file_1->sections[crossing->section_1];
+						section_2 = (struct mbna_section *) &file_2->sections[crossing->section_2];
+						tie = (struct mbna_tie *) &crossing->ties[j];
+						snav_1 = tie->snav_1;
+						snav_2 = tie->snav_2;
+						navlon1 = section_1->snav_lon[snav_1] + section_1->snav_lon_offset[snav_1];
+						navlat1 = section_1->snav_lat[snav_1] + section_1->snav_lat_offset[snav_1];
+						navlon2 = section_2->snav_lon[snav_2] + section_2->snav_lon_offset[snav_2];
+						navlat2 = section_2->snav_lat[snav_2] + section_2->snav_lat_offset[snav_2];
+						if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+							status_char = 'U';
+						else if (crossing->status == MBNA_CROSSING_STATUS_SET)
+							status_char = '*';
+						else
+							status_char = '-';
+						if (crossing->truecrossing == MB_NO)
+							truecrossing_char = ' ';
+						else
+							truecrossing_char = 'X';
+						sprintf(routename,"Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d",
+							status_char, truecrossing_char, i,
+							file_1->block,
+							crossing->file_id_1,
+							crossing->section_1,
+							file_2->block,
+							crossing->file_id_2,
+							crossing->section_2,
+							crossing->overlap,
+							j, crossing->num_ties);
+						fprintf(hfp,"## ROUTENAME %s\n", routename);
+						fprintf(hfp,"## ROUTESIZE %d\n", 1);
+						fprintf(hfp,"## ROUTECOLOR %d\n", routecolor);
+						fprintf(hfp,"## ROUTEPOINTS %d\n", 2);
+						fprintf(hfp,"## ROUTEEDITMODE %d\n", MB_NO);
+						fprintf(hfp,"> ## STARTROUTE\n");
+						fprintf(hfp,"%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n",
+							navlon1,navlat1,navlon2,navlat2);
+						nroute++;
+						}
+					}
+				}
+			fclose(hfp);
+fprintf(stderr,"Output %d unfixed tie locations in survey %d to %s\n", nroute, isurvey, routefile);
+			}
+		}
+
+	/* write mbgrdviz route files for all crossings in each survey */
+	for (isurvey=0;isurvey<project.num_blocks;isurvey++)
+		{
+		sprintf(routefile,"%s%s_crossings_survey%2.2d.rte",project.path,project.name,isurvey);
+		if ((hfp = fopen(routefile,"w")) == NULL)
+			{
+			fclose(hfp);
+			status = MB_FAILURE;
+			error = MB_ERROR_OPEN_FAIL;
+			sprintf(message, " > Unable to open output crossings route file %s\n", routefile);
+			do_info_add(message, MB_NO);
+			if (mbna_verbose == 0)
+				fprintf(stderr,"%s",message);
+			}
+		else
+			{
+			/* write the route file header */
+			fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
+			fprintf(hfp, "## Output by Program %s\n",program_name);
+			fprintf(hfp, "## Program Version %s\n",rcs_id);
+			fprintf(hfp, "## MB-System Version %s\n",MB_VERSION);
+			strncpy(date,"\0",25);
+			right_now = time((time_t *)0);
+			strcpy(date,ctime(&right_now));
+					date[strlen(date)-1] = '\0';
+			if ((user_ptr = getenv("USER")) == NULL)
+				if ((user_ptr = getenv("LOGNAME")) == NULL)
+					user_ptr = unknown;
+			gethostname(host,MB_PATH_MAXLINE);
+			fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n",
+				user_ptr,host,date);
+			fprintf(hfp, "## Number of routes: %d\n",nties_unfixed);
+			fprintf(hfp, "## Route point format:\n");
+			fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
+			routecolor = ROUTE_COLOR_BLUEGREEN;
+		
+			/* loop over all crossings */
+			nroute = 0;
+			for (i=0;i<project.num_crossings;i++)
+				{
+				crossing = &project.crossings[i];
+		
+				/* output only crossings within the current survey */
+				if (project.files[crossing->file_id_1].block == isurvey
+					&& project.files[crossing->file_id_2].block == isurvey
+					&& !(project.files[crossing->file_id_1].status == MBNA_FILE_FIXEDNAV
+						|| project.files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV))
+					{
+					file_1 = (struct mbna_file *) &project.files[crossing->file_id_1];
+					file_2 = (struct mbna_file *) &project.files[crossing->file_id_2];
+					section_1 = (struct mbna_section *) &file_1->sections[crossing->section_1];
+					section_2 = (struct mbna_section *) &file_2->sections[crossing->section_2];
+					snav_1 = section_1->num_snav/2;
+					snav_2 = section_2->num_snav/2;
+					navlon1 = section_1->snav_lon[snav_1] + section_1->snav_lon_offset[snav_1];
+					navlat1 = section_1->snav_lat[snav_1] + section_1->snav_lat_offset[snav_1];
+					navlon2 = section_2->snav_lon[snav_2] + section_2->snav_lon_offset[snav_2];
+					navlat2 = section_2->snav_lat[snav_2] + section_2->snav_lat_offset[snav_2];
+					if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+						{
+						status_char = 'U';
+						routecolor = ROUTE_COLOR_YELLOW;
+						}
+					else if (crossing->status == MBNA_CROSSING_STATUS_SET)
+						{
+						status_char = '*';
+						routecolor = ROUTE_COLOR_GREEN;
+						}
+					else
+						{
+						status_char = '-';
+						routecolor = ROUTE_COLOR_RED;
+						}
+					if (crossing->truecrossing == MB_NO)
+						truecrossing_char = ' ';
+					else
+						truecrossing_char = 'X';
+					sprintf(routename,"%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d",
+						status_char, truecrossing_char, i,
+						file_1->block,
+						crossing->file_id_1,
+						crossing->section_1,
+						file_2->block,
+						crossing->file_id_2,
+						crossing->section_2,
+						crossing->overlap,
+						crossing->num_ties);
+					fprintf(hfp,"## ROUTENAME %s\n", routename);
+					fprintf(hfp,"## ROUTESIZE %d\n", 1);
+					fprintf(hfp,"## ROUTECOLOR %d\n", routecolor);
+					fprintf(hfp,"## ROUTEPOINTS %d\n", 2);
+					fprintf(hfp,"## ROUTEEDITMODE %d\n", MB_NO);
+					fprintf(hfp,"> ## STARTROUTE\n");
+					fprintf(hfp,"%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n",
+						navlon1,navlat1,navlon2,navlat2);
+					nroute++;
+					}
+				}
+			fclose(hfp);
+fprintf(stderr,"Output %d crossing locations in survey %d to %s\n", nroute, isurvey, routefile);
+			}
 		}
 
 	/* output offset vectors */

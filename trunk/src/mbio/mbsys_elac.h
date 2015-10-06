@@ -23,60 +23,6 @@
  * Author:	D. W. Caress (L-DEO)
  * Date:	August 20, 1994
  *
- * $Log: mbsys_elac.h,v $
- * Revision 5.6  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.5  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.4  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.3  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.2  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.6  2000/09/30  06:31:19  caress
- * Snapshot for Dale.
- *
- * Revision 4.5  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 1.1  1998/10/05  17:46:15  caress
- * Initial revision
- *
- * Revision 4.4  1997/09/15  19:06:40  caress
- * Real Version 4.5
- *
- * Revision 4.3  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.2  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1995/07/13  19:15:09  caress
- * Intermediate check-in during major bug-fixing flail.
- *
- * Revision 4.1  1995/07/13  19:15:09  caress
- * Intermediate check-in during major bug-fixing flail.
- *
- * Revision 4.0  1994/10/21  12:35:07  caress
- * Release V4.0
- *
- * Revision 1.1  1994/10/21  12:20:01  caress
- * Initial revision
- *
- *
  *
  */
 /*

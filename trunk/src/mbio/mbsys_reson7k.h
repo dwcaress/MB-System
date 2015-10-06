@@ -114,49 +114,49 @@
 #define R7KRECID_ProcessedSidescan		        3199
 
 /* 7000-7999 reserved for SeaBat 7k records */
-#define R7KRECID_7kVolatileSonarSettings		7000
-#define R7KRECID_7kConfiguration			7001
-#define R7KRECID_7kMatchFilter				7002
+#define R7KRECID_7kVolatileSonarSettings		    7000
+#define R7KRECID_7kConfiguration			        7001
+#define R7KRECID_7kMatchFilter				        7002
 #define R7KRECID_7kV2FirmwareHardwareConfiguration	7003
-#define R7KRECID_7kBeamGeometry				7004
-#define R7KRECID_7kCalibrationData			7005
-#define R7KRECID_7kBathymetricData			7006
-#define R7KRECID_7kBackscatterImageData			7007
-#define R7KRECID_7kBeamData				7008
-#define R7KRECID_7kVerticalDepth			7009
-#define R7KRECID_7kTVGData       			7010
-#define R7KRECID_7kImageData				7011
-#define R7KRECID_7kV2PingMotion				7012
-#define R7KRECID_7kV2DetectionSetup			7017
-#define R7KRECID_7kV2BeamformedData			7018
-#define R7KRECID_7kV2BITEData				7021
-#define R7KRECID_7kV27kCenterVersion			7022
-#define R7KRECID_7kV28kWetEndVersion			7023
-#define R7KRECID_7kV2Detection				7026
-#define R7KRECID_7kV2RawDetection			7027
-#define R7KRECID_7kV2SnippetData			7028
-#define R7KRECID_7kInstallationParameters		7030
-#define R7KRECID_7kSystemEvents				7050
-#define R7KRECID_7kSystemEventMessage			7051
-#define R7KRECID_7kTargetData				7060
-#define R7KRECID_7kDataStorageStatus			7052
-#define R7KRECID_7kCalibratedSnippetData                7058
-#define R7KRECID_7kFileHeader				7200
-#define R7KRECID_7kTrigger				7300
-#define R7KRECID_7kTriggerSequenceSetup			7301
-#define R7KRECID_7kTriggerSequenceDone			7302
-#define R7KRECID_7kTimeMessage				7400
-#define R7KRECID_7kRemoteControl			7500
-#define R7KRECID_7kRemoteControlAcknowledge		7501
+#define R7KRECID_7kBeamGeometry				        7004
+#define R7KRECID_7kCalibrationData			        7005
+#define R7KRECID_7kBathymetricData			        7006
+#define R7KRECID_7kBackscatterImageData			    7007
+#define R7KRECID_7kBeamData				            7008
+#define R7KRECID_7kVerticalDepth			        7009
+#define R7KRECID_7kTVGData       			        7010
+#define R7KRECID_7kImageData				        7011
+#define R7KRECID_7kV2PingMotion				        7012
+#define R7KRECID_7kV2DetectionSetup			        7017
+#define R7KRECID_7kV2BeamformedData			        7018
+#define R7KRECID_7kV2BITEData				        7021
+#define R7KRECID_7kV27kCenterVersion			    7022
+#define R7KRECID_7kV28kWetEndVersion			    7023
+#define R7KRECID_7kV2Detection				        7026
+#define R7KRECID_7kV2RawDetection			        7027
+#define R7KRECID_7kV2SnippetData			        7028
+#define R7KRECID_7kInstallationParameters		    7030
+#define R7KRECID_7kSystemEvents				        7050
+#define R7KRECID_7kSystemEventMessage			    7051
+#define R7KRECID_7kTargetData				        7060
+#define R7KRECID_7kDataStorageStatus			    7052
+#define R7KRECID_7kCalibratedSnippetData            7058
+#define R7KRECID_7kFileHeader				        7200
+#define R7KRECID_7kTrigger				            7300
+#define R7KRECID_7kTriggerSequenceSetup			    7301
+#define R7KRECID_7kTriggerSequenceDone			    7302
+#define R7KRECID_7kTimeMessage				        7400
+#define R7KRECID_7kRemoteControl			        7500
+#define R7KRECID_7kRemoteControlAcknowledge		    7501
 #define R7KRECID_7kRemoteControlNotAcknowledge		7502
 #define R7KRECID_7kRemoteControlSonarSettings		7503
-#define R7KRECID_7kReserved				7504
-#define R7KRECID_7kRoll					7600
-#define R7KRECID_7kPitch				7601
-#define R7KRECID_7kSoundVelocity			7610
-#define R7KRECID_7kAbsorptionLoss			7611
-#define R7KRECID_7kSpreadingLoss			7612
-#define R7KRECID_8100SonarData				8100
+#define R7KRECID_7kReserved				            7504
+#define R7KRECID_7kRoll					            7600
+#define R7KRECID_7kPitch				            7601
+#define R7KRECID_7kSoundVelocity			        7610
+#define R7KRECID_7kAbsorptionLoss			        7611
+#define R7KRECID_7kSpreadingLoss			        7612
+#define R7KRECID_8100SonarData				        8100
 
 /* 11000-11199 reserved for Payload Controller command records */
 #define R7KRECID_7kPayloadControllerCommand		11000
@@ -2252,11 +2252,11 @@ struct mbsys_reson7k_struct
 	int		read_v2detection;
 	int		read_v2rawdetection;
 	int		read_v2snippet;
-        int             read_calibratedsnippet;
+    int     read_calibratedsnippet;
 	int		read_processedsidescan;
 
 	/* MB-System time stamp */
-	double		time_d;
+	double	time_d;
 	int		time_i[7];
 
 	/* Reference point information (record 1000) */
@@ -2398,8 +2398,8 @@ struct mbsys_reson7k_struct
 	/* Reson 7k system event (record 7051) */
 	s7kr_systemeventmessage	systemeventmessage;
 
-        /* Reson 7k calibrated snippet (record 7058) */
-        s7kr_calibratedsnippet calibratedsnippet;
+    /* Reson 7k calibrated snippet (record 7058) */
+    s7kr_calibratedsnippet calibratedsnippet;
 
 	/* Reson 7k file header (record 7200) */
 	s7kr_fileheader		fileheader;
@@ -2463,6 +2463,18 @@ int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sonartype, int *error);
 int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
+int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
+				double *nav_speed,
+		int n_sensordepth, double *sensordepth_time_d,
+				double *sensordepth_sensordepth,
+		int n_heading, double *heading_time_d, double *heading_heading,
+		int n_altitude, double *altitude_time_d, double *altitude_altitude,
+		int n_attitude, double *attitude_time_d, double *attitude_roll,
+				double *attitude_pitch, double *attitude_heave,
+		int *error);
+int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, void **platform_ptr, int *error);
 int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

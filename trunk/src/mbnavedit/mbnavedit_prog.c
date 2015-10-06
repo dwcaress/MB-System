@@ -134,6 +134,7 @@ static int	verbose = 0;
 static char	*message = NULL;
 
 /* MBIO control parameters */
+static int  platform_source;
 static int	nav_source;
 static int	heading_source;
 static int	vru_source;
@@ -756,7 +757,7 @@ int mbnavedit_open_file(int useprevious)
 
 		/* initialize reading the input multibeam file */
 		status = mb_format_source(verbose, &format_use,
-				&nav_source, &heading_source,
+				&platform_source, &nav_source, &heading_source,
 				&vru_source, &svp_source,
 				&error);
 		if ((status = mb_read_init(

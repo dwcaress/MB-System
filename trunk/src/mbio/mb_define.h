@@ -233,7 +233,7 @@ int mb_format_info(int verbose, int *format, int *system,
 		char *format_name, char *system_name, char *format_description,
 		int *numfile, int *filetype, int *variable_beams,
 		int *traveltime, int *beam_flagging,
-		int *nav_source, int *heading_source, int *vru_source, int *svp_source,
+		int *platform_source, int *nav_source, int *heading_source, int *vru_source, int *svp_source,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error);
 int mb_format(int verbose, int *format, int *error);
@@ -247,7 +247,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging,
 		int *error);
 int mb_format_source(int verbose, int *format,
-		int *nav_source, int *heading_source,
+		int *platform_source, int *nav_source, int *heading_source,
 		int *vru_source, int *svp_source,
 		int *error);
 int mb_format_beamwidth(int verbose, int *format,
@@ -383,11 +383,18 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sonartype, int *error);
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
-int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-		double time_d, double navlon, double navlat,
-		double speed, double heading, double sonardepth,
-		double roll, double pitch, double heave,
+int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
+				double *nav_speed,
+		int n_sensordepth, double *sensordepth_time_d,
+				double *sensordepth_sensordepth,
+		int n_heading, double *heading_time_d, double *heading_heading,
+		int n_altitude, double *altitude_time_d, double *altitude_altitude,
+		int n_attitude, double *attitude_time_d, double *attitude_roll,
+				double *attitude_pitch, double *attitude_heave,
 		int *error);
+int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, void **platform_ptr, int *error);
 int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -494,66 +501,115 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 int mb_copyrecord(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);
 
-int mb_platform_init(int verbose, int type, char *name, char *organization,
-		int source_swathbathymetry, int source_position,
-		int source_depth, int source_heave, int source_attitude,
-		void **platform_ptr, int *error);
-int mb_platform_add_sensor(int verbose, void **platform_ptr,
+int mb_platform_init(int verbose,
+        int type,
+        char *name,
+        char *organization,
+		void **platform_ptr,
+        int *error);
+int mb_platform_add_sensor(int verbose,
+        void *platform_ptr,
 		int type, mb_longname model,
 		mb_longname manufacturer,
 		mb_longname serialnumber,
-		int capability, int special_capability,
-		int num_offsets, int num_time_latency,
+		int capability1,
+        int capability2,
+		int num_offsets,
+        int num_time_latency,
 		int *error);
-int mb_platform_add_sensor_offset(int verbose, void **platform_ptr,
-		int isensor, int ioffset,
+int mb_platform_set_sensor_offset(int verbose,
+        void *platform_ptr,
+        int isensor, int ioffset,
+        int position_offset_mode,
+        double position_offset_x,
+        double position_offset_y,
+        double position_offset_z,   
+        int attitude_offset_mode,
+        double attitude_offset_azimuth,
+        double attitude_offset_roll,
+        double attitude_offset_pitch,
+        int *error);
+int mb_platform_set_sensor_timelatency(int verbose,
+        void *platform_ptr,
+		int isensor,
 		int time_latency_mode,
 		double time_latency_static,
 		int num_time_latency,
 		double *time_latency_time_d,
 		double *time_latency_value,
-		int position_offset_mode,
-		double position_offset_x,
-		double position_offset_y,
-		double position_offset_z,   
-		int attitude_offset_mode,
-		double attitude_offset_azimuth,
-		double attitude_offset_roll,
-		double attitude_offset_pitch,
 		int *error);
-int mb_platform_deall(int verbose, void **platform_ptr, int *error);
-int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int *error);
-int mb_platform_write(int verbose, char *platform_file, void **platform_ptr, int *error);
-int mb_platform_lever(int verbose, void **platform_ptr,
-                int targetsensor, int targetsensoroffset,
-		double heading, double roll, double pitch,
-		double *lever_x, double *lever_y, double *lever_z,
-                int *error);
-int mb_platform_position(int verbose, void **platform_ptr,
-                int targetsensor, int targetsensoroffset,
-		double navlon, double navlat, double sensordepth,
-		double heading, double roll, double pitch,
-		double *targetlon, double *targetlat, double *targetz,
-                int *error);
-int mb_platform_orientation (int verbose, void **platform_ptr,
-							double heading, double roll, double pitch,
-							double *platform_heading, 
-							double *platform_roll, 
-							double *platform_pitch,
-							int *error);
-int mb_platform_orientation_offset (int verbose, void **platform_ptr,
-							int targetsensor, int targetsensoroffset,
-							double *target_hdg_offset, 
-							double *target_roll_offset, 
-							double *target_pitch_offset,
-							int *error);
-int mb_platform_orientation_target (int verbose, void **platform_ptr,
-							int targetsensor, int targetsensoroffset,
-							double heading, double roll, double pitch,
-							double *target_heading, 
-							double *target_roll, 
-							double *target_pitch,
-							int *error);
+int mb_platform_set_source_sensor(int verbose,
+        void *platform_ptr,
+		int source_type,
+        int sensor,
+        int *error);
+int mb_platform_deall(int verbose,
+        void **platform_ptr,
+        int *error);
+int mb_platform_read(int verbose,
+        char *platform_file,
+        void **platform_ptr,
+        int *error);
+int mb_platform_write(int verbose,
+        char *platform_file,
+        void *platform_ptr,
+        int *error);
+int mb_platform_lever(int verbose,
+        void *platform_ptr,
+        int targetsensor,
+        int targetsensoroffset,
+		double heading,
+        double roll,
+        double pitch,
+		double *lever_x,
+        double *lever_y,
+        double *lever_z,
+        int *error);
+int mb_platform_position(int verbose,
+        void *platform_ptr,
+        int targetsensor,
+        int targetsensoroffset,
+		double navlon,
+        double navlat,
+        double sensordepth,
+		double heading,
+        double roll,
+        double pitch,
+		double *targetlon,
+        double *targetlat,
+        double *targetz,
+        int *error);
+int mb_platform_orientation (int verbose,
+        void *platform_ptr,
+		double heading,
+        double roll,
+        double pitch,
+        double *platform_heading, 
+		double *platform_roll, 
+		double *platform_pitch,
+		int *error);
+int mb_platform_orientation_offset (int verbose,
+        void *platform_ptr,
+		int targetsensor,
+        int targetsensoroffset,
+		double *target_hdg_offset, 
+		double *target_roll_offset, 
+		double *target_pitch_offset,
+		int *error);
+int mb_platform_orientation_target (int verbose,
+        void *platform_ptr,
+		int targetsensor,
+        int targetsensoroffset,
+		double heading,
+        double roll,
+        double pitch,
+		double *target_heading, 
+		double *target_roll, 
+		double *target_pitch,
+		int *error);
+int mb_platform_print(int verbose,
+        void *platform_ptr,
+        int *error);
 
 void mb_platform_math_matrix_times_vector_3x1 (double* A, double* b, double* Ab);
 void mb_platform_math_matrix_times_matrix_3x3 (double* A, double* B, double* AB);
@@ -870,6 +926,20 @@ int mb_proj_transform(int verbose,
 		int npoint,
 		double *x, double *y, double *z,
 		int *error);
+
+/* mb_spline function prototypes */
+int mb_spline_init(int verbose, double *x, double *y,
+	int n, double yp1, double ypn, double *y2, int *error);
+int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
+	int n, double x, double *y, int *i, int *error);
+int mb_linear_interp(int verbose, double *xa, double *ya,
+		int n, double x, double *y, int *i, int *error);
+int mb_linear_interp_longitude(int verbose, double *xa, double *ya,
+		int n, double x, double *y, int *i, int *error);
+int mb_linear_interp_latitude(int verbose, double *xa, double *ya,
+		int n, double x, double *y, int *i, int *error);
+int mb_linear_interp_heading(int verbose, double *xa, double *ya,
+		int n, double x, double *y, int *i, int *error);
 
 int mb_swap_check();
 int mb_swap_float(float *a);

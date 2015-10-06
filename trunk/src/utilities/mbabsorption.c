@@ -91,10 +91,6 @@
  *              Note: as I was writing this code the Flyer was refloated
  *              and successfully backed off the reef.
  *
- * $Log: mbabsorption.c,v $
- * Revision 5.0  2008/02/12 02:33:49  caress
- * Initial version.
- *
  *
  */
 

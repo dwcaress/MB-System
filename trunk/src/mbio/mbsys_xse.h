@@ -27,52 +27,6 @@
  * Date:	August 1,  1999
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
- * $Log: mbsys_xse.h,v $
- * Revision 5.12  2007/07/03 17:28:08  caress
- * Fixes to XSE format.
- *
- * Revision 5.11  2007/06/18 01:19:48  caress
- * Changes as of 17 June 2007.
- *
- * Revision 5.10  2006/09/11 18:55:53  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.9  2005/11/05 00:48:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.8  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.7  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.6  2001/12/30 20:36:13  caress
- * Fixed array overflows in handling XSE data.
- *
- * Revision 5.5  2001/12/20 20:48:51  caress
- * Release 5.0.beta11
- *
- * Revision 5.4  2001/07/22  21:19:23  caress
- * Removed redundant define.
- *
- * Revision 5.3  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/04/06  22:05:59  caress
- * Consolidated xse formats into one format.
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.1  2000/09/30  06:31:19  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  1999/08/08  04:14:35  caress
- * Initial revision.
  *
  *
  */

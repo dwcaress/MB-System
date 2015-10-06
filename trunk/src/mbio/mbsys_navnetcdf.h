@@ -22,19 +22,6 @@
  * Author:	D. W. Caress
  * Date:	May 4, 2002
  *
- * $Log: mbsys_navnetcdf.h,v $
- * Revision 5.3  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.2  2005/11/05 00:48:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.1  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.0  2002/05/29 23:41:20  caress
- * Release 5.0.beta18
- *
  *
  *
  */

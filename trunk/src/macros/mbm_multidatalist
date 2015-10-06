@@ -34,10 +34,6 @@
 # Version:
 #   $Id: mbm_multidatalist.pl 19XX 2011-07-18 15:40:00Z ferreira $
 #
-# Revisions:
-#
-#  Revision 1.0		2011-07-18 15:40:00	cferreira
-#  Initial version with partial implementation of mbdatalist flags
 #
 
 $program_name = "mbm_multidatalist";

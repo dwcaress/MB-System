@@ -19,31 +19,6 @@
  * Author:	D. W. Caress
  * Date:	May 20, 1999
  *
- * $Log: mbf_mbarirov.h,v $
- * Revision 5.3  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.1  2001/03/22 20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.3  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.2  1999/09/24  23:10:12  caress
- * Made this module work with older variant of format.
- *
- * Revision 4.1  1999/07/16  19:29:09  caress
- * First revision.
- *
- * Revision 1.1  1999/07/16  19:24:15  caress
- * Initial revision
- *
  *
  */
 /*

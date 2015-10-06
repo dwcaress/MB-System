@@ -23,160 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	October 16,  1998
- * $Log: mbr_em300mba.c,v $
- * Revision 5.38  2008/09/13 06:08:09  caress
- * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
- *
- * Revision 5.37  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.36  2008/03/01 09:14:03  caress
- * Some housekeeping changes.
- *
- * Revision 5.35  2007/07/03 17:31:03  caress
- * Fixed handling of EM121A data.
- *
- * Revision 5.34  2006/11/10 22:36:04  caress
- * Working towards release 5.1.0
- *
- * Revision 5.33  2006/07/27 18:42:51  caress
- * Working towards 5.1.0
- *
- * Revision 5.32  2006/02/07 03:12:14  caress
- * Another shot at dealing with broken simrad sidescan records. Now we will keep the raw sidescan data but not use it to make the binned sidescan returned by the standard mbio extract functions.
- *
- * Revision 5.31  2006/02/06 16:54:50  caress
- * Set the Simrad i/o modules to output error messages with verbose > 0 when
- * sidescan is zeroed because of mismatch between bathymetry and sidescan records.
- *
- * Revision 5.30  2006/02/06 06:18:06  caress
- * Commented out checks for beam mismatches between bathy and sidescan records - Barry Eakins of SIO has complained of dropped pings in Revelle data.
- *
- * Revision 5.29  2006/02/03 21:08:51  caress
- * Working on supporting water column datagrams in Simrad formats.
- *
- * Revision 5.28  2006/02/02 19:42:09  caress
- * Fixed handling of unknown datagrams on little-endian systems.
- *
- * Revision 5.27  2006/02/01 18:32:05  caress
- * Fixed problem reading RAWBEAM3 records.
- *
- * Revision 5.26  2006/01/27 20:09:47  caress
- * Added support for EM3002
- *
- * Revision 5.25  2006/01/27 19:09:38  caress
- * Version 5.0.8beta2
- *
- * Revision 5.24  2006/01/11 07:37:29  caress
- * Working towards 5.0.8
- *
- * Revision 5.23  2006/01/06 18:27:19  caress
- * Working towards 5.0.8
- *
- * Revision 5.22  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.21  2005/03/25 04:18:14  caress
- * Fixed problems with the debug mode being on in mbr_em300mba.c and problems with the debug output in both mbr_em300mba.c and mbr_em300mba.c.
- *
- * Revision 5.20  2004/07/15 19:25:04  caress
- * Progress in supporting Reson 7k data.
- *
- * Revision 5.19  2004/02/24 22:29:02  caress
- * Fixed errors in handling Simrad datagrams and edit save files on byteswapped machines (e.g. Intel or AMD processors).
- *
- * Revision 5.18  2003/11/24 20:44:51  caress
- * Fixes to more gracefully handle unsupported datagrams.
- *
- * Revision 5.17  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.16  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.15  2003/04/16 16:47:41  caress
- * Release 5.0.beta30
- *
- * Revision 5.14  2002/09/16 05:51:53  caress
- * Really fixed bug...
- *
- * Revision 5.13  2002/09/16 04:50:47  caress
- * Fixed mis-dimensioned array in rd_rawbeam functions.
- *
- * Revision 5.12  2002/08/21 00:55:46  caress
- * Release 5.0.beta22
- *
- * Revision 5.11  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.10  2002/05/29 23:38:53  caress
- * Release 5.0.beta18
- *
- * Revision 5.9  2001/08/10 22:41:19  dcaress
- * Release 5.0.beta07
- *
- * Revision 5.8  2001-08-03 18:00:02-07  caress
- * Applied mods from Gordon Keith.
- *
- * Revision 5.7  2001/07/20  00:31:11  caress
- * Release 5.0.beta03
- *
- * Revision 5.6  2001/06/08  21:44:01  caress
- * Version 5.0.beta01
- *
- * Revision 5.5  2001/06/01  00:14:06  caress
- * Redid support for current Simrad multibeam data.
- *
- * Revision 5.4  2001/05/30  17:57:26  caress
- * Fixed New Simrad data handling, plus removed use of
- * intermediate data structure. Still need to reduce use
- * of #ifdefs related to byteswapping.
- *
- * Revision 5.3  2001/05/24  23:18:07  caress
- * Fixed handling of Revelle EM120 data (first cut).
- *
- * Revision 5.2  2001/03/22  20:45:56  caress
- * Trying to make 5.0.beta0...
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.9  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.8  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.7  2000/09/19  23:13:26  caress
- * Applied fixes from Gordon Keith at AGSO.
- *
- * Revision 4.6  2000/07/20  20:24:59  caress
- * First cut at supporting both EM120 and EM1002.
- *
- * Revision 4.5  2000/07/17  23:36:24  caress
- * Added support for EM120.
- *
- * Revision 4.4  2000/02/07  22:59:47  caress
- * Fixed problem with depth_offset_multiplier
- *
- * Revision 4.3  1999/04/21  05:45:32  caress
- * Fixed handling of bad sidescan data.
- *
- * Revision 4.2  1999/04/07  20:38:24  caress
- * Fixes related to building under Linux.
- *
- * Revision 4.2  1999/04/03 07:36:16  caress
- * Fix bugs in byteswapped code.
- *
- * Revision 4.1  1999/02/04 23:52:54  caress
- * MB-System version 4.6beta7
- *
- * Revision 4.0  1998/12/17  22:59:14  caress
- * MB-System version 4.6beta4
- *
  *
  *
  */
@@ -215,6 +61,7 @@ int mbr_info_em300mba(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -353,6 +200,7 @@ int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -403,6 +251,7 @@ int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -451,6 +300,7 @@ int mbr_info_em300mba(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -486,6 +336,7 @@ int mbr_info_em300mba(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_ATTITUDE;
@@ -510,6 +361,7 @@ int mbr_info_em300mba(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

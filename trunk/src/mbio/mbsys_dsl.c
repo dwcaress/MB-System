@@ -24,63 +24,6 @@
  * Author:	D. W. Caress
  * Date:	August 5, 1996
  *
- * $Log: mbsys_dsl.c,v $
- * Revision 5.8  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.7  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/09/25 20:41:04  caress
- * Fixed old DSL120 format.
- *
- * Revision 5.5  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.4  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.3  2001/08/25 00:54:13  caress
- * Adding beamwidth values to extract functions.
- *
- * Revision 5.2  2001/07/20  00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.5  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.4  2000/09/30  06:32:52  caress
- * Snapshot for Dale.
- *
- * Revision 4.3  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 1.1  1998/10/05  17:46:15  caress
- * Initial revision
- *
- * Revision 4.2  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.0  1996/08/26  17:29:56  caress
- * Release 4.4 revision.
- *
- * Revision 4.0  1996/08/26  17:29:56  caress
- * Release 4.4 revision.
- *
- * Revision 1.1  1996/08/26  17:24:56  caress
- * Initial revision
- *
- *
  *
  *
  */

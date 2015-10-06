@@ -24,66 +24,6 @@
  *
  * Author:	D. W. Caress
  * Date:	February 16, 1993
- * $Log: mbsys_hsds.h,v $
- * Revision 5.5  2005/11/05 00:48:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.4  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.3  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.2  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.5  2000/09/30  06:31:19  caress
- * Snapshot for Dale.
- *
- * Revision 4.4  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 1.1  1998/10/05  17:46:15  caress
- * Initial revision
- *
- * Revision 4.3  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.3  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.2  1995/02/22  21:56:08  caress
- * Put array of per beam gain values in this include file.
- *
- * Revision 4.2  1995/02/22  21:56:08  caress
- * Put array of per beam gain values in this include file.
- *
- * Revision 4.1  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.1  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.0  1994/02/17  20:36:40  caress
- * First cut at new version.  Comment changes only.
- *
- * Revision 3.1  1993/06/09  08:21:11  caress
- * Added definition of beam angle spacing.  The actual spacing
- * seems to be 1.510 degrees instead of the 1.525 degrees listed
- * in the Atlas manuals (based on Hydrosweep DS data collected
- * on the R/V Ewing on June 9, 1993.
- *
- * Revision 3.0  1993/05/14  22:59:28  sohara
- * initial version
  *
  */
 /*

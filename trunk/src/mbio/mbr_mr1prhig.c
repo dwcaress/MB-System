@@ -23,92 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	July 17, 1994
- * $Log: mbr_mr1prhig.c,v $
- * Revision 5.9  2008/07/10 06:43:41  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.8  2005/11/05 00:48:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.7  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.6  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.5  2003/03/10 20:02:29  caress
- * Added mr1pr library.
- *
- * Revision 5.4  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.3  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.14  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.13  2000/10/03  21:48:03  caress
- * Snapshot for Dale.
- *
- * Revision 4.12  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.11  1999/05/05  20:32:19  caress
- * Fixed bugs in handling updated bathymetry through mb_put_all call.
- *
- * Revision 4.10  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.9  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.8  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.8  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.7  1996/04/22  11:16:30  caress
- * DTR define now in mb_io.h
- *
- * Revision 4.6  1996/03/12  17:21:55  caress
- * Added format 63, short HMR1 processing format.
- *
- * Revision 4.5  1996/01/26  21:23:30  caress
- * Version 4.3 distribution
- *
- * Revision 4.4  1995/09/28  18:10:48  caress
- * Various bug fixes working toward release 4.3.
- *
- * Revision 4.3  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.2  1994/11/23  23:16:34  caress
- * Now uses png_course instead of png_heading for heading
- * value because png_heading has large errors. Will
- * change back after processing tools to correct heading
- * are created.
- *
- * Revision 4.1  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.0  1994/07/29  18:59:33  caress
- * Initial Revision.
- *
- * Revision 1.1  1994/07/29  18:46:51  caress
- * Initial revision
- *
- *
  *
  */
 
@@ -142,6 +56,7 @@ int mbr_info_mr1prhig(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -200,6 +115,7 @@ int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -247,6 +163,7 @@ int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -295,6 +212,7 @@ int mbr_info_mr1prhig(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -330,6 +248,7 @@ int mbr_info_mr1prhig(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -354,6 +273,7 @@ int mbr_info_mr1prhig(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

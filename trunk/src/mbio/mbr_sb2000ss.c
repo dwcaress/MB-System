@@ -23,80 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	October 14, 1994
- * $Log: mbr_sb2000ss.c,v $
- * Revision 5.13  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.12  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.11  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.10  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.9  2002/04/08 21:29:49  caress
- * Removed errant debug message.
- *
- * Revision 5.8  2002/04/08 20:59:38  caress
- * Release 5.0.beta17
- *
- * Revision 5.7  2002/02/26 07:50:41  caress
- * Release 5.0.beta14
- *
- * Revision 5.6  2002/02/22 09:03:43  caress
- * Release 5.0.beta13
- *
- * Revision 5.5  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.4  2001/04/06  22:05:59  caress
- * Consolidated xse formats into one format.
- *
- * Revision 5.3  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.9  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.8  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.7  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.6  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.5  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.5  1997/04/17  15:07:36  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.4  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.3  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.2  1994/12/21  20:21:09  caress
- * Changes to support high resolution SeaBeam 2000 sidescan files
- * from R/V Melville data.
- *
- * Revision 4.0  1994/10/21  12:34:58  caress
- * Release V4.0
- *
- * Revision 1.1  1994/10/21  12:20:01  caress
- * Initial revision
  *
  *
  */
@@ -159,6 +85,7 @@ int mbr_info_sb2000ss(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -206,6 +133,7 @@ int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -253,6 +181,7 @@ int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -301,6 +230,7 @@ int mbr_info_sb2000ss(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -336,6 +266,7 @@ int mbr_info_sb2000ss(int verbose,
 	*variable_beams = MB_NO;
 	*traveltime = MB_NO;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -360,6 +291,7 @@ int mbr_info_sb2000ss(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

@@ -29,92 +29,363 @@
 #include "mb_config.h"
 #include "mb_define.h"
 #include "mb_status.h"
-        
-/* survey platform definition structures */
+
+/* ---------------------------------------------------------------------------*/
+/* Survey Platform definitions and structures for the
+ * mb_platform_*() functions */
+
+/* survey platform type defines */
+#define MB_PLATFORM_NONE                0
+#define MB_PLATFORM_SURFACE_VESSEL      1
+#define MB_PLATFORM_TOW_BODY            2
+#define MB_PLATFORM_ROV                 3
+#define MB_PLATFORM_AUV                 4
+#define MB_PLATFORM_AIRCRAFT            5
+#define MB_PLATFORM_SATELLITE           6
+static char *mb_platform_type_string[] =
+	{
+	"Unknown platform type",
+	"Surface vessel",
+	"Tow body",
+	"ROV",
+	"AUV",
+	"Aircraft",
+	"Satellite"
+    };
+
+/* survey platform data source sensor defines */
+#define MB_PLATFORM_SOURCE_NONE                 0
+#define MB_PLATFORM_SOURCE_BATHYMETRY           1
+#define MB_PLATFORM_SOURCE_BATHYMETRY1          2
+#define MB_PLATFORM_SOURCE_BATHYMETRY2          3
+#define MB_PLATFORM_SOURCE_BATHYMETRY3          4
+#define MB_PLATFORM_SOURCE_BACKSCATTER          5
+#define MB_PLATFORM_SOURCE_BACKSCATTER1         6
+#define MB_PLATFORM_SOURCE_BACKSCATTER2         7
+#define MB_PLATFORM_SOURCE_BACKSCATTER3         8
+#define MB_PLATFORM_SOURCE_SUBBOTTOM            9
+#define MB_PLATFORM_SOURCE_SUBBOTTOM1           10
+#define MB_PLATFORM_SOURCE_SUBBOTTOM2           11
+#define MB_PLATFORM_SOURCE_SUBBOTTOM3           12
+#define MB_PLATFORM_SOURCE_POSITION             13
+#define MB_PLATFORM_SOURCE_POSITION1            14
+#define MB_PLATFORM_SOURCE_POSITION2            15
+#define MB_PLATFORM_SOURCE_POSITION3            16
+#define MB_PLATFORM_SOURCE_DEPTH                17
+#define MB_PLATFORM_SOURCE_DEPTH1               18
+#define MB_PLATFORM_SOURCE_DEPTH2               19
+#define MB_PLATFORM_SOURCE_DEPTH3               20
+#define MB_PLATFORM_SOURCE_HEADING              21
+#define MB_PLATFORM_SOURCE_HEADING1             22
+#define MB_PLATFORM_SOURCE_HEADING2             23
+#define MB_PLATFORM_SOURCE_HEADING3             24
+#define MB_PLATFORM_SOURCE_ROLLPITCH            25
+#define MB_PLATFORM_SOURCE_ROLLPITCH1           26
+#define MB_PLATFORM_SOURCE_ROLLPITCH2           27
+#define MB_PLATFORM_SOURCE_ROLLPITCH3           28
+#define MB_PLATFORM_SOURCE_HEAVE                29
+#define MB_PLATFORM_SOURCE_HEAVE1               30
+#define MB_PLATFORM_SOURCE_HEAVE2               31
+#define MB_PLATFORM_SOURCE_HEAVE3               32
+
+/* survey sensor time latency defines */
 #define MB_SENSOR_TIME_LATENCY_NONE                     0
 #define MB_SENSOR_TIME_LATENCY_STATIC                   1
 #define MB_SENSOR_TIME_LATENCY_MODEL                    2
 #define MB_SENSOR_POSITION_OFFSET_NONE                  0
 #define MB_SENSOR_POSITION_OFFSET_STATIC                1
-#define MB_SENSOR_ATTITUDE_OFFSET_NONE                   0
-#define MB_SENSOR_ATTITUDE_OFFSET_STATIC                 1
+#define MB_SENSOR_ATTITUDE_OFFSET_NONE                  0
+#define MB_SENSOR_ATTITUDE_OFFSET_STATIC                1
+
+/* survey platform sensor type defines */
+#define NUM_MB_SENSOR_TYPES                             22
+#define MB_SENSOR_TYPE_NONE                             0
+#define MB_SENSOR_TYPE_SONAR_ECHOSOUNDER                10
+#define MB_SENSOR_TYPE_SONAR_MULTIECHOSOUNDER           11
+#define MB_SENSOR_TYPE_SONAR_SIDESCAN                   20
+#define MB_SENSOR_TYPE_SONAR_INTERFEROMETRY             21
+#define MB_SENSOR_TYPE_SONAR_MULTIBEAM                  30
+#define MB_SENSOR_TYPE_SONAR_MULTIBEAM_TWOHEAD          31
+#define MB_SENSOR_TYPE_SONAR_SUBBOTTOM                  40
+#define MB_SENSOR_TYPE_CAMERA_MONO                      50
+#define MB_SENSOR_TYPE_CAMERA_STEREO                    51
+#define MB_SENSOR_TYPE_CAMERA_VIDEO                     52
+#define MB_SENSOR_TYPE_LIDAR_SCAN                       60
+#define MB_SENSOR_TYPE_LIDAR_SWATH                      61
+#define MB_SENSOR_TYPE_POSITION                         70
+#define MB_SENSOR_TYPE_COMPASS                          80
+#define MB_SENSOR_TYPE_VRU                              90
+#define MB_SENSOR_TYPE_IMU                              100
+#define MB_SENSOR_TYPE_INS                              101
+#define MB_SENSOR_TYPE_INS_WITH_PRESSURE                102
+#define MB_SENSOR_TYPE_CTD                              110
+#define MB_SENSOR_TYPE_PRESSURE                         111
+#define MB_SENSOR_TYPE_SOUNDSPEED                       120
+static int mb_sensor_type_id[] =
+	{
+    MB_SENSOR_TYPE_NONE,                            // 0
+    MB_SENSOR_TYPE_SONAR_ECHOSOUNDER,               // 10
+    MB_SENSOR_TYPE_SONAR_MULTIECHOSOUNDER,          // 11
+    MB_SENSOR_TYPE_SONAR_SIDESCAN,                  // 20
+    MB_SENSOR_TYPE_SONAR_INTERFEROMETRY,            // 21
+    MB_SENSOR_TYPE_SONAR_MULTIBEAM,                 // 30
+    MB_SENSOR_TYPE_SONAR_MULTIBEAM_TWOHEAD,         // 31
+    MB_SENSOR_TYPE_SONAR_SUBBOTTOM,                 // 40
+    MB_SENSOR_TYPE_CAMERA_MONO,                     // 50
+    MB_SENSOR_TYPE_CAMERA_STEREO,                   // 51
+    MB_SENSOR_TYPE_CAMERA_VIDEO,                    // 52
+    MB_SENSOR_TYPE_LIDAR_SCAN,                      // 60
+    MB_SENSOR_TYPE_LIDAR_SWATH,                     // 61
+    MB_SENSOR_TYPE_POSITION,                        // 70
+    MB_SENSOR_TYPE_COMPASS,                         // 80
+    MB_SENSOR_TYPE_VRU,                             // 90
+    MB_SENSOR_TYPE_IMU,                             // 100
+    MB_SENSOR_TYPE_INS,                             // 101
+    MB_SENSOR_TYPE_INS_WITH_PRESSURE,               // 102
+    MB_SENSOR_TYPE_CTD,                             // 110
+    MB_SENSOR_TYPE_PRESSURE,                        // 111
+    MB_SENSOR_TYPE_SOUNDSPEED,                      // 120
+    };
+static char *mb_sensor_type_string[] =
+	{
+	"Unknown sensor type",
+	"Sonar echosounder",
+	"Sonar multiechosounder",
+	"Sonar sidescan",
+	"Sonar interferometry",
+	"Sonar multibeam",
+	"Sonar multibeam twohead",
+	"Sonar subbottom",
+	"Camera mono",
+	"Camera stereo",
+	"Camera video",
+	"Lidar scan",
+	"Lidar swath",
+	"Position",
+	"Compass",
+	"VRU",
+	"IMU",
+	"INS",
+	"INS with pressure",
+	"CTD",
+	"Pressure",
+	"Soundspeed"
+    };
+
+/* survey platform sensor capability bitmask defines */
+#define MB_SENSOR_CAPABILITY1_NONE                              0x00000000      // All bits = 0
+#define MB_SENSOR_CAPABILITY1_POSITION                          0x00000001      // Bit 0 = 1
+#define MB_SENSOR_CAPABILITY1_DEPTH                             0x00000002      // Bit 1 = 2
+#define MB_SENSOR_CAPABILITY1_ALTITUDE                          0x00000004      // Bit 2 = 4
+#define MB_SENSOR_CAPABILITY1_VELOCITY                          0x00000008      // Bit 3 = 8
+#define MB_SENSOR_CAPABILITY1_ACCELERATION                      0x00000010      // Bit 4 = 16
+#define MB_SENSOR_CAPABILITY1_PRESSURE                          0x00000020      // Bit 5 = 32
+#define MB_SENSOR_CAPABILITY1_ROLLPITCH                         0x00000040      // Bit 6 = 64
+#define MB_SENSOR_CAPABILITY1_HEADING                           0x00000080      // Bit 7 = 128 
+#define MB_SENSOR_CAPABILITY1_HEAVE                             0x00000100      // Bit 8 = 256 
+#define MB_SENSOR_CAPABILITY1_UNUSED09                          0x00000200      // Bit 9 = 512 
+#define MB_SENSOR_CAPABILITY1_UNUSED10                          0x00000400      // Bit 10 = 1024 
+#define MB_SENSOR_CAPABILITY1_UNUSED11                          0x00000800      // Bit 11 = 2048
+#define MB_SENSOR_CAPABILITY1_UNUSED12                          0x00001000      // Bit 12 = 4096
+#define MB_SENSOR_CAPABILITY1_TEMPERATURE                       0x00002000      // Bit 13 = 8192
+#define MB_SENSOR_CAPABILITY1_CONDUCTIVITY                      0x00004000      // Bit 14 = 16384
+#define MB_SENSOR_CAPABILITY1_SALINITY                          0x00008000      // Bit 15 = 32768
+#define MB_SENSOR_CAPABILITY1_SOUNDSPEED                        0x00010000      // Bit 16 = 65536
+#define MB_SENSOR_CAPABILITY1_UNUSED17                          0x00020000      // Bit 17= 131072
+#define MB_SENSOR_CAPABILITY1_UNUSED18                          0x00040000      // Bit 18 = 262144
+#define MB_SENSOR_CAPABILITY1_UNUSED19                          0x00080000      // Bit 19 = 524288
+#define MB_SENSOR_CAPABILITY1_GRAVITY                           0x00100000      // Bit 20 = 1048576
+#define MB_SENSOR_CAPABILITY1_UNUSED21                          0x00200000      // Bit 21 = 2097152
+#define MB_SENSOR_CAPABILITY1_UNUSED22                          0x00400000      // Bit 22 = 4194304
+#define MB_SENSOR_CAPABILITY1_UNUSED23                          0x00800000      // Bit 23 = 8388608
+#define MB_SENSOR_CAPABILITY1_MAGNETICFIELD                     0x01000000      // Bit 24 = 16777216
+#define MB_SENSOR_CAPABILITY1_UNUSED25                          0x02000000      // Bit 25 = 33554432
+#define MB_SENSOR_CAPABILITY1_UNUSED26                          0x04000000      // Bit 26 = 67108864
+#define MB_SENSOR_CAPABILITY1_UNUSED27                          0x08000000      // Bit 27 = 134217728
+#define MB_SENSOR_CAPABILITY1_UNUSED28                          0x10000000      // Bit 28 = 268435456
+#define MB_SENSOR_CAPABILITY1_UNUSED29                          0x20000000      // Bit 29 = 536870912
+#define MB_SENSOR_CAPABILITY1_UNUSED30                          0x40000000      // Bit 30 = 1073741824
+#define MB_SENSOR_CAPABILITY1_UNUSED31                          0x80000000      // Bit 31 = 2147483648
+#define mb_check_sensor_capability1_position(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_POSITION))
+#define mb_check_sensor_capability1_depth(F)                    ((int)(F & MB_SENSOR_CAPABILITY1_DEPTH))
+#define mb_check_sensor_capability1_altitude(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_ALTITUDE))
+#define mb_check_sensor_capability1_velocity(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_VELOCITY))
+#define mb_check_sensor_capability1_acceleration(F)             ((int)(F & MB_SENSOR_CAPABILITY1_ACCELERATION))
+#define mb_check_sensor_capability1_pressure(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_PRESSURE))
+#define mb_check_sensor_capability1_rollpitch(F)                ((int)(F & MB_SENSOR_CAPABILITY1_ROLLPITCH))
+#define mb_check_sensor_capability1_heading(F)                  ((int)(F & MB_SENSOR_CAPABILITY1_HEADING))
+#define mb_check_sensor_capability1_heading(F)                  ((int)(F & MB_SENSOR_CAPABILITY1_HEADING))
+#define mb_check_sensor_capability1_unused09(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED09))
+#define mb_check_sensor_capability1_unused10(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED10))
+#define mb_check_sensor_capability1_unused11(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED11))
+#define mb_check_sensor_capability1_unused12(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED12))
+#define mb_check_sensor_capability1_temperature(F)              ((int)(F & MB_SENSOR_CAPABILITY1_TEMPERATURE))
+#define mb_check_sensor_capability1_conductivity(F)             ((int)(F & MB_SENSOR_CAPABILITY1_CONDUCTIVITY))
+#define mb_check_sensor_capability1_salinity(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_SALINITY))
+#define mb_check_sensor_capability1_soundspeed(F)               ((int)(F & MB_SENSOR_CAPABILITY1_SOUNDSPEED))
+#define mb_check_sensor_capability1_unused17(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED17))
+#define mb_check_sensor_capability1_unused18(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED18))
+#define mb_check_sensor_capability1_unused19(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED19))
+#define mb_check_sensor_capability1_gravity(F)                  ((int)(F & MB_SENSOR_CAPABILITY1_GRAVITY))
+#define mb_check_sensor_capability1_unused21(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED21))
+#define mb_check_sensor_capability1_unused22(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED22))
+#define mb_check_sensor_capability1_unused23(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED23))
+#define mb_check_sensor_capability1_magneticfield(F)            ((int)(F & MB_SENSOR_CAPABILITY1_MAGNETICFIELD))
+#define mb_check_sensor_capability1_unused25(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED25))
+#define mb_check_sensor_capability1_unused26(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED26))
+#define mb_check_sensor_capability1_unused27(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED27))
+#define mb_check_sensor_capability1_unused28(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED28))
+#define mb_check_sensor_capability1_unused29(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED29))
+#define mb_check_sensor_capability1_unused30(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED30))
+#define mb_check_sensor_capability1_unused31(F)                 ((int)(F & MB_SENSOR_CAPABILITY1_UNUSED31))
+
+#define MB_SENSOR_CAPABILITY2_NONE                              0x00000000      // All bits = 0
+#define MB_SENSOR_CAPABILITY2_TOPOGRAPHY_ECHOSOUNDER            0x00000001      // Bit 0 = 1
+#define MB_SENSOR_CAPABILITY2_TOPOGRAPHY_INTERFEROMETRY         0x00000002      // Bit 1 = 2
+#define MB_SENSOR_CAPABILITY2_TOPOGRAPHY_SASS                   0x00000004      // Bit 2 = 4
+#define MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM              0x00000008      // Bit 3 = 8
+#define MB_SENSOR_CAPABILITY2_TOPOGRAPHY_PHOTOGRAMMETRY         0x00000010      // Bit 4 = 16
+#define MB_SENSOR_CAPABILITY2_TOPOGRAPHY_STRUCTUREFROMMOTION    0x00000020      // Bit 5 = 32
+#define MB_SENSOR_CAPABILITY2_TOPOGRAPHY_LIDAR                  0x00000040      // Bit 6 = 64
+#define MB_SENSOR_CAPABILITY2_TOPOGRAPHY_STRUCTUREDLIGHT        0x00000080      // Bit 7 = 128 
+#define MB_SENSOR_CAPABILITY2_TOPOGRAPHY_LASERSCANNER           0x00000100      // Bit 8 = 256 
+#define MB_SENSOR_CAPABILITY2_UNUSED09                          0x00000200      // Bit 9 = 512 
+#define MB_SENSOR_CAPABILITY2_UNUSED10                          0x00000400      // Bit 10 = 1024 
+#define MB_SENSOR_CAPABILITY2_UNUSED11                          0x00000800      // Bit 11 = 2048
+#define MB_SENSOR_CAPABILITY2_BACKSCATTER_ECHOSOUNDER           0x00001000      // Bit 12 = 4096
+#define MB_SENSOR_CAPABILITY2_BACKSCATTER_SIDESCAN              0x00002000      // Bit 13 = 8192
+#define MB_SENSOR_CAPABILITY2_BACKSCATTER_INTERFEROMETRY        0x00004000      // Bit 14 = 16384
+#define MB_SENSOR_CAPABILITY2_BACKSCATTER_SASS                  0x00008000      // Bit 15 = 32768
+#define MB_SENSOR_CAPABILITY2_BACKSCATTER_MULTIBEAM             0x00010000      // Bit 16 = 65536
+#define MB_SENSOR_CAPABILITY2_BACKSCATTER_LIDAR                 0x00020000      // Bit 17= 131072
+#define MB_SENSOR_CAPABILITY2_BACKSCATTER_STRUCTUREDLIGHT       0x00040000      // Bit 18 = 262144
+#define MB_SENSOR_CAPABILITY2_BACKSCATTER_LASERSCANNER          0x00080000      // Bit 19 = 524288
+#define MB_SENSOR_CAPABILITY2_UNUSED20                          0x00100000      // Bit 20 = 1048576
+#define MB_SENSOR_CAPABILITY2_SUBBOTTOM_ECHOSOUNDER             0x00200000      // Bit 21 = 2097152
+#define MB_SENSOR_CAPABILITY2_SUBBOTTOM_CHIRP                   0x00400000      // Bit 22 = 4194304
+#define MB_SENSOR_CAPABILITY2_UNUSED23                          0x00800000      // Bit 23 = 8388608
+#define MB_SENSOR_CAPABILITY2_PHOTOGRAPHY                       0x01000000      // Bit 24 = 16777216
+#define MB_SENSOR_CAPABILITY2_STEREOPHOTOGRAPHY                 0x02000000      // Bit 25 = 33554432
+#define MB_SENSOR_CAPABILITY2_VIDEO                             0x04000000      // Bit 26 = 67108864
+#define MB_SENSOR_CAPABILITY2_STEREOVIDEO                       0x08000000      // Bit 27 = 134217728
+#define MB_SENSOR_CAPABILITY2_UNUSED28                          0x10000000      // Bit 28 = 268435456
+#define MB_SENSOR_CAPABILITY2_UNUSED29                          0x20000000      // Bit 29 = 536870912
+#define MB_SENSOR_CAPABILITY2_UNUSED30                          0x40000000      // Bit 30 = 1073741824
+#define MB_SENSOR_CAPABILITY2_UNUSED31                          0x80000000      // Bit 31 = 2147483648
+#define mb_check_sensor_capability2_topography_echosounder(F)           ((int)(F & MB_SENSOR_CAPABILITY2_TOPOGRAPHY_ECHOSOUNDER))
+#define mb_check_sensor_capability2_topography_interferometry(F)        ((int)(F & MB_SENSOR_CAPABILITY2_TOPOGRAPHY_INTERFEROMETRY))
+#define mb_check_sensor_capability2_topography_sass(F)                  ((int)(F & MB_SENSOR_CAPABILITY2_TOPOGRAPHY_SASS))
+#define mb_check_sensor_capability2_topography_multibeam(F)             ((int)(F & MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM))
+#define mb_check_sensor_capability2_topography_photogrammetry(F)        ((int)(F & MB_SENSOR_CAPABILITY2_TOPOGRAPHY_PHOTOGRAMMETRY))
+#define mb_check_sensor_capability2_topography_structurefrommotion(F)   ((int)(F & MB_SENSOR_CAPABILITY2_TOPOGRAPHY_STRUCTUREFROMMOTION))
+#define mb_check_sensor_capability2_topography_lidar(F)                 ((int)(F & MB_SENSOR_CAPABILITY2_TOPOGRAPHY_LIDAR))
+#define mb_check_sensor_capability2_topography_structuredlight(F)       ((int)(F & MB_SENSOR_CAPABILITY2_TOPOGRAPHY_STRUCTUREDLIGHT))
+#define mb_check_sensor_capability2_topography_laserscanner(F)          ((int)(F & MB_SENSOR_CAPABILITY2_TOPOGRAPHY_LASERSCANNER))
+#define mb_check_sensor_capability2_unused09(F)                         ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED09))
+#define mb_check_sensor_capability2_unused10(F)                         ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED10))
+#define mb_check_sensor_capability2_unused11(F)                         ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED11))
+#define mb_check_sensor_capability2_backscatter_echosounder(F)          ((int)(F & MB_SENSOR_CAPABILITY2_BACKSCATTER_ECHOSOUNDER))
+#define mb_check_sensor_capability2_backscatter_sidescan(F)             ((int)(F & MB_SENSOR_CAPABILITY2_BACKSCATTER_SIDESCAN))
+#define mb_check_sensor_capability2_backscatter_interferometry(F)       ((int)(F & MB_SENSOR_CAPABILITY2_BACKSCATTER_INTERFEROMETRY))
+#define mb_check_sensor_capability2_backscatter_sass(F)                 ((int)(F & MB_SENSOR_CAPABILITY2_BACKSCATTER_SASS))
+#define mb_check_sensor_capability2_backscatter_multibeam(F)            ((int)(F & MB_SENSOR_CAPABILITY2_BACKSCATTER_MULTIBEAM))
+#define mb_check_sensor_capability2_backscatter_lidar(F)                ((int)(F & MB_SENSOR_CAPABILITY2_BACKSCATTER_LIDAR))
+#define mb_check_sensor_capability2_backscatter_structuredlight(F)      ((int)(F & MB_SENSOR_CAPABILITY2_BACKSCATTER_STRUCTUREDLIGHT))
+#define mb_check_sensor_capability2_backscatter_laserscanner(F)         ((int)(F & MB_SENSOR_CAPABILITY2_BACKSCATTER_LASERSCANNER))
+#define mb_check_sensor_capability2_unused20(F)                         ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED20))
+#define mb_check_sensor_capability2_subbottom_echosounder(F)            ((int)(F & MB_SENSOR_CAPABILITY2_SUBBOTTOM_ECHOSOUNDER))
+#define mb_check_sensor_capability2_subbottom_chirp(F)                  ((int)(F & MB_SENSOR_CAPABILITY2_SUBBOTTOM_CHIRP))
+#define mb_check_sensor_capability2_unused23(F)                         ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED23))
+#define mb_check_sensor_capability2_photography(F)                      ((int)(F & MB_SENSOR_CAPABILITY2_PHOTOGRAPHY))
+#define mb_check_sensor_capability2_stereophotography(F)                ((int)(F & MB_SENSOR_CAPABILITY2_STEREOPHOTOGRAPHY))
+#define mb_check_sensor_capability2_video(F)                            ((int)(F & MB_SENSOR_CAPABILITY2_VIDEO))
+#define mb_check_sensor_capability2_stereovideo(F)                      ((int)(F & MB_SENSOR_CAPABILITY2_STEREOVIDEO))
+#define mb_check_sensor_capability2_unused28(F)                         ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED28))
+#define mb_check_sensor_capability2_unused29(F)                         ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED29))
+#define mb_check_sensor_capability2_unused30(F)                         ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED30))
+#define mb_check_sensor_capability2_unused31(F)                         ((int)(F & MB_SENSOR_CAPABILITY2_UNUSED31))
+
+/* survey platform definition structures */
 struct mb_sensor_offset_struct
         {
-        int     time_latency_mode;
-        double  time_latency_static;
-        int     num_time_latency;
-        int     num_time_latency_alloc;
-        double  *time_latency_time_d;
-        double  *time_latency_value;
-        
         int     position_offset_mode;
         double  position_offset_x;
         double  position_offset_y;
         double  position_offset_z;
         
         int     attitude_offset_mode;
-        double  attitude_offset_azimuth;
+        double  attitude_offset_heading;
         double  attitude_offset_roll;
         double  attitude_offset_pitch;
-        };
+         };
 
-#define MB_SENSOR_TYPE_NONE                             0
-#define MB_SENSOR_TYPE_SONAR_ECHOSOUNDER                1
-#define MB_SENSOR_TYPE_SONAR_MULTIECHOSOUNDER           2
-#define MB_SENSOR_TYPE_SONAR_SIDESCAN                   3
-#define MB_SENSOR_TYPE_SONAR_INTERFEROMETRY             4
-#define MB_SENSOR_TYPE_SONAR_MULTIBEAM                  5
-#define MB_SENSOR_TYPE_SONAR_SUBBOTTOM                  6
-#define MB_SENSOR_TYPE_CAMERA_MONO                      21
-#define MB_SENSOR_TYPE_CAMERA_STEREO                    22
-#define MB_SENSOR_TYPE_CAMERA_VIDEO                     23
-#define MB_SENSOR_TYPE_LIDAR_SCAN                       31
-#define MB_SENSOR_TYPE_LIDAR_SWATH                      32
-#define MB_SENSOR_TYPE_POSITION                         51
-#define MB_SENSOR_TYPE_COMPASS                          61
-#define MB_SENSOR_TYPE_VRU                              71
-#define MB_SENSOR_TYPE_IMU                              81
-#define MB_SENSOR_TYPE_INS                              82
-#define MB_SENSOR_TYPE_CTD                              91
-#define MB_SENSOR_TYPE_PRESSURE                         92
-#define MB_SENSOR_TYPE_SOUNDSPEED                       101
 struct mb_sensor_struct
         {
         int     type;
         mb_longname model;
         mb_longname manufacturer;
         mb_longname serialnumber;
-        int     capability;
-        int     special_capability;
-        int     num_offsets;
+        int     capability1;    /* bitmask indicating position and attitude capabilities */
+        int     capability2;    /* bitmask indicating mapping and imaging capabilities */
+        int     num_offsets;    /* most sensors have one set of offsets, multibeam sonars
+                                 * have two sets of offsets, one for the transmit and
+                                 * one for the receive array */
         int     num_offsets_alloc;
         struct mb_sensor_offset_struct *offsets;
         
+        int     time_latency_mode;
+        double  time_latency_static;
+        int     num_time_latency;
+        int     num_time_latency_alloc;
+        double  *time_latency_time_d;
+        double  *time_latency_value;
         };
-        
-#define MB_PLATFORM_NONE                0
-#define MB_PLATFORM_SURFACE_VESSEL      1
-#define MB_PLATFORM_TOW_BODY            2
-#define MB_PLATFORM_ROV                 3
-#define MB_PLATFORM_AUV                 4
-#define MB_PLATFORM_AIRPLANE            5
-#define MB_PLATFORM_SATELLITE           6
 struct mb_platform_struct
         {
         int             type;
         mb_longname     name;
         mb_longname     organization;
         
-        int             source_swathbathymetry;
+        int             source_bathymetry;
+        int             source_bathymetry1;
+        int             source_bathymetry2;
+        int             source_bathymetry3;
+        int             source_backscatter;
+        int             source_backscatter1;
+        int             source_backscatter2;
+        int             source_backscatter3;
+        int             source_subbottom;
+        int             source_subbottom1;
+        int             source_subbottom2;
+        int             source_subbottom3;
         int             source_position;
+        int             source_position1;
+        int             source_position2;
+        int             source_position3;
         int             source_depth;
+        int             source_depth1;
+        int             source_depth2;
+        int             source_depth3;
+        int             source_heading;
+        int             source_heading1;
+        int             source_heading2;
+        int             source_heading3;
+        int             source_rollpitch;
+        int             source_rollpitch1;
+        int             source_rollpitch2;
+        int             source_rollpitch3;
         int             source_heave;
-        int             source_attitude;
-        
+        int             source_heave1;
+        int             source_heave2;
+        int             source_heave3;
+       
         int             num_sensors;
         int             num_sensors_alloc;
         struct mb_sensor_struct *sensors;
         };
+
+/* ---------------------------------------------------------------------------*/
+/* MBIO data storage and control structures */
 
 struct mb_io_ping_struct
 	{
@@ -164,10 +435,11 @@ struct mb_io_struct
 	int	variable_beams; /* if true then number of beams variable */
 	int	traveltime;	/* if true then traveltime and angle data supported */
 	int	beam_flagging;	/* if true then beam flagging supported */
-	int	nav_source;	/* data record types containing the primary navigation */
-	int	heading_source;	/* data record types containing the primary heading */
-	int	vru_source;	/* data record types containing the primary vru */
-	int	svp_source;	/* data record types containing the primary svp */
+	int	platform_source;	/* data record type containing sensor offsets */
+	int	nav_source;	/* data record type containing the primary navigation */
+	int	heading_source;	/* data record type containing the primary heading */
+	int	vru_source;	/* data record type containing the primary vru */
+	int	svp_source;	/* data record type containing the primary svp */
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
 
@@ -403,11 +675,18 @@ struct mb_io_struct
 		int *sonartype, int *error);
 	int (*mb_io_sidescantype)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
-        int (*mb_io_preprocess)(int verbose, void *mbio_ptr, void *store_ptr,
-		double time_d, double navlon, double navlat,
-		double speed, double heading, double sonardepth,
-		double roll, double pitch, double heave,
+    int (*mb_io_preprocess)(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
+				double *nav_speed,
+		int n_sensordepth, double *sensordepth_time_d,
+				double *sensordepth_sensordepth,
+		int n_heading, double *heading_time_d, double *heading_heading,
+		int n_altitude, double *altitude_time_d, double *altitude_altitude,
+		int n_attitude, double *attitude_time_d, double *attitude_roll,
+				double *attitude_pitch, double *attitude_heave,
 		int *error);
+    int (*mb_io_extract_platform)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, void **platform_ptr, int *error);
 	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,

@@ -22,38 +22,6 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  *
- * $Log: mbsys_mr1b.h,v $
- * Revision 5.5  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.4  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.3  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.2  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.2  2000/09/30  06:31:19  caress
- * Snapshot for Dale.
- *
- * Revision 4.1  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.0  1996/03/12  17:23:54  caress
- * Initial version.
- *
- * Revision 4.0  1996/03/12  17:23:54  caress
- * Initial version.
- *
- *
  *
  *
  */

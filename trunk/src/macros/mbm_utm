@@ -36,23 +36,6 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: mbm_utm.perl,v $
-#   Revision 5.4  2007/10/08 04:27:20  caress
-#   Now handles comma delimited xyz data along with white space delimited data.
-#
-#   Revision 5.3  2003/04/17 20:42:48  caress
-#   Release 5.0.beta30
-#
-#   Revision 5.2  2003/03/27 07:58:11  caress
-#   This macro now sets MEASURE_UNIT to inches and then resets it to the original value.
-#
-#   Revision 5.1  2002/05/29 23:35:57  caress
-#   Release 5.0.beta18
-#
-#   Revision 5.0  2002/05/14 18:53:03  caress
-#   Initial revision.
-#
 #
 #
 $program_name = "mbm_utm";

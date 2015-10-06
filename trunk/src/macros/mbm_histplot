@@ -48,14 +48,6 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: mbm_histplot.perl,v $
-#   Revision 5.1  2007/10/08 05:43:09  caress
-#   Added some large page definitions.
-#
-#   Revision 5.0  2006/11/10 22:01:56  caress
-#   New macro for simple histogram plots.
-#
 #
 #
 $program_name = "mbm_histplot";

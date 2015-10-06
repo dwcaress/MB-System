@@ -20,16 +20,6 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  *
- * $Log: mbf_hs10jams.h,v $
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/10 20:24:25  caress
- * Initial revision.
- *
  *
  */
 /*

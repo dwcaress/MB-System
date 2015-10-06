@@ -19,29 +19,6 @@
  * Author:	D. W. Caress
  * Date:	October 23, 1995
  *
- * $Log: mbf_mr1bldeo.h,v $
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.2  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.1  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.0  1996/03/12  17:20:05  caress
- * Initial version.
- *
- * Revision 4.0  1996/03/12  17:20:05  caress
- * Initial version.
- *
- *
  *
  */
 /*

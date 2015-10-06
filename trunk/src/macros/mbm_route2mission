@@ -38,8 +38,6 @@
 # Version:
 # $Id$
 #
-# Revisions:
-#
 #
 $program_name = "mbm_route2mission";
 
@@ -147,7 +145,8 @@ $behaviorarg = -1;
 $behaviorWaypointID = 0;
 $behaviorWaypointDepthID = 1;
 $behaviorWaypointWallID = 2;
-@behaviorNames = ("Waypoint", "WaypointDepth", "WaypointWall");
+$behaviorWaypointBottomID = 3;
+@behaviorNames = ("Waypoint", "WaypointDepth", "WaypointWall", "WaypointBottom");
 @behaviorIDs = ($behaviorWaypointDepthID, $behaviorWaypointDepthID, $behaviorWaypointDepthID, $behaviorWaypointDepthID, $behaviorWaypointDepthID);
 $depthmax = 5900.0;
 $depthabort = 6000.0;
@@ -265,7 +264,7 @@ if ($behaviorarg != -1)
         for ($i = 0; $i < 5; $i++)
                 {
                 if ($behaviorIDs[$i] < behaviorWaypointID
-                    || $behaviorIDs[$i] > $behaviorWaypointWallID)
+                    || $behaviorIDs[$i] > $behaviorWaypointBottomID)
                     {
                     $behaviorIDs[$i] = $behaviorWaypointDepthID;
                     }
@@ -2151,6 +2150,111 @@ printf " %.2f m\n",$mmissiondepths[$i];
 			print MFILE "windowLen          = 1; \r\n";
 			print MFILE "useWallEstimator   = True; \r\n";
 			print MFILE "wallFeedForward    = True; \r\n";
+			print MFILE "} \r\n";
+			print WFILE "$mlons[$i] $mlats[$i]\r\n";
+			}
+
+		# output $behaviorWaypointBottomID mission point behavior
+		elsif ($behavior == $behaviorWaypointBottomID)
+			{
+			print MFILE "# \r\n";
+			if ($mwaypoints[$i] != 0 && $iwaypoint == 0)
+				{
+				print MFILE "# Waypoint_bottom behavior to get to start of line 1\r\n";
+print "Behavior: waypoint_bottom (to start line 1) ";
+				}
+			elsif ($mwaypoints[$i] != 0)
+				{
+				printf MFILE "# Waypoint_bottom behavior to get to end of line %d\r\n", $iwaypoint;
+print "Behavior: waypoint_bottom (to end line $iwaypoint) ";
+				}
+			else
+				{
+				printf MFILE "# Waypoint_bottom behavior during line %d\r\n", $iwaypoint;
+print "Behavior: waypoint_bottom (during line $iwaypoint) ";
+				}
+printf " Segment length: %.2f m ",$mlengths[$i];
+			printf MFILE "#   Segment length %f meters\r\n", $mlengths[$i];
+			printf MFILE "#   Minimum depth: %f meters looking forward %f meters along route\r\n", -$mtopomaxs[$i], $forwarddist;
+			printf MFILE "#   Maximum depth: %f meters looking forward %f meters along route\r\n", -$mtopomins[$i], $forwarddist;
+			printf MFILE "#   Maximum vehicle depth: %f meters\r\n", $depthmax;
+			if ($mmodes[$i] == 1)
+				{
+				printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+                $altitude = $altitudedesired;
+				}
+			elsif ($mmodes[$i] == 2)
+				{
+				printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired2;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+                $altitude = $altitudedesired2;
+				}
+			elsif ($mmodes[$i] == 3)
+				{
+				printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired3;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+                $altitude = $altitudedesired3;
+				}
+			elsif ($mmodes[$i] == 4)
+				{
+				printf MFILE "#   Constant vehicle depth:   %f meters\r\n", $depthconstant;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+                $altitude = $altitudemin;
+				}
+			elsif ($mmodes[$i] == 5)
+				{
+				printf MFILE "#   Constant vehicle depth:   %f meters\r\n", $depthconstant2;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+                $altitude = $altitudemin;
+				}
+			if ($maxdepthapplied == 0)
+				{
+				printf MFILE "#   Behavior depth of %f meters set by local depth and desired altitude\r\n", $mmissiondepths[$i];
+				}
+			else
+				{
+				printf MFILE "#   Behavior depth of %f meters set to maximum vehicle depth\r\n", $mmissiondepths[$i];
+				}
+			if ($i > 0 && $mstartstops[$i-1] == 2)
+				{
+				printf MFILE "#   Vehicle transit speed:    %f m/s\r\n", $transit_speed;
+				}
+			else
+				{
+				printf MFILE "#   Vehicle survey speed:     %f m/s\r\n", $survey_speed;
+				}
+			print MFILE "behavior waypoint_bottom  \r\n";
+			print MFILE "{ \r\n";
+			printf MFILE "latitude           = %f; \r\n", $mlats[$i];
+			printf MFILE "longitude          = %f; \r\n", $mlons[$i];
+			printf MFILE "lastLatitude       = %f; \r\n", $mlats[$i-1];
+			printf MFILE "lastLongitude      = %f; \r\n", $mlons[$i-1];
+			if ($mwaypoints[$i] != 0 && $iwaypoint == 0)
+				{
+				printf MFILE "duration           = %d; \r\n", 600;
+				}
+			else
+				{
+				printf MFILE "duration           = %d; \r\n", ($durationfactorwaypoint * $mlengths[$i] / $survey_speed);
+				}
+			if ($mwaypoints[$i] != 0 && $iwaypoint != 0)
+				{
+				printf MFILE "# abortOnTimeout    = True; \r\n";
+				}
+			printf MFILE "altitude              = %f; \r\n", $altitude;
+			printf MFILE "depth                 = %f; \r\n", $depthmax;
+			if ($i > 0 && $mstartstops[$i-1] == 2)
+				{
+				print MFILE "speed              = TRANSIT_SPEED; \r\n";
+				}
+			else
+				{
+				print MFILE "speed              = SURVEY_SPEED; \r\n";
+				}
+			print MFILE "tau                = 3;\r\n";
+			print MFILE "feedThetaForward   = False; \r\n";
+			print MFILE "maxLowerPitch      = 15; \r\n";
 			print MFILE "} \r\n";
 			print WFILE "$mlons[$i] $mlats[$i]\r\n";
 			}

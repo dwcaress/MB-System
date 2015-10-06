@@ -20,7 +20,6 @@
  * Author:	David W. Caress
  * Date:	November 29, 2013
  *
- * $Log: mbsys_3datdepthlidar.c,v $
  *
  */
 /*
@@ -332,19 +331,16 @@ int mbsys_3datdepthlidar_dimensions(int verbose,
 	int *nss,
 	int *error);
 int mbsys_3datdepthlidar_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
-int mbsys_3datdepthlidar_preprocess(int verbose,
-        void *mbio_ptr,
-        void *store_ptr,
-	double time_d,
-        double navlon,
-        double navlat,
-	double speed,
-        double heading,
-        double sensordepth,
-	double roll,
-        double pitch,
-        double heave,
-	int *error);
+int mbsys_3datdepthlidar_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
+				double *nav_speed,
+		int n_sensordepth, double *sensordepth_time_d,
+				double *sensordepth_sensordepth,
+		int n_heading, double *heading_time_d, double *heading_heading,
+		int n_altitude, double *altitude_time_d, double *altitude_altitude,
+		int n_attitude, double *attitude_time_d, double *attitude_roll,
+				double *attitude_pitch, double *attitude_heave,
+		int *error);
 int mbsys_3datdepthlidar_extract(int verbose,
 	void *mbio_ptr,
 	void *store_ptr,

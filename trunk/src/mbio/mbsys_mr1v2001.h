@@ -23,13 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	March 6, 2003
- * $Log: mbsys_mr1v2001.h,v $
- * Revision 5.1  2005/11/05 00:48:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.0  2003/03/10 20:03:59  caress
- * Initial version.
- *
  *
  *
  */

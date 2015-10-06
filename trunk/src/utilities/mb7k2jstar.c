@@ -19,39 +19,6 @@
  * Author:	D. W. Caress
  * Date:	May 19, 2005
  *
- * $Log: mb7k2jstar.c,v $
- * Revision 5.9  2008/09/13 06:08:09  caress
- * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
- *
- * Revision 5.8  2007/10/08 16:48:07  caress
- * State of the code on 8 October 2007.
- *
- * Revision 5.7  2006/12/15 21:42:49  caress
- * Incremental CVS update.
- *
- * Revision 5.6  2006/04/26 22:05:25  caress
- * Changes to handle MBARI Mapping AUV data better.
- *
- * Revision 5.5  2006/04/19 18:32:07  caress
- * Allowed smoothing of extracted sidescan.
- *
- * Revision 5.4  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.3  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.2  2005/08/17 17:27:02  caress
- * Fixed scaling for heading, roll, and pitch values.
- *
- * Revision 5.1  2005/06/15 15:35:37  caress
- * Fixed issues.
- *
- * Revision 5.0  2005/06/04 05:00:05  caress
- * Program to extract subbottom and sidescan data from Reson 7k files into Edgetech Jstar files.
- *
- *
- *
  *
  */
 

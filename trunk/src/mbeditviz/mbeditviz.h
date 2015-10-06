@@ -23,16 +23,6 @@
  * Author:	D. W. Caress
  * Date:	April 27, 2007
  *
- * $Log: mbeditviz.h,v $
- * Revision 5.2  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.1  2007/11/16 17:26:56  caress
- * Progress on MBeditviz
- *
- * Revision 5.0  2007/06/17 23:24:12  caress
- * Added NBeditviz.
- *
  *
  */
 

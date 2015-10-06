@@ -31,41 +31,6 @@
  * Author:	D. W. Caress
  * Date:	January 3,  2001
  *
- * $Log: mbsvplist.c,v $
- * Revision 5.10  2008/09/20 00:57:41  caress
- * Release 5.1.1beta23
- *
- * Revision 5.9  2006/09/11 18:55:54  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.8  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.7  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.6  2005/03/25 04:42:59  caress
- * Standardized the string lengths used for filenames and comment data.
- *
- * Revision 5.5  2004/10/06 19:10:53  caress
- * Release 5.0.5 update.
- *
- * Revision 5.4  2003/07/02 18:14:19  caress
- * Release 5.0.0
- *
- * Revision 5.3  2003/04/17 21:18:57  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2001/07/20 00:34:38  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/03/22 21:15:49  caress
- * Trying to make release 5.0.beta0.
- *
- * Revision 5.0  2001/01/04  21:43:50  caress
- * Initial revision.
- *
  *
  */
 
@@ -109,7 +74,7 @@ struct mbsvplist_svp_struct {
 	double	velocity[MB_SVP_MAX];
 };
 
-static char rcs_id[] = "$Id$";
+static char svn_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -180,6 +145,7 @@ int main (int argc, char **argv)
 	double	last_navlat = 0.0;
 
 	/* data record source types */
+	int platform_source;
 	int	nav_source;
 	int	heading_source;
 	int	vru_source;
@@ -335,7 +301,7 @@ int main (int argc, char **argv)
 	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
-		fprintf(stderr,"Version %s\n",rcs_id);
+		fprintf(stderr,"Version %s\n",svn_id);
 		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
 		}
 
@@ -343,7 +309,7 @@ int main (int argc, char **argv)
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  Program <%s>\n",program_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Version %s\n",svn_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Control Parameters:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
@@ -422,7 +388,7 @@ int main (int argc, char **argv)
 	{
 	/* check format and get data sources */
 	if ((status = mb_format_source(verbose, &format,
-			&nav_source, &heading_source,
+			&platform_source, &nav_source, &heading_source,
 			&vru_source, &svp_source,
 			&error)) == MB_FAILURE)
 		{
@@ -793,7 +759,7 @@ int main (int argc, char **argv)
 							    svp_save[isvp].latitude);
 					fprintf(svp_fp, "## Water Sound Velocity Profile (SVP)\n");
 					fprintf(svp_fp, "## Output by Program %s\n",program_name);
-					fprintf(svp_fp, "## Program Version %s\n",rcs_id);
+					fprintf(svp_fp, "## Program Version %s\n",svn_id);
 					fprintf(svp_fp, "## MB-System Version %s\n",MB_VERSION);
 					right_now = time((time_t *)0);
 					strcpy(date,ctime(&right_now));

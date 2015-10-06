@@ -17,14 +17,6 @@
  * Author:	D. W. Caress
  * Date:	March 8, 2006
  *
- * $Log: mbview_profile.c,v $
- * Revision 5.1  2008/05/16 22:59:42  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.0  2007/06/17 23:16:58  caress
- * Added profiling to mbview.
- *
- *
  *
  */
 /*------------------------------------------------------------------------------*/

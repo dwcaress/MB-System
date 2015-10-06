@@ -24,20 +24,6 @@
  * Author:	D. W. Caress
  * Date:	November 21, 2004
  *
- * $Log: mbauvnavusbl.c,v $
- * Revision 5.3  2008/09/11 20:20:14  caress
- * Checking in updates made during cruise AT15-36.
- *
- * Revision 5.2  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.1  2004/12/18 01:38:52  caress
- * Working towards release 5.0.6.
- *
- * Revision 5.0  2004/12/02 06:41:47  caress
- * New program to help process ROV/AUV navigation data.
- *
- *
  *
  */
 

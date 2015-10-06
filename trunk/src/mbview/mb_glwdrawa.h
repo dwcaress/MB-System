@@ -17,14 +17,6 @@
  * Author:	D. W. Caress
  * Date:	May 22, 2007
  *
- * $Log: mb_glwdrawa.h,v $
- * Revision 5.0  2007/06/17 23:16:14  caress
- * Added MBeditviz.
- *
- * Revision 5.0  2007/05/23 16:39:54  caress
- * Added library for Motif OpenGL widget because this library is no longer uniformly available in Xfree86 distributions.
- *
- *
  */
 /*------------------------------------------------------------------------------*/
 /*

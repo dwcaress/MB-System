@@ -37,33 +37,6 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: mbm_arc2grd.perl,v $
-#   Revision 5.7  2009/01/15 17:37:28  caress
-#   Update on 15 Jan 2009 - fix to mbm_grd2arc and mbm_arc2grd
-#
-#   Revision 5.6  2005/06/04 04:25:57  caress
-#   Macros now handles both upper case and lower case characters in Arc grid headers.
-#
-#   Revision 5.5  2003/09/23 21:13:51  caress
-#   Fixed bug in applying xyz2grd to temporary file of xyz triples.
-#
-#   Revision 5.4  2003/08/28 18:39:37  caress
-#   Fixed problems parsing Arc grid files on MBARI CD's..
-#
-#   Revision 5.3  2003/08/24 23:57:14  caress
-#   *** empty log message ***
-#
-#   Revision 5.2  2003/04/17 20:42:48  caress
-#   Release 5.0.beta30
-#
-#   Revision 5.1  2001/06/03 06:59:24  caress
-#   Release 5.0.beta01
-#
-#   Revision 5.0  2001/04/23 21:22:45  caress
-#   Initial revision
-#
-#
 #
 #
 

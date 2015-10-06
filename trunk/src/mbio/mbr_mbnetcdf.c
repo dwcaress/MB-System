@@ -24,53 +24,6 @@
  * Author:	D. W. Caress
  * Date:	January 25, 2002
  *
- * $Log: mbr_mbnetcdf.c,v $
- * Revision 5.9  2008/12/05 17:32:52  caress
- * Check-in mods 5 December 2008 including contributions from Gordon Keith.
- *
- * Revision 5.8  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.7  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.6  2008/03/01 09:14:03  caress
- * Some housekeeping changes.
- *
- * Revision 5.5  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.4  2005/05/02 19:02:40  caress
- * The format 75 (MBF_MBNETCDF) i/o module has been altered to
- * handle multiple pings with the same time stamp without breaking
- * the beam edit (edit save file) scheme, which depends upon
- * unique time stamps. When multiple pings with the same time
- * stamp are encountered, the subsequent pings have multiples
- * of 2 msec added so that each has a detectably unique time
- * stamp. This issue relates to Thompson Seafalcon II multibeam
- * data; this sonar collects five simultaneous acrosstrack swathes.
- * Since this is a deep water sonar, the maximum 10 msec time
- * addition should not introduce excessive error in navigation
- * or other aspects of the data.
- *
- * Revision 5.3  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/05/29 23:38:53  caress
- * Release 5.0.beta18
- *
- * Revision 5.0  2002/05/02 04:00:03  caress
- * Release 5.0.beta17
- *
- * Revision 1.2  2002/05/02 03:55:34  caress
- * Release 5.0.beta17
- *
- * Revision 1.1  2002/02/22 09:03:43  caress
- * Initial revision
- *
  *
  */
 
@@ -106,6 +59,7 @@ int mbr_info_mbnetcdf(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -126,6 +80,7 @@ int mbr_info_mbncdfxt(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -175,6 +130,7 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -222,6 +178,7 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -270,6 +227,7 @@ int mbr_info_mbnetcdf(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -305,6 +263,7 @@ int mbr_info_mbnetcdf(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_NO;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -329,6 +288,7 @@ int mbr_info_mbnetcdf(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
@@ -358,6 +318,7 @@ int mbr_info_mbncdfxt(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -393,6 +354,7 @@ int mbr_info_mbncdfxt(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_NO;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -417,6 +379,7 @@ int mbr_info_mbncdfxt(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

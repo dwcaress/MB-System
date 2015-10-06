@@ -23,10 +23,6 @@
  * Author:	D. W. Caress
  * Date:	June 5, 2008
  *
- * $Log: mbtime.c,v $
- * Revision 5.0  2008/07/19 07:52:03  caress
- * Added program mbtime.
- *
  *
  */
 

@@ -28,43 +28,6 @@
  * Author:	D. N. Chayes
  * Date:	June 25, 2001
  *
- * $Log: mbsys_atlas.c,v $
- * Revision 5.11  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.10  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.9  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.8  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.7  2001/12/18 04:27:45  caress
- * Release 5.0.beta11.
- *
- * Revision 5.6  2001/08/25 00:54:13  caress
- * Adding beamwidth values to extract functions.
- *
- * Revision 5.5  2001/08/10  22:41:19  dcaress
- * Release 5.0.beta07
- *
- * Revision 5.4  2001-07-30 17:40:52-07  caress
- * Fixed typos.
- *
- * Revision 5.3  2001/07/26  03:40:56  caress
- * Fixed handling of sidescan.
- *
- * Revision 5.2  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/06/30  17:40:14  caress
- * Release 5.0.beta02
- *
- * Revision 5.0  2001/06/29  22:49:07  caress
- * Added support for HSDS2RAW
- *
  *
  *
  */

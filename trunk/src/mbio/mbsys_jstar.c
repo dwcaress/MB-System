@@ -22,29 +22,6 @@
  *
  * Author:	D. W. Caress
  * Date:	May 4, 2005
- * $Log: mbsys_jstar.c,v $
- * Revision 5.8  2008/07/10 18:02:39  caress
- * Proceeding towards 5.1.1beta20.
- *
- * Revision 5.5  2007/10/08 15:59:34  caress
- * MBIO changes as of 8 October 2007.
- *
- * Revision 5.4  2006/11/10 22:36:05  caress
- * Working towards release 5.1.0
- *
- * Revision 5.3  2006/03/12 19:23:19  caress
- * Changed log2() and exp2() calls to log() and exp() for compatitibility with non-POSIX compliant operating systems.
- *
- * Revision 5.2  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.1  2005/06/15 15:20:17  caress
- * Fixed problems with writing Bluefin records in 7k data and improved support for Edgetech Jstar data.
- *
- * Revision 5.0  2005/06/04 04:11:35  caress
- * Support for Edgetech Jstar format (id 132 and 133).
- *
- *
  *
  */
 
@@ -58,6 +35,7 @@
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_define.h"
+#include "mb_aux.h"
 #include "mb_segy.h"
 #include "mbsys_jstar.h"
 
@@ -313,11 +291,33 @@ int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-                        double time_d, double navlon, double navlat,
-                        double speed, double heading, double sonardepth,
-                        double roll, double pitch, double heave,
-                        int *error)
+int mbsys_jstar_preprocess
+(
+	int verbose,			/* in: verbosity level set on command line 0..N */
+	void *mbio_ptr,			/* in: see mb_io.h:/^struct mb_io_struct/ */
+	void *store_ptr,		/* in: see mbsys_3datdepthlidar.h:/^struct mbsys_3datdepthlidar_struct/ */
+	void *platform_ptr,
+	int n_nav,
+	double *nav_time_d,
+	double *nav_lon,
+	double *nav_lat,
+	double *nav_speed,
+	int n_sensordepth,
+	double *sensordepth_time_d,
+	double *sensordepth_sensordepth,
+	int n_heading,
+	double *heading_time_d,
+	double *heading_heading,
+	int n_altitude,
+	double *altitude_time_d,
+	double *altitude_altitude,
+	int n_attitude,
+	double *attitude_time_d,
+	double *attitude_roll,
+	double *attitude_pitch,
+	double *attitude_heave,
+	int *error
+)
 {
 	char	*function_name = "mbsys_jstar_preprocess";
 	int	status = MB_SUCCESS;
@@ -327,6 +327,14 @@ int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_jstar_channel_struct *ssport;
 	struct mbsys_jstar_channel_struct *ssstbd;
 	int	time_i[7], time_j[5];
+	double time_d, navlon, navlat, sensordepth, speed;
+	double heading, roll, pitch, heave, altitude;
+	int	interp_status, interp_error;
+	int	jnav = 0;
+	int	jsensordepth = 0;
+	int	jheading = 0;
+	int	jaltitude = 0;
+	int	jattitude = 0;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -334,18 +342,29 @@ int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
-		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
-		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
-		fprintf(stderr,"dbg2       speed:      %f\n",speed);
-		fprintf(stderr,"dbg2       heading:    %f\n",heading);
-		fprintf(stderr,"dbg2       sonardepth: %f\n",sonardepth);
-		fprintf(stderr,"dbg2       roll:       %f\n",roll);
-		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
-		fprintf(stderr,"dbg2       heave:      %f\n",heave);
+		fprintf(stderr,"dbg2       verbose:                    %d\n", verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
+		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
+		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
+		fprintf(stderr,"dbg2       nav_time_d:                 %p\n",nav_time_d);
+		fprintf(stderr,"dbg2       nav_lon:                    %p\n",nav_lon);
+		fprintf(stderr,"dbg2       nav_lat:                    %p\n",nav_lat);
+		fprintf(stderr,"dbg2       nav_speed:                  %p\n",nav_speed);
+		fprintf(stderr,"dbg2       n_sensordepth:              %d\n",n_sensordepth);
+		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n",sensordepth_time_d);
+		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n",sensordepth_sensordepth);
+		fprintf(stderr,"dbg2       n_heading:                  %d\n",n_heading);
+		fprintf(stderr,"dbg2       heading_time_d:             %p\n",heading_time_d);
+		fprintf(stderr,"dbg2       heading_heading:            %p\n",heading_heading);
+		fprintf(stderr,"dbg2       n_altitude:                 %d\n",n_altitude);
+		fprintf(stderr,"dbg2       altitude_time_d:            %p\n",altitude_time_d);
+		fprintf(stderr,"dbg2       altitude_altitude:          %p\n",altitude_altitude);
+		fprintf(stderr,"dbg2       n_attitude:                 %d\n",n_attitude);
+		fprintf(stderr,"dbg2       attitude_time_d:            %p\n",attitude_time_d);
+		fprintf(stderr,"dbg2       attitude_roll:              %p\n",attitude_roll);
+		fprintf(stderr,"dbg2       attitude_pitch:             %p\n",attitude_pitch);
+		fprintf(stderr,"dbg2       attitude_heave:             %p\n",attitude_heave);
 		}
 
 	/* get mbio descriptor */
@@ -361,19 +380,95 @@ int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
 
 		/* get time */
-		mb_get_date(verbose,time_d,time_i);
-		mb_get_jtime(verbose,time_i,time_j);
-		sbp->year = time_i[0];
-		sbp->day = time_j[1];
-		sbp->hour = time_i[3];
-		sbp->minute = time_i[4];
-		sbp->second = time_i[5];
-		sbp->millisecondsToday = 0.001 * time_i[6]
-					+ 1000 * (time_i[5]
-						+ 60.0 * (time_i[4]
-							+ 60.0 * time_i[3]));
+		time_j[0] = sbp->year;
+		time_j[1] = sbp->day;
+		time_j[2] = 60 * sbp->hour + sbp->minute;
+		time_j[3] = sbp->second;
+		time_j[4] = (int)1000 * (sbp->millisecondsToday
+				- 1000 * floor(0.001 * ((double)sbp->millisecondsToday)));
+		mb_get_itime(verbose,time_j,time_i);
+		mb_get_time(verbose,time_i,&time_d);
+		}
 
-		/* get navigation */
+	/* preprocess sidescan data */
+	else if (store->kind == MB_DATA_DATA
+		|| store->kind == MB_DATA_SIDESCAN2)
+		{
+		/* get channels */
+		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
+		ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
+
+		/* get time */
+		time_j[0] = ssport->year;
+		time_j[1] = ssport->day;
+		time_j[2] = 60 * ssport->hour + ssport->minute;
+		time_j[3] = ssport->second;
+		time_j[4] = (int)1000 * (ssport->millisecondsToday
+				- 1000 * floor(0.001 * ((double)ssport->millisecondsToday)));
+		mb_get_itime(verbose,time_j,time_i);
+		mb_get_time(verbose,time_i,&time_d);
+		}
+
+	/* get nav sensordepth heading attitude values for record timestamp */
+	if (n_nav > 0)
+		{
+		interp_status = mb_linear_interp_longitude(verbose,
+					nav_time_d-1, nav_lon-1, n_nav, 
+					time_d, &navlon, &jnav,
+					&interp_error);
+		interp_status = mb_linear_interp_latitude(verbose,
+					nav_time_d-1, nav_lat-1, n_nav, 
+					time_d, &navlat, &jnav,
+					&interp_error);
+		interp_status = mb_linear_interp(verbose,
+					nav_time_d-1, nav_speed-1, n_nav, 
+					time_d, &speed, &jnav,
+					&interp_error);
+		}
+	if (n_sensordepth > 0)
+		{
+		interp_status = mb_linear_interp(verbose,
+					sensordepth_time_d-1, sensordepth_sensordepth-1, n_sensordepth, 
+					time_d, &sensordepth, &jsensordepth,
+					&interp_error);
+		}
+	if (n_heading > 0)
+		{
+		interp_status = mb_linear_interp_heading(verbose,
+					heading_time_d-1, heading_heading-1, n_heading, 
+					time_d, &heading, &jheading,
+					&interp_error);
+		}
+	if (n_altitude > 0)
+		{
+		interp_status = mb_linear_interp(verbose,
+					altitude_time_d-1, altitude_altitude-1, n_altitude, 
+					time_d, &altitude, &jaltitude,
+					&interp_error);
+		}
+	if (n_attitude > 0)
+		{
+		interp_status = mb_linear_interp(verbose,
+					attitude_time_d-1, attitude_roll-1, n_attitude, 
+					time_d, &roll, &jattitude,
+					&interp_error);
+		interp_status = mb_linear_interp(verbose,
+					attitude_time_d-1, attitude_pitch-1, n_attitude, 
+					time_d, &pitch, &jattitude,
+					&interp_error);
+		interp_status = mb_linear_interp(verbose,
+					attitude_time_d-1, attitude_heave-1, n_attitude, 
+					time_d, &heave, &jattitude,
+					&interp_error);
+		}
+
+	/* preprocess subbottom data */
+	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+		{
+		/* get channel */
+		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
+
+		/* set navigation */
 		if (navlon < 180.0) navlon = navlon + 360.0;
 		if (navlon > 180.0) navlon = navlon - 360.0;
 		sbp->sourceCoordX = (int) (600000.0 * navlon);
@@ -381,19 +476,19 @@ int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp->groupCoordX = (int) (600000.0 * navlon);
 		sbp->groupCoordY = (int) (600000.0 * navlat);
 
-		/* get heading */
+		/* set heading */
 		if (heading > 180.0)
 			heading -= 360.0;
 		if (heading < -180.0)
 			heading += 360.0;
 		sbp->heading = (short) (100.0 * heading);
 
-		/* get sonardepth */
-		sbp->startDepth = sonardepth /
+		/* set sonardepth */
+		sbp->startDepth = sensordepth /
 				sbp->sampleInterval / 0.00000075;
-		sbp->sonardepth = 1000 * sonardepth;
+		sbp->sonardepth = 1000 * sensordepth;
 
-		/* get attitude */
+		/* set attitude */
 		sbp->roll = 32768 * roll / 180.0;
 		sbp->pitch = 32768 * pitch / 180.0;
 		sbp->heaveCompensation = heave /
@@ -408,29 +503,7 @@ int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
 		ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
 
-		/* get time */
-		mb_get_date(verbose,time_d,time_i);
-		mb_get_jtime(verbose,time_i,time_j);
-		ssport->year = time_i[0];
-		ssport->day = time_j[1];
-		ssport->hour = time_i[3];
-		ssport->minute = time_i[4];
-		ssport->second = time_i[5];
-		ssport->millisecondsToday = 0.001 * time_i[6]
-					+ 1000 * (time_i[5]
-						+ 60.0 * (time_i[4]
-							+ 60.0 * time_i[3]));
-		ssstbd->year = time_i[0];
-		ssstbd->day = time_j[1];
-		ssstbd->hour = time_i[3];
-		ssstbd->minute = time_i[4];
-		ssstbd->second = time_i[5];
-		ssstbd->millisecondsToday = 0.001 * time_i[6]
-					+ 1000 * (time_i[5]
-						+ 60.0 * (time_i[4]
-							+ 60.0 * time_i[3]));
-
-		/* get navigation */
+		/* set navigation */
 		if (navlon < 180.0) navlon = navlon + 360.0;
 		if (navlon > 180.0) navlon = navlon - 360.0;
 		ssport->sourceCoordX = 600000.0 * navlon;
@@ -442,7 +515,7 @@ int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		ssstbd->groupCoordX = 600000.0 * navlon;
 		ssstbd->groupCoordY = 600000.0 * navlat;
 
-		/* get heading and speed */
+		/* set heading and speed */
 		if (heading > 180.0)
 			heading -= 360.0;
 		if (heading < -180.0)
@@ -450,15 +523,15 @@ int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		ssport->heading = (short) (100.0 * heading);
 		ssstbd->heading = (short) (100.0 * heading);
 
-		/* get sonardepth */
-		ssport->startDepth = sonardepth /
+		/* set sonardepth */
+		ssport->startDepth = sensordepth /
 				ssport->sampleInterval / 0.00000075;
-		ssstbd->startDepth = sonardepth /
+		ssstbd->startDepth = sensordepth /
 				ssstbd->sampleInterval / 0.00000075;
-		ssport->sonardepth = 1000 * sonardepth;
-		ssstbd->sonardepth = 1000 * sonardepth;
+		ssport->sonardepth = 1000 * sensordepth;
+		ssstbd->sonardepth = 1000 * sensordepth;
 
-		/* get attitude */
+		/* set attitude */
 		ssport->roll = 32768 * roll / 180.0;
 		ssport->pitch = 32768 * pitch / 180.0;
 		ssport->heaveCompensation = heave /

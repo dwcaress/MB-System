@@ -22,65 +22,6 @@
  *
  * Author:	D. W. Caress
  * Date:	October 4, 1994
- * $Log: mbsys_sb2000.h,v $
- * Revision 5.9  2009/03/08 09:21:00  caress
- * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
- *
- * Revision 5.8  2005/11/05 00:48:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.7  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.5  2002/02/26 07:50:41  caress
- * Release 5.0.beta14
- *
- * Revision 5.4  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.3  2001/04/06  22:05:59  caress
- * Consolidated xse formats into one format.
- *
- * Revision 5.2  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.5  2000/09/30  06:31:19  caress
- * Snapshot for Dale.
- *
- * Revision 4.4  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.3  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.3  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.2  1995/02/14  22:01:39  caress
- * Version 4.2
- *
- * Revision 4.2  1995/02/14  22:01:39  caress
- * Version 4.2
- *
- * Revision 4.1  1994/12/21  20:21:09  caress
- * Changes to support high resolution SeaBeam 2000 sidescan files
- * from R/V Melville data.
- *
- * Revision 4.0  1994/10/21  12:35:09  caress
- * Release V4.0
- *
- * Revision 1.1  1994/10/21  12:20:01  caress
- * Initial revision
- *
  *
  */
 /*

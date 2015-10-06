@@ -23,31 +23,6 @@
  * Author:	D. W. Caress
  * Date:	January 24, 2001
  *
- * $Log: mbgetesf.c,v $
- * Revision 5.7  2008/05/16 22:44:37  caress
- * Release 5.1.1beta18
- *
- * Revision 5.6  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.5  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.4  2005/03/25 04:43:02  caress
- * Standardized the string lengths used for filenames and comment data.
- *
- * Revision 5.3  2003/04/17 21:17:10  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2002/10/02 23:56:06  caress
- * Release 5.0.beta24
- *
- * Revision 5.1  2001/07/20 00:34:38  caress
- * Release 5.0.beta03
- *
- * Revision 5.0  2001/03/22 21:14:47  caress
- * Trying to make release 5.0.beta0.
- *
  *
  */
 

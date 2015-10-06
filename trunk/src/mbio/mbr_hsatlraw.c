@@ -23,128 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	February 11, 1993
- * $Log: mbr_hsatlraw.c,v $
- * Revision 5.11  2006/09/11 18:55:52  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.10  2005/11/05 00:48:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.9  2004/05/22 06:00:07  caress
- * Release 5.0.4
- *
- * Revision 5.8  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.7  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.5  2002/08/21 00:55:46  caress
- * Release 5.0.beta22
- *
- * Revision 5.4  2002/05/02 03:55:34  caress
- * Release 5.0.beta17
- *
- * Revision 5.3  2001/07/20 00:31:11  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.17  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.16  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.15  2000/03/06  21:54:21  caress
- * Added check for Hydrosweep Y2k problem - Ewing sonar
- * started putting out 1900 instead of 2000 in February 2000.
- *
- * Revision 4.14  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.13  1997/09/12  14:58:34  caress
- * Set size of tape block headers to exclude at 12 characters.
- *
- * Revision 4.12  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.11  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.10  1996/04/24  01:14:38  caress
- * Code now keeps any water sound velocity or position offset
- * data encountered in memory.
- *
- * Revision 4.10  1996/04/24  01:14:38  caress
- * Code now keeps any water sound velocity or position offset
- * data encountered in memory.
- *
- * Revision 4.9  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.8  1995/07/26  14:45:39  caress
- * Fixed problems related to shallow water data.
- *
- * Revision 4.7  1995/07/13  21:40:28  caress
- * Fixed problem with scaling of center beam depths.
- *
- * Revision 4.6  1995/03/17  15:12:59  caress
- * Changes related to handling early, problematic
- * Ewing Hydrosweep data.
- *
- * Revision 4.5  1995/03/08  13:31:09  caress
- * Fixed bug related to handling of shallow water data and the depth scale.
- *
- * Revision 4.4  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.3  1995/02/22  21:55:10  caress
- * Fixed reading of amplitude data from existing data.
- *
- * Revision 4.2  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.1  1994/05/21  02:23:29  caress
- * Made sure that mb_io_ptr->new_bath_alongtrack is set to zero on reading.
- *
- * Revision 4.1  1994/05/21  02:23:29  caress
- * Made sure that mb_io_ptr->new_bath_alongtrack is set to zero on reading.
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.3  1994/03/04  22:27:09  caress
- * Reduced output amplitude values by a factor of 10 so that
- * general range should be between 20 and 500, hopefully
- * enough to insure actual range between 1 and 999.
- *
- * Revision 4.2  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.1  1994/03/03  03:15:16  caress
- * Added simple processing of amplitude data as part of
- * reading.  This will have to be improved, but its a start.
- *
- * Revision 4.0  1994/02/21  03:59:50  caress
- * First cut at new version. Altered to be consistent
- * with passing of three types of data: bathymetry,
- * amplitude, and sidescan.
- *
- * Revision 3.0  1993/05/14  22:55:16  sohara
- * initial version
  *
  */
 
@@ -181,6 +59,7 @@ int mbr_info_hsatlraw(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -267,6 +146,7 @@ int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -314,6 +194,7 @@ int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -362,6 +243,7 @@ int mbr_info_hsatlraw(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -397,6 +279,7 @@ int mbr_info_hsatlraw(int verbose,
 	*variable_beams = MB_NO;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_NO;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -421,6 +304,7 @@ int mbr_info_hsatlraw(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

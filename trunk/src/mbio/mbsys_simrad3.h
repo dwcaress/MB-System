@@ -34,16 +34,6 @@
  * Author:	D. W. Caress (L-DEO)
  * Date:	February 22, 2008
  *
- * $Log: mbsys_simrad3.h,v $
- * Revision 5.2  2009/03/02 18:51:52  caress
- * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
- *
- * Revision 5.1  2008/07/10 06:40:34  caress
- * Fixed support for EM122
- *
- * Revision 5.0  2008/03/01 09:11:35  caress
- * Added support for Simrad EM710 multibeam in new formats 58 and 59.
- *
  *
  */
 /*
@@ -934,42 +924,42 @@ struct mbsys_simrad3_struct
 	int	sts_spare2;		/* Spare */
 
 	/* installation parameter values */
-	int	par_date;	/* installation parameter date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	par_msec;	/* installation parameter time since midnight in msec
-				    08:12:51.234 = 29570234 */
+	int	par_date;	    /* installation parameter date = year*10000 + month*100 + day
+                            Feb 26, 1995 = 19950226 */
+	int	par_msec;	    /* installation parameter time since midnight in msec
+                            08:12:51.234 = 29570234 */
 	int	par_line_num;	/* Survey line number */
 	int	par_serial_1;	/* System 1 serial number */
 	int	par_serial_2;	/* System 2 serial number */
 	double	par_wlz;	/* water line vertical location (m) */
-	int	par_smh;	/* System main head serial number */
-        
-        int     par_hun;        /* Hull unit (0 or 1) */
-        double  par_hut;        /* Hull unit tilt offset */
-        int     par_txs;        /* TX serial number */
-        int     par_t2x;        /* TX number 2 serial number */
-        int     par_r1s;        /* RX number 1 serial number */
-        int     par_r2s;        /* RX number 2 serial number */
-        int     par_stc;        /* System transducer configuration
-                                 *      0 = Single TX + single RX
-                                 *              EM122, EM302, EM710, EM2040-Single
-                                 *      1 = Single head
-                                 *              EM3002S, EM2040C-Single, EM2040P
-                                 *      2 = Dual Head
-                                 *              EM3002-Dual, EM2040C-Dual
-                                 *      3 = Single TX + Dual RX
-                                 *              EM2040-Dual-RX
-                                 *      4 = Dual TX + Dual RX
-                                 *              EM2040-Dual-TX
-                                 *  If present, the STC parameter can be used in
-                                 *  decoding of the transducer installation parameters:
-                                 *      STC  S0X/Y/Z/R/P/H  S1X/Y/Z/R/P/H  S2X/Y/Z/R/P/H  S3X/Y/Z/R/P/H
-                                 *      ---  -------------  -------------  -------------  -------------
-                                 *       0        ----            TX             RX           ----
-                                 *       1        ----           Head           ----          ----
-                                 *       2        ----          Head 1         Head 2         ----
-                                 *       3        ----            TX            RX 1          RX 2
-                                 *       4        TX 1           TX 2           RX 1          RX 2     */
+	int	par_smh;	    /* System main head serial number */
+    
+    int     par_hun;    /* Hull unit (0 or 1) */
+    double  par_hut;    /* Hull unit tilt offset */
+    int     par_txs;    /* TX serial number */
+    int     par_t2x;    /* TX number 2 serial number */
+    int     par_r1s;    /* RX number 1 serial number */
+    int     par_r2s;    /* RX number 2 serial number */
+    int     par_stc;    /* System transducer configuration
+                         *      0 = Single TX + single RX
+                         *              EM122, EM302, EM710, EM2040-Single
+                         *      1 = Single head
+                         *              EM3002S, EM2040C-Single, EM2040P
+                         *      2 = Dual Head
+                         *              EM3002-Dual, EM2040C-Dual
+                         *      3 = Single TX + Dual RX
+                         *              EM2040-Dual-RX
+                         *      4 = Dual TX + Dual RX
+                         *              EM2040-Dual-TX
+                         *  If present, the STC parameter can be used in
+                         *  decoding of the transducer installation parameters:
+                         *      STC  S0X/Y/Z/R/P/H  S1X/Y/Z/R/P/H  S2X/Y/Z/R/P/H  S3X/Y/Z/R/P/H
+                         *      ---  -------------  -------------  -------------  -------------
+                         *       0        ----            TX             RX           ----
+                         *       1        ----           Head           ----          ----
+                         *       2        ----          Head 1         Head 2         ----
+                         *       3        ----            TX            RX 1          RX 2
+                         *       4        TX 1           TX 2           RX 1          RX 2     */
 	double	par_s0z;	/* Transducer 0 vertical location (m) */
 	double	par_s0x;	/* Transducer 0 along location (m) */
 	double	par_s0y;	/* Transducer 0 athwart location (m) */
@@ -983,14 +973,14 @@ struct mbsys_simrad3_struct
 	double	par_s1h;	/* Transducer 1 heading (deg) */
 	double	par_s1r;	/* Transducer 1 roll (m) */
 	double	par_s1p;	/* Transducer 1 pitch (m) */
-	int	par_s1n;	/* Transducer 1 number of modules */
+	int	    par_s1n;	    /* Transducer 1 number of modules */
 	double	par_s2z;	/* Transducer 2 vertical location (m) */
 	double	par_s2x;	/* Transducer 2 along location (m) */
 	double	par_s2y;	/* Transducer 2 athwart location (m) */
 	double	par_s2h;	/* Transducer 2 heading (deg) */
 	double	par_s2r;	/* Transducer 2 roll (m) */
 	double	par_s2p;	/* Transducer 2 pitch (m) */
-	int	par_s2n;	/* Transducer 2 number of modules */
+	int	    par_s2n;	    /* Transducer 2 number of modules */
         
 	double	par_s3z;	/* Transducer 3 vertical location (m) */
 	double	par_s3x;	/* Transducer 3 along location (m) */
@@ -999,13 +989,13 @@ struct mbsys_simrad3_struct
 	double	par_s3r;	/* Transducer 3 roll (m) */
 	double	par_s3p;	/* Transducer 3 pitch (m) */
 
-        int     par_s1s;        /* TX array size (0=0.5 deg, 1 = 1 deg, 2 = 2 deg) */
-        int     par_s2s;        /* RX array size (1 = 1 deg, 2 = 2 deg) */
+    int     par_s1s;    /* TX array size (0=0.5 deg, 1 = 1 deg, 2 = 2 deg) */
+    int     par_s2s;    /* RX array size (1 = 1 deg, 2 = 2 deg) */
         
 	double	par_go1;	/* System (sonar head 1) gain offset */
 	double	par_go2;	/* Sonar head 2 gain offset */
-        double  par_obo;        /* Outer beam offset */
-        double  par_fgd;        /* High/low frequency gain difference */
+    double  par_obo;        /* Outer beam offset */
+    double  par_fgd;        /* High/low frequency gain difference */
         
 	char	par_tsv[16];	/* Transmitter (sonar head 1) software version */
 	char	par_rsv[16];	/* Receiver (sonar head 2) software version */
@@ -1017,39 +1007,39 @@ struct mbsys_simrad3_struct
 	double	par_dsx;	/* Depth sensor along location (m) */
 	double	par_dsy;	/* Depth sensor athwart location (m) */
 	double	par_dsz;	/* Depth sensor vertical location (m) */
-	int	par_dsd;	/* Depth sensor time delay (msec) */
+	int	    par_dsd;	/* Depth sensor time delay (msec) */
 	double	par_dso;	/* Depth sensor offset */
 	double	par_dsf;	/* Depth sensor scale factor */
-	char	par_dsh[2];	/* Depth sensor heave (IN or NI) */
-	int	par_aps;	/* Active position system number */
-	int	par_p1q;	/* Position system 1 quality (boolean) */
-	int	par_p1m;	/* Position system 1 motion compensation (boolean) */
-	int	par_p1t;	/* Position system 1 time stamp used
+	char	par_dsh[2];	/* Depth sensor heave (IN = depth sensor or NI = use heave) */
+	int	    par_aps;	/* Active position system number - 1 ==> 0 to 2 */
+	int	    par_p1q;	/* Position system 1 quality (boolean) */
+	int	    par_p1m;	/* Position system 1 motion compensation (boolean) */
+	int	    par_p1t;	/* Position system 1 time stamp used
 				    (0=system time, 1=position input time) */
 	double	par_p1z;	/* Position system 1 vertical location (m) */
 	double	par_p1x;	/* Position system 1 along location (m) */
 	double	par_p1y;	/* Position system 1 athwart location (m) */
 	double	par_p1d;	/* Position system 1 time delay (sec) */
 	char	par_p1g[16];	/* Position system 1 geodetic datum */
-	int	par_p2q;	/* Position system 2 quality (boolean) */
-	int	par_p2m;	/* Position system 2 motion compensation (boolean) */
-	int	par_p2t;	/* Position system 2 time stamp used
+	int	    par_p2q;	/* Position system 2 quality (boolean) */
+	int	    par_p2m;	/* Position system 2 motion compensation (boolean) */
+	int	    par_p2t;	/* Position system 2 time stamp used
 				    (0=system time, 1=position input time) */
 	double	par_p2z;	/* Position system 2 vertical location (m) */
 	double	par_p2x;	/* Position system 2 along location (m) */
 	double	par_p2y;	/* Position system 2 athwart location (m) */
 	double	par_p2d;	/* Position system 2 time delay (sec) */
 	char	par_p2g[16];	/* Position system 2 geodetic datum */
-	int	par_p3q;	/* Position system 3 quality (boolean) */
-	int	par_p3m;	/* Position system 3 motion compensation (boolean) */
-	int	par_p3t;	/* Position system 3 time stamp used
+	int	    par_p3q;	/* Position system 3 quality (boolean) */
+	int	    par_p3m;	/* Position system 3 motion compensation (boolean) */
+	int	    par_p3t;	/* Position system 3 time stamp used
 				    (0=system time, 1=position input time) */
 	double	par_p3z;	/* Position system 3 vertical location (m) */
 	double	par_p3x;	/* Position system 3 along location (m) */
 	double	par_p3y;	/* Position system 3 athwart location (m) */
 	double	par_p3d;	/* Position system 3 time delay (sec) */
 	char	par_p3g[16];	/* Position system 3 geodetic datum */
-	int	par_p3s;	/* Position system 3 on serial line or ethernet (0=ethernet) */
+	int	    par_p3s;	/* Position system 3 on serial line or ethernet (0=ethernet) */
         
 	double	par_msz;	/* Motion sensor 1 vertical location (m) */
 	double	par_msx;	/* Motion sensor 1 along location (m) */
@@ -1071,7 +1061,7 @@ struct mbsys_simrad3_struct
         
 	double	par_gcg;	/* Gyro compass heading offset (deg) */
 	double	par_mas;        /* Roll scaling factor */
-	int	par_shc;        /* Transducer depth sound speed source
+	int	    par_shc;        /* Transducer depth sound speed source
                                  *   0 = transducer depth sound speed is used as
                                  *          the initial entry the sound speed profile
                                  *          used in the raytracing calculations
@@ -1401,6 +1391,22 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr,
 			int *pingnumber, int *error);
+int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+            int *sonartype, int *error);
+int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
+            int *ss_type, int *error);
+int mbsys_simrad3_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+            int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
+			double *nav_speed,
+            int n_sensordepth, double *sensordepth_time_d,
+			double *sensordepth_sensordepth,
+            int n_heading, double *heading_time_d, double *heading_heading,
+            int n_altitude, double *altitude_time_d, double *altitude_altitude,
+            int n_attitude, double *attitude_time_d, double *attitude_roll,
+			double *attitude_pitch, double *attitude_heave,
+            int *error);
+int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, void **platform_ptr, int *error);
 int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

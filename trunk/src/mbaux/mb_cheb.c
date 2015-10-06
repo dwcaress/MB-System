@@ -30,25 +30,6 @@
  * Author:	D. W. Caress
  * Date:	March 23, 2000
  *
- * $Log: mb_cheb.c,v $
- * Revision 5.3  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.2  2007/10/08 05:56:18  caress
- * Changed convergence criteria.
- *
- * Revision 5.1  2006/01/11 07:33:01  caress
- * Working towards 5.0.8
- *
- * Revision 5.0  2000/12/01 22:53:59  caress
- * First cut at Version 5.0.
- *
- * Revision 4.1  2000/09/30  06:54:58  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  2000/09/08  17:19:14  caress
- * Initial version.
- *
  *
  *
  */

@@ -25,32 +25,6 @@
  * Author:	D. W. Caress
  * Date:	April 13, 2004
  *
- * $Log: mb_segy.h,v $
- * Revision 5.7  2008/09/13 06:08:09  caress
- * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
- *
- * Revision 5.6  2006/11/10 22:36:04  caress
- * Working towards release 5.1.0
- *
- * Revision 5.5  2005/05/05 23:53:01  caress
- * Just added a space in a line of code...
- *
- * Revision 5.4  2004/09/16 19:02:33  caress
- * Changes to better support segy data.
- *
- * Revision 5.3  2004/07/27 19:44:38  caress
- * Working on handling subbottom data.
- *
- * Revision 5.2  2004/06/18 05:22:32  caress
- * Working on adding support for segy i/o and for Reson 7k format 88.
- *
- * Revision 5.1  2004/05/21 23:44:49  caress
- * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
- *
- * Revision 5.0  2004/04/27 01:50:15  caress
- * Adding support for Reson 7k sonar data, including segy extensions.
- *
- *
  */
 
 /* Standard SEGY format sizes */

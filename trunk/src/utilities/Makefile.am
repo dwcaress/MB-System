@@ -29,6 +29,7 @@ bin_PROGRAMS = mb7k2jstar \
         mbkongsbergpreprocess \
         mblevitus \
         mblist \
+		mbmakeplatform \
         mbmosaic \
         mbnavlist \
         mbneptune2esf \
@@ -105,6 +106,7 @@ mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
 mblevitus_SOURCES = mblevitus.c
 mblist_SOURCES = mblist.c
+mbmakeplatform_SOURCES = mbmakeplatform.c
 mbmosaic_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbmosaic_SOURCES = mbmosaic.c
 mbnavlist_SOURCES = mbnavlist.c
