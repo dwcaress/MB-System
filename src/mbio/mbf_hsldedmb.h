@@ -18,52 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
- * $Log: mbf_hsldedmb.h,v $
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.6  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.5  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.4  1997/09/15  19:06:40  caress
- * Real Version 4.5
- *
- * Revision 4.3  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.2  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.2  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.1  1994/07/29  18:46:51  caress
- * Changes associated with supporting Lynx OS (byte swapped) and
- * using unix second time base (for time_d values).
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.2  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.1  1994/02/17  21:19:08  caress
- * Updated associated MBIO format id in comments.
- *
- * Revision 4.0  1994/02/17  20:59:54  caress
- * First cut at new version. No changes.
- *
- * Revision 3.0  1993/05/14  22:51:24  sohara
- * initial version
  *
  */
 /*

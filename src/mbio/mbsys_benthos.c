@@ -24,7 +24,6 @@
  * Author:	D. W. Caress
  * Date:	2 May 2012 (when the code was brought into the MB-System archive as a read-only i/o module)
  *
- * $Log: $
  *
  */
 

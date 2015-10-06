@@ -27,37 +27,6 @@
  * Author:	D. N. Chayes
  * Date:	June 13, 2002
  *
- * $Log: mbsys_surf.h,v $
- * Revision 5.9  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.8  2003/11/24 21:09:09  caress
- * Implement Reinhard Holtkamp's suggested mods for better SURF format support.
- *
- * Revision 5.7  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2003/03/10 20:04:45  caress
- * Added mr1pr library.
- *
- * Revision 5.5  2003/02/27 04:33:33  caress
- * Fixed handling of SURF format data.
- *
- * Revision 5.4  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.3  2001/12/18 04:27:45  caress
- * Release 5.0.beta11.
- *
- * Revision 5.2  2001/08/10 22:41:19  dcaress
- * Release 5.0.beta07
- *
- * Revision 5.1  2001-07-19 17:32:54-07  caress
- * Release 5.0.beta03
- *
- * Revision 5.0  2001/06/29  22:49:07  caress
- * Added support for HSDS2RAW
- *
  *
  */
 /*

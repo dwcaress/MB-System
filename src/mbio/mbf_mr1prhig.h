@@ -18,41 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	July 15, 1994
- * $Log: mbf_mr1prhig.h,v $
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.4  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.3  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.2  1996/01/26  21:27:27  caress
- * Version 4.3 distribution.
- *
- * Revision 4.2  1996/01/26  21:27:27  caress
- * Version 4.3 distribution.
- *
- * Revision 4.1  1995/09/28  18:10:48  caress
- * Various bug fixes working toward release 4.3.
- *
- * Revision 4.0  1994/10/21  12:35:05  caress
- * Release V4.0
- *
- * Revision 1.2  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 1.1  1994/07/29  18:46:51  caress
- * Initial revision
- *
- *
  *
  */
 /*

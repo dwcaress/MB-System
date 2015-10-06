@@ -18,59 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	March 3, 1994
- * $Log: mbf_sb2100rw.h,v $
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.10  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.9  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.8  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.7  1995/06/07  20:41:47  caress
- * Fixed some typos.
- *
- * Revision 4.7  1995/06/07  20:41:47  caress
- * Fixed some typos.
- *
- * Revision 4.6  1995/05/08  21:26:28  caress
- * Made changes consistent with new i/o spec for SB2100 data.
- *
- * Revision 4.5  1995/02/14  22:01:39  caress
- * Version 4.2
- *
- * Revision 4.4  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.3  1994/06/21  22:54:21  caress
- * Added #ifdef statements to handle byte swapping.
- *
- * Revision 4.2  1994/04/09  15:49:21  caress
- * Altered to fit latest iteration of SeaBeam 2100 vendor format.
- *
- * Revision 4.1  1994/03/25  14:02:38  caress
- * Made changes in accordance with latest iteration of
- * SeaBeam 2100 vendor format.
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.0  1994/03/05  02:12:07  caress
- * First cut for SeaBeam 2100 i/o.
- *
  *
  */
 /*

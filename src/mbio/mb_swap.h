@@ -22,44 +22,6 @@
  * Author:	D. W. Caress
  * Date:	June 21, 1994
  *
- * $Log: mb_swap.h,v $
- * Revision 5.3  2004/11/06 03:55:15  caress
- * Working to support the Reson 7k format.
- *
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.6  2000/09/30  06:29:44  caress
- * Snapshot for Dale.
- *
- * Revision 4.5  1998/12/17  23:01:15  caress
- * MB-System version 4.6beta4
- *
- * Revision 4.4  1998/10/05 17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.3  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.2  1994/10/21  12:11:53  caress
- * Release V4.0
- *
- * Revision 4.2  1994/10/21  12:11:53  caress
- * Release V4.0
- *
- * Revision 4.1  1994/07/29  18:46:51  caress
- * Changes associated with supporting Lynx OS (byte swapped) and
- * using unix second time base (for time_d values).
- *
- * Revision 4.0  1994/06/21  23:22:59  caress
- * First cut.
- *
  *
  *
  */

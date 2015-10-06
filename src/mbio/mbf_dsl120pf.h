@@ -24,41 +24,6 @@
  *
  * Author:	D. W. Caress
  * Date:	August 5, 1996
- * $Log: mbf_dsl120pf.h,v $
- * Revision 5.3  2006/09/11 18:55:52  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.3  2000/09/30  06:29:44  caress
- * Snapshot for Dale.
- *
- * Revision 4.2  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1997/04/17  15:07:36  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.0  1996/08/26  17:29:56  caress
- * Release 4.4 revision.
- *
- * Revision 1.1  1996/08/26  17:24:56  caress
- * Initial revision
- *
  *
  */
 /*

@@ -15,7 +15,7 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbaux_la_SOURCES = \
-		      mb_spline.c mb_zgrid.c mb_surface.c mb_cheb.c \
+		      mb_zgrid.c mb_surface.c mb_cheb.c \
 		      mb_delaun.c mb_track.c mb_truecont.c mb_readwritegrd.c \
 		      mb_intersectgrid.c
 libmbaux_la_LIBADD =  ${top_builddir}/src/mbio/libmbio.la \

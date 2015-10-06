@@ -24,70 +24,6 @@
  * Author:	D. W. Caress
  * Date:	June 6, 1997
  *
- * $Log: mbr_elmk2unb.c,v $
- * Revision 5.9  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.8  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.7  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.5  2001/08/10 22:41:19  dcaress
- * Release 5.0.beta07
- *
- * Revision 5.4  2001-07-19 17:31:11-07  caress
- * Release 5.0.beta03
- *
- * Revision 5.3  2001/06/08  21:44:01  caress
- * Version 5.0.beta01
- *
- * Revision 5.2  2001/03/22  20:45:56  caress
- * Trying to make 5.0.beta0...
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.8  2000/10/11  01:02:30  caress
- * Convert to ANSI C
- *
- * Revision 4.7  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.6  1999/04/07  20:38:24  caress
- * Fixes related to building under Linux.
- *
- * Revision 4.6  1999/04/03 07:36:16  caress
- * Fix bugs in byteswapped code.
- *
- * Revision 4.5  1999/04/02 00:55:11  caress
- * Handles nav and nav records more properly.
- *
- * Revision 4.4  1999/03/31  18:11:35  caress
- * MB-System 4.6beta7
- *
- * Revision 4.3  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.2  1997/09/15  19:06:40  caress
- * Real Version 4.5
- *
- * Revision 4.1  1997/07/28  14:58:19  caress
- * Fixed typos.
- *
- * Revision 4.0  1997/07/25  14:25:40  caress
- * Version 4.5beta2.
- *
- * Revision 1.1  1997/07/25  14:19:53  caress
- * Initial revision
- *
  *
  */
 
@@ -123,6 +59,7 @@ int mbr_info_elmk2unb(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -188,6 +125,7 @@ int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -235,6 +173,7 @@ int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -283,6 +222,7 @@ int mbr_info_elmk2unb(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -318,6 +258,7 @@ int mbr_info_elmk2unb(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_NAV;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -342,6 +283,7 @@ int mbr_info_elmk2unb(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

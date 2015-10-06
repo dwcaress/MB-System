@@ -23,70 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	October 24, 1995
- * $Log: mbr_mr1aldeo.c,v $
- * Revision 5.8  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.7  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.6  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.5  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.4  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.3  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 1.10  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 1.9  2000/10/03  21:48:03  caress
- * Snapshot for Dale.
- *
- * Revision 1.8  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 1.7  1999/05/05  20:32:19  caress
- * Fixed bugs in handling updated bathymetry through mb_put_all call.
- *
- * Revision 1.6  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 1.1  1998/10/05  17:46:15  caress
- * Initial revision
- *
- * Revision 1.5  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 1.4  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 1.4  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 1.3  1996/04/22  11:16:30  caress
- * DTR define now in mb_io.h
- *
- * Revision 1.2  1996/03/12  17:21:55  caress
- * Added format 63, short HMR1 processing format.
- *
- * Revision 1.1  1996/01/26  21:23:30  caress
- * Initial revision
- *
  *
  */
 
@@ -120,6 +56,7 @@ int mbr_info_mr1aldeo(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -178,6 +115,7 @@ int mbr_register_mr1aldeo(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -225,6 +163,7 @@ int mbr_register_mr1aldeo(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -273,6 +212,7 @@ int mbr_info_mr1aldeo(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -308,6 +248,7 @@ int mbr_info_mr1aldeo(int verbose,
 	*variable_beams = MB_NO;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -332,6 +273,7 @@ int mbr_info_mr1aldeo(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

@@ -40,31 +40,6 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: mbm_grdinfo.perl,v $
-#   Revision 1.6  2006/11/26 09:42:01  caress
-#   Making distribution 5.1.0.
-#
-#   Revision 1.5  2006/09/11 18:55:52  caress
-#   Changes during Western Flyer and Thomas Thompson cruises, August-September
-#   2006.
-#
-#   Revision 1.4  2006/02/10 01:27:40  caress
-#   Fixed parsing of grdinfo output to handle changes to GMT4.1.
-#
-#   Revision 1.3  2003/07/02 18:12:33  caress
-#   Release 5.0.0
-#
-#   Revision 1.2  2003/04/17 20:42:48  caress
-#   Release 5.0.beta30
-#
-#   Revision 1.1  2001/06/03 06:59:24  caress
-#   Initial revision
-#
-#   Revision 5.1  2001/03/22 21:05:45  caress
-#   Trying to make release 5.0.beta0
-#
-#
 #
 #
 $program_name = "mbm_grdinfo";

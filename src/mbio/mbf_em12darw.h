@@ -19,45 +19,6 @@
  * Authors:	D. W. Caress (L-DEO)
  *		R. B. Owens (University of Oxford)
  * Date:	January 20, 1994
- * $Log: mbf_em12darw.h,v $
- * Revision 5.3  2003/12/04 23:10:22  caress
- * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
- *
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.3  2000/09/30  06:29:44  caress
- * Snapshot for Dale.
- *
- * Revision 4.2  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.0  1994/10/21  12:35:05  caress
- * Release V4.0
- *
- * Revision 4.0  1994/10/21  12:35:05  caress
- * Release V4.0
- *
- * Revision 1.1  1994/10/21  12:20:01  caress
- * Initial revision
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.0  1994/03/05  22:54:09  caress
- * First cut.
  *
  *
  */

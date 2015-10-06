@@ -52,48 +52,6 @@
  * Hacker:	D. W. Caress
  * Date:	April 25, 1995
  *
- * $Log: mb_zgrid.c,v $
- * Revision 5.6  2009/03/13 07:05:58  caress
- * Release 5.1.2beta02
- *
- * Revision 5.5  2008/12/22 08:36:18  caress
- * Check in of 22 Dec 2008.
- *
- * Revision 5.4  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.3  2008/10/17 07:52:44  caress
- * Check in on October 17, 2008.
- *
- * Revision 5.2  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.1  2007/10/08 05:50:55  caress
- * Changed convergence criteria.
- *
- * Revision 5.0  2000/12/01 22:53:59  caress
- * First cut at Version 5.0.
- *
- * Revision 4.5  2000/10/11  21:48:43  caress
- * Moved file to mbaux directory and renamed to mb_zgrid.c
- *
- * Revision 4.4  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.3  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.2  1997/04/21  17:19:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.1  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.0  1995/04/25  19:07:29  caress
- * First cut at C version of zgrid.
  *
  *
  * The following are the original comments from the Fortran code:

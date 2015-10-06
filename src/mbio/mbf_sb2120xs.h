@@ -21,11 +21,6 @@
  * Author:	D. W. Caress
  * Date:	December 8,  2000
  *
- * $Log: mbf_sb2120xs.h,v $
- * Revision 5.0  2000/12/10 20:24:25  caress
- * Initial revision.
- *
- *
  *
  */
 /*

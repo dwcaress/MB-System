@@ -1783,8 +1783,6 @@ int mbeditviz_beam_position (double navlon, double navlat,
 	/* local variables */
 	char	*function_name = "mbeditviz_beam_position";
 	double	bathuse;
-	double	range;
-	double	alpha, beta;
 	double	newbath, neweasting, newnorthing;
 
 	/* print input debug statements */
@@ -1843,9 +1841,6 @@ fprintf(stderr,"     rolldelta:   %f\n",rolldelta);
 fprintf(stderr,"     pitchdelta:  %f\n",pitchdelta);
 fprintf(stderr,"     heading:     %f\n",heading);
 fprintf(stderr,"     bathuse:     %f\n",bathuse);
-fprintf(stderr,"     range:       %f\n",range);
-fprintf(stderr,"     alpha:       %f\n",alpha);
-fprintf(stderr,"     beta:        %f\n",beta);
 fprintf(stderr,"     newbath:     %f\n",newbath);
 fprintf(stderr,"     bathcorr:    %f\n",*bathcorr);
 fprintf(stderr,"     lon:         %f\n",*lon);

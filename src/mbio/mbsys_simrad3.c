@@ -33,22 +33,6 @@
  * Author:	D. W. Caress
  * Date:	February 22, 2008
  *
- * $Log: mbsys_simrad3.c,v $
- * Revision 5.4  2009/03/02 18:51:52  caress
- * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
- *
- * Revision 5.3  2009/02/06 19:12:43  caress
- * Fixed description in mb_angle.c and angle extraction in mb_simrad3.c
- *
- * Revision 5.2  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.1  2008/07/10 06:40:34  caress
- * Fixed support for EM122
- *
- * Revision 5.0  2008/03/01 09:11:35  caress
- * Added support for Simrad EM710 multibeam in new formats 58 and 59.
- *
  *
  */
 
@@ -65,7 +49,7 @@
 #include "mb_define.h"
 #include "mbsys_simrad3.h"
 
-static char rcs_id[]="$Id$";
+static char svn_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr,
@@ -79,7 +63,7 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -125,7 +109,7 @@ int mbsys_simrad3_survey_alloc(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -166,7 +150,7 @@ int mbsys_simrad3_extraparameters_alloc(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -220,7 +204,7 @@ int mbsys_simrad3_wc_alloc(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -315,7 +299,7 @@ int mbsys_simrad3_attitude_alloc(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -402,7 +386,7 @@ int mbsys_simrad3_netattitude_alloc(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -488,7 +472,7 @@ int mbsys_simrad3_heading_alloc(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -566,7 +550,7 @@ int mbsys_simrad3_ssv_alloc(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -642,7 +626,7 @@ int mbsys_simrad3_tilt_alloc(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -714,7 +698,7 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -785,7 +769,7 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error)
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
@@ -998,6 +982,1135 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error)
+{
+	char	*function_name = "mbsys_simrad3_sonartype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad3_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad3_struct *) store_ptr;
+
+	/* get sonar type */
+	*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sonartype:  %d\n",*sonartype);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *ss_type, int *error)
+{
+	char	*function_name = "mbsys_simrad3_sidescantype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad3_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad3_struct *) store_ptr;
+
+	/* get sidescan type */
+	*ss_type = MB_SIDESCAN_LOGARITHMIC;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ss_type:    %d\n",*ss_type);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad3_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
+				double *nav_speed,
+		int n_sensordepth, double *sensordepth_time_d,
+				double *sensordepth_sensordepth,
+		int n_heading, double *heading_time_d, double *heading_heading,
+		int n_altitude, double *altitude_time_d, double *altitude_altitude,
+		int n_attitude, double *attitude_time_d, double *attitude_roll,
+				double *attitude_pitch, double *attitude_heave,
+		int *error)
+{
+	char	*function_name = "mbsys_simrad3_preprocess";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                    %d\n", verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
+		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
+		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
+		fprintf(stderr,"dbg2       nav_time_d:                 %p\n",nav_time_d);
+		fprintf(stderr,"dbg2       nav_lon:                    %p\n",nav_lon);
+		fprintf(stderr,"dbg2       nav_lat:                    %p\n",nav_lat);
+		fprintf(stderr,"dbg2       nav_speed:                  %p\n",nav_speed);
+		fprintf(stderr,"dbg2       n_sensordepth:              %d\n",n_sensordepth);
+		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n",sensordepth_time_d);
+		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n",sensordepth_sensordepth);
+		fprintf(stderr,"dbg2       n_heading:                  %d\n",n_heading);
+		fprintf(stderr,"dbg2       heading_time_d:             %p\n",heading_time_d);
+		fprintf(stderr,"dbg2       heading_heading:            %p\n",heading_heading);
+		fprintf(stderr,"dbg2       n_altitude:                 %d\n",n_altitude);
+		fprintf(stderr,"dbg2       altitude_time_d:            %p\n",altitude_time_d);
+		fprintf(stderr,"dbg2       altitude_altitude:          %p\n",altitude_altitude);
+		fprintf(stderr,"dbg2       n_attitude:                 %d\n",n_attitude);
+		fprintf(stderr,"dbg2       attitude_time_d:            %p\n",attitude_time_d);
+		fprintf(stderr,"dbg2       attitude_roll:              %p\n",attitude_roll);
+		fprintf(stderr,"dbg2       attitude_pitch:             %p\n",attitude_pitch);
+		fprintf(stderr,"dbg2       attitude_heave:             %p\n",attitude_heave);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:         %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:        %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, void **platform_ptr, int *error)
+{
+	char	*function_name = "mbsys_simrad3_extract_platform";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mb_platform_struct *platform;
+	struct mbsys_simrad3_struct *store;
+	int	sensor_multibeam;
+	int multibeam_type;
+	int multibeam_offsets;
+	mb_path multibeam_model;
+	mb_path multibeam_serial;
+	int capability1;
+	int capability2;
+	int num_offsets;
+	int num_time_latency;
+	int position_offset_mode;
+	double position_offset_x;
+	double position_offset_y;
+	double position_offset_z;
+	int attitude_offset_mode;
+	double attitude_offset_heading;
+	double attitude_offset_roll;
+	double attitude_offset_pitch;
+	int isensor;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:      %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       platform_ptr:   %p\n",(void *)platform_ptr);
+		fprintf(stderr,"dbg2       *platform_ptr:  %p\n",(void *)*platform_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	store = (struct mbsys_simrad3_struct *) store_ptr;
+
+	/* if needed allocate a new platform structure */
+	if (*platform_ptr == NULL)
+		{
+		status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL,
+								(void **)platform_ptr, error);
+		}
+		
+	/* extract sensor offsets from installation record */
+	if (*platform_ptr != NULL)
+		{
+		/* get pointer to platform structure */
+		platform = (struct mb_platform_struct *) (*platform_ptr);
+		
+		/* look for multibeam sensor, add it if necessary */
+		sensor_multibeam = -1;
+		for (isensor=0; isensor<platform->num_sensors && sensor_multibeam < 0; isensor++)
+			{
+			if (platform->sensors[isensor].type == MB_SENSOR_TYPE_SONAR_MULTIBEAM
+				&& platform->sensors[isensor].num_offsets == 2)
+				{
+				sensor_multibeam = isensor;
+				}
+			}
+		if (sensor_multibeam < 0)
+			{
+			/* set sensor 0 (multibeam) */
+			if (store->par_stc > 1)
+				{
+				multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM_TWOHEAD;
+				multibeam_offsets = 4;	
+				}
+			else
+				{
+				multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM;
+				multibeam_offsets = 2;	
+				}
+			switch (store->sonar)
+				{
+				case MBSYS_SIMRAD3_M3:
+					strcpy(multibeam_model, "M3");
+					break;
+				case MBSYS_SIMRAD3_EM2045:
+					strcpy(multibeam_model, "EM2045");
+					break;
+				case MBSYS_SIMRAD3_EM2040:
+					strcpy(multibeam_model, "EM2040");
+					break;
+				case MBSYS_SIMRAD3_EM710:
+					strcpy(multibeam_model, "EM710");
+					break;
+				case MBSYS_SIMRAD3_EM302:
+					strcpy(multibeam_model, "EM302");
+					break;
+				case MBSYS_SIMRAD3_EM122:
+					strcpy(multibeam_model, "EM122");
+					break;
+				case MBSYS_SIMRAD3_EM120:
+					strcpy(multibeam_model, "EM120");
+					break;
+				case MBSYS_SIMRAD3_EM300:
+					strcpy(multibeam_model, "EM300");
+					break;
+				case MBSYS_SIMRAD3_EM1002:
+					strcpy(multibeam_model, "EM1002");
+					break;
+				case MBSYS_SIMRAD3_EM2000:
+					strcpy(multibeam_model, "EM2000");
+					break;
+				case MBSYS_SIMRAD3_EM3000:
+					strcpy(multibeam_model, "EM3000");
+					break;
+				case MBSYS_SIMRAD3_EM3000D_1:
+					strcpy(multibeam_model, "EM3000D_1");
+					break;
+				case MBSYS_SIMRAD3_EM3000D_2:
+					strcpy(multibeam_model, "EM3000D_2");
+					break;
+				case MBSYS_SIMRAD3_EM3000D_3:
+					strcpy(multibeam_model, "EM3000D_3");
+					break;
+				case MBSYS_SIMRAD3_EM3000D_4:
+					strcpy(multibeam_model, "EM3000D_4");
+					break;
+				case MBSYS_SIMRAD3_EM3000D_5:
+					strcpy(multibeam_model, "EM3000D_5");
+					break;
+				case MBSYS_SIMRAD3_EM3000D_6:
+					strcpy(multibeam_model, "EM3000D_6");
+					break;
+				case MBSYS_SIMRAD3_EM3000D_7:
+					strcpy(multibeam_model, "EM3000D_7");
+					break;
+				case MBSYS_SIMRAD3_EM3000D_8:
+					strcpy(multibeam_model, "EM3000D_8");
+					break;
+				case MBSYS_SIMRAD3_EM3002:
+					strcpy(multibeam_model, "EM3002");
+					break;
+				case MBSYS_SIMRAD3_EM12S:
+					strcpy(multibeam_model, "EM12S");
+					break;
+				case MBSYS_SIMRAD3_EM12D:
+					strcpy(multibeam_model, "EM12D");
+					break;
+				case MBSYS_SIMRAD3_EM121:
+					strcpy(multibeam_model, "EM121");
+					break;
+				case MBSYS_SIMRAD3_EM100:
+					strcpy(multibeam_model, "EM100");
+					break;
+				case MBSYS_SIMRAD3_EM1000:
+					strcpy(multibeam_model, "EM1000");
+					break;
+				default:
+					strcpy(multibeam_model, "Unknown");
+				}
+			sprintf(multibeam_serial, "%d", store->par_serial_1);
+			capability1 = MB_SENSOR_CAPABILITY1_NONE;
+			capability2 = MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM
+							+ MB_SENSOR_CAPABILITY2_BACKSCATTER_MULTIBEAM;
+			num_offsets = multibeam_offsets;
+			num_time_latency = 0;
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							MB_SENSOR_TYPE_SONAR_MULTIBEAM,
+							multibeam_model,
+							"Kongsberg",
+							multibeam_serial,
+							capability1,
+							capability2,
+							num_offsets,
+							num_time_latency,
+							error);
+			if (status == MB_SUCCESS)
+				{
+				sensor_multibeam = platform->num_sensors - 1;
+				}
+			}
+		if (sensor_multibeam >= 0)
+			{
+			if (status == MB_SUCCESS)
+				{
+				platform->source_bathymetry = sensor_multibeam;
+				platform->source_backscatter = sensor_multibeam;
+				}
+			/* store->par_stc:
+			 * System transducer configuration
+			 *      0 = Single TX + single RX
+			 *              EM122, EM302, EM710, EM2040-Single
+			 *      1 = Single head
+			 *              EM3002S, EM2040C-Single, EM2040P
+			 *      2 = Dual Head
+			 *              EM3002-Dual, EM2040C-Dual
+			 *      3 = Single TX + Dual RX
+			 *              EM2040-Dual-RX
+			 *      4 = Dual TX + Dual RX
+			 *              EM2040-Dual-TX
+			 *  If present, the STC parameter can be used in
+			 *  decoding of the transducer installation parameters:
+			 *      STC  S0X/Y/Z/R/P/H  S1X/Y/Z/R/P/H  S2X/Y/Z/R/P/H  S3X/Y/Z/R/P/H
+			 *      ---  -------------  -------------  -------------  -------------
+			 *       0        ----            TX             RX           ----
+			 *       1        ----           Head           ----          ----
+			 *       2        ----          Head 1         Head 2         ----
+			 *       3        ----            TX            RX 1          RX 2
+			 *       4        TX 1           TX 2           RX 1          RX 2
+			 */
+			if (store->par_stc == 0)
+				{
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 0,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s1y,
+								(double) store->par_s1x,
+								(double) -store->par_s1z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s1h,
+								(double) store->par_s1r,
+								(double) store->par_s1p,   
+								error);
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 1,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s2y,
+								(double) store->par_s2x,
+								(double) -store->par_s2z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s2h,
+								(double) store->par_s2r,
+								(double) store->par_s2p,   
+								error);	
+				}
+			else if (store->par_stc == 1)
+				{
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 0,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s1y,
+								(double) store->par_s1x,
+								(double) -store->par_s1z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s1h,
+								(double) store->par_s1r,
+								(double) store->par_s1p,   
+								error);
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 1,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s1y,
+								(double) store->par_s1x,
+								(double) -store->par_s1z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s1h,
+								(double) store->par_s1r,
+								(double) store->par_s1p,   
+								error);	
+				}
+			else if (store->par_stc == 2)
+				{
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 0,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s1y,
+								(double) store->par_s1x,
+								(double) -store->par_s1z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s1h,
+								(double) store->par_s1r,
+								(double) store->par_s1p,   
+								error);
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 1,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s1y,
+								(double) store->par_s1x,
+								(double) -store->par_s1z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s1h,
+								(double) store->par_s1r,
+								(double) store->par_s1p,   
+								error);	
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 2,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s2y,
+								(double) store->par_s2x,
+								(double) -store->par_s2z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s2h,
+								(double) store->par_s2r,
+								(double) store->par_s2p,   
+								error);
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 3,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s2y,
+								(double) store->par_s2x,
+								(double) -store->par_s2z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s2h,
+								(double) store->par_s2r,
+								(double) store->par_s2p,   
+								error);	
+				}
+			else if (store->par_stc == 3)
+				{
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 0,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s1y,
+								(double) store->par_s1x,
+								(double) -store->par_s1z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s1h,
+								(double) store->par_s1r,
+								(double) store->par_s1p,   
+								error);
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 1,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s2y,
+								(double) store->par_s2x,
+								(double) -store->par_s2z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s2h,
+								(double) store->par_s2r,
+								(double) store->par_s2p,   
+								error);	
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 2,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s1y,
+								(double) store->par_s1x,
+								(double) -store->par_s1z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s1h,
+								(double) store->par_s1r,
+								(double) store->par_s1p,   
+								error);
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 3,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s3y,
+								(double) store->par_s3x,
+								(double) -store->par_s3z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s3h,
+								(double) store->par_s3r,
+								(double) store->par_s3p,   
+								error);	
+				}
+			else if (store->par_stc == 4)
+				{
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 0,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s0y,
+								(double) store->par_s0x,
+								(double) -store->par_s0z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s0h,
+								(double) store->par_s0r,
+								(double) store->par_s0p,   
+								error);
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 1,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s2y,
+								(double) store->par_s2x,
+								(double) -store->par_s2z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s2h,
+								(double) store->par_s2r,
+								(double) store->par_s2p,   
+								error);	
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 2,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s1y,
+								(double) store->par_s1x,
+								(double) -store->par_s1z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s1h,
+								(double) store->par_s1r,
+								(double) store->par_s1p,   
+								error);
+				if (status == MB_SUCCESS)
+				status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+								sensor_multibeam, 3,
+								MB_SENSOR_POSITION_OFFSET_STATIC,
+								(double) store->par_s3y,
+								(double) store->par_s3x,
+								(double) -store->par_s3z,
+								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+								(double) store->par_s3h,
+								(double) store->par_s3r,
+								(double) store->par_s3p,   
+								error);	
+				}
+			}
+		
+		/* set position sensor 1, add it if necessary */
+		if (platform->source_position1 < 0 && store->par_p1q)
+			{
+			/* set sensor 1 (position) */
+			capability1 = MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_HEADING;
+			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			capability1 = 0;
+			capability2 = 0;
+			num_offsets = 1;
+			num_time_latency = 0;
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							MB_SENSOR_TYPE_POSITION,
+							NULL,
+							NULL,
+							NULL,
+							capability1, 
+							capability2,
+							num_offsets,
+							num_time_latency,
+							error);
+			if (status == MB_SUCCESS)
+				{
+				platform->source_position1 = platform->num_sensors - 1;
+				}
+			}
+			
+		/* set offsets for position sensor 1 */
+		if (store->par_p1q && platform->source_position1 >= 0
+				&& platform->sensors[platform->source_position1].num_offsets == 1)
+			{
+			/* set offsets based on whether position data are already motion compensated */
+			if (store->par_p1m)
+				{
+				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+				position_offset_x = 0.0;
+				position_offset_y = 0.0;
+				position_offset_z = 0.0;
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
+				attitude_offset_heading = 0.0;
+				attitude_offset_roll = 0.0;
+				attitude_offset_pitch = 0.0;
+				}
+			else
+				{
+				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+				position_offset_x = store->par_p1y;
+				position_offset_y = store->par_p1x;
+				position_offset_z = -store->par_p1z;
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
+				attitude_offset_heading = 0.0;
+				attitude_offset_roll = 0.0;
+				attitude_offset_pitch = 0.0;
+				}
+				
+			/* if position sensor 1 is also the heading sensor, add heading offset */
+			if ((store->par_ahs== 1 || store->par_gcg != 0.0) && !store->par_p1m)
+				{
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
+				attitude_offset_heading = store->par_gcg;
+				}
+
+			/* now set the offsets for position sensor 1 */
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+							platform->source_position1, 0,
+							position_offset_mode,
+							position_offset_x,
+							position_offset_y,
+							position_offset_z,   
+							attitude_offset_mode,
+							attitude_offset_heading,
+							attitude_offset_roll,
+							attitude_offset_pitch,
+							error);
+			
+			/* set time latency for position sensor 1 */
+			if (status == MB_SUCCESS && store->par_p1d != 0.0)
+				{
+				status = mb_platform_set_sensor_timelatency(verbose, (void *)platform,
+								platform->source_position1,
+								MB_SENSOR_TIME_LATENCY_STATIC,
+								(double)store->par_p1d,
+								0,
+								NULL,
+								NULL,
+								error);
+				}
+			}
+		
+		/* set position sensor 2, add it if necessary */
+		if (platform->source_position2 < 0 && store->par_p2q)
+			{
+			/* set sensor 2 (position) */
+			capability1 = MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_HEADING;
+			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			capability1 = 0;
+			capability2 = 0;
+			num_offsets = 1;
+			num_time_latency = 0;
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							MB_SENSOR_TYPE_POSITION,
+							NULL,
+							NULL,
+							NULL,
+							capability1, 
+							capability2,
+							num_offsets,
+							num_time_latency,
+							error);
+			if (status == MB_SUCCESS)
+				{
+				platform->source_position2 = platform->num_sensors - 1;
+				}
+			}
+			
+		/* set offsets for position sensor 2 */
+		if (store->par_p2q && platform->source_position2 >= 0
+				&& platform->sensors[platform->source_position2].num_offsets == 1)
+			{
+			/* set offsets based on whether position data are already motion compensated */
+			if (store->par_p2m)
+				{
+				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+				position_offset_x = 0.0;
+				position_offset_y = 0.0;
+				position_offset_z = 0.0;
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
+				attitude_offset_heading = 0.0;
+				attitude_offset_roll = 0.0;
+				attitude_offset_pitch = 0.0;
+				}
+			else
+				{
+				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+				position_offset_x = store->par_p2y;
+				position_offset_y = store->par_p2x;
+				position_offset_z = -store->par_p2z;
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
+				attitude_offset_heading = 0.0;
+				attitude_offset_roll = 0.0;
+				attitude_offset_pitch = 0.0;
+				}
+				
+			/* if position sensor 2 is also the heading sensor, add heading offset */
+			if (store->par_ahs== 2 && !store->par_p2m)
+				{
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
+				attitude_offset_heading = store->par_gcg;
+				}
+			
+			/* now set the offsets for position sensor 2 */
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+							platform->source_position2, 0,
+							position_offset_mode,
+							position_offset_x,
+							position_offset_y,
+							position_offset_z,   
+							attitude_offset_mode,
+							attitude_offset_heading,
+							attitude_offset_roll,
+							attitude_offset_pitch,
+							error);
+			
+			/* set time latency for position sensor 2 */
+			if (status == MB_SUCCESS && store->par_p2d != 0.0)
+				{
+				status = mb_platform_set_sensor_timelatency(verbose, (void *)platform,
+								platform->source_position2,
+								MB_SENSOR_TIME_LATENCY_STATIC,
+								(double)store->par_p2d,
+								0,
+								NULL,
+								NULL,
+								error);
+				}
+			}
+		
+		/* set position sensor 3, add it if necessary */
+		if (platform->source_position3 < 0 && store->par_p3q)
+			{
+			/* set sensor 3 (position) */
+			capability1 = MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_HEADING;
+			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			capability1 = 0;
+			capability2 = 0;
+			num_offsets = 1;
+			num_time_latency = 0;
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							MB_SENSOR_TYPE_POSITION,
+							NULL,
+							NULL,
+							NULL,
+							capability1, 
+							capability2,
+							num_offsets,
+							num_time_latency,
+							error);
+			if (status == MB_SUCCESS)
+				{
+				platform->source_position3 = platform->num_sensors - 1;
+				}
+			}
+			
+		/* set offsets for position sensor 3 */
+		if (store->par_p3q && platform->source_position3 >= 0
+				&& platform->sensors[platform->source_position3].num_offsets == 1)
+			{
+			/* set offsets based on whether position data are already motion compensated */
+			if (store->par_p3m)
+				{
+				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+				position_offset_x = 0.0;
+				position_offset_y = 0.0;
+				position_offset_z = 0.0;
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
+				attitude_offset_heading = 0.0;
+				attitude_offset_roll = 0.0;
+				attitude_offset_pitch = 0.0;
+				}
+			else
+				{
+				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+				position_offset_x = store->par_p3y;
+				position_offset_y = store->par_p3x;
+				position_offset_z = -store->par_p3z;
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
+				attitude_offset_heading = 0.0;
+				attitude_offset_roll = 0.0;
+				attitude_offset_pitch = 0.0;
+				}
+				
+			/* if position sensor 3 is also the heading sensor, add heading offset */
+			if (store->par_ahs== 3 && !store->par_p3m)
+				{
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
+				attitude_offset_heading = store->par_gcg;
+				}
+			
+			/* now set the offsets for position sensor 3 */
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+							platform->source_position3, 0,
+							position_offset_mode,
+							position_offset_x,
+							position_offset_y,
+							position_offset_z,   
+							attitude_offset_mode,
+							attitude_offset_heading,
+							attitude_offset_roll,
+							attitude_offset_pitch,
+							error);
+			
+			/* set time latency for position sensor 3 */
+			if (status == MB_SUCCESS && store->par_p3d != 0.0)
+				{
+				status = mb_platform_set_sensor_timelatency(verbose, (void *)platform,
+								platform->source_position3,
+								MB_SENSOR_TIME_LATENCY_STATIC,
+								(double)store->par_p3d,
+								0,
+								NULL,
+								NULL,
+								error);
+				}
+			}
+			
+		/* add depth sensor if needed */
+		if (platform->source_depth1 < 0 && store->par_dsh[0] == 'I' && store->par_dsh[0] == 'N')
+			{
+			capability1 = MB_SENSOR_CAPABILITY1_DEPTH;
+			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			capability1 = 0;
+			capability2 = 0;
+			num_offsets = 1;
+			num_time_latency = 0;
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							MB_SENSOR_TYPE_PRESSURE,
+							NULL,
+							NULL,
+							NULL,
+							capability1, 
+							capability2,
+							num_offsets,
+							num_time_latency,
+							error);
+			if (status == MB_SUCCESS)
+				{
+				platform->source_depth1 = platform->num_sensors - 1;
+				}
+			}
+		if (platform->source_depth1 >= 0
+				&& platform->sensors[platform->source_depth1].num_offsets == 1)
+			{
+			position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+			position_offset_x = store->par_dsy;
+			position_offset_y = store->par_dsx;
+			position_offset_z = -store->par_dsz;
+			attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
+			attitude_offset_heading = 0.0;
+			attitude_offset_roll = 0.0;
+			attitude_offset_pitch = 0.0;
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+						platform->source_depth1, 0,
+						position_offset_mode,
+						position_offset_x,
+						position_offset_y,
+						position_offset_z,   
+						attitude_offset_mode,
+						attitude_offset_heading,
+						attitude_offset_roll,
+						attitude_offset_pitch,
+						error);
+			if (status == MB_SUCCESS && store->par_dsd != 0.0)
+				{
+				status = mb_platform_set_sensor_timelatency(verbose, (void *)platform,
+								platform->source_depth1,
+								MB_SENSOR_TIME_LATENCY_STATIC,
+								(double)store->par_dsd,
+								0,
+								NULL,
+								NULL,
+								error);
+				}
+			}
+		
+		/* set motion sensor 1, add it if necessary */
+		if (platform->source_rollpitch1 < 0)
+			{
+			/* set sensor 1 (position) */
+			capability1 = MB_SENSOR_CAPABILITY1_ROLLPITCH
+							+ MB_SENSOR_CAPABILITY1_HEADING
+							+ MB_SENSOR_CAPABILITY1_HEAVE;
+			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			capability1 = 0;
+			capability2 = 0;
+			num_offsets = 1;
+			num_time_latency = 0;
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							MB_SENSOR_TYPE_VRU,
+							NULL,
+							NULL,
+							NULL,
+							capability1, 
+							capability2,
+							num_offsets,
+							num_time_latency,
+							error);
+			if (status == MB_SUCCESS)
+				{
+				platform->source_rollpitch1 = platform->num_sensors - 1;
+				}
+			}
+			
+		/* set motion sensor 1 offsets */
+		if (platform->source_rollpitch1 >= 0
+				&& platform->sensors[platform->source_rollpitch1].num_offsets == 1)
+			{
+			/* set offsets */
+			position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+			position_offset_x = store->par_msy;
+			position_offset_y = store->par_msx;
+			position_offset_z = -store->par_msz;
+			attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
+			attitude_offset_heading = store->par_msg;
+			attitude_offset_roll = store->par_msr;
+			attitude_offset_pitch = store->par_msp;
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+						platform->source_rollpitch1, 0,
+						position_offset_mode,
+						position_offset_x,
+						position_offset_y,
+						position_offset_z,   
+						attitude_offset_mode,
+						attitude_offset_heading,
+						attitude_offset_roll,
+						attitude_offset_pitch,
+						error);
+			
+			/* set time latency */
+			if (status == MB_SUCCESS && store->par_msd != 0.0)
+				{
+				status = mb_platform_set_sensor_timelatency(verbose, (void *)platform,
+								platform->source_rollpitch1,
+								MB_SENSOR_TIME_LATENCY_STATIC,
+								(double)store->par_msd,
+								0,
+								NULL,
+								NULL,
+								error);
+				}
+			}
+		
+		/* set motion sensor 2, add it if necessary */
+		if (platform->source_rollpitch2 < 0)
+			{
+			capability1 = MB_SENSOR_CAPABILITY1_ROLLPITCH
+							+ MB_SENSOR_CAPABILITY1_HEADING
+							+ MB_SENSOR_CAPABILITY1_HEAVE;
+			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			capability1 = 0;
+			capability2 = 0;
+			num_offsets = 1;
+			num_time_latency = 0;
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							MB_SENSOR_TYPE_VRU,
+							NULL,
+							NULL,
+							NULL,
+							capability1, 
+							capability2,
+							num_offsets,
+							num_time_latency,
+							error);
+			if (status == MB_SUCCESS)
+				{
+				platform->source_rollpitch2 = platform->num_sensors - 1;
+				}
+			}
+
+		/* set motion sensor 2 offsets */
+		if (platform->source_rollpitch2 >= 0
+				&& platform->sensors[platform->source_rollpitch2].num_offsets == 1)
+			{
+			/* set offsets - same as motion sensor 1 if not specified */
+			if (store->par_nsx != 0.0
+				|| store->par_nsy != 0.0
+				|| store->par_nsz != 0.0
+				|| store->par_nsg != 0.0
+				|| store->par_nsr != 0.0
+				|| store->par_nsp != 0.0)
+				{
+				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+				position_offset_x = store->par_nsy;
+				position_offset_y = store->par_nsx;
+				position_offset_z = -store->par_nsz;
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
+				attitude_offset_heading = store->par_nsg;
+				attitude_offset_roll = store->par_nsr;
+				attitude_offset_pitch = store->par_nsp;
+				}
+			else
+				{
+				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+				position_offset_x = store->par_msy;
+				position_offset_y = store->par_msx;
+				position_offset_z = -store->par_msz;
+				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
+				attitude_offset_heading = store->par_msg;
+				attitude_offset_roll = store->par_msr;
+				attitude_offset_pitch = store->par_msp;
+				}
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+						platform->source_rollpitch2, 0,
+						position_offset_mode,
+						position_offset_x,
+						position_offset_y,
+						position_offset_z,   
+						attitude_offset_mode,
+						attitude_offset_heading,
+						attitude_offset_roll,
+						attitude_offset_pitch,
+						error);
+			
+			/* set time latency */
+			if (status == MB_SUCCESS && store->par_nsd != 0.0)
+				{
+				status = mb_platform_set_sensor_timelatency(verbose, (void *)platform,
+								platform->source_rollpitch2,
+								MB_SENSOR_TIME_LATENCY_STATIC,
+								(double)store->par_nsd,
+								0,
+								NULL,
+								NULL,
+								error);
+				}
+			}
+			
+		/* now set primary data sources */
+		if (store->par_aps == 0)
+			platform->source_position = platform->source_position1;
+		else if (store->par_aps == 1)
+			platform->source_position = platform->source_position2;
+		else if (store->par_aps == 2)
+			platform->source_position = platform->source_position3;
+		else
+			platform->source_position = platform->source_position1;
+		if (store->par_aro == 2)
+			platform->source_rollpitch = platform->source_rollpitch1;
+		else if (store->par_aro == 3)
+			platform->source_rollpitch = platform->source_rollpitch2;
+		else if (store->par_aro == 8)
+			platform->source_rollpitch = platform->source_rollpitch1;
+		else if (store->par_aro == 9)
+			platform->source_rollpitch = platform->source_rollpitch2;
+		else
+			platform->source_rollpitch = platform->source_rollpitch1;
+		if (store->par_dsh[0] == 'I' && store->par_dsh[0] == 'N')
+			platform->source_depth = platform->source_depth1;
+		if (store->par_ahe == 2 || store->par_ahe == 8)
+			platform->source_heave = platform->source_rollpitch1;
+		else if (store->par_ahe == 3 || store->par_ahe == 9)
+			platform->source_heave = platform->source_rollpitch2;
+		if (store->par_ahs == 0)
+			platform->source_heading = platform->source_position3;
+		else if (store->par_ahs == 1)
+			platform->source_heading = platform->source_position1;
+		else if (store->par_ahs == 2)
+			platform->source_heading = platform->source_rollpitch1;
+		else if (store->par_ahs == 3 && platform->source_rollpitch2 >=0)
+			platform->source_heading = platform->source_rollpitch2;
+		else if (store->par_ahs == 3)
+			platform->source_heading = platform->source_position2;
+		else if (store->par_ahs == 4)
+			platform->source_heading = platform->source_position3;
+		else if (store->par_ahs == 5)
+			platform->source_heading = platform->source_position1;
+		else if (store->par_ahs == 6)
+			platform->source_heading = platform->source_position1;
+		else if (store->par_ahs == 7)
+			platform->source_heading = platform->source_position1;
+		else if (store->par_ahs == 8)
+			platform->source_heading = platform->source_rollpitch1;
+		else if (store->par_ahs == 9)
+			platform->source_heading = platform->source_rollpitch2;
+		
+		/* print platform */
+		if (verbose >= 2)
+			{
+			status = mb_platform_print(verbose, (void *) platform, error);
+			}
+		}
+	else
+		{
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+		fprintf(stderr,"\nUnable to initialize platform offset structure\n");
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:           %d\n",*kind);
+		fprintf(stderr,"dbg2       platform_ptr:   %p\n",(void *)platform_ptr);
+		fprintf(stderr,"dbg2       *platform_ptr:  %p\n",(void *)*platform_ptr);
+		fprintf(stderr,"dbg2       error:		   %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:		   %d\n",status);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:          %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -1021,7 +2134,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1358,7 +2471,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -1604,7 +2717,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1767,7 +2880,7 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1866,7 +2979,7 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -2063,7 +3176,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -2184,7 +3297,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -2472,7 +3585,7 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -2663,7 +3776,7 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -2822,7 +3935,7 @@ int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -2904,7 +4017,7 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -2978,7 +4091,7 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);

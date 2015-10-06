@@ -44,7 +44,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char rcs_id[]="$Id$";
+static char svn_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header,
@@ -58,7 +58,7 @@ int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       header:     %p\n",(void *)header);
@@ -173,7 +173,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -1224,7 +1224,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -1510,7 +1510,7 @@ int mbsys_reson7k_print_header(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       header:     %p\n",(void *)header);
@@ -1584,7 +1584,7 @@ int mbsys_reson7k_print_reference(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       reference:  %p\n",(void *)reference);
@@ -1637,7 +1637,7 @@ int mbsys_reson7k_print_sensoruncal(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       sensoruncal:  %p\n",(void *)sensoruncal);
@@ -1692,7 +1692,7 @@ int mbsys_reson7k_print_sensorcal(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       sensorcal:    %p\n",(void *)sensorcal);
@@ -1745,7 +1745,7 @@ int mbsys_reson7k_print_position(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       position:     %p\n",(void *)position);
@@ -1804,7 +1804,7 @@ int mbsys_reson7k_print_customattitude(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       customattitude:%p\n",(void *)customattitude);
@@ -1866,7 +1866,7 @@ int mbsys_reson7k_print_tide(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       tide:         %p\n",(void *)tide);
@@ -1926,7 +1926,7 @@ int mbsys_reson7k_print_altitude(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       altitude:     %p\n",(void *)altitude);
@@ -1977,7 +1977,7 @@ int mbsys_reson7k_print_motion(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       motion:       %p\n",(void *)motion);
@@ -2034,7 +2034,7 @@ int mbsys_reson7k_print_depth(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       depth:        %p\n",(void *)depth);
@@ -2088,7 +2088,7 @@ int mbsys_reson7k_print_svp(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       svp:          %p\n",(void *)svp);
@@ -2148,7 +2148,7 @@ int mbsys_reson7k_print_ctd(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       ctd:          %p\n",(void *)ctd);
@@ -2215,7 +2215,7 @@ int mbsys_reson7k_print_geodesy(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       geodesy:      %p\n",(void *)geodesy);
@@ -2289,7 +2289,7 @@ int mbsys_reson7k_print_rollpitchheave(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
 		fprintf(stderr,"dbg2       rollpitchheave: %p\n",(void *)rollpitchheave);
@@ -2341,7 +2341,7 @@ int mbsys_reson7k_print_heading(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       heading:      %p\n",(void *)heading);
@@ -2392,7 +2392,7 @@ int mbsys_reson7k_print_surveyline(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       surveyline:   %p\n",(void *)surveyline);
@@ -2449,7 +2449,7 @@ int mbsys_reson7k_print_navigation(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       navigation:   %p\n",(void *)navigation);
@@ -2508,7 +2508,7 @@ int mbsys_reson7k_print_attitude(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       attitude:     %p\n",(void *)attitude);
@@ -2564,7 +2564,7 @@ int mbsys_reson7k_print_rec1022(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       rec1022:      %p\n",(void *)rec1022);
@@ -2622,7 +2622,7 @@ int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       data_format:  %d\n",data_format);
@@ -2701,7 +2701,7 @@ int mbsys_reson7k_print_fsdwssheader(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       fsdwssheader:  %p\n",(void *)fsdwssheader);
@@ -2782,7 +2782,7 @@ int mbsys_reson7k_print_fsdwsegyheader(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       fsdwsegyheader:  %p\n",(void *)fsdwsegyheader);
@@ -2896,7 +2896,7 @@ int mbsys_reson7k_print_fsdwss(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       fsdwss:       %p\n",(void *)fsdwss);
@@ -2954,7 +2954,7 @@ int mbsys_reson7k_print_fsdwsb(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       fsdwsb:       %p\n",(void *)fsdwsb);
@@ -3010,7 +3010,7 @@ int mbsys_reson7k_print_bluefin(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       bluefin:      %p\n",(void *)bluefin);
@@ -3144,7 +3144,7 @@ int mbsys_reson7k_print_processedsidescan(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       processedsidescan: %p\n",(void *)processedsidescan);
@@ -3204,7 +3204,7 @@ int mbsys_reson7k_print_volatilesettings(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       volatilesettings:  %p\n",(void *)volatilesettings);
@@ -3291,7 +3291,7 @@ int mbsys_reson7k_print_device(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       device:            %p\n",(void *)device);
@@ -3343,7 +3343,7 @@ int mbsys_reson7k_print_configuration(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       configuration:     %p\n",(void *)configuration);
@@ -3395,7 +3395,7 @@ int mbsys_reson7k_print_matchfilter(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       matchfilter:       %p\n",(void *)matchfilter);
@@ -3448,7 +3448,7 @@ int mbsys_reson7k_print_v2firmwarehardwareconfiguration(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       v2firmwarehardwareconfiguration:       %p\n",(void *)v2firmwarehardwareconfiguration);
@@ -3501,7 +3501,7 @@ int mbsys_reson7k_print_beamgeometry(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       beamgeometry:      %p\n",(void *)beamgeometry);
@@ -3556,7 +3556,7 @@ int mbsys_reson7k_print_calibration(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       calibration:       %p\n",(void *)calibration);
@@ -3610,7 +3610,7 @@ int mbsys_reson7k_print_bathymetry(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       bathymetry:        %p\n",(void *)bathymetry);
@@ -3688,7 +3688,7 @@ int mbsys_reson7k_print_backscatter(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       backscatter:       %p\n",(void *)backscatter);
@@ -3805,7 +3805,7 @@ int mbsys_reson7k_print_beam(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       beam:              %p\n",(void *)beam);
@@ -3909,7 +3909,7 @@ int mbsys_reson7k_print_verticaldepth(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       verticaldepth:     %p\n",(void *)verticaldepth);
@@ -3968,7 +3968,7 @@ int mbsys_reson7k_print_tvg(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       tvg:               %p\n",(void *)tvg);
@@ -4031,7 +4031,7 @@ int mbsys_reson7k_print_image(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       image:             %p\n",(void *)image);
@@ -4109,7 +4109,7 @@ int mbsys_reson7k_print_v2pingmotion(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       v2pingmotion:      %p\n",(void *)v2pingmotion);
@@ -4174,7 +4174,7 @@ int mbsys_reson7k_print_v2detectionsetup(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       v2detectionsetup:  %p\n",(void *)v2detectionsetup);
@@ -4259,7 +4259,7 @@ int mbsys_reson7k_print_v2beamformed(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       v2beamformed:      %p\n",(void *)v2beamformed);
@@ -4331,7 +4331,7 @@ int mbsys_reson7k_print_v2bite(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       v2bite:      %p\n",(void *)v2bite);
@@ -4413,7 +4413,7 @@ int mbsys_reson7k_print_v27kcenterversion(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       v27kcenterversion: %p\n",(void *)v27kcenterversion);
@@ -4462,7 +4462,7 @@ int mbsys_reson7k_print_v28kwetendversion(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       v28kwetendversion:      %p\n",(void *)v28kwetendversion);
@@ -4512,7 +4512,7 @@ int mbsys_reson7k_print_v2detection(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       v2detection:      %p\n",(void *)v2detection);
@@ -4583,7 +4583,7 @@ int mbsys_reson7k_print_v2rawdetection(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       v2rawdetection:      %p\n",(void *)v2rawdetection);
@@ -4657,7 +4657,7 @@ int mbsys_reson7k_print_v2snippet(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       v2snippet:      %p\n",(void *)v2snippet);
@@ -4727,7 +4727,7 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       calibratedsnippet:      %p\n",(void *)calibratedsnippet);
@@ -4795,7 +4795,7 @@ int mbsys_reson7k_print_installation(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       installation:      %p\n",(void *)installation);
@@ -4882,7 +4882,7 @@ int mbsys_reson7k_print_systemeventmessage(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       systemeventmessage:%p\n",(void *)systemeventmessage);
@@ -4936,7 +4936,7 @@ int mbsys_reson7k_print_subsystem(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       subsystem:         %p\n",(void *)subsystem);
@@ -4984,7 +4984,7 @@ int mbsys_reson7k_print_fileheader(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       fileheader:        %p\n",(void *)fileheader);
@@ -5048,7 +5048,7 @@ int mbsys_reson7k_print_remotecontrolsettings(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       remotecontrolsettings:  %p\n",(void *)remotecontrolsettings);
@@ -5149,7 +5149,7 @@ int mbsys_reson7k_print_reserved(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       reserved:          %p\n",(void *)reserved);
@@ -5199,7 +5199,7 @@ int mbsys_reson7k_print_roll(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       roll:              %p\n",(void *)roll);
@@ -5248,7 +5248,7 @@ int mbsys_reson7k_print_pitch(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       pitch:             %p\n",(void *)pitch);
@@ -5297,7 +5297,7 @@ int mbsys_reson7k_print_soundvelocity(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       soundvelocity:     %p\n",(void *)soundvelocity);
@@ -5346,7 +5346,7 @@ int mbsys_reson7k_print_absorptionloss(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       absorptionloss:    %p\n",(void *)absorptionloss);
@@ -5395,7 +5395,7 @@ int mbsys_reson7k_print_spreadingloss(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       spreadingloss:     %p\n",(void *)spreadingloss);
@@ -5443,7 +5443,7 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -5507,7 +5507,7 @@ int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -5550,7 +5550,7 @@ int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -5593,7 +5593,7 @@ int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -5618,6 +5618,336 @@ int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
+				double *nav_speed,
+		int n_sensordepth, double *sensordepth_time_d,
+				double *sensordepth_sensordepth,
+		int n_heading, double *heading_time_d, double *heading_heading,
+		int n_altitude, double *altitude_time_d, double *altitude_altitude,
+		int n_attitude, double *attitude_time_d, double *attitude_roll,
+				double *attitude_pitch, double *attitude_heave,
+		int *error)
+{
+	char	*function_name = "mbsys_reson7k_preprocess";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                    %d\n", verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
+		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
+		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
+		fprintf(stderr,"dbg2       nav_time_d:                 %p\n",nav_time_d);
+		fprintf(stderr,"dbg2       nav_lon:                    %p\n",nav_lon);
+		fprintf(stderr,"dbg2       nav_lat:                    %p\n",nav_lat);
+		fprintf(stderr,"dbg2       nav_speed:                  %p\n",nav_speed);
+		fprintf(stderr,"dbg2       n_sensordepth:              %d\n",n_sensordepth);
+		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n",sensordepth_time_d);
+		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n",sensordepth_sensordepth);
+		fprintf(stderr,"dbg2       n_heading:                  %d\n",n_heading);
+		fprintf(stderr,"dbg2       heading_time_d:             %p\n",heading_time_d);
+		fprintf(stderr,"dbg2       heading_heading:            %p\n",heading_heading);
+		fprintf(stderr,"dbg2       n_altitude:                 %d\n",n_altitude);
+		fprintf(stderr,"dbg2       altitude_time_d:            %p\n",altitude_time_d);
+		fprintf(stderr,"dbg2       altitude_altitude:          %p\n",altitude_altitude);
+		fprintf(stderr,"dbg2       n_attitude:                 %d\n",n_attitude);
+		fprintf(stderr,"dbg2       attitude_time_d:            %p\n",attitude_time_d);
+		fprintf(stderr,"dbg2       attitude_roll:              %p\n",attitude_roll);
+		fprintf(stderr,"dbg2       attitude_pitch:             %p\n",attitude_pitch);
+		fprintf(stderr,"dbg2       attitude_heave:             %p\n",attitude_heave);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:         %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:        %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, void **platform_ptr, int *error)
+{
+	char	*function_name = "mbsys_reson7k_extract_platform";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mb_platform_struct *platform;
+	struct mbsys_reson7k_struct *store;
+	s7kr_installation *installation;
+	int	sensor_multibeam, sensor_position, sensor_attitude;
+	int ntimelag = 0;
+	int isensor;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:      %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       platform_ptr:   %p\n",(void *)platform_ptr);
+		fprintf(stderr,"dbg2       *platform_ptr:  %p\n",(void *)*platform_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+	installation = (s7kr_installation *) &store->installation;
+
+	/* if needed allocate a new platform structure */
+	if (*platform_ptr == NULL)
+		{
+		status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL,
+								(void **)platform_ptr, error);
+		}
+		
+	/* extract sensor offsets from installation record */
+	if (*platform_ptr != NULL)
+		{
+		/* get pointer to platform structure */
+		platform = (struct mb_platform_struct *) (*platform_ptr);
+		
+		/* look for multibeam sensor, add it if necessary */
+		sensor_multibeam = -1;
+		for (isensor=0; isensor<platform->num_sensors && sensor_multibeam < 0; isensor++)
+			{
+			if (platform->sensors[isensor].type == MB_SENSOR_TYPE_SONAR_MULTIBEAM
+				&& platform->sensors[isensor].num_offsets == 2)
+				{
+				sensor_multibeam = isensor;
+				}
+			}
+		if (sensor_multibeam < 0)
+			{
+			/* set sensor 0 (multibeam) */
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							MB_SENSOR_TYPE_SONAR_MULTIBEAM,
+							NULL,
+							"Reson",
+							NULL,
+							MB_SENSOR_CAPABILITY1_NONE,
+							MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM,
+							2, 0,
+							error);
+			if (status == MB_SUCCESS)
+				{
+				sensor_multibeam = platform->num_sensors - 1;
+				}
+			}
+		if (sensor_multibeam >= 0
+				&& platform->sensors[sensor_multibeam].num_offsets == 2)
+			{
+			if (status == MB_SUCCESS)
+				{
+				platform->source_bathymetry = sensor_multibeam;
+				platform->source_backscatter = sensor_multibeam;
+				}
+			if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+							0, 0,
+							MB_SENSOR_POSITION_OFFSET_STATIC,
+							(double) installation->transmit_x,
+							(double) installation->transmit_y,
+							(double) installation->transmit_z,
+							MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+							(double) installation->transmit_heading,
+							(double) installation->transmit_roll,
+							(double) installation->transmit_pitch,   
+							error);
+			if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+							0, 1,
+							MB_SENSOR_POSITION_OFFSET_STATIC,
+							(double) installation->receive_x,
+							(double) installation->receive_y,
+							(double) installation->receive_z,   
+							MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+							(double) installation->receive_heading,
+							(double) installation->receive_roll,
+							(double) installation->receive_pitch,   
+							error);
+			}
+		
+		/* look for position sensor, add it if necessary */
+		sensor_position = -1;
+		if (platform->source_position1 >= 0)
+			sensor_position = platform->source_position1;
+		for (isensor=0; isensor<platform->num_sensors && sensor_position < 0; isensor++)
+			{
+			if (platform->sensors[isensor].type == MB_SENSOR_TYPE_POSITION
+				&& platform->sensors[isensor].num_offsets == 1)
+				{
+				sensor_position = isensor;
+				}
+			}
+		if (sensor_position < 0)
+			{
+			/* set sensor 1 (position) */
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							MB_SENSOR_TYPE_POSITION,
+							NULL,
+							NULL,
+							NULL,
+							0, 0,
+							1, ntimelag,
+							error);
+			if (status == MB_SUCCESS)
+				{
+				sensor_position = platform->num_sensors - 1;
+				}
+			}
+		if (sensor_position >= 0
+				&& platform->sensors[sensor_position].num_offsets == 1)
+			{
+			if (status == MB_SUCCESS)
+				{
+				platform->source_position1 = sensor_position;
+				platform->source_depth1 = sensor_position;
+				platform->source_position = sensor_position;
+				platform->source_depth = sensor_position;
+				}
+					
+			if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+						1, 0,
+						MB_SENSOR_POSITION_OFFSET_STATIC,
+						(double) installation->position_x,
+						(double) installation->position_y,
+						(double) installation->position_z,   
+						MB_SENSOR_ATTITUDE_OFFSET_NONE,
+						(double) 0.0,
+						(double) 0.0,
+						(double) 0.0,   
+						error);
+			if (status == MB_SUCCESS && installation->position_time_delay != 0)
+				{
+				status = mb_platform_set_sensor_timelatency(verbose, (void *)platform,
+								1,
+								MB_SENSOR_TIME_LATENCY_STATIC,
+								(double)(0.001 * installation->position_time_delay),
+								0,
+								NULL,
+								NULL,
+								error);
+				}
+			}
+		
+		/* look for attitude sensor, add it if necessary */
+		sensor_attitude = -1;
+		if (platform->source_rollpitch1 >= 0)
+			sensor_attitude = platform->source_rollpitch1;
+		for (isensor=0; isensor<platform->num_sensors && sensor_attitude < 0; isensor++)
+			{
+			if ((platform->sensors[isensor].type == MB_SENSOR_TYPE_VRU
+					|| platform->sensors[isensor].type == MB_SENSOR_TYPE_IMU
+					|| platform->sensors[isensor].type == MB_SENSOR_TYPE_INS)
+				&& platform->sensors[isensor].num_offsets == 1)
+				{
+				sensor_attitude = isensor;
+				}
+			}
+		if (sensor_attitude < 0)
+			{
+			/* set sensor 2 (attitude) */
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							MB_SENSOR_TYPE_VRU,
+							NULL,
+							NULL,
+							NULL,
+							0, 0,
+							1, ntimelag,
+							error);
+			if (status == MB_SUCCESS)
+				{
+				sensor_attitude = platform->num_sensors - 1;
+				}
+			}
+		if (sensor_attitude >= 0
+				&& platform->sensors[sensor_attitude].num_offsets == 1)
+			{
+			if (status == MB_SUCCESS)
+				{
+				platform->source_rollpitch1 = sensor_attitude;
+				platform->source_heading1 = sensor_attitude;
+				platform->source_rollpitch = sensor_attitude;
+				platform->source_heading = sensor_attitude;
+				}
+					
+			if (status == MB_SUCCESS)
+				    status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+						2, 0,
+						MB_SENSOR_POSITION_OFFSET_STATIC,
+						(double) installation->motion_x,
+						(double) installation->motion_y,
+						(double) installation->motion_z,   
+						MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+						(double) installation->motion_heading,
+						(double) installation->motion_roll,
+						(double) installation->motion_pitch,   
+						error);
+			if (status == MB_SUCCESS && installation->motion_time_delay != 0)
+				{
+				status = mb_platform_set_sensor_timelatency(verbose, (void *)platform,
+								1,
+								MB_SENSOR_TIME_LATENCY_STATIC,
+								(double)(0.001 * installation->motion_time_delay),
+								0,
+								NULL,
+								NULL,
+								error);
+				}
+			}
+		
+		/* print platform */
+		if (verbose >= 2)
+			{
+			status = mb_platform_print(verbose, (void *)platform, error);
+			}
+		}
+	else
+		{
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+		fprintf(stderr,"\nUnable to initialize platform offset structure\n");
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:           %d\n",*kind);
+		fprintf(stderr,"dbg2       platform_ptr:   %p\n",(void *)platform_ptr);
+		fprintf(stderr,"dbg2       *platform_ptr:  %p\n",(void *)*platform_ptr);
+		fprintf(stderr,"dbg2       error:          %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
 		}
 
 	/* return status */
@@ -5660,7 +5990,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -6367,7 +6697,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -6679,7 +7009,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -6844,7 +7174,7 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -6944,7 +7274,7 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -7047,7 +7377,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -7230,7 +7560,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -7670,13 +8000,14 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 	s7kr_attitude *attitude;
 	s7kr_reference *reference;
 	s7kr_navigation *navigation;
+	s7kr_rollpitchheave *rollpitchheave;
 	int	i, inav;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -7696,6 +8027,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 	attitude = (s7kr_attitude *) &store->attitude;
 	reference = (s7kr_reference *) &store->reference;
 	navigation = &(store->navigation);
+	rollpitchheave = &(store->rollpitchheave);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -7910,6 +8242,59 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		}
 
+	/* extract data from attitude structure */
+	else if (*kind == MB_DATA_ATTITUDE)
+		{
+		/* just one navigation value */
+		*n = 1;
+
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		time_d[0] = store->time_d;
+
+		/* get interpolated nav heading and speed  */
+		speed[0] = 0.0;
+		heading[0] = 0.0;
+		if (mb_io_ptr->nheading > 0)
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,
+							&(heading[0]), error);
+		else if (bathymetry->optionaldata == MB_YES)
+			heading[0] = RTD * bathymetry->heading;
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, heading[0], speed[0],
+							&(navlon[0]), &(navlat[0]), &(speed[0]), error);
+		else if (bathymetry->optionaldata == MB_YES)
+			{
+			navlon[0] = RTD * bathymetry->longitude;
+			navlat[0] = RTD * bathymetry->latitude;
+			}
+
+		/* get draft  */
+		if (mb_io_ptr->nsonardepth > 0)
+			{
+			mb_depint_interp(verbose, mbio_ptr, store->time_d,
+				    &(draft[0]), error);
+			}
+		else if (bathymetry->optionaldata == MB_YES)
+			{
+			draft[0] = -bathymetry->vehicle_height + reference->water_z;
+			}
+		else
+			{
+			draft[0] = reference->water_z;
+			}
+
+		/* get attitude  */
+		roll[0] = RTD * rollpitchheave->roll;
+		pitch[0] = RTD * rollpitchheave->pitch;
+		heave[0] = rollpitchheave->heave;
+
+		/* done translating values */
+
+		}
+
+
 	/* deal with comment */
 	else if (*kind == MB_DATA_COMMENT)
 		{
@@ -7991,7 +8376,7 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -8102,7 +8487,7 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -8186,7 +8571,7 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -8280,7 +8665,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
@@ -8550,7 +8935,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
@@ -8793,7 +9178,7 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
@@ -9049,7 +9434,7 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -9188,7 +9573,7 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -9297,7 +9682,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -9901,7 +10286,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:        %p\n",(void *)mbio_ptr);

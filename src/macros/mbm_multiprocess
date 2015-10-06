@@ -34,18 +34,6 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#
-#  Revision 2		2011-07-23 12:51:00	cferreira
-#  Major rewrite to avoid that files are processed twice since the
-#  locking may not be fast enough, now running with sequential files
-#  using a datalist.
-#
-#  Revision 1.1		2011-07-05 20:26:00	cferreira
-#  Minor changes.
-#
-#  Revision 1.0		2011-07-01 22:20:00	cferreira
-#  Initial version.
 
 
 $program_name = "mbm_multiprocess";

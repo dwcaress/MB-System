@@ -40,6 +40,7 @@
 #include "mb_format.h"
 #include "mb_define.h"
 #include "mb_io.h"
+#include "mb_process.h"
 #include "mb_aux.h"
 #include "mbsys_reson7k.h"
 
@@ -60,6 +61,8 @@
 #define	MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION	3
 #define	MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE		4
 #define	MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK		5
+#define	MB7KPREPROCESS_KLUGE_FIXTIMEJUMP			6
+#define	MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY	7
 static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -112,10 +115,6 @@ int main (int argc, char **argv)
 	char	platform_file[MB_PATH_MAXLINE];
 	int	use_platform_file = MB_NO;
 	struct mb_platform_struct *platform = NULL;
-	struct mb_sensor_struct *sensor_swathbathymetry = NULL;
-	struct mb_sensor_struct *sensor_attitude = NULL;
-	struct mb_sensor_struct *sensor_position = NULL;
-	struct mb_sensor_struct *sensor_depth = NULL;
 
 	/* MBIO read values */
 	void	*imbio_ptr = NULL;
@@ -240,7 +239,7 @@ int main (int argc, char **argv)
 	int	nrec_v2detection = 0;
 	int	nrec_v2rawdetection = 0;
 	int	nrec_v2snippet = 0;
-	int 	nrec_calibratedsnippet = 0;
+	int nrec_calibratedsnippet = 0;
 	int	nrec_processedsidescan = 0;
 	int	nrec_installation = 0;
 	int	nrec_systemeventmessage = 0;
@@ -439,41 +438,47 @@ int main (int argc, char **argv)
 	double	sonardepthfilterlength = 20.0;
 	double	sonardepthfilterdepth = 20.0;
 
-	/* depth sensor offset (+ makes vehicle deeper) */
+	/* depth sensor offset (+ makes platform deeper) */
 	double	sonardepthoffset = 0.0;
-
-	/* depth sensor lever arm parameter */
-	int	use_depthsensoroff = MB_NO;
-	double	depthsensoroffx = 0.0;
-	double	depthsensoroffy = 0.0;
-	double	depthsensoroffz = 0.0;
 	
-	int	sonar_offset_mode = MB_NO;
-	double	sonar_offset_x = 0.0;
-	double	sonar_offset_y = 0.0;
-	double	sonar_offset_z = 0.0;
-	double	sonar_offset_heading = 0.0;
-	double	sonar_offset_roll = 0.0;
-	double	sonar_offset_pitch = 0.0;
+	/* multibeam sensor offsets */
+	int	multibeam_offset_mode = MB_NO;
+	double	mbtransmit_offset_x = 0.0;
+	double	mbtransmit_offset_y = 0.0;
+	double	mbtransmit_offset_z = 0.0;
+	double	mbtransmit_offset_heading = 0.0;
+	double	mbtransmit_offset_roll = 0.0;
+	double	mbtransmit_offset_pitch = 0.0;
+	double	mbreceive_offset_x = 0.0;
+	double	mbreceive_offset_y = 0.0;
+	double	mbreceive_offset_z = 0.0;
+	double	mbreceive_offset_heading = 0.0;
+	double	mbreceive_offset_roll = 0.0;
+	double	mbreceive_offset_pitch = 0.0;
 	
-	int	vru_offset_mode = MB_NO;
-	double	vru_offset_x = 0.0;
-	double	vru_offset_y = 0.0;
-	double	vru_offset_z = 0.0;
-	double	vru_offset_heading = 0.0;
-	double	vru_offset_roll = 0.0;
-	double	vru_offset_pitch = 0.0;
-	
-	int	navigation_offset_mode = MB_NO;
-	double	navigation_offset_x = 0.0;
-	double	navigation_offset_y = 0.0;
-	double	navigation_offset_z = 0.0;
-	double	navigation_offset_heading = 0.0;
-	double	navigation_offset_roll = 0.0;
-	double	navigation_offset_pitch = 0.0;
+	/* position sensor offsets */
+	int	position_offset_mode = MB_NO;
 	double	position_offset_x = 0.0;
 	double	position_offset_y = 0.0;
 	double	position_offset_z = 0.0;
+
+	/* depth sensor offsets */
+	int	depth_offset_mode = MB_NO;
+	double	depth_offset_x = 0.0;
+	double	depth_offset_y = 0.0;
+	double	depth_offset_z = 0.0;
+	
+	/* heading sensor offsets */
+	int	heading_offset_mode = MB_NO;
+	double	heading_offset_heading = 0.0;
+	double	heading_offset_roll = 0.0;
+	double	heading_offset_pitch = 0.0;
+	
+	/* rollpitch sensor offsets */
+	int	rollpitch_offset_mode = MB_NO;
+	double	rollpitch_offset_heading = 0.0;
+	double	rollpitch_offset_roll = 0.0;
+	double	rollpitch_offset_pitch = 0.0;
 
 	/* multibeam sidescan parameters */
 	int	ss_source = R7KRECID_None;
@@ -490,13 +495,25 @@ int main (int argc, char **argv)
 
 	/* kluge modes */
 	int	klugemode;
-	double	klugevalue;
+	double	klugevalue, klugevalue2;
 	int	kluge_useverticaldepth = MB_NO; /* kluge 1 */
 	int	kluge_zeroalongtrackangles = MB_NO; /* kluge 2 */
 	int	kluge_zeroattitudecorrection = MB_NO; /* kluge 3 */
 	int	kluge_kearfottrovnoise = MB_NO; /* kluge 4 */
 	int	kluge_beampatterntweak = MB_NO; /* kluge 5 */
 	double	kluge_beampatternfactor = 1.0;
+	int	kluge_fixtimejump = MB_NO; /* kluge 6 */
+	double	kluge_timejump_interval = 0.0;
+	double	kluge_timejump_threshold = 0.0;
+	double	time_interval, time_d_old, time_d_org, dtime_d;
+	double	time_d_tolerance = 0.001;
+	int		ping_increment, ping_number_old;
+	int kluge_donotrecalculatebathy = MB_NO;
+	s7k_time	s7kTime;
+	mb_path	esffile;
+	int	esf_status;
+	int	esffile_open = MB_NO;
+	struct mb_esf_struct esf;
 
 	/* MBARI data flag */
 	int	MBARIdata = MB_NO;
@@ -530,7 +547,6 @@ int main (int argc, char **argv)
 	double	soundspeed;
 	double	alpha, beta, theta, phi;
 	double	rr, xx, zz;
-	double	lever_x, lever_y, lever_z;
 	double	headingx, headingy, mtodeglon, mtodeglat;
 	double	dx, dy, dist, dt, v;
 	double	longitude_offset, latitude_offset;
@@ -616,39 +632,43 @@ int main (int argc, char **argv)
 			break;
 		case 'C':
 		case 'c':
-			nscan = sscanf (optarg,"%lf/%lf", &sonar_offset_roll,&sonar_offset_pitch);
+			nscan = sscanf (optarg,"%lf/%lf", &mbtransmit_offset_roll,&mbtransmit_offset_pitch);
 			if (nscan == 2)
-				sonar_offset_mode = MB_YES;
+				{
+				multibeam_offset_mode = MB_YES;
+				mbreceive_offset_roll = mbtransmit_offset_roll;
+				mbreceive_offset_pitch = mbtransmit_offset_pitch;
+				}
 			break;
 		case 'D':
 		case 'd':
-			nscan = sscanf (optarg,"%lf/%lf/%lf/%lf", &depthsensoroffx, &depthsensoroffy, &depthsensoroffz, &sonardepthoffset);
+			nscan = sscanf (optarg,"%lf/%lf/%lf/%lf", &depth_offset_x, &depth_offset_y, &depth_offset_z, &sonardepthoffset);
 			if (nscan < 4)
 				{
 				if (nscan == 3)
 					{
-					sonardepthoffset = depthsensoroffz;
-					depthsensoroffz = depthsensoroffy;
-					depthsensoroffy = depthsensoroffx;
-					depthsensoroffx = 0.0;
+					sonardepthoffset = depth_offset_z;
+					depth_offset_z = depth_offset_y;
+					depth_offset_y = depth_offset_x;
+					depth_offset_x = 0.0;
 					}
 				else if (nscan == 2)
 					{
 					sonardepthoffset = 0.0;
-					depthsensoroffz = depthsensoroffy;
-					depthsensoroffy = depthsensoroffx;
-					depthsensoroffx = 0.0;
+					depth_offset_z = depth_offset_y;
+					depth_offset_y = depth_offset_x;
+					depth_offset_x = 0.0;
 					}
 				else if (nscan == 1)
 					{
 					sonardepthoffset = 0.0;
-					depthsensoroffz = 0.0;
-					depthsensoroffy = depthsensoroffx;
-					depthsensoroffx = 0.0;
+					depth_offset_z = 0.0;
+					depth_offset_y = depth_offset_x;
+					depth_offset_x = 0.0;
 					}
 				}
 			if (nscan > 0)
-				use_depthsensoroff = MB_YES;
+				depth_offset_mode = MB_YES;
 			flag++;
 			break;
 		case 'F':
@@ -669,7 +689,7 @@ int main (int argc, char **argv)
 			break;
 		case 'K':
 		case 'k':
-			nscan = sscanf (optarg,"%d/%lf", &klugemode, &klugevalue);
+			nscan = sscanf (optarg,"%d/%lf/%lf", &klugemode, &klugevalue, &klugevalue2);
 			if (klugemode == MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH)
 				{
 				kluge_useverticaldepth = MB_YES;
@@ -691,6 +711,20 @@ int main (int argc, char **argv)
 				{
 				kluge_beampatterntweak = MB_YES;
 				kluge_beampatternfactor = klugevalue;
+				}
+			if (klugemode == MB7KPREPROCESS_KLUGE_FIXTIMEJUMP
+				&& nscan >= 2)
+				{
+				kluge_fixtimejump = MB_YES;
+				kluge_timejump_interval = klugevalue;
+				if (nscan == 3)
+						kluge_timejump_threshold = klugevalue2;
+				else
+						kluge_timejump_threshold = kluge_timejump_interval / 4.0;
+				}
+			if (klugemode == MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY)
+				{
+				kluge_donotrecalculatebathy = MB_YES;
 				}
 			flag++;
 			break;
@@ -794,34 +828,82 @@ int main (int argc, char **argv)
 			break;
 		case 'Z':
 		case 'z':
-			/* sonar_offsets */
-			if (strncmp("sonar_offsets=", optarg, 14) == 0)
+			/* multibeam_offsets */
+			if (strncmp("multibeam_offsets=", optarg, 17) == 0)
 				{
-				n = sscanf(optarg, "sonar_offsets=%lf/%lf/%lf/%lf/%lf/%lf",
-					   &sonar_offset_x,&sonar_offset_y,&sonar_offset_z,
-					   &sonar_offset_heading,&sonar_offset_roll,&sonar_offset_pitch);
+				n = sscanf(optarg, "multibeam_offsets=%lf/%lf/%lf/%lf/%lf/%lf",
+					   &mbtransmit_offset_x,&mbtransmit_offset_y,&mbtransmit_offset_z,
+					   &mbtransmit_offset_heading,&mbtransmit_offset_roll,&mbtransmit_offset_pitch);
 				if (n == 6)
-					sonar_offset_mode = MB_YES;
+					{
+				    multibeam_offset_mode = MB_YES;
+				    mbreceive_offset_x = mbtransmit_offset_x;
+					mbreceive_offset_y = mbtransmit_offset_y;
+					mbreceive_offset_z = mbtransmit_offset_z;
+				    mbreceive_offset_heading = mbtransmit_offset_heading;
+					mbreceive_offset_roll = mbtransmit_offset_roll;
+					mbreceive_offset_pitch = mbtransmit_offset_pitch;
+					}
 				}
 			
-			/* vru_offsets */
-			else if (strncmp("vru_offsets=", optarg, 12) == 0)
+			/* mbtransmit_offsets */
+			else if (strncmp("mbtransmit_offsets=", optarg, 18) == 0)
 				{
-				n = sscanf(optarg, "vru_offsets=%lf/%lf/%lf/%lf/%lf/%lf",
-					   &vru_offset_x,&vru_offset_y,&vru_offset_z,
-					   &vru_offset_heading,&vru_offset_roll,&vru_offset_pitch);
+				n = sscanf(optarg, "mbtransmit_offsets=%lf/%lf/%lf/%lf/%lf/%lf",
+					   &mbtransmit_offset_x,&mbtransmit_offset_y,&mbtransmit_offset_z,
+					   &mbtransmit_offset_heading,&mbtransmit_offset_roll,&mbtransmit_offset_pitch);
 				if (n == 6)
-					sonar_offset_mode = MB_YES;
+					{
+				    multibeam_offset_mode = MB_YES;
+					}
 				}
 			
-			/* navigation_offsets */
-			else if (strncmp("navigation_offsets=", optarg, 19) == 0)
+			/* mbreceive_offsets */
+			else if (strncmp("mbreceive_offsets=", optarg, 17) == 0)
 				{
-				n = sscanf(optarg, "navigation_offsets=%lf/%lf/%lf/%lf/%lf/%lf",
-					   &navigation_offset_x,&navigation_offset_y,&navigation_offset_z,
-					   &navigation_offset_heading,&navigation_offset_roll,&navigation_offset_pitch);
+				n = sscanf(optarg, "mbreceive_offsets=%lf/%lf/%lf/%lf/%lf/%lf",
+					   &mbreceive_offset_x,&mbreceive_offset_y,&mbreceive_offset_z,
+					   &mbreceive_offset_heading,&mbreceive_offset_roll,&mbreceive_offset_pitch);
 				if (n == 6)
-					sonar_offset_mode = MB_YES;
+					{
+				    multibeam_offset_mode = MB_YES;
+					}
+				}
+			
+			/* position_offsets */
+			else if (strncmp("position_offsets=", optarg, 16) == 0)
+				{
+				n = sscanf(optarg, "position_offsets=%lf/%lf/%lf",
+					   &position_offset_x,&position_offset_y,&position_offset_z);
+				if (n == 3)
+					position_offset_mode = MB_YES;
+				}
+			
+			/* depth_offsets */
+			else if (strncmp("depth_offsets=", optarg, 13) == 0)
+				{
+				n = sscanf(optarg, "depth_offsets=%lf/%lf/%lf",
+					   &depth_offset_x,&depth_offset_y,&depth_offset_z);
+				if (n == 3)
+					depth_offset_mode = MB_YES;
+				}
+			
+			/* heading_offsets */
+			else if (strncmp("heading_offsets=", optarg, 15) == 0)
+				{
+				n = sscanf(optarg, "heading_offsets=%lf/%lf/%lf",
+					   &heading_offset_heading,&heading_offset_roll,&heading_offset_pitch);
+				if (n == 3)
+					heading_offset_mode = MB_YES;
+				}
+			
+			/* rollpitch_offsets */
+			else if (strncmp("rollpitch_offsets=", optarg, 17) == 0)
+				{
+				n = sscanf(optarg, "rollpitch_offsets=%lf/%lf/%lf",
+					   &rollpitch_offset_heading,&rollpitch_offset_roll,&rollpitch_offset_pitch);
+				if (n == 3)
+					rollpitch_offset_mode = MB_YES;
 				}
 			flag++;
 			break;
@@ -902,7 +984,11 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       kluge_kearfottrovnoise:        %d\n",kluge_useverticaldepth);
 		fprintf(stderr,"dbg2       kluge_beampatterntweak:        %d\n",kluge_useverticaldepth);
 		fprintf(stderr,"dbg2       kluge_beampatternfactor:       %f\n",kluge_beampatternfactor);
-		if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+		fprintf(stderr,"dbg2       kluge_fixtimejump:             %d\n",kluge_fixtimejump);
+		fprintf(stderr,"dbg2       kluge_timejump_interval:       %f\n",kluge_timejump_interval);
+		fprintf(stderr,"dbg2       kluge_timejump_threshold:      %f\n",kluge_timejump_threshold);
+		fprintf(stderr,"dbg2       kluge_donotrecalculatebathy:   %d\n",kluge_donotrecalculatebathy);
+        if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 			{
 			fprintf(stderr,"dbg2       timelagfile:         %s\n",timelagfile);
 			fprintf(stderr,"dbg2       ntimelag:            %d\n",ntimelag);
@@ -911,39 +997,44 @@ int main (int argc, char **argv)
 			{
 			fprintf(stderr,"dbg2       timelagconstant:     %f\n",timelagconstant);
 			}
-		fprintf(stderr,"dbg2       timelag:                %f\n",timelag);
-		fprintf(stderr,"dbg2       sonardepthfilter:       %d\n",sonardepthfilter);
-		fprintf(stderr,"dbg2       sonardepthfilterlength: %f\n",sonardepthfilterlength);
-		fprintf(stderr,"dbg2       sonardepthfilterdepth:  %f\n",sonardepthfilterdepth);
-		fprintf(stderr,"dbg2       sonardepthfile:         %s\n",sonardepthfile);
-		fprintf(stderr,"dbg2       sonardepthdata:         %d\n",sonardepthdata);
-		fprintf(stderr,"dbg2       sonardepthoffset:       %f\n",sonardepthoffset);
-		fprintf(stderr,"dbg2       depthsensoroffx:        %f\n",depthsensoroffx);
-		fprintf(stderr,"dbg2       depthsensoroffy:        %f\n",depthsensoroffy);
-		fprintf(stderr,"dbg2       depthsensoroffz:        %f\n",depthsensoroffz);
-		fprintf(stderr,"dbg2       sonar_offset_mode:          %d\n",sonar_offset_mode);
-		fprintf(stderr,"dbg2       sonar_offset_x:             %f\n",sonar_offset_x);
-		fprintf(stderr,"dbg2       sonar_offset_y:             %f\n",sonar_offset_y);
-		fprintf(stderr,"dbg2       sonar_offset_z:             %f\n",sonar_offset_z);
-		fprintf(stderr,"dbg2       sonar_offset_heading:       %f\n",sonar_offset_heading);
-		fprintf(stderr,"dbg2       sonar_offset_roll:          %f\n",sonar_offset_roll);
-		fprintf(stderr,"dbg2       sonar_offset_pitch:         %f\n",sonar_offset_pitch);
-		fprintf(stderr,"dbg2       vru_offset_mode:            %d\n",vru_offset_mode);
-		fprintf(stderr,"dbg2       vru_offset_x:               %f\n",vru_offset_x);
-		fprintf(stderr,"dbg2       vru_offset_y:               %f\n",vru_offset_y);
-		fprintf(stderr,"dbg2       vru_offset_z:               %f\n",vru_offset_z);
-		fprintf(stderr,"dbg2       vru_offset_heading:         %f\n",vru_offset_heading);
-		fprintf(stderr,"dbg2       vru_offset_roll:            %f\n",vru_offset_roll);
-		fprintf(stderr,"dbg2       vru_offset_pitch:           %f\n",vru_offset_pitch);
-		fprintf(stderr,"dbg2       navigation_offset_mode:     %d\n",navigation_offset_mode);
-		fprintf(stderr,"dbg2       navigation_offset_x:        %f\n",navigation_offset_x);
-		fprintf(stderr,"dbg2       navigation_offset_y:        %f\n",navigation_offset_y);
-		fprintf(stderr,"dbg2       navigation_offset_z:        %f\n",navigation_offset_z);
-		fprintf(stderr,"dbg2       navigation_offset_heading:  %f\n",navigation_offset_heading);
-		fprintf(stderr,"dbg2       navigation_offset_roll:     %f\n",navigation_offset_roll);
-		fprintf(stderr,"dbg2       navigation_offset_pitch:    %f\n",navigation_offset_pitch);
+		fprintf(stderr,"dbg2       timelag:                         %f\n",timelag);
+		fprintf(stderr,"dbg2       sonardepthfilter:                %d\n",sonardepthfilter);
+		fprintf(stderr,"dbg2       sonardepthfilterlength:          %f\n",sonardepthfilterlength);
+		fprintf(stderr,"dbg2       sonardepthfilterdepth:           %f\n",sonardepthfilterdepth);
+		fprintf(stderr,"dbg2       sonardepthfile:                  %s\n",sonardepthfile);
+		fprintf(stderr,"dbg2       sonardepthdata:                  %d\n",sonardepthdata);
+		fprintf(stderr,"dbg2       sonardepthoffset:                %f\n",sonardepthoffset);
+		fprintf(stderr,"dbg2       multibeam_offset_mode:           %d\n",multibeam_offset_mode);
+		fprintf(stderr,"dbg2       mbtransmit_offset_x:             %f\n",mbtransmit_offset_x);
+		fprintf(stderr,"dbg2       mbtransmit_offset_y:             %f\n",mbtransmit_offset_y);
+		fprintf(stderr,"dbg2       mbtransmit_offset_z:             %f\n",mbtransmit_offset_z);
+		fprintf(stderr,"dbg2       mbtransmit_offset_heading:       %f\n",mbtransmit_offset_heading);
+		fprintf(stderr,"dbg2       mbtransmit_offset_roll:          %f\n",mbtransmit_offset_roll);
+		fprintf(stderr,"dbg2       mbtransmit_offset_pitch:         %f\n",mbtransmit_offset_pitch);
+		fprintf(stderr,"dbg2       mbreceive_offset_x:              %f\n",mbreceive_offset_x);
+		fprintf(stderr,"dbg2       mbreceive_offset_y:              %f\n",mbreceive_offset_y);
+		fprintf(stderr,"dbg2       mbreceive_offset_z:              %f\n",mbreceive_offset_z);
+		fprintf(stderr,"dbg2       mbreceive_offset_heading:        %f\n",mbreceive_offset_heading);
+		fprintf(stderr,"dbg2       mbreceive_offset_roll:           %f\n",mbreceive_offset_roll);
+		fprintf(stderr,"dbg2       mbreceive_offset_pitch:          %f\n",mbreceive_offset_pitch);
+		fprintf(stderr,"dbg2       position_offset_mode:            %d\n",position_offset_mode);
+		fprintf(stderr,"dbg2       position_offset_x:               %f\n",position_offset_x);
+		fprintf(stderr,"dbg2       position_offset_y:               %f\n",position_offset_y);
+		fprintf(stderr,"dbg2       position_offset_z:               %f\n",position_offset_z);
+		fprintf(stderr,"dbg2       depth_offset_mode:               %d\n",depth_offset_mode);
+		fprintf(stderr,"dbg2       depth_offset_x:                  %f\n",depth_offset_x);
+		fprintf(stderr,"dbg2       depth_offset_y:                  %f\n",depth_offset_y);
+		fprintf(stderr,"dbg2       depth_offset_z:                  %f\n",depth_offset_z);
+		fprintf(stderr,"dbg2       heading_offset_mode:             %d\n",heading_offset_mode);
+		fprintf(stderr,"dbg2       heading_offset_heading:          %f\n",heading_offset_heading);
+		fprintf(stderr,"dbg2       heading_offset_roll:             %f\n",heading_offset_roll);
+		fprintf(stderr,"dbg2       heading_offset_pitch:            %f\n",heading_offset_pitch);
+		fprintf(stderr,"dbg2       rollpitch_offset_mode:           %d\n",rollpitch_offset_mode);
+		fprintf(stderr,"dbg2       rollpitch_offset_heading:        %f\n",rollpitch_offset_heading);
+		fprintf(stderr,"dbg2       rollpitch_offset_roll:           %f\n",rollpitch_offset_roll);
+		fprintf(stderr,"dbg2       rollpitch_offset_pitch:          %f\n",rollpitch_offset_pitch);
 		for (i=0;i<nrangeoffset;i++)
-			fprintf(stderr,"dbg2       rangeoffset[%d]:         %d %d %f\n",
+				fprintf(stderr,"dbg2       rangeoffset[%d]:                 %d %d %f\n",
 				i,rangeoffsetstart[i], rangeoffsetend[i], rangeoffset[i]);
 		}
 
@@ -1034,31 +1125,31 @@ int main (int argc, char **argv)
 
 		/* allocate arrays for ins data */
 		if (nins > 0)
-		    {
-		    status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_time_d,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_lon,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_lat,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_heading,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_roll,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_pitch,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_sonardepth,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_sonardepthfilter,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_altitude_time_d,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_altitude,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_speed_time_d,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_speed,&error);
-		    if (error != MB_ERROR_NO_ERROR)
+			{
+			status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_time_d,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_lon,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_lat,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_heading,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_roll,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_pitch,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_sonardepth,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_sonardepthfilter,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_altitude_time_d,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_altitude,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_speed_time_d,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_speed,&error);
+			if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nMBIO Error allocating ins data arrays:\n%s\n",message);
@@ -1066,17 +1157,17 @@ int main (int argc, char **argv)
 				program_name);
 			exit(error);
 			}
-		    }
+			}
 
 		/* if no ins data then quit */
 		else
-		    {
-		    error = MB_ERROR_BAD_DATA;
-		    fprintf(stderr,"\nUnable to read data from MBARI AUV navigation file <%s>\n",insfile);
-		    fprintf(stderr,"\nProgram <%s> Terminated\n",
-			    program_name);
-		    exit(error);
-		    }
+			{
+			error = MB_ERROR_BAD_DATA;
+			fprintf(stderr,"\nUnable to read data from MBARI AUV navigation file <%s>\n",insfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
 		/* read the data points in the auv log file */
 		nins = 0;
@@ -1175,28 +1266,28 @@ ins_speed[nins]);*/
 		nrock = 0;
 		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
 			if (buffer[0] != '#')
-			    nrock++;
+				nrock++;
 		rewind(tfp);
 
 		/* allocate arrays for rock data */
 		if (nrock > 0)
-		    {
-		    status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_time_d,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_lon,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_lat,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepth,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepthfilter,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_heading,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_roll,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_pitch,&error);
-		    if (error != MB_ERROR_NO_ERROR)
+			{
+			status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_time_d,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_lon,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_lat,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepth,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepthfilter,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_heading,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_roll,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_pitch,&error);
+			if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nMBIO Error allocating rock data arrays:\n%s\n",message);
@@ -1204,27 +1295,27 @@ ins_speed[nins]);*/
 				program_name);
 			exit(error);
 			}
-		    }
+			}
 
 		/* if no rock data then quit */
 		else
-		    {
-		    error = MB_ERROR_BAD_DATA;
-		    fprintf(stderr,"\nUnable to read data from rock file <%s>\n",rockfile);
-		    fprintf(stderr,"\nProgram <%s> Terminated\n",
-			    program_name);
-		    exit(error);
-		    }
+			{
+			error = MB_ERROR_BAD_DATA;
+			fprintf(stderr,"\nUnable to read data from rock file <%s>\n",rockfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
 		/* read the data points in the rock file */
 		nrock = 0;
 		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
 			{
 			if (buffer[0] != '#')
-			    if (sscanf(buffer,"%lf %lf %lf %lf %lf %lf %lf",
+				if (sscanf(buffer,"%lf %lf %lf %lf %lf %lf %lf",
 					&rock_time_d[nrock], &rock_lon[nrock], &rock_lat[nrock], &rock_sonardepth[nrock],
 					&rock_heading[nrock], &rock_roll[nrock], &rock_pitch[nrock]) == 7)
-			    	{
+					{
 /*fprintf(stderr,"ROCK DATA: %f %f %f %f %f %f\n",
 rock_time_d[nrock],
 rock_lon[nrock],
@@ -1234,7 +1325,7 @@ rock_heading[nrock],
 rock_roll[nrock],
 rock_pitch[nrock],
 rock_heading[nrock]);*/
-			    	nrock++;
+					nrock++;
 				}
 			}
 		fclose(tfp);
@@ -1270,28 +1361,28 @@ rock_heading[nrock]);*/
 		ndsl = 0;
 		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
 			if (buffer[0] != '#')
-			    ndsl++;
+				ndsl++;
 		rewind(tfp);
 
 		/* allocate arrays for dsl data */
 		if (ndsl > 0)
-		    {
-		    status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_time_d,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lon,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lat,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepth,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepthfilter,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_heading,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_roll,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_pitch,&error);
-		    if (error != MB_ERROR_NO_ERROR)
+			{
+			status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_time_d,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lon,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lat,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepth,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepthfilter,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_heading,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_roll,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_pitch,&error);
+			if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nMBIO Error allocating dsl data arrays:\n%s\n",message);
@@ -1299,33 +1390,33 @@ rock_heading[nrock]);*/
 				program_name);
 			exit(error);
 			}
-		    }
+			}
 
 		/* if no dsl data then quit */
 		else
-		    {
-		    error = MB_ERROR_BAD_DATA;
-		    fprintf(stderr,"\nUnable to read data from dsl file <%s>\n",dslfile);
-		    fprintf(stderr,"\nProgram <%s> Terminated\n",
-			    program_name);
-		    exit(error);
-		    }
+			{
+			error = MB_ERROR_BAD_DATA;
+			fprintf(stderr,"\nUnable to read data from dsl file <%s>\n",dslfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
 		/* read the data points in the dsl file */
 		ndsl = 0;
 		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
 			{
 			if (buffer[0] != '#')
-			    {
-			    nscan = sscanf(buffer,"PPL %d/%d/%d %d:%d:%lf %s %lf %lf %lf %lf %lf %lf %lf",
-			    		&year, &month, &day, &hour, &minute, &second,
+				{
+				nscan = sscanf(buffer,"PPL %d/%d/%d %d:%d:%lf %s %lf %lf %lf %lf %lf %lf %lf",
+						&year, &month, &day, &hour, &minute, &second,
 					sensor, &dsl_lat[ndsl], &dsl_lon[ndsl], &dsl_sonardepth[ndsl],
 					&dsl_heading[ndsl], &dsl_pitch[ndsl], &dsl_roll[ndsl], &id);
 /* fprintf(stderr,"nscan:%d year:%d month:%d day:%d hour:%d minute:%d second:%f sensor:%s %f %f %f %f %f %f %f\n",
 nscan,year,month,day,hour,minute,second,sensor,dsl_lat[ndsl], dsl_lon[ndsl], dsl_sonardepth[ndsl],
 dsl_heading[ndsl], dsl_pitch[ndsl], dsl_roll[ndsl], id); */
-			    if (nscan == 14)
-			    	{
+				if (nscan == 14)
+					{
 				time_i[0] = year;
 				time_i[1] = month;
 				time_i[2] = day;
@@ -1343,9 +1434,9 @@ dsl_heading[ndsl],
 dsl_roll[ndsl],
 dsl_pitch[ndsl],
 dsl_heading[ndsl]); */
-			    	ndsl++;
+					ndsl++;
 				}
-			    }
+				}
 			}
 		fclose(tfp);
 
@@ -1410,13 +1501,13 @@ dsl_heading[ndsl]); */
 
 		/* allocate arrays for sonardepth data */
 		if (nsonardepth > 0)
-		    {
-		    status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_time_d,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepth,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepthfilter,&error);
-		    if (error != MB_ERROR_NO_ERROR)
+			{
+			status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_time_d,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepth,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepthfilter,&error);
+			if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nMBIO Error allocating sonardepth data arrays:\n%s\n",message);
@@ -1424,17 +1515,17 @@ dsl_heading[ndsl]); */
 				program_name);
 			exit(error);
 			}
-		    }
+			}
 
 		/* if no sonardepth data then quit */
 		else
-		    {
-		    error = MB_ERROR_BAD_DATA;
-		    fprintf(stderr,"\nUnable to read data from MBARI AUV sonardepth file <%s>\n",sonardepthfile);
-		    fprintf(stderr,"\nProgram <%s> Terminated\n",
-			    program_name);
-		    exit(error);
-		    }
+			{
+			error = MB_ERROR_BAD_DATA;
+			fprintf(stderr,"\nUnable to read data from MBARI AUV sonardepth file <%s>\n",sonardepthfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
 		/* read the data points in the auv log file */
 		nsonardepth = 0;
@@ -1479,16 +1570,16 @@ sonardepth_sonardepth[nsonardepth]);*/
 			}
 		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
 			if (buffer[0] != '#')
-			    ntimelag++;
+				ntimelag++;
 		rewind(tfp);
 
 		/* allocate arrays for time lag */
 		if (ntimelag > 0)
-		    {
-		    status = mb_mallocd(verbose, __FILE__, __LINE__,ntimelag * sizeof(double), (void **)&timelag_time_d,&error);
-		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__,ntimelag * sizeof(double), (void **)&timelag_model,&error);
-		    if (error != MB_ERROR_NO_ERROR)
+			{
+			status = mb_mallocd(verbose, __FILE__, __LINE__,ntimelag * sizeof(double), (void **)&timelag_time_d,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__,ntimelag * sizeof(double), (void **)&timelag_model,&error);
+			if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
@@ -1496,29 +1587,29 @@ sonardepth_sonardepth[nsonardepth]);*/
 				program_name);
 			exit(error);
 			}
-		    }
+			}
 
 		/* if no time lag data then quit */
 		else
-		    {
-		    error = MB_ERROR_BAD_DATA;
-		    fprintf(stderr,"\nUnable to read data from time lag model file <%s>\n",timelagfile);
-		    fprintf(stderr,"\nProgram <%s> Terminated\n",
-			    program_name);
-		    exit(error);
-		    }
+			{
+			error = MB_ERROR_BAD_DATA;
+			fprintf(stderr,"\nUnable to read data from time lag model file <%s>\n",timelagfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
 		/* read the data points in the timelag file */
 		ntimelag = 0;
 		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
-		    {
-		    if (buffer[0] != '#')
+			{
+			if (buffer[0] != '#')
 			{
 			/* read the time and time lag pair */
 			if (sscanf(buffer,"%lf %lf",&timelag_time_d[ntimelag],&timelag_model[ntimelag]) == 2)
-			    ntimelag++;
+				ntimelag++;
 			}
-		    }
+			}
 		fclose(tfp);
 
 		/* output info */
@@ -1542,7 +1633,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	/* load platform definition if specified or if offsets otherwise specified create a platform structure */
 	if (use_platform_file == MB_YES)
 		{
-		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
+		status = mb_platform_read(verbose, platform_file,  (void **)&platform, &error);
 		if (status == MB_FAILURE)
 			{
 			error = MB_ERROR_OPEN_FAIL;
@@ -1551,99 +1642,147 @@ sonardepth_sonardepth[nsonardepth]);*/
 			exit(error);				
 			}
 		}
-	else if (use_depthsensoroff == MB_YES || sonar_offset_mode == MB_YES)
+	else if (depth_offset_mode == MB_YES || multibeam_offset_mode == MB_YES)
 		{
 		status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL,
-						0, 1, 2, 3, 3, 
-						(void **)&platform, &error);
+						 (void **)&platform, &error);
 			
-		/* set sensor 0 (multibeam) */
+		/* set sensor 0 (multibeam)
+				for a single first offsets are for transmit array, second for receive array */
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void **)&platform,
+			status = mb_platform_add_sensor(verbose,  (void *)platform,
 					MB_SENSOR_TYPE_SONAR_MULTIBEAM,
 					NULL,
+					"Reson",
 					NULL,
-					NULL,
-					0, 0,
-					1, 0,
-					&error);
-		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
-					0, 0,
-					MB7KPREPROCESS_TIMELAG_OFF,
-					0.0,
-					0,
-					NULL,
-					NULL,
-					sonar_offset_mode,
-					sonar_offset_x,
-					sonar_offset_y,
-					sonar_offset_z,   
-					sonar_offset_mode,
-					sonar_offset_heading,
-					sonar_offset_roll,
-					sonar_offset_pitch,
-					&error);
-			
-		/* set sensor 1 (position) */
-		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void **)&platform,
-					MB_SENSOR_TYPE_POSITION,
-					NULL,
-					NULL,
-					NULL,
-					0, 0,
-					1, ntimelag,
-					&error);
-		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
-					1, 0,
-					timelagmode,
-					timelagconstant,
-					ntimelag,
-					timelag_time_d,
-					timelag_model,
-					navigation_offset_mode,
-					navigation_offset_x,
-					navigation_offset_y,
-					navigation_offset_z,   
-					navigation_offset_mode,
-					navigation_offset_heading,
-					navigation_offset_roll,
-					navigation_offset_pitch,
-					&error);
-			
-		/* set sensor 2 (sensor depth) */
-		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void **)&platform,
-					MB_SENSOR_TYPE_POSITION,
-					NULL,
-					NULL,
-					NULL,
-					0, 0,
-					1, ntimelag,
-					&error);
-		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
+					MB_SENSOR_CAPABILITY1_NONE, 
+					MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM,
 					2, 0,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					0, 0,
+					multibeam_offset_mode,
+					mbtransmit_offset_x,
+					mbtransmit_offset_y,
+					mbtransmit_offset_z,   
+					multibeam_offset_mode,
+					mbtransmit_offset_heading,
+					mbtransmit_offset_roll,
+					mbtransmit_offset_pitch,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					0, 1,
+					multibeam_offset_mode,
+					mbreceive_offset_x,
+					mbreceive_offset_y,
+					mbreceive_offset_z,   
+					multibeam_offset_mode,
+					mbreceive_offset_heading,
+					mbreceive_offset_roll,
+					mbreceive_offset_pitch,
+					&error);
+			
+		/* set sensor 1 (position sensor) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose,  (void *)platform,
+					MB_SENSOR_TYPE_POSITION,
+					NULL,
+					NULL,
+					NULL,
+					0, 0,
+					1, ntimelag,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					1, 0,
+					position_offset_mode,
+					position_offset_x,
+					position_offset_y,
+					position_offset_z,   
+					MB_NO,
+					0.0,
+					0.0,
+					0.0,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_timelatency(verbose,  (void *)platform,
+					1, 
 					timelagmode,
 					timelagconstant,
 					ntimelag,
 					timelag_time_d,
 					timelag_model,
-					use_depthsensoroff,
-					depthsensoroffx,
-					depthsensoroffy,
-					depthsensoroffz,   
-					0,
+					&error);
+			
+		/* set sensor 2 (depth sensor) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose,  (void *)platform,
+					MB_SENSOR_TYPE_PRESSURE,
+					NULL,
+					NULL,
+					NULL,
+					0, 0,
+					1, ntimelag,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					2, 0,
+					depth_offset_mode,
+					depth_offset_x,
+					depth_offset_y,
+					depth_offset_z,   
+					MB_NO,
 					0.0,
 					0.0,
 					0.0,
 					&error);
-			
-		/* set sensor 3 (attitude) */
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void **)&platform,
+			status = mb_platform_set_sensor_timelatency(verbose,  (void *)platform,
+					2, 
+					timelagmode,
+					timelagconstant,
+					ntimelag,
+					timelag_time_d,
+					timelag_model,
+					&error);
+			
+		/* set sensor 3 (heading sensor) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose,  (void *)platform,
+					MB_SENSOR_TYPE_COMPASS,
+					NULL,
+					NULL,
+					NULL,
+					0, 0,
+					1, ntimelag,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					3, 0,
+					MB_NO,
+					0.0,
+					0.0,
+					0.0,   
+					heading_offset_mode,
+					heading_offset_heading,
+					heading_offset_roll,
+					heading_offset_pitch,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_timelatency(verbose,  (void *)platform,
+					3, 
+					timelagmode,
+					timelagconstant,
+					ntimelag,
+					timelag_time_d,
+					timelag_model,
+					&error);
+			
+		/* set sensor 4 (rollpitch sensor) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose,  (void *)platform,
 					MB_SENSOR_TYPE_VRU,
 					NULL,
 					NULL,
@@ -1652,22 +1791,49 @@ sonardepth_sonardepth[nsonardepth]);*/
 					1, ntimelag,
 					&error);
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
-					3, 0,
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					4, 0,
+					MB_NO,
+					0.0,
+					0.0,
+					0.0,   
+					rollpitch_offset_mode,
+					rollpitch_offset_heading,
+					rollpitch_offset_roll,
+					rollpitch_offset_pitch,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_timelatency(verbose,  (void *)platform,
+					4, 
 					timelagmode,
 					timelagconstant,
 					ntimelag,
 					timelag_time_d,
 					timelag_model,
-					vru_offset_mode,
-					vru_offset_x,
-					vru_offset_y,
-					vru_offset_z,   
-					vru_offset_mode,
-					vru_offset_heading,
-					vru_offset_roll,
-					vru_offset_pitch,
 					&error);
+			
+		/* set data source sensors */
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_BATHYMETRY, 0, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_BACKSCATTER, 0, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_POSITION, 1, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_DEPTH, 2, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_HEADING, 3, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_ROLLPITCH, 4, &error);
+//		if (status == MB_SUCCESS)
+//			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+//					MB_PLATFORM_SOURCE_HEAVE1, 5, &error);
 		
 		/* deal with error */
 		if (status == MB_FAILURE)
@@ -1689,9 +1855,9 @@ sonardepth_sonardepth[nsonardepth]);*/
 
 	/* open file list */
 	if (read_datalist == MB_YES)
-	    {
-	    if ((status = mb_datalist_open(verbose,&datalist,
-					    read_file,look_processed,&error)) != MB_SUCCESS)
+		{
+		if ((status = mb_datalist_open(verbose,&datalist,
+						read_file,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -1700,19 +1866,19 @@ sonardepth_sonardepth[nsonardepth]);*/
 			program_name);
 		exit(error);
 		}
-	    if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error))
-			    == MB_SUCCESS)
+		if ((status = mb_datalist_read(verbose,datalist,
+				ifile,&format,&file_weight,&error))
+				== MB_SUCCESS)
 		read_data = MB_YES;
-	    else
+		else
 		read_data = MB_NO;
-	    }
+		}
 	/* else copy single filename to be read */
 	else
-	    {
-	    strcpy(ifile, read_file);
-	    read_data = MB_YES;
-	    }
+		{
+		strcpy(ifile, read_file);
+		read_data = MB_YES;
+		}
 
 	/* loop over all files to be read */
 	while (read_data == MB_YES && format == MBF_RESON7KR)
@@ -1786,6 +1952,8 @@ sonardepth_sonardepth[nsonardepth]);*/
 		}
 
 	/* reset file record counters */
+	nfile_read = 0;
+	nfile_write = 0;
 	nrec_reference = 0;
 	nrec_sensoruncal = 0;
 	nrec_sensorcal = 0;
@@ -1843,13 +2011,13 @@ sonardepth_sonardepth[nsonardepth]);*/
 
 		/* read next data record */
 		status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
-				    time_i,&time_d,&navlon,&navlat,
-				    &speed,&heading,
-				    &distance,&altitude,&sonardepth,
-				    &beams_bath,&beams_amp,&pixels_ss,
-				    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-				    ss,ssacrosstrack,ssalongtrack,
-				    comment,&error);
+					time_i,&time_d,&navlon,&navlat,
+					&speed,&heading,
+					&distance,&altitude,&sonardepth,
+					&beams_bath,&beams_amp,&pixels_ss,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
+					comment,&error);
 
 		/* some nonfatal errors do not matter */
 		if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE)
@@ -1858,7 +2026,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			status = MB_SUCCESS;
 			}
 
-	   	/* handle multibeam data */
+		/* handle multibeam data */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 			nrec_multibeam++;
@@ -2000,7 +2168,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 						mb_error(verbose,error,&message);
 						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 						fprintf(stderr,"\nProgram <%s> Terminated\n",
-						    program_name);
+							program_name);
 						exit(error);
 						}
 					}
@@ -2234,7 +2402,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			}
 
-	   	/* handle reference point data */
+		/* handle reference point data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_ReferencePoint)
 			{
 			nrec_reference++;
@@ -2255,7 +2423,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				header->RecordNumber);
 			}
 
-	   	/* handle uncalibrated sensor offset data */
+		/* handle uncalibrated sensor offset data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_UncalibratedSensorOffset)
 			{
 			nrec_sensoruncal++;
@@ -2276,7 +2444,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				header->RecordNumber);
 			}
 
-	   	/* handle calibrated sensor offset data */
+		/* handle calibrated sensor offset data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_CalibratedSensorOffset)
 			{
 			nrec_sensorcal++;
@@ -2297,7 +2465,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				header->RecordNumber);
 			}
 
-	   	/* handle position data */
+		/* handle position data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Position)
 			{
 			nrec_position++;
@@ -2331,7 +2499,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -2348,7 +2516,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 
 			}
 
-	   	/* handle customattitude data */
+		/* handle customattitude data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_CustomAttitude)
 			{
 			nrec_customattitude++;
@@ -2382,7 +2550,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -2401,7 +2569,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			}
 
-	   	/* handle tide data */
+		/* handle tide data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Tide)
 			{
 			nrec_tide++;
@@ -2422,7 +2590,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				header->RecordNumber);
 			}
 
-	   	/* handle altitude data */
+		/* handle altitude data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Altitude)
 			{
 			nrec_altitude++;
@@ -2453,7 +2621,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -2467,7 +2635,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			}
 
-	   	/* handle motion data */
+		/* handle motion data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_MotionOverGround)
 			{
 			nrec_motion++;
@@ -2488,7 +2656,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				header->RecordNumber,motion->n);
 			}
 
-	   	/* handle depth data */
+		/* handle depth data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Depth)
 			{
 			nrec_depth++;
@@ -2520,7 +2688,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -2535,7 +2703,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			}
 
-	   	/* handle sound velocity data */
+		/* handle sound velocity data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_SoundVelocityProfile)
 			{
 			nrec_svp++;
@@ -2556,7 +2724,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				header->RecordNumber,svp->n);
 			}
 
-	   	/* handle ctd data */
+		/* handle ctd data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_CTD)
 			{
 			nrec_ctd++;
@@ -2578,7 +2746,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			header->RecordNumber,ctd->n);
 			}
 
-	   	/* handle geodesy data */
+		/* handle geodesy data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Geodesy)
 			{
 			nrec_geodesy++;
@@ -2600,7 +2768,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			header->RecordNumber);
 			}
 
-	   	/* handle rollpitchheave data */
+		/* handle rollpitchheave data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_RollPitchHeave)
 			{
 			nrec_rollpitchheave++;
@@ -2634,7 +2802,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -2651,7 +2819,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 
 			}
 
-	   	/* handle heading data */
+		/* handle heading data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Heading)
 			{
 			nrec_heading++;
@@ -2682,7 +2850,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -2696,7 +2864,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			}
 
-	   	/* handle survey line data */
+		/* handle survey line data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_SurveyLine)
 			{
 			nrec_surveyline++;
@@ -2718,7 +2886,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			header->RecordNumber);
 			}
 
-	   	/* handle navigation data */
+		/* handle navigation data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Navigation)
 			{
 			nrec_navigation++;
@@ -2752,7 +2920,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -2778,7 +2946,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -2792,7 +2960,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			}
 
-	   	/* handle attitude data */
+		/* handle attitude data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Attitude)
 			{
 			nrec_attitude++;
@@ -2826,7 +2994,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -2845,7 +3013,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			}
 
-	   	/* handle file header data */
+		/* handle file header data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_7kFileHeader)
 			{
 			nrec_fileheader++;
@@ -2866,7 +3034,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				header->RecordNumber);
 			}
 
-	   	/* handle installation data */
+		/* handle installation data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_7kInstallationParameters)
 			{
 			nrec_installation++;
@@ -2888,152 +3056,8 @@ sonardepth_sonardepth[nsonardepth]);*/
 
 			if (platform == NULL)
 				{
-				status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL,
-								0, 1, 1, 2, 2, 
-								(void **)&platform, &error);
-					
-				/* set sensor 0 (multibeam) */
-				if (status == MB_SUCCESS)
-					status = mb_platform_add_sensor(verbose, (void **)&platform,
-							MB_SENSOR_TYPE_SONAR_MULTIBEAM,
-							NULL,
-							NULL,
-							NULL,
-							0, 0,
-							2, 0,
-							&error);
-				if (status == MB_SUCCESS)
-					status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
-							0, 0,
-							MB7KPREPROCESS_TIMELAG_OFF,
-							0.0,
-							0,
-							NULL,
-							NULL,
-							MB_SENSOR_POSITION_OFFSET_STATIC,
-							(double) installation->transmit_x,
-							(double) installation->transmit_y,
-							(double) installation->transmit_z,   
-							MB_SENSOR_ATTITUDE_OFFSET_STATIC,
-							(double) installation->transmit_heading,
-							(double) installation->transmit_roll,
-							(double) installation->transmit_pitch,   
-							&error);
-				if (status == MB_SUCCESS)
-					status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
-							0, 1,
-							MB7KPREPROCESS_TIMELAG_OFF,
-							0.0,
-							0,
-							NULL,
-							NULL,
-							MB_SENSOR_POSITION_OFFSET_STATIC,
-							(double) installation->receive_x,
-							(double) installation->receive_y,
-							(double) installation->receive_z,   
-							MB_SENSOR_ATTITUDE_OFFSET_STATIC,
-							(double) installation->receive_heading,
-							(double) installation->receive_roll,
-							(double) installation->receive_pitch,   
-							&error);
-					
-				/* set sensor 1 (position) */
-				if (status == MB_SUCCESS)
-					status = mb_platform_add_sensor(verbose, (void **)&platform,
-							MB_SENSOR_TYPE_POSITION,
-							NULL,
-							NULL,
-							NULL,
-							0, 0,
-							1, ntimelag,
-							&error);
-				if (status == MB_SUCCESS)
-					{
-					if (timelagmode == MB7KPREPROCESS_TIMELAG_OFF
-						&& installation->position_time_delay != 0)
-						status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
-								1, 0,
-								MB7KPREPROCESS_TIMELAG_CONSTANT,
-								(double)(0.001 * installation->position_time_delay),
-								0,
-								NULL,
-								NULL,
-								MB_SENSOR_POSITION_OFFSET_STATIC,
-								(double) installation->position_x,
-								(double) installation->position_y,
-								(double) installation->position_z,   
-								MB_SENSOR_ATTITUDE_OFFSET_NONE,
-								(double) 0.0,
-								(double) 0.0,
-								(double) 0.0,   
-								&error);
-					else
-						status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
-								1, 0,
-								timelagmode,
-								timelagconstant,
-								ntimelag,
-								timelag_time_d,
-								timelag_model,
-								MB_SENSOR_POSITION_OFFSET_STATIC,
-								(double) installation->position_x,
-								(double) installation->position_y,
-								(double) installation->position_z,   
-								MB_SENSOR_ATTITUDE_OFFSET_NONE,
-								(double) 0.0,
-								(double) 0.0,
-								(double) 0.0,   
-								&error);
-					}
-					
-				/* set sensor 2 (motion sensor) */
-				if (status == MB_SUCCESS)
-					status = mb_platform_add_sensor(verbose, (void **)&platform,
-							MB_SENSOR_TYPE_VRU,
-							NULL,
-							NULL,
-							NULL,
-							0, 0,
-							1, ntimelag,
-							&error);
-				if (status == MB_SUCCESS)
-					{
-					if (timelagmode == MB7KPREPROCESS_TIMELAG_OFF
-						&& installation->motion_time_delay != 0)
-						status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
-								2, 0,
-								MB7KPREPROCESS_TIMELAG_CONSTANT,
-								(double)(0.001 * installation->motion_time_delay),
-								0,
-								NULL,
-								NULL,
-								MB_SENSOR_POSITION_OFFSET_STATIC,
-								(double) installation->motion_x,
-								(double) installation->motion_y,
-								(double) installation->motion_z,   
-								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
-								(double) installation->motion_heading,
-								(double) installation->motion_roll,
-								(double) installation->motion_pitch,   
-								&error);
-					else
-						status = mb_platform_add_sensor_offset(verbose, (void **)&platform,
-								2, 0,
-								timelagmode,
-								timelagconstant,
-								ntimelag,
-								timelag_time_d,
-								timelag_model,
-								MB_SENSOR_POSITION_OFFSET_STATIC,
-								(double) installation->motion_x,
-								(double) installation->motion_y,
-								(double) installation->motion_z,   
-								MB_SENSOR_ATTITUDE_OFFSET_STATIC,
-								(double) installation->motion_heading,
-								(double) installation->motion_roll,
-								(double) installation->motion_pitch,   
-								&error);
-					}
+                status = mb_extract_platform(verbose, imbio_ptr, istore_ptr,
+                                                &kind,  (void *)platform, &error);
 				
 				/* deal with error */
 				if (status == MB_FAILURE)
@@ -3046,7 +3070,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			}
 
-	   	/* handle bluefin ctd data */
+		/* handle bluefin ctd data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_SSV)
 			{
 			nrec_bluefinenv++;
@@ -3084,7 +3108,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			}
 
-	   	/* handle bluefin nav data */
+		/* handle bluefin nav data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_NAV2)
 			{
 			nrec_bluefinnav++;
@@ -3102,7 +3126,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 
 			/* apply time delay from MBARI AUV if not set and data are pre-2012 */
 			if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_UNDEFINED
-			    && header->s7kTime.Year < 2012)
+				&& header->s7kTime.Year < 2012)
 				timedelaymode = MB7KPREPROCESS_TIMEDELAY_ON;
 			else if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_UNDEFINED)
 				timedelaymode = MB7KPREPROCESS_TIMEDELAY_OFF;
@@ -3163,7 +3187,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -3180,7 +3204,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -3199,7 +3223,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -3216,7 +3240,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -3234,7 +3258,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -3312,7 +3336,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			}
 
 
-	   	/* handle subbottom data */
+		/* handle subbottom data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 			{
 			nrec_fsdwsbp++;
@@ -3337,7 +3361,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				fsdwsb->ping_number,fsdwchannel->sample_interval,fsdwchannel->number_samples);
 			}
 
-	   	/* handle low frequency sidescan data */
+		/* handle low frequency sidescan data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2)
 			{
 			nrec_fsdwsslo++;
@@ -3380,7 +3404,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					mb_error(verbose,error,&message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
+						program_name);
 					exit(error);
 					}
 				}
@@ -3420,7 +3444,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			sslo_last_ping = fsdwssheader->pingNum;
 			}
 
-	   	/* handle high frequency sidescan data */
+		/* handle high frequency sidescan data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN3)
 			{
 			nrec_fsdwsshi++;
@@ -3449,14 +3473,14 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			}
 
-	   	/* handle unknown data */
+		/* handle unknown data */
 		else  if (status == MB_SUCCESS)
 			{
 /*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nrec_other++;
 			}
 
-	   	/* handle read error */
+		/* handle read error */
 		else
 			{
 /*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
@@ -3537,68 +3561,67 @@ sonardepth_sonardepth[nsonardepth]);*/
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other);
-	nrec_fileheader_tot += nrec_fileheader;
-	nrec_multibeam_tot += nrec_multibeam;
-	nrec_volatilesettings_tot += nrec_volatilesettings;
-	nrec_matchfilter_tot += nrec_matchfilter;
-	nrec_beamgeometry_tot += nrec_beamgeometry;
-	nrec_remotecontrolsettings_tot += nrec_remotecontrolsettings;
-	nrec_bathymetry_tot += nrec_bathymetry;
-	nrec_backscatter_tot += nrec_backscatter;
-	nrec_beam_tot += nrec_beam;
-	nrec_image_tot += nrec_image;
-	nrec_v2pingmotion_tot += nrec_v2pingmotion;
-	nrec_v2detectionsetup_tot += nrec_v2detectionsetup;
-	nrec_v2beamformed_tot += nrec_v2beamformed;
-	nrec_v2detection_tot += nrec_v2detection;
-	nrec_v2rawdetection_tot += nrec_v2rawdetection;
-	nrec_v2snippet_tot += nrec_v2snippet;
-	nrec_calibratedsnippet_tot += nrec_calibratedsnippet;
-	nrec_processedsidescan_tot += nrec_processedsidescan;
-	nrec_reference_tot += nrec_reference;
-	nrec_sensoruncal_tot += nrec_sensoruncal;
-	nrec_sensorcal_tot += nrec_sensorcal;
-	nrec_position_tot += nrec_position;
-	nrec_customattitude_tot += nrec_customattitude;
-	nrec_tide_tot += nrec_tide;
-	nrec_altitude_tot += nrec_altitude;
-	nrec_motion_tot += nrec_motion;
-	nrec_depth_tot += nrec_depth;
-	nrec_svp_tot += nrec_svp;
-	nrec_ctd_tot += nrec_ctd;
-	nrec_geodesy_tot += nrec_geodesy;
-	nrec_rollpitchheave_tot += nrec_rollpitchheave;
-	nrec_heading_tot += nrec_heading;
-	nrec_surveyline_tot += nrec_surveyline;
-	nrec_navigation_tot += nrec_navigation;
-	nrec_attitude_tot += nrec_attitude;
-	nrec_fsdwsbp_tot += nrec_fsdwsbp;
-	nrec_fsdwsslo_tot += nrec_fsdwsslo;
-	nrec_fsdwsshi_tot += nrec_fsdwsshi;
-	nrec_bluefinenv_tot += nrec_bluefinenv;
-	nrec_position_tot += nrec_position;
-	nrec_bluefinnav_tot += nrec_bluefinnav;
-	nrec_configuration_tot += nrec_configuration;
-	nrec_calibration_tot += nrec_calibration;
-	nrec_verticaldepth_tot += nrec_verticaldepth;
-	nrec_installation_tot += nrec_installation;
-	nrec_systemeventmessage_tot += nrec_systemeventmessage;
-	nrec_other_tot += nrec_other;
+    nrec_reference_tot += nrec_reference;
+    nrec_sensoruncal_tot += nrec_sensoruncal;
+    nrec_sensorcal_tot += nrec_sensorcal;
+    nrec_position_tot += nrec_position;
+    nrec_customattitude_tot += nrec_customattitude;
+    nrec_tide_tot += nrec_tide;
+    nrec_altitude_tot += nrec_altitude;
+    nrec_motion_tot += nrec_motion;
+    nrec_depth_tot += nrec_depth;
+    nrec_svp_tot += nrec_svp;
+    nrec_ctd_tot += nrec_ctd;
+    nrec_geodesy_tot += nrec_geodesy;
+    nrec_rollpitchheave_tot += nrec_rollpitchheave;
+    nrec_heading_tot += nrec_heading;
+    nrec_surveyline_tot += nrec_surveyline;
+    nrec_navigation_tot += nrec_navigation;
+    nrec_attitude_tot += nrec_attitude;
+    nrec_fsdwsslo_tot += nrec_fsdwsslo;
+    nrec_fsdwsshi_tot += nrec_fsdwsshi;
+    nrec_fsdwsbp_tot += nrec_fsdwsbp;
+    nrec_bluefinnav_tot += nrec_bluefinnav;
+    nrec_bluefinenv_tot += nrec_bluefinenv;
+    nrec_multibeam_tot += nrec_multibeam;
+    nrec_volatilesettings_tot += nrec_volatilesettings;
+    nrec_configuration_tot += nrec_configuration;
+    nrec_matchfilter_tot += nrec_matchfilter;
+    nrec_beamgeometry_tot += nrec_beamgeometry;
+    nrec_calibration_tot += nrec_calibration;
+    nrec_bathymetry_tot += nrec_bathymetry;
+    nrec_backscatter_tot += nrec_backscatter;
+    nrec_beam_tot += nrec_beam;
+    nrec_verticaldepth_tot += nrec_verticaldepth;
+    nrec_image_tot += nrec_image;
+    nrec_v2pingmotion_tot += nrec_v2pingmotion;
+    nrec_v2detectionsetup_tot += nrec_v2detectionsetup;
+    nrec_v2beamformed_tot += nrec_v2beamformed;
+    nrec_v2detection_tot += nrec_v2detection;
+    nrec_v2rawdetection_tot += nrec_v2rawdetection;
+    nrec_v2snippet_tot += nrec_v2snippet;
+    nrec_calibratedsnippet_tot += nrec_calibratedsnippet;
+    nrec_processedsidescan_tot += nrec_processedsidescan;
+    nrec_installation_tot += nrec_installation;
+    nrec_systemeventmessage_tot += nrec_systemeventmessage;
+    nrec_fileheader_tot += nrec_fileheader;
+    nrec_remotecontrolsettings_tot += nrec_remotecontrolsettings;
+    nrec_other_tot += nrec_other;
 
 	/* figure out whether and what to read next */
-        if (read_datalist == MB_YES)
-                {
+		if (read_datalist == MB_YES)
+				{
 		if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error))
-			    == MB_SUCCESS)
-                        read_data = MB_YES;
-                else
-                        read_data = MB_NO;
-                }
-        else
-                {
-                read_data = MB_NO;
-                }
+				ifile,&format,&file_weight,&error))
+				== MB_SUCCESS)
+						read_data = MB_YES;
+				else
+						read_data = MB_NO;
+				}
+		else
+				{
+				read_data = MB_NO;
+				}
 
 	/* end loop over files in list */
 	}
@@ -4327,45 +4350,52 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation_tot);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage_tot);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other_tot);
-
-	nrec_reference_tot = 0;
-	nrec_sensoruncal_tot = 0;
-	nrec_sensorcal_tot = 0;
-	nrec_position_tot = 0;
-	nrec_customattitude_tot = 0;
-	nrec_tide_tot = 0;
-	nrec_altitude_tot = 0;
-	nrec_motion_tot = 0;
-	nrec_depth_tot = 0;
-	nrec_svp_tot = 0;
-	nrec_ctd_tot = 0;
-	nrec_geodesy_tot = 0;
-	nrec_rollpitchheave_tot = 0;
-	nrec_heading_tot = 0;
-	nrec_surveyline_tot = 0;
-	nrec_navigation_tot = 0;
-	nrec_attitude_tot = 0;
-	nrec_fsdwsslo_tot = 0;
-	nrec_fsdwsshi_tot = 0;
-	nrec_fsdwsbp_tot = 0;
-	nrec_bluefinnav_tot = 0;
-	nrec_bluefinenv_tot = 0;
-	nrec_multibeam_tot = 0;
-	nrec_volatilesettings_tot = 0;
-	nrec_configuration_tot = 0;
-	nrec_matchfilter_tot = 0;
-	nrec_beamgeometry_tot = 0;
-	nrec_calibration_tot = 0;
-	nrec_bathymetry_tot = 0;
-	nrec_backscatter_tot = 0;
-	nrec_beam_tot = 0;
-	nrec_verticaldepth_tot = 0;
-	nrec_image_tot = 0;
-	nrec_installation_tot = 0;
-	nrec_systemeventmessage_tot = 0;
-	nrec_fileheader_tot = 0;
-	nrec_remotecontrolsettings_tot = 0;
-	nrec_other_tot = 0;
+    nrec_reference_tot = 0;
+    nrec_sensoruncal_tot = 0;
+    nrec_sensorcal_tot = 0;
+    nrec_position_tot = 0;
+    nrec_customattitude_tot = 0;
+    nrec_tide_tot = 0;
+    nrec_altitude_tot = 0;
+    nrec_motion_tot = 0;
+    nrec_depth_tot = 0;
+    nrec_svp_tot = 0;
+    nrec_ctd_tot = 0;
+    nrec_geodesy_tot = 0;
+    nrec_rollpitchheave_tot = 0;
+    nrec_heading_tot = 0;
+    nrec_surveyline_tot = 0;
+    nrec_navigation_tot = 0;
+    nrec_attitude_tot = 0;
+    nrec_fsdwsslo_tot = 0;
+    nrec_fsdwsshi_tot = 0;
+    nrec_fsdwsbp_tot = 0;
+    nrec_bluefinnav_tot = 0;
+    nrec_bluefinenv_tot = 0;
+    nrec_multibeam_tot = 0;
+    nrec_volatilesettings_tot = 0;
+    nrec_configuration_tot = 0;
+    nrec_matchfilter_tot = 0;
+    nrec_beamgeometry_tot = 0;
+    nrec_calibration_tot = 0;
+    nrec_bathymetry_tot = 0;
+    nrec_backscatter_tot = 0;
+    nrec_beam_tot = 0;
+    nrec_verticaldepth_tot = 0;
+    nrec_image_tot = 0;
+    nrec_v2pingmotion_tot = 0;
+    nrec_v2detectionsetup_tot = 0;
+    nrec_v2beamformed_tot = 0;
+    nrec_v2detection_tot = 0;
+    nrec_v2rawdetection_tot = 0;
+    nrec_v2snippet_tot = 0;
+    nrec_calibratedsnippet_tot = 0;
+    nrec_processedsidescan_tot = 0;
+    nrec_installation_tot = 0;
+    nrec_systemeventmessage_tot = 0;
+    nrec_fileheader_tot = 0;
+    nrec_remotecontrolsettings_tot = 0;
+    nrec_other_tot = 0;
 
 	/* now read the data files again, this time interpolating nav and attitude
 		into the multibeam records and fixing other problems found in the
@@ -4375,9 +4405,9 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 
 	/* open file list */
 	if (read_datalist == MB_YES)
-	    {
-	    if ((status = mb_datalist_open(verbose,&datalist,
-					    read_file,look_processed,&error)) != MB_SUCCESS)
+		{
+		if ((status = mb_datalist_open(verbose,&datalist,
+						read_file,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -4386,19 +4416,19 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 			program_name);
 		exit(error);
 		}
-	    if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error))
-			    == MB_SUCCESS)
+		if ((status = mb_datalist_read(verbose,datalist,
+				ifile,&format,&file_weight,&error))
+				== MB_SUCCESS)
 		read_data = MB_YES;
-	    else
+		else
 		read_data = MB_NO;
-	    }
+		}
 	/* else copy single filename to be read */
 	else
-	    {
-	    strcpy(ifile, read_file);
-	    read_data = MB_YES;
-	    }
+		{
+		strcpy(ifile, read_file);
+		read_data = MB_YES;
+		}
 
 	/* loop over all files to be read */
 	while (read_data == MB_YES && format == MBF_RESON7KR)
@@ -4562,7 +4592,10 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 		exit(error);
 		}
 
+
 	/* reset file record counters */
+	nfile_read = 0;
+	nfile_write = 0;
 	nrec_reference = 0;
 	nrec_sensoruncal = 0;
 	nrec_sensorcal = 0;
@@ -4610,6 +4643,44 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 	nrec_remotecontrolsettings = 0;
 	nrec_other = 0;
 
+    /* if requested to look for jumps in multibeam time then load
+       any available bathymetry edits so those time stamps can
+       be fixed too */
+	esffile_open = MB_NO;
+    if (error == MB_ERROR_NO_ERROR && kluge_fixtimejump == MB_YES)
+		{
+		/* progress message */
+		fprintf(stderr, "Checking for existing bathymetry edits...\n");
+		
+		/* check for existing esf file */
+		esf_status = mb_esf_check(verbose, ofile, esffile, &found, &error);
+
+		/* if esf file found load it */
+		if (esf_status == MB_SUCCESS && found == MB_YES)
+			{
+			esf_status = mb_esf_load(verbose, ofile, MB_YES, MB_YES, esffile, &esf, &error);
+			if (status == MB_SUCCESS
+				&& esf.esffp != NULL)
+				esffile_open = MB_YES;
+			if (status == MB_FAILURE
+					&& error == MB_ERROR_OPEN_FAIL)
+				{
+				esffile_open = MB_NO;
+				fprintf(stderr, "\nUnable to open new edit save file %s\n",
+				esf.esffile);
+				}
+			else if (status == MB_FAILURE
+					&& error == MB_ERROR_MEMORY_FAIL)
+				{
+				esffile_open = MB_NO;
+				fprintf(stderr, "\nUnable to allocate memory for edits in esf file %s\n", esf.esffile);
+				}
+				
+			/* progress message */
+			fprintf(stderr, "%d existing edits sorted...\n",esf.nedit);
+			}
+		}
+
 	/* read and print data */
 	while (error <= MB_ERROR_NO_ERROR)
 		{
@@ -4619,13 +4690,13 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 
 		/* read next data record */
 		status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
-				    time_i,&time_d,&navlon,&navlat,
-				    &speed,&heading,
-				    &distance,&altitude,&sonardepth,
-				    &beams_bath,&beams_amp,&pixels_ss,
-				    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-				    ss,ssacrosstrack,ssalongtrack,
-				    comment,&error);
+					time_i,&time_d,&navlon,&navlat,
+					&speed,&heading,
+					&distance,&altitude,&sonardepth,
+					&beams_bath,&beams_amp,&pixels_ss,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
+					comment,&error);
 
 		/* some nonfatal errors do not matter */
 		if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE)
@@ -4634,7 +4705,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 			status = MB_SUCCESS;
 			}
 
-	   	/* handle multibeam data */
+		/* handle multibeam data */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 			nrec_multibeam++;
@@ -4676,6 +4747,102 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				nrec_calibratedsnippet++;
 			if (istore->read_processedsidescan == MB_YES)
 				nrec_processedsidescan++;
+			
+            /* if requested look for jumps in multibeam time and fix them if necessary */
+            if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA
+				&& istore->read_bathymetry == MB_YES
+				&& kluge_fixtimejump == MB_YES)
+				{
+				/* compare interval between the current and previous ping with
+				   the expected interval */
+				bathymetry = &(istore->bathymetry);
+				header = &(bathymetry->header);
+				time_interval = time_d - time_d_old;
+				ping_increment = bathymetry->ping_number - ping_number_old;
+				if (nrec_bathymetry > 1
+						&& fabs(time_interval - ping_increment * kluge_timejump_interval)
+								>= kluge_timejump_threshold)
+						{
+						fprintf(stderr,"*** Timestamp adjusted from "
+								"%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d to ",
+							time_i[0],time_i[1],time_i[2],
+							time_i[3],time_i[4],time_i[5],time_i[6]);
+
+						/* predict what the timestamp should be */
+						time_d_org = time_d;
+						time_d = time_d_old + ping_increment * kluge_timejump_interval;
+						dtime_d = ping_increment * kluge_timejump_interval - time_interval;
+
+						/* get s7k timestamp structure of new timestamp */
+						mb_get_date(verbose, time_d, time_i);
+						mb_get_jtime(verbose, time_i, time_j);
+						s7kTime.Year = time_i[0];
+						s7kTime.Day = time_j[1];
+						s7kTime.Hours = time_i[3];
+						s7kTime.Minutes = time_i[4];
+						s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+						fprintf(stderr,"%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
+								"| delta: %.6f seconds | ping_number:%d\n",
+							time_i[0],time_i[1],time_i[2],
+							time_i[3],time_i[4],time_i[5],time_i[6],
+							dtime_d, bathymetry->ping_number);
+						
+						/* apply the timestamp to all of the relevant data records */
+						if (istore->read_volatilesettings == MB_YES)
+						    istore->volatilesettings.header.s7kTime = s7kTime;
+						if (istore->read_matchfilter == MB_YES)
+							istore->matchfilter.header.s7kTime = s7kTime;
+						if (istore->read_beamgeometry == MB_YES)
+							istore->beamgeometry.header.s7kTime = s7kTime;
+						if (istore->read_remotecontrolsettings == MB_YES)
+							istore->remotecontrolsettings.header.s7kTime = s7kTime;
+						if (istore->read_bathymetry == MB_YES)
+							istore->bathymetry.header.s7kTime = s7kTime;
+						if (istore->read_backscatter == MB_YES)
+							istore->backscatter.header.s7kTime = s7kTime;
+						if (istore->read_beam == MB_YES)
+							istore->beam.header.s7kTime = s7kTime;
+						if (istore->read_verticaldepth == MB_YES)
+							istore->verticaldepth.header.s7kTime = s7kTime;
+						if (istore->read_image == MB_YES)
+							istore->image.header.s7kTime = s7kTime;
+						if (istore->read_v2pingmotion == MB_YES)
+							istore->v2pingmotion.header.s7kTime = s7kTime;
+						if (istore->read_v2detectionsetup == MB_YES)
+							istore->v2detectionsetup.header.s7kTime = s7kTime;
+						if (istore->read_v2beamformed == MB_YES)
+							istore->v2beamformed.header.s7kTime = s7kTime;
+						if (istore->read_v2detection == MB_YES)
+							istore->v2detection.header.s7kTime = s7kTime;
+						if (istore->read_v2rawdetection == MB_YES)
+							istore->v2rawdetection.header.s7kTime = s7kTime;
+						if (istore->read_v2snippet == MB_YES)
+							istore->v2snippet.header.s7kTime = s7kTime;
+						if (istore->read_calibratedsnippet == MB_YES)
+							istore->calibratedsnippet.header.s7kTime = s7kTime;
+						if (istore->read_processedsidescan == MB_YES)
+							istore->processedsidescan.header.s7kTime = s7kTime;
+							
+						/* apply the timestamp change to any affected beam edits */
+						if (esffile_open == MB_YES)
+								{
+								for (i = 0; i < esf.nedit; i++)
+										{
+										if (fabs(esf.edit[i].time_d - time_d_org) < time_d_tolerance)
+											{
+											esf.edit[i].time_d = time_d;
+										    fprintf(stderr,"     Beam edit timestamp adjusted: "
+														"%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %2d\n",
+														time_i[0],time_i[1],time_i[2],
+														time_i[3],time_i[4],time_i[5],time_i[6],
+														esf.edit[i].beam, esf.edit[i].action);
+											}
+										}
+								}
+						}
+				time_d_old = time_d;
+				ping_number_old = bathymetry->ping_number;
+				}
 
 			/* print out record headers */
 			if (istore->read_volatilesettings == MB_YES)
@@ -5239,8 +5406,8 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 
 					if (platform != NULL)
 						{
-						status = mb_platform_position(verbose, (void **)&platform,
-										platform->source_swathbathymetry, 0,
+						status = mb_platform_position(verbose,  (void *)platform,
+										platform->source_bathymetry, 0,
 										navlon, navlat, sonardepth,
 										heading, roll, pitch,
 										&navlon, &navlat, &sonardepth,
@@ -5259,13 +5426,15 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 					}
 
 				/* if the optional data are available, then proceed */
-				if (status == MB_SUCCESS)
+				if (status == MB_SUCCESS
+					&& (bathymetry->optionaldata == MB_NO
+						|| kluge_donotrecalculatebathy == MB_NO))
 					{		
 					/* initialize all of the beams */
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
 						if (istore->read_v2rawdetection == MB_YES
-						    || (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES))
+							|| (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES))
 							bathymetry->quality[i] = 0;
 						bathymetry->depth[i] = 0.0;
 						bathymetry->acrosstrack[i] = 0.0;
@@ -5358,13 +5527,13 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 					/* get transducer angular offsets */
 					if (platform != NULL)
 						{
-						status = mb_platform_orientation_offset(verbose, (void **)&platform,
-										platform->source_swathbathymetry, 0,
+						status = mb_platform_orientation_offset(verbose,  (void *)platform,
+										platform->source_bathymetry, 0,
 										&(tx_align.heading), &(tx_align.roll), &(tx_align.pitch),
 										&error);
 
-						status = mb_platform_orientation_offset(verbose, (void **)&platform,
-										platform->source_swathbathymetry, 0,
+						status = mb_platform_orientation_offset(verbose,  (void *)platform,
+										platform->source_bathymetry, 0,
 										&(rx_align.heading), &(rx_align.roll), &(rx_align.pitch),
 										&error);
 
@@ -5541,7 +5710,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 // 180 = 90 + X ==> X = 90
 // 90 = -0 + X ==> X = 90
 // 0 = -90 + X ==> X = 90
- 														
+														
 							/* calculate beam angles the old way */
 							/*alpha = RTD * (beampitchr + v2rawdetection->tx_angle) + pitchbias;
 							beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - beamrollr) + rollbias;
@@ -5819,7 +5988,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 								
 								/* calculate bathymetry */
 								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr
-									       + volatilesettings->steering_vertical) + pitchbias;
+										   + volatilesettings->steering_vertical) + pitchbias;
 								beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - beamrollr) + rollbias;
 								mb_rollpitch_to_takeoff(
 									verbose,
@@ -5926,7 +6095,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 						MB_YES, &error);
 			}
 
-	   	/* handle reference point data */
+		/* handle reference point data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_ReferencePoint)
 			{
 			nrec_reference++;
@@ -5947,7 +6116,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				header->RecordNumber);
 			}
 
-	   	/* handle uncalibrated sensor offset data */
+		/* handle uncalibrated sensor offset data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_UncalibratedSensorOffset)
 			{
 			nrec_sensoruncal++;
@@ -5968,7 +6137,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				header->RecordNumber);
 			}
 
-	   	/* handle calibrated sensor offset data */
+		/* handle calibrated sensor offset data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_CalibratedSensorOffset)
 			{
 			nrec_sensorcal++;
@@ -5989,7 +6158,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				header->RecordNumber);
 			}
 
-	   	/* handle position data */
+		/* handle position data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Position)
 			{
 			nrec_position++;
@@ -6039,7 +6208,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 			header->RecordNumber);
 			}
 
-	   	/* handle customattitude data */
+		/* handle customattitude data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_CustomAttitude)
 			{
 			nrec_customattitude++;
@@ -6097,7 +6266,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				}
 			}
 
-	   	/* handle tide data */
+		/* handle tide data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Tide)
 			{
 			nrec_tide++;
@@ -6118,7 +6287,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				header->RecordNumber);
 			}
 
-	   	/* handle altitude data */
+		/* handle altitude data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Altitude)
 			{
 			nrec_altitude++;
@@ -6168,7 +6337,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				header->RecordNumber);
 			}
 
-	   	/* handle motion data */
+		/* handle motion data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_MotionOverGround)
 			{
 			nrec_motion++;
@@ -6218,7 +6387,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				header->RecordNumber,motion->n);
 			}
 
-	   	/* handle depth data */
+		/* handle depth data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Depth)
 			{
 			nrec_depth++;
@@ -6268,7 +6437,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				header->RecordNumber);
 			}
 
-	   	/* handle sound velocity data */
+		/* handle sound velocity data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_SoundVelocityProfile)
 			{
 			nrec_svp++;
@@ -6318,7 +6487,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				header->RecordNumber,svp->n);
 			}
 
-	   	/* handle ctd data */
+		/* handle ctd data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_CTD)
 			{
 			nrec_ctd++;
@@ -6377,7 +6546,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				}
 			}
 
-	   	/* handle geodesy data */
+		/* handle geodesy data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Geodesy)
 			{
 			nrec_geodesy++;
@@ -6399,7 +6568,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 			header->RecordNumber);
 			}
 
-	   	/* handle rollpitchheave data */
+		/* handle rollpitchheave data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_RollPitchHeave)
 			{
 			nrec_rollpitchheave++;
@@ -6453,7 +6622,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 					time_d, RTD * rollpitchheave->roll, RTD * rollpitchheave->pitch);
 			}
 
-	   	/* handle heading data */
+		/* handle heading data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Heading)
 			{
 			nrec_heading++;
@@ -6506,7 +6675,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 			fprintf(athfp, "%0.6f\t%7.3f\n", time_d, RTD * headingrec->heading);
 			}
 
-	   	/* handle survey line data */
+		/* handle survey line data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_SurveyLine)
 			{
 			nrec_surveyline++;
@@ -6528,7 +6697,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 			header->RecordNumber);
 			}
 
-	   	/* handle navigation data */
+		/* handle navigation data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Navigation)
 			{
 			nrec_navigation++;
@@ -6578,7 +6747,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 			header->RecordNumber);
 			}
 
-	   	/* handle attitude data */
+		/* handle attitude data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Attitude)
 			{
 			nrec_attitude++;
@@ -6635,7 +6804,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				}
 			}
 
-	   	/* handle file header data */
+		/* handle file header data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_7kFileHeader)
 			{
 			nrec_fileheader++;
@@ -6656,7 +6825,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				header->RecordNumber);
 			}
 
-	   	/* handle installation data */
+		/* handle installation data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_7kInstallationParameters)
 			{
 			nrec_installation++;
@@ -6677,7 +6846,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				header->RecordNumber);
 			}
 
-	   	/* handle bluefin ctd data */
+		/* handle bluefin ctd data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_SSV)
 			{
 			nrec_bluefinenv++;
@@ -6898,7 +7067,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				}
 			}
 
-	   	/* handle bluefin nav data */
+		/* handle bluefin nav data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_NAV2)
 			{
 			nrec_bluefinnav++;
@@ -6980,9 +7149,9 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				/* output asynchronous heading, sonardepth, and attitude */
 				fprintf(athfp, "%0.6f\t%7.3f\n", time_d, RTD * bluefin->nav[i].yaw);
 				sonardepth = bluefin->nav[i].depth
-						+ depthsensoroffx * sin(bluefin->nav[i].roll)
-						+ depthsensoroffy * sin(bluefin->nav[i].pitch)
-						+ depthsensoroffz * cos(bluefin->nav[i].pitch)
+						+ depth_offset_x * sin(bluefin->nav[i].roll)
+						+ depth_offset_y * sin(bluefin->nav[i].pitch)
+						+ depth_offset_z * cos(bluefin->nav[i].pitch)
 						+ sonardepthoffset;
 				fprintf(atsfp, "%0.6f\t%0.3f\n", time_d, sonardepth);
 				fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n",
@@ -6990,7 +7159,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				}
 			}
 
-	   	/* handle subbottom data */
+		/* handle subbottom data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 			{
 			nrec_fsdwsbp++;
@@ -7053,7 +7222,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				}
 			}
 
-	   	/* handle low frequency sidescan data */
+		/* handle low frequency sidescan data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2)
 			{
 			nrec_fsdwsslo++;
@@ -7125,7 +7294,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				}
 			}
 
-	   	/* handle high frequency sidescan data */
+		/* handle high frequency sidescan data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN3)
 			{
 			nrec_fsdwsshi++;
@@ -7198,14 +7367,14 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				}
 			}
 
-	   	/* handle unknown data */
+		/* handle unknown data */
 		else  if (status == MB_SUCCESS)
 			{
 /*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nrec_other++;
 			}
 
-	   	/* handle read error */
+		/* handle read error */
 		else
 			{
 /*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
@@ -7225,7 +7394,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 	  write the processed data
 	  --------------------------------------------*/
 
-	  	/* if using AUV ins data log for navigation and attitude, then
+		/* if using AUV ins data log for navigation and attitude, then
 			output these data in new bluefin racords while not outputting
 			any old bluefin records. */
 		if (nins > 0 && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
@@ -7371,6 +7540,11 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 				}
 			}
 
+		/* do not output compressed image data */
+		if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA
+			&& istore->read_image == MB_YES)
+			istore->read_image = MB_NO;
+
 		/* do not output full beam data */
 		if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA
 			&& istore->read_beam == MB_YES)
@@ -7447,68 +7621,65 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other);
-	nrec_fileheader_tot += nrec_fileheader;
-	nrec_multibeam_tot += nrec_multibeam;
-	nrec_volatilesettings_tot += nrec_volatilesettings;
-	nrec_matchfilter_tot += nrec_matchfilter;
-	nrec_beamgeometry_tot += nrec_beamgeometry;
-	nrec_remotecontrolsettings_tot += nrec_remotecontrolsettings;
-	nrec_bathymetry_tot += nrec_bathymetry;
-	nrec_backscatter_tot += nrec_backscatter;
-	nrec_beam_tot += nrec_beam;
-	nrec_image_tot += nrec_image;
-	nrec_v2pingmotion_tot += nrec_v2pingmotion;
-	nrec_v2detectionsetup_tot += nrec_v2detectionsetup;
-	nrec_v2beamformed_tot += nrec_v2beamformed;
-	nrec_v2detection_tot += nrec_v2detection;
-	nrec_v2rawdetection_tot += nrec_v2rawdetection;
-	nrec_v2snippet_tot += nrec_v2snippet;
-	nrec_calibratedsnippet_tot += nrec_calibratedsnippet;
-	nrec_processedsidescan_tot += nrec_processedsidescan;
-	nrec_reference_tot += nrec_reference;
-	nrec_sensoruncal_tot += nrec_sensoruncal;
-	nrec_sensorcal_tot += nrec_sensorcal;
-	nrec_position_tot += nrec_position;
-	nrec_customattitude_tot += nrec_customattitude;
-	nrec_tide_tot += nrec_tide;
-	nrec_altitude_tot += nrec_altitude;
-	nrec_motion_tot += nrec_motion;
-	nrec_depth_tot += nrec_depth;
-	nrec_svp_tot += nrec_svp;
-	nrec_ctd_tot += nrec_ctd;
-	nrec_geodesy_tot += nrec_geodesy;
-	nrec_rollpitchheave_tot += nrec_rollpitchheave;
-	nrec_heading_tot += nrec_heading;
-	nrec_surveyline_tot += nrec_surveyline;
-	nrec_navigation_tot += nrec_navigation;
-	nrec_attitude_tot += nrec_attitude;
-	nrec_fsdwsbp_tot += nrec_fsdwsbp;
-	nrec_fsdwsslo_tot += nrec_fsdwsslo;
-	nrec_fsdwsshi_tot += nrec_fsdwsshi;
-	nrec_bluefinenv_tot += nrec_bluefinenv;
-	nrec_position_tot += nrec_position;
-	nrec_bluefinnav_tot += nrec_bluefinnav;
-	nrec_configuration_tot += nrec_configuration;
-	nrec_calibration_tot += nrec_calibration;
-	nrec_verticaldepth_tot += nrec_verticaldepth;
-	nrec_installation_tot += nrec_installation;
-	nrec_systemeventmessage_tot += nrec_systemeventmessage;
-	nrec_other_tot += nrec_other;
+    nrec_reference_tot += nrec_reference;
+    nrec_sensoruncal_tot += nrec_sensoruncal;
+    nrec_sensorcal_tot += nrec_sensorcal;
+    nrec_position_tot += nrec_position;
+    nrec_customattitude_tot += nrec_customattitude;
+    nrec_tide_tot += nrec_tide;
+    nrec_altitude_tot += nrec_altitude;
+    nrec_motion_tot += nrec_motion;
+    nrec_depth_tot += nrec_depth;
+    nrec_svp_tot += nrec_svp;
+    nrec_ctd_tot += nrec_ctd;
+    nrec_geodesy_tot += nrec_geodesy;
+    nrec_rollpitchheave_tot += nrec_rollpitchheave;
+    nrec_heading_tot += nrec_heading;
+    nrec_surveyline_tot += nrec_surveyline;
+    nrec_navigation_tot += nrec_navigation;
+    nrec_attitude_tot += nrec_attitude;
+    nrec_fsdwsslo_tot += nrec_fsdwsslo;
+    nrec_fsdwsshi_tot += nrec_fsdwsshi;
+    nrec_fsdwsbp_tot += nrec_fsdwsbp;
+    nrec_bluefinnav_tot += nrec_bluefinnav;
+    nrec_bluefinenv_tot += nrec_bluefinenv;
+    nrec_multibeam_tot += nrec_multibeam;
+    nrec_volatilesettings_tot += nrec_volatilesettings;
+    nrec_configuration_tot += nrec_configuration;
+    nrec_matchfilter_tot += nrec_matchfilter;
+    nrec_beamgeometry_tot += nrec_beamgeometry;
+    nrec_calibration_tot += nrec_calibration;
+    nrec_bathymetry_tot += nrec_bathymetry;
+    nrec_backscatter_tot += nrec_backscatter;
+    nrec_beam_tot += nrec_beam;
+    nrec_verticaldepth_tot += nrec_verticaldepth;
+    nrec_image_tot += nrec_image;
+    nrec_v2pingmotion_tot += nrec_v2pingmotion;
+    nrec_v2detectionsetup_tot += nrec_v2detectionsetup;
+    nrec_v2beamformed_tot += nrec_v2beamformed;
+    nrec_v2detection_tot += nrec_v2detection;
+    nrec_v2rawdetection_tot += nrec_v2rawdetection;
+    nrec_v2snippet_tot += nrec_v2snippet;
+    nrec_calibratedsnippet_tot += nrec_calibratedsnippet;
+    nrec_processedsidescan_tot += nrec_processedsidescan;
+    nrec_installation_tot += nrec_installation;
+    nrec_systemeventmessage_tot += nrec_systemeventmessage;
+    nrec_fileheader_tot += nrec_fileheader;
+    nrec_remotecontrolsettings_tot += nrec_remotecontrolsettings;
+    nrec_other_tot += nrec_other;
 
-	/* figure out whether and what to read next */
-        if (read_datalist == MB_YES)
-                {
-		if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error))
-			    == MB_SUCCESS)
-                        read_data = MB_YES;
-                else
-                        read_data = MB_NO;
-                }
-        else
-                {
-                read_data = MB_NO;
-                }
+    /* if fixing time stamps of existing beam edits
+		write out and close the edit save file */
+    if (kluge_fixtimejump == MB_YES && esffile_open == MB_YES)
+		{
+		for (i = 0; i < esf.nedit; i++)
+				{
+				status = mb_esf_save(verbose, &esf, esf.edit[i].time_d,
+									 esf.edit[i].beam, esf.edit[i].action,
+									 &error);
+				}
+		esf_status = mb_esf_close(verbose, &esf, &error);
+		}
 
 	/* close the input swath file */
 	status = mb_close(verbose,&imbio_ptr,&error);
@@ -7529,6 +7700,21 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 			status = mb_make_info(verbose, MB_YES, ofile, format, &error);
 			}
 		}
+
+	/* figure out whether and what to read next */
+		if (read_datalist == MB_YES)
+				{
+		if ((status = mb_datalist_read(verbose,datalist,
+				ifile,&format,&file_weight,&error))
+				== MB_SUCCESS)
+						read_data = MB_YES;
+				else
+						read_data = MB_NO;
+				}
+		else
+				{
+				read_data = MB_NO;
+				}
 
 	/* end loop over files in list */
 	}
@@ -7692,7 +7878,7 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 	/* deallocate platform structure */
 	if (platform != NULL)
 		{
-		status = mb_platform_deall(verbose, (void **)&platform, &error);
+		status = mb_platform_deall(verbose,  (void **)&platform, &error);
 		}
 
 	/* check memory */

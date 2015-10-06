@@ -35,15 +35,6 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: mbm_makedatalist.perl,v $
-#   Revision 5.1  2006/04/11 19:12:06  caress
-#   Macro now handles data in remote directories.
-#
-#   Revision 5.0  2006/02/03 21:06:18  caress
-#   Initial version of macro to generate a datalist of all recognizable swath files in a directory.
-#
-#
 #
 $program_name = "mbm_makedatalist";
 

@@ -19,37 +19,6 @@
  * Author:	D. W. Caress
  * Date:	July 15, 1997
  *
- * $Log: mb_put_comment.c,v $
- * Revision 5.3  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.1  2001/07/20 00:31:11  caress
- * Release 5.0.beta03
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.3  2000/10/11  01:02:30  caress
- * Convert to ANSI C
- *
- * Revision 4.2  2000/09/30  06:32:11  caress
- * Snapshot for Dale.
- *
- * Revision 4.1  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.0  1997/07/25  14:25:40  caress
- * Version 4.5beta2.
- *
- * Revision 4.0  1997/07/25  14:25:40  caress
- * Version 4.5beta2.
- *
- * Revision 1.1  1997/07/25  14:19:53  caress
- * Initial revision
- *
  *
  *
  */

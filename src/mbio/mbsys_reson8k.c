@@ -23,30 +23,6 @@
  * Author:	D. W. Caress
  * Date:	September 3, 2001
  *
- * $Log: mbsys_reson8k.c,v $
- * Revision 5.7  2007/10/08 15:59:34  caress
- * MBIO changes as of 8 October 2007.
- *
- * Revision 5.6  2006/08/09 22:41:27  caress
- * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
- *
- * Revision 5.5  2006/03/06 21:47:48  caress
- * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
- *
- * Revision 5.4  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.3  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.1  2001/11/16 01:32:31  caress
- * Working on it...
- *
- * Revision 5.0  2001/09/17  23:24:10  caress
- * Added XTF format.
  *
  *
  */

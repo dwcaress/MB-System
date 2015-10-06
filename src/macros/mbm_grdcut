@@ -40,30 +40,6 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: mbm_grdcut.perl,v $
-#   Revision 5.6  2006/11/26 09:42:01  caress
-#   Making distribution 5.1.0.
-#
-#   Revision 5.5  2006/09/11 18:55:52  caress
-#   Changes during Western Flyer and Thomas Thompson cruises, August-September
-#   2006.
-#
-#   Revision 5.4  2006/02/10 01:27:40  caress
-#   Fixed parsing of grdinfo output to handle changes to GMT4.1.
-#
-#   Revision 5.3  2003/07/02 18:12:33  caress
-#   Release 5.0.0
-#
-#   Revision 5.2  2003/04/17 20:42:48  caress
-#   Release 5.0.beta30
-#
-#   Revision 5.1  2001/06/03 06:59:24  caress
-#   Release 5.0.beta01
-#
-#   Revision 5.0  2001/04/24 23:29:35  caress
-#   Initital revision.
-#
 #
 #
 

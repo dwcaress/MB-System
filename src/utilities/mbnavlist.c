@@ -93,6 +93,7 @@ int main (int argc, char **argv)
 	int	pixels_ss;
 
 	/* data record source types */
+	int	platform_source;
 	int	nav_source;
 	int	heading_source;
 	int	vru_source;
@@ -408,7 +409,7 @@ int main (int argc, char **argv)
 	{
 	/* check format and get data sources */
 	if ((status = mb_format_source(verbose, &format,
-			&nav_source, &heading_source,
+			&platform_source, &nav_source, &heading_source,
 			&vru_source, &svp_source,
 			&error)) == MB_FAILURE)
 		{

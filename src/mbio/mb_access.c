@@ -549,10 +549,15 @@ int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-		double time_d, double navlon, double navlat,
-		double speed, double heading, double sonardepth,
-		double roll, double pitch, double heave,
+int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
+				double *nav_speed,
+		int n_sensordepth, double *sensordepth_time_d,
+				double *sensordepth_sensordepth,
+		int n_heading, double *heading_time_d, double *heading_heading,
+		int n_altitude, double *altitude_time_d, double *altitude_altitude,
+		int n_attitude, double *attitude_time_d, double *attitude_roll,
+				double *attitude_pitch, double *attitude_heave,
 		int *error)
 {
 	char	*function_name = "mb_preprocess";
@@ -565,18 +570,29 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:      %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:     %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       time_d:        %f\n",time_d);
-		fprintf(stderr,"dbg2       longitude:     %f\n",navlon);
-		fprintf(stderr,"dbg2       latitude:      %f\n",navlat);
-		fprintf(stderr,"dbg2       speed:         %f\n",speed);
-		fprintf(stderr,"dbg2       heading:       %f\n",heading);
-		fprintf(stderr,"dbg2       sonardepth:    %f\n",sonardepth);
-		fprintf(stderr,"dbg2       roll:          %f\n",roll);
-		fprintf(stderr,"dbg2       pitch:         %f\n",pitch);
-		fprintf(stderr,"dbg2       heave:         %f\n",heave);
+		fprintf(stderr,"dbg2       verbose:                    %d\n", verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
+		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
+		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
+		fprintf(stderr,"dbg2       nav_time_d:                 %p\n",nav_time_d);
+		fprintf(stderr,"dbg2       nav_lon:                    %p\n",nav_lon);
+		fprintf(stderr,"dbg2       nav_lat:                    %p\n",nav_lat);
+		fprintf(stderr,"dbg2       nav_speed:                  %p\n",nav_speed);
+		fprintf(stderr,"dbg2       n_sensordepth:              %d\n",n_sensordepth);
+		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n",sensordepth_time_d);
+		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n",sensordepth_sensordepth);
+		fprintf(stderr,"dbg2       n_heading:                  %d\n",n_heading);
+		fprintf(stderr,"dbg2       heading_time_d:             %p\n",heading_time_d);
+		fprintf(stderr,"dbg2       heading_heading:            %p\n",heading_heading);
+		fprintf(stderr,"dbg2       n_altitude:                 %d\n",n_altitude);
+		fprintf(stderr,"dbg2       altitude_time_d:            %p\n",altitude_time_d);
+		fprintf(stderr,"dbg2       altitude_altitude:          %p\n",altitude_altitude);
+		fprintf(stderr,"dbg2       n_attitude:                 %d\n",n_attitude);
+		fprintf(stderr,"dbg2       attitude_time_d:            %p\n",attitude_time_d);
+		fprintf(stderr,"dbg2       attitude_roll:              %p\n",attitude_roll);
+		fprintf(stderr,"dbg2       attitude_pitch:             %p\n",attitude_pitch);
+		fprintf(stderr,"dbg2       attitude_heave:             %p\n",attitude_heave);
 		}
 
 	/* get mbio descriptor */
@@ -586,10 +602,13 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 	if (mb_io_ptr->mb_io_preprocess != NULL)
 		{
 		status = (*mb_io_ptr->mb_io_preprocess)
-				(verbose, mbio_ptr, store_ptr,
-				time_d, navlon, navlat,
-				speed, heading, sonardepth,
-				roll, pitch, heave, error);
+				(verbose, mbio_ptr, store_ptr, platform_ptr,
+				n_nav, nav_time_d, nav_lon, nav_lat, nav_speed,
+				n_sensordepth, sensordepth_time_d, sensordepth_sensordepth,
+				n_heading, heading_time_d, heading_heading,
+				n_altitude, altitude_time_d, altitude_altitude,
+				n_attitude, attitude_time_d, attitude_roll, attitude_pitch, attitude_heave,
+				error);
 		}
 		
 	else
@@ -607,6 +626,131 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:        %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, void **platform_ptr, int *error)
+{
+	char	*function_name = "mb_extract_platform";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	struct mb_platform_struct *platform;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:      %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       platform_ptr:   %p\n",(void *)platform_ptr);
+		fprintf(stderr,"dbg2       *platform_ptr:  %p\n",(void *)*platform_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	if (mb_io_ptr->mb_io_extract_platform != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_extract_platform)
+						(verbose, mbio_ptr, store_ptr,
+							kind, platform_ptr, error);
+				
+		if (status == MB_SUCCESS && *platform_ptr == NULL)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_BAD_SYSTEM; 
+				}
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		platform = (struct mb_platform_struct *) *platform_ptr;
+		fprintf(stderr,"dbg2       platform:		     		    %p\n", platform);
+		fprintf(stderr,"dbg2       platform->type:		     		%d\n", platform->type);
+		fprintf(stderr,"dbg2       platform->name:		     		%s\n", platform->name);
+		fprintf(stderr,"dbg2       platform->organization:	     	%s\n", platform->organization);
+		fprintf(stderr,"dbg2       platform->source_bathymetry1:  	%d\n", platform->source_bathymetry1);
+		fprintf(stderr,"dbg2       platform->source_bathymetry2:  	%d\n", platform->source_bathymetry2);
+		fprintf(stderr,"dbg2       platform->source_bathymetry3:  	%d\n", platform->source_bathymetry3);
+		fprintf(stderr,"dbg2       platform->source_backscatter1:  	%d\n", platform->source_backscatter1);
+		fprintf(stderr,"dbg2       platform->source_backscatter2:  	%d\n", platform->source_backscatter2);
+		fprintf(stderr,"dbg2       platform->source_backscatter3:  	%d\n", platform->source_backscatter3);
+		fprintf(stderr,"dbg2       platform->source_position1:  	%d\n", platform->source_position1);
+		fprintf(stderr,"dbg2       platform->source_position2:  	%d\n", platform->source_position2);
+		fprintf(stderr,"dbg2       platform->source_position3:  	%d\n", platform->source_position3);
+		fprintf(stderr,"dbg2       platform->source_depth1:  		%d\n", platform->source_depth1);
+		fprintf(stderr,"dbg2       platform->source_depth2:  		%d\n", platform->source_depth2);
+		fprintf(stderr,"dbg2       platform->source_depth3:  		%d\n", platform->source_depth3);
+		fprintf(stderr,"dbg2       platform->source_heading1:  		%d\n", platform->source_heading1);
+		fprintf(stderr,"dbg2       platform->source_heading2:  		%d\n", platform->source_heading2);
+		fprintf(stderr,"dbg2       platform->source_heading3:  		%d\n", platform->source_heading3);
+		fprintf(stderr,"dbg2       platform->source_rollpitch1:  	%d\n", platform->source_rollpitch1);
+		fprintf(stderr,"dbg2       platform->source_rollpitch2:  	%d\n", platform->source_rollpitch2);
+		fprintf(stderr,"dbg2       platform->source_rollpitch3:  	%d\n", platform->source_rollpitch3);
+		fprintf(stderr,"dbg2       platform->source_heave1:  		%d\n", platform->source_heave1);
+		fprintf(stderr,"dbg2       platform->source_heave2:  		%d\n", platform->source_heave2);
+		fprintf(stderr,"dbg2       platform->source_heave3:  		%d\n", platform->source_heave3);
+		fprintf(stderr,"dbg2       platform->num_sensors:	     	%d\n", platform->num_sensors);
+		for (i=0;i<platform->num_sensors;i++)
+			{
+			fprintf(stderr,"dbg2       platform->sensors[%2d].type:                 %d\n", i, platform->sensors[i].type);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].model:                %s\n", i, platform->sensors[i].model);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].manufacturer:         %s\n", i, platform->sensors[i].manufacturer);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].serialnumber:         %s\n", i, platform->sensors[i].serialnumber);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].capability1:          %d\n", i, platform->sensors[i].capability1);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].capability2:          %d\n", i, platform->sensors[i].capability2);
+			fprintf(stderr,"dbg2       platform->sensors[%2d].num_offsets:          %d\n", i, platform->sensors[i].num_offsets);
+			for (j=0;j<platform->sensors[i].num_offsets;j++)
+				{
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_mode:	        %d\n", i, j, platform->sensors[i].offsets[j].position_offset_mode);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_x:	        %f\n", i, j, platform->sensors[i].offsets[j].position_offset_x);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_y:	        %f\n", i, j, platform->sensors[i].offsets[j].position_offset_y);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_z:	        %f\n", i, j, platform->sensors[i].offsets[j].position_offset_z);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_mode:	        %d\n", i, j, platform->sensors[i].offsets[j].attitude_offset_mode);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_heading:	    %f\n", i, j, platform->sensors[i].offsets[j].attitude_offset_heading);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_roll:	        %f\n", i, j, platform->sensors[i].offsets[j].attitude_offset_roll);
+				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_pitch:	    %f\n", i, j, platform->sensors[i].offsets[j].attitude_offset_pitch);
+				}
+		    fprintf(stderr,"dbg2       platform->sensors[%2d].time_latency_mode:	%d\n", i, platform->sensors[i].time_latency_mode);
+		    fprintf(stderr,"dbg2       platform->sensors[%2d].time_latency_static:	%f\n", i, platform->sensors[i].time_latency_static);
+		    fprintf(stderr,"dbg2       platform->sensors[%2d].num_time_latency:		%d\n", i, platform->sensors[i].num_time_latency);
+		    for (j=0;j<platform->sensors[i].num_time_latency;j++)
+				{
+				fprintf(stderr,"dbg2       platform->sensors[%2d].time_latency[%2d]:		%16.6f %8.6f\n", i, j,
+						platform->sensors[i].time_latency_time_d[j],platform->sensors[i].time_latency_value[j]);
+				}
+			}
+		fprintf(stderr,"dbg2       error:			     %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:			     %d\n",status);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */

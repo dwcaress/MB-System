@@ -26,58 +26,6 @@
  * 		David W. Caress
  * Date:	August 10, 1995
  *
- * $Log: mbsys_hsmd.h,v $
- * Revision 5.5  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.4  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.3  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.2  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.4  2000/09/30  06:31:19  caress
- * Snapshot for Dale.
- *
- * Revision 4.3  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.2  1997/09/15  19:06:40  caress
- * Real Version 4.5
- *
- * Revision 4.2  1997/09/15  19:06:40  caress
- * Real Version 4.5
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.0  1995/09/28  18:14:11  caress
- * First cut.
- *
- * Revision 4.0  1995/09/28  18:14:11  caress
- * First cut.
- *
- * Revision 1.1  1995/09/28  18:10:48  caress
- * Initial revision
- *
- * Revision 4.2  95/08/16  07:08:50  07:08:50  dale (Dale Chayes)
- * Works but not quite right.
- *
- * Revision 4.1  95/08/14  20:56:19  20:56:19  dale (Dale Chayes)
- * HSMD is sort of working.... needs work and testing.
- *
- * Revision 4.0  95/08/10  15:58:27  15:58:27  dale (Dale Chayes)
- * first crack, with formatting and "hs" ds" -> "md" conversions but
- * not with substantial functional changes.
  *
  *
  * Notes on the MBSYS_HSMD data structure:

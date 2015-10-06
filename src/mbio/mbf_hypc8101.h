@@ -18,43 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	August 21, 1994
- * $Log: mbf_hypc8101.h,v $
- * Revision 5.3  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2003/01/15 20:51:48  caress
- * Release 5.0.beta28
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.1  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  1999/01/01  23:38:01  caress
- * MB-System version 4.6beta6
- *
- * Revision 4.2  1998/10/05 17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.0  1994/10/21  12:35:04  caress
- * Release V4.0
- *
- * Revision 4.0  1994/10/21  12:35:04  caress
- * Release V4.0
- *
- * Revision 1.1  1994/10/21  12:20:01  caress
- * Initial revision
- *
- * Revision 1.1  1994/10/21  12:13:33  caress
- * Initial revision
- *
  *
  *
  */

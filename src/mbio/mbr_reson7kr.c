@@ -23,7 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	April 4,2004
- * $Log: mbr_reson7kr.c,v $
  *
  */
 
@@ -45,6 +44,7 @@
 /* turn on debug statements here */
 //#define MBR_RESON7KR_DEBUG 1
 //#define MBR_RESON7KR_DEBUG2 1
+//#define MBR_RESON7KR_DEBUG3 1
 
 /* essential function prototypes */
 int mbr_register_reson7kr(int verbose, void *mbio_ptr,
@@ -62,6 +62,7 @@ int mbr_info_reson7kr(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -239,6 +240,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -258,6 +260,8 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_pingnumber = &mbsys_reson7k_pingnumber;
 	mb_io_ptr->mb_io_sonartype = &mbsys_reson7k_sonartype;
 	mb_io_ptr->mb_io_sidescantype = &mbsys_reson7k_sidescantype;
+	mb_io_ptr->mb_io_preprocess = &mbsys_reson7k_preprocess;
+	mb_io_ptr->mb_io_extract_platform = &mbsys_reson7k_extract_platform;
 	mb_io_ptr->mb_io_extract = &mbsys_reson7k_extract;
 	mb_io_ptr->mb_io_insert = &mbsys_reson7k_insert;
 	mb_io_ptr->mb_io_extract_nav = &mbsys_reson7k_extract_nav;
@@ -296,6 +300,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -347,6 +352,7 @@ int mbr_info_reson7kr(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -382,6 +388,7 @@ int mbr_info_reson7kr(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_INSTALLATION;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -406,6 +413,7 @@ int mbr_info_reson7kr(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
@@ -849,7 +857,7 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 					error);
 		}
 
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 if (verbose > 0)
 fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, status, *error);
 #endif
@@ -875,6 +883,12 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			}
 		}
 */
+
+#ifdef MBR_RESON7KR_DEBUG
+if (status == MB_SUCCESS && store->kind == MB_DATA_DATA)
+fprintf(stderr,"\nPING: store->read_bathymetry:%d ping_number:%d\n\n",
+store->read_bathymetry,v2rawdetection->ping_number);
+#endif
 
 	/* calculate bathymetry if only raw detects are available */
 	if (status == MB_SUCCESS
@@ -1408,7 +1422,7 @@ Have a nice day...\n");
 					       &read_len, error);
 				}
 
-#ifndef MBR_RESON7KR_DEBUG
+#ifndef MBR_RESON7KR_DEBUG2
 if (skip > 0)
 fprintf(stderr,"RESON7KR record:skip:%d recordid:%x %d deviceid:%x %d enumerator:%x %d size:%d done:%d\n",
 skip, *recordid, *recordid,
@@ -1455,7 +1469,7 @@ skip, *recordid, *recordid,
 				/* check for ping number */
 				ping_record = MB_YES;
 				mbr_reson7kr_chk_pingnumber(verbose, *recordid, buffer, new_ping);
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"called mbr_reson7kr_chk_pingnumber recordid:%d last_ping:%d new_ping:%d\n",
 *recordid,*last_ping,*new_ping);
 fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
@@ -1624,7 +1638,7 @@ ping_record,*last_ping,*new_ping,*current_ping,done,status,*error); */
 			mb_get_date(verbose, store->time_d, store->time_i);
 			}
 
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 if (status == MB_SUCCESS && done == MB_NO && *save_flag == MB_NO)
 {
 fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |",
@@ -1700,7 +1714,7 @@ if (*recordid == R7KRECID_8100SonarData) fprintf(stderr," R7KRECID_8100SonarData
 		/* set done if read failure */
 		if (status == MB_FAILURE)
 			{
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	fprintf(stderr,"call nothing, read failure\n");
 #endif
 			done = MB_YES;
@@ -1863,7 +1877,7 @@ mb_navint_add(verbose, mbio_ptr,
 					if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
 						*edgetech_dt = time_d - *edgetech_time_d;
 					*edgetech_time_d = time_d;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif
 					}
@@ -1891,7 +1905,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_tim
 					if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
 						*edgetech_dt = time_d - *edgetech_time_d;
 					*edgetech_time_d = time_d;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif
 					}
@@ -1920,7 +1934,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_tim
 					if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
 						*edgetech_dt = time_d - *edgetech_time_d;
 					*edgetech_time_d = time_d;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif
 					}
@@ -1948,7 +1962,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_tim
 					if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
 						*edgetech_dt = time_d - *edgetech_time_d;
 					*edgetech_time_d = time_d;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif
 					}
@@ -1975,7 +1989,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_tim
 					if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
 						*edgetech_dt = time_d - *edgetech_time_d;
 					*edgetech_time_d = time_d;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif
 					}
@@ -2067,7 +2081,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_ti
 						header->s7kTime.Hours = store->time_i[3];
 						header->s7kTime.Minutes = store->time_i[4];
 						header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"TIME CORRECTION: R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
@@ -2110,7 +2124,7 @@ header->RecordNumber,bathymetry->ping_number);
 						header->s7kTime.Hours = store->time_i[3];
 						header->s7kTime.Minutes = store->time_i[4];
 						header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"TIME CORRECTION: R7KRECID_7kBackscatterImageData:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
@@ -2150,7 +2164,7 @@ header->RecordNumber,backscatter->ping_number);
 						header->s7kTime.Hours = store->time_i[3];
 						header->s7kTime.Minutes = store->time_i[4];
 						header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"TIME CORRECTION: R7KRECID_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
@@ -2204,7 +2218,7 @@ header->RecordNumber,beam->ping_number);
 						header->s7kTime.Hours = store->time_i[3];
 						header->s7kTime.Minutes = store->time_i[4];
 						header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"TIME CORRECTION: R7KRECID_7kImageData:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
@@ -2323,7 +2337,7 @@ header->RecordNumber,image->ping_number);
 			else
 				{
 
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 				fprintf(stderr,"Record type %d - recognized but not supported.\n",*recordid);
 #endif
 				done = MB_NO;
@@ -2387,7 +2401,7 @@ header->RecordNumber,image->ping_number);
 		/* bail out if there is a parsing error */
 		if (status == MB_FAILURE)
 			done = MB_YES;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 if (verbose >= 0)
 {
 fprintf(stderr,"done:%d kind:%d recordid:%x size:%d status:%d error:%d\n",
@@ -2407,7 +2421,7 @@ store->read_beam,store->read_verticaldepth,store->read_tvg,store->read_image);
 }*/
 #endif
 		}
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (status == MB_SUCCESS)
 		fprintf(stderr,"RESON7KR DATA READ: type:%d status:%d error:%d\n\n",
 			store->kind, status, *error);
@@ -2466,7 +2480,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	mb_get_binary_int(MB_YES, &buffer[36], deviceid);
 	mb_get_binary_short(MB_YES, &buffer[40], &reserved);
 	mb_get_binary_short(MB_YES, &buffer[42], enumerator);
-#ifdef MBR_RESON7KR_DEBUG2
+#ifdef MBR_RESON7KR_DEBUG3
 	fprintf(stderr, "\nChecking header in mbr_reson7kr_chk_header:\n");
 	fprintf(stderr, "Version:      %4.4hX | %d\n", version, version);
 	fprintf(stderr, "Offset:       %4.4hX | %d\n", offset, offset);
@@ -2559,7 +2573,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 		{
 		status = MB_SUCCESS;
 
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 		if (verbose > 0)
 			{
 			fprintf(stderr, "Good record id: %4.4X | %d", *recordid, *recordid);
@@ -2936,7 +2950,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -3024,7 +3038,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -3112,7 +3126,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -3203,7 +3217,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -3362,7 +3376,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -3455,7 +3469,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -3538,7 +3552,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -3683,7 +3697,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -3769,7 +3783,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -3883,7 +3897,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -4012,7 +4026,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -4138,7 +4152,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -4223,7 +4237,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -4306,7 +4320,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -4421,7 +4435,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -4512,7 +4526,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -4631,7 +4645,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -4718,7 +4732,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -5156,7 +5170,7 @@ index, header->OffsetToOptionalData);
 		mb_get_time(verbose, time_i, &(bathy_time_d));
 
 		/* figure out offset between 7k timestamp and Edgetech timestamp */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n",
 function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bathy_time_d);
 #endif
@@ -5198,12 +5212,6 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-	if (verbose > 0)
-#else
-	if (verbose >= 2)
-#endif
-	mbsys_reson7k_print_fsdwss(verbose, fsdwsslo, error);
-#ifdef MBR_RESON7KR_DEBUG
 for (i=0;i<fsdwsslo->number_channels;i++)
 {
 mb_get_date(verbose, s7k_time_d, time_i);
@@ -5219,6 +5227,12 @@ fsdwchannel->number,fsdwssheader->channelNum,
 fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 }
 #endif
+#ifdef MBR_RESON7KR_DEBUG2
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_fsdwss(verbose, fsdwsslo, error);
 
 	/* get sonar_depth and altitude if possible */
 /*
@@ -5466,7 +5480,7 @@ index, header->OffsetToOptionalData);
 		mb_get_time(verbose, time_i, &(bathy_time_d));
 
 		/* figure out offset between 7k timestamp and Edgetech timestamp */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n",
 function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bathy_time_d);
 #endif
@@ -5508,12 +5522,6 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-	if (verbose > 0)
-#else
-	if (verbose >= 2)
-#endif
-	mbsys_reson7k_print_fsdwss(verbose, fsdwsshi, error);
-#ifdef MBR_RESON7KR_DEBUG
 for (i=0;i<fsdwsshi->number_channels;i++)
 {
 mb_get_date(verbose, s7k_time_d, time_i);
@@ -5529,6 +5537,12 @@ fsdwchannel->number,fsdwssheader->channelNum,
 fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 }
 #endif
+#ifdef MBR_RESON7KR_DEBUG2
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_fsdwss(verbose, fsdwsshi, error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -5632,7 +5646,7 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 		mb_get_time(verbose, time_i, &(bathy_time_d));
 
 		/* figure out offset between 7k timestamp and Edgetech timestamp */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n",
 function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bathy_time_d);
 #endif
@@ -5678,12 +5692,6 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-	if (verbose > 0)
-#else
-	if (verbose >= 2)
-#endif
-	mbsys_reson7k_print_fsdwsb(verbose, fsdwsb, error);
-#ifdef MBR_RESON7KR_DEBUG
 for (i=0;i<fsdwsb->number_channels;i++)
 {
 mb_get_date(verbose, s7k_time_d, time_i);
@@ -5699,6 +5707,12 @@ fsdwchannel->number,fsdwsegyheader->channelNum,
 fsdwchannel->sample_interval,fsdwsegyheader->sampleInterval);
 }
 #endif
+#ifdef MBR_RESON7KR_DEBUG2
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_fsdwsb(verbose, fsdwsb, error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -5726,7 +5740,7 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 	double	time_d;
 	int	timeproblem;
 	int	i, j;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	int	time_i[7];
 #endif
 	/* print input debug statements */
@@ -5852,7 +5866,7 @@ fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].dept
 */
 
 /* print out the nav point time stamp */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 time_j[0] = bluefin->nav[i].s7kTime.Year;
 time_j[1] = bluefin->nav[i].s7kTime.Day;
 time_j[2] = 60 * bluefin->nav[i].s7kTime.Hours + bluefin->nav[i].s7kTime.Minutes;
@@ -5886,7 +5900,7 @@ bluefin->nav[i].position_time);
 				for (i=0;i<bluefin->number_frames;i++)
 					{
 					/* get the time  */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"CHANGE TIMESTAMP: %d %2.2d:%2.2d:%6.3f %12f",
 i,bluefin->nav[i].s7kTime.Hours,bluefin->nav[i].s7kTime.Minutes,bluefin->nav[i].s7kTime.Seconds,time_d);
 #endif
@@ -5899,7 +5913,7 @@ i,bluefin->nav[i].s7kTime.Hours,bluefin->nav[i].s7kTime.Minutes,bluefin->nav[i].
 					mb_get_time(verbose, store->time_i, &time_d);
 					bluefin->nav[i].position_time = time_d;
 					bluefin->nav[i].depth_time = time_d;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"    %12f\n",time_d);
 #endif
 					}
@@ -5951,7 +5965,7 @@ fprintf(stderr,"    %12f\n",time_d);
 				}
 
 /* print out the environmental point time stamp */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 time_j[0] = bluefin->environmental[i].s7kTime.Year;
 time_j[1] = bluefin->environmental[i].s7kTime.Day;
 time_j[2] = 60 * bluefin->environmental[i].s7kTime.Hours + bluefin->environmental[i].s7kTime.Minutes;
@@ -5989,7 +6003,7 @@ bluefin->environmental[i].sensor_time_nsec);
 				for (i=0;i<bluefin->number_frames;i++)
 					{
 					/* get the time  */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"CHANGE TIMESTAMP: %d %2.2d:%2.2d:%6.3f %12f",
 i,bluefin->environmental[i].s7kTime.Hours,bluefin->environmental[i].s7kTime.Minutes,bluefin->environmental[i].s7kTime.Seconds,time_d);
 #endif
@@ -6002,7 +6016,7 @@ i,bluefin->environmental[i].s7kTime.Hours,bluefin->environmental[i].s7kTime.Minu
 					mb_get_time(verbose, store->time_i, &time_d);
 					bluefin->environmental[i].ctd_time = time_d;
 					bluefin->environmental[i].temperature_time = time_d;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr,"    %12f\n",
 time_d);
 #endif
@@ -6058,17 +6072,17 @@ time_d);
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
 if (bluefin->data_format == R7KRECID_BluefinNav)
-fprintf(stderr,"R7KRECID_BluefinNav:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_BluefinNav:                    7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 else
-fprintf(stderr,"R7KRECID_BluefinEnvironmental:     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_BluefinEnvironmental:          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -6166,12 +6180,12 @@ int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_ProcessedSidescan:       7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_ProcessedSidescan:                  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,header->Size,index);
+processedsidescan->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -6287,12 +6301,12 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kVolatileSonarSettings:       7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_7kVolatileSonarSettings:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,header->Size,index);
+volatilesettings->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -6413,7 +6427,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -6495,12 +6509,12 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kMatchFilter:                 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_7kMatchFilter:                      7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,header->Size,index);
+matchfilter->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -6602,12 +6616,12 @@ int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, v
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kV2FirmwareHardwareConfiguration:                 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_7kV2FirmwareHardwareConfiguration: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -6705,12 +6719,12 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kBeamGeometry:                7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_7kBeamGeometry:                     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -6805,7 +6819,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -7016,12 +7030,12 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kBathymetricData:             7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kBathymetricData:                  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,bathymetry->ping_number);
+bathymetry->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -7198,12 +7212,12 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kBackscatterImageData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kBackscatterImageData:             7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,backscatter->ping_number);
+backscatter->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -7417,12 +7431,12 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KHDRSIZE_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KHDRSIZE_7kBeamData:                       7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,beam->ping_number);
+beam->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -7508,12 +7522,12 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kVerticalDepth:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kVerticalDepth:                    7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,verticaldepth->ping_number);
+verticaldepth->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -7618,12 +7632,12 @@ int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error)
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kTVGData:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kTVGData:                          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,tvg->ping_number);
+tvg->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -7755,12 +7769,12 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kImageData:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kImageData:                        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,image->ping_number);
+image->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -7921,12 +7935,12 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kV2PingMotion:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kV2PingMotion:                     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,v2pingmotion->ping_number);
+v2pingmotion->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -8045,12 +8059,12 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kV2DetectionSetup:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kV2DetectionSetup:                 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,v2detectionsetup->ping_number);
+v2detectionsetup->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -8174,12 +8188,12 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kV2BeamformedData:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kV2BeamformedData:                 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,v2beamformed->ping_number);
+v2beamformed->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -8333,12 +8347,12 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kV2BITEData:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_7kV2BITEData:                  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -8420,12 +8434,12 @@ int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kV27kCenterVersion:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_7kV27kCenterVersion:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -8507,12 +8521,12 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kV28kWetEndVersion:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_7kV28kWetEndVersion:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -8617,12 +8631,12 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kV2Detection:             7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kV2Detection:                      7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,v2detection->ping_number);
+v2detection->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -8741,12 +8755,12 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kV2RawDetection:             7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kV2RawDetection:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,v2rawdetection->ping_number);
+v2rawdetection->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -8873,12 +8887,12 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kV2SnippetData:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kV2SnippetData:                    7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,v2snippet->ping_number);
+v2snippet->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9005,12 +9019,12 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kCalibratedSnippetData:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kCalibratedSnippetData:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,calibratedsnippet->ping_number);
+calibratedsnippet->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9138,7 +9152,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9258,7 +9272,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9363,6 +9377,12 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"R7KRECID_7kSystemEventMessage:          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,header->Size,index);
+#endif
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9498,12 +9518,12 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kRemoteControlSonarSettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_7kRemoteControlSonarSettings:       7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-header->RecordNumber,header->Size,index);
+remotecontrolsettings->ping_number,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9585,12 +9605,12 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kReserved:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+fprintf(stderr,"R7KRECID_7kReserved:                    7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9668,6 +9688,12 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"R7KRECID_7kRoll:                        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,header->Size,index);
+#endif
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9745,6 +9771,12 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"R7KRECID_7kPitch:                       7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,header->Size,index);
+#endif
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9822,6 +9854,12 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"R7KRECID_7kSoundVelocity:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,header->Size,index);
+#endif
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9899,6 +9937,12 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"R7KRECID_7kAbsorptionLoss:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,header->Size,index);
+#endif
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -9976,6 +10020,12 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"R7KRECID_7kSpreadingLoss:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d size:%d index:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,header->Size,index);
+#endif
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -10038,7 +10088,7 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (status == MB_SUCCESS
 		&& (store->type == R7KRECID_7kFileHeader || *fileheaders == 0))
 		{
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kFileHeader, R7KRECID_7kFileHeader);
 fprintf(stderr," R7KRECID_7kFileHeader\n");
 #endif
@@ -10061,7 +10111,7 @@ fprintf(stderr," R7KRECID_7kFileHeader\n");
 		if (status == MB_SUCCESS && store->read_volatilesettings == MB_YES)
 			{
 			store->type = R7KRECID_7kVolatileSonarSettings;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kVolatileSonarSettings, R7KRECID_7kVolatileSonarSettings);
 fprintf(stderr," R7KRECID_7kVolatileSonarSettings\n");
 #endif
@@ -10074,7 +10124,7 @@ fprintf(stderr," R7KRECID_7kVolatileSonarSettings\n");
 		if (status == MB_SUCCESS && store->read_matchfilter == MB_YES)
 			{
 			store->type = R7KRECID_7kMatchFilter;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kMatchFilter, R7KRECID_7kMatchFilter);
 fprintf(stderr," R7KRECID_7kMatchFilter\n");
 #endif
@@ -10088,7 +10138,7 @@ fprintf(stderr," R7KRECID_7kMatchFilter\n");
 		if (status == MB_SUCCESS && store->read_beamgeometry == MB_YES)
 			{
 			store->type = R7KRECID_7kBeamGeometry;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBeamGeometry, R7KRECID_7kBeamGeometry);
 fprintf(stderr," R7KRECID_7kBeamGeometry\n");
 #endif
@@ -10102,7 +10152,7 @@ fprintf(stderr," R7KRECID_7kBeamGeometry\n");
 		if (status == MB_SUCCESS && store->read_remotecontrolsettings == MB_YES)
 			{
 			store->type = R7KRECID_7kRemoteControlSonarSettings;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kRemoteControlSonarSettings, R7KRECID_7kRemoteControlSonarSettings);
 fprintf(stderr," R7KRECID_7kRemoteControlSonarSettings\n");
 #endif
@@ -10116,7 +10166,7 @@ fprintf(stderr," R7KRECID_7kRemoteControlSonarSettings\n");
 		if (status == MB_SUCCESS && store->read_bathymetry == MB_YES)
 			{
 				store->type = R7KRECID_7kBathymetricData;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBathymetricData, R7KRECID_7kBathymetricData);
 fprintf(stderr," R7KRECID_7kBathymetricData\n");
 #endif
@@ -10133,7 +10183,7 @@ fprintf(stderr," R7KRECID_7kBathymetricData\n");
 		if (status == MB_SUCCESS && store->read_processedsidescan == MB_YES)
 			{
 				store->type = R7KRECID_ProcessedSidescan;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_ProcessedSidescan, R7KRECID_ProcessedSidescan);
 fprintf(stderr," R7KRECID_ProcessedSidescan\n");
 #endif
@@ -10150,7 +10200,7 @@ fprintf(stderr," R7KRECID_ProcessedSidescan\n");
 		if (status == MB_SUCCESS && store->read_backscatter == MB_YES)
 			{
 			store->type = R7KRECID_7kBackscatterImageData;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBackscatterImageData, R7KRECID_7kBackscatterImageData);
 fprintf(stderr," R7KRECID_7kBackscatterImageData\n");
 #endif
@@ -10164,7 +10214,7 @@ fprintf(stderr," R7KRECID_7kBackscatterImageData\n");
 		if (status == MB_SUCCESS && store->read_beam == MB_YES)
 			{
 			store->type = R7KRECID_7kBeamData;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBeamData, R7KRECID_7kBeamData);
 fprintf(stderr," R7KRECID_7kBeamData\n");
 #endif
@@ -10178,7 +10228,7 @@ fprintf(stderr," R7KRECID_7kBeamData\n");
 		if (status == MB_SUCCESS && store->read_verticaldepth == MB_YES)
 			{
 			store->type = R7KRECID_7kVerticalDepth;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kVerticalDepth, R7KRECID_7kVerticalDepth);
 fprintf(stderr," R7KRECID_7kVerticalDepth\n");
 #endif
@@ -10192,7 +10242,7 @@ fprintf(stderr," R7KRECID_7kVerticalDepth\n");
 		if (status == MB_SUCCESS && store->read_tvg == MB_YES)
 			{
 			store->type = R7KRECID_7kTVGData;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kTVGData, R7KRECID_7kTVGData);
 fprintf(stderr," R7KRECID_7kTVGData\n");
 #endif
@@ -10206,7 +10256,7 @@ fprintf(stderr," R7KRECID_7kTVGData\n");
 		if (status == MB_SUCCESS && store->read_image == MB_YES)
 			{
 			store->type = R7KRECID_7kImageData;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kImageData, R7KRECID_7kImageData);
 fprintf(stderr," R7KRECID_7kImageData\n");
 #endif
@@ -10220,7 +10270,7 @@ fprintf(stderr," R7KRECID_7kImageData\n");
 		if (status == MB_SUCCESS && store->read_v2pingmotion == MB_YES)
 			{
 			store->type = R7KRECID_7kV2PingMotion;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2PingMotion, R7KRECID_7kV2PingMotion);
 fprintf(stderr," R7KRECID_7kV2PingMotion\n");
 #endif
@@ -10234,7 +10284,7 @@ fprintf(stderr," R7KRECID_7kV2PingMotion\n");
 		if (status == MB_SUCCESS && store->read_v2detectionsetup == MB_YES)
 			{
 			store->type = R7KRECID_7kV2DetectionSetup;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2DetectionSetup, R7KRECID_7kV2DetectionSetup);
 fprintf(stderr," R7KRECID_7kV2DetectionSetup\n");
 #endif
@@ -10248,7 +10298,7 @@ fprintf(stderr," R7KRECID_7kV2DetectionSetup\n");
 		if (status == MB_SUCCESS && store->read_v2beamformed == MB_YES)
 			{
 			store->type = R7KRECID_7kV2BeamformedData;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2BeamformedData, R7KRECID_7kV2BeamformedData);
 fprintf(stderr," R7KRECID_7kV2BeamformedData\n");
 #endif
@@ -10262,7 +10312,7 @@ fprintf(stderr," R7KRECID_7kV2BeamformedData\n");
 		if (status == MB_SUCCESS && store->read_v2detection == MB_YES)
 			{
 			store->type = R7KRECID_7kV2Detection;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2Detection, R7KRECID_7kV2Detection);
 fprintf(stderr," R7KRECID_7kV2Detection\n");
 #endif
@@ -10276,7 +10326,7 @@ fprintf(stderr," R7KRECID_7kV2Detection\n");
 		if (status == MB_SUCCESS && store->read_v2rawdetection == MB_YES)
 			{
 			store->type = R7KRECID_7kV2RawDetection;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2RawDetection, R7KRECID_7kV2RawDetection);
 fprintf(stderr," R7KRECID_7kV2RawDetection\n");
 #endif
@@ -10290,7 +10340,7 @@ fprintf(stderr," R7KRECID_7kV2RawDetection\n");
 		if (status == MB_SUCCESS && store->read_v2snippet == MB_YES)
 			{
 			store->type = R7KRECID_7kV2SnippetData;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2SnippetData, R7KRECID_7kV2SnippetData);
 fprintf(stderr," R7KRECID_7kV2SnippetData\n");
 #endif
@@ -10304,7 +10354,7 @@ fprintf(stderr," R7KRECID_7kV2SnippetData\n");
 		if (status == MB_SUCCESS && store->read_calibratedsnippet == MB_YES)
 			{
 			store->type = R7KRECID_7kCalibratedSnippetData;
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kCalibratedSnippetData, R7KRECID_7kCalibratedSnippetData);
 fprintf(stderr," R7KRECID_7kCalibratedSnippetData\n");
 #endif
@@ -10319,7 +10369,7 @@ fprintf(stderr," R7KRECID_7kCalibratedSnippetData\n");
 	/* call appropriate writing routine for other records */
 	else if (status == MB_SUCCESS && store->type != R7KRECID_7kFileHeader)
 		{
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 fprintf(stderr, "Writing record id: %4.4X | %d", store->type, store->type);
 if (store->type == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferencePoint\n");
 if (store->type == R7KRECID_UncalibratedSensorOffset) fprintf(stderr," R7KRECID_UncalibratedSensorOffset\n");
@@ -10564,7 +10614,7 @@ if (store->type == R7KRECID_8100SonarData) fprintf(stderr," R7KRECID_8100SonarDa
 			}
 		}
 
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	fprintf(stderr,"RESON7KR DATA WRITTEN: type:%d status:%d error:%d\n\n",
 	store->kind, status, *error);
 #endif
@@ -10616,7 +10666,7 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index,
 	header->Reserved2 = 0;
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -10689,7 +10739,7 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
 	header = &(reference->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -10796,7 +10846,7 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
 	header = &(sensoruncal->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -10906,7 +10956,7 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
 	header = &(sensorcal->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -11016,7 +11066,7 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
 	header = &(position->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -11129,7 +11179,7 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 	header = &(customattitude->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -11294,7 +11344,7 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
 	header = &(tide->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -11409,7 +11459,7 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 	header = &(altitude->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -11514,7 +11564,7 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 	header = &(motion->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -11657,7 +11707,7 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
 	header = &(depth->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -11765,7 +11815,7 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 	header = &(svp->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -11882,7 +11932,7 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 	header = &(ctd->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -12008,7 +12058,7 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 	header = &(geodesy->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -12153,7 +12203,7 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
 	header = &(rollpitchheave->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -12258,7 +12308,7 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 	header = &(heading->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -12361,7 +12411,7 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
 	header = &(surveyline->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -12476,7 +12526,7 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
 	header = &(navigation->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -12587,7 +12637,7 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 	header = &(attitude->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -12699,7 +12749,7 @@ int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, voi
 	header = &(rec1022->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -13118,13 +13168,13 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
 	bluefin = &(store->bluefin);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_fsdwss(verbose, fsdwsslo, error);
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 for (i=0;i<fsdwsslo->number_channels;i++)
 {
 fsdwchannel = &(fsdwsslo->channel[i]);
@@ -13265,13 +13315,13 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
 	header = &(fsdwsshi->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_fsdwss(verbose, fsdwsshi, error);
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 for (i=0;i<fsdwsshi->number_channels;i++)
 {
 fsdwchannel = &(fsdwsshi->channel[i]);
@@ -13412,13 +13462,13 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
 	header = &(fsdwsb->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_fsdwsb(verbose, fsdwsb, error);
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 for (i=0;i<fsdwsb->number_channels;i++)
 {
 fsdwchannel = &(fsdwsb->channel);
@@ -13553,7 +13603,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 	header = &(bluefin->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -13754,7 +13804,7 @@ int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **buff
 	header->Size = *size;
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -13874,7 +13924,7 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
 	header = &(volatilesettings->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -14018,7 +14068,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 	header = &(configuration->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -14148,7 +14198,7 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
 	header = &(matchfilter->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -14257,7 +14307,7 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
 	header = &(v2firmwarehardwareconfiguration->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -14370,7 +14420,7 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
 	header = &(beamgeometry->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -14495,7 +14545,7 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
 	header = &(calibration->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -14627,7 +14677,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 	header->Size = *size;
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -14786,7 +14836,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 	header = &(backscatter->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -15004,7 +15054,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 	header = &(beam->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -15210,7 +15260,7 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 	header = &(verticaldepth->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -15323,7 +15373,7 @@ int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *s
 	header = &(tvg->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -15444,7 +15494,7 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 	header = &(image->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -15599,7 +15649,7 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
 	header = &(v2pingmotion->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -15741,7 +15791,7 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
 	header = &(v2detectionsetup->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -15880,7 +15930,7 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
 	header = &(v2beamformed->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -16006,7 +16056,7 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
 	header = &(v2bite->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -16170,7 +16220,7 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
 	header = &(v27kcenterversion->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -16276,7 +16326,7 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
 	header = &(v28kwetendversion->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -16389,7 +16439,7 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
 	header->Size = *size;
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -16524,7 +16574,7 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
 	header->Size = *size;
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -16667,7 +16717,7 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
 	header->Size = *size;
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -16813,7 +16863,7 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
 	header->Size = *size;
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -16944,7 +16994,7 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
 	header = &(installation->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -17128,7 +17178,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 		}
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -17268,7 +17318,7 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
 	header = &(systemeventmessage->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -17383,7 +17433,7 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 	header = &(remotecontrolsettings->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -17541,7 +17591,7 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
 	header = &(reserved->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -17649,7 +17699,7 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
 	header = &(roll->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -17754,7 +17804,7 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
 	header = &(pitch->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -17859,7 +17909,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 	header = &(soundvelocity->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -17964,7 +18014,7 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
 	header = &(absorptionloss->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)
@@ -18069,7 +18119,7 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 	header = &(spreadingloss->header);
 
 	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
+#ifdef MBR_RESON7KR_DEBUG2
 	if (verbose > 0)
 #else
 	if (verbose >= 2)

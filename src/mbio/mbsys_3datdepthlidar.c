@@ -180,6 +180,7 @@
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_define.h"
+#include "mb_aux.h"
 #include "mbsys_3datdepthlidar.h"
 
 #define MBF_3DDEPTHP_DEBUG 1
@@ -498,18 +499,52 @@ int mbsys_3datdepthlidar_pingnumber
 	return status;
 }							/* mbsys_3datdepthlidar_pingnumber */
 /*--------------------------------------------------------------------*/
-int mbsys_3datdepthlidar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-		double time_d, double navlon, double navlat,
-		double speed, double heading, double sonardepth,
-		double roll, double pitch, double heave,
-		int *error)
+int mbsys_3datdepthlidar_preprocess
+(
+	int verbose,			/* in: verbosity level set on command line 0..N */
+	void *mbio_ptr,			/* in: see mb_io.h:/^struct mb_io_struct/ */
+	void *store_ptr,		/* in: see mbsys_3datdepthlidar.h:/^struct mbsys_3datdepthlidar_struct/ */
+	void *platform_ptr,
+	int n_nav,
+	double *nav_time_d,
+	double *nav_lon,
+	double *nav_lat,
+	double *nav_speed,
+	int n_sensordepth,
+	double *sensordepth_time_d,
+	double *sensordepth_sensordepth,
+	int n_heading,
+	double *heading_time_d,
+	double *heading_heading,
+	int n_altitude,
+	double *altitude_time_d,
+	double *altitude_altitude,
+	int n_attitude,
+	double *attitude_time_d,
+	double *attitude_roll,
+	double *attitude_pitch,
+	double *attitude_heave,
+	int *error
+)
 {
 	char    *function_name = "mbsys_3datdepthlidar_preprocess";
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	int status = MB_SUCCESS;
+	double time_d;
 	int time_i[7];
+    double heading;                    /* heading (degrees) */
+    double roll;                       /* roll (degrees) */
+    double pitch;                      /* pitch (degrees) */
+    double speed;                      /* speed (degrees) */
+	int interp_status = MB_SUCCESS;
+	int	interp_error = MB_ERROR_NO_ERROR;
 	int i;
+	int	jnav = 0;
+	int	jsensordepth = 0;
+	int	jheading = 0;
+	//int	jaltitude = 0;
+	int	jattitude = 0;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -517,18 +552,29 @@ int mbsys_3datdepthlidar_preprocess(int verbose, void *mbio_ptr, void *store_ptr
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:      %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:     %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       time_d:        %f\n",time_d);
-		fprintf(stderr,"dbg2       longitude:     %f\n",navlon);
-		fprintf(stderr,"dbg2       latitude:      %f\n",navlat);
-		fprintf(stderr,"dbg2       speed:         %f\n",speed);
-		fprintf(stderr,"dbg2       heading:       %f\n",heading);
-		fprintf(stderr,"dbg2       sonardepth:    %f\n",sonardepth);
-		fprintf(stderr,"dbg2       roll:          %f\n",roll);
-		fprintf(stderr,"dbg2       pitch:         %f\n",pitch);
-		fprintf(stderr,"dbg2       heave:         %f\n",heave);
+		fprintf(stderr,"dbg2       verbose:                    %d\n", verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
+		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
+		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
+		fprintf(stderr,"dbg2       nav_time_d:                 %p\n",nav_time_d);
+		fprintf(stderr,"dbg2       nav_lon:                    %p\n",nav_lon);
+		fprintf(stderr,"dbg2       nav_lat:                    %p\n",nav_lat);
+		fprintf(stderr,"dbg2       nav_speed:                  %p\n",nav_speed);
+		fprintf(stderr,"dbg2       n_sensordepth:              %d\n",n_sensordepth);
+		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n",sensordepth_time_d);
+		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n",sensordepth_sensordepth);
+		fprintf(stderr,"dbg2       n_heading:                  %d\n",n_heading);
+		fprintf(stderr,"dbg2       heading_time_d:             %p\n",heading_time_d);
+		fprintf(stderr,"dbg2       heading_heading:            %p\n",heading_heading);
+		fprintf(stderr,"dbg2       n_altitude:                 %d\n",n_altitude);
+		fprintf(stderr,"dbg2       altitude_time_d:            %p\n",altitude_time_d);
+		fprintf(stderr,"dbg2       altitude_altitude:          %p\n",altitude_altitude);
+		fprintf(stderr,"dbg2       n_attitude:                 %d\n",n_attitude);
+		fprintf(stderr,"dbg2       attitude_time_d:            %p\n",attitude_time_d);
+		fprintf(stderr,"dbg2       attitude_roll:              %p\n",attitude_roll);
+		fprintf(stderr,"dbg2       attitude_pitch:             %p\n",attitude_pitch);
+		fprintf(stderr,"dbg2       attitude_heave:             %p\n",attitude_heave);
 		}
 
 	/* check for non-null data */
@@ -541,24 +587,66 @@ int mbsys_3datdepthlidar_preprocess(int verbose, void *mbio_ptr, void *store_ptr
 	/* get data structure pointers */
 	store = (struct mbsys_3datdepthlidar_struct *) store_ptr;
 
-	/* insert navigation and attitude */
-	store->time_d = time_d;
+	/* interpolate navigation and attitude */
+	time_d = store->time_d;
 	mb_get_date(verbose, time_d, time_i);
-	store->year = time_i[0];
-	store->month = time_i[1];
-	store->day = time_i[2];
-	store->hour = time_i[3];
-	store->minutes = time_i[4];
-	store->seconds = time_i[5];
-	store->nanoseconds = 1000 * ((unsigned int)time_i[6]);
 
-	store->navlon = navlon;
-	store->navlat = navlat;
-	store->heading = heading;
-	store->speed = speed;
-	store->sensordepth = sonardepth;
-	store->roll = roll;
-	store->pitch = pitch;
+	/* get nav sensordepth heading attitude values for record timestamp */
+	if (n_nav > 0)
+		{
+		interp_status = mb_linear_interp_longitude(verbose,
+					nav_time_d-1, nav_lon-1, n_nav, 
+					time_d, &store->navlon, &jnav,
+					&interp_error);
+		interp_status = mb_linear_interp_latitude(verbose,
+					nav_time_d-1, nav_lat-1, n_nav, 
+					time_d, &store->navlat, &jnav,
+					&interp_error);
+		interp_status = mb_linear_interp(verbose,
+					nav_time_d-1, nav_speed-1, n_nav, 
+					time_d, &speed, &jnav,
+					&interp_error);
+		store->speed = (float) speed;
+		}
+	if (n_sensordepth > 0)
+		{
+		interp_status = mb_linear_interp(verbose,
+					sensordepth_time_d-1, sensordepth_sensordepth-1, n_sensordepth, 
+					time_d, &store->sensordepth, &jsensordepth,
+					&interp_error);
+		}
+	if (n_heading > 0)
+		{
+		interp_status = mb_linear_interp_heading(verbose,
+					heading_time_d-1, heading_heading-1, n_heading, 
+					time_d, &heading, &jheading,
+					&interp_error);
+		store->heading = (float) heading;
+		}
+	//if (n_altitude > 0)
+	//	{
+	//	interp_status = mb_linear_interp(verbose,
+	//				altitude_time_d-1, altitude_altitude-1, n_altitude, 
+	//				time_d, &store->altitude, &jaltitude,
+	//				&interp_error);
+	//	}
+	if (n_attitude > 0)
+		{
+		interp_status = mb_linear_interp(verbose,
+					attitude_time_d-1, attitude_roll-1, n_attitude, 
+					time_d, &roll, &jattitude,
+					&interp_error);
+		store->roll = (float) roll;
+		interp_status = mb_linear_interp(verbose,
+					attitude_time_d-1, attitude_pitch-1, n_attitude, 
+					time_d, &pitch, &jattitude,
+					&interp_error);
+		store->pitch = (float) pitch;
+		//interp_status = mb_linear_interp(verbose,
+		//			attitude_time_d-1, attitude_heave-1, n_attitude, 
+		//			time_d, &store->heave, &jattitude,
+		//			&interp_error);
+		}
 
 	/* loop over all pulses */
 	for (i=0;i<store->num_pulses;i++)
@@ -567,15 +655,63 @@ int mbsys_3datdepthlidar_preprocess(int verbose, void *mbio_ptr, void *store_ptr
 		pulse = (struct mbsys_3datdepthlidar_pulse_struct *) &store->pulses[i];
 		
 		/* set time */
-		pulse->time_d = store->time_d + 0.000001 * pulse->pulse_time_offset;
+		//pulse->time_d = store->time_d + 0.000001 * pulse->pulse_time_offset;
 		
-		/* set navigation and attitude for pulses */
-		pulse->heading = store->heading;
-		pulse->navlon = store->navlon;
-		pulse->navlat = store->navlat;
-		pulse->sensordepth = store->sensordepth;
-		pulse->roll = store->roll;
-		pulse->pitch = store->pitch;
+		/* get nav sensordepth heading attitude values for record timestamp */
+		if (n_nav > 0)
+			{
+			interp_status = mb_linear_interp_longitude(verbose,
+						nav_time_d-1, nav_lon-1, n_nav, 
+						pulse->time_d, &pulse->navlon, &jnav,
+						&interp_error);
+			interp_status = mb_linear_interp_latitude(verbose,
+						nav_time_d-1, nav_lat-1, n_nav, 
+						pulse->time_d, &pulse->navlat, &jnav,
+						&interp_error);
+			//interp_status = mb_linear_interp(verbose,
+			//			nav_time_d-1, nav_speed-1, n_nav, 
+			//			pulse->time_d, &pulse->speed, &jnav,
+			//			&interp_error);
+			}
+		if (n_sensordepth > 0)
+			{
+			interp_status = mb_linear_interp(verbose,
+						sensordepth_time_d-1, sensordepth_sensordepth-1, n_sensordepth, 
+						pulse->time_d, &pulse->sensordepth, &jsensordepth,
+						&interp_error);
+			}
+		if (n_heading > 0)
+			{
+			interp_status = mb_linear_interp_heading(verbose,
+						heading_time_d-1, heading_heading-1, n_heading, 
+						pulse->time_d, &heading, &jheading,
+						&interp_error);
+			pulse->heading = (float) heading;
+			}
+		//if (n_altitude > 0)
+		//	{
+		//	interp_status = mb_linear_interp(verbose,
+		//				altitude_time_d-1, altitude_altitude-1, n_altitude, 
+		//				pulse->time_d, &pulse->altitude, &jaltitude,
+		//				&interp_error);
+		//	}
+		if (n_attitude > 0)
+			{
+			interp_status = mb_linear_interp(verbose,
+						attitude_time_d-1, attitude_roll-1, n_attitude, 
+						pulse->time_d, &roll, &jattitude,
+						&interp_error);
+			pulse->roll = (float) roll;
+			interp_status = mb_linear_interp(verbose,
+						attitude_time_d-1, attitude_pitch-1, n_attitude, 
+						pulse->time_d, &pitch, &jattitude,
+						&interp_error);
+			pulse->pitch = (float) pitch;
+			//interp_status = mb_linear_interp(verbose,
+			//			attitude_time_d-1, attitude_heave-1, n_attitude, 
+			//			pulse->time_d, &store->heave, &jattitude,
+			//			&interp_error);
+			}
 		}
 			
 	/* calculate the bathymetry using the newly inserted values */

@@ -36,7 +36,6 @@
 /* mbio include files */
 #include "mb_status.h"
 #include "mb_define.h"
-#include "mb_aux.h"
 
 static char rcs_id[]="$Id$";
 

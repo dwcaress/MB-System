@@ -34,18 +34,6 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: mbm_copy.perl,v $
-#   Revision 5.2  2006/09/11 18:55:52  caress
-#   Changes during Western Flyer and Thomas Thompson cruises, August-September
-#   2006.
-#
-#   Revision 5.1  2005/11/05 01:34:20  caress
-#   Much work over the past two months.
-#
-#   Revision 5.0  2003/03/10 19:54:43  caress
-#   Initial version.
-#
 #
 #
 $program_name = "mbm_copy";

@@ -24,19 +24,6 @@
  * Author:	D. W. Caress
  * Date:	February 26, 2008
  *
- * $Log: mbr_em710raw.c,v $
- * Revision 5.3  2009/03/02 18:51:52  caress
- * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
- *
- * Revision 5.2  2008/11/16 21:51:18  caress
- * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
- *
- * Revision 5.1  2008/07/10 06:41:31  caress
- * Fixed support for EM122
- *
- * Revision 5.0  2008/03/01 09:11:35  caress
- * Added support for Simrad EM710 multibeam in new formats 58 and 59.
- *
  *
  */
 
@@ -108,6 +95,7 @@ int mbr_info_em710raw(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -262,6 +250,7 @@ int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -279,6 +268,10 @@ int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_em710raw;
 	mb_io_ptr->mb_io_dimensions = &mbsys_simrad3_dimensions;
 	mb_io_ptr->mb_io_pingnumber = &mbsys_simrad3_pingnumber;
+	mb_io_ptr->mb_io_sonartype = &mbsys_simrad3_sonartype;
+	mb_io_ptr->mb_io_sidescantype = &mbsys_simrad3_sidescantype;
+	mb_io_ptr->mb_io_preprocess = &mbsys_simrad3_preprocess;
+	mb_io_ptr->mb_io_extract_platform = &mbsys_simrad3_extract_platform;
 	mb_io_ptr->mb_io_extract = &mbsys_simrad3_extract;
 	mb_io_ptr->mb_io_insert = &mbsys_simrad3_insert;
 	mb_io_ptr->mb_io_extract_nnav = &mbsys_simrad3_extract_nnav;
@@ -313,6 +306,7 @@ int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -362,6 +356,7 @@ int mbr_info_em710raw(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -397,6 +392,7 @@ int mbr_info_em710raw(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_NO;
+	*platform_source = MB_DATA_START;
 	*nav_source = MB_DATA_NAV;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_ATTITUDE;
@@ -421,6 +417,7 @@ int mbr_info_em710raw(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
@@ -4561,24 +4558,24 @@ int mbr_em710raw_rd_pos(int verbose, void *mbio_ptr, int swap,
 		    {
 		    navchannel = (store->pos_system & 0x03);
 		    if (navchannel == 1)
-			{
-			store->kind = MB_DATA_NAV1;
-			}
+				{
+				store->kind = MB_DATA_NAV1;
+				}
 		    else if (navchannel == 2)
-			{
-			store->kind = MB_DATA_NAV2;
-			}
+				{
+				store->kind = MB_DATA_NAV2;
+				}
 		    else if (navchannel == 3)
-			{
-			store->kind = MB_DATA_NAV3;
-			}
+				{
+				store->kind = MB_DATA_NAV3;
+				}
 
 		    /* otherwise its an error */
 		    else
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				}
 		    }
 		}
 

@@ -34,14 +34,6 @@
  * Author:	D. W. Caress
  * Date:	October 9, 1998
  *
- * $Log: mbsys_simrad2.h,v $
- * Revision 5.22  2009/03/02 18:51:52  caress
- * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
- *
- * Revision 5.21  2008/03/01 09:14:03  caress
- * Some housekeeping changes.
- *
- *
  */
 /*
  * Notes on the MBSYS_SIMRAD2 data structure:

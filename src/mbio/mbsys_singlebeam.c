@@ -28,56 +28,6 @@
  * Author:	D. W. Caress
  * Date:	April 13,  1999
  *
- * $Log: mbsys_singlebeam.c,v $
- * Revision 5.11  2006/11/10 22:36:05  caress
- * Working towards release 5.1.0
- *
- * Revision 5.10  2006/10/05 18:58:29  caress
- * Changes for 5.1.0beta4
- *
- * Revision 5.9  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.8  2005/03/25 04:29:56  caress
- * Fixed problem in which sonar depth could be calculated from implausible pressure values in some single beam or navigation formats.
- *
- * Revision 5.7  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.5  2002/02/22 09:03:43  caress
- * Release 5.0.beta13
- *
- * Revision 5.4  2001/08/25 00:54:13  caress
- * Adding beamwidth values to extract functions.
- *
- * Revision 5.3  2001/07/20  00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.4  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.3  2000/09/30  06:32:52  caress
- * Snapshot for Dale.
- *
- * Revision 4.2  1999/10/21  22:40:10  caress
- * Added MBPRONAV format.
- *
- * Revision 4.1  1999/07/16  19:24:15  caress
- * Yet another version.
- *
- *
  *
  */
 

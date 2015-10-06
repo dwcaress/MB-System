@@ -18,48 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
- * $Log: mbf_sbsiolsi.h,v $
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.4  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.3  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.2  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.2  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.1  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.2  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.1  1994/02/17  21:19:08  caress
- * Updated associated MBIO format id in comments.
- *
- * Revision 4.0  1994/02/17  20:59:54  caress
- * First cut at new version. No changes.
- *
- * Revision 3.0  1993/05/14  22:53:31  sohara
- * initial version
  *
  */
 /*

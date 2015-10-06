@@ -19,29 +19,6 @@
  * Author:	D. W. Caress
  * Date:	June 6, 1997
  *
- * $Log: mbf_elmk2unb.h,v $
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.2  2000/09/30  06:29:44  caress
- * Snapshot for Dale.
- *
- * Revision 4.1  1998/10/05  17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.0  1997/07/25  14:25:40  caress
- * Version 4.5beta2.
- *
- * Revision 1.1  1997/07/25  14:19:53  caress
- * Initial revision
- *
- *
  *
  *
  */

@@ -25,75 +25,6 @@
  * Date:	March 27, 1999
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
- * $Log: mbr_l3xseraw.c,v $
- * Revision 5.21  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.20  2007/07/03 17:28:08  caress
- * Fixes to XSE format.
- *
- * Revision 5.19  2007/06/18 01:19:48  caress
- * Changes as of 17 June 2007.
- *
- * Revision 5.18  2006/12/15 21:36:16  caress
- * Turned off debug mode.
- *
- * Revision 5.17  2006/09/11 18:55:52  caress
- * Changes during Western Flyer and Thomas Thompson cruises, August-September
- * 2006.
- *
- * Revision 5.16  2006/08/04 03:56:41  caress
- * Working towards 5.1.0 release.
- *
- * Revision 5.15  2006/01/06 18:27:19  caress
- * Working towards 5.0.8
- *
- * Revision 5.14  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.13  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.12  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.11  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.10  2001/12/30 20:32:12  caress
- * Fixed array overflows in handling XSE data.
- *
- * Revision 5.9  2001/12/20 20:48:51  caress
- * Release 5.0.beta11
- *
- * Revision 5.8  2001/10/23  02:34:12  caress
- * Added error checking for corrupted depth and heave values.
- *
- * Revision 5.7  2001/08/23  20:50:24  caress
- * Fixed problems with SB2120 data.
- *
- * Revision 5.6  2001/08/10  22:41:19  dcaress
- * Release 5.0.beta07
- *
- * Revision 5.5  2001-07-22 14:17:01-07  caress
- * Fixed bug that deallocated an unallocated array.
- *
- * Revision 5.4  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.3  2001/06/08  21:44:01  caress
- * Version 5.0.beta01
- *
- * Revision 5.2  2001/06/03  06:54:56  caress
- * Fixed support for xse format on byte swapped computers.
- *
- * Revision 5.1  2001/04/09  18:04:51  caress
- * Fixed bug related to nav handling.
- *
- * Revision 5.0  2001/04/05  18:33:25  caress
- * Initial version.
- * Consolidates two former i/o modules elmk2xse and sb2120xs.
- *
  *
  */
 
@@ -139,6 +70,7 @@ int mbr_info_l3xseraw(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -210,6 +142,7 @@ int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -257,6 +190,7 @@ int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -305,6 +239,7 @@ int mbr_info_l3xseraw(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -340,6 +275,7 @@ int mbr_info_l3xseraw(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -364,6 +300,7 @@ int mbr_info_l3xseraw(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

@@ -40,11 +40,6 @@
 # Version:
 #   $Id: mbm_multiprocess.pl 19XX 2011-07-17 15:15:00Z ferreira $
 #
-# Revisions:
-#
-#  Revision 1.0		2011-07-17 15:15:00	cferreira
-#  Initial version with full implementation of mbcopy flags
-#
 
 $program_name = "mbm_multicopy";
 

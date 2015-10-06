@@ -24,49 +24,6 @@
  * Author:	D. W. Caress
  * Date:	August 5, 1996
  *
- * $Log: mbsys_dsl.h,v $
- * Revision 5.6  2005/11/05 00:48:03  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.5  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.4  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.3  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.2  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.3  2000/09/30  06:31:19  caress
- * Snapshot for Dale.
- *
- * Revision 4.2  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1997/04/17  15:07:36  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.0  1996/08/26  17:29:56  caress
- * Release 4.4 revision.
- *
- * Revision 1.1  1996/08/26  17:24:56  caress
- * Initial revision
- *
  *
  */
 /*

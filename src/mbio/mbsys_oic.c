@@ -22,46 +22,6 @@
  * Author:	D. W. Caress
  * Date:	March 1, 1999
  *
- * $Log: mbsys_oic.c,v $
- * Revision 5.10  2008/07/10 18:02:39  caress
- * Proceeding towards 5.1.1beta20.
- *
- * Revision 5.7  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.6  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.5  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.4  2001/08/25 00:54:13  caress
- * Adding beamwidth values to extract functions.
- *
- * Revision 5.3  2001/07/20  00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.2  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.1  2000/09/30  06:32:52  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  1999/03/31  18:29:20  caress
- * MB-System 4.6beta7
- *
- * Revision 1.1  1999/03/31  18:11:35  caress
- * Initial revision
- *
  *
  */
 

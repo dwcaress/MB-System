@@ -36,45 +36,6 @@
  * Date:	February 27, 2003
  *		Amsterdam Airport
  *
- * $Log: mbareaclean.c,v $
- * Revision 5.13  2008/12/05 17:32:52  caress
- * Check-in mods 5 December 2008 including contributions from Gordon Keith.
- *
- * Revision 5.12  2008/07/10 18:16:33  caress
- * Proceeding towards 5.1.1beta20.
- *
- * Revision 5.10  2007/10/08 16:48:07  caress
- * State of the code on 8 October 2007.
- *
- * Revision 5.9  2006/08/09 22:41:27  caress
- * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
- *
- * Revision 5.8  2006/02/01 07:31:06  caress
- * Modifications suggested by Gordon Keith
- *
- * Revision 5.7  2006/01/27 19:13:04  caress
- * Version 5.0.8beta2
- *
- * Revision 5.6  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.5  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.4  2004/12/02 06:39:28  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.3  2004/09/16 00:57:46  caress
- * Fixed parsing of bounds argument.
- *
- * Revision 5.2  2003/07/26 18:01:22  caress
- * Changed beamflag handling code.
- *
- * Revision 5.1  2003/04/17 21:17:10  caress
- * Release 5.0.beta30
- *
- * Revision 5.0  2003/03/10 20:47:08  caress
- * Initial version.
  *
  *
  */

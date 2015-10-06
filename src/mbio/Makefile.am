@@ -48,7 +48,8 @@ include_HEADERS = mb_config.h \
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -I@top_srcdir@/src/bsio \
+AM_CPPFLAGS = -I${top_srcdir}/src/mbaux \
+	-I@top_srcdir@/src/bsio \
 	-I@top_srcdir@/src/surf \
 	-I@top_srcdir@/src/gsf \
 	${libgmt_CPPFLAGS} \
@@ -68,7 +69,7 @@ libmbio_la_SOURCES = \
                 mb_fileio.c mb_mem.c \
                 mb_coor_scale.c mb_check_info.c \
                 mb_time.c mb_angle.c \
-                mb_absorption.c mb_proj.c \
+                mb_absorption.c mb_proj.c mb_spline.c \
                 mb_get_value.c mb_defaults.c \
                 mb_process.c mb_esf.c \
                 mb_get.c mb_get_all.c mb_read.c \

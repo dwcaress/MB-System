@@ -26,15 +26,6 @@
  *       	D.W. Caress
  * Date:	May 5, 2008
  *
- * $Log: mbsys_image83p.c,v $
- * Revision 5.4  2008/07/19 07:41:14  caress
- * Added formats 191 and 192 to support Imagenex Delta T multibeam data.
- *
- * Revision 5.3  2008/07/10 18:02:39  caress
- * Proceeding towards 5.1.1beta20.
- *
- * Revision 5.0  2008/05/16 22:51:24  caress
- * Initial version.
  *
  *
  */

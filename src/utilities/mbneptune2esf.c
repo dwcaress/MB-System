@@ -44,24 +44,6 @@
  * Acknowledgments:
  * This program is based on a skeleton derived from mbclean.
  *
- * $Log: mbneptune2esf.c,v $
- * Revision 5.5  2008/09/11 20:20:14  caress
- * Checking in updates made during cruise AT15-36.
- *
- * Revision 5.4  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.3  2005/11/05 01:07:54  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.2  2005/03/25 04:43:02  caress
- * Standardized the string lengths used for filenames and comment data.
- *
- * Revision 5.1  2004/12/18 01:38:52  caress
- * Working towards release 5.0.6.
- *
- * Revision 5.0  2004/12/02 06:40:49  caress
- * New program submitted by Gordon Keith.
  *
  *
  */

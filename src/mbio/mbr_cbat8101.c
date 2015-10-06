@@ -24,55 +24,6 @@
  * Author:	D. W. Caress
  * Date:	December 10, 1998
  *
- * $Log: mbr_cbat8101.c,v $
- * Revision 5.11  2008/09/13 06:08:09  caress
- * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
- *
- * Revision 5.10  2008/07/10 06:43:40  caress
- * Preparing for 5.1.1beta20
- *
- * Revision 5.9  2006/01/06 18:27:19  caress
- * Working towards 5.0.8
- *
- * Revision 5.8  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.7  2003/05/20 18:05:32  caress
- * Added svp_source to data source parameters.
- *
- * Revision 5.6  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.5  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.4  2001/07/20 00:31:11  caress
- * Release 5.0.beta03
- *
- * Revision 5.3  2001/06/08  21:44:01  caress
- * Version 5.0.beta01
- *
- * Revision 5.2  2001/03/22  20:45:56  caress
- * Trying to make 5.0.beta0...
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.3  2000/10/11  01:02:30  caress
- * Convert to ANSI C
- *
- * Revision 4.2  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.1  1999/03/31  18:11:35  caress
- * MB-System 4.6beta7
- *
- * Revision 4.0  1999/01/01  23:38:01  caress
- * MB-System version 4.6beta6
- *
  *
  */
 
@@ -108,6 +59,7 @@ int mbr_info_cbat8101(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -181,6 +133,7 @@ int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->variable_beams,
 			&mb_io_ptr->traveltime,
 			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
 			&mb_io_ptr->heading_source,
 			&mb_io_ptr->vru_source,
@@ -228,6 +181,7 @@ int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
@@ -276,6 +230,7 @@ int mbr_info_cbat8101(int verbose,
 			int *variable_beams,
 			int *traveltime,
 			int *beam_flagging,
+			int *platform_source,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
@@ -311,6 +266,7 @@ int mbr_info_cbat8101(int verbose,
 	*variable_beams = MB_NO;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
+	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_NAV;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -335,6 +291,7 @@ int mbr_info_cbat8101(int verbose,
 		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
 		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);

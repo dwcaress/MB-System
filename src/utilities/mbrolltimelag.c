@@ -26,30 +26,6 @@
  * Author:	D. W. Caress
  * Date:	November 11, 2005
  *
- * $Log: mbrolltimelag.c,v $
- * Revision 5.7  2008/09/13 06:08:09  caress
- * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
- *
- * Revision 5.6  2008/02/12 02:48:39  caress
- * Added ability to set output filename root.
- *
- * Revision 5.5  2006/06/16 19:30:58  caress
- * Check in after the Santa Monica Basin Mapping AUV Expedition.
- *
- * Revision 5.4  2006/04/26 22:05:26  caress
- * Changes to handle MBARI Mapping AUV data better.
- *
- * Revision 5.3  2006/04/19 18:31:23  caress
- * Fixed use of mbm_histplot.
- *
- * Revision 5.2  2006/04/11 19:19:30  caress
- * Various fixes.
- *
- * Revision 5.1  2006/01/18 15:17:00  caress
- * Added stdlib.h include.
- *
- * Revision 5.0  2006/01/06 18:20:56  caress
- * Working towards 5.0.8
  *
  */
 

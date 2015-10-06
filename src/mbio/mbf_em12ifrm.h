@@ -18,23 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	December 5, 2000
- * $Log: mbf_em12ifrm.h,v $
- * Revision 5.4  2004/10/18 04:15:46  caress
- * Minor change.
- *
- * Revision 5.3  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.1  2001/03/22 20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.0  2000/12/10  20:24:25  caress
- * Initial revision.
- *
- *
  *
  */
 /*
