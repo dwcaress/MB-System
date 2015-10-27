@@ -1727,7 +1727,11 @@ if (*recordid == R7KRECID_8100SonarData) fprintf(stderr," R7KRECID_8100SonarData
 				{
 				status = mbr_reson7kr_rd_fileheader(verbose, buffer, store_ptr, error);
 				(*fileheaders)++;
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
+					store->nrec_fileheader++;
+					}
 
 /* kluge to set bogus background navigation */
 /*klugelon = -121.0;
@@ -1749,19 +1753,28 @@ mb_navint_add(verbose, mbio_ptr,
 				{
 				status = mbr_reson7kr_rd_reference(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_reference++;
+					}
 				}
 			else if (*recordid == R7KRECID_UncalibratedSensorOffset)
 				{
 				status = mbr_reson7kr_rd_sensoruncal(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_sensoruncal++;
+					}
 				}
 			else if (*recordid == R7KRECID_CalibratedSensorOffset)
 				{
 				status = mbr_reson7kr_rd_sensorcal(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_sensorcal++;
+					}
 				}
 			else if (*recordid == R7KRECID_Position)
 				{
@@ -1773,85 +1786,127 @@ mb_navint_add(verbose, mbio_ptr,
 				{
 				status = mbr_reson7kr_rd_customattitude(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_customattitude++;
+					}
 				}
 			else if (*recordid == R7KRECID_Tide)
 				{
 				status = mbr_reson7kr_rd_tide(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_tide++;
+					}
 				}
 			else if (*recordid == R7KRECID_Altitude)
 				{
 				status = mbr_reson7kr_rd_altitude(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_altitude++;
+					}
 				}
 			else if (*recordid == R7KRECID_MotionOverGround)
 				{
 				status = mbr_reson7kr_rd_motion(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_motion++;
+					}
 				}
 			else if (*recordid == R7KRECID_Depth)
 				{
 				status = mbr_reson7kr_rd_depth(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_depth++;
+					}
 				}
 			else if (*recordid == R7KRECID_SoundVelocityProfile)
 				{
 				status = mbr_reson7kr_rd_svp(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_svp++;
+					}
 				}
 			else if (*recordid == R7KRECID_CTD)
 				{
 				status = mbr_reson7kr_rd_ctd(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_ctd++;
+					}
 				}
 			else if (*recordid == R7KRECID_Geodesy)
 				{
 				status = mbr_reson7kr_rd_geodesy(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_geodesy++;
+					}
 				}
 			else if (*recordid == R7KRECID_RollPitchHeave)
 				{
 				status = mbr_reson7kr_rd_rollpitchheave(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_rollpitchheave++;
+					}
 				}
 			else if (*recordid == R7KRECID_Heading)
 				{
 				status = mbr_reson7kr_rd_heading(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_heading++;
+					}
 				}
 			else if (*recordid == R7KRECID_SurveyLine)
 				{
 				status = mbr_reson7kr_rd_surveyline(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_surveyline++;
+					}
 				}
 			else if (*recordid == R7KRECID_Navigation)
 				{
 				status = mbr_reson7kr_rd_navigation(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_navigation++;
+					}
 				}
 			else if (*recordid == R7KRECID_Attitude)
 				{
 				status = mbr_reson7kr_rd_attitude(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_attitude++;
+					}
 				}
 			else if (*recordid == R7KRECID_Rec1022)
 				{
 				status = mbr_reson7kr_rd_rec1022(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_rec1022++;
+					}
 				}
 			else if (*recordid == R7KRECID_FSDWsidescan
 				&& *deviceid == R7KDEVID_EdgetechFSDW
@@ -1861,6 +1916,7 @@ mb_navint_add(verbose, mbio_ptr,
 				if (status == MB_SUCCESS)
 					{
 					done = MB_YES;
+					store->nrec_fsdwsslo++;
 
 					/* store the Edgetech timestamp for possible use in fixing 7k time */
 					fsdwsslo = &(store->fsdwsslo);
@@ -1889,6 +1945,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_tim
 				if (status == MB_SUCCESS)
 					{
 					done = MB_YES;
+					store->nrec_fsdwsslo++;
 
 					/* store the Edgetech timestamp for possible use in fixing 7k time */
 					fsdwsslo = &(store->fsdwsslo);
@@ -1918,6 +1975,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_tim
 				if (status == MB_SUCCESS)
 					{
 					done = MB_YES;
+					store->nrec_fsdwsshi++;
 
 					/* store the Edgetech timestamp for possible use in fixing 7k time */
 					fsdwsshi = &(store->fsdwsshi);
@@ -1946,6 +2004,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_tim
 				if (status == MB_SUCCESS)
 					{
 					done = MB_YES;
+					store->nrec_fsdwsshi++;
 
 					/* store the Edgetech timestamp for possible use in fixing 7k time */
 					fsdwsshi = &(store->fsdwsshi);
@@ -1973,6 +2032,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_tim
 				if (status == MB_SUCCESS)
 					{
 					done = MB_YES;
+					store->nrec_fsdwsb++;
 
 					/* store the Edgetech timestamp for possible use in fixing 7k time */
 					fsdwsb = &(store->fsdwsb);
@@ -1998,37 +2058,58 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_ti
 				{
 				status = mbr_reson7kr_rd_bluefin(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					if (store->bluefin.data_format == R7KRECID_BluefinNav)
+						store->nrec_bluefinnav++;
+					else if (store->bluefin.data_format == R7KRECID_BluefinEnvironmental)
+						store->nrec_bluefinenv++;
+					}
 				}
 			else if (*recordid == R7KRECID_ProcessedSidescan)
 				{
 				status = mbr_reson7kr_rd_processedsidescan(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_processedsidescan = MB_YES;
+					store->nrec_processedsidescan++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kVolatileSonarSettings)
 				{
 				status = mbr_reson7kr_rd_volatilesonarsettings(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_volatilesettings = MB_YES;
+					store->nrec_volatilesonarsettings++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kConfiguration)
 				{
 				status = mbr_reson7kr_rd_configuration(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_configuration++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kMatchFilter)
 				{
 				status = mbr_reson7kr_rd_matchfilter(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_matchfilter = MB_YES;
+					store->nrec_matchfilter++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kV2FirmwareHardwareConfiguration)
 				{
 				status = mbr_reson7kr_rd_v2firmwarehardwareconfiguration(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_v2firmwarehardwareconfiguration++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kBeamGeometry)
 				{
@@ -2037,6 +2118,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_ti
 					{
 					store->read_beamgeometry = MB_YES;
 					done = MB_NO;
+					store->nrec_beamgeometry++;
 
 					/* set beam widths */
 					beamgeometry = &(store->beamgeometry);
@@ -2048,7 +2130,10 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_ti
 				{
 				status = mbr_reson7kr_rd_calibration(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_calibration++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kBathymetricData)
 				{
@@ -2056,6 +2141,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_ti
 				if (status == MB_SUCCESS)
 					{
 					store->read_bathymetry = MB_YES;
+					store->nrec_bathymetry++;
 
 					/* if needed use most recent Edgetech timestamp to fix 7k time */
 					bathymetry = &(store->bathymetry);
@@ -2099,6 +2185,7 @@ header->RecordNumber,bathymetry->ping_number);
 				if (status == MB_SUCCESS)
 					{
 					store->read_backscatter = MB_YES;
+					store->nrec_backscatter++;
 
 					/* if needed use most recent Edgetech timestamp to fix 7k time */
 					backscatter = &(store->backscatter);
@@ -2139,6 +2226,7 @@ header->RecordNumber,backscatter->ping_number);
 				if (status == MB_SUCCESS)
 					{
 					store->read_beam = MB_YES;
+					store->nrec_beam++;
 
 					/* if needed use most recent Edgetech timestamp to fix 7k time */
 					beam = &(store->beam);
@@ -2177,7 +2265,10 @@ header->RecordNumber,beam->ping_number);
 				{
 				status = mbr_reson7kr_rd_verticaldepth(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_verticaldepth = MB_YES;
+					store->nrec_verticaldepth++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kTVGData)
 				{
@@ -2185,6 +2276,7 @@ header->RecordNumber,beam->ping_number);
 				if (status == MB_SUCCESS)
 					{
 					store->read_tvg = MB_YES;
+					store->nrec_tvg++;
 					}
 				}
 			else if (*recordid == R7KRECID_7kImageData)
@@ -2193,6 +2285,7 @@ header->RecordNumber,beam->ping_number);
 				if (status == MB_SUCCESS)
 					{
 					store->read_image = MB_YES;
+					store->nrec_image++;
 
 					/* if needed use most recent Edgetech timestamp to fix 7k time */
 					image = &(store->image);
@@ -2231,108 +2324,173 @@ header->RecordNumber,image->ping_number);
 				{
 				status = mbr_reson7kr_rd_v2pingmotion(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_v2pingmotion = MB_YES;
+					store->nrec_v2pingmotion++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kV2DetectionSetup)
 				{
 				status = mbr_reson7kr_rd_v2detectionsetup(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_v2detectionsetup = MB_YES;
+					store->nrec_v2detectionsetup++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kV2BeamformedData)
 				{
 				status = mbr_reson7kr_rd_v2beamformed(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_v2beamformed = MB_YES;
+					store->nrec_v2beamformed++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kV2BITEData)
 				{
 				status = mbr_reson7kr_rd_v2bite(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_v2bite++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kV27kCenterVersion)
 				{
 				status = mbr_reson7kr_rd_v27kcenterversion(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_v27kcenterversion++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kV28kWetEndVersion)
 				{
 				status = mbr_reson7kr_rd_v28kwetendversion(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					done = MB_YES;
+					store->nrec_v28kwetendversion++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kV2Detection)
 				{
 				status = mbr_reson7kr_rd_v2detection(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_v2detection = MB_YES;
+					store->nrec_v2detection++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kV2RawDetection)
 				{
 				status = mbr_reson7kr_rd_v2rawdetection(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_v2rawdetection = MB_YES;
+					store->nrec_v2rawdetection++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kV2SnippetData)
 				{
 				status = mbr_reson7kr_rd_v2snippet(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_v2snippet = MB_YES;
+					store->nrec_v2snippet++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kCalibratedSnippetData)
 				{
 				status = mbr_reson7kr_rd_calibratedsnippet(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_calibratedsnippet = MB_YES;
+					store->nrec_calibratedsnippet++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kInstallationParameters)
 				{
 				status = mbr_reson7kr_rd_installation(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
+					store->nrec_installation++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kSystemEventMessage)
 				{
 				status = mbr_reson7kr_rd_systemeventmessage(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
+					store->nrec_systemeventmessage++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kRemoteControlSonarSettings)
 				{
 				status = mbr_reson7kr_rd_remotecontrolsettings(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
+					{
 					store->read_remotecontrolsettings = MB_YES;
-				done = MB_NO;
+					done = MB_NO;
+					store->nrec_remotecontrolsettings++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kReserved)
 				{
 				status = mbr_reson7kr_rd_reserved(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
+					store->nrec_reserved++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kRoll)
 				{
 				status = mbr_reson7kr_rd_roll(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
+					store->nrec_roll++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kPitch)
 				{
 				status = mbr_reson7kr_rd_pitch(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
+					store->nrec_pitch++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kSoundVelocity)
 				{
 				status = mbr_reson7kr_rd_soundvelocity(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
+					store->nrec_soundvelocity++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kAbsorptionLoss)
 				{
 				status = mbr_reson7kr_rd_absorptionloss(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
+					store->nrec_absorptionloss++;
+					}
 				}
 			else if (*recordid == R7KRECID_7kSpreadingLoss)
 				{
 				status = mbr_reson7kr_rd_spreadingloss(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
+					store->nrec_spreadingloss++;
+					}
 				}
 			else
 				{
@@ -2341,6 +2499,7 @@ header->RecordNumber,image->ping_number);
 				fprintf(stderr,"Record type %d - recognized but not supported.\n",*recordid);
 #endif
 				done = MB_NO;
+				store->nrec_other++;
 				}
 
 			/* check if ping record is known to be done */
@@ -10101,6 +10260,7 @@ fprintf(stderr," R7KRECID_7kFileHeader\n");
 			buffer = (char *) *bufferptr;
 			write_len = (size_t)size;
 			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+			store->nrec_fileheader++;
 			}
 		}
 

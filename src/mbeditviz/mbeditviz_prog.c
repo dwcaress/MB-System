@@ -982,7 +982,8 @@ fprintf(stderr,"     Beam bathymetry: %d %f %f %f\n",ibeam,ping->bath[ibeam],pin
 							/* apply rotations and calculate position */
 							mbeditviz_beam_position (ping->navlon, ping->navlat,
 										mtodeglon, mtodeglat,
-										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+										ping->bath[ibeam] - ping->sonardepth,
+										ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 										sonardepth,
 										rolldelta, pitchdelta, heading,
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
@@ -1536,7 +1537,7 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 					fclose(afp);
 					}
 
-				/* allocate space for asynchronous attitude */
+				/* allocate space for synchronous attitude */
 				if (file->n_sync_attitude > 0)
 					{
 					if ((file->sync_attitude_time_d = (double *) malloc(sizeof(double) * (file->n_sync_attitude))) != NULL)
@@ -1775,14 +1776,13 @@ fprintf(stderr,"pitchdelta: %f %f   pitch:%f %f   %d\n", *pitchdelta, pitchbias,
 /*--------------------------------------------------------------------*/
 int mbeditviz_beam_position (double navlon, double navlat,
 							double mtodeglon, double mtodeglat,
-							double bath, double acrosstrack, double alongtrack,
+							double rawbath, double acrosstrack, double alongtrack,
 							double sonardepth,
 							double rolldelta, double pitchdelta, double heading,
 							double *bathcorr, double *lon, double *lat)
 {
 	/* local variables */
 	char	*function_name = "mbeditviz_beam_position";
-	double	bathuse;
 	double	newbath, neweasting, newnorthing;
 
 	/* print input debug statements */
@@ -1795,7 +1795,7 @@ int mbeditviz_beam_position (double navlon, double navlat,
 		fprintf(stderr,"dbg2       navlat:      %f\n",navlat);
 		fprintf(stderr,"dbg2       mtodeglon:   %f\n",mtodeglon);
 		fprintf(stderr,"dbg2       mtodeglat:   %f\n",mtodeglat);
-		fprintf(stderr,"dbg2       bath:        %f\n",bath);
+		fprintf(stderr,"dbg2       rawbath:     %f\n",rawbath);
 		fprintf(stderr,"dbg2       acrosstrack: %f\n",acrosstrack);
 		fprintf(stderr,"dbg2       alongtrack:  %f\n",alongtrack);
 		fprintf(stderr,"dbg2       sonardepth:  %f\n",sonardepth);
@@ -1804,22 +1804,20 @@ int mbeditviz_beam_position (double navlon, double navlat,
 		fprintf(stderr,"dbg2       heading:     %f\n",heading);
 		}
 
-	/* strip off heave + draft */
-	bathuse = bath - sonardepth;
-
-	/* rotate beam by 
-	   rolldelta:  Roll relative to previous correction and bias included
-	   pitchdelta: Pitch relative to previous correction and bias included
-	   heading:    Heading absolute (bias included) */
+	/* initial sounding rawbath is relative to sensor (sensor depth subtracted)
+	 * rotate sounding by 
+	     rolldelta:  Roll relative to previous correction and bias included
+	     pitchdelta: Pitch relative to previous correction and bias included
+	     heading:    Heading absolute (bias included) */
 	mb_platform_math_attitude_rotate_beam (
 			mbev_verbose,
-			acrosstrack, alongtrack, bathuse,
+			acrosstrack, alongtrack, rawbath,
 			rolldelta, pitchdelta, heading,
 			&neweasting, &newnorthing, &newbath,
 			&mbev_error);
 
 
-	/* add heave and draft back in */
+	/* add sensordepth to get full corrected bathymetry */
 	*bathcorr = newbath + sonardepth;
 
 	/* locate lon lat position */
@@ -1833,14 +1831,13 @@ fprintf(stderr,"     navlon:      %f\n",navlon);
 fprintf(stderr,"     navlat:      %f\n",navlat);
 fprintf(stderr,"     mtodeglon:   %f\n",mtodeglon);
 fprintf(stderr,"     mtodeglat:   %f\n",mtodeglat);
-fprintf(stderr,"     bath:        %f\n",bath);
+fprintf(stderr,"     bath:        %f\n",rawbath);
 fprintf(stderr,"     acrosstrack: %f\n",acrosstrack);
 fprintf(stderr,"     alongtrack:  %f\n",alongtrack);
 fprintf(stderr,"     sonardepth:  %f\n",sonardepth);
 fprintf(stderr,"     rolldelta:   %f\n",rolldelta);
 fprintf(stderr,"     pitchdelta:  %f\n",pitchdelta);
 fprintf(stderr,"     heading:     %f\n",heading);
-fprintf(stderr,"     bathuse:     %f\n",bathuse);
 fprintf(stderr,"     newbath:     %f\n",newbath);
 fprintf(stderr,"     bathcorr:    %f\n",*bathcorr);
 fprintf(stderr,"     lon:         %f\n",*lon);
@@ -3536,7 +3533,8 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position (ping->navlon, ping->navlat,
 										mtodeglon, mtodeglat,
-										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+										ping->bath[ibeam] - ping->sonardepth,
+										ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 										sonardepth,
 										rolldelta, pitchdelta, heading,
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
@@ -3720,7 +3718,8 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position (ping->navlon, ping->navlat,
 										mtodeglon, mtodeglat,
-										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+										ping->bath[ibeam] - ping->sonardepth,
+										ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 										sonardepth,
 										rolldelta, pitchdelta, heading, 
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
@@ -3879,7 +3878,8 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position (ping->navlon, ping->navlat,
 										mtodeglon, mtodeglat,
-										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+										ping->bath[ibeam] - ping->sonardepth,
+										ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 										sonardepth,
 										rolldelta, pitchdelta, heading, 
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
@@ -4223,7 +4223,8 @@ rollbias, pitchbias, headingbias, timelag);
 		/* apply rotations and recalculate position */
 		mbeditviz_beam_position (ping->navlon, ping->navlat,
 				mtodeglon, mtodeglat,
-				ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+				ping->bath[ibeam] - ping->sonardepth,
+				ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 				sonardepth,
 				rolldelta, pitchdelta, heading, 
 				&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
@@ -4329,7 +4330,8 @@ rollbias, pitchbias, headingbias, timelag);
 					/* apply rotations and recalculate position */
 					mbeditviz_beam_position (ping->navlon, ping->navlat,
 							mtodeglon, mtodeglat,
-							ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+							ping->bath[ibeam] - ping->sonardepth,
+							ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
 							sonardepth,
 							rolldelta, pitchdelta, heading, 
 							&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));

@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2259       October 27, 2015
   Version 5.5.2258       October 5, 2015
   Version 5.5.2257       September 1, 2015
   Version 5.5.2256       August 24, 2015
@@ -221,6 +222,20 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+Mbpreprocess: Now called format-specific preprocess function if available and
+applied generic preprocessing otherwise. The first format specific preprocessing
+to be defined is for Reson 7k data (MBIO format 88).
+
+Mb7kpreprocess: Modified optional fixing of multibeam ping times assuming a
+specified constant ping interval.
+
+Mbmakembplatform: Added manual page.
+
+mbio/mb_navint.c: Added MBIO API functions mb_apply_time_latency() and
+mb_apply_time_filter().
+
+Mbeditviz: Fixed application of time latency to sonardepth.
 
 -----> 5.5.2258 (October 5, 2015)
 

@@ -51,19 +51,16 @@ static char version_id[] = "$Id$";
 #define MBPREPROCESS_MERGE_OFF 		0
 #define MBPREPROCESS_MERGE_FILE 	1
 #define MBPREPROCESS_MERGE_ASYNC 	2
-#define MBPREPROCESS_TIMESHIFT_OFF 	0
-#define MBPREPROCESS_TIMESHIFT_FILE 	1
-#define MBPREPROCESS_TIMESHIFT_CONSTANT 2
 
-#define MBPREPROCESS_TIMESHIFT_APPLY_NONE		0x00
-#define MBPREPROCESS_TIMESHIFT_APPLY_NAV		0x01
-#define MBPREPROCESS_TIMESHIFT_APPLY_SENSORDEPTH	0x02
-#define MBPREPROCESS_TIMESHIFT_APPLY_HEADING		0x04
-#define MBPREPROCESS_TIMESHIFT_APPLY_ALTITUDE		0x08
-#define MBPREPROCESS_TIMESHIFT_APPLY_ATTITUDE		0x10
-#define MBPREPROCESS_TIMESHIFT_APPLY_ALL_ANCILLIARY	0x7F
-#define MBPREPROCESS_TIMESHIFT_APPLY_SURVEY		0x80
-#define MBPREPROCESS_TIMESHIFT_APPLY_ALL		0xFF
+#define MBPREPROCESS_TIME_LATENCY_APPLY_NONE		0x00
+#define MBPREPROCESS_TIME_LATENCY_APPLY_NAV		0x01
+#define MBPREPROCESS_TIME_LATENCY_APPLY_SENSORDEPTH	0x02
+#define MBPREPROCESS_TIME_LATENCY_APPLY_HEADING		0x04
+#define MBPREPROCESS_TIME_LATENCY_APPLY_ALTITUDE		0x08
+#define MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE		0x10
+#define MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY	0x7F
+#define MBPREPROCESS_TIME_LATENCY_APPLY_SURVEY		0x80
+#define MBPREPROCESS_TIME_LATENCY_APPLY_ALL		0xFF
 
 /*--------------------------------------------------------------------*/
 
@@ -91,28 +88,41 @@ int main (int argc, char **argv)
 	 * 		--format=format_id
 	 * 		--nav-file=file
 	 * 		--nav-file-format=format_id
+	 * 		--output-sensor-fnv
 	 * 		--nav-async=record_kind
+	 * 		--nav-sensor=sensor_id
 	 * 		--sensordepth-file=file
 	 * 		--sensordepth-file-format=format_id
 	 * 		--sensordepth-async=record_kind
+	 * 		--sensordepth-sensor=sensor_id
 	 * 		--heading-file=file
 	 * 		--heading-file-format=format_id
 	 * 		--heading-async=record_kind
+	 * 		--heading-sensor=sensor_id
 	 * 		--altitude-file=file
 	 * 		--altitude-file-format=format_id
 	 * 		--altitude-async=record_kind
+	 * 		--altitude-sensor=sensor_id
 	 * 		--attitude-file=file
 	 * 		--attitude-file-format=format_id
 	 * 		--attitude-async=record_kind
-	 * 		--timeshift-file=file
-	 * 		--timeshift-constant=value
-	 * 		--timeshift-apply-nav=boolean
-	 * 		--timeshift-apply-sensordepth=boolean
-	 * 		--timeshift-apply-heading=boolean
-	 * 		--timeshift-apply-attitude=boolean
-	 * 		--timeshift-apply-all-ancilliary=boolean
-	 * 		--timeshift-apply-survey=boolean
-	 * 		--timeshift-apply-all=boolean
+	 * 		--attitude-sensor=sensor_id
+	 * 		--time-latency-file=file
+	 * 		--time-latency-file-format=format_id
+	 * 		--time-latency-constant=value
+	 * 		--time-latency-apply-nav
+	 * 		--time-latency-apply-sensordepth
+	 * 		--time-latency-apply-heading
+	 * 		--time-latency-apply-attitude
+	 * 		--time-latency-apply-all-ancilliary
+	 * 		--time-latency-apply-survey
+	 * 		--time-latency-apply-all
+	 * 		--filter=value
+	 * 		--filter-apply-nav
+	 * 		--filter-apply-sensordepth
+	 * 		--filter-apply-heading
+	 * 		--filter-apply-attitude
+	 * 		--filter-apply-all-ancilliary
 	 * 		--platform-file=platform_file
 	 * 		--platform-target-sensor=sensor_id
 	 * 		--sensordepth-offsets=offset_x/offset_y/offset_z
@@ -128,30 +138,43 @@ int main (int argc, char **argv)
 		{"verbose",							no_argument, 		NULL, 		0},
 		{"input",							required_argument, 	NULL, 		0},
 		{"format",							required_argument, 	NULL, 		0},
+		{"output-sensor-fnv",				no_argument, 		NULL, 		0},
 		{"nav-file",						required_argument, 	NULL, 		0},
 		{"nav-file-format",					required_argument, 	NULL, 		0},
 		{"nav-async",						required_argument, 	NULL, 		0},
+		{"nav-sensor",						required_argument, 	NULL, 		0},
 		{"sensordepth-file",				required_argument, 	NULL, 		0},
 		{"sensordepth-file-format",			required_argument, 	NULL, 		0},
 		{"sensordepth-async",				required_argument, 	NULL, 		0},
+		{"sensordepth-sensor",				required_argument, 	NULL, 		0},
 		{"heading-file",					required_argument, 	NULL, 		0},
 		{"heading-file-format",				required_argument, 	NULL, 		0},
 		{"heading-async",					required_argument, 	NULL, 		0},
+		{"heading-sensor",					required_argument, 	NULL, 		0},
 		{"altitude-file",					required_argument, 	NULL, 		0},
 		{"altitude-file-format",			required_argument, 	NULL, 		0},
 		{"altitude-async",					required_argument, 	NULL, 		0},
+		{"altitude-sensor",					required_argument, 	NULL, 		0},
 		{"attitude-file",					required_argument, 	NULL, 		0},
 		{"attitude-file-format",			required_argument, 	NULL, 		0},
 		{"attitude-async",					required_argument, 	NULL, 		0},
-		{"timeshift-file",					required_argument, 	NULL, 		0},
-		{"timeshift-constant",				required_argument, 	NULL, 		0},
-		{"timeshift-apply-nav",				no_argument, 		NULL, 		0},
-		{"timeshift-apply-sensordepth",		no_argument, 		NULL, 		0},
-		{"timeshift-apply-heading",			no_argument, 		NULL, 		0},
-		{"timeshift-apply-attitude",		no_argument, 		NULL, 		0},
-		{"timeshift-apply-all-ancilliary",	no_argument, 		NULL, 		0},
-		{"timeshift-apply-survey",			no_argument, 		NULL, 		0},
-		{"timeshift-apply-all",				no_argument, 		NULL, 		0},
+		{"attitude-sensor",					required_argument, 	NULL, 		0},
+		{"time-latency-file",					required_argument, 	NULL, 		0},
+		{"time-latency-file-format",				required_argument, 	NULL, 		0},
+		{"time-latency-constant",				required_argument, 	NULL, 		0},
+		{"time-latency-apply-nav",				no_argument, 		NULL, 		0},
+		{"time-latency-apply-sensordepth",		no_argument, 		NULL, 		0},
+		{"time-latency-apply-heading",			no_argument, 		NULL, 		0},
+		{"time-latency-apply-attitude",			no_argument, 		NULL, 		0},
+		{"time-latency-apply-all-ancilliary",	no_argument, 		NULL, 		0},
+		{"time-latency-apply-survey",			no_argument, 		NULL, 		0},
+		{"time-latency-apply-all",				no_argument, 		NULL, 		0},
+		{"time-latency-apply-nav",				no_argument, 		NULL, 		0},
+		{"filter",							required_argument, 		NULL, 		0},
+		{"filter-apply-sensordepth",		no_argument, 		NULL, 		0},
+		{"filter-apply-heading",			no_argument, 		NULL, 		0},
+		{"filter-apply-attitude",			no_argument, 		NULL, 		0},
+		{"filter-apply-all-ancilliary",		no_argument, 		NULL, 		0},
 		{"platform-file",					required_argument, 	NULL, 		0},
 		{"platform-target-sensor",			required_argument, 	NULL, 		0},
 		{"sensordepth-offsets",				required_argument, 	NULL, 		0},
@@ -167,6 +190,7 @@ int main (int argc, char **argv)
 	mb_path	nav_file;
 	int	nav_file_format = 0;
 	int	nav_async = MB_DATA_DATA;
+	int	nav_sensor = -1;
 	int	nav_num = 0;
 	int	nav_alloc = 0;
 	double	*nav_time_d = NULL;
@@ -178,6 +202,7 @@ int main (int argc, char **argv)
 	mb_path	sensordepth_file;
 	int	sensordepth_file_format = 0;
 	int	sensordepth_async = MB_DATA_DATA;
+	int	sensordepth_sensor = -1;
 	int	sensordepth_num = 0;
 	int	sensordepth_alloc = 0;
 	double	*sensordepth_time_d = NULL;
@@ -187,6 +212,7 @@ int main (int argc, char **argv)
 	mb_path	heading_file;
 	int	heading_file_format = 0;
 	int	heading_async = MB_DATA_DATA;
+	int	heading_sensor = -1;
 	int	heading_num = 0;
 	int	heading_alloc = 0;
 	double	*heading_time_d = NULL;
@@ -196,6 +222,7 @@ int main (int argc, char **argv)
 	mb_path	altitude_file;
 	int	altitude_file_format = 0;
 	int	altitude_async = MB_DATA_DATA;
+	int	altitude_sensor = -1;
 	int	altitude_num = 0;
 	int	altitude_alloc = 0;
 	double	*altitude_time_d = NULL;
@@ -205,6 +232,7 @@ int main (int argc, char **argv)
 	mb_path	attitude_file;
 	int	attitude_file_format = 0;
 	int	attitude_async = MB_DATA_DATA;
+	int	attitude_sensor = -1;
 	int	attitude_num = 0;
 	int	attitude_alloc = 0;
 	double	*attitude_time_d = NULL;
@@ -212,15 +240,19 @@ int main (int argc, char **argv)
 	double	*attitude_pitch = NULL;
 	double	*attitude_heave = NULL;
 
-	int	timeshift_mode = MBPREPROCESS_TIMESHIFT_OFF;
-	mb_u_char timeshift_apply = MBPREPROCESS_TIMESHIFT_APPLY_NONE;
-	mb_path	timeshift_file;
-	int	timeshift_format = 0;
-	int	timeshift_num = 0;
-	int	timeshift_alloc = 0;
-	double	*timeshift_time_d = NULL;
-	double	*timeshift_timeshift = NULL;
-	double	timeshift_constant = 0.0;
+	int	time_latency_mode = MB_SENSOR_TIME_LATENCY_NONE;
+	mb_u_char time_latency_apply = MBPREPROCESS_TIME_LATENCY_APPLY_NONE;
+	mb_path	time_latency_file;
+	int	time_latency_format = 1;
+	int	time_latency_num = 0;
+	int	time_latency_alloc = 0;
+	double	*time_latency_time_d = NULL;
+	double	*time_latency_time_latency = NULL;
+	double	time_latency_constant = 0.0;
+	
+	/* time domain filtering */
+	mb_u_char filter_apply = MBPREPROCESS_TIME_LATENCY_APPLY_NONE;
+	double	filter_length = 0.0;
 	
 	/* platform definition file */
 	mb_path	platform_file;
@@ -233,7 +265,10 @@ int main (int argc, char **argv)
 	struct mb_sensor_struct *sensor_heading = NULL;
 	struct mb_sensor_struct *sensor_rollpitch = NULL;
 	struct mb_sensor_struct *sensor_heave = NULL;
+	struct mb_sensor_struct *sensor_target = NULL;
 	int platform_target_sensor = -1;
+	
+	int output_sensor_fnv = MB_NO;
 	
 	int	no_change_survey = MB_NO;
 	
@@ -369,17 +404,24 @@ int main (int argc, char **argv)
 	int	n_wt_att2 = 0;
 	int	n_wt_att3 = 0;
 	
+	mb_path afile;
+	FILE *afp;
+	int	istart, iend;
+	double start_time_d;
+	double end_time_d;
+	
+	mb_path fnvfile;
+	int	isensor, ioffset;
+	
 	int	testformat;
 	int	interp_status = MB_SUCCESS;
 	int	interp_error = MB_ERROR_NO_ERROR;
-	double	timeshift;
-	int	jsurvey = 0;
 	int	jnav = 0;
 	int	jsensordepth = 0;
 	int	jheading = 0;
 	int	jaltitude = 0;
 	int	jattitude = 0;
-	int	i, j, n;
+	int	i, n;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -420,6 +462,12 @@ int main (int argc, char **argv)
 				{
 				n = sscanf(optarg, "%d", &format);
 				}
+			
+			/* output-sensor-fnv */
+			else if (strcmp("output-sensor-fnv", options[option_index].name) == 0)
+				{
+				output_sensor_fnv = MB_YES;
+				}
 				
 			/*-------------------------------------------------------
 			 * Define source of navigation - could be an external file
@@ -444,6 +492,12 @@ int main (int argc, char **argv)
 				n = sscanf(optarg, "%d", &nav_async);
 				if (n == 1)
 					nav_mode = MBPREPROCESS_MERGE_ASYNC;
+				}
+			
+			/* nav-sensor */
+			else if (strcmp("nav-sensor", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%d", &nav_sensor);
 				}
 				
 			/*-------------------------------------------------------
@@ -470,6 +524,12 @@ int main (int argc, char **argv)
 				if (n == 1)
 					sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
 				}
+			
+			/* sensordepth-sensor */
+			else if (strcmp("sensordepth-sensor", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%d", &sensordepth_sensor);
+				}
 				
 			/*-------------------------------------------------------
 			 * Define source of heading - could be an external file
@@ -494,6 +554,12 @@ int main (int argc, char **argv)
 				n = sscanf(optarg, "%d", &heading_async);
 				if (n == 1)
 					heading_mode = MBPREPROCESS_MERGE_ASYNC;
+				}
+			
+			/* heading-sensor */
+			else if (strcmp("heading-sensor", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%d", &heading_sensor);
 				}
 				
 			/*-------------------------------------------------------
@@ -520,6 +586,12 @@ int main (int argc, char **argv)
 				if (n == 1)
 					altitude_mode = MBPREPROCESS_MERGE_ASYNC;
 				}
+			
+			/* altitude-sensor */
+			else if (strcmp("altitude-sensor", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%d", &altitude_sensor);
+				}
 				
 			/*-------------------------------------------------------
 			 * Define source of attitude - could be an external file
@@ -545,75 +617,136 @@ int main (int argc, char **argv)
 				if (n == 1)
 					attitude_mode = MBPREPROCESS_MERGE_ASYNC;
 				}
+			
+			/* attitude-sensor */
+			else if (strcmp("attitude-sensor", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%d", &attitude_sensor);
+				}
 				
 			/*-------------------------------------------------------
-			 * Define source of timeshift - could be an external file
-			 * or single value. Also define which data the timeshift model
+			 * Define source of time_latency - could be an external file
+			 * or single value. Also define which data the time_latency model
 			 * will be applied to - nav, sensordepth, heading, attitude,
 			 * or all. */
 			
-			/* timeshift-file */
-			else if (strcmp("timeshift-file", options[option_index].name) == 0)
+			/* time-latency-file */
+			else if (strcmp("time-latency-file", options[option_index].name) == 0)
 				{
-				strcpy(timeshift_file, optarg);
-				timeshift_mode = MBPREPROCESS_TIMESHIFT_FILE;
+				strcpy(time_latency_file, optarg);
+				time_latency_mode = MB_SENSOR_TIME_LATENCY_MODEL;
 				}
 			
-			/* timeshift-constant */
-			else if (strcmp("timeshift-constant", options[option_index].name) == 0)
+			/* time-latency-file-format */
+			else if (strcmp("time-latency-file-format", options[option_index].name) == 0)
 				{
-				n = sscanf(optarg, "%lf", &timeshift_constant);
+				n = sscanf(optarg, "%d", &time_latency_format);
+				}
+			
+			/* time-latency-constant */
+			else if (strcmp("time-latency-constant", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%lf", &time_latency_constant);
 				if (n == 1)
-					timeshift_mode = MBPREPROCESS_TIMESHIFT_CONSTANT;
+					time_latency_mode = MB_SENSOR_TIME_LATENCY_STATIC;
 				}
 			
-			/* timeshift-apply-nav */
-			else if (strcmp("timeshift-apply-nav", options[option_index].name) == 0)
+			/* time-latency-apply-nav */
+			else if (strcmp("time-latency-apply-nav", options[option_index].name) == 0)
 				{
-				timeshift_apply =  timeshift_apply | MBPREPROCESS_TIMESHIFT_APPLY_NAV;
+				time_latency_apply =  time_latency_apply | MBPREPROCESS_TIME_LATENCY_APPLY_NAV;
 				}
 			
-			/* timeshift-apply-sensordepth */
-			else if (strcmp("timeshift-apply-sensordepth", options[option_index].name) == 0)
+			/* time-latency-apply-sensordepth */
+			else if (strcmp("time-latency-apply-sensordepth", options[option_index].name) == 0)
 				{
-				timeshift_apply =  timeshift_apply | MBPREPROCESS_TIMESHIFT_APPLY_SENSORDEPTH;
+				time_latency_apply =  time_latency_apply | MBPREPROCESS_TIME_LATENCY_APPLY_SENSORDEPTH;
 				}
 			
-			/* timeshift-apply-heading */
-			else if (strcmp("timeshift-apply-heading", options[option_index].name) == 0)
+			/* time-latency-apply-heading */
+			else if (strcmp("time-latency-apply-heading", options[option_index].name) == 0)
 				{
-				timeshift_apply =  timeshift_apply | MBPREPROCESS_TIMESHIFT_APPLY_HEADING;
+				time_latency_apply =  time_latency_apply | MBPREPROCESS_TIME_LATENCY_APPLY_HEADING;
 				}
 			
-			/* timeshift-apply-attitude */
-			else if (strcmp("timeshift-apply-attitude", options[option_index].name) == 0)
+			/* time-latency-apply-attitude */
+			else if (strcmp("time-latency-apply-attitude", options[option_index].name) == 0)
 				{
-				timeshift_apply =  timeshift_apply | MBPREPROCESS_TIMESHIFT_APPLY_ATTITUDE;
+				time_latency_apply =  time_latency_apply | MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE;
 				}
 			
-			/* timeshift-apply-altitude */
-			else if (strcmp("timeshift-apply-altitude", options[option_index].name) == 0)
+			/* time-latency-apply-altitude */
+			else if (strcmp("time-latency-apply-altitude", options[option_index].name) == 0)
 				{
-				timeshift_apply =  timeshift_apply | MBPREPROCESS_TIMESHIFT_APPLY_ATTITUDE;
+				time_latency_apply =  time_latency_apply | MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE;
 				}
 			
-			/* timeshift-apply-all-ancilliary */
-			else if (strcmp("timeshift-apply-all-ancilliary", options[option_index].name) == 0)
+			/* time-latency-apply-all-ancilliary */
+			else if (strcmp("time-latency-apply-all-ancilliary", options[option_index].name) == 0)
 				{
-				timeshift_apply =  MBPREPROCESS_TIMESHIFT_APPLY_ALL_ANCILLIARY;
+				time_latency_apply =  MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
 				}
 			
-			/* timeshift-apply-survey */
-			else if (strcmp("timeshift-apply-survey", options[option_index].name) == 0)
+			/* time-latency-apply-survey */
+			else if (strcmp("time-latency-apply-survey", options[option_index].name) == 0)
 				{
-				timeshift_apply =  MBPREPROCESS_TIMESHIFT_APPLY_SURVEY;
+				time_latency_apply =  MBPREPROCESS_TIME_LATENCY_APPLY_SURVEY;
 				}
 			
-			/* timeshift-apply-all */
-			else if (strcmp("timeshift-apply-all", options[option_index].name) == 0)
+			/* time-latency-apply-all */
+			else if (strcmp("time-latency-apply-all", options[option_index].name) == 0)
 				{
-				timeshift_apply =  MBPREPROCESS_TIMESHIFT_APPLY_ALL;
+				time_latency_apply =  MBPREPROCESS_TIME_LATENCY_APPLY_ALL;
 				}
+				
+			/*-------------------------------------------------------
+			 * Define time domain filtering of ancilliary data such as
+			 * nav, sensordepth, heading, attitude, and altitude */
+			
+			/* filter */
+			else if (strcmp("filter", options[option_index].name) == 0)
+				{
+				n = sscanf(optarg, "%lf", &filter_length);
+				}
+			
+			/* filter-apply-nav */
+			else if (strcmp("filter-apply-nav", options[option_index].name) == 0)
+				{
+				filter_apply =  filter_apply | MBPREPROCESS_TIME_LATENCY_APPLY_NAV;
+				}
+			
+			/* filter-apply-sensordepth */
+			else if (strcmp("filter-apply-sensordepth", options[option_index].name) == 0)
+				{
+				filter_apply =  filter_apply | MBPREPROCESS_TIME_LATENCY_APPLY_SENSORDEPTH;
+				}
+			
+			/* filter-apply-heading */
+			else if (strcmp("filter-apply-heading", options[option_index].name) == 0)
+				{
+				filter_apply =  filter_apply | MBPREPROCESS_TIME_LATENCY_APPLY_HEADING;
+				}
+			
+			/* filter-apply-attitude */
+			else if (strcmp("filter-apply-attitude", options[option_index].name) == 0)
+				{
+				filter_apply =  filter_apply | MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE;
+				}
+			
+			/* filter-apply-altitude */
+			else if (strcmp("filter-apply-altitude", options[option_index].name) == 0)
+				{
+				filter_apply =  filter_apply | MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE;
+				}
+			
+			/* filter-apply-all-ancilliary */
+			else if (strcmp("filter-apply-all-ancilliary", options[option_index].name) == 0)
+				{
+				filter_apply =  MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
+				}
+
+			/*-------------------------------------------------------
+			 * Set platform file */
 			
 			/* platform-file */
 			else if (strcmp("platform-file", options[option_index].name) == 0)
@@ -623,7 +756,7 @@ int main (int argc, char **argv)
 					use_platform_file = MB_YES;
 				}
 			
-			/* platform-file */
+			/* platform-target-sensor */
 			else if (strcmp("platform-target-sensor", options[option_index].name) == 0)
 				{
 				n = sscanf (optarg,"%d", &platform_target_sensor);
@@ -649,6 +782,16 @@ int main (int argc, char **argv)
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
 		}
+	
+	/* if no affected data have been specified apply time_latency to all */
+	if (time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE
+			&& time_latency_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
+			time_latency_apply =  MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
+	
+	/* if no affected data have been specified apply filtering to all ancilliary data */
+	if (filter_length > 0.0
+			&& filter_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
+			filter_apply =  MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
 
 	/* print starting message */
 	if (verbose == 1 || help)
@@ -691,34 +834,101 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       speedmin:                   %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:                    %f\n",timegap);
 		fprintf(stderr,"dbg2       read_file:                  %s\n",read_file);
+		fprintf(stderr,"dbg2       output_sensor_fnv:          %d\n",output_sensor_fnv);
 		fprintf(stderr,"dbg2       nav_mode:                   %d\n",nav_mode);
 		fprintf(stderr,"dbg2       nav_file:                   %s\n",nav_file);
 		fprintf(stderr,"dbg2       nav_file_format:            %d\n",nav_file_format);
 		fprintf(stderr,"dbg2       nav_async:                  %d\n",nav_async);
+		fprintf(stderr,"dbg2       nav_sensor:                 %d\n",nav_sensor);
 		fprintf(stderr,"dbg2       sensordepth_mode:           %d\n",sensordepth_mode);
 		fprintf(stderr,"dbg2       sensordepth_file:           %s\n",sensordepth_file);
 		fprintf(stderr,"dbg2       sensordepth_file_format:    %d\n",sensordepth_file_format);
 		fprintf(stderr,"dbg2       sensordepth_async:          %d\n",sensordepth_async);
+		fprintf(stderr,"dbg2       sensordepth_sensor:         %d\n",sensordepth_sensor);
 		fprintf(stderr,"dbg2       heading_mode:               %d\n",heading_mode);
 		fprintf(stderr,"dbg2       heading_file:               %s\n",heading_file);
 		fprintf(stderr,"dbg2       heading_file_format:        %d\n",heading_file_format);
 		fprintf(stderr,"dbg2       heading_async:              %d\n",heading_async);
+		fprintf(stderr,"dbg2       heading_sensor:             %d\n",heading_sensor);
 		fprintf(stderr,"dbg2       altitude_mode:              %d\n",altitude_mode);
 		fprintf(stderr,"dbg2       altitude_file:              %s\n",altitude_file);
 		fprintf(stderr,"dbg2       altitude_file_format:       %d\n",altitude_file_format);
 		fprintf(stderr,"dbg2       altitude_async:             %d\n",altitude_async);
+		fprintf(stderr,"dbg2       altitude_sensor:            %d\n",altitude_sensor);
 		fprintf(stderr,"dbg2       attitude_mode:              %d\n",attitude_mode);
 		fprintf(stderr,"dbg2       attitude_file:              %s\n",attitude_file);
 		fprintf(stderr,"dbg2       attitude_file_format:       %d\n",attitude_file_format);
 		fprintf(stderr,"dbg2       attitude_async:             %d\n",attitude_async);
-		fprintf(stderr,"dbg2       timeshift_mode:             %d\n",timeshift_mode);
-		fprintf(stderr,"dbg2       timeshift_file:             %s\n",timeshift_file);
-		fprintf(stderr,"dbg2       timeshift_format:           %d\n",timeshift_format);
-		fprintf(stderr,"dbg2       timeshift_apply:            %x\n",timeshift_apply);
+		fprintf(stderr,"dbg2       attitude_sensor:            %d\n",attitude_sensor);
+		fprintf(stderr,"dbg2       time_latency_mode:          %d\n",time_latency_mode);
+		fprintf(stderr,"dbg2       time_latency_file:          %s\n",time_latency_file);
+		fprintf(stderr,"dbg2       time_latency_format:        %d\n",time_latency_format);
+		fprintf(stderr,"dbg2       time_latency_apply:         %x\n",time_latency_apply);
+		fprintf(stderr,"dbg2       filter_length:              %f\n",filter_length);
+		fprintf(stderr,"dbg2       filter_apply:               %x\n",filter_apply);
 		fprintf(stderr,"dbg2       use_platform_file:          %d\n",use_platform_file);
 		fprintf(stderr,"dbg2       platform_file:              %s\n",platform_file);
 		fprintf(stderr,"dbg2       platform_target_sensor:     %d\n",platform_target_sensor);
 		fprintf(stderr,"dbg2       no_change_survey:           %d\n",no_change_survey);
+		}
+
+	/* print starting verbose */
+	else if (verbose > 0)
+		{
+		fprintf(stderr,"\nProgram <%s>\n",program_name);
+		fprintf(stderr,"Version %s\n",version_id);
+		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"Input survey data to be preprocessed:\n");
+		fprintf(stderr,"     read_file:                  %s\n",read_file);
+		fprintf(stderr,"     format:                     %d\n",format);
+		fprintf(stderr,"Source of platform model:\n");
+		if (use_platform_file == MB_YES)
+			fprintf(stderr,"     platform_file:              %s\n",platform_file);
+		else
+			fprintf(stderr,"     platform_file:              not specified\n");
+		fprintf(stderr,"     platform_target_sensor:     %d\n",platform_target_sensor);
+		fprintf(stderr,"Source of navigation data:\n");
+		fprintf(stderr,"     nav_mode:                   %d\n",nav_mode);
+		fprintf(stderr,"     nav_file:                   %s\n",nav_file);
+		fprintf(stderr,"     nav_file_format:            %d\n",nav_file_format);
+		fprintf(stderr,"     nav_async:                  %d\n",nav_async);
+		fprintf(stderr,"     nav_sensor:                 %d\n",nav_sensor);
+		fprintf(stderr,"Source of navigation data:\n");
+		fprintf(stderr,"     sensordepth_mode:           %d\n",sensordepth_mode);
+		fprintf(stderr,"     sensordepth_file:           %s\n",sensordepth_file);
+		fprintf(stderr,"     sensordepth_file_format:    %d\n",sensordepth_file_format);
+		fprintf(stderr,"     sensordepth_async:          %d\n",sensordepth_async);
+		fprintf(stderr,"     sensordepth_sensor:         %d\n",sensordepth_sensor);
+		fprintf(stderr,"Source of heading data:\n");
+		fprintf(stderr,"     heading_mode:               %d\n",heading_mode);
+		fprintf(stderr,"     heading_file:               %s\n",heading_file);
+		fprintf(stderr,"     heading_file_format:        %d\n",heading_file_format);
+		fprintf(stderr,"     heading_async:              %d\n",heading_async);
+		fprintf(stderr,"     heading_sensor:             %d\n",heading_sensor);
+		fprintf(stderr,"Source of altitude data:\n");
+		fprintf(stderr,"     altitude_mode:              %d\n",altitude_mode);
+		fprintf(stderr,"     altitude_file:              %s\n",altitude_file);
+		fprintf(stderr,"     altitude_file_format:       %d\n",altitude_file_format);
+		fprintf(stderr,"     altitude_async:             %d\n",altitude_async);
+		fprintf(stderr,"     altitude_sensor:            %d\n",altitude_sensor);
+		fprintf(stderr,"Source of attitude data:\n");
+		fprintf(stderr,"     attitude_mode:              %d\n",attitude_mode);
+		fprintf(stderr,"     attitude_file:              %s\n",attitude_file);
+		fprintf(stderr,"     attitude_file_format:       %d\n",attitude_file_format);
+		fprintf(stderr,"     attitude_async:             %d\n",attitude_async);
+		fprintf(stderr,"     attitude_sensor:            %d\n",attitude_sensor);
+		fprintf(stderr,"Time latency correction:\n");
+		fprintf(stderr,"     time_latency_mode:          %d\n",time_latency_mode);
+		fprintf(stderr,"     time_latency_file:          %s\n",time_latency_file);
+		fprintf(stderr,"     time_latency_format:        %d\n",time_latency_format);
+		fprintf(stderr,"     time_latency_apply:         %x\n",time_latency_apply);
+		fprintf(stderr,"Time domain filtering:\n");
+		fprintf(stderr,"     filter_length:              %f\n",filter_length);
+		fprintf(stderr,"     filter_apply:               %x\n",filter_apply);
+		fprintf(stderr,"Limit consequences:\n");
+		fprintf(stderr,"     no_change_survey:           %d\n",no_change_survey);
+		fprintf(stderr,"Additional output:\n");
+		fprintf(stderr,"     output_sensor_fnv:          %d\n",output_sensor_fnv);
 		}
 
 	/* if help desired then print it and exit */
@@ -728,8 +938,69 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+
+	/*-------------------------------------------------------------------*/
+	/* load platform definition if specified or if offsets otherwise specified create a platform structure */
+	if (use_platform_file == MB_YES)
+		{
+		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
+		if (status == MB_FAILURE)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open and parse platform file: %s\n", platform_file);
+			fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+			exit(error);				
+			}
+			
+		/* reset data sources according to commands */
+		if (nav_sensor >= 0)
+			platform->source_position = nav_sensor;
+		if (sensordepth_sensor >= 0)
+			platform->source_depth = sensordepth_sensor;
+		if (heading_sensor >= 0)
+			platform->source_heading = heading_sensor;
+		if (attitude_sensor >= 0)
+			{
+			platform->source_rollpitch = attitude_sensor;
+			platform->source_heave = attitude_sensor;
+			}
 		
+		/* get sensor structures */
+		if (platform->source_bathymetry >= 0)
+			sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
+		if (platform->source_backscatter >= 0)
+			sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
+		if (platform->source_position >= 0)
+			sensor_position = &(platform->sensors[platform->source_position]);
+		if (platform->source_depth >= 0)
+			sensor_depth = &(platform->sensors[platform->source_depth]);
+		if (platform->source_heading >= 0)
+			sensor_heading = &(platform->sensors[platform->source_heading]);
+		if (platform->source_rollpitch >= 0)
+			sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
+		if (platform->source_heave >= 0)
+			sensor_heave = &(platform->sensors[platform->source_heave]);
+		if (platform_target_sensor < 0)
+			platform_target_sensor = platform->source_bathymetry;
+		if (platform_target_sensor >= 0)
+			sensor_target = &(platform->sensors[platform_target_sensor]);
+		}
+		
+	/*-------------------------------------------------------------------*/
 	/* load ancilliary data from external files if requested */
+	
+	/* start by loading time latency model if required */
+	if (time_latency_mode == MB_SENSOR_TIME_LATENCY_MODEL)
+		{
+		mb_loadtimeshiftdata(verbose, time_latency_file, time_latency_format,
+			       &time_latency_num, &time_latency_alloc,
+			       &time_latency_time_d, &time_latency_time_latency, &error);
+		
+		if (verbose > 0)
+			fprintf(stderr,"%d time_latency records loaded from file %s\n", time_latency_num, time_latency_file);
+		}
+	
+	/* import specified ancilliary data */
 	if (nav_mode == MBPREPROCESS_MERGE_FILE)
 		{
 		mb_loadnavdata(verbose, nav_file, nav_file_format, lonflip,
@@ -775,39 +1046,6 @@ int main (int argc, char **argv)
 		if (verbose > 0)
 			fprintf(stderr,"%d attitude records loaded from file %s\n", heading_num, heading_file);
 		}
-	if (timeshift_mode == MBPREPROCESS_MERGE_FILE)
-		{
-		mb_loadtimeshiftdata(verbose, timeshift_file, timeshift_format,
-			       &timeshift_num, &timeshift_alloc,
-			       &timeshift_time_d, &timeshift_timeshift, &error);
-		
-		if (verbose > 0)
-			fprintf(stderr,"%d timeshift records loaded from file %s\n", heading_num, heading_file);
-		}
-
-	/*-------------------------------------------------------------------*/
-	/* load platform definition if specified or if offsets otherwise specified create a platform structure */
-	if (use_platform_file == MB_YES)
-		{
-		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
-		if (status == MB_FAILURE)
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr,"\nUnable to open and parse platform file: %s\n", platform_file);
-			fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
-			exit(error);				
-			}
-		
-		sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
-		sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
-		sensor_position = &(platform->sensors[platform->source_position]);
-		sensor_depth = &(platform->sensors[platform->source_depth]);
-		sensor_heading = &(platform->sensors[platform->source_heading]);
-		sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
-		sensor_heave = &(platform->sensors[platform->source_heave]);
-		if (platform_target_sensor < 0)
-			platform_target_sensor = platform->source_bathymetry;
-		}
 
 	/*-------------------------------------------------------------------*/
 	
@@ -837,9 +1075,9 @@ int main (int argc, char **argv)
 	    if ((status = mb_datalist_read(verbose,datalist,
 			    ifile,&iformat,&file_weight,&error))
 			    == MB_SUCCESS)
-		read_data = MB_YES;
+			read_data = MB_YES;
 	    else
-		read_data = MB_NO;
+			read_data = MB_NO;
 	    }
 	/* else copy single filename to be read */
 	else
@@ -1014,7 +1252,7 @@ int main (int argc, char **argv)
 			/* look for nav if not externally defined */
 			if (status == MB_SUCCESS
 				&& nav_mode == MBPREPROCESS_MERGE_ASYNC
-				&& kind == sensordepth_async)
+				&& kind == nav_async)
 				{
 				/* extract nav data */
 				status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr,
@@ -1299,145 +1537,246 @@ int main (int argc, char **argv)
 		fprintf(stderr,"     %d heading data (mode:%d)\n", heading_num, heading_mode);
 		fprintf(stderr,"     %d altitude data (mode:%d)\n", altitude_num, altitude_mode);
 		fprintf(stderr,"     %d attitude data (mode:%d)\n", attitude_num, attitude_mode);
-		fprintf(stderr,"     %d timeshift data (mode:%d)\n", timeshift_num, timeshift_mode);
+		fprintf(stderr,"     %d time_latency data (mode:%d)\n", time_latency_num, time_latency_mode);
 		fprintf(stderr,"-----------------------------------------------\n");
 		}
 		
 	/* end first pass through data */
 	
 	/*-------------------------------------------------------------------*/
-	
-	/* Apply any specified timeshift to the chosen data */
-	if (timeshift_mode != MBPREPROCESS_TIMESHIFT_OFF)
+
+	/* deal with time latency corrections */
+	if (verbose > 0)
 		{
-		/* if no affected data have been specified apply timeshift to all */
-		if (timeshift_apply == MBPREPROCESS_TIMESHIFT_APPLY_NONE)
-			timeshift_apply =  MBPREPROCESS_TIMESHIFT_APPLY_ALL_ANCILLIARY;
-			
-		/* apply timeshift to nav data */
-		if (timeshift_apply &  MBPREPROCESS_TIMESHIFT_APPLY_NAV)
+		fprintf(stderr,"\n-----------------------------------------------\n");
+		fprintf(stderr,"Applying time latency corrections:\n");
+		}
+	
+	/* position */
+	if (nav_num > 0 && nav_alloc >= nav_num)
+		{
+		/* apply time latency correction called for in the platform file */
+		if (sensor_position != NULL
+			&& sensor_position->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
 			{
-			if (timeshift_mode == MBPREPROCESS_TIMESHIFT_FILE)
-				{
-				j = 0;
-				for (i=0;i<nav_num;i++)
-					{
-					interp_status = mb_linear_interp(verbose,
-								timeshift_time_d-1, timeshift_timeshift-1,
-								timeshift_num, nav_time_d[i], &timeshift, &j,
-								&interp_error);
-					nav_time_d[i] -= timeshift;
-					}
-				
-				}
-			else if (timeshift_mode == MBPREPROCESS_TIMESHIFT_CONSTANT)
-				{
-				for (i=0;i<nav_num;i++)
-					{
-					nav_time_d[i] -= timeshift_constant;
-					}
-				}
+			if (verbose > 0)
+				fprintf(stderr,"Applying time latency correction from platform model to %d position data\n", nav_num);
+			mb_apply_time_latency(verbose, nav_num, nav_time_d,
+									sensor_position->time_latency_mode,
+									sensor_position->time_latency_static,
+									sensor_position->num_time_latency,
+									sensor_position->time_latency_time_d,
+									sensor_position->time_latency_value,
+									&error);
 			}
 			
-		/* apply timeshift to sensordepth data */
-		if (timeshift_apply & MBPREPROCESS_TIMESHIFT_APPLY_SENSORDEPTH)
+		/* apply time latency correction called for on the command line */
+		if ((time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
+			&& (time_latency_apply & MBPREPROCESS_TIME_LATENCY_APPLY_NAV))
 			{
-			if (timeshift_mode == MBPREPROCESS_TIMESHIFT_FILE)
-				{
-				j = 0;
-				for (i=0;i<sensordepth_num;i++)
-					{
-					interp_status = mb_linear_interp(verbose,
-								timeshift_time_d-1, timeshift_timeshift-1,
-								timeshift_num, sensordepth_time_d[i], &timeshift, &j,
-								&interp_error);
-					sensordepth_time_d[i] -= timeshift;
-					}
-				
-				}
-			else if (timeshift_mode == MBPREPROCESS_TIMESHIFT_CONSTANT)
-				{
-				for (i=0;i<sensordepth_num;i++)
-					{
-					sensordepth_time_d[i] -= timeshift_constant;
-					}
-				}
+			if (verbose > 0)
+				fprintf(stderr,"Applying time latency correction from command line to %d position data\n", nav_num);
+			mb_apply_time_latency(verbose, nav_num, nav_time_d,
+									time_latency_mode,
+									time_latency_constant,
+									time_latency_num,
+									time_latency_time_d,
+									time_latency_time_latency,
+									&error);
+			}
+		}
+	
+	/* sensordepth */
+	if (sensordepth_num > 0 && sensordepth_alloc >= sensordepth_num)
+		{
+		/* apply time latency correction called for in the platform file */
+		if (sensor_depth != NULL
+			&& sensor_depth->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
+			{
+			if (verbose > 0)
+				fprintf(stderr,"Applying time latency correction from platform model to %d sensordepth data\n", sensordepth_num);
+			mb_apply_time_latency(verbose, sensordepth_num, sensordepth_time_d,
+									sensor_depth->time_latency_mode,
+									sensor_depth->time_latency_static,
+									sensor_depth->num_time_latency,
+									sensor_depth->time_latency_time_d,
+									sensor_depth->time_latency_value,
+									&error);
 			}
 			
-		/* apply timeshift to heading data */
-		if (timeshift_apply & MBPREPROCESS_TIMESHIFT_APPLY_HEADING)
+		/* apply time latency correction called for on the command line */
+		if ((time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
+			&& (time_latency_apply & MBPREPROCESS_TIME_LATENCY_APPLY_SENSORDEPTH))
 			{
-			if (timeshift_mode == MBPREPROCESS_TIMESHIFT_FILE)
-				{
-				j = 0;
-				for (i=0;i<heading_num;i++)
-					{
-					interp_status = mb_linear_interp(verbose,
-								timeshift_time_d-1, timeshift_timeshift-1,
-								timeshift_num, heading_time_d[i], &timeshift, &j,
-								&interp_error);
-					heading_time_d[i] -= timeshift;
-					}
-				
-				}
-			else if (timeshift_mode == MBPREPROCESS_TIMESHIFT_CONSTANT)
-				{
-				for (i=0;i<heading_num;i++)
-					{
-					heading_time_d[i] -= timeshift_constant;
-					}
-				}
+			if (verbose > 0)
+				fprintf(stderr,"Applying time latency correction from command line to %d sensordepth data\n", sensordepth_num);
+			mb_apply_time_latency(verbose, sensordepth_num, sensordepth_time_d,
+									time_latency_mode,
+									time_latency_constant,
+									time_latency_num,
+									time_latency_time_d,
+									time_latency_time_latency,
+									&error);
+			}
+		}
+	
+	/* heading */
+	if (heading_num > 0 && heading_alloc >= heading_num)
+		{
+		/* apply time latency correction called for in the platform file */
+		if (sensor_heading != NULL
+			&& sensor_heading->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
+			{
+			if (verbose > 0)
+				fprintf(stderr,"Applying time latency correction from platform model to %d heading data\n", heading_num);
+			mb_apply_time_latency(verbose, heading_num, heading_time_d,
+									sensor_heading->time_latency_mode,
+									sensor_heading->time_latency_static,
+									sensor_heading->num_time_latency,
+									sensor_heading->time_latency_time_d,
+									sensor_heading->time_latency_value,
+									&error);
 			}
 			
-		/* apply timeshift to altitude data */
-		if (timeshift_apply & MBPREPROCESS_TIMESHIFT_APPLY_ALTITUDE)
+		/* apply time latency correction called for on the command line */
+		if ((time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
+			&& (time_latency_apply & MBPREPROCESS_TIME_LATENCY_APPLY_HEADING))
 			{
-			if (timeshift_mode == MBPREPROCESS_TIMESHIFT_FILE)
-				{
-				j = 0;
-				for (i=0;i<altitude_num;i++)
-					{
-					interp_status = mb_linear_interp(verbose,
-								timeshift_time_d-1, timeshift_timeshift-1,
-								timeshift_num, altitude_time_d[i], &timeshift, &j,
-								&interp_error);
-					altitude_time_d[i] -= timeshift;
-					}
-				
-				}
-			else if (timeshift_mode == MBPREPROCESS_TIMESHIFT_CONSTANT)
-				{
-				for (i=0;i<altitude_num;i++)
-					{
-					altitude_time_d[i] -= timeshift_constant;
-					}
-				}
+			if (verbose > 0)
+				fprintf(stderr,"Applying time latency correction from command line to %d heading data\n", heading_num);
+			mb_apply_time_latency(verbose, heading_num, heading_time_d,
+									time_latency_mode,
+									time_latency_constant,
+									time_latency_num,
+									time_latency_time_d,
+									time_latency_time_latency,
+									&error);
+			}
+		}
+
+	
+	/* altitude */
+	if (altitude_num > 0 && altitude_alloc >= altitude_num)
+		{
+		/* apply time latency correction called for on the command line */
+		if ((time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
+			&& (time_latency_apply & MBPREPROCESS_TIME_LATENCY_APPLY_ALTITUDE))
+			{
+			if (verbose > 0)
+				fprintf(stderr,"Applying time latency correction from command line to %d altitude data\n", altitude_num);
+			mb_apply_time_latency(verbose, altitude_num, altitude_time_d,
+									time_latency_mode,
+									time_latency_constant,
+									time_latency_num,
+									time_latency_time_d,
+									time_latency_time_latency,
+									&error);
+			}
+		}
+
+	
+	/* attitude */
+	if (attitude_num > 0 && attitude_alloc >= attitude_num)
+		{
+		/* apply time latency correction called for in the platform file */
+		if (sensor_rollpitch != NULL
+			&& sensor_rollpitch->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
+			{
+			if (verbose > 0)
+				fprintf(stderr,"Applying time latency correction from platform model to %d attitude data\n", attitude_num);
+			mb_apply_time_latency(verbose, attitude_num, attitude_time_d,
+									sensor_rollpitch->time_latency_mode,
+									sensor_rollpitch->time_latency_static,
+									sensor_rollpitch->num_time_latency,
+									sensor_rollpitch->time_latency_time_d,
+									sensor_rollpitch->time_latency_value,
+									&error);
 			}
 			
-		/* apply timeshift to attitude data */
-		if (timeshift_apply & MBPREPROCESS_TIMESHIFT_APPLY_ATTITUDE)
+		/* apply time latency correction called for on the command line */
+		if ((time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
+			&& (time_latency_apply & MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE))
 			{
-			if (timeshift_mode == MBPREPROCESS_TIMESHIFT_FILE)
-				{
-				j = 0;
-				for (i=0;i<attitude_num;i++)
-					{
-					interp_status = mb_linear_interp(verbose,
-								timeshift_time_d-1, timeshift_timeshift-1,
-								timeshift_num, attitude_time_d[i], &timeshift, &j,
-								&interp_error);
-					attitude_time_d[i] -= timeshift;
-					}
-				
-				}
-			else if (timeshift_mode == MBPREPROCESS_TIMESHIFT_CONSTANT)
-				{
-				for (i=0;i<attitude_num;i++)
-					{
-					attitude_time_d[i] -= timeshift_constant;
-					}
-				}
+			if (verbose > 0)
+				fprintf(stderr,"Applying time latency correction from command line to %d attitude data\n", attitude_num);
+			mb_apply_time_latency(verbose, attitude_num, attitude_time_d,
+									time_latency_mode,
+									time_latency_constant,
+									time_latency_num,
+									time_latency_time_d,
+									time_latency_time_latency,
+									&error);
 			}
+		}
+
+	/*-------------------------------------------------------------------*/
+
+	/* deal with filtering */
+	if (verbose > 0)
+		{
+		fprintf(stderr,"\n-----------------------------------------------\n");
+		fprintf(stderr,"Applying time domain filtering:\n");
+		}
+	
+	/* filter position */
+	if ((filter_apply & MBPREPROCESS_TIME_LATENCY_APPLY_NAV)
+		&& nav_num > 0 && nav_alloc >= nav_num)
+		{
+		if (verbose > 0)
+			fprintf(stderr,"Applying %f second Gaussian filter to %d position data\n", filter_length, nav_num);
+		mb_apply_time_filter(verbose, nav_num, nav_time_d, nav_navlon,
+								filter_length, &error);
+		mb_apply_time_filter(verbose, nav_num, nav_time_d, nav_navlat,
+								filter_length, &error);
+		}
+	
+	/* filter sensordepth */
+	if ((filter_apply & MBPREPROCESS_TIME_LATENCY_APPLY_SENSORDEPTH)
+		&& sensordepth_num > 0 && sensordepth_alloc >= sensordepth_num)
+		{
+		if (verbose > 0)
+			fprintf(stderr,"Applying %f second Gaussian filter to %d sensordepth data\n", filter_length, sensordepth_num);
+		mb_apply_time_filter(verbose, sensordepth_num, sensordepth_time_d, sensordepth_sensordepth,
+								filter_length, &error);
+		}
+	
+	/* heading */
+	if ((filter_apply & MBPREPROCESS_TIME_LATENCY_APPLY_HEADING)
+		&& heading_num > 0 && heading_alloc >= heading_num)
+		{
+		if (verbose > 0)
+			fprintf(stderr,"Applying %f second Gaussian filter to %d heading data\n", filter_length, heading_num);
+		mb_apply_time_filter(verbose, heading_num, heading_time_d, heading_heading,
+								filter_length, &error);
+		}
+
+	/* altitude */
+	if ((filter_apply & MBPREPROCESS_TIME_LATENCY_APPLY_ALTITUDE)
+		&& altitude_num > 0 && altitude_alloc >= altitude_num)
+		{
+		if (verbose > 0)
+			fprintf(stderr,"Applying %f second Gaussian filter to %d altitude data\n", filter_length, altitude_num);
+		mb_apply_time_filter(verbose, altitude_num, altitude_time_d, altitude_altitude,
+								filter_length, &error);
+		}
+
+	/* attitude */
+	if ((filter_apply & MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE)
+		&& attitude_num > 0 && attitude_alloc >= attitude_num)
+		{
+		if (verbose > 0)
+			fprintf(stderr,"Applying %f second Gaussian filter to %d attitude data\n", filter_length, attitude_num);
+		mb_apply_time_filter(verbose, attitude_num, attitude_time_d, attitude_roll,
+								filter_length, &error);
+		mb_apply_time_filter(verbose, attitude_num, attitude_time_d, attitude_pitch,
+								filter_length, &error);
+		mb_apply_time_filter(verbose, attitude_num, attitude_time_d, attitude_heave,
+								filter_length, &error);
+		}
+
+	if (verbose > 0)
+		{
+		fprintf(stderr,"-----------------------------------------------\n");
 		}
 	
 	/*-------------------------------------------------------------------*/
@@ -1490,6 +1829,32 @@ int main (int argc, char **argv)
 	n_wt_att1 = 0;
 	n_wt_att2 = 0;
 	n_wt_att3 = 0;
+	
+	/* if requested to output integrated nav for all survey sensors, open files */
+fprintf(stderr,"Checking to see if sensor fnv files to be output:%d\n",output_sensor_fnv);
+	if (output_sensor_fnv == MB_YES && platform != NULL)
+		{
+		for (isensor=0; isensor < platform->num_sensors; isensor++)
+			{
+fprintf(stderr,"Checking sensor %d: %d\n",isensor,platform->sensors[isensor].capability2);
+			if (platform->sensors[isensor].capability2 != 0)
+				{
+				for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++)
+					{
+fprintf(stderr,"Outputting sensor %d offset %d\n",isensor,ioffset);
+					sprintf(fnvfile, "sensor_%2.2d_%2.2d_%2.2d.fnv", isensor, ioffset, platform->sensors[isensor].type);
+					if ((platform->sensors[isensor].offsets[ioffset].ofp = fopen(fnvfile, "w")) == NULL)
+						{
+						error = MB_ERROR_OPEN_FAIL;
+						fprintf(stderr,"\nUnable to open sensor fnv data file <%s> for writing\n",fnvfile);
+						fprintf(stderr,"\nProgram <%s> Terminated\n",
+							program_name);
+						exit(error);
+						}
+					}
+				}
+			}
+		}
 
 	/* open file list */
 	if (read_datalist == MB_YES)
@@ -1620,6 +1985,17 @@ int main (int argc, char **argv)
 				program_name);
 			exit(error);
 			}
+			
+		/* open synchronous attitude file */
+		sprintf(afile,"%s.sta",ofile);
+		if ((afp = fopen(afile, "w")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open synchronous attitude data file <%s> for writing\n",afile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 				
 		/* zero file count records */
 		n_rf_data = 0;
@@ -1642,6 +2018,8 @@ int main (int argc, char **argv)
 		n_wf_att1 = 0;
 		n_wf_att2 = 0;
 		n_wf_att3 = 0;
+		start_time_d = -1.0;
+		end_time_d = -1.0;
 
 		/* ------------------------------- */
 		/* write comments to output file   */
@@ -1676,6 +2054,9 @@ int main (int argc, char **argv)
 				{
 				n_rf_data++;
 				n_rt_data++;
+				if (start_time_d <= 0.0)
+					start_time_d = time_d;
+				end_time_d = time_d;
 				}
 			else if (kind == MB_DATA_COMMENT)
 				{
@@ -1739,115 +2120,38 @@ int main (int argc, char **argv)
 					|| kind == MB_DATA_SIDESCAN3
 					|| kind == MB_DATA_WATER_COLUMN))
 				{
-				/* call mb_extract_nav to get attitude */
-				status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind,
-							time_i, &time_d, &navlon_org, &navlat_org,
-							&speed_org, &heading_org, &draft_org,
-							&roll_org, &pitch_org, &heave_org, &error);
-				
-				/* call mb_extract_altitude to get altitude */
-				status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr,
-							&kind, &sensordepth_org, &altitude_org,
-							&error);
-				
-				/* save the original values */
-				navlon = navlon_org;
-				navlat = navlat_org;
-				speed = speed_org;
-				heading = heading_org;
-				altitude = altitude_org;
-				sensordepth = sensordepth_org;
-				draft = draft_org;
-				roll = roll_org;
-				pitch = pitch_org;
-				heave = heave_org;
 					
-				/* apply timeshift to survey data */
-				if (timeshift_apply & MBPREPROCESS_TIMESHIFT_APPLY_SURVEY)
-					{
-					if (timeshift_mode == MBPREPROCESS_TIMESHIFT_FILE)
-						{
-						interp_status = mb_linear_interp(verbose,
-										timeshift_time_d-1, timeshift_timeshift-1,
-										timeshift_num, time_d, &timeshift, &jsurvey,
-										&interp_error);
-						time_d += timeshift;						
-						}
-					else if (timeshift_mode == MBPREPROCESS_TIMESHIFT_CONSTANT)
-						{
-						time_d += timeshift_constant;
-						}
-					timestamp_changed = MB_YES;
-					}
-
-				/* get nav sensordepth heading attitude values for record timestamp */
-				if (nav_num > 0)
-					{
-					interp_status = mb_linear_interp_longitude(verbose,
-								nav_time_d-1, nav_navlon-1, nav_num, 
-								time_d, &navlon, &jnav,
-								&interp_error);
-					interp_status = mb_linear_interp_latitude(verbose,
-								nav_time_d-1, nav_navlat-1, nav_num, 
-								time_d, &navlat, &jnav,
-								&interp_error);
-					interp_status = mb_linear_interp(verbose,
-								nav_time_d-1, nav_speed-1, nav_num, 
-								time_d, &speed, &jnav,
-								&interp_error);
-					nav_changed = MB_YES;
-					}
-				if (sensordepth_num > 0)
-					{
-					interp_status = mb_linear_interp(verbose,
-								sensordepth_time_d-1, sensordepth_sensordepth-1, sensordepth_num, 
-								time_d, &sensordepth, &jsensordepth,
-								&interp_error);
-					sensordepth_changed = MB_YES;
-					}
-				if (heading_num > 0)
-					{
-					interp_status = mb_linear_interp_heading(verbose,
-								heading_time_d-1, heading_heading-1, heading_num, 
-								time_d, &heading, &jheading,
-								&interp_error);
-					heading_changed = MB_YES;
-					}
-				if (altitude_num > 0)
-					{
-					interp_status = mb_linear_interp(verbose,
-								altitude_time_d-1, altitude_altitude-1, altitude_num, 
-								time_d, &altitude, &jaltitude,
-								&interp_error);
-					altitude_changed = MB_YES;
-					}
-				if (attitude_num > 0)
-					{
-					interp_status = mb_linear_interp(verbose,
-								attitude_time_d-1, attitude_roll-1, attitude_num, 
-								time_d, &roll, &jattitude,
-								&interp_error);
-					interp_status = mb_linear_interp(verbose,
-								attitude_time_d-1, attitude_pitch-1, attitude_num, 
-								time_d, &pitch, &jattitude,
-								&interp_error);
-					interp_status = mb_linear_interp(verbose,
-								attitude_time_d-1, attitude_heave-1, attitude_num, 
-								time_d, &heave, &jattitude,
-								&interp_error);
-					attitude_changed = MB_YES;
-					}
-				if (sensordepth_num > 0 || attitude_num > 0)
-					{
-					draft = sensordepth - heave;
-					}
-					
+				/* apply time latency correction called for in the platform file */
+				if (sensor_target != NULL
+					&& sensor_target->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
+					mb_apply_time_latency(verbose, 1, &time_d,
+											sensor_target->time_latency_mode,
+											sensor_target->time_latency_static,
+											sensor_target->num_time_latency,
+											sensor_target->time_latency_time_d,
+											sensor_target->time_latency_value,
+											&error);
+			
+				/* apply time latency correction called for on the command line */
+				if ((time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE)
+					&& (time_latency_apply & MBPREPROCESS_TIME_LATENCY_APPLY_SURVEY))
+					mb_apply_time_latency(verbose, 1, &time_d,
+											time_latency_mode,
+											time_latency_constant,
+											time_latency_num,
+											time_latency_time_d,
+											time_latency_time_latency,
+											&error);
+				
 				/* attempt to execute a preprocess function for these data */
-				//status = mb_preprocess(verbose, imbio_ptr, istore_ptr,
-				//			time_d, navlon, navlat, speed,
-				//			heading, sensordepth,
-				//			roll, pitch, heave, &error);
-				status = MB_FAILURE;
+				status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform,
+							nav_num, nav_time_d, nav_navlon, nav_navlat, nav_speed,
+							sensordepth_num, sensordepth_time_d, sensordepth_sensordepth,
+							heading_num, heading_time_d, heading_heading,
+							altitude_num, altitude_time_d, altitude_altitude,
+							attitude_num, attitude_time_d, attitude_roll, attitude_pitch, attitude_heave,
+							&error);
+				//status = MB_FAILURE;
 				
 				/* If a predefined preprocess function does not exist for 
 				 * this format then standard preprocessing will be done
@@ -1859,12 +2163,96 @@ int main (int argc, char **argv)
 					/* reset status and error */
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
+
+					/* call mb_extract_nav to get attitude */
+					status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind,
+								time_i, &time_d, &navlon_org, &navlat_org,
+								&speed_org, &heading_org, &draft_org,
+								&roll_org, &pitch_org, &heave_org, &error);
+					
+					/* call mb_extract_altitude to get altitude */
+					status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr,
+								&kind, &sensordepth_org, &altitude_org,
+								&error);
+					
+					/* save the original values */
+					navlon = navlon_org;
+					navlat = navlat_org;
+					speed = speed_org;
+					heading = heading_org;
+					altitude = altitude_org;
+					sensordepth = sensordepth_org;
+					draft = draft_org;
+					roll = roll_org;
+					pitch = pitch_org;
+					heave = heave_org;
+	
+					/* get nav sensordepth heading attitude values for record timestamp */
+					if (nav_num > 0)
+						{
+						interp_status = mb_linear_interp_longitude(verbose,
+									nav_time_d-1, nav_navlon-1, nav_num, 
+									time_d, &navlon, &jnav,
+									&interp_error);
+						interp_status = mb_linear_interp_latitude(verbose,
+									nav_time_d-1, nav_navlat-1, nav_num, 
+									time_d, &navlat, &jnav,
+									&interp_error);
+						interp_status = mb_linear_interp(verbose,
+									nav_time_d-1, nav_speed-1, nav_num, 
+									time_d, &speed, &jnav,
+									&interp_error);
+						nav_changed = MB_YES;
+						}
+					if (sensordepth_num > 0)
+						{
+						interp_status = mb_linear_interp(verbose,
+									sensordepth_time_d-1, sensordepth_sensordepth-1, sensordepth_num, 
+									time_d, &sensordepth, &jsensordepth,
+									&interp_error);
+						sensordepth_changed = MB_YES;
+						}
+					if (heading_num > 0)
+						{
+						interp_status = mb_linear_interp_heading(verbose,
+									heading_time_d-1, heading_heading-1, heading_num, 
+									time_d, &heading, &jheading,
+									&interp_error);
+						heading_changed = MB_YES;
+						}
+					if (altitude_num > 0)
+						{
+						interp_status = mb_linear_interp(verbose,
+									altitude_time_d-1, altitude_altitude-1, altitude_num, 
+									time_d, &altitude, &jaltitude,
+									&interp_error);
+						altitude_changed = MB_YES;
+						}
+					if (attitude_num > 0)
+						{
+						interp_status = mb_linear_interp(verbose,
+									attitude_time_d-1, attitude_roll-1, attitude_num, 
+									time_d, &roll, &jattitude,
+									&interp_error);
+						interp_status = mb_linear_interp(verbose,
+									attitude_time_d-1, attitude_pitch-1, attitude_num, 
+									time_d, &pitch, &jattitude,
+									&interp_error);
+						interp_status = mb_linear_interp(verbose,
+									attitude_time_d-1, attitude_heave-1, attitude_num, 
+									time_d, &heave, &jattitude,
+									&interp_error);
+						attitude_changed = MB_YES;
+						}
+					if (sensordepth_num > 0 || attitude_num > 0)
+						{
+						draft = sensordepth - heave;
+						}
 		
 					if (platform != NULL)
 						{
-
-						/* Update swathsensor position (note: no longer vehicle position) */
-						status = mb_platform_position (verbose, (void **)&platform,
+						/* calculate position of target sensor */
+						status = mb_platform_position (verbose, (void *)platform,
 										platform_target_sensor, 0,
 										navlon, navlat, sensordepth,
 										heading, roll, pitch,
@@ -1875,16 +2263,15 @@ int main (int argc, char **argv)
 						sensordepth_changed = MB_YES;
 
 						/* Update swathsensor attitude (note: no longer vehicle attitude) */
-						status = mb_platform_orientation_target (verbose, (void **)&platform,
-										platform->source_bathymetry, 0,
+						status = mb_platform_orientation_target (verbose, (void *)platform,
+										platform_target_sensor, 0,
 										heading, roll, pitch,
 										&heading, &roll, &pitch,
 										&error);
 						attitude_changed = MB_YES;
-
 						}
 
-					/* if attitude changed apply rigid rotations to the bathymetry */
+					/* if attitude changed apply rigid rotations to any bathymetry */
 					if (attitude_changed == MB_YES)
 						{
 						/* loop over the beams */
@@ -1892,9 +2279,8 @@ int main (int argc, char **argv)
 							{
 							if (beamflag[i] != MB_FLAG_NULL)
 								{	
-								/* strip off heave + draft */
+								/* strip off original heave + draft */
 								bath[i] -= sensordepth_org;
-
 								/* rotate beam by 
 								   rolldelta:  Roll relative to previous correction and bias included
 								   pitchdelta: Pitch relative to previous correction and bias included
@@ -1989,7 +2375,11 @@ int main (int argc, char **argv)
 						program_name);
 					exit(error);
 					}
-				
+					
+				/* output synchronous attitude */
+				if (kind == MB_DATA_DATA)
+					fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", time_d, roll, pitch);
+
 				/* count records */
 				if (kind == MB_DATA_DATA)
 					{
@@ -2042,7 +2432,61 @@ int main (int argc, char **argv)
 					n_wt_att3++;
 					}
 				}
+				
+			/* if requested output integrated nave */
+			if (output_sensor_fnv == MB_YES
+				&& status == MB_SUCCESS
+				&& kind == MB_DATA_DATA)
+				{
+				/* save the current values */
+				navlon_org = navlon;
+				navlat_org = navlat;
+				speed_org = speed;
+				heading_org = heading;
+				altitude_org = altitude;
+				sensordepth_org = sensordepth;
+				draft_org = draft;
+				roll_org = roll;
+				pitch_org = pitch;
+				heave_org = heave;
+				
+				for (isensor=0; isensor < platform->num_sensors; isensor++)
+					{
+					if (platform->sensors[isensor].capability2 != 0)
+						{
+						for (ioffset=0; ioffset < platform->sensors[isensor].num_offsets; ioffset++)
+							{
+							if (platform->sensors[isensor].offsets[ioffset].ofp != NULL)
+								{
+								/* calculate position and attitude of target sensor */
+								status = mb_platform_position (verbose, (void *)platform,
+												isensor, ioffset,
+												navlon_org, navlat_org, sensordepth_org,
+												heading_org, roll_org, pitch_org,
+												&navlon, &navlat, &sensordepth,
+												&error);
+								draft = sensordepth - heave;
+								status = mb_platform_orientation_target (verbose, (void *)platform,
+												isensor, ioffset,
+												heading_org, roll_org, pitch_org,
+												&heading, &roll, &pitch,
+												&error);
+		
+								/* output integrated navigation */
+								fprintf(platform->sensors[isensor].offsets[ioffset].ofp,
+										"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d\t%.6f\t%.10f\t%.10f\t%.3f\t%.3f\t%.4f\t%.3f\t%.3f\t%.3f\n",
+										time_i[0], time_i[1], time_i[2], time_i[3],
+										time_i[4], time_i[5], time_i[6], time_d,
+										navlon, navlat,
+										heading, speed, draft,
+										roll, pitch, heave);
+								}
+							}
+						}
+					}
+				}
 			}
+			
 		/* end read+process+output data loop */
 		/* --------------------------------- */
 		
@@ -2078,10 +2522,109 @@ int main (int argc, char **argv)
 
 		/* close the output swath file */
 		status = mb_close(verbose,&ombio_ptr,&error);
+		
+		/* close the synchronous attitude file */
+		fclose(afp);
 	
 		/* generate inf fnv and fbt files */
 		if (status == MB_SUCCESS)
 			status = mb_make_info(verbose, MB_YES, ofile, oformat, &error);
+			
+		/* generate asynchronous heading file */
+		if (heading_num > 0)
+			{
+			istart = 0;
+			iend = heading_num - 1;
+			for (i=0;i<heading_num;i++)
+				{
+				if (heading_time_d[i] < start_time_d)
+					istart = i;
+				if (heading_time_d[i] < end_time_d)
+					iend = i;
+				}
+			if (iend > istart)
+				{
+				sprintf(afile,"%s.ath",ofile);
+				if ((afp = fopen(afile, "w")) == NULL)
+					{
+					error = MB_ERROR_OPEN_FAIL;
+					fprintf(stderr,"\nUnable to open asynchronous heading data file <%s> for writing\n",afile);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+						program_name);
+					exit(error);
+					}
+				fprintf(stderr, "Generating ath file for %s\n", ofile);
+				for (i=0;i<heading_num;i++)
+					{
+					fprintf(afp, "%0.6f\t%7.3f\n", heading_time_d[i], heading_heading[i]);
+					}
+				fclose(afp);
+				}
+			}
+			
+		/* generate asynchronous sensordepth file */
+		if (sensordepth_num > 0)
+			{
+			istart = 0;
+			iend = sensordepth_num - 1;
+			for (i=0;i<sensordepth_num;i++)
+				{
+				if (sensordepth_time_d[i] < start_time_d)
+					istart = i;
+				if (sensordepth_time_d[i] < end_time_d)
+					iend = i;
+				}
+			if (iend > istart)
+				{
+				sprintf(afile,"%s.ats",ofile);
+				if ((afp = fopen(afile, "w")) == NULL)
+					{
+					error = MB_ERROR_OPEN_FAIL;
+					fprintf(stderr,"\nUnable to open asynchronous sensordepth data file <%s> for writing\n",afile);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+						program_name);
+					exit(error);
+					}
+				fprintf(stderr, "Generating ats file for %s\n", ofile);
+				for (i=0;i<sensordepth_num;i++)
+					{
+					fprintf(afp, "%0.6f\t%7.3f\n", sensordepth_time_d[i], sensordepth_sensordepth[i]);
+					}
+				fclose(afp);
+				}
+			}
+			
+		/* generate asynchronous attitude file */
+		if (attitude_num > 0)
+			{
+			istart = 0;
+			iend = attitude_num - 1;
+			for (i=0;i<attitude_num;i++)
+				{
+				if (attitude_time_d[i] < start_time_d)
+					istart = i;
+				if (attitude_time_d[i] < end_time_d)
+					iend = i;
+				}
+			if (iend > istart)
+				{
+				sprintf(afile,"%s.ata",ofile);
+				if ((afp = fopen(afile, "w")) == NULL)
+					{
+					error = MB_ERROR_OPEN_FAIL;
+					fprintf(stderr,"\nUnable to open asynchronous attitude data file <%s> for writing\n",afile);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+						program_name);
+					exit(error);
+					}
+				fprintf(stderr, "Generating ata file for %s\n", ofile);
+				for (i=0;i<attitude_num;i++)
+					{
+					fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", attitude_time_d[i], attitude_roll[i], attitude_pitch[i]);
+					}
+				fclose(afp);
+				}
+			}
 	
 		/* figure out whether and what to read next */
 		if (read_datalist == MB_YES)
@@ -2097,7 +2640,6 @@ int main (int argc, char **argv)
 			{
 			read_data = MB_NO;
 			}
-
 	
 		/* end loop over files in list */
 		}
@@ -2134,8 +2676,27 @@ int main (int argc, char **argv)
 	/* end second pass through data */
 	
 	/*-------------------------------------------------------------------*/
+	
+	/* close any integrated navigation files */
+	if (output_sensor_fnv == MB_YES)
+		{
+		for (isensor=0; isensor < platform->num_sensors; isensor++)
+			{
+			if (platform->sensors[isensor].capability2 != 0)
+				{
+				for (ioffset=0; ioffset < platform->sensors[isensor].num_offsets; ioffset++)
+					{
+					if (platform->sensors[isensor].offsets[ioffset].ofp != NULL)
+						{
+						fclose(platform->sensors[isensor].offsets[ioffset].ofp);
+						platform->sensors[isensor].offsets[ioffset].ofp  = NULL;
+						}
+					}
+				}
+			}
+		}
 
-	/* deallocate nav, sensordepth, heading, attitude, and timeshift arrays */
+	/* deallocate nav, sensordepth, heading, attitude, and time_latency arrays */
 	if (nav_alloc > 0)
 		{
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_time_d,&error);
@@ -2160,10 +2721,10 @@ int main (int argc, char **argv)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&attitude_pitch,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&attitude_heave,&error);
 		}
-	if (timeshift_alloc > 0)
+	if (time_latency_alloc > 0)
 		{
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&timeshift_time_d,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&timeshift_timeshift,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&time_latency_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&time_latency_time_latency,&error);
 		}
 
 	/* deallocate platform structure */

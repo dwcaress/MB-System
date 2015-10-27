@@ -62,7 +62,8 @@
 #define	MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE		4
 #define	MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK		5
 #define	MB7KPREPROCESS_KLUGE_FIXTIMEJUMP			6
-#define	MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY	7
+#define	MB7KPREPROCESS_KLUGE_FIXTIMEJUMPBEAMEDITS	7
+#define	MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY	8
 static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -503,11 +504,12 @@ int main (int argc, char **argv)
 	int	kluge_beampatterntweak = MB_NO; /* kluge 5 */
 	double	kluge_beampatternfactor = 1.0;
 	int	kluge_fixtimejump = MB_NO; /* kluge 6 */
+	int	kluge_fixtimejumpbeamedits = MB_NO; /* kluge 7 */
 	double	kluge_timejump_interval = 0.0;
 	double	kluge_timejump_threshold = 0.0;
-	double	time_interval, time_d_old, time_d_org, dtime_d;
+	double	time_d_org, dtime_d;
 	double	time_d_tolerance = 0.001;
-	int		ping_increment, ping_number_old;
+	int		iping = 0;
 	int kluge_donotrecalculatebathy = MB_NO;
 	s7k_time	s7kTime;
 	mb_path	esffile;
@@ -721,6 +723,10 @@ int main (int argc, char **argv)
 						kluge_timejump_threshold = klugevalue2;
 				else
 						kluge_timejump_threshold = kluge_timejump_interval / 4.0;
+				}
+			if (klugemode == MB7KPREPROCESS_KLUGE_FIXTIMEJUMPBEAMEDITS)
+				{
+				kluge_fixtimejumpbeamedits = MB_YES;
 				}
 			if (klugemode == MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY)
 				{
@@ -985,6 +991,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       kluge_beampatterntweak:        %d\n",kluge_useverticaldepth);
 		fprintf(stderr,"dbg2       kluge_beampatternfactor:       %f\n",kluge_beampatternfactor);
 		fprintf(stderr,"dbg2       kluge_fixtimejump:             %d\n",kluge_fixtimejump);
+		fprintf(stderr,"dbg2       kluge_fixtimejumpbeamedits:    %d\n",kluge_fixtimejumpbeamedits);
 		fprintf(stderr,"dbg2       kluge_timejump_interval:       %f\n",kluge_timejump_interval);
 		fprintf(stderr,"dbg2       kluge_timejump_threshold:      %f\n",kluge_timejump_threshold);
 		fprintf(stderr,"dbg2       kluge_donotrecalculatebathy:   %d\n",kluge_donotrecalculatebathy);
@@ -2173,8 +2180,21 @@ sonardepth_sonardepth[nsonardepth]);*/
 						}
 					}
 
-				/* store the bathtech time stamp */
-				if (nbatht == 0 || time_d > batht_time_d[nbatht-1])
+				/* if applying kluge 6 timestamp correction accumulate the timestamps */
+				if (kluge_fixtimejump == MB_YES)
+					{
+					batht_time_d[nbatht] = time_d;
+					batht_time_d_new[nbatht] = time_d;
+					batht_ping[nbatht] = bathymetry->ping_number;
+					batht_time_offset[nbatht] = 0.0;
+					batht_ping_offset[nbatht] = 0;
+					batht_good_offset[nbatht] = MB_NO;
+					nbatht++;
+					}
+
+				/* else store the bathtech time stamp for use in the old timestamp correcting algorithm */
+				else if (fix_time_stamps != MB7KPREPROCESS_TIMEFIX_NONE
+					&& (nbatht == 0 || time_d > batht_time_d[nbatht-1]))
 					{
 					batht_time_d[nbatht] = time_d;
 					batht_ping[nbatht] = bathymetry->ping_number;
@@ -2808,7 +2828,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 
 			/* store the rollpitchheave data */
-			if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < time_d)
+			//if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < time_d)
 				{
 				dat_rph_time_d[ndat_rph] = time_d;
 				dat_rph_roll[ndat_rph] = RTD * rollpitchheave->roll;
@@ -3390,7 +3410,8 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 
 			/* allocate memory for edgetech timetag arrays if needed */
-			if (nedget == 0 || nedget >= nedget_alloc)
+			if (fix_time_stamps != MB7KPREPROCESS_TIMEFIX_NONE
+					&& (nedget == 0 || nedget >= nedget_alloc))
 				{
 				nedget_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
 				status = mb_reallocd(verbose,__FILE__,__LINE__,nedget_alloc*sizeof(double),(void **)&edget_time_d,&error);
@@ -3420,7 +3441,8 @@ sonardepth_sonardepth[nsonardepth]);*/
 						- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
-			if (nedget == 0 || time_d > edget_time_d[nedget-1])
+			if (fix_time_stamps != MB7KPREPROCESS_TIMEFIX_NONE
+					&& (nedget == 0 || time_d > edget_time_d[nedget-1]))
 				{
 				edget_time_d[nedget] = time_d;
 				edget_ping[nedget] = fsdwssheader->pingNum;
@@ -4110,86 +4132,163 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 			}
 		}
 
-	/* fix problems with batht timestamp arrays */
-	for (i=0;i<nbatht;i++)
+	/* Fix timestamp jumps if requested with kluge 6 */
+	if (kluge_fixtimejump == MB_YES)
 		{
-		if (batht_good_offset[i] == MB_NO)
+fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
+				
+		/* calculate how far off the raw timestamp is from the expected time  */
+		for (i=0;i<nbatht;i++)
 			{
-			foundstart = MB_NO;
-			foundend = MB_NO;
-			for (j = i - 1; j >= 0 && foundstart == MB_NO; j--)
+			batht_time_offset[i] = batht_time_d[0]
+								+ (batht_ping[i] - batht_ping[0]) * kluge_timejump_interval
+								- batht_time_d[i];
+			batht_ping_offset[i] = batht_time_offset[i] / kluge_timejump_interval;
+			}
+			
+		/* loop over the timestamps finding and fixing ones that are locally
+		 * offset by more than the threshold - do not adjust things if there
+		 * is a static offset */
+		for (i=3;i<nbatht-3;i++)
+			{
+			/* if the time interval between three pings ago and three pings in
+			 * the future is close enough to the expected, then check to see
+			 * if the current timestamp needs adjusting */
+			if (fabs((batht_time_d[i+3] - batht_time_d[i-3])
+					 - kluge_timejump_interval * (batht_ping[i+3] - batht_ping[i-3]))
+				< kluge_timejump_threshold)
 				{
-				if (batht_good_offset[j] == MB_YES)
+				if (fabs((batht_time_d[i] - batht_time_d[i-3])
+						- kluge_timejump_interval * (batht_ping[i] - batht_ping[i-3]))
+					> kluge_timejump_threshold)
 					{
-					foundstart = MB_YES;
-					start = j;
+					batht_time_d_new[i] = batht_time_d[i-3]
+											+ kluge_timejump_interval
+												* (batht_ping[i] - batht_ping[i-3]);
+					batht_good_offset[i] = MB_YES;
 					}
-				}
-			for (j = i + 1; j < nbatht && foundend == MB_NO; j++)
-				{
-				if (batht_good_offset[j] == MB_YES)
-					{
-					foundend = MB_YES;
-					end = j;
-					}
-				}
-			if (foundstart == MB_YES && foundend == MB_YES)
-				{
-				batht_time_offset[i] = batht_time_offset[start]
-							+ (batht_time_offset[end] - batht_time_offset[start])
-								* ((double)(i - start)) / ((double)(end - start));
-				}
-			else if (foundstart == MB_YES)
-				{
-				batht_time_offset[i] = batht_time_offset[start];
-				}
-			else if (foundend == MB_YES)
-				{
-				batht_time_offset[i] = batht_time_offset[end];
 				}
 			}
-		batht_time_d_new[i] = batht_time_d[i] + batht_time_offset[i];
+			
+		/* print it all out */
+		for (i=0;i<nbatht;i++)
+			{
+			mb_get_date(verbose, batht_time_d[i], time_i);
+			fprintf(stderr,"Ping: %7d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %15.6f %10.6f %2d  %15.6f",
+					batht_ping[i],
+					time_i[0], time_i[1], time_i[2],
+					time_i[3], time_i[4], time_i[5], time_i[6],
+					batht_time_d[i],
+					batht_time_offset[i],
+					batht_ping_offset[i],
+					batht_time_d_new[i]);
+			if (batht_good_offset[i] == MB_YES)
+				fprintf(stderr," ***");
+			fprintf(stderr,"\n");
+			}
+			
+//		/* print out roll pitch heave data */
+//		for (i=1;i<ndat_rph;i++)
+//			{
+//			mb_get_date(verbose, dat_rph_time_d[i], time_i);
+//			fprintf(stderr,"INS RPH: %7d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %15.6f %10.6f",
+//					i,
+//					time_i[0], time_i[1], time_i[2],
+//					time_i[3], time_i[4], time_i[5], time_i[6],
+//					dat_rph_time_d[i],
+//					dat_rph_time_d[i] - dat_rph_time_d[i-1]);
+//			if (fabs(dat_rph_time_d[i] - dat_rph_time_d[i-1] - 0.08) >= 0.01)
+//				fprintf(stderr," ***");
+//			fprintf(stderr,"\n");
+//			}
+		}
+
+	/* fix problems with batht timestamp arrays */
+	else if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON)
+		{
+		for (i=0;i<nbatht;i++)
+			{
+			if (batht_good_offset[i] == MB_NO)
+				{
+				foundstart = MB_NO;
+				foundend = MB_NO;
+				for (j = i - 1; j >= 0 && foundstart == MB_NO; j--)
+					{
+					if (batht_good_offset[j] == MB_YES)
+						{
+						foundstart = MB_YES;
+						start = j;
+						}
+					}
+				for (j = i + 1; j < nbatht && foundend == MB_NO; j++)
+					{
+					if (batht_good_offset[j] == MB_YES)
+						{
+						foundend = MB_YES;
+						end = j;
+						}
+					}
+				if (foundstart == MB_YES && foundend == MB_YES)
+					{
+					batht_time_offset[i] = batht_time_offset[start]
+								+ (batht_time_offset[end] - batht_time_offset[start])
+									* ((double)(i - start)) / ((double)(end - start));
+					}
+				else if (foundstart == MB_YES)
+					{
+					batht_time_offset[i] = batht_time_offset[start];
+					}
+				else if (foundend == MB_YES)
+					{
+					batht_time_offset[i] = batht_time_offset[end];
+					}
+				}
+			batht_time_d_new[i] = batht_time_d[i] + batht_time_offset[i];
+			}
 		}
 
 	/* fix problems with edget timestamp arrays */
-	for (i=0;i<nedget;i++)
+	if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH)
 		{
-		if (edget_good_offset[i] == MB_NO)
+		for (i=0;i<nedget;i++)
 			{
-			foundstart = MB_NO;
-			foundend = MB_NO;
-			for (j = i - 1; j >= 0 && foundstart == MB_NO; j--)
+			if (edget_good_offset[i] == MB_NO)
 				{
-				if (edget_good_offset[j] == MB_YES)
+				foundstart = MB_NO;
+				foundend = MB_NO;
+				for (j = i - 1; j >= 0 && foundstart == MB_NO; j--)
 					{
-					foundstart = MB_YES;
-					start = j;
+					if (edget_good_offset[j] == MB_YES)
+						{
+						foundstart = MB_YES;
+						start = j;
+						}
+					}
+				for (j = i + 1; j < nedget && foundend == MB_NO; j++)
+					{
+					if (edget_good_offset[j] == MB_YES)
+						{
+						foundend = MB_YES;
+						end = j;
+						}
+					}
+				if (foundstart == MB_YES && foundend == MB_YES)
+					{
+					edget_time_offset[i] = edget_time_offset[start]
+								+ (edget_time_offset[end] - edget_time_offset[start])
+									* ((double)(i - start)) / ((double)(end - start));
+					}
+				else if (foundstart == MB_YES)
+					{
+					edget_time_offset[i] = edget_time_offset[start];
+					}
+				else if (foundend == MB_YES)
+					{
+					edget_time_offset[i] = edget_time_offset[end];
 					}
 				}
-			for (j = i + 1; j < nedget && foundend == MB_NO; j++)
-				{
-				if (edget_good_offset[j] == MB_YES)
-					{
-					foundend = MB_YES;
-					end = j;
-					}
-				}
-			if (foundstart == MB_YES && foundend == MB_YES)
-				{
-				edget_time_offset[i] = edget_time_offset[start]
-							+ (edget_time_offset[end] - edget_time_offset[start])
-								* ((double)(i - start)) / ((double)(end - start));
-				}
-			else if (foundstart == MB_YES)
-				{
-				edget_time_offset[i] = edget_time_offset[start];
-				}
-			else if (foundend == MB_YES)
-				{
-				edget_time_offset[i] = edget_time_offset[end];
-				}
+			edget_time_d_new[i] = edget_time_d[i] + edget_time_offset[i];
 			}
-		edget_time_d_new[i] = edget_time_d[i] + edget_time_offset[i];
 		}
 
 	/* remove noise from position data associated with Kearfott INS on an ROV
@@ -4748,20 +4847,32 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 			if (istore->read_processedsidescan == MB_YES)
 				nrec_processedsidescan++;
 			
-            /* if requested look for jumps in multibeam time and fix them if necessary */
+            /* if requested fix jumps in multibeam timestamps */
             if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA
 				&& istore->read_bathymetry == MB_YES
 				&& kluge_fixtimejump == MB_YES)
 				{
-				/* compare interval between the current and previous ping with
-				   the expected interval */
+				/* find the ping in the timestamp list */
 				bathymetry = &(istore->bathymetry);
 				header = &(bathymetry->header);
-				time_interval = time_d - time_d_old;
-				ping_increment = bathymetry->ping_number - ping_number_old;
-				if (nrec_bathymetry > 1
-						&& fabs(time_interval - ping_increment * kluge_timejump_interval)
-								>= kluge_timejump_threshold)
+				found = MB_NO;
+				for (i = iping; i < nbatht && found == MB_NO; i++)
+					{
+					if (bathymetry->ping_number == batht_ping[i])
+						{
+						iping = i;
+						found = MB_YES;
+						}
+					}
+				for (i = 0; i < nbatht && found == MB_NO; i++)
+					{
+					if (bathymetry->ping_number == batht_ping[i])
+						{
+						iping = i;
+						found = MB_YES;
+						}
+					}
+				if (found == MB_YES && batht_good_offset[iping] == MB_YES)
 						{
 						fprintf(stderr,"*** Timestamp adjusted from "
 								"%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d to ",
@@ -4770,8 +4881,8 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 
 						/* predict what the timestamp should be */
 						time_d_org = time_d;
-						time_d = time_d_old + ping_increment * kluge_timejump_interval;
-						dtime_d = ping_increment * kluge_timejump_interval - time_interval;
+						time_d = batht_time_d_new[iping];
+						dtime_d = time_d - time_d_org;
 
 						/* get s7k timestamp structure of new timestamp */
 						mb_get_date(verbose, time_d, time_i);
@@ -4840,8 +4951,6 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 										}
 								}
 						}
-				time_d_old = time_d;
-				ping_number_old = bathymetry->ping_number;
 				}
 
 			/* print out record headers */
@@ -7670,7 +7779,9 @@ fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 
     /* if fixing time stamps of existing beam edits
 		write out and close the edit save file */
-    if (kluge_fixtimejump == MB_YES && esffile_open == MB_YES)
+    if (kluge_fixtimejump == MB_YES
+		&& kluge_fixtimejumpbeamedits == MB_YES
+		&& esffile_open == MB_YES)
 		{
 		for (i = 0; i < esf.nedit; i++)
 				{

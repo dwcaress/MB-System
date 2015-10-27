@@ -3294,3 +3294,153 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 	}
 
 /*--------------------------------------------------------------------*/
+
+int mb_apply_time_latency(int verbose, int data_num, double *data_time_d,
+									int time_latency_mode,
+									double time_latency_static,
+									int time_latency_num,
+									double *time_latency_time_d,
+									double *time_latency_value,
+									int *error)
+	{
+	char	*function_name = "mb_apply_time_latency";
+	int	status = MB_SUCCESS;
+	int interp_status;
+	double time_latency;
+	int interp_error = MB_ERROR_NO_ERROR;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:                           %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:                          %d\n",verbose);
+		fprintf(stderr,"dbg2       data_num:                         %d\n",data_num);
+		fprintf(stderr,"dbg2       data_time_d:                      %p\n",data_time_d);
+		fprintf(stderr,"dbg2       time_latency_mode:                %d\n",time_latency_mode);
+		fprintf(stderr,"dbg2       time_latency_static:              %f\n",time_latency_static);
+		fprintf(stderr,"dbg2       time_latency_num:                 %d\n",time_latency_num);
+		fprintf(stderr,"dbg2       time_latency_time_d:              %p\n",time_latency_time_d);
+		fprintf(stderr,"dbg2       time_latency_value:               %p\n",time_latency_value);
+		for (i=0;i<time_latency_num;i++)
+		fprintf(stderr,"dbg2          time_latency[%d]:              %f %f\n",
+				i,time_latency_time_d[i],time_latency_value[i]);
+		}
+
+	/* apply time_latency model to time data */
+	if (time_latency_mode == MB_SENSOR_TIME_LATENCY_MODEL)
+		{
+		j = 0;
+		for (i=0;i<data_num;i++)
+			{
+			interp_status = mb_linear_interp(verbose,
+						time_latency_time_d-1, time_latency_value-1,
+						time_latency_num, data_time_d[i], &time_latency, &j,
+						&interp_error);
+			data_time_d[i] -= time_latency;
+			}
+		
+		}
+	else if (time_latency_mode == MB_SENSOR_TIME_LATENCY_STATIC)
+		{
+fprintf(stderr,"Applying time latency: %f to %d data\n",time_latency_static,data_num);
+		for (i=0;i<data_num;i++)
+			{
+			data_time_d[i] -= time_latency_static;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:                            %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                           %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+	}
+
+/*--------------------------------------------------------------------*/
+
+int mb_apply_time_filter(int verbose, int data_num,
+							double *data_time_d,
+							double *data_value,
+							double filter_length,
+							int *error)
+	{
+	char	*function_name = "mb_apply_time_filter";
+	int	status = MB_SUCCESS;
+	double *data_value_filtered = NULL;
+	double dtime, dtol, filterweight, weight;
+	int	nhalffilter;
+	size_t size;
+	int	i, j, j1, j2;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:                           %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:                          %d\n",verbose);
+		fprintf(stderr,"dbg2       data_num:                         %d\n",data_num);
+		fprintf(stderr,"dbg2       data_time_d:                      %p\n",data_time_d);
+		fprintf(stderr,"dbg2       data_value:                       %p\n",data_value);
+		fprintf(stderr,"dbg2       filter_length:                    %f\n",filter_length);
+		}
+
+	/* apply a Gaussian time domain filter to the time series provided */
+	size = data_num * sizeof(double);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&data_value_filtered, error);
+	if (status == MB_SUCCESS)
+		{
+		dtime = (data_time_d[data_num-1]  - data_time_d[0]) / data_num;
+		nhalffilter = (int)(4.0 * filter_length / dtime);
+		for (i=0;i<data_num;i++)
+			{
+			data_value_filtered[i] = 0.0;
+			filterweight = 0.0;
+			j1 = MAX(i - nhalffilter, 0);
+			j2 = MIN(i + nhalffilter, data_num - 1);
+			for (j=j1;j<=j2;j++)
+				{
+				dtol = (data_time_d[j] - data_time_d[i]) / filter_length;
+				weight = exp(-dtol * dtol);
+				data_value_filtered[i] += weight * data_value[j];
+				filterweight += weight;
+				}
+			if (filterweight > 0.0)
+				data_value_filtered[i] /= filterweight;
+			}
+		for (i=0;i<data_num;i++)
+			{
+			data_value[i] = data_value_filtered[i];
+			}
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&data_value_filtered, error);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:                            %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                           %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+	}
+
+/*--------------------------------------------------------------------*/

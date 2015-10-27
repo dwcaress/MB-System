@@ -269,7 +269,7 @@ mb_platform_math_attitude_platform (int     verbose,
 		*platform_heading -= 360.0;
 
 	/* print output debug statements */
-	if (verbose >= 1)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
