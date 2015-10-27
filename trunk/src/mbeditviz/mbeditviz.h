@@ -280,7 +280,7 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 				double *rolldelta, double *pitchdelta);
 int mbeditviz_beam_position (double navlon, double navlat,
 							double mtodeglon, double mtodeglat,
-							double bath, double acrosstrack, double alongtrack,
+							double rawbath, double acrosstrack, double alongtrack,
 							double sonardepth,
 							double rolldelta, double pitchdelta, double heading,
 							double *bathcorr, double *lon, double *lat);

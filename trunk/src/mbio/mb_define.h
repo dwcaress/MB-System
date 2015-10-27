@@ -818,6 +818,18 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
                 int *merge_timeshift_num, int *merge_timeshift_alloc,
                 double **merge_timeshift_time_d, double **merge_timeshift_timeshift,
                 int *error);
+int mb_apply_time_latency(int verbose, int data_num, double *data_time_d,
+                int time_latency_mode,
+                double time_latency_static,
+                int time_latency_num,
+                double *time_latency_time_d,
+                double *time_latency_value,
+                int *error);
+int mb_apply_time_filter(int verbose, int data_num,
+				double *data_time_d,
+				double *data_value,
+				double filter_length,
+                int *error);
 
 int mb_swap_check(void);
 int mb_get_double(double *, char *, int);

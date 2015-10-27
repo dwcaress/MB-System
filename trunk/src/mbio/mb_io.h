@@ -317,6 +317,8 @@ struct mb_sensor_offset_struct
         double  attitude_offset_heading;
         double  attitude_offset_roll;
         double  attitude_offset_pitch;
+        
+        FILE    *ofp;       /* file pointer for integrated nav output by mbpreprocess */
          };
 
 struct mb_sensor_struct

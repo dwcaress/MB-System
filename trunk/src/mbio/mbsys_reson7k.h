@@ -2425,6 +2425,68 @@ struct mbsys_reson7k_struct
 	/* Reson 7k Spreading Loss (record 7612) */
 	s7kr_spreadingloss	spreadingloss;
 
+	/* record counting variables */
+	int	nrec_read;
+	int	nrec_write;
+	int	nrec_reference;
+	int	nrec_sensoruncal;
+	int	nrec_sensorcal;
+	int	nrec_position;
+	int	nrec_customattitude;
+	int	nrec_tide;
+	int	nrec_altitude;
+	int	nrec_motion;
+	int	nrec_depth;
+	int	nrec_svp;
+	int	nrec_ctd;
+	int	nrec_geodesy;
+	int	nrec_rollpitchheave;
+	int	nrec_heading;
+	int	nrec_surveyline;
+	int	nrec_navigation;
+	int	nrec_attitude;
+    int nrec_rec1022;
+	int	nrec_fsdwsslo;
+	int	nrec_fsdwsshi;
+	int	nrec_fsdwsb;
+	int	nrec_bluefinnav;
+	int	nrec_bluefinenv;
+	int	nrec_multibeam;
+	int	nrec_volatilesonarsettings;
+	int	nrec_configuration;
+	int	nrec_matchfilter;
+	int	nrec_beamgeometry;
+    int nrec_v2firmwarehardwareconfiguration;
+	int	nrec_calibration;
+	int	nrec_bathymetry;
+	int	nrec_backscatter;
+	int	nrec_beam;
+	int	nrec_verticaldepth;
+    int nrec_tvg;
+	int	nrec_image;
+	int	nrec_v2pingmotion;
+	int	nrec_v2detectionsetup;
+	int	nrec_v2beamformed;
+    int nrec_v2bite;
+    int nrec_v27kcenterversion;
+    int nrec_v28kwetendversion;
+	int	nrec_v2detection;
+	int	nrec_v2rawdetection;
+	int	nrec_v2snippet;
+	int nrec_calibratedsnippet;
+	int	nrec_processedsidescan;
+	int	nrec_installation;
+	int	nrec_systemeventmessage;
+	int	nrec_fileheader;
+	int	nrec_remotecontrolsettings;
+    int nrec_reserved;
+    int nrec_roll;
+    int nrec_pitch;
+    int nrec_soundvelocity;
+    int nrec_absorptionloss;
+    int nrec_spreadingloss;
+	int	nrec_other;
+
 	};
 
 

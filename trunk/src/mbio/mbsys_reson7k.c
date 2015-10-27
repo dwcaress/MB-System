@@ -5638,6 +5638,102 @@ int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void 
 	char	*function_name = "mbsys_reson7k_preprocess";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	struct mb_platform_struct *platform;
+	struct mbsys_reson7k_struct *store;
+
+	/* data structure pointers */
+	s7k_header				*header;
+	s7kr_reference			*reference;
+	s7kr_sensoruncal		*sensoruncal;
+	s7kr_sensorcal			*sensorcal;
+	s7kr_position 			*position;
+	s7kr_customattitude		*customattitude;
+	s7kr_tide				*tide;
+	s7kr_altitude			*altituderec;
+	s7kr_motion				*motion;
+	s7kr_depth				*depth;
+	s7kr_svp				*svp;
+	s7kr_ctd				*ctd;
+	s7kr_geodesy			*geodesy;
+	s7kr_rollpitchheave 	*rollpitchheave;
+	s7kr_heading			*headingrec;
+	s7kr_surveyline			*surveyline;
+	s7kr_navigation			*navigation;
+	s7kr_attitude			*attitude;
+	s7kr_fsdwss 			*fsdwsslo;
+	s7kr_fsdwss 			*fsdwsshi;
+	s7kr_fsdwsb 			*fsdwsb;
+	s7k_fsdwchannel 		*fsdwchannel;
+	s7k_fsdwssheader 		*fsdwssheader;
+	s7k_fsdwsegyheader 		*fsdwsegyheader;
+	s7kr_bluefin			*bluefin;
+	s7kr_volatilesettings	*volatilesettings;
+	s7kr_matchfilter		*matchfilter;
+	s7kr_beamgeometry		*beamgeometry;
+	s7kr_bathymetry			*bathymetry;
+	s7kr_backscatter		*backscatter;
+	s7kr_beam				*beam;
+	s7kr_v2pingmotion		*v2pingmotion;
+	s7kr_v2detectionsetup	*v2detectionsetup;
+	s7kr_v2beamformed		*v2beamformed;
+	s7kr_verticaldepth		*verticaldepth;
+	s7kr_v2detection		*v2detection;
+	s7kr_v2rawdetection		*v2rawdetection;
+	s7kr_v2snippet			*v2snippet;
+	s7kr_calibratedsnippet 	*calibratedsnippet;
+	s7kr_processedsidescan	*processedsidescan;
+	s7kr_image				*image;
+	s7kr_fileheader			*fileheader;
+	s7kr_installation		*installation;
+	s7kr_remotecontrolsettings	*remotecontrolsettings;
+	
+	/* control parameters */
+	int pp_recalculate_bathymetry = MB_YES;
+	int	pp_ss_source = R7KRECID_None;
+	double	pp_pixel_size = 0.0;
+	double	pp_swath_width = 0.0;
+	int pp_zeroattitudecorrection = MB_NO;
+	int pp_zeroalongtrackangles = MB_NO;
+	int pp_beampatterntweak = MB_NO;
+	double	pp_beampatternfactor = 1.0;
+	
+	/* variables for beam angle calculation */
+	mb_3D_orientation tx_align;
+	mb_3D_orientation tx_orientation;
+	double tx_steer;
+	mb_3D_orientation rx_align;
+	mb_3D_orientation rx_orientation;
+	double rx_steer;
+	double reference_heading;
+	double beamAzimuth;
+	double beamDepression;
+
+	int	time_i[7];
+	int	time_j[5];
+	double	time_d = 0.0;
+	double	navlon = 0.0;
+	double	navlat = 0.0;
+	double	speed = 0.0;
+	double	altitude = 0.0;
+	double	sensordepth = 0.0;
+	double	heading = 0.0;
+	double	beamheading, beamheadingr;
+	double	roll = 0.0;
+	double	rollr, beamroll, beamrollr;
+	double	pitch = 0.0;
+	double	pitchr, beampitch, beampitchr;
+	double	heave = 0.0;
+	double	beamheave;
+	double	soundspeed;
+	double	theta, phi;
+	double	rr, xx, zz;
+	double	mtodeglon, mtodeglat, headingx, headingy;
+	double	dx, dy, dt;
+	int	jnav, jsensordepth, jheading, jaltitude, jattitude;
+	int	j1, j2;
+	int	interp_status;
+	
+	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5672,6 +5768,925 @@ int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void 
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+
+	/* get platform structure pointer */
+	platform = (struct mb_platform_struct *) platform_ptr;
+	
+	/* deal with a survey record */
+	if (store->kind == MB_DATA_DATA)
+		{
+		bathymetry = &(store->bathymetry);
+		v2detection = &(store->v2detection);
+		v2detectionsetup = &(store->v2detectionsetup);
+		v2rawdetection = &(store->v2rawdetection);
+		bluefin = &(store->bluefin);
+	
+		/* print out record headers */
+		if (store->read_volatilesettings == MB_YES)
+			{
+			volatilesettings = &(store->volatilesettings);
+			header = &(volatilesettings->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 1)
+			fprintf(stderr,"R7KRECID_7kVolatileSonarSettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+		if (store->read_matchfilter == MB_YES)
+			{
+			matchfilter = &(store->matchfilter);
+			header = &(matchfilter->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 1)
+			fprintf(stderr,"R7KRECID_7kMatchFilter:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+		if (store->read_beamgeometry == MB_YES)
+			{
+			beamgeometry = &(store->beamgeometry);
+			header = &(beamgeometry->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 1)
+			fprintf(stderr,"R7KRECID_7kBeamGeometry:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d beams:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber,beamgeometry->number_beams);
+			}
+		if (store->read_remotecontrolsettings == MB_YES)
+			{
+			remotecontrolsettings = &(store->remotecontrolsettings);
+			header = &(remotecontrolsettings->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 1)
+			fprintf(stderr,"R7KRECID_7kremotecontrolsettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+		if (store->read_backscatter == MB_YES)
+			{
+			backscatter = &(store->backscatter);
+			header = &(backscatter->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 1)
+			fprintf(stderr,"R7KRECID_7kBackscatterImageData:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d samples:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber,backscatter->ping_number,backscatter->number_samples);
+			}
+		if (store->read_beam == MB_YES)
+			{
+			beam = &(store->beam);
+			header = &(beam->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 1)
+			fprintf(stderr,"R7KRECID_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d samples:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber,beam->ping_number,beam->number_beams,beam->number_samples);
+			}
+		if (store->read_verticaldepth == MB_YES)
+			{
+			verticaldepth = &(store->verticaldepth);
+			header = &(verticaldepth->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 1)
+			fprintf(stderr,"R7KRECID_7kVerticalDepth: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber,verticaldepth->ping_number);
+			}
+		if (store->read_image == MB_YES)
+			{
+			image = &(store->image);
+			header = &(image->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 1)
+			fprintf(stderr,"R7KRECID_7kImageData:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d width:%d height:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber,image->ping_number,image->width,image->height);
+			}
+		if (store->read_bathymetry != MB_YES)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_IGNORE;
+			}
+		else
+			{
+			bathymetry = &(store->bathymetry);
+			header = &(bathymetry->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 1)
+			fprintf(stderr,"R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber,bathymetry->ping_number,bathymetry->number_beams);
+	
+			/*--------------------------------------------------------------*/
+			/* apply any required fixes to survey data beam flags */
+			/*--------------------------------------------------------------*/
+			/* fix version 4 quality flags */
+			if (bathymetry->header.Version < 5)
+				{
+				for (i=0;i<bathymetry->number_beams;i++)
+					{
+					if ((bathymetry->quality[i]) < 16)
+						{
+						if (bathymetry->range[i] > 0.007)
+							{
+							bathymetry->quality[i] = 23;
+							}
+						else if (bathymetry->range[i] > 0.0)
+							{
+							bathymetry->quality[i] = 20;
+							}
+						else
+							{
+							bathymetry->quality[i] = 0;
+							}
+						}
+					}
+				}
+
+			/* fix early version 5 quality flags */
+			else if (bathymetry->header.Version == 5
+					&& header->s7kTime.Year < 2006)
+				{
+				for (i=0;i<bathymetry->number_beams;i++)
+					{
+					/* phase picks */
+					if ((bathymetry->quality[i]) == 8)
+						{
+/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
+						bathymetry->quality[i] = 32 + 15;
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+						}
+					else if ((bathymetry->quality[i]) == 4)
+						{
+/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
+						bathymetry->quality[i] = 16 + 15;
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+						}
+					}
+				}
+
+			/* fix early MBARI version 5 quality flags */
+			else if (bathymetry->header.Version == 5
+					&& store->nrec_bluefinnav > 0
+					&& header->s7kTime.Year < 2008)
+				{
+				for (i=0;i<bathymetry->number_beams;i++)
+					{
+					/* phase picks */
+					if ((bathymetry->quality[i]) == 4)
+						{
+/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
+						bathymetry->quality[i] = 32 + 15;
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+						}
+					else if ((bathymetry->quality[i]) == 2)
+						{
+/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
+						bathymetry->quality[i] = 16 + 15;
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+						}
+					}
+				}
+
+			/* fix upgraded MBARI version 5 quality flags */
+			else if (bathymetry->header.Version >= 5
+					&& store->nrec_bluefinnav > 0
+					&& header->s7kTime.Year <= 2010)
+				{
+				for (i=0;i<bathymetry->number_beams;i++)
+					{
+/* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
+					bathymetry->quality[i] = bathymetry->quality[i] & 15;
+
+					/* phase or amplitude picks */
+					if (bathymetry->quality[i] & 8)
+						{
+/* fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]); */
+						bathymetry->quality[i] += 32;
+/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
+						}
+					else if (bathymetry->quality[i] & 4)
+						{
+/* fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]); */
+						bathymetry->quality[i] += 16;
+/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
+						}
+
+					/* flagged by sonar */
+					if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0)
+						{
+						bathymetry->quality[i] += 64;
+						}
+/* fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]); */
+					}
+				}
+
+			/* fix upgraded version 5 quality flags */
+			else if (bathymetry->header.Version >= 5)
+				{
+				for (i=0;i<bathymetry->number_beams;i++)
+					{
+//fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]);
+					bathymetry->quality[i] = bathymetry->quality[i] & 15;
+
+					/* phase or amplitude picks */
+					if (bathymetry->quality[i] & 8)
+						{
+//fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);
+						bathymetry->quality[i] += 32;
+//fprintf(stderr," %d\n",bathymetry->quality[i]);
+						}
+					else if (bathymetry->quality[i] & 4)
+						{
+//fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);
+						bathymetry->quality[i] += 16;
+//fprintf(stderr," %d\n",bathymetry->quality[i]);
+						}
+
+					/* flagged by sonar */
+					if ((bathymetry->quality[i] & 3) == 3)
+						{
+						}
+					else if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0)
+						{
+						bathymetry->quality[i] += 64;
+						}
+					else if (bathymetry->quality[i] > 0)
+						{
+						bathymetry->quality[i] += 64;
+						}
+//fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]);
+					}
+				}
+			
+			/*--------------------------------------------------------------*/
+			/* interpolate ancilliary values  */
+			/*--------------------------------------------------------------*/
+			interp_status = mb_linear_interp_longitude(verbose,
+						nav_time_d-1, nav_lon-1,
+						n_nav, time_d, &navlon, &jnav,
+						error);
+			interp_status = mb_linear_interp_latitude(verbose,
+						nav_time_d-1, nav_lat-1,
+						n_nav, time_d, &navlat, &jnav,
+						error);
+			interp_status = mb_linear_interp(verbose,
+						nav_time_d-1, nav_speed-1,
+						n_nav, time_d, &speed, &jnav,
+						error);
+			
+			/* interpolate sensordepth */
+			interp_status = mb_linear_interp(verbose,
+						sensordepth_time_d-1, sensordepth_sensordepth-1,
+						n_sensordepth, time_d, &sensordepth, &jsensordepth,
+						error);
+			
+			/* interpolate heading */
+			interp_status = mb_linear_interp_heading(verbose,
+						heading_time_d-1, heading_heading-1,
+						n_heading, time_d, &heading, &jheading,
+						error);
+			
+			/* interpolate altitude */
+			interp_status = mb_linear_interp(verbose,
+						altitude_time_d-1, altitude_altitude-1,
+						n_altitude, time_d, &altitude, &jaltitude,
+						error);
+			
+			/* interpolate attitude */
+			interp_status = mb_linear_interp(verbose,
+						attitude_time_d-1, attitude_roll-1,
+						n_attitude, time_d, &roll, &jattitude,
+						error);
+			interp_status = mb_linear_interp(verbose,
+						attitude_time_d-1, attitude_pitch-1,
+						n_attitude, time_d, &pitch, &jattitude,
+						error);
+			interp_status = mb_linear_interp(verbose,
+						attitude_time_d-1, attitude_heave-1,
+						n_attitude, time_d, &heave, &jattitude,
+						error);
+
+			/* get local translation between lon lat degrees and meters */
+			mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+			headingx = sin(DTR*heading);
+			headingy = cos(DTR*heading);	
+			
+			/* if a valide speed is not available calculate it */
+			if (interp_status == MB_SUCCESS
+				&& speed <= 0.0)
+				{
+				if (jnav > 1)
+					{
+					j1 = jnav - 2;
+					j2 = jnav - 1;
+					}
+				else
+					{
+					j1 = jnav - 1;
+					j2 = jnav;
+					}
+				dx = (nav_lon[j2] - nav_lon[j1]) / mtodeglon;
+				dy = (nav_lat[j2] - nav_lat[j1]) / mtodeglat;
+				dt = (nav_time_d[j2] - nav_time_d[j1]);
+				if (dt > 0.0)
+					speed = sqrt(dx * dx + dy * dy) / dt;
+				}
+
+			/* if the optional data are not all available, this ping
+				is not useful, and is discarded by setting
+				*error to MB_ERROR_MISSING_NAVATTITUDE */
+			if (interp_status == MB_FAILURE)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_MISSING_NAVATTITUDE;
+				}
+			
+			
+			/*--------------------------------------------------------------*/
+			/* recalculate bathymetry  */
+			/*--------------------------------------------------------------*/
+			if (bathymetry->optionaldata == MB_NO
+				|| pp_recalculate_bathymetry == MB_YES)
+				{
+				/* initialize all of the beams */
+				for (i=0;i<bathymetry->number_beams;i++)
+					{
+					if (store->read_v2rawdetection == MB_YES
+						|| (store->read_v2detection == MB_YES && store->read_v2detectionsetup == MB_YES))
+						bathymetry->quality[i] = 0;
+					bathymetry->depth[i] = 0.0;
+					bathymetry->acrosstrack[i] = 0.0;
+					bathymetry->alongtrack[i] = 0.0;
+					bathymetry->pointing_angle[i] = 0.0;
+					bathymetry->azimuth_angle[i] = 0.0;
+					}
+//fprintf(stderr,"sonardepth:%f heave:%f\n",sonardepth,heave);
+
+				/* set ping values */
+				bathymetry->longitude = DTR * navlon;
+				bathymetry->latitude = DTR * navlat;
+				bathymetry->heading = DTR * heading;
+				bathymetry->height_source = 1;
+				bathymetry->tide = 0.0;
+				bathymetry->roll = DTR * roll;
+				bathymetry->pitch = DTR * pitch;
+				bathymetry->heave = heave;
+				if ((volatilesettings->receive_flags & 0x2) != 0)
+					{
+					bathymetry->vehicle_height = -sensordepth - heave;
+					}
+				else
+					{								
+					bathymetry->vehicle_height = -sensordepth;
+					}
+
+				/* get ready to calculate bathymetry */
+				if (volatilesettings->sound_velocity > 0.0)
+					soundspeed = volatilesettings->sound_velocity;
+				else if (bluefin->environmental[0].sound_speed > 0.0)
+					soundspeed = bluefin->environmental[0].sound_speed;
+				else
+					soundspeed = 1500.0;
+				rollr = DTR * roll;
+				pitchr = DTR * pitch;
+				
+				/* zero atttitude correction if requested */
+				if (pp_zeroattitudecorrection == MB_YES)
+					{
+					rollr = 0.0;
+					pitchr = 0.0;
+					}
+
+				/* zero alongtrack angles if requested */
+				if (pp_zeroalongtrackangles == MB_YES)
+					{
+					for (i=0;i<bathymetry->number_beams;i++)
+						{
+						beamgeometry->angle_alongtrack[i] = 0.0;
+						}
+					}
+
+				/* if requested apply kluge scaling of rx beam angles */
+				if (pp_beampatterntweak == MB_YES)
+					{
+					/* case of v2rawdetection record */
+					if (store->read_v2rawdetection == MB_YES)
+						{
+						for (i=0;i<v2rawdetection->number_beams;i++)
+							{
+							v2rawdetection->rx_angle[i] *= pp_beampatternfactor;
+							}
+						}
+					
+					/* case of v2detection record with or without v2detectionsetup */
+					else if (store->read_v2detection == MB_YES)
+						{
+						for (i=0;i<v2detection->number_beams;i++)
+							{
+							v2detection->angle_x[i] *= pp_beampatternfactor;
+							}
+						}
+
+
+					/* else default case of beamgeometry record */
+					else
+						{
+						for (i=0;i<bathymetry->number_beams;i++)
+							{
+							beamgeometry->angle_acrosstrack[i] *= pp_beampatternfactor;
+							}
+						}
+					}
+
+				/* get transducer angular offsets */
+				if (platform != NULL)
+					{
+					status = mb_platform_orientation_offset(verbose,  (void *)platform,
+									platform->source_bathymetry, 0,
+									&(tx_align.heading), &(tx_align.roll), &(tx_align.pitch),
+									error);
+
+					status = mb_platform_orientation_offset(verbose,  (void *)platform,
+									platform->source_bathymetry, 0,
+									&(rx_align.heading), &(rx_align.roll), &(rx_align.pitch),
+									error);
+
+					}
+
+				/* loop over detections as available - the 7k format has used several
+				   different records over the years, so there are several different
+				   cases that must be handled */
+
+				/* case of v2rawdetection record */
+				if (store->read_v2rawdetection == MB_YES)
+					{
+					for (j=0;j<v2rawdetection->number_beams;j++)
+						{
+						/* beam id */
+						i = v2rawdetection->beam_descriptor[j];
+						
+						/* get range and quality */
+						bathymetry->range[i] = v2rawdetection->detection_point[j]
+									/ v2rawdetection->sampling_rate;
+						bathymetry->quality[i] = v2rawdetection->quality[j];
+						
+						/* get roll at bottom return time for this beam */
+						interp_status = mb_linear_interp(verbose,
+								attitude_time_d-1, attitude_roll-1,n_attitude,
+								time_d + bathymetry->range[i], &beamroll, &jattitude,
+								error);
+						beamrollr = DTR * beamroll;
+						
+						/* get pitch at bottom return time for this beam */
+						interp_status = mb_linear_interp(verbose,
+								attitude_time_d-1, attitude_pitch-1, n_attitude,
+								time_d + bathymetry->range[i], &beampitch, &jattitude,
+								error);
+						beampitchr = DTR * beampitch;
+						
+						/* get heading at bottom return time for this beam */
+						interp_status = mb_linear_interp_heading(verbose,
+								heading_time_d-1, heading_heading-1, n_heading,
+								time_d + bathymetry->range[i], &beamheading, &jheading,
+								error);
+						beamheadingr = DTR * beamheading;
+						
+						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+							Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+							Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+							Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+							p.26-31.
+							(http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+						   note complexity if transducer arrays are reverse mounted, as determined
+						   by a mount heading angle of about 180 degrees rather than about 0 degrees.
+						   If a receive array or a transmit array are reverse mounted then:
+							1) subtract 180 from the heading mount angle of the array
+							2) flip the sign of the pitch and roll mount offsets of the array
+							3) flip the sign of the beam steering angle from that array
+								(reverse TX means flip sign of TX steer, reverse RX
+								means flip sign of RX steer) */
+						tx_steer = RTD * v2rawdetection->tx_angle;
+						tx_orientation.roll = roll;
+						tx_orientation.pitch = pitch;
+						tx_orientation.heading = heading;
+						rx_steer = -RTD * v2rawdetection->rx_angle[j];
+						rx_orientation.roll = beamroll;
+						rx_orientation.pitch = beampitch;
+						rx_orientation.heading = beamheading;
+						reference_heading = heading;
+		
+						status = mb_beaudoin(verbose,
+									tx_align,
+									tx_orientation,
+									tx_steer,
+									rx_align,
+									rx_orientation,
+									rx_steer,
+									reference_heading,
+									&beamAzimuth,
+									&beamDepression,
+									error);
+						theta = 90.0 - beamDepression;
+						phi = 90.0 - beamAzimuth;
+						if (phi < 0.0)
+							phi += 360.0;
+
+						/* calculate bathymetry */
+						rr = 0.5 * soundspeed * bathymetry->range[i];
+						xx = rr * sin(DTR * theta);
+						zz = rr * cos(DTR * theta);
+						bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+						bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+						bathymetry->depth[i] = zz + sensordepth - heave;
+						bathymetry->pointing_angle[i] = DTR * theta;
+						bathymetry->azimuth_angle[i] = DTR * phi;
+						}
+					}
+
+				/* case of v2detection record with v2detectionsetup */
+				else if (store->read_v2detection == MB_YES && store->read_v2detectionsetup == MB_YES)
+					{
+					for (j=0;j<v2detection->number_beams;j++)
+						{
+						i = v2detectionsetup->beam_descriptor[j];
+		
+						bathymetry->range[i] = v2detection->range[j];
+						bathymetry->quality[i] = v2detectionsetup->quality[j];
+						
+						/* compensate for pitch if not already compensated */
+						if ((volatilesettings->transmit_flags & 0xF) != 0)
+							{
+							beampitch = 0.0;
+							}
+						else
+							{
+							beampitch = pitch;
+							}
+						beampitchr = DTR * beampitch;
+						
+						/* compensate for roll if not already compensated */
+						if ((volatilesettings->receive_flags & 0x1) != 0)
+							{
+							beamroll = 0.0;
+							}
+						else
+							{								
+							/* get roll at bottom return time for this beam */
+							interp_status = mb_linear_interp(verbose,
+									attitude_time_d-1, attitude_roll-1,n_attitude,
+									time_d + bathymetry->range[i], &beamroll, &jattitude,
+									error);
+							}
+						beamrollr = DTR * beamroll;
+						
+						/* get heading at bottom return time for this beam */
+						interp_status = mb_linear_interp_heading(verbose,
+								heading_time_d-1, heading_heading-1, n_heading,
+								time_d + bathymetry->range[i], &beamheading, &jheading,
+								error);
+						beamheadingr = DTR * beamheading;
+							
+						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+							Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+							Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+							Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+							p.26-31.
+							(http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+						   note complexity if transducer arrays are reverse mounted, as determined
+						   by a mount heading angle of about 180 degrees rather than about 0 degrees.
+						   If a receive array or a transmit array are reverse mounted then:
+							1) subtract 180 from the heading mount angle of the array
+							2) flip the sign of the pitch and roll mount offsets of the array
+							3) flip the sign of the beam steering angle from that array
+								(reverse TX means flip sign of TX steer, reverse RX
+								means flip sign of RX steer) */
+						tx_steer = RTD * v2detection->angle_y[j];
+						tx_orientation.roll = roll;
+						tx_orientation.pitch = pitch;
+						tx_orientation.heading = heading;
+						rx_steer = -RTD * v2detection->angle_x[j];
+						rx_orientation.roll = beamroll;
+						rx_orientation.pitch = beampitch;
+						rx_orientation.heading = beamheading;
+						reference_heading = heading;
+		
+						status = mb_beaudoin(verbose,
+									tx_align,
+									tx_orientation,
+									tx_steer,
+									rx_align,
+									rx_orientation,
+									rx_steer,
+									reference_heading,
+									&beamAzimuth,
+									&beamDepression,
+									error);
+						theta = 90.0 - beamDepression;
+						phi = 90.0 - beamAzimuth;
+						if (phi < 0.0)
+							phi += 360.0;
+
+						/* calculate bathymetry */
+						rr = 0.5 * soundspeed * bathymetry->range[i];
+						xx = rr * sin(DTR * theta);
+						zz = rr * cos(DTR * theta);
+						bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+						bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+						bathymetry->depth[i] = zz + sensordepth - heave;
+						bathymetry->pointing_angle[i] = DTR * theta;
+						bathymetry->azimuth_angle[i] = DTR * phi;
+						}
+					}
+
+				/* case of v2detection record */
+				else if (store->read_v2detection == MB_YES)
+					{
+					/* now loop over the detects */
+					for (i=0;i<v2detection->number_beams;i++)
+						{
+						bathymetry->range[i] = v2detection->range[i];
+						/* bathymetry->quality[i] set in bathymetry record */
+						
+						/* compensate for pitch if not already compensated */
+						if ((volatilesettings->transmit_flags & 0xF) != 0)
+							{
+							beampitch = 0.0;
+							}
+						else
+							{
+							beampitch = pitch;
+							}
+						beampitchr = DTR * beampitch;
+						
+						/* compensate for roll if not already compensated */
+						if ((volatilesettings->receive_flags & 0x1) != 0)
+							{
+							beamroll = 0.0;
+							}
+						else
+							{								
+							/* get roll at bottom return time for this beam */
+							interp_status = mb_linear_interp(verbose,
+									attitude_time_d-1, attitude_roll-1,n_attitude,
+									time_d + bathymetry->range[i], &beamroll, &jattitude,
+									error);
+							}
+						beamrollr = DTR * beamroll;
+						
+						/* get heading at bottom return time for this beam */
+						interp_status = mb_linear_interp_heading(verbose,
+								heading_time_d-1, heading_heading-1, n_heading,
+								time_d + bathymetry->range[i], &beamheading, &jheading,
+								error);
+						beamheadingr = DTR * beamheading;
+							
+						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+							Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+							Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+							Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+							p.26-31.
+							(http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+						   note complexity if transducer arrays are reverse mounted, as determined
+						   by a mount heading angle of about 180 degrees rather than about 0 degrees.
+						   If a receive array or a transmit array are reverse mounted then:
+							1) subtract 180 from the heading mount angle of the array
+							2) flip the sign of the pitch and roll mount offsets of the array
+							3) flip the sign of the beam steering angle from that array
+								(reverse TX means flip sign of TX steer, reverse RX
+								means flip sign of RX steer) */
+						tx_steer = RTD * v2detection->angle_y[i];
+						tx_orientation.roll = roll;
+						tx_orientation.pitch = pitch;
+						tx_orientation.heading = heading;
+						rx_steer = -RTD * v2detection->angle_x[i];
+						rx_orientation.roll = beamroll;
+						rx_orientation.pitch = beampitch;
+						rx_orientation.heading = beamheading;
+						reference_heading = heading;
+		
+						status = mb_beaudoin(verbose,
+									tx_align,
+									tx_orientation,
+									tx_steer,
+									rx_align,
+									rx_orientation,
+									rx_steer,
+									reference_heading,
+									&beamAzimuth,
+									&beamDepression,
+									error);
+						theta = 90.0 - beamDepression;
+						phi = 90.0 - beamAzimuth;
+						if (phi < 0.0)
+							phi += 360.0;
+
+						/* calculate bathymetry */
+						rr = 0.5 * soundspeed * bathymetry->range[i];
+						xx = rr * sin(DTR * theta);
+						zz = rr * cos(DTR * theta);
+						bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+						bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+						bathymetry->depth[i] = zz + sensordepth - heave;
+						bathymetry->pointing_angle[i] = DTR * theta;
+						bathymetry->azimuth_angle[i] = DTR * phi;
+						}
+					}
+
+				/* else default case of beamgeometry record */
+				else
+					{
+					/* loop over all beams */
+					for (i=0;i<bathymetry->number_beams;i++)
+						{
+						/* bathymetry->range[i] set */
+						/* bathymetry->quality[i] set */
+						if ((bathymetry->quality[i] & 15) > 0)
+							{
+							/* compensate for pitch if not already compensated */
+							if ((volatilesettings->transmit_flags & 0xF) != 0)
+								{
+								beampitch = 0.0;
+								}
+							else
+								{
+								beampitch = pitch;
+								}
+							beampitchr = DTR * beampitch;
+							
+							/* compensate for roll if not already compensated */
+							if ((volatilesettings->receive_flags & 0x1) != 0)
+								{
+								beamroll = 0.0;
+								}
+							else
+								{								
+								/* get roll at bottom return time for this beam */
+								interp_status = mb_linear_interp(verbose,
+										attitude_time_d-1, attitude_roll-1,n_attitude,
+										time_d + bathymetry->range[i], &beamroll, &jattitude,
+										error);
+								}
+							beamrollr = DTR * beamroll;
+							
+							/* compensate for heave if not already compensated */
+							if ((volatilesettings->receive_flags & 0x2) != 0)
+								{
+								beamheave = 0.0;
+								}
+							else
+								{								
+								interp_status = mb_linear_interp(verbose,
+										attitude_time_d-1, attitude_heave-1,n_attitude,
+										time_d + bathymetry->range[i], &beamheave, &jattitude,
+										error);
+								}
+						
+							/* get heading at bottom return time for this beam */
+							interp_status = mb_linear_interp_heading(verbose,
+									heading_time_d-1, heading_heading-1, n_heading,
+									time_d + bathymetry->range[i], &beamheading, &jheading,
+									error);
+							beamheadingr = DTR * beamheading;
+							
+							/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+								Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+								Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+								Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+								p.26-31.
+								(http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+							   note complexity if transducer arrays are reverse mounted, as determined
+							   by a mount heading angle of about 180 degrees rather than about 0 degrees.
+							   If a receive array or a transmit array are reverse mounted then:
+								1) subtract 180 from the heading mount angle of the array
+								2) flip the sign of the pitch and roll mount offsets of the array
+								3) flip the sign of the beam steering angle from that array
+									(reverse TX means flip sign of TX steer, reverse RX
+									means flip sign of RX steer) */
+							tx_steer = RTD * beamgeometry->angle_alongtrack[i];
+							tx_orientation.roll = roll;
+							tx_orientation.pitch = pitch;
+							tx_orientation.heading = heading;
+							rx_steer = -RTD * beamgeometry->angle_acrosstrack[i];
+							rx_orientation.roll = beamroll;
+							rx_orientation.pitch = beampitch;
+							rx_orientation.heading = beamheading;
+							reference_heading = heading;
+			
+							status = mb_beaudoin(verbose,
+										tx_align,
+										tx_orientation,
+										tx_steer,
+										rx_align,
+										rx_orientation,
+										rx_steer,
+										reference_heading,
+										&beamAzimuth,
+										&beamDepression,
+										error);
+							theta = 90.0 - beamDepression;
+							phi = 90.0 - beamAzimuth;
+							if (phi < 0.0)
+								phi += 360.0;
+	
+							/* calculate bathymetry */
+							rr = 0.5 * soundspeed * bathymetry->range[i];
+							xx = rr * sin(DTR * theta);
+							zz = rr * cos(DTR * theta);
+							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+							bathymetry->depth[i] = zz + sensordepth - heave;
+							bathymetry->pointing_angle[i] = DTR * theta;
+							bathymetry->azimuth_angle[i] = DTR * phi;
+							}
+						}
+					}
+
+				/* set flag */
+				bathymetry->optionaldata = MB_YES;
+				bathymetry->header.OffsetToOptionalData
+						= MBSYS_RESON7K_RECORDHEADER_SIZE
+							+ R7KHDRSIZE_7kBathymetricData
+							+ bathymetry->number_beams * 9;
+
+				/* regenerate sidescan */
+				status = mbsys_reson7k_makess(verbose, mbio_ptr, store_ptr,
+							pp_ss_source, MB_NO, &pp_pixel_size,
+							MB_NO, &pp_swath_width,
+							MB_YES, error);
+				}
+			/*--------------------------------------------------------------*/
+
+			}
+
+		}
+	
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -10315,6 +11330,19 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	processedsidescan = (s7kr_processedsidescan *) &store->processedsidescan;
 	bluefin = (s7kr_bluefin *) &store->bluefin;
 	soundvelocity = (s7kr_soundvelocity *) &store->soundvelocity;
+	
+	/* if necessary pick a source for the backscatter */
+	if (store->kind == MB_DATA_DATA && source == R7KRECID_None)
+		{
+		if (store->read_calibratedsnippet == MB_YES)
+			source = R7KRECID_7kCalibratedSnippetData;
+		else if (store->read_v2snippet == MB_YES)
+			source = R7KRECID_7kV2SnippetData;
+		else if (store->read_beam == MB_YES)
+			source = R7KRECID_7kBeamData;
+		else if (store->read_backscatter == MB_YES)
+			source = R7KRECID_7kBackscatterImageData;
+		}
 
 	/* calculate sidescan from the desired source data if it is available */
 	if (store->kind == MB_DATA_DATA &&

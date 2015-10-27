@@ -2163,7 +2163,7 @@ int mb_platform_print(int verbose, void *platform_ptr, int *error)
 			fprintf(stderr,"dbg2       platform->source_subbottom1:  	%d\n", platform->source_subbottom1);
 			fprintf(stderr,"dbg2       platform->source_subbottom2:  	%d\n", platform->source_subbottom2);
 			fprintf(stderr,"dbg2       platform->source_subbottom3:  	%d\n", platform->source_subbottom3);
-			fprintf(stderr,"dbg2       platform->source_position:  	    %d\n", platform->source_position);
+			fprintf(stderr,"dbg2       platform->source_position:   	%d\n", platform->source_position);
 			fprintf(stderr,"dbg2       platform->source_position1:  	%d\n", platform->source_position1);
 			fprintf(stderr,"dbg2       platform->source_position2:  	%d\n", platform->source_position2);
 			fprintf(stderr,"dbg2       platform->source_position3:  	%d\n", platform->source_position3);
