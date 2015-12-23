@@ -40,8 +40,7 @@
 static char svn_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mb_platform_init(int verbose, int type, char *name, char *organization,
-			void **platform_ptr, int *error)
+int mb_platform_init(int verbose, void **platform_ptr, int *error)
 {
 	char	*function_name = "mb_platform_init";
 	int	status = MB_SUCCESS;
@@ -54,9 +53,6 @@ int mb_platform_init(int verbose, int type, char *name, char *organization,
 		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                  %d\n", verbose);
-		fprintf(stderr,"dbg2       type:		             %d\n", type);
-		fprintf(stderr,"dbg2       name:		             %s\n", name);
-		fprintf(stderr,"dbg2       organization:	         %s\n", organization);
 		fprintf(stderr,"dbg2       platform_ptr:             %p\n", platform_ptr);
 		fprintf(stderr,"dbg2       *platform_ptr:            %p\n", *platform_ptr);
 		}
@@ -65,29 +61,26 @@ int mb_platform_init(int verbose, int type, char *name, char *organization,
 	if (*platform_ptr == NULL)
 		{
 		status = mb_mallocd(verbose,__FILE__, __LINE__,sizeof(struct mb_platform_struct),
-				(void **) platform_ptr, error);
+							(void **) platform_ptr, error);
 		if (status == MB_SUCCESS)
 			{
 			memset(*platform_ptr, 0, sizeof(struct mb_platform_struct));
 			}
 		}
 
-	/* proceed if platform structure is allocated */
+	/* initialize structure if platform structure is allocated */
 	if (*platform_ptr != NULL)
 		{
 		/* get platform structure */
 		platform = (struct mb_platform_struct *) *platform_ptr;
 		
 		/* set values */
-		platform->type = type;
-		if (name != NULL)
-			strcpy(platform->name, name);
-		else
-			memset(platform->name, 0, sizeof(mb_longname));
-		if (organization != NULL)
-			strcpy(platform->organization, organization);
-		else
-			memset(platform->name, 0, sizeof(mb_longname));
+		platform->type = MB_PLATFORM_NONE;
+		memset(platform->name, 0, sizeof(mb_longname));
+		memset(platform->name, 0, sizeof(mb_longname));
+		memset(platform->name, 0, sizeof(mb_longname));
+		memset(platform->start_time_i, 0, 7 * sizeof(int));
+		memset(platform->end_time_i, 0, 7 * sizeof(int));
 		platform->source_bathymetry = -1;
 		platform->source_bathymetry1 = -1;
 		platform->source_bathymetry2 = -1;
@@ -137,6 +130,93 @@ int mb_platform_init(int verbose, int type, char *name, char *organization,
 		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       *platform_ptr:		     		%p\n", *platform_ptr);
+		fprintf(stderr,"dbg2       error:			     %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:			     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mb_platform_setinfo(int verbose, void *platform_ptr,
+						int type, char *name, char *organization,
+						char *documentation_url,
+						double start_time_d, double end_time_d,
+						int *error)
+{
+	char	*function_name = "mb_platform_setinfo";
+	int	status = MB_SUCCESS;
+	struct mb_platform_struct *platform;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                  %d\n", verbose);
+		fprintf(stderr,"dbg2       platform_ptr:             %p\n", platform_ptr);
+		fprintf(stderr,"dbg2       type:		             %d\n", type);
+		fprintf(stderr,"dbg2       name:		             %s\n", name);
+		fprintf(stderr,"dbg2       organization:	         %s\n", organization);
+		fprintf(stderr,"dbg2       documentation_url:	     %s\n", documentation_url);
+		fprintf(stderr,"dbg2       start_time_d:	         %f\n", start_time_d);
+		fprintf(stderr,"dbg2       end_time_d:	             %f\n", end_time_d);
+		}
+
+	/* proceed if platform structure is allocated */
+	if (platform_ptr != NULL)
+		{
+		/* get platform structure */
+		platform = (struct mb_platform_struct *) platform_ptr;
+		
+		/* set values */
+		platform->type = type;
+		if (name != NULL)
+			strcpy(platform->name, name);
+		else
+			memset(platform->name, 0, sizeof(mb_longname));
+		if (organization != NULL)
+			strcpy(platform->organization, organization);
+		else
+			memset(platform->name, 0, sizeof(mb_longname));
+		if (documentation_url != NULL)
+			strcpy(platform->documentation_url, documentation_url);
+		else
+			memset(platform->name, 0, sizeof(mb_longname));
+		platform->start_time_d = start_time_d;
+		if (platform->start_time_d > 100.0)
+				mb_get_date(verbose, platform->start_time_d, platform->start_time_i);
+		else
+			memset(platform->start_time_i, 0, 7 * sizeof(int));
+		platform->end_time_d = end_time_d;
+		if (platform->end_time_d > 100.0)
+				mb_get_date(verbose, platform->end_time_d, platform->end_time_i);
+		else
+			memset(platform->end_time_i, 0, 7 * sizeof(int));
+		
+		/* print platform */
+		if (verbose >= 2)
+			{
+			status = mb_platform_print(verbose, (void *) platform, error);
+			}
+		}
+	
+	/* null platform pointer is an error */
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_DESCRIPTOR;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:			     %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:			     %d\n",status);
@@ -296,7 +376,7 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       platform_ptr:		%p\n", platform_ptr);
+		fprintf(stderr,"dbg2       platform_ptr:	%p\n", platform_ptr);
 		fprintf(stderr,"dbg2       error:			%d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:			%d\n",status);
@@ -845,7 +925,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 	/* allocate memory for platform descriptor structure if needed */
 	if (*platform_ptr == NULL)
 		{
-		status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL, platform_ptr, error);
+		status = mb_platform_init(verbose, platform_ptr, error);
 		}
 		
 	/* proceed if platform structure is allocated */
@@ -882,6 +962,26 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 					else if (strncmp(buffer, "PLATFORM_ORGANIZATION", 21) == 0)
 						{
 						sscanf(buffer, "%s %s", dummy, platform->organization);
+						}
+					else if (strncmp(buffer, "DOCUMENTATION_URL", 17) == 0)
+						{
+						sscanf(buffer, "%s %s", dummy, platform->documentation_url);
+						}
+					else if (strncmp(buffer, "START_TIME_D", 12) == 0)
+						{
+						sscanf(buffer, "%s %lf", dummy, &platform->start_time_d);
+						if (platform->start_time_d > 100.0)
+							mb_get_date(verbose, platform->start_time_d, platform->start_time_i);
+						else
+							memset(platform->start_time_i, 0, 7 * sizeof(int));
+						}
+					else if (strncmp(buffer, "END_TIME_D", 10) == 0)
+						{
+						sscanf(buffer, "%s %lf", dummy, &platform->end_time_d);
+						if (platform->end_time_d > 100.0)
+							mb_get_date(verbose, platform->end_time_d, platform->end_time_i);
+						else
+							memset(platform->end_time_i, 0, 7 * sizeof(int));
 						}
 						
 					else if (strncmp(buffer, "SOURCE_BATHYMETRY1", 18) == 0)
@@ -1271,6 +1371,16 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 			fprintf(fp, "PLATFORM_TYPE            %d  ## %s\n", platform->type, type_string);
 			fprintf(fp, "PLATFORM_NAME            %s\n", platform->name);
 			fprintf(fp, "PLATFORM_ORGANIZATION    %s\n", platform->organization);
+			fprintf(fp, "DOCUMENTATION_URL        %s\n", platform->documentation_url);
+			fprintf(fp, "##\n");
+			fprintf(fp, "START_TIME_D             %f  ## %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					platform->start_time_d, platform->start_time_i[0], platform->start_time_i[1],
+					platform->start_time_i[2], platform->start_time_i[3], platform->start_time_i[4],
+					platform->start_time_i[5], platform->start_time_i[6]);
+			fprintf(fp, "END_TIME_D             %f  ## %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					platform->end_time_d, platform->end_time_i[0], platform->end_time_i[1],
+					platform->end_time_i[2], platform->end_time_i[3], platform->end_time_i[4],
+					platform->end_time_i[5], platform->end_time_i[6]);
 			fprintf(fp, "##\n");
 			fprintf(fp, "PLATFORM_NUM_SENSORS     %d\n", platform->num_sensors);
 			fprintf(fp, "##\n");
@@ -1493,14 +1603,14 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 					{
 					if (platform->sensors[isensor].offsets[ioffset].position_offset_mode == MB_SENSOR_POSITION_OFFSET_STATIC)
 						{
-						fprintf(fp, "OFFSET_POSITION             %2d      %2d  %10.6lf  %10.6lf  %10.6lf\n", isensor, ioffset, 
+						fprintf(fp, "OFFSET_POSITION             %2d      %2d  %10.6lf  %10.6lf  %10.6lf ## Starboard, Forward, Up (meters)\n", isensor, ioffset, 
 							platform->sensors[isensor].offsets[ioffset].position_offset_x,
 							platform->sensors[isensor].offsets[ioffset].position_offset_y,
 							platform->sensors[isensor].offsets[ioffset].position_offset_z);
 						}
 					if (platform->sensors[isensor].offsets[ioffset].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC)
 						{
-						fprintf(fp, "OFFSET_ATTITUDE             %2d      %2d  %10.6lf  %10.6lf  %10.6lf\n", isensor, ioffset, 
+						fprintf(fp, "OFFSET_ATTITUDE             %2d      %2d  %10.6lf  %10.6lf  %10.6lf ## Heading, Roll, Pitch (degrees)\n", isensor, ioffset, 
 							platform->sensors[isensor].offsets[ioffset].attitude_offset_heading,
 							platform->sensors[isensor].offsets[ioffset].attitude_offset_roll,
 							platform->sensors[isensor].offsets[ioffset].attitude_offset_pitch);
@@ -1509,7 +1619,7 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 				if (platform->sensors[isensor].time_latency_mode
 					== MB_SENSOR_TIME_LATENCY_STATIC)
 					{
-					fprintf(fp, "SENSOR_TIME_LATENCY_STATIC  %2d      %10.6lf\n",
+					fprintf(fp, "SENSOR_TIME_LATENCY_STATIC  %2d      %10.6lf  ## Seconds\n",
 						isensor, platform->sensors[isensor].time_latency_static);
 					}
 				else if (platform->sensors[isensor].time_latency_mode
@@ -1519,7 +1629,7 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 						isensor, platform->sensors[isensor].num_time_latency);
 					for (i=0;i<platform->sensors[isensor].num_time_latency;i++)
 						{
-						fprintf(fp, "                                     %10.6lf  %10.6lf",
+						fprintf(fp, "                                     %10.6lf  %10.6lf  ## Seconds, Seconds",
 							platform->sensors[isensor].time_latency_time_d[i],
 							platform->sensors[isensor].time_latency_value[i]);
 					
@@ -1676,11 +1786,9 @@ int mb_platform_lever(int verbose, void *platform_ptr,
 				yy -= sensor_position->offsets[0].position_offset_y;
 				zz -= sensor_position->offsets[0].position_offset_z;
 				}
-	
 			*lever_x = (cheading*croll + sheading*spitch*sroll) * xx + 
 						cpitch*sheading                         * yy +
 					   (croll*sheading*spitch - cheading*sroll) * zz;
-	
 	
 			*lever_y = (cheading*spitch*sroll - croll*sheading) * xx +
 						cheading*cpitch                         * yy +
@@ -1717,7 +1825,7 @@ int mb_platform_position(int verbose, void *platform_ptr,
 						int targetsensor, int targetsensoroffset,
 						double navlon, double navlat, double sensordepth,
 						double heading, double roll, double pitch,
-						double *targetlon, double *targetlat, double *targetz,
+						double *targetlon, double *targetlat, double *targetdepth,
 						int *error)
 {
 	char	*function_name = "mb_platform_position";
@@ -1766,10 +1874,11 @@ int mb_platform_position(int verbose, void *platform_ptr,
 		/* get local translation between lon lat degrees and meters */
 		mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
 		
-		/* calculate absolute position and depth for target sensor */
+		/* calculate absolute position and depth for target sensor
+			- note that z is positive up but sensordepth is positive down */
 		*targetlon = navlon + lever_x * mtodeglon;
 		*targetlat = navlat + lever_y * mtodeglat;
-		*targetz = sensordepth + lever_z;
+		*targetdepth = sensordepth + lever_z;
 		}
 	
 	/* null platform pointer is an error */
@@ -1787,7 +1896,7 @@ int mb_platform_position(int verbose, void *platform_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       targetlon:		%f\n", *targetlon);
 		fprintf(stderr,"dbg2       targetlat:		%f\n", *targetlat);
-		fprintf(stderr,"dbg2       targetz:		    %f\n", *targetz);
+		fprintf(stderr,"dbg2       targetdepth:	    %f\n", *targetdepth);
 		fprintf(stderr,"dbg2       error:			%d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:			%d\n",status);
@@ -2151,6 +2260,9 @@ int mb_platform_print(int verbose, void *platform_ptr, int *error)
 			fprintf(stderr,"dbg2       platform->type:		     		%d\n", platform->type);
 			fprintf(stderr,"dbg2       platform->name:		     		%s\n", platform->name);
 			fprintf(stderr,"dbg2       platform->organization:	     	%s\n", platform->organization);
+			fprintf(stderr,"dbg2       platform->documentation_url:	    %s\n", platform->documentation_url);
+			fprintf(stderr,"dbg2       platform->start_time_d:	        %f\n", platform->start_time_d);
+			fprintf(stderr,"dbg2       platform->end_time_d:	        %f\n", platform->end_time_d);
 			fprintf(stderr,"dbg2       platform->source_bathymetry:  	%d\n", platform->source_bathymetry);
 			fprintf(stderr,"dbg2       platform->source_bathymetry1:  	%d\n", platform->source_bathymetry1);
 			fprintf(stderr,"dbg2       platform->source_bathymetry2:  	%d\n", platform->source_bathymetry2);

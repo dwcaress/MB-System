@@ -125,7 +125,7 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libmbgmt_la_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_libmbgmt_la_OBJECTS = mbswath.lo mbcontour.lo mbgrdtiff.lo
 libmbgmt_la_OBJECTS = $(am_libmbgmt_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -223,6 +223,8 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GDAL_CONF = @GDAL_CONF@
+GMT_CONF = @GMT_CONF@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -244,6 +246,8 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+NC_CONF = @NC_CONF@
+NETCDF = @NETCDF@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -313,12 +317,12 @@ libfftw3_CFLAGS = @libfftw3_CFLAGS@
 libfftw3_LIBS = @libfftw3_LIBS@
 libfftw_CPPFLAGS = @libfftw_CPPFLAGS@
 libfftw_LIBS = @libfftw_LIBS@
-libgmt_CFLAGS = @libgmt_CFLAGS@
+libgdal_CPPFLAGS = @libgdal_CPPFLAGS@
+libgdal_LIBS = @libgdal_LIBS@
 libgmt_CPPFLAGS = @libgmt_CPPFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
 libmotif_CPPFLAGS = @libmotif_CPPFLAGS@
 libmotif_LIBS = @libmotif_LIBS@
-libnetcdf_CFLAGS = @libnetcdf_CFLAGS@
 libnetcdf_CPPFLAGS = @libnetcdf_CPPFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
 libopengl_CPPFLAGS = @libopengl_CPPFLAGS@
@@ -326,8 +330,6 @@ libopengl_LIBS = @libopengl_LIBS@
 libproj_CFLAGS = @libproj_CFLAGS@
 libproj_CPPFLAGS = @libproj_CPPFLAGS@
 libproj_LIBS = @libproj_LIBS@
-libpsl_CFLAGS = @libpsl_CFLAGS@
-libpsl_LIBS = @libpsl_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
@@ -353,14 +355,15 @@ include_HEADERS =
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	      -I${top_srcdir}/src/mbaux \
 	      ${libgmt_CPPFLAGS} \
+	      ${libgdal_CPPFLAGS} \
 	      ${libnetcdf_CPPFLAGS}
 
-AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
 libmbgmt_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbgmt_la_SOURCES = mbswath.c mbcontour.c mbgrdtiff.c
 libmbgmt_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
 			${top_builddir}/src/mbaux/libmbaux.la \
-			${libgmt_LIBS} ${libnetcdf_LIBS}
+			${libgmt_LIBS} ${libgdal_LIBS} ${libnetcdf_LIBS}
 
 all: all-am
 

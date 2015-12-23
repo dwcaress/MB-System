@@ -4148,6 +4148,7 @@ ifile, iping, ibeam);
 		ibeam,ping->beams_bath,iping,file->num_pings,file->name,ping->time_i[0],ping->time_i[1],ping->time_i[2],
 		ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],ping->time_d,
 		ping->bathlon[ibeam],ping->bathlat[ibeam],ping->bath[ibeam],ping->bathacrosstrack[ibeam],ping->bathalongtrack[ibeam]);
+fprintf(stderr,"\nbathcorr:%f bath:%f sonardepth:%f",ping->bathcorr[ibeam], ping->bath[ibeam], ping->sonardepth);
 
 	/* print output debug statements */
 	if (mbev_verbose >= 2)

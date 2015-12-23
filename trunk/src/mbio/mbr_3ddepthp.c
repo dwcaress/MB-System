@@ -502,6 +502,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	size_t	index;
 	unsigned short magic_number;
 	unsigned int *newscancheck, newscancheckvalue;
+	int time_i[7];
 	int	done;
 	int	i;
 
@@ -804,7 +805,16 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 //fprintf(stderr,"   %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%9.9d\n",
 //store->year,store->month,store->day,store->hour,store->minutes,store->seconds,store->nanoseconds);
 
-				store->time_d = 0.0;
+				/* get time_d timestamp */
+				time_i[0] = store->year;
+				time_i[1] = store->month;
+				time_i[2] = store->day;
+				time_i[3] = store->hour;
+				time_i[4] = store->minutes;
+				time_i[5] = store->seconds;
+				time_i[6] = (int)(0.001 * store->nanoseconds);
+				mb_get_time(verbose, time_i, &store->time_d);
+
 				store->navlon = 0.0;
 				store->navlat = 0.0;
 				store->sensordepth = 0.0;
@@ -835,7 +845,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						mb_get_binary_int(MB_YES, (void *) &buffer[index], &(pulse->pulse_time_offset)); index += 4;
 						pulse->saturated = buffer[index]; index++;
 						
-						pulse->time_d = 0.0;
+						pulse->time_d = store->time_d + 0.000001 * pulse->pulse_time_offset;
 						pulse->beamflag = MB_FLAG_NULL;
 						pulse->acrosstrack = 0.0;
 						pulse->alongtrack = 0.0;
@@ -1028,7 +1038,16 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->month++;
 				}
 
-			store->time_d = 0.0;
+			/* get time_d timestamp */
+			time_i[0] = store->year;
+			time_i[1] = store->month;
+			time_i[2] = store->day;
+			time_i[3] = store->hour;
+			time_i[4] = store->minutes;
+			time_i[5] = store->seconds;
+			time_i[6] = (int)(0.001 * store->nanoseconds);
+			mb_get_time(verbose, time_i, &store->time_d);
+
 			store->navlon = 0.0;
 			store->navlat = 0.0;
 			store->sensordepth = 0.0;
@@ -1090,7 +1109,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					mb_get_binary_int(MB_YES, (void *) &buffer[index], &(pulse->pulse_time_offset)); index += 4;
 					pulse->saturated = buffer[index]; index++;
 
-					pulse->time_d = 0.0;
+					pulse->time_d = store->time_d + 0.000001 * pulse->pulse_time_offset;
 					pulse->beamflag = MB_FLAG_NULL;
 					pulse->acrosstrack = 0.0;
 					pulse->alongtrack = 0.0;
@@ -1137,6 +1156,11 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 		}
 
+if (store->kind == MB_DATA_DATA)
+{
+fprintf(stderr,"JUST READ: store->bathymetry_calculated:%d sensordepth: %f %f\n",
+store->bathymetry_calculated, store->time_d, store->sensordepth);
+}
 	/* print out status info */
 	if (verbose >= 3 && status == MB_SUCCESS)
 		mbsys_3datdepthlidar_print_store(verbose, store_ptr, error);
@@ -1358,6 +1382,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			mb_put_binary_float(MB_YES, store->pitch, &buffer[index]); index += 4;
 			mb_put_binary_float(MB_YES, store->speed, &buffer[index]); index += 4;
 			mb_put_binary_int(MB_YES, store->num_pulses, &buffer[index]); index += 4;
+fprintf(stderr,"WRITE: %f %f\n ", store->time_d, store->sensordepth);
 			
 			/* write LIDAR scan record header */
 			write_len = (size_t) index;

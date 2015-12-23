@@ -505,6 +505,7 @@ int mbsys_3datdepthlidar_preprocess
 	void *mbio_ptr,			/* in: see mb_io.h:/^struct mb_io_struct/ */
 	void *store_ptr,		/* in: see mbsys_3datdepthlidar.h:/^struct mbsys_3datdepthlidar_struct/ */
 	void *platform_ptr,
+	int platform_target_sensor,
 	int n_nav,
 	double *nav_time_d,
 	double *nav_lon,
@@ -557,24 +558,24 @@ int mbsys_3datdepthlidar_preprocess
 		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
 		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
 		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
-		fprintf(stderr,"dbg2       nav_time_d:                 %p\n",nav_time_d);
-		fprintf(stderr,"dbg2       nav_lon:                    %p\n",nav_lon);
-		fprintf(stderr,"dbg2       nav_lat:                    %p\n",nav_lat);
-		fprintf(stderr,"dbg2       nav_speed:                  %p\n",nav_speed);
-		fprintf(stderr,"dbg2       n_sensordepth:              %d\n",n_sensordepth);
-		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n",sensordepth_time_d);
-		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n",sensordepth_sensordepth);
-		fprintf(stderr,"dbg2       n_heading:                  %d\n",n_heading);
-		fprintf(stderr,"dbg2       heading_time_d:             %p\n",heading_time_d);
-		fprintf(stderr,"dbg2       heading_heading:            %p\n",heading_heading);
-		fprintf(stderr,"dbg2       n_altitude:                 %d\n",n_altitude);
-		fprintf(stderr,"dbg2       altitude_time_d:            %p\n",altitude_time_d);
-		fprintf(stderr,"dbg2       altitude_altitude:          %p\n",altitude_altitude);
-		fprintf(stderr,"dbg2       n_attitude:                 %d\n",n_attitude);
-		fprintf(stderr,"dbg2       attitude_time_d:            %p\n",attitude_time_d);
-		fprintf(stderr,"dbg2       attitude_roll:              %p\n",attitude_roll);
-		fprintf(stderr,"dbg2       attitude_pitch:             %p\n",attitude_pitch);
-		fprintf(stderr,"dbg2       attitude_heave:             %p\n",attitude_heave);
+		fprintf(stderr,"dbg2       nav_time_d:                 %p\n", nav_time_d);
+		fprintf(stderr,"dbg2       nav_lon:                    %p\n", nav_lon);
+		fprintf(stderr,"dbg2       nav_lat:                    %p\n", nav_lat);
+		fprintf(stderr,"dbg2       nav_speed:                  %p\n", nav_speed);
+		fprintf(stderr,"dbg2       n_sensordepth:              %d\n", n_sensordepth);
+		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n", sensordepth_time_d);
+		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n", sensordepth_sensordepth);
+		fprintf(stderr,"dbg2       n_heading:                  %d\n", n_heading);
+		fprintf(stderr,"dbg2       heading_time_d:             %p\n", heading_time_d);
+		fprintf(stderr,"dbg2       heading_heading:            %p\n", heading_heading);
+		fprintf(stderr,"dbg2       n_altitude:                 %d\n", n_altitude);
+		fprintf(stderr,"dbg2       altitude_time_d:            %p\n", altitude_time_d);
+		fprintf(stderr,"dbg2       altitude_altitude:          %p\n", altitude_altitude);
+		fprintf(stderr,"dbg2       n_attitude:                 %d\n", n_attitude);
+		fprintf(stderr,"dbg2       attitude_time_d:            %p\n", attitude_time_d);
+		fprintf(stderr,"dbg2       attitude_roll:              %p\n", attitude_roll);
+		fprintf(stderr,"dbg2       attitude_pitch:             %p\n", attitude_pitch);
+		fprintf(stderr,"dbg2       attitude_heave:             %p\n", attitude_heave);
 		}
 
 	/* check for non-null data */
@@ -647,6 +648,26 @@ int mbsys_3datdepthlidar_preprocess
 		//			time_d, &store->heave, &jattitude,
 		//			&interp_error);
 		}
+fprintf(stderr,"PREPROCESS: %f %f ", time_d, store->sensordepth);
+	/* do lever arm correction */
+	if (platform_ptr != NULL)
+		{
+		/* calculate sonar position position */
+		status = mb_platform_position (verbose, platform_ptr,
+						platform_target_sensor, 0,
+						store->navlon, store->navlat, store->sensordepth,
+						heading, roll, pitch,
+						&store->navlon, &store->navlat, &store->sensordepth,
+						error);
+
+		/* calculate sonar attitude */
+		status = mb_platform_orientation_target (verbose, platform_ptr,
+						platform_target_sensor, 0,
+						heading, roll, pitch,
+						&heading, &roll, &pitch,
+						error);
+		}
+fprintf(stderr,"    %f\n ", store->sensordepth);
 
 	/* loop over all pulses */
 	for (i=0;i<store->num_pulses;i++)
@@ -655,7 +676,10 @@ int mbsys_3datdepthlidar_preprocess
 		pulse = (struct mbsys_3datdepthlidar_pulse_struct *) &store->pulses[i];
 		
 		/* set time */
-		//pulse->time_d = store->time_d + 0.000001 * pulse->pulse_time_offset;
+		pulse->time_d = store->time_d + 0.000001 * pulse->pulse_time_offset;
+		heading = pulse->heading;
+		roll = pulse->roll;
+		pitch = pulse->pitch;
 		
 		/* get nav sensordepth heading attitude values for record timestamp */
 		if (n_nav > 0)
@@ -711,6 +735,28 @@ int mbsys_3datdepthlidar_preprocess
 			//			attitude_time_d-1, attitude_heave-1, n_attitude, 
 			//			pulse->time_d, &store->heave, &jattitude,
 			//			&interp_error);
+			}
+
+		/* do lever arm correction */
+		if (platform_ptr != NULL)
+			{
+			/* calculate sonar position position */
+			status = mb_platform_position (verbose, platform_ptr,
+							platform_target_sensor, 0,
+							pulse->navlon, pulse->navlat, pulse->sensordepth,
+							heading, roll, pitch,
+							&pulse->navlon, &pulse->navlat, &pulse->sensordepth,
+							error);
+	
+			/* calculate sonar attitude */
+			status = mb_platform_orientation_target (verbose, platform_ptr,
+							platform_target_sensor, 0,
+							heading, roll, pitch,
+							&heading, &roll, &pitch,
+							error);
+			pulse->heading = (float) heading;
+			pulse->roll = (float) roll;
+			pulse->pitch = (float) pitch;
 			}
 		}
 			
@@ -2305,6 +2351,10 @@ int mbsys_3datdepthlidar_calculatebathymetry
 				pulse->acrosstrack = xx * cos(DTR * phi) + pulse->cross_track_offset;
 				pulse->alongtrack = xx * sin(DTR * phi) + pulse->forward_track_offset
 							+ 0.0000002777777 * pulse->pulse_time_offset * store->speed;
+//fprintf(stderr,"pulse:%d time_d:%f %f heading:%f pitch:%f %f roll:%f %f alpha:%f beta:%f theta:%f phi:%f  bath: %f %f %f\n",
+//i, store->time_d, pulse->time_d, store->heading, store->roll, pulse->roll, store->pitch, pulse->pitch,
+//alpha, beta, theta, phi,
+//pulse->depth, pulse->acrosstrack, pulse->alongtrack);
 				}
 			else
 				{

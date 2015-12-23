@@ -3772,10 +3772,9 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    *image_size = nrawpixels;
 		    if (data->ss_raw != NULL)
-			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ss_raw,error);
+				status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ss_raw,error);
 		    status = mb_mallocd(verbose,__FILE__,__LINE__,
-				    *image_size,
-				    (void **)&data->ss_raw,error);
+								*image_size, (void **)&data->ss_raw,error);
 		    }
 
 		/* read the sidescan */
@@ -3783,41 +3782,54 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    /* first read spare bytes if any */
 		    if (ssrawoffset > mb_io_ptr->file2_bytes)
-			{
-			for (i=mb_io_ptr->file2_bytes;i<ssrawoffset;i++)
-			    {
-			    if ((read_size = fread(data->ss_raw,1,
-				1,mb_io_ptr->mbfp2)) != 1)
 				{
-				/* close the secondary file and deallocate memory */
-				fclose(mb_io_ptr->mbfp2);
-				mb_io_ptr->mbfp2 = NULL;
-				if (data->ss_raw != NULL)
-				    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ss_raw,error);
+				if (verbose > 0)
+					fprintf(stderr, "Ignored %ld spare bytes in ss_raw file: %s\n",
+							ssrawoffset - mb_io_ptr->file2_bytes,
+							mb_io_ptr->file2);
+				for (i=mb_io_ptr->file2_bytes;i<ssrawoffset;i++)
+					{
+					if ((read_size = fread(data->ss_raw,1,
+						1,mb_io_ptr->mbfp2)) != 1)
+						{
+						/* close the secondary file and deallocate memory */
+						fclose(mb_io_ptr->mbfp2);
+						mb_io_ptr->mbfp2 = NULL;
+						nrawpixels = 0;
+						profile->numSamples = 0;
+						if (data->ss_raw != NULL)
+							status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ss_raw,error);
+						}
+					else
+						{
+						mb_io_ptr->file2_bytes += read_size;
+						}
+					}
 				}
-			    else
-				{
-				mb_io_ptr->file2_bytes += read_size;
-				}
-			    }
-			}
 
 		    /* now read the real data */
 		    if ((read_size = fread(data->ss_raw,1,
-			nrawpixels,mb_io_ptr->mbfp2))
-			!= nrawpixels)
-			{
-			/* close the secondary file and deallocate memory */
-			fclose(mb_io_ptr->mbfp2);
-			mb_io_ptr->mbfp2 = NULL;
-			if (data->ss_raw != NULL)
-			    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ss_raw,error);
-			}
+					nrawpixels,mb_io_ptr->mbfp2)) != nrawpixels)
+				{
+				if (verbose > 0)
+					fprintf(stderr, "Sidescan ss_raw file %s missing %d bytes\n",
+							mb_io_ptr->file2, nrawpixels - read_size);
+				
+				/* close the secondary file and deallocate memory */
+				mb_io_ptr->file2_bytes += read_size;
+				fclose(mb_io_ptr->mbfp2);
+				mb_io_ptr->mbfp2 = NULL;
+				nrawpixels = 0;
+				profile->numSamples = 0;
+				
+				if (data->ss_raw != NULL)
+					status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ss_raw,error);
+				}
 		    else
-			{
-			mb_io_ptr->file2_bytes += read_size;
-			profile->numSamples = nrawpixels;
-			}
+				{
+				mb_io_ptr->file2_bytes += read_size;
+				profile->numSamples = nrawpixels;
+				}
 		    }
 		}
 	    }

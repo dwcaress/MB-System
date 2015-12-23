@@ -331,7 +331,8 @@ int mbsys_3datdepthlidar_dimensions(int verbose,
 	int *nss,
 	int *error);
 int mbsys_3datdepthlidar_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
-int mbsys_3datdepthlidar_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+int mbsys_3datdepthlidar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+        void *platform_ptr, int platform_target_sensor,
 		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
 				double *nav_speed,
 		int n_sensordepth, double *sensordepth_time_d,

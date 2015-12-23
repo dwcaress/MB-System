@@ -429,6 +429,21 @@ int main (int argc, char **argv)
 
 	/* set default input to datalist.mb-1 */
 	strcpy (read_file, "datalist.mb-1");
+	
+	/* initialize some other things */
+	memset(nav_file, 0, sizeof(mb_path));
+	memset(sensordepth_file, 0, sizeof(mb_path));
+	memset(heading_file, 0, sizeof(mb_path));
+	memset(altitude_file, 0, sizeof(mb_path));
+	memset(attitude_file, 0, sizeof(mb_path));
+	memset(time_latency_file, 0, sizeof(mb_path));
+	memset(platform_file, 0, sizeof(mb_path));
+	memset(read_file, 0, sizeof(mb_path));
+	memset(ifile, 0, sizeof(mb_path));
+	memset(ofile, 0, sizeof(mb_path));
+	memset(fileroot, 0, sizeof(mb_path));
+	memset(afile, 0, sizeof(mb_path));
+	memset(fnvfile, 0, sizeof(mb_path));
 
 	/* process argument list */
 	while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
@@ -2142,16 +2157,102 @@ fprintf(stderr,"Outputting sensor %d offset %d\n",isensor,ioffset);
 											time_latency_time_d,
 											time_latency_time_latency,
 											&error);
+
+				/* call mb_extract_nav to get attitude */
+				status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind,
+							time_i, &time_d, &navlon_org, &navlat_org,
+							&speed_org, &heading_org, &draft_org,
+							&roll_org, &pitch_org, &heave_org, &error);
+				
+				/* call mb_extract_altitude to get altitude */
+				status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr,
+							&kind, &sensordepth_org, &altitude_org,
+							&error);
+	
+				/* use available asynchronous ancilliary data to replace
+					nav sensordepth heading attitude values for record timestamp  */
+				if (nav_num > 0)
+					{
+					interp_status = mb_linear_interp_longitude(verbose,
+								nav_time_d-1, nav_navlon-1, nav_num, 
+								time_d, &navlon_org, &jnav,
+								&interp_error);
+					interp_status = mb_linear_interp_latitude(verbose,
+								nav_time_d-1, nav_navlat-1, nav_num, 
+								time_d, &navlat_org, &jnav,
+								&interp_error);
+					interp_status = mb_linear_interp(verbose,
+								nav_time_d-1, nav_speed-1, nav_num, 
+								time_d, &speed_org, &jnav,
+								&interp_error);
+					nav_changed = MB_YES;
+					}
+				if (sensordepth_num > 0)
+					{
+					interp_status = mb_linear_interp(verbose,
+								sensordepth_time_d-1, sensordepth_sensordepth-1, sensordepth_num, 
+								time_d, &sensordepth_org, &jsensordepth,
+								&interp_error);
+					sensordepth_changed = MB_YES;
+					}
+				if (heading_num > 0)
+					{
+					interp_status = mb_linear_interp_heading(verbose,
+								heading_time_d-1, heading_heading-1, heading_num, 
+								time_d, &heading_org, &jheading,
+								&interp_error);
+					heading_changed = MB_YES;
+					}
+				if (altitude_num > 0)
+					{
+					interp_status = mb_linear_interp(verbose,
+								altitude_time_d-1, altitude_altitude-1, altitude_num, 
+								time_d, &altitude_org, &jaltitude,
+								&interp_error);
+					altitude_changed = MB_YES;
+					}
+				if (attitude_num > 0)
+					{
+					interp_status = mb_linear_interp(verbose,
+								attitude_time_d-1, attitude_roll-1, attitude_num, 
+								time_d, &roll_org, &jattitude,
+								&interp_error);
+					interp_status = mb_linear_interp(verbose,
+								attitude_time_d-1, attitude_pitch-1, attitude_num, 
+								time_d, &pitch_org, &jattitude,
+								&interp_error);
+					interp_status = mb_linear_interp(verbose,
+								attitude_time_d-1, attitude_heave-1, attitude_num, 
+								time_d, &heave_org, &jattitude,
+								&interp_error);
+					attitude_changed = MB_YES;
+					}
+				if (sensordepth_num > 0 || attitude_num > 0)
+					{
+					draft_org = sensordepth_org - heave_org;
+					}
+					
+				/* save the original values prior to lever arm correction */
+				navlon = navlon_org;
+				navlat = navlat_org;
+				speed = speed_org;
+				heading = heading_org;
+				altitude = altitude_org;
+				sensordepth = sensordepth_org;
+				draft = draft_org;
+				roll = roll_org;
+				pitch = pitch_org;
+				heave = heave_org;
 				
 				/* attempt to execute a preprocess function for these data */
-				status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform,
+				status = mb_preprocess(verbose, imbio_ptr, istore_ptr,
+							(void *)platform, platform_target_sensor,
 							nav_num, nav_time_d, nav_navlon, nav_navlat, nav_speed,
 							sensordepth_num, sensordepth_time_d, sensordepth_sensordepth,
 							heading_num, heading_time_d, heading_heading,
 							altitude_num, altitude_time_d, altitude_altitude,
 							attitude_num, attitude_time_d, attitude_roll, attitude_pitch, attitude_heave,
 							&error);
-				//status = MB_FAILURE;
 				
 				/* If a predefined preprocess function does not exist for 
 				 * this format then standard preprocessing will be done
@@ -2163,95 +2264,11 @@ fprintf(stderr,"Outputting sensor %d offset %d\n",isensor,ioffset);
 					/* reset status and error */
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
-
-					/* call mb_extract_nav to get attitude */
-					status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind,
-								time_i, &time_d, &navlon_org, &navlat_org,
-								&speed_org, &heading_org, &draft_org,
-								&roll_org, &pitch_org, &heave_org, &error);
-					
-					/* call mb_extract_altitude to get altitude */
-					status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr,
-								&kind, &sensordepth_org, &altitude_org,
-								&error);
-					
-					/* save the original values */
-					navlon = navlon_org;
-					navlat = navlat_org;
-					speed = speed_org;
-					heading = heading_org;
-					altitude = altitude_org;
-					sensordepth = sensordepth_org;
-					draft = draft_org;
-					roll = roll_org;
-					pitch = pitch_org;
-					heave = heave_org;
-	
-					/* get nav sensordepth heading attitude values for record timestamp */
-					if (nav_num > 0)
-						{
-						interp_status = mb_linear_interp_longitude(verbose,
-									nav_time_d-1, nav_navlon-1, nav_num, 
-									time_d, &navlon, &jnav,
-									&interp_error);
-						interp_status = mb_linear_interp_latitude(verbose,
-									nav_time_d-1, nav_navlat-1, nav_num, 
-									time_d, &navlat, &jnav,
-									&interp_error);
-						interp_status = mb_linear_interp(verbose,
-									nav_time_d-1, nav_speed-1, nav_num, 
-									time_d, &speed, &jnav,
-									&interp_error);
-						nav_changed = MB_YES;
-						}
-					if (sensordepth_num > 0)
-						{
-						interp_status = mb_linear_interp(verbose,
-									sensordepth_time_d-1, sensordepth_sensordepth-1, sensordepth_num, 
-									time_d, &sensordepth, &jsensordepth,
-									&interp_error);
-						sensordepth_changed = MB_YES;
-						}
-					if (heading_num > 0)
-						{
-						interp_status = mb_linear_interp_heading(verbose,
-									heading_time_d-1, heading_heading-1, heading_num, 
-									time_d, &heading, &jheading,
-									&interp_error);
-						heading_changed = MB_YES;
-						}
-					if (altitude_num > 0)
-						{
-						interp_status = mb_linear_interp(verbose,
-									altitude_time_d-1, altitude_altitude-1, altitude_num, 
-									time_d, &altitude, &jaltitude,
-									&interp_error);
-						altitude_changed = MB_YES;
-						}
-					if (attitude_num > 0)
-						{
-						interp_status = mb_linear_interp(verbose,
-									attitude_time_d-1, attitude_roll-1, attitude_num, 
-									time_d, &roll, &jattitude,
-									&interp_error);
-						interp_status = mb_linear_interp(verbose,
-									attitude_time_d-1, attitude_pitch-1, attitude_num, 
-									time_d, &pitch, &jattitude,
-									&interp_error);
-						interp_status = mb_linear_interp(verbose,
-									attitude_time_d-1, attitude_heave-1, attitude_num, 
-									time_d, &heave, &jattitude,
-									&interp_error);
-						attitude_changed = MB_YES;
-						}
-					if (sensordepth_num > 0 || attitude_num > 0)
-						{
-						draft = sensordepth - heave;
-						}
 		
+					/* if platform defined, do lever arm correction */
 					if (platform != NULL)
 						{
-						/* calculate position of target sensor */
+						/* calculate target sensor position */
 						status = mb_platform_position (verbose, (void *)platform,
 										platform_target_sensor, 0,
 										navlon, navlat, sensordepth,
@@ -2262,7 +2279,7 @@ fprintf(stderr,"Outputting sensor %d offset %d\n",isensor,ioffset);
 						nav_changed = MB_YES;
 						sensordepth_changed = MB_YES;
 
-						/* Update swathsensor attitude (note: no longer vehicle attitude) */
+						/* calculate target sensor attitude */
 						status = mb_platform_orientation_target (verbose, (void *)platform,
 										platform_target_sensor, 0,
 										heading, roll, pitch,
@@ -2291,11 +2308,12 @@ fprintf(stderr,"Outputting sensor %d offset %d\n",isensor,ioffset);
 										roll,  pitch,  0.0,
 										&(bathacrosstrack[i]), &(bathalongtrack[i]), &(bath[i]),
 										&error);
-								}
+								
 								/* add heave and draft back in */
 								bath[i] += sensordepth_org;
 								}
 							}
+						}
 
 					/* recalculate bathymetry by changes to sensor depth  */
 					if (sensordepth_changed == MB_YES)
@@ -2433,23 +2451,13 @@ fprintf(stderr,"Outputting sensor %d offset %d\n",isensor,ioffset);
 					}
 				}
 				
-			/* if requested output integrated nave */
+			/* if requested output integrated nav */
 			if (output_sensor_fnv == MB_YES
 				&& status == MB_SUCCESS
 				&& kind == MB_DATA_DATA)
 				{
-				/* save the current values */
-				navlon_org = navlon;
-				navlat_org = navlat;
-				speed_org = speed;
-				heading_org = heading;
-				altitude_org = altitude;
-				sensordepth_org = sensordepth;
-				draft_org = draft;
-				roll_org = roll;
-				pitch_org = pitch;
-				heave_org = heave;
-				
+				/* loop over all sensors and output integrated nav for all
+					sensors producing mapping data */
 				for (isensor=0; isensor < platform->num_sensors; isensor++)
 					{
 					if (platform->sensors[isensor].capability2 != 0)

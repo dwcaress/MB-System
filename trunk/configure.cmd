@@ -64,12 +64,11 @@ make uninstall (to remove a previously installed version)
 #------------------------
 #   Prerequisite location:
 #------------------------
-#    --with-netcdf-lib     - location of NetCDF libs
-#    --with-netcdf-include - location of NetCDF headers
+#    --with-netcdf-config  - location of NetCDF config script nc-config
+#    --with-gdal-config    - location of GDAL config script gdal-config
+#    --with-gmt-config     - location of GMT config script gmt-config
 #    --with-proj-lib       - location of PROJ libs
 #    --with-proj-include   - location of PROJ headers
-#    --with-gmt-lib        - location of GMT libs
-#    --with-gmt-include    - location of GMT headers
 #    --with-fftw-lib       - location of FFTW3 libs 
 #    --with-fftw-include   - location of FFTW3 headers 
 #    --with-motif-lib      - location of Motif libs 
@@ -101,18 +100,14 @@ make uninstall (to remove a previously installed version)
 # Mac Os X configure script command line examples:
 #------------------------------------------------------------------------------
 #
-# Build in /usr/local on a Mac 10.9 or 10.10 with most prerequisites installed
+# Build in /usr/local on a Mac 10.9 to 10.11 with most prerequisites installed
 # through Fink in /sw, and the OTPS program predict_time located
 # in /usr/local/OTPS2.
-# Prerequisite Fink packages include gmt, netcdf, proj, fftw3, and gv:
+# Prerequisite Fink packages include gmt, netcdf, gdal, proj, fftw3, and gv:
 #
 sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/usr/local \
-    --with-netcdf-include=/sw/include \
-    --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/sw/include/gmt \
-    --with-gmt-lib=/sw/lib \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
     --with-fftw-include=/sw/include \
@@ -128,7 +123,7 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 # Install on Ubuntu (12.04.02LTS or 14.04LTS) 
 #
 # At present (June 2015), GMT 5 is not available on Ubuntu as a standard package.
-# Consequently, one can use apt-get for all prerequisites except GMT 5.1.2,
+# Consequently, one can use apt-get for all prerequisites except GMT 5.2.1,
 # which must be built locally from source and installed into /usr/local
 
 # Prerequisites for 64-bit installation excluding GMT
@@ -139,7 +134,7 @@ sudo apt-get install xorg-dev libmotif-dev libmotif4 libxp-dev mesa-common-dev \
     libnetcdf-dev netcdf-bin gdal-bin libgdal-dev libproj-dev libproj0 \
     gv cmake
     
-# GMT 5.1.2 is built from source using cmake and by default installs into
+# GMT 5.2.1 is built from source using cmake and by default installs into
 # /usr/local in Ubuntu. Follow the directions in the GMT Wiki.
 # The specific installation points of the libraries and the header files will
 # vary according to the architecture.
@@ -153,16 +148,12 @@ export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 # On a machine with a 64-bit processor,
 # the following configure options are required to build MB-System:
 sudo CFLAGS="-Wl,-rpath -Wl,/usr/local/lib" \
-    ./configure --prefix=/usr/local \
-    --with-gmt-include=/usr/local/include/gmt \
-    --with-gmt-lib=/usr/local/lib/x86_64-linux-gnu
+    ./configure --prefix=/usr/local
 
 # On a machine with a 32-bit processor,
 # the following configure options are required to build MB-System:
 sudo CFLAGS="-Wl,-rpath -Wl,/usr/local/lib" \
-    ./configure --prefix=/usr/local \
-    --with-gmt-include=/usr/local/include/gmt \
-    --with-gmt-lib=/usr/local/lib/i386-linux-gnu
+    ./configure --prefix=/usr/local 
 
 # Once configure has been run, build and install MB-System into /usr/local/bin,
 # /usr/local/lib, etc with the simple make commands:
@@ -173,7 +164,7 @@ sudo make install
 # CentOs configure script command line examples:
 #------------------------------------------------------------------------------
 
-# Install on CentOs 6 or 7 using only yum for prerequisites
+# Install on CentOs 6 or 7 using yum for most or all prerequisites
 
 # Prerequisites
 sudo yum install openmotif openmotif-devel fftw fftw-devel netcdf netcdf-devel \
@@ -182,21 +173,10 @@ sudo yum install openmotif openmotif-devel fftw fftw-devel netcdf netcdf-devel \
 # If the prerequisites have all been installed with yum and it is desired to
 # install MB-System in /usr/local, then only a simple call to configure is required:
 sudo ./configure
-#
-#------------------------------------------------------------------------------
 
-# Install on CentOs 6 or 7 using yum for prerequisites other than GMT
-#
-# Prerequisites
-sudo yum install openmotif openmotif-devel fftw fftw-devel netcdf netcdf-devel \
-		proj proj-devel gdal-devel gv
-
-# If GMT 5.1.2 has been installed from source into /usr/local, and it is desired to
-# install MB-System in /usr/local, then only the call to configure must specify
-# the location of the GMT libraries and header files:
-sudo ./configure --prefix=/usr/local \
-    --with-gmt-include=/usr/local/include/gmt \
-    --with-gmt-lib=/usr/local/lib64
+# If NetCDF, GDAL, and GMT have been installed locally, then still only a
+# simple call to configure is required:
+sudo ./configure
 #
 #------------------------------------------------------------------------------
 # To modify the build system...
@@ -261,10 +241,6 @@ CFLAGS="-g -Wall -Wmissing-prototypes -I/opt/X11/include " LDFLAGS="-L/opt/X11/l
     --enable-shared \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
-    --with-netcdf-include=/sw/include \
-    --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/sw/include/gmt \
-    --with-gmt-lib=/sw/lib \
     --with-fftw-include=/sw/include \
     --with-fftw-lib=/sw/lib \
     --with-motif-include=/sw/include \

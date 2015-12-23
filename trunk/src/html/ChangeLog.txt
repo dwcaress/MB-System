@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2260       December 22, 2015
   Version 5.5.2259       October 27, 2015
   Version 5.5.2258       October 5, 2015
   Version 5.5.2257       September 1, 2015
@@ -222,6 +223,43 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+
+Format 58 (MBF_EM710RAW): Worked on preprocessing function called by mbpreprocess.
+Not done yet...
+
+Format 59 (MBF_EM710MBA): Worked on preprocessing function called by mbpreprocess.
+Not done yet...
+
+Format 88 (MBF_RESON7KR): Worked on preprocessing function called by mbpreprocess.
+Not done yet...
+
+mbio/mb_access.c: Added explicitly setting the target sensor id to the
+mb_preprocess() function call.
+
+Mbm_grdtiff: Fixed bug in grdinfo call.
+
+GMT integration: Removed GMT header files from mbsystem/gmt because GMT 5.2.1
+now installs full development headers. MB-System is now not compatible with any
+version of GMT prior to 5.2.1.
+
+Configure build system: Now uses built in configuration tools in GMT and netCDF
+so that command line arguments to the configure script specifying GMT and netCDF
+library locations are no longer necessary.
+
+mbio/mb_io.h and mbio/mb_platform.c: Added fields to platform structure:
+                  mb_longname     documentation_url;
+                  double          start_time_d;
+                  double          end_time_d;
+                  int             start_time_i[7];
+                  int             end_time_i[7];
+
+Mbmakeplatform: Added commands:
+                  --platform-documentation-url=string
+                  --platform-start-time=yyyy/mm/dd/hh/mm/ss.ssssss
+                  --platform-end-time=yyyy/mm/dd/hh/mm/ss.ssssss
+
+-----> 5.5.2259 (October 27, 2015)
 
 Mbpreprocess: Now called format-specific preprocess function if available and
 applied generic preprocessing otherwise. The first format specific preprocessing

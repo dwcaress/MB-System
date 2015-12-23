@@ -69,7 +69,7 @@ $program_name = "mbm_route2mission";
 $durationfactorwaypoint = 3.0;
 $durationfactormission = 1.3;
 $durationmax = 28800;
-$batterylife = 64800; # 18 hours
+$batterylife = 68400; # 19 hours
 $safetymargin = 1800;
 
 # set defaults
@@ -263,7 +263,7 @@ if ($behaviorarg != -1)
 		}
         for ($i = 0; $i < 5; $i++)
                 {
-                if ($behaviorIDs[$i] < behaviorWaypointID
+                if ($behaviorIDs[$i] < $behaviorWaypointID
                     || $behaviorIDs[$i] > $behaviorWaypointBottomID)
                     {
                     $behaviorIDs[$i] = $behaviorWaypointDepthID;
