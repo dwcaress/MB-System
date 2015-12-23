@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2259],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2260],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "27 October 2015", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "22 December 2015", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -88,12 +88,12 @@ AS_ECHO(["    To generate the makefiles needed to build MB-System, run ./configu
 AS_ECHO(["    with the options appropriate for your situation. These options are"])
 AS_ECHO(["    listed here:"])
 AS_ECHO(["        --prefix=install      - location for mbsystem (/usr/local/mbsystem)"])
-AS_ECHO(["        --with-netcdf-lib     - location of NetCDF libs"])
-AS_ECHO(["        --with-netcdf-include - location of NetCDF headers"])
+AS_ECHO(["        --with-netcdf-config  - location of NetCDF config script nc-config"])
+AS_ECHO(["        --with-gdal-config    - location of GDAL config script gdal-config"])
+AS_ECHO(["        --with-gmt-config     - location of GMT config script gmt-config"])
 AS_ECHO(["        --with-proj-lib       - location of PROJ libs"])
 AS_ECHO(["        --with-proj-include   - location of PROJ headers"])
-AS_ECHO(["        --with-gmt-lib        - location of GMT libs"])
-AS_ECHO(["        --with-gmt-include    - location of GMT headers"])
+AS_ECHO(["        --enable-bundledproj  - build using bundled proj package - default is to link with libproj"])
 AS_ECHO(["        --with-fftw-lib       - location of FFTW3 libs (optional)"])
 AS_ECHO(["        --with-fftw-include   - location of FFTW3 headers (optional)"])
 AS_ECHO(["        --with-motif-lib      - location of Motif libs (optional)"])
@@ -101,7 +101,6 @@ AS_ECHO(["        --with-motif-include  - location of Motif headers (optional)"]
 AS_ECHO(["        --with-opengl-lib     - location of OpenGL libs (optional)"])
 AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"])
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
-AS_ECHO(["        --enable-bundledproj  - build using bundled proj package - default is to link with libproj"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
 AS_ECHO(["        make"])
@@ -210,83 +209,52 @@ AC_SUBST(OTPS_DIR)
 
 dnl--------------------------------------------------------------------
 dnl NetCDF Section
+dnl Always try looking for nc-config unless explicitly given "no"
 dnl--------------------------------------------------------------------
+dnl
+if test "X$with_nc_config" != "Xno" ; then
+ 	AC_PATH_PROG([NC_CONF], [nc-config], [$with_nc_config])
+fi
 
-dnl Check for netCDF library
-AS_ECHO(["Check for netCDF library libnetcdf"])
-GOT_CDF=no
-CDF_SETTING=no
-dnl First check if netcdf location specified on the command line
-AC_ARG_WITH(netcdf-lib, [  --with-netcdf-lib=DIR	Location of NetCDF library],
-	[netcdf_libdir="${withval}"] [GOT_CDF=yes], [GOT_CDF=no])
-if test "$GOT_CDF" = "yes" ; then
-    dnl NetCDF library location specified: $netcdf_libdir - check if libnetcdf is there...
-    AS_ECHO(["NetCDF library location specified: $netcdf_libdir - check if libnetcdf is there..."])
-    save_LDFLAGS=$LDFLAGS
-    LDFLAGS="$LDFLAGS -L$netcdf_libdir"
-    AC_CHECK_LIB([netcdf], [nc_open], [CDF_SETTING=yes], [CDF_SETTING=no], )
-    LDFLAGS="$save_LDFLAGS"
-    if test "$CDF_SETTING" = "no"; then
-	AC_MSG_ERROR([Did not find libnetcdf according to --with-netcdf-lib - check the installation!])
-    fi
-    libnetcdf_LIBS="-L$netcdf_libdir -R $netcdf_libdir -lnetcdf"
-    libnetcdf_LDFLAGS="-L$netcdf_libdir"
+if test -x "$NC_CONF" && test "X$NETCDF_INC" = "X" && test "X$NETCDF_LIB" = "X" ; then
+	AC_MSG_CHECKING(for netCDF includes)
+	libnetcdf_CPPFLAGS=-I`$NC_CONF --includedir | sed -e 's/^-I//'`
+	AC_MSG_RESULT($libnetcdf_CPPFLAGS)
+	AC_MSG_CHECKING(for netCDF libs)
+	libnetcdf_LIBS=`$NC_CONF --libs`
+	AC_MSG_RESULT($libnetcdf_LIBS)
+	NETCDF_LIB=`echo $libnetcdf_LIBS | sed 's/^-L//;s/\ .*//'`
+    libnetcdf_LDFLAGS="-L$NETCDF_LIB"
 else
-    dnl Look for pkg-config netCDF package...
-    AS_ECHO(["Look for pkg-config netCDF package..."])
-    PKG_CHECK_MODULES([libnetcdf], [netcdf], [GOT_CDF=yes], [GOT_CDF=no])
-    libnetcdf_LIBS="-lnetcdf"
-    libnetcdf_LDFLAGS=""
+	if test "X$enable_netcdf" = "X" || test "X$enable_netcdf" = "Xyes" ; then
+		AC_PATH_PROG([NETCDF], [ncdump], [/usr/local/netcdf/bin/ncdump])
+		NETCDF=`dirname $NETCDF`
+		NETCDF=`dirname $NETCDF`
+	else
+		NETCDF=$enable_netcdf
+	fi
+	AC_MSG_CHECKING(for netCDF include directory)
+	if test "X$NETCDF_INC" = "X"; then
+		NETCDF_INC=$NETCDF/include
+	fi
+	AC_MSG_RESULT($NETCDF_INC)
+	if test ! -f $NETCDF_INC/netcdf.h; then
+		AC_MSG_WARN([[netcdf.h can not be found in $NETCDF_INC]])
+	fi
+	AC_MSG_CHECKING(for netCDF library directory)
+	if test "X$NETCDF_LIB" = "X"; then
+		NETCDF_LIB=$NETCDF/lib
+	fi
+	AC_MSG_RESULT($NETCDF_LIB)
+	if test ! -d $NETCDF_LIB; then
+		AC_MSG_WARN([[No such directory: $NETCDF_LIB]])
+	fi
+	libnetcdf_LIBS="-L$NETCDF_LIB -R $NETCDF_LIB -lnetcdf"
+    libnetcdf_LDFLAGS="-L$NETCDF_LIB"
+	libnetcdf_CPPFLAGS="-I$NETCDF_INC"
 fi
-if test "$GOT_CDF" = "no" ; then
-    dnl Did not find netCDF library pkg-config package, looking in the usual places...
-    AS_ECHO(["Did not find netCDF library pkg-config package, looking in the usual places..."])
-    AC_CHECK_LIB([netcdf], [nc_open], [CDF_SETTING=yes], [CDF_SETTING=no],)
-    if test "$CDF_SETTING" = "yes" ; then
-        GOT_CDF=yes
-        AS_ECHO(["Using pre-installed libnetcdf..."])
-        libnetcdf_LIBS="-lnetcdf"
-        libnetcdf_LDFLAGS=""
-    else
-        AS_ECHO(["Did not find netCDF library anywhere, use --with-netcdf-lib to set the location"])
-        AC_MSG_ERROR([Did not find netCDF library anywhere, use --with-netcdf-lib to set the location])
-    fi
-fi
-dnl Done checking for netCDF library libnetcdf
-
-dnl Check for netCDF headers
-AS_ECHO(["Check for netCDF headers"])
-GOT_CDF=no
-CDF_SETTING=no
-dnl First check if netcdf location specified on the command line
-AC_ARG_WITH(netcdf-include, [  --with-netcdf-include=DIR	Location of NetCDF headers],
-	[libnetcdf_CPPFLAGS="-I${withval}"] [GOT_CDF=yes], [GOT_CDF=no])
-if test "$GOT_CDF" = "yes" ; then
-    dnl NetCDF header location specified: $libnetcdf_CPPFLAGS - check if netcdf.h is there...
-    AS_ECHO(["NetCDF header location specified: $libnetcdf_CPPFLAGS - check if netcdf.h is there..."])
-    save_CPPFLAGS=$CPPFLAGS
-    save_CFLAGS=$CFLAGS
-    CPPFLAGS="$CPPFLAGS $libnetcdf_CPPFLAGS"
-    CFLAGS="$CFLAGS $libnetcdf_CPPFLAGS"
-    AC_CHECK_HEADER(netcdf.h, [CDF_SETTING=yes], [CDF_SETTING=no],)
-    CPPFLAGS=$save_CPPFLAGS
-    CFLAGS=$save_CFLAGS
-    if test "$CDF_SETTING" = "no"; then
-	AC_MSG_ERROR([Did not find netcdf.h according to --with-netcdf-include - check the installation!])
-    fi
-else
-    dnl Looking for netCDF headers in the usual places...
-    AS_ECHO(["Looking for netCDF headers in the usual places..."])
-    AC_CHECK_HEADER(netcdf.h, [CDF_SETTING=yes], [CDF_SETTING=no])
-    if test "$CDF_SETTING" = "yes" ; then
-        GOT_CDF=yes
-        AS_ECHO(["Using pre-installed netCDF headers..."])
-    else
-        AS_ECHO(["Did not find netCDF headers anywhere, use --with-netcdf-include to set the location"])
-        AC_MSG_ERROR([Did not find netCDF headers anywhere, use --with-netcdf-include to set the location])
-    fi
-fi
-dnl Done checking for netCDF headers
+dnl
+dnl Done checking for netCDF headers and libraries
 
 dnl Substitute netCDF library and header arguments
 AC_SUBST([libnetcdf_LIBS], [$libnetcdf_LIBS])
@@ -387,93 +355,64 @@ AC_SUBST([libproj_LIBS], [$libproj_LIBS])
 AC_SUBST([libproj_CPPFLAGS], [$libproj_CPPFLAGS])
 
 dnl--------------------------------------------------------------------
-dnl GMT Section
+dnl GDAL Section
+dnl We use gdal-config to set GDAL paths and settings
 dnl--------------------------------------------------------------------
 
-dnl Check for GMT libraries libgmt libpsl
-AS_ECHO(["Check for GMT libraries libgmt libpsl"])
-GOT_GMT=no
-GMT_SETTING=no
-dnl First check if GMT library location specified on the command line
-AC_ARG_WITH(gmt-lib, [  --with-gmt-lib=DIR	Location of GMT libraries libgmt libpsl],
-	[gmt_libdir="${withval}"] [GOT_GMT=yes], [GOT_GMT=no])
-if test "$GOT_GMT" = "yes" ; then
-    dnl GMT library location specified: $gmt_libdir - check if libgmt libpsl are there...
-    AS_ECHO(["GMT library location specified: $gmt_libdir - check if libgmt libpsl are there..."])
-    save_LDFLAGS=$LDFLAGS
-    LDFLAGS="$LDFLAGS -L$gmt_libdir"
-    AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no], )
-    LDFLAGS="$save_LDFLAGS"
-    if test "$GMT_SETTING" = "no"; then
-	AC_MSG_ERROR([Did not find libgmt according to --with-gmt-lib - check the installation!])
-    fi
-    libgmt_LIBS="-L$gmt_libdir -R $gmt_libdir -lgmt -lpsl"
-    libgmt_LDFLAGS="-L$gmt_libdir"
-else
-    dnl Look for pkg-config GMT package...
-    AS_ECHO(["Look for pkg-config GMT package..."])
-    PKG_CHECK_MODULES([libgmt], [gmt], [GOT_LIBGMT=yes], [GOT_LIBGMT=no])
-    PKG_CHECK_MODULES([libpsl], [gmt], [GOT_LIBPSL=yes], [GOT_LIBPSL=no])
-    if test "$GOT_LIBGMT" = "yes" ; then
-            GOT_GMT=yes
-    fi
-    if test "$GOT_PSL" = "no" ; then
-            GOT_GMT=no
-    fi
-    libgmt_LIBS="-lgmt -lpsl"
-    libgmt_LDFLAGS=""
+if test "X$with_gdal_config" != "Xno" ; then
+	AC_PATH_PROG([GDAL_CONF], [gdal-config], [$with_gdal_config])
 fi
-if test "$GOT_GMT" = "no" ; then
-    dnl Did not find GMT library pkg-config package, looking in the usual places...
-    AS_ECHO(["Did not find GMT library pkg-config package, looking in the usual places..."])
-    AC_CHECK_LIB([gmt], [GMT_begin], [GMT_SETTING=yes], [GMT_SETTING=no],)
-    if test "$GMT_SETTING" = "yes" ; then
-        GOT_GMT=yes
-        AS_ECHO(["Using pre-installed libgmt..."])
-        libgmt_LIBS="-lgmt -lpsl"
-        libgmt_LDFLAGS=""
-    else
-        AS_ECHO(["Did not find GMT libraries anywhere, use --with-gmt-lib to set the location"])
-        AC_MSG_ERROR([Did not find GMT libraries anywhere, use --with-gmt-lib to set the location])
-    fi
-fi
-dnl Done checking for GMT libraries libgmt libpsl
+if test -x "$GDAL_CONF" && test "X$GDAL_INC" = "X" && test "X$GDAL_LIB" = "X" ; then
+	AC_MSG_CHECKING(for GDAL includes)
+	GDAL_INC=`$GDAL_CONF --cflags`
+	AC_MSG_RESULT($GDAL_INC)
+	AC_MSG_CHECKING(for GDAL libs)
+	GDAL_LIB=`$GDAL_CONF --libs`
+	DEP_LIBS=`$GDAL_CONF --dep-libs`
+	AC_MSG_RESULT($GDAL_LIB)
+	GDAL_LIB_PATH=`echo $GDAL_LIB | sed 's/^-L//;s/\ .*//'`
 
-dnl Check for GMT headers
-AS_ECHO(["Check for GMT headers"])
-GOT_GMT=no
-GMT_SETTING=no
-dnl First check if GMT header location specified on the command line
-AC_ARG_WITH(gmt-include, [  --with-gmt-include=DIR	Location of GMT headers],
-	[libgmt_CPPFLAGS="-I${withval}"] [GOT_GMT=yes], [GOT_GMT=no])
-if test "$GOT_GMT" = "yes" ; then
-    dnl GMT header location specified: $libgmt_CPPFLAGS - check if gmt.h is there...
-    AS_ECHO(["GMT header location specified: $libgmt_CPPFLAGS - check if gmt.h is there..."])
-    save_CPPFLAGS=$CPPFLAGS
-    save_CFLAGS=$CFLAGS
-    CPPFLAGS="$CPPFLAGS $libgmt_CPPFLAGS"
-    CFLAGS="$CFLAGS $libgmt_CPPFLAGS"
-    AC_CHECK_HEADER(gmt.h, [GMT_SETTING=yes], [GMT_SETTING=no],)
-    CPPFLAGS=$save_CPPFLAGS
-    CFLAGS=$save_CFLAGS
-    if test "$GMT_SETTING" = "no"; then
-	AC_MSG_ERROR([Did not find gmt.h according to --with-gmt-include - check the installation!])
-    fi
-else
-    dnl Looking for GMT headers in the usual places...
-    AS_ECHO(["Looking for GMT headers in the usual places..."])
-    AC_CHECK_HEADER(gmt.h, [GMT_SETTING=yes], [GMT_SETTING=no])
-    if test "$GMT_SETTING" = "yes" ; then
-        GOT_GMT=yes
-        AS_ECHO(["Using pre-installed GMT headers..."])
-    else
-        AS_ECHO(["Did not find GMT headers anywhere, use --with-gmt-include to set the location"])
-        AC_MSG_ERROR([Did not find GMT headers anywhere, use --with-gmt-include to set the location])
-    fi
+    libgdal_CPPFLAGS="$GDAL_INC"
+    libgdal_LIBS="-L$GDAL_LIB_PATH -R $GDAL_LIB_PATH -lgdal"
+    libgdal_LDFLAGS="-L$GDAL_LIB_PATH"
 fi
-dnl Done checking for GMT headers
 
-dnl Substitute PROJ library and header arguments
+dnl Substitute GDAL library and header arguments
+AC_SUBST([libgdal_LIBS], [$libgdal_LIBS])
+AC_SUBST([libgdal_CPPFLAGS], [$libgdal_CPPFLAGS])
+
+
+dnl--------------------------------------------------------------------
+dnl GMT Section
+dnl We use gmt-config to set GMT5 paths and settings
+dnl--------------------------------------------------------------------
+
+if test "X$with_gmt_config" != "Xno" ; then
+	AC_PATH_PROG([GMT_CONF], [gmt-config], [$with_gmt_config])
+fi
+if test -x "$GMT_CONF" && test "X$GMT_INC" = "X" && test "X$GMT_LIB" = "X" ; then
+	AC_MSG_CHECKING(for GMT includes)
+	GMT_INC=`$GMT_CONF --cflags`
+	AC_MSG_RESULT($GMT_INC)
+	AC_MSG_CHECKING(for GMT libs)
+	GMT_LIB=`$GMT_CONF --libs`
+	DEP_LIBS=`$GMT_CONF --dep-libs`
+	AC_MSG_RESULT($GMT_LIB)
+	GMT_LIB_PATH=`echo $GMT_LIB | sed 's/^-L//;s/\ .*//'`
+	rpath="$GMT_LIB_PATH"
+	AC_MSG_CHECKING(for 32/64-bit GMT5 installation)
+	bits=`$GMT_CONF --bits`
+	GCC_64="-m${bits}"
+	LDFLAGS="$LDFLAGS -m${bits}"
+	AC_MSG_RESULT(found ${bits}-bit)
+
+    libgmt_CPPFLAGS="$GMT_INC"
+    libgmt_LIBS="-L$GMT_LIB_PATH -R $GMT_LIB_PATH -lgmt -lpostscriptlight"
+    libgmt_LDFLAGS="-L$GMT_LIB_PATH"
+
+fi
+
+dnl Substitute GMT library and header arguments
 AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
 AC_SUBST([libgmt_CPPFLAGS], [$libgmt_CPPFLAGS])
 

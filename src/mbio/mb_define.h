@@ -383,7 +383,8 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sonartype, int *error);
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
-int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+        void *platform_ptr, int platform_target_sensor,
 		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
 				double *nav_speed,
 		int n_sensordepth, double *sensordepth_time_d,
@@ -502,11 +503,17 @@ int mb_copyrecord(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);
 
 int mb_platform_init(int verbose,
-        int type,
+        void **platform_ptr,
+        int *error);
+int mb_platform_setinfo(int verbose,
+        void *platform_ptr,
+		int type,
         char *name,
         char *organization,
-		void **platform_ptr,
-        int *error);
+        char *documentation_url,
+		double start_time_d,
+        double end_time_d,
+		int *error);
 int mb_platform_add_sensor(int verbose,
         void *platform_ptr,
 		int type, mb_longname model,

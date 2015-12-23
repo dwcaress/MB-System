@@ -5624,7 +5624,8 @@ int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+		void *platform_ptr, int platform_target_sensor,
 		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
 				double *nav_speed,
 		int n_sensordepth, double *sensordepth_time_d,
@@ -5745,25 +5746,26 @@ int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void 
 		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
 		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
+		fprintf(stderr,"dbg2       platform_target_sensor:     %d\n", platform_target_sensor);
 		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
-		fprintf(stderr,"dbg2       nav_time_d:                 %p\n",nav_time_d);
-		fprintf(stderr,"dbg2       nav_lon:                    %p\n",nav_lon);
-		fprintf(stderr,"dbg2       nav_lat:                    %p\n",nav_lat);
-		fprintf(stderr,"dbg2       nav_speed:                  %p\n",nav_speed);
-		fprintf(stderr,"dbg2       n_sensordepth:              %d\n",n_sensordepth);
-		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n",sensordepth_time_d);
-		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n",sensordepth_sensordepth);
-		fprintf(stderr,"dbg2       n_heading:                  %d\n",n_heading);
-		fprintf(stderr,"dbg2       heading_time_d:             %p\n",heading_time_d);
-		fprintf(stderr,"dbg2       heading_heading:            %p\n",heading_heading);
-		fprintf(stderr,"dbg2       n_altitude:                 %d\n",n_altitude);
-		fprintf(stderr,"dbg2       altitude_time_d:            %p\n",altitude_time_d);
-		fprintf(stderr,"dbg2       altitude_altitude:          %p\n",altitude_altitude);
-		fprintf(stderr,"dbg2       n_attitude:                 %d\n",n_attitude);
-		fprintf(stderr,"dbg2       attitude_time_d:            %p\n",attitude_time_d);
-		fprintf(stderr,"dbg2       attitude_roll:              %p\n",attitude_roll);
-		fprintf(stderr,"dbg2       attitude_pitch:             %p\n",attitude_pitch);
-		fprintf(stderr,"dbg2       attitude_heave:             %p\n",attitude_heave);
+		fprintf(stderr,"dbg2       nav_time_d:                 %p\n", nav_time_d);
+		fprintf(stderr,"dbg2       nav_lon:                    %p\n", nav_lon);
+		fprintf(stderr,"dbg2       nav_lat:                    %p\n", nav_lat);
+		fprintf(stderr,"dbg2       nav_speed:                  %p\n", nav_speed);
+		fprintf(stderr,"dbg2       n_sensordepth:              %d\n", n_sensordepth);
+		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n", sensordepth_time_d);
+		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n", sensordepth_sensordepth);
+		fprintf(stderr,"dbg2       n_heading:                  %d\n", n_heading);
+		fprintf(stderr,"dbg2       heading_time_d:             %p\n", heading_time_d);
+		fprintf(stderr,"dbg2       heading_heading:            %p\n", heading_heading);
+		fprintf(stderr,"dbg2       n_altitude:                 %d\n", n_altitude);
+		fprintf(stderr,"dbg2       altitude_time_d:            %p\n", altitude_time_d);
+		fprintf(stderr,"dbg2       altitude_altitude:          %p\n", altitude_altitude);
+		fprintf(stderr,"dbg2       n_attitude:                 %d\n", n_attitude);
+		fprintf(stderr,"dbg2       attitude_time_d:            %p\n", attitude_time_d);
+		fprintf(stderr,"dbg2       attitude_roll:              %p\n", attitude_roll);
+		fprintf(stderr,"dbg2       attitude_pitch:             %p\n", attitude_pitch);
+		fprintf(stderr,"dbg2       attitude_heave:             %p\n", attitude_heave);
 		}
 
 	/* get mbio descriptor */
@@ -6132,6 +6134,25 @@ int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void 
 						attitude_time_d-1, attitude_heave-1,
 						n_attitude, time_d, &heave, &jattitude,
 						error);
+		
+			/* do lever arm correction */
+			if (platform != NULL)
+				{
+				/* calculate sonar position position */
+				status = mb_platform_position (verbose, (void *)platform,
+								platform_target_sensor, 0,
+								navlon, navlat, sensordepth,
+								heading, roll, pitch,
+								&navlon, &navlat, &sensordepth,
+								error);
+
+				/* calculate sonar attitude */
+				status = mb_platform_orientation_target (verbose, (void *)platform,
+								platform_target_sensor, 0,
+								heading, roll, pitch,
+								&heading, &roll, &pitch,
+								error);
+				}
 
 			/* get local translation between lon lat degrees and meters */
 			mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
@@ -6269,12 +6290,12 @@ int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void 
 				if (platform != NULL)
 					{
 					status = mb_platform_orientation_offset(verbose,  (void *)platform,
-									platform->source_bathymetry, 0,
+									platform_target_sensor, 0,
 									&(tx_align.heading), &(tx_align.roll), &(tx_align.pitch),
 									error);
 
 					status = mb_platform_orientation_offset(verbose,  (void *)platform,
-									platform->source_bathymetry, 0,
+									platform_target_sensor, 0,
 									&(rx_align.heading), &(rx_align.roll), &(rx_align.pitch),
 									error);
 
@@ -6737,8 +6758,7 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 	/* if needed allocate a new platform structure */
 	if (*platform_ptr == NULL)
 		{
-		status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL,
-								(void **)platform_ptr, error);
+		status = mb_platform_init(verbose, (void **)platform_ptr, error);
 		}
 		
 	/* extract sensor offsets from installation record */

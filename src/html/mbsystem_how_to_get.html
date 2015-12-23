@@ -145,7 +145,7 @@ Suggested Software and Data</font></b></dd>
 <p>MB-System requires a number of other software packages and databases
 to be fully functional. These are:</p>
 <ul>
-  <li><b>GMT</b> version 4.5 or later: MB-System makes use of the
+  <li><b>GMT</b> version 5.2.1 or later: MB-System makes use of the
 Generic
 Mapping Tools (GMT) libraries and programs for much of its graphics.
 GMT
@@ -163,6 +163,7 @@ require
 the <a href="http://www.unidata.ucar.edu/software/netcdf/">NCAR
 netCDF
 library</a>.</li>
+  <li><strong>GDAL</strong> 1.11 or later: GDAL (Geospatial Data Abstraction Library) is a translator library for raster and vector geospatial data, and is now a prerequisite for GMT. Source code and documentation are available at the <a href="http://www.gdal.org">GDAL web page</a>.</li>
   <li><b>Perl</b> version 5.0 or later: Perl is a fast, well
 documented
 scripting language used widely in the Linux/Unix world. MB-System contains a
@@ -317,10 +318,10 @@ sudo make install</pre>
 The configure command line options controlling the locations of prerequisites are:</p>
 <ul>
 <pre>
---with-netcdf-lib 		Location of NetCDF libs
---with-netcdf-include 	Location of NetCDF headers
---with-gmt-lib 		Location of GMT libs
---with-gmt-include 	Location of GMT headers
+--with-netcdf-config 	Location of NetCDF configuration script nc-config
+--with-gmt-config 		Location of GMT configuration script nc-config
+--with-proj-lib 		Location of PROJ libs (optional)
+--with-proj-include 	Location of PROJ libs (optional)
 --with-fftw-lib 		Location of FFTW3 libs (optional)
 --with-fftw-include 	Location of FFTW3 headers (optional)
 --with-motif-lib 		Location of Motif libs (optional)

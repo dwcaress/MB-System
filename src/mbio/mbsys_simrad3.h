@@ -1395,7 +1395,8 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
             int *sonartype, int *error);
 int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
             int *ss_type, int *error);
-int mbsys_simrad3_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+int mbsys_simrad3_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+            void *platform_ptr, int platform_target_sensor,
             int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
 			double *nav_speed,
             int n_sensordepth, double *sensordepth_time_d,

@@ -549,7 +549,8 @@ int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+		void *platform_ptr, int platform_target_sensor,
 		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
 				double *nav_speed,
 		int n_sensordepth, double *sensordepth_time_d,
@@ -574,6 +575,7 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_p
 		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
 		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
+		fprintf(stderr,"dbg2       platform_target_sensor:     %d\n", platform_target_sensor);
 		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
 		fprintf(stderr,"dbg2       nav_time_d:                 %p\n",nav_time_d);
 		fprintf(stderr,"dbg2       nav_lon:                    %p\n",nav_lon);
@@ -602,7 +604,7 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_p
 	if (mb_io_ptr->mb_io_preprocess != NULL)
 		{
 		status = (*mb_io_ptr->mb_io_preprocess)
-				(verbose, mbio_ptr, store_ptr, platform_ptr,
+				(verbose, mbio_ptr, store_ptr, platform_ptr, platform_target_sensor,
 				n_nav, nav_time_d, nav_lon, nav_lat, nav_speed,
 				n_sensordepth, sensordepth_time_d, sensordepth_sensordepth,
 				n_heading, heading_time_d, heading_heading,

@@ -1,4 +1,4 @@
-.TH mbnavadjustmerge 1 "21 March 2015" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjustmerge 1 "3 November 2015" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjustmerge\fP \- Tool to merge two MBnavadjust projects,
 either adding one to the first or outputting a new project combining
@@ -32,6 +32,8 @@ Version 5.0
 --set-ties-zoffset-by-block=survey1/survey2/zoffset
 --skip-unset-crossings
 --insert-discontinuity=file:section
+--import-tie-list=filename
+--export-tie-list=filename
 --verbose --help ]
 
 .SH DESCRIPTION
@@ -235,6 +237,21 @@ two surveys.
 This option sets all unset crossings in the input projects to be
 skipped. This does not apply to any new crossings between the two
 merged projects.
+.TP
+.B \--insert-discontinuity=file:section
+This option inserts a navigation discontinuity immediately after the specified
+file and section.
+.TP
+.B \--import-tie-list=filename
+Import a listing of navigation ties that has been exported from a different
+\fBmbnavadjust\fP project using the \fB--export-tie-list\fP
+command. 
+.TP
+.B \--export-tie-list=filename
+Output the current navigation ties as a text file that can be imported into
+a different \fBmbnavadjust\fP project using the \fB--import-tie-list\fP
+command. The ties that are output reflect all modifications specified by other
+commands.
 .TP
 .B \--verbose
 This option increases the verbosity of \fBMBnavadjustmerge\fP, which

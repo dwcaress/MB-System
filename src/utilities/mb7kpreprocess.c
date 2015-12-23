@@ -1651,8 +1651,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 		}
 	else if (depth_offset_mode == MB_YES || multibeam_offset_mode == MB_YES)
 		{
-		status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL,
-						 (void **)&platform, &error);
+		status = mb_platform_init(verbose, (void **)&platform, &error);
 			
 		/* set sensor 0 (multibeam)
 				for a single first offsets are for transmit array, second for receive array */
@@ -2104,7 +2103,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
 				if (verbose > 0)
-				fprintf(stderr,"R7KRECID_7kVolatileSonarSettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				fprintf(stderr,"R7KRECID_7kMatchFilter:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber);
@@ -6544,6 +6543,10 @@ fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
 				time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5],time_i[6],
 				header->RecordNumber);
+
+			/* output asynchronous sonardepth */
+			sonardepth = depth->depth;
+			fprintf(atsfp, "%0.6f\t%0.3f\n", time_d, sonardepth);
 			}
 
 		/* handle sound velocity data */

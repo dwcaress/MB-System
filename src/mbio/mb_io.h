@@ -42,6 +42,8 @@
 #define MB_PLATFORM_AUV                 4
 #define MB_PLATFORM_AIRCRAFT            5
 #define MB_PLATFORM_SATELLITE           6
+#define MB_PLATFORM_MOORING             7
+#define MB_PLATFORM_FIXED               8
 static char *mb_platform_type_string[] =
 	{
 	"Unknown platform type",
@@ -50,7 +52,9 @@ static char *mb_platform_type_string[] =
 	"ROV",
 	"AUV",
 	"Aircraft",
-	"Satellite"
+	"Satellite",
+	"Mooring",
+	"Fixed"
     };
 
 /* survey platform data source sensor defines */
@@ -347,6 +351,11 @@ struct mb_platform_struct
         int             type;
         mb_longname     name;
         mb_longname     organization;
+        mb_longname     documentation_url;
+        double          start_time_d;
+        double          end_time_d;
+        int             start_time_i[7];
+        int             end_time_i[7];
         
         int             source_bathymetry;
         int             source_bathymetry1;
@@ -677,7 +686,8 @@ struct mb_io_struct
 		int *sonartype, int *error);
 	int (*mb_io_sidescantype)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
-    int (*mb_io_preprocess)(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+    int (*mb_io_preprocess)(int verbose, void *mbio_ptr, void *store_ptr,
+        void *platform_ptr, int platform_target_sensor,
 		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
 				double *nav_speed,
 		int n_sensordepth, double *sensordepth_time_d,

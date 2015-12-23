@@ -505,7 +505,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
 		@grdinfo = `grdinfo $file_grd 2>&1`;
 		if ($verbose > 0)
 			{
-			print "\tgrdinfo -I$file_grd\n";
+			print "\tgrdinfo $file_grd\n";
 			}
 		}
 	while (@grdinfo)

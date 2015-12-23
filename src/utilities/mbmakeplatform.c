@@ -70,6 +70,9 @@ int main (int argc, char **argv)
 								"\t--platform-type-satellite\n"
 								"\t--platform-name=string\n"
 								"\t--platform-organization=string\n"
+								"\t--platform-documentation-url\n"
+								"\t--platform-start-time\n"
+								"\t--platform-end-time\n"
 								"\t--add-sensor-sonar-echosounder\n"
 								"\t--add-sensor-sonar-multiechosounder\n"
 								"\t--add-sensor-sonar-sidescan\n"
@@ -276,6 +279,7 @@ int main (int argc, char **argv)
 	
 	int		nscan;
 	double	d1, d2, d3, d4, d5, d6;
+	double	seconds;
 	int		index;
 	int		i, j;
 
@@ -301,6 +305,9 @@ int main (int argc, char **argv)
 	 * 		
 	 * 		--platform-name=string
 	 * 		--platform-organization=string
+	 *		--platform-documentation-url=string
+	 *		--platform-start-time=yyyy/mm/dd/hh/mm/ss.ssssss
+	 *		--platform-end-time=yyyy/mm/dd/hh/mm/ss.ssssss
 	 *
 	 * 		--add-sensor-sonar-echosounder
 	 * 		--add-sensor-sonar-multiechosounder
@@ -465,6 +472,9 @@ int main (int argc, char **argv)
 		{"platform-type-satellite",								no_argument, 		NULL, 		0},
 		{"platform-name",										required_argument, 	NULL, 		0},
 		{"platform-organization",								required_argument, 	NULL, 		0},
+		{"platform-documenation-url",							required_argument, 	NULL, 		0},
+		{"platform-start-time",									required_argument, 	NULL, 		0},
+		{"platform-end-time",									required_argument, 	NULL, 		0},
 		{"add-sensor-sonar-echosounder",						no_argument, 		NULL, 		0},
 		{"add-sensor-sonar-multiechosounder",					no_argument, 		NULL, 		0},
 		{"add-sensor-sonar-sidescan",							no_argument, 		NULL, 		0},
@@ -678,6 +688,17 @@ int main (int argc, char **argv)
 					fprintf(stderr, "    platform->type:                        %d <%s>\n", platform->type, mb_platform_type_string[platform->type]);
 					fprintf(stderr, "    platform->name:                        %s\n", platform->name);
 					fprintf(stderr, "    platform->organization:                %s\n", platform->organization);
+					fprintf(stderr, "    platform->documentation_url:           %s\n", platform->documentation_url);
+					fprintf(stderr, "    platform->start_time_d:                %f\n", platform->start_time_d);
+					fprintf(stderr, "    platform->start_time_i:                %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+							platform->start_time_i[0], platform->start_time_i[1], platform->start_time_i[2],
+							platform->start_time_i[3], platform->start_time_i[4], platform->start_time_i[5],
+							platform->start_time_i[6]);
+					fprintf(stderr, "    platform->end_time_d:                  %f\n", platform->end_time_d);
+					fprintf(stderr, "    platform->end_time_i:                %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+							platform->end_time_i[0], platform->end_time_i[1], platform->end_time_i[2],
+							platform->end_time_i[3], platform->end_time_i[4], platform->end_time_i[5],
+							platform->end_time_i[6]);
 					fprintf(stderr, "    platform->source_bathymetry:           %d\n", platform->source_bathymetry);
 					fprintf(stderr, "    platform->source_bathymetry1:          %d\n", platform->source_bathymetry1);
 					fprintf(stderr, "    platform->source_bathymetry2:          %d\n", platform->source_bathymetry2);
@@ -878,6 +899,17 @@ int main (int argc, char **argv)
 					fprintf(stderr, "    platform->type:                        %d <%s>\n", platform->type, mb_platform_type_string[platform->type]);
 					fprintf(stderr, "    platform->name:                        %s\n", platform->name);
 					fprintf(stderr, "    platform->organization:                %s\n", platform->organization);
+					fprintf(stderr, "    platform->documentation_url:           %s\n", platform->documentation_url);
+					fprintf(stderr, "    platform->start_time_d:                %f\n", platform->start_time_d);
+					fprintf(stderr, "    platform->start_time_i:                %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+							platform->start_time_i[0], platform->start_time_i[1], platform->start_time_i[2],
+							platform->start_time_i[3], platform->start_time_i[4], platform->start_time_i[5],
+							platform->start_time_i[6]);
+					fprintf(stderr, "    platform->end_time_d:                  %f\n", platform->end_time_d);
+					fprintf(stderr, "    platform->end_time_i:                %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+							platform->end_time_i[0], platform->end_time_i[1], platform->end_time_i[2],
+							platform->end_time_i[3], platform->end_time_i[4], platform->end_time_i[5],
+							platform->end_time_i[6]);
 					fprintf(stderr, "    platform->source_bathymetry:           %d\n", platform->source_bathymetry);
 					fprintf(stderr, "    platform->source_bathymetry1:          %d\n", platform->source_bathymetry1);
 					fprintf(stderr, "    platform->source_bathymetry2:          %d\n", platform->source_bathymetry2);
@@ -968,8 +1000,7 @@ int main (int argc, char **argv)
 				if (input_platform_file_defined == MB_NO
 						&& input_swath_platform_defined == MB_NO)
 					{
-					status = mb_platform_init(verbose, MB_PLATFORM_NONE, NULL, NULL,
-												(void **)&platform, &error);
+					status = mb_platform_init(verbose, (void **)&platform, &error);
 					}
 				}
 							
@@ -1025,6 +1056,34 @@ int main (int argc, char **argv)
 			else if (strcmp("platform-organization", options[option_index].name) == 0)
 				{
 				strcpy(platform->organization, optarg);
+				}
+			
+			/* platform-documentation-url */
+			else if (strcmp("platform-documentation-url", options[option_index].name) == 0)
+				{
+				strcpy(platform->documentation_url, optarg);
+				}
+			
+			/* platform-start-time */
+			else if (strcmp("platform-start-time", options[option_index].name) == 0)
+				{
+				sscanf(optarg, "%d/%d/%d %d:%d:%lf",
+							&platform->start_time_i[0], &platform->start_time_i[1], &platform->start_time_i[2],
+							&platform->start_time_i[3], &platform->start_time_i[4], &seconds);
+				platform->start_time_i[5] = (int) floor(seconds);
+				platform->start_time_i[6] = (int) (1000000 * (seconds - floor(seconds)));
+				mb_get_time(verbose, platform->start_time_i, &platform->start_time_d);
+				}
+			
+			/* platform-end-time */
+			else if (strcmp("platform-end-time", options[option_index].name) == 0)
+				{
+				sscanf(optarg, "%d/%d/%d %d:%d:%lf",
+							&platform->end_time_i[0], &platform->end_time_i[1], &platform->end_time_i[2],
+							&platform->end_time_i[3], &platform->end_time_i[4], &seconds);
+				platform->end_time_i[5] = (int) floor(seconds);
+				platform->end_time_i[6] = (int) (1000000 * (seconds - floor(seconds)));
+				mb_get_time(verbose, platform->end_time_i, &platform->end_time_d);
 				}
 
 			/*-------------------------------------------------------
@@ -2433,6 +2492,17 @@ int main (int argc, char **argv)
 		fprintf(stderr, "    platform->type:                        %d <%s>\n", platform->type, mb_platform_type_string[platform->type]);
 		fprintf(stderr, "    platform->name:                        %s\n", platform->name);
 		fprintf(stderr, "    platform->organization:                %s\n", platform->organization);
+		fprintf(stderr, "    platform->documentation_url:           %s\n", platform->documentation_url);
+		fprintf(stderr, "    platform->start_time_d:                %f\n", platform->start_time_d);
+		fprintf(stderr, "    platform->start_time_i:                %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+				platform->start_time_i[0], platform->start_time_i[1], platform->start_time_i[2],
+				platform->start_time_i[3], platform->start_time_i[4], platform->start_time_i[5],
+				platform->start_time_i[6]);
+		fprintf(stderr, "    platform->end_time_d:                  %f\n", platform->end_time_d);
+		fprintf(stderr, "    platform->end_time_i:                %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+				platform->end_time_i[0], platform->end_time_i[1], platform->end_time_i[2],
+				platform->end_time_i[3], platform->end_time_i[4], platform->end_time_i[5],
+				platform->end_time_i[6]);
 		fprintf(stderr, "    platform->source_bathymetry:           %d\n", platform->source_bathymetry);
 		fprintf(stderr, "    platform->source_bathymetry1:          %d\n", platform->source_bathymetry1);
 		fprintf(stderr, "    platform->source_bathymetry2:          %d\n", platform->source_bathymetry2);

@@ -452,7 +452,8 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr,
 			int *pingnumber, int *error);
-int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr,
+int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+        void *platform_ptr, int platform_target_sensor,
 		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
 				double *nav_speed,
 		int n_sensordepth, double *sensordepth_time_d,

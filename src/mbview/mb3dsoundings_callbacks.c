@@ -466,6 +466,12 @@ int mb3dsoundings_updatestatus()
 		(mb3dsoundings.mb3dsoundings_info_notify)(sounding->ifile, sounding->iping,
 							sounding->ibeam, value_text);
 fprintf(stderr,"\n%s\n",value_text);
+fprintf(stderr,"xyzorigin: %f %f %f bounds:%f %f %f %f %f %f  bearing:%f scale:%f zscale:%f\n",
+soundingdata->xorigin,soundingdata->yorigin,soundingdata->zorigin,
+soundingdata->xmin,soundingdata->xmax,soundingdata->ymin,soundingdata->ymax,soundingdata->zmin,soundingdata->zmax,
+soundingdata->bearing,soundingdata->scale,soundingdata->zscale);
+fprintf(stderr,"SOUNDING: xyz: %f %f %f   glxyz: %f %f %f  winxy: %d %d\n",
+sounding->x,sounding->y,sounding->z,sounding->glx,sounding->gly,sounding->glz,sounding->winx,sounding->winy);
 		}
 
 	/* else set standard status label */
@@ -2366,6 +2372,8 @@ mb3dsoundings_info(int x, int y)
 
 		mb3dsoundings_plot(mbs_verbose, &mbs_error);
 		mb3dsoundings_updatestatus();
+        
+fprintf(stderr,"Sounding info:\n");
 		}
 	else
 		{

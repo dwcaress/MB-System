@@ -131,6 +131,8 @@ int main (int argc, char **argv)
 				"\t--insert-discontinuity=file:section\n"
 				"\t--reimport-file=file\n"
 				"\t--reimport-all-files\n"
+				"\t--import-tie-list=file\n"
+				"\t--export-tie-list=file\n"
 				"\t--verbose --help]\n";
 	extern char *optarg;
 	int	option_index;
@@ -180,6 +182,8 @@ int main (int argc, char **argv)
 		{"insert-discontinuity",	required_argument, 	NULL, 		0},
 		{"reimport-file",	required_argument, 	NULL, 		0},
 		{"reimport-all-files",	no_argument, 	NULL, 		0},
+		{"import-tie-list",	required_argument, 	NULL, 		0},
+		{"export-tie-list",	required_argument, 	NULL, 		0},
 		{NULL,				0, 			NULL, 		0}
 		};
 		
@@ -188,9 +192,13 @@ int main (int argc, char **argv)
 	mb_path	project_inputbase_path;
 	mb_path	project_inputadd_path;
 	mb_path	project_output_path;
+	mb_path	import_tie_list_path;
+	mb_path	export_tie_list_path;
 	int	project_inputbase_set = MB_NO;
 	int	project_inputadd_set = MB_NO;
 	int	project_output_set = MB_NO;
+	int	import_tie_list_set = MB_NO;
+	int	export_tie_list_set = MB_NO;
 	struct mbna_project project_inputbase;
 	struct mbna_project project_inputadd;
 	struct mbna_project project_output;
@@ -205,13 +213,43 @@ int main (int argc, char **argv)
 	struct mbna_section *section2;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
+	
+	int	num_import_tie;
+	int	import_tie_status;
+	mb_path import_tie_file_1_path;
+	mb_path import_tie_file_2_path;
+	mb_path import_tie_file_1_name;
+	mb_path import_tie_file_2_name;
+	double import_tie_snav_1_time_d;
+	double import_tie_snav_2_time_d;
+	double import_tie_offset_x;
+	double import_tie_offset_y;
+	double import_tie_offset_z_m;
+	double import_tie_sigmar1;
+	double import_tie_sigmax1[3];
+	double import_tie_sigmar2;
+	double import_tie_sigmax2[3];
+	double import_tie_sigmar3;
+	double import_tie_sigmax3[3];
+	int import_tie_file_1;
+	int import_tie_file_2;
+	int import_tie_section_1_id;
+	int import_tie_section_2_id;
+	int import_tie_snav_1;
+	int import_tie_snav_2;
+	FILE *tfp;
 
+	char buffer[BUFFER_MAX];
+	char *result = NULL;
 	int	nscan;
 	int	shellstatus;
 	mb_path	command;
+	mb_path filename;
 	double	mtodeglon, mtodeglat;
 	int	found, current_crossing;
-	int	imod, ifile, icrossing, itie;
+	int	imod, ifile, icrossing, itie, isection, isnav;
+	double timediff, timediffmin;
+	int done;
 	int	i, j, k;
 	
 	memset(project_inputbase_path, 0, sizeof(mb_path));
@@ -1026,6 +1064,21 @@ int main (int argc, char **argv)
 					fprintf(stderr,"Maximum number of mod commands reached:\n\tskip-unset-crossings command ignored\n\n");	
 					}
 				}
+				
+			/*-------------------------------------------------------
+			 * Import or export list of ties
+				--import-tie-list=file
+				--export-tie-list=file */
+			else if (strcmp("import-tie-list", options[option_index].name) == 0)
+				{
+				strcpy(import_tie_list_path, optarg);
+				import_tie_list_set = MB_YES;
+				}
+			else if (strcmp("export-tie-list", options[option_index].name) == 0)
+				{
+				strcpy(export_tie_list_path, optarg);
+				export_tie_list_set = MB_YES;
+				}
 			
 			break;
 		case '?':
@@ -1051,7 +1104,7 @@ int main (int argc, char **argv)
 		}
 
 	/* print starting debug statements */
-	if (verbose >= 2)
+	if (verbose >= 0)
 		{
 		fprintf(stderr,"\ndbg2  Program <%s>\n",program_name);
 		fprintf(stderr,"dbg2  Version %s\n",version_id);
@@ -1065,6 +1118,10 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       project_inputadd_path:      %s\n",project_inputadd_path);
 		fprintf(stderr,"dbg2       project_output_set:         %d\n",project_output_set);
 		fprintf(stderr,"dbg2       project_output_path:        %s\n",project_output_path);
+		fprintf(stderr,"dbg2       import_tie_list_set:        %d\n",import_tie_list_set);
+		fprintf(stderr,"dbg2       import_tie_list_path:       %s\n",import_tie_list_path);
+		fprintf(stderr,"dbg2       export_tie_list_set:        %d\n",export_tie_list_set);
+		fprintf(stderr,"dbg2       export_tie_list_path:       %s\n",export_tie_list_path);
 		fprintf(stderr,"dbg2       num_mods:                   %d\n",num_mods);
 		for (i=0;i<num_mods;i++)
 			{
@@ -2372,22 +2429,350 @@ fprintf(stderr,"\nCommand reimport-all-files\n");
 
 			}
 		}
+		
+	/* if specified import ties from a tie list file */
+	if (import_tie_list_set == MB_YES)
+		{
+		if ((tfp = fopen(import_tie_list_path,"r")) == NULL)
+			{
+			fprintf(stderr, "Unable to open tie list file %s for reading\n", import_tie_list_path);
+			status = MB_FAILURE;
+			error = MB_ERROR_OPEN_FAIL;
+			exit(error);
+			}
+		
+		/* read and process the ties */
+		done = MB_NO;
+		num_import_tie = 0;
+		while (done == MB_NO)
+			{
+			/* read the firt line of the next tie */
+			if ((result = fgets(buffer,BUFFER_MAX,tfp)) != buffer
+				|| (nscan = sscanf(buffer, "TIE %s %s %lf %lf %d %lf %lf %lf",
+						    import_tie_file_1_path,
+							import_tie_file_2_path,
+							&import_tie_snav_1_time_d,
+							&import_tie_snav_2_time_d,
+							&import_tie_status,
+							&import_tie_offset_x,
+							&import_tie_offset_y,
+							&import_tie_offset_z_m)) != 8)
+				{
+				done = MB_YES;
+				}
+				
+			/* read the second line of the next tie */
+			if ((result = fgets(buffer,BUFFER_MAX,tfp)) != buffer
+				|| (nscan = sscanf(buffer,"COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+							&import_tie_sigmar1,
+							&(import_tie_sigmax1[0]),
+							&(import_tie_sigmax1[1]),
+							&(import_tie_sigmax1[2]),
+							&import_tie_sigmar2,
+							&(import_tie_sigmax2[0]),
+							&(import_tie_sigmax2[1]),
+							&(import_tie_sigmax2[2]),
+							&import_tie_sigmar3,
+							&(import_tie_sigmax3[0]),
+							&(import_tie_sigmax3[1]),
+							&(import_tie_sigmax3[2]))) != 12)
+				{
+				done = MB_YES;
+				}
+				
+			/* apply the new tie if it has been read */
+			if (done == MB_NO)
+				{
+				/* figure out the file and block ids for the first file */
+				found = MB_NO;
+				strcpy(import_tie_file_1_name, (strrchr(import_tie_file_1_path,'/') + 1));
+				for (ifile=0;ifile<project_output.num_files;ifile++)
+				    {
+				    /* compare the file name rather than the path */
+					file1 = &(project_output.files[ifile]);
+					strcpy(filename, (strrchr(file1->path,'/') + 1));
+					if (strcmp(import_tie_file_1_name, filename) == 0)
+						{
+						import_tie_file_1 = ifile;
+						
+						/* found the file, now find the section and snav */
+						for (isection=0;i<file1->num_sections;isection++)
+							{
+							section1 = &(file1->sections[isection]);
+							if (import_tie_snav_1_time_d >= section1->btime_d
+								&& import_tie_snav_1_time_d <= section1->etime_d)
+								{
+								/* now pick the closest snav */
+								found = MB_YES;
+								import_tie_section_1_id = isection;
+								timediffmin = fabs(section1->etime_d - section1->btime_d);
+								import_tie_snav_1 = 0;
+								for (isnav=0;isnav<section1->num_snav;isnav++)
+									{
+									timediff = fabs(import_tie_snav_1_time_d - section1->snav_time_d[isnav]);
+									if (timediff < timediffmin)
+										import_tie_snav_1 = isnav;
+									}
+								}
+							}
+						}
+					}
+
+				/* figure out the file and block ids for the second file */
+				if (found == MB_YES)
+					{
+					found = MB_NO;
+					strcpy(import_tie_file_2_name, (strrchr(import_tie_file_2_path,'/') + 1));
+					for (ifile=0;ifile<project_output.num_files;ifile++)
+						{
+						/* compare the file name rather than the path */
+						file2 = &(project_output.files[ifile]);
+						strcpy(filename, (strrchr(file2->path,'/') + 1));
+						if (strcmp(import_tie_file_2_name, filename) == 0)
+							{
+							import_tie_file_2 = ifile;
+							
+							/* found the file, now find the section and snav */
+							for (isection=0;i<file2->num_sections;isection++)
+								{
+								section2 = &(file2->sections[isection]);
+								if (import_tie_snav_2_time_d >= section2->btime_d
+									&& import_tie_snav_2_time_d <= section2->etime_d)
+									{
+									/* now pick the closest snav */
+									found = MB_YES;
+									import_tie_section_2_id = isection;
+									timediffmin = fabs(section2->etime_d - section2->btime_d);
+									import_tie_snav_2 = 0;
+									for (isnav=0;isnav<section2->num_snav;isnav++)
+										{
+										timediff = fabs(import_tie_snav_2_time_d - section2->snav_time_d[isnav]);
+										if (timediff < timediffmin)
+											import_tie_snav_2 = isnav;
+										}
+									}
+								}
+							}
+						}
+					}
+				
+fprintf(stderr,"\nCommand import-tie-list=%4.4d:%4.4d/%4.4d:%4.4d/%.3f/%.3f/%.3f/%.3f/%.3f/%.3f\n",
+import_tie_file_1,import_tie_section_1_id,import_tie_file_2,import_tie_section_2_id,
+import_tie_offset_x,import_tie_offset_y,import_tie_offset_z_m,
+import_tie_sigmar1,import_tie_sigmar2,import_tie_sigmar3);
+				
+				/* check to see if this crossing already exists */
+				found = MB_NO;
+				for (icrossing=0;icrossing<project_output.num_crossings && found == MB_NO;icrossing++)
+					{
+					crossing = &(project_output.crossings[icrossing]);
+					if (crossing->file_id_2 == import_tie_file_1 && crossing->file_id_1 == import_tie_file_2
+						&& crossing->section_2 == import_tie_section_1_id && crossing->section_1 == import_tie_section_2_id)
+						{
+						found = MB_YES;
+						current_crossing = icrossing;
+						crossing = (struct mbna_crossing *) &project_output.crossings[icrossing];
+						}
+					else if (crossing->file_id_1 == import_tie_file_1 && crossing->file_id_2 == import_tie_file_2
+						&& crossing->section_1 == import_tie_section_1_id && crossing->section_2 == import_tie_section_2_id)
+						{
+						found = MB_YES;
+						current_crossing = icrossing;
+						crossing = (struct mbna_crossing *) &project_output.crossings[icrossing];
+						}
+					}
+					
+				/* if the crossing does not exist, create it */
+				if (found == MB_NO)
+					{
+					/* allocate mbna_crossing array if needed */
+					if (project_output.num_crossings_alloc <= project_output.num_crossings)
+					    {
+					    project_output.crossings = (struct mbna_crossing *) realloc(project_output.crossings,
+							    sizeof(struct mbna_crossing) * (project_output.num_crossings_alloc + ALLOC_NUM));
+					    if (project_output.crossings != NULL)
+						    project_output.num_crossings_alloc += ALLOC_NUM;
+					    else
+						{
+						status = MB_FAILURE;
+						error = MB_ERROR_MEMORY_FAIL;
+						}
+					    }
+	
+					/* add crossing to list */
+					current_crossing = project_output.num_crossings;
+					crossing = (struct mbna_crossing *) &project_output.crossings[current_crossing];
+					file1 = (struct mbna_file *) &project_output.files[crossing->file_id_1];
+					file2 = (struct mbna_file *) &project_output.files[crossing->file_id_2];
+					crossing->status = MBNA_CROSSING_STATUS_NONE;
+					crossing->truecrossing = MB_NO;
+					crossing->overlap = 0;
+					crossing->file_id_1 = import_tie_file_1;
+					crossing->section_1 = import_tie_section_1_id;
+					crossing->file_id_2 = import_tie_file_2;
+					crossing->section_2 = import_tie_section_2_id;
+					crossing->num_ties = 0;
+					current_crossing = project_output.num_crossings;
+					project_output.num_crossings++;
+
+fprintf(stderr,"Added crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n",
+current_crossing,
+file1->block, crossing->file_id_1, crossing->section_1,
+file2->block, crossing->file_id_2, crossing->section_2);
+					}
+				
+				/* if the tie does not exist, create it */
+				if (crossing->num_ties == 0)
+					{
+					/* add tie and set number */
+					file1 = (struct mbna_file *) &project_output.files[crossing->file_id_1];
+					file2 = (struct mbna_file *) &project_output.files[crossing->file_id_2];
+					section1 = (struct mbna_section *) &file1->sections[crossing->section_1];
+					section2 = (struct mbna_section *) &file2->sections[crossing->section_2];
+					crossing->num_ties++;
+					project_output.num_ties++;
+					tie = &crossing->ties[0];
+		
+					if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+						{
+						project_output.num_crossings_analyzed++;
+						if (crossing->truecrossing == MB_YES)
+							project_output.num_truecrossings_analyzed++;
+						}
+					crossing->status = MBNA_CROSSING_STATUS_SET;
+		
+					/* set nav points */
+					tie->snav_1 = import_tie_snav_1;
+					tie->snav_2 = import_tie_snav_2;
+		
+					/* augment tie counts for snavs */
+					section1->snav_num_ties[tie->snav_1]++;
+					section2->snav_num_ties[tie->snav_2]++;
+
+fprintf(stderr,"Added tie: %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d\n",
+current_crossing, 0,
+file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2);
+					}
+					
+				/* set the tie parameters */
+				for (itie=0;itie<crossing->num_ties;itie++)
+					{
+					tie = &crossing->ties[itie];
+					tie->status = import_tie_status;
+					tie->snav_1_time_d = section1->snav_time_d[tie->snav_1];
+					tie->snav_2_time_d = section2->snav_time_d[tie->snav_2];
+					mb_coor_scale(verbose,0.25 * (section1->latmin + section1->latmax + section2->latmin + section2->latmax),
+							&mtodeglon,&mtodeglat);
+					tie->offset_x = import_tie_offset_x * mtodeglon;
+					tie->offset_y = import_tie_offset_y * mtodeglat;
+					tie->offset_x_m = import_tie_offset_x;
+					tie->offset_y_m = import_tie_offset_y;
+					tie->offset_z_m = import_tie_offset_z_m;
+					tie->sigmar1 = import_tie_sigmar1;
+					tie->sigmax1[0] = import_tie_sigmax1[0];
+					tie->sigmax1[1] = import_tie_sigmax1[1];
+					tie->sigmax1[2] = import_tie_sigmax1[2];
+					tie->sigmar2 = import_tie_sigmar2;
+					tie->sigmax2[0] = import_tie_sigmax2[0];
+					tie->sigmax2[1] = import_tie_sigmax2[1];
+					tie->sigmax2[2] = import_tie_sigmax2[2];
+					tie->sigmar3 = import_tie_sigmar3;
+					tie->sigmax3[0] = import_tie_sigmax3[0];
+					tie->sigmax3[1] = import_tie_sigmax3[1];
+					tie->sigmax3[2] = import_tie_sigmax3[2];
+					tie->inversion_offset_x = section2->snav_lon_offset[tie->snav_2]
+								- section1->snav_lon_offset[tie->snav_1];
+					tie->inversion_offset_y = section2->snav_lat_offset[tie->snav_2]
+								- section1->snav_lat_offset[tie->snav_1];
+					tie->inversion_offset_x_m = tie->inversion_offset_x / mtodeglon;
+					tie->inversion_offset_y_m = tie->inversion_offset_y / mtodeglat;
+					tie->inversion_offset_z_m = section2->snav_z_offset[tie->snav_2]
+								- section1->snav_z_offset[tie->snav_1];
+					tie->inversion_status = MBNA_INVERSION_NONE;
+					if (project_output.inversion == MBNA_INVERSION_CURRENT)
+						project_output.inversion = MBNA_INVERSION_OLD;
+
+fprintf(stderr,"Set tie offsets:       %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
+current_crossing, itie,
+file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2,
+tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
+					}
+				}
+			}
+		}
+		
+	/* if specified output ties to a tie list file */
+	if (export_tie_list_set == MB_YES)
+		{
+		if ((tfp = fopen(export_tie_list_path,"w")) == NULL)
+			{
+			fprintf(stderr, "Unable to open tie list file %s for writing\n", export_tie_list_path);
+			status = MB_FAILURE;
+			error = MB_ERROR_OPEN_FAIL;
+			exit(error);
+			}
+			
+		for (icrossing=0;icrossing<project_output.num_crossings;icrossing++)
+			{
+			crossing = &(project_output.crossings[icrossing]);
+			file1 = &(project_output.files[crossing->file_id_1]);
+			file2 = &(project_output.files[crossing->file_id_2]);
+			section1 = &(file1->sections[crossing->section_1]);
+			section2 = &(file2->sections[crossing->section_1]);
+			for (itie=0;itie<crossing->num_ties;itie++)
+				{
+				tie = &(crossing->ties[itie]);
+				fprintf(tfp, "TIE %s %s %1d %16.6f %16.6f %13.8f %13.8f %13.8f\n",
+						project_output.files[crossing->file_id_1].path,
+						project_output.files[crossing->file_id_2].path,
+						tie->status,
+						section1->snav_time_d[tie->snav_1],
+						section2->snav_time_d[tie->snav_2],
+						tie->offset_x,
+						tie->offset_y,
+						tie->offset_z_m);
+				fprintf(tfp,"COV %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n",
+						import_tie_sigmar1,
+						import_tie_sigmax1[0],
+						import_tie_sigmax1[1],
+						import_tie_sigmax1[2],
+						import_tie_sigmar2,
+						import_tie_sigmax2[0],
+						import_tie_sigmax2[1],
+						import_tie_sigmax2[2],
+						import_tie_sigmar3,
+						import_tie_sigmax3[0],
+						import_tie_sigmax3[1],
+						import_tie_sigmax3[2]);
+				}
+			}
+			
+		fclose(tfp);
+		}
 
 	/* write out the new project file */
-	status = mbnavadjust_write_project(verbose, &project_output, &error);
-	if (status == MB_SUCCESS)
+	if (!((export_tie_list_set == MB_YES || import_tie_list_set == MB_YES)
+			&& project_inputadd_set == MB_NO
+			&& project_output_set == MB_NO
+			&& num_mods == 0))
 		{
-		fprintf(stderr,"Output project written:\n\t%s\n", project_output_path);
-		fprintf(stderr,"\t%d files\n\t%d crossings\n\t%d ties\n",
-			project_output.num_files, project_output.num_crossings, project_output.num_ties);
-		}
-	else
-		{
-		fprintf(stderr,"Write failure for output project:\n\t%s\n",
-			project_output_path);
-		fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
+		status = mbnavadjust_write_project(verbose, &project_output, &error);
+		if (status == MB_SUCCESS)
+			{
+			fprintf(stderr,"Output project written:\n\t%s\n", project_output_path);
+			fprintf(stderr,"\t%d files\n\t%d crossings\n\t%d ties\n",
+				project_output.num_files, project_output.num_crossings, project_output.num_ties);
+			}
+		else
+			{
+			fprintf(stderr,"Write failure for output project:\n\t%s\n",
+				project_output_path);
+			fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+			error = MB_ERROR_BAD_USAGE;
+			exit(error);
+			}
 		}
 
 	/* check memory */
