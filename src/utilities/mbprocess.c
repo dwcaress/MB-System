@@ -2,7 +2,7 @@
  *    The MB-system:	mbprocess.c	3/31/93
  *    $Id$
  *
- *    Copyright (c) 2000-2015 by
+ *    Copyright (c) 2000-2016 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -5225,35 +5225,35 @@ alpha, beta, lever_heave);*/
 					|| (kind == MB_DATA_NAV && inav > 1)))
 			    {
 			    dist = sqrt(dx*dx + dy*dy);
-			    if (del_time > 0.0)
-				{
-				speedcalc = 3.6*dist/del_time;
+				if (del_time > 0.0)
+					{
+					speedcalc = 3.6*dist/del_time;
+					}
+				else
+					speedcalc = speed_old;
+				if (dist > 0.0 && del_time > 0.0)
+					{
+					headingcalc = RTD*atan2(dx/dist,dy/dist);
+									if (headingcalc < 0.0)
+										headingcalc += 360.0;
+					}
+				else
+					headingcalc = heading_old;
 				}
-			    else
-				speedcalc = speed_old;
-			    if (dist > 0.0 && del_time > 0.0)
+			else
 				{
-				headingcalc = RTD*atan2(dx/dist,dy/dist);
-                                if (headingcalc < 0.0)
-                                    headingcalc += 360.0;
+				speedcalc = speed;
+				headingcalc = heading;
 				}
-			    else
-				headingcalc = heading_old;
-			    }
-                        else
-                            {
-                            speedcalc = speed;
-                            headingcalc = heading;
-                            }
-                        if (process.mbp_heading_mode == MBP_HEADING_CALC
-                                || process.mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-                                {
-                                heading = headingcalc;
-                                }
-                        else
-                                {
-                                speed = speedcalc;
-                                }
+			if (process.mbp_heading_mode == MBP_HEADING_CALC
+					|| process.mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+				{
+				heading = headingcalc;
+				}
+			else
+				{
+				speed = speedcalc;
+				}
 			time_d_old = time_d;
 			navlon_old = navlon;
 			navlat_old = navlat;
@@ -5293,11 +5293,11 @@ alpha, beta, lever_heave);*/
 			if (traveltime == MB_YES)
 			    {
 			    status = mb_ttimes(verbose,imbio_ptr,
-				store_ptr,&kind,&nbeams,
-				ttimes,angles,
-				angles_forward,angles_null,
-				bheave,alongtrack_offset,
-				&draft_org,&ssv,&error);
+									store_ptr,&kind,&nbeams,
+									ttimes,angles,
+									angles_forward,angles_null,
+									bheave,alongtrack_offset,
+									&draft_org,&ssv,&error);
 			    }
 
 			/* estimate travel times if they don't exist */
@@ -5307,31 +5307,31 @@ alpha, beta, lever_heave);*/
 			    ssv = 1500.0;
 			    nbeams = nbath;
 			    for (i=0;i<nbath;i++)
-				{
-				if (beamflag[i] != MB_FLAG_NULL)
-				    {
-				    zz = bath[i] - sonardepth;
-				    rr = sqrt(zz * zz
-					+ bathacrosstrack[i] * bathacrosstrack[i]
-					+ bathalongtrack[i] * bathalongtrack[i]);
-				    ttimes[i] = rr / 750.0;
-				    mb_xyz_to_takeoff(verbose,
-						bathacrosstrack[i],
-						bathalongtrack[i],
-						(bath[i] - sonardepth),
-						&angles[i],
-						&angles_forward[i],
-						&error);
-				    }
-				else
-				    {
-				    angles[i] = 0.0;
-				    angles_forward[i] = 0.0;
-				    }
-				angles_null[i] = 0.0;
-				bheave[i] = 0.0;
-				alongtrack_offset[i] = 0.0;
-				}
+					{
+					if (beamflag[i] != MB_FLAG_NULL)
+						{
+						zz = bath[i] - sonardepth;
+						rr = sqrt(zz * zz
+						+ bathacrosstrack[i] * bathacrosstrack[i]
+						+ bathalongtrack[i] * bathalongtrack[i]);
+						ttimes[i] = rr / 750.0;
+						mb_xyz_to_takeoff(verbose,
+							bathacrosstrack[i],
+							bathalongtrack[i],
+							(bath[i] - sonardepth),
+							&angles[i],
+							&angles_forward[i],
+							&error);
+						}
+					else
+						{
+						angles[i] = 0.0;
+						angles_forward[i] = 0.0;
+						}
+					angles_null[i] = 0.0;
+					bheave[i] = 0.0;
+					alongtrack_offset[i] = 0.0;
+					}
 			    }
 
 	/*--------------------------------------------
@@ -5349,16 +5349,16 @@ alpha, beta, lever_heave);*/
 			    {
 			    if (process.mbp_heave_mode == MBP_HEAVE_MULTIPLY
 				|| process.mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET)
-				{
-				for (i=0;i<nbath;i++)
-				    bheave[i] *= process.mbp_heave_mult;
-				}
+					{
+					for (i=0;i<nbath;i++)
+						bheave[i] *= process.mbp_heave_mult;
+					}
 			    if (process.mbp_heave_mode == MBP_HEAVE_OFFSET
 				|| process.mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET)
-				{
-				for (i=0;i<nbath;i++)
-				    bheave[i] += process.mbp_heave;
-				}
+					{
+					for (i=0;i<nbath;i++)
+						bheave[i] += process.mbp_heave;
+					}
 			    }
 
 			/* if tt adjustment specified do it */
@@ -5400,105 +5400,105 @@ time_i[3], time_i[4], time_i[5], time_i[6],
 time_d); */
 			    /* loop over the beams */
 			    for (i=0;i<nbeams;i++)
-			      {
-			      if (ttimes[i] > 0.0)
-				{
-				/* if needed, translate angles from takeoff
-					angle coordinates to roll-pitch
-					coordinates, apply roll and pitch
-					corrections, and translate back */
-				if (process.mbp_rollbias_mode != MBP_ROLLBIAS_OFF
-					|| process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON
-					|| process.mbp_nav_attitude == MBP_NAV_ON
-					|| process.mbp_attitude_mode == MBP_ATTITUDE_ON
-					|| process.mbp_kluge003 == MB_YES)
 					{
-					mb_takeoff_to_rollpitch(
-						verbose,
-						angles[i], angles_forward[i],
-						&alpha, &beta,
-						&error);
-        			       /* apply kluge_003 - enables correction of beam angles in
-        				SeaBeam 2112 data
-        				- a data sample from the SeaBeam 2112 on
-                			  the USCG Icebreaker Healy (collected on
-                			  23 July 2003) was found to have an error
-                			  in which the beam angles had 0.25 times
-                			  the roll added
-        				- this correction subtracts 0.25 * roll
-                			  from the beam angles before the bathymetry
-                			  is recalculated by raytracing through a
-                			  water sound velocity profile
-        				- the mbprocess parameter files must be
-                			  set to enable bathymetry recalculation
-                			  by raytracing in order to apply this
-                			  correction */
-					if (process.mbp_kluge003 == MB_YES)
-						beta -= 0.25*roll;
-					if (process.mbp_nav_attitude == MBP_NAV_ON
-						|| process.mbp_attitude_mode == MBP_ATTITUDE_ON)
+					if (ttimes[i] > 0.0)
 						{
-						beta += roll - roll_org;
-						alpha += pitch - pitch_org;
-						}
-					if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-			    			alpha += process.mbp_pitchbias;
-			    		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-			    			beta += process.mbp_rollbias;
-			    		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE
-						&& angles[i] >= 0.0)
-			    			beta += process.mbp_rollbias_stbd;
-			    		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-			    			beta += process.mbp_rollbias_port;
-					mb_rollpitch_to_takeoff(
-						verbose,
-						alpha, beta,
-						&angles[i], &angles_forward[i],
-						&error);
-					}
+						/* if needed, translate angles from takeoff
+							angle coordinates to roll-pitch
+							coordinates, apply roll and pitch
+							corrections, and translate back */
+						if (process.mbp_rollbias_mode != MBP_ROLLBIAS_OFF
+							|| process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON
+							|| process.mbp_nav_attitude == MBP_NAV_ON
+							|| process.mbp_attitude_mode == MBP_ATTITUDE_ON
+							|| process.mbp_kluge003 == MB_YES)
+							{
+							mb_takeoff_to_rollpitch(
+								verbose,
+								angles[i], angles_forward[i],
+								&alpha, &beta,
+								&error);
+        			       /* apply kluge_003 - enables correction of beam angles in
+								SeaBeam 2112 data
+								- a data sample from the SeaBeam 2112 on
+									  the USCG Icebreaker Healy (collected on
+									  23 July 2003) was found to have an error
+									  in which the beam angles had 0.25 times
+									  the roll added
+								- this correction subtracts 0.25 * roll
+									  from the beam angles before the bathymetry
+									  is recalculated by raytracing through a
+									  water sound velocity profile
+								- the mbprocess parameter files must be
+									  set to enable bathymetry recalculation
+									  by raytracing in order to apply this
+									  correction */
+							if (process.mbp_kluge003 == MB_YES)
+								beta -= 0.25*roll;
+							if (process.mbp_nav_attitude == MBP_NAV_ON
+								|| process.mbp_attitude_mode == MBP_ATTITUDE_ON)
+								{
+								beta += roll - roll_org;
+								alpha += pitch - pitch_org;
+								}
+							if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+									alpha += process.mbp_pitchbias;
+								if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+									beta += process.mbp_rollbias;
+								else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE
+								&& angles[i] >= 0.0)
+									beta += process.mbp_rollbias_stbd;
+								else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+									beta += process.mbp_rollbias_port;
+							mb_rollpitch_to_takeoff(
+								verbose,
+								alpha, beta,
+								&angles[i], &angles_forward[i],
+								&error);
+							}
 
-				/* add heave and draft */
-				depth_offset_use = bheave[i] + draft + lever_heave;
-
-				/* check depth_offset - use static shift if depth_offset negative */
-				if (depth_offset_use >= depth[0])
-				    {
-				    static_shift = 0.0;
-				    }
-				else
-				    {
-				    static_shift = depth_offset_use - depth[0];
-
-				    if (verbose > 0)
-				    	{
-					fprintf(stderr, "\nWarning: Sonar depth is shallower than the top\n");
-					fprintf(stderr, "of the SVP - transducers above water?!\n");
-					fprintf(stderr, "Raytracing performed from top of SVP followed by static shift.\n");
-					fprintf(stderr, "Sonar depth is sum of heave + draft (or transducer depth).\n");
-					fprintf(stderr, "Draft from data:       %f\n", draft);
-					fprintf(stderr, "Heave from data:       %f\n", bheave[i]);
-					fprintf(stderr, "Heave from lever calc: %f\n", lever_heave);
-					fprintf(stderr, "User specified draft:  %f\n", process.mbp_draft);
-					fprintf(stderr, "Depth offset used:     %f\n", depth_offset_use);
-					fprintf(stderr, "Data Record: %d\n",odata);
-					fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n",
-						time_i[0], time_i[1], time_i[2],
-						time_i[3], time_i[4], time_i[5], time_i[6]);
-	    				}
-				    }
+						/* add heave and draft */
+						depth_offset_use = bheave[i] + draft + lever_heave;
+		
+						/* check depth_offset - use static shift if depth_offset negative */
+						if (depth_offset_use >= depth[0])
+							{
+							static_shift = 0.0;
+							}
+						else
+							{
+							static_shift = depth_offset_use - depth[0];
+		
+							if (verbose > 0)
+								{
+							fprintf(stderr, "\nWarning: Sonar depth is shallower than the top\n");
+							fprintf(stderr, "of the SVP - transducers above water?!\n");
+							fprintf(stderr, "Raytracing performed from top of SVP followed by static shift.\n");
+							fprintf(stderr, "Sonar depth is sum of heave + draft (or transducer depth).\n");
+							fprintf(stderr, "Draft from data:       %f\n", draft);
+							fprintf(stderr, "Heave from data:       %f\n", bheave[i]);
+							fprintf(stderr, "Heave from lever calc: %f\n", lever_heave);
+							fprintf(stderr, "User specified draft:  %f\n", process.mbp_draft);
+							fprintf(stderr, "Depth offset used:     %f\n", depth_offset_use);
+							fprintf(stderr, "Data Record: %d\n",odata);
+							fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n",
+								time_i[0], time_i[1], time_i[2],
+								time_i[3], time_i[4], time_i[5], time_i[6]);
+								}
+							}
 /* fprintf(stderr,"draft_org:%f draft:%f depth_offset_use:%f static_shift:%f\n",
 draft_org,draft,depth_offset_use,static_shift);*/
 
-				/* raytrace */
-				status = mb_rt(verbose, rt_svp, (depth_offset_use - static_shift),
-					angles[i], 0.5*ttimes[i],
-					process.mbp_angle_mode, ssv, angles_null[i],
-					0, NULL, NULL, NULL,
-					&xx, &zz,
-					&ttime, &ray_stat, &error);
-
-				/* apply static shift if any */
-				zz += static_shift;
+						/* raytrace */
+						status = mb_rt(verbose, rt_svp, (depth_offset_use - static_shift),
+							angles[i], 0.5*ttimes[i],
+							process.mbp_angle_mode, ssv, angles_null[i],
+							0, NULL, NULL, NULL,
+							&xx, &zz,
+							&ttime, &ray_stat, &error);
+		
+						/* apply static shift if any */
+						zz += static_shift;
 
 /* fprintf(stderr,"PING:%4d %2d %2d %2d:%2d:%2d.%6d BEAM:%d depth_offset_use:%f draft:%f bheave:%f lever_heave:%f angle:%f tt:%f mode:%d ssv:%f null:%f xx:%f zz:%f tt:%f\n",
 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],i,
@@ -5649,7 +5649,7 @@ bath[i]-zz); */
 			    /* get draft change */
 			    depth_offset_change = draft - draft_org + lever_heave;
 /* fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  depth_offset_change:%f\n",
-time_d, draft, draft_org, lever_heave, depth_offset_change);*/
+time_d, draft, draft_org, lever_heave, depth_offset_change); */
 
 			    /* loop over the beams */
 			    for (i=0;i<nbath;i++)

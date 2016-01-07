@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
  *	$Id$
  *
- *    Copyright (c) 1998-2015 by
+ *    Copyright (c) 1998-2016 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

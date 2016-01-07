@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_gsf.h	6/10/97
  *	$Id$
  *
- *    Copyright (c) 1998-2015 by
+ *    Copyright (c) 1998-2016 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

@@ -66,7 +66,7 @@ make uninstall (to remove a previously installed version)
 #------------------------
 #    --with-netcdf-config  - location of NetCDF config script nc-config
 #    --with-gdal-config    - location of GDAL config script gdal-config
-#    --with-gmt-config     - location of GMT config script gmt-config
+#    --with-gmt-config     - location of GMT5 config script gmt-config
 #    --with-proj-lib       - location of PROJ libs
 #    --with-proj-include   - location of PROJ headers
 #    --with-fftw-lib       - location of FFTW3 libs 
@@ -104,6 +104,10 @@ make uninstall (to remove a previously installed version)
 # through Fink in /sw, and the OTPS program predict_time located
 # in /usr/local/OTPS2.
 # Prerequisite Fink packages include gmt, netcdf, gdal, proj, fftw3, and gv:
+fink install gmt5 gmt5-dev gmt5-doc gmt5-shlibs openmotif4 \
+        netcdf-bin netcdf-c7 netcdf-c7-shlibs gdal gdal-dev gdal-shlibs \
+        proj proj-bin proj-shlibs fftw3 fftw3-shlibs \
+        openmotif4 openmotif4-bin openmotif- libicu55-shlibs gv
 #
 sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \

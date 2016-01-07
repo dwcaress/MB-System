@@ -3,7 +3,7 @@
  *
  *    $Id$
  *
- *    Copyright (c) 2014-2015 by
+ *    Copyright (c) 2014-2016 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
