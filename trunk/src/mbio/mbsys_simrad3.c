@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_simrad3.c	3.00	2/22/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2015 by
+ *    Copyright (c) 2008-2016 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -2796,7 +2796,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				
 		/* get sonar depth */
 		*ssv = 0.1 * ping->png_ssv;
-		*draft = ping->png_xducer_depth;
+		*draft = ping->png_xducer_depth - 0.01 * ping->png_heave;
 
 		/* get travel times, angles */
 		*nbeams = ping->png_nbeams;
@@ -2808,7 +2808,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			angles_forward[i] = 180.0 - ping->png_azimuth[i];
 			if (angles_forward[i] < 0.0) angles_forward[i] += 360.0;
 			angles_null[i] = 0.0;
-			heave[i] = ping->png_bheave[i];
+			heave[i] = ping->png_bheave[i] + 0.01 * ping->png_heave;
 			alongtrack_offset[i] = (0.01 * ((double)ping->png_speed))
 						* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]])
 						+ offset_y;
@@ -3354,7 +3354,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 			*speed = 0.0;
 
 		/* get draft  */
-		*draft = ping->png_xducer_depth;
+		*draft = ping->png_xducer_depth - 0.01 * ping->png_heave;
 
 		/* get roll pitch and heave */
 		*roll = 0.01 * ping->png_roll;
@@ -3411,7 +3411,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get draft  */
 		if (ping != NULL)
-			*draft = ping->png_xducer_depth;
+			*draft = ping->png_xducer_depth - 0.01 * store->pos_heave;
 		else
 			*draft = 0.0;
 
@@ -3563,6 +3563,11 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
+//if (*kind == MB_DATA_DATA)
+//for (inav=0;inav<*n;inav++)
+//fprintf(stderr,"ExtractNNav: %.6f %12.8f %12.8f   %6.3f km/hr %7.3f deg %10.3f m %5.2f deg %5.2f deg %6.3f m\n",
+//		time_d[inav], navlon[inav], navlat[inav], speed[inav], heading[inav],
+//		draft[inav], roll, pitch[inav], heave[inav]);
 
 	/* return status */
 	return(status);
@@ -3638,7 +3643,7 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			*speed = 0.0;
 
 		/* get draft  */
-		*draft = ping->png_xducer_depth;
+		*draft = ping->png_xducer_depth - 0.01 * ping->png_heave;
 
 		/* get roll pitch and heave */
 		*roll = 0.01 * ping->png_roll;
@@ -3693,7 +3698,7 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get draft  */
 		if (ping != NULL)
-			*draft = ping->png_xducer_depth;
+			*draft = ping->png_xducer_depth - 0.01 * store->pos_heave;
 		else
 			*draft = 0.0;
 
@@ -3755,6 +3760,9 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
+//if (*kind == MB_DATA_DATA)
+//fprintf(stderr,"ExtractNav: %.6f %12.8f %12.8f   %6.3f km/hr %7.3f deg %10.3f m %5.2f deg %5.2f deg %6.3f m\n",
+//		*time_d, *navlon, *navlat, *speed, *heading, *draft, *roll, *pitch, *heave);
 
 	/* return status */
 	return(status);
@@ -3809,6 +3817,8 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	/* insert data in ping structure */
 	if (store->kind == MB_DATA_DATA)
 		{
+//fprintf(stderr,"InsertNav: %.6f %12.8f %12.8f   %6.3f km/hr %7.3f deg %10.3f m %5.2f deg %5.2f deg %6.3f m\n\n",
+//		time_d, navlon, navlat, speed, heading, draft, roll, pitch, heave);
 		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		/* get time */
@@ -3841,7 +3851,7 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		ping->png_speed = (int) rint(speed / 0.036);
 
 		/* get draft  */
-		ping->png_xducer_depth = draft;
+		ping->png_xducer_depth = draft + heave;
 
 		/* get roll pitch and heave */
 		ping->png_roll = (int) rint(roll / 0.01);
