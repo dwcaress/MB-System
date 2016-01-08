@@ -42,7 +42,7 @@
 archive
 by anonymous ftp to the Lamont-Doherty Earth Observatory of Columbia
 University.
-This archive file is about 3 megabytes in size and, depending on the
+This archive file is about 16 megabytes in size and, depending on the
 speed of your internet connection, may take a few minutes to transfer.</p>
 <p>Click<a
  href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/MB-System.tar.gz"> here to ftp</a> the current MB-System release as a compressed tar archive.</p>
@@ -63,7 +63,7 @@ Name: anonymous<br>
 Password: your@email.address<br>
 &gt; cd pub/MB-System<br>
 &gt; binary<br>
-&gt; get MB-System.tar.gz<br>
+&gt; get mbsystem-5.5.2263.tar.gz<br>
 &gt; quit<br>
 </ul>
 If anonymous ftp fails with an error message like: "Sorry no DNS entry"
@@ -116,22 +116,15 @@ The MB-System source code is archived and managed using  <a href="http://subvers
 <p>MB-System is included in <a href="http://sites.google.com/site/poseidonlinux/">Poseidon Linux</a>, the "Scientific GNU/Linux". Poseidon is an Ubuntu Linux based distribution including a selection of open source software packages intended to support scientific research. In particular, it offers several specific tools in the areas of GIS, 3D Visualization, Mathematics, Statistics and several other fields of research.</p>
   <p>MB-System has been packaged for MacOS X as part of the <a href="http://www.finkproject.org/">Fink Project</a>. The MB-System Fink package can be found at:</p>
 <dd><a href="http://pdb.finkproject.org/pdb/package.php/mbsystem">http://pdb.finkproject.org/pdb/package.php/mbsystem</a></dd>
+ <p>If the fink package manager is installed, then MB-System and its prerequisites can be installed using this command:</p>
+<dd>fink install mbsystem</dd>
   <p>MB-System has also been packaged for MacOs X as part of <a href="http://brew.sh">Homebrew</a>.
  If you have Homebrew installed, then MB-System and its prerequisites can be installed using these two commands:</p>
 <dd>brew tap homebrew/science</dd>
 <dd>brew install mbsystem</dd>
 <p>The <a href="http://live.osgeo.org/">OSGeo-Live</a>
   distribution includes MB-System. OSGeo-Live is a self-contained bootable DVD, USB thumb drive or Virtual Machine based on <a href="http://xubuntu.org">Xubuntu</a> that includes a wide variety of open source geospatial software.
-<p>The <a href="http://www.sio.ucsd.edu/">Scripps Institution of Oceanography</a>'s <a href="https://scripps.ucsd.edu/ships/shipboard-technical-support/">Shipboard Technical Support</a> group maintains a repository of open source software RPM distributions for Red Hat Enterprise Linux and CentOS Linux. This repository includes both source and binary distributions of MB-System, GMT, and netCDF that can be accessed using the yum utility. The MB-System RPMs require the GMT and netCDF RPMs, but have no other external dependencies.
-  This repository can be found at:
-<ul>
-    <a href="http://sts.ucsd.edu/repos/centos-5/local">http://sts.ucsd.edu/repos/centos-5/local</a>
-</ul>
-  The SIO-STS gpg signing key is
-  <ul>
-    <a href="http://sts.ucsd.edu/repos/centos-5/local/RPM-GPG-KEY-STS">http://sts.ucsd.edu/repos/centos-5/local/RPM-GPG-KEY-STS</a>
-  </ul>
-<p>Thanks to Christian Ferreira for creating and distributing Poseidon Linux, to Kurt Schwehr for maintaing the Fink MB-System package, to Anthony Lukach for maintaining the Homebrew MB-System package, to Hamish Bowman for maintaining the OSGeo-Live MB-System package, and to Frank Delahoyde for maintaining the CentOS MB-System RPM distribution.</p>
+<p>Thanks to Christian Ferreira for creating and distributing Poseidon Linux, to Kurt Schwehr for maintaing the Fink MB-System package, to Anthony Lukach for maintaining the Homebrew MB-System package, to Hamish Bowman for maintaining the OSGeo-Live MB-System package.</p>
 <center>
   <p></p>
   <hr width="67%">
@@ -224,20 +217,20 @@ painlessly installed using the fink package available from the
 </center>
 <p>The MB-System source code is extracted from the distribution using the tar utility:</p>
 <ul>
-  <pre>tar xvzf MB-System.tar.gz</pre>
+  <pre>tar xvzf mbsystem-5.5.2263.tar.gz</pre>
 </ul>
 <p>or for some older systems with feature-limited versions of tar, a combination of gunzip and tar:</p>
 <ul>
-  <pre>gunzip MB-System.tar.gz
-tar xvf MB-System.tar</pre>
+  <pre>gunzip mbsystem-5.5.2263.tar.gz
+tar xvf mbsystem-5.5.2263.tar</pre>
 </ul>
-<p>This will create a directory called (for the 5.4.2035 distribution): </p>
+<p>This will create a directory called (for the 5.5.2263 distribution): </p>
 <ul>
-  <pre>mbsystem-5.4.2253</pre>
+  <pre>mbsystem-5.5.2263</pre>
 </ul>
 <p>In order to build and install MB-System from an interactive shell, you need to change your current directory to the distribution:</p>
 <ul>
-  <pre>cd mbsystem-5.4.2253</pre>
+  <pre>cd mbsystem-5.5.2263</pre>
 </ul>
 <center>
 <p></p>
@@ -250,7 +243,7 @@ tar xvf MB-System.tar</pre>
 <p>The basic steps for building MB-System using the configure script are:</p>
 <p>1. Move to the top of the MB-System distribution directory:</p>
 <ul>
-        cd mbsystem-5.4.2253
+        cd mbsystem-5.5.2263
 </ul>
 
 <p>2. Run the configure script to generate the Makefile files throughout the
@@ -314,12 +307,13 @@ sudo make install</pre>
 						[Default: ${exec_prefix}/include ==> /usr/local/include]
 </pre>
 </ul>
-<p>MB-System depends on librarys from a number of different packages, including NetCDF, GMT, FFTW3, X11, and Motif. Sometimes a user will have more than one installation of a package available, and specifying which is used is desirable. Also, unfortunately the configure script does not always successfully find all needed packages. Consequently, the configure script allows users to set the locations on the command line when necessary. 
+<p>MB-System depends on librarys from a number of different packages, including NetCDF, GMT5, GDAL, FFTW3, X11, and Motif. Sometimes a user will have more than one installation of a package available, and specifying which is used is desirable. Also, unfortunately the configure script does not always successfully find all needed packages. Consequently, the configure script allows users to set the locations on the command line when necessary. 
 The configure command line options controlling the locations of prerequisites are:</p>
 <ul>
 <pre>
 --with-netcdf-config 	Location of NetCDF configuration script nc-config
---with-gmt-config 		Location of GMT configuration script nc-config
+--with-gdal-config		Location of GDAL configuration script gdal-config
+--with-gmt-config 		Location of GMT configuration script gmt-config
 --with-proj-lib 		Location of PROJ libs (optional)
 --with-proj-include 	Location of PROJ libs (optional)
 --with-fftw-lib 		Location of FFTW3 libs (optional)
@@ -360,22 +354,37 @@ in the file gmt.conf that is part of the GMT installation, by setting
 this parameter in the file gmt.conf in the user's home directory, or by using
 the GMT module gmtset to modify this parameter in the current working directory. If, for instance, the mbgmt shared library has been installed in the file /usr/lib/libmbgmt.dylib, then the GMT_CUSTOM_LIBS parameter in a gmt.conf file can be set to:
 <ul><pre>GMT_CUSTOM_LIBS = /usr/lib/libmbgmt.dylib</pre></ul></p>
+<p>The parallel processing modules mbm_multiprocess, mbm_multidatalist, and mbm_multicopy require the perl module Parallel::ForkManager. This can be added to your local perl installation using the command line utility cpan:</p>
+<ul>
+<pre>
+	cpan Parallel::ForkManager 
+</pre>
+</ul>
 <p>Most users will also wish to specify which program they generally
 use to view Postscript plots on their screen. This parameter is set
 with the mbdefaults program (see the mbdefaults manual page for
 details).
-Popular open source options for Postscript display include ghostview and gv (gv is recommended). The postscript plots can also be imported into proprietary tools like Adobe Illustrator, Adobe Acrobat, or Preview on MacOs X. If one is working in a Unix museum, pageview works well on Sun workstations running Solaris, and xpsview is great on on Silicon Graphics machines running Irix.</p>
+Popular open source options for Postscript display include ghostview and gv (gv is recommended). The postscript plots can also be imported into proprietary tools like Adobe Illustrator, Adobe Acrobat, or Preview on MacOs X. If one is working in a Unix museum, or is otherwise stuck in the 1990's, pageview works well on Sun workstations running Solaris, and xpsview is great on on Silicon Graphics machines running Irix.</p>
 
 <strong>Mac OS X</strong>
-<p>Many MacOsX users have their NetCDF, GMT5, FFTW3, and OpenMotif installations through the Fink package manager, which installs packages in /sw. The configure script fails to find packages in /sw, and so the user must explicitly specify those packages. The OTPS tide modeling software used by mbotps is not packaged in Fink, and so must be manually installed by a user if mbotps is to work correctly. Installation of MB-System on a Mac running MacOsX 10.9 or 10.10 will likely use a configure command that looks something like:</p>
+<p>Many MacOsX users have their NetCDF, GDAL, PROJ, GMT5, FFTW3, and OpenMotif installations through the Fink package manager, which installs packages in /sw. To install the  MB-System prerequisites:</p>
+<ul>
+<pre>
+sudo fink install \
+	gmt5 gmt5-dev \
+	gdal gdal-dev gdal-shlibs \
+	netcdf-c7 netcdf-c7-shlibs \
+	proj proj-bin proj-shlibs \
+	openmotif4 openmotif4-shlibs x11 x11-dev \
+	fftw3 fftw3-shlibs \
+	gv
+</pre>
+</ul>
+<p>The configure script is able to find the NetCDF, GDAL and GMT5 installations because they install the programs nc-config, gdal-config, and gmt-config, respectively, in /sw/bin. However, the configure script fails to find the PROJ, FFTW3, and OpenMotif packages in /sw, and so the user must explicitly specify those packages. The OTPS tide modeling software used by mbotps is not packaged in Fink, and so must be manually installed by a user if mbotps is to work correctly. Installation of MB-System on a Mac running MacOsX 10.9 or 10.10 will likely use a configure command that looks something like:</p>
 <ul>
 <pre>
 sudo CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 ./configure \
-    --with-netcdf-include=/sw/include \
-    --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/sw/include/gmt5 \
-    --with-gmt-lib=/sw/lib \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
     --with-fftw-include=/sw/include \
@@ -390,10 +399,6 @@ sudo CFLAGS="-I/opt/X11/include -L/opt/X11/lib" \
 <pre>
 sudo CFLAGS="-g -I/opt/X11/include -L/opt/X11/lib" \
 ./configure \
-    --with-netcdf-include=/sw/include \
-    --with-netcdf-lib=/sw/lib \
-    --with-gmt-include=/sw/include/gmt5 \
-    --with-gmt-lib=/sw/lib \
     --with-proj-include=/sw/include \
     --with-proj-lib=/sw/lib \
     --with-fftw-include=/sw/include \
@@ -425,32 +430,11 @@ export PATH=/usr/lib/gmt/bin:$PATH
 </pre>
 </ul>
 
-<p>By default, the Ubuntu GMT installation is not known to pkg-config, and the installation
-points of the libraries and the header files must be specified:</p>
+<p>If the prerequisites have all been installed with apt-get and it is desired to
+install MB-System in /usr/local, then only a simple call to configure is required:</p>
 <ul>
   <pre>
-sudo ./configure --prefix=/usr/local \
-    --with-gmt-include=/usr/include/gmt \
-    --with-gmt-lib=/usr/lib
-</pre></ul>
-<p> Although the GMT installation does not include a pkg-config *.pc file, 
-it is simple to construct one. On Ubuntu pkg-config looks in /usr/lib/pkgconfig,
-so one can put a file there called gmt.pc with the contents:
-<ul><pre>
-# start gmt.pc
-prefix=/usr
-exec_prefix=${prefix}
-libdir=${exec_prefix}/lib
-includedir=${prefix}/include/gmt
-ccompiler=gcc
-cppcompiler=g++
-
-Name: gmt
-Description: GMT Libraries
-Version: 4.5.6
-Libs: -L${libdir} -lgmt -lgmtps -lpsl
-Cflags: -I${includedir}
-# end gmt.pc
+sudo ./configure
 </pre></ul>
 
 <p>
