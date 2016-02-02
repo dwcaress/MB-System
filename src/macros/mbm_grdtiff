@@ -112,7 +112,7 @@ $ncpt = 11;
 	@cptbb7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 
 # Determine the GMT version
-@grdinfo = `grdinfo 2>&1`;
+@grdinfo = `gmt grdinfo 2>&1`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
@@ -404,7 +404,7 @@ if ($ENV{"MB_IMG_VIEWER"})
 	}
 
 # see if data file is a grd file or a list of grdfiles
-@grdinfo = `grdinfo $file_data 2>&1`;
+@grdinfo = `gmt grdinfo $file_data 2>&1`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
@@ -433,7 +433,7 @@ else
 # see if intensity file is a grd file or a list of grdfiles
 if ($file_intensity)
 	{
-	@grdinfo = `grdinfo $file_intensity 2>&1`;
+	@grdinfo = `gmt grdinfo $file_intensity 2>&1`;
 	while (@grdinfo)
 		{
 		$line = shift @grdinfo;
@@ -502,10 +502,10 @@ if (!$bounds || !$zbounds || $zmode == 1)
 		}
 	else
 		{
-		@grdinfo = `grdinfo $file_grd 2>&1`;
+		@grdinfo = `gmt grdinfo $file_grd 2>&1`;
 		if ($verbose > 0)
 			{
-			print "\tgrdinfo $file_grd\n";
+			print "\tgmt grdinfo $file_grd\n";
 			}
 		}
 	while (@grdinfo)

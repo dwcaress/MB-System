@@ -1,4 +1,4 @@
-.TH mbauvloglist 1 "18 February 2015" "MB-System 5.0" "MB-System 5.0"
+.TH mbauvloglist 1 "2 February 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbauvloglist\fP \- Lists table data from an MBARI AUV mission log file.
 
@@ -355,10 +355,14 @@ log file being parsed, plus the following:
      mergeRoll
      mergePitch
      mergeHeave
+     potentialTemperature
 .br
 All of the special values are double values. Those beginning with "merge"
 derive from interpolation of data from an external navigation file
-specified using the \fB-N\fP option.
+specified using the \fB-N\fP option. The "potentialTemperature" value is defined
+only when the input file is fastcatlog.log, which contains temperature, pressure,
+and salinity values.
+
 .TP
 .B \-P
 .br

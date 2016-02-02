@@ -342,8 +342,8 @@ int main (int argc, char **argv)
 	double	altitude_org;
 	double	sensordepth_org;
 	double	draft_org;
-	double	roll_org;
-	double	pitch_org;
+	double	roll_org, roll_delta;
+	double	pitch_org, pitch_delta;
 	double	heave_org;
 	double	depth_offset_change;
 	
@@ -2269,7 +2269,7 @@ fprintf(stderr,"Outputting sensor %d offset %d\n",isensor,ioffset);
 					if (platform != NULL)
 						{
 						/* calculate target sensor position */
-						status = mb_platform_position (verbose, (void *)platform,
+						status = mb_platform_position(verbose, (void *)platform,
 										platform_target_sensor, 0,
 										navlon, navlat, sensordepth,
 										heading, roll, pitch,
@@ -2280,12 +2280,15 @@ fprintf(stderr,"Outputting sensor %d offset %d\n",isensor,ioffset);
 						sensordepth_changed = MB_YES;
 
 						/* calculate target sensor attitude */
-						status = mb_platform_orientation_target (verbose, (void *)platform,
+						status = mb_platform_orientation_target(verbose, (void *)platform,
 										platform_target_sensor, 0,
 										heading, roll, pitch,
 										&heading, &roll, &pitch,
 										&error);
-						attitude_changed = MB_YES;
+						roll_delta = roll - roll_org;
+						pitch_delta = pitch - pitch_org;
+						if (roll_delta != 0.0 || pitch_delta != 0.0)
+							attitude_changed = MB_YES;
 						}
 
 					/* if attitude changed apply rigid rotations to any bathymetry */
@@ -2302,10 +2305,10 @@ fprintf(stderr,"Outputting sensor %d offset %d\n",isensor,ioffset);
 								   rolldelta:  Roll relative to previous correction and bias included
 								   pitchdelta: Pitch relative to previous correction and bias included
 								   heading:    Heading absolute (bias included) */
-								mb_platform_math_attitude_rotate_beam (
+								mb_platform_math_attitude_rotate_beam(
 										verbose,
 										bathacrosstrack[i], bathalongtrack[i], bath[i],
-										roll,  pitch,  0.0,
+										roll_delta,  pitch_delta,  0.0,
 										&(bathacrosstrack[i]), &(bathalongtrack[i]), &(bath[i]),
 										&error);
 								

@@ -64,11 +64,11 @@
  * AlphaW = Aw * Pw * f**2
  *
  * For T <= 20 deg C
- *   Aw = 0.0004397 - 0.0000259 * T
+ *   Aw = 0.0004937 - 0.0000259 * T
  *           + 0.000000911 * T**2 - 0.000000015 * T**3 (dB/km/kHz)
  * For T > 20 deg C
  *   Aw = 0.0003964 - 0.00001146 * T
- *           + 0.000000145 * T**2 - 0.00000000049 * T**3 (dB/km/kHz)
+ *           + 0.000000145 * T**2 - 0.00000000065 * T**3 (dB/km/kHz)
  * Pw = 1 - 0.0000383 * D + 0.00000000049 * D**2
  *
  * **************************
@@ -158,13 +158,13 @@ int mb_absorption(int verbose,
 
 	/* calculate pure water contribution */
 	if (temperature <= 20.0)
-		Aw = 0.0004397 - 0.0000259 * temperature
+		Aw = 0.0004937 - 0.0000259 * temperature
 			+ 0.000000911 * temperature * temperature
 			- 0.000000015 * temperature * temperature * temperature;
 	else
 		Aw = 0.0003964 - 0.00001146 * temperature
 			+ 0.000000145 * temperature * temperature
-			- 0.00000000049 * temperature * temperature * temperature;
+			- 0.00000000065 * temperature * temperature * temperature;
 
 	Pw = 1 - 0.0000383 * depth + 0.00000000049 *  depth * depth;
 	Alphaw = Aw * Pw * frequency * frequency;
@@ -191,3 +191,76 @@ int mb_absorption(int verbose,
 	/* return status */
 	return(status);
 }
+
+/*--------------------------------------------------------------------*/
+/*
+ * mb_absorption.c includes a "mb_" function used to calculate
+ * the potential temperature (deg C) of sea water as a function of in situ
+ * temperature (deg C), salinity (PSU), and pressure (dbar). The algorithm
+ * derives from:
+ *     David R. Jackett, Trevor J. McDougall, Rainer Feistel, Daniel G. Wright,
+ *     and Stephen M. Griffies, 2006: Algorithms for density, potential
+ *     temperature, conservative temperature, and the freezing temperature of
+ *     seawater. J. Atmos. Oceanic Technol., 23, 1709–1728.
+ *     doi: http://dx.doi.org/10.1175/JTECH1946.1
+ */
+int mb_potential_temperature(int verbose,
+		double temperature,double salinity, double pressure,
+		double *potential_temperature, int *error)
+{
+	char	*function_name = "mb_potential_temperature";
+	int	status = MB_SUCCESS;
+	double	Pn, Pd;
+		
+	/* Polynomial coefficients */
+	double	a1 = 8.65483913395442e-6;
+	double	a2 = -1.41636299744881e-6;
+	double	a3 = -7.38286467135737e-9;
+	double	a4 = -8.38241357039698e-6;
+	double	a5 = 2.83933368585534e-8;
+	double	a6 = 1.77803965218656e-8;
+	double	a7 = 1.71155619208233e-10;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       temperature:%f deg C\n",temperature);
+		fprintf(stderr,"dbg2       salinity:   %f PSU\n",salinity);
+		fprintf(stderr,"dbg2       pressure:   %f dbar\n",pressure);
+		}
+
+	/* Calculate potential temperature */
+	*potential_temperature = temperature
+								+ pressure * (a1
+											  + (a2 * salinity)
+											  + (a3 * pressure)
+											  + (a4 * temperature)
+											  + (a5 * salinity * temperature)
+											  + (a6 * temperature * temperature)
+											  + (a7 * temperature * pressure));
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       potential_temperature: %f deg C\n",*potential_temperature);
+		fprintf(stderr,"dbg2       error:                 %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/

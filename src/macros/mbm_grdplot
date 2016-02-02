@@ -1240,11 +1240,11 @@ else
 `echo $xmax $ymin >> tmp$$.dat`;
 `echo $xmax $ymax >> tmp$$.dat`;
 `echo $xmin $ymax >> tmp$$.dat`;
-@projected = `mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1`;
+@projected = `gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1`;
 #
 if ($verbose > 0)
 	{
-	print "\nCalling GMT program mapproject...\n\tmapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot \n";
+	print "\nCalling GMT program mapproject...\n\tgmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot \n";
 	}
 `/bin/rm -f tmp$$.dat`;
 $cnt = 0;
@@ -1255,7 +1255,7 @@ while (@projected)
 
 	if ($verbose > 0)
 		{
-		print "mapproject output: $line";
+		print "gmt mapproject output: $line";
 		}
 
 	if ($cnt == 1)
@@ -1282,12 +1282,12 @@ if ($dxx == 0.0 && $dyy == 0.0)
 	print "\a";
 	print "GMT program mapproject failed...\n";
 	print "\tMapproject invocation:\n";
-	print "\t\tmapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot\n";
+	print "\t\tgmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot\n";
 	print "\tInput bounds:\n";
 	print "\t\txmin:$xmin xmax:$xmax ymax:$ymin ymax:$ymax\n";
 	if ($cnt < 4)
 		{
-		print "\tmapproject seems to have failed to generate output\n";
+		print "\tgmt mapproject seems to have failed to generate output\n";
 		}
 	else
 		{

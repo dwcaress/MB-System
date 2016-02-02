@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2264       February 2, 2016
 * Version 5.5.2263       January 7, 2016
   Version 5.5.2260       December 22, 2015
   Version 5.5.2259       October 27, 2015
@@ -224,6 +225,21 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2264 (February 4, 2016)
+
+Mbgrid, mbm_dslnavfix, mbm_grd2arc, mbm_grd3dplot, mbm_grdplot, mbm_grdtiff,
+mbm_histplot, mgm_plot, mbm_utm, mbm_xyplot: Replaced call to "grdinfo" with
+call to "gmt grdinfo" for compatibility with GMT5 installations that do not
+include soft links to the old GMT4 programs.
+
+Mbauvloglist: Added ability to calculate and output potential temperature when
+parsing an MBARI Dorado AUV CTD log. Includes adding a potential temperature
+calculation function to src/mbio/mb_absorption.c
+
+Mbpreprocess: Fixed problem with application of changes to roll and pitch values.
+
+MBnavadjustmerge: Enabled exporting and importing lists of ties.
 
 -----> 5.5.2263 (January 7, 2016)
 

@@ -1394,7 +1394,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			}
 
 		/* if needed translate grid to normal registration */
-		sprintf(plot_cmd, "grdinfo %s", backgroundfile);
+		sprintf(plot_cmd, "gmt grdinfo %s", backgroundfile);
 		strcpy(backgroundfileuse, backgroundfile);
 		if ((rfp = popen(plot_cmd,"r")) != NULL)
 			{

@@ -892,6 +892,9 @@ int mb_absorption(int verbose,
 		double frequency, double temperature,double salinity,
 		double depth, double ph, double soundspeed,
 		double *absorption, int *error);
+int mb_potential_temperature(int verbose,
+		double temperature,double salinity, double pressure,
+		double *potential_temperature, int *error);
 
 int mb_mem_debug_on(int verbose, int *error);
 int mb_mem_debug_off(int verbose, int *error);

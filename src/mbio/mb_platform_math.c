@@ -16,7 +16,7 @@
  * This source file includes the math functions used on mb_platform.c.
  * Note that all matrices are assumed column-major.
  * 
- * Author:	G. Troni
+ * Author:	Giancarlo Troni
  * Date:	July 15, 2015
  *
  */

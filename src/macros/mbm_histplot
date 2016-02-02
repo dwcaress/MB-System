@@ -137,7 +137,7 @@ use POSIX;
 	"m4",   "16m",   "m5",   "16m",   "m6",   "16m");
 
 # Determine the GMT version
-@grdinfo = `grdinfo 2>&1`;
+@grdinfo = `gmt grdinfo 2>&1`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
@@ -368,9 +368,9 @@ else
 `echo $xmax $ymin >> tmp$$.dat`;
 `echo $xmax $ymax >> tmp$$.dat`;
 `echo $xmin $ymax >> tmp$$.dat`;
-@projected = `mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
+@projected = `gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
 `/bin/rm -f tmp$$.dat`;
-print "mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot\n";
+print "gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot\n";
 
 while (@projected)
 {

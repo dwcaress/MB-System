@@ -429,10 +429,10 @@ if ($verbose)
 # unproject the eastings and northings into longitude and latitude
 if ($verbose)
 	{
-	print "\nRunning mapproject...\n";
-	print "mapproject $tmp_proj_navfile -J$projection -I -R$bounds > $tmp_geo_navfile\n";
+	print "\nRunning gmt mapproject...\n";
+	print "gmt mapproject $tmp_proj_navfile -J$projection -I -R$bounds > $tmp_geo_navfile\n";
 	}
-@line = `mapproject $tmp_proj_navfile -J$projection -I -R$bounds > $tmp_geo_navfile`;
+@line = `gmt mapproject $tmp_proj_navfile -J$projection -I -R$bounds > $tmp_geo_navfile`;
 if ($verbose)
 	{
 	foreach $line (@line) {

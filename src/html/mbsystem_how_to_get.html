@@ -377,7 +377,7 @@ sudo fink install \
 	proj proj-bin proj-shlibs \
 	openmotif4 openmotif4-shlibs x11 x11-dev \
 	fftw3 fftw3-shlibs \
-	gv
+	gv libicu55-shlibs
 </pre>
 </ul>
 <p>The configure script is able to find the NetCDF, GDAL and GMT5 installations because they install the programs nc-config, gdal-config, and gmt-config, respectively, in /sw/bin. However, the configure script fails to find the PROJ, FFTW3, and OpenMotif packages in /sw, and so the user must explicitly specify those packages. The OTPS tide modeling software used by mbotps is not packaged in Fink, and so must be manually installed by a user if mbotps is to work correctly. Installation of MB-System on a Mac running MacOsX 10.9 or 10.10 will likely use a configure command that looks something like:</p>

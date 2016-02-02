@@ -959,7 +959,7 @@ else
 `echo $xmax $ymin >> tmp$$.dat`;
 `echo $xmax $ymax >> tmp$$.dat`;
 `echo $xmin $ymax >> tmp$$.dat`;
-@projected = `mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
+@projected = `gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
 `/bin/rm -f tmp$$.dat`;
 while (@projected)
 	{
