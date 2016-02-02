@@ -1156,11 +1156,11 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 		}
 
-if (store->kind == MB_DATA_DATA)
-{
-fprintf(stderr,"JUST READ: store->bathymetry_calculated:%d sensordepth: %f %f\n",
-store->bathymetry_calculated, store->time_d, store->sensordepth);
-}
+//if (store->kind == MB_DATA_DATA)
+//{
+//fprintf(stderr,"JUST READ: store->bathymetry_calculated:%d sensordepth: %f %f\n",
+//store->bathymetry_calculated, store->time_d, store->sensordepth);
+//}
 	/* print out status info */
 	if (verbose >= 3 && status == MB_SUCCESS)
 		mbsys_3datdepthlidar_print_store(verbose, store_ptr, error);
@@ -1382,7 +1382,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			mb_put_binary_float(MB_YES, store->pitch, &buffer[index]); index += 4;
 			mb_put_binary_float(MB_YES, store->speed, &buffer[index]); index += 4;
 			mb_put_binary_int(MB_YES, store->num_pulses, &buffer[index]); index += 4;
-fprintf(stderr,"WRITE: %f %f\n ", store->time_d, store->sensordepth);
+//fprintf(stderr,"WRITE: %f %f\n ", store->time_d, store->sensordepth);
 			
 			/* write LIDAR scan record header */
 			write_len = (size_t) index;

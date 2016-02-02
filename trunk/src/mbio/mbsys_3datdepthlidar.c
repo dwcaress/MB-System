@@ -648,7 +648,7 @@ int mbsys_3datdepthlidar_preprocess
 		//			time_d, &store->heave, &jattitude,
 		//			&interp_error);
 		}
-fprintf(stderr,"PREPROCESS: %f %f ", time_d, store->sensordepth);
+//fprintf(stderr,"PREPROCESS: %f %f ", time_d, store->sensordepth);
 	/* do lever arm correction */
 	if (platform_ptr != NULL)
 		{
@@ -667,7 +667,7 @@ fprintf(stderr,"PREPROCESS: %f %f ", time_d, store->sensordepth);
 						&heading, &roll, &pitch,
 						error);
 		}
-fprintf(stderr,"    %f\n ", store->sensordepth);
+//fprintf(stderr,"    %f\n ", store->sensordepth);
 
 	/* loop over all pulses */
 	for (i=0;i<store->num_pulses;i++)

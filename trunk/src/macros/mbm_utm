@@ -183,9 +183,9 @@ if (!$inverse)
 	# run mapproject
 	if ($verbose)
 		{
-		print "Doing forward projection using mapproject...\n";
+		print "Doing forward projection using gmt mapproject...\n";
 		}
-	`mapproject $filetmpa -J$projection -R$bounds > $filetmpb`;
+	`gmt mapproject $filetmpa -J$projection -R$bounds > $filetmpb`;
 
 	# open temporary file
 	if (!open(INP2,"<$filetmpb"))
@@ -202,7 +202,7 @@ if (!$inverse)
 	# read temporary file, looping over input lines
 	if ($verbose)
 		{
-		print "Processing output from mapproject...\n";
+		print "Processing output from gmt mapproject...\n";
 		}
 	$ndata = 0;
 	while ($line = <INP2>)
@@ -317,12 +317,12 @@ else
 	# close temporary file
 	close OUT1;
 
-	# run mapproject
+	# run gmt mapproject
 	if ($verbose)
 		{
-		print "Doing inverse projection using mapproject...\n";
+		print "Doing inverse projection using gmt mapproject...\n";
 		}
-	`mapproject $filetmpa -J$projection -I -R$bounds > $filetmpb`;
+	`gmt mapproject $filetmpa -J$projection -I -R$bounds > $filetmpb`;
 
 	# open temporary file
 	if (!open(INP2,"<$filetmpb"))
@@ -339,7 +339,7 @@ else
 	# read temporary file, looping over input lines
 	if ($verbose)
 		{
-		print "Processing output from mapproject...\n";
+		print "Processing output from gmt mapproject...\n";
 		}
 	$ndata = 0;
 	while ($line = <INP2>)

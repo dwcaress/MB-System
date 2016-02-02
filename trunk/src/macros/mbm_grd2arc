@@ -98,7 +98,7 @@ $line = `gmtdefaults -L | grep D_FORMAT`;
 `gmtset D_FORMAT %.10lg`;
 
 # Get info using grdinfo
-@grdinfo = `grdinfo $ifile`;
+@grdinfo = `gmt grdinfo $ifile`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;

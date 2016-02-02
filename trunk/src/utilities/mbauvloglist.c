@@ -56,6 +56,7 @@
 #define INDEX_MERGE_ROLL	-7
 #define INDEX_MERGE_PITCH	-8
 #define INDEX_MERGE_HEAVE	-9
+#define INDEX_CALCULATE_POTENTIALTEMPERATURE -10
 
 #define OUTPUT_MODE_TAB		0
 #define OUTPUT_MODE_CSV		1
@@ -137,6 +138,11 @@ int main (int argc, char **argv)
 	double	*nav_pitch = NULL;
 	double	*nav_heave = NULL;
 	
+	/* values used to calculate potential temperature */
+	double	temperature;
+	double	salinity;
+	double	pressure;
+	
 	/* output control */
 	int	output_mode = OUTPUT_MODE_TAB;
 
@@ -157,7 +163,7 @@ int main (int argc, char **argv)
 	int	nget;
 	int	nav_ok;
 	int	interp_status;
-	int	i, j;
+	int	i, j, ii;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -583,6 +589,14 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 				strcpy(printfields[i].format, "%.3f");
 				}
 			}
+		else if (strcmp(printfields[i].name,"potentialTemperature") == 0)
+			{
+			printfields[i].index = INDEX_CALCULATE_POTENTIALTEMPERATURE;
+			if (printfields[i].formatset == MB_NO)
+				{
+				strcpy(printfields[i].format, "%.8f");
+				}
+			}
 		else
 			{
 			for (j=0;j<nfields;j++)
@@ -731,6 +745,30 @@ fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_fil
 				else
 					fprintf(stdout, printfields[i].format, dvalue);
 				}
+			else if (index == INDEX_CALCULATE_POTENTIALTEMPERATURE)
+				{
+				/* get temperature value */
+				temperature = 0.0;
+				salinity = 0.0;
+				pressure = 0.0;
+				for (ii=0;ii<nprintfields;ii++)
+					{
+					if (strcmp(fields[printfields[ii].index].name, "temperature") == 0)
+						mb_get_binary_double(MB_YES, &buffer[fields[printfields[ii].index].index], &temperature);
+					else if (strcmp(fields[printfields[ii].index].name, "calculated_salinity") == 0)
+						mb_get_binary_double(MB_YES, &buffer[fields[printfields[ii].index].index], &salinity);
+					else if (strcmp(fields[printfields[ii].index].name, "pressure") == 0)
+						mb_get_binary_double(MB_YES, &buffer[fields[printfields[ii].index].index], &pressure);
+					}
+				interp_status = mb_potential_temperature(verbose,
+							temperature, salinity, pressure, &dvalue,
+							&error);
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&dvalue, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, dvalue);
+				}
+				
 			else if (fields[index].type == TYPE_DOUBLE)
 				{
 				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);

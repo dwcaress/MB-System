@@ -222,8 +222,8 @@ int main (int argc, char **argv)
 	mb_path import_tie_file_2_name;
 	double import_tie_snav_1_time_d;
 	double import_tie_snav_2_time_d;
-	double import_tie_offset_x;
-	double import_tie_offset_y;
+	double import_tie_offset_x_m;
+	double import_tie_offset_y_m;
 	double import_tie_offset_z_m;
 	double import_tie_sigmar1;
 	double import_tie_sigmax1[3];
@@ -1104,7 +1104,7 @@ int main (int argc, char **argv)
 		}
 
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  Program <%s>\n",program_name);
 		fprintf(stderr,"dbg2  Version %s\n",version_id);
@@ -2448,14 +2448,14 @@ fprintf(stderr,"\nCommand reimport-all-files\n");
 			{
 			/* read the firt line of the next tie */
 			if ((result = fgets(buffer,BUFFER_MAX,tfp)) != buffer
-				|| (nscan = sscanf(buffer, "TIE %s %s %lf %lf %d %lf %lf %lf",
+				|| (nscan = sscanf(buffer, "TIE %s %s %d %lf %lf %lf %lf %lf",
 						    import_tie_file_1_path,
 							import_tie_file_2_path,
+							&import_tie_status,
 							&import_tie_snav_1_time_d,
 							&import_tie_snav_2_time_d,
-							&import_tie_status,
-							&import_tie_offset_x,
-							&import_tie_offset_y,
+							&import_tie_offset_x_m,
+							&import_tie_offset_y_m,
 							&import_tie_offset_z_m)) != 8)
 				{
 				done = MB_YES;
@@ -2496,7 +2496,7 @@ fprintf(stderr,"\nCommand reimport-all-files\n");
 						import_tie_file_1 = ifile;
 						
 						/* found the file, now find the section and snav */
-						for (isection=0;i<file1->num_sections;isection++)
+						for (isection=0;isection<file1->num_sections;isection++)
 							{
 							section1 = &(file1->sections[isection]);
 							if (import_tie_snav_1_time_d >= section1->btime_d
@@ -2533,7 +2533,7 @@ fprintf(stderr,"\nCommand reimport-all-files\n");
 							import_tie_file_2 = ifile;
 							
 							/* found the file, now find the section and snav */
-							for (isection=0;i<file2->num_sections;isection++)
+							for (isection=0;isection<file2->num_sections;isection++)
 								{
 								section2 = &(file2->sections[isection]);
 								if (import_tie_snav_2_time_d >= section2->btime_d
@@ -2556,9 +2556,9 @@ fprintf(stderr,"\nCommand reimport-all-files\n");
 						}
 					}
 				
-fprintf(stderr,"\nCommand import-tie-list=%4.4d:%4.4d/%4.4d:%4.4d/%.3f/%.3f/%.3f/%.3f/%.3f/%.3f\n",
+fprintf(stderr,"\nImport tie from list: %4.4d:%4.4d/%4.4d:%4.4d/%.3f/%.3f/%.3f/%.3f/%.3f/%.3f\n",
 import_tie_file_1,import_tie_section_1_id,import_tie_file_2,import_tie_section_2_id,
-import_tie_offset_x,import_tie_offset_y,import_tie_offset_z_m,
+import_tie_offset_x_m,import_tie_offset_y_m,import_tie_offset_z_m,
 import_tie_sigmar1,import_tie_sigmar2,import_tie_sigmar3);
 				
 				/* check to see if this crossing already exists */
@@ -2664,10 +2664,10 @@ file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2);
 					tie->snav_2_time_d = section2->snav_time_d[tie->snav_2];
 					mb_coor_scale(verbose,0.25 * (section1->latmin + section1->latmax + section2->latmin + section2->latmax),
 							&mtodeglon,&mtodeglat);
-					tie->offset_x = import_tie_offset_x * mtodeglon;
-					tie->offset_y = import_tie_offset_y * mtodeglat;
-					tie->offset_x_m = import_tie_offset_x;
-					tie->offset_y_m = import_tie_offset_y;
+					tie->offset_x = import_tie_offset_x_m * mtodeglon;
+					tie->offset_y = import_tie_offset_y_m * mtodeglat;
+					tie->offset_x_m = import_tie_offset_x_m;
+					tie->offset_y_m = import_tie_offset_y_m;
 					tie->offset_z_m = import_tie_offset_z_m;
 					tie->sigmar1 = import_tie_sigmar1;
 					tie->sigmax1[0] = import_tie_sigmax1[0];
@@ -2730,22 +2730,22 @@ tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
 						tie->status,
 						section1->snav_time_d[tie->snav_1],
 						section2->snav_time_d[tie->snav_2],
-						tie->offset_x,
-						tie->offset_y,
+						tie->offset_x_m,
+						tie->offset_y_m,
 						tie->offset_z_m);
 				fprintf(tfp,"COV %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n",
-						import_tie_sigmar1,
-						import_tie_sigmax1[0],
-						import_tie_sigmax1[1],
-						import_tie_sigmax1[2],
-						import_tie_sigmar2,
-						import_tie_sigmax2[0],
-						import_tie_sigmax2[1],
-						import_tie_sigmax2[2],
-						import_tie_sigmar3,
-						import_tie_sigmax3[0],
-						import_tie_sigmax3[1],
-						import_tie_sigmax3[2]);
+						tie->sigmar1,
+						tie->sigmax1[0],
+						tie->sigmax1[1],
+						tie->sigmax1[2],
+						tie->sigmar2,
+						tie->sigmax2[0],
+						tie->sigmax2[1],
+						tie->sigmax2[2],
+						tie->sigmar3,
+						tie->sigmax3[0],
+						tie->sigmax3[1],
+						tie->sigmax3[2]);
 				}
 			}
 			
