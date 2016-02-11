@@ -832,7 +832,7 @@ int main (int argc, char **argv)
 	if (status == MB_SUCCESS)
 	    {
 	    /* handle esf edits */
-	    status = mb_esf_load(verbose, swathfile,
+	    status = mb_esf_load(verbose, program_name, swathfile,
 			    MB_YES, MB_NO, esffile, &esf, &error);
 	    }
 
@@ -1262,7 +1262,7 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 	for (i=0; i < nfile; i++)
 		{
 		/* open esf file */
-	    	status = mb_esf_load(verbose, files[i].filelist,
+	    	status = mb_esf_load(verbose, program_name, files[i].filelist,
 			    MB_NO, MB_YES, esffile, &esf, &error);
 	    	if (status == MB_SUCCESS
 		    	&& esf.esffp != NULL)

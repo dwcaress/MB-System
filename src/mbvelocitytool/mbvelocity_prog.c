@@ -2504,7 +2504,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	/* Load with ESF File if avialable */
         if (status == MB_SUCCESS)
         {
-                status = mb_esf_load(verbose, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
+                status = mb_esf_load(verbose, program_name, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
 
         }
 

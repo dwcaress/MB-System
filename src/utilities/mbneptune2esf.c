@@ -732,7 +732,7 @@ int main (int argc, char **argv)
 	    fprintf(stderr, "Sorting old edits...\n");
 
 	    /* handle esf edits */
-	    status = mb_esf_load(verbose, swathfile,
+	    status = mb_esf_load(verbose, program_name, swathfile,
 				 MB_YES, MB_YES, esffile, &esf, &error);
 	    if (status == MB_SUCCESS
 		    && esf.esffp != NULL)

@@ -794,7 +794,7 @@ by MBprocess.";
 	/* Deal with ESF File if avialable */
 	if (status == MB_SUCCESS)
 	{
-		status = mb_esf_load(verbose, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
+		status = mb_esf_load(verbose, program_name, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
 
 	}
 
