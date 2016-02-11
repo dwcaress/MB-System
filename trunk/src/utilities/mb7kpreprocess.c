@@ -4767,7 +4767,7 @@ fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
 		/* if esf file found load it */
 		if (esf_status == MB_SUCCESS && found == MB_YES)
 			{
-			esf_status = mb_esf_load(verbose, ofile, MB_YES, MB_YES, esffile, &esf, &error);
+			esf_status = mb_esf_load(verbose, program_name, ofile, MB_YES, MB_YES, esffile, &esf, &error);
 			if (status == MB_SUCCESS
 				&& esf.esffp != NULL)
 				esffile_open = MB_YES;

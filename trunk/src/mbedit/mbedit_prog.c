@@ -4853,7 +4853,7 @@ int mbedit_open_file(char *file, int form, int savemode)
 			outputmode = MB_NO;
 		if (savemode == MB_YES || outputmode == MB_YES)
 			{
-			status = mb_esf_load(verbose, ifile,
+			status = mb_esf_load(verbose, program_name, ifile,
 					savemode, outputmode, esffile, &esf, &error);
 			if (output_mode != MBEDIT_OUTPUT_BROWSE
 				&& status == MB_SUCCESS

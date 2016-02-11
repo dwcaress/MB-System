@@ -1256,12 +1256,12 @@ int mb_pr_point_in_quad(int verbose, double px, double py,
 			double *x, double *y, int *error);
 int mb_esf_check(int verbose, char *swathfile, char *esffile,
 			int *found, int *error);
-int mb_esf_load(int verbose, char *swathfile,
+int mb_esf_load(int verbose, char *program_name, char *swathfile,
 			int load, int output,
 			char *esffile,
 			struct mb_esf_struct *esf,
 			int *error);
-int mb_esf_open(int verbose, char *esffile,
+int mb_esf_open(int verbose, char *program_name, char *esffile,
 			int load, int output,
 			struct mb_esf_struct *esf,
 			int *error);

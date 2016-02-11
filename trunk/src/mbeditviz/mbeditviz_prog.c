@@ -1146,7 +1146,7 @@ fprintf(stderr,"     Beam bathymetry: %d %f %f %f\n",ibeam,ping->bath[ibeam],pin
 					}
 
 				/* now read and apply the global edits */
-				mbev_status = mb_esf_open(mbev_verbose, geffile, MB_YES, MBP_ESF_NOWRITE,
+				mbev_status = mb_esf_open(mbev_verbose, program_name, geffile, MB_YES, MBP_ESF_NOWRITE,
 							&(file->esf), &mbev_error);
 				if (mbev_status == MB_SUCCESS)
 					{
@@ -1198,7 +1198,7 @@ fprintf(stderr,"loaded swathfile:%s file->processed_info_loaded:%d file->process
 swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 
 			/* attempt to load bathymetry edits */
-			mbev_status = mb_esf_load(mbev_verbose, file->path, MB_YES, MBP_ESF_NOWRITE,
+			mbev_status = mb_esf_load(mbev_verbose, program_name, file->path, MB_YES, MBP_ESF_NOWRITE,
 							file->esffile, &(file->esf), &mbev_error);
 			if (mbev_status == MB_SUCCESS)
 				{
@@ -4085,7 +4085,7 @@ ifile, iping, ibeam, beamflag, flush); */
 			/* open esf and ess files if not already open */
 			if (file->esf_open == MB_NO)
 				{
-				mbev_status = mb_esf_load(mbev_verbose, file->path, MB_NO, MBP_ESF_APPEND,
+				mbev_status = mb_esf_load(mbev_verbose, program_name, file->path, MB_NO, MBP_ESF_APPEND,
 								file->esffile, &(file->esf), &mbev_error);
 				if (mbev_status == MB_SUCCESS)
 					{

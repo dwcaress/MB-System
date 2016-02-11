@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.5.2266       February 11, 2016
   Version 5.5.2265       February 11, 2016
   Version 5.5.2264       February 2, 2016
 * Version 5.5.2263       January 7, 2016
@@ -227,7 +228,7 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2265 (February 11, 2016)
+-----> 5.5.2266 (February 11, 2016)
 
 Mbeditviz: Added capability to do automated optimization for bias parameters
 from the 3D soundings view. Optimization options are accessed from the "Action"
@@ -240,7 +241,7 @@ Mbgetesf, mbdumpesf, mbedit, mbeditviz, mbareaclean, mbclean, mbprocess:
 Fixed problem handling certain old ESF files (edit save files) that had timestamps
 truncated to milliseconds instead of microseconds. New ESF files now have a
 header indicating the version and time of creation. Version 2 ESF files are
-presumed to have timestamps consistent with datafiles to a 1 microsecond
+presumed to have timestamps consistent with datafiles to a +/-1 microsecond
 precision.
 
 Documentation: Corrected instructions for building MB-System on Ubuntu machines.

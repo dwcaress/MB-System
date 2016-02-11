@@ -2869,7 +2869,7 @@ and mbedit edit save files.\n";
 	/* get edits */
 	if (process.mbp_edit_mode == MBP_EDIT_ON)
 	    {
-	    status = mb_esf_open(verbose, process.mbp_editfile,
+	    status = mb_esf_open(verbose, program_name, process.mbp_editfile,
 			    MB_YES, MB_NO, &esf, &error);
 	    if (status == MB_FAILURE)
 		{
