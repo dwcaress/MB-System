@@ -410,41 +410,28 @@ sudo CFLAGS="-g -I/opt/X11/include -L/opt/X11/lib" \
 </ul>
 
 <strong>Ubuntu Linux</strong>
-<p>For Ubuntu Linux 12.04.02LTS, the following use of the apt-get utility will install 
-all of the MB-System prerequisites excepting OTPS:</p>
+<p>At present (February 2015) the standard Ubuntu package manager does not yet install GMT5. Since MB-System now requires GMT 5.2.1 or later, MB-System installation on Ubuntu requires a manual installation of GMT5.</p>
+<p>For Ubuntu Linux 12.04.02LTS or later, the following use of the apt-get utility will install 
+  all of the MB-System prerequisites excepting GMT5 and OTPS:</p>
 <ul>
 <pre>
 sudo apt-get install xorg-dev libmotif-dev libmotif4 libxp-dev mesa-common-dev \
     libsdl1.2-dev libsdl-image1.2-dev build-essential gfortran \
     nautilus-open-terminal libfftw3-3 libfftw3-dev \
-    libnetcdf-dev netcdf-bin gdal-bin gdal1-dev gmt libgmt-dev gv
-</pre>
-</ul>
-<p>Because GMT is installed in an unusual way on Ubuntu, it is necessary to augment 
-the PATH and LD_LIBRARY_PATH environment variables by adding the following two
-lines to each user's ~/.bashrc file:</p>
+    libnetcdf-dev netcdf-bin gdal-bin gdal1-dev gv</pre></ul>
+
+<p>In order to install GMT5, follow the <a href="http://gmt.soest.hawaii.edu/projects/gmt/wiki/Installing">installation instructions in the GMT documentation</a> or in the excellent GMT5 installation guide by Andrew Moody at:</p>
+<blockquote>
+  <p><a href="http://andrewjmoodie.com/2014/12/installing-the-generic-mapping-tools-5-gmt-5-1-x-on-ubuntu-linux/">http://andrewjmoodie.com/2014/12/installing-the-generic-mapping-tools-5-gmt-5-1-x-on-ubuntu-linux/</a></p>
+</blockquote>
+<p>If the prerequisites have all been installed as shown above, and it is desired to
+  install MB-System in /usr/local, then only a simple call to configure is required:</p>
 <ul>
 <pre>
-export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-export PATH=/usr/lib/gmt/bin:$PATH
-</pre>
-</ul>
-
-<p>If the prerequisites have all been installed with apt-get and it is desired to
-install MB-System in /usr/local, then only a simple call to configure is required:</p>
-<ul>
-  <pre>
 sudo ./configure
 </pre></ul>
 
-<p>
-If the GMT installation has been augmented with a /usr/lib/pkgconfig/gmt.pc
-file so that pkg-config knows about GMT, then the configure call to install
-in /usr/local is just: </p>
-<ul>
-  <pre>
-sudo ./configure
-</pre></ul>
+<p>&nbsp;</p>
 
 <strong>CentOs or Red Hat Linux</strong> 
 

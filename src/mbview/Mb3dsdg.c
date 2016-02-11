@@ -91,6 +91,12 @@ extern void do_mb3dsdg_action_colorsoundingsgreen(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_colorsoundingsbluegreen(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_colorsoundingsblue(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_colorsoundingspurple(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_optimizebiasvalues_r(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_optimizebiasvalues_p(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_optimizebiasvalues_h(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_optimizebiasvalues_rp(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_optimizebiasvalues_rph(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_optimizebiasvalues_t(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_dismiss(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_toggle(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_pick(Widget, XtPointer, XtPointer);
@@ -1001,6 +1007,150 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     }
 
     XtAddCallback(class_in->pushButton_action_colorsoundingspurple, XmNactivateCallback, do_mb3dsdg_action_colorsoundingspurple, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (roll)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_optimizebiasvalues_r = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_optimizebiasvalues_r",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_optimizebiasvalues_r);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_optimizebiasvalues_r, XmNactivateCallback, do_mb3dsdg_action_optimizebiasvalues_r, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (pitch)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_optimizebiasvalues_p = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_optimizebiasvalues_p",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_optimizebiasvalues_p);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_optimizebiasvalues_p, XmNactivateCallback, do_mb3dsdg_action_optimizebiasvalues_p, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (heading)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_optimizebiasvalues_h = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_optimizebiasvalues_h",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_optimizebiasvalues_h);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_optimizebiasvalues_h, XmNactivateCallback, do_mb3dsdg_action_optimizebiasvalues_h, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (roll-pitch)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_optimizebiasvalues_rp = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_optimizebiasvalues_rp",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_optimizebiasvalues_rp);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_optimizebiasvalues_rp, XmNactivateCallback, do_mb3dsdg_action_optimizebiasvalues_rp, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (roll-pitch-heading)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_optimizebiasvalues_rph = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_optimizebiasvalues_rph",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_optimizebiasvalues_rph);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_optimizebiasvalues_rph, XmNactivateCallback, do_mb3dsdg_action_optimizebiasvalues_rph, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Time Lag Values",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_optimizebiasvalues_t = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_optimizebiasvalues_t",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_optimizebiasvalues_t);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_optimizebiasvalues_t, XmNactivateCallback, do_mb3dsdg_action_optimizebiasvalues_t, (XtPointer)0);
     
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, class_in->pulldownMenu_action); ac++;

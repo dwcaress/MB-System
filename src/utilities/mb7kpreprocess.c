@@ -64,6 +64,7 @@
 #define	MB7KPREPROCESS_KLUGE_FIXTIMEJUMP			6
 #define	MB7KPREPROCESS_KLUGE_FIXTIMEJUMPBEAMEDITS	7
 #define	MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY	8
+#define	MB7KPREPROCESS_KLUGE_BEAMPATTERNSNELLTWEAK	9
 static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -496,13 +497,15 @@ int main (int argc, char **argv)
 
 	/* kluge modes */
 	int	klugemode;
-	double	klugevalue, klugevalue2;
+	double	klugevalue, klugevalue2, klugevalue3;
 	int	kluge_useverticaldepth = MB_NO; /* kluge 1 */
 	int	kluge_zeroalongtrackangles = MB_NO; /* kluge 2 */
 	int	kluge_zeroattitudecorrection = MB_NO; /* kluge 3 */
 	int	kluge_kearfottrovnoise = MB_NO; /* kluge 4 */
 	int	kluge_beampatterntweak = MB_NO; /* kluge 5 */
 	double	kluge_beampatternfactor = 1.0;
+	int	kluge_beampatternsnelltweak = MB_NO; /* kluge 5 */
+	double	kluge_beampatternsnellfactor = 1.0;
 	int	kluge_fixtimejump = MB_NO; /* kluge 6 */
 	int	kluge_fixtimejumpbeamedits = MB_NO; /* kluge 7 */
 	double	kluge_timejump_interval = 0.0;
@@ -691,7 +694,7 @@ int main (int argc, char **argv)
 			break;
 		case 'K':
 		case 'k':
-			nscan = sscanf (optarg,"%d/%lf/%lf", &klugemode, &klugevalue, &klugevalue2);
+			nscan = sscanf (optarg,"%d/%lf/%lf/%lf", &klugemode, &klugevalue, &klugevalue2, &klugevalue3);
 			if (klugemode == MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH)
 				{
 				kluge_useverticaldepth = MB_YES;
@@ -709,7 +712,7 @@ int main (int argc, char **argv)
 				kluge_kearfottrovnoise = MB_YES;
 				}
 			if (klugemode == MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK
-				&& nscan == 2)
+				&& nscan >= 2)
 				{
 				kluge_beampatterntweak = MB_YES;
 				kluge_beampatternfactor = klugevalue;
@@ -731,6 +734,12 @@ int main (int argc, char **argv)
 			if (klugemode == MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY)
 				{
 				kluge_donotrecalculatebathy = MB_YES;
+				}
+			if (klugemode == MB7KPREPROCESS_KLUGE_BEAMPATTERNSNELLTWEAK
+				&& nscan >= 2)
+				{
+				kluge_beampatternsnelltweak = MB_YES;
+				kluge_beampatternsnellfactor = klugevalue;
 				}
 			flag++;
 			break;
@@ -987,14 +996,16 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       kluge_useverticaldepth:        %d\n",kluge_useverticaldepth);
 		fprintf(stderr,"dbg2       kluge_zeroalongtrackangles:    %d\n",kluge_zeroalongtrackangles);
 		fprintf(stderr,"dbg2       kluge_zeroattitudecorrection:  %d\n",kluge_zeroattitudecorrection);
-		fprintf(stderr,"dbg2       kluge_kearfottrovnoise:        %d\n",kluge_useverticaldepth);
-		fprintf(stderr,"dbg2       kluge_beampatterntweak:        %d\n",kluge_useverticaldepth);
+		fprintf(stderr,"dbg2       kluge_kearfottrovnoise:        %d\n",kluge_kearfottrovnoise);
+		fprintf(stderr,"dbg2       kluge_beampatterntweak:        %d\n",kluge_beampatterntweak);
 		fprintf(stderr,"dbg2       kluge_beampatternfactor:       %f\n",kluge_beampatternfactor);
 		fprintf(stderr,"dbg2       kluge_fixtimejump:             %d\n",kluge_fixtimejump);
 		fprintf(stderr,"dbg2       kluge_fixtimejumpbeamedits:    %d\n",kluge_fixtimejumpbeamedits);
 		fprintf(stderr,"dbg2       kluge_timejump_interval:       %f\n",kluge_timejump_interval);
 		fprintf(stderr,"dbg2       kluge_timejump_threshold:      %f\n",kluge_timejump_threshold);
 		fprintf(stderr,"dbg2       kluge_donotrecalculatebathy:   %d\n",kluge_donotrecalculatebathy);
+		fprintf(stderr,"dbg2       kluge_beampatternsnelltweak:   %d\n",kluge_beampatternsnelltweak);
+		fprintf(stderr,"dbg2       kluge_beampatternsnellfactor:  %f\n",kluge_beampatternsnellfactor);
         if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 			{
 			fprintf(stderr,"dbg2       timelagfile:         %s\n",timelagfile);
@@ -5628,6 +5639,38 @@ fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
 							for (i=0;i<bathymetry->number_beams;i++)
 								{
 								beamgeometry->angle_acrosstrack[i] *= kluge_beampatternfactor;
+								}
+							}
+						}
+
+					/* if requested apply kluge scaling of rx beam angles */
+					if (kluge_beampatternsnelltweak == MB_YES)
+						{
+						/* case of v2rawdetection record */
+						if (istore->read_v2rawdetection == MB_YES)
+							{
+							for (i=0;i<v2rawdetection->number_beams;i++)
+								{
+								v2rawdetection->rx_angle[i] = asin(kluge_beampatternsnellfactor * sin(v2rawdetection->rx_angle[i]));
+								}
+							}
+						
+						/* case of v2detection record with or without v2detectionsetup */
+						else if (istore->read_v2detection == MB_YES)
+							{
+							for (i=0;i<v2detection->number_beams;i++)
+								{
+								v2detection->angle_x[i] = asin(kluge_beampatternsnellfactor * sin(v2detection->angle_x[i]));
+								}
+							}
+
+
+						/* else default case of beamgeometry record */
+						else
+							{
+							for (i=0;i<bathymetry->number_beams;i++)
+								{
+								beamgeometry->angle_acrosstrack[i] = asin(kluge_beampatternsnellfactor * sin(beamgeometry->angle_acrosstrack[i]));
 								}
 							}
 						}

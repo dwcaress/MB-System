@@ -78,7 +78,6 @@
 #define	MBS_VIEW_PROFILES_UNFLAGGED	1
 #define	MBS_VIEW_PROFILES_ALL		2
 
-
 /* structure to hold instances of mb3dsoundings windows */
 struct mb3dsoundings_world_struct
     {
@@ -92,6 +91,9 @@ struct mb3dsoundings_world_struct
     void (*mb3dsoundings_bias_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
     void (*mb3dsoundings_biasapply_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
     void (*mb3dsoundings_colorsoundings_notify)(int color);
+    void (*mb3dsoundings_optimizebiasvalues_notify)(int mode,
+                        double *rollbias, double *pitchbias,
+                        double *headingbias, double *timelag);
 
     /* pointer to structure holding data to be rendered */
     struct mb3dsoundings_struct *soundingdata;
@@ -286,6 +288,12 @@ void do_mb3dsdg_action_colorsoundingsgreen( Widget w, XtPointer client_data, XtP
 void do_mb3dsdg_action_colorsoundingsbluegreen( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_colorsoundingsblue( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_colorsoundingspurple( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_optimizebiasvalues_r( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_optimizebiasvalues_p( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_optimizebiasvalues_h( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_optimizebiasvalues_rp( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_optimizebiasvalues_rph( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_optimizebiasvalues_t( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_boundingbox( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_scalewithflagged( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_reset( Widget w, XtPointer client_data, XtPointer call_data);
