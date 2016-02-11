@@ -218,6 +218,15 @@
 #define	MB3DSDG_EDIT_FLUSH		1
 #define	MB3DSDG_EDIT_FLUSHPREVIOUS	2
 
+#define	MB3DSDG_OPTIMIZEBIASVALUES_NONE		0x00
+#define	MB3DSDG_OPTIMIZEBIASVALUES_R		0x01
+#define	MB3DSDG_OPTIMIZEBIASVALUES_P		0x02
+#define	MB3DSDG_OPTIMIZEBIASVALUES_H		0x04
+#define	MB3DSDG_OPTIMIZEBIASVALUES_T		0x08
+#define	MB3DSDG_OPTIMIZEBIASVALUES_RP		0x03
+#define	MB3DSDG_OPTIMIZEBIASVALUES_RPH		0x07
+#define	MB3DSDG_OPTIMIZEBIASVALUES_RPHT		0x0F
+
 /*--------------------------------------------------------------------*/
 
 /* structure declarations */
@@ -628,9 +637,9 @@ struct mb3dsoundings_sounding_struct {
 	int	ifile;
 	int	iping;
 	int	ibeam;
-        int     beamcolor;
+    int     beamcolor;
 	char	beamflag;
-        char	beamflagorg;
+    char	beamflagorg;
 	double	x;
 	double	y;
 	double	z;
@@ -1176,6 +1185,7 @@ int mb3dsoundings_set_info_notify(int verbose, void (edit_notify)(int, int, int,
 int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double, double), int *error);
 int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double, double), int *error);
 int mb3dsoundings_set_colorsoundings_notify(int verbose, void (colorsoundings_notify)(int), int *error);
+int mb3dsoundings_set_optimizebiasvalues_notify(int verbose, void (optimizebiasvalues_notify)(int, double *, double *, double *, double *), int *error);
 int mb3dsoundings_plot(int verbose, int *error);
 int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, double *timelag, int *error);
 /*--------------------------------------------------------------------*/

@@ -796,6 +796,47 @@ int mb3dsoundings_set_colorsoundings_notify(int verbose, void (colorsoundings_no
 }
 
 /*------------------------------------------------------------------------------*/
+int mb3dsoundings_set_optimizebiasvalues_notify(int verbose, void (optimizebiasvalues_notify)(int, double *, double *, double *, double *), int *error)
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_set_optimizebiasvalues_notify";
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		}
+
+	/* set the function pointer */
+	mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify = optimizebiasvalues_notify;
+
+	/* set error */
+	*error = mbs_error;
+
+	/* set error */
+	*error = mbs_error;
+
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+
+/*------------------------------------------------------------------------------*/
 int mb3dsoundings_reset()
 {
 	/* local variables */
@@ -3637,6 +3678,275 @@ do_mb3dsdg_action_colorsoundingspurple( Widget w, XtPointer client_data, XtPoint
 
 	/* replot the data */
 	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_optimizebiasvalues_r( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    double  rollbias;
+    double  pitchbias;
+    double  headingbias;
+    double  timelag;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_r\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL)
+        {
+        /* get bias parameters */
+        rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+        pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+        headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+        timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+
+        (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_R,
+                                                                &rollbias, &pitchbias,
+                                                                &headingbias, &timelag);
+        
+        /* set the bias parameters stored for the gui */
+        mb3dsoundings.irollbias = (int)(100 * rollbias);
+        mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
+        mb3dsoundings.iheadingbias = (int)(100 * headingbias);
+        mb3dsoundings.itimelag = (int)(100 * timelag);
+        
+        /* update the gui */
+        mb3dsoundings_updategui();
+    
+        /* rescale data to the gl coordinates */
+        mb3dsoundings_scale(mbs_verbose, &mbs_error);
+        mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+    
+        /* replot the data */
+        mb3dsoundings_plot(mbs_verbose, &mbs_error);
+        }
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_optimizebiasvalues_p( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    double  rollbias;
+    double  pitchbias;
+    double  headingbias;
+    double  timelag;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_p\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL)
+        {
+        /* get bias parameters */
+        rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+        pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+        headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+        timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+
+        (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_P,
+                                                            &rollbias, &pitchbias,
+                                                            &headingbias, &timelag);
+    
+        /* set the bias parameters stored for the gui */
+        mb3dsoundings.irollbias = (int)(100 * rollbias);
+        mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
+        mb3dsoundings.iheadingbias = (int)(100 * headingbias);
+        mb3dsoundings.itimelag = (int)(100 * timelag);
+        
+        /* update the gui */
+        mb3dsoundings_updategui();
+    
+        /* rescale data to the gl coordinates */
+        mb3dsoundings_scale(mbs_verbose, &mbs_error);
+        mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+    
+        /* replot the data */
+        mb3dsoundings_plot(mbs_verbose, &mbs_error);
+        }
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_optimizebiasvalues_h( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    double  rollbias;
+    double  pitchbias;
+    double  headingbias;
+    double  timelag;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_h\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL)
+	    {
+        /* get bias parameters */
+        rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+        pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+        headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+        timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+
+        (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_H,
+                                                            &rollbias, &pitchbias,
+                                                            &headingbias, &timelag);
+    
+        /* set the bias parameters stored for the gui */
+        mb3dsoundings.irollbias = (int)(100 * rollbias);
+        mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
+        mb3dsoundings.iheadingbias = (int)(100 * headingbias);
+        mb3dsoundings.itimelag = (int)(100 * timelag);
+        
+        /* update the gui */
+        mb3dsoundings_updategui();
+    
+        /* rescale data to the gl coordinates */
+        mb3dsoundings_scale(mbs_verbose, &mbs_error);
+        mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+    
+        /* replot the data */
+        mb3dsoundings_plot(mbs_verbose, &mbs_error);
+        }
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_optimizebiasvalues_rp( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    double  rollbias;
+    double  pitchbias;
+    double  headingbias;
+    double  timelag;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rp\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL)
+	    {
+        /* get bias parameters */
+        rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+        pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+        headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+        timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+
+        (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_RP,
+                                                            &rollbias, &pitchbias,
+                                                            &headingbias, &timelag);
+    
+        /* set the bias parameters stored for the gui */
+        mb3dsoundings.irollbias = (int)(100 * rollbias);
+        mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
+        mb3dsoundings.iheadingbias = (int)(100 * headingbias);
+        mb3dsoundings.itimelag = (int)(100 * timelag);
+        
+        /* update the gui */
+        mb3dsoundings_updategui();
+    
+        /* rescale data to the gl coordinates */
+        mb3dsoundings_scale(mbs_verbose, &mbs_error);
+        mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+    
+        /* replot the data */
+        mb3dsoundings_plot(mbs_verbose, &mbs_error);
+        }
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_optimizebiasvalues_rph( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    double  rollbias;
+    double  pitchbias;
+    double  headingbias;
+    double  timelag;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rph\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL)
+	    {
+        /* get bias parameters */
+        rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+        pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+        headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+        timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+
+        (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_RPH,
+                                                            &rollbias, &pitchbias,
+                                                            &headingbias, &timelag);
+    
+        /* set the bias parameters stored for the gui */
+        mb3dsoundings.irollbias = (int)(100 * rollbias);
+        mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
+        mb3dsoundings.iheadingbias = (int)(100 * headingbias);
+        mb3dsoundings.itimelag = (int)(100 * timelag);
+        
+        /* update the gui */
+        mb3dsoundings_updategui();
+    
+        /* rescale data to the gl coordinates */
+        mb3dsoundings_scale(mbs_verbose, &mbs_error);
+        mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+    
+        /* replot the data */
+        mb3dsoundings_plot(mbs_verbose, &mbs_error);
+        }
+}
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_optimizebiasvalues_t( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    double  rollbias;
+    double  pitchbias;
+    double  headingbias;
+    double  timelag;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rph\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL)
+	    {
+        /* get bias parameters */
+        rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+        pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+        headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+        timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+
+        (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_T,
+                                                            &rollbias, &pitchbias,
+                                                            &headingbias, &timelag);
+    
+        /* set the bias parameters stored for the gui */
+        mb3dsoundings.irollbias = (int)(100 * rollbias);
+        mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
+        mb3dsoundings.iheadingbias = (int)(100 * headingbias);
+        mb3dsoundings.itimelag = (int)(100 * timelag);
+        
+        /* update the gui */
+        mb3dsoundings_updategui();
+    
+        /* rescale data to the gl coordinates */
+        mb3dsoundings_scale(mbs_verbose, &mbs_error);
+        mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+    
+        /* replot the data */
+        mb3dsoundings_plot(mbs_verbose, &mbs_error);
+        }
 }
 
 /*---------------------------------------------------------------------------------------*/

@@ -102,6 +102,11 @@ int main (int argc, char **argv)
 	int	time_i[7];
 	int	beam;
 	int	action;
+
+	/* time, user, host variables */
+	time_t	right_now;
+	char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	mb_path esf_header;
 	
 	int	ignore;
 	int	ignore_unflag = MB_NO;
@@ -252,9 +257,6 @@ int main (int argc, char **argv)
 	fstat = stat(iesffile, &file_status);
 	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
 	    	{
-		/* get number of edits */
-		nedit = file_status.st_size / (sizeof(double) + 2 * sizeof(int));
-
 		/* open the input esf file */
 		if ((iesffp = fopen(iesffile, "r")) == NULL)
 			{
@@ -274,6 +276,40 @@ int main (int argc, char **argv)
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 			exit(error);
+			}
+					
+		/* read file header to discern the format */
+		if (fread(esf_header, MB_PATH_MAXLINE, 1, iesffp) == 1
+			&& strncmp(esf_header, "ESFVERSION02", 12) == 0)
+			{
+			nedit = (file_status.st_size - MB_PATH_MAXLINE) / (sizeof(double) + 2 * sizeof(int));
+			
+			if (omode == OUTPUT_ESF && oesffp != NULL)
+				{
+				memset(esf_header, 0, MB_PATH_MAXLINE);
+				right_now = time((time_t *)0);
+				strcpy(date,ctime(&right_now));
+						date[strlen(date)-1] = '\0';
+				if ((user_ptr = getenv("USER")) == NULL)
+					user_ptr = getenv("LOGNAME");
+				if (user_ptr != NULL)
+					strcpy(user,user_ptr);
+				else
+					strcpy(user, "unknown");
+				gethostname(host,MBP_FILENAMESIZE);
+				sprintf(esf_header,"ESFVERSION02\nMB-System Version %s\nUser:%s\nCPU:%s\nDate:%s\n",
+						MB_VERSION,user,host,date);
+				if (fwrite(esf_header, MB_PATH_MAXLINE, 1, oesffp) != 1)
+					{
+					status = MB_FAILURE;
+					error = MB_ERROR_WRITE_FAIL;
+					}
+				}
+			}
+		else
+			{
+			rewind(iesffp);
+			nedit = file_status.st_size / (sizeof(double) + 2 * sizeof(int));
 			}
 
 		/* loop over reading edit events and printing them out */

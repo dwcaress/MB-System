@@ -307,6 +307,20 @@ void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostr
 void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag);
 void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag);
 void mbeditviz_mb3dsoundings_colorsoundings(int color);
+void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode,
+                        double *rollbias, double *pitchbias,
+                        double *headingbias, double *timelag);
+void mbeditviz_mb3dsoundings_getbiasvariance(
+						double local_grid_xmin, double local_grid_xmax,
+						double local_grid_ymin, double local_grid_ymax,
+						int local_grid_nx, int local_grid_ny,
+						double local_grid_dx, double local_grid_dy,
+						double *local_grid_first, double *local_grid_sum,
+						double *local_grid_sum2, double *local_grid_variance,
+						int *local_grid_num,
+						double rollbias, double pitchbias,
+						double headingbias, double timelag,
+						int *variance_total_num, double *variance_total);
 int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double, double), int *error);
 
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);

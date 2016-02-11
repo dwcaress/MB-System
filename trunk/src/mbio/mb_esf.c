@@ -25,8 +25,10 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -142,6 +144,7 @@ int mb_esf_load(int verbose, char *swathfile,
 	esf->esffp = NULL;
 	esf->essfp = NULL;
 	esf->byteswapped = mb_swap_check();
+	esf->version = 1;
 	esf->startnextsearch = 0;
 
 	/* get name of existing or new esffile, then load old edits
@@ -197,13 +200,19 @@ int mb_esf_open(int verbose, char *esffile,
 		int *error)
 {
   	char	*function_name = "mb_esf_open";
-	int	status = MB_SUCCESS;
+	int		status = MB_SUCCESS;
 	char	command[MB_PATH_MAXLINE];
 	FILE	*esffp;
 	struct stat file_status;
-	int	fstat;
+	int		fstat;
 	char	fmode[16];
-	int	shellstatus;
+	int		shellstatus;
+
+	/* time, user, host variables */
+	time_t	right_now;
+	char	date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	mb_path esf_header;
+
 	int	i;
 
 	/* print input debug statements */
@@ -228,6 +237,7 @@ int mb_esf_open(int verbose, char *esffile,
 	esf->esffp = NULL;
 	esf->essfp = NULL;
 	esf->byteswapped = mb_swap_check();
+	esf->version = 2;
 	esf->startnextsearch = 0;
 
 	/* load edits from existing esf file if requested */
@@ -248,21 +258,21 @@ int mb_esf_open(int verbose, char *esffile,
 
 		    /* allocate arrays for old edits */
 		    if (esf->nedit > 0)
-			{
-			status = mb_mallocd(verbose, __FILE__, __LINE__, esf->nedit * sizeof(struct mb_edit_struct), (void **)&(esf->edit), error);
-			if (status == MB_SUCCESS)
-			memset(esf->edit, 0, esf->nedit * sizeof(struct mb_edit_struct));
-
-			/* if error initializing memory then quit */
-			if (status != MB_SUCCESS)
-			    {
-			    *error = MB_ERROR_MEMORY_FAIL;
-			    fprintf(stderr, "\nUnable to allocate memory for %d edit events\n",
-				esf->nedit);
-			    esf->nedit = 0;
-			    return(status);
-			    }
-			}
+				{
+				status = mb_mallocd(verbose, __FILE__, __LINE__, esf->nedit * sizeof(struct mb_edit_struct), (void **)&(esf->edit), error);
+				if (status == MB_SUCCESS)
+					memset(esf->edit, 0, esf->nedit * sizeof(struct mb_edit_struct));
+	
+				/* if error initializing memory then quit */
+				if (status != MB_SUCCESS)
+					{
+					*error = MB_ERROR_MEMORY_FAIL;
+					fprintf(stderr, "\nUnable to allocate memory for %d edit events\n",
+					esf->nedit);
+					esf->nedit = 0;
+					return(status);
+					}
+				}
 
 		    /* open and read the old edit file */
 #ifdef WIN32
@@ -271,80 +281,90 @@ int mb_esf_open(int verbose, char *esffile,
 		    strcpy(fmode,"rw");
 #endif
 		    if (status == MB_SUCCESS && esf->nedit > 0 && (esffp = fopen(esffile,fmode)) == NULL)
-			{
-			fprintf(stderr, "\nnedit:%d\n", esf->nedit);
-			esf->nedit = 0;
-			*error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr, "\nUnable to open edit save file %s\n", esffile);
-			}
+				{
+				fprintf(stderr, "\nnedit:%d\n", esf->nedit);
+				esf->nedit = 0;
+				*error = MB_ERROR_OPEN_FAIL;
+				fprintf(stderr, "\nUnable to open edit save file %s\n", esffile);
+				}
 		    else if (status == MB_SUCCESS && esf->nedit > 0)
-			{
-			/* reset message */
-			if (verbose > 0)
-				fprintf(stderr, "Reading %d old edits...\n", esf->nedit);
-
-			*error = MB_ERROR_NO_ERROR;
-			for (i=0;i<esf->nedit && *error == MB_ERROR_NO_ERROR;i++)
-			    {
-			    if (fread(&(esf->edit[i].time_d), sizeof(double), 1, esffp) != 1
-				|| fread(&(esf->edit[i].beam), sizeof(int), 1, esffp) != 1
-				|| fread(&(esf->edit[i].action), sizeof(int), 1, esffp) != 1)
 				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
+				/* reset message */
+				if (verbose > 0)
+					fprintf(stderr, "Reading %d old edits...\n", esf->nedit);
+					
+				/* read file header to discern the format */
+				if (fread(esf_header, MB_PATH_MAXLINE, 1, esffp) == 1
+					&& strncmp(esf_header, "ESFVERSION02", 12) == 0)
+					{
+					esf->version = 2;
+					esf->nedit -= MB_PATH_MAXLINE / (sizeof(double) + 2 * sizeof(int));
+					}
+				else
+					rewind(esffp);
+	
+				*error = MB_ERROR_NO_ERROR;
+				for (i=0;i<esf->nedit && *error == MB_ERROR_NO_ERROR;i++)
+					{
+					if (fread(&(esf->edit[i].time_d), sizeof(double), 1, esffp) != 1
+					|| fread(&(esf->edit[i].beam), sizeof(int), 1, esffp) != 1
+					|| fread(&(esf->edit[i].action), sizeof(int), 1, esffp) != 1)
+						{
+						status = MB_FAILURE;
+						*error = MB_ERROR_EOF;
+						}
+					else if (esf->byteswapped == MB_YES)
+						{
+						mb_swap_double(&(esf->edit[i].time_d));
+						esf->edit[i].beam = mb_swap_int(esf->edit[i].beam);
+						esf->edit[i].action = mb_swap_int(esf->edit[i].action);
+						}
+	/*fprintf(stderr,"EDITS READ: i:%d edit: %f %d %d  use:%d\n",
+	i,esf->edit[i].time_d,esf->edit[i].beam,
+	esf->edit[i].action,esf->edit[i].use);*/
+					}
+	
+				/* close the file */
+				fclose(esffp);
+	
+				/* reset message */
+				if (verbose > 0)
+					fprintf(stderr, "Sorting %d old edits...\n", esf->nedit);
+	
+				/* first round all timestamps to the nearest 0.1 millisecond to avoid
+					comparison errors during sorting */
+				/* for (i=0;i<esf->nedit;i++)
+					{
+					esf->edit[i].time_d = 0.0001 * floor(10000.0 * esf->edit[i].time_d + 0.5);
+					} */
+	
+				/* now sort the edits */
+				mb_mergesort((char *)esf->edit, esf->nedit,
+						sizeof(struct mb_edit_struct), mb_edit_compare);
+	/* for (i=0;i<esf->nedit;i++)
+	fprintf(stderr,"EDITS SORTED: i:%d edit: %f %d %d  use:%d\n",
+	i,esf->edit[i].time_d,esf->edit[i].beam,
+	esf->edit[i].action,esf->edit[i].use); */
 				}
-			    else if (esf->byteswapped == MB_YES)
-				{
-				mb_swap_double(&(esf->edit[i].time_d));
-				esf->edit[i].beam = mb_swap_int(esf->edit[i].beam);
-				esf->edit[i].action = mb_swap_int(esf->edit[i].action);
-				}
-/*fprintf(stderr,"EDITS READ: i:%d edit: %f %d %d  use:%d\n",
-i,esf->edit[i].time_d,esf->edit[i].beam,
-esf->edit[i].action,esf->edit[i].use);*/
-			    }
-
-			/* close the file */
-			fclose(esffp);
-
-			/* reset message */
-			if (verbose > 0)
-				fprintf(stderr, "Sorting %d old edits...\n", esf->nedit);
-
-			/* first round all timestamps to the nearest 0.1 millisecond to avoid
-				comparison errors during sorting */
-			/* for (i=0;i<esf->nedit;i++)
-			    {
-			    esf->edit[i].time_d = 0.0001 * floor(10000.0 * esf->edit[i].time_d + 0.5);
-			    } */
-
-			/* now sort the edits */
-			mb_mergesort((char *)esf->edit, esf->nedit,
-					sizeof(struct mb_edit_struct), mb_edit_compare);
-/* for (i=0;i<esf->nedit;i++)
-fprintf(stderr,"EDITS SORTED: i:%d edit: %f %d %d  use:%d\n",
-i,esf->edit[i].time_d,esf->edit[i].beam,
-esf->edit[i].action,esf->edit[i].use); */
 			}
-		    }
-	    	}
+		}
 
 	if (status == MB_SUCCESS
 		&& output != MBP_ESF_NOWRITE)
-	    	{
+		{
 		/* check if esf file exists */
 		fstat = stat(esffile, &file_status);
 		if (fstat == 0
-		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
-		    {
-		    /* copy old edit save file to tmp file */
-		    if (load == MB_YES)
-	    		{
-			sprintf(command, "cp %s %s.tmp\n",
-				esffile, esffile);
-	    		shellstatus = system(command);
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			{
+			/* copy old edit save file to tmp file */
+			if (load == MB_YES)
+				{
+				sprintf(command, "cp %s %s.tmp\n",
+					esffile, esffile);
+					shellstatus = system(command);
+				}
 			}
-		    }
 
 		/* open the edit save file */
 		if (output == MBP_ESF_WRITE)
@@ -352,21 +372,50 @@ esf->edit[i].action,esf->edit[i].use); */
 		else if (output == MBP_ESF_APPEND)
 			strcpy(fmode,"ab");
 		if ((esf->esffp = fopen(esf->esffile,fmode)) == NULL)
-		    {
-		    status = MB_FAILURE;
-		    *error = MB_ERROR_OPEN_FAIL;
-		    }
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_OPEN_FAIL;
+			}
 /*else
 fprintf(stderr,"esffile %s opened with mode %s\n",esf->esffile,fmode);*/
 
 		/* open the edit save stream file */
-		if ((esf->essfp = fopen(esf->esstream,fmode)) == NULL)
-		    {
-		    status = MB_FAILURE;
-		    *error = MB_ERROR_OPEN_FAIL;
-		    }
+		if (status == MB_SUCCESS
+			&& (esf->essfp = fopen(esf->esstream,fmode)) == NULL)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_OPEN_FAIL;
+			}
 /*else
 fprintf(stderr,"esstream %s opened with mode %s\n",esf->esstream,fmode);*/
+
+		/* if writing a new esf file then put version header at beginning */
+		if (status == MB_SUCCESS && output == MBP_ESF_WRITE)
+			{
+			memset(esf_header, 0, MB_PATH_MAXLINE);
+			right_now = time((time_t *)0);
+			strcpy(date,ctime(&right_now));
+					date[strlen(date)-1] = '\0';
+			if ((user_ptr = getenv("USER")) == NULL)
+				user_ptr = getenv("LOGNAME");
+			if (user_ptr != NULL)
+				strcpy(user,user_ptr);
+			else
+				strcpy(user, "unknown");
+			gethostname(host,MBP_FILENAMESIZE);
+			sprintf(esf_header,"ESFVERSION02\nMB-System Version %s\nUser:%s\nCPU:%s\nDate:%s\n",
+					MB_VERSION,user,host,date);
+			if (fwrite(esf_header, MB_PATH_MAXLINE, 1, esf->esffp) != 1)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_WRITE_FAIL;
+				}
+			else if (fwrite(esf_header, MB_PATH_MAXLINE, 1, esf->essfp) != 1)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_WRITE_FAIL;
+				}
+			}
 		}
 
 	/* print output debug statements */
@@ -467,6 +516,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 	int	apply, action;
 	int	beamoffset, beamoffsetmax;
 	char	beamflagorg;
+	double	maxtimediff;
 	int	ibeam;
 	int	i, j;
 
@@ -494,18 +544,25 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 		MB_ESF_MULTIPLICITY_FACTOR * pingmultiplicity */
 	beamoffset = MB_ESF_MULTIPLICITY_FACTOR * pingmultiplicity;
 	beamoffsetmax = beamoffset + MB_ESF_MULTIPLICITY_FACTOR;
+	
+	/* if the esf file version is old then use a larger
+	 * criteria to match timestamps because some esf timestamps were truncated
+	 * to a 1 msec granularity */
+	maxtimediff = MB_ESF_MAXTIMEDIFF;
+	if (esf->version == 1)
+		maxtimediff *= 10.0;
 
 	/* find first and last edits for this ping - take ping multiplicity into account */
-	if (esf->nedit > 0 && time_d < (esf->edit[esf->startnextsearch].time_d - MB_ESF_MAXTIMEDIFF)
+	if (esf->nedit > 0 && time_d < (esf->edit[esf->startnextsearch].time_d - maxtimediff)
 		&& (esf->startnextsearch > 0
-			&& time_d < (esf->edit[esf->startnextsearch-1].time_d - MB_ESF_MAXTIMEDIFF)))
+			&& time_d < (esf->edit[esf->startnextsearch-1].time_d - maxtimediff)))
 		firstedit = 0;
 	else
 		firstedit = esf->startnextsearch;
 	lastedit = firstedit - 1;
-	for (j = firstedit; j < esf->nedit && time_d >= (esf->edit[j].time_d - MB_ESF_MAXTIMEDIFF); j++)
+	for (j = firstedit; j < esf->nedit && time_d >= (esf->edit[j].time_d - maxtimediff); j++)
 		{
-		if (fabs(esf->edit[j].time_d - time_d) < MB_ESF_MAXTIMEDIFF
+		if (fabs(esf->edit[j].time_d - time_d) < maxtimediff
 		    && esf->edit[j].beam >= beamoffset && esf->edit[j].beam < beamoffsetmax)
 		    {
 		    if (lastedit < firstedit)
@@ -535,63 +592,63 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 		    apply = MB_NO;
 		    beamflagorg = beamflag[i];
 		    for (j=firstedit;j<=lastedit;j++)
-			{
-			/* apply the edits for this beam in the
-			   order they were created so that the last
-			   edit event is applied last - only the
-			   last event will be output to a new
-			   esf file - the overridden edit events
-			   may already be indicated by a use value
-			   of 100 or more. */
-			if (esf->edit[j].beam == ibeam
-			    && esf->edit[j].use < 100)
-			    {
-			    /* apply edit */
-			    if (esf->edit[j].action == MBP_EDIT_FLAG
-				&& !mb_beam_check_flag_null(beamflag[i]))
 				{
-/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_FLAG  flag:%d ",j,i,beamflag[i]);*/
-				beamflag[i] = mb_beam_set_flag_manual(beamflag[i]);
-				esf->edit[j].use++;
-				apply = MB_YES;
-				action = esf->edit[j].action;
-/*fprintf(stderr," %d\n",beamflag[i]);*/
+				/* apply the edits for this beam in the
+				   order they were created so that the last
+				   edit event is applied last - only the
+				   last event will be output to a new
+				   esf file - the overridden edit events
+				   may already be indicated by a use value
+				   of 100 or more. */
+				if (esf->edit[j].beam == ibeam
+					&& esf->edit[j].use < 100)
+					{
+					/* apply edit */
+					if (esf->edit[j].action == MBP_EDIT_FLAG
+					&& !mb_beam_check_flag_null(beamflag[i]))
+						{
+	/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_FLAG  flag:%d ",j,i,beamflag[i]);*/
+						beamflag[i] = mb_beam_set_flag_manual(beamflag[i]);
+						esf->edit[j].use++;
+						apply = MB_YES;
+						action = esf->edit[j].action;
+	/*fprintf(stderr," %d\n",beamflag[i]);*/
+						}
+					else if (esf->edit[j].action == MBP_EDIT_FILTER
+					&& !mb_beam_check_flag_null(beamflag[i]))
+						{
+	/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_FILTER\n",j,i);*/
+						beamflag[i] = mb_beam_set_flag_filter(beamflag[i]);
+						esf->edit[j].use++;
+						apply = MB_YES;
+						action = esf->edit[j].action;
+						}
+					else if (esf->edit[j].action == MBP_EDIT_UNFLAG
+					&& !mb_beam_check_flag_null(beamflag[i]))
+						{
+	/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_UNFLAG\n",j,i);*/
+						beamflag[i] = mb_beam_set_flag_none(beamflag[i]);
+						esf->edit[j].use++;
+						apply = MB_YES;
+						action = esf->edit[j].action;
+						}
+					else if (esf->edit[j].action == MBP_EDIT_ZERO)
+						{
+	/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_ZERO\n",j,i);*/
+						beamflag[i] = mb_beam_set_flag_null(beamflag[i]);
+						esf->edit[j].use++;
+						apply = MB_YES;
+						action = esf->edit[j].action;
+						}
+					else
+						{
+	/*fprintf(stderr,"edit:%d beam:%d NOT USED\n",j,i);*/
+						esf->edit[j].use += 1000;
+	/*fprintf(stderr,"Dup Edit[%d]?: ping:%f beam:%d flag:%d action:%d\n",
+	j, time_d, i, beamflag[i], esf->edit[j].action);*/
+						}
+					}
 				}
-			    else if (esf->edit[j].action == MBP_EDIT_FILTER
-				&& !mb_beam_check_flag_null(beamflag[i]))
-				{
-/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_FILTER\n",j,i);*/
-				beamflag[i] = mb_beam_set_flag_filter(beamflag[i]);
-				esf->edit[j].use++;
-				apply = MB_YES;
-				action = esf->edit[j].action;
-				}
-			    else if (esf->edit[j].action == MBP_EDIT_UNFLAG
-				&& !mb_beam_check_flag_null(beamflag[i]))
-				{
-/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_UNFLAG\n",j,i);*/
-				beamflag[i] = mb_beam_set_flag_none(beamflag[i]);
-				esf->edit[j].use++;
-				apply = MB_YES;
-				action = esf->edit[j].action;
-				}
-			    else if (esf->edit[j].action == MBP_EDIT_ZERO)
-				{
-/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_ZERO\n",j,i);*/
-				beamflag[i] = mb_beam_set_flag_null(beamflag[i]);
-				esf->edit[j].use++;
-				apply = MB_YES;
-				action = esf->edit[j].action;
-				}
-			    else
-				{
-/*fprintf(stderr,"edit:%d beam:%d NOT USED\n",j,i);*/
-				esf->edit[j].use += 1000;
-/*fprintf(stderr,"Dup Edit[%d]?: ping:%f beam:%d flag:%d action:%d\n",
-j, time_d, i, beamflag[i], esf->edit[j].action);*/
-				}
-			    }
-			}
 		    if (apply == MB_YES
 		    	&& esf->essfp != NULL
 			&& beamflag[i] != beamflagorg)
@@ -654,27 +711,27 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf,
 /*fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
 	    if (esf->byteswapped == MB_YES)
 	    	{
-	   	mb_swap_double(&time_d);
-	    	beam = mb_swap_int(beam);
-	    	action = mb_swap_int(action);
-		}
+			mb_swap_double(&time_d);
+				beam = mb_swap_int(beam);
+				action = mb_swap_int(action);
+			}
 	    if (fwrite(&time_d, sizeof(double), 1, esf->esffp) != 1)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
 	    if (status == MB_SUCCESS
 		&& fwrite(&beam, sizeof(int), 1, esf->esffp) != 1)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
 	    if (status == MB_SUCCESS
 		&& fwrite(&action, sizeof(int), 1, esf->esffp) != 1)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
 	    }
 
 	/* print output debug statements */
@@ -728,24 +785,24 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf,
 	        mb_swap_double(&time_d);
 	        beam = mb_swap_int(beam);
 	        action = mb_swap_int(action);
-		}
+			}
 	    if (fwrite(&time_d, sizeof(double), 1, esf->essfp) != 1)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
 	    if (status == MB_SUCCESS
 		&& fwrite(&beam, sizeof(int), 1, esf->essfp) != 1)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
 	    if (status == MB_SUCCESS
 		&& fwrite(&action, sizeof(int), 1, esf->essfp) != 1)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
 	    }
 
 	/* print output debug statements */

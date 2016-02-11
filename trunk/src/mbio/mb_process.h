@@ -597,7 +597,7 @@
 #define	MBP_CUT_MODE_SPEED 	3
 #define	MBP_CUT_NUM_MAX		20
 #define MBP_EDIT_OFF		0
-#define MBP_EDIT_ON		1
+#define MBP_EDIT_ON		    1
 #define MBP_EDIT_FLAG		1
 #define MBP_EDIT_UNFLAG		2
 #define MBP_EDIT_ZERO		3
@@ -870,6 +870,7 @@ struct mb_esf_struct
 	char	esffile[MB_PATH_MAXLINE];
 	char	esstream[MB_PATH_MAXLINE];
 	int	byteswapped;
+    int version;
 	int	nedit;
 	struct mb_edit_struct	*edit;
 	FILE	*esffp;

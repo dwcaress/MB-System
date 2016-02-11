@@ -342,20 +342,20 @@ int main (int argc, char **argv)
 	    {
 	    /* get edit save file */
 	    if (sofile_set == MB_NO)
-		{
-		sofp = stdout;
-		}
+			{
+			sofp = stdout;
+			}
 
 	    /* open the edit save file */
 	    else if ((sofp = fopen(sofile,"w")) == NULL)
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nEdit Save File <%s> not initialized for writing\n",sofile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nEdit Save File <%s> not initialized for writing\n",sofile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 	    }
 
 	/* read and write */
@@ -365,13 +365,14 @@ int main (int argc, char **argv)
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
-			time_i,&time_d,&navlon,&navlat,
-			&speed,&heading,
-			&distance,&altitude,&sonardepth,
-			&nbath,&namp,&nss,
-			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+							time_i,&time_d,&navlon,&navlat,
+							&speed,&heading,
+							&distance,&altitude,&sonardepth,
+							&nbath,&namp,&nss,
+							beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+							ss,ssacrosstrack,ssalongtrack,
+							comment,&error);
+//fprintf(stderr,"\nMBGETESF READ status:%d: error:%d kind:%d\n",status,error,kind);
 
 		/* increment counter */
 		if (error <= MB_ERROR_NO_ERROR
@@ -427,60 +428,72 @@ int main (int argc, char **argv)
 				time_i[3],time_i[4],time_i[5],time_i[6]);
 			}
 
-		/* fix a problem with EM300/EM3000 data in HDCS format */
-		if (format == 151 && kluge == 1)
-		    {
-		    for (i=0;i<nbath-1;i++)
-			beamflag[i] = beamflag[i+1];
-		    beamflag[nbath-1] = MB_FLAG_FLAG;
-		    }
-
-		/* count and write the flags */
-		for (i=0;i<nbath;i++)
-		    {
-		    if (mb_beam_ok(beamflag[i]))
+		/* deal with data without errors */
+		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
-			beam_ok++;
-			if (mode == MBGETESF_ALL)
-			    {
-			    mbgetesf_save_edit(verbose, sofp, time_d, i,
-						MBP_EDIT_UNFLAG, &error);
-			    beam_ok_write++;
-			    }
+//fprintf(stderr,"MBGETESF PING %d: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beams:%d\n",
+//						idata,time_d,time_i[0],time_i[1],time_i[2],
+//						time_i[3],time_i[4],time_i[5],time_i[6],
+//						nbath);
+			/* fix a problem with EM300/EM3000 data in HDCS format */
+			if (format == 151 && kluge == 1)
+				{
+				for (i=0;i<nbath-1;i++)
+					beamflag[i] = beamflag[i+1];
+				beamflag[nbath-1] = MB_FLAG_FLAG;
+				}
+	
+			/* count and write the flags */
+			for (i=0;i<nbath;i++)
+				{
+//fprintf(stderr,"MBGETESF: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d flag:%d   bath:%.3f\n",
+//time_d,time_i[0],time_i[1],time_i[2],
+//time_i[3],time_i[4],time_i[5],time_i[6],
+//i,beamflag[i],bath[i]);
+				if (mb_beam_ok(beamflag[i]))
+					{
+					beam_ok++;
+					if (mode == MBGETESF_ALL)
+						{
+						mbgetesf_save_edit(verbose, sofp, time_d, i,
+								MBP_EDIT_UNFLAG, &error);
+						beam_ok_write++;
+						}
+					}
+				else if (mb_beam_check_flag_null(beamflag[i]))
+					{
+					beam_null++;
+					if (mode == MBGETESF_FLAGNULL || mode == MBGETESF_ALL)
+						{
+						mbgetesf_save_edit(verbose, sofp, time_d, i,
+								MBP_EDIT_ZERO, &error);
+						beam_null_write++;
+						}
+					}
+				else
+					{
+					beam_flag++;
+					if (mb_beam_check_flag_manual(beamflag[i]))
+						{
+						beam_flag_manual++;
+						mbgetesf_save_edit(verbose, sofp, time_d, i,
+								MBP_EDIT_FLAG, &error);
+						}
+					if (mb_beam_check_flag_filter(beamflag[i]))
+						{
+						beam_flag_filter++;
+						mbgetesf_save_edit(verbose, sofp, time_d, i,
+								MBP_EDIT_FILTER, &error);
+						}
+					if (mb_beam_check_flag_sonar(beamflag[i]))
+						{
+						beam_flag_sonar++;
+						mbgetesf_save_edit(verbose, sofp, time_d, i,
+								MBP_EDIT_FLAG, &error);
+						}
+					}
+				}
 			}
-		    else if (mb_beam_check_flag_null(beamflag[i]))
-			{
-			beam_null++;
-			if (mode == MBGETESF_FLAGNULL || mode == MBGETESF_ALL)
-			    {
-			    mbgetesf_save_edit(verbose, sofp, time_d, i,
-						MBP_EDIT_ZERO, &error);
-			    beam_null_write++;
-			    }
-			}
-		    else
-			{
-			beam_flag++;
-			if (mb_beam_check_flag_manual(beamflag[i]))
-			    {
-			    beam_flag_manual++;
-			    mbgetesf_save_edit(verbose, sofp, time_d, i,
-						MBP_EDIT_FLAG, &error);
-			    }
-			if (mb_beam_check_flag_filter(beamflag[i]))
-			    {
-			    beam_flag_filter++;
-			    mbgetesf_save_edit(verbose, sofp, time_d, i,
-						MBP_EDIT_FILTER, &error);
-			    }
-			if (mb_beam_check_flag_sonar(beamflag[i]))
-			    {
-			    beam_flag_sonar++;
-			    mbgetesf_save_edit(verbose, sofp, time_d, i,
-						MBP_EDIT_FLAG, &error);
-			    }
-			}
-		    }
 		}
 
 	/* close the file */
@@ -523,6 +536,7 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 	/* local variables */
 	char	*function_name = "mbgetesf_save_edit";
 	int	status = MB_SUCCESS;
+//	int time_i[7];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -536,6 +550,11 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 		fprintf(stderr,"dbg2       beam:            %d\n",beam);
 		fprintf(stderr,"dbg2       action:          %d\n",action);
 		}
+//mb_get_date(verbose,time_d,time_i);
+//fprintf(stderr,"MBGETESF: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d action:%d\n",
+//time_d,time_i[0],time_i[1],time_i[2],
+//time_i[3],time_i[4],time_i[5],time_i[6],
+//beam,action);
 
 	/* write out the edit */
 	if (sofp != NULL)
@@ -546,22 +565,22 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 	    action = mb_swap_int(action);
 #endif
 	    if (fwrite(&time_d, sizeof(double), 1, sofp) != 1)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
 	    if (status == MB_SUCCESS
 		&& fwrite(&beam, sizeof(int), 1, sofp) != 1)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
 	    if (status == MB_SUCCESS
 		&& fwrite(&action, sizeof(int), 1, sofp) != 1)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
 	    }
 
 	/* print output debug statements */
