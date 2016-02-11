@@ -1712,7 +1712,7 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 		time_d = ping->time_d + timelag;
 
 		/* if asyncronous sonardepth available, interpolate new value */
-		if (file->n_async_sonardepth > 0)
+		if (timelag != 0.0 && file->n_async_sonardepth > 0)
 			{
 			intstat = mb_linear_interp(mbev_verbose,
 					file->async_sonardepth_time_d-1, file->async_sonardepth_sonardepth-1,
@@ -1725,7 +1725,7 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 			}
 
 		/* if asyncronous heading available, interpolate new value */
-		if (file->n_async_heading > 0)
+		if (timelag != 0.0 && file->n_async_heading > 0)
 			{
 			intstat = mb_linear_interp_heading(mbev_verbose,
 					file->async_heading_time_d-1, file->async_heading_heading-1,
@@ -1739,7 +1739,7 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 
 
 		/* if asynchronous roll and pitch available, interpolate new values */
-		if (file->n_async_attitude > 0)
+		if (timelag != 0.0 && file->n_async_attitude > 0)
 			{
 			intstat = mb_linear_interp(mbev_verbose,
 					file->async_attitude_time_d-1, file->async_attitude_roll-1,
