@@ -1002,11 +1002,11 @@ int mbview_enableviewroutes(int verbose, size_t instance,
 			int *error);
 int mbview_enableeditroutes(int verbose, size_t instance,
 			int *error);
-int mbview_pick_route_select(size_t instance, int which, int xpixel, int ypixel);
+int mbview_pick_route_select(int verbose, size_t instance, int which, int xpixel, int ypixel);
 int mbview_extract_route_profile(size_t instance);
-int mbview_pick_route_add(size_t instance, int which, int xpixel, int ypixel);
-int mbview_pick_route_delete(size_t instance, int xpixel, int ypixel);
-int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
+int mbview_pick_route_add(int verbose, size_t instance, int which, int xpixel, int ypixel);
+int mbview_pick_route_delete(int verbose, size_t instance, int xpixel, int ypixel);
+int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypoint,
 				double xgrid, double ygrid,
 				double xlon, double ylat, double zdata,
 				double xdisplay, double ydisplay, double zdisplay);

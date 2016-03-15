@@ -507,6 +507,10 @@ int mbview_addnav(int verbose, size_t instance,
 	/* make sure no nav is selected */
 	shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
 	shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+	shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
+	shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+	shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
+	shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
 
 	/* set nav id so that new nav is created */
 	inav = shared.shareddata.nnav;
@@ -880,6 +884,59 @@ int mbview_enableviewnavs(int verbose, size_t instance,
 }
 
 /*------------------------------------------------------------------------------*/
+int mbview_enableadjustnavs(int verbose, size_t instance,
+			int *error)
+
+{
+	/* local variables */
+	char	*function_name = "mbview_enableadjustnavs";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
+		fprintf(stderr,"dbg2       instance:                  %zu\n", instance);
+		}
+
+	/* set values */
+    shared.shareddata.nav_mode = MBV_NAV_MBNAVADJUST;
+
+	/* set widget sensitivity on all active instances */
+	for (instance=0;instance<MBV_MAX_WINDOWS;instance++)
+		{
+		/* get view */
+		view = &(mbviews[instance]);
+		data = &(view->data);
+
+		/* if instance active reset action sensitivity */
+		if (data->active == MB_YES)
+			mbview_update_sensitivity(verbose, instance, error);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:                     %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                    %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
 int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, int ypixel)
 {
 
@@ -917,248 +974,532 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* only select one nav point if enabled and not in move mode */
+	/* only work if there is nav */
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF
-		&& shared.shareddata.nnav > 0
-		&& (which == MBV_PICK_DOWN
-			|| shared.shareddata.nav_selected[0] == MBV_SELECT_NONE))
+		&& shared.shareddata.nnav > 0)
 		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel,
-				&found,
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-
-		/* look for nearest nav point */
-		if (found)
+		/* deal with MBV_NAV_VIEW mode */
+		if (shared.shareddata.nav_mode == MBV_NAV_VIEW)
 			{
-			rrmin = 1000000000.0;
-			shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
-			shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
-			shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
-			shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
-
-			for (i=0;i<shared.shareddata.nnav;i++)
+			/* select first pick - usually this is an MBV_PICK_DOWN event */
+			if (which == MBV_PICK_DOWN
+				|| shared.shareddata.nav_selected[0] == MBV_SELECT_NONE)
 				{
-				for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				/* look for point */
+				mbview_findpoint(instance, xpixel, ypixel,
+						&found,
+						&xgrid, &ygrid,
+						&xlon, &ylat, &zdata,
+						&xdisplay, &ydisplay, &zdisplay);
+		
+				/* look for nearest nav point */
+				if (found)
 					{
-					xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
-					yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
-					rr = sqrt(xx * xx + yy * yy);
-					if (rr < rrmin)
+					rrmin = 1000000000.0;
+					shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+					shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
+					shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+					shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+		
+					for (i=0;i<shared.shareddata.nnav;i++)
 						{
-						rrmin = rr;
-						shared.shareddata.nav_selected[0] = i;
-						shared.shareddata.nav_point_selected[0] = j;
+						for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+							{
+							xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
+							yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
+							rr = sqrt(xx * xx + yy * yy);
+							if (rr < rrmin)
+								{
+								rrmin = rr;
+								shared.shareddata.nav_selected[0] = i;
+								shared.shareddata.nav_point_selected[0] = j;
+								}
+							}
+						}
+		
+					/* set pick location */
+					data->pickinfo_mode = MBV_PICK_NAV;
+					shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
+					shared.shareddata.navpick.endpoints[0].xgrid[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xgrid[instance];
+					shared.shareddata.navpick.endpoints[0].ygrid[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ygrid[instance];
+					shared.shareddata.navpick.endpoints[0].xlon
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon;
+					shared.shareddata.navpick.endpoints[0].ylat
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ylat;
+					shared.shareddata.navpick.endpoints[0].zdata
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdata;
+					shared.shareddata.navpick.endpoints[0].xdisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xdisplay[instance];
+					shared.shareddata.navpick.endpoints[0].ydisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ydisplay[instance];
+					shared.shareddata.navpick.endpoints[0].zdisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdisplay[instance];
+		
+					/* get pick positions for all active instances */
+					mbview_updatepointw(instance, &(shared.shareddata.navpick.endpoints[0]));
+		
+					/* generate 3D drape of pick marks  */
+					mbview_navpicksize(instance);
+					}
+				else
+					{
+					/* unselect nav pick */
+					data->pickinfo_mode = data->pick_type;
+					shared.shareddata.navpick_type = MBV_PICK_NONE;
+					shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+					shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
+					XBell(view->dpy,100);
+					}
+				}
+				
+			/* select second point if MBV_PICK_MOVE event */
+			else if (which == MBV_PICK_MOVE)
+				{
+				/* look for point */
+				mbview_findpoint(instance, xpixel, ypixel,
+						&found,
+						&xgrid, &ygrid,
+						&xlon, &ylat, &zdata,
+						&xdisplay, &ydisplay, &zdisplay);
+		
+				/* look for nearest nav point */
+				if (found)
+					{
+					rrmin = 1000000000.0;
+					shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+					shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+		
+					for (i=0;i<shared.shareddata.nnav;i++)
+						{
+						for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+							{
+							xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
+							yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
+							rr = sqrt(xx * xx + yy * yy);
+							if (rr < rrmin)
+								{
+								rrmin = rr;
+								shared.shareddata.nav_selected[1] = i;
+								shared.shareddata.nav_point_selected[1] = j;
+								}
+							}
+						}
+		
+					/* set pick location */
+					data->pickinfo_mode = MBV_PICK_NAV;
+					shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
+					shared.shareddata.navpick.endpoints[1].xgrid[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xgrid[instance];
+					shared.shareddata.navpick.endpoints[1].ygrid[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ygrid[instance];
+					shared.shareddata.navpick.endpoints[1].xlon
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xlon;
+					shared.shareddata.navpick.endpoints[1].ylat
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ylat;
+					shared.shareddata.navpick.endpoints[1].zdata
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.zdata;
+					shared.shareddata.navpick.endpoints[1].xdisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xdisplay[instance];
+					shared.shareddata.navpick.endpoints[1].ydisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ydisplay[instance];
+					shared.shareddata.navpick.endpoints[1].zdisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.zdisplay[instance];
+		
+					/* get pick positions for all active instances */
+					mbview_updatepointw(instance, &(shared.shareddata.navpick.endpoints[1]));
+		
+					/* generate 3D drape of pick marks */
+					mbview_navpicksize(instance);
+					}
+				}
+				
+			/* deal with MBV_PICK_UP event */
+			else if (which == MBV_PICK_UP)
+				{
+				/* if data->mouse_mode == MBV_MOUSE_NAV only select or deselect
+					range of nav points if enabled and two different points selected */
+				if (data->mouse_mode == MBV_MOUSE_NAV)
+					{
+					/* select range of nav if two different points have been selected */
+					if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE
+						&& shared.shareddata.nav_selected[1] != MBV_SELECT_NONE)
+						{
+						/* get order of selected nav points */
+						inav0 = MIN(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
+						inav1 = MAX(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
+						if (inav0 == inav1)
+							{
+							jpt0 = MIN(shared.shareddata.nav_point_selected[0], shared.shareddata.nav_point_selected[1]);
+							jpt1 = MAX(shared.shareddata.nav_point_selected[0], shared.shareddata.nav_point_selected[1]);
+							}
+						else if (shared.shareddata.nav_selected[0] <= shared.shareddata.nav_selected[1])
+							{
+							jpt0 = shared.shareddata.nav_point_selected[0];
+							jpt1 = shared.shareddata.nav_point_selected[1];
+							}
+						else
+							{
+							jpt0 = shared.shareddata.nav_point_selected[1];
+							jpt1 = shared.shareddata.nav_point_selected[0];
+							}
+			
+						/* loop over the affected nav */
+						for (inav=inav0;inav<=inav1;inav++)
+							{
+							if (inav == inav0)
+								jj0 = MIN(jpt0, shared.shareddata.navs[inav].npoints - 1);
+							else
+								jj0 = 0;
+							if (inav == inav1)
+								jj1 = MAX(jpt1, 0);
+							else
+								jj1 = shared.shareddata.navs[inav].npoints;
+							for (jpt=jj0;jpt<=jj1;jpt++)
+								{
+								shared.shareddata.navs[inav].navpts[jpt].selected = select;
+								}
+							shared.shareddata.navs[inav].nselected = 0;
+							for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+								{
+								if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
+									shared.shareddata.navs[inav].nselected++;
+								}
+							}
+						}
+			
+					/* else select single nav point */
+					else if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
+						{
+						inav = shared.shareddata.nav_selected[0];
+						jpt = shared.shareddata.nav_point_selected[0];
+						shared.shareddata.navs[inav].navpts[jpt].selected = select;
+						shared.shareddata.navs[inav].nselected = 0;
+						for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+							{
+							if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
+								shared.shareddata.navs[inav].nselected++;
+							}
 						}
 					}
-				}
 
-			/* set pick location */
-			data->pickinfo_mode = MBV_PICK_NAV;
-			shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
-			shared.shareddata.navpick.endpoints[0].xgrid[instance]
-				= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xgrid[instance];
-			shared.shareddata.navpick.endpoints[0].ygrid[instance]
-				= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ygrid[instance];
-			shared.shareddata.navpick.endpoints[0].xlon
-				= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon;
-			shared.shareddata.navpick.endpoints[0].ylat
-				= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ylat;
-			shared.shareddata.navpick.endpoints[0].zdata
-				= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdata;
-			shared.shareddata.navpick.endpoints[0].xdisplay[instance]
-				= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xdisplay[instance];
-			shared.shareddata.navpick.endpoints[0].ydisplay[instance]
-				= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ydisplay[instance];
-			shared.shareddata.navpick.endpoints[0].zdisplay[instance]
-				= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdisplay[instance];
-
-			/* get pick positions for all active instances */
-			mbview_updatepointw(instance, &(shared.shareddata.navpick.endpoints[0]));
-
-			/* generate 3D drape of pick marks  */
-			mbview_navpicksize(instance);
-			}
-		else
-			{
-			/* unselect nav pick */
-			data->pickinfo_mode = data->pick_type;
-			shared.shareddata.navpick_type = MBV_PICK_NONE;
-			shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
-			shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
-			XBell(view->dpy,100);
-			}
-		}
-
-	/* only select two nav points if enabled */
-	else if (shared.shareddata.nav_mode != MBV_NAV_OFF
-		&& shared.shareddata.nnav > 0
-		&& (which == MBV_PICK_MOVE
-			&& shared.shareddata.nav_selected[0] != MBV_SELECT_NONE))
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel,
-				&found,
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-
-		/* look for nearest nav point */
-		if (found)
-			{
-			rrmin = 1000000000.0;
-			shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
-			shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
-
-			for (i=0;i<shared.shareddata.nnav;i++)
-				{
-				for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				/* if data->mouse_mode == MBV_MOUSE_NAVFILE & view mode select
+					or deselect all affected files */
+				else if (data->mouse_mode == MBV_MOUSE_NAVFILE)
 					{
-					xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
-					yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
-					rr = sqrt(xx * xx + yy * yy);
-					if (rr < rrmin)
+					/* select range of nav files if one or two different points have been selected */
+					if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
 						{
-						rrmin = rr;
-						shared.shareddata.nav_selected[1] = i;
-						shared.shareddata.nav_point_selected[1] = j;
+						/* get order of selected nav points */
+						if (shared.shareddata.nav_selected[1] != MBV_SELECT_NONE)
+							{
+							inav0 = MIN(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
+							inav1 = MAX(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
+							}
+						else
+							{
+							inav0 = shared.shareddata.nav_selected[0];
+							inav1 = shared.shareddata.nav_selected[0];
+							}
+			
+						/* loop over the affected nav */
+						for (inav=inav0;inav<=inav1;inav++)
+							{
+							for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+								{
+								shared.shareddata.navs[inav].navpts[jpt].selected = select;
+								}
+							shared.shareddata.navs[inav].nselected = 0;
+							for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+								{
+								if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
+									shared.shareddata.navs[inav].nselected++;
+								}
+							}
 						}
 					}
+
+				/* call pick notify if defined */
+				if (data->mbview_picknav_notify != NULL
+					&& shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
+					{
+					(data->mbview_picknav_notify)(instance);
+					}
 				}
-
-			/* set pick location */
-			data->pickinfo_mode = MBV_PICK_NAV;
-			shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
-			shared.shareddata.navpick.endpoints[1].xgrid[instance]
-				= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xgrid[instance];
-			shared.shareddata.navpick.endpoints[1].ygrid[instance]
-				= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ygrid[instance];
-			shared.shareddata.navpick.endpoints[1].xlon
-				= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xlon;
-			shared.shareddata.navpick.endpoints[1].ylat
-				= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ylat;
-			shared.shareddata.navpick.endpoints[1].zdata
-				= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.zdata;
-			shared.shareddata.navpick.endpoints[1].xdisplay[instance]
-				= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xdisplay[instance];
-			shared.shareddata.navpick.endpoints[1].ydisplay[instance]
-				= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ydisplay[instance];
-			shared.shareddata.navpick.endpoints[1].zdisplay[instance]
-				= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.zdisplay[instance];
-
-			/* get pick positions for all active instances */
-			mbview_updatepointw(instance, &(shared.shareddata.navpick.endpoints[1]));
-
-			/* generate 3D drape of pick marks */
-			mbview_navpicksize(instance);
 			}
-		}
-
-	/* if data->mouse_mode == MBV_MOUSE_NAV only select or deselect range of nav points if enabled and two different points selected */
-	else if (shared.shareddata.nav_mode != MBV_NAV_OFF
-		&& shared.shareddata.nnav > 0
-		&& which == MBV_PICK_UP
-		&& data->mouse_mode == MBV_MOUSE_NAV)
-		{
-		/* select range of nav if two different points have been selected */
-		if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE
-			&& shared.shareddata.nav_selected[1] != MBV_SELECT_NONE)
+			
+		/* deal with MBV_NAV_NAVADJUST mode (note: data->mouse_mode will be MBV_MOUSE_NAVFILE only) */
+		else if (shared.shareddata.nav_mode == MBV_NAV_MBNAVADJUST)
 			{
-			/* get order of selected nav points */
-			inav0 = MIN(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
-			inav1 = MAX(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
-			if (inav0 == inav1)
+			/* select first pick - usually this is an MBV_PICK_DOWN event */
+			if (which == MBV_PICK_DOWN
+				|| shared.shareddata.nav_selected[0] == MBV_SELECT_NONE)
 				{
-				jpt0 = MIN(shared.shareddata.nav_point_selected[0], shared.shareddata.nav_point_selected[1]);
-				jpt1 = MAX(shared.shareddata.nav_point_selected[0], shared.shareddata.nav_point_selected[1]);
-				}
-			else if (shared.shareddata.nav_selected[0] <= shared.shareddata.nav_selected[1])
-				{
-				jpt0 = shared.shareddata.nav_point_selected[0];
-				jpt1 = shared.shareddata.nav_point_selected[1];
-				}
-			else
-				{
-				jpt0 = shared.shareddata.nav_point_selected[1];
-				jpt1 = shared.shareddata.nav_point_selected[0];
-				}
+				/* delete all previous standard nav selections */
+				shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+				shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
+				shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+				shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+				for (i=0;i<shared.shareddata.nnav;i++)
+					{
+					for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+						{
+						shared.shareddata.navs[i].navpts[j].selected = MB_NO;
+						}
+					}
 
-			/* loop over the affected nav */
-			for (inav=inav0;inav<=inav1;inav++)
-				{
-				if (inav == inav0)
-					jj0 = MIN(jpt0, shared.shareddata.navs[inav].npoints - 1);
+				/* look for point */
+				mbview_findpoint(instance, xpixel, ypixel,
+						&found,
+						&xgrid, &ygrid,
+						&xlon, &ylat, &zdata,
+						&xdisplay, &ydisplay, &zdisplay);
+		
+				/* look for nearest nav point */
+				if (found)
+					{
+					rrmin = 1000000000.0;
+					for (i=0;i<shared.shareddata.nnav;i++)
+						{
+						for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+							{
+							xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
+							yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
+							rr = sqrt(xx * xx + yy * yy);
+							if (rr < rrmin)
+								{
+								rrmin = rr;
+								shared.shareddata.nav_selected[0] = i;
+								shared.shareddata.nav_point_selected[0] = j;
+								}
+							}
+						}
+		
+					/* set pick location */
+					data->pickinfo_mode = MBV_PICK_NAV;
+					shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
+					shared.shareddata.navpick.endpoints[0].xgrid[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xgrid[instance];
+					shared.shareddata.navpick.endpoints[0].ygrid[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ygrid[instance];
+					shared.shareddata.navpick.endpoints[0].xlon
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon;
+					shared.shareddata.navpick.endpoints[0].ylat
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ylat;
+					shared.shareddata.navpick.endpoints[0].zdata
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdata;
+					shared.shareddata.navpick.endpoints[0].xdisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xdisplay[instance];
+					shared.shareddata.navpick.endpoints[0].ydisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ydisplay[instance];
+					shared.shareddata.navpick.endpoints[0].zdisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdisplay[instance];
+		
+					/* get pick positions for all active instances */
+					mbview_updatepointw(instance, &(shared.shareddata.navpick.endpoints[0]));
+		
+					/* generate 3D drape of pick marks  */
+					mbview_navpicksize(instance);
+					}
 				else
-					jj0 = 0;
-				if (inav == inav1)
-					jj1 = MAX(jpt1, 0);
-				else
-					jj1 = shared.shareddata.navs[inav].npoints;
-				for (jpt=jj0;jpt<=jj1;jpt++)
 					{
-					shared.shareddata.navs[inav].navpts[jpt].selected = select;
-					}
-				shared.shareddata.navs[inav].nselected = 0;
-				for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
-					{
-					if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
-						shared.shareddata.navs[inav].nselected++;
+					/* unselect nav pick */
+					data->pickinfo_mode = data->pick_type;
+					shared.shareddata.navpick_type = MBV_PICK_NONE;
+					shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+					shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
+					XBell(view->dpy,100);
 					}
 				}
-			}
-
-		/* else select single nav point */
-		else if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
-			{
-			inav = shared.shareddata.nav_selected[0];
-			jpt = shared.shareddata.nav_point_selected[0];
-			shared.shareddata.navs[inav].navpts[jpt].selected = select;
-			shared.shareddata.navs[inav].nselected = 0;
-			for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+				
+			/* select second point if MBV_PICK_MOVE event */
+			else if (which == MBV_PICK_MOVE)
 				{
-				if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
-					shared.shareddata.navs[inav].nselected++;
-				}
-			}
-		}
-
-	/* if data->mouse_mode == MBV_MOUSE_NAVFILE select or deselect all affected files */
-	else if (shared.shareddata.nav_mode != MBV_NAV_OFF
-		&& shared.shareddata.nnav > 0
-		&& which == MBV_PICK_UP
-		&& data->mouse_mode == MBV_MOUSE_NAVFILE)
-		{
-/* fprintf(stderr,"nav selected: %d %d select:%d\n",
-shared.shareddata.nav_selected[0],shared.shareddata.nav_selected[1],select);*/
-		/* select range of nav files if one or two different points have been selected */
-		if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
-			{
-			/* get order of selected nav points */
-			if (shared.shareddata.nav_selected[1] != MBV_SELECT_NONE)
-				{
-				inav0 = MIN(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
-				inav1 = MAX(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
-				}
-			else
-				{
-				inav0 = shared.shareddata.nav_selected[0];
-				inav1 = shared.shareddata.nav_selected[0];
-				}
-
-			/* loop over the affected nav */
-			for (inav=inav0;inav<=inav1;inav++)
-				{
-				for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+				/* look for point */
+				mbview_findpoint(instance, xpixel, ypixel,
+						&found,
+						&xgrid, &ygrid,
+						&xlon, &ylat, &zdata,
+						&xdisplay, &ydisplay, &zdisplay);
+		
+				/* look for nearest nav point */
+				if (found)
 					{
-					shared.shareddata.navs[inav].navpts[jpt].selected = select;
+					rrmin = 1000000000.0;
+					shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+					shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+		
+					for (i=0;i<shared.shareddata.nnav;i++)
+						{
+						for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+							{
+							xx = xgrid - shared.shareddata.navs[i].navpts[j].point.xgrid[instance];
+							yy = ygrid - shared.shareddata.navs[i].navpts[j].point.ygrid[instance];
+							rr = sqrt(xx * xx + yy * yy);
+							if (rr < rrmin)
+								{
+								rrmin = rr;
+								shared.shareddata.nav_selected[1] = i;
+								shared.shareddata.nav_point_selected[1] = j;
+								}
+							}
+						}
+		
+					/* set pick location */
+					data->pickinfo_mode = MBV_PICK_NAV;
+					shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
+					shared.shareddata.navpick.endpoints[1].xgrid[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xgrid[instance];
+					shared.shareddata.navpick.endpoints[1].ygrid[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ygrid[instance];
+					shared.shareddata.navpick.endpoints[1].xlon
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xlon;
+					shared.shareddata.navpick.endpoints[1].ylat
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ylat;
+					shared.shareddata.navpick.endpoints[1].zdata
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.zdata;
+					shared.shareddata.navpick.endpoints[1].xdisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xdisplay[instance];
+					shared.shareddata.navpick.endpoints[1].ydisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ydisplay[instance];
+					shared.shareddata.navpick.endpoints[1].zdisplay[instance]
+						= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.zdisplay[instance];
+		
+					/* get pick positions for all active instances */
+					mbview_updatepointw(instance, &(shared.shareddata.navpick.endpoints[1]));
+		
+					/* generate 3D drape of pick marks */
+					mbview_navpicksize(instance);
 					}
-				shared.shareddata.navs[inav].nselected = 0;
-				for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+				}
+				
+			/* deal with MBV_PICK_UP event */
+			else if (which == MBV_PICK_UP)
+				{
+				/* select range of nav files if one or two different points have been selected */
+				if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
 					{
-					if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
-						shared.shareddata.navs[inav].nselected++;
+					/* two different files picked - take both */
+					if (shared.shareddata.nav_selected[1] != MBV_SELECT_NONE
+						&& shared.shareddata.nav_selected[0] != shared.shareddata.nav_selected[1])
+						{
+						shared.shareddata.nav_selected_mbnavadjust[0]
+							= MIN(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
+						shared.shareddata.nav_selected_mbnavadjust[1]
+							= MAX(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
+						}
+						
+					/* else one file picked and at least one valid pick already to be kept */
+					else if (shared.shareddata.nav_selected_mbnavadjust[0] != MBV_SELECT_NONE)
+						{
+						shared.shareddata.nav_selected_mbnavadjust[1] = shared.shareddata.nav_selected_mbnavadjust[0];
+						shared.shareddata.nav_selected_mbnavadjust[0] = shared.shareddata.nav_selected[0];
+						}
+						
+					/* else one file picked and no previous pick */
+					else
+						{
+						shared.shareddata.nav_selected_mbnavadjust[0] = shared.shareddata.nav_selected[0];
+						shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
+						}
+		
+					/* clear all previous selection */
+					for (i=0;i<shared.shareddata.nnav;i++)
+						{
+						for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+							{
+							shared.shareddata.navs[i].navpts[j].selected = MB_NO;
+							}
+						}
+						
+					/* select the nav from the selected files */
+					if (shared.shareddata.nav_selected_mbnavadjust[0] != MBV_SELECT_NONE)
+						{
+						shared.shareddata.nav_selected[0]
+							= shared.shareddata.nav_selected_mbnavadjust[0];						
+						shared.shareddata.nav_point_selected[0] = 0;
+						
+						inav = shared.shareddata.nav_selected_mbnavadjust[0];
+						for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+							{
+							shared.shareddata.navs[inav].navpts[jpt].selected = select;
+							}
+						shared.shareddata.navs[inav].nselected = shared.shareddata.navs[inav].npoints;
+	
+						/* set pick location */
+						data->pickinfo_mode = MBV_PICK_NAV;
+						shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
+						shared.shareddata.navpick.endpoints[0].xgrid[instance]
+							= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xgrid[instance];
+						shared.shareddata.navpick.endpoints[0].ygrid[instance]
+							= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ygrid[instance];
+						shared.shareddata.navpick.endpoints[0].xlon
+							= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon;
+						shared.shareddata.navpick.endpoints[0].ylat
+							= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ylat;
+						shared.shareddata.navpick.endpoints[0].zdata
+							= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdata;
+						shared.shareddata.navpick.endpoints[0].xdisplay[instance]
+							= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xdisplay[instance];
+						shared.shareddata.navpick.endpoints[0].ydisplay[instance]
+							= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ydisplay[instance];
+						shared.shareddata.navpick.endpoints[0].zdisplay[instance]
+							= shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdisplay[instance];
+			
+						/* get pick positions for all active instances */
+						mbview_updatepointw(instance, &(shared.shareddata.navpick.endpoints[0]));
+						}
+					if (shared.shareddata.nav_selected_mbnavadjust[1] != MBV_SELECT_NONE)
+						{
+						shared.shareddata.nav_selected[1]
+							= shared.shareddata.nav_selected_mbnavadjust[1];						
+						shared.shareddata.nav_point_selected[1] = 0;
+						
+						inav = shared.shareddata.nav_selected_mbnavadjust[1];
+						for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+							{
+							shared.shareddata.navs[inav].navpts[jpt].selected = select;
+							}
+						shared.shareddata.navs[inav].nselected = shared.shareddata.navs[inav].npoints;
+
+						/* set pick location */
+						data->pickinfo_mode = MBV_PICK_NAV;
+						shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
+						shared.shareddata.navpick.endpoints[1].xgrid[instance]
+							= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xgrid[instance];
+						shared.shareddata.navpick.endpoints[1].ygrid[instance]
+							= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ygrid[instance];
+						shared.shareddata.navpick.endpoints[1].xlon
+							= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xlon;
+						shared.shareddata.navpick.endpoints[1].ylat
+							= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ylat;
+						shared.shareddata.navpick.endpoints[1].zdata
+							= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.zdata;
+						shared.shareddata.navpick.endpoints[1].xdisplay[instance]
+							= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xdisplay[instance];
+						shared.shareddata.navpick.endpoints[1].ydisplay[instance]
+							= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ydisplay[instance];
+						shared.shareddata.navpick.endpoints[1].zdisplay[instance]
+							= shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.zdisplay[instance];
+			
+						/* get pick positions for all active instances */
+						mbview_updatepointw(instance, &(shared.shareddata.navpick.endpoints[1]));
+						}
+						
+					/* generate 3D drape of pick marks */
+					if (shared.shareddata.nav_selected_mbnavadjust[0] != MBV_SELECT_NONE)
+						{
+						mbview_navpicksize(instance);
+						}
+					}
+					
+				/* call pick notify if defined */
+				if (data->mbview_picknav_notify != NULL
+					&& (shared.shareddata.nav_selected_mbnavadjust[0] != MBV_SELECT_NONE
+						|| shared.shareddata.nav_selected_mbnavadjust[1] != MBV_SELECT_NONE))
+					{
+					(data->mbview_picknav_notify)(instance);
 					}
 				}
 			}
@@ -1171,6 +1512,8 @@ shared.shareddata.nav_selected[0],shared.shareddata.nav_selected[1],select);*/
 		shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
 		shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
 		shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+		shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
+		shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
 		XBell(view->dpy,100);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
@@ -1196,13 +1539,6 @@ shared.shareddata.nav_selected[0],shared.shareddata.nav_selected[1],select);*/
 
 	/* set pick annotation */
 	mbview_pick_text(instance);
-
-	/* call pick notify if defined */
-	if (which == MBV_PICK_UP && shared.shareddata.nav_selected[0] != MBV_SELECT_NONE
-		&& data->mbview_picknav_notify != NULL)
-		{
-		(data->mbview_picknav_notify)(instance);
-		}
 
 	/* print nav debug statements */
 	if (mbv_verbose >= 2)
@@ -1584,6 +1920,10 @@ int mbview_nav_delete(size_t instance, int inav)
 		shared.shareddata.navpick_type = MBV_PICK_NONE;
 		shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
 		shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+		shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
+		shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+		shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
+		shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
 		}
 	else
 		{
@@ -2399,6 +2739,195 @@ int mbview_updatenavlist()
 	/* return */
 	return(status);
 }
+/*------------------------------------------------------------------------------*/
 
+int mbview_picknavbyname(int verbose, size_t instance,
+			char *name, 
+			int *error)
+{
+	/* local variables */
+	char	*function_name = "mbview_picknavbyname";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	found;
+	int	inav, jpt;
+	int	i, j;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
+		fprintf(stderr,"dbg2       name:             %s\n",name);
+		}
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+//fprintf(stderr,"mbview_picknavbyname:%s\n",name);
+
+	/* find and select the navigation associated with name */
+	found = MB_NO;
+	if (shared.shareddata.nav_mode != MBV_NAV_OFF
+		&& shared.shareddata.nnav > 0)
+		{
+		for (inav=0;inav<shared.shareddata.nnav && found == MB_NO;inav++)
+			{
+			if (strcmp(shared.shareddata.navs[inav].name, name) == 0)
+				{
+				found = MB_YES;
+				shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
+				shared.shareddata.nav_selected[0] = inav;
+				shared.shareddata.nav_point_selected[0] = 0;
+				shared.shareddata.nav_selected[1] = inav;
+				shared.shareddata.nav_point_selected[1] = shared.shareddata.navs[inav].npoints -1;
+				shared.shareddata.navs[inav].nselected = shared.shareddata.navs[inav].npoints;
+				shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
+				shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
+				for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+					{
+					shared.shareddata.navs[inav].navpts[jpt].selected = MB_YES;
+					}
+				}
+			}
+//if (found == MB_YES) fprintf(stderr,"FILE FOUND: %s\n",name);
+		}
+
+	/* else beep */
+	else
+		{
+		shared.shareddata.navpick_type = MBV_PICK_NONE;
+		shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+		shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+		shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
+		shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+		shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
+		shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
+		XBell(view->dpy,100);
+		for (i=0;i<shared.shareddata.nnav;i++)
+			{
+			for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				{
+				shared.shareddata.navs[i].navpts[j].selected = MB_NO;
+				}
+			}
+		}
+
+	/* set what kind of pick to annotate */
+	if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
+		{
+		data->pickinfo_mode = MBV_PICK_NAV;
+		}
+	else
+		{
+		data->pickinfo_mode = data->pick_type;
+		}
+
+	/* update nav data list */
+	mbview_updatenavlist();
+
+	/* print nav debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Nav data altered in function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg2  Nav values:\n");
+		fprintf(stderr,"dbg2       nav_mode:              %d\n",shared.shareddata.nav_mode);
+		fprintf(stderr,"dbg2       nav_view_mode:         %d\n",data->nav_view_mode);
+		fprintf(stderr,"dbg2       navdrape_view_mode:    %d\n",data->navdrape_view_mode);
+		fprintf(stderr,"dbg2       nnav:                  %d\n",shared.shareddata.nnav);
+		fprintf(stderr,"dbg2       nnav_alloc:            %d\n",shared.shareddata.nnav_alloc);
+		fprintf(stderr,"dbg2       nav_selected[0]:       %d\n",shared.shareddata.nav_selected[0]);
+		fprintf(stderr,"dbg2       nav_point_selected[0]: %d\n",shared.shareddata.nav_point_selected[0]);
+		fprintf(stderr,"dbg2       nav_selected[1]:       %d\n",shared.shareddata.nav_selected[1]);
+		fprintf(stderr,"dbg2       nav_point_selected[1]: %d\n",shared.shareddata.nav_point_selected[1]);
+		for (i=0;i<shared.shareddata.nnav;i++)
+			{
+			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
+			fprintf(stderr,"dbg2       nav %d size:          %d\n",i,shared.shareddata.navs[i].size);
+			fprintf(stderr,"dbg2       nav %d name:          %s\n",i,shared.shareddata.navs[i].name);
+			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,shared.shareddata.navs[i].swathbounds);
+			fprintf(stderr,"dbg2       nav %d line:          %d\n",i,shared.shareddata.navs[i].line);
+			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,shared.shareddata.navs[i].shot);
+			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,shared.shareddata.navs[i].cdp);
+			fprintf(stderr,"dbg2       nav %d decimation:    %d\n",i,shared.shareddata.navs[i].decimation);
+			fprintf(stderr,"dbg2       nav %d npoints:       %d\n",i,shared.shareddata.navs[i].npoints);
+			fprintf(stderr,"dbg2       nav %d npoints_alloc: %d\n",i,shared.shareddata.navs[i].npoints_alloc);
+			fprintf(stderr,"dbg2       nav %d nselected:     %d\n",i,shared.shareddata.navs[i].nselected);
+			for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				{
+				fprintf(stderr,"dbg2       nav %d %d draped:   %d\n",i,j,shared.shareddata.navs[i].navpts[j].draped);
+				fprintf(stderr,"dbg2       nav %d %d selected: %d\n",i,j,shared.shareddata.navs[i].navpts[j].selected);
+				fprintf(stderr,"dbg2       nav %d %d time_d:   %f\n",i,j,shared.shareddata.navs[i].navpts[j].time_d);
+				fprintf(stderr,"dbg2       nav %d %d heading:  %f\n",i,j,shared.shareddata.navs[i].navpts[j].heading);
+				fprintf(stderr,"dbg2       nav %d %d speed:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].speed);
+				fprintf(stderr,"dbg2       nav %d %d line:     %d\n",i,j,shared.shareddata.navs[i].navpts[j].line);
+				fprintf(stderr,"dbg2       nav %d %d shot:     %d\n",i,j,shared.shareddata.navs[i].navpts[j].shot);
+				fprintf(stderr,"dbg2       nav %d %d cdp:      %d\n",i,j,shared.shareddata.navs[i].navpts[j].cdp);
+
+				fprintf(stderr,"dbg2       nav %d %d xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xgrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ygrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xlon);
+				fprintf(stderr,"dbg2       nav %d %d ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ylat);
+				fprintf(stderr,"dbg2       nav %d %d zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdata);
+				fprintf(stderr,"dbg2       nav %d %d xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xdisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ydisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdisplay[instance]);
+
+				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xgrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ygrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d stbd xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xlon);
+				fprintf(stderr,"dbg2       nav %d %d stbd ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ylat);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdata);
+				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xdisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ydisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdisplay[instance]);
+
+				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xgrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ygrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d cntr xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xlon);
+				fprintf(stderr,"dbg2       nav %d %d cntr ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ylat);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdata);
+				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xdisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ydisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdisplay[instance]);
+
+				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xgrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ygrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d port xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xlon);
+				fprintf(stderr,"dbg2       nav %d %d port ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ylat);
+				fprintf(stderr,"dbg2       nav %d %d port zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdata);
+				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xdisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[instance]);
+				}
+			for (j=0;j<shared.shareddata.navs[i].npoints-1;j++)
+				{
+				fprintf(stderr,"dbg2       nav %d %d nls:          %d\n",i,j,shared.shareddata.navs[i].segments[j].nls);
+				fprintf(stderr,"dbg2       nav %d %d nls_alloc:    %d\n",i,j,shared.shareddata.navs[i].segments[j].nls_alloc);
+				fprintf(stderr,"dbg2       nav %d %d endpoints[0]: %p\n",i,j,&shared.shareddata.navs[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       nav %d %d endpoints[1]: %p\n",i,j,&shared.shareddata.navs[i].segments[j].endpoints[1]);
+				}
+			}
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
 
 /*------------------------------------------------------------------------------*/

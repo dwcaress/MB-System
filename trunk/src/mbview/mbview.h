@@ -153,6 +153,7 @@
 #define MBV_ROUTE_OFF			0
 #define MBV_ROUTE_VIEW			1
 #define MBV_ROUTE_EDIT			2
+#define MBV_ROUTE_NAVADJUST		3
 #define MBV_ROUTE_WAYPOINT_DELETEFLAG	-1
 #define MBV_ROUTE_WAYPOINT_NONE		0
 #define MBV_ROUTE_WAYPOINT_SIMPLE	1
@@ -167,8 +168,9 @@
 #define MBV_ROUTE_WAYPOINT_ENDLINE4	10
 
 /* nav defines */
-#define MBV_NAV_OFF			0
+#define MBV_NAV_OFF				0
 #define MBV_NAV_VIEW			1
+#define MBV_NAV_MBNAVADJUST		2
 
 /* vector defines */
 #define MBV_VECTOR_OFF			0
@@ -455,6 +457,7 @@ struct mbview_shareddata_struct {
 	int	nnav_alloc;
 	int	nav_selected[2];
 	int	nav_point_selected[2];
+	int	nav_selected_mbnavadjust[2];
 	struct mbview_nav_struct *navs;
 
 	/* vector data */
@@ -886,6 +889,8 @@ int mbview_plot(size_t instance, int rez);
 int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg);
 
 /* mbview_pick.c function prototypes */
+int mbview_clearpicks(size_t instance);
+int mbview_clearnavpicks(size_t instance);
 
 /* mbview_nav.c function prototypes */
 int mbview_getnavcount(int verbose, size_t instance,
@@ -956,6 +961,11 @@ int mbview_addnav(int verbose, size_t instance,
 			int	decimation,
 			int *error);
 int mbview_enableviewnavs(int verbose, size_t instance,
+			int *error);
+int mbview_enableadjustnavs(int verbose, size_t instance,
+			int *error);
+int mbview_picknavbyname(int verbose, size_t instance,
+			char *name, 
 			int *error);
 
 /* mbview_vector.c function prototypes */
@@ -1050,12 +1060,14 @@ int mbview_addroute(int verbose, size_t instance,
 			int	*waypoint,
 			int	routecolor,
 			int	routesize,
-                        int     routeeditmode,
+            int     routeeditmode,
 			mb_path	routename,
 			int 	*iroute,
 			int *error);
 int mbview_deleteroute(int verbose, size_t instance,
 			int	iroute,
+			int *error);
+int mbview_deleteallroutes(int verbose, size_t instance,
 			int *error);
 int mbview_getroute(int verbose, size_t instance,
 			int	route,
@@ -1076,10 +1088,16 @@ int mbview_enableviewroutes(int verbose, size_t instance,
 			int *error);
 int mbview_enableeditroutes(int verbose, size_t instance,
 			int *error);
-int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
+int mbview_enableviewties(int verbose, size_t instance,
+			int *error);
+int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypoint,
 				double xgrid, double ygrid,
 				double xlon, double ylat, double zdata,
 				double xdisplay, double ydisplay, double zdisplay);
+int mbview_updateroutelist(void);
+int mbview_pick_routebyname(int verbose, size_t instance, char *name, int *error);
+int mbview_pick_route_select(int verbose, size_t instance, int which, int xpixel, int ypixel);
+int mbview_pick_route_delete(int verbose, size_t instance, int xpixel, int ypixel);
 
 /* mbview_site.c function prototypes */
 int mbview_getsitecount(int verbose, size_t instance,

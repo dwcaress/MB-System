@@ -25,18 +25,12 @@
 /* OpenGL Error checking */
 /* #define MBS_GETERRORS 1 */
 
-/* OpenGL plotting parameters */
-#define LEFT_WIDTH 200
-#define LEFT_HEIGHT 30
-#define MBS_OPENGL_WIDTH 3.0
-#define MBS_OPENGL_ZMIN2D -5.0
-#define MBS_OPENGL_ZMAX2D 1000.0
-#define MBS_OPENGL_ZMIN3D 100000.0
-#define MBS_OPENGL_ZMAX3D 100000000.0
-
 /* OpenGL list IDs */
 #define MBS_GLLIST_3DSOUNDINGS  41
 
+/* OpenGL plotting parameters */
+#define LEFT_WIDTH 200
+#define LEFT_HEIGHT 30
 #define MBS_PICK_IDIVISION 15
 #define MBS_PICK_DIVISION ((double)MBS_PICK_IDIVISION)
 #define MBS_PICK_DOWN	1

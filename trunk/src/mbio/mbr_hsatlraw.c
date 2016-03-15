@@ -970,19 +970,20 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error)
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
-		else if (expect != MBF_HSATLRAW_NONE && expect != type)
-			{
-			done = MB_YES;
-			line_save_flag = MB_YES;
-			}
 		else if (type == MBF_HSATLRAW_RAW_LINE)
 			{
 			strcpy(data->comment,raw_line+shift);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = MB_YES;
+			expect = MBF_HSATLRAW_NONE;
 			data->kind = MB_DATA_RAW_LINE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			status = MB_FAILURE;
+			}
+		else if (expect != MBF_HSATLRAW_NONE && expect != type)
+			{
+			done = MB_YES;
+			line_save_flag = MB_YES;
 			}
 		else if (type == MBF_HSATLRAW_ERGNHYDI)
 			{

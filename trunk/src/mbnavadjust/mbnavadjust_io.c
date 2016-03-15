@@ -171,12 +171,11 @@ int mbnavadjust_new_project(int verbose, char *projectpath,
                         project->precision = SIGMA_MINIMUM;
                         project->smoothing = smoothing;
                         project->zoffsetwidth = zoffsetwidth;
-                        project->inversion = MBNA_INVERSION_NONE;
+                        project->inversion_status = MBNA_INVERSION_NONE;
+                        project->grid_status = MBNA_GRID_NONE;
                         project->modelplot = MB_NO;
                         project->modelplot_style = MBNA_MODELPLOT_TIMESERIES;
                         project->logfp = NULL;
-                        
-                        project->inversion = MBNA_INVERSION_NONE;
                         project->precision = SIGMA_MINIMUM;
                         project->smoothing = MBNA_SMOOTHING_DEFAULT;
                         project->zoffsetwidth = 5.0;
@@ -266,937 +265,994 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
 		fprintf(stderr,"dbg2       project:            %p\n",project);
 		}
                 
-        /* if project structure holds an open project close it first */
-        if (project->open == MB_YES)
-                status = mbnavadjust_close_project(verbose, project, error);
+    /* if project structure holds an open project close it first */
+    if (project->open == MB_YES)
+            status = mbnavadjust_close_project(verbose, project, error);
 
 	/* check path to see if project exists */
-        nameptr = (char *) NULL;
-        slashptr = strrchr(projectpath,'/');
-        if (slashptr != (char *) NULL)
-                nameptr = slashptr + 1;
+    nameptr = (char *) NULL;
+    slashptr = strrchr(projectpath,'/');
+    if (slashptr != (char *) NULL)
+        nameptr = slashptr + 1;
+    else
+        nameptr = projectpath;
+    if (strlen(nameptr) > 4
+            && strcmp(&nameptr[strlen(nameptr)-4],".nvh") == 0)
+        nameptr[strlen(nameptr)-4] = '\0';
+    if (strlen(nameptr) == 0)
+        {
+        fprintf(stderr,"Unable to read project!\nInvalid project path: %s\n", projectpath);
+        *error = MB_ERROR_INIT_FAIL;
+        status = MB_FAILURE;
+        }
+    
+    /* try to read project */
+    if (status == MB_SUCCESS)
+        {
+        strcpy(project->name,nameptr);
+        if (strlen(projectpath) == strlen(nameptr))
+            {
+            getcwd(project->path, MB_PATH_MAXLINE);
+            strcat(project->path, "/");
+            }
         else
-                nameptr = projectpath;
-        if (strlen(nameptr) > 4
-                && strcmp(&nameptr[strlen(nameptr)-4],".nvh") == 0)
-                nameptr[strlen(nameptr)-4] = '\0';
-        if (strlen(nameptr) == 0)
-                {
-                fprintf(stderr,"Unable to read project!\nInvalid project path: %s\n", projectpath);
-                *error = MB_ERROR_INIT_FAIL;
-                status = MB_FAILURE;
-                }
-        
-        /* try to read project */
+            {
+            strcpy(project->path, projectpath);
+            project->path[strlen(projectpath)-strlen(nameptr)] = '\0';
+            }
+        strcpy(project->home,project->path);
+        strcat(project->home,project->name);
+        strcat(project->home,".nvh");
+        strcpy(project->datadir,project->path);
+        strcat(project->datadir,project->name);
+        strcat(project->datadir,".dir");
+        strcpy(project->logfile,project->datadir);
+        strcat(project->logfile,"/log.txt");
+
+        /* check if project exists */
+        if (stat(project->home,&statbuf) != 0)
+            {
+            fprintf(stderr,"Project home file %s does not exist\n", project->home);
+            *error = MB_ERROR_INIT_FAIL;
+            status = MB_FAILURE;
+            }
+        if (stat(project->datadir,&statbuf) != 0)
+            {
+            fprintf(stderr,"Data directory %s does not exist\n", project->datadir);
+            *error = MB_ERROR_INIT_FAIL;
+            status = MB_FAILURE;
+            }
+    
+        /* read the project */
         if (status == MB_SUCCESS)
+            {
+            /* first save copy of the project file */
+            sprintf(command,"cp %s %s.save", project->home, project->home);
+            shellstatus = system(command);
+    
+            /* open and read home file */
+            status = MB_SUCCESS;
+            if ((hfp = fopen(project->home,"r")) != NULL)
                 {
-                strcpy(project->name,nameptr);
-		if (strlen(projectpath) == strlen(nameptr))
-			{
-			getcwd(project->path, MB_PATH_MAXLINE);
-			strcat(project->path, "/");
-			}
+                /* check for proper header */
+                if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                        || strncmp(buffer,"##MBNAVADJUST PROJECT",21) != 0)
+                        status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+        
+                /* read basic names and stats */
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
+                                || strcmp(label,"MB-SYSTEM_VERSION") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+            
+                if (status == MB_SUCCESS
+                    && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                            || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
+                            || strcmp(label,"PROGRAM_VERSION") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+            
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %d.%d",label,&versionmajor,&versionminor)) != 3
+                                || strcmp(label,"FILE_VERSION") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+                    version_id = 100 * versionmajor + versionminor;
+            
+                if (version_id >= 302)
+                    {
+                    if (status == MB_SUCCESS
+                            && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                    || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
+                                    || strcmp(label,"ORIGIN") != 0))
+                            status = MB_FAILURE;
+                    }
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+            
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
+                                || strcmp(label,"NAME") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+            
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
+                                || strcmp(label,"PATH") != 0))
+                     status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+            
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
+                                || strcmp(label,"HOME") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+            
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
+                                || strcmp(label,"DATADIR") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+            
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %d",label,&project->num_files)) != 2
+                                || strcmp(label,"NUMFILES") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+            
+                if (version_id >= 306)
+                    {
+                    if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                            || (nscan = sscanf(buffer,"%s %d",label,&project->num_blocks)) != 2
+                            || strcmp(label,"NUMBLOCKS") != 0))
+                        status = MB_FAILURE;
+                    }
                 else
-			{
-			strcpy(project->path, projectpath);
-			project->path[strlen(projectpath)-strlen(nameptr)] = '\0';
-			}
-                strcpy(project->home,project->path);
-                strcat(project->home,project->name);
-                strcat(project->home,".nvh");
-                strcpy(project->datadir,project->path);
-                strcat(project->datadir,project->name);
-                strcat(project->datadir,".dir");
-                strcpy(project->logfile,project->datadir);
-                strcat(project->logfile,"/log.txt");
-
-                /* check if project exists */
-                if (stat(project->home,&statbuf) != 0)
-                        {
-                        fprintf(stderr,"Project home file %s does not exist\n", project->home);
-                        *error = MB_ERROR_INIT_FAIL;
-                        status = MB_FAILURE;
-                        }
-                if (stat(project->datadir,&statbuf) != 0)
-                        {
-                        fprintf(stderr,"Data directory %s does not exist\n", project->datadir);
-                        *error = MB_ERROR_INIT_FAIL;
-                        status = MB_FAILURE;
-                        }
-
-                /* read the project */
+                    {
+                    project->num_blocks = 0;
+                    }
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+        
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %d",label,&project->num_crossings)) != 2
+                                || strcmp(label,"NUMCROSSINGS") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+                        
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %lf",label,&project->section_length)) != 2
+                                || strcmp(label,"SECTIONLENGTH") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+                        
+                if (status == MB_SUCCESS
+                        && version_id >= 101
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %d",label,&project->section_soundings)) != 2
+                                || strcmp(label,"SECTIONSOUNDINGS") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+                
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %d",label,&project->decimation)) != 2
+                                || strcmp(label,"DECIMATION") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+                
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %lf",label,&project->cont_int)) != 2
+                                || strcmp(label,"CONTOURINTERVAL") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+                
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %lf",label,&project->col_int)) != 2
+                                || strcmp(label,"COLORINTERVAL") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+                
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %lf",label,&project->tick_int)) != 2
+                                || strcmp(label,"TICKINTERVAL") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+                
+                if (status == MB_SUCCESS
+                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %d",label,&project->inversion_status)) != 2
+                                || strcmp(label,"INVERSION") != 0))
+                    status = MB_FAILURE;
+                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+                        
                 if (status == MB_SUCCESS)
+                    {
+                    if (version_id >= 307)
                         {
-                        /* first save copy of the project file */
-                        sprintf(command,"cp %s %s.save", project->home, project->home);
-                        shellstatus = system(command);
-                
-                        /* open and read home file */
-                        status = MB_SUCCESS;
-                        if ((hfp = fopen(project->home,"r")) != NULL)
-                                {
-                                /* check for proper header */
-                                if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                        || strncmp(buffer,"##MBNAVADJUST PROJECT",21) != 0)
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                /* read basic names and stats */
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
-                                                || strcmp(label,"MB-SYSTEM_VERSION") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
-                                                || strcmp(label,"PROGRAM_VERSION") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %d.%d",label,&versionmajor,&versionminor)) != 3
-                                                || strcmp(label,"FILE_VERSION") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-				version_id = 100 * versionmajor + versionminor;
-                
-                                if (version_id >= 302)
-                                        {
-                                        if (status == MB_SUCCESS
-                                                && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                        || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
-                                                        || strcmp(label,"ORIGIN") != 0))
-                                                status = MB_FAILURE;
-                                        }
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
-                                                || strcmp(label,"NAME") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
-                                                || strcmp(label,"PATH") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
-                                                || strcmp(label,"HOME") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
-                                                || strcmp(label,"DATADIR") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %d",label,&project->num_files)) != 2
-                                                || strcmp(label,"NUMFILES") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-				if (version_id >= 306)
-					{
-					if (status == MB_SUCCESS
-						&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-							|| (nscan = sscanf(buffer,"%s %d",label,&project->num_blocks)) != 2
-							|| strcmp(label,"NUMBLOCKS") != 0))
-						status = MB_FAILURE;
-					}
-				else
-					{
-					project->num_blocks = 0;
-					}
-		if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %d",label,&project->num_crossings)) != 2
-                                                || strcmp(label,"NUMCROSSINGS") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %lf",label,&project->section_length)) != 2
-                                                || strcmp(label,"SECTIONLENGTH") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && version_id >= 101
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %d",label,&project->section_soundings)) != 2
-                                                || strcmp(label,"SECTIONSOUNDINGS") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %d",label,&project->decimation)) != 2
-                                                || strcmp(label,"DECIMATION") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %lf",label,&project->cont_int)) != 2
-                                                || strcmp(label,"CONTOURINTERVAL") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %lf",label,&project->col_int)) != 2
-                                                || strcmp(label,"COLORINTERVAL") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %lf",label,&project->tick_int)) != 2
-                                                || strcmp(label,"TICKINTERVAL") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS
-                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                || (nscan = sscanf(buffer,"%s %d",label,&project->inversion)) != 2
-                                                || strcmp(label,"INVERSION") != 0))
-                                        status = MB_FAILURE;
-                if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
-                
-                                if (status == MB_SUCCESS)
-                                        {
-                                        if (version_id >= 301)
-                                                {
-                                                if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                        || (nscan = sscanf(buffer,"%s %lf",label,&project->smoothing)) != 2
-                                                        || strcmp(label,"SMOOTHING") != 0)
-                                                        status = MB_FAILURE;
-                                                project->precision = SIGMA_MINIMUM;
-                                                }
-                                        else if (version_id >= 103)
-                                                {
-                                                if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                        || (nscan = sscanf(buffer,"%s %lf",label,&project->precision)) != 2
-                                                        || strcmp(label,"PRECISION") != 0)
-                                                        status = MB_FAILURE;
-                                                project->smoothing = MBNA_SMOOTHING_DEFAULT;
-                                                }
-                                        else
-                                                {
-                                                project->precision = SIGMA_MINIMUM;
-                                                project->smoothing = MBNA_SMOOTHING_DEFAULT;
-                                                }
-                                        }
+                        if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %d",label,&project->grid_status)) != 2
+                                || strcmp(label,"GRIDSTATUS") != 0)
+                                status = MB_FAILURE;
+                        }
+                    }
+                if (status == MB_SUCCESS)
+                    {
+                    if (version_id >= 301)
+                        {
+                        if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %lf",label,&project->smoothing)) != 2
+                                || strcmp(label,"SMOOTHING") != 0)
+                                status = MB_FAILURE;
+                        project->precision = SIGMA_MINIMUM;
+                        }
+                    else if (version_id >= 103)
+                        {
+                        if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"%s %lf",label,&project->precision)) != 2
+                                || strcmp(label,"PRECISION") != 0)
+                                status = MB_FAILURE;
+                        project->smoothing = MBNA_SMOOTHING_DEFAULT;
+                        }
+                    else
+                        {
+                        project->precision = SIGMA_MINIMUM;
+                        project->smoothing = MBNA_SMOOTHING_DEFAULT;
+                        }
+                    }
                 if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
                 
-                                if (status == MB_SUCCESS)
-                                        {
-                                        if (version_id >= 105
-                                                && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                        || (nscan = sscanf(buffer,"%s %lf",label,&project->zoffsetwidth)) != 2
-                                                        || strcmp(label,"ZOFFSETWIDTH") != 0))
-                                                status = MB_FAILURE;
-                                        else
-                                                project->zoffsetwidth = 5.0;
-                                        }
+                if (status == MB_SUCCESS)
+                    {
+                    if (version_id >= 105
+                            && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                    || (nscan = sscanf(buffer,"%s %lf",label,&project->zoffsetwidth)) != 2
+                                    || strcmp(label,"ZOFFSETWIDTH") != 0))
+                            status = MB_FAILURE;
+                    else
+                            project->zoffsetwidth = 5.0;
+                    }
                 
-                                /* allocate memory for files array */
+                /* allocate memory for files array */
                 if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
                 
-                                if (project->num_files > 0)
-                                        {
-                                        project->files = (struct mbna_file *)
-                                                malloc(sizeof(struct mbna_file) * (project->num_files));
-                                        if (project->files != NULL)
-                                                {
-                                                project->num_files_alloc = project->num_files;
-                                                memset(project->files,0,project->num_files_alloc * sizeof(struct mbna_file));
-                                                }
-                                        else
-                                                {
-                                                project->num_files_alloc = 0;
-                                                status = MB_FAILURE;
-                                                *error = MB_ERROR_MEMORY_FAIL;
-                                                }
-                                        }
+                if (project->num_files > 0)
+                    {
+                    project->files = (struct mbna_file *)
+                            malloc(sizeof(struct mbna_file) * (project->num_files));
+                    if (project->files != NULL)
+                        {
+                        project->num_files_alloc = project->num_files;
+                        memset(project->files,0,project->num_files_alloc * sizeof(struct mbna_file));
+                        }
+                    else
+                        {
+                        project->num_files_alloc = 0;
+                        status = MB_FAILURE;
+                        *error = MB_ERROR_MEMORY_FAIL;
+                        }
+                    }
                 if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
                 
-                                if (project->num_crossings > 0)
-                                        {
-                                        project->crossings = (struct mbna_crossing *)
-                                                malloc(sizeof(struct mbna_crossing) * (project->num_crossings));
-                                        if (project->crossings != NULL)
-                                                {
-                                                project->num_crossings_alloc = project->num_crossings;
-                                                memset(project->crossings,0,sizeof(struct mbna_crossing) * project->num_crossings_alloc);
-                                                }
-                                        else
-                                                {
-                                                project->num_crossings_alloc = 0;
-                                                status = MB_FAILURE;
-                                                *error = MB_ERROR_MEMORY_FAIL;
-                                                }
-                                        }
+                if (project->num_crossings > 0)
+                    {
+                    project->crossings = (struct mbna_crossing *)
+                            malloc(sizeof(struct mbna_crossing) * (project->num_crossings));
+                    if (project->crossings != NULL)
+                        {
+                        project->num_crossings_alloc = project->num_crossings;
+                        memset(project->crossings,0,sizeof(struct mbna_crossing) * project->num_crossings_alloc);
+                        }
+                    else
+                        {
+                        project->num_crossings_alloc = 0;
+                        status = MB_FAILURE;
+                        *error = MB_ERROR_MEMORY_FAIL;
+                        }
+                    }
                 if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
                 
-                                for (i=0;i<project->num_files;i++)
-                                        {
-                                        file = &project->files[i];
-                                        file->num_sections_alloc = 0;
-                                        file->sections = NULL;
-                                        file->num_snavs = 0;
-                                        file->num_pings = 0;
-                                        file->num_beams = 0;
-					if (version_id >= 306)
-						{
-						if (status == MB_SUCCESS
-							&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-								|| (nscan = sscanf(buffer,"FILE %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %s",
-								&idummy,
-								&(file->status),
-								&(file->id),
-								&(file->format),
-								&(file->block),
-								&(file->block_offset_x),
-								&(file->block_offset_y),
-								&(file->block_offset_z),
-								&(file->heading_bias_import),
-								&(file->roll_bias_import),
-								&(file->heading_bias),
-								&(file->roll_bias),
-								&(file->num_sections),
-								&(file->output_id),
-								file->file)) != 15))
-							status = MB_FAILURE;
-						}
-					else
-						{
-						if (status == MB_SUCCESS
-							&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-								|| (nscan = sscanf(buffer,"FILE %d %d %d %d %lf %lf %lf %lf %d %d %s",
-								&idummy,
-								&(file->status),
-								&(file->id),
-								&(file->format),
-								&(file->heading_bias_import),
-								&(file->roll_bias_import),
-								&(file->heading_bias),
-								&(file->roll_bias),
-								&(file->num_sections),
-								&(file->output_id),
-								file->file)) != 11))
-							status = MB_FAILURE;
-						file->block = 0;
-						file->block_offset_x = 0.0;
-						file->block_offset_y = 0.0;
-						file->block_offset_z = 0.0;
-						}
-                
-                                        /* set file->path as absolute path
-                                            - file->file may be a relative path */
-                                        if (status == MB_SUCCESS)
-                                                {
-                                                if (file->file[0] == '/')
-                                                    strcpy(file->path, file->file);
-                                                else
-                                                    {
-                                                    strcpy(file->path, project->path);
-                                                    strcat(file->path, file->file);
-                                                    }
-                                                }
-                
-                                        /* read section info */
-                                        if (file->num_sections > 0)
-                                                {
-                                                file->sections = (struct mbna_section *)
-                                                        malloc(sizeof(struct mbna_section) * (file->num_sections));
-                                                if (file->sections != NULL)
-                                                        {
-                                                        file->num_sections_alloc = file->num_sections;
-                                                        memset(file->sections,0,sizeof(struct mbna_section) * file->num_sections_alloc);
-                                                        }
-                                                else
-                                                        {
-                                                        file->num_sections_alloc = 0;
-                                                        status = MB_FAILURE;
-                                                        *error = MB_ERROR_MEMORY_FAIL;
-                                                        }
-                                                }
-                                        for (j=0;j<file->num_sections;j++)
-                                                {
-                                                section = &file->sections[j];
-                                                if (status == MB_SUCCESS)
-                                                        result = fgets(buffer,BUFFER_MAX,hfp);
-                                                if (status == MB_SUCCESS && result == buffer)
-                                                        nscan = sscanf(buffer,"SECTION %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %d",
-                                                                &idummy,
-                                                                &section->num_pings,
-                                                                &section->num_beams,
-                                                                &section->num_snav,
-                                                                &section->continuity,
-                                                                &section->distance,
-                                                                &section->btime_d,
-                                                                &section->etime_d,
-                                                                &section->lonmin,
-                                                                &section->lonmax,
-                                                                &section->latmin,
-                                                                &section->latmax,
-                                                                &section->depthmin,
-                                                                &section->depthmax,
-                                                                &section->contoursuptodate);
-                                                if (result != buffer || nscan < 14)
-                                                        {
-                                                        status = MB_FAILURE;
-fprintf(stderr, "read failed on section: %s\n", buffer);
-                                                        }
-                                                if (nscan < 15)
-                                                        section->contoursuptodate = MB_NO;
-                                                for (k=MBNA_MASK_DIM-1;k>=0;k--)
-                                                    {
-                                                    if (status == MB_SUCCESS)
-                                                        result = fgets(buffer,BUFFER_MAX,hfp);
-                                                    for (l=0;l<MBNA_MASK_DIM;l++)
-                                                        {
-                                                        sscanf(&buffer[l], "%1d", &section->coverage[l+k*MBNA_MASK_DIM]);
-                                                        }
-                                                    }
-if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
-/*fprintf(stderr,"%s/nvs_%4.4d_%4.4d.mb71\n",
-project->datadir,file->id,j);
-for (k=MBNA_MASK_DIM-1;k>=0;k--)
-{
-for (l=0;l<MBNA_MASK_DIM;l++)
-{
-fprintf(stderr, "%1d", section->coverage[l + k * MBNA_MASK_DIM]);
-}
-fprintf(stderr, "\n");
-}*/
-                                                for (k=0;k<section->num_snav;k++)
-                                                    {
-                                                    if (status == MB_SUCCESS)
-                                                        result = fgets(buffer,BUFFER_MAX,hfp);
-                                                    if (status == MB_SUCCESS && result == buffer)
-                                                        nscan = sscanf(buffer,"SNAV %d %d %lf %lf %lf %lf %lf %lf %lf",
-                                                                &idummy,
-                                                                &section->snav_id[k],
-                                                                &section->snav_distance[k],
-                                                                &section->snav_time_d[k],
-                                                                &section->snav_lon[k],
-                                                                &section->snav_lat[k],
-                                                                &section->snav_lon_offset[k],
-                                                                &section->snav_lat_offset[k],
-                                                                &section->snav_z_offset[k]);
-                                                    section->snav_num_ties[k] = 0;
-                                                    section->snav_lon_offset_int[k] = 0.0;
-                                                    section->snav_lat_offset_int[k] = 0.0;
-                                                    section->snav_z_offset_int[k] = 0.0;
-                                                    if (result == buffer && nscan == 6)
-                                                        {
-                                                        section->snav_lon_offset[k] = 0.0;
-                                                        section->snav_lat_offset[k] = 0.0;
-                                                        section->snav_z_offset[k] = 0.0;
-                                                        }
-                                                    else if (result == buffer && nscan == 8)
-                                                        {
-                                                        section->snav_z_offset[k] = 0.0;
-                                                        }
-                                                    else if (result != buffer || nscan != 9)
-                                                        {
-                                                        status = MB_FAILURE;
-fprintf(stderr, "read failed on snav: %s\n", buffer);
-                                                        }
-                
-                                                    /* reverse offset values if older values */
-                                                    if (version_id < 300)
-                                                        {
-                                                        section->snav_lon_offset[k] *= -1.0;
-                                                        section->snav_lat_offset[k] *= -1.0;
-                                                        section->snav_z_offset[k] *= -1.0;
-                                                        }
-                                                    }
-						
-						/* global fixed frame tie, whether defined or not */
-						if (version_id >= 305)
-							{
-							if (status == MB_SUCCESS)
-								result = fgets(buffer,BUFFER_MAX,hfp);
-							if (status == MB_SUCCESS && result == buffer)
-								nscan = sscanf(buffer,"GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf",
-									&section->global_tie_status,
-									&section->global_tie_snav,
-									&section->global_tie_offset_x,
-									&section->global_tie_offset_y,
-									&section->global_tie_offset_z_m,
-									&section->global_tie_xsigma,
-									&section->global_tie_ysigma,
-									&section->global_tie_zsigma);
-							mb_coor_scale(verbose,0.5 * (section->latmin + section->latmax),
-									&mtodeglon,&mtodeglat);
-							section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
-							section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
-							}
-						else if (version_id == 304)
-							{
-							if (status == MB_SUCCESS)
-								result = fgets(buffer,BUFFER_MAX,hfp);
-							if (status == MB_SUCCESS && result == buffer)
-								nscan = sscanf(buffer,"GLOBALTIE %d %lf %lf %lf %lf %lf %lf",
-									&section->global_tie_snav,
-									&section->global_tie_offset_x,
-									&section->global_tie_offset_y,
-									&section->global_tie_offset_z_m,
-									&section->global_tie_xsigma,
-									&section->global_tie_ysigma,
-									&section->global_tie_zsigma);
-							if (section->global_tie_snav != MBNA_SELECT_NONE)
-								section->global_tie_status = MBNA_TIE_XYZ;
-							else
-								section->global_tie_status = MBNA_TIE_NONE;
-							mb_coor_scale(verbose,0.5 * (section->latmin + section->latmax),
-									&mtodeglon,&mtodeglat);
-							section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
-							section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
-							}
-						else
-							{
-							section->global_tie_status = MBNA_TIE_NONE;
-							section->global_tie_snav = MBNA_SELECT_NONE;
-							section->global_tie_offset_x = 0.0;
-							section->global_tie_offset_y = 0.0;
-							section->global_tie_offset_x_m = 0.0;
-							section->global_tie_offset_y_m = 0.0;
-							section->global_tie_offset_z_m = 0.0;
-							section->global_tie_xsigma = 0.0;
-							section->global_tie_ysigma = 0.0;
-							section->global_tie_zsigma = 0.0;
-							}
-						}
-					}
-                
-				/* count the number of blocks */
-				if (version_id < 306)
-					{
-					project->num_blocks = 0;
-					for (i=0;i<project->num_files;i++)
-						{
-						file = &project->files[i];
-						if (i==0 || file->sections[0].continuity == MB_NO)
-							{
-							project->num_blocks++;
-							}
-						file->block = project->num_blocks - 1;
-						file->block_offset_x = 0.0;
-						file->block_offset_y = 0.0;
-						file->block_offset_z = 0.0;
-						}
-					}
-		    
-                                /* read crossings */
-                                project->num_crossings_analyzed = 0;
-                                project->num_goodcrossings = 0;
-                                project->num_truecrossings = 0;
-                                project->num_truecrossings_analyzed = 0;
-                                project->num_ties = 0;
-                                for (i=0;i<project->num_crossings;i++)
-                                        {
-                                        /* read each crossing */
-                                        crossing = &project->crossings[i];
-                                        if (status == MB_SUCCESS
-                                                && version_id >= 106)
-                                                {
-                                                if (status == MB_SUCCESS
-                                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                                || (nscan = sscanf(buffer,"CROSSING %d %d %d %d %d %d %d %d %d",
-                                                                &idummy,
-                                                                &crossing->status,
-                                                                &crossing->truecrossing,
-                                                                &crossing->overlap,
-                                                                &crossing->file_id_1,
-                                                                &crossing->section_1,
-                                                                &crossing->file_id_2,
-                                                                &crossing->section_2,
-                                                                &crossing->num_ties)) != 9))
-                                                                {
-                                                                status = MB_FAILURE;
-fprintf(stderr, "read failed on crossing: %s\n", buffer);
-                                                                }
-                                                }
-                                        else if (status == MB_SUCCESS
-                                                && version_id >= 102)
-                                                {
-                                                crossing->overlap = 0;
-                                                if (status == MB_SUCCESS
-                                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                                || (nscan = sscanf(buffer,"CROSSING %d %d %d %d %d %d %d %d",
-                                                                &idummy,
-                                                                &crossing->status,
-                                                                &crossing->truecrossing,
-                                                                &crossing->file_id_1,
-                                                                &crossing->section_1,
-                                                                &crossing->file_id_2,
-                                                                &crossing->section_2,
-                                                                &crossing->num_ties)) != 8))
-                                                                {
-                                                                status = MB_FAILURE;
-fprintf(stderr, "read failed on crossing: %s\n", buffer);
-                                                                }
-                                                }
-                                        else if (status == MB_SUCCESS)
-                                                {
-                                                crossing->truecrossing = MB_NO;
-                                                crossing->overlap = 0;
-                                                if (status == MB_SUCCESS
-                                                        && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                                || (nscan = sscanf(buffer,"CROSSING %d %d %d %d %d %d %d",
-                                                                &idummy,
-                                                                &crossing->status,
-                                                                &crossing->file_id_1,
-                                                                &crossing->section_1,
-                                                                &crossing->file_id_2,
-                                                                &crossing->section_2,
-                                                                &crossing->num_ties)) != 7))
-                                                                {
-                                                                status = MB_FAILURE;
-fprintf(stderr, "read failed on old format crossing: %s\n", buffer);
-                                                                }
-                                                }
-                                        if (status == MB_SUCCESS
-                                            && crossing->status != MBNA_CROSSING_STATUS_NONE)
-                                                project->num_crossings_analyzed++;
-                                        if (status == MB_SUCCESS
-                                            && crossing->truecrossing == MB_YES)
-                                                {
-                                                project->num_truecrossings++;
-                                                if (crossing->status != MBNA_CROSSING_STATUS_NONE)
-                                                project->num_truecrossings_analyzed++;
-                                                }
-                
-                                        /* reorder crossing to be early file first older file second if
-                                                file version prior to 3.00 */
-                                        if (version_id < 300)
-                                                {
-                                                idummy = crossing->file_id_1;
-                                                jdummy = crossing->section_1;
-                                                crossing->file_id_1 = crossing->file_id_2;
-                                                crossing->section_1 = crossing->section_2;
-                                                crossing->file_id_2 = idummy;
-                                                crossing->section_2 = jdummy;
-                                                }
-                
-                                        /* read ties */
-                                        if (status == MB_SUCCESS)
-                                        for (j=0;j<crossing->num_ties;j++)
-                                                {
-                                                /* read each tie */
-                                                tie = &crossing->ties[j];
-                                                if (status == MB_SUCCESS && version_id >= 302)
-                                                        {
-                                                        if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                                || (nscan = sscanf(buffer,"TIE %d %d %d %lf %d %lf %lf %lf %lf %d %lf %lf %lf",
-                                                                        &idummy,
-                                                                        &tie->status,
-                                                                        &tie->snav_1,
-                                                                        &tie->snav_1_time_d,
-                                                                        &tie->snav_2,
-                                                                        &tie->snav_2_time_d,
-                                                                        &tie->offset_x,
-                                                                        &tie->offset_y,
-                                                                        &tie->offset_z_m,
-                                                                        &tie->inversion_status,
-                                                                        &tie->inversion_offset_x,
-                                                                        &tie->inversion_offset_y,
-                                                                        &tie->inversion_offset_z_m)) != 13)
-                                                                {
-                                                                status = MB_FAILURE;
-fprintf(stderr, "read failed on tie: %s\n", buffer);
-                                                                }
-                                                        }
-                                                else if (status == MB_SUCCESS && version_id >= 104)
-                                                        {
-                                                        if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                                || (nscan = sscanf(buffer,"TIE %d %d %lf %d %lf %lf %lf %lf %d %lf %lf %lf",
-                                                                        &idummy,
-                                                                        &tie->snav_1,
-                                                                        &tie->snav_1_time_d,
-                                                                        &tie->snav_2,
-                                                                        &tie->snav_2_time_d,
-                                                                        &tie->offset_x,
-                                                                        &tie->offset_y,
-                                                                        &tie->offset_z_m,
-                                                                        &tie->inversion_status,
-                                                                        &tie->inversion_offset_x,
-                                                                        &tie->inversion_offset_y,
-                                                                        &tie->inversion_offset_z_m)) != 12)
-                                                                {
-                                                                status = MB_FAILURE;
-fprintf(stderr, "read failed on tie: %s\n", buffer);
-                                                                }
-                                                        tie->status = MBNA_TIE_XYZ;
-                                                        }
-                                                else if (status == MB_SUCCESS)
-                                                        {
-                                                        if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                                || (nscan = sscanf(buffer,"TIE %d %d %lf %d %lf %lf %lf %d %lf %lf",
-                                                                        &idummy,
-                                                                        &tie->snav_1,
-                                                                        &tie->snav_1_time_d,
-                                                                        &tie->snav_2,
-                                                                        &tie->snav_2_time_d,
-                                                                        &tie->offset_x,
-                                                                        &tie->offset_y,
-                                                                        &tie->inversion_status,
-                                                                        &tie->inversion_offset_x,
-                                                                        &tie->inversion_offset_y)) != 10)
-                                                                {
-                                                                status = MB_FAILURE;
-fprintf(stderr, "read failed on tie: %s\n", buffer);
-                                                                }
-                                                        tie->status = MBNA_TIE_XYZ;
-                                                        tie->offset_z_m = 0.0;
-                                                        tie->inversion_offset_z_m = 0.0;
-                                                        }
-                
-                                                /* reorder crossing to be early file first older file second if
-                                                        file version prior to 3.00 */
-                                                if (version_id < 300)
-                                                        {
-                                                        idummy = tie->snav_1;
-                                                        dummy = tie->snav_1_time_d;
-                                                        tie->snav_1 = tie->snav_2;
-                                                        tie->snav_1_time_d = tie->snav_2_time_d;
-                                                        tie->snav_2 = idummy;
-                                                        tie->snav_2_time_d = dummy;
-/*					                tie->offset_x *= -1.0;
-                                                        tie->offset_y *= -1.0;
-                                                        tie->offset_z_m *= -1.0;
-                                                        tie->inversion_offset_x *= -1.0;
-                                                        tie->inversion_offset_y *= -1.0;
-                                                        tie->inversion_offset_z_m *= -1.0;*/
-                                                        }
-                
-                                                /* for version 2.0 or later read covariance */
-                                                if (status == MB_SUCCESS && version_id >= 200)
-                                                        {
-                                                        if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-                                                                || (nscan = sscanf(buffer,"COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-                                                                        &tie->sigmar1,
-                                                                        &(tie->sigmax1[0]),
-                                                                        &(tie->sigmax1[1]),
-                                                                        &(tie->sigmax1[2]),
-                                                                        &tie->sigmar2,
-                                                                        &(tie->sigmax2[0]),
-                                                                        &(tie->sigmax2[1]),
-                                                                        &(tie->sigmax2[2]),
-                                                                        &tie->sigmar3,
-                                                                        &(tie->sigmax3[0]),
-                                                                        &(tie->sigmax3[1]),
-                                                                        &(tie->sigmax3[2]))) != 12)
-                                                                {
-                                                                status = MB_FAILURE;
-fprintf(stderr, "read failed on tie covariance: %s\n", buffer);
-                                                                }
-                                                        if (tie->sigmar1 <= 0.0)
-                                                                {
-                                                                tie->sigmax1[0] = 1.0;
-                                                                tie->sigmax1[1] = 0.0;
-                                                                tie->sigmax1[2] = 0.0;
-                                                                }
-                                                        if (tie->sigmar2 <= 0.0)
-                                                                {
-                                                                tie->sigmax2[0] = 0.0;
-                                                                tie->sigmax2[1] = 1.0;
-                                                                tie->sigmax2[2] = 0.0;
-                                                                }
-                                                        if (tie->sigmar3 <= 0.0)
-                                                                {
-                                                                tie->sigmax3[0] = 0.0;
-                                                                tie->sigmax3[1] = 0.0;
-                                                                tie->sigmax3[2] = 1.0;
-                                                                }
-                                                        }
-                                                else if (status == MB_SUCCESS)
-                                                        {
-                                                        tie->sigmar1 = 100.0;
-                                                        tie->sigmax1[0] = 1.0;
-                                                        tie->sigmax1[1] = 0.0;
-                                                        tie->sigmax1[2] = 0.0;
-                                                        tie->sigmar2 = 100.0;
-                                                        tie->sigmax2[0] = 0.0;
-                                                        tie->sigmax2[1] = 1.0;
-                                                        tie->sigmax2[2] = 0.0;
-                                                        tie->sigmar3 = 100.0;
-                                                        tie->sigmax3[0] = 0.0;
-                                                        tie->sigmax3[1] = 0.0;
-                                                        tie->sigmax3[2] = 1.0;
-                                                        }
-                
-                                                /* update number of ties */
-                                                if (status == MB_SUCCESS)
-                                                    {
-                                                    project->num_ties++;
-                                                    }
-                
-                                                /* check for reasonable snav id's */
-                                                if (status == MB_SUCCESS)
-                                                    {
-                                                    file = &project->files[crossing->file_id_1];
-                                                    section = &file->sections[crossing->section_1];
-                                                    if (tie->snav_1 >= section->num_snav)
-                                                        {
-                                                        tie->snav_1 = ((double)tie->snav_1
-                                                                                / (double)section->num_pings)
-                                                                                * (MBNA_SNAV_NUM - 1);
-                                                        tie->snav_1_time_d = section->snav_time_d[tie->snav_1];
-fprintf(stderr,"Reset tie snav_1 on read:%d\n",tie->snav_1);
-                                                        }
-                                                    file = &project->files[crossing->file_id_2];
-                                                    section = &file->sections[crossing->section_2];
-                                                    if (tie->snav_2 >= section->num_snav)
-                                                        {
-                                                        tie->snav_2 = ((double)tie->snav_2
-                                                                                / (double)section->num_pings)
-                                                                                * (MBNA_SNAV_NUM - 1);
-                                                        tie->snav_2_time_d = section->snav_time_d[tie->snav_2];
-fprintf(stderr,"Reset tie snav_2 on read:%d\n",tie->snav_2);
-                                                        }
-                                                    }
-                
-                                                /* update number of ties for snavs */
-                                                if (status == MB_SUCCESS)
-                                                    {
-                                                    file = &project->files[crossing->file_id_1];
-                                                    section = &file->sections[crossing->section_1];
-                                                    section->snav_num_ties[tie->snav_1]++;
-                                                    file = &project->files[crossing->file_id_2];
-                                                    section = &file->sections[crossing->section_2];
-                                                    section->snav_num_ties[tie->snav_2]++;
-                                                    }
-                
-                                                /* calculate offsets in local meters */
-                                                if (status == MB_SUCCESS)
-                                                    {
-                                                    section1 = &(project->files[crossing->file_id_1].sections[crossing->section_1]);
-                                                    section2 = &(project->files[crossing->file_id_2].sections[crossing->section_2]);
-                                                    mb_coor_scale(verbose,0.5 * (MIN(section1->latmin,section2->latmin)
-										 + MAX(section1->latmax,section2->latmax)),
-                                                                    &mtodeglon,&mtodeglat);
-                                                    tie->offset_x_m = tie->offset_x / mtodeglon;
-                                                    tie->offset_y_m = tie->offset_y / mtodeglat;
-                                                    tie->inversion_offset_x_m = tie->inversion_offset_x / mtodeglon;
-                                                    tie->inversion_offset_y_m = tie->inversion_offset_y / mtodeglat;
-                                                    }
-                                                }
-                
-                                        /* finally make sure crossing has later section second, switch if needed */
-                                        s1id = crossing->file_id_1 * 1000 + crossing->section_1;
-                                        s2id = crossing->file_id_2 * 1000 + crossing->section_2;
-                                        if (s2id < s1id)
-                                                {
-                                                idummy = crossing->file_id_1;
-                                                jdummy = crossing->section_1;
-                                                crossing->file_id_1 = crossing->file_id_2;
-                                                crossing->section_1 = crossing->section_2;
-                                                crossing->file_id_2 = idummy;
-                                                crossing->section_2 = jdummy;
-                                                for (j=0;j<crossing->num_ties;j++)
-                                                        {
-                                                        tie = &crossing->ties[j];
-                                                        idummy = tie->snav_1;
-                                                        dummy = tie->snav_1_time_d;
-                                                        tie->snav_1 = tie->snav_2;
-                                                        tie->snav_1_time_d = tie->snav_2_time_d;
-                                                        tie->snav_2 = idummy;
-                                                        tie->snav_2_time_d = dummy;
-                                                        tie->offset_x *= -1.0;
-                                                        tie->offset_y *= -1.0;
-                                                        tie->offset_x_m *= -1.0;
-                                                        tie->offset_y_m *= -1.0;
-                                                        tie->offset_z_m *= -1.0;
-                                                        tie->inversion_offset_x *= -1.0;
-                                                        tie->inversion_offset_y *= -1.0;
-                                                        tie->inversion_offset_x_m *= -1.0;
-                                                        tie->inversion_offset_y_m *= -1.0;
-                                                        tie->inversion_offset_z_m *= -1.0;
-                                                        }
-                                                }
-                                        }
-                
-                                /* close home file */
-                                fclose(hfp);
-                
-                                /* set project status flag */
-                                if (status == MB_SUCCESS)
-                                        project->open = MB_YES;
-                                else
-                                        {
-                                        for (i=0;i<project->num_files;i++)
-                                                {
-                                                file = &project->files[i];
-                                                if (file->sections != NULL)
-                                                         free( file->sections);
-                                                }
-                                        if (project->files != NULL)
-                                                free(project->files);
-                                        if (project->crossings != NULL)
-                                                free(project->crossings);
-                                        project->open = MB_NO;
-                                        memset(project->name,0,STRING_MAX);
-                                        strcpy(project->name,"None");
-                                        memset(project->path,0,STRING_MAX);
-                                        memset(project->datadir,0,STRING_MAX);
-                                        project->num_files = 0;
-                                        project->num_files_alloc = 0;
-                                        project->num_snavs = 0;
-                                        project->num_pings = 0;
-                                        project->num_beams = 0;
-                                        project->num_crossings = 0;
-                                        project->num_crossings_alloc = 0;
-                                        project->num_crossings_analyzed = 0;
-                                        project->num_goodcrossings = 0;
-                                        project->num_truecrossings = 0;
-                                        project->num_truecrossings_analyzed = 0;
-                                        project->num_ties = 0;
-                                        }
-                                }
-                
-                        /* else set error */
+                for (i=0;i<project->num_files;i++)
+                    {
+                    file = &project->files[i];
+                    file->num_sections_alloc = 0;
+                    file->sections = NULL;
+                    file->num_snavs = 0;
+                    file->num_pings = 0;
+                    file->num_beams = 0;
+                    if (version_id >= 306)
+                        {
+                        if (status == MB_SUCCESS
+                            && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"FILE %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %s",
+                                &idummy,
+                                &(file->status),
+                                &(file->id),
+                                &(file->format),
+                                &(file->block),
+                                &(file->block_offset_x),
+                                &(file->block_offset_y),
+                                &(file->block_offset_z),
+                                &(file->heading_bias_import),
+                                &(file->roll_bias_import),
+                                &(file->heading_bias),
+                                &(file->roll_bias),
+                                &(file->num_sections),
+                                &(file->output_id),
+                                file->file)) != 15))
+                            status = MB_FAILURE;
+                        }
+                    else
+                        {
+                        if (status == MB_SUCCESS
+                            && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                || (nscan = sscanf(buffer,"FILE %d %d %d %d %lf %lf %lf %lf %d %d %s",
+                                &idummy,
+                                &(file->status),
+                                &(file->id),
+                                &(file->format),
+                                &(file->heading_bias_import),
+                                &(file->roll_bias_import),
+                                &(file->heading_bias),
+                                &(file->roll_bias),
+                                &(file->num_sections),
+                                &(file->output_id),
+                                file->file)) != 11))
+                            status = MB_FAILURE;
+                        file->block = 0;
+                        file->block_offset_x = 0.0;
+                        file->block_offset_y = 0.0;
+                        file->block_offset_z = 0.0;
+                        }
+                        
+                    /* set file->path as absolute path
+                        - file->file may be a relative path */
+                    if (status == MB_SUCCESS)
+                        {
+                        if (file->file[0] == '/')
+                            strcpy(file->path, file->file);
                         else
+                            {
+                            strcpy(file->path, project->path);
+                            strcat(file->path, file->file);
+                            }
+                        }
+        
+                    /* read section info */
+                    if (file->num_sections > 0)
+                        {
+                        file->sections = (struct mbna_section *)
+                            malloc(sizeof(struct mbna_section) * (file->num_sections));
+                        if (file->sections != NULL)
+                            {
+                            file->num_sections_alloc = file->num_sections;
+                            memset(file->sections,0,sizeof(struct mbna_section) * file->num_sections_alloc);
+                            }
+                        else
+                            {
+                            file->num_sections_alloc = 0;
+                            status = MB_FAILURE;
+                            *error = MB_ERROR_MEMORY_FAIL;
+                            }
+                        }
+                    for (j=0;j<file->num_sections;j++)
+                        {
+                        section = &file->sections[j];
+                        if (status == MB_SUCCESS)
+                            result = fgets(buffer,BUFFER_MAX,hfp);
+                        if (status == MB_SUCCESS && result == buffer)
+                            nscan = sscanf(buffer,"SECTION %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %d",
+                                        &idummy,
+                                        &section->num_pings,
+                                        &section->num_beams,
+                                        &section->num_snav,
+                                        &section->continuity,
+                                        &section->distance,
+                                        &section->btime_d,
+                                        &section->etime_d,
+                                        &section->lonmin,
+                                        &section->lonmax,
+                                        &section->latmin,
+                                        &section->latmax,
+                                        &section->depthmin,
+                                        &section->depthmax,
+                                        &section->contoursuptodate);
+                        if (result != buffer || nscan < 14)
+                            {
+                            status = MB_FAILURE;
+fprintf(stderr, "read failed on section: %s\n", buffer);
+                            }
+                        if (nscan < 15)
+                           section->contoursuptodate = MB_NO;
+                        for (k=MBNA_MASK_DIM-1;k>=0;k--)
+                            {
+                            if (status == MB_SUCCESS)
+                                result = fgets(buffer,BUFFER_MAX,hfp);
+                            for (l=0;l<MBNA_MASK_DIM;l++)
+                                {
+                                sscanf(&buffer[l], "%1d", &section->coverage[l+k*MBNA_MASK_DIM]);
+                                }
+                            }
+        if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
+        /*fprintf(stderr,"%s/nvs_%4.4d_%4.4d.mb71\n",
+        project->datadir,file->id,j);
+        for (k=MBNA_MASK_DIM-1;k>=0;k--)
+        {
+        for (l=0;l<MBNA_MASK_DIM;l++)
+        {
+        fprintf(stderr, "%1d", section->coverage[l + k * MBNA_MASK_DIM]);
+        }
+        fprintf(stderr, "\n");
+        }*/
+                        for (k=0;k<section->num_snav;k++)
+                            {
+                            if (status == MB_SUCCESS)
+                                result = fgets(buffer,BUFFER_MAX,hfp);
+                            if (status == MB_SUCCESS && result == buffer)
+                                nscan = sscanf(buffer,"SNAV %d %d %lf %lf %lf %lf %lf %lf %lf",
+                                        &idummy,
+                                        &section->snav_id[k],
+                                        &section->snav_distance[k],
+                                        &section->snav_time_d[k],
+                                        &section->snav_lon[k],
+                                        &section->snav_lat[k],
+                                        &section->snav_lon_offset[k],
+                                        &section->snav_lat_offset[k],
+                                        &section->snav_z_offset[k]);
+                            section->snav_num_ties[k] = 0;
+                            section->snav_lon_offset_int[k] = 0.0;
+                            section->snav_lat_offset_int[k] = 0.0;
+                            section->snav_z_offset_int[k] = 0.0;
+                            if (result == buffer && nscan == 6)
+                                {
+                                section->snav_lon_offset[k] = 0.0;
+                                section->snav_lat_offset[k] = 0.0;
+                                section->snav_z_offset[k] = 0.0;
+                                }
+                            else if (result == buffer && nscan == 8)
+                                {
+                                section->snav_z_offset[k] = 0.0;
+                                }
+                            else if (result != buffer || nscan != 9)
                                 {
                                 status = MB_FAILURE;
+fprintf(stderr, "read failed on snav: %s\n", buffer);
                                 }
+        
+                            /* reverse offset values if older values */
+                            if (version_id < 300)
+                                {
+                                section->snav_lon_offset[k] *= -1.0;
+                                section->snav_lat_offset[k] *= -1.0;
+                                section->snav_z_offset[k] *= -1.0;
+                                }
+                            }
+                                
+                        /* global fixed frame tie, whether defined or not */
+                        if (version_id >= 305)
+                            {
+                            if (status == MB_SUCCESS)
+                                result = fgets(buffer,BUFFER_MAX,hfp);
+                            if (status == MB_SUCCESS && result == buffer)
+                                nscan = sscanf(buffer,"GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf",
+                                    &section->global_tie_status,
+                                    &section->global_tie_snav,
+                                    &section->global_tie_offset_x,
+                                    &section->global_tie_offset_y,
+                                    &section->global_tie_offset_z_m,
+                                    &section->global_tie_xsigma,
+                                    &section->global_tie_ysigma,
+                                    &section->global_tie_zsigma);
+                            mb_coor_scale(verbose,0.5 * (section->latmin + section->latmax),
+                                    &mtodeglon,&mtodeglat);
+                            section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
+                            section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
+                            }
+                        else if (version_id == 304)
+                            {
+                            if (status == MB_SUCCESS)
+                                result = fgets(buffer,BUFFER_MAX,hfp);
+                            if (status == MB_SUCCESS && result == buffer)
+                                nscan = sscanf(buffer,"GLOBALTIE %d %lf %lf %lf %lf %lf %lf",
+                                    &section->global_tie_snav,
+                                    &section->global_tie_offset_x,
+                                    &section->global_tie_offset_y,
+                                    &section->global_tie_offset_z_m,
+                                    &section->global_tie_xsigma,
+                                    &section->global_tie_ysigma,
+                                    &section->global_tie_zsigma);
+                            if (section->global_tie_snav != MBNA_SELECT_NONE)
+                                section->global_tie_status = MBNA_TIE_XYZ;
+                            else
+                                section->global_tie_status = MBNA_TIE_NONE;
+                            mb_coor_scale(verbose,0.5 * (section->latmin + section->latmax),
+                                    &mtodeglon,&mtodeglat);
+                            section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
+                            section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
+                            }
+                        else
+                            {
+                            section->global_tie_status = MBNA_TIE_NONE;
+                            section->global_tie_snav = MBNA_SELECT_NONE;
+                            section->global_tie_offset_x = 0.0;
+                            section->global_tie_offset_y = 0.0;
+                            section->global_tie_offset_x_m = 0.0;
+                            section->global_tie_offset_y_m = 0.0;
+                            section->global_tie_offset_z_m = 0.0;
+                            section->global_tie_xsigma = 0.0;
+                            section->global_tie_ysigma = 0.0;
+                            section->global_tie_zsigma = 0.0;
+                            }
                         }
-
-                /* open log file */
-                if ((project->logfp = fopen(project->logfile, "a")) != NULL)
+                    }
+                
+                /* count the number of blocks */
+                if (version_id < 306)
+                    {
+                    project->num_blocks = 0;
+                    for (i=0;i<project->num_files;i++)
                         {
-                        fprintf(project->logfp,"Project opened: %s\n > Project home: %s\n > Number of Files: %d\n > Number of Crossings Found: %d\n > Number of Crossings Analyzed: %d\n > Number of Navigation Ties: %d\n",
-                                                project->name, project->home, project->num_files, project->num_crossings,
-                                                project->num_crossings_analyzed, project->num_ties);
+                        file = &project->files[i];
+                        if (i==0 || file->sections[0].continuity == MB_NO)
+                            {
+                            project->num_blocks++;
+                            }
+                        file->block = project->num_blocks - 1;
+                        file->block_offset_x = 0.0;
+                        file->block_offset_y = 0.0;
+                        file->block_offset_z = 0.0;
                         }
+                    }
+                
+                /* set project bounds and scaling */
+                for (i=0;i<project->num_files;i++)
+                    {
+                    file = &project->files[i];
+                    for (j=0;j<file->num_sections;j++)
+                        {
+                        section = &file->sections[j];
+                        if (i == 0 && j == 0)
+                            {
+                            project->lon_min = section->lonmin;
+                            project->lon_max = section->lonmax;
+                            project->lat_min = section->latmin;
+                            project->lat_max = section->latmax;
+                            }
+                        else
+                            {
+                            project->lon_min = MIN(project->lon_min, section->lonmin);
+                            project->lon_max = MAX(project->lon_max, section->lonmax);
+                            project->lat_min = MIN(project->lat_min, section->latmin);
+                            project->lat_max = MAX(project->lat_max, section->latmax);
+                            }
+                        }
+                    }
+                mb_coor_scale(verbose,0.5 * (project->lat_min + project->lat_max),
+                                &project->mtodeglon,&project->mtodeglat);
+                
+                /* read crossings */
+                project->num_crossings_analyzed = 0;
+                project->num_goodcrossings = 0;
+                project->num_truecrossings = 0;
+                project->num_truecrossings_analyzed = 0;
+                project->num_ties = 0;
+                for (i=0;i<project->num_crossings;i++)
+                    {
+                    /* read each crossing */
+                    crossing = &project->crossings[i];
+                    if (status == MB_SUCCESS
+                        && version_id >= 106)
+                        {
+                        if (status == MB_SUCCESS
+                            && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                    || (nscan = sscanf(buffer,"CROSSING %d %d %d %d %d %d %d %d %d",
+                                    &idummy,
+                                    &crossing->status,
+                                    &crossing->truecrossing,
+                                    &crossing->overlap,
+                                    &crossing->file_id_1,
+                                    &crossing->section_1,
+                                    &crossing->file_id_2,
+                                    &crossing->section_2,
+                                    &crossing->num_ties)) != 9))
+                            {
+                            status = MB_FAILURE;
+fprintf(stderr, "read failed on crossing: %s\n", buffer);
+                            }
+                        }
+                    else if (status == MB_SUCCESS
+                        && version_id >= 102)
+                        {
+                        crossing->overlap = 0;
+                        if (status == MB_SUCCESS
+                            && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                            || (nscan = sscanf(buffer,"CROSSING %d %d %d %d %d %d %d %d",
+                            &idummy,
+                            &crossing->status,
+                            &crossing->truecrossing,
+                            &crossing->file_id_1,
+                            &crossing->section_1,
+                            &crossing->file_id_2,
+                            &crossing->section_2,
+                            &crossing->num_ties)) != 8))
+                            {
+                            status = MB_FAILURE;
+fprintf(stderr, "read failed on crossing: %s\n", buffer);
+                            }
+                        }
+                    else if (status == MB_SUCCESS)
+                        {
+                        crossing->truecrossing = MB_NO;
+                        crossing->overlap = 0;
+                        if (status == MB_SUCCESS
+                            && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                            || (nscan = sscanf(buffer,"CROSSING %d %d %d %d %d %d %d",
+                            &idummy,
+                            &crossing->status,
+                            &crossing->file_id_1,
+                            &crossing->section_1,
+                            &crossing->file_id_2,
+                            &crossing->section_2,
+                            &crossing->num_ties)) != 7))
+                            {
+                            status = MB_FAILURE;
+fprintf(stderr, "read failed on old format crossing: %s\n", buffer);
+                            }
+                        }
+                    if (status == MB_SUCCESS
+                        && crossing->status != MBNA_CROSSING_STATUS_NONE)
+                            project->num_crossings_analyzed++;
+                    if (status == MB_SUCCESS
+                        && crossing->truecrossing == MB_YES)
+                        {
+                        project->num_truecrossings++;
+                        if (crossing->status != MBNA_CROSSING_STATUS_NONE)
+                        project->num_truecrossings_analyzed++;
+                        }
+            
+                    /* reorder crossing to be early file first older file second if
+                            file version prior to 3.00 */
+                    if (version_id < 300)
+                        {
+                        idummy = crossing->file_id_1;
+                        jdummy = crossing->section_1;
+                        crossing->file_id_1 = crossing->file_id_2;
+                        crossing->section_1 = crossing->section_2;
+                        crossing->file_id_2 = idummy;
+                        crossing->section_2 = jdummy;
+                        }
+        
+                    /* read ties */
+                    if (status == MB_SUCCESS)
+                        {
+                        for (j=0;j<crossing->num_ties;j++)
+                            {
+                            /* read each tie */
+                            tie = &crossing->ties[j];
+                            if (status == MB_SUCCESS && version_id >= 302)
+                                {
+                                if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                    || (nscan = sscanf(buffer,"TIE %d %d %d %lf %d %lf %lf %lf %lf %d %lf %lf %lf",
+                                                        &idummy,
+                                                        &tie->status,
+                                                        &tie->snav_1,
+                                                        &tie->snav_1_time_d,
+                                                        &tie->snav_2,
+                                                        &tie->snav_2_time_d,
+                                                        &tie->offset_x,
+                                                        &tie->offset_y,
+                                                        &tie->offset_z_m,
+                                                        &tie->inversion_status,
+                                                        &tie->inversion_offset_x,
+                                                        &tie->inversion_offset_y,
+                                                        &tie->inversion_offset_z_m)) != 13)
+                                    {
+                                    status = MB_FAILURE;
+fprintf(stderr, "read failed on tie: %s\n", buffer);
+                                    }
+                                }
+                            else if (status == MB_SUCCESS && version_id >= 104)
+                                {
+                                if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                        || (nscan = sscanf(buffer,"TIE %d %d %lf %d %lf %lf %lf %lf %d %lf %lf %lf",
+                                                            &idummy,
+                                                            &tie->snav_1,
+                                                            &tie->snav_1_time_d,
+                                                            &tie->snav_2,
+                                                            &tie->snav_2_time_d,
+                                                            &tie->offset_x,
+                                                            &tie->offset_y,
+                                                            &tie->offset_z_m,
+                                                            &tie->inversion_status,
+                                                            &tie->inversion_offset_x,
+                                                            &tie->inversion_offset_y,
+                                                            &tie->inversion_offset_z_m)) != 12)
+                                    {
+                                    status = MB_FAILURE;
+fprintf(stderr, "read failed on tie: %s\n", buffer);
+                                    }
+                                tie->status = MBNA_TIE_XYZ;
+                                }
+                            else if (status == MB_SUCCESS)
+                                {
+                                if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                        || (nscan = sscanf(buffer,"TIE %d %d %lf %d %lf %lf %lf %d %lf %lf",
+                                                    &idummy,
+                                                    &tie->snav_1,
+                                                    &tie->snav_1_time_d,
+                                                    &tie->snav_2,
+                                                    &tie->snav_2_time_d,
+                                                    &tie->offset_x,
+                                                    &tie->offset_y,
+                                                    &tie->inversion_status,
+                                                    &tie->inversion_offset_x,
+                                                    &tie->inversion_offset_y)) != 10)
+                                    {
+                                    status = MB_FAILURE;
+fprintf(stderr, "read failed on tie: %s\n", buffer);
+                                    }
+                                tie->status = MBNA_TIE_XYZ;
+                                tie->offset_z_m = 0.0;
+                                tie->inversion_offset_z_m = 0.0;
+                                }
+        
+                            /* reorder crossing to be early file first older file second if
+                                    file version prior to 3.00 */
+                            if (version_id < 300)
+                                {
+                                idummy = tie->snav_1;
+                                dummy = tie->snav_1_time_d;
+                                tie->snav_1 = tie->snav_2;
+                                tie->snav_1_time_d = tie->snav_2_time_d;
+                                tie->snav_2 = idummy;
+                                tie->snav_2_time_d = dummy;
+            /*					                tie->offset_x *= -1.0;
+                                tie->offset_y *= -1.0;
+                                tie->offset_z_m *= -1.0;
+                                tie->inversion_offset_x *= -1.0;
+                                tie->inversion_offset_y *= -1.0;
+                                tie->inversion_offset_z_m *= -1.0;*/
+                                }
+            
+                            /* for version 2.0 or later read covariance */
+                            if (status == MB_SUCCESS && version_id >= 200)
+                                {
+                                if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                                        || (nscan = sscanf(buffer,"COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+                                                &tie->sigmar1,
+                                                &(tie->sigmax1[0]),
+                                                &(tie->sigmax1[1]),
+                                                &(tie->sigmax1[2]),
+                                                &tie->sigmar2,
+                                                &(tie->sigmax2[0]),
+                                                &(tie->sigmax2[1]),
+                                                &(tie->sigmax2[2]),
+                                                &tie->sigmar3,
+                                                &(tie->sigmax3[0]),
+                                                &(tie->sigmax3[1]),
+                                                &(tie->sigmax3[2]))) != 12)
+                                    {
+                                    status = MB_FAILURE;
+fprintf(stderr, "read failed on tie covariance: %s\n", buffer);
+                                    }
+                                if (tie->sigmar1 <= 0.0)
+                                    {
+                                    tie->sigmax1[0] = 1.0;
+                                    tie->sigmax1[1] = 0.0;
+                                    tie->sigmax1[2] = 0.0;
+                                    }
+                                if (tie->sigmar2 <= 0.0)
+                                    {
+                                    tie->sigmax2[0] = 0.0;
+                                    tie->sigmax2[1] = 1.0;
+                                    tie->sigmax2[2] = 0.0;
+                                    }
+                                if (tie->sigmar3 <= 0.0)
+                                    {
+                                    tie->sigmax3[0] = 0.0;
+                                    tie->sigmax3[1] = 0.0;
+                                    tie->sigmax3[2] = 1.0;
+                                    }
+                                }
+                            else if (status == MB_SUCCESS)
+                                {
+                                tie->sigmar1 = 100.0;
+                                tie->sigmax1[0] = 1.0;
+                                tie->sigmax1[1] = 0.0;
+                                tie->sigmax1[2] = 0.0;
+                                tie->sigmar2 = 100.0;
+                                tie->sigmax2[0] = 0.0;
+                                tie->sigmax2[1] = 1.0;
+                                tie->sigmax2[2] = 0.0;
+                                tie->sigmar3 = 100.0;
+                                tie->sigmax3[0] = 0.0;
+                                tie->sigmax3[1] = 0.0;
+                                tie->sigmax3[2] = 1.0;
+                                }
+            
+                            /* update number of ties */
+                            if (status == MB_SUCCESS)
+                                {
+                                project->num_ties++;
+                                }
+            
+                            /* check for reasonable snav id's */
+                            if (status == MB_SUCCESS)
+                                {
+                                file = &project->files[crossing->file_id_1];
+                                section = &file->sections[crossing->section_1];
+                                if (tie->snav_1 >= section->num_snav)
+                                    {
+                                    tie->snav_1 = ((double)tie->snav_1
+                                                            / (double)section->num_pings)
+                                                            * (MBNA_SNAV_NUM - 1);
+                                    tie->snav_1_time_d = section->snav_time_d[tie->snav_1];
+fprintf(stderr,"Reset tie snav_1 on read:%d\n",tie->snav_1);
+                                    }
+                                file = &project->files[crossing->file_id_2];
+                                section = &file->sections[crossing->section_2];
+                                if (tie->snav_2 >= section->num_snav)
+                                    {
+                                    tie->snav_2 = ((double)tie->snav_2
+                                                            / (double)section->num_pings)
+                                                            * (MBNA_SNAV_NUM - 1);
+                                    tie->snav_2_time_d = section->snav_time_d[tie->snav_2];
+fprintf(stderr,"Reset tie snav_2 on read:%d\n",tie->snav_2);
+                                    }
+                                }
+            
+                            /* update number of ties for snavs */
+                            if (status == MB_SUCCESS)
+                                {
+                                file = &project->files[crossing->file_id_1];
+                                section = &file->sections[crossing->section_1];
+                                section->snav_num_ties[tie->snav_1]++;
+                                file = &project->files[crossing->file_id_2];
+                                section = &file->sections[crossing->section_2];
+                                section->snav_num_ties[tie->snav_2]++;
+                                }
+            
+                            /* calculate offsets in local meters */
+                            if (status == MB_SUCCESS)
+                                {
+                                section1 = &(project->files[crossing->file_id_1].sections[crossing->section_1]);
+                                section2 = &(project->files[crossing->file_id_2].sections[crossing->section_2]);
+                                mb_coor_scale(verbose,0.5 * (MIN(section1->latmin,section2->latmin)
+                                                + MAX(section1->latmax,section2->latmax)),
+                                                &mtodeglon,&mtodeglat);
+                                tie->offset_x_m = tie->offset_x / mtodeglon;
+                                tie->offset_y_m = tie->offset_y / mtodeglat;
+                                tie->inversion_offset_x_m = tie->inversion_offset_x / mtodeglon;
+                                tie->inversion_offset_y_m = tie->inversion_offset_y / mtodeglat;
+                                }
+                            }
+                        }
+        
+                    /* finally make sure crossing has later section second, switch if needed */
+                    s1id = crossing->file_id_1 * 1000 + crossing->section_1;
+                    s2id = crossing->file_id_2 * 1000 + crossing->section_2;
+                    if (s2id < s1id)
+                        {
+                        idummy = crossing->file_id_1;
+                        jdummy = crossing->section_1;
+                        crossing->file_id_1 = crossing->file_id_2;
+                        crossing->section_1 = crossing->section_2;
+                        crossing->file_id_2 = idummy;
+                        crossing->section_2 = jdummy;
+                        for (j=0;j<crossing->num_ties;j++)
+                            {
+                            tie = &crossing->ties[j];
+                            idummy = tie->snav_1;
+                            dummy = tie->snav_1_time_d;
+                            tie->snav_1 = tie->snav_2;
+                            tie->snav_1_time_d = tie->snav_2_time_d;
+                            tie->snav_2 = idummy;
+                            tie->snav_2_time_d = dummy;
+                            tie->offset_x *= -1.0;
+                            tie->offset_y *= -1.0;
+                            tie->offset_x_m *= -1.0;
+                            tie->offset_y_m *= -1.0;
+                            tie->offset_z_m *= -1.0;
+                            tie->inversion_offset_x *= -1.0;
+                            tie->inversion_offset_y *= -1.0;
+                            tie->inversion_offset_x_m *= -1.0;
+                            tie->inversion_offset_y_m *= -1.0;
+                            tie->inversion_offset_z_m *= -1.0;
+                            }
+                        }
+                    }
+            
+                /* close home file */
+                fclose(hfp);
+            
+                /* set project status flag */
+                if (status == MB_SUCCESS)
+                    project->open = MB_YES;
                 else
+                    {
+                    for (i=0;i<project->num_files;i++)
+                            {
+                            file = &project->files[i];
+                            if (file->sections != NULL)
+                                     free( file->sections);
+                            }
+                    if (project->files != NULL)
+                            free(project->files);
+                    if (project->crossings != NULL)
+                            free(project->crossings);
+                    project->open = MB_NO;
+                    memset(project->name,0,STRING_MAX);
+                    strcpy(project->name,"None");
+                    memset(project->path,0,STRING_MAX);
+                    memset(project->datadir,0,STRING_MAX);
+                    project->num_files = 0;
+                    project->num_files_alloc = 0;
+                    project->num_snavs = 0;
+                    project->num_pings = 0;
+                    project->num_beams = 0;
+                    project->num_crossings = 0;
+                    project->num_crossings_alloc = 0;
+                    project->num_crossings_analyzed = 0;
+                    project->num_goodcrossings = 0;
+                    project->num_truecrossings = 0;
+                    project->num_truecrossings_analyzed = 0;
+                    project->num_ties = 0;
+                    }
+        
+                /* recalculate crossing overlap values if not already set */
+                if (project->open == MB_YES)
+                    {
+                    for (i=0;i<project->num_crossings;i++)
                         {
-                        fprintf(stderr,"Failure to open log file %s\n", project->logfile);
-                        *error = MB_ERROR_INIT_FAIL;
-                        status = MB_FAILURE;
+                        crossing = &(project->crossings[i]);
+                        if (crossing->overlap <= 0)
+                            {
+                            mbnavadjust_crossing_overlap(verbose, project, i, error);
+                            }
+                        if (crossing->overlap >= 25)
+                            project->num_goodcrossings++;
                         }
-		}
+                    }
+        
+                /* interpolate inversion solution if it exists */
+                if (project->inversion_status != MBNA_INVERSION_NONE)
+                    mbnavadjust_interpolatesolution(verbose, project, error);
+                }
+        
+            /* else set error */
+            else
+                {
+                status = MB_FAILURE;
+                }
+            }
+        
+        /* open log file */
+        if ((project->logfp = fopen(project->logfile, "a")) != NULL)
+            {
+            fprintf(project->logfp,"Project opened: %s\n > Project home: %s\n > Number of Files: %d\n > Number of Crossings Found: %d\n > Number of Crossings Analyzed: %d\n > Number of Navigation Ties: %d\n",
+                                    project->name, project->home, project->num_files, project->num_crossings,
+                                    project->num_crossings_analyzed, project->num_ties);
+            }
+        else
+            {
+            fprintf(stderr,"Failure to open log file %s\n", project->logfile);
+            *error = MB_ERROR_INIT_FAIL;
+            status = MB_FAILURE;
+            }
+        }
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1276,7 +1332,8 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project,
 	project->num_truecrossings = 0;
  	project->num_truecrossings_analyzed = 0;
 	project->num_ties = 0;
- 	project->inversion = MBNA_INVERSION_NONE;
+ 	project->inversion_status = MBNA_INVERSION_NONE;
+ 	project->grid_status = MBNA_GRID_NONE;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1355,7 +1412,7 @@ fprintf(stderr,"Writing project %s\n", project->name);
 		fprintf(hfp,"##MBNAVADJUST PROJECT\n");
 		fprintf(hfp,"MB-SYSTEM_VERSION\t%s\n",MB_VERSION);
 		fprintf(hfp,"PROGRAM_VERSION\t%s\n",version_id);
-		fprintf(hfp,"FILE_VERSION\t3.06\n");
+		fprintf(hfp,"FILE_VERSION\t3.07\n");
 		fprintf(hfp,"ORIGIN\tGenerated by user <%s> on cpu <%s> at <%s>\n", user,host,date);
 		fprintf(hfp,"NAME\t%s\n",project->name);
 		fprintf(hfp,"PATH\t%s\n",project->path);
@@ -1370,7 +1427,8 @@ fprintf(stderr,"Writing project %s\n", project->name);
 		fprintf(hfp,"CONTOURINTERVAL\t%f\n",project->cont_int);
 		fprintf(hfp,"COLORINTERVAL\t%f\n",project->col_int);
 		fprintf(hfp,"TICKINTERVAL\t%f\n",project->tick_int);
-		fprintf(hfp,"INVERSION\t%d\n",project->inversion);
+		fprintf(hfp,"INVERSION\t%d\n",project->inversion_status);
+		fprintf(hfp,"GRIDSTATUS\t%d\n",project->grid_status);
 		fprintf(hfp,"SMOOTHING\t%f\n",project->smoothing);
 		fprintf(hfp,"ZOFFSETWIDTH\t%f\n",project->zoffsetwidth);
 		for (i=0;i<project->num_files;i++)
@@ -2239,7 +2297,7 @@ fprintf(stderr,"Output %d (expected %d) fixed tie locations to %s\n", nroute, nt
 		}
 
 	/* output offset vectors */
-	if (project->inversion == MBNA_INVERSION_CURRENT)
+	if (project->inversion_status == MBNA_INVERSION_CURRENT)
 		{
 		sprintf(xoffsetfile,"%s%s_dx.txt",project->path,project->name);
 		sprintf(yoffsetfile,"%s%s_dy.txt",project->path,project->name);
@@ -2278,6 +2336,566 @@ fprintf(stderr,"Output %d (expected %d) fixed tie locations to %s\n", nroute, nt
 		}
 
 	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project,
+                                 int crossing_id, int *error)
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_crossing_overlap";
+	int	status = MB_SUCCESS;
+	struct mbna_file *file;
+	struct mbna_crossing *crossing;
+	struct mbna_section *section1;
+	struct mbna_section *section2;
+	int	overlap1[MBNA_MASK_DIM * MBNA_MASK_DIM];
+	int	overlap2[MBNA_MASK_DIM * MBNA_MASK_DIM];
+	double	lonoffset, latoffset;
+	double	lon1min, lon1max;
+	double	lat1min, lat1max;
+	double	lon2min, lon2max;
+	double	lat2min, lat2max;
+	double	dx1, dy1, dx2, dy2;
+	double	overlapfraction;
+	int	ncoverage1, ncoverage2;
+	int	noverlap1, noverlap2;
+	int	first;
+	int	i, ii1, jj1, kk1, ii2, jj2, kk2;
+
+ 	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       project:              %p\n",project);
+		fprintf(stderr,"dbg2       crossing_id:          %d\n",crossing_id);
+		}
+
+	/* get crossing */
+	crossing = (struct mbna_crossing *) &project->crossings[crossing_id];
+
+	/* get section endpoints */
+	file = &project->files[crossing->file_id_1];
+	section1 = &file->sections[crossing->section_1];
+	file = &project->files[crossing->file_id_2];
+	section2 = &file->sections[crossing->section_2];
+	lonoffset = section2->snav_lon_offset[section2->num_snav/2] - section1->snav_lon_offset[section1->num_snav/2];
+	latoffset = section2->snav_lat_offset[section2->num_snav/2] - section1->snav_lat_offset[section1->num_snav/2];
+
+	/* initialize overlap arrays */
+	for (i=0;i<MBNA_MASK_DIM*MBNA_MASK_DIM;i++)
+		{
+		overlap1[i] = 0;
+		overlap2[i] = 0;
+		}
+
+	/* check coverage masks for overlap */
+	first = MB_YES;
+	dx1 = (section1->lonmax - section1->lonmin) / MBNA_MASK_DIM;
+	dy1 = (section1->latmax - section1->latmin) / MBNA_MASK_DIM;
+	dx2 = (section2->lonmax - section2->lonmin) / MBNA_MASK_DIM;
+	dy2 = (section2->latmax - section2->latmin) / MBNA_MASK_DIM;
+	for (ii1=0;ii1<MBNA_MASK_DIM;ii1++)
+	    for (jj1=0;jj1<MBNA_MASK_DIM;jj1++)
+		{
+		kk1 = ii1 + jj1 * MBNA_MASK_DIM;
+		if (section1->coverage[kk1] == 1)
+		    {
+		    lon1min = section1->lonmin + dx1 * ii1;
+		    lon1max = section1->lonmin + dx1 * (ii1 + 1);
+		    lat1min = section1->latmin + dy1 * jj1;
+		    lat1max = section1->latmin + dy1 * (jj1 + 1);
+		    for (ii2=0;ii2<MBNA_MASK_DIM;ii2++)
+			for (jj2=0;jj2<MBNA_MASK_DIM;jj2++)
+			    {
+			    kk2 = ii2 + jj2 * MBNA_MASK_DIM;
+			    if (section2->coverage[kk2] == 1)
+				{
+				lon2min = section2->lonmin + dx2 * ii2 + lonoffset;
+				lon2max = section2->lonmin + dx2 * (ii2 + 1) + lonoffset;
+				lat2min = section2->latmin + dy2 * jj2 + latoffset;
+				lat2max = section2->latmin + dy2 * (jj2 + 1) + latoffset;
+				if ((lon1min < lon2max)
+				    && (lon1max > lon2min)
+				    && (lat1min < lat2max)
+				    && (lat1max > lat2min))
+				    {
+				    overlap1[kk1] = 1;
+				    overlap2[kk2] = 1;
+				    }
+				}
+			    }
+		    }
+		}
+
+	/* count fractions covered */
+	ncoverage1 = 0;
+	ncoverage2 = 0;
+	noverlap1 = 0;
+	noverlap2 = 0;
+	for (i=0;i<MBNA_MASK_DIM*MBNA_MASK_DIM;i++)
+		{
+		if (section1->coverage[i] == 1)
+			ncoverage1++;
+		if (section2->coverage[i] == 1)
+			ncoverage2++;
+		if (overlap1[i] == 1)
+			noverlap1++;
+		if (overlap2[i] == 1)
+			noverlap2++;
+		}
+	overlapfraction = (dx1 * dy1) / (dx1 * dy1 + dx2 * dy2)
+				* ((double)noverlap1) / ((double)ncoverage1)
+			+ (dx2 * dy2) / (dx1 * dy1 + dx2 * dy2)
+				* ((double)noverlap2) / ((double)ncoverage2);
+	crossing->overlap = (int) (100.0 * overlapfraction);
+	if (crossing->overlap < 1)
+		crossing->overlap = 1;
+
+ 	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       crossing->overlap: %d\n",crossing->overlap);
+		fprintf(stderr,"dbg2       error:       %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbnavadjust_crossing_overlapbounds(int verbose,
+                                struct mbna_project *project, int crossing_id,
+                                double offset_x, double offset_y,
+                                double *lonmin, double *lonmax,
+                                double *latmin, double *latmax,
+                                int *error)
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_crossing_overlapbounds";
+	int	status = MB_SUCCESS;
+	struct mbna_file *file;
+	struct mbna_crossing *crossing;
+	struct mbna_section *section1;
+	struct mbna_section *section2;
+	int	overlap1[MBNA_MASK_DIM * MBNA_MASK_DIM];
+	int	overlap2[MBNA_MASK_DIM * MBNA_MASK_DIM];
+	double	lon1min, lon1max;
+	double	lat1min, lat1max;
+	double	lon2min, lon2max;
+	double	lat2min, lat2max;
+	double	dx1, dy1, dx2, dy2;
+	int	first;
+	int	i, ii1, jj1, kk1, ii2, jj2, kk2;
+
+ 	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       project:            %p\n",project);
+		fprintf(stderr,"dbg2       crossing_id:          %d\n",crossing_id);
+		fprintf(stderr,"dbg2       offset_x:             %f\n",offset_x);
+		fprintf(stderr,"dbg2       offset_y:             %f\n",offset_y);
+		}
+
+	/* get crossing */
+	crossing = (struct mbna_crossing *) &project->crossings[crossing_id];
+
+	/* get section endpoints */
+	file = &project->files[crossing->file_id_1];
+	section1 = &file->sections[crossing->section_1];
+	file = &project->files[crossing->file_id_2];
+	section2 = &file->sections[crossing->section_2];
+
+	/* initialize overlap arrays */
+	for (i=0;i<MBNA_MASK_DIM*MBNA_MASK_DIM;i++)
+		{
+		overlap1[i] = 0;
+		overlap2[i] = 0;
+		}
+
+	/* check coverage masks for overlap */
+	first = MB_YES;
+	*lonmin = 0.0;
+	*lonmax = 0.0;
+	*latmin = 0.0;
+	*latmax = 0.0;
+	dx1 = (section1->lonmax - section1->lonmin) / MBNA_MASK_DIM;
+	dy1 = (section1->latmax - section1->latmin) / MBNA_MASK_DIM;
+	dx2 = (section2->lonmax - section2->lonmin) / MBNA_MASK_DIM;
+	dy2 = (section2->latmax - section2->latmin) / MBNA_MASK_DIM;
+	for (ii1=0;ii1<MBNA_MASK_DIM;ii1++)
+	    for (jj1=0;jj1<MBNA_MASK_DIM;jj1++)
+		{
+		kk1 = ii1 + jj1 * MBNA_MASK_DIM;
+		if (section1->coverage[kk1] == 1)
+		    {
+		    lon1min = section1->lonmin + dx1 * ii1;
+		    lon1max = section1->lonmin + dx1 * (ii1 + 1);
+		    lat1min = section1->latmin + dy1 * jj1;
+		    lat1max = section1->latmin + dy1 * (jj1 + 1);
+		    for (ii2=0;ii2<MBNA_MASK_DIM;ii2++)
+			for (jj2=0;jj2<MBNA_MASK_DIM;jj2++)
+			    {
+			    kk2 = ii2 + jj2 * MBNA_MASK_DIM;
+			    if (section2->coverage[kk2] == 1)
+				{
+				lon2min = section2->lonmin + dx2 * ii2 + offset_x;
+				lon2max = section2->lonmin + dx2 * (ii2 + 1) + offset_x;
+				lat2min = section2->latmin + dy2 * jj2 + offset_y;
+				lat2max = section2->latmin + dy2 * (jj2 + 1) + offset_y;
+				if ((lon1min < lon2max)
+				    && (lon1max > lon2min)
+				    && (lat1min < lat2max)
+				    && (lat1max > lat2min))
+				    {
+				    overlap1[kk1] = 1;
+				    overlap2[kk2] = 1;
+				    if (first == MB_NO)
+					{
+					*lonmin = MIN(*lonmin, MAX(lon1min, lon2min));
+					*lonmax = MAX(*lonmax, MIN(lon1max, lon2max));
+					*latmin = MIN(*latmin, MAX(lat1min, lat2min));
+					*latmax = MAX(*latmax, MIN(lat1max, lat2max));
+					}
+				    else
+					{
+					first = MB_NO;
+					*lonmin = MAX(lon1min, lon2min);
+					*lonmax = MIN(lon1max, lon2max);
+					*latmin = MAX(lat1min, lat2min);
+					*latmax = MIN(lat1max, lat2max);
+					}
+				    }
+				}
+			    }
+		    }
+		}
+
+ 	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       lonmin:      %.10f\n",*lonmin);
+		fprintf(stderr,"dbg2       lonmax:      %.10f\n",*lonmax);
+		fprintf(stderr,"dbg2       latmin:      %.10f\n",*latmin);
+		fprintf(stderr,"dbg2       latmax:      %.10f\n",*latmax);
+		fprintf(stderr,"dbg2       error:       %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+
+int
+mbnavadjust_interpolatesolution(int verbose, struct mbna_project *project,
+                                int *error)
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_interpolatesolution";
+	int	status = MB_SUCCESS;
+	struct mbna_file *file;
+	struct mbna_file *pfile;
+	struct mbna_section *section;
+	struct mbna_section *psection;
+	int	previoustie;
+	int	ifilestart;
+	int	isectionstart;
+	int	isnavstart;
+	double	plonoffset;
+	double	platoffset;
+	double	pzoffset;
+	double	ptime_d;
+	double	factor;
+	int	ok;
+	int	ii, jj, iisnav;
+	int	i, j, isnav;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
+		fprintf(stderr,"dbg2       project:            %p\n",project);
+		}
+
+	/* linearly interpolate solution between tied snavs */
+	previoustie = MB_NO;
+	ifilestart = 0;
+	isectionstart = 0;
+	isnavstart = 0;
+	for (i=0;i<project->num_files;i++)
+	    {
+	    file = &project->files[i];
+	    for (j=0;j<file->num_sections;j++)
+            {
+            section = &file->sections[j];
+            for (isnav=0;isnav<section->num_snav;isnav++)
+                {
+                /* deal with constrained snav points */
+                if (section->snav_num_ties[isnav] > 0
+                        || section->global_tie_snav == isnav)
+                    {
+                    /* if no previous tie set apply current offset to intervening snav points */
+                    if (previoustie == MB_NO)
+                        {
+                        for (ii=ifilestart;ii<=i;ii++)
+                            {
+                            pfile = &project->files[ii];
+                            for (jj=0;jj<pfile->num_sections;jj++)
+                                {
+                                psection = &pfile->sections[jj];
+                                for (iisnav=0;iisnav<psection->num_snav;iisnav++)
+                                    {
+                                    ok = MB_YES;
+                                    if (ii == ifilestart && jj < isectionstart)
+                                        ok = MB_NO;
+                                    if (ii == ifilestart && jj == isectionstart && iisnav < isnavstart)
+                                        ok = MB_NO;
+                                    if (ii == i && jj > j)
+                                        ok = MB_NO;
+                                    if (ii == i && jj == j && iisnav > isnav)
+                                        ok = MB_NO;
+                                    if (ok == MB_YES)
+                                        {
+                                        psection->snav_lon_offset_int[iisnav] = section->snav_lon_offset[isnav];
+                                        psection->snav_lat_offset_int[iisnav] = section->snav_lat_offset[isnav];
+                                        psection->snav_z_offset_int[iisnav] = section->snav_z_offset[isnav];
+/*fprintf(stderr,"SET1: %d %d %d   %f %f %f\n",
+ii,jj,iisnav,
+psection->snav_lon_offset_int[iisnav],
+psection->snav_lat_offset_int[iisnav],
+psection->snav_z_offset_int[iisnav]);*/
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    /* if previous tie set interpolate intervening snav points */
+                    if (previoustie == MB_YES)
+                        {
+                        pfile = &project->files[ifilestart];
+                        psection = &pfile->sections[isectionstart];
+                        plonoffset = psection->snav_lon_offset[isnavstart];
+                        platoffset = psection->snav_lat_offset[isnavstart];
+                        pzoffset = psection->snav_z_offset[isnavstart];
+                        ptime_d = psection->snav_time_d[isnavstart];
+                        for (ii=ifilestart;ii<=i;ii++)
+                            {
+                            pfile = &project->files[ii];
+                            for (jj=0;jj<pfile->num_sections;jj++)
+                                {
+                                psection = &pfile->sections[jj];
+                                for (iisnav=0;iisnav<psection->num_snav;iisnav++)
+                                    {
+                                    ok = MB_YES;
+                                    if (ii == ifilestart && jj < isectionstart)
+                                        ok = MB_NO;
+                                    if (ii == ifilestart && jj == isectionstart && iisnav <= isnavstart)
+                                        ok = MB_NO;
+                                    if (ii == i && jj > j)
+                                        ok = MB_NO;
+                                    if (ii == i && jj == j && iisnav > isnav)
+                                        ok = MB_NO;
+                                    if (ok == MB_YES)
+                                        {
+                                        if ((section->snav_time_d[isnav] - ptime_d) > 0.0)
+                                            {
+                                            factor = (psection->snav_time_d[iisnav] - ptime_d)
+                                                / (section->snav_time_d[isnav] - ptime_d);
+                                            }
+                                        else
+                                            {
+                                            factor = 0.0;
+                                            }
+                                        psection->snav_lon_offset_int[iisnav] = plonoffset
+                                            + factor * (section->snav_lon_offset[isnav] - plonoffset);
+                                        psection->snav_lat_offset_int[iisnav] = platoffset
+                                            + factor * (section->snav_lat_offset[isnav] - platoffset);
+                                        psection->snav_z_offset_int[iisnav] = pzoffset
+                                            + factor * (section->snav_z_offset[isnav] - pzoffset);
+        /*fprintf(stderr,"SET2: %d %d %d   %f %f %f   times: %f %f %f\n",
+        ii,jj,iisnav,
+        psection->snav_lon_offset_int[iisnav],
+        psection->snav_lat_offset_int[iisnav],
+        psection->snav_z_offset_int[iisnav],
+        section->snav_time_d[isnav],psection->snav_time_d[iisnav],ptime_d);*/
+                                        }
+                                    }
+                                }
+                            }
+                        }
+        
+                    /* reset tracking */
+                    previoustie = MB_YES;
+                    ifilestart = i;
+                    isectionstart = j;
+                    isnavstart = isnav;
+                    }
+    
+                /* deal with a break in continuity */
+                else if (isnav == 0 && section->continuity == MB_NO)
+                    {
+                    /* if previous tie set apply that offset to intervening snav points */
+                    if (previoustie == MB_YES)
+                        {
+                        pfile = &project->files[ifilestart];
+                        psection = &pfile->sections[isectionstart];
+                        plonoffset = psection->snav_lon_offset[isnavstart];
+                        platoffset = psection->snav_lat_offset[isnavstart];
+                        pzoffset = psection->snav_z_offset[isnavstart];
+                        for (ii=ifilestart;ii<=i;ii++)
+                            {
+                            pfile = &project->files[ii];
+                            for (jj=0;jj<pfile->num_sections;jj++)
+                                {
+                                psection = &pfile->sections[jj];
+                                for (iisnav=0;iisnav<psection->num_snav;iisnav++)
+                                    {
+                                    ok = MB_YES;
+                                    if (ii == ifilestart && jj < isectionstart)
+                                        ok = MB_NO;
+                                    if (ii == ifilestart && jj == isectionstart && iisnav <= isnavstart)
+                                        ok = MB_NO;
+                                    if (ii == i && jj > j)
+                                        ok = MB_NO;
+                                    if (ii == i && jj == j && iisnav >= isnav)
+                                        ok = MB_NO;
+                                    if (ok == MB_YES)
+                                        {
+                                        psection->snav_lon_offset_int[iisnav] = plonoffset;
+                                        psection->snav_lat_offset_int[iisnav] = platoffset;
+                                        psection->snav_z_offset_int[iisnav] = pzoffset;
+/*fprintf(stderr,"SET3: %d %d %d   %f %f %f\n",
+ii,jj,iisnav,
+psection->snav_lon_offset_int[iisnav],
+psection->snav_lat_offset_int[iisnav],
+psection->snav_z_offset_int[iisnav]);*/
+                                        }
+                
+                                    }
+                                }
+                            }
+                        }
+        
+                    /* reset tracking */
+                    previoustie = MB_NO;
+                    ifilestart = i;
+                    isectionstart = j;
+                    isnavstart = isnav;
+                    }
+
+                /* deal with end of data */
+                else if (i == project->num_files - 1
+                        && j == file->num_sections - 1
+                        && isnav == section->num_snav - 1)
+                    {
+                    /* if previous tie set apply that offset to intervening snav points */
+                    if (previoustie == MB_YES)
+                        {
+                        pfile = &project->files[ifilestart];
+                        psection = &pfile->sections[isectionstart];
+                        plonoffset = psection->snav_lon_offset[isnavstart];
+                        platoffset = psection->snav_lat_offset[isnavstart];
+                        pzoffset = psection->snav_z_offset[isnavstart];
+                        for (ii=ifilestart;ii<=i;ii++)
+                            {
+                            pfile = &project->files[ii];
+                            for (jj=0;jj<pfile->num_sections;jj++)
+                                {
+                                psection = &pfile->sections[jj];
+                                for (iisnav=0;iisnav<psection->num_snav;iisnav++)
+                                    {
+                                    ok = MB_YES;
+                                    if (ii == ifilestart && jj < isectionstart)
+                                        ok = MB_NO;
+                                    if (ii == ifilestart && jj == isectionstart && iisnav <= isnavstart)
+                                        ok = MB_NO;
+                                    if (ii == i && jj > j)
+                                        ok = MB_NO;
+                                    if (ii == i && jj == j && iisnav > isnav)
+                                        ok = MB_NO;
+                                    if (ok == MB_YES)
+                                        {
+                                        psection->snav_lon_offset_int[iisnav] = plonoffset;
+                                        psection->snav_lat_offset_int[iisnav] = platoffset;
+                                        psection->snav_z_offset_int[iisnav] = pzoffset;
+/*fprintf(stderr,"SET4: %d %d %d   %f %f %f\n",
+ii,jj,iisnav,
+psection->snav_lon_offset_int[iisnav],
+psection->snav_lat_offset_int[iisnav],
+psection->snav_z_offset_int[iisnav]);*/
+                                        }
+                                    }
+                                }
+                            }
+                        }
+        
+                    /* reset tracking */
+                    previoustie = MB_NO;
+                    ifilestart = i;
+                    isectionstart = j;
+                    isnavstart = isnav;
+                    }
+    
+                /* zero unconstrained snav points - these will be interpolated later if possible */
+                else
+                    {
+                    section->snav_lon_offset_int[isnav] = 0.0;
+                    section->snav_lat_offset_int[isnav] = 0.0;
+                    section->snav_z_offset_int[isnav] = 0.0;
+/*fprintf(stderr,"SET5: %d %d %d   %f %f %f\n",
+i,j,isnav,
+section->snav_lon_offset_int[isnav],
+section->snav_lat_offset_int[isnav],
+section->snav_z_offset_int[isnav]);*/
+                    }
+                }
+            }
+	    }
+/*for (i=0;i<project->num_files;i++)
+{
+file = &project->files[i];
+for (j=0;j<file->num_sections;j++)
+{
+section = &file->sections[j];
+for (isnav=0;isnav<section->num_snav;isnav++)
+{
+fprintf(stderr,"INTERPOLATION: %2d %2d %2d   %f %f %f\n",
+i,j,isnav,
+section->snav_lon_offset_int[isnav],
+section->snav_lat_offset_int[isnav],
+section->snav_z_offset_int[isnav]);
+}
+}
+}*/
+
+ 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",

@@ -73,7 +73,7 @@ if ($cpu < 1)
 	}
 	
 # make sure that the input file exists
-if !(-f $datalist)
+if (! -f $datalist)
 	{
 	print "\nExiting $program_name, Input file $datalist does not exist...\n\n";
 	exit 0;

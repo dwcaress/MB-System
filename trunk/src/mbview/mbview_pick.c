@@ -81,6 +81,241 @@ static char rcs_id[]="$Id$";
 
 
 /*------------------------------------------------------------------------------*/
+int mbview_clearpicks(size_t instance)
+{
+
+	/* local variables */
+	char	*function_name = "mbview_clearpicks";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	int	replotinstance;
+	int	replotall;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	inav, jpoint;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
+		}
+
+	/* clear local picks */
+	replotinstance = MB_NO;
+	replotall = MB_NO;
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	if (data->pick_type != MBV_PICK_NONE)
+		{
+		data->pick_type = MBV_PICK_NONE;
+		replotinstance = MB_YES;
+		}
+	if (data->region_type != MBV_REGION_NONE)
+		{
+		data->region_type = MBV_REGION_NONE;
+		replotinstance = MB_YES;
+		}
+	if (data->area_type != MBV_AREA_NONE)
+		{
+		data->area_type = MBV_AREA_NONE;
+		replotinstance = MB_YES;
+		}
+
+	/* clear local profile */
+	if (data->profile.npoints > 0)
+		{
+		data->profile.npoints = 0;
+		data->profile.source = MBV_PROFILE_NONE;
+		if (data->profile_view_mode == MBV_VIEW_ON)
+			mbview_plotprofile(instance);
+		}
+
+	/* clear shared picks */
+	if (shared.shareddata.navpick_type != MBV_PICK_NONE)
+		{
+		shared.shareddata.navpick_type = MBV_PICK_NONE;
+		shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+		shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+		replotall = MB_YES;
+
+		/* loop over the navs resetting selected points */
+		for (inav=0;inav<shared.shareddata.nnav;inav++)
+			{
+			shared.shareddata.navs[inav].nselected = 0;
+			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints;jpoint++)
+				{
+				/* set size and color */
+				if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES)
+					{
+					shared.shareddata.navs[inav].navpts[jpoint].selected = MB_NO;
+					replotall = MB_YES;
+					}
+				}
+			}
+		}
+	if (shared.shareddata.site_selected != MBV_SELECT_NONE)
+		{
+		shared.shareddata.site_selected = MBV_SELECT_NONE;
+		replotall = MB_YES;
+		}
+	if (shared.shareddata.route_selected != MBV_SELECT_NONE)
+		{
+		shared.shareddata.route_selected = MBV_SELECT_NONE;
+		shared.shareddata.route_point_selected = MBV_SELECT_NONE;
+		replotall = MB_YES;
+		}
+
+	/* set widget sensitivity */
+	if (data->active == MB_YES)
+		mbview_update_sensitivity(mbv_verbose, instance, &error);
+
+	/* set pick annotation */
+	mbview_pick_text(instance);
+
+	/* update nav, site, and route lists */
+	mbview_updatenavlist();
+	mbview_updatesitelist();
+	mbview_updateroutelist();
+
+    /* draw */
+    if (replotinstance == MB_YES || replotall == MB_YES)
+    	{
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_clearpicks\n");
+    	mbview_plotlowhigh(instance);
+        }
+
+    /* if needed replot all active instances */
+    if (replotall == MB_YES)
+        {
+        mbview_plothighall(instance);
+        }
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_clearnavpicks(size_t instance)
+{
+
+	/* local variables */
+	char	*function_name = "mbview_clearnavpicks";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	int	replotinstance;
+	int	replotall;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	inav, jpoint;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %zu\n",instance);
+		}
+
+	/* clear local picks */
+	replotinstance = MB_NO;
+	replotall = MB_NO;
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	if (data->pick_type == MBV_PICK_NAV)
+		{
+		data->pick_type = MBV_PICK_NONE;
+		replotinstance = MB_YES;
+		}
+
+	/* clear shared nav picks */
+	if (shared.shareddata.navpick_type != MBV_PICK_NONE)
+		{
+		shared.shareddata.navpick_type = MBV_PICK_NONE;
+		shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+		shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+		replotall = MB_YES;
+
+		/* loop over the navs resetting selected points */
+		for (inav=0;inav<shared.shareddata.nnav;inav++)
+			{
+			shared.shareddata.navs[inav].nselected = 0;
+			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints;jpoint++)
+				{
+				/* set size and color */
+				if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES)
+					{
+					shared.shareddata.navs[inav].navpts[jpoint].selected = MB_NO;
+					replotall = MB_YES;
+					}
+				}
+			}
+		}
+
+	/* set widget sensitivity */
+	if (data->active == MB_YES
+        && (replotinstance == MB_YES || replotall == MB_YES))
+		{
+        mbview_update_sensitivity(mbv_verbose, instance, &error);
+
+        /* set pick annotation */
+        mbview_pick_text(instance);
+
+        /* update nav list */
+        mbview_updatenavlist();
+        }
+
+    /* draw */
+    if (replotinstance == MB_YES || replotall == MB_YES)
+    	{
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_clearpicks\n");
+    	mbview_plotlowhigh(instance);
+        }
+
+    /* if needed replot all active instances */
+    if (replotall == MB_YES)
+        {
+        mbview_plothighall(instance);
+        }
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
 int mbview_pick(size_t instance, int which, int xpixel, int ypixel)
 {
 
@@ -562,6 +797,7 @@ int mbview_pick_text(size_t instance)
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
+//fprintf(stderr,"mbview_pick_text: instance:%zu pickinfo_mode:%d\n",instance,data->pickinfo_mode);
 
 	/* update pick info */
 	if (data->pickinfo_mode == MBV_PICK_ONEPOINT)
@@ -809,7 +1045,7 @@ int mbview_pick_text(size_t instance)
 		sprintf(value_list, "Pick Info: No Pick\n");
 		}*/
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_pickinfo, value_text);
-	fprintf(stderr,"%s\n", value_list);
+//fprintf(stderr,"%s\n", value_list);
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)

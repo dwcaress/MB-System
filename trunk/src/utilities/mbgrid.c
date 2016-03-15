@@ -662,17 +662,20 @@ int main (int argc, char **argv)
 		}
 
 	/* if bounds not set get bounds of input data */
-	if (gbndset == MB_NO)
+	if (gbndset == MB_NO || (set_spacing == MB_NO && set_dimensions == MB_NO))
 		{
 		formatread = -1;
 		status = mb_get_info_datalist(verbose, filelist, &formatread,
 				&mb_info, lonflip, &error);
 
-		gbnd[0] = mb_info.lon_min;
-		gbnd[1] = mb_info.lon_max;
-		gbnd[2] = mb_info.lat_min;
-		gbnd[3] = mb_info.lat_max;
-		gbndset = MB_YES;
+		if (gbndset == MB_NO)
+			{
+			gbnd[0] = mb_info.lon_min;
+			gbnd[1] = mb_info.lon_max;
+			gbnd[2] = mb_info.lat_min;
+			gbnd[3] = mb_info.lat_max;
+			gbndset = MB_YES;
+			}
 
 		if (set_spacing == MB_NO && set_dimensions == MB_NO)
 			{
@@ -685,14 +688,14 @@ int main (int argc, char **argv)
 
         /* if requested expand the grid bounds */
         if (boundsfactor > 1.0)
-                {
-                xx1 = 0.5 * (boundsfactor - 1.0) * (gbnd[1] - gbnd[0]);
-                yy1 = 0.5 * (boundsfactor - 1.0) * (gbnd[3] - gbnd[2]);
-		gbnd[0] -= xx1;
-		gbnd[1] += xx1;
-		gbnd[2] -= yy1;
-		gbnd[3] += yy1;
-                }
+			{
+			xx1 = 0.5 * (boundsfactor - 1.0) * (gbnd[1] - gbnd[0]);
+			yy1 = 0.5 * (boundsfactor - 1.0) * (gbnd[3] - gbnd[2]);
+			gbnd[0] -= xx1;
+			gbnd[1] += xx1;
+			gbnd[2] -= yy1;
+			gbnd[3] += yy1;
+			}
 
 	/* if bounds not specified then quit */
 	if (gbnd[0] >= gbnd[1] || gbnd[2] >= gbnd[3])

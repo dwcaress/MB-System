@@ -157,6 +157,13 @@ enum { WNull, WTab, WNewLine, WCarriageReturn, WFormFeed, WVerticalTab,
 /*****************************************************************************
  *       EXTERNAL DECLARATIONS
  *****************************************************************************/
+extern void RegisterBxConverters(XtAppContext);
+extern XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
+extern XtPointer BX_DOUBLE(double);
+extern XtPointer BX_SINGLE(float);
+extern void BX_MENU_POST(Widget, XtPointer, XEvent *, Boolean *);
+extern Pixmap XPM_PIXMAP(Widget, char **);
+extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 
 /*****************************************************************************
  *	STATIC DECLARATION

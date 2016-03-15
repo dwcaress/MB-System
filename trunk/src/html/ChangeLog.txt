@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2268       March 14, 2016
 * Version 5.5.2267       February 11, 2016
   Version 5.5.2265       February 11, 2016
   Version 5.5.2264       February 2, 2016
@@ -228,7 +229,29 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2266 (February 11, 2016)
+-----> 5.5.2268 (March 14, 2016)
+
+Mbnavadjust: Added integrated mbgrdviz-style visualization of the bathymetry in
+an Mbnavadjust project. Users can select crossings or ties by clicking on the
+navigation in the map view. If two selected sections do not already have a
+defined crossing, a crossing can be created and analyzed. The new version of
+mbnavadjust will upgrade old projects to include the bathymetry grid. The
+new GUI commands include <Update Grids> under the <Action> menu, and
+<Visualize Survey> under the <View> menu. The documentation, such as it is,
+does not yet cover these new features.
+
+Mbm_multicopy and mbm_multidatalist: Fixed bugs identified (along with fixes) by
+Martin Ernst of HafenCity University in Hamburg, Germany.
+
+Mbswath, mbcontour, mbgrdtiff: added #ifdefs for compatibility with the upcoming
+GMT 5.3 release. A number of GMT functions called by the MB-System GMT modules
+are being renamed.
+
+Format 21 (MBF_HSATLRAW): Added some logic to handle problems in a very old HSDS
+dataset collected on the R/V Ewing and available at the archive formally known
+as NGDC.
+
+-----> 5.5.2267 (February 11, 2016)
 
 Mbeditviz: Added capability to do automated optimization for bias parameters
 from the 3D soundings view. Optimization options are accessed from the "Action"

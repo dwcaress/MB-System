@@ -6144,6 +6144,7 @@ int mbedit_plot_beam(int iping, int jbeam)
 	else if (jbeam >= 0 && jbeam < ping[iping].beams_bath
 		&& !mb_beam_check_flag_null(ping[iping].beamflag[jbeam]))
 		{
+		beam_color = BLACK;
 		if (show_mode == MBEDIT_SHOW_FLAG)
 			{
 			if (mb_beam_ok(ping[iping].beamflag[jbeam]))

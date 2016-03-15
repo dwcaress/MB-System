@@ -34,52 +34,61 @@
 #endif
 
 /* mbnavadjust global defines */
-#define STRING_MAX 			MB_PATH_MAXLINE
-#define BUFFER_MAX 			1024
-#define ALLOC_NUM			10
+#define STRING_MAX 				MB_PATH_MAXLINE
+#define BUFFER_MAX 				1024
+#define ALLOC_NUM				10
 #define MBNA_SNAV_NUM			11
 #define	MBNA_STATUS_GUI			0
-#define	MBNA_STATUS_AUTOPICK		1
+#define	MBNA_STATUS_AUTOPICK	1
 #define	MBNA_STATUS_NAVERR		2
-#define	MBNA_STATUS_NAVSOLVE		3
+#define	MBNA_STATUS_NAVSOLVE	3
 #define	MBNA_INVERSION_NONE		0
 #define	MBNA_INVERSION_OLD		1
-#define	MBNA_INVERSION_CURRENT		2
+#define	MBNA_INVERSION_CURRENT	2
+#define	MBNA_GRID_RAW			0
+#define	MBNA_GRID_ADJUSTED		1
+#define	MBNA_GRID_NONE			0
+#define	MBNA_GRID_OLD			1
+#define	MBNA_GRID_CURRENT		2
+#define MBNA_INVERT_ZFULL		0
+#define MBNA_INVERT_ZISOLATED	1
 #define	MBNA_FILE_POORNAV		1
 #define	MBNA_FILE_GOODNAV		2
 #define	MBNA_FILE_FIXEDNAV		3
-#define	MBNA_FILE_FIXEDXYNAV		4
+#define	MBNA_FILE_FIXEDXYNAV	4
 #define	MBNA_FILE_FIXEDZNAV		5
 #define	MBNA_TIE_NONE			0
 #define	MBNA_TIE_XYZ			1
-#define	MBNA_TIE_XY			2
-#define	MBNA_TIE_Z			3
+#define	MBNA_TIE_XY				2
+#define	MBNA_TIE_Z				3
 #define	MBNA_CROSSING_STATUS_NONE	0
 #define	MBNA_CROSSING_STATUS_SET	1
 #define	MBNA_CROSSING_STATUS_SKIP	2
 #define MBNA_TIME_GAP_MAX		120.0
 #define MBNA_TIME_DIFF_THRESHOLD	2.0
-#define MBNA_VIEW_LIST_SURVEYS		0
-#define MBNA_VIEW_LIST_FILES		1
-#define MBNA_VIEW_LIST_FILESECTIONS	2
-#define MBNA_VIEW_LIST_CROSSINGS	3
-#define MBNA_VIEW_LIST_MEDIOCRECROSSINGS	4
-#define MBNA_VIEW_LIST_GOODCROSSINGS	5
-#define MBNA_VIEW_LIST_BETTERCROSSINGS	6
-#define MBNA_VIEW_LIST_TRUECROSSINGS	7
-#define MBNA_VIEW_LIST_TIES		8
-#define MBNA_VIEW_MODE_ALL		0
-#define MBNA_VIEW_MODE_SURVEY		1
-#define MBNA_VIEW_MODE_WITHSURVEY	2
-#define MBNA_VIEW_MODE_FILE		3
-#define MBNA_VIEW_MODE_WITHFILE		4
-#define MBNA_VIEW_MODE_WITHSECTION	5
-#define MBNA_SELECT_NONE		-1
+#define MBNA_VIEW_LIST_SURVEYS				0
+#define MBNA_VIEW_LIST_BLOCKS				1
+#define MBNA_VIEW_LIST_FILES				2
+#define MBNA_VIEW_LIST_FILESECTIONS			3
+#define MBNA_VIEW_LIST_CROSSINGS			4
+#define MBNA_VIEW_LIST_MEDIOCRECROSSINGS	5
+#define MBNA_VIEW_LIST_GOODCROSSINGS		6
+#define MBNA_VIEW_LIST_BETTERCROSSINGS		7
+#define MBNA_VIEW_LIST_TRUECROSSINGS		8
+#define MBNA_VIEW_LIST_TIES					9
+#define MBNA_VIEW_MODE_ALL					0
+#define MBNA_VIEW_MODE_SURVEY				1
+#define MBNA_VIEW_MODE_WITHSURVEY			2
+#define MBNA_VIEW_MODE_BLOCK				3
+#define MBNA_VIEW_MODE_FILE					4
+#define MBNA_VIEW_MODE_WITHFILE				5
+#define MBNA_VIEW_MODE_WITHSECTION			6
+#define MBNA_SELECT_NONE			-1
 #define MBNA_VECTOR_ALLOC_INC		1000
-#define MBNA_PEN_UP			3
-#define MBNA_PEN_DOWN			2
-#define MBNA_PEN_ORIGIN			-3
-#define MBNA_PEN_COLOR			0
+#define MBNA_PEN_UP					3
+#define MBNA_PEN_DOWN				2
+#define MBNA_PEN_ORIGIN				-3
+#define MBNA_PEN_COLOR				0
 #define MBNA_PLOT_MODE_FIRST 		0
 #define MBNA_PLOT_MODE_MOVE 		1
 #define MBNA_PLOT_MODE_ZOOMFIRST 	2
@@ -92,7 +101,9 @@
 #define MBNA_MISFIT_DIMZ		51
 #define MBNA_BIAS_SAME			0
 #define MBNA_BIAS_DIFFERENT		1
-#define MBNA_OVERLAP_THRESHOLD		25
+#define MBNA_MEDIOCREOVERLAP_THRESHOLD		10
+#define MBNA_GOODOVERLAP_THRESHOLD		25
+#define MBNA_BETTEROVERLAP_THRESHOLD		50
 
 #define	MBNA_MODELPLOT_TIMESERIES	0
 #define	MBNA_MODELPLOT_PERTURBATION	1
@@ -240,42 +251,77 @@ struct mbna_crossing {
 	int	num_ties;
 	struct mbna_tie ties[MBNA_SNAV_NUM];
 };
+struct mbna_grid
+	{
+	int	status;
+	char	projection_id[STRING_MAX];
+	void	*pjptr;
+	double	bounds[4];
+	double	boundsutm[4];
+	double	dx;
+	double	dy;
+	int	nx;
+	int	ny;
+	double	min;
+	double	max;
+	double	smin;
+	double	smax;
+	float	nodatavalue;
+	float	*sum;
+	float	*wgt;
+	float	*val;
+	float	*sgm;
+	};
 struct mbna_project {
-	int	open;
+	int		open;
 	char	name[STRING_MAX];
 	char	path[STRING_MAX];
 	char	home[STRING_MAX];
 	char	datadir[STRING_MAX];
 	char	logfile[STRING_MAX];
-	int	num_files;
-	int	num_files_alloc;
+	FILE	*logfp;
+	
+	int		num_files;
+	int		num_files_alloc;
 	struct mbna_file *files;
-	int	num_blocks;
-	int	num_snavs;
-	int	num_pings;
-	int	num_beams;
-	int	num_crossings;
-	int	num_crossings_alloc;
-	int	num_crossings_analyzed;
-	int	num_goodcrossings;
-	int	num_truecrossings;
-	int	num_truecrossings_analyzed;
+	int		num_blocks;
+	int		num_snavs;
+	int		num_pings;
+	int		num_beams;
+	int		num_crossings;
+	int		num_crossings_alloc;
+	int		num_crossings_analyzed;
+	int		num_goodcrossings;
+	int		num_truecrossings;
+	int		num_truecrossings_analyzed;
 	struct mbna_crossing *crossings;
-	int	num_ties;
+	int		num_ties;
 	double	section_length;
-	int	section_soundings;
+	int		section_soundings;
+	
+	double	lon_min;
+	double	lon_max;
+	double	lat_min;
+	double	lat_max;
+	double	mtodeglon;
+	double	mtodeglat;
+	
 	double	cont_int;
 	double	col_int;
 	double	tick_int;
 	double	label_int;
-	int	decimation;
+	int		decimation;
 	double	precision;
 	double	smoothing;
 	double	zoffsetwidth;
-	int	inversion;
-	int	modelplot;
-	int	modelplot_style;
-	FILE	*logfp;
+	int		inversion_status;
+	
+	int		grid_status;
+	struct mbna_grid grid;
+	int		visualization_status;
+	
+	int		modelplot;
+	int		modelplot_style;
 };
 struct mbna_plot_vector
     {
@@ -308,9 +354,15 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
                                 int *error);
 int mbnavadjust_close_project(int verbose, struct mbna_project *project,
                                 int *error);
-
-
-
-
+int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project,
+                                 int crossing_id, int *error);
+int mbnavadjust_crossing_overlapbounds(int verbose,
+                                struct mbna_project *project, int crossing_id,
+                                double offset_x, double offset_y,
+                                double *lonmin, double *lonmax,
+                                double *latmin, double *latmax,
+                                int *error);
+int mbnavadjust_interpolatesolution(int verbose, struct mbna_project *project,
+                                int *error);
 
 /*--------------------------------------------------------------------*/

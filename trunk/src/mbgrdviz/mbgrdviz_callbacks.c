@@ -2740,129 +2740,128 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 	    /* loop over reading */
 	    if (status == MB_SUCCESS)
 	    	{
-		while ((result = fgets(buffer,MB_PATH_MAXLINE,sfp)) == buffer)
-		    {
-		    /* deal with comments */
-		    if (buffer[0] == '#')
-		    	{
-			if (rawroutefile == MB_YES
-				&& strncmp(buffer,"## Route File Version", 21) == 0)
-				{
-				rawroutefile = MB_NO;
-				}
-			else if (strncmp(buffer,"## ROUTENAME", 12) == 0)
-				{
-                                strcpy(routename, &buffer[13]);
-                                if (routename[strlen(routename)-1] == '\n')
-                                    routename[strlen(routename)-1] = '\0';
-                                if (routename[strlen(routename)-1] == '\r')
-                                    routename[strlen(routename)-1] = '\0';
-				}
-			else if (strncmp(buffer,"## ROUTECOLOR", 13) == 0)
-				{
-				sscanf(buffer,"## ROUTECOLOR %d", &routecolor);
-				}
-			else if (strncmp(buffer,"## ROUTESIZE", 12) == 0)
-				{
-				sscanf(buffer,"## ROUTESIZE %d", &routesize);
-				}
-			else if (strncmp(buffer,"## ROUTEEDITMODE", 16) == 0)
-				{
-				sscanf(buffer,"## ROUTEEDITMODE %d", &routeeditmode);
-				}
-			}
+            while ((result = fgets(buffer,MB_PATH_MAXLINE,sfp)) == buffer)
+                {
+                /* deal with comments */
+                if (buffer[0] == '#')
+                    {
+                    if (rawroutefile == MB_YES
+                        && strncmp(buffer,"## Route File Version", 21) == 0)
+                        {
+                        rawroutefile = MB_NO;
+                        }
+                    else if (strncmp(buffer,"## ROUTENAME", 12) == 0)
+                        {
+                                        strcpy(routename, &buffer[13]);
+                                        if (routename[strlen(routename)-1] == '\n')
+                                            routename[strlen(routename)-1] = '\0';
+                                        if (routename[strlen(routename)-1] == '\r')
+                                            routename[strlen(routename)-1] = '\0';
+                        }
+                    else if (strncmp(buffer,"## ROUTECOLOR", 13) == 0)
+                        {
+                        sscanf(buffer,"## ROUTECOLOR %d", &routecolor);
+                        }
+                    else if (strncmp(buffer,"## ROUTESIZE", 12) == 0)
+                        {
+                        sscanf(buffer,"## ROUTESIZE %d", &routesize);
+                        }
+                    else if (strncmp(buffer,"## ROUTEEDITMODE", 16) == 0)
+                        {
+                        sscanf(buffer,"## ROUTEEDITMODE %d", &routeeditmode);
+                        }
+                    }
 
-		    /* deal with route segment marker */
-		    else if (buffer[0] == '>')
-		    	{
-			/* if data accumulated call mbview_addroute() */
-			if (npoint > 0)
-			    {
-			    status = mbview_addroute(verbose, instance,
-			    				npoint, routelon, routelat, routewaypoint,
-							routecolor, routesize, routeeditmode, routename,
-							&iroute, &error);
-			    npoint = 0;
-			    }
-			}
+                /* deal with route segment marker */
+                else if (buffer[0] == '>')
+                    {
+                    /* if data accumulated call mbview_addroute() */
+                    if (npoint > 0)
+                        {
+                        status = mbview_addroute(verbose, instance,
+                                        npoint, routelon, routelat, routewaypoint,
+                                    routecolor, routesize, routeeditmode, routename,
+                                    &iroute, &error);
+                        npoint = 0;
+                        }
+                    }
 
-		    /* deal with data */
-		    else
-		        {
-			/* read the data from the buffer */
-			nget = sscanf(buffer,"%lf %lf %lf %d",
-			    &lon, &lat, &topo, &waypoint);
-		    	if ((rawroutefile == MB_YES && nget >= 2)
-				|| (rawroutefile == MB_NO && nget >= 3 && waypoint > MBV_ROUTE_WAYPOINT_NONE))
-			    point_ok = MB_YES;
-			else
-			    point_ok = MB_NO;
+                /* deal with data */
+                else
+                    {
+                    /* read the data from the buffer */
+                    nget = sscanf(buffer,"%lf %lf %lf %d",
+                        &lon, &lat, &topo, &waypoint);
+                        if ((rawroutefile == MB_YES && nget >= 2)
+                        || (rawroutefile == MB_NO && nget >= 3 && waypoint > MBV_ROUTE_WAYPOINT_NONE))
+                        point_ok = MB_YES;
+                    else
+                        point_ok = MB_NO;
+        
+                    /* if good data check for need to allocate more space */
+                    if (point_ok == MB_YES
+                        && npoint + 1 > npointalloc)
+                        {
+                        npointalloc += MBV_ALLOC_NUM;
+                        status = mbview_allocroutearrays(verbose,
+                                    npointalloc,
+                                    &routelon,
+                                    &routelat,
+                                    &routewaypoint,
+                                    NULL,
+                                    NULL,
+                                    NULL,
+                                    NULL,
+                                    NULL,
+                                    &error);
+                        if (status != MB_SUCCESS)
+                            {
+                            npointalloc = 0;
+                            }
+                        }
+        
+                    /* add good point to route */
+                    if (point_ok == MB_YES && npointalloc > npoint)
+                        {
+                        routelon[npoint] = lon;
+                        routelat[npoint] = lat;
+                        routewaypoint[npoint] = waypoint;
+                        npoint++;
+                        }
+                    }
+                }
 
-			/* if good data check for need to allocate more space */
-			if (point_ok == MB_YES
-				&& npoint + 1 > npointalloc)
-			    {
-			    npointalloc += MBV_ALLOC_NUM;
-			    status = mbview_allocroutearrays(verbose,
-						    npointalloc,
-						    &routelon,
-						    &routelat,
-						    &routewaypoint,
-						    NULL,
-						    NULL,
-						    NULL,
-						    NULL,
-						    NULL,
-						    &error);
-			    if (status != MB_SUCCESS)
-				    {
-				    npointalloc = 0;
-				    }
-			    }
+            /* add last route if not already handled */
+            if (npoint > 0)
+                {
+                status = mbview_addroute(verbose, instance,
+                                npoint, routelon, routelat, routewaypoint,
+                            routecolor, routesize, routeeditmode, routename,
+                            &iroute, &error);
+                npoint = 0;
+                }
+    
+            /* free the memory */
+            if (npointalloc > 0)
+                status = mbview_freeroutearrays(verbose,
+                                &routelon,
+                                &routelat,
+                                &routewaypoint,
+                                NULL,
+                                NULL,
+                                NULL,
+                                NULL,
+                                NULL,
+                                &error);
 
-			/* add good point to route */
-			if (point_ok == MB_YES && npointalloc > npoint)
-			    {
-			    routelon[npoint] = lon;
-			    routelat[npoint] = lat;
-			    routewaypoint[npoint] = waypoint;
-			    npoint++;
-			    }
-			}
-		    }
+            /* close the input file */
+            fclose(sfp);
+            }
 
-		/* add last route if not already handled */
-		if (npoint > 0)
-		    {
-		    status = mbview_addroute(verbose, instance,
-			    			npoint, routelon, routelat, routewaypoint,
-						routecolor, routesize, routeeditmode, routename,
-						&iroute, &error);
-		    npoint = 0;
-		    }
-
-		/* free the memory */
-		if (npointalloc > 0)
-		status = mbview_freeroutearrays(verbose,
-						    &routelon,
-						    &routelat,
-						    &routewaypoint,
-						    NULL,
-						    NULL,
-						    NULL,
-						    NULL,
-						    NULL,
-						    &error);
-
-		/* close the input file */
-		fclose(sfp);
-		}
-
-	    /* update widgets */
-	    if (status == MB_SUCCESS)
-	    status = mbview_update(verbose, instance, &error);
+        /* update widgets */
+        mbview_updateroutelist();
+        status = mbview_update(verbose, instance, &error);
 	    }
-
 
 	/* set sensitivity of widgets that require an mbview instance to be active */
 	do_mbgrdviz_sensitivity( );
@@ -6481,7 +6480,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 					}
 				else
 					{
-					mbview_route_add(instance, working_route, npoints, waypoint,
+					mbview_route_add(verbose, instance, working_route, npoints, waypoint,
 							xgrid, ygrid,
 							xlon, ylat, zdata,
 							xdisplay, ydisplay, zdisplay);
@@ -6523,7 +6522,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 				mbview_projectll2display(instance,
 					xlon, ylat, zdata,
 					&xdisplay, &ydisplay, &zdisplay);
-				mbview_route_add(instance, working_route, npoints, waypoint,
+				mbview_route_add(verbose, instance, working_route, npoints, waypoint,
 						xgrid, ygrid,
 						xlon, ylat, zdata,
 						xdisplay, ydisplay, zdisplay);
@@ -6605,7 +6604,7 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 						}
 					else
 						{
-						mbview_route_add(instance, working_route, npoints, waypoint,
+						mbview_route_add(verbose, instance, working_route, npoints, waypoint,
 								xgrid, ygrid,
 								xlon, ylat, zdata,
 								xdisplay, ydisplay, zdisplay);
@@ -6650,7 +6649,7 @@ fprintf(stderr,"Survey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n"
 iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
 
 					/* add single point */
-					mbview_route_add(instance, working_route, npoints, waypoint,
+					mbview_route_add(verbose, instance, working_route, npoints, waypoint,
 							xgrid, ygrid,
 							xlon, ylat, zdata,
 							xdisplay, ydisplay, zdisplay);
@@ -6752,7 +6751,7 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 				mbview_projectll2display(instance,
 					xlon, ylat, zdata,
 					&xdisplay, &ydisplay, &zdisplay);
-				mbview_route_add(instance, working_route, npoints, waypoint,
+				mbview_route_add(verbose, instance, working_route, npoints, waypoint,
 						xgrid, ygrid,
 						xlon, ylat, zdata,
 						xdisplay, ydisplay, zdisplay);
@@ -6793,7 +6792,7 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 				mbview_projectll2display(instance,
 					xlon, ylat, zdata,
 					&xdisplay, &ydisplay, &zdisplay);
-				mbview_route_add(instance, working_route, npoints, waypoint,
+				mbview_route_add(verbose, instance, working_route, npoints, waypoint,
 						xgrid, ygrid,
 						xlon, ylat, zdata,
 						xdisplay, ydisplay, zdisplay);
@@ -6804,8 +6803,9 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 
 		/* free the memory for xx */
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&xx, &error);
-
-		/* update widgets */
+        
+ 		/* update widgets */
+        mbview_updateroutelist();
 		do_mbgrdviz_arearoute_info(instance);
 		mbview_enableviewnavs(verbose, instance, &error);
 		status = mbview_update(verbose, instance, &error);
