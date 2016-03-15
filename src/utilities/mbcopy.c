@@ -3055,7 +3055,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 			      mb_ping->beam_flags
 				  = (unsigned char *)
 				      realloc(mb_ping->beam_flags,
-						  istore->beams_bath * sizeof(char));
+						  istore->beams_bath * sizeof(unsigned char));
 			      mb_ping->depth
 				  = (double *)
 				      realloc(mb_ping->depth,

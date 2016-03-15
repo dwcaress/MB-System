@@ -156,6 +156,7 @@ extern void BxSetValuesCB(Widget, XtPointer, XtPointer);
 extern void do_file_close(Widget, XtPointer, XtPointer);
 extern void do_quit(Widget, XtPointer, XtPointer);
 extern void do_view_showsurveys(Widget, XtPointer, XtPointer);
+extern void do_view_showblocks(Widget, XtPointer, XtPointer);
 extern void do_view_showdata(Widget, XtPointer, XtPointer);
 extern void do_view_showsections(Widget, XtPointer, XtPointer);
 extern void do_view_showcrossings(Widget, XtPointer, XtPointer);
@@ -166,11 +167,12 @@ extern void do_view_showtruecrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showties(Widget, XtPointer, XtPointer);
 extern void do_view_showallsurveys(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedsurveys(Widget, XtPointer, XtPointer);
+extern void do_view_showselectedblock(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedfile(Widget, XtPointer, XtPointer);
 extern void do_view_showwithselectedsurveys(Widget, XtPointer, XtPointer);
 extern void do_view_showwithselectedfile(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedsection(Widget, XtPointer, XtPointer);
-extern void do_make_grid(Widget, XtPointer, XtPointer);
+extern void do_visualize(Widget, XtPointer, XtPointer);
 extern void do_modelplot_show(Widget, XtPointer, XtPointer);
 extern void do_action_poornav(Widget, XtPointer, XtPointer);
 extern void do_action_goodnav(Widget, XtPointer, XtPointer);
@@ -188,6 +190,7 @@ extern void do_naverr_init(Widget, XtPointer, XtPointer);
 extern void do_action_analyzecrossings(Widget, XtPointer, XtPointer);
 extern void do_zerozoffsets(Widget, XtPointer, XtPointer);
 extern void do_action_invertnav(Widget, XtPointer, XtPointer);
+extern void do_action_updategrids(Widget, XtPointer, XtPointer);
 extern void do_apply_nav(Widget, XtPointer, XtPointer);
 extern void do_list_data_select(Widget, XtPointer, XtPointer);
 
@@ -641,6 +644,30 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Survey-vs-Survey Blocks",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_showblocks = XmCreatePushButton(pulldownMenu_view,
+            (char *)"pushButton_showblocks",
+            args,
+            ac);
+        XtManageChild(pushButton_showblocks);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(pushButton_showblocks, XmNactivateCallback, do_view_showblocks, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
         tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Data Files",
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
@@ -888,6 +915,30 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected Survey-vs-Survey Block",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_showselectedblock = XmCreateToggleButton(pulldownMenu_view,
+            (char *)"toggleButton_showselectedblock",
+            args,
+            ac);
+        XtManageChild(toggleButton_showselectedblock);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(toggleButton_showselectedblock, XmNvalueChangedCallback, do_view_showselectedblock, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
         tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected File",
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
@@ -997,11 +1048,11 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNfontList,
             BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
             XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_makegrid = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_makegrid",
+        pushButton_visualize = XmCreatePushButton(pulldownMenu_view,
+            (char *)"pushButton_visualize",
             args,
             ac);
-        XtManageChild(pushButton_makegrid);
+        XtManageChild(pushButton_visualize);
 
         /**
          * Free any memory allocated for resources.
@@ -1009,7 +1060,7 @@ CreatemainWindow(Widget parent)
         XmStringFree((XmString)tmp0);
     }
 
-    XtAddCallback(pushButton_makegrid, XmNactivateCallback, do_make_grid, (XtPointer)0);
+    XtAddCallback(pushButton_visualize, XmNactivateCallback, do_visualize, (XtPointer)0);
 
     ac = 0;
     {
@@ -1473,6 +1524,30 @@ CreatemainWindow(Widget parent)
     }
 
     XtAddCallback(pushButton_invertnav, XmNactivateCallback, do_action_invertnav, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Update Grids",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_updategrids = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_updategrids",
+            args,
+            ac);
+        XtManageChild(pushButton_updategrids);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(pushButton_updategrids, XmNactivateCallback, do_action_updategrids, (XtPointer)0);
 
     ac = 0;
     {

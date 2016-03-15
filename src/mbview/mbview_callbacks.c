@@ -471,9 +471,11 @@ int mbview_reset_shared(int mode)
 	shared.shareddata.nnav = 0;
 	shared.shareddata.nnav_alloc = 0;
 	shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
-	shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
 	shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+	shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
 	shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+	shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
+	shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
 	shared.shareddata.navs = NULL;
 
 	for (instance=0;instance<MBV_MAX_WINDOWS;instance++)
@@ -2614,10 +2616,15 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error)
 	XtSetValues(view->mb3dview.mbview_toggleButton_route, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_route, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rroute, args, ac);
-	if (shared.shareddata.route_mode != MBV_ROUTE_EDIT)
+	if (shared.shareddata.route_mode == MBV_ROUTE_EDIT)
 		{
-		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_route, "Pick Routes");
-		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rroute, "Pick Routes");
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_route, "Edit Routes");
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rroute, "Edit Routes");
+		}
+    else if (shared.shareddata.route_mode == MBV_ROUTE_NAVADJUST)
+		{
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_route, "Pick Ties");
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rroute, "Pick Ties");
 		}
 	else
 		{
@@ -2629,21 +2636,46 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error)
 	if (shared.shareddata.nav_mode == MBV_NAV_OFF)
 		{
 		XtSetArg(args[ac], XmNsensitive, False); ac++;
+        XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_nav, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnav, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_navfile, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnavfile, args, ac);
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_nav, "Pick Nav");
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnav, "Pick Nav");
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_navfile, "Pick Nav File");
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnavfile, "Pick Nav File");
 		}
-	else
+	else if (shared.shareddata.nav_mode == MBV_NAV_VIEW)
 		{
 		XtSetArg(args[ac], XmNsensitive, True); ac++;
+        XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_nav, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnav, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_navfile, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnavfile, args, ac);
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_nav, "Pick Nav");
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnav, "Pick Nav");
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_navfile, "Pick Nav File");
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnavfile, "Pick Nav File");
 		}
-	XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_mode_nav, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnav, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_mode_navfile, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnavfile, args, ac);
-	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_nav, "Pick Nav");
-	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnav, "Pick Nav");
-	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_navfile, "Pick Nav File");
-	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnavfile, "Pick Nav File");
+	else // if (shared.shareddata.nav_mode == MBV_NAV_MBNAVADJUST)
+		{
+		XtSetArg(args[ac], XmNsensitive, True); ac++;
+        XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_navfile, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnavfile, args, ac);
+		XtSetArg(args[ac], XmNsensitive, False); ac++;
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_nav, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnav, args, ac);
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_nav, "Pick Nav");
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnav, "Pick Nav");
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_navfile, "Pick Nav Section");
+        set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnavfile, "Pick Nav Section");
+		}
 
 	ac = 0;
 	if (shared.shareddata.vector_mode == MBV_VECTOR_OFF)
@@ -3787,7 +3819,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* process route select */
-		    mbview_pick_route_select(instance, MBV_PICK_DOWN,
+		    mbview_pick_route_select(mbv_verbose, instance, MBV_PICK_DOWN,
 				    view->button_down_x,
 				    data->height - view->button_down_y);
 
@@ -3924,7 +3956,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* process route select */
-		    mbview_pick_route_add(instance, MBV_PICK_DOWN,
+		    mbview_pick_route_add(mbv_verbose, instance, MBV_PICK_DOWN,
 				    view->button_down_x,
 				    data->height - view->button_down_y);
 
@@ -4081,7 +4113,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* process route select */
-		    mbview_pick_route_delete(instance,
+		    mbview_pick_route_delete(mbv_verbose, instance,
 				    view->button_down_x,
 				    data->height - view->button_down_y);
 
@@ -4203,7 +4235,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* process route select */
-		    mbview_pick_route_select(instance, MBV_PICK_MOVE,
+		    mbview_pick_route_select(mbv_verbose, instance, MBV_PICK_MOVE,
 				    view->button_move_x,
 				    data->height - view->button_move_y);
 
@@ -4425,7 +4457,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* process route select */
-		    mbview_pick_route_add(instance, MBV_PICK_MOVE,
+		    mbview_pick_route_add(mbv_verbose, instance, MBV_PICK_MOVE,
 				    view->button_move_x,
 				    data->height - view->button_move_y);
 
@@ -6649,7 +6681,8 @@ fprintf(stderr,"do_mbview_mouse_rmode: \n");
 	    replot = MB_YES;
 	    }
 	if (data->mouse_mode != MBV_MOUSE_ROUTE
-	    && shared.shareddata.route_selected != MBV_SELECT_NONE)
+	    && shared.shareddata.route_selected != MBV_SELECT_NONE
+        && shared.shareddata.route_mode != MBV_ROUTE_NAVADJUST)
 	    {
 	    shared.shareddata.route_selected = MBV_SELECT_NONE;
 	    shared.shareddata.route_point_selected = MBV_SELECT_NONE;
@@ -6767,7 +6800,8 @@ fprintf(stderr,"do_mbview_mouse_mode: \n");
 	    replot = MB_YES;
 	    }
 	if (data->mouse_mode != MBV_MOUSE_ROUTE
-	    && shared.shareddata.route_selected != MBV_SELECT_NONE)
+	    && shared.shareddata.route_selected != MBV_SELECT_NONE
+        && shared.shareddata.route_mode != MBV_ROUTE_NAVADJUST)
 	    {
 	    shared.shareddata.route_selected = MBV_SELECT_NONE;
 	    shared.shareddata.route_point_selected = MBV_SELECT_NONE;
@@ -6775,8 +6809,8 @@ fprintf(stderr,"do_mbview_mouse_mode: \n");
 	    replot = MB_YES;
 	    }
 
-    	/* set mouse togglebuttons */
-    	set_mbview_mouse_mode(instance, data->mouse_mode);
+    /* set mouse togglebuttons */
+    set_mbview_mouse_mode(instance, data->mouse_mode);
 
 	/* replot if necessary */
 	if (replot == MB_YES)
@@ -8923,6 +8957,10 @@ fprintf(stderr,"do_mbview_navlist_delete:\n");
 	shared.shareddata.navpick_type = MBV_PICK_NONE;
 	shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
 	shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+	shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
+	shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+	shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
+	shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
 
 	/* get first valid instance */
 	instance = MBV_NO_WINDOW;
@@ -9119,113 +9157,18 @@ do_mbview_clearpicks( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    	int	error;
 	size_t	instance;
-	int	replotinstance;
-	int	replotall;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	inav, jpoint;
 
 	/* get instance */
 	ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_clearpicks\n");
+fprintf(stderr,"do_mbview_clearpicks: instance:%zu\n", instance);
 
-	/* clear local picks */
-	replotinstance = MB_NO;
-	replotall = MB_NO;
-	if (data->pick_type != MBV_PICK_NONE)
-		{
-		data->pick_type = MBV_PICK_NONE;
-		replotinstance = MB_YES;
-		}
-	if (data->region_type != MBV_REGION_NONE)
-		{
-		data->region_type = MBV_REGION_NONE;
-		replotinstance = MB_YES;
-		}
-	if (data->area_type != MBV_AREA_NONE)
-		{
-		data->area_type = MBV_AREA_NONE;
-		replotinstance = MB_YES;
-		}
-
-	/* clear local profile */
-	if (data->profile.npoints > 0)
-		{
-		data->profile.npoints = 0;
-		data->profile.source = MBV_PROFILE_NONE;
-		if (data->profile_view_mode == MBV_VIEW_ON)
-			mbview_plotprofile(instance);
-		}
-
-	/* clear shared picks */
-	if (shared.shareddata.navpick_type != MBV_PICK_NONE)
-		{
-		shared.shareddata.navpick_type = MBV_PICK_NONE;
-		shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
-		shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
-		replotall = MB_YES;
-
-		/* loop over the navs resetting selected points */
-		for (inav=0;inav<shared.shareddata.nnav;inav++)
-			{
-			shared.shareddata.navs[inav].nselected = 0;
-			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints;jpoint++)
-				{
-				/* set size and color */
-				if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES)
-					{
-					shared.shareddata.navs[inav].navpts[jpoint].selected = MB_NO;
-					replotall = MB_YES;
-					}
-				}
-			}
-		}
-	if (shared.shareddata.site_selected != MBV_SELECT_NONE)
-		{
-		shared.shareddata.site_selected = MBV_SELECT_NONE;
-		replotall = MB_YES;
-		}
-	if (shared.shareddata.route_selected != MBV_SELECT_NONE)
-		{
-		shared.shareddata.route_selected = MBV_SELECT_NONE;
-		shared.shareddata.route_point_selected = MBV_SELECT_NONE;
-		replotall = MB_YES;
-		}
-
-	/* set widget sensitivity */
-	if (data->active == MB_YES)
-		mbview_update_sensitivity(mbv_verbose, instance, &error);
-
-	/* set pick annotation */
-	mbview_pick_text(instance);
-
-	/* update nav, site, and route lists */
-	mbview_updatenavlist();
-	mbview_updatesitelist();
-	mbview_updateroutelist();
-
-    /* draw */
-    if (replotinstance == MB_YES || replotall == MB_YES)
-    	{
-if (mbv_verbose >= 2)
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_clearpicks\n");
-    	mbview_plotlowhigh(instance);
-	}
-
-    /* if needed replot all active instances */
-    if (replotall == MB_YES)
-	{
-	mbview_plothighall(instance);
-	}
+	/* clear all picks */
+	mbview_clearpicks(instance);
 }
 /*------------------------------------------------------------------------------*/
 

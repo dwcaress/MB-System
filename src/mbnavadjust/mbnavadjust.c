@@ -70,9 +70,8 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mb_aux.h"
+#include "mbview.h"
 #include "mbnavadjust.h"
-
-Widget CreatemainWindow(Widget parent);
 
 /* End user code block <globals> */
 
@@ -89,6 +88,7 @@ int main( int argc, char **argv)
     Cardinal     ac;
     Widget   topLevelShell;
     Widget   mainWindow;
+    int     error = MB_ERROR_NO_ERROR;
 
     /* Begin user code block <declarations> */
 
@@ -161,6 +161,9 @@ int main( int argc, char **argv)
 
     /* initialize everything */
     do_mbnavadjust_init(argc_save,argv);
+
+    /* initialize the vizualization widgets code */
+    mbview_startup(0, parent, app, &error);
 
     /* End user code block <app_procedures> */
 

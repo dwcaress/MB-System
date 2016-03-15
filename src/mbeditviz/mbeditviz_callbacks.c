@@ -1316,13 +1316,13 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 				if ((navstbdlat = malloc(file->num_pings*sizeof(double))) == NULL)
 					mbev_status = MB_FAILURE;
 				if (mbev_status == MB_SUCCESS)
-				if ((navline = malloc(file->num_pings*sizeof(double))) == NULL)
+				if ((navline = malloc(file->num_pings*sizeof(int))) == NULL)
 					mbev_status = MB_FAILURE;
 				if (mbev_status == MB_SUCCESS)
-				if ((navshot = malloc(file->num_pings*sizeof(double))) == NULL)
+				if ((navshot = malloc(file->num_pings*sizeof(int))) == NULL)
 					mbev_status = MB_FAILURE;
 				if (mbev_status == MB_SUCCESS)
-				if ((navcdp = malloc(file->num_pings*sizeof(double))) == NULL)
+				if ((navcdp = malloc(file->num_pings*sizeof(int))) == NULL)
 					mbev_status = MB_FAILURE;
 
 				/* copy nav data */

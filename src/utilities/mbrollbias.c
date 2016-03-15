@@ -1079,7 +1079,9 @@ void gauss(double *a, double *vec,
 /*                                               on TRUE useful when solving*/
 /*                                               multiple systems with same a */
         static int isub[10], l1;
-        int line[10], iet, ieb, i, j, k, l, j2;
+        int line[10], iet, ieb;
+		int	i = 0;
+		int j, k, l, j2;
         double big, testa, b, sum;
 
 

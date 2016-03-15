@@ -944,7 +944,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    mb_ping->beam_flags
 			= (unsigned char *)
 			    realloc(mb_ping->beam_flags,
-					nbath * sizeof(char));
+					nbath * sizeof(unsigned char));
 		    mb_ping->depth
 			= (double *) realloc(mb_ping->depth, nbath * sizeof(double));
 		    mb_ping->across_track = (double *) realloc(mb_ping->across_track, nbath * sizeof(double));

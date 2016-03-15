@@ -1282,7 +1282,8 @@ int main (int argc, char **argv)
 		project_output.precision = project_inputbase.precision;
 		project_output.smoothing = project_inputbase.smoothing;
 		project_output.zoffsetwidth = project_inputbase.zoffsetwidth;
-		//project_output.inversion = project_inputbase.inversion;
+		//project_output.inversion_status = project_inputbase.inversion_status;
+		//project_output.grid_status = project_inputbase.grid_status;
 		//project_output.modelplot = project_inputbase.modelplot;
 		//project_output.modelplot_style = project_inputbase.modelplot_style;
 		//project_output.logfp;
@@ -1873,6 +1874,10 @@ file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2);
 				/* set the tie parameters */
 				for (itie=0;itie<crossing->num_ties;itie++)
 					{
+					file1 = (struct mbna_file *) &project_output.files[crossing->file_id_1];
+					file2 = (struct mbna_file *) &project_output.files[crossing->file_id_2];
+					section1 = (struct mbna_section *) &file1->sections[crossing->section_1];
+					section2 = (struct mbna_section *) &file2->sections[crossing->section_2];
 					tie = &crossing->ties[itie];
 					tie->status = MBNA_TIE_XYZ;
 					tie->snav_1_time_d = section1->snav_time_d[tie->snav_1];
@@ -1905,8 +1910,9 @@ file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2);
 					tie->inversion_offset_z_m = section2->snav_z_offset[tie->snav_2]
 								- section1->snav_z_offset[tie->snav_1];
 					tie->inversion_status = MBNA_INVERSION_NONE;
-					if (project_output.inversion == MBNA_INVERSION_CURRENT)
-						project_output.inversion = MBNA_INVERSION_OLD;
+					if (project_output.inversion_status == MBNA_INVERSION_CURRENT)
+						project_output.inversion_status = MBNA_INVERSION_OLD;
+					project_output.grid_status = MBNA_GRID_OLD;
 		
 					/* reset tie counts for snavs */
 					section1->snav_num_ties[tie->snav_1]++;
@@ -2690,8 +2696,9 @@ file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2);
 					tie->inversion_offset_z_m = section2->snav_z_offset[tie->snav_2]
 								- section1->snav_z_offset[tie->snav_1];
 					tie->inversion_status = MBNA_INVERSION_NONE;
-					if (project_output.inversion == MBNA_INVERSION_CURRENT)
-						project_output.inversion = MBNA_INVERSION_OLD;
+					if (project_output.inversion_status == MBNA_INVERSION_CURRENT)
+						project_output.inversion_status = MBNA_INVERSION_OLD;
+					project_output.grid_status = MBNA_GRID_OLD;
 
 fprintf(stderr,"Set tie offsets:       %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
 current_crossing, itie,
@@ -2773,6 +2780,29 @@ tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
 			error = MB_ERROR_BAD_USAGE;
 			exit(error);
 			}
+		}
+	
+	/* update datalist and ancilliary files */
+	sprintf(filename,"%s/%s.dir/datalist.mb-1",project_output.path,project_output.name);
+	if ((tfp = fopen(filename,"w")) != NULL)
+		{
+		for (i=0;i<project_output.num_files;i++)
+			{
+			file1 = &project_output.files[i];
+			for (j=0;j<file1->num_sections;j++)
+				{
+				fprintf(tfp, "%s/nvs_%4.4d_%4.4d.mb71 71\n", project_output.datadir, file1->id, j);
+				}
+			}
+		fclose(tfp);
+		}
+	sprintf(filename, "cd %s/%s.dir ; mbdatalist -Idatalist.mb-1 -O -Z -V", project_output.path,project_output.name);
+	system(filename);
+	sprintf(filename,"%s/%s.dir/mbgrid.cmd",project_output.path,project_output.name);
+	if ((tfp = fopen(filename,"w")) != NULL)
+		{
+		fprintf(tfp, "mbgrid -I datalistp.mb-1 \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopo\n\n");
+		fclose(tfp);
 		}
 
 	/* check memory */

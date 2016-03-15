@@ -652,6 +652,7 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		else if (store->GlobalData.typeOfSounder == 'V')
 			{
 			store->NrBeams = 0;
+			i = 0;
   			if (store->SingleBeamDepth.depthHFreq > 0.0)
   				store->SingleBeamDepth.depthHFreq = bath[0];
 			else if (store->SingleBeamDepth.depthMFreq > 0.0)

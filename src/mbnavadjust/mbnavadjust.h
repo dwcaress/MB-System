@@ -41,258 +41,6 @@
 #define MBNAVADJUST_EXTERNAL extern
 #endif
 
-/* mbnavadjust global defines */
-#define STRING_MAX 			MB_PATH_MAXLINE
-#define BUFFER_MAX 			1024
-#define ALLOC_NUM			10
-#define MBNA_SNAV_NUM			11
-#define	MBNA_STATUS_GUI			0
-#define	MBNA_STATUS_AUTOPICK		1
-#define	MBNA_STATUS_NAVERR		2
-#define	MBNA_STATUS_NAVSOLVE		3
-#define	MBNA_INVERSION_NONE		0
-#define	MBNA_INVERSION_OLD		1
-#define	MBNA_INVERSION_CURRENT		2
-#define MBNA_INVERT_ZFULL		0
-#define MBNA_INVERT_ZISOLATED		1
-#define	MBNA_FILE_POORNAV		1
-#define	MBNA_FILE_GOODNAV		2
-#define	MBNA_FILE_FIXEDNAV		3
-#define	MBNA_FILE_FIXEDXYNAV		4
-#define	MBNA_FILE_FIXEDZNAV		5
-#define	MBNA_TIE_NONE			0
-#define	MBNA_TIE_XYZ			1
-#define	MBNA_TIE_XY			2
-#define	MBNA_TIE_Z			3
-#define	MBNA_CROSSING_STATUS_NONE	0
-#define	MBNA_CROSSING_STATUS_SET	1
-#define	MBNA_CROSSING_STATUS_SKIP	2
-#define MBNA_TIME_GAP_MAX		120.0
-#define MBNA_TIME_DIFF_THRESHOLD	2.0
-#define MBNA_VIEW_LIST_SURVEYS		0
-#define MBNA_VIEW_LIST_FILES		1
-#define MBNA_VIEW_LIST_FILESECTIONS	2
-#define MBNA_VIEW_LIST_CROSSINGS	3
-#define MBNA_VIEW_LIST_MEDIOCRECROSSINGS	4
-#define MBNA_VIEW_LIST_GOODCROSSINGS	5
-#define MBNA_VIEW_LIST_BETTERCROSSINGS	6
-#define MBNA_VIEW_LIST_TRUECROSSINGS	7
-#define MBNA_VIEW_LIST_TIES		8
-#define MBNA_VIEW_MODE_ALL		0
-#define MBNA_VIEW_MODE_SURVEY		1
-#define MBNA_VIEW_MODE_WITHSURVEY	2
-#define MBNA_VIEW_MODE_FILE		3
-#define MBNA_VIEW_MODE_WITHFILE		4
-#define MBNA_VIEW_MODE_WITHSECTION	5
-#define MBNA_SELECT_NONE		-1
-#define MBNA_VECTOR_ALLOC_INC		1000
-#define MBNA_PEN_UP			3
-#define MBNA_PEN_DOWN			2
-#define MBNA_PEN_ORIGIN			-3
-#define MBNA_PEN_COLOR			0
-#define MBNA_PLOT_MODE_FIRST 		0
-#define MBNA_PLOT_MODE_MOVE 		1
-#define MBNA_PLOT_MODE_ZOOMFIRST 	2
-#define MBNA_PLOT_MODE_ZOOM 		3
-#define MBNA_MASK_DIM			25
-#define MBNA_MISFIT_ZEROCENTER		0
-#define MBNA_MISFIT_AUTOCENTER		1
-#define MBNA_MISFIT_DIMXY		61
-#define MBNA_MISFIT_NTHRESHOLD		(MBNA_MISFIT_DIMXY * MBNA_MISFIT_DIMXY / 36)
-#define MBNA_MISFIT_DIMZ		51
-#define MBNA_BIAS_SAME			0
-#define MBNA_BIAS_DIFFERENT		1
-#define MBNA_MEDIOCREOVERLAP_THRESHOLD		10
-#define MBNA_GOODOVERLAP_THRESHOLD		25
-#define MBNA_BETTEROVERLAP_THRESHOLD		50
-
-#define	MBNA_MODELPLOT_TIMESERIES	0
-#define	MBNA_MODELPLOT_PERTURBATION	1
-#define	MBNA_MODELPLOT_TIEOFFSETS	2
-#define	MBNA_MODELPLOT_LEFT_WIDTH	25
-#define	MBNA_MODELPLOT_LEFT_HEIGHT	65
-#define	MBNA_MODELPLOT_X_SPACE		10
-#define	MBNA_MODELPLOT_Y_SPACE		30
-
-#define	MBNA_INTERP_NONE		0
-#define	MBNA_INTERP_CONSTANT		1
-#define	MBNA_INTERP_INTERP		2
-
-#define MBNA_SMOOTHING_DEFAULT		2
-
-#define MBNA_INTERATION_MAX		10000
-#define MBNA_CONVERGENCE		0.000001
-#define MBNA_SMALL			0.0001
-
-/* minimum initial sigma_crossing (meters) */
-#define	SIGMA_MINIMUM	0.1
-
-/* ping type defines */
-#define	SIDE_PORT	0
-#define	SIDE_STBD	1
-#define	SIDE_FULLSWATH	2
-
-/* route version define */
-#define ROUTE_VERSION "1.00"
-
-/* mbnavadjust project and file structures */
-struct mbna_section {
-	int	num_pings;
-	int	num_beams;
-	int	global_start_ping;
-	int	global_start_snav;
-	int	continuity;
-	double	distance;
-	double	btime_d;
-	double 	etime_d;
-	double	lonmin;
-	double	lonmax;
- 	double	latmin;
-	double	latmax;
-	double	depthmin;
-	double	depthmax;
-	int	coverage[MBNA_MASK_DIM * MBNA_MASK_DIM];
-	int	num_snav;
-	int	snav_id[MBNA_SNAV_NUM];
-	int	snav_num_ties[MBNA_SNAV_NUM];
-	int	snav_invert_id[MBNA_SNAV_NUM];
-	int	snav_invert_constraint[MBNA_SNAV_NUM];
-	double	snav_distance[MBNA_SNAV_NUM];
-	double	snav_time_d[MBNA_SNAV_NUM];
-	double	snav_lon[MBNA_SNAV_NUM];
-	double	snav_lat[MBNA_SNAV_NUM];
-	double	snav_lon_offset[MBNA_SNAV_NUM];
-	double	snav_lat_offset[MBNA_SNAV_NUM];
-	double	snav_z_offset[MBNA_SNAV_NUM];
-	double	snav_lon_offset_int[MBNA_SNAV_NUM];
-	double	snav_lat_offset_int[MBNA_SNAV_NUM];
-	double	snav_z_offset_int[MBNA_SNAV_NUM];
-	int	show_in_modelplot;
-	int	modelplot_start_count;
-	int	contoursuptodate;
-	int	global_tie_status;
-	int	global_tie_snav;
-	double	global_tie_offset_x;
-	double	global_tie_offset_y;
-	double	global_tie_offset_x_m;
-	double	global_tie_offset_y_m;
-	double	global_tie_offset_z_m;
-	double	global_tie_xsigma;
-	double	global_tie_ysigma;
-	double	global_tie_zsigma;
-};
-struct mbna_file {
-	int	status;
-	int	id;
-	int	output_id;
-	char 	file[STRING_MAX];
-	char 	path[STRING_MAX];
-	int	format;
-	double	heading_bias_import;
-	double	roll_bias_import;
-	double	heading_bias;
-	double	roll_bias;
-	int	block;
-	double	block_offset_x;
-	double	block_offset_y;
-	double	block_offset_z;
-	int	show_in_modelplot;
-	int	num_snavs;
-	int	num_pings;
-	int	num_beams;
-	int	num_sections;
-	int	num_sections_alloc;
-	struct mbna_section *sections;
-};
-struct mbna_tie {
-	int	status;
-	int	snav_1;
-	double	snav_1_time_d;
-	int	snav_2;
-	double	snav_2_time_d;
-	double	offset_x;
-	double	offset_y;
-	double	offset_x_m;
-	double	offset_y_m;
-	double	offset_z_m;
-	double	sigmar1;
-	double	sigmax1[3];
-	double	sigmar2;
-	double	sigmax2[3];
-	double	sigmar3;
-	double	sigmax3[3];
-	int	inversion_status;
-	double	inversion_offset_x;
-	double	inversion_offset_y;
-	double	inversion_offset_x_m;
-	double	inversion_offset_y_m;
-	double	inversion_offset_z_m;
-	int	block_1;
-	int	block_2;
-	int	isurveyplotindex;
-};
-struct mbna_crossing {
-	int	status;
-	int	truecrossing;
-	int	overlap;
-	int	file_id_1;
-	int	section_1;
-	int	file_id_2;
-	int	section_2;
-	int	num_ties;
-	struct mbna_tie ties[MBNA_SNAV_NUM];
-};
-struct mbna_project {
-	int	open;
-	char	name[STRING_MAX];
-	char	path[STRING_MAX];
-	char	home[STRING_MAX];
-	char	datadir[STRING_MAX];
-	char	logfile[STRING_MAX];
-	int	num_files;
-	int	num_files_alloc;
-	struct mbna_file *files;
-	int	num_blocks;
-	int	num_snavs;
-	int	num_pings;
-	int	num_beams;
-	int	num_crossings;
-	int	num_crossings_alloc;
-	int	num_crossings_analyzed;
-	int	num_goodcrossings;
-	int	num_truecrossings;
-	int	num_truecrossings_analyzed;
-	struct mbna_crossing *crossings;
-	int	num_ties;
-	double	section_length;
-	int	section_soundings;
-	double	cont_int;
-	double	col_int;
-	double	tick_int;
-	double	label_int;
-	int	decimation;
-	double	precision;
-	double	smoothing;
-	double	zoffsetwidth;
-	int	inversion;
-	int	modelplot;
-	int	modelplot_style;
-	FILE	*logfp;
-};
-struct mbna_plot_vector
-    {
-    int	    command;
-    int	    color;
-    double  x;
-    double  y;
-    };
-struct mbna_contour_vector
-    {
-    int	    nvector;
-    int	    nvector_alloc;
-    struct mbna_plot_vector *vector;
-    };
-
 /* mbnavadjust global control parameters */
 MBNAVADJUST_EXTERNAL int	mbna_verbose;
 MBNAVADJUST_EXTERNAL int	mbna_status;
@@ -302,6 +50,9 @@ MBNAVADJUST_EXTERNAL int	mbna_invert_mode;
 MBNAVADJUST_EXTERNAL int	mbna_color_foreground;
 MBNAVADJUST_EXTERNAL int	mbna_color_background;
 MBNAVADJUST_EXTERNAL int	mbna_survey_select;
+MBNAVADJUST_EXTERNAL int	mbna_block_select;
+MBNAVADJUST_EXTERNAL int	mbna_block_select1;
+MBNAVADJUST_EXTERNAL int	mbna_block_select2;
 MBNAVADJUST_EXTERNAL int	mbna_file_select;
 MBNAVADJUST_EXTERNAL int	mbna_section_select;
 MBNAVADJUST_EXTERNAL int	mbna_crossing_select;
@@ -420,8 +171,6 @@ MBNAVADJUST_EXTERNAL int	mbna_modelplot_tieendzoom;
 MBNAVADJUST_EXTERNAL int	mbna_modelplot_pickfile;
 MBNAVADJUST_EXTERNAL int	mbna_modelplot_picksection;
 MBNAVADJUST_EXTERNAL int	mbna_modelplot_picksnav;
-MBNAVADJUST_EXTERNAL int	mbna_modelplot_blocksurvey1;
-MBNAVADJUST_EXTERNAL int	mbna_modelplot_blocksurvey2;
 
 /* mbnavadjust global project parameters */
 MBNAVADJUST_EXTERNAL struct	mbna_project project;
@@ -451,9 +200,6 @@ int	mbnavadjust_set_borders(int *cn_brdr, int *cr_brdr, int *zc_brdr);
 int	mbnavadjust_set_graphics(void *cn_xgid, void *cr_xgid, void *zc_xgid);
 int	mbnavadjust_file_new(char *projectname);
 int	mbnavadjust_file_open(char *projectname);
-int	mbnavadjust_close_project(void);
-int	mbnavadjust_write_project(void);
-int	mbnavadjust_read_project(void);
 int	mbnavadjust_import_data(char *path, int format);
 int	mbnavadjust_import_file(char *path, int format, int firstfile);
 int 	mbnavadjust_bin_bathymetry(double altitude, int beams_bath, char *beamflag, double *bath,
@@ -464,6 +210,7 @@ int 	mbnavadjust_bin_bathymetry(double altitude, int beams_bath, char *beamflag,
 				int *error);
 int	mbnavadjust_findcrossings(void);
 int	mbnavadjust_findcrossingsfile(int ifile);
+int mbnavadjust_addcrossing(int ifile1, int isection1, int ifile2, int isection2);
 int	mbnavadjust_poornav_file(void);
 int	mbnavadjust_goodnav_file(void);
 int	mbnavadjust_fixednav_file(void);
@@ -496,11 +243,6 @@ int	mbnavadjust_section_contour(int fileid, int sectionid,
 				struct mbna_contour_vector *contour);
 int	mbnavadjust_naverr_snavpoints(int ix, int iy);
 int	mbnavadjust_sections_intersect(int crossing_id);
-int	mbnavadjust_crossing_overlap(int crossing_id);
-int	mbnavadjust_crossing_overlapbounds(int crossing_id,
-				double offset_x, double offset_y,
-				double *lonmin, double *lonmax,
-				double *latmin, double *latmax);
 int	mbnavadjust_get_misfit(void);
 int	mbnavadjust_get_misfitxy(void);
 void 	plot(double x,double y,int ipen);
@@ -514,7 +256,8 @@ int	mbnavadjust_autosetsvsvertical(void);
 int	mbnavadjust_zerozoffsets(void);
 int	mbnavadjust_invertnav(void);
 int	mbnavadjust_applynav(void);
-int	mbnavadjust_interpolatesolution(void);
+int mbnavadjust_updaterawgrid(void);
+int mbnavadjust_updateadjustedgrid(void);
 int	mbnavadjust_modelplot_plot(void);
 int	mbnavadjust_set_modelplot_graphics(void *modp_xgid, int *modp_borders);
 int	mbnavadjust_modelplot_plot_timeseries(void);
@@ -529,7 +272,15 @@ int	mbnavadjust_modelplot_setzoom(void);
 int	mbnavadjust_modelplot_clearblock(void);
 int	mbnavadjust_crossing_compare(const void *a, const void *b);
 
+int mbnavadjust_open_visualization(int which_grid);
+int mbnavadjust_dismiss_visualization(void);
+int mbnavadjust_reset_visualization_navties(void);
+int mbnavadjust_visualization_selectcrossingfromroute(int icrossing, int itie);
+int mbnavadjust_visualization_selectcrossingfromnav(int ifile1, int isection1, int ifile2, int isection2);
+
 void	do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data);
+int		do_check_crossing_listok(int icrossing);
+int     do_check_globaltie_listok(int ifile, int isection);
 void	do_naverr_cont_expose( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_corr_expose( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data);
@@ -560,6 +311,7 @@ void	do_fileselection_mode( Widget w, XtPointer client_data, XtPointer call_data
 void	do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showsurveys( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showblocks( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showdata( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showmediocrecrossings( Widget w, XtPointer client_data, XtPointer call_data);
@@ -568,6 +320,7 @@ void	do_view_showtruecrossings( Widget w, XtPointer client_data, XtPointer call_
 void	do_view_showties( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showallsurveys( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showselectedsurveys( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showselectedblock( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showselectedfile( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showselectedsection( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data);
@@ -576,13 +329,14 @@ void	do_action_autosetsvsvertical( Widget w, XtPointer client_data, XtPointer ca
 void	do_action_analyzecrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_checknewcrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_action_updategrids( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_apply_nav( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_fileselection_list(Widget w, XtPointer client, XtPointer call);
-int	do_wait_until_viewed(XtAppContext app);
+int		do_wait_until_viewed(XtAppContext app);
 void	set_label_string(Widget w, String str);
 void	set_label_multiline_string(Widget w, String str);
 void	get_text_string(Widget w, String str);
-int	do_info_add(char *info, int timetag);
-void	do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
+int		do_info_add(char *info, int timetag);
 
 void	do_naverr_setoffset( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_fullsize( Widget w, XtPointer client_data, XtPointer call_data);
@@ -615,7 +369,7 @@ void	do_action_tie_xy( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_z( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_tie_xyz( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_zerozoffsets( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_apply_nav( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_visualize( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_modelplot_show( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_modelplot_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_modelplot_fullsize( Widget w, XtPointer client_data, XtPointer call_data);
@@ -625,7 +379,13 @@ void	do_modelplot_tieoffsets( Widget w, XtPointer client_data, XtPointer call_da
 void	do_modelplot_perturbation( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_modelplot_timeseries( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_modelplot_clearblock( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_make_grid( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
+int     do_visualize_dismiss_notify(size_t instance);
+void    do_visualize_sensitivity(void);
+void    do_update_visualization_status(void);
+void    do_pickroute_notify(size_t instance);
+void    do_picknav_notify(size_t instance);
+void    do_mbnavadjust_addcrossing(Widget w, XtPointer client, XtPointer call);
 
 void 	BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
 void 	BxManageCB(Widget w, XtPointer client, XtPointer call);

@@ -2143,13 +2143,14 @@ printf " %.2f m\n",$mmissiondepths[$i];
 				{
 				print MFILE "speed              = SURVEY_SPEED; \r\n";
 				}
-			print MFILE "maxCrossTrackError = 10; \r\n";             #Meters; Maximum cross-track displacement
+			print MFILE "maxCrossTrackError          = 10; \r\n";    #Meters; Maximum cross-track displacement
 			print MFILE "starboardMaxCrossTrackError = 40; \r\n";    #Meters; Maximum starboard cross-track displacement
-			print MFILE "standOff           = 60; \r\n";             #Meters; Stand off from the wall
-			print MFILE "sonarTimeOut       = 2; \r\n";             #Seconds;
-			print MFILE "windowLen          = 1; \r\n";
-			print MFILE "useWallEstimator   = True; \r\n";
-			print MFILE "wallFeedForward    = True; \r\n";
+			print MFILE "standOff                    = 80; \r\n";    #Meters; Stand off from the wall
+			print MFILE "sonarTimeOut                = 2; \r\n";     #Seconds;
+			#print MFILE "windowLen                   = 1; \r\n";
+			print MFILE "useWallEstimator            = True; \r\n";
+			#print MFILE "wallFeedForward             = True; \r\n";
+			print MFILE "filterType                  = 1; \r\n";
 			print MFILE "} \r\n";
 			print WFILE "$mlons[$i] $mlats[$i]\r\n";
 			}

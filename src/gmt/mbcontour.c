@@ -41,6 +41,54 @@
 
 /* GMT5 header file */
 #include "gmt_dev.h"
+/*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */
+#if GMT_MINOR_VERSION < 3
+#define gmt_M_180_range GMT_180_RANGE
+#define gmt_M_free_options GMT_Free_Options
+#define gmt_M_ijp GMT_IJP
+#define gmt_M_ijpgi GMT_IJPGI
+#define gmt_M_check_condition GMT_check_condition
+#define gmt_M_get_inc GMT_get_inc
+#define gmt_M_get_n GMT_get_n
+#define gmt_M_grd_is_global GMT_grd_is_global
+#define gmt_M_grd_same_region GMT_grd_same_region
+#define gmt_M_is255 GMT_is255
+#define gmt_M_is_geographic GMT_is_geographic
+#define gmt_M_memcpy GMT_memcpy
+#define gmt_M_rgb_copy GMT_rgb_copy
+#define gmt_M_u255 GMT_u255
+#define gmt_M_err_fail GMT_err_fail
+#define gmt_M_free GMT_free
+#define gmt_M_is_fnan GMT_is_fnan
+#define gmt_M_memory GMT_memory
+#define gmt_get_cpt GMT_Get_CPT
+#define gmt_access GMT_access
+#define gmt_begin_module GMT_begin_module
+#define gmt_check_filearg GMT_check_filearg
+#define gmt_default_error GMT_default_error
+#define gmt_end_module GMT_end_module
+#define gmt_geo_to_xy GMT_geo_to_xy
+#define gmt_get_api_ptr GMT_get_API_ptr
+#define gmt_get_rgb_from_z GMT_get_rgb_from_z
+#define gmt_getrgb GMT_getrgb
+#define gmt_grd_project GMT_grd_project
+#define gmt_grd_setregion GMT_grd_setregion
+#define gmt_illuminate GMT_illuminate
+#define gmt_map_basemap GMT_map_basemap
+#define gmt_map_clip_off GMT_map_clip_off
+#define gmt_map_clip_on GMT_map_clip_on
+#define gmt_map_setup GMT_map_setup
+#define gmt_not_numeric GMT_not_numeric
+#define gmt_plane_perspective GMT_plane_perspective
+#define gmt_plotcanvas GMT_plotcanvas
+#define gmt_plotend GMT_plotend
+#define gmt_plotinit GMT_plotinit
+#define gmt_project_init GMT_project_init
+#define gmt_putrgb GMT_putrgb
+#define gmt_rgb_syntax GMT_rgb_syntax
+#define gmt_set_grddim GMT_set_grddim
+#define gmt_show_name_and_purpose GMT_show_name_and_purpose
+#endif
 
 #define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
@@ -190,7 +238,7 @@ void *New_mbcontour_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
         int     dummyformat;
         int     dummypings;
 
-	Ctrl = GMT_memory (GMT, NULL, 1, struct MBCONTOUR_CTRL);
+	Ctrl = gmt_M_memory (GMT, NULL, 1, struct MBCONTOUR_CTRL);
 
 	/* Initialize values whose defaults are not 0/false/NULL */
 
@@ -243,7 +291,7 @@ void Free_mbcontour_Ctrl (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl) {	/
 	if (!Ctrl) return;
 	if (Ctrl->C.contourfile) free (Ctrl->C.contourfile);
 	if (Ctrl->I.inputfile) free (Ctrl->I.inputfile);
-	GMT_free (GMT, Ctrl);
+	gmt_M_free (GMT, Ctrl);
 }
 
 int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level)
@@ -251,7 +299,7 @@ int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level)
 //	char help_message[] =  "mbcontour is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBCONTOUR in conjunction with the usual GMT programs.";
 //	char usage_message[] = "mbcontour -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode[F] -V -H]";
 
-	GMT_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbcontour -I<inputfile> %s [%s]\n", GMT_J_OPT, GMT_B_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[-A<factor>/<mode>/<depth>]\n");
@@ -276,7 +324,7 @@ int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level)
 	GMT_Message (API, GMT_TIME_NONE, "\t-E Set dpi for the projected output Postscript image\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t   if -Jx or -Jm is not selected.\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t   Give i to do the interpolation in PostScript at device resolution.\n");
-	GMT_rgb_syntax (API->GMT, 'G', "Set transparency color for images that otherwise would result in 1-bit images.\n\t  ");
+	gmt_rgb_syntax (API->GMT, 'G', "Set transparency color for images that otherwise would result in 1-bit images.\n\t  ");
 	GMT_Option (API, "K");
 	GMT_Option (API, "O,P");
 	GMT_Message (API, GMT_TIME_NONE, "\t-p<pings> Sets the ping averaging of the input data [Default = 1, i.e. no ping average].\n");
@@ -306,9 +354,9 @@ int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, stru
 			case '<':	/* Input file (only one or three is accepted) */
 				Ctrl->I.active = true;
 #if GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
-				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN)) {
+				if (gmt_check_filearg (GMT, '<', opt->arg, GMT_IN)) {
 #else
-				if (GMT_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET)) {
+				if (gmt_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET)) {
 #endif
 					Ctrl->I.inputfile = strdup (opt->arg);
 					n_files = 1;
@@ -399,7 +447,7 @@ int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, stru
 
 			case 'I':	/* -I<inputfile> */
 				Ctrl->I.active = true;
-				if (!GMT_access (GMT, opt->arg, R_OK)) {	/* Got a file */
+				if (!gmt_access (GMT, opt->arg, R_OK)) {	/* Got a file */
 					Ctrl->I.inputfile = strdup (opt->arg);
 					n_files = 1;
 				}
@@ -479,23 +527,23 @@ int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, stru
 				}
 				break;
 			default:	/* Report bad options */
-				n_errors += GMT_default_error (GMT, opt->option);
+				n_errors += gmt_default_error (GMT, opt->option);
 				break;
 		}
 	}
 
-	n_errors += GMT_check_condition (GMT, !GMT->common.R.active, "Syntax error: Must specify -R option\n");
-	n_errors += GMT_check_condition (GMT, !GMT->common.J.active,
+	n_errors += gmt_M_check_condition (GMT, !GMT->common.R.active, "Syntax error: Must specify -R option\n");
+	n_errors += gmt_M_check_condition (GMT, !GMT->common.J.active,
 	                                 "Syntax error: Must specify a map projection with the -J option\n");
-	n_errors += GMT_check_condition (GMT, n_files != 1, "Syntax error: Must specify one input file(s)\n");
-	n_errors += GMT_check_condition (GMT, Ctrl->I.active && !Ctrl->I.inputfile, 
+	n_errors += gmt_M_check_condition (GMT, n_files != 1, "Syntax error: Must specify one input file(s)\n");
+	n_errors += gmt_M_check_condition (GMT, Ctrl->I.active && !Ctrl->I.inputfile, 
 	                                 "Syntax error -I option: Must specify input file\n");
 
 	return (n_errors ? GMT_PARSE_ERROR : GMT_OK);
 }
 
-#define bailout(code) {GMT_Free_Options (mode); return (code);}
-#define Return(code) {Free_mbcontour_Ctrl (GMT, Ctrl); GMT_end_module (GMT, GMT_cpy); bailout (code);}
+#define bailout(code) {gmt_M_free_options (mode); return (code);}
+#define Return(code) {Free_mbcontour_Ctrl (GMT, Ctrl); gmt_end_module (GMT, GMT_cpy); bailout (code);}
 
 int GMT_mbcontour (void *V_API, int mode, void *args)
 {
@@ -505,7 +553,7 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 	struct GMT_PALETTE *CPTcolor = NULL;
 	struct GMT_CTRL *GMT_cpy = NULL;	/* General GMT interal parameters */
 	struct GMT_OPTION *options = NULL;
-	struct GMTAPI_CTRL *API = GMT_get_API_ptr (V_API);	/* Cast from void to GMTAPI_CTRL pointer */
+	struct GMTAPI_CTRL *API = gmt_get_api_ptr (V_API);	/* Cast from void to GMTAPI_CTRL pointer */
 	struct MBCONTOUR_CTRL *Ctrl = NULL;
 
 	/* MBIO status variables */
@@ -627,7 +675,7 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 
 	/* Parse the command-line arguments */
 
-	GMT = GMT_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
 	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) {
 		fprintf(stderr,"Error from GMT_Parse_common():%d\n",API->error);
 		Return (API->error);
@@ -891,17 +939,17 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 		}
 
 	/* Start the postscript plot */
-	GMT_err_fail (GMT, GMT_map_setup (GMT, GMT->common.R.wesn), "");
-	PSL = GMT_plotinit (GMT, options);
-	GMT_plane_perspective (GMT, GMT->current.proj.z_project.view_plane, GMT->current.proj.z_level);
-	GMT_plotcanvas (GMT);	/* Fill canvas if requested */
-	GMT_map_clip_on (GMT, GMT->session.no_rgb, 3);
+	gmt_M_err_fail (GMT, gmt_map_setup (GMT, GMT->common.R.wesn), "");
+	PSL = gmt_plotinit (GMT, options);
+	gmt_plane_perspective (GMT, GMT->current.proj.z_project.view_plane, GMT->current.proj.z_level);
+	gmt_plotcanvas (GMT);	/* Fill canvas if requested */
+	gmt_map_clip_on (GMT, GMT->session.no_rgb, 3);
                 
         /* Set particulars of output image for the postscript plot */
-	GMT_geo_to_xy(GMT, GMT->common.R.wesn[0], GMT->common.R.wesn[2], &clipx[0], &clipy[0]);
-	GMT_geo_to_xy(GMT, GMT->common.R.wesn[1], GMT->common.R.wesn[2], &clipx[1], &clipy[1]);
-	GMT_geo_to_xy(GMT, GMT->common.R.wesn[1], GMT->common.R.wesn[3], &clipx[2], &clipy[2]);
-	GMT_geo_to_xy(GMT, GMT->common.R.wesn[0], GMT->common.R.wesn[3], &clipx[3], &clipy[3]);
+	gmt_geo_to_xy(GMT, GMT->common.R.wesn[0], GMT->common.R.wesn[2], &clipx[0], &clipy[0]);
+	gmt_geo_to_xy(GMT, GMT->common.R.wesn[1], GMT->common.R.wesn[2], &clipx[1], &clipy[1]);
+	gmt_geo_to_xy(GMT, GMT->common.R.wesn[1], GMT->common.R.wesn[3], &clipx[2], &clipy[2]);
+	gmt_geo_to_xy(GMT, GMT->common.R.wesn[0], GMT->common.R.wesn[3], &clipx[3], &clipy[3]);
 //	x_inch = clipx[1] - clipx[0];
 //	y_inch = clipy[2] - clipy[1];
 //	x0 = GMT->common.R.wesn[0];
@@ -1296,11 +1344,11 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 
-	GMT_map_clip_off (GMT);
+	gmt_map_clip_off (GMT);
 
-	GMT_map_basemap (GMT);
-	GMT_plane_perspective (GMT, -1, 0.0);
-	GMT_plotend (GMT);
+	gmt_map_basemap (GMT);
+	gmt_plane_perspective (GMT, -1, 0.0);
+	gmt_plotend (GMT);
 
 	/* deallocate memory for data arrays */
 	mb_freed(verbose,__FILE__, __LINE__, (void **)&level,&error);
@@ -1448,7 +1496,7 @@ void mbcontour_plot(double x, double y, int ipen)
 	    }
             
         /* convert to map units */
-        GMT_geo_to_xy(GMT, x, y, &xx, &yy);
+        gmt_geo_to_xy(GMT, x, y, &xx, &yy);
         
         /* if command is move then start new contour */
         if (ipen == MBCONTOUR_PLOT_MOVE)
@@ -1525,7 +1573,7 @@ void mbcontour_plot_string(double x, double y, double hgt, double angle, char *l
         int     mode = 0;
 
 	fontsize = 72.0 * hgt / inchtolon;
-	GMT_geo_to_xy(GMT, x, y, &xx, &yy);
+	gmt_geo_to_xy(GMT, x, y, &xx, &yy);
         PSL_plottext (PSL, xx, yy, fontsize, label, angle, justify, mode);
 	return;
 }

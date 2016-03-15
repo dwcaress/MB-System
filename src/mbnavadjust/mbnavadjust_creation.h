@@ -31,6 +31,8 @@
 #define EXTERNAL extern
 #endif
 
+Widget CreatemainWindow(Widget parent);
+
 /**
  * Start Global Widget Declarations.
  */
@@ -100,6 +102,7 @@ EXTERNAL Widget   pushButton_close;
 EXTERNAL Widget   pushButton_importdata;
 EXTERNAL Widget   pushButton_quit;
 EXTERNAL Widget   pushButton_showsurveys;
+EXTERNAL Widget   pushButton_showblocks; /* NEW */
 EXTERNAL Widget   pushButton_showdata;
 EXTERNAL Widget   pushButton_showsections;
 EXTERNAL Widget   pushButton_showcrossings;
@@ -110,11 +113,12 @@ EXTERNAL Widget   pushButton_showtruecrossings;
 EXTERNAL Widget   pushButton_showties;
 EXTERNAL Widget   toggleButton_showallsurveys;
 EXTERNAL Widget   toggleButton_showselectedsurvey;
+EXTERNAL Widget   toggleButton_showselectedblock; /* NEW */
 EXTERNAL Widget   toggleButton_showselectedfile;
 EXTERNAL Widget   toggleButton_showwithselectedsurvey;
 EXTERNAL Widget   toggleButton_showwithselectedfile;
 EXTERNAL Widget   toggleButton_showselectedsection;
-EXTERNAL Widget   pushButton_makegrid;
+EXTERNAL Widget   pushButton_visualize;
 EXTERNAL Widget   pushButton_showmodelplot;
 EXTERNAL Widget   pushButton_poornav;
 EXTERNAL Widget   pushButton_goodnav;
@@ -131,6 +135,7 @@ EXTERNAL Widget   pushButton_newcrossings;
 EXTERNAL Widget   pushButton_analyzecrossings;
 EXTERNAL Widget   pushButton_zerozoffsets;
 EXTERNAL Widget   pushButton_invertnav;
+EXTERNAL Widget   pushButton_updategrids;
 EXTERNAL Widget   pushButton_applynav;
 EXTERNAL Widget   form_mbnavadjust;
 EXTERNAL Widget   scrolledWindow_messages;

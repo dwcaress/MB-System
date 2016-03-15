@@ -512,7 +512,7 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* if needed create array for beam flags */
 		if (mb_ping->number_beams > 0 && mb_ping->beam_flags == NULL)
 		    {
-		    mb_ping->beam_flags = (unsigned char *) malloc(mb_ping->number_beams * sizeof(char));
+		    mb_ping->beam_flags = (unsigned char *) malloc(mb_ping->number_beams * sizeof(unsigned char));
 		    for (i=0;i<mb_ping->number_beams;i++)
 			mb_ping->beam_flags[i] = MB_FLAG_NONE;
 		    }
