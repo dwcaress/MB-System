@@ -66,7 +66,7 @@ $program_name = "mbm_route2mission";
 #     Use 3.0 * expected duration for waypoint behaviors
 #     Use 1.3 * expected duration the mission as a whole
 #     Abort time must not be greater than battery life of 8 hours = 28800 seconds
-$durationfactorwaypoint = 3.0;
+$durationfactorwaypoint = 6.0;
 $durationfactormission = 1.3;
 $durationmax = 28800;
 $batterylife = 68400; # 19 hours
@@ -2291,14 +2291,14 @@ print "Behavior: acousticUpdate\r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
 			if ($subbottom && $mstartstops[$i-1] == 2)
 				{
-				print MFILE "SBP_Mode = 1; \r\n";
-				print MFILE "SBP_Power = 100.0; \r\n";
+				#print MFILE "SBP_Mode = 1; \r\n";
+				#print MFILE "SBP_Power = 100.0; \r\n";
 print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
 				}
 			elsif ($subbottom && $mstartstops[$i-1] == 1)
 				{
-				print MFILE "SBP_Mode = 1; \r\n";
-				print MFILE "SBP_Power = 100.0; \r\n";
+				#print MFILE "SBP_Mode = 1; \r\n";
+				#print MFILE "SBP_Power = 100.0; \r\n";
 print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
 				}
 			elsif ($subbottom)
@@ -2307,27 +2307,27 @@ print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint
 				}
 			if ($subbottom)
 				{
-				printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
+				#printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
 				}
 			if ($sidescanlo)
 				{
-				printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
+				#printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
 				}
 			if ($sidescanhi)
 				{
-				print MFILE "HiSS_Range = $sslo_range; \r\n";
+				#print MFILE "HiSS_Range = $sslo_range; \r\n";
 				}
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
-			print MFILE "MB_Rate = $mb_pingrate; \r\n";
-			print MFILE "MB_Gain = $mb_receivegain; \r\n";
-			print MFILE "MB_Sound_Velocity = 0.0; \r\n";
-			printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
+			#print MFILE "MB_Rate = $mb_pingrate; \r\n";
+			#print MFILE "MB_Gain = $mb_receivegain; \r\n";
+			#print MFILE "MB_Sound_Velocity = 0.0; \r\n";
+			#printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
 			printf MFILE "MB_Bottom_Detect_Filter_Min_Range = %.2f; \r\n", $mb_minrange;
 			printf MFILE "MB_Bottom_Detect_Filter_Max_Range = %.2f; \r\n", $mb_maxrange;
 			printf MFILE "MB_Bottom_Detect_Filter_Min_Depth = %.2f; \r\n", $mb_mindepth;
-			printf MFILE "MB_Bottom_Detect_Filter_Max_Depth = %.2f; \r\n", $mb_maxdepth;
-			print MFILE "MB_Bottom_Detect_Range_Mode = 1; \r\n";
-			print MFILE "MB_Bottom_Detect_Depth_Mode = 0; \r\n";
+			#printf MFILE "MB_Bottom_Detect_Filter_Max_Depth = %.2f; \r\n", $mb_maxdepth;
+			#print MFILE "MB_Bottom_Detect_Range_Mode = 1; \r\n";
+			#print MFILE "MB_Bottom_Detect_Depth_Mode = 0; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";

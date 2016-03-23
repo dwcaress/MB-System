@@ -229,6 +229,25 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2269 (March 20, 2016)
+
+MBkongsbergpreprocess, and formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA) for
+current generation Kongsberg multibeam data: Changed so that the default source
+for attitude data used in recalculating bathymetry from travel times and angles
+is the "active" source originally used by the sonar rather than always being
+motion sensor 1.
+
+MBnavadjust: Fixed creation of bathymetry grid (gridding scripts were not being
+set executable). Removed data from fixed files from the bathymetry grid.
+
+MBkongsbergpreprocess: Now by default uses the same attitude data stream used
+by the sonar in realtime, as opposed to using data from "motion sensor 1"
+regardless of whether that was the active realtime sensor.
+
+Bathymetry editing programs (MBedit, MBeditviz, MBareaclean, MBclean): fixed
+beam edit code so that no attempt is made to sort zero length arrays of beam
+flags.
+
 -----> 5.5.2268 (March 14, 2016)
 
 Mbnavadjust: Added integrated mbgrdviz-style visualization of the bathymetry in

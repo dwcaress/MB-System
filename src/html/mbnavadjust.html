@@ -98,7 +98,7 @@ can be reversed manually using <B>mbset</B>, but then the user will
 unnecessarily complicating his or her efforts.
 <P>
 A companion program <B>mbnavadjustmerge</B> can add <B>mbnavadjust</B> projects
-together or or modify <B>mbnavadjust</B> prooject settings. 
+together or or modify <B>mbnavadjust</B> project settings. 
 <P>
 The inversion for an optimal navigation which fits the offsets identified
 at matching features must also be reasonable. This is achieved by
@@ -233,7 +233,7 @@ These widgets are discussed in the <B>Controls</B> section below.
 <BR>&nbsp;.TP
 <B>View</B>
 
-This button brings up a pulldown menu with fifteen items in three
+This button brings up a pulldown menu with nineteen items in three
 groups. This menu controls the contents of the list widget in the lower
 right <B>MBnavadjust Window</B>. If an <B>mbnavadjust</B> project
 has been created or opened, the <B>Data Table</B> list
@@ -242,9 +242,9 @@ and the corresponding menu item will be disabled. Selection of another item
 items will change what is displayed in the <B>Data Table</B> list
 widget accordingly.
 <P>
-The first group includes the <B>Show Surveys</B>,
+The first group includes the <B>Show Surveys</B>, <B>Show Survey-vs-Survey Blocks</B>,
 <B>Show Data Files</B>, <B>Show Data File Sections</B>, <B>Show All Crossings</B>,
-<B>Show All Crossings</B>, <B>Show &gt;25% Crossings</B>, <B>Show &gt;50% Crossings</B>,
+<B>Show &gt;10% Crossings</B>, <B>Show &gt;25% Crossings</B>, <B>Show &gt;50% Crossings</B>,
 <B>Show True Crossings</B>, and <B>Show Ties</B> items.
 <DT><B>View-&gt;Show Surveys</B>
 
@@ -252,6 +252,25 @@ The first group includes the <B>Show Surveys</B>,
 This menu item causes the <B>Data Table</B> list widget to display a list of the
 surveys in the current <B>mbnavadjust</B> project. Within <B>MBnavadjust</B>, a
 survey is a group of swath files that are contiguous in time.
+<DT><B>View-&gt;Show Survey-vs-Survey Blocks</B>
+
+<DD>
+This menu item causes the <B>Data Table</B> list widget to display a list of the
+survey-vs-survey blocks in the current <B>mbnavadjust</B> project. If there are
+are three surveys in the project, then the available survey-vs-survey blocks
+include:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey&nbsp;0&nbsp;vs&nbsp;Survey&nbsp;0
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey&nbsp;0&nbsp;vs&nbsp;Survey&nbsp;1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey&nbsp;1&nbsp;vs&nbsp;Survey&nbsp;1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey&nbsp;0&nbsp;vs&nbsp;Survey&nbsp;2
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey&nbsp;1&nbsp;vs&nbsp;Survey&nbsp;2
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey&nbsp;2&nbsp;vs&nbsp;Survey&nbsp;2
+<BR>
+
+If one of these survey blocks is selected, then is possible to restrict the
+crossings or ties that are viewed to being those between the specified surveys.
 <DT><B>View-&gt;Show Data Files</B>
 
 <DD>
@@ -267,6 +286,14 @@ data sections in the current <B>mbnavadjust</B> project.
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of all the swath
 crossings in the current <B>mbnavadjust</B> project.
+When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
+selected crossing in the &quot;Nav Err&quot; window.
+<DT><B>View-&gt;Show &gt;10% Crossings</B>
+
+<DD>
+This menu item causes the <B>Data Table</B> list widget to display a list of all the swath
+crossings in the current <B>mbnavadjust</B> project for which the two sections overlap by
+more than 10%.
 When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
 selected crossing in the &quot;Nav Err&quot; window.
 <DT><B>View-&gt;Show &gt;25% Crossings</B>
@@ -299,7 +326,8 @@ This menu item causes the <B>Data Table</B> list widget to display a list of the
 in the current <B>mbnavadjust</B> project.
 <P>
 The second group includes the
-<B>Show All Surveys</B>, <B>Show Only Selected Survey</B>, <B>Show Only Selected File</B>,
+<B>Show All Surveys</B>, <B>Show Only Selected Survey</B>,
+<B>Show Only Selected Survey-vs-Survey Block</B>, <B>Show Only Selected File</B>,
 and <B>Show Only Selected Section</B> items. One of these options is always active, and
 modifies what is displayed in the <B>Data Table</B> list.
 <DT><B>View-&gt;Show All Surveys</B>
@@ -314,6 +342,14 @@ This menu item limits the items (file, sections, crossings, ties) displayed in
 the <B>Data Table</B> list to those associated with the most recently
 selected survey (e.g. a survey selected by clicking in the <B>Data Table</B> list
 while the &lt;View-&gt;Show Surveys&gt; option is active).
+<DT><B>View-&gt;Show Only Selected Survey-vs-Survey Blocks</B>
+
+<DD>
+This menu item limits the items (file, sections, crossings, ties) displayed in
+the <B>Data Table</B> list to those associated with the most recently
+selected survey-vs-survey blocks (e.g. a survey-vs-survey block selected by
+clicking in the <B>Data Table</B> list
+while the &lt;View-&gt;Show Survey-vs-Survey Blocks&gt; option is active).
 <DT><B>View-&gt;Show Only Selected File</B>
 
 <DD>
@@ -333,7 +369,17 @@ The third group includes two options:
 <DT><B>View-&gt;Visualize Survey</B>
 
 <DD>
-This option is not active, and is for future use.
+This option causes an MBgrdviz-style window to be displayed that shows the most
+recent bathymetry grid associated with the project. The current navigation model
+is overlain on the bathymetry. When the <B>Data Table</B> list is configured to
+show crossings or ties, any associated ties are also overlain on the bathymetry
+grid. These ties are displayed as two connected circles with the circles located
+at the nav points that have been tied. The bathymetry grid is generated from
+the data imported into the project following application of the adjusted navigation
+model generated by MBnavadjust. This grid always exists, but is only updated by
+the &lt;Action-&gt;Update Grids&gt; option. Therefore, frequently the current navigation
+and tie locations will be shown over bathymetry generated using a previous
+navigation model.
 <DT><B>View-&gt;Show Modelplot</B>
 
 <DD>
@@ -347,7 +393,7 @@ This button brings up a pulldown menu with nine items:
 <B>Set File Poor Navigation</B>, <B>Set File Good Navigation</B>,
 <B>Set File Fixed Navigation</B>, <B>Auto-Pick Offsets</B>,
 <B>Check for New Crossings</B>, <B>Analyze Crossings</B>, <B>Zero All Z Offsets</B>,
-<B>Invert Navigation</B>, and <B>Apply Adjusted Navigation</B>.
+<B>Invert Navigation</B>, <B>Update Grids</B>, and <B>Apply Adjusted Navigation</B>.
 <DT><B>Action-&gt;Set File Poor Navigation</B>
 
 <DD>
@@ -418,6 +464,17 @@ navigation solution that fits the offsets defined at the navigation
 tie points while minimizing speed and acceleration. This option is
 only activated when all of the true crossings in the current
 <B>mbnavadjust</B> project have been analyzed interactively.
+<DT><B>Action-&gt;Update Grids</B>
+
+<DD>
+This menu item causes <B>mbnavadjust</B> to apply the current navigation model
+to the bathymetry data that have been imported into the project, and then
+create a bathymetry grid using the adjusted data. This option is
+only activated when the inversion is current and newer than the most recent
+grid update. The gridding is done by the program <B>mbgrid</B> using the
+&quot;weighted footprint&quot; algorithm. The grid bounds encompass all of the data in
+the project, and the grid cell size is set by mbgrid according to the sounding
+footprint sizes contained in the data.
 <DT><B>Action-&gt;Apply Adjusted Navigation</B>
 
 <DD>

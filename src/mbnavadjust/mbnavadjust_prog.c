@@ -11027,6 +11027,7 @@ mbnavadjust_updaterawgrid()
 	char	command[STRING_MAX];
 	FILE	*afp;
 	double	lon_min, lon_max, lat_min, lat_max;
+	int		nfixed;
 	int		i, j;
 
  	/* print input debug statements */
@@ -11050,9 +11051,30 @@ mbnavadjust_updaterawgrid()
 		for (i=0;i<project.num_files;i++)
 			{
 			file = &project.files[i];
-			for (j=0;j<file->num_sections;j++)
+			if (file->status != MBNA_FILE_FIXEDNAV)
 				{
-				fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
+				for (j=0;j<file->num_sections;j++)
+					{
+					fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
+					}
+				}
+			}
+		fclose(afp);
+		}
+	sprintf(apath,"%s/datalistf.mb-1",project.datadir);
+	if ((afp = fopen(apath,"w")) != NULL)
+		{
+		nfixed = 0;
+		for (i=0;i<project.num_files;i++)
+			{
+			file = &project.files[i];
+			if (file->status == MBNA_FILE_FIXEDNAV)
+				{
+				nfixed++;
+				for (j=0;j<file->num_sections;j++)
+					{
+					fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
+					}
 				}
 			}
 		fclose(afp);
@@ -11074,10 +11096,16 @@ mbnavadjust_updaterawgrid()
 		{
 		fprintf(afp, "mbgrid -I datalistp.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoAdj\n\n",
 				lon_min, lon_max, lat_min, lat_max);
+		if (nfixed > 0)
+			fprintf(afp, "mbgrid -I datalistf.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoFix\n\n",
+					lon_min, lon_max, lat_min, lat_max);
 		fclose(afp);
 		}
 
-	sprintf(command, "cd %s ; mbdatalist -Idatalist.mb-1 -O -Z -V", project.datadir);
+	sprintf(command, "chmod +x %s/mbgrid_raw.cmd %s/mbgrid_adj.cmd", project.datadir, project.datadir);
+	system(command);
+
+	sprintf(command, "cd %s ; mbdatalist -Idatalist.mb-1 -O -Y -Z -V", project.datadir);
 	system(command);
 
 	sprintf(command, "cd %s ; mbgrid_raw.cmd", project.datadir);
@@ -11133,7 +11161,8 @@ mbnavadjust_updateadjustedgrid()
 	int	done;
 	int	isection, isnav;
 	double	seconds;
-	int	i;
+	double	lon_min, lon_max, lat_min, lat_max;
+	int		i, j;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -11157,6 +11186,61 @@ mbnavadjust_updateadjustedgrid()
 		do_info_add(message, MB_NO);
 		if (mbna_verbose == 0)
 			fprintf(stderr,"%s",message);
+	
+		/* update datalist files and mbgrid commands */
+		sprintf(apath,"%s/datalist.mb-1",project.datadir);
+		if ((afp = fopen(apath,"w")) != NULL)
+			{
+			for (i=0;i<project.num_files;i++)
+				{
+				file = &project.files[i];
+				if (file->status != MBNA_FILE_FIXEDNAV)
+					{
+					for (j=0;j<file->num_sections;j++)
+						{
+						fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
+						}
+					}
+				}
+			fclose(afp);
+			}
+		sprintf(apath,"%s/datalistf.mb-1",project.datadir);
+		if ((afp = fopen(apath,"w")) != NULL)
+			{
+			for (i=0;i<project.num_files;i++)
+				{
+				file = &project.files[i];
+				if (file->status == MBNA_FILE_FIXEDNAV)
+					{
+					for (j=0;j<file->num_sections;j++)
+						{
+						fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
+						}
+					}
+				}
+			fclose(afp);
+			}
+	
+		lon_min = project.lon_min - 0.1 * (project.lon_max - project.lon_min);
+		lon_max = project.lon_max + 0.1 * (project.lon_max - project.lon_min);
+		lat_min = project.lat_min - 0.1 * (project.lat_max - project.lat_min);
+		lat_max = project.lat_max + 0.1 * (project.lat_max - project.lat_min);
+		sprintf(apath,"%s/mbgrid_raw.cmd",project.datadir);
+		if ((afp = fopen(apath,"w")) != NULL)
+			{
+			fprintf(afp, "mbgrid -I datalist.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoRaw\n\n",
+					lon_min, lon_max, lat_min, lat_max);
+			fclose(afp);
+			}
+		sprintf(apath,"%s/mbgrid_adj.cmd",project.datadir);
+		if ((afp = fopen(apath,"w")) != NULL)
+			{
+			fprintf(afp, "mbgrid -I datalistp.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoAdj\n\n",
+					lon_min, lon_max, lat_min, lat_max);
+			fprintf(afp, "mbgrid -I datalistf.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoFix\n\n",
+					lon_min, lon_max, lat_min, lat_max);
+			fclose(afp);
+			}
 
 		/* generate new nav files */
 		for (i=0;i<project.num_files;i++)

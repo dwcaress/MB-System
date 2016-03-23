@@ -341,7 +341,8 @@ int mb_esf_open(int verbose, char *program_name, char *esffile,
 					} */
 	
 				/* now sort the edits */
-				mb_mergesort((char *)esf->edit, esf->nedit,
+				if (esf->nedit > 1)
+					mb_mergesort((char *)esf->edit, esf->nedit,
 						sizeof(struct mb_edit_struct), mb_edit_compare);
 	/* for (i=0;i<esf->nedit;i++)
 	fprintf(stderr,"EDITS SORTED: i:%d edit: %f %d %d  use:%d\n",

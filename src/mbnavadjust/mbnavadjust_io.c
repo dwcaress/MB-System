@@ -43,6 +43,22 @@
 /* define mbnavadjust io structures */
 #include "mbnavadjust_io.h"
 
+/* get NaN detector */
+#if defined(isnanf)
+#define check_fnan(x) isnanf((x))
+#elif defined(isnan)
+#define check_fnan(x) isnan((double)(x))
+#elif HAVE_ISNANF == 1
+#define check_fnan(x) isnanf(x)
+extern int isnanf(float x);
+#elif HAVE_ISNAN == 1
+#define check_fnan(x) isnan((double)(x))
+#elif HAVE_ISNAND == 1
+#define check_fnan(x) isnand((double)(x))
+#else
+#define check_fnan(x) ((x) != (x))
+#endif
+
 static char version_id[] = "$Id$";
 static char program_name[] = "mbnavadjust i/o functions";
 
@@ -250,6 +266,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
 	int	nscan, idummy, jdummy;
 	int	s1id, s2id;
 	int	shellstatus;
+    int first;
 	int	i, j, k, l;
 	double	mtodeglon;
 	double	mtodeglat;
@@ -818,27 +835,40 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
                     }
                 
                 /* set project bounds and scaling */
+                first = MB_YES;
                 for (i=0;i<project->num_files;i++)
                     {
                     file = &project->files[i];
-                    for (j=0;j<file->num_sections;j++)
+                    if (file->status != MBNA_FILE_FIXEDNAV)
                         {
-                        section = &file->sections[j];
-                        if (i == 0 && j == 0)
+                        for (j=0;j<file->num_sections;j++)
                             {
-                            project->lon_min = section->lonmin;
-                            project->lon_max = section->lonmax;
-                            project->lat_min = section->latmin;
-                            project->lat_max = section->latmax;
-                            }
-                        else
-                            {
-                            project->lon_min = MIN(project->lon_min, section->lonmin);
-                            project->lon_max = MAX(project->lon_max, section->lonmax);
-                            project->lat_min = MIN(project->lat_min, section->latmin);
-                            project->lat_max = MAX(project->lat_max, section->latmax);
+                            section = &file->sections[j];
+                            if (!(check_fnan(section->lonmin)
+                                || check_fnan(section->lonmax)
+                                || check_fnan(section->latmin)
+                                || check_fnan(section->latmax)))
+                                {
+                                if (first == MB_YES)
+                                    {
+                                    project->lon_min = section->lonmin;
+                                    project->lon_max = section->lonmax;
+                                    project->lat_min = section->latmin;
+                                    project->lat_max = section->latmax;
+                                    first = MB_NO;
+                                    }
+                                else
+                                    {
+                                    project->lon_min = MIN(project->lon_min, section->lonmin);
+                                    project->lon_max = MAX(project->lon_max, section->lonmax);
+                                    project->lat_min = MIN(project->lat_min, section->latmin);
+                                    project->lat_max = MAX(project->lat_max, section->latmax);
+                                    }
+                                }
                             }
                         }
+//fprintf(stderr, "PROJECT BOUNDS: file %d %s: %.7f %.7f    %.7f %.7f\n",
+//i, file->path, project->lon_min, project->lon_max, project->lat_min, project->lat_max);
                     }
                 mb_coor_scale(verbose,0.5 * (project->lat_min + project->lat_max),
                                 &project->mtodeglon,&project->mtodeglat);

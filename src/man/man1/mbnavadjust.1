@@ -75,7 +75,7 @@ can be reversed manually using \fBmbset\fP, but then the user will
 unnecessarily complicating his or her efforts.
 
 A companion program \fBmbnavadjustmerge\fP can add \fBmbnavadjust\fP projects
-together or or modify \fBmbnavadjust\fP prooject settings. 
+together or or modify \fBmbnavadjust\fP project settings. 
 
 The inversion for an optimal navigation which fits the offsets identified
 at matching features must also be reasonable. This is achieved by
@@ -183,7 +183,7 @@ that set parameters controlling how swath data are imported and displayed.
 These widgets are discussed in the \fBControls\fP section below.
  .TP
 .B View
-This button brings up a pulldown menu with fifteen items in three
+This button brings up a pulldown menu with nineteen items in three
 groups. This menu controls the contents of the list widget in the lower
 right \fBMBnavadjust Window\fP. If an \fBmbnavadjust\fP project
 has been created or opened, the \fBData Table\fP list
@@ -192,15 +192,31 @@ and the corresponding menu item will be disabled. Selection of another item
 items will change what is displayed in the \fBData Table\fP list
 widget accordingly.
 
-The first group includes the \fBShow Surveys\fP,
+The first group includes the \fBShow Surveys\fP, \fBShow Survey-vs-Survey Blocks\fP,
 \fBShow Data Files\fP, \fBShow Data File Sections\fP, \fBShow All Crossings\fP,
-\fBShow All Crossings\fP, \fBShow >25% Crossings\fP, \fBShow >50% Crossings\fP,
+\fBShow >10% Crossings\fP, \fBShow >25% Crossings\fP, \fBShow >50% Crossings\fP,
 \fBShow True Crossings\fP, and \fBShow Ties\fP items.
 .TP
 .B View->Show Surveys
 This menu item causes the \fBData Table\fP list widget to display a list of the
 surveys in the current \fBmbnavadjust\fP project. Within \fBMBnavadjust\fP, a
 survey is a group of swath files that are contiguous in time.
+.TP
+.B View->Show Survey-vs-Survey Blocks
+This menu item causes the \fBData Table\fP list widget to display a list of the
+survey-vs-survey blocks in the current \fBmbnavadjust\fP project. If there are
+are three surveys in the project, then the available survey-vs-survey blocks
+include:
+.br
+     Survey 0 vs Survey 0
+     Survey 0 vs Survey 1
+     Survey 1 vs Survey 1
+     Survey 0 vs Survey 2
+     Survey 1 vs Survey 2
+     Survey 2 vs Survey 2
+.br
+If one of these survey blocks is selected, then is possible to restrict the
+crossings or ties that are viewed to being those between the specified surveys.
 .TP
 .B View->Show Data Files
 This menu item causes the \fBData Table\fP list widget to display a list of the swath
@@ -213,6 +229,13 @@ data sections in the current \fBmbnavadjust\fP project.
 .B View->Show All Crossings
 This menu item causes the \fBData Table\fP list widget to display a list of all the swath
 crossings in the current \fBmbnavadjust\fP project.
+When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
+selected crossing in the "Nav Err" window.
+.TP
+.B View->Show >10% Crossings
+This menu item causes the \fBData Table\fP list widget to display a list of all the swath
+crossings in the current \fBmbnavadjust\fP project for which the two sections overlap by
+more than 10%.
 When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
 selected crossing in the "Nav Err" window.
 .TP
@@ -241,7 +264,8 @@ This menu item causes the \fBData Table\fP list widget to display a list of the 
 in the current \fBmbnavadjust\fP project.
 
 The second group includes the
-\fBShow All Surveys\fP, \fBShow Only Selected Survey\fP, \fBShow Only Selected File\fP,
+\fBShow All Surveys\fP, \fBShow Only Selected Survey\fP,
+\fBShow Only Selected Survey-vs-Survey Block\fP, \fBShow Only Selected File\fP,
 and \fBShow Only Selected Section\fP items. One of these options is always active, and
 modifies what is displayed in the \fBData Table\fP list.
 .TP
@@ -254,6 +278,13 @@ This menu item limits the items (file, sections, crossings, ties) displayed in
 the \fBData Table\fP list to those associated with the most recently
 selected survey (e.g. a survey selected by clicking in the \fBData Table\fP list
 while the <View->Show Surveys> option is active).
+.TP
+.B View->Show Only Selected Survey-vs-Survey Blocks
+This menu item limits the items (file, sections, crossings, ties) displayed in
+the \fBData Table\fP list to those associated with the most recently
+selected survey-vs-survey blocks (e.g. a survey-vs-survey block selected by
+clicking in the \fBData Table\fP list
+while the <View->Show Survey-vs-Survey Blocks> option is active).
 .TP
 .B View->Show Only Selected File
 This menu item limits the items (file, sections, crossings, ties) displayed in
@@ -270,7 +301,17 @@ while the <View->Show Sections> option is active).
 The third group includes two options:
 .TP
 .B View->Visualize Survey
-This option is not active, and is for future use.
+This option causes an MBgrdviz-style window to be displayed that shows the most
+recent bathymetry grid associated with the project. The current navigation model
+is overlain on the bathymetry. When the \fBData Table\fP list is configured to
+show crossings or ties, any associated ties are also overlain on the bathymetry
+grid. These ties are displayed as two connected circles with the circles located
+at the nav points that have been tied. The bathymetry grid is generated from
+the data imported into the project following application of the adjusted navigation
+model generated by MBnavadjust. This grid always exists, but is only updated by
+the <Action->Update Grids> option. Therefore, frequently the current navigation
+and tie locations will be shown over bathymetry generated using a previous
+navigation model.
 .TP
 .B View->Show Modelplot
 This option causes an addition "Model Plot" window to be shown that displays
@@ -282,7 +323,7 @@ This button brings up a pulldown menu with nine items:
 \fBSet File Poor Navigation\fP, \fBSet File Good Navigation\fP,
 \fBSet File Fixed Navigation\fP, \fBAuto-Pick Offsets\fP,
 \fBCheck for New Crossings\fP, \fBAnalyze Crossings\fP, \fBZero All Z Offsets\fP,
-\fBInvert Navigation\fP, and \fBApply Adjusted Navigation\fP.
+\fBInvert Navigation\fP, \fBUpdate Grids\fP, and \fBApply Adjusted Navigation\fP.
 .TP
 .B Action->Set File Poor Navigation
 This menu item causes \fBmbnavadjust\fP to treat the navigation of
@@ -345,6 +386,16 @@ navigation solution that fits the offsets defined at the navigation
 tie points while minimizing speed and acceleration. This option is
 only activated when all of the true crossings in the current
 \fBmbnavadjust\fP project have been analyzed interactively.
+.TP
+.B Action->Update Grids
+This menu item causes \fBmbnavadjust\fP to apply the current navigation model
+to the bathymetry data that have been imported into the project, and then
+create a bathymetry grid using the adjusted data. This option is
+only activated when the inversion is current and newer than the most recent
+grid update. The gridding is done by the program \fBmbgrid\fP using the
+"weighted footprint" algorithm. The grid bounds encompass all of the data in
+the project, and the grid cell size is set by mbgrid according to the sounding
+footprint sizes contained in the data.
 .TP
 .B Action->Apply Adjusted Navigation
 This menu item causes \fBmbnavadjust\fP to export the adjusted

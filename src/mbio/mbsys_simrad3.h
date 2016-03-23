@@ -1334,8 +1334,8 @@ struct mbsys_simrad3_struct
 	/* pointer to survey data structure */
 	struct mbsys_simrad3_ping_struct pings[MBSYS_SIMRAD3_NUM_PING_STRUCTURES];
 
-        /* pointer to extra parameters data structure */
-        struct mbsys_simrad3_extraparameters_struct *extraparameters;
+    /* pointer to extra parameters data structure */
+    struct mbsys_simrad3_extraparameters_struct *extraparameters;
 
 	/* pointer to attitude data structure */
 	struct mbsys_simrad3_attitude_struct *attitude;

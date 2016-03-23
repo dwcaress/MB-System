@@ -1,4 +1,4 @@
-.TH mbkongsbergpreprocess 1 "12 November 2014" "MB-System 5.0" "MB-System 5.0"
+.TH mbkongsbergpreprocess 1 "17 March 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbkongsbergpreprocess\fP \- performs preprocessing of data from third generation
 Kongsberg multibeam sonars (e.g. EM122, EM302, EM710, EM2040, M3).
@@ -168,11 +168,14 @@ a data record type. The possibilities for Kongsberg data include:
      MB_DATA_ATTITUDE2		56
      MB_DATA_ATTITUDE3		57
 .br
-The default values are:
+The default sources for position, heading and sensor depth are:
      nav_source = MB_DATA_NAV
-     attitude_source = MB_DATA_ATTITUDE
      heading_source = MB_DATA_NAV
      sonardepth_source = MB_DATA_DATA
+.br
+The default source for attitude is set according to the sensor that was active
+during data collection, most often:
+     attitude_source = MB_DATA_ATTITUDE 
 .br
 .TP
 .B \-T
