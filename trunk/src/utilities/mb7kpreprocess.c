@@ -184,7 +184,7 @@ int main (int argc, char **argv)
 	s7kr_beamgeometry	*beamgeometry;
 	s7kr_bathymetry		*bathymetry;
 	s7kr_backscatter	*backscatter;
-	s7kr_beam		*beam;
+	s7kr_beam			*beam;
 	s7kr_v2pingmotion	*v2pingmotion;
 	s7kr_v2detectionsetup	*v2detectionsetup;
 	s7kr_v2beamformed	*v2beamformed;
@@ -196,7 +196,8 @@ int main (int argc, char **argv)
 	s7kr_processedsidescan	*processedsidescan;
 	s7kr_image		*image;
 	s7kr_fileheader		*fileheader;
-	s7kr_installation	*installation;
+	s7kr_v2bite					*v2bite;
+	s7kr_installation			*installation;
 	s7kr_remotecontrolsettings	*remotecontrolsettings;
 
 	/* counting variables */
@@ -243,6 +244,7 @@ int main (int argc, char **argv)
 	int	nrec_v2snippet = 0;
 	int nrec_calibratedsnippet = 0;
 	int	nrec_processedsidescan = 0;
+	int	nrec_v2bite = 0;
 	int	nrec_installation = 0;
 	int	nrec_systemeventmessage = 0;
 	int	nrec_fileheader = 0;
@@ -289,6 +291,7 @@ int main (int argc, char **argv)
 	int	nrec_v2snippet_tot = 0;
 	int	nrec_calibratedsnippet_tot = 0;
 	int	nrec_processedsidescan_tot = 0;
+	int	nrec_v2bite_tot = 0;
 	int	nrec_installation_tot = 0;
 	int	nrec_systemeventmessage_tot = 0;
 	int	nrec_fileheader_tot = 0;
@@ -2012,6 +2015,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	nrec_v2snippet = 0;
 	nrec_calibratedsnippet = 0;
 	nrec_processedsidescan = 0;
+	nrec_v2bite_tot = 0;
 	nrec_installation = 0;
 	nrec_systemeventmessage = 0;
 	nrec_fileheader = 0;
@@ -3064,6 +3068,27 @@ sonardepth_sonardepth[nsonardepth]);*/
 				header->RecordNumber);
 			}
 
+		/* handle bite data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_7kV2BITEData)
+			{
+			nrec_v2bite++;
+
+			v2bite = &(istore->v2bite);
+			header = &(v2bite->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kV2BITEData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+
 		/* handle installation data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_7kInstallationParameters)
 			{
@@ -3590,6 +3615,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	fprintf(stdout, "     Configuration:                     %d\n", nrec_configuration);
 	fprintf(stdout, "     Calibration:                       %d\n", nrec_calibration);
 	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth);
+	fprintf(stdout, "     BITE:                              %d\n", nrec_v2bite);
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other);
@@ -3634,6 +3660,7 @@ sonardepth_sonardepth[nsonardepth]);*/
     nrec_v2snippet_tot += nrec_v2snippet;
     nrec_calibratedsnippet_tot += nrec_calibratedsnippet;
     nrec_processedsidescan_tot += nrec_processedsidescan;
+    nrec_v2bite_tot += nrec_v2bite;
     nrec_installation_tot += nrec_installation;
     nrec_systemeventmessage_tot += nrec_systemeventmessage;
     nrec_fileheader_tot += nrec_fileheader;
@@ -4456,6 +4483,7 @@ fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
 	fprintf(stdout, "     Configuration:                     %d\n", nrec_configuration_tot);
 	fprintf(stdout, "     Calibration:                       %d\n", nrec_calibration_tot);
 	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth_tot);
+	fprintf(stdout, "     BITE:                              %d\n", nrec_v2bite_tot);
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation_tot);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage_tot);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other_tot);
@@ -4500,6 +4528,7 @@ fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
     nrec_v2snippet_tot = 0;
     nrec_calibratedsnippet_tot = 0;
     nrec_processedsidescan_tot = 0;
+    nrec_v2bite_tot = 0;
     nrec_installation_tot = 0;
     nrec_systemeventmessage_tot = 0;
     nrec_fileheader_tot = 0;
@@ -4746,6 +4775,7 @@ fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
 	nrec_v2snippet = 0;
 	nrec_calibratedsnippet = 0;
 	nrec_processedsidescan = 0;
+	nrec_v2bite = 0;
 	nrec_installation = 0;
 	nrec_systemeventmessage = 0;
 	nrec_fileheader = 0;
@@ -6980,6 +7010,27 @@ fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
 				header->RecordNumber);
 			}
 
+		/* handle bite data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_7kV2BITEData)
+			{
+			nrec_v2bite++;
+
+			v2bite = &(istore->v2bite);
+			header = &(v2bite->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kV2BITEData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+
 		/* handle installation data */
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_7kInstallationParameters)
 			{
@@ -7773,6 +7824,7 @@ fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
 	fprintf(stdout, "     Configuration:                     %d\n", nrec_configuration);
 	fprintf(stdout, "     Calibration:                       %d\n", nrec_calibration);
 	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth);
+	fprintf(stdout, "     BITE:                              %d\n", nrec_v2bite);
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other);
@@ -7817,6 +7869,7 @@ fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
     nrec_v2snippet_tot += nrec_v2snippet;
     nrec_calibratedsnippet_tot += nrec_calibratedsnippet;
     nrec_processedsidescan_tot += nrec_processedsidescan;
+    nrec_v2bite_tot += nrec_v2bite;
     nrec_installation_tot += nrec_installation;
     nrec_systemeventmessage_tot += nrec_systemeventmessage;
     nrec_fileheader_tot += nrec_fileheader;
@@ -7925,6 +7978,7 @@ fprintf(stderr,"Fixing timestamp jumps in %d Reson data\n", nbatht);
 	fprintf(stdout, "     Configuration:                     %d\n", nrec_configuration_tot);
 	fprintf(stdout, "     Calibration:                       %d\n", nrec_calibration_tot);
 	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth_tot);
+	fprintf(stdout, "     BITE:                              %d\n", nrec_v2bite_tot);
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation_tot);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage_tot);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other_tot);

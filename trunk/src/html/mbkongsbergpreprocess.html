@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbkongsbergpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  12 November 2014 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  17 March 2016 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -216,11 +216,15 @@ a data record type. The possibilities for Kongsberg data include:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<BR>
 <BR>
 
-The default values are:
+The default sources for position, heading and sensor depth are:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nav_source&nbsp;=&nbsp;MB_DATA_NAV
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attitude_source&nbsp;=&nbsp;MB_DATA_ATTITUDE
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heading_source&nbsp;=&nbsp;MB_DATA_NAV
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sonardepth_source&nbsp;=&nbsp;MB_DATA_DATA
+<BR>
+
+The default source for attitude is set according to the sensor that was active
+during data collection, most often:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attitude_source&nbsp;=&nbsp;MB_DATA_ATTITUDE&nbsp;
 <BR>
 
 <DT><B>-T</B>
@@ -391,7 +395,7 @@ Not true bugs. More like arachnids.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 12 November 2014</P></CENTER>
+Last Updated: 17 March 2016</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

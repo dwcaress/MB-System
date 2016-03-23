@@ -610,9 +610,13 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	pixel_size = (double *) &mb_io_ptr->saved1;
 	swath_width = (double *) &mb_io_ptr->saved2;
 
-	/* save fix and heading if nav data */
+	/* save fix and heading if nav data from the active position system */
 	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_NAV)
+		&& (store->kind == MB_DATA_NAV
+			|| store->kind == MB_DATA_NAV1
+			|| store->kind == MB_DATA_NAV2
+			|| store->kind == MB_DATA_NAV3)
+		&& store->pos_system & 128)
 		{
 		/* get nav time */
 		time_i[0] = store->pos_date / 10000;

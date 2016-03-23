@@ -157,8 +157,8 @@ int main (int argc, char **argv)
 	/* program mode */
 	int	mode = MBKONSBERGPREPROCESS_PROCESS;
 	int	nav_source = MB_DATA_NAV;
-	int	attitude_source = MB_DATA_ATTITUDE;
-	int	heading_source = MB_DATA_HEADING;
+	int	attitude_source = MB_DATA_NONE; // usually MB_DATA_ATTITUDE but let this be set by active sensor
+	int	heading_source = MB_DATA_NAV;
 	int	sonardepth_source = MB_DATA_DATA;
 
 	/* counting variables file */
@@ -378,7 +378,7 @@ int main (int argc, char **argv)
 
 	/* set default nav and attitude sources */
 	nav_source = MB_DATA_NAV;
-	attitude_source = MB_DATA_ATTITUDE;
+	attitude_source = MB_DATA_NONE; // usually MB_DATA_ATTITUDE but let this be set by active sensor
 	heading_source = MB_DATA_NAV;
 	sonardepth_source = MB_DATA_DATA;
 
@@ -952,6 +952,26 @@ int main (int argc, char **argv)
 		else
 			{
 /*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
+			}
+			
+		/* set attitude data source from active sensors set in the start datagram */
+		if (status == MB_SUCCESS
+			&& istore->type == EM3_START
+			&& istore->kind == MB_DATA_START
+			&& attitude_source == MB_DATA_NONE)
+			{
+			if (istore->par_aro == 2)
+				{
+				attitude_source = MB_DATA_ATTITUDE;
+				}
+			else if (istore->par_aro == 3)
+				{
+				attitude_source = MB_DATA_ATTITUDE1;
+				}
+			else
+				{
+				attitude_source = MB_DATA_ATTITUDE2;
+				}
 			}
 
 	   	/* save navigation and heading data from EM3_POS records */
@@ -2577,6 +2597,10 @@ ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i])
 				ping->png_azimuth[i] = 90.0 + beamAzimuth;
 				if (ping->png_azimuth[i] < 0.0)
 					ping->png_azimuth[i] += 360.0;
+//fprintf(stderr,"mb_beaudoin result: i:%d tx steer:%f rph: %f %f %f  rx steer:%f rph: %f %f %f  beam: %f %f\n",
+//i,tx_steer,tx_orientation.roll,tx_orientation.pitch,tx_orientation.heading,
+//i,rx_steer,rx_orientation.roll,rx_orientation.pitch,rx_orientation.heading,
+//beamDepression,beamAzimuth);
 /* fprintf(stderr,"i:%d %f %f     %f %f\n",
 i,beamDepression,beamAzimuth,ping->png_depression[i],ping->png_azimuth[i]);*/
 	
