@@ -1,4 +1,4 @@
-.TH mbnavadjust 1 "22 April 2015" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjust 1 "24 March 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjust\fP \- Package that solves for optimal navigation by
 matching bathymetry of overlapping swaths.
@@ -105,21 +105,25 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
+
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
+
 .TP
 .B \-D
 Normally, \fBmbnavadjust\fP uses a white background for the
 interactive plots. This option causes the program to use a
 black background for the plots.
+
 .TP
 .B \-R
 This option causes \fBmbnavadjust\fP to discard all navigation ties,
 set all crossings to "unanalyzed" status, and to save the project
 in this pristine state. Only use this option if you really, really
 want to start over.
+
 .TP
 .B \-V
 Normally, \fBmbnavadjust\fP outputs nothing to the stderr stream.
@@ -145,13 +149,16 @@ This menu item brings up a popup window which allows the user to
 specify a new \fBmbnavadjust\fP project. As part of initializing
 a new project, \fBmbnavadjust\fP creates a file with a ".nvh"
 suffix and a directory with a ".dir" suffix.
+
 .TP
 .B File->Open
 This menu item brings up a popup window which allows the user to
 open an existing \fBmbnavadjust\fP project.
+
 .TP
 .B File->Close
 This menu item causes \fBmbnavadjust\fP to close the current project.
+
 .TP
 .B File->Import Swath Data
 This menu item brings up a popup window which allows the user to
@@ -168,20 +175,24 @@ suffix convention (format 11 files end with ".mb11", format
 41 files end with ".mb41", etc.), then the program will
 automatically use the appropriate format id; otherwise the
 format must be set by the user in the format text box.
+
 .TP
 .B File->Quit
 This button causes \fBmbnavadjust\fP to quit. If a project has been
 created or opened, that project will be closed before the program
 quits.
+
 .TP
 .B Option
 This button brings up a pulldown menu with one item: \fBControls\fP.
+
 .TP
 .B Option->Controls
 This menu item brings up a dialog window with several slider widgets
 that set parameters controlling how swath data are imported and displayed.
 These widgets are discussed in the \fBControls\fP section below.
- .TP
+ 
+.TP
 .B View
 This button brings up a pulldown menu with nineteen items in three
 groups. This menu controls the contents of the list widget in the lower
@@ -196,11 +207,21 @@ The first group includes the \fBShow Surveys\fP, \fBShow Survey-vs-Survey Blocks
 \fBShow Data Files\fP, \fBShow Data File Sections\fP, \fBShow All Crossings\fP,
 \fBShow >10% Crossings\fP, \fBShow >25% Crossings\fP, \fBShow >50% Crossings\fP,
 \fBShow True Crossings\fP, and \fBShow Ties\fP items.
+
+The second group includes the
+\fBShow All Surveys\fP, \fBShow Only Selected Survey\fP,
+\fBShow Only Selected Survey-vs-Survey Block\fP, \fBShow Only Selected File\fP,
+and \fBShow Only Selected Section\fP items. One of these options is always active, and
+modifies what is displayed in the \fBData Table\fP list.
+
+The third group includes two options: \fBVisualize Survey\fP and \fBShow Modelplot\fP.
+
 .TP
 .B View->Show Surveys
 This menu item causes the \fBData Table\fP list widget to display a list of the
 surveys in the current \fBmbnavadjust\fP project. Within \fBMBnavadjust\fP, a
 survey is a group of swath files that are contiguous in time.
+
 .TP
 .B View->Show Survey-vs-Survey Blocks
 This menu item causes the \fBData Table\fP list widget to display a list of the
@@ -217,20 +238,24 @@ include:
 .br
 If one of these survey blocks is selected, then is possible to restrict the
 crossings or ties that are viewed to being those between the specified surveys.
+
 .TP
 .B View->Show Data Files
 This menu item causes the \fBData Table\fP list widget to display a list of the swath
 data files in the current \fBmbnavadjust\fP project.
+
 .TP
 .B View->Show Data File Sections
 This menu item causes the \fBData Table\fP list widget to display a list of the swath
 data sections in the current \fBmbnavadjust\fP project.
+
 .TP
 .B View->Show All Crossings
 This menu item causes the \fBData Table\fP list widget to display a list of all the swath
 crossings in the current \fBmbnavadjust\fP project.
 When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
 selected crossing in the "Nav Err" window.
+
 .TP
 .B View->Show >10% Crossings
 This menu item causes the \fBData Table\fP list widget to display a list of all the swath
@@ -238,6 +263,7 @@ crossings in the current \fBmbnavadjust\fP project for which the two sections ov
 more than 10%.
 When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
 selected crossing in the "Nav Err" window.
+
 .TP
 .B View->Show >25% Crossings
 This menu item causes the \fBData Table\fP list widget to display a list of all the swath
@@ -245,6 +271,7 @@ crossings in the current \fBmbnavadjust\fP project for which the two sections ov
 more than 25%.
 When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
 selected crossing in the "Nav Err" window.
+
 .TP
 .B View->Show >50% Crossings
 This menu item causes the \fBData Table\fP list widget to display a list of all the swath
@@ -252,32 +279,31 @@ crossings in the current \fBmbnavadjust\fP project for which the two sections ov
 more than 50%..
 When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
 selected crossing in the "Nav Err" window.
+
 .TP
 .B View->Show True Crossings
 This menu item causes the \fBData Table\fP list widget to display a list of all the swath
 crossings  in the current \fBmbnavadjust\fP project for which the navigation tracks cross.
 When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
 selected crossing in the "Nav Err" window.
+
 .TP
 .B View->Show Ties
 This menu item causes the \fBData Table\fP list widget to display a list of the tie points
 in the current \fBmbnavadjust\fP project.
 
-The second group includes the
-\fBShow All Surveys\fP, \fBShow Only Selected Survey\fP,
-\fBShow Only Selected Survey-vs-Survey Block\fP, \fBShow Only Selected File\fP,
-and \fBShow Only Selected Section\fP items. One of these options is always active, and
-modifies what is displayed in the \fBData Table\fP list.
 .TP
 .B View->Show All Surveys
 This menu item allows all of the possible items (file, sections, crossings, ties)
 to be displayed in the \fBData Table\fP list.
+
 .TP
 .B View->Show Only Selected Surveys
 This menu item limits the items (file, sections, crossings, ties) displayed in
 the \fBData Table\fP list to those associated with the most recently
 selected survey (e.g. a survey selected by clicking in the \fBData Table\fP list
 while the <View->Show Surveys> option is active).
+
 .TP
 .B View->Show Only Selected Survey-vs-Survey Blocks
 This menu item limits the items (file, sections, crossings, ties) displayed in
@@ -285,12 +311,14 @@ the \fBData Table\fP list to those associated with the most recently
 selected survey-vs-survey blocks (e.g. a survey-vs-survey block selected by
 clicking in the \fBData Table\fP list
 while the <View->Show Survey-vs-Survey Blocks> option is active).
+
 .TP
 .B View->Show Only Selected File
 This menu item limits the items (file, sections, crossings, ties) displayed in
 the \fBData Table\fP list to those associated with the most recently
 selected file (e.g. a file selected by clicking in the \fBData Table\fP list
 while the <View->Show Files> option is active).
+
 .TP
 .B View->Show Only Selected Section
 This menu item limits the items (file, sections, crossings, ties) displayed in
@@ -298,7 +326,6 @@ the \fBData Table\fP list to those associated with the most recently
 selected section (e.g. a section selected by clicking in the \fBData Table\fP list
 while the <View->Show Sections> option is active).
 
-The third group includes two options:
 .TP
 .B View->Visualize Survey
 This option causes an MBgrdviz-style window to be displayed that shows the most
@@ -312,11 +339,13 @@ model generated by MBnavadjust. This grid always exists, but is only updated by
 the <Action->Update Grids> option. Therefore, frequently the current navigation
 and tie locations will be shown over bathymetry generated using a previous
 navigation model.
+
 .TP
 .B View->Show Modelplot
 This option causes an addition "Model Plot" window to be shown that displays
 the navigation adjustment model as three time series: longitude on top, latitude
 in the middle, and vertical on the bottom.
+
 .TP
 .B Action
 This button brings up a pulldown menu with nine items:
@@ -324,6 +353,7 @@ This button brings up a pulldown menu with nine items:
 \fBSet File Fixed Navigation\fP, \fBAuto-Pick Offsets\fP,
 \fBCheck for New Crossings\fP, \fBAnalyze Crossings\fP, \fBZero All Z Offsets\fP,
 \fBInvert Navigation\fP, \fBUpdate Grids\fP, and \fBApply Adjusted Navigation\fP.
+
 .TP
 .B Action->Set File Poor Navigation
 This menu item causes \fBmbnavadjust\fP to treat the navigation of
@@ -334,6 +364,7 @@ In the case where no files are fixed, the final adjusted navigation model
 is centered on the average navigation offsets required for good files.
 The offsets tieing to files with poor navigation are ignored in
 calculating the averages.
+
 .TP
 .B Action->Set File Good Navigation
 This menu item causes \fBmbnavadjust\fP to treat the navigation of
@@ -345,6 +376,7 @@ In the case where no files are fixed, the final adjusted navigation model
 is centered on the average navigation offsets required for good files.
 The offsets tieing to files with good navigation are used in
 calculating the averages.
+
 .TP
 .B Action->Set File Fixed Navigation
 This menu item causes \fBmbnavadjust\fP to treat the navigation of
@@ -355,6 +387,7 @@ the adjustments of the unfixed files.
 This option is only activated
 when the \fBData Table\fP list widget shows a list of the imported
 swath files and one file has been selected by clicking in that list.
+
 .TP
 .B Action->Auto-Pick Offsets
 This menu item causes \fBmbnavadjust\fP to automatically pick offsets in
@@ -363,6 +396,7 @@ If <View->Show True Crossings> has been selected, then only true crossings are
 displayed and only the unset true crossings will be automatically picked.
 In general, unsupervised offset picks are frequently erroneous, and use
 of this experimental option is not encouraged.
+
 .TP
 .B Action->Check For New Crossings
 This menu item causes \fBmbnavadjust\fP to search for new crossings using
@@ -371,14 +405,17 @@ swaths overlap and cross emerge as the navigation is adjusted. The percentage
 of overlap is also recalculated for all of the existing crossings. If new true
 crossings are found, the user will be unable to perform a new inversion until
 all of the true crossings have been analyzed.
+
 .TP
 .B Action->Analyze Crossings
 This menu item causes \fBmbnavadjust\fP to load and display the first
 crossing in the "Nav Err" window.
+
 .TP
 .B Action->Zero All Z Offsets
 This menu item causes \fBmbnavadjust\fP to load and display the first
 crossing in the "Nav Err" window.
+
 .TP
 .B Action->Invert Navigation
 This menu item causes \fBmbnavadjust\fP to invert for an optimal
@@ -386,6 +423,7 @@ navigation solution that fits the offsets defined at the navigation
 tie points while minimizing speed and acceleration. This option is
 only activated when all of the true crossings in the current
 \fBmbnavadjust\fP project have been analyzed interactively.
+
 .TP
 .B Action->Update Grids
 This menu item causes \fBmbnavadjust\fP to apply the current navigation model
@@ -396,6 +434,7 @@ grid update. The gridding is done by the program \fBmbgrid\fP using the
 "weighted footprint" algorithm. The grid bounds encompass all of the data in
 the project, and the grid cell size is set by mbgrid according to the sounding
 footprint sizes contained in the data.
+
 .TP
 .B Action->Apply Adjusted Navigation
 This menu item causes \fBmbnavadjust\fP to export the adjusted
@@ -404,24 +443,36 @@ swath files in the project.This option is
 only activated when the inversion is current, meaning that no new
 data have been imported and no changes to offset picks have been
 made since the last inversion.
+
 .TP
 .B About
 This button brings up a pulldown menu with one item: \fBAbout\fP.
+
 .TP
 .B About->About
 This menu item brings up a popup window that displays the program's
 name, authors, and version. Clicking the \fBDismiss\fP button will
 close the window.
+
 .TP
 .B Data Table
-This list widget displays one of five tables of information regarding
-the current \fBmbnavadjust\fP project. These tables are a list of the
-imported swath surveys, the data files, the shorter data sections
-comprising each data file, a list of the identified crossing swaths, and
-a list of the navigation tie points defined interactively by the user.
+This list widget displays one of ten tables of information regarding
+the current \fBmbnavadjust\fP project. The available tables include:
+.br
+    - List of surveys
+    - List of survey versus survey pairs (all permutations)
+    - List of data files
+    - List of data sections comprising the data files
+    - List of all crossings (pairs of data sections that overlap)
+    - List of crossings with >10% overlap
+    - List of crossings with >25% overlap
+    - List of crossings with >50% overlap
+    - List of crossings where navigation lines cross ("true crossings")
+    - List of navigation offset ties set interactively or automatically
+
 The \fBView\fP pulldown menu allows the user to set which table is displayed.
 
-The survey list will look something like:
+The Surveys list will look something like:
 .br
  	00 53 2009/08/03 08:18:49.484999 2009/08/03 22:52:59.375000 good
  	01 51 2009/08/04 09:03:11.938999 2009/08/04 23:02:03.470999 good
@@ -433,7 +484,24 @@ consists of the start and end times of the data in each survey
 shown in YYYY/MM/DD HH:MM:SS.SSSSSS format, followed by the survey status
 (poor, good, fixed, fixedxy, fixedz).
 
-The file list will look something like:
+The user can select one of the
+surveys, then use this selection to filter listings of crossings or ties
+by choosing the <View->Show Only Selected Survey> or
+<View->Show Only With Selected Survey> option.
+
+The Survey-vs-Survey Blocks list will look something like:
+.br
+ 	block 0000: Survey 00 vs Survey 00
+ 	block 0001: Survey 00 vs Survey 01
+ 	block 0002: Survey 01 vs Survey 01
+ 	block 0003: Survey 00 vs Survey 02
+ 	block 0004: Survey 01 vs Survey 02
+.br
+The user can select one of the survey-versus-survey options, then use this
+selection to filter listings of crossings or ties by choosing the
+<View->Show Only Selected Survey-vs-Survey Blocks> option.
+
+The Data Files list will look something like:
 .br
  	0000:00  good   11  0.0  0.0 ../../20090803/20090803_081706.mb88
  	0001:00  good   11  0.0  0.0 ../../20090803/20090803_083332.mb88
@@ -462,6 +530,10 @@ if possible, extracted from a "processed" swath file
 generated by \fBmbprocess\fP rather than the
 associated "raw" file.
 
+The user can select one of the files, then use this
+selection to filter listings of crossings or ties by choosing the
+<View->Show Only Selected File> or <View->Show Only With Selected File> options.
+
 The file section list will look something like:
 .br
  	00:0000:00 2009/08/03 08:17:07.546998 2009/08/03 08:18:49.484999
@@ -481,7 +553,11 @@ and the section counter separated by colons. The following information
 consists of the start and end times of each section
 shown in YYYY/MM/DD HH:MM:SS.SSSSSS format.
 
-The crossing list will look something like:
+The user can select one of the sections, then use this
+selection to filter listings of crossings or ties by choosing the
+<View->Show Only With Selected Section> option.. 
+
+The crossing lists will look something like:
  	-X    0 000:009 001:000  21  0
  	-     1 001:009 002:000  10  0
  	-     2 002:009 003:000  10  0
@@ -510,7 +586,7 @@ The sixth, and last column gives the number of tie
 points that have been defined for each crossing. New crossings always
 begin with 0 tie points prior to being inspected by a user.
 
-The tie point list will look something like:
+The navigation tie point list will look something like:
 .br
  	   7 0 009:008:07 010:000:04 00:00  1.02 \-2.87 0.00 |  9.61  8.49 1.40 | 0.041 0.107 0.027
  	   8 0 009:009:02 010:000:00 00:00  0.90 \-4.47 0.00 |  7.37  6.30 2.29 | 0.040 0.184 0.033
@@ -565,12 +641,14 @@ sets the section track length. The ideal section length varies with the sonar
 altitude and ping rate. If the section length is too short, there will be too
 many small sections and an excessive number of crossings to analyze. If the
 section length is too large, individual sections will be slow to load and display.
+
 .TP
 .B Max # Soundings in Section
 This slider widget sets an additional or alternative control on swath data section size: the
 maximum number of soundings (not pings) that may be included in a given section. For some
 datasets, it may be more convenient to use the number of soundings rather than the track
 length as the criterea for breaking files up into sections.
+
 .TP
 .B Decimation
 When swath bathymetry sections are displayed in the \fBNav Err\fP window,
@@ -580,20 +658,24 @@ contours is linear with the number of soundings. This slider allows users to
 decimate the pings used for the contour displays. If the decimation is set
 to 1, all soundings are used. If the decimation is set to 2, the soundings from
 every second ping are used for contouring.
+
 .TP
 .B Contour Interval (m)
 This slider widget sets the depth interval in meters for the bathymetric contours.
+
 .TP
 .B Color Interval (m)
 This slider widget sets the the depth interval in meters at which the
 color of the bathymetric contours changes. The contours are generated in four
 colors: black, red, green, and blue. The color interval should be a multiple
 of the contour interval.
+
 .TP
 .B Tick Interval (m)
 This slider widget sets the depth interval in meters at which contours have
 downhill facing tickmarks. The tick interval should be a multiple of the contour
 interval.
+
 .TP
 .B Inversion Smoothing
 This slider widget sets the importance of smoothing in the adjusted
@@ -602,11 +684,13 @@ The default is 4.00, and possible ranges are 0.10 to
 10.0, where the smoothing penalty weight applied to the first and
 second derivatives of the adjusted navigation perturbation is ten
 raised to this power.
+
 .TP
 .B Apply
 This button applies any changed values in the slider widgets of the \fBControls Window\fP.
 If the \fBControls Window\fP is closed without the \fBApply\fP button being clicked, all
 changes to the values controlled by the sliders are lost.
+
 .TP
 .B Dismiss
 This button closes the \fBControls Window\fP.
@@ -656,6 +740,7 @@ the contour map, the closest navigation control points from each swath to
 that position are selected for the current tie point. In practice, the user
 should right-click on the bathymetric feature being matched to set the
 tie point correctly.
+
 .TP
 .B Lateral Misfit Display
 This canvas shows a color two dimensional plot of the RMS bathymetric misfit
@@ -675,6 +760,7 @@ location of the cursor is taken as the new navigation offset
 and the red square moves to that location. Simultaneously, the
 bathymetric contours in the Contour Display shift to reflect
 the new offset.
+
 .TP
 .B Vertical Misfit Display
 This canvas shows a color profile plot of the RMS bathymetric misfit
@@ -694,47 +780,58 @@ location of the cursor is taken as the new vertical offset
 and the solid line moves to that location. Simultaneously, the
 bathymetric contours in the Contour Display shift to reflect
 the new offset.
+
 .TP
 .B Settings
 This button brings up a pulldown menu with two items: \fPBiases\fP and \fBContoursB
+
 .TP
 .B Settings->Biases
 This menu item brings up a dialog window with several slider widgets
 that set roll and heading bias values.
 These widgets are discussed in the \fBBiases\fP section below.
+
 .TP
 .B Settings->Contours
 This menu item brings up a dialog window with several slider widgets
 that set parameters controlling how swath data are imported and displayed.
 These widgets are discussed in the \fBControls\fP section above.
+
 .TP
 .B Previous
 Clicking this button causes the Nav Err window to load and display the previous crossing.
+
 .TP
 .B Next
 Clicking this button causes the Nav Err window to load and display the next crossing.
+
 .TP
 .B Next Unset
 Clicking this button causes the Nav Err window to load and display the next crossing which
 has no tie points set and has not been explicitly skipped.
+
 .TP
 .B Skip Crossing
 This button indicates that no good tie points can be defined for the current crossing.
 The program \fBmbnavadjust\fP will not allow an inversion to be calculated until all true crossings
 either have tie points defined or have been explicitly skipped.
+
 .TP
 .B Full Size
 Clicking this button causes the contour display to resize so that it shows the entire area
 covered by the swath sections in the current crossing.
+
 .TP
 .B Unset Crossing
 This button returns the current crossing to the original unset state, deleting any ties that
 have been set.
+
 .TP
 .B Reset Crossing
 This button is active only if a tie has been set for the current crossing. If a tie exists,
 and the user has changed the current offset from that of the current tie, then this button
 returns the working offset values to that of the existing tie.
+
 .TP
 .B Set Offset
 This very important button causes the current navigational offset to be set for the
@@ -744,16 +841,20 @@ changes the loaded crossing, or changes the active tie point without clicking <S
 whatever navigational offset was viewed will be lost. Tie points are displayed in yellow
 once they are set, and in red when either the navigational offset or the navigation
 points have been changed but not yet set.
+
 .TP
 .B Zero Z Offset
 This button sets the current vertical offset to zero meters.
+
 .TP
 .B Add Tie
 This button adds a new tie point for the current crossing and makes this new tie point
 active. The tie point initially adopts the current navigational offset.
+
 .TP
 .B Zero Offset
 This button sets the current navigational offset to zero meters for longitude, latitude, and vertical.
+
 .TP
 .B Select Tie
 If more than one navigation tie point has been defined for a crossing,
@@ -763,17 +864,21 @@ tie points will be shown as smaller red boxes. This button changes the active ti
 Repeatedly clicking this button will cycle through all of the tie points in the
 current crossing. Note that each tie point has its own offset defined, so in general
 the positions of the bathymetric contours will change as the active tie point changes.
+
 .TP
 .B Delete Tie
 This button deletes the current active tie point.
+
 .TP
 .B Dismiss
 This button closes the Nav Err window.
+
 .TP
 .B Minimum Misfit
 This button shifts the current offset to the value identified as the minimum misfit in
 the current misfit display. The minimum misfit is shown as the large black X on the
 color lateral misfit plot and on the vertical misfit profile.
+
 .TP
 .B Minimum XY Misfit
 This button shifts the current lateral offset to the values identified as the minimum lateral misfit in
@@ -781,12 +886,59 @@ the current misfit display. The vertical offset is not changed. The minimum late
 misfit is shown as the small black X on the lateral misfit plot. This button is generally
 used when the data are already corrected for all vertical offsets (e.g. tides), and so
 all z offsets can be confined to zero values.
+
 .TP
 .B Center on Zero Offset
 This button causes the misfit plot to be regenerated using a zero navigational offset as the plot origin.
+
 .TP
 .B Center on Current Offset
 This button causes the misfit plot to be regenerated using the current navigational offset as the plot origin.
+
+.SS Survey Visualization Window
+This window allows users to visualize the topography in the \fBmbnavadjust\fP
+project along with the platform track lines and the locations of navigation
+ties that have been made. The navigation tracks are shown as black lines.
+When the view options of the main \fBmbnavadjust\fP
+window have either crossings or ties listed in the data table, 
+any listed navigation ties are each shown as two connected circles. The circles
+show the location of the tied navigation points. Ties within a survey are displayed
+with light blue circles, and ties between different surveys are shown with
+dark blue circles. The interface is largely the same used in the
+program \fBmbgrdviz\fP; refer to the \fBmbgrdviz\fP for a full description of
+the controls and their use in manipulating the 2D and 3D display. The only
+differences relative to an \fBmbgrdviz\fP window involve the selection of
+data sections, navigation ties, and crossings. The \fBmbnavadjust\fP
+survey visualization window includes the mouse mode buttons <Pick Ties> and
+<Pick Nav Section>, and the <Action->Add and open new crossing> menu option.
+
+.TP
+.B Pick Ties
+This button changes the mouse mode to allow selection of any displayed
+navigation ties using the left mouse buttom. Clicking with the left mouse
+button will select the tie with the nearest visible navigation point, and bring
+the associated crossing up in the Nav Err window.
+
+.TP
+.B Pick Nav Section
+This button changes the mouse mode to allow selection of data sections using the
+track line navigation. Clicking with the center button selects the nearest data
+section and causes the associated trackline to be shown in red; the coverage of
+the swath bathymetry of that section are outlined in yellow. If a second data
+section is selected, and the two selected sections correspond to an existing
+crossing in the \fBnavadjust\fP project, then that crossing is selected and
+brought up in the Nav Err window. If the two selected sections do not correspond
+to an existing crossing, then the Nav Err window does not come up. However, in
+this case the user can use the <Action->Add and open new crossing> menu option
+to create a new crossing with the selected sections, which is then selected and
+brought up in the Nav Err window.
+
+.TP
+.B Add and open new crossing
+The <Action->Add and open new crossing> menu option is available when two data
+sections have been selected but are not already identified as a crossing. In this
+case, selecting this option creates a new crossing with the selected
+sections, which is then selected and brought up in the Nav Err window.
 
 .SS Biases Window
 This dialog window is brought up by clicking the \fBSettings->Biases\fP
@@ -807,34 +959,42 @@ dismiss the window.
 This toggle button sets the bias mode so that the heading and roll bias is identical
 for both swath data sections in the current crossing. The <Different Biases> toggle
 is deselected when this toggle is selected.
+
 .TP
 .B Different Biases (km)
 This toggle button sets the bias mode so that the heading and roll bias can be
 different between the two swath data sections in the current crossing.  The <Same Biases> toggle
 is deselected when this toggle is selected.
+
 .TP
 .B Section 1 Biases (deg) \-> Heading
 This slider widget sets the heading bias for swath section 1. The
+
 .TP
 .B Section 1 Biases (deg) \-> Roll
 This slider widget sets the roll bias for swath section 1.
+
 .TP
 .B Section 2 Biases (deg) \-> Heading
 This slider widget sets the heading bias for swath section 2.
+
 .TP
 .B Section 2 Biases (deg) \-> Roll
 This slider widget sets the roll bias for swath section 2.
+
 .TP
 .B Apply to All Files
 This button sets the current heading and roll bias values as the
 bias values for all swath files in the \fBmbnavadjust\fP project.
 This button is only enabled when the <Same Biases> toggle is selected.
+
 .TP
 .B Apply
 This button sets the current heading and roll bias values as the
 bias values for the swath sections in the current crossing. The bathymetry
 contours and misfit plot are recalculated and redisplayed using the
 new bias values.
+
 .TP
 .B Dismiss
 This button closes the \fBControls Window\fP.

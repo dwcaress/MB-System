@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.5.2270       March 24, 2016
   Version 5.5.2268       March 14, 2016
 * Version 5.5.2267       February 11, 2016
   Version 5.5.2265       February 11, 2016
@@ -229,7 +230,16 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2269 (March 20, 2016)
+-----> 5.5.2270 (March 24, 2016)
+
+MBnavadjust: Now plots ties within missions (surveys) in dark blue and ties
+between mission in light blue in the bathymetry visualization.
+
+Mbm_route2mission: Calculates AUV ascent time with a 1.5 safety factor instead
+of a 1.2 safety factor to ensure the new Mapping AUV always makes it to the
+surface before timing out.
+
+-----> 5.5.2269 (March 23, 2016)
 
 MBkongsbergpreprocess, and formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA) for
 current generation Kongsberg multibeam data: Changed so that the default source

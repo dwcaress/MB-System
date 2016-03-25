@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavadjust</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  22 April 2015 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  24 March 2016 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -135,18 +135,21 @@ Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
 
+<P>
 <DL COMPACT>
 <DT><B>-H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
+<P>
 <DT><B>-D</B>
 
 <DD>
 Normally, <B>mbnavadjust</B> uses a white background for the
 interactive plots. This option causes the program to use a
 black background for the plots.
+<P>
 <DT><B>-R</B>
 
 <DD>
@@ -154,6 +157,7 @@ This option causes <B>mbnavadjust</B> to discard all navigation ties,
 set all crossings to &quot;unanalyzed&quot; status, and to save the project
 in this pristine state. Only use this option if you really, really
 want to start over.
+<P>
 <DT><B>-V</B>
 
 <DD>
@@ -188,15 +192,18 @@ This menu item brings up a popup window which allows the user to
 specify a new <B>mbnavadjust</B> project. As part of initializing
 a new project, <B>mbnavadjust</B> creates a file with a &quot;.nvh&quot;
 suffix and a directory with a &quot;.dir&quot; suffix.
+<P>
 <DT><B>File-&gt;Open</B>
 
 <DD>
 This menu item brings up a popup window which allows the user to
 open an existing <B>mbnavadjust</B> project.
+<P>
 <DT><B>File-&gt;Close</B>
 
 <DD>
 This menu item causes <B>mbnavadjust</B> to close the current project.
+<P>
 <DT><B>File-&gt;Import Swath Data</B>
 
 <DD>
@@ -214,25 +221,29 @@ suffix convention (format 11 files end with &quot;.mb11&quot;, format
 41 files end with &quot;.mb41&quot;, etc.), then the program will
 automatically use the appropriate format id; otherwise the
 format must be set by the user in the format text box.
+<P>
 <DT><B>File-&gt;Quit</B>
 
 <DD>
 This button causes <B>mbnavadjust</B> to quit. If a project has been
 created or opened, that project will be closed before the program
 quits.
+<P>
 <DT><B>Option</B>
 
 <DD>
 This button brings up a pulldown menu with one item: <B>Controls</B>.
+<P>
 <DT><B>Option-&gt;Controls</B>
 
 <DD>
 This menu item brings up a dialog window with several slider widgets
 that set parameters controlling how swath data are imported and displayed.
 These widgets are discussed in the <B>Controls</B> section below.
-<BR>&nbsp;.TP
-<B>View</B>
+<BR>&nbsp;
+<DT><B>View</B>
 
+<DD>
 This button brings up a pulldown menu with nineteen items in three
 groups. This menu controls the contents of the list widget in the lower
 right <B>MBnavadjust Window</B>. If an <B>mbnavadjust</B> project
@@ -246,12 +257,22 @@ The first group includes the <B>Show Surveys</B>, <B>Show Survey-vs-Survey Block
 <B>Show Data Files</B>, <B>Show Data File Sections</B>, <B>Show All Crossings</B>,
 <B>Show &gt;10% Crossings</B>, <B>Show &gt;25% Crossings</B>, <B>Show &gt;50% Crossings</B>,
 <B>Show True Crossings</B>, and <B>Show Ties</B> items.
+<P>
+The second group includes the
+<B>Show All Surveys</B>, <B>Show Only Selected Survey</B>,
+<B>Show Only Selected Survey-vs-Survey Block</B>, <B>Show Only Selected File</B>,
+and <B>Show Only Selected Section</B> items. One of these options is always active, and
+modifies what is displayed in the <B>Data Table</B> list.
+<P>
+The third group includes two options: <B>Visualize Survey</B> and <B>Show Modelplot</B>.
+<P>
 <DT><B>View-&gt;Show Surveys</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of the
 surveys in the current <B>mbnavadjust</B> project. Within <B>MBnavadjust</B>, a
 survey is a group of swath files that are contiguous in time.
+<P>
 <DT><B>View-&gt;Show Survey-vs-Survey Blocks</B>
 
 <DD>
@@ -271,16 +292,19 @@ include:
 
 If one of these survey blocks is selected, then is possible to restrict the
 crossings or ties that are viewed to being those between the specified surveys.
+<P>
 <DT><B>View-&gt;Show Data Files</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of the swath
 data files in the current <B>mbnavadjust</B> project.
+<P>
 <DT><B>View-&gt;Show Data File Sections</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of the swath
 data sections in the current <B>mbnavadjust</B> project.
+<P>
 <DT><B>View-&gt;Show All Crossings</B>
 
 <DD>
@@ -288,6 +312,7 @@ This menu item causes the <B>Data Table</B> list widget to display a list of all
 crossings in the current <B>mbnavadjust</B> project.
 When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
 selected crossing in the &quot;Nav Err&quot; window.
+<P>
 <DT><B>View-&gt;Show &gt;10% Crossings</B>
 
 <DD>
@@ -296,6 +321,7 @@ crossings in the current <B>mbnavadjust</B> project for which the two sections o
 more than 10%.
 When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
 selected crossing in the &quot;Nav Err&quot; window.
+<P>
 <DT><B>View-&gt;Show &gt;25% Crossings</B>
 
 <DD>
@@ -304,6 +330,7 @@ crossings in the current <B>mbnavadjust</B> project for which the two sections o
 more than 25%.
 When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
 selected crossing in the &quot;Nav Err&quot; window.
+<P>
 <DT><B>View-&gt;Show &gt;50% Crossings</B>
 
 <DD>
@@ -312,6 +339,7 @@ crossings in the current <B>mbnavadjust</B> project for which the two sections o
 more than 50%..
 When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
 selected crossing in the &quot;Nav Err&quot; window.
+<P>
 <DT><B>View-&gt;Show True Crossings</B>
 
 <DD>
@@ -319,22 +347,19 @@ This menu item causes the <B>Data Table</B> list widget to display a list of all
 crossings  in the current <B>mbnavadjust</B> project for which the navigation tracks cross.
 When this option is set, selecting a list item causes <B>mbnavadjust</B> to load and display the selected
 selected crossing in the &quot;Nav Err&quot; window.
+<P>
 <DT><B>View-&gt;Show Ties</B>
 
 <DD>
 This menu item causes the <B>Data Table</B> list widget to display a list of the tie points
 in the current <B>mbnavadjust</B> project.
 <P>
-The second group includes the
-<B>Show All Surveys</B>, <B>Show Only Selected Survey</B>,
-<B>Show Only Selected Survey-vs-Survey Block</B>, <B>Show Only Selected File</B>,
-and <B>Show Only Selected Section</B> items. One of these options is always active, and
-modifies what is displayed in the <B>Data Table</B> list.
 <DT><B>View-&gt;Show All Surveys</B>
 
 <DD>
 This menu item allows all of the possible items (file, sections, crossings, ties)
 to be displayed in the <B>Data Table</B> list.
+<P>
 <DT><B>View-&gt;Show Only Selected Surveys</B>
 
 <DD>
@@ -342,6 +367,7 @@ This menu item limits the items (file, sections, crossings, ties) displayed in
 the <B>Data Table</B> list to those associated with the most recently
 selected survey (e.g. a survey selected by clicking in the <B>Data Table</B> list
 while the &lt;View-&gt;Show Surveys&gt; option is active).
+<P>
 <DT><B>View-&gt;Show Only Selected Survey-vs-Survey Blocks</B>
 
 <DD>
@@ -350,6 +376,7 @@ the <B>Data Table</B> list to those associated with the most recently
 selected survey-vs-survey blocks (e.g. a survey-vs-survey block selected by
 clicking in the <B>Data Table</B> list
 while the &lt;View-&gt;Show Survey-vs-Survey Blocks&gt; option is active).
+<P>
 <DT><B>View-&gt;Show Only Selected File</B>
 
 <DD>
@@ -357,6 +384,7 @@ This menu item limits the items (file, sections, crossings, ties) displayed in
 the <B>Data Table</B> list to those associated with the most recently
 selected file (e.g. a file selected by clicking in the <B>Data Table</B> list
 while the &lt;View-&gt;Show Files&gt; option is active).
+<P>
 <DT><B>View-&gt;Show Only Selected Section</B>
 
 <DD>
@@ -365,7 +393,6 @@ the <B>Data Table</B> list to those associated with the most recently
 selected section (e.g. a section selected by clicking in the <B>Data Table</B> list
 while the &lt;View-&gt;Show Sections&gt; option is active).
 <P>
-The third group includes two options:
 <DT><B>View-&gt;Visualize Survey</B>
 
 <DD>
@@ -380,12 +407,14 @@ model generated by MBnavadjust. This grid always exists, but is only updated by
 the &lt;Action-&gt;Update Grids&gt; option. Therefore, frequently the current navigation
 and tie locations will be shown over bathymetry generated using a previous
 navigation model.
+<P>
 <DT><B>View-&gt;Show Modelplot</B>
 
 <DD>
 This option causes an addition &quot;Model Plot&quot; window to be shown that displays
 the navigation adjustment model as three time series: longitude on top, latitude
 in the middle, and vertical on the bottom.
+<P>
 <DT><B>Action</B>
 
 <DD>
@@ -394,6 +423,7 @@ This button brings up a pulldown menu with nine items:
 <B>Set File Fixed Navigation</B>, <B>Auto-Pick Offsets</B>,
 <B>Check for New Crossings</B>, <B>Analyze Crossings</B>, <B>Zero All Z Offsets</B>,
 <B>Invert Navigation</B>, <B>Update Grids</B>, and <B>Apply Adjusted Navigation</B>.
+<P>
 <DT><B>Action-&gt;Set File Poor Navigation</B>
 
 <DD>
@@ -405,6 +435,7 @@ In the case where no files are fixed, the final adjusted navigation model
 is centered on the average navigation offsets required for good files.
 The offsets tieing to files with poor navigation are ignored in
 calculating the averages.
+<P>
 <DT><B>Action-&gt;Set File Good Navigation</B>
 
 <DD>
@@ -417,6 +448,7 @@ In the case where no files are fixed, the final adjusted navigation model
 is centered on the average navigation offsets required for good files.
 The offsets tieing to files with good navigation are used in
 calculating the averages.
+<P>
 <DT><B>Action-&gt;Set File Fixed Navigation</B>
 
 <DD>
@@ -428,6 +460,7 @@ the adjustments of the unfixed files.
 This option is only activated
 when the <B>Data Table</B> list widget shows a list of the imported
 swath files and one file has been selected by clicking in that list.
+<P>
 <DT><B>Action-&gt;Auto-Pick Offsets</B>
 
 <DD>
@@ -437,6 +470,7 @@ If &lt;View-&gt;Show True Crossings&gt; has been selected, then only true crossi
 displayed and only the unset true crossings will be automatically picked.
 In general, unsupervised offset picks are frequently erroneous, and use
 of this experimental option is not encouraged.
+<P>
 <DT><B>Action-&gt;Check For New Crossings</B>
 
 <DD>
@@ -446,16 +480,19 @@ swaths overlap and cross emerge as the navigation is adjusted. The percentage
 of overlap is also recalculated for all of the existing crossings. If new true
 crossings are found, the user will be unable to perform a new inversion until
 all of the true crossings have been analyzed.
+<P>
 <DT><B>Action-&gt;Analyze Crossings</B>
 
 <DD>
 This menu item causes <B>mbnavadjust</B> to load and display the first
 crossing in the &quot;Nav Err&quot; window.
+<P>
 <DT><B>Action-&gt;Zero All Z Offsets</B>
 
 <DD>
 This menu item causes <B>mbnavadjust</B> to load and display the first
 crossing in the &quot;Nav Err&quot; window.
+<P>
 <DT><B>Action-&gt;Invert Navigation</B>
 
 <DD>
@@ -464,6 +501,7 @@ navigation solution that fits the offsets defined at the navigation
 tie points while minimizing speed and acceleration. This option is
 only activated when all of the true crossings in the current
 <B>mbnavadjust</B> project have been analyzed interactively.
+<P>
 <DT><B>Action-&gt;Update Grids</B>
 
 <DD>
@@ -475,6 +513,7 @@ grid update. The gridding is done by the program <B>mbgrid</B> using the
 &quot;weighted footprint&quot; algorithm. The grid bounds encompass all of the data in
 the project, and the grid cell size is set by mbgrid according to the sounding
 footprint sizes contained in the data.
+<P>
 <DT><B>Action-&gt;Apply Adjusted Navigation</B>
 
 <DD>
@@ -484,27 +523,40 @@ swath files in the project.This option is
 only activated when the inversion is current, meaning that no new
 data have been imported and no changes to offset picks have been
 made since the last inversion.
+<P>
 <DT><B>About</B>
 
 <DD>
 This button brings up a pulldown menu with one item: <B>About</B>.
+<P>
 <DT><B>About-&gt;About</B>
 
 <DD>
 This menu item brings up a popup window that displays the program's
 name, authors, and version. Clicking the <B>Dismiss</B> button will
 close the window.
+<P>
 <DT><B>Data Table</B>
 
 <DD>
-This list widget displays one of five tables of information regarding
-the current <B>mbnavadjust</B> project. These tables are a list of the
-imported swath surveys, the data files, the shorter data sections
-comprising each data file, a list of the identified crossing swaths, and
-a list of the navigation tie points defined interactively by the user.
+This list widget displays one of ten tables of information regarding
+the current <B>mbnavadjust</B> project. The available tables include:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;List&nbsp;of&nbsp;surveys
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;List&nbsp;of&nbsp;survey&nbsp;versus&nbsp;survey&nbsp;pairs&nbsp;(all&nbsp;permutations)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;List&nbsp;of&nbsp;data&nbsp;files
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;List&nbsp;of&nbsp;data&nbsp;sections&nbsp;comprising&nbsp;the&nbsp;data&nbsp;files
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;List&nbsp;of&nbsp;all&nbsp;crossings&nbsp;(pairs&nbsp;of&nbsp;data&nbsp;sections&nbsp;that&nbsp;overlap)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;List&nbsp;of&nbsp;crossings&nbsp;with&nbsp;&gt;10%&nbsp;overlap
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;List&nbsp;of&nbsp;crossings&nbsp;with&nbsp;&gt;25%&nbsp;overlap
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;List&nbsp;of&nbsp;crossings&nbsp;with&nbsp;&gt;50%&nbsp;overlap
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;List&nbsp;of&nbsp;crossings&nbsp;where&nbsp;navigation&nbsp;lines&nbsp;cross&nbsp;(&quot;true&nbsp;crossings&quot;)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;List&nbsp;of&nbsp;navigation&nbsp;offset&nbsp;ties&nbsp;set&nbsp;interactively&nbsp;or&nbsp;automatically
+<P>
 The <B>View</B> pulldown menu allows the user to set which table is displayed.
 <P>
-The survey list will look something like:
+The Surveys list will look something like:
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>00&nbsp;53&nbsp;2009/08/03&nbsp;08:18:49.484999&nbsp;2009/08/03&nbsp;22:52:59.375000&nbsp;good<BR>
@@ -518,7 +570,26 @@ consists of the start and end times of the data in each survey
 shown in YYYY/MM/DD HH:MM:SS.SSSSSS format, followed by the survey status
 (poor, good, fixed, fixedxy, fixedz).
 <P>
-The file list will look something like:
+The user can select one of the
+surveys, then use this selection to filter listings of crossings or ties
+by choosing the &lt;View-&gt;Show Only Selected Survey&gt; or
+&lt;View-&gt;Show Only With Selected Survey&gt; option.
+<P>
+The Survey-vs-Survey Blocks list will look something like:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>block&nbsp;0000:&nbsp;Survey&nbsp;00&nbsp;vs&nbsp;Survey&nbsp;00<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>block&nbsp;0001:&nbsp;Survey&nbsp;00&nbsp;vs&nbsp;Survey&nbsp;01<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>block&nbsp;0002:&nbsp;Survey&nbsp;01&nbsp;vs&nbsp;Survey&nbsp;01<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>block&nbsp;0003:&nbsp;Survey&nbsp;00&nbsp;vs&nbsp;Survey&nbsp;02<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>block&nbsp;0004:&nbsp;Survey&nbsp;01&nbsp;vs&nbsp;Survey&nbsp;02<BR>
+<BR>
+
+The user can select one of the survey-versus-survey options, then use this
+selection to filter listings of crossings or ties by choosing the
+&lt;View-&gt;Show Only Selected Survey-vs-Survey Blocks&gt; option.
+<P>
+The Data Files list will look something like:
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0000:00&nbsp;&nbsp;good&nbsp;&nbsp;&nbsp;11&nbsp;&nbsp;0.0&nbsp;&nbsp;0.0&nbsp;../../20090803/20090803_081706.mb88<BR>
@@ -549,6 +620,10 @@ if possible, extracted from a &quot;processed&quot; swath file
 generated by <B>mbprocess</B> rather than the
 associated &quot;raw&quot; file.
 <P>
+The user can select one of the files, then use this
+selection to filter listings of crossings or ties by choosing the
+&lt;View-&gt;Show Only Selected File&gt; or &lt;View-&gt;Show Only With Selected File&gt; options.
+<P>
 The file section list will look something like:
 <BR>
 
@@ -570,7 +645,11 @@ and the section counter separated by colons. The following information
 consists of the start and end times of each section
 shown in YYYY/MM/DD HH:MM:SS.SSSSSS format.
 <P>
-The crossing list will look something like:
+The user can select one of the sections, then use this
+selection to filter listings of crossings or ties by choosing the
+&lt;View-&gt;Show Only With Selected Section&gt; option.. 
+<P>
+The crossing lists will look something like:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-X&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;000:009&nbsp;001:000&nbsp;&nbsp;21&nbsp;&nbsp;0<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;001:009&nbsp;002:000&nbsp;&nbsp;10&nbsp;&nbsp;0<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;002:009&nbsp;003:000&nbsp;&nbsp;10&nbsp;&nbsp;0<BR>
@@ -600,7 +679,7 @@ The sixth, and last column gives the number of tie
 points that have been defined for each crossing. New crossings always
 begin with 0 tie points prior to being inspected by a user.
 <P>
-The tie point list will look something like:
+The navigation tie point list will look something like:
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;7&nbsp;0&nbsp;009:008:07&nbsp;010:000:04&nbsp;00:00&nbsp;&nbsp;1.02&nbsp;-2.87&nbsp;0.00&nbsp;|&nbsp;&nbsp;9.61&nbsp;&nbsp;8.49&nbsp;1.40&nbsp;|&nbsp;0.041&nbsp;0.107&nbsp;0.027<BR>
@@ -662,6 +741,7 @@ sets the section track length. The ideal section length varies with the sonar
 altitude and ping rate. If the section length is too short, there will be too
 many small sections and an excessive number of crossings to analyze. If the
 section length is too large, individual sections will be slow to load and display.
+<P>
 <DT><B>Max # Soundings in Section</B>
 
 <DD>
@@ -669,6 +749,7 @@ This slider widget sets an additional or alternative control on swath data secti
 maximum number of soundings (not pings) that may be included in a given section. For some
 datasets, it may be more convenient to use the number of soundings rather than the track
 length as the criterea for breaking files up into sections.
+<P>
 <DT><B>Decimation</B>
 
 <DD>
@@ -679,10 +760,12 @@ contours is linear with the number of soundings. This slider allows users to
 decimate the pings used for the contour displays. If the decimation is set
 to 1, all soundings are used. If the decimation is set to 2, the soundings from
 every second ping are used for contouring.
+<P>
 <DT><B>Contour Interval (m)</B>
 
 <DD>
 This slider widget sets the depth interval in meters for the bathymetric contours.
+<P>
 <DT><B>Color Interval (m)</B>
 
 <DD>
@@ -690,12 +773,14 @@ This slider widget sets the the depth interval in meters at which the
 color of the bathymetric contours changes. The contours are generated in four
 colors: black, red, green, and blue. The color interval should be a multiple
 of the contour interval.
+<P>
 <DT><B>Tick Interval (m)</B>
 
 <DD>
 This slider widget sets the depth interval in meters at which contours have
 downhill facing tickmarks. The tick interval should be a multiple of the contour
 interval.
+<P>
 <DT><B>Inversion Smoothing</B>
 
 <DD>
@@ -705,12 +790,14 @@ The default is 4.00, and possible ranges are 0.10 to
 10.0, where the smoothing penalty weight applied to the first and
 second derivatives of the adjusted navigation perturbation is ten
 raised to this power.
+<P>
 <DT><B>Apply</B>
 
 <DD>
 This button applies any changed values in the slider widgets of the <B>Controls Window</B>.
 If the <B>Controls Window</B> is closed without the <B>Apply</B> button being clicked, all
 changes to the values controlled by the sliders are lost.
+<P>
 <DT><B>Dismiss</B>
 
 <DD>
@@ -766,6 +853,7 @@ the contour map, the closest navigation control points from each swath to
 that position are selected for the current tie point. In practice, the user
 should right-click on the bathymetric feature being matched to set the
 tie point correctly.
+<P>
 <DT><B>Lateral Misfit Display</B>
 
 <DD>
@@ -786,6 +874,7 @@ location of the cursor is taken as the new navigation offset
 and the red square moves to that location. Simultaneously, the
 bathymetric contours in the Contour Display shift to reflect
 the new offset.
+<P>
 <DT><B>Vertical Misfit Display</B>
 
 <DD>
@@ -806,57 +895,68 @@ location of the cursor is taken as the new vertical offset
 and the solid line moves to that location. Simultaneously, the
 bathymetric contours in the Contour Display shift to reflect
 the new offset.
+<P>
 <DT><B>Settings</B>
 
 <DD>
 This button brings up a pulldown menu with two items: Biases and <B>ContoursB
+<P>
 <DT>Settings-&gt;Biases</B>
 
 <DD>
 This menu item brings up a dialog window with several slider widgets
 that set roll and heading bias values.
 These widgets are discussed in the <B>Biases</B> section below.
+<P>
 <DT><B>Settings-&gt;Contours</B>
 
 <DD>
 This menu item brings up a dialog window with several slider widgets
 that set parameters controlling how swath data are imported and displayed.
 These widgets are discussed in the <B>Controls</B> section above.
+<P>
 <DT><B>Previous</B>
 
 <DD>
 Clicking this button causes the Nav Err window to load and display the previous crossing.
+<P>
 <DT><B>Next</B>
 
 <DD>
 Clicking this button causes the Nav Err window to load and display the next crossing.
+<P>
 <DT><B>Next Unset</B>
 
 <DD>
 Clicking this button causes the Nav Err window to load and display the next crossing which
 has no tie points set and has not been explicitly skipped.
+<P>
 <DT><B>Skip Crossing</B>
 
 <DD>
 This button indicates that no good tie points can be defined for the current crossing.
 The program <B>mbnavadjust</B> will not allow an inversion to be calculated until all true crossings
 either have tie points defined or have been explicitly skipped.
+<P>
 <DT><B>Full Size</B>
 
 <DD>
 Clicking this button causes the contour display to resize so that it shows the entire area
 covered by the swath sections in the current crossing.
+<P>
 <DT><B>Unset Crossing</B>
 
 <DD>
 This button returns the current crossing to the original unset state, deleting any ties that
 have been set.
+<P>
 <DT><B>Reset Crossing</B>
 
 <DD>
 This button is active only if a tie has been set for the current crossing. If a tie exists,
 and the user has changed the current offset from that of the current tie, then this button
 returns the working offset values to that of the existing tie.
+<P>
 <DT><B>Set Offset</B>
 
 <DD>
@@ -867,19 +967,23 @@ changes the loaded crossing, or changes the active tie point without clicking &l
 whatever navigational offset was viewed will be lost. Tie points are displayed in yellow
 once they are set, and in red when either the navigational offset or the navigation
 points have been changed but not yet set.
+<P>
 <DT><B>Zero Z Offset</B>
 
 <DD>
 This button sets the current vertical offset to zero meters.
+<P>
 <DT><B>Add Tie</B>
 
 <DD>
 This button adds a new tie point for the current crossing and makes this new tie point
 active. The tie point initially adopts the current navigational offset.
+<P>
 <DT><B>Zero Offset</B>
 
 <DD>
 This button sets the current navigational offset to zero meters for longitude, latitude, and vertical.
+<P>
 <DT><B>Select Tie</B>
 
 <DD>
@@ -890,20 +994,24 @@ tie points will be shown as smaller red boxes. This button changes the active ti
 Repeatedly clicking this button will cycle through all of the tie points in the
 current crossing. Note that each tie point has its own offset defined, so in general
 the positions of the bathymetric contours will change as the active tie point changes.
+<P>
 <DT><B>Delete Tie</B>
 
 <DD>
 This button deletes the current active tie point.
+<P>
 <DT><B>Dismiss</B>
 
 <DD>
 This button closes the Nav Err window.
+<P>
 <DT><B>Minimum Misfit</B>
 
 <DD>
 This button shifts the current offset to the value identified as the minimum misfit in
 the current misfit display. The minimum misfit is shown as the large black X on the
 color lateral misfit plot and on the vertical misfit profile.
+<P>
 <DT><B>Minimum XY Misfit</B>
 
 <DD>
@@ -912,10 +1020,12 @@ the current misfit display. The vertical offset is not changed. The minimum late
 misfit is shown as the small black X on the lateral misfit plot. This button is generally
 used when the data are already corrected for all vertical offsets (e.g. tides), and so
 all z offsets can be confined to zero values.
+<P>
 <DT><B>Center on Zero Offset</B>
 
 <DD>
 This button causes the misfit plot to be regenerated using a zero navigational offset as the plot origin.
+<P>
 <DT><B>Center on Current Offset</B>
 
 <DD>
@@ -923,6 +1033,58 @@ This button causes the misfit plot to be regenerated using the current navigatio
 <P>
 </DL>
 <A NAME="lbAL">&nbsp;</A>
+<H3>Survey Visualization Window</H3>
+
+This window allows users to visualize the topography in the <B>mbnavadjust</B>
+project along with the platform track lines and the locations of navigation
+ties that have been made. The navigation tracks are shown as black lines.
+When the view options of the main <B>mbnavadjust</B>
+window have either crossings or ties listed in the data table, 
+any listed navigation ties are each shown as two connected circles. The circles
+show the location of the tied navigation points. Ties within a survey are displayed
+with light blue circles, and ties between different surveys are shown with
+dark blue circles. The interface is largely the same used in the
+program <B>mbgrdviz</B>; refer to the <B>mbgrdviz</B> for a full description of
+the controls and their use in manipulating the 2D and 3D display. The only
+differences relative to an <B>mbgrdviz</B> window involve the selection of
+data sections, navigation ties, and crossings. The <B>mbnavadjust</B>
+survey visualization window includes the mouse mode buttons &lt;Pick Ties&gt; and
+&lt;Pick Nav Section&gt;, and the &lt;Action-&gt;Add and open new crossing&gt; menu option.
+<P>
+<DL COMPACT>
+<DT><B>Pick Ties</B>
+
+<DD>
+This button changes the mouse mode to allow selection of any displayed
+navigation ties using the left mouse buttom. Clicking with the left mouse
+button will select the tie with the nearest visible navigation point, and bring
+the associated crossing up in the Nav Err window.
+<P>
+<DT><B>Pick Nav Section</B>
+
+<DD>
+This button changes the mouse mode to allow selection of data sections using the
+track line navigation. Clicking with the center button selects the nearest data
+section and causes the associated trackline to be shown in red; the coverage of
+the swath bathymetry of that section are outlined in yellow. If a second data
+section is selected, and the two selected sections correspond to an existing
+crossing in the <B>navadjust</B> project, then that crossing is selected and
+brought up in the Nav Err window. If the two selected sections do not correspond
+to an existing crossing, then the Nav Err window does not come up. However, in
+this case the user can use the &lt;Action-&gt;Add and open new crossing&gt; menu option
+to create a new crossing with the selected sections, which is then selected and
+brought up in the Nav Err window.
+<P>
+<DT><B>Add and open new crossing</B>
+
+<DD>
+The &lt;Action-&gt;Add and open new crossing&gt; menu option is available when two data
+sections have been selected but are not already identified as a crossing. In this
+case, selecting this option creates a new crossing with the selected
+sections, which is then selected and brought up in the Nav Err window.
+<P>
+</DL>
+<A NAME="lbAM">&nbsp;</A>
 <H3>Biases Window</H3>
 
 This dialog window is brought up by clicking the <B>Settings-&gt;Biases</B>
@@ -945,34 +1107,41 @@ dismiss the window.
 This toggle button sets the bias mode so that the heading and roll bias is identical
 for both swath data sections in the current crossing. The &lt;Different Biases&gt; toggle
 is deselected when this toggle is selected.
+<P>
 <DT><B>Different Biases (km)</B>
 
 <DD>
 This toggle button sets the bias mode so that the heading and roll bias can be
 different between the two swath data sections in the current crossing.  The &lt;Same Biases&gt; toggle
 is deselected when this toggle is selected.
+<P>
 <DT><B>Section 1 Biases (deg) -&gt; Heading</B>
 
 <DD>
 This slider widget sets the heading bias for swath section 1. The
+<P>
 <DT><B>Section 1 Biases (deg) -&gt; Roll</B>
 
 <DD>
 This slider widget sets the roll bias for swath section 1.
+<P>
 <DT><B>Section 2 Biases (deg) -&gt; Heading</B>
 
 <DD>
 This slider widget sets the heading bias for swath section 2.
+<P>
 <DT><B>Section 2 Biases (deg) -&gt; Roll</B>
 
 <DD>
 This slider widget sets the roll bias for swath section 2.
+<P>
 <DT><B>Apply to All Files</B>
 
 <DD>
 This button sets the current heading and roll bias values as the
 bias values for all swath files in the <B>mbnavadjust</B> project.
 This button is only enabled when the &lt;Same Biases&gt; toggle is selected.
+<P>
 <DT><B>Apply</B>
 
 <DD>
@@ -980,6 +1149,7 @@ This button sets the current heading and roll bias values as the
 bias values for the swath sections in the current crossing. The bathymetry
 contours and misfit plot are recalculated and redisplayed using the
 new bias values.
+<P>
 <DT><B>Dismiss</B>
 
 <DD>
@@ -987,7 +1157,7 @@ This button closes the <B>Controls Window</B>.
 <P>
 <P>
 </DL>
-<A NAME="lbAM">&nbsp;</A>
+<A NAME="lbAN">&nbsp;</A>
 <H2>USING MBNAVADJUST 1: IMPORTING DATA</H2>
 
 Users begin using <B>mbnavadjust</B> by starting up the program
@@ -1061,11 +1231,11 @@ In cases where the data are known to be already corrected for vertical offsets,
 such as tides, then the user can uniformly set the vertical (z) components of
 offsets to zero.
 <P>
-<A NAME="lbAN">&nbsp;</A>
+<A NAME="lbAO">&nbsp;</A>
 <H2>USING MBNAVADJUST 2: INSPECTING CROSSINGS</H2>
 
 <P>
-<A NAME="lbAO">&nbsp;</A>
+<A NAME="lbAP">&nbsp;</A>
 <H3>Bringing Up The Nav Error Window</H3>
 
 <P>
@@ -1095,7 +1265,7 @@ more navigation offsets set at particular &quot;tie points&quot;, or by being
 button will load the next crossing that has not been resolved.
 To close the &quot;Nav Err&quot; window, click the &lt;Dismiss&gt; button.
 <P>
-<A NAME="lbAP">&nbsp;</A>
+<A NAME="lbAQ">&nbsp;</A>
 <H3>Interactively Matching Seafloor Features</H3>
 
 <P>
@@ -1171,7 +1341,7 @@ intrinsically involves speed and acceleration changes. Fortunately,
 we are able to formulate the automated inversion process discussed below to obtain an
 optimal navigation solution.
 <P>
-<A NAME="lbAQ">&nbsp;</A>
+<A NAME="lbAR">&nbsp;</A>
 <H3>Display Controls</H3>
 
 <P>
@@ -1202,7 +1372,7 @@ recalculated and redisplayed centered around the current offset. The color map
 used for the misfit display is automatically scaled according to the
 minimum and maximum misfit values.
 <P>
-<A NAME="lbAR">&nbsp;</A>
+<A NAME="lbAS">&nbsp;</A>
 <H3>Setting Crossing Ties and Offsets</H3>
 
 <P>
@@ -1296,7 +1466,7 @@ changed without restriction. Users may also quit <B>mbnavadjust</B>
 and then later reopen the same project without losing any
 information.
 <P>
-<A NAME="lbAS">&nbsp;</A>
+<A NAME="lbAT">&nbsp;</A>
 <H3>Setting Good, Poor and Fixed Navigation</H3>
 
 <P>
@@ -1313,11 +1483,11 @@ navigation, they can be fixed (e.g. to have zero adjustment) using the
 &lt;Action-&gt;Set File Fixed Navigation&gt; menu item. In this case, all of the
 non-fixed files are adjusted relative to the fixed files.
 <P>
-<A NAME="lbAT">&nbsp;</A>
+<A NAME="lbAU">&nbsp;</A>
 <H2>USING MBNAVADJUST 3: INVERTING FOR AN OPTIMAL NAVIGATION SOLUTION</H2>
 
 <P>
-<A NAME="lbAU">&nbsp;</A>
+<A NAME="lbAV">&nbsp;</A>
 <H3>Performing the Inversion</H3>
 
 <P>
@@ -1402,7 +1572,7 @@ file is to be used in multiple <B>mbnavadjust</B> projects, the first project
 should be finalized and the results applied before data are imported into the
 second.
 <P>
-<A NAME="lbAV">&nbsp;</A>
+<A NAME="lbAW">&nbsp;</A>
 <H3>Fine-Tuning the Inversion</H3>
 
 <P>
@@ -1438,7 +1608,7 @@ navigation. Once again, we emphasize that users should always finalize an
 <B>mbnavadjust</B> project before importing affected swath data into another
 <B>mbnavadjust</B> project.
 <P>
-<A NAME="lbAW">&nbsp;</A>
+<A NAME="lbAX">&nbsp;</A>
 <H3>Details of the Inversion</H3>
 
 <P>
@@ -1657,7 +1827,7 @@ optimal solution in this fashion is that this approach insures that the smoothne
 constraint is sufficient large to be impacting the fit, but not so large that
 the fit has been substantially degraded.
 <P>
-<A NAME="lbAX">&nbsp;</A>
+<A NAME="lbAY">&nbsp;</A>
 <H2>REFERENCES</H2>
 
 <P>
@@ -1676,13 +1846,13 @@ Phys. Earth Planet. Inter., 47, 333-345, 1987.
 
 Parker, R. L., <B>Geophysical Inverse Theory</B>, Princeton University Press, Princeton, NJ, 1994.
 <P>
-<A NAME="lbAY">&nbsp;</A>
+<A NAME="lbAZ">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
 <B><A HREF="mbnavadjustmerge.html">mbnavadjustmerge</A>(1)</B>, <B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbio.html">mbio</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1),
 <B><A HREF="mbnavedit.html">mbnavedit</A></B>(1), <B><A HREF="mbset.html">mbset</A></B>(1)
 <P>
-<A NAME="lbAZ">&nbsp;</A>
+<A NAME="lbBA">&nbsp;</A>
 <H2>BUGS</H2>
 
 It used to be too new to be bulletproof, now its too complicated to be bulletproof.
@@ -1703,32 +1873,33 @@ Good luck.
 <DT><A HREF="#lbAI">MBnavadjust Window</A><DD>
 <DT><A HREF="#lbAJ">Controls Window</A><DD>
 <DT><A HREF="#lbAK">Nav Err Window</A><DD>
-<DT><A HREF="#lbAL">Biases Window</A><DD>
+<DT><A HREF="#lbAL">Survey Visualization Window</A><DD>
+<DT><A HREF="#lbAM">Biases Window</A><DD>
 </DL>
-<DT><A HREF="#lbAM">USING MBNAVADJUST 1: IMPORTING DATA</A><DD>
-<DT><A HREF="#lbAN">USING MBNAVADJUST 2: INSPECTING CROSSINGS</A><DD>
+<DT><A HREF="#lbAN">USING MBNAVADJUST 1: IMPORTING DATA</A><DD>
+<DT><A HREF="#lbAO">USING MBNAVADJUST 2: INSPECTING CROSSINGS</A><DD>
 <DL>
-<DT><A HREF="#lbAO">Bringing Up The Nav Error Window</A><DD>
-<DT><A HREF="#lbAP">Interactively Matching Seafloor Features</A><DD>
-<DT><A HREF="#lbAQ">Display Controls</A><DD>
-<DT><A HREF="#lbAR">Setting Crossing Ties and Offsets</A><DD>
-<DT><A HREF="#lbAS">Setting Good, Poor and Fixed Navigation</A><DD>
+<DT><A HREF="#lbAP">Bringing Up The Nav Error Window</A><DD>
+<DT><A HREF="#lbAQ">Interactively Matching Seafloor Features</A><DD>
+<DT><A HREF="#lbAR">Display Controls</A><DD>
+<DT><A HREF="#lbAS">Setting Crossing Ties and Offsets</A><DD>
+<DT><A HREF="#lbAT">Setting Good, Poor and Fixed Navigation</A><DD>
 </DL>
-<DT><A HREF="#lbAT">USING MBNAVADJUST 3: INVERTING FOR AN OPTIMAL NAVIGATION SOLUTION</A><DD>
+<DT><A HREF="#lbAU">USING MBNAVADJUST 3: INVERTING FOR AN OPTIMAL NAVIGATION SOLUTION</A><DD>
 <DL>
-<DT><A HREF="#lbAU">Performing the Inversion</A><DD>
-<DT><A HREF="#lbAV">Fine-Tuning the Inversion</A><DD>
-<DT><A HREF="#lbAW">Details of the Inversion</A><DD>
+<DT><A HREF="#lbAV">Performing the Inversion</A><DD>
+<DT><A HREF="#lbAW">Fine-Tuning the Inversion</A><DD>
+<DT><A HREF="#lbAX">Details of the Inversion</A><DD>
 </DL>
-<DT><A HREF="#lbAX">REFERENCES</A><DD>
-<DT><A HREF="#lbAY">SEE ALSO</A><DD>
-<DT><A HREF="#lbAZ">BUGS</A><DD>
+<DT><A HREF="#lbAY">REFERENCES</A><DD>
+<DT><A HREF="#lbAZ">SEE ALSO</A><DD>
+<DT><A HREF="#lbBA">BUGS</A><DD>
 </DL>
 <HR>
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 22 April 2015</P></CENTER>
+Last Updated: 24 March 2016</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
