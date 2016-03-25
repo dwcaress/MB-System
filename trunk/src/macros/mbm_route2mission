@@ -770,8 +770,8 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 		}
 
 	push(@mmissiondepths, $topomax);
-	$ascendtime = -1.2 * $topomax / $ascendrate;
-	$descendtime = -1.2 * $topomax / $descendrate;
+	$ascendtime = -1.5 * $topomax / $ascendrate;
+	$descendtime = -1.5 * $topomax / $descendrate;
 	if ($ascendtime < 300)
 		{
 		$ascendtime = 300;

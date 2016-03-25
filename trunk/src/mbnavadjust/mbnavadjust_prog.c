@@ -16442,7 +16442,6 @@ int mbnavadjust_reset_visualization_navties()
 		npoint = 2;
 		waypoint[0] = 1;
 		waypoint[1] = 1;
-		navtiecolor = ROUTE_COLOR_BLUEGREEN;
 		navtiesize = 1;
 		navtieeditmode = 0;
 		
@@ -16465,6 +16464,10 @@ int mbnavadjust_reset_visualization_navties()
 					navtielat[0] = section_1->snav_lat[snav_1] + section_1->snav_lat_offset[snav_1];
 					navtielon[1] = section_2->snav_lon[snav_2] + section_2->snav_lon_offset[snav_2];
 					navtielat[1] = section_2->snav_lat[snav_2] + section_2->snav_lat_offset[snav_2];
+					if (file_1->block == file_2->block)
+						navtiecolor = ROUTE_COLOR_BLUEGREEN;
+					else
+						navtiecolor = ROUTE_COLOR_BLUE;
 					sprintf(navtiename, "%4.4d:%1d %2.2d:%4.4d:%2.2d %2.2d:%4.4d:%2.2d",
 							i, j, file_1->block, crossing->file_id_1,crossing->section_1,
 							file_2->block, crossing->file_id_2,crossing->section_2);
