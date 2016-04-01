@@ -1227,6 +1227,9 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 				case MBSYS_SIMRAD3_EM710:
 					strcpy(multibeam_model, "EM710");
 					break;
+				case MBSYS_SIMRAD3_EM850:
+					strcpy(multibeam_model, "EM850");
+					break;
 				case MBSYS_SIMRAD3_EM302:
 					strcpy(multibeam_model, "EM302");
 					break;

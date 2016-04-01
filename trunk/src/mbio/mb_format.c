@@ -2362,6 +2362,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 			    sonar2 = *shortptr;
 			    sonar2swap = (short) mb_swap_short(sonar2);
 			    if (sonar2 == MBSYS_SIMRAD3_EM710 || sonar2swap == MBSYS_SIMRAD3_EM710
+					|| sonar2 == MBSYS_SIMRAD3_EM850|| sonar2swap == MBSYS_SIMRAD3_EM850
 			    	|| sonar2 == MBSYS_SIMRAD3_EM302 || sonar2swap == MBSYS_SIMRAD3_EM302
 			    	|| sonar2 == MBSYS_SIMRAD3_EM122 || sonar2swap == MBSYS_SIMRAD3_EM122
 			    	|| sonar2 == MBSYS_SIMRAD3_EM2040 || sonar2swap == MBSYS_SIMRAD3_EM2040
@@ -2461,6 +2462,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 			    sonar2 = *shortptr;
 			    sonar2swap = (short) mb_swap_short(sonar2);
 			    if (sonar2 == MBSYS_SIMRAD3_EM710 || sonar2swap == MBSYS_SIMRAD3_EM710
+			    	|| sonar2 == MBSYS_SIMRAD3_EM850 || sonar2swap == MBSYS_SIMRAD3_EM850
 			    	|| sonar2 == MBSYS_SIMRAD3_EM302 || sonar2swap == MBSYS_SIMRAD3_EM302
 			    	|| sonar2 == MBSYS_SIMRAD3_EM122 || sonar2swap == MBSYS_SIMRAD3_EM122
 			    	|| sonar2 == MBSYS_SIMRAD3_EM2040 || sonar2swap == MBSYS_SIMRAD3_EM2040
