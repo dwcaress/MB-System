@@ -740,6 +740,11 @@ void do_update_status()
 	char	*filestatus_fixedxy = "fixedxy";
 	char	*filestatus_fixedz  = "fixedz ";
 	char	*filestatus_unknown = "unknown";
+    int n_tcrossing = 0;
+    int n_50crossing = 0;
+    int n_25crossing = 0;
+    int n_allcrossing = 0;
+    int n_tie = 0;
     int	i, ii, j, k;
 
 	/* set status label */
@@ -906,8 +911,31 @@ void do_update_status()
                 {
                 for (j=0;j<=i;j++)
                     {
-                    sprintf(string,"block %4.4d: Survey %2.2d vs Survey %2.2d",
-                            num_blocks, j, i);
+                    n_tcrossing = 0;
+                    n_50crossing = 0;
+                    n_25crossing = 0;
+                    n_allcrossing = 0;
+                    n_tie = 0;
+                    for (k=0;k<project.num_crossings;k++)
+                        {
+                        crossing = &project.crossings[k];
+                        if ((project.files[crossing->file_id_1].block == i
+                                && project.files[crossing->file_id_2].block == j)
+                            || (project.files[crossing->file_id_2].block == i
+                                && project.files[crossing->file_id_1].block == j))
+                            {
+                            if (crossing->truecrossing == MB_YES)
+                                n_tcrossing++;
+                            if (crossing->overlap >= 50)
+                                n_50crossing++;
+                            if (crossing->overlap >= 25)
+                                n_25crossing++;
+                            n_allcrossing++;
+                            n_tie += crossing->num_ties;     
+                            }
+                        }
+                    sprintf(string,"block %4.4d: Survey %2.2d vs Survey %2.2d : Crossings: %4d %4d %4d %4d : Ties: %4d",
+                            num_blocks, j, i, n_tcrossing, n_50crossing, n_25crossing, n_allcrossing, n_tie);
     				xstr[num_blocks] = XmStringCreateLocalized(string);
 					if (mbna_verbose > 0)
 						fprintf(stderr,"%s\n",string);

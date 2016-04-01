@@ -1696,6 +1696,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 
 		/* check for valid sonarunswap */
 		if (sonarunswap == MBSYS_SIMRAD3_EM710
+			|| sonarunswap == MBSYS_SIMRAD3_EM850
 			|| sonarunswap == MBSYS_SIMRAD3_EM3002
 			|| sonarunswap == MBSYS_SIMRAD3_EM302
 			|| sonarunswap == MBSYS_SIMRAD3_EM122
@@ -1712,6 +1713,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 
 		/* check for valid sonarswap */
 		if (sonarswap == MBSYS_SIMRAD3_EM710
+			|| sonarswap == MBSYS_SIMRAD3_EM850
 			|| sonarswap == MBSYS_SIMRAD3_EM3002
 			|| sonarswap == MBSYS_SIMRAD3_EM302
 			|| sonarswap == MBSYS_SIMRAD3_EM122
@@ -1759,6 +1761,7 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 
 	/* check for valid sonar */
 	if (*sonar != MBSYS_SIMRAD3_EM710
+		&& *sonar != MBSYS_SIMRAD3_EM850
 		&& *sonar != MBSYS_SIMRAD3_EM3002
 		&& *sonar != MBSYS_SIMRAD3_EM302
 		&& *sonar != MBSYS_SIMRAD3_EM122
