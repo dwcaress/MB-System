@@ -11,19 +11,19 @@ dnl
 dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
-dnl Require automake 2.65 or later
-AC_PREREQ([2.65])
+dnl Require automake 2.69 or later
+AC_PREREQ([2.69])
 
 dnl Disable configure caching
 define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2273],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2274],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "4 May 2016", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "5 May 2016", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
