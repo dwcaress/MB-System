@@ -16,7 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
-* Version 5.5.2272       May 4, 2016
+* Version 5.5.2273       May 4, 2016
   Version 5.5.2271       April 1, 2016
 * Version 5.5.2270       March 24, 2016
   Version 5.5.2268       March 14, 2016
@@ -232,7 +232,7 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2272 (May 4, 2016)
+-----> 5.5.2273 (May 4, 2016)
 
 MBgrdviz, MBeditviz: New radiobox in the Controls->Projections dialog allows
 user to change interactive pick annotations so that longitude and latitude
@@ -244,13 +244,14 @@ Gordon Keith - MB-System now builds on Ubuntu 16.04.
 Mbswath: Fixed bug in handling format for single input files, as suggested by
 Joaquim Luis.
 
-Many source files: Added a number of #ifdef preprocessor statements to handle
-building on Windows, generally following suggestions by Joaquim Luis.
-
 Mbnavadjustmerge: Added commands to set the mode of all ties as XYZ, XY only, or
 Z only.
 
-Fixed 
+Many source files: Added a number of #ifdef preprocessor statements to handle
+building on Windows, generally following suggestions by Joaquim Luis.
+
+Many source files: Fixed a number of warnings related to typing and prototyping
+issues.
 
 -----> 5.5.2271 (April 1, 2016)
 
