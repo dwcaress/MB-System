@@ -71,7 +71,9 @@
 
 /* system function declarations */
 char	*ctime();
+#ifndef WIN32
 char	*getenv();
+#endif
 
 /*--------------------------------------------------------------------*/
 

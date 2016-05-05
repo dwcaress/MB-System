@@ -844,9 +844,9 @@ int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<store->beams_bath;i++)
 			{
 			if (store->bath[i] > 0.0
-			    && fabs(store->bath_acrosstrack[i]) < xtrack_min)
+			    && (double)abs(store->bath_acrosstrack[i]) < xtrack_min)
 			    {
-			    xtrack_min = fabs(store->bath_acrosstrack[i]);
+			    xtrack_min =  (double)abs(store->bath_acrosstrack[i]);
 			    bath_best = store->bath[i];
 			    }
 			}
@@ -857,9 +857,9 @@ int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<store->beams_bath;i++)
 			{
 			if (store->bath[i] < 0.0
-			    && fabs(store->bath_acrosstrack[i]) < xtrack_min)
+			    &&  (double)abs(store->bath_acrosstrack[i]) < xtrack_min)
 			    {
-			    xtrack_min = fabs(store->bath_acrosstrack[i]);
+			    xtrack_min =  (double)abs(store->bath_acrosstrack[i]);
 			    bath_best = -store->bath[i];
 			    }
 			}

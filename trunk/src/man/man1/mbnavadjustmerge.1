@@ -1,4 +1,4 @@
-.TH mbnavadjustmerge 1 "3 November 2015" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjustmerge 1 "21 April 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjustmerge\fP \- Tool to merge two MBnavadjust projects,
 either adding one to the first or outputting a new project combining
@@ -20,6 +20,9 @@ Version 5.0
 --set-tie-xyonly=file1:section1/file2:section2
 --set-tie-zonly=file1:section1/file2:section2
 --unset-tie=file1:section1/file2:section2
+--set-ties-xyz-all
+--set-ties-xyonly-all
+--set-ties-zonly-all
 --set-ties-xyz-with-file=file
 --set-ties-xyonly-with-file=file
 --set-ties-zonly-with-file=file
@@ -156,6 +159,21 @@ for an optimal navigation model.
 .B \--unset-tie=file1:section1/file2:section2
 This option unsets (deletes) the specified tie in the
 \fBMBnavadjust\fP project. 
+.TP
+.B \--set-ties-xyz-all
+This option sets the mode of all ties in the \fBMBnavadjust\fP project to be "XYZ". This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-xyonly-all
+This option sets the mode of all ties in the \fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-zonly-all
+This option sets the mode of all ties in the \fBMBnavadjust\fP project to be "Z". This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
+for an optimal navigation model.
 .TP
 .B \--set-ties-xyz-with-file=file
 This option sets the mode of all ties involved with the specified

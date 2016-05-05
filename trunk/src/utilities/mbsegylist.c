@@ -115,7 +115,7 @@ int main (int argc, char **argv)
 	int	first_u = MB_YES;
 	time_t	time_u;
 	time_t	time_u_ref;
-	double	time_interval;
+	double	time_interval = 0.0;
 	double	minutes;
 	int	degrees;
 	char	hemi;
@@ -624,12 +624,13 @@ int main (int argc, char **argv)
 						break;
 					case 'V': /* time in seconds since last ping */
 					case 'v':
+						time_interval = time_d - time_d_old;
 						if (ascii == MB_YES)
 						    {
 						    if ( fabs(time_interval) > 100. )
-							printf("%g",time_interval);
+								printf("%g",time_interval);
 						    else
-							printf("%7.3f",time_interval);
+								printf("%7.3f",time_interval);
 						    }
 						else
 						    {

@@ -420,117 +420,122 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* deal with errors */
 	if (ret < 0)
 	    {
+#ifndef WIN32
 	    if (gsfError == GSF_READ_TO_END_OF_FILE
-		|| gsfError == GSF_PARTIAL_RECORD_AT_END_OF_FILE)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-		}
+			|| gsfError == GSF_PARTIAL_RECORD_AT_END_OF_FILE)
+#else
+		/* On Windows the external gsfError set in gsf.c is not visible here */p
+		if (ret < 0)
+#endif
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
 	    else
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 	    }
 
 	/* else deal with data */
 	else
 	    {
 	    if (dataID->recordID == GSF_RECORD_HISTORY)
-		{
-		data->kind = MB_DATA_HISTORY;
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-		}
+			{
+			data->kind = MB_DATA_HISTORY;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
 
 	    else if (dataID->recordID == GSF_RECORD_SWATH_BATHY_SUMMARY)
-		{
-		data->kind = MB_DATA_SUMMARY;
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-		}
+			{
+			data->kind = MB_DATA_SUMMARY;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
 
 	    else if (dataID->recordID == GSF_RECORD_PROCESSING_PARAMETERS)
-		{
-		data->kind = MB_DATA_PROCESSING_PARAMETERS;
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-		}
+			{
+			data->kind = MB_DATA_PROCESSING_PARAMETERS;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
 
 	    else if (dataID->recordID == GSF_RECORD_SENSOR_PARAMETERS)
-		{
-		data->kind = MB_DATA_PROCESSING_PARAMETERS;
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-		}
+			{
+			data->kind = MB_DATA_PROCESSING_PARAMETERS;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
 
 	    else if (dataID->recordID == GSF_RECORD_NAVIGATION_ERROR)
-		{
-		data->kind = MB_DATA_NAVIGATION_ERROR;
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-		}
+			{
+			data->kind = MB_DATA_NAVIGATION_ERROR;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
 
 	    else if (dataID->recordID == GSF_RECORD_SOUND_VELOCITY_PROFILE)
-		{
-		data->kind = MB_DATA_VELOCITY_PROFILE;
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-		}
+			{
+			data->kind = MB_DATA_VELOCITY_PROFILE;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
 
 	    else if (dataID->recordID == GSF_RECORD_COMMENT)
-		{
-		/* copy comment */
-		data->kind = MB_DATA_COMMENT;
-		if (records->comment.comment != NULL)
-		    {
-		    status = MB_SUCCESS;
-		    *error = MB_ERROR_NO_ERROR;
-		    }
-		else
-		    {
-		    status = MB_FAILURE;
-		    *error = MB_ERROR_UNINTELLIGIBLE;
-		    }
-		}
+			{
+			/* copy comment */
+			data->kind = MB_DATA_COMMENT;
+			if (records->comment.comment != NULL)
+				{
+				status = MB_SUCCESS;
+				*error = MB_ERROR_NO_ERROR;
+				}
+			else
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				}
+			}
 
 	    else if (dataID->recordID == GSF_RECORD_SWATH_BATHYMETRY_PING)
-		{
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-		data->kind = MB_DATA_DATA;
-
-		/* get beam widths */
-		ret = gsfGetSwathBathyBeamWidths(records, &(mb_io_ptr->beamwidth_ltrack),
-							&(mb_io_ptr->beamwidth_xtrack));
-		if (ret < 0)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 0.0;
-		    mb_io_ptr->beamwidth_xtrack = 0.0;
-		    }
-		    
-		/* if needed create array for beam flags */
-		if (mb_ping->number_beams > 0 && mb_ping->beam_flags == NULL)
-		    {
-		    mb_ping->beam_flags = (unsigned char *) malloc(mb_ping->number_beams * sizeof(unsigned char));
-		    for (i=0;i<mb_ping->number_beams;i++)
-			mb_ping->beam_flags[i] = MB_FLAG_NONE;
-		    }
-		    
-		/* if needed create array for along_track */
-		if (mb_ping->number_beams > 0 && mb_ping->along_track == NULL)
-		    {
-		    mb_ping->along_track = (double *) malloc(mb_ping->number_beams * sizeof(double));
-		    for (i=0;i<mb_ping->number_beams;i++)
-			mb_ping->along_track[i] = 0.0;
-		    }
-		}
+			{
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			data->kind = MB_DATA_DATA;
+	
+			/* get beam widths */
+			ret = gsfGetSwathBathyBeamWidths(records, &(mb_io_ptr->beamwidth_ltrack),
+								&(mb_io_ptr->beamwidth_xtrack));
+			if (ret < 0)
+				{
+				mb_io_ptr->beamwidth_ltrack = 0.0;
+				mb_io_ptr->beamwidth_xtrack = 0.0;
+				}
+				
+			/* if needed create array for beam flags */
+			if (mb_ping->number_beams > 0 && mb_ping->beam_flags == NULL)
+				{
+				mb_ping->beam_flags = (unsigned char *) malloc(mb_ping->number_beams * sizeof(unsigned char));
+				for (i=0;i<mb_ping->number_beams;i++)
+				mb_ping->beam_flags[i] = MB_FLAG_NONE;
+				}
+				
+			/* if needed create array for along_track */
+			if (mb_ping->number_beams > 0 && mb_ping->along_track == NULL)
+				{
+				mb_ping->along_track = (double *) malloc(mb_ping->number_beams * sizeof(double));
+				for (i=0;i<mb_ping->number_beams;i++)
+				mb_ping->along_track[i] = 0.0;
+				}
+			}
 
 	    else
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 	    }
 
 	/* set error and kind in mb_io_ptr */

@@ -62,20 +62,23 @@ static char version_id[] = "$Id$";
 #define MOD_MODE_SET_TIE_XY		9
 #define MOD_MODE_SET_TIE_Z		10
 #define MOD_MODE_UNSET_TIE		11
-#define MOD_MODE_SET_TIES_XYZ_FILE	12
-#define MOD_MODE_SET_TIES_XY_FILE	13
-#define MOD_MODE_SET_TIES_Z_FILE	14
-#define MOD_MODE_SET_TIES_XYZ_SURVEY	15
-#define MOD_MODE_SET_TIES_XY_SURVEY	16
-#define MOD_MODE_SET_TIES_Z_SURVEY	17
-#define MOD_MODE_SET_TIES_XYZ_BLOCK	18
-#define MOD_MODE_SET_TIES_XY_BLOCK	19
-#define MOD_MODE_SET_TIES_Z_BLOCK	20
-#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK	21
-#define MOD_MODE_SKIP_UNSET_CROSSINGS	22
-#define MOD_MODE_INSERT_DISCONTINUITY   23
-#define MOD_MODE_REIMPORT_FILE   24
-#define MOD_MODE_REIMPORT_ALL_FILES   25
+#define MOD_MODE_SET_TIES_XYZ_ALL	12
+#define MOD_MODE_SET_TIES_XY_ALL	13
+#define MOD_MODE_SET_TIES_Z_ALL	14
+#define MOD_MODE_SET_TIES_XYZ_FILE	15
+#define MOD_MODE_SET_TIES_XY_FILE	16
+#define MOD_MODE_SET_TIES_Z_FILE	17
+#define MOD_MODE_SET_TIES_XYZ_SURVEY	18
+#define MOD_MODE_SET_TIES_XY_SURVEY	19
+#define MOD_MODE_SET_TIES_Z_SURVEY	20
+#define MOD_MODE_SET_TIES_XYZ_BLOCK	21
+#define MOD_MODE_SET_TIES_XY_BLOCK	22
+#define MOD_MODE_SET_TIES_Z_BLOCK	23
+#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK	24
+#define MOD_MODE_SKIP_UNSET_CROSSINGS	25
+#define MOD_MODE_INSERT_DISCONTINUITY   26
+#define MOD_MODE_REIMPORT_FILE   27
+#define MOD_MODE_REIMPORT_ALL_FILES   28
 
 struct mbnavadjust_mod
 	{
@@ -117,6 +120,9 @@ int main (int argc, char **argv)
 				"\t--set-tie-xyonly=file1:section1/file2:section2\n"
 				"\t--set-tie-zonly=file1:section1/file2:section2\n"
 				"\t--unset-tie=file1:section1/file2:section2\n"
+				"\t--set-ties-xyz-all\n"
+				"\t--set-ties-xyonly-all\n"
+				"\t--set-ties-zonly-all\n"
 				"\t--set-ties-xyz-with-file=file\n"
 				"\t--set-ties-xyonly-with-file=file\n"
 				"\t--set-ties-zonly-with-file=file\n"
@@ -168,6 +174,9 @@ int main (int argc, char **argv)
 		{"set-tie-xyonly",		required_argument, 	NULL, 		0},
 		{"set-tie-zonly",		required_argument, 	NULL, 		0},
 		{"unset-tie",			required_argument, 	NULL, 		0},
+		{"set-ties-xyz-all",	no_argument, 	NULL, 		0},
+		{"set-ties-xyonly-all",	no_argument, 	NULL, 		0},
+		{"set-ties-zonly-all",	no_argument, 	NULL, 		0},
 		{"set-ties-xyz-with-file",	required_argument, 	NULL, 		0},
 		{"set-ties-xyonly-with-file",	required_argument, 	NULL, 		0},
 		{"set-ties-zonly-with-file",	required_argument, 	NULL, 		0},
@@ -754,6 +763,51 @@ int main (int argc, char **argv)
 					}
 				}
 			
+			/*-------------------------------------------------------
+			 * set mode of all ties
+				--set-ties-xyz-all
+				--set-ties-xyonly-all
+				--set-ties-zonly-all */
+			else if (strcmp("set-ties-xyz-all", options[option_index].name) == 0)
+				{
+				if (num_mods < NUMBER_MODS_MAX)
+					{
+					mods[num_mods].mode = MOD_MODE_SET_TIES_XYZ_ALL;
+					num_mods++;
+					}
+				else
+					{
+					fprintf(stderr,"Maximum number of mod commands reached:\n\t--set-ties-xyz-all=%s command ignored\n\n",
+							optarg);	
+					}
+				}
+			else if (strcmp("set-ties-xyonly-all", options[option_index].name) == 0)
+				{
+				if (num_mods < NUMBER_MODS_MAX)
+					{
+					mods[num_mods].mode = MOD_MODE_SET_TIES_XY_ALL;
+					num_mods++;
+					}
+				else
+					{
+					fprintf(stderr,"Maximum number of mod commands reached:\n\t--set-ties-xyonly-all=%s command ignored\n\n",
+							optarg);	
+					}
+				}
+			else if (strcmp("set-ties-xyz-all", options[option_index].name) == 0)
+				{
+				if (num_mods < NUMBER_MODS_MAX)
+					{
+					mods[num_mods].mode = MOD_MODE_SET_TIES_Z_ALL;
+					num_mods++;
+					}
+				else
+					{
+					fprintf(stderr,"Maximum number of mod commands reached:\n\t--set-ties-xyz-all=%s command ignored\n\n",
+							optarg);	
+					}
+				}
+
 			/*-------------------------------------------------------
 			 * set mode of all ties with a file
 				--set-ties-xyz-with-file=file
@@ -2097,7 +2151,84 @@ current_crossing,
 file1->block, crossing->file_id_1, crossing->section_1,
 file2->block, crossing->file_id_2, crossing->section_2);
 					}
-					
+				break;
+			
+			case MOD_MODE_SET_TIES_XYZ_ALL:
+fprintf(stderr,"\nCommand set-ties-xyz-all=%4.4d\n", mods[imod].file1);
+
+				/* loop over all crossings looking for ties, then set the tie modes */
+				for (icrossing=0;icrossing<project_output.num_crossings;icrossing++)
+					{
+					crossing = &(project_output.crossings[icrossing]);
+					file1 = (struct mbna_file *) &project_output.files[crossing->file_id_1];
+					file2 = (struct mbna_file *) &project_output.files[crossing->file_id_2];
+					for (itie=0;itie<crossing->num_ties;itie++)
+						{
+						tie = &crossing->ties[itie];
+						if (tie->status != MBNA_TIE_XYZ)
+							{
+							tie->status = MBNA_TIE_XYZ;
+
+fprintf(stderr,"Set tie mode XYZ:      %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
+icrossing, itie,
+file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2,
+tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
+							}
+						}
+					}
+				break;
+			
+			case MOD_MODE_SET_TIES_XY_ALL:
+fprintf(stderr,"\nCommand set-ties-xy-all=%4.4d\n", mods[imod].file1);
+
+				/* loop over all crossings looking for ties, then set the tie modes */
+				for (icrossing=0;icrossing<project_output.num_crossings;icrossing++)
+					{
+					crossing = &(project_output.crossings[icrossing]);
+					file1 = (struct mbna_file *) &project_output.files[crossing->file_id_1];
+					file2 = (struct mbna_file *) &project_output.files[crossing->file_id_2];
+					for (itie=0;itie<crossing->num_ties;itie++)
+						{
+						tie = &crossing->ties[itie];
+						if (tie->status != MBNA_TIE_XY)
+							{
+							tie->status = MBNA_TIE_XY;
+
+fprintf(stderr,"Set tie mode XY-only:  %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
+icrossing, itie,
+file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2,
+tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
+							}
+						}
+					}
+				break;
+			
+			case MOD_MODE_SET_TIES_Z_ALL:
+fprintf(stderr,"\nCommand set-ties-z-all=%4.4d\n", mods[imod].file1);
+
+				/* loop over all crossings looking for ties, then set the tie modes */
+				for (icrossing=0;icrossing<project_output.num_crossings;icrossing++)
+					{
+					crossing = &(project_output.crossings[icrossing]);
+					file1 = (struct mbna_file *) &project_output.files[crossing->file_id_1];
+					file2 = (struct mbna_file *) &project_output.files[crossing->file_id_2];
+					for (itie=0;itie<crossing->num_ties;itie++)
+						{
+						tie = &crossing->ties[itie];
+						if (tie->status != MBNA_TIE_Z)
+							{
+							tie->status = MBNA_TIE_Z;
+
+fprintf(stderr,"Set tie mode Z-only:   %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
+icrossing, itie,
+file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2,
+tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
+							}
+						}
+					}
 				break;
 			
 			case MOD_MODE_SET_TIES_XYZ_FILE:

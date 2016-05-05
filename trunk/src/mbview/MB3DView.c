@@ -135,6 +135,8 @@ extern void do_mbview_projection_popdown(Widget, XtPointer, XtPointer);
 extern void do_mbview_display_geographic(Widget, XtPointer, XtPointer);
 extern void do_mbview_display_utm(Widget, XtPointer, XtPointer);
 extern void do_mbview_display_spheroid(Widget, XtPointer, XtPointer);
+extern void do_mbview_annotation_degreesminutes( Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_mbview_annotation_degreesdecimal( Widget w, XtPointer client_data, XtPointer call_data);
 extern void do_mbview_profile_width(Widget, XtPointer, XtPointer);
 extern void do_mbview_profile_slope(Widget, XtPointer, XtPointer);
 extern void do_mbview_profile_exager(Widget, XtPointer, XtPointer);
@@ -2363,6 +2365,97 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     }
 
     XtAddCallback(class_in->mbview_toggleButton_spheroid, XmNvalueChangedCallback, do_mbview_display_spheroid, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"Annotation Style:",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 20); ac++;
+        XtSetArg(args[ac], XmNy, 140); ac++;
+        XtSetArg(args[ac], XmNwidth, 150); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_annotationstyle = XmCreateLabel(class_in->mbview_bulletinBoard_projection,
+            (char *)"mbview_label_annotationstyle",
+            args,
+            ac);
+        XtManageChild(class_in->mbview_label_annotationstyle);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 40); ac++;
+    XtSetArg(args[ac], XmNy, 160); ac++;
+    XtSetArg(args[ac], XmNwidth, 115); ac++;
+    XtSetArg(args[ac], XmNheight, 96); ac++;
+    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
+    class_in->mbview_radioBox_annotation = XmCreateRadioBox(class_in->mbview_bulletinBoard_projection,
+        (char *)"mbview_radioBox_annotation",
+        args,
+        ac);
+    XtManageChild(class_in->mbview_radioBox_annotation);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"Degrees + Minutes",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 109); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_toggleButton_annotation_degreesminutes = XmCreateToggleButton(class_in->mbview_radioBox_annotation,
+            (char *)"mbview_toggleButton_annotation_degreesminutes",
+            args,
+            ac);
+        XtManageChild(class_in->mbview_toggleButton_annotation_degreesminutes);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->mbview_toggleButton_annotation_degreesminutes, XmNvalueChangedCallback, do_mbview_annotation_degreesminutes, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"Decimal Degrees",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 109); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_toggleButton_annotation_degreesdecimal = XmCreateToggleButton(class_in->mbview_radioBox_annotation,
+            (char *)"mbview_toggleButton_annotation_degreesdecimal",
+            args,
+            ac);
+        XtManageChild(class_in->mbview_toggleButton_annotation_degreesdecimal);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->mbview_toggleButton_annotation_degreesdecimal, XmNvalueChangedCallback, do_mbview_annotation_degreesdecimal, (XtPointer)0);
 
     ac = 0;
     {

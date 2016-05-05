@@ -340,9 +340,6 @@ int main (int argc, char **argv)
 	/* position sensor offsets */
 	double	position_off_x, position_off_y, position_off_z;
 	
-	/* lever arm offsets */
-	double	lever_x, lever_y, lever_z;
-	
 	/* variables for beam angle calculation */
 	mb_3D_orientation tx_align;
 	mb_3D_orientation tx_orientation;
@@ -1807,7 +1804,7 @@ fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
 		}
 
 	/* if output directory was set by user, reset file path */
-	if (odir_set == MB_YES && odir!=NULL)
+	if (odir_set == MB_YES)
 		{
 		strcpy(buffer, odir);
 		if (buffer[strlen(odir)-1] != '/')

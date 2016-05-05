@@ -517,6 +517,8 @@ void do_mbview_projection_popdown( Widget w, XtPointer client_data, XtPointer ca
 void do_mbview_display_spheroid( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_display_geographic( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_display_utm( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_annotation_degreesminutes( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_annotation_degreesdecimal( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_glwda_expose( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data);

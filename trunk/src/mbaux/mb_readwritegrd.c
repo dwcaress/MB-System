@@ -389,7 +389,8 @@ int mb_write_gmt_grd(int verbose,
 	int	utmzone;
 	char	NorS;
 	time_t	right_now;
-	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	date[32], user[MB_PATH_MAXLINE], *user_ptr;
+	char	host[MB_PATH_MAXLINE] = {""}, *host_ptr;
 	int	first = MB_NO;
 	double	min = 0.0;
 	double	max = 0.0;
@@ -508,14 +509,21 @@ int mb_write_gmt_grd(int verbose,
 		strcpy(program_name, "\0");
 	right_now = time((time_t *)0);
 	strcpy(date,ctime(&right_now));
-        date[strlen(date)-1] = '\0';
+    date[strlen(date)-1] = '\0';
 	if ((user_ptr = getenv("USER")) == NULL)
-		user_ptr = getenv("LOGNAME");
+		if ((user_ptr = getenv("LOGNAME")) == NULL)
+			user_ptr = getenv("USERNAME");
 	if (user_ptr != NULL)
 		strcpy(user,user_ptr);
 	else
 		strcpy(user, "unknown");
 	gethostname(host, MB_PATH_MAXLINE);
+	if (host[0] == '\0')		/* Don't know why but the above fails on Win. So get the same info from ENV */
+		{
+		host_ptr = getenv("USERDOMAIN");
+		if (host_ptr != NULL)
+			strcpy(host, host_ptr);
+		}
 	sprintf(remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
 		projection,program_name,MB_VERSION,user,host,date);
 	

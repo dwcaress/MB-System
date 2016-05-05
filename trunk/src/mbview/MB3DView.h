@@ -252,6 +252,10 @@ typedef struct _MB3DViewData
     Widget mbview_toggleButton_geographic;
     Widget mbview_toggleButton_utm;
     Widget mbview_toggleButton_spheroid;
+    Widget mbview_label_annotationstyle;
+    Widget mbview_radioBox_annotation;
+    Widget mbview_toggleButton_annotation_degreesminutes;
+    Widget mbview_toggleButton_annotation_degreesdecimal;
     Widget mbview_label_projection;
     Widget mbview_pushButton_projection_dismiss;
     Widget mbview_dialogShell_profile;

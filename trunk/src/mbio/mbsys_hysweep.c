@@ -2510,7 +2510,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr,
 										+ store->RMBint_heave;
 				nbathsort++;
 
-				if (found == MB_NO || fabs(store->RMB_sounding_across[i] < minxtrack))
+				if (found == MB_NO || fabs(store->RMB_sounding_across[i]) < minxtrack)
 					{
 					minxtrack = fabs(store->RMB_sounding_across[i]);
 					iminxtrack = i;

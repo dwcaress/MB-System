@@ -1304,15 +1304,15 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		if (interleave == MB_YES)
 			{
 			if (ping->bath_mode == 12
-			    && fabs(ping->bath_acrosstrack[28])
-				< fabs(ping->bath_acrosstrack[29]))
+			    &&  abs(ping->bath_acrosstrack[28])
+				<  abs(ping->bath_acrosstrack[29]))
 			    istep = 1;
 			else if (ping->bath_mode == 13
-			    && fabs(ping->bath_acrosstrack[31])
-				< fabs(ping->bath_acrosstrack[30]))
+			    &&  abs(ping->bath_acrosstrack[31])
+				<  abs(ping->bath_acrosstrack[30]))
 			    istep = 1;
-			else if (fabs(ping->bath_acrosstrack[*nbeams/2-1])
-			    < fabs(ping->bath_acrosstrack[*nbeams/2]))
+			else if ( abs(ping->bath_acrosstrack[*nbeams/2-1])
+			    <  abs(ping->bath_acrosstrack[*nbeams/2]))
 			    istep = 1;
 			else
 			    istep = 0;
@@ -2746,15 +2746,15 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		if (interleave == MB_YES)
 			{
 			if (ping->bath_mode == 12
-			    && fabs(ping->bath_acrosstrack[28])
-				< fabs(ping->bath_acrosstrack[29]))
+			    &&  abs(ping->bath_acrosstrack[28])
+				<  abs(ping->bath_acrosstrack[29]))
 			    istep = 1;
 			else if (ping->bath_mode == 13
-			    && fabs(ping->bath_acrosstrack[31])
-				< fabs(ping->bath_acrosstrack[30]))
+			    &&  abs(ping->bath_acrosstrack[31])
+				<  abs(ping->bath_acrosstrack[30]))
 			    istep = 1;
-			else if (fabs(ping->bath_acrosstrack[ping->beams_bath/2-1])
-			    < fabs(ping->bath_acrosstrack[ping->beams_bath/2]))
+			else if ( abs(ping->bath_acrosstrack[ping->beams_bath/2-1])
+			    <  abs(ping->bath_acrosstrack[ping->beams_bath/2]))
 			    istep = 1;
 			else
 			    istep = 0;
