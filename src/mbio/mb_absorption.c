@@ -210,7 +210,6 @@ int mb_potential_temperature(int verbose,
 {
 	char	*function_name = "mb_potential_temperature";
 	int	status = MB_SUCCESS;
-	double	Pn, Pd;
 		
 	/* Polynomial coefficients */
 	double	a1 = 8.65483913395442e-6;

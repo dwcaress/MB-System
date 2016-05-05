@@ -1045,7 +1045,7 @@ int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			if (store->bath[i] != 0
 			    && store->quality[i] >= 3
-			    && fabs(store->bath_acrosstrack[i]) < xtrack_min)
+			    &&  (double)abs(store->bath_acrosstrack[i]) < xtrack_min)
 			    {
 			    xtrack_min = fabs(dacrscale * store->bath_acrosstrack[i]);
 			    bath_best = depthscale * store->bath[i];

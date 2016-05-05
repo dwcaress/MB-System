@@ -82,8 +82,8 @@
 #define	MBV_VIEW_ON		1
 
 /* lon lat style mode */
-#define MBV_LONLAT_DECIMAL	0
-#define	MBV_LONLAT_MINUTES	1
+#define MBV_LONLAT_DEGREESDECIMAL	0
+#define	MBV_LONLAT_DEGREESMINUTES	1
 
 /* colortable view mode defines */
 #define	MBV_COLORTABLE_NORMAL		0

@@ -1415,7 +1415,7 @@ void read_list
 						inf_hold[i].file_name);
 				for(j=0; j<size_2; j++)
 					{
-					time_hold[i][j] = abs(difftime(inf_hold[i].s_Time, svp_hold[j].svp_Time));
+					time_hold[i][j] = fabs(difftime(inf_hold[i].s_Time, svp_hold[j].svp_Time));
 					if (verbose==1)
 						printf("Time number %d is : %lf\n", j, time_hold[i][j]);
 					}
@@ -1467,7 +1467,7 @@ void read_list
 						inf_hold[i].file_name);
 				for(j=0; j<size_2; j++)
 					{
-					time_hold[i][j] = abs(difftime(inf_hold[i].s_Time, svp_hold[j].svp_Time));
+					time_hold[i][j] = fabs(difftime(inf_hold[i].s_Time, svp_hold[j].svp_Time));
 					/* dist[i][j] = distVincenty(inf_hold[i].ave_lat, inf_hold[i].ave_lon,
 					   svp_hold[j].s_lat, svp_hold[j].s_lon); */
 					geod_inverse(&g,
@@ -1555,7 +1555,7 @@ void read_list
 						inf_hold[i].s_datum_time.tm_hour - svp_hold[j].svp_datum_time.tm_hour);
 					min_hold[i][j] = abs(
 						inf_hold[i].s_datum_time.tm_min - svp_hold[j].svp_datum_time.tm_min);
-					time_hold[i][j] = abs(difftime(inf_hold[i].s_Time, svp_hold[j].svp_Time));
+					time_hold[i][j] = fabs(difftime(inf_hold[i].s_Time, svp_hold[j].svp_Time));
 					/* dist[i][j] = distVincenty(inf_hold[i].ave_lat, inf_hold[i].ave_lon,
 					   svp_hold[j].s_lat, svp_hold[j].s_lon); */
 					geod_inverse(&g,

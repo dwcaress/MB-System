@@ -339,6 +339,7 @@ int              tiff_offset[] =
 #define gmt_M_grd_same_region GMT_grd_same_region
 #define gmt_M_is255 GMT_is255
 #define gmt_M_is_geographic GMT_is_geographic
+#define gmt_M_is_nonlinear_graticule GMT_IS_NONLINEAR_GRATICULE
 #define gmt_M_memcpy GMT_memcpy
 #define gmt_M_rgb_copy GMT_rgb_copy
 #define gmt_M_u255 GMT_u255
@@ -346,6 +347,7 @@ int              tiff_offset[] =
 #define gmt_M_free GMT_free
 #define gmt_M_is_fnan GMT_is_fnan
 #define gmt_M_memory GMT_memory
+#define gmt_M_yiq GMT_YIQ
 #define gmt_get_cpt GMT_Get_CPT
 #define gmt_access GMT_access
 #define gmt_begin_module GMT_begin_module

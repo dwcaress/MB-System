@@ -11457,7 +11457,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 				bathsort[nbathsort] = bathymetry->depth[i] + bathymetry->vehicle_height;
 				nbathsort++;
 
-				if (found == MB_NO || fabs(bathymetry->acrosstrack[i] < minxtrack))
+				if (found == MB_NO || fabs(bathymetry->acrosstrack[i]) < minxtrack)
 					{
 					minxtrack = fabs(bathymetry->acrosstrack[i]);
 					iminxtrack = i;

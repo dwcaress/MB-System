@@ -35,13 +35,14 @@
 
 #include <stdlib.h>
 #include <string.h>
-#ifndef WIN32
-#include <sys/time.h>		/* Why this include? time.h is included by mbbs_defines.h */
-#endif
 #include <math.h>
 
 #include "mbbs_defines.h"
 #include "mbbs_mem.h"
+#ifdef WIN32
+#include <float.h>
+#define isnan _isnan
+#endif
 
 int
 mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)

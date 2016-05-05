@@ -1140,7 +1140,10 @@ int mbvt_save_residuals(char *file)
 			rr = sqrt(residual_acrosstrack[i] * residual_acrosstrack[i]
 					  + (residual_altitude[i] + residual[i]) * (residual_altitude[i] + residual[i]));
 			xx = copysign(sqrt(rr * rr - residual_altitude[i] * residual_altitude[i]), residual_acrosstrack[i]);
-			dangle = asin(residual_acrosstrack[i] / rr) - asin(xx / rr);
+			if (rr > 0.0)
+				dangle = asin(residual_acrosstrack[i] / rr) - asin(xx / rr);
+			else
+				dangle = 0.0;
 		    fprintf(fp," %4d  %9.3f  %9.3f\n",
 				i, angle[i], dangle);
 			}

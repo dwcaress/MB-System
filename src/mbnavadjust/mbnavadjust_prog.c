@@ -15921,7 +15921,7 @@ int mbnavadjust_open_visualization(int which_grid)
 
 		/* read in the grd file */
 		if (status == MB_SUCCESS
-			&& mbv_file_name != NULL)
+			&& strlen(mbv_file_name) > 0)
 			status = mb_read_gmt_grd(mbna_verbose, mbv_file_name,
 							&mbv_primary_grid_projection_mode,
 							mbv_primary_grid_projection_id,

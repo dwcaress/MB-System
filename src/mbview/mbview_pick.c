@@ -900,8 +900,8 @@ int mbview_pick_text(size_t instance)
 			data->region.width,
 			data->region.height);
 		sprintf(value_list,
-		"Region Info: Bounds: %.6f/%.6f/%.6f/%.6f  Width: %.3f m Height: %.3f m",
-			lonmin, lonmax, latmin, latmax,
+		"Region Info: Bounds: %s/%s/%s/%s  Width: %.3f m Height: %.3f m",
+			lonstr0, lonstr1, latstr0, latstr1,
 			data->region.width,
 			data->region.height);
 		}
@@ -1045,7 +1045,7 @@ int mbview_pick_text(size_t instance)
 		sprintf(value_list, "Pick Info: No Pick\n");
 		}*/
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_pickinfo, value_text);
-//fprintf(stderr,"%s\n", value_list);
+fprintf(stderr,"%s\n", value_list);
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -1092,7 +1092,7 @@ int mbview_setlonlatstrings(int style, double lon, double lat, char *lonstring, 
 		lon += 360.0;
 		}
 
-	if (style == MBV_LONLAT_DECIMAL)
+	if (style == MBV_LONLAT_DEGREESDECIMAL)
 		{
 		if (lon < 0.0)
 			sprintf(lonstring, "%9.5f W", fabs(lon));

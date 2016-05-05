@@ -378,14 +378,15 @@ int main (int argc, char **argv)
 				nav_ok = MB_YES;
 			else
 				nav_ok = MB_NO;
-                        if (nav_num > 0 && nav_time_d[nav_num] <= nav_time_d[nav_num-1])
-                                nav_ok = MB_NO;
+            if (nav_num > 0 && nav_time_d[nav_num] <= nav_time_d[nav_num-1])
+                nav_ok = MB_NO;
 			if (nav_ok == MB_YES)
 			    nav_num++;
 			}
 		fclose(fp);
  		}
-fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_file);
+	if (nav_merge == MB_YES)
+		fprintf(stderr,"%d %d records read from nav file %s\n",nav_alloc,nav_num,nav_file);
 		
 	/* open the input file */
 	if ((fp = fopen(file, "r")) == NULL)

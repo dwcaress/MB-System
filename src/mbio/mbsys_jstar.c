@@ -1223,7 +1223,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		if (altitude >= 0.0 && xtrackmax >= 0.0 && jxtrackmax != nss / 2)
 			{
 			range = sqrt(xtrackmax * xtrackmax + altitude * altitude);
-			pixelsize = (range - altitude) / (fabs(jxtrackmax - nss / 2));
+			pixelsize = (range - altitude) / (abs(jxtrackmax - nss / 2));
 			nsamples = (int)MIN((double)(nss/2), (range / pixelsize));
 			}
 		else
