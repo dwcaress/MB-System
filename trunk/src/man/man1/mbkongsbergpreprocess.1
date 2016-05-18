@@ -1,4 +1,4 @@
-.TH mbkongsbergpreprocess 1 "17 March 2016" "MB-System 5.0" "MB-System 5.0"
+.TH mbkongsbergpreprocess 1 "17 May 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbkongsbergpreprocess\fP \- performs preprocessing of data from third generation
 Kongsberg multibeam sonars (e.g. EM122, EM302, EM710, EM2040, M3).
@@ -11,7 +11,7 @@ Version 5.0
 \fB\-E\fP\fIoffx/offy[/offdepth]\fP
 \fB\-F\fP\fIformat\fP
 \fB\-I\fIfile \fB\-O\fP\fIoutfile\fP \
-\fB\-P\fP\fIfilterlength/filterdepth\fP
+\fB\-P\fP\fIsonardepthfile\fP \fB\-PF\fP\fIfilterlength/filterdepth\fP
 \fB\-S\fP\fIdatatype/source\fP
 \fB\-T\fP\fItimelag\fP \fB\-W \-H \-V\fP]
 
@@ -128,6 +128,18 @@ This option causes \fBmbkongsbergpreprocess\fP to output all data to a single fi
 specified as \fIoutfile\fP. By default, the program creates output files for
 each input file. If the \fB\-D\fP\fIoutputdirectory\fP option is also used, then
 the output file \fIoutfile\fP will be in \fIoutputdirectory\fP.
+.TP
+.B \-P
+\fIsonardepthfile\fP
+.br
+The program will read sonar depth data from \fIsonardepthfile\fP and merge
+those data with the multibeam, sidescan, and subbtottom data in the 7k file.
+The \fIsonardepthfile\fP is a text data file containing two space delimited columns:
+ 	time_d sonardepth
+.br
+where:
+ 	time_d \- decimal epoch seconds (since start of 1970)
+ 	sonardepth \- sonar depth in meters, positive down
 .TP
 .B \-P
 \fIfilterlength/filterdepth\fP

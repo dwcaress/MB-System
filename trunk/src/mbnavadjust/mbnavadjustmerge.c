@@ -2928,7 +2928,7 @@ tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
 		fclose(tfp);
 		}
 	sprintf(filename, "cd %s/%s.dir ; mbdatalist -Idatalist.mb-1 -O -Z -V", project_output.path,project_output.name);
-	system(filename);
+	shellstatus = system(filename);
 	sprintf(filename,"%s/%s.dir/mbgrid.cmd",project_output.path,project_output.name);
 	if ((tfp = fopen(filename,"w")) != NULL)
 		{

@@ -5082,47 +5082,46 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 	  view->plot_interrupt_allowed = MB_YES;
       } /* end of button release events */
 
-      /* Deal with KeyPress events */
-      if(event->xany.type == KeyPress)
-      {
+    /* Deal with KeyPress events */
+    if(event->xany.type == KeyPress)
+        {
 /* fprintf(stderr,"KeyPress event\n"); */
-      /* Get key pressed - buffer[0] */
-      actual = XLookupString((XKeyEvent *)event,
-		    buffer, 1, &keysym, NULL);
+        /* Get key pressed - buffer[0] */
+        actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
-      /* process events */
-      switch (buffer[0])
-	    {
-	    case 'R':
-	    case 'r':
-		    do_mbview_reset_view(w, client_data, call_data);
-		    break;
-	    default:
-		    break;
-	  } /* end of key switch */
+        /* process events */
+        switch (buffer[0])
+            {
+            case 'R':
+            case 'r':
+                do_mbview_reset_view(w, client_data, call_data);
+                break;
+            default:
+                break;
+            } /* end of key switch */
+  
+         } /* end of key press events */
 
-       } /* end of key press events */
+    /* if needed replot profile */
+    if (replotprofile == MB_YES)
+        {
+        /* extract profile if pick is right type */
+        if (data->pickinfo_mode == MBV_PICK_TWOPOINT)
+           mbview_extract_pick_profile(instance);
+        else if (data->pickinfo_mode == MBV_PICK_ROUTE)
+           mbview_extract_route_profile(instance);
+        else if (data->pickinfo_mode == MBV_PICK_NAV)
+           mbview_extract_nav_profile(instance);
+  
+        /* now replot profile */
+        mbview_plotprofile(instance);
+        }
 
-       /* if needed replot profile */
-       if (replotprofile == MB_YES)
-	  {
-	  /* extract profile if pick is right type */
-	  if (data->pickinfo_mode == MBV_PICK_TWOPOINT)
-	     mbview_extract_pick_profile(instance);
-	  else if (data->pickinfo_mode == MBV_PICK_ROUTE)
-	     mbview_extract_route_profile(instance);
-	  else if (data->pickinfo_mode == MBV_PICK_NAV)
-	     mbview_extract_nav_profile(instance);
-
-	  /* now replot profile */
-	  mbview_plotprofile(instance);
-	  }
-
-     /* update action buttons according to pick state */
+    /* update action buttons according to pick state */
 /* fprintf(stderr,"About to call mbview_action_sensitivity %zu\n",instance); */
-     mbview_action_sensitivity(instance);
+    mbview_action_sensitivity(instance);
 
-     } /* end of inputs from window */
+    } /* end of inputs from window */
 
 }
 
