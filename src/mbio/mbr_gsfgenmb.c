@@ -424,7 +424,7 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    if (gsfError == GSF_READ_TO_END_OF_FILE
 			|| gsfError == GSF_PARTIAL_RECORD_AT_END_OF_FILE)
 #else
-		/* On Windows the external gsfError set in gsf.c is not visible here */p
+		/* On Windows the external gsfError set in gsf.c is not visible here */
 		if (ret < 0)
 #endif
 			{

@@ -444,7 +444,7 @@ int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error)
 		data->bat_sampleSize = 0.0;
 		data->bat_p_flags = 0;
 		data->bat_max_range = 0.0;
-		for (i=0;i<10;i++)
+		for (i=0;i<9;i++)
 			data->bat_future[i] = 0;
 		for (i=0;i<MBSYS_DSL_MAXBEAMS_SIDE;i++)
 			{
@@ -459,7 +459,7 @@ int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error)
 		data->amp_p_flags = 0;
 		data->amp_max_range = 0.0;
 		data->amp_channel = 0.0;
-		for (i=0;i<9;i++)
+		for (i=0;i<8;i++)
 			data->amp_future[i] = 0;
 		for (i=0;i<MBSYS_DSL_MAXBEAMS_SIDE;i++)
 			{
@@ -562,7 +562,7 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->bat_sampleSize = data->bat_sampleSize;
 		store->bat_p_flags = data->bat_p_flags;
 		store->bat_max_range = data->bat_max_range;
-		for (i=0;i<10;i++)
+		for (i=0;i<9;i++)
 			store->bat_future[i] = data->bat_future[i];
 		for (i=0;i<MBSYS_DSL_MAXBEAMS_SIDE;i++)
 			{
@@ -577,7 +577,7 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->amp_p_flags = data->amp_p_flags;
 		store->amp_max_range = data->amp_max_range;
 		store->amp_channel = data->amp_channel;
-		for (i=0;i<9;i++)
+		for (i=0;i<8;i++)
 			store->amp_future[i] = data->amp_future[i];
 		for (i=0;i<MBSYS_DSL_MAXBEAMS_SIDE;i++)
 			{
@@ -672,7 +672,7 @@ int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->bat_sampleSize = store->bat_sampleSize;
 		data->bat_p_flags = store->bat_p_flags;
 		data->bat_max_range = store->bat_max_range;
-		for (i=0;i<10;i++)
+		for (i=0;i<9;i++)
 			data->bat_future[i] = store->bat_future[i];
 		for (i=0;i<MBSYS_DSL_MAXBEAMS_SIDE;i++)
 			{
@@ -687,7 +687,7 @@ int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->amp_p_flags = store->amp_p_flags;
 		data->amp_max_range = store->amp_max_range;
 		data->amp_channel = store->amp_channel;
-		for (i=0;i<9;i++)
+		for (i=0;i<8;i++)
 			data->amp_future[i] = store->amp_future[i];
 		for (i=0;i<MBSYS_DSL_MAXBEAMS_SIDE;i++)
 			{

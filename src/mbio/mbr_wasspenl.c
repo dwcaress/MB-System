@@ -1122,7 +1122,7 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 	mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->pitch)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->heave)); index += 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->sample_type)); index += 4;
-	for (i=0;i<6;i++)
+	for (i=0;i<5;i++)
 		{
 		mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->spare[i])); index += 4;
 		}
@@ -1168,7 +1168,7 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr,"dbg5       corbathy->pitch:                      %f\n",corbathy->pitch);
 		fprintf(stderr,"dbg5       corbathy->heave:                      %f\n",corbathy->heave);
 		fprintf(stderr,"dbg5       corbathy->sample_type:                %u\n",corbathy->sample_type);
-		for (i=0;i<6;i++)
+		for (i=0;i<5;i++)
 			{
 			fprintf(stderr,"dbg5       corbathy->spare[%3d]:                 %u\n",i,corbathy->spare[i]);	
 			}
@@ -2172,7 +2172,7 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr,"dbg5       corbathy->pitch:                      %f\n",corbathy->pitch);
 		fprintf(stderr,"dbg5       corbathy->heave:                      %f\n",corbathy->heave);
 		fprintf(stderr,"dbg5       corbathy->sample_type:                %u\n",corbathy->sample_type);
-		for (i=0;i<6;i++)
+		for (i=0;i<5;i++)
 			{
 			fprintf(stderr,"dbg5       corbathy->spare[%3d]:                 %u\n",i,corbathy->spare[i]);	
 			}
@@ -2229,7 +2229,7 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 		mb_put_binary_float(MB_YES, corbathy->pitch, &buffer[index]); index += 4;
 		mb_put_binary_float(MB_YES, corbathy->heave, &buffer[index]); index += 4;
 		mb_put_binary_int(MB_YES, corbathy->sample_type, &buffer[index]); index += 4;
-		for (i=0;i<6;i++)
+		for (i=0;i<5;i++)
 			{
 			mb_put_binary_int(MB_YES, corbathy->spare[i], &buffer[index]); index += 4;
 			}

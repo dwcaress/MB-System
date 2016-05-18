@@ -242,6 +242,14 @@ int main (int argc, char **argv)
 	int	nrec_0xE4_sidescan_mbari59_tot = 0;
 	int	nrec_0xE5_bathymetry_mbari59_tot = 0;
 
+	/* merge sonardepth from separate parosci pressure sensor data file */
+	char	sonardepthfile[MB_PATH_MAXLINE];
+	int	sonardepthdata = MB_NO;
+	int	nsonardepth = 0;
+	double	*sonardepth_time_d = NULL;
+	double	*sonardepth_sonardepth = NULL;
+	double	*sonardepth_sonardepthfilter = NULL;
+
 	/* asynchronous navigation, heading, attitude data */
 	int	ndat_nav = 0;
 	int	ndat_nav_alloc = 0;
@@ -456,13 +464,24 @@ int main (int argc, char **argv)
 			break;
 		case 'P':
 		case 'p':
-			nscan = sscanf (optarg,"%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
-			if (nscan == 1)
-				sonardepthfilterdepth = 20.0;
-			if (nscan >= 1)
-				sonardepthfilter = MB_YES;
-			else
-				sonardepthfilter = MB_NO;
+			sscanf (optarg,"%s", buffer);
+			if ((fstat = stat(buffer, &file_status)) == 0
+				&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+					{
+					sonardepthdata  = MB_YES;
+					strcpy(sonardepthfile,buffer);
+					}
+			else if (optarg[0] == 'F' || optarg[0] == 'f')
+				{
+				nscan = sscanf (&(optarg[1]),"%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
+				if (nscan == 1)
+					sonardepthfilterdepth = 20.0;
+				if (nscan >= 1)
+					sonardepthfilter = MB_YES;
+				else
+					sonardepthfilter = MB_NO;
+				}
+			flag++;
 			break;
 		case 'S':
 		case 's':
@@ -570,6 +589,8 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       sonardepthfilter:       %d\n",sonardepthfilter);
 		fprintf(stderr,"dbg2       sonardepthfilterlength: %f\n",sonardepthfilterlength);
 		fprintf(stderr,"dbg2       sonardepthfilterdepth:  %f\n",sonardepthfilterdepth);
+		fprintf(stderr,"dbg2       sonardepthfile:         %s\n",sonardepthfile);
+		fprintf(stderr,"dbg2       sonardepthdata:         %d\n",sonardepthdata);
 		fprintf(stderr,"dbg2       sonardepthlever:        %d\n",sonardepthlever);
 		fprintf(stderr,"dbg2       sonardepthoffset:       %f\n",sonardepthoffset);
 		fprintf(stderr,"dbg2       depthsensoroffx:        %f\n",depthsensoroffx);
@@ -584,6 +605,88 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+
+	/* read sonardepth data from file if specified */
+	if (sonardepthdata == MB_YES)
+		{
+		/* count the data points in the auv log file */
+		if ((tfp = fopen(sonardepthfile, "r")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open sonardepth data file <%s> for reading\n",sonardepthfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		/* count the data records */
+		nsonardepth = 0;
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+			if (buffer[0] != '#')
+				nsonardepth++;
+		rewind(tfp);
+
+		/* allocate arrays for sonardepth data */
+		if (nsonardepth > 0)
+			{
+			status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_time_d,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepth,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepthfilter,&error);
+			if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating sonardepth data arrays:\n%s\n",message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+			}
+
+		/* if no sonardepth data then quit */
+		else
+			{
+			error = MB_ERROR_BAD_DATA;
+			fprintf(stderr,"\nUnable to read data from MBARI AUV sonardepth file <%s>\n",sonardepthfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		/* read the data points in the file */
+		nsonardepth = 0;
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+			{
+			if (buffer[0] != '#')
+				{
+				/* read the time and sonardepth pair */
+				if (sscanf(buffer,"%lf %lf",&(sonardepth_time_d[nsonardepth]),&(sonardepth_sonardepth[nsonardepth])) == 2)
+					{
+/*fprintf(stderr,"SONARDEPTH DATA: %f %f\n",
+sonardepth_time_d[nsonardepth],
+sonardepth_sonardepth[nsonardepth]);*/
+					sonardepth_sonardepth[nsonardepth] += sonardepthoffset;
+					nsonardepth++;
+					}
+				}
+			}
+		fclose(tfp);
+
+		/* output info */
+		if (nsonardepth > 0)
+			{
+			mb_get_date(verbose, sonardepth_time_d[0], btime_i);
+			mb_get_date(verbose, sonardepth_time_d[nsonardepth-1], etime_i);
+			fprintf(stderr, "%d sonardepth records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  End:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					nsonardepth, sonardepthfile,
+					btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
+					etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
+			}
+		else
+			fprintf(stderr, "No sonardepth data read from %s....\n",sonardepthfile);
+		}
+
 
 	/* get time lag model if specified */
 	if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL)
@@ -1640,6 +1743,51 @@ fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
 							+ factor * dat_sonardepth_sonardepthfilter[i];
 				}
 			}
+
+		/* filter sonardepth data from separate file */
+		if (nsonardepth > 1)
+			{
+fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
+			dtime = (sonardepth_time_d[nsonardepth-1]  - sonardepth_time_d[0]) / nsonardepth;
+			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+			for (i=0;i<nsonardepth;i++)
+				{
+				sonardepth_sonardepthfilter[i] = 0.0;
+				sonardepth_filterweight = 0.0;
+				j1 = MAX(i - nhalffilter, 0);
+				j2 = MIN(i + nhalffilter, nsonardepth - 1);
+				for (j=j1;j<=j2;j++)
+					{
+					dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
+					weight = exp(-dtol * dtol);
+					sonardepth_sonardepthfilter[i] += weight * sonardepth_sonardepth[j];
+					sonardepth_filterweight += weight;
+					}
+				if (sonardepth_filterweight > 0.0)
+					sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
+				}
+			for (i=0;i<nsonardepth;i++)
+				{
+				if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+					factor = 1.0;
+				else
+					factor = exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+							/ (sonardepthfilterdepth));
+				sonardepth_sonardepth[i] = (1.0 - factor) * sonardepth_sonardepth[i]
+							+ factor * sonardepth_sonardepthfilter[i];
+				}
+			}
+		}
+
+	/* output auv sonardepth data */
+	if (nsonardepth > 0 && (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST))
+		{
+		fprintf(stdout, "\nTotal auv sonardepth data read: %d\n", nsonardepth);
+		for (i=0;i<nsonardepth;i++)
+			{
+			fprintf(stdout, "  SONARDEPTH: %12d %8.3f %8.3f\n",
+				i, sonardepth_time_d[i], sonardepth_sonardepth[i]);
+			}
 		}
 
 	/* output asynchronous navigation and attitude data */
@@ -2351,7 +2499,15 @@ fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
 				}
 			
 			/* merge sonardepth from best available source */
-			if (ndat_sonardepth > 0)
+			if (nsonardepth > 0)
+				{
+				if (interp_status == MB_SUCCESS)
+				interp_status = mb_linear_interp(verbose,
+							sonardepth_time_d-1, sonardepth_sonardepth-1,
+							nsonardepth, time_d, &sonardepth, &jsonardepth,
+							&error);
+				}
+			else if (ndat_sonardepth > 0)
 				{
 				interp_status = mb_linear_interp(verbose,
 							dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
@@ -2932,19 +3088,31 @@ i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality
 	if (ndat_nav > 0)
 		{
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_nav_time_d,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_nav_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_nav_lon,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_nav_lat,&error);
 		}
 	if (ndat_heading > 0)
 		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_heading_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_heading_heading,&error);
 		}
 	if (ndat_rph > 0)
 		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_rph_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_rph_roll,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_rph_pitch,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_rph_heave,&error);
+		}
+	if (ntimelag > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&timelag_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&timelag_model,&error);
+		}
+	if (nsonardepth > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sonardepth_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sonardepth_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sonardepth_sonardepthfilter,&error);
 		}
 
 	/* check memory */

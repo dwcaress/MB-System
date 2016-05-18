@@ -121,7 +121,8 @@
 
 #define MBNA_INTERATION_MAX		10000
 #define MBNA_CONVERGENCE		0.000001
-#define MBNA_SMALL			0.0001
+#define MBNA_SMALL			0.1
+#define MBNA_ZSMALL			0.001
 
 /* minimum initial sigma_crossing (meters) */
 #define	SIGMA_MINIMUM	0.1

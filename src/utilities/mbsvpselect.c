@@ -732,7 +732,8 @@ void fill_struct_inf
 	FILE *fileName;
 	inf_hold->file_name = holder;
 	struct tm *ptr;
-        
+	char *result;
+       
 	/* reading relative inf file */
 	fileName = fopen(inf_hold->file_name, "r");
 	if(fileName == NULL)
@@ -742,16 +743,12 @@ void fill_struct_inf
 		}
 
 	/* reaching start of data key word */
-
-
-	while(fgets(buffer, sizeof buffer, fileName)!=NULL)
+	while ((result = fgets(buffer, sizeof buffer, fileName)) != NULL)
 		if (strcmp(buffer, "Start of Data:\n")==0)
 			break;
 
-
 	/* parsing date and time*/
-
-	fgets(buffer, sizeof buffer, fileName);
+	result = fgets(buffer, sizeof buffer, fileName);
 
 	sscanf(buffer,
 		"%*s %d %d %d %i:%i:%lf %*s %*s",
@@ -775,17 +772,17 @@ void fill_struct_inf
 
 	/* Lon and Lat processing*/
 
-	fgets(buffer, sizeof buffer, fileName);
+	result = fgets(buffer, sizeof buffer, fileName);
 
 	sscanf(buffer, "%*s %Lf %*s %Lf %*s %*f %*s", &inf_hold->s_lon, &inf_hold->s_lat);
 
 	/*parsing end of data information*/
 
-	while(fgets(buffer, sizeof buffer, fileName)!=NULL)
+	while ((result = fgets(buffer, sizeof buffer, fileName)) != NULL)
 		if (strcmp(buffer, "End of Data:\n")==0)
 			break;
 
-	fgets(buffer, sizeof buffer, fileName);
+	result = fgets(buffer, sizeof buffer, fileName);
 
 	sscanf(buffer,
 		"%*s %d %d %d %i:%i:%lf %*s %*s",
@@ -807,7 +804,7 @@ void fill_struct_inf
 	/* calc_ave_dateTime(inf_hold); */
 
 	/* Lon and Lat processing */
-	fgets(buffer, sizeof buffer, fileName);
+	result = fgets(buffer, sizeof buffer, fileName);
 
 	sscanf(buffer, "%*s %Lf %*s %Lf %*s %*f %*s", &inf_hold->e_lon, &inf_hold->e_lat);
 	if (zero_test>0)
@@ -866,6 +863,7 @@ void fill_struct_svp
 	char *ptr_caris = NULL;
 	char *ptr_mb1 = NULL;
 	char *ptr_mb2 = NULL;
+	char *result;
 
 	/* reading relative svp file */
 	fileName = fopen(svp_hold->file_name, "r");
@@ -878,7 +876,7 @@ void fill_struct_svp
 
 	/* reaching start of data */
 
-	while(fgets(buffer, sizeof buffer, fileName)!=NULL)
+	while ((result = fgets(buffer, sizeof buffer, fileName)) != NULL)
 		{
 		ptr_caris = strstr(buffer, caris_str);
 		ptr_mb1 = strstr(buffer, mb1_str);
@@ -1007,7 +1005,9 @@ void read_list
 	int n = 0;
 	struct geod_geodesic g;
 	double azi1, azi2;
-        int count;
+    int count;
+	char *result;
+	int shellstatus;
 
 	atexit(pause_screen);				/* pause the screen */
 
@@ -1033,7 +1033,7 @@ void read_list
 		}
 	/* ------------------------------ */
 
-	while(fgets(dBuffer, sizeof dBuffer, fDatalist)!=NULL)
+	while ((result = fgets(dBuffer, sizeof dBuffer, fDatalist)) != NULL)
 		{
 		strcpy(holder[i], dBuffer);
 		while(holder[i][strlen(holder[i])-1] != ' ')
@@ -1063,7 +1063,7 @@ void read_list
 				}
 			else
 				{
-				while(fgets(buffer, sizeof buffer, dHold_file)!=NULL)
+				while ((result = fgets(buffer, sizeof buffer, dHold_file)) != NULL)
 					{
 					strcpy(holder[i2], holder_3[i]);
 
@@ -1123,7 +1123,7 @@ void read_list
 	i=0;
 	i2=0;
 	/* ------------------------ */
-	while(fgets(sdBuffer, sizeof sdBuffer, fSvp)!=NULL)
+	while ((result = fgets(sdBuffer, sizeof sdBuffer, fSvp)) != NULL)
 		{
 		strcpy(sdHolder[i], sdBuffer);
 		while(sdHolder[i][strlen(sdHolder[i])-1] != ' ')
@@ -1141,7 +1141,7 @@ void read_list
 			}
 		else
 			{
-			while(fgets(buffer_2, sizeof buffer_2, sdHold_file)!=NULL)
+			while ((result = fgets(buffer_2, sizeof buffer_2, sdHold_file)) != NULL)
 				{
 				strcpy(holder_2[i2], holder_4[i]);
 				strcat(holder_2[i2], buffer_2);
@@ -1262,7 +1262,7 @@ void read_list
 				strcat(all_in_sys, " -PSVPFILE:");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				system(all_in_sys);
+				shellstatus = system(all_in_sys);
 				break;
 			case 1:
 				if (verbose==1)
@@ -1323,7 +1323,7 @@ void read_list
 				strcat(all_in_sys, " -P ");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				system(all_in_sys);
+				shellstatus = system(all_in_sys);
 				break;
 			case 2:
 				if (verbose==1)
@@ -1379,7 +1379,7 @@ void read_list
 				strcat(all_in_sys, " -P ");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				system(all_in_sys);
+				shellstatus = system(all_in_sys);
 				fprintf(fresult,
 					"%s\n",
 					"=============================================================");
@@ -1453,7 +1453,7 @@ void read_list
 				strcat(all_in_sys, " -PSVPFILE:");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				system(all_in_sys);
+				shellstatus = system(all_in_sys);
 				}
 			/************calculate the nearest in position within time***************************/
 			if(p_flag==2)
@@ -1533,7 +1533,7 @@ void read_list
 				strcat(all_in_sys, " -PSVPFILE:");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				system(all_in_sys);
+				shellstatus = system(all_in_sys);
 				}
 			if (p_flag==3)
 				{
@@ -1620,7 +1620,7 @@ void read_list
 					strcat(all_in_sys, " -PSVPFILE:");
 					strcat(all_in_sys, svp_hold[n].file_name);
 					printf("%s\n", all_in_sys);
-					system(all_in_sys);
+					shellstatus = system(all_in_sys);
 					}
 				else
 					{
@@ -1690,7 +1690,7 @@ void read_list
 					strcat(all_in_sys, " -PSVPFILE:");
 					strcat(all_in_sys, svp_hold[n].file_name);
 					printf("%s\n", all_in_sys);
-					system(all_in_sys);
+					shellstatus = system(all_in_sys);
 					}
 				}
 			}

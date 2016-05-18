@@ -635,7 +635,7 @@ int mbnavadjust_file_new(char *projectname)
 				strcpy(error2,"Home file already exists.");
 				strcpy(error3," ");
 				if (stat(project.datadir,&statbuf) == 0)
-				sprintf(error3,"Data directory already exists.");
+					sprintf(error3,"Data directory already exists.");
 				status = MB_FAILURE;
 				}
 			else if (stat(project.datadir,&statbuf) == 0)
@@ -3191,9 +3191,9 @@ int mbnavadjust_naverr_save()
 			&& (tie->offset_x != mbna_offset_x
 			    || tie->offset_y != mbna_offset_y
 			    || tie->offset_z_m != mbna_offset_z))
-			{
-			tie->inversion_status = MBNA_INVERSION_OLD;
-			}
+				{
+				tie->inversion_status = MBNA_INVERSION_OLD;
+				}
 		    tie->offset_x = mbna_offset_x;
 		    tie->offset_y = mbna_offset_y;
 		    tie->offset_x_m = mbna_offset_x / mbna_mtodeglon;
@@ -3208,6 +3208,27 @@ int mbnavadjust_naverr_save()
 			    tie->sigmax2[i] = mbna_minmisfit_sx2[i];
 			    tie->sigmax3[i] = mbna_minmisfit_sx3[i];
 			    }
+			if (tie->sigmar1 < MBNA_SMALL)
+				{
+				tie->sigmar1 = MBNA_SMALL;
+				tie->sigmax1[0] = 1.0;
+				tie->sigmax1[1] = 0.0;
+				tie->sigmax1[2] = 0.0;
+				}
+			if (tie->sigmar2 < MBNA_SMALL)
+				{
+				tie->sigmar2 = MBNA_SMALL;
+				tie->sigmax2[0] = 0.0;
+				tie->sigmax2[1] = 1.0;
+				tie->sigmax2[2] = 0.0;
+				}
+			if (tie->sigmar3 < MBNA_ZSMALL)
+				{
+				tie->sigmar3 = MBNA_ZSMALL;
+				tie->sigmax3[0] = 0.0;
+				tie->sigmax3[1] = 0.0;
+				tie->sigmax3[2] = 1.0;
+				}
 		    if (project.inversion_status == MBNA_INVERSION_CURRENT)
 			    project.inversion_status = MBNA_INVERSION_OLD;
 
@@ -3944,21 +3965,21 @@ int mbnavadjust_naverr_addtie()
 				}
 			if (tie->sigmar1 < MBNA_SMALL)
 				{
-				tie->sigmar1 = 100.0;
+				tie->sigmar1 = MBNA_SMALL;
 				tie->sigmax1[0] = 1.0;
 				tie->sigmax1[1] = 0.0;
 				tie->sigmax1[2] = 0.0;
 				}
 			if (tie->sigmar2 < MBNA_SMALL)
 				{
-				tie->sigmar2 = 100.0;
+				tie->sigmar2 = MBNA_SMALL;
 				tie->sigmax2[0] = 0.0;
 				tie->sigmax2[1] = 1.0;
 				tie->sigmax2[2] = 0.0;
 				}
-			if (tie->sigmar3 < MBNA_SMALL)
+			if (tie->sigmar3 < MBNA_ZSMALL)
 				{
-				tie->sigmar3 = 100.0;
+				tie->sigmar3 = MBNA_ZSMALL;
 				tie->sigmax3[0] = 0.0;
 				tie->sigmax3[1] = 0.0;
 				tie->sigmax3[2] = 1.0;
@@ -6013,7 +6034,7 @@ mbna_minmisfit_sx1[0],mbna_minmisfit_sx1[1],mbna_minmisfit_sx1[2],mbna_minmisfit
 			    mbna_minmisfit_sx2[0] = 0.0;
 			    mbna_minmisfit_sx2[1] = 1.0;
 			    mbna_minmisfit_sx2[2] = 0.0;
-			    mbna_minmisfit_sr2 = 1.0;
+			    mbna_minmisfit_sr2 = MBNA_SMALL;
 			    }
 		    else
 			    {
@@ -6030,12 +6051,12 @@ mbna_minmisfit_sx2[0],mbna_minmisfit_sx2[1],mbna_minmisfit_sx2[2],mbna_minmisfit
 		    /* now get a near-vertical unit vector perpendicular to the the longest vector
 			    and then find the largest r associated with that vector */
 		    mbna_minmisfit_sr3 = sqrt(mbna_minmisfit_sx1[0] * mbna_minmisfit_sx1[0] + mbna_minmisfit_sx1[1] * mbna_minmisfit_sx1[1]);
-		    if (mbna_minmisfit_sr3 < MBNA_SMALL)
+		    if (mbna_minmisfit_sr3 < MBNA_ZSMALL)
 			{
 			mbna_minmisfit_sx3[0] = 0.0;
 			mbna_minmisfit_sx3[1] = 0.0;
 			mbna_minmisfit_sx3[2] = 1.0;
-			mbna_minmisfit_sr3 = 1.0;
+			mbna_minmisfit_sr3 = MBNA_ZSMALL;
 			}
 		    else
 			{
@@ -6112,7 +6133,7 @@ ic,jc,kc,lc,gridm[lc],minmisfitthreshold,dotproduct,x,y,z,r); */
 				}
 		    if (mbna_minmisfit_sr2 < MBNA_SMALL)
 		    	mbna_minmisfit_sr2 = rsave2;
-		    if (mbna_minmisfit_sr3 < MBNA_SMALL)
+		    if (mbna_minmisfit_sr3 < MBNA_ZSMALL)
 		    	mbna_minmisfit_sr3 = rsave3;
 		    }
 		else
@@ -7035,6 +7056,11 @@ mbnavadjust_autopick(int do_vertical)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
 							&& (mbna_survey_select == project.files[crossing->file_id_1].block
 								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_BLOCK
+							&& ((mbna_block_select1 == project.files[crossing->file_id_1].block
+									&& mbna_block_select2 == project.files[crossing->file_id_2].block)
+								|| (mbna_block_select2 == project.files[crossing->file_id_1].block
+								&& mbna_block_select1 == project.files[crossing->file_id_2].block)))
 						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 							&& (mbna_file_select == crossing->file_id_1
 								|| mbna_file_select == crossing->file_id_2))
@@ -7060,6 +7086,11 @@ mbnavadjust_autopick(int do_vertical)
 							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
 								&& (mbna_survey_select == project.files[crossing->file_id_1].block
 									|| mbna_survey_select == project.files[crossing->file_id_2].block))
+							|| (mbna_view_mode == MBNA_VIEW_MODE_BLOCK
+								&& ((mbna_block_select1 == project.files[crossing->file_id_1].block
+										&& mbna_block_select2 == project.files[crossing->file_id_2].block)
+									|| (mbna_block_select2 == project.files[crossing->file_id_1].block
+									&& mbna_block_select1 == project.files[crossing->file_id_2].block)))
 							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 								&& (mbna_file_select == crossing->file_id_1
 									|| mbna_file_select == crossing->file_id_2))
@@ -7086,6 +7117,11 @@ mbnavadjust_autopick(int do_vertical)
 							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
 								&& (mbna_survey_select == project.files[crossing->file_id_1].block
 									|| mbna_survey_select == project.files[crossing->file_id_2].block))
+							|| (mbna_view_mode == MBNA_VIEW_MODE_BLOCK
+								&& ((mbna_block_select1 == project.files[crossing->file_id_1].block
+										&& mbna_block_select2 == project.files[crossing->file_id_2].block)
+									|| (mbna_block_select2 == project.files[crossing->file_id_1].block
+									&& mbna_block_select1 == project.files[crossing->file_id_2].block)))
 							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 								&& (mbna_file_select == crossing->file_id_1
 									|| mbna_file_select == crossing->file_id_2))
@@ -7112,6 +7148,11 @@ mbnavadjust_autopick(int do_vertical)
 							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
 								&& (mbna_survey_select == project.files[crossing->file_id_1].block
 									|| mbna_survey_select == project.files[crossing->file_id_2].block))
+							|| (mbna_view_mode == MBNA_VIEW_MODE_BLOCK
+								&& ((mbna_block_select1 == project.files[crossing->file_id_1].block
+										&& mbna_block_select2 == project.files[crossing->file_id_2].block)
+									|| (mbna_block_select2 == project.files[crossing->file_id_1].block
+									&& mbna_block_select1 == project.files[crossing->file_id_2].block)))
 							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 								&& (mbna_file_select == crossing->file_id_1
 									|| mbna_file_select == crossing->file_id_2))
@@ -7138,6 +7179,11 @@ mbnavadjust_autopick(int do_vertical)
 							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
 								&& (mbna_survey_select == project.files[crossing->file_id_1].block
 									|| mbna_survey_select == project.files[crossing->file_id_2].block))
+							|| (mbna_view_mode == MBNA_VIEW_MODE_BLOCK
+								&& ((mbna_block_select1 == project.files[crossing->file_id_1].block
+										&& mbna_block_select2 == project.files[crossing->file_id_2].block)
+									|| (mbna_block_select2 == project.files[crossing->file_id_1].block
+									&& mbna_block_select1 == project.files[crossing->file_id_2].block)))
 							|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 								&& (mbna_file_select == crossing->file_id_1
 									|| mbna_file_select == crossing->file_id_2))
@@ -8667,6 +8713,8 @@ fprintf(stderr, "BAD TIE snav ID: %d %d %d\n", nc1, nc2, nsnav);
 					misfit_ties_initial += misfit * misfit;
 					misfit_norm_initial += misfit * misfit / tie->sigmar1 / tie->sigmar1;
 					nmisfit++;
+//fprintf(stderr,"Crossing %d Tie %d X: sigmar1: %f misfit:%f misfit_norm_initial:%f\n",
+//icrossing,j,tie->sigmar1,misfit,misfit_norm_initial);
 	
 					/* get horizontal axis misfit */
 					misfit = (offsetx * tie->sigmax2[0]
@@ -8675,6 +8723,8 @@ fprintf(stderr, "BAD TIE snav ID: %d %d %d\n", nc1, nc2, nsnav);
 					misfit_ties_initial += misfit * misfit;
 					misfit_norm_initial += misfit * misfit / tie->sigmar2 / tie->sigmar2;
 					nmisfit++;
+//fprintf(stderr,"Crossing %d Tie %d Y: sigmar2: %f misfit:%f misfit_norm_initial:%f\n",
+//icrossing,j,tie->sigmar2,misfit,misfit_norm_initial);
 					}
 	
 				if (tie->status != MBNA_TIE_XY)
@@ -8686,6 +8736,8 @@ fprintf(stderr, "BAD TIE snav ID: %d %d %d\n", nc1, nc2, nsnav);
 					misfit_ties_initial += misfit * misfit;
 					misfit_norm_initial += misfit * misfit / tie->sigmar3 / tie->sigmar3;
 					nmisfit++;
+//fprintf(stderr,"Crossing %d Tie %d Z: sigmar3: %f misfit:%f misfit_norm_initial:%f\n",
+//icrossing,j,tie->sigmar3,misfit,misfit_norm_initial);
 					}
 				}
 		    }
@@ -11028,6 +11080,7 @@ mbnavadjust_updaterawgrid()
 	FILE	*afp;
 	double	lon_min, lon_max, lat_min, lat_max;
 	int		nfixed;
+	int		shellstatus;
 	int		i, j;
 
  	/* print input debug statements */
@@ -11103,13 +11156,13 @@ mbnavadjust_updaterawgrid()
 		}
 
 	sprintf(command, "chmod +x %s/mbgrid_raw.cmd %s/mbgrid_adj.cmd", project.datadir, project.datadir);
-	system(command);
+	shellstatus = system(command);
 
 	sprintf(command, "cd %s ; mbdatalist -Idatalist.mb-1 -O -Y -Z -V", project.datadir);
-	system(command);
+	shellstatus = system(command);
 
 	sprintf(command, "cd %s ; mbgrid_raw.cmd", project.datadir);
-	system(command);
+	shellstatus = system(command);
 
 	/* turn off message dialog */
 	do_message_off();
@@ -11134,7 +11187,7 @@ mbnavadjust_updateadjustedgrid()
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_updateadjustedgrid";
-	int	status = MB_SUCCESS;
+	int		status = MB_SUCCESS;
 	struct mbna_file *file;
 	struct mbna_section *section;
 	char	npath[STRING_MAX];
@@ -11144,8 +11197,8 @@ mbnavadjust_updateadjustedgrid()
 	FILE	*nfp, *afp;
 	char	*result;
 	char	buffer[BUFFER_MAX];
-	int	nscan;
-	int	time_i[7];
+	int		nscan;
+	int		time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
@@ -11158,10 +11211,11 @@ mbnavadjust_updateadjustedgrid()
 	double	factor;
 	double	zoffset;
 	char	ostring[STRING_MAX];
-	int	done;
-	int	isection, isnav;
+	int		done;
+	int		isection, isnav;
 	double	seconds;
 	double	lon_min, lon_max, lat_min, lat_max;
+	int		shellstatus;
 	int		i, j;
 
  	/* print input debug statements */
@@ -11441,7 +11495,7 @@ mbnavadjust_updateadjustedgrid()
 		if (mbna_verbose == 0)
 			fprintf(stderr,"%s",message);
 		sprintf(command, "cd %s ; mbdatalist -Y", project.datadir);
-		system(command);
+		shellstatus = system(command);
 					
 		/* run mbprocess */
 		sprintf(message, " > Running mbprocess in project\n");
@@ -11449,7 +11503,7 @@ mbnavadjust_updateadjustedgrid()
 		if (mbna_verbose == 0)
 			fprintf(stderr,"%s",message);
 		sprintf(command, "cd %s ; mbprocess", project.datadir);
-		system(command);
+		shellstatus = system(command);
 			
 		/* run mbgrid */
 		sprintf(message, " > Running mbgrid_adj\n");
@@ -11457,7 +11511,7 @@ mbnavadjust_updateadjustedgrid()
 		if (mbna_verbose == 0)
 			fprintf(stderr,"%s",message);
 		sprintf(command, "cd %s ; mbgrid_adj.cmd", project.datadir);
-		system(command);
+		shellstatus = system(command);
 		project.grid_status = MBNA_GRID_CURRENT;
 		
 		/* write current project */
@@ -15861,6 +15915,7 @@ int mbnavadjust_open_visualization(int which_grid)
 	struct mbna_section *section;
 	int		year, month, day, hour, minute;
 	double	seconds, roll, pitch, heave;
+	double	sonardepth;
 	int		nscan;
 	int		i, j;
 
@@ -16273,11 +16328,12 @@ int mbnavadjust_open_visualization(int which_grid)
 							while ((nscan = fscanf(nfp, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 										  &year, &month, &day, &hour, &minute, &seconds,
 										  &navtime_d[mbv_navpings], &navlon[mbv_navpings], &navlat[mbv_navpings],
-										  &navheading[mbv_navpings], &navspeed[mbv_navpings], &navz[mbv_navpings],
+										  &navheading[mbv_navpings], &navspeed[mbv_navpings], &sonardepth,
 										  &roll, &pitch, &heave,
 										  &navportlon[mbv_navpings], &navportlat[mbv_navpings], 
 										  &navstbdlon[mbv_navpings], &navstbdlat[mbv_navpings])) > 0)
 								{
+								navz[mbv_navpings] = -sonardepth;
 								navline[mbv_navpings] = i;
 								navshot[mbv_navpings] = j;
 								navcdp[mbv_navpings] = mbv_navpings;
