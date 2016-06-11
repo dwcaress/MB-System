@@ -736,6 +736,41 @@ int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(doub
 	/* set error */
 	*error = mbs_error;
 
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_set_flagsparsevoxels_notify(int verbose, void (flagsparsevoxels_notify)(int, int), int *error)
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_set_flagsparsevoxels_notify";
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		}
+
+	/* set the function pointer */
+	mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify =flagsparsevoxels_notify;
+
 	/* set error */
 	*error = mbs_error;
 
@@ -777,9 +812,6 @@ int mb3dsoundings_set_colorsoundings_notify(int verbose, void (colorsoundings_no
 	/* set error */
 	*error = mbs_error;
 
-	/* set error */
-	*error = mbs_error;
-
 	/* print output debug statements */
 	if (mbs_verbose >= 2)
 		{
@@ -814,9 +846,6 @@ int mb3dsoundings_set_optimizebiasvalues_notify(int verbose, void (optimizebiasv
 
 	/* set the function pointer */
 	mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify = optimizebiasvalues_notify;
-
-	/* set error */
-	*error = mbs_error;
 
 	/* set error */
 	*error = mbs_error;
@@ -860,6 +889,7 @@ int mb3dsoundings_reset()
 	mb3dsoundings.mb3dsoundings_info_notify = NULL;
 	mb3dsoundings.mb3dsoundings_bias_notify = NULL;
 	mb3dsoundings.mb3dsoundings_biasapply_notify = NULL;
+	mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify = NULL;
 
 	mb3dsoundings.topLevelShell = NULL;
 	mb3dsoundings.mainWindow = NULL;
@@ -3553,6 +3583,108 @@ do_mb3dsdg_action_applybias( Widget w, XtPointer client_data, XtPointer call_dat
 						0.01 *((double)mb3dsoundings.ipitchbias),
 						0.01 *((double)mb3dsoundings.iheadingbias),
 						0.01 *((double)mb3dsoundings.itimelag));
+}
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_flagsparsevoxels_A( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_A\n"); */
+
+	/* send bias parameters to calling program to be applied */
+	if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(1, 10);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_flagsparsevoxels_B( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_B\n"); */
+
+	/* send bias parameters to calling program to be applied */
+	if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(1, 2);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_flagsparsevoxels_C( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_C\n"); */
+
+	/* send bias parameters to calling program to be applied */
+	if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(4, 10);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_flagsparsevoxels_D( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_D\n"); */
+
+	/* send bias parameters to calling program to be applied */
+	if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(4, 2);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_flagsparsevoxels_E( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_E\n"); */
+
+	/* send bias parameters to calling program to be applied */
+	if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(8, 10);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_flagsparsevoxels_F( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_F\n"); */
+
+	/* send bias parameters to calling program to be applied */
+	if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(8, 2);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
 /*---------------------------------------------------------------------------------------*/
 

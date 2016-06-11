@@ -39,7 +39,7 @@
 /* turn on debug statements here */
 /* #define MSYS_HYSWEEP_DEBUG 1 */
 
-static char rcs_id[]="$Id$";
+static char svn_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
@@ -57,7 +57,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -639,7 +639,7 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -723,7 +723,7 @@ int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -788,7 +788,7 @@ int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -830,7 +830,7 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -960,7 +960,7 @@ int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -998,6 +998,398 @@ int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, void **platform_ptr, int *error)
+{
+	char	*function_name = "mbsys_hysweep_extract_platform";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mb_platform_struct *platform;
+	struct mbsys_hysweep_struct *store;
+	struct mbsys_hysweep_device_struct *device;
+	struct mbsys_hysweep_device_offset_struct *offset;
+	mb_longname sensor_name;
+	int	sensor_capability1, sensor_capability2;
+	int sensor_type;
+	int	num_offsets = 0;
+	int	num_time_latency = 0;
+	int sensor_multibeam = -1;
+	int idevice, isensor, ioffset;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:      %p\n",(void *)store_ptr);
+		fprintf(stderr,"dbg2       platform_ptr:   %p\n",(void *)platform_ptr);
+		fprintf(stderr,"dbg2       *platform_ptr:  %p\n",(void *)*platform_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	store = (struct mbsys_hysweep_struct *) store_ptr;
+
+	/* if needed allocate a new platform structure */
+	if (*platform_ptr == NULL)
+		{
+		status = mb_platform_init(verbose, (void **)platform_ptr, error);
+		}
+		
+	/* extract sensor offsets from installation record */
+	if (*platform_ptr != NULL)
+		{
+		/* get pointer to platform structure */
+		platform = (struct mb_platform_struct *) (*platform_ptr);
+		
+		/* copy info */
+		strcpy(platform->name, store->INF_boat);
+		strcpy(platform->organization, store->INF_surveyor);
+		
+		/* loop over devices in Hysweep header */
+		for (idevice=0;idevice<store->num_devices;idevice++)
+			{
+			/* get device structure */
+			device = (struct mbsys_hysweep_device_struct *)&(store->devices[idevice]);
+			
+			/* add sensors with appropriate types, capabilities, and offsets */
+			isensor = platform->num_sensors;
+			strcpy(sensor_name, device->DEV_device_name);
+			sensor_capability1 = MB_SENSOR_CAPABILITY1_NONE;
+			sensor_capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			num_offsets = device->num_offsets;
+			num_time_latency = 0;
+			if (num_offsets > 0)
+				{
+				offset = (struct mbsys_hysweep_device_offset_struct *) &(device->offsets[0]);
+				if (offset->OF2_offset_time != 0.0)
+					num_time_latency = 1;
+				}
+			
+			/* first look for mapping devices */
+			
+			/* multibeam sonar */
+			if (device->DV2_device_capability & 0x0001)
+				{
+				sensor_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM;
+				sensor_capability2 = MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM;
+				platform->source_bathymetry = isensor;
+				sensor_multibeam = isensor;
+				
+				if (platform->source_bathymetry1 < 0)
+					platform->source_bathymetry1 = isensor;
+				else if (platform->source_bathymetry2 < 0)
+					platform->source_bathymetry2 = isensor;
+				else if (platform->source_bathymetry3 < 0)
+					platform->source_bathymetry3 = isensor;
+					
+				/* add backscatter if available */
+				if (device->DV2_device_capability & 0x0008)
+					{
+					sensor_capability2 += MB_SENSOR_CAPABILITY2_BACKSCATTER_MULTIBEAM;
+					platform->source_backscatter = isensor;
+					
+					if (platform->source_backscatter1 < 0)
+						platform->source_backscatter1 = isensor;
+					else if (platform->source_backscatter2 < 0)
+						platform->source_backscatter2 = isensor;
+					else if (platform->source_backscatter3 < 0)
+						platform->source_backscatter3 = isensor;
+					}
+				}
+				
+			/* multitransducer echosounder */
+			else if (device->DV2_device_capability & 0x0002)
+				{
+				sensor_type = MB_SENSOR_TYPE_SONAR_MULTIECHOSOUNDER;
+				sensor_capability2 = MB_SENSOR_CAPABILITY2_TOPOGRAPHY_ECHOSOUNDER;
+				platform->source_bathymetry = isensor;
+				
+				if (platform->source_bathymetry1 < 0)
+					platform->source_bathymetry1 = isensor;
+				else if (platform->source_bathymetry2 < 0)
+					platform->source_bathymetry2 = isensor;
+				else if (platform->source_bathymetry3 < 0)
+					platform->source_bathymetry3 = isensor;
+				}
+				
+			/* sidesscan sonar */
+			else if (device->DV2_device_capability & 0x0008)
+				{
+				sensor_type = MB_SENSOR_TYPE_SONAR_SIDESCAN;
+				sensor_capability2 = MB_SENSOR_CAPABILITY2_BACKSCATTER_SIDESCAN;
+				platform->source_backscatter = isensor;
+				
+				if (platform->source_backscatter1 < 0)
+					platform->source_backscatter1 = isensor;
+				else if (platform->source_backscatter2 < 0)
+					platform->source_backscatter2 = isensor;
+				else if (platform->source_backscatter3 < 0)
+					platform->source_backscatter3 = isensor;
+				}
+				
+			/* single beam echosounder */
+			else if (device->DV2_device_capability & 0x0010)
+				{
+				sensor_type = MB_SENSOR_TYPE_SONAR_ECHOSOUNDER;
+				sensor_capability2 = MB_SENSOR_CAPABILITY2_TOPOGRAPHY_ECHOSOUNDER;
+				platform->source_bathymetry = isensor;
+				
+				if (platform->source_bathymetry1 < 0)
+					platform->source_bathymetry1 = isensor;
+				else if (platform->source_bathymetry2 < 0)
+					platform->source_bathymetry2 = isensor;
+				else if (platform->source_bathymetry3 < 0)
+					platform->source_bathymetry3 = isensor;
+				}
+				
+			/* now look for navigation and attitude devices
+			 * - can potentially overwrite sensor_type if a device has both
+			 * mapping and navigation/attitude capability */
+				
+			/* full INS - position attitude and heading */
+			if (device->DV2_device_capability & 0x0004
+				&& device->DV2_device_capability & 0x0020
+				&& device->DV2_device_capability & 0x0200)
+				{
+				sensor_type = MB_SENSOR_TYPE_INS;
+				sensor_capability1 = MB_SENSOR_CAPABILITY1_HEADING
+									+ MB_SENSOR_CAPABILITY1_ROLLPITCH
+									+ MB_SENSOR_CAPABILITY1_POSITION;
+				platform->source_position = isensor;
+				platform->source_depth = isensor;
+				platform->source_heading = isensor;
+				platform->source_rollpitch = isensor;
+				platform->source_heave = isensor;
+
+				if (platform->source_position1 < 0)
+					platform->source_position1 = isensor;
+				else if (platform->source_position2 < 0)
+					platform->source_position2 = isensor;
+				else if (platform->source_position3 < 0)
+					platform->source_position3 = isensor;
+
+				if (platform->source_depth1 < 0)
+					platform->source_depth1 = isensor;
+				else if (platform->source_depth2 < 0)
+					platform->source_depth2 = isensor;
+				else if (platform->source_depth3 < 0)
+					platform->source_depth3 = isensor;
+
+				if (platform->source_heading1 < 0)
+					platform->source_heading1 = isensor;
+				else if (platform->source_heading2 < 0)
+					platform->source_heading2 = isensor;
+				else if (platform->source_heading3 < 0)
+					platform->source_heading3 = isensor;
+
+				if (platform->source_rollpitch1 < 0)
+					platform->source_rollpitch1 = isensor;
+				else if (platform->source_rollpitch2 < 0)
+					platform->source_rollpitch2 = isensor;
+				else if (platform->source_rollpitch3 < 0)
+					platform->source_rollpitch3 = isensor;
+
+				if (platform->source_heave1 < 0)
+					platform->source_heave1 = isensor;
+				else if (platform->source_heave2 < 0)
+					platform->source_heave2 = isensor;
+				else if (platform->source_heave3 < 0)
+					platform->source_heave3 = isensor;
+				}
+				
+			/* IMU - attitude and heading */
+			else if (device->DV2_device_capability & 0x0020
+				&& device->DV2_device_capability & 0x0200)
+				{
+				sensor_type = MB_SENSOR_TYPE_IMU;
+				sensor_capability1 = MB_SENSOR_CAPABILITY1_HEADING
+									+ MB_SENSOR_CAPABILITY1_ROLLPITCH;
+				platform->source_heading = isensor;
+				platform->source_rollpitch = isensor;
+
+				if (platform->source_heading1 < 0)
+					platform->source_heading1 = isensor;
+				else if (platform->source_heading2 < 0)
+					platform->source_heading2 = isensor;
+				else if (platform->source_heading3 < 0)
+					platform->source_heading3 = isensor;
+
+				if (platform->source_rollpitch1 < 0)
+					platform->source_rollpitch1 = isensor;
+				else if (platform->source_rollpitch2 < 0)
+					platform->source_rollpitch2 = isensor;
+				else if (platform->source_rollpitch3 < 0)
+					platform->source_rollpitch3 = isensor;
+				}
+				
+			/* Position + heading */
+			else if (device->DV2_device_capability & 0x0020
+				&& device->DV2_device_capability & 0x0004)
+				{
+				sensor_type = MB_SENSOR_TYPE_POSITION;
+				sensor_capability1 = MB_SENSOR_CAPABILITY1_HEADING
+									+ MB_SENSOR_CAPABILITY1_POSITION;
+				platform->source_position = isensor;
+				platform->source_heading = isensor;
+
+				if (platform->source_position1 < 0)
+					platform->source_position1 = isensor;
+				else if (platform->source_position2 < 0)
+					platform->source_position2 = isensor;
+				else if (platform->source_position3 < 0)
+					platform->source_position3 = isensor;
+
+				if (platform->source_heading1 < 0)
+					platform->source_heading1 = isensor;
+				else if (platform->source_heading2 < 0)
+					platform->source_heading2 = isensor;
+				else if (platform->source_heading3 < 0)
+					platform->source_heading3 = isensor;
+				}
+				
+			/* VRU or MRU - attitude */
+			else if (device->DV2_device_capability & 0x0200)
+				{
+				sensor_type = MB_SENSOR_TYPE_VRU;
+				sensor_capability1 = MB_SENSOR_CAPABILITY1_ROLLPITCH;
+				platform->source_rollpitch = isensor;
+
+				if (platform->source_rollpitch1 < 0)
+					platform->source_rollpitch1 = isensor;
+				else if (platform->source_rollpitch2 < 0)
+					platform->source_rollpitch2 = isensor;
+				else if (platform->source_rollpitch3 < 0)
+					platform->source_rollpitch3 = isensor;
+				}
+				
+			/* compass - heading */
+			else if (device->DV2_device_capability & 0x0020)
+				{
+				sensor_type = MB_SENSOR_TYPE_COMPASS;
+				sensor_capability1 = MB_SENSOR_CAPABILITY1_HEADING;
+				platform->source_heading = isensor;
+
+				if (platform->source_heading1 < 0)
+					platform->source_heading1 = isensor;
+				else if (platform->source_heading2 < 0)
+					platform->source_heading2 = isensor;
+				else if (platform->source_heading3 < 0)
+					platform->source_heading3 = isensor;
+				}
+				
+			/* position - navigation */
+			else if (device->DV2_device_capability & 0x0004)
+				{
+				sensor_type = MB_SENSOR_TYPE_POSITION;
+				sensor_capability1 = MB_SENSOR_CAPABILITY1_POSITION;
+				platform->source_position = isensor;
+
+				if (platform->source_position1 < 0)
+					platform->source_position1 = isensor;
+				else if (platform->source_position2 < 0)
+					platform->source_position2 = isensor;
+				else if (platform->source_position3 < 0)
+					platform->source_position3 = isensor;
+				}
+				
+			/* set sensor */
+			status = mb_platform_add_sensor(verbose, (void *)platform,
+							sensor_type,
+							sensor_name,
+							NULL,
+							NULL,
+							sensor_capability1,
+							sensor_capability2,
+							num_offsets, 0,
+							error);
+				
+			if (status == MB_SUCCESS)
+				{
+				for (ioffset=0;ioffset<num_offsets;ioffset++)
+					{
+					offset = (struct mbsys_hysweep_device_offset_struct *) &(device->offsets[ioffset]);
+					status = mb_platform_set_sensor_offset(verbose, (void *)platform,
+									isensor, ioffset,
+									MB_SENSOR_POSITION_OFFSET_STATIC,
+									(double) offset->OF2_offset_starboard,
+									(double) offset->OF2_offset_forward,
+									(double) offset->OF2_offset_vertical,
+									MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+									(double) offset->OF2_offset_yaw,
+									(double) -offset->OF2_offset_roll,
+									(double) offset->OF2_offset_pitch,
+									error);
+					if (ioffset == 0 && num_time_latency > 0)
+						{
+						status = mb_platform_set_sensor_timelatency(verbose, (void *)platform,
+										isensor, 
+										MB_SENSOR_TIME_LATENCY_STATIC,
+										(double) offset->OF2_offset_time,
+										0, NULL, NULL,
+										error);
+						}
+					}
+				}
+			}
+			
+		/* reset data sources to reflect Hysweep designated primary nav device */
+		if (store->primary_nav_device >= 0 && store->primary_nav_device < store->num_devices)
+			{
+			/* get device structure */
+			isensor = store->primary_nav_device;
+			device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->primary_nav_device]);
+			
+			if (device->DV2_device_capability & 0x0004)
+				platform->source_position = store->primary_nav_device;
+			if (device->DV2_device_capability & 0x0020)
+				platform->source_heading = store->primary_nav_device;
+			if (device->DV2_device_capability & 0x0200)
+				platform->source_rollpitch = store->primary_nav_device;
+			if (device->DV2_device_capability & 0x0200)
+				platform->source_heave = store->primary_nav_device;
+			}
+			
+		/* make sure that a multibeam is the primary bathymetry source if available */
+		if (sensor_multibeam >= 0 && platform->source_bathymetry != sensor_multibeam)
+			{
+			platform->source_bathymetry = sensor_multibeam;
+			}
+		
+		/* print platform */
+		if (verbose >= 0)
+			{
+			status = mb_platform_print(verbose, (void *)platform, error);
+			}
+		}
+	else
+		{
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+		fprintf(stderr,"\nUnable to initialize platform offset structure\n");
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:           %d\n",*kind);
+		fprintf(stderr,"dbg2       platform_ptr:   %p\n",(void *)platform_ptr);
+		fprintf(stderr,"dbg2       *platform_ptr:  %p\n",(void *)*platform_ptr);
+		fprintf(stderr,"dbg2       error:          %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -1018,7 +1410,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1406,7 +1798,7 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -1602,7 +1994,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1642,7 +2034,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			if (store->RMB_sounding_takeoffangles != NULL && store->RMB_sounding_azimuthalangles != NULL)
 				{
 				angles[i] = store->RMB_sounding_takeoffangles[i];
-				angles_forward[i] = store->RMB_sounding_azimuthalangles[i] + 90.0;
+				angles_forward[i] = 90.0 - store->RMB_sounding_azimuthalangles[i];
 				}
 			else if (store->RMB_sounding_pitchangles != NULL && store->RMB_sounding_rollangles != NULL)
 				{
@@ -1655,7 +2047,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 
 				/* correct beta for roll if necessary */
 				if (!(device->MBI_sonar_flags & 0x0001))
-					beta -= store->RMBint_roll;
+					beta += store->RMBint_roll;
 
 				mb_rollpitch_to_takeoff(
 					verbose,
@@ -1669,7 +2061,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				angles_null[i] = angles[i];
 			else
 				angles_null[i] = 0.0;
-			heave[i] = store->RMBint_heave;
+			heave[i] = -store->RMBint_heave;
 			if (store->RMB_beam_data_available & 0x0400)
 				alongtrack_offset[i] = store->GPS_sog * 0.0005144 * store->RMB_sounding_timedelays[i];
 			else
@@ -1742,7 +2134,7 @@ int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1831,7 +2223,7 @@ int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1923,7 +2315,7 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1943,7 +2335,7 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get transducer depth */
-		*transducer_depth = store->RMBint_draft - store->RMBint_heave;
+		*transducer_depth = store->RMBint_draft + store->RMBint_heave;
 
 		/* get altitude */
 		altitude_found = MB_NO;
@@ -2031,7 +2423,7 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -2075,7 +2467,7 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*draft = store->RMBint_draft;
 
 		/* get attitude  */
-		*roll = store->RMBint_roll;
+		*roll = -store->RMBint_roll;
 		*pitch = store->RMBint_pitch;
 		*heave = store->RMBint_heave;
 
@@ -2117,6 +2509,46 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			mb_attint_interp(verbose, mbio_ptr, *time_d,
 				    heave, roll, pitch, error);
 			}
+
+		/* get draft  */
+		if (mb_io_ptr->nsonardepth > 0)
+			{
+			if (mb_io_ptr->nsonardepth > 0)
+				mb_depint_interp(verbose, mbio_ptr, store->time_d,
+				    draft, error);
+			*heave = 0.0;
+			}
+
+		/* done translating values */
+
+		}
+
+	/* extract data from attitude structure */
+	else if (*kind == MB_DATA_ATTITUDE
+		|| *kind == MB_DATA_ATTITUDE1
+		|| *kind == MB_DATA_ATTITUDE2
+		|| *kind == MB_DATA_ATTITUDE3)
+		{
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
+
+		/* get heading */
+		if (mb_io_ptr->nheading > 0)
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,
+				    heading, error);
+
+		/* get position and speed */
+		*speed = 0.0;
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed,
+				    navlon, navlat, speed, error);
+
+		/* get roll pitch and heave */
+		*roll = -store->HCP_roll;
+		*pitch = store->HCP_pitch;
+		*heave = store->HCP_heave;
 
 		/* get draft  */
 		if (mb_io_ptr->nsonardepth > 0)
@@ -2209,7 +2641,7 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -2267,7 +2699,7 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get roll pitch and heave */
 		store->RMBint_heave = heave;
 		store->RMBint_pitch = pitch;
-		store->RMBint_roll = roll;
+		store->RMBint_roll = -roll;
 		}
 
 	/* insert data in nav structure */
@@ -2323,7 +2755,7 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -2448,7 +2880,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:        %p\n",(void *)mbio_ptr);

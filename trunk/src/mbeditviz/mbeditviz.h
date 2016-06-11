@@ -226,6 +226,10 @@ MBVIEW_EXTERNAL double	mbev_pitchbias_3dsdg;
 MBVIEW_EXTERNAL double	mbev_headingbias_3dsdg;
 MBVIEW_EXTERNAL double	mbev_timelag_3dsdg;
 
+/* sparse voxel filter parameters */
+MBVIEW_EXTERNAL int     mbev_sizemultiplier;
+MBVIEW_EXTERNAL int     mbev_nsoundingthreshold;
+
 /* selected sounding parameters */
 MBVIEW_EXTERNAL struct mb3dsoundings_struct mbev_selected;
 
@@ -306,6 +310,7 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostring);
 void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag);
 void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag);
+void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingthreshold);
 void mbeditviz_mb3dsoundings_colorsoundings(int color);
 void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode,
                         double *rollbias, double *pitchbias,
@@ -321,7 +326,6 @@ void mbeditviz_mb3dsoundings_getbiasvariance(
 						double rollbias, double pitchbias,
 						double headingbias, double timelag,
 						int *variance_total_num, double *variance_total);
-int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double, double), int *error);
 
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
 void BxManageCB(Widget w, XtPointer client, XtPointer call);

@@ -147,9 +147,9 @@ int mb_fileio_close(int verbose, void *mbio_ptr, int *error)
 	/* open the file */
 	if (mb_io_ptr->mbfp != NULL)
 		{
-                fclose(mb_io_ptr->mbfp);
-                mb_io_ptr->mbfp = NULL;
-                }
+		fclose(mb_io_ptr->mbfp);
+		mb_io_ptr->mbfp = NULL;
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -171,7 +171,7 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 	char	*function_name = "mb_fileio_get";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-        size_t  read_len;
+    size_t  read_len;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -189,13 +189,17 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
-        /* read expected number of bytes into buffer */
-        if ((read_len = fread(buffer, 1, *size, mb_io_ptr->mbfp)) != *size)
-                {
-                status = MB_FAILURE;
-                *error = MB_ERROR_EOF;
-                *size = read_len;
-                }
+    /* read expected number of bytes into buffer */
+    if ((read_len = fread(buffer, 1, *size, mb_io_ptr->mbfp)) != *size)
+        {
+        status = MB_FAILURE;
+        *error = MB_ERROR_EOF;
+        *size = read_len;
+        }
+	else
+		{
+		*error = MB_ERROR_NO_ERROR;
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -237,13 +241,17 @@ int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
-        /* write expected number of bytes from buffer */
-        if ((write_len = fwrite(buffer, 1, *size, mb_io_ptr->mbfp)) != *size)
-                {
-                status = MB_FAILURE;
-                *error = MB_ERROR_EOF;
-                *size = write_len;
-                }
+	/* write expected number of bytes from buffer */
+	if ((write_len = fwrite(buffer, 1, *size, mb_io_ptr->mbfp)) != *size)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		*size = write_len;
+		}
+	else
+		{
+		*error = MB_ERROR_NO_ERROR;
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)

@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* mbio include files */
 #include "mb_status.h"

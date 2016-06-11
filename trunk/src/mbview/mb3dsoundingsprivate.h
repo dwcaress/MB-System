@@ -84,6 +84,7 @@ struct mb3dsoundings_world_struct
     void (*mb3dsoundings_info_notify)(int ifile, int iping, int ibeam, char *infostring);
     void (*mb3dsoundings_bias_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
     void (*mb3dsoundings_biasapply_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
+    void (*mb3dsoundings_flagsparsevoxels_notify)(int sizemultiplier, int nsoundingthreshold);
     void (*mb3dsoundings_colorsoundings_notify)(int color);
     void (*mb3dsoundings_optimizebiasvalues_notify)(int mode,
                         double *rollbias, double *pitchbias,
@@ -275,6 +276,12 @@ void do_mb3dsdg_view_goodprofile( Widget w, XtPointer client_data, XtPointer cal
 void do_mb3dsdg_view_allprofile( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_resetview( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_applybias( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_flagsparsevoxels_A( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_flagsparsevoxels_B( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_flagsparsevoxels_C( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_flagsparsevoxels_D( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_flagsparsevoxels_E( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_flagsparsevoxels_F( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_colorsoundingsblack( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_colorsoundingsred( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_colorsoundingsyellow( Widget w, XtPointer client_data, XtPointer call_data);

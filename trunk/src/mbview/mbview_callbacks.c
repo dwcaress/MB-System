@@ -2294,6 +2294,8 @@ int mbview_open(int verbose, size_t instance, int *error)
 		XtSetValues(view->mb3dview.mbview_toggleButton_utm, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_spheroid, args, ac);
 		XtSetValues(view->mb3dview.mbview_label_projection, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_annotation_degreesminutes, args, ac);
+        XtSetValues(view->mb3dview.mbview_toggleButton_annotation_degreesdecimal, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_projection_dismiss, args, ac);
 		XtSetValues(view->mb3dview.mbview_dialogShell_profile, args, ac);
 		XtSetValues(view->mb3dview.mbview_form_profile, args, ac);
@@ -3279,12 +3281,12 @@ fprintf(stderr,"do_mbview_projection_popup: instance:%zu\n", instance);
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-    	XtManageChild(view->mb3dview.mbview_bulletinBoard_projection);
+    XtManageChild(view->mb3dview.mbview_bulletinBoard_projection);
 
 	/* set values of widgets */
 	if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
 		{
-	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_geographic,
+	    XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_geographic,
 			TRUE, FALSE);
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm,
 			FALSE, FALSE);
@@ -3296,20 +3298,34 @@ fprintf(stderr,"do_mbview_projection_popup: instance:%zu\n", instance);
 		{
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_geographic,
 			FALSE, FALSE);
-	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm,
+	    XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm,
 			TRUE, FALSE);
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid,
 			FALSE, FALSE);
 		}
 	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
 		{
-	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid,
+	    XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid,
 			TRUE, FALSE);
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm,
 			FALSE, FALSE);
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid,
 			FALSE, FALSE);
 		}
+    if (shared.lonlatstyle == MBV_LONLAT_DEGREESMINUTES)
+        {
+ 	    XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_annotation_degreesminutes,
+			TRUE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_annotation_degreesdecimal,
+			FALSE, FALSE);
+        }
+    else
+        {
+ 	    XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_annotation_degreesminutes,
+			FALSE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_annotation_degreesdecimal,
+			TRUE, FALSE);
+        }
 
 	/* set label */
 	do_mbview_set_projection_label(instance);
@@ -3684,7 +3700,7 @@ fprintf(stderr,"do_mbview_annotation_degreesminutes: instance:%zu\n", instance);
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* reproject as utm if the togglebutton has been set */
+	/* use degrees + minutes for pick annotation */
 	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_annotation_degreesminutes))
 		{
 		shared.lonlatstyle = MBV_LONLAT_DEGREESMINUTES;
@@ -3713,7 +3729,7 @@ fprintf(stderr,"do_mbview_annotation_degreesdecimal: instance:%zu\n", instance);
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* reproject as utm if the togglebutton has been set */
+	/* use decimal degrees for pick annotation */
 	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_annotation_degreesdecimal))
 		{
 		shared.lonlatstyle = MBV_LONLAT_DEGREESDECIMAL;

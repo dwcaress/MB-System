@@ -84,6 +84,12 @@ extern void do_mb3dsdg_view_goodprofile(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_allprofile(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_scalewithflagged(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_applybias(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_flagsparsevoxels_A(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_flagsparsevoxels_B(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_flagsparsevoxels_C(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_flagsparsevoxels_D(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_flagsparsevoxels_E(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_flagsparsevoxels_F(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_colorsoundingsblack(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_colorsoundingsred(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_colorsoundingsyellow(Widget, XtPointer, XtPointer);
@@ -841,6 +847,164 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     XtAddCallback(class_in->pushButton_action_applybias, XmNactivateCallback, do_mb3dsdg_action_applybias, (XtPointer)0);
 
     ac = 0;
+    class_in->separator3 = XmCreateSeparator(class_in->pulldownMenu_action,
+        (char *)"separator3",
+        args,
+        ac);
+    XtManageChild(class_in->separator3);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (1 X cell, n<10)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_flagsparsevoxels_A = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_flagsparsevoxels",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_flagsparsevoxels_A);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_flagsparsevoxels_A, XmNactivateCallback, do_mb3dsdg_action_flagsparsevoxels_A, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (1 X cell, n<2)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_flagsparsevoxels_B = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_flagsparsevoxels",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_flagsparsevoxels_B);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_flagsparsevoxels_B, XmNactivateCallback, do_mb3dsdg_action_flagsparsevoxels_B, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (4 X cell, n<10)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_flagsparsevoxels_C = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_flagsparsevoxels",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_flagsparsevoxels_C);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_flagsparsevoxels_C, XmNactivateCallback, do_mb3dsdg_action_flagsparsevoxels_C, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (4 X cell, n<2)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_flagsparsevoxels_D = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_flagsparsevoxels",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_flagsparsevoxels_D);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_flagsparsevoxels_D, XmNactivateCallback, do_mb3dsdg_action_flagsparsevoxels_D, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (8 X cell, n<10)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_flagsparsevoxels_E = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_flagsparsevoxels",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_flagsparsevoxels_E);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_flagsparsevoxels_E, XmNactivateCallback, do_mb3dsdg_action_flagsparsevoxels_E, (XtPointer)0);
+
+    ac = 0;
+    {
+        XmString    tmp0;
+
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (8 X cell, n<2)",
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList,
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_flagsparsevoxels_F = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_flagsparsevoxels",
+            args,
+            ac);
+        XtManageChild(class_in->pushButton_action_flagsparsevoxels_F);
+
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+
+    XtAddCallback(class_in->pushButton_action_flagsparsevoxels_F, XmNactivateCallback, do_mb3dsdg_action_flagsparsevoxels_F, (XtPointer)0);
+
+    ac = 0;
+    class_in->separator4 = XmCreateSeparator(class_in->pulldownMenu_action,
+        (char *)"separator4",
+        args,
+        ac);
+    XtManageChild(class_in->separator4);
+
+    ac = 0;
     {
         XmString    tmp0;
 
@@ -1007,6 +1171,13 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     }
 
     XtAddCallback(class_in->pushButton_action_colorsoundingspurple, XmNactivateCallback, do_mb3dsdg_action_colorsoundingspurple, (XtPointer)0);
+
+    ac = 0;
+    class_in->separator5 = XmCreateSeparator(class_in->pulldownMenu_action,
+        (char *)"separator5",
+        args,
+        ac);
+    XtManageChild(class_in->separator5);
 
     ac = 0;
     {

@@ -1979,6 +1979,7 @@ fprintf(stderr,"do_mbeditviz_pickarea_notify:%zu\n", instance);
 	mbev_status = mb3dsoundings_set_info_notify(mbev_verbose, &mbeditviz_mb3dsoundings_info, &mbev_error);
 	mbev_status = mb3dsoundings_set_bias_notify(mbev_verbose, &mbeditviz_mb3dsoundings_bias, &mbev_error);
 	mbev_status = mb3dsoundings_set_biasapply_notify(mbev_verbose, &mbeditviz_mb3dsoundings_biasapply, &mbev_error);
+	mbev_status = mb3dsoundings_set_flagsparsevoxels_notify(mbev_verbose, &mbeditviz_mb3dsoundings_flagsparsevoxels, &mbev_error);
 	mbev_status = mb3dsoundings_set_colorsoundings_notify(mbev_verbose, &mbeditviz_mb3dsoundings_colorsoundings, &mbev_error);
 	mbev_status = mb3dsoundings_set_optimizebiasvalues_notify(mbev_verbose, &mbeditviz_mb3dsoundings_optimizebiasvalues, &mbev_error);
 
@@ -2010,6 +2011,7 @@ fprintf(stderr,"do_mbeditviz_pickregion_notify:%zu\n", instance);
 	mbev_status = mb3dsoundings_set_info_notify(mbev_verbose, &mbeditviz_mb3dsoundings_info, &mbev_error);
 	mbev_status = mb3dsoundings_set_bias_notify(mbev_verbose, &mbeditviz_mb3dsoundings_bias, &mbev_error);
 	mbev_status = mb3dsoundings_set_biasapply_notify(mbev_verbose, &mbeditviz_mb3dsoundings_biasapply, &mbev_error);
+	mbev_status = mb3dsoundings_set_flagsparsevoxels_notify(mbev_verbose, &mbeditviz_mb3dsoundings_flagsparsevoxels, &mbev_error);
 	mbev_status = mb3dsoundings_set_colorsoundings_notify(mbev_verbose, &mbeditviz_mb3dsoundings_colorsoundings, &mbev_error);
 	mbev_status = mb3dsoundings_set_optimizebiasvalues_notify(mbev_verbose, &mbeditviz_mb3dsoundings_optimizebiasvalues, &mbev_error);
 
@@ -2088,6 +2090,7 @@ fprintf(stderr,"do_mbeditviz_picknav_notify:%zu\n", instance);
 	mbev_status = mb3dsoundings_set_info_notify(mbev_verbose, &mbeditviz_mb3dsoundings_info, &mbev_error);
 	mbev_status = mb3dsoundings_set_bias_notify(mbev_verbose, &mbeditviz_mb3dsoundings_bias, &mbev_error);
 	mbev_status = mb3dsoundings_set_biasapply_notify(mbev_verbose, &mbeditviz_mb3dsoundings_biasapply, &mbev_error);
+	mbev_status = mb3dsoundings_set_flagsparsevoxels_notify(mbev_verbose, &mbeditviz_mb3dsoundings_flagsparsevoxels, &mbev_error);
 	mbev_status = mb3dsoundings_set_colorsoundings_notify(mbev_verbose, &mbeditviz_mb3dsoundings_colorsoundings, &mbev_error);
 	mbev_status = mb3dsoundings_set_optimizebiasvalues_notify(mbev_verbose, &mbeditviz_mb3dsoundings_optimizebiasvalues, &mbev_error);
 

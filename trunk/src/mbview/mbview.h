@@ -1202,6 +1202,7 @@ int mb3dsoundings_set_edit_notify(int verbose, void (edit_notify)(int, int, int,
 int mb3dsoundings_set_info_notify(int verbose, void (edit_notify)(int, int, int, char *), int *error);
 int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double, double), int *error);
 int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double, double), int *error);
+int mb3dsoundings_set_flagsparsevoxels_notify(int verbose, void (flagsparsevoxels_notify)(int, int), int *error);
 int mb3dsoundings_set_colorsoundings_notify(int verbose, void (colorsoundings_notify)(int), int *error);
 int mb3dsoundings_set_optimizebiasvalues_notify(int verbose, void (optimizebiasvalues_notify)(int, double *, double *, double *, double *), int *error);
 int mb3dsoundings_plot(int verbose, int *error);
